@@ -32,7 +32,7 @@ describe('ImageAssetCard', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c30 {
+      .c29 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -62,14 +62,14 @@ describe('ImageAssetCard', () => {
         position: end;
       }
 
-      .c18 {
+      .c17 {
         padding-top: 8px;
         padding-right: 12px;
         padding-bottom: 8px;
         padding-left: 12px;
       }
 
-      .c26 {
+      .c25 {
         background: #f6f6f9;
         padding: 4px;
         border-radius: 4px;
@@ -108,7 +108,7 @@ describe('ImageAssetCard', () => {
         flex-direction: row;
       }
 
-      .c19 {
+      .c18 {
         -webkit-align-items: flex-start;
         -webkit-box-align: flex-start;
         -ms-flex-align: flex-start;
@@ -122,7 +122,7 @@ describe('ImageAssetCard', () => {
         flex-direction: row;
       }
 
-      .c27 {
+      .c26 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -161,7 +161,7 @@ describe('ImageAssetCard', () => {
         right: 12px;
       }
 
-      .c17 {
+      .c16 {
         margin: 0;
         padding: 0;
         max-height: 100%;
@@ -169,7 +169,7 @@ describe('ImageAssetCard', () => {
         object-fit: contain;
       }
 
-      .c16 {
+      .c15 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -185,20 +185,20 @@ describe('ImageAssetCard', () => {
         border-top-right-radius: 4px;
       }
 
-      .c22 {
+      .c21 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c23 {
+      .c22 {
         color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c29 {
+      .c28 {
         color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
@@ -206,14 +206,14 @@ describe('ImageAssetCard', () => {
         text-transform: uppercase;
       }
 
-      .c25 {
+      .c24 {
         margin-left: auto;
         -webkit-flex-shrink: 0;
         -ms-flex-negative: 0;
         flex-shrink: 0;
       }
 
-      .c28 {
+      .c27 {
         margin-left: 4px;
       }
 
@@ -285,7 +285,7 @@ describe('ImageAssetCard', () => {
         background-color: #8e8ea9;
       }
 
-      .c20 {
+      .c19 {
         word-break: break-all;
       }
 
@@ -294,20 +294,8 @@ describe('ImageAssetCard', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c21 {
+      .c20 {
         padding-top: 4px;
-      }
-
-      .c15 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
       }
 
       .c13 {
@@ -408,7 +396,7 @@ describe('ImageAssetCard', () => {
         fill: #666687;
       }
 
-      .c24 {
+      .c23 {
         text-transform: uppercase;
       }
 
@@ -444,15 +432,11 @@ describe('ImageAssetCard', () => {
                 class="c4 c5 c6 c7"
                 spacing="2"
               >
-                <div
-                  class=""
-                >
-                  <input
-                    aria-labelledby="card-1-title"
-                    class="c8"
-                    type="checkbox"
-                  />
-                </div>
+                <input
+                  aria-labelledby="card-1-title"
+                  class="c8"
+                  type="checkbox"
+                />
               </div>
             </div>
             <div
@@ -467,15 +451,8 @@ describe('ImageAssetCard', () => {
                   tabindex="0"
                   type="button"
                 >
-                  <span
-                    class="c15"
-                  >
-                    Edit
-                  </span>
                   <svg
-                    aria-hidden="true"
                     fill="none"
-                    focusable="false"
                     height="1em"
                     viewBox="0 0 24 24"
                     width="1em"
@@ -492,40 +469,40 @@ describe('ImageAssetCard', () => {
               </span>
             </div>
             <div
-              class="c16"
+              class="c15"
             >
               <img
                 alt=""
                 aria-hidden="true"
-                class="c17"
+                class="c16"
                 src="http://somewhere.com/hello.png?width=40&height=40"
               />
             </div>
           </div>
           <div
-            class="c18"
+            class="c17"
           >
             <div
-              class="c19"
+              class="c18"
             >
               <div
-                class="c20"
+                class="c19"
               >
                 <div
-                  class="c21"
+                  class="c20"
                 >
                   <h2
-                    class="c22"
+                    class="c21"
                     id="card-1-title"
                   >
                     hello.png
                   </h2>
                 </div>
                 <div
-                  class="c23"
+                  class="c22"
                 >
                   <span
-                    class="c24"
+                    class="c23"
                   >
                     png
                   </span>
@@ -533,13 +510,13 @@ describe('ImageAssetCard', () => {
                 </div>
               </div>
               <div
-                class="c25"
+                class="c24"
               >
                 <div
-                  class="c26 c27 c28"
+                  class="c25 c26 c27"
                 >
                   <span
-                    class="c29"
+                    class="c28"
                   >
                     Image
                   </span>
@@ -549,7 +526,7 @@ describe('ImageAssetCard', () => {
           </div>
         </article>
         <div
-          class="c30"
+          class="c29"
         >
           <p
             aria-live="polite"

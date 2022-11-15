@@ -254,15 +254,11 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
       <div
         class="c5"
       >
-        <div
-          class=""
-        >
-          <input
-            aria-labelledby="folder-3-title"
-            class="c6"
-            type="checkbox"
-          />
-        </div>
+        <input
+          aria-labelledby="folder-3-title"
+          class="c6"
+          type="checkbox"
+        />
       </div>
       <div
         class="c7"

@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ListView /> renders and matches the snapshot 1`] = `
-.c82 {
+.c81 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -31,7 +31,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   justify-content: flex-end;
 }
 
-.c47 {
+.c46 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -86,12 +86,12 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   margin-top: 16px;
 }
 
-.c56 > * {
+.c55 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c56 > * + * {
+.c55 > * + * {
   margin-top: 4px;
 }
 
@@ -143,21 +143,21 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   line-height: 1.43;
 }
 
-.c51 {
+.c50 {
   font-weight: 600;
   color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c59 {
+.c58 {
   font-weight: 600;
   color: #4945ff;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c66 {
+.c65 {
   font-weight: 600;
   color: #32324d;
   display: block;
@@ -474,60 +474,60 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   padding-left: 24px;
 }
 
-.c42 {
+.c41 {
   padding-right: 0px;
   padding-left: 24px;
 }
 
-.c45 {
+.c44 {
   padding-top: 16px;
   padding-bottom: 16px;
 }
 
-.c48 {
+.c47 {
   background: #dcdce4;
 }
 
-.c50 {
+.c49 {
   padding-left: 12px;
 }
 
-.c53 {
+.c52 {
   padding-left: 40px;
 }
 
-.c60 {
+.c59 {
   padding-right: 16px;
   padding-left: 16px;
   border-radius: borderRadius;
 }
 
-.c65 {
+.c64 {
   max-width: calc(8.75rem - 32px);
 }
 
-.c71 {
+.c70 {
   background: #d9d8ff;
 }
 
-.c73 {
+.c72 {
   background: #eaeaef;
 }
 
-.c75 {
+.c74 {
   background: #f0f0ff;
   padding: 20px;
 }
 
-.c78 {
+.c77 {
   background: #d9d8ff;
 }
 
-.c80 {
+.c79 {
   padding-left: 12px;
 }
 
-.c77 {
+.c76 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -541,20 +541,20 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
-.c74 {
+.c73 {
   height: 1px;
   border: none;
   margin: 0;
 }
 
-.c81 {
+.c80 {
   font-weight: 600;
   color: #4945ff;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c79 {
+.c78 {
   height: 1.5rem;
   width: 1.5rem;
   border-radius: 50%;
@@ -572,32 +572,20 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c79 svg {
+.c78 svg {
   height: 0.625rem;
   width: 0.625rem;
 }
 
-.c79 svg path {
+.c78 svg path {
   fill: #4945ff;
 }
 
-.c76 {
+.c75 {
   border-radius: 0 0 4px 4px;
   display: block;
   width: 100%;
   border: none;
-}
-
-.c40 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c38 {
@@ -835,7 +823,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   line-height: 1.5;
 }
 
-.c64 {
+.c63 {
   width: 2rem !important;
   height: 2rem !important;
   padding: 0.5625rem;
@@ -843,27 +831,27 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   background: #eaeaef;
 }
 
-.c64 path {
+.c63 path {
   fill: #8e8ea9;
 }
 
-.c68 {
+.c67 {
   position: absolute;
   display: none;
   top: 5px;
   right: 0.5rem;
 }
 
-.c68 svg {
+.c67 svg {
   width: 0.625rem;
   height: 0.625rem;
 }
 
-.c68 svg path {
+.c67 svg path {
   fill: #4945ff;
 }
 
-.c61 {
+.c60 {
   -webkit-flex-shrink: 0;
   -ms-flex-negative: 0;
   flex-shrink: 0;
@@ -887,58 +875,58 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c61.active,
-.c61:hover {
+.c60.active,
+.c60:hover {
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
 }
 
-.c61.active .c67,
-.c61:hover .c67 {
+.c60.active .c66,
+.c60:hover .c66 {
   display: block;
 }
 
-.c61.active .c63,
-.c61:hover .c63 {
+.c60.active .c62,
+.c60:hover .c62 {
   background: #d9d8ff;
 }
 
-.c61.active .c63 path,
-.c61:hover .c63 path {
+.c60.active .c62 path,
+.c60:hover .c62 path {
   fill: #4945ff;
 }
 
-.c61.active .c29,
-.c61:hover .c29 {
+.c60.active .c29,
+.c60:hover .c29 {
   color: #4945ff;
 }
 
-.c62 {
+.c61 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
 }
 
-.c41.component-row,
-.c41.dynamiczone-row {
+.c40.component-row,
+.c40.dynamiczone-row {
   position: relative;
   border-top: none !important;
 }
 
-.c41.component-row table tr:first-child,
-.c41.dynamiczone-row table tr:first-child {
+.c40.component-row table tr:first-child,
+.c40.dynamiczone-row table tr:first-child {
   border-top: none;
 }
 
-.c41.component-row > td:first-of-type,
-.c41.dynamiczone-row > td:first-of-type {
+.c40.component-row > td:first-of-type,
+.c40.dynamiczone-row > td:first-of-type {
   padding: 0 0 0 1.25rem;
   position: relative;
 }
 
-.c41.component-row > td:first-of-type::before,
-.c41.dynamiczone-row > td:first-of-type::before {
+.c40.component-row > td:first-of-type::before,
+.c40.dynamiczone-row > td:first-of-type::before {
   content: '';
   width: 0.25rem;
   height: calc(100% - 40px);
@@ -949,29 +937,29 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   background: #eaeaef;
 }
 
-.c41.dynamiczone-row > td:first-of-type {
+.c40.dynamiczone-row > td:first-of-type {
   padding: 0;
 }
 
-.c52.component-row,
-.c52.dynamiczone-row {
+.c51.component-row,
+.c51.dynamiczone-row {
   position: relative;
   border-top: none !important;
 }
 
-.c52.component-row table tr:first-child,
-.c52.dynamiczone-row table tr:first-child {
+.c51.component-row table tr:first-child,
+.c51.dynamiczone-row table tr:first-child {
   border-top: none;
 }
 
-.c52.component-row > td:first-of-type,
-.c52.dynamiczone-row > td:first-of-type {
+.c51.component-row > td:first-of-type,
+.c51.dynamiczone-row > td:first-of-type {
   padding: 0 0 0 1.25rem;
   position: relative;
 }
 
-.c52.component-row > td:first-of-type::before,
-.c52.dynamiczone-row > td:first-of-type::before {
+.c51.component-row > td:first-of-type::before,
+.c51.dynamiczone-row > td:first-of-type::before {
   content: '';
   width: 0.25rem;
   height: calc(100% - 40px);
@@ -982,11 +970,11 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   background-color: #d9d8ff;
 }
 
-.c52.dynamiczone-row > td:first-of-type {
+.c51.dynamiczone-row > td:first-of-type {
   padding: 0;
 }
 
-.c58 {
+.c57 {
   width: 2rem;
   height: 2rem;
   padding: 0.5625rem;
@@ -994,11 +982,11 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
-.c58 path {
+.c57 path {
   fill: #4945ff;
 }
 
-.c54 {
+.c53 {
   height: 5.625rem;
   position: absolute;
   width: 100%;
@@ -1006,16 +994,16 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   left: 0;
 }
 
-.c55 {
+.c54 {
   width: 100%;
   overflow-x: auto;
 }
 
-.c69 {
+.c68 {
   padding-top: 5.625rem;
 }
 
-.c57 {
+.c56 {
   -webkit-flex-shrink: 0;
   -ms-flex-negative: 0;
   flex-shrink: 0;
@@ -1066,7 +1054,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   outline-offset: -4px;
 }
 
-.c49 {
+.c48 {
   height: 1.5rem;
   width: 1.5rem;
   border-radius: 50%;
@@ -1084,16 +1072,16 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c49 svg {
+.c48 svg {
   height: 0.625rem;
   width: 0.625rem;
 }
 
-.c49 svg path {
+.c48 svg path {
   fill: #666687;
 }
 
-.c72 {
+.c71 {
   height: 1.5rem;
   width: 1.5rem;
   border-radius: 50%;
@@ -1111,16 +1099,16 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c72 svg {
+.c71 svg {
   height: 0.625rem;
   width: 0.625rem;
 }
 
-.c72 svg path {
+.c71 svg path {
   fill: #4945ff;
 }
 
-.c46 {
+.c45 {
   border-radius: 0 0 4px 4px;
   display: block;
   width: 100%;
@@ -1129,20 +1117,20 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   left: -0.25rem;
 }
 
-.c43 {
+.c42 {
   position: absolute;
   left: -1.125rem;
   top: 0px;
 }
 
-.c43:before {
+.c42:before {
   content: '';
   width: 0.25rem;
   height: 0.75rem;
   display: block;
 }
 
-.c44 {
+.c43 {
   position: relative;
   -webkit-flex-shrink: 0;
   -ms-flex-negative: 0;
@@ -1152,11 +1140,11 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   transform: translate(-0.5px,-1px);
 }
 
-.c44 * {
+.c43 * {
   fill: #eaeaef;
 }
 
-.c70 {
+.c69 {
   position: relative;
   -webkit-flex-shrink: 0;
   -ms-flex-negative: 0;
@@ -1166,7 +1154,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   transform: translate(-0.5px,-1px);
 }
 
-.c70 * {
+.c69 * {
   fill: #d9d8ff;
 }
 
@@ -1479,15 +1467,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             tabindex="0"
                             type="button"
                           >
-                            <span
-                              class="c40"
-                            >
-                              Edit postal_code
-                            </span>
                             <svg
-                              aria-hidden="true"
                               fill="none"
-                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -1510,15 +1491,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             tabindex="0"
                             type="button"
                           >
-                            <span
-                              class="c40"
-                            >
-                              Delete postal_code
-                            </span>
                             <svg
-                              aria-hidden="true"
                               fill="none"
-                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -1606,15 +1580,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             tabindex="0"
                             type="button"
                           >
-                            <span
-                              class="c40"
-                            >
-                              Edit categories
-                            </span>
                             <svg
-                              aria-hidden="true"
                               fill="none"
-                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -1637,15 +1604,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             tabindex="0"
                             type="button"
                           >
-                            <span
-                              class="c40"
-                            >
-                              Delete categories
-                            </span>
                             <svg
-                              aria-hidden="true"
                               fill="none"
-                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -1731,15 +1691,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             tabindex="0"
                             type="button"
                           >
-                            <span
-                              class="c40"
-                            >
-                              Edit cover
-                            </span>
                             <svg
-                              aria-hidden="true"
                               fill="none"
-                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -1762,15 +1715,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             tabindex="0"
                             type="button"
                           >
-                            <span
-                              class="c40"
-                            >
-                              Delete cover
-                            </span>
                             <svg
-                              aria-hidden="true"
                               fill="none"
-                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -1856,15 +1802,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             tabindex="0"
                             type="button"
                           >
-                            <span
-                              class="c40"
-                            >
-                              Edit images
-                            </span>
                             <svg
-                              aria-hidden="true"
                               fill="none"
-                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -1887,15 +1826,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             tabindex="0"
                             type="button"
                           >
-                            <span
-                              class="c40"
-                            >
-                              Delete images
-                            </span>
                             <svg
-                              aria-hidden="true"
                               fill="none"
-                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -1979,15 +1911,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             tabindex="0"
                             type="button"
                           >
-                            <span
-                              class="c40"
-                            >
-                              Edit city
-                            </span>
                             <svg
-                              aria-hidden="true"
                               fill="none"
-                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -2010,15 +1935,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             tabindex="0"
                             type="button"
                           >
-                            <span
-                              class="c40"
-                            >
-                              Delete city
-                            </span>
                             <svg
-                              aria-hidden="true"
                               fill="none"
-                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -2104,15 +2022,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             tabindex="0"
                             type="button"
                           >
-                            <span
-                              class="c40"
-                            >
-                              Edit json
-                            </span>
                             <svg
-                              aria-hidden="true"
                               fill="none"
-                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -2135,15 +2046,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             tabindex="0"
                             type="button"
                           >
-                            <span
-                              class="c40"
-                            >
-                              Delete json
-                            </span>
                             <svg
-                              aria-hidden="true"
                               fill="none"
-                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -2223,15 +2127,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             tabindex="0"
                             type="button"
                           >
-                            <span
-                              class="c40"
-                            >
-                              Edit slug
-                            </span>
                             <svg
-                              aria-hidden="true"
                               fill="none"
-                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -2254,15 +2151,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             tabindex="0"
                             type="button"
                           >
-                            <span
-                              class="c40"
-                            >
-                              Delete slug
-                            </span>
                             <svg
-                              aria-hidden="true"
                               fill="none"
-                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -2352,15 +2242,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             tabindex="0"
                             type="button"
                           >
-                            <span
-                              class="c40"
-                            >
-                              Edit notrepeat_req
-                            </span>
                             <svg
-                              aria-hidden="true"
                               fill="none"
-                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -2383,15 +2266,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             tabindex="0"
                             type="button"
                           >
-                            <span
-                              class="c40"
-                            >
-                              Delete notrepeat_req
-                            </span>
                             <svg
-                              aria-hidden="true"
                               fill="none"
-                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -2409,7 +2285,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                 </tr>
                 <tr
-                  class="c41 component-row"
+                  class="c40 component-row"
                 >
                   <td
                     colspan="12"
@@ -2418,7 +2294,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       class="c27"
                     >
                       <div
-                        class="c42"
+                        class="c41"
                       >
                         <table>
                           <tbody>
@@ -2430,10 +2306,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 style="position: relative;"
                               >
                                 <div
-                                  class="c43"
+                                  class="c42"
                                 >
                                   <svg
-                                    class="c44"
+                                    class="c43"
                                     color="neutral150"
                                     fill="none"
                                     height="23"
@@ -2508,15 +2384,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         tabindex="0"
                                         type="button"
                                       >
-                                        <span
-                                          class="c40"
-                                        >
-                                          Edit name
-                                        </span>
                                         <svg
-                                          aria-hidden="true"
                                           fill="none"
-                                          focusable="false"
                                           height="1em"
                                           viewBox="0 0 24 24"
                                           width="1em"
@@ -2539,15 +2408,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         tabindex="0"
                                         type="button"
                                       >
-                                        <span
-                                          class="c40"
-                                        >
-                                          Delete name
-                                        </span>
                                         <svg
-                                          aria-hidden="true"
                                           fill="none"
-                                          focusable="false"
                                           height="1em"
                                           viewBox="0 0 24 24"
                                           width="1em"
@@ -2572,10 +2434,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 style="position: relative;"
                               >
                                 <div
-                                  class="c43"
+                                  class="c42"
                                 >
                                   <svg
-                                    class="c44"
+                                    class="c43"
                                     color="neutral150"
                                     fill="none"
                                     height="23"
@@ -2650,15 +2512,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         tabindex="0"
                                         type="button"
                                       >
-                                        <span
-                                          class="c40"
-                                        >
-                                          Edit popo
-                                        </span>
                                         <svg
-                                          aria-hidden="true"
                                           fill="none"
-                                          focusable="false"
                                           height="1em"
                                           viewBox="0 0 24 24"
                                           width="1em"
@@ -2681,15 +2536,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         tabindex="0"
                                         type="button"
                                       >
-                                        <span
-                                          class="c40"
-                                        >
-                                          Delete popo
-                                        </span>
                                         <svg
-                                          aria-hidden="true"
                                           fill="none"
-                                          focusable="false"
                                           height="1em"
                                           viewBox="0 0 24 24"
                                           width="1em"
@@ -2714,10 +2562,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 style="position: relative;"
                               >
                                 <div
-                                  class="c43"
+                                  class="c42"
                                 >
                                   <svg
-                                    class="c44"
+                                    class="c43"
                                     color="neutral150"
                                     fill="none"
                                     height="23"
@@ -2792,15 +2640,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         tabindex="0"
                                         type="button"
                                       >
-                                        <span
-                                          class="c40"
-                                        >
-                                          Edit poq
-                                        </span>
                                         <svg
-                                          aria-hidden="true"
                                           fill="none"
-                                          focusable="false"
                                           height="1em"
                                           viewBox="0 0 24 24"
                                           width="1em"
@@ -2823,15 +2664,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         tabindex="0"
                                         type="button"
                                       >
-                                        <span
-                                          class="c40"
-                                        >
-                                          Delete poq
-                                        </span>
                                         <svg
-                                          aria-hidden="true"
                                           fill="none"
-                                          focusable="false"
                                           height="1em"
                                           viewBox="0 0 24 24"
                                           width="1em"
@@ -2852,15 +2686,15 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         </table>
                       </div>
                       <button
-                        class="c45 c46"
+                        class="c44 c45"
                         type="button"
                       >
                         <div
-                          class="c47"
+                          class="c46"
                         >
                           <div
                             aria-hidden="true"
-                            class="c48 c49"
+                            class="c47 c48"
                           >
                             <svg
                               fill="none"
@@ -2876,10 +2710,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             </svg>
                           </div>
                           <div
-                            class="c50"
+                            class="c49"
                           >
                             <span
-                              class="c29 c51"
+                              class="c29 c50"
                             >
                               Add another field to this component
                             </span>
@@ -2962,15 +2796,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             tabindex="0"
                             type="button"
                           >
-                            <span
-                              class="c40"
-                            >
-                              Edit Compopo
-                            </span>
                             <svg
-                              aria-hidden="true"
                               fill="none"
-                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -2993,15 +2820,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             tabindex="0"
                             type="button"
                           >
-                            <span
-                              class="c40"
-                            >
-                              Delete Compopo
-                            </span>
                             <svg
-                              aria-hidden="true"
                               fill="none"
-                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -3019,7 +2839,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                 </tr>
                 <tr
-                  class="c41 component-row"
+                  class="c40 component-row"
                 >
                   <td
                     colspan="12"
@@ -3028,7 +2848,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       class="c27"
                     >
                       <div
-                        class="c42"
+                        class="c41"
                       >
                         <table>
                           <tbody>
@@ -3040,10 +2860,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 style="position: relative;"
                               >
                                 <div
-                                  class="c43"
+                                  class="c42"
                                 >
                                   <svg
-                                    class="c44"
+                                    class="c43"
                                     color="neutral150"
                                     fill="none"
                                     height="23"
@@ -3118,15 +2938,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         tabindex="0"
                                         type="button"
                                       >
-                                        <span
-                                          class="c40"
-                                        >
-                                          Edit dede
-                                        </span>
                                         <svg
-                                          aria-hidden="true"
                                           fill="none"
-                                          focusable="false"
                                           height="1em"
                                           viewBox="0 0 24 24"
                                           width="1em"
@@ -3149,15 +2962,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         tabindex="0"
                                         type="button"
                                       >
-                                        <span
-                                          class="c40"
-                                        >
-                                          Delete dede
-                                        </span>
                                         <svg
-                                          aria-hidden="true"
                                           fill="none"
-                                          focusable="false"
                                           height="1em"
                                           viewBox="0 0 24 24"
                                           width="1em"
@@ -3182,10 +2988,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 style="position: relative;"
                               >
                                 <div
-                                  class="c43"
+                                  class="c42"
                                 >
                                   <svg
-                                    class="c44"
+                                    class="c43"
                                     color="neutral150"
                                     fill="none"
                                     height="23"
@@ -3260,15 +3066,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         tabindex="0"
                                         type="button"
                                       >
-                                        <span
-                                          class="c40"
-                                        >
-                                          Edit dada
-                                        </span>
                                         <svg
-                                          aria-hidden="true"
                                           fill="none"
-                                          focusable="false"
                                           height="1em"
                                           viewBox="0 0 24 24"
                                           width="1em"
@@ -3291,15 +3090,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         tabindex="0"
                                         type="button"
                                       >
-                                        <span
-                                          class="c40"
-                                        >
-                                          Delete dada
-                                        </span>
                                         <svg
-                                          aria-hidden="true"
                                           fill="none"
-                                          focusable="false"
                                           height="1em"
                                           viewBox="0 0 24 24"
                                           width="1em"
@@ -3324,10 +3116,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 style="position: relative;"
                               >
                                 <div
-                                  class="c43"
+                                  class="c42"
                                 >
                                   <svg
-                                    class="c44"
+                                    class="c43"
                                     color="neutral150"
                                     fill="none"
                                     height="23"
@@ -3402,15 +3194,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         tabindex="0"
                                         type="button"
                                       >
-                                        <span
-                                          class="c40"
-                                        >
-                                          Edit papi
-                                        </span>
                                         <svg
-                                          aria-hidden="true"
                                           fill="none"
-                                          focusable="false"
                                           height="1em"
                                           viewBox="0 0 24 24"
                                           width="1em"
@@ -3433,15 +3218,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         tabindex="0"
                                         type="button"
                                       >
-                                        <span
-                                          class="c40"
-                                        >
-                                          Delete papi
-                                        </span>
                                         <svg
-                                          aria-hidden="true"
                                           fill="none"
-                                          focusable="false"
                                           height="1em"
                                           viewBox="0 0 24 24"
                                           width="1em"
@@ -3462,15 +3240,15 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         </table>
                       </div>
                       <button
-                        class="c45 c46"
+                        class="c44 c45"
                         type="button"
                       >
                         <div
-                          class="c47"
+                          class="c46"
                         >
                           <div
                             aria-hidden="true"
-                            class="c48 c49"
+                            class="c47 c48"
                           >
                             <svg
                               fill="none"
@@ -3486,10 +3264,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             </svg>
                           </div>
                           <div
-                            class="c50"
+                            class="c49"
                           >
                             <span
-                              class="c29 c51"
+                              class="c29 c50"
                             >
                               Add another field to this component
                             </span>
@@ -3566,15 +3344,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             tabindex="0"
                             type="button"
                           >
-                            <span
-                              class="c40"
-                            >
-                              Edit DynamicZone
-                            </span>
                             <svg
-                              aria-hidden="true"
                               fill="none"
-                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -3597,15 +3368,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             tabindex="0"
                             type="button"
                           >
-                            <span
-                              class="c40"
-                            >
-                              Delete DynamicZone
-                            </span>
                             <svg
-                              aria-hidden="true"
                               fill="none"
-                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -3623,27 +3387,27 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                 </tr>
                 <tr
-                  class="c52 dynamiczone-row"
+                  class="c51 dynamiczone-row"
                 >
                   <td
                     colspan="12"
                   >
                     <div
-                      class="c53 c54"
+                      class="c52 c53"
                     >
                       <div
-                        class="c17 c18 c55"
+                        class="c17 c18 c54"
                         spacing="2"
                       >
                         <button
                           type="button"
                         >
                           <div
-                            class="c23 c56 c57"
+                            class="c23 c55 c56"
                             spacing="1"
                           >
                             <svg
-                              class="c58"
+                              class="c57"
                               fill="none"
                               height="1em"
                               viewBox="0 0 24 24"
@@ -3656,7 +3420,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                               />
                             </svg>
                             <span
-                              class="c29 c59"
+                              class="c29 c58"
                             >
                               Add a component
                             </span>
@@ -3666,15 +3430,15 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                           type="button"
                         >
                           <div
-                            class="c60 c61 active"
+                            class="c59 c60 active"
                           >
                             <div
-                              class="c23 c56 c62"
+                              class="c23 c55 c61"
                               spacing="1"
                             >
                               <svg
                                 aria-hidden="true"
-                                class="svg-inline--fa fa-adjust c63 c64"
+                                class="svg-inline--fa fa-adjust c62 c63"
                                 data-icon="adjust"
                                 data-prefix="fas"
                                 focusable="false"
@@ -3688,15 +3452,15 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 />
                               </svg>
                               <div
-                                class="c65"
+                                class="c64"
                               >
                                 <span
-                                  class="c29 c66"
+                                  class="c29 c65"
                                 />
                               </div>
                             </div>
                             <div
-                              class="c67 c68"
+                              class="c66 c67"
                               role="button"
                               tabindex="0"
                             >
@@ -3719,15 +3483,15 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                           type="button"
                         >
                           <div
-                            class="c60 c61"
+                            class="c59 c60"
                           >
                             <div
-                              class="c23 c56 c62"
+                              class="c23 c55 c61"
                               spacing="1"
                             >
                               <svg
                                 aria-hidden="true"
-                                class="svg-inline--fa fa-address-book c63 c64"
+                                class="svg-inline--fa fa-address-book c62 c63"
                                 data-icon="address-book"
                                 data-prefix="fas"
                                 focusable="false"
@@ -3741,15 +3505,15 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 />
                               </svg>
                               <div
-                                class="c65"
+                                class="c64"
                               >
                                 <span
-                                  class="c29 c66"
+                                  class="c29 c65"
                                 />
                               </div>
                             </div>
                             <div
-                              class="c67 c68"
+                              class="c66 c67"
                               role="button"
                               tabindex="0"
                             >
@@ -3772,15 +3536,15 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                           type="button"
                         >
                           <div
-                            class="c60 c61"
+                            class="c59 c60"
                           >
                             <div
-                              class="c23 c56 c62"
+                              class="c23 c55 c61"
                               spacing="1"
                             >
                               <svg
                                 aria-hidden="true"
-                                class="svg-inline--fa fa-calendar c63 c64"
+                                class="svg-inline--fa fa-calendar c62 c63"
                                 data-icon="calendar"
                                 data-prefix="fas"
                                 focusable="false"
@@ -3794,15 +3558,15 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 />
                               </svg>
                               <div
-                                class="c65"
+                                class="c64"
                               >
                                 <span
-                                  class="c29 c66"
+                                  class="c29 c65"
                                 />
                               </div>
                             </div>
                             <div
-                              class="c67 c68"
+                              class="c66 c67"
                               role="button"
                               tabindex="0"
                             >
@@ -3825,15 +3589,15 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                           type="button"
                         >
                           <div
-                            class="c60 c61"
+                            class="c59 c60"
                           >
                             <div
-                              class="c23 c56 c62"
+                              class="c23 c55 c61"
                               spacing="1"
                             >
                               <svg
                                 aria-hidden="true"
-                                class="svg-inline--fa fa-cannabis c63 c64"
+                                class="svg-inline--fa fa-cannabis c62 c63"
                                 data-icon="cannabis"
                                 data-prefix="fas"
                                 focusable="false"
@@ -3847,15 +3611,15 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 />
                               </svg>
                               <div
-                                class="c65"
+                                class="c64"
                               >
                                 <span
-                                  class="c29 c66"
+                                  class="c29 c65"
                                 />
                               </div>
                             </div>
                             <div
-                              class="c67 c68"
+                              class="c66 c67"
                               role="button"
                               tabindex="0"
                             >
@@ -3877,7 +3641,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       </div>
                     </div>
                     <div
-                      class="c69"
+                      class="c68"
                     >
                       <div
                         class=""
@@ -3886,7 +3650,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <table>
                           <tbody>
                             <tr
-                              class="c52 component-row"
+                              class="c51 component-row"
                             >
                               <td
                                 colspan="12"
@@ -3895,7 +3659,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   class="c27"
                                 >
                                   <div
-                                    class="c42"
+                                    class="c41"
                                   >
                                     <table>
                                       <tbody>
@@ -3907,10 +3671,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             style="position: relative;"
                                           >
                                             <div
-                                              class="c43"
+                                              class="c42"
                                             >
                                               <svg
-                                                class="c70"
+                                                class="c69"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -3985,15 +3749,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Edit name
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -4016,15 +3773,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Delete name
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -4049,10 +3799,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             style="position: relative;"
                                           >
                                             <div
-                                              class="c43"
+                                              class="c42"
                                             >
                                               <svg
-                                                class="c70"
+                                                class="c69"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4127,15 +3877,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Edit mail
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -4158,15 +3901,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Delete mail
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -4191,10 +3927,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             style="position: relative;"
                                           >
                                             <div
-                                              class="c43"
+                                              class="c42"
                                             >
                                               <svg
-                                                class="c70"
+                                                class="c69"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4269,15 +4005,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Edit phone
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -4300,15 +4029,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Delete phone
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -4329,15 +4051,15 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     </table>
                                   </div>
                                   <button
-                                    class="c45 c46"
+                                    class="c44 c45"
                                     type="button"
                                   >
                                     <div
-                                      class="c47"
+                                      class="c46"
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c71 c72"
+                                        class="c70 c71"
                                       >
                                         <svg
                                           fill="none"
@@ -4353,10 +4075,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         </svg>
                                       </div>
                                       <div
-                                        class="c50"
+                                        class="c49"
                                       >
                                         <span
-                                          class="c29 c59"
+                                          class="c29 c58"
                                         >
                                           Add another field to this component
                                         </span>
@@ -4376,7 +4098,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <table>
                           <tbody>
                             <tr
-                              class="c52 component-row"
+                              class="c51 component-row"
                             >
                               <td
                                 colspan="12"
@@ -4385,7 +4107,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   class="c27"
                                 >
                                   <div
-                                    class="c42"
+                                    class="c41"
                                   >
                                     <table>
                                       <tbody>
@@ -4397,10 +4119,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             style="position: relative;"
                                           >
                                             <div
-                                              class="c43"
+                                              class="c42"
                                             >
                                               <svg
-                                                class="c70"
+                                                class="c69"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4475,15 +4197,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Edit name
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -4506,15 +4221,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Delete name
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -4539,10 +4247,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             style="position: relative;"
                                           >
                                             <div
-                                              class="c43"
+                                              class="c42"
                                             >
                                               <svg
-                                                class="c70"
+                                                class="c69"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4617,15 +4325,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Edit description
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -4648,15 +4349,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Delete description
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -4681,10 +4375,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             style="position: relative;"
                                           >
                                             <div
-                                              class="c43"
+                                              class="c42"
                                             >
                                               <svg
-                                                class="c70"
+                                                class="c69"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4759,15 +4453,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Edit price
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -4790,15 +4477,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Delete price
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -4823,10 +4503,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             style="position: relative;"
                                           >
                                             <div
-                                              class="c43"
+                                              class="c42"
                                             >
                                               <svg
-                                                class="c70"
+                                                class="c69"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4903,15 +4583,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Edit picture
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -4934,15 +4607,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Delete picture
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -4967,10 +4633,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             style="position: relative;"
                                           >
                                             <div
-                                              class="c43"
+                                              class="c42"
                                             >
                                               <svg
-                                                class="c70"
+                                                class="c69"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -5047,15 +4713,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Edit very_long_description
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -5078,15 +4737,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Delete very_long_description
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -5111,10 +4763,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             style="position: relative;"
                                           >
                                             <div
-                                              class="c43"
+                                              class="c42"
                                             >
                                               <svg
-                                                class="c70"
+                                                class="c69"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -5193,15 +4845,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Edit categories
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -5224,15 +4869,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Delete categories
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -5253,15 +4891,15 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     </table>
                                   </div>
                                   <button
-                                    class="c45 c46"
+                                    class="c44 c45"
                                     type="button"
                                   >
                                     <div
-                                      class="c47"
+                                      class="c46"
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c71 c72"
+                                        class="c70 c71"
                                       >
                                         <svg
                                           fill="none"
@@ -5277,10 +4915,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         </svg>
                                       </div>
                                       <div
-                                        class="c50"
+                                        class="c49"
                                       >
                                         <span
-                                          class="c29 c59"
+                                          class="c29 c58"
                                         >
                                           Add another field to this component
                                         </span>
@@ -5300,7 +4938,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <table>
                           <tbody>
                             <tr
-                              class="c52 component-row"
+                              class="c51 component-row"
                             >
                               <td
                                 colspan="12"
@@ -5309,7 +4947,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   class="c27"
                                 >
                                   <div
-                                    class="c42"
+                                    class="c41"
                                   >
                                     <table>
                                       <tbody>
@@ -5321,10 +4959,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             style="position: relative;"
                                           >
                                             <div
-                                              class="c43"
+                                              class="c42"
                                             >
                                               <svg
-                                                class="c70"
+                                                class="c69"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -5399,15 +5037,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Edit label
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -5430,15 +5061,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Delete label
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -5463,10 +5087,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             style="position: relative;"
                                           >
                                             <div
-                                              class="c43"
+                                              class="c42"
                                             >
                                               <svg
-                                                class="c70"
+                                                class="c69"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -5541,15 +5165,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Edit time
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -5572,15 +5189,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Delete time
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -5605,10 +5215,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             style="position: relative;"
                                           >
                                             <div
-                                              class="c43"
+                                              class="c42"
                                             >
                                               <svg
-                                                class="c70"
+                                                class="c69"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -5690,15 +5300,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Edit dishrep
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -5721,15 +5324,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Delete dishrep
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -5747,7 +5343,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                           </td>
                                         </tr>
                                         <tr
-                                          class="c41 component-row"
+                                          class="c40 component-row"
                                         >
                                           <td
                                             colspan="12"
@@ -5756,7 +5352,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c27"
                                             >
                                               <div
-                                                class="c42"
+                                                class="c41"
                                               >
                                                 <table>
                                                   <tbody>
@@ -5768,10 +5364,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                         style="position: relative;"
                                                       >
                                                         <div
-                                                          class="c43"
+                                                          class="c42"
                                                         >
                                                           <svg
-                                                            class="c44"
+                                                            class="c43"
                                                             color="neutral150"
                                                             fill="none"
                                                             height="23"
@@ -5846,15 +5442,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                                 tabindex="0"
                                                                 type="button"
                                                               >
-                                                                <span
-                                                                  class="c40"
-                                                                >
-                                                                  Edit name
-                                                                </span>
                                                                 <svg
-                                                                  aria-hidden="true"
                                                                   fill="none"
-                                                                  focusable="false"
                                                                   height="1em"
                                                                   viewBox="0 0 24 24"
                                                                   width="1em"
@@ -5877,15 +5466,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                                 tabindex="0"
                                                                 type="button"
                                                               >
-                                                                <span
-                                                                  class="c40"
-                                                                >
-                                                                  Delete name
-                                                                </span>
                                                                 <svg
-                                                                  aria-hidden="true"
                                                                   fill="none"
-                                                                  focusable="false"
                                                                   height="1em"
                                                                   viewBox="0 0 24 24"
                                                                   width="1em"
@@ -5910,10 +5492,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                         style="position: relative;"
                                                       >
                                                         <div
-                                                          class="c43"
+                                                          class="c42"
                                                         >
                                                           <svg
-                                                            class="c44"
+                                                            class="c43"
                                                             color="neutral150"
                                                             fill="none"
                                                             height="23"
@@ -5988,15 +5570,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                                 tabindex="0"
                                                                 type="button"
                                                               >
-                                                                <span
-                                                                  class="c40"
-                                                                >
-                                                                  Edit description
-                                                                </span>
                                                                 <svg
-                                                                  aria-hidden="true"
                                                                   fill="none"
-                                                                  focusable="false"
                                                                   height="1em"
                                                                   viewBox="0 0 24 24"
                                                                   width="1em"
@@ -6019,15 +5594,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                                 tabindex="0"
                                                                 type="button"
                                                               >
-                                                                <span
-                                                                  class="c40"
-                                                                >
-                                                                  Delete description
-                                                                </span>
                                                                 <svg
-                                                                  aria-hidden="true"
                                                                   fill="none"
-                                                                  focusable="false"
                                                                   height="1em"
                                                                   viewBox="0 0 24 24"
                                                                   width="1em"
@@ -6052,10 +5620,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                         style="position: relative;"
                                                       >
                                                         <div
-                                                          class="c43"
+                                                          class="c42"
                                                         >
                                                           <svg
-                                                            class="c44"
+                                                            class="c43"
                                                             color="neutral150"
                                                             fill="none"
                                                             height="23"
@@ -6130,15 +5698,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                                 tabindex="0"
                                                                 type="button"
                                                               >
-                                                                <span
-                                                                  class="c40"
-                                                                >
-                                                                  Edit price
-                                                                </span>
                                                                 <svg
-                                                                  aria-hidden="true"
                                                                   fill="none"
-                                                                  focusable="false"
                                                                   height="1em"
                                                                   viewBox="0 0 24 24"
                                                                   width="1em"
@@ -6161,15 +5722,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                                 tabindex="0"
                                                                 type="button"
                                                               >
-                                                                <span
-                                                                  class="c40"
-                                                                >
-                                                                  Delete price
-                                                                </span>
                                                                 <svg
-                                                                  aria-hidden="true"
                                                                   fill="none"
-                                                                  focusable="false"
                                                                   height="1em"
                                                                   viewBox="0 0 24 24"
                                                                   width="1em"
@@ -6194,10 +5748,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                         style="position: relative;"
                                                       >
                                                         <div
-                                                          class="c43"
+                                                          class="c42"
                                                         >
                                                           <svg
-                                                            class="c44"
+                                                            class="c43"
                                                             color="neutral150"
                                                             fill="none"
                                                             height="23"
@@ -6274,15 +5828,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                                 tabindex="0"
                                                                 type="button"
                                                               >
-                                                                <span
-                                                                  class="c40"
-                                                                >
-                                                                  Edit picture
-                                                                </span>
                                                                 <svg
-                                                                  aria-hidden="true"
                                                                   fill="none"
-                                                                  focusable="false"
                                                                   height="1em"
                                                                   viewBox="0 0 24 24"
                                                                   width="1em"
@@ -6305,15 +5852,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                                 tabindex="0"
                                                                 type="button"
                                                               >
-                                                                <span
-                                                                  class="c40"
-                                                                >
-                                                                  Delete picture
-                                                                </span>
                                                                 <svg
-                                                                  aria-hidden="true"
                                                                   fill="none"
-                                                                  focusable="false"
                                                                   height="1em"
                                                                   viewBox="0 0 24 24"
                                                                   width="1em"
@@ -6338,10 +5878,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                         style="position: relative;"
                                                       >
                                                         <div
-                                                          class="c43"
+                                                          class="c42"
                                                         >
                                                           <svg
-                                                            class="c44"
+                                                            class="c43"
                                                             color="neutral150"
                                                             fill="none"
                                                             height="23"
@@ -6418,15 +5958,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                                 tabindex="0"
                                                                 type="button"
                                                               >
-                                                                <span
-                                                                  class="c40"
-                                                                >
-                                                                  Edit very_long_description
-                                                                </span>
                                                                 <svg
-                                                                  aria-hidden="true"
                                                                   fill="none"
-                                                                  focusable="false"
                                                                   height="1em"
                                                                   viewBox="0 0 24 24"
                                                                   width="1em"
@@ -6449,15 +5982,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                                 tabindex="0"
                                                                 type="button"
                                                               >
-                                                                <span
-                                                                  class="c40"
-                                                                >
-                                                                  Delete very_long_description
-                                                                </span>
                                                                 <svg
-                                                                  aria-hidden="true"
                                                                   fill="none"
-                                                                  focusable="false"
                                                                   height="1em"
                                                                   viewBox="0 0 24 24"
                                                                   width="1em"
@@ -6482,10 +6008,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                         style="position: relative;"
                                                       >
                                                         <div
-                                                          class="c43"
+                                                          class="c42"
                                                         >
                                                           <svg
-                                                            class="c44"
+                                                            class="c43"
                                                             color="neutral150"
                                                             fill="none"
                                                             height="23"
@@ -6564,15 +6090,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                                 tabindex="0"
                                                                 type="button"
                                                               >
-                                                                <span
-                                                                  class="c40"
-                                                                >
-                                                                  Edit categories
-                                                                </span>
                                                                 <svg
-                                                                  aria-hidden="true"
                                                                   fill="none"
-                                                                  focusable="false"
                                                                   height="1em"
                                                                   viewBox="0 0 24 24"
                                                                   width="1em"
@@ -6595,15 +6114,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                                 tabindex="0"
                                                                 type="button"
                                                               >
-                                                                <span
-                                                                  class="c40"
-                                                                >
-                                                                  Delete categories
-                                                                </span>
                                                                 <svg
-                                                                  aria-hidden="true"
                                                                   fill="none"
-                                                                  focusable="false"
                                                                   height="1em"
                                                                   viewBox="0 0 24 24"
                                                                   width="1em"
@@ -6624,15 +6136,15 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 </table>
                                               </div>
                                               <button
-                                                class="c45 c46"
+                                                class="c44 c45"
                                                 type="button"
                                               >
                                                 <div
-                                                  class="c47"
+                                                  class="c46"
                                                 >
                                                   <div
                                                     aria-hidden="true"
-                                                    class="c48 c49"
+                                                    class="c47 c48"
                                                   >
                                                     <svg
                                                       fill="none"
@@ -6648,10 +6160,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     </svg>
                                                   </div>
                                                   <div
-                                                    class="c50"
+                                                    class="c49"
                                                   >
                                                     <span
-                                                      class="c29 c51"
+                                                      class="c29 c50"
                                                     >
                                                       Add another field to this component
                                                     </span>
@@ -6665,15 +6177,15 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     </table>
                                   </div>
                                   <button
-                                    class="c45 c46"
+                                    class="c44 c45"
                                     type="button"
                                   >
                                     <div
-                                      class="c47"
+                                      class="c46"
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c71 c72"
+                                        class="c70 c71"
                                       >
                                         <svg
                                           fill="none"
@@ -6689,10 +6201,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         </svg>
                                       </div>
                                       <div
-                                        class="c50"
+                                        class="c49"
                                       >
                                         <span
-                                          class="c29 c59"
+                                          class="c29 c58"
                                         >
                                           Add another field to this component
                                         </span>
@@ -6712,7 +6224,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <table>
                           <tbody>
                             <tr
-                              class="c52 component-row"
+                              class="c51 component-row"
                             >
                               <td
                                 colspan="12"
@@ -6721,7 +6233,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   class="c27"
                                 >
                                   <div
-                                    class="c42"
+                                    class="c41"
                                   >
                                     <table>
                                       <tbody>
@@ -6733,10 +6245,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             style="position: relative;"
                                           >
                                             <div
-                                              class="c43"
+                                              class="c42"
                                             >
                                               <svg
-                                                class="c70"
+                                                class="c69"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -6811,15 +6323,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Edit name
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -6842,15 +6347,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Delete name
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -6875,10 +6373,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             style="position: relative;"
                                           >
                                             <div
-                                              class="c43"
+                                              class="c42"
                                             >
                                               <svg
-                                                class="c70"
+                                                class="c69"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -6955,15 +6453,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Edit media
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -6986,15 +6477,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Delete media
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -7019,10 +6503,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             style="position: relative;"
                                           >
                                             <div
-                                              class="c43"
+                                              class="c42"
                                             >
                                               <svg
-                                                class="c70"
+                                                class="c69"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -7097,15 +6581,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Edit is_available
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -7128,15 +6605,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     tabindex="0"
                                                     type="button"
                                                   >
-                                                    <span
-                                                      class="c40"
-                                                    >
-                                                      Delete is_available
-                                                    </span>
                                                     <svg
-                                                      aria-hidden="true"
                                                       fill="none"
-                                                      focusable="false"
                                                       height="1em"
                                                       viewBox="0 0 24 24"
                                                       width="1em"
@@ -7157,15 +6627,15 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     </table>
                                   </div>
                                   <button
-                                    class="c45 c46"
+                                    class="c44 c45"
                                     type="button"
                                   >
                                     <div
-                                      class="c47"
+                                      class="c46"
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c71 c72"
+                                        class="c70 c71"
                                       >
                                         <svg
                                           fill="none"
@@ -7181,10 +6651,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         </svg>
                                       </div>
                                       <div
-                                        class="c50"
+                                        class="c49"
                                       >
                                         <span
-                                          class="c29 c59"
+                                          class="c29 c58"
                                         >
                                           Add another field to this component
                                         </span>
@@ -7205,17 +6675,17 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
           </div>
           <div>
             <hr
-              class="c73 c74"
+              class="c72 c73"
             />
             <button
-              class="c75 c76"
+              class="c74 c75"
             >
               <div
-                class="c77"
+                class="c76"
               >
                 <div
                   aria-hidden="true"
-                  class="c78 c79"
+                  class="c77 c78"
                 >
                   <svg
                     fill="none"
@@ -7231,10 +6701,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </svg>
                 </div>
                 <div
-                  class="c80"
+                  class="c79"
                 >
                   <span
-                    class="c81"
+                    class="c80"
                   >
                     Add another field to this collection type
                   </span>
@@ -7247,7 +6717,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
     </div>
   </div>
   <div
-    class="c82"
+    class="c81"
   >
     <p
       aria-live="polite"

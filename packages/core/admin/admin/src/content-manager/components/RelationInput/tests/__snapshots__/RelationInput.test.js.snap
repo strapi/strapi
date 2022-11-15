@@ -227,11 +227,11 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   border: 1px solid #c6f0c2;
 }
 
-.c25 .sc-dfhuTu {
+.c25 .sc-URNzB {
   color: #0c75af;
 }
 
-.c33 .sc-dfhuTu {
+.c33 .sc-URNzB {
   color: #328048;
 }
 

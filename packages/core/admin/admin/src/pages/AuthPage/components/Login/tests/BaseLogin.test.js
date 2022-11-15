@@ -261,10 +261,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         padding-top: 16px;
       }
 
-      .c31 {
-        padding-left: 8px;
-      }
-
       .c30 {
         margin: 0;
         height: 18px;
@@ -331,6 +327,10 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
 
       .c30:indeterminate:disabled:after {
         background-color: #8e8ea9;
+      }
+
+      .c31 {
+        padding-left: 8px;
       }
 
       .c26 {
@@ -817,17 +817,13 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                   <label
                     class="c28 c29"
                   >
-                    <div
-                      class=""
-                    >
-                      <input
-                        aria-label="rememberMe"
-                        class="c30"
-                        id="checkbox-1"
-                        name="rememberMe"
-                        type="checkbox"
-                      />
-                    </div>
+                    <input
+                      aria-label="rememberMe"
+                      class="c30"
+                      id="checkbox-1"
+                      name="rememberMe"
+                      type="checkbox"
+                    />
                     <div
                       class="c31"
                     >

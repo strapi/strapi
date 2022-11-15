@@ -19,7 +19,7 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import Write from '@strapi/icons/Write';
 import Exit from '@strapi/icons/Exit';
-import { auth, usePersistentState, useAppInfos } from '@strapi/helper-plugin';
+import { auth, usePersistentState, useAppInfos, useTracking } from '@strapi/helper-plugin';
 import useConfigurations from '../../hooks/useConfigurations';
 
 const LinkUserWrapper = styled(Box)`
@@ -59,6 +59,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   const [condensed, setCondensed] = usePersistentState('navbar-condensed', false);
   const { userDisplayName } = useAppInfos();
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
 
   const initials = userDisplayName
     .split(' ')
@@ -125,7 +126,23 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
               const Icon = link.icon;
 
               return (
-                <NavLink as={RouterNavLink} to={link.to} key={link.to} icon={<Icon />}>
+                <NavLink
+                  as={RouterNavLink}
+                  to={link.to}
+                  key={link.to}
+                  icon={<Icon />}
+                  isActive={(match, location) => {
+                    if (match) {
+                      if (location.pathname === '/plugins/content-type-builder') {
+                        trackUsage(`didGoToCTB`);
+                      }
+
+                      return true;
+                    }
+
+                    return false;
+                  }}
+                >
                   {formatMessage(link.intlLabel)}
                 </NavLink>
               );

@@ -4,7 +4,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
 <body
   class="lock-body-scroll"
 >
-  .c21 {
+  .c20 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -45,7 +45,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   width: 100%;
 }
 
-.c18 {
+.c17 {
   padding-top: 8px;
   padding-right: 16px;
   padding-left: 16px;
@@ -58,7 +58,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   line-height: 1.33;
 }
 
-.c19 {
+.c18 {
   color: #666687;
   display: block;
   white-space: nowrap;
@@ -68,7 +68,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   line-height: 1.33;
 }
 
-.c20 {
+.c19 {
   color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
@@ -153,18 +153,6 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-}
-
-.c17 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c15 {
@@ -331,15 +319,8 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                     tabindex="0"
                     type="button"
                   >
-                    <span
-                      class="c17"
-                    >
-                      Change logo
-                    </span>
                     <svg
-                      aria-hidden="true"
                       fill="none"
-                      focusable="false"
                       height="1em"
                       viewBox="0 0 24 24"
                       width="1em"
@@ -355,7 +336,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
               </div>
             </section>
             <div
-              class="c18"
+              class="c17"
             >
               <span>
                 <div
@@ -364,7 +345,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                   tabindex="0"
                 >
                   <span
-                    class="c19"
+                    class="c18"
                   >
                     logo.png
                   </span>
@@ -374,7 +355,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
           </div>
         </div>
         <p
-          class="c20"
+          class="c19"
           id="carouselinput-4-hint"
         >
           Change the admin panel logo (Max dimension: 750x750, Max file size: 100KB)
@@ -382,7 +363,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
       </div>
     </div>
     <div
-      class="c21"
+      class="c20"
     >
       <p
         aria-live="polite"
@@ -472,24 +453,24 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
       </p>
     </div>
   </div>
-  .c10 {
+  .c9 {
   padding-right: 40px;
   padding-left: 40px;
 }
 
-.c19 {
+.c18 {
   padding-top: 24px;
   padding-right: 40px;
   padding-bottom: 24px;
   padding-left: 40px;
 }
 
-.c26 {
+.c25 {
   padding-top: 12px;
   padding-bottom: 20px;
 }
 
-.c33 {
+.c32 {
   padding-top: 24px;
 }
 
@@ -549,7 +530,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   justify-content: space-between;
 }
 
-.c36 {
+.c35 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -561,18 +542,6 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-}
-
-.c9 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c7 {
@@ -678,12 +647,12 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   border-bottom: 1px solid #eaeaef;
 }
 
-.c35 {
+.c34 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
 
-.c37 > * + * {
+.c36 > * + * {
   margin-left: 8px;
 }
 
@@ -694,20 +663,20 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   line-height: 1.43;
 }
 
-.c27 {
+.c26 {
   color: #32324d;
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
 }
 
-.c34 {
+.c33 {
   color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c14 {
+.c13 {
   color: #4945ff;
   font-weight: 600;
   font-size: 0.6875rem;
@@ -715,7 +684,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   text-transform: uppercase;
 }
 
-.c16 {
+.c15 {
   color: #666687;
   font-weight: 600;
   font-size: 0.6875rem;
@@ -723,33 +692,33 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   text-transform: uppercase;
 }
 
-.c12 {
+.c11 {
   padding: 16px;
 }
 
-.c13 {
+.c12 {
   border-bottom: 2px solid #4945ff;
 }
 
-.c15 {
+.c14 {
   border-bottom: 2px solid transparent;
 }
 
-.c11[aria-disabled='true'] {
+.c10[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c17 {
+.c16 {
   background: #eaeaef;
 }
 
-.c18 {
+.c17 {
   height: 1px;
   border: none;
   margin: 0;
 }
 
-.c20 {
+.c19 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -763,16 +732,16 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   flex-direction: column;
 }
 
-.c21 > * {
+.c20 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c21 > * + * {
+.c20 > * + * {
   margin-top: 8px;
 }
 
-.c22 {
+.c21 {
   background: #f6f6f9;
   padding-top: 48px;
   padding-bottom: 32px;
@@ -783,7 +752,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   position: relative;
 }
 
-.c23 {
+.c22 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -801,24 +770,24 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   justify-content: center;
 }
 
-.c24 {
+.c23 {
   color: #4945ff;
   width: 3.75rem;
   height: 3.75rem;
 }
 
-.c25 path {
+.c24 path {
   fill: #4945ff;
 }
 
-.c32 {
+.c31 {
   font-weight: 600;
   color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c29 {
+.c28 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -832,21 +801,21 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   outline: none;
 }
 
-.c29 svg {
+.c28 svg {
   height: 12px;
   width: 12px;
 }
 
-.c29 svg > g,
-.c29 svg path {
+.c28 svg > g,
+.c28 svg path {
   fill: #ffffff;
 }
 
-.c29[aria-disabled='true'] {
+.c28[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c29:after {
+.c28:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -861,11 +830,11 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   border: 2px solid transparent;
 }
 
-.c29:focus-visible {
+.c28:focus-visible {
   outline: none;
 }
 
-.c29:focus-visible:after {
+.c28:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -876,7 +845,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   border: 2px solid #4945ff;
 }
 
-.c30 {
+.c29 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -886,7 +855,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   border: 1px solid #4945ff;
 }
 
-.c30 .sc-hAWBJg {
+.c29 .sc-hAWBJg {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -897,54 +866,54 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   align-items: center;
 }
 
-.c30 .c31 {
+.c29 .c30 {
   color: #ffffff;
 }
 
-.c30[aria-disabled='true'] {
+.c29[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c30[aria-disabled='true'] .c31 {
+.c29[aria-disabled='true'] .c30 {
   color: #666687;
 }
 
-.c30[aria-disabled='true'] svg > g,
-.c30[aria-disabled='true'] svg path {
+.c29[aria-disabled='true'] svg > g,
+.c29[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c30[aria-disabled='true']:active {
+.c29[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c30[aria-disabled='true']:active .c31 {
+.c29[aria-disabled='true']:active .c30 {
   color: #666687;
 }
 
-.c30[aria-disabled='true']:active svg > g,
-.c30[aria-disabled='true']:active svg path {
+.c29[aria-disabled='true']:active svg > g,
+.c29[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c30:hover {
+.c29:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c30:active {
+.c29:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c30 svg > g,
-.c30 svg path {
+.c29 svg > g,
+.c29 svg path {
   fill: #ffffff;
 }
 
-.c38 {
+.c37 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -956,7 +925,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   background: #ffffff;
 }
 
-.c38 .sc-hAWBJg {
+.c37 .sc-hAWBJg {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -967,56 +936,56 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   align-items: center;
 }
 
-.c38 .c31 {
+.c37 .c30 {
   color: #ffffff;
 }
 
-.c38[aria-disabled='true'] {
+.c37[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c38[aria-disabled='true'] .c31 {
+.c37[aria-disabled='true'] .c30 {
   color: #666687;
 }
 
-.c38[aria-disabled='true'] svg > g,
-.c38[aria-disabled='true'] svg path {
+.c37[aria-disabled='true'] svg > g,
+.c37[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c38[aria-disabled='true']:active {
+.c37[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c38[aria-disabled='true']:active .c31 {
+.c37[aria-disabled='true']:active .c30 {
   color: #666687;
 }
 
-.c38[aria-disabled='true']:active svg > g,
-.c38[aria-disabled='true']:active svg path {
+.c37[aria-disabled='true']:active svg > g,
+.c37[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c38:hover {
+.c37:hover {
   background-color: #f6f6f9;
 }
 
-.c38:active {
+.c37:active {
   background-color: #eaeaef;
 }
 
-.c38 .c31 {
+.c37 .c30 {
   color: #32324d;
 }
 
-.c38 svg > g,
-.c38 svg path {
+.c37 svg > g,
+.c37 svg path {
   fill: #32324d;
 }
 
-.c28 {
+.c27 {
   opacity: 0;
   position: absolute;
   top: 0;
@@ -1054,18 +1023,12 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                 </h2>
                 <button
                   aria-disabled="false"
+                  aria-label="Close the modal"
                   class="c7 c8"
                   type="button"
                 >
-                  <span
-                    class="c9"
-                  >
-                    Close the modal
-                  </span>
                   <svg
-                    aria-hidden="true"
                     fill="none"
-                    focusable="false"
                     height="1em"
                     viewBox="0 0 24 24"
                     width="1em"
@@ -1081,7 +1044,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
             </div>
             <div>
               <div
-                class="c10"
+                class="c9"
               >
                 <div
                   aria-label="How do you want to upload your assets?"
@@ -1091,17 +1054,17 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                     aria-controls="tabgroup-1-0-tabpanel"
                     aria-disabled="false"
                     aria-selected="true"
-                    class="c11"
+                    class="c10"
                     id="tabgroup-1-0-tab"
                     role="tab"
                     tabindex="0"
                     type="button"
                   >
                     <div
-                      class="c12 c13"
+                      class="c11 c12"
                     >
                       <span
-                        class="c14"
+                        class="c13"
                       >
                         From computer
                       </span>
@@ -1110,17 +1073,17 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                   <button
                     aria-disabled="false"
                     aria-selected="false"
-                    class="c11"
+                    class="c10"
                     id="tabgroup-1-1-tab"
                     role="tab"
                     tabindex="-1"
                     type="button"
                   >
                     <div
-                      class="c12 c15"
+                      class="c11 c14"
                     >
                       <span
-                        class="c16"
+                        class="c15"
                       >
                         From url
                       </span>
@@ -1128,7 +1091,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                   </button>
                 </div>
                 <hr
-                  class="c17 c18"
+                  class="c16 c17"
                 />
               </div>
               <div>
@@ -1140,22 +1103,22 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                 >
                   <form>
                     <div
-                      class="c19"
+                      class="c18"
                     >
                       <div>
                         <label
                           for="logo-upload"
                         >
                           <div
-                            class="c20 c21"
+                            class="c19 c20"
                             spacing="2"
                           >
                             <div
-                              class="c22 c23"
+                              class="c21 c22"
                             >
                               <svg
                                 aria-hidden="true"
-                                class="c24 c25"
+                                class="c23 c24"
                                 fill="none"
                                 height="3.75rem"
                                 viewBox="0 0 24 20"
@@ -1172,17 +1135,17 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                                 />
                               </svg>
                               <div
-                                class="c26"
+                                class="c25"
                               >
                                 <span
-                                  class="c27"
+                                  class="c26"
                                 >
                                   Drag and Drop here or
                                 </span>
                               </div>
                               <input
                                 accept="image/jpeg,image/png,image/svg+xml"
-                                class="c28"
+                                class="c27"
                                 cursor="pointer"
                                 id="logo-upload"
                                 name="files"
@@ -1191,20 +1154,20 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                               />
                               <button
                                 aria-disabled="false"
-                                class="c29 c30"
+                                class="c28 c29"
                                 type="button"
                               >
                                 <span
-                                  class="c31 c32"
+                                  class="c30 c31"
                                 >
                                   Browse files
                                 </span>
                               </button>
                               <div
-                                class="c33"
+                                class="c32"
                               >
                                 <span
-                                  class="c34"
+                                  class="c33"
                                 >
                                   Max dimension: 750x750, Max size: 100KB
                                 </span>
@@ -1216,28 +1179,28 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                     </div>
                   </form>
                   <div
-                    class="c3 c35"
+                    class="c3 c34"
                   >
                     <div
                       class="c5"
                     >
                       <div
-                        class="c36 c37"
+                        class="c35 c36"
                       >
                         <button
                           aria-disabled="false"
-                          class="c29 c38"
+                          class="c28 c37"
                           type="button"
                         >
                           <span
-                            class="c31 c32"
+                            class="c30 c31"
                           >
                             Cancel
                           </span>
                         </button>
                       </div>
                       <div
-                        class="c36 c37"
+                        class="c35 c36"
                       />
                     </div>
                   </div>
@@ -1256,7 +1219,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
 <body
   class="lock-body-scroll"
 >
-  .c21 {
+  .c20 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -1297,7 +1260,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   width: 100%;
 }
 
-.c18 {
+.c17 {
   padding-top: 8px;
   padding-right: 16px;
   padding-left: 16px;
@@ -1310,7 +1273,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   line-height: 1.33;
 }
 
-.c19 {
+.c18 {
   color: #666687;
   display: block;
   white-space: nowrap;
@@ -1320,7 +1283,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   line-height: 1.33;
 }
 
-.c20 {
+.c19 {
   color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
@@ -1405,18 +1368,6 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-}
-
-.c17 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c15 {
@@ -1583,15 +1534,8 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                     tabindex="0"
                     type="button"
                   >
-                    <span
-                      class="c17"
-                    >
-                      Change logo
-                    </span>
                     <svg
-                      aria-hidden="true"
                       fill="none"
-                      focusable="false"
                       height="1em"
                       viewBox="0 0 24 24"
                       width="1em"
@@ -1607,7 +1551,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
               </div>
             </section>
             <div
-              class="c18"
+              class="c17"
             >
               <span>
                 <div
@@ -1616,7 +1560,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                   tabindex="0"
                 >
                   <span
-                    class="c19"
+                    class="c18"
                   >
                     logo.png
                   </span>
@@ -1626,7 +1570,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
           </div>
         </div>
         <p
-          class="c20"
+          class="c19"
           id="carouselinput-49-hint"
         >
           Change the admin panel logo (Max dimension: 750x750, Max file size: 100KB)
@@ -1634,7 +1578,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
       </div>
     </div>
     <div
-      class="c21"
+      class="c20"
     >
       <p
         aria-live="polite"
@@ -1724,12 +1668,12 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
       </p>
     </div>
   </div>
-  .c10 {
+  .c9 {
   padding-right: 40px;
   padding-left: 40px;
 }
 
-.c19 {
+.c18 {
   padding-top: 24px;
   padding-right: 40px;
   padding-bottom: 24px;
@@ -1792,7 +1736,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   justify-content: space-between;
 }
 
-.c28 {
+.c27 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1804,18 +1748,6 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-}
-
-.c9 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c7 {
@@ -1921,12 +1853,12 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   border-bottom: 1px solid #eaeaef;
 }
 
-.c27 {
+.c26 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
 
-.c29 > * + * {
+.c28 > * + * {
   margin-left: 8px;
 }
 
@@ -1937,7 +1869,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   line-height: 1.43;
 }
 
-.c16 {
+.c15 {
   color: #4945ff;
   font-weight: 600;
   font-size: 0.6875rem;
@@ -1945,7 +1877,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   text-transform: uppercase;
 }
 
-.c14 {
+.c13 {
   color: #666687;
   font-weight: 600;
   font-size: 0.6875rem;
@@ -1953,40 +1885,40 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   text-transform: uppercase;
 }
 
-.c12 {
+.c11 {
   padding: 16px;
 }
 
-.c15 {
+.c14 {
   border-bottom: 2px solid #4945ff;
 }
 
-.c13 {
+.c12 {
   border-bottom: 2px solid transparent;
 }
 
-.c11[aria-disabled='true'] {
+.c10[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c17 {
+.c16 {
   background: #eaeaef;
 }
 
-.c18 {
+.c17 {
   height: 1px;
   border: none;
   margin: 0;
 }
 
-.c33 {
+.c32 {
   font-weight: 600;
   color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c30 {
+.c29 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2000,21 +1932,21 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   outline: none;
 }
 
-.c30 svg {
+.c29 svg {
   height: 12px;
   width: 12px;
 }
 
-.c30 svg > g,
-.c30 svg path {
+.c29 svg > g,
+.c29 svg path {
   fill: #ffffff;
 }
 
-.c30[aria-disabled='true'] {
+.c29[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c30:after {
+.c29:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -2029,11 +1961,11 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   border: 2px solid transparent;
 }
 
-.c30:focus-visible {
+.c29:focus-visible {
   outline: none;
 }
 
-.c30:focus-visible:after {
+.c29:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -2044,7 +1976,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   border: 2px solid #4945ff;
 }
 
-.c34 {
+.c33 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -2054,7 +1986,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   border: 1px solid #4945ff;
 }
 
-.c34 .sc-hAWBJg {
+.c33 .sc-hAWBJg {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2065,54 +1997,54 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   align-items: center;
 }
 
-.c34 .c32 {
+.c33 .c31 {
   color: #ffffff;
 }
 
-.c34[aria-disabled='true'] {
+.c33[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c34[aria-disabled='true'] .c32 {
+.c33[aria-disabled='true'] .c31 {
   color: #666687;
 }
 
-.c34[aria-disabled='true'] svg > g,
-.c34[aria-disabled='true'] svg path {
+.c33[aria-disabled='true'] svg > g,
+.c33[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c34[aria-disabled='true']:active {
+.c33[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c34[aria-disabled='true']:active .c32 {
+.c33[aria-disabled='true']:active .c31 {
   color: #666687;
 }
 
-.c34[aria-disabled='true']:active svg > g,
-.c34[aria-disabled='true']:active svg path {
+.c33[aria-disabled='true']:active svg > g,
+.c33[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c34:hover {
+.c33:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c34:active {
+.c33:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c34 svg > g,
-.c34 svg path {
+.c33 svg > g,
+.c33 svg path {
   fill: #ffffff;
 }
 
-.c31 {
+.c30 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -2124,7 +2056,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   background: #ffffff;
 }
 
-.c31 .sc-hAWBJg {
+.c30 .sc-hAWBJg {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2135,56 +2067,56 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   align-items: center;
 }
 
-.c31 .c32 {
+.c30 .c31 {
   color: #ffffff;
 }
 
-.c31[aria-disabled='true'] {
+.c30[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c31[aria-disabled='true'] .c32 {
+.c30[aria-disabled='true'] .c31 {
   color: #666687;
 }
 
-.c31[aria-disabled='true'] svg > g,
-.c31[aria-disabled='true'] svg path {
+.c30[aria-disabled='true'] svg > g,
+.c30[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c31[aria-disabled='true']:active {
+.c30[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c31[aria-disabled='true']:active .c32 {
+.c30[aria-disabled='true']:active .c31 {
   color: #666687;
 }
 
-.c31[aria-disabled='true']:active svg > g,
-.c31[aria-disabled='true']:active svg path {
+.c30[aria-disabled='true']:active svg > g,
+.c30[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c31:hover {
+.c30:hover {
   background-color: #f6f6f9;
 }
 
-.c31:active {
+.c30:active {
   background-color: #eaeaef;
 }
 
-.c31 .c32 {
+.c30 .c31 {
   color: #32324d;
 }
 
-.c31 svg > g,
-.c31 svg path {
+.c30 svg > g,
+.c30 svg path {
   fill: #32324d;
 }
 
-.c20 {
+.c19 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -2198,7 +2130,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   flex-direction: column;
 }
 
-.c23 {
+.c22 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -2212,7 +2144,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   flex-direction: row;
 }
 
-.c24 {
+.c23 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -2230,14 +2162,14 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   justify-content: space-between;
 }
 
-.c22 {
+.c21 {
   font-weight: 600;
   color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c26 {
+.c25 {
   border: none;
   border-radius: 4px;
   padding-bottom: 0.65625rem;
@@ -2252,36 +2184,36 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   background: inherit;
 }
 
-.c26::-webkit-input-placeholder {
+.c25::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c26::-moz-placeholder {
+.c25::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c26:-ms-input-placeholder {
+.c25:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c26::placeholder {
+.c25::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c26[aria-disabled='true'] {
+.c25[aria-disabled='true'] {
   color: inherit;
 }
 
-.c26:focus {
+.c25:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c25 {
+.c24 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
@@ -2293,17 +2225,17 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   transition-duration: 0.2s;
 }
 
-.c25:focus-within {
+.c24:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c21 > * {
+.c20 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c21 > * + * {
+.c20 > * + * {
   margin-top: 4px;
 }
 
@@ -2335,18 +2267,12 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                 </h2>
                 <button
                   aria-disabled="false"
+                  aria-label="Close the modal"
                   class="c7 c8"
                   type="button"
                 >
-                  <span
-                    class="c9"
-                  >
-                    Close the modal
-                  </span>
                   <svg
-                    aria-hidden="true"
                     fill="none"
-                    focusable="false"
                     height="1em"
                     viewBox="0 0 24 24"
                     width="1em"
@@ -2362,7 +2288,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
             </div>
             <div>
               <div
-                class="c10"
+                class="c9"
               >
                 <div
                   aria-label="How do you want to upload your assets?"
@@ -2371,17 +2297,17 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                   <button
                     aria-disabled="false"
                     aria-selected="false"
-                    class="c11"
+                    class="c10"
                     id="tabgroup-10-0-tab"
                     role="tab"
                     tabindex="-1"
                     type="button"
                   >
                     <div
-                      class="c12 c13"
+                      class="c11 c12"
                     >
                       <span
-                        class="c14"
+                        class="c13"
                       >
                         From computer
                       </span>
@@ -2391,17 +2317,17 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                     aria-controls="tabgroup-10-1-tabpanel"
                     aria-disabled="false"
                     aria-selected="true"
-                    class="c11"
+                    class="c10"
                     id="tabgroup-10-1-tab"
                     role="tab"
                     tabindex="0"
                     type="button"
                   >
                     <div
-                      class="c12 c15"
+                      class="c11 c14"
                     >
                       <span
-                        class="c16"
+                        class="c15"
                       >
                         From url
                       </span>
@@ -2409,7 +2335,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                   </button>
                 </div>
                 <hr
-                  class="c17 c18"
+                  class="c16 c17"
                 />
               </div>
               <div>
@@ -2421,31 +2347,31 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                 >
                   <form>
                     <div
-                      class="c19"
+                      class="c18"
                     >
                       <div>
                         <div>
                           <div
-                            class="c20 c21"
+                            class="c19 c20"
                             spacing="1"
                           >
                             <label
-                              class="c22"
+                              class="c21"
                               for="textinput-1"
                             >
                               <div
-                                class="c23"
+                                class="c22"
                               >
                                 URL
                               </div>
                             </label>
                             <div
-                              class="c24 c25"
+                              class="c23 c24"
                             >
                               <input
                                 aria-disabled="false"
                                 aria-invalid="false"
-                                class="c26"
+                                class="c25"
                                 id="textinput-1"
                                 name="logo-url"
                                 value=""
@@ -2456,36 +2382,36 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                       </div>
                     </div>
                     <div
-                      class="c3 c27"
+                      class="c3 c26"
                     >
                       <div
                         class="c5"
                       >
                         <div
-                          class="c28 c29"
+                          class="c27 c28"
                         >
                           <button
                             aria-disabled="false"
-                            class="c30 c31"
+                            class="c29 c30"
                             type="button"
                           >
                             <span
-                              class="c32 c33"
+                              class="c31 c32"
                             >
                               Cancel
                             </span>
                           </button>
                         </div>
                         <div
-                          class="c28 c29"
+                          class="c27 c28"
                         >
                           <button
                             aria-disabled="false"
-                            class="c30 c34"
+                            class="c29 c33"
                             type="submit"
                           >
                             <span
-                              class="c32 c33"
+                              class="c31 c32"
                             >
                               Next
                             </span>
@@ -2506,7 +2432,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
 `;
 
 exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`] = `
-.c21 {
+.c20 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -2547,13 +2473,13 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   width: 100%;
 }
 
-.c18 {
+.c17 {
   padding-top: 8px;
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c25 {
+.c24 {
   background: #212134;
   padding: 8px;
   border-radius: 4px;
@@ -2566,7 +2492,7 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   line-height: 1.33;
 }
 
-.c19 {
+.c18 {
   color: #666687;
   display: block;
   white-space: nowrap;
@@ -2576,13 +2502,13 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   line-height: 1.33;
 }
 
-.c20 {
+.c19 {
   color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c27 {
+.c26 {
   font-weight: 600;
   color: #ffffff;
   font-size: 0.75rem;
@@ -2635,7 +2561,7 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   justify-content: center;
 }
 
-.c26 {
+.c25 {
   position: absolute;
   z-index: 4;
   display: none;
@@ -2676,32 +2602,20 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   display: flex;
 }
 
-.c22 {
+.c21 {
   background: #212134;
   padding: 8px;
   border-radius: 4px;
 }
 
-.c24 {
+.c23 {
   font-weight: 600;
   color: #ffffff;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c17 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
-.c23 {
+.c22 {
   position: absolute;
   z-index: 4;
   display: none;
@@ -2872,15 +2786,8 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
                     tabindex="0"
                     type="button"
                   >
-                    <span
-                      class="c17"
-                    >
-                      Change logo
-                    </span>
                     <svg
-                      aria-hidden="true"
                       fill="none"
-                      focusable="false"
                       height="1em"
                       viewBox="0 0 24 24"
                       width="1em"
@@ -2896,7 +2803,7 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
               </div>
             </section>
             <div
-              class="c18"
+              class="c17"
             >
               <span>
                 <div
@@ -2905,7 +2812,7 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
                   tabindex="0"
                 >
                   <span
-                    class="c19"
+                    class="c18"
                   >
                     logo.png
                   </span>
@@ -2915,7 +2822,7 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
           </div>
         </div>
         <p
-          class="c20"
+          class="c19"
           id="carouselinput-1-hint"
         >
           Change the admin panel logo (Max dimension: 750x750, Max file size: 100KB)
@@ -2923,7 +2830,7 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
       </div>
     </div>
     <div
-      class="c21"
+      class="c20"
     >
       <p
         aria-live="polite"
@@ -2949,12 +2856,12 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
     data-react-portal="true"
   >
     <div
-      class="c22 c23"
+      class="c21 c22"
       id="tooltip-1"
       role="tooltip"
     >
       <p
-        class="c24"
+        class="c23"
       >
         Change logo
       </p>
@@ -2964,12 +2871,12 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
     data-react-portal="true"
   >
     <div
-      class="c25 c26"
+      class="c24 c25"
       id="tooltip-2"
       role="tooltip"
     >
       <p
-        class="c27"
+        class="c26"
       >
         logo.png
       </p>

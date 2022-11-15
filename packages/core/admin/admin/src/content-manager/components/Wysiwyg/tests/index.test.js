@@ -62,7 +62,7 @@ describe('Wysiwyg render and actions buttons', () => {
         line-height: 1.33;
       }
 
-      .c40 {
+      .c39 {
         color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -80,7 +80,7 @@ describe('Wysiwyg render and actions buttons', () => {
         padding: 8px;
       }
 
-      .c36 {
+      .c35 {
         background: #f6f6f9;
         padding: 8px;
         border-radius: 4px;
@@ -164,7 +164,7 @@ describe('Wysiwyg render and actions buttons', () => {
         flex-direction: row;
       }
 
-      .c37 {
+      .c36 {
         -webkit-align-items: flex-end;
         -webkit-box-align: flex-end;
         -ms-flex-align: flex-end;
@@ -182,14 +182,14 @@ describe('Wysiwyg render and actions buttons', () => {
         justify-content: flex-end;
       }
 
-      .c33 {
+      .c32 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c30 {
+      .c29 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -203,21 +203,21 @@ describe('Wysiwyg render and actions buttons', () => {
         outline: none;
       }
 
-      .c30 svg {
+      .c29 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c30 svg > g,
-      .c30 svg path {
+      .c29 svg > g,
+      .c29 svg path {
         fill: #ffffff;
       }
 
-      .c30[aria-disabled='true'] {
+      .c29[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c30:after {
+      .c29:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -232,11 +232,11 @@ describe('Wysiwyg render and actions buttons', () => {
         border: 2px solid transparent;
       }
 
-      .c30:focus-visible {
+      .c29:focus-visible {
         outline: none;
       }
 
-      .c30:focus-visible:after {
+      .c29:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -247,7 +247,7 @@ describe('Wysiwyg render and actions buttons', () => {
         border: 2px solid #4945ff;
       }
 
-      .c31 {
+      .c30 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -259,7 +259,7 @@ describe('Wysiwyg render and actions buttons', () => {
         background: #ffffff;
       }
 
-      .c31 .sc-dJjYzT {
+      .c30 .sc-dJjYzT {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -270,65 +270,53 @@ describe('Wysiwyg render and actions buttons', () => {
         align-items: center;
       }
 
-      .c31 .c32 {
+      .c30 .c31 {
         color: #ffffff;
       }
 
-      .c31[aria-disabled='true'] {
+      .c30[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c31[aria-disabled='true'] .c32 {
+      .c30[aria-disabled='true'] .c31 {
         color: #666687;
       }
 
-      .c31[aria-disabled='true'] svg > g,
-      .c31[aria-disabled='true'] svg path {
+      .c30[aria-disabled='true'] svg > g,
+      .c30[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c31[aria-disabled='true']:active {
+      .c30[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c31[aria-disabled='true']:active .c32 {
+      .c30[aria-disabled='true']:active .c31 {
         color: #666687;
       }
 
-      .c31[aria-disabled='true']:active svg > g,
-      .c31[aria-disabled='true']:active svg path {
+      .c30[aria-disabled='true']:active svg > g,
+      .c30[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c31:hover {
+      .c30:hover {
         background-color: #f6f6f9;
       }
 
-      .c31:active {
+      .c30:active {
         background-color: #eaeaef;
       }
 
-      .c31 .c32 {
+      .c30 .c31 {
         color: #32324d;
       }
 
-      .c31 svg > g,
-      .c31 svg path {
+      .c30 svg > g,
+      .c30 svg path {
         fill: #32324d;
-      }
-
-      .c28 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
       }
 
       .c24 {
@@ -624,16 +612,16 @@ describe('Wysiwyg render and actions buttons', () => {
         width: 100%;
       }
 
-      .c35 {
+      .c34 {
         cursor: auto;
         height: 100%;
       }
 
-      .c35 .CodeMirror-placeholder {
+      .c34 .CodeMirror-placeholder {
         color: #666687 !important;
       }
 
-      .c35 .CodeMirror {
+      .c34 .CodeMirror {
         font-size: 0.875rem;
         height: 290px;
         color: #32324d;
@@ -641,22 +629,22 @@ describe('Wysiwyg render and actions buttons', () => {
         font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell, 'Open Sans','Helvetica Neue',sans-serif;
       }
 
-      .c35 .CodeMirror-lines {
+      .c34 .CodeMirror-lines {
         padding: 12px 16px;
       }
 
-      .c35 .CodeMirror-scrollbar-filler,
-      .c35 .CodeMirror-gutter-filler {
+      .c34 .CodeMirror-scrollbar-filler,
+      .c34 .CodeMirror-gutter-filler {
         background-color: #ffffff;
       }
 
-      .c35 .CodeMirror-gutters {
+      .c34 .CodeMirror-gutters {
         border-right: 1px solid #ddd;
         background-color: #f7f7f7;
         white-space: nowrap;
       }
 
-      .c35 .CodeMirror-linenumber {
+      .c34 .CodeMirror-linenumber {
         padding: 0 3px 0 5px;
         min-width: 20px;
         text-align: right;
@@ -664,31 +652,31 @@ describe('Wysiwyg render and actions buttons', () => {
         white-space: nowrap;
       }
 
-      .c35 .CodeMirror-guttermarker {
+      .c34 .CodeMirror-guttermarker {
         color: black;
       }
 
-      .c35 .CodeMirror-guttermarker-subtle {
+      .c34 .CodeMirror-guttermarker-subtle {
         color: #999;
       }
 
-      .c35 .CodeMirror-cursor {
+      .c34 .CodeMirror-cursor {
         border-left: 1px solid black;
         border-right: none;
         width: 0;
       }
 
-      .c35 .CodeMirror div.CodeMirror-secondarycursor {
+      .c34 .CodeMirror div.CodeMirror-secondarycursor {
         border-left: 1px solid silver;
       }
 
-      .c35 .cm-fat-cursor .CodeMirror-cursor {
+      .c34 .cm-fat-cursor .CodeMirror-cursor {
         width: auto;
         border: 0 !important;
         background: #7e7;
       }
 
-      .c35 .cm-fat-cursor-mark {
+      .c34 .cm-fat-cursor-mark {
         background-color: rgba(20,255,20,0.5);
         -webkit-animation: blink 1.06s steps(1) infinite;
         -moz-animation: blink 1.06s steps(1) infinite;
@@ -696,7 +684,7 @@ describe('Wysiwyg render and actions buttons', () => {
         animation: blink 1.06s steps(1) infinite;
       }
 
-      .c35 .cm-animate-fat-cursor {
+      .c34 .cm-animate-fat-cursor {
         width: auto;
         border: 0;
         -webkit-animation: blink 1.06s steps(1) infinite;
@@ -706,13 +694,13 @@ describe('Wysiwyg render and actions buttons', () => {
         background-color: #7e7;
       }
 
-      .c35 .cm-tab {
+      .c34 .cm-tab {
         display: inline-block;
         -webkit-text-decoration: inherit;
         text-decoration: inherit;
       }
 
-      .c35 .CodeMirror-rulers {
+      .c34 .CodeMirror-rulers {
         position: absolute;
         left: 0;
         right: 0;
@@ -721,59 +709,59 @@ describe('Wysiwyg render and actions buttons', () => {
         overflow: hidden;
       }
 
-      .c35 .CodeMirror-ruler {
+      .c34 .CodeMirror-ruler {
         border-left: 1px solid #ccc;
         top: 0;
         bottom: 0;
         position: absolute;
       }
 
-      .c35 .cm-header,
-      .c35 .cm-strong {
+      .c34 .cm-header,
+      .c34 .cm-strong {
         font-weight: bold;
       }
 
-      .c35 .cm-em {
+      .c34 .cm-em {
         font-style: italic;
       }
 
-      .c35 .cm-link {
+      .c34 .cm-link {
         -webkit-text-decoration: underline;
         text-decoration: underline;
       }
 
-      .c35 .cm-strikethrough {
+      .c34 .cm-strikethrough {
         -webkit-text-decoration: line-through;
         text-decoration: line-through;
       }
 
-      .c35 .CodeMirror-composing {
+      .c34 .CodeMirror-composing {
         border-bottom: 2px solid;
       }
 
-      .c35 div.CodeMirror span.CodeMirror-matchingbracket {
+      .c34 div.CodeMirror span.CodeMirror-matchingbracket {
         color: #0b0;
       }
 
-      .c35 div.CodeMirror span.CodeMirror-nonmatchingbracket {
+      .c34 div.CodeMirror span.CodeMirror-nonmatchingbracket {
         color: #a22;
       }
 
-      .c35 .CodeMirror-matchingtag {
+      .c34 .CodeMirror-matchingtag {
         background: rgba(255,150,0,0.3);
       }
 
-      .c35 .CodeMirror-activeline-background {
+      .c34 .CodeMirror-activeline-background {
         background: #e8f2ff;
       }
 
-      .c35 .CodeMirror {
+      .c34 .CodeMirror {
         position: relative;
         overflow: hidden;
         background: #ffffff;
       }
 
-      .c35 .CodeMirror-scroll {
+      .c34 .CodeMirror-scroll {
         overflow: scroll !important;
         margin-bottom: -50px;
         margin-right: -50px;
@@ -783,47 +771,47 @@ describe('Wysiwyg render and actions buttons', () => {
         position: relative;
       }
 
-      .c35 .CodeMirror-sizer {
+      .c34 .CodeMirror-sizer {
         position: relative;
         border-right: 50px solid transparent;
       }
 
-      .c35 .CodeMirror-vscrollbar,
-      .c35 .CodeMirror-hscrollbar,
-      .c35 .CodeMirror-scrollbar-filler,
-      .c35 .CodeMirror-gutter-filler {
+      .c34 .CodeMirror-vscrollbar,
+      .c34 .CodeMirror-hscrollbar,
+      .c34 .CodeMirror-scrollbar-filler,
+      .c34 .CodeMirror-gutter-filler {
         position: absolute;
         z-index: 1;
         display: none;
         outline: none;
       }
 
-      .c35 .CodeMirror-vscrollbar {
+      .c34 .CodeMirror-vscrollbar {
         right: 0;
         top: 0;
         overflow-x: hidden;
         overflow-y: scroll;
       }
 
-      .c35 .CodeMirror-hscrollbar {
+      .c34 .CodeMirror-hscrollbar {
         bottom: 0;
         left: 0;
         overflow-y: hidden;
         overflow-x: scroll;
       }
 
-      .c35 .CodeMirror-scrollbar-filler {
+      .c34 .CodeMirror-scrollbar-filler {
         right: 0;
         bottom: 0;
       }
 
-      .c35 .CodeMirror-lines {
+      .c34 .CodeMirror-lines {
         cursor: text;
         min-height: 1px;
       }
 
-      .c35 .CodeMirror pre.CodeMirror-line,
-      .c35 .CodeMirror pre.CodeMirror-line-like {
+      .c34 .CodeMirror pre.CodeMirror-line,
+      .c34 .CodeMirror pre.CodeMirror-line-like {
         -moz-border-radius: 0;
         -webkit-border-radius: 0;
         border-radius: 0;
@@ -843,18 +831,18 @@ describe('Wysiwyg render and actions buttons', () => {
         font-variant-ligatures: contextual;
       }
 
-      .c35 .CodeMirror pre.CodeMirror-line-like {
+      .c34 .CodeMirror pre.CodeMirror-line-like {
         z-index: 2;
       }
 
-      .c35 .CodeMirror-wrap pre.CodeMirror-line,
-      .c35 .CodeMirror-wrap pre.CodeMirror-line-like {
+      .c34 .CodeMirror-wrap pre.CodeMirror-line,
+      .c34 .CodeMirror-wrap pre.CodeMirror-line-like {
         word-wrap: break-word;
         white-space: pre-wrap;
         word-break: normal;
       }
 
-      .c35 .CodeMirror-linebackground {
+      .c34 .CodeMirror-linebackground {
         position: absolute;
         left: 0;
         right: 0;
@@ -863,29 +851,29 @@ describe('Wysiwyg render and actions buttons', () => {
         z-index: 0;
       }
 
-      .c35 .CodeMirror-linewidget {
+      .c34 .CodeMirror-linewidget {
         position: relative;
         padding: 0.1px;
       }
 
-      .c35 .CodeMirror-rtl pre {
+      .c34 .CodeMirror-rtl pre {
         direction: rtl;
       }
 
-      .c35 .CodeMirror-code {
+      .c34 .CodeMirror-code {
         outline: none;
       }
 
-      .c35 .CodeMirror-scroll,
-      .c35 .CodeMirror-sizer,
-      .c35 .CodeMirror-gutter,
-      .c35 .CodeMirror-gutters,
-      .c35 .CodeMirror-linenumber {
+      .c34 .CodeMirror-scroll,
+      .c34 .CodeMirror-sizer,
+      .c34 .CodeMirror-gutter,
+      .c34 .CodeMirror-gutters,
+      .c34 .CodeMirror-linenumber {
         -moz-box-sizing: content-box;
         box-sizing: content-box;
       }
 
-      .c35 .CodeMirror-measure {
+      .c34 .CodeMirror-measure {
         position: absolute;
         width: 100%;
         height: 0;
@@ -893,58 +881,58 @@ describe('Wysiwyg render and actions buttons', () => {
         visibility: hidden;
       }
 
-      .c35 .CodeMirror-cursor {
+      .c34 .CodeMirror-cursor {
         position: absolute;
         pointer-events: none;
         border-color: #32324d;
       }
 
-      .c35 .CodeMirror-measure pre {
+      .c34 .CodeMirror-measure pre {
         position: static;
       }
 
-      .c35 div.CodeMirror-cursors {
+      .c34 div.CodeMirror-cursors {
         visibility: hidden;
         position: relative;
       }
 
-      .c35 div.CodeMirror-cursors + div {
+      .c34 div.CodeMirror-cursors + div {
         z-index: 0 !important;
       }
 
-      .c35 div.CodeMirror-dragcursors {
+      .c34 div.CodeMirror-dragcursors {
         visibility: visible;
       }
 
-      .c35 .CodeMirror-focused div.CodeMirror-cursors {
+      .c34 .CodeMirror-focused div.CodeMirror-cursors {
         visibility: visible;
       }
 
-      .c35 .CodeMirror-selected {
+      .c34 .CodeMirror-selected {
         background: #dcdce4;
       }
 
-      .c35 .CodeMirror-crosshair {
+      .c34 .CodeMirror-crosshair {
         cursor: crosshair;
       }
 
-      .c35 .cm-force-border {
+      .c34 .cm-force-border {
         padding-right: 0.1px;
       }
 
-      .c35 .cm-tab-wrap-hack:after {
+      .c34 .cm-tab-wrap-hack:after {
         content: '';
       }
 
-      .c35 span.CodeMirror-selectedtext {
+      .c34 span.CodeMirror-selectedtext {
         background: none;
       }
 
-      .c35 span {
+      .c34 span {
         color: #32324d !important;
       }
 
-      .c38 {
+      .c37 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -958,21 +946,21 @@ describe('Wysiwyg render and actions buttons', () => {
         outline: none;
       }
 
-      .c38 svg {
+      .c37 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c38 svg > g,
-      .c38 svg path {
+      .c37 svg > g,
+      .c37 svg path {
         fill: #ffffff;
       }
 
-      .c38[aria-disabled='true'] {
+      .c37[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c38:after {
+      .c37:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -987,11 +975,11 @@ describe('Wysiwyg render and actions buttons', () => {
         border: 2px solid transparent;
       }
 
-      .c38:focus-visible {
+      .c37:focus-visible {
         outline: none;
       }
 
-      .c38:focus-visible:after {
+      .c37:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -1016,22 +1004,22 @@ describe('Wysiwyg render and actions buttons', () => {
         margin-left: 16px;
       }
 
-      .c29 {
+      .c28 {
         margin: 0 8px;
         padding: 8px;
       }
 
-      .c29 svg {
+      .c28 svg {
         width: 1.125rem;
         height: 1.125rem;
       }
 
-      .c34 {
+      .c33 {
         position: relative;
         height: calc(100% - 48px);
       }
 
-      .c39 {
+      .c38 {
         background-color: transparent;
         border: none;
         -webkit-align-items: center;
@@ -1040,11 +1028,11 @@ describe('Wysiwyg render and actions buttons', () => {
         align-items: center;
       }
 
-      .c39 svg {
+      .c38 svg {
         margin-left: 8px;
       }
 
-      .c39 svg path {
+      .c38 svg path {
         fill: #4a4a6a;
         width: 0.75rem;
         height: 0.75rem;
@@ -1151,15 +1139,8 @@ describe('Wysiwyg render and actions buttons', () => {
                       tabindex="0"
                       type="button"
                     >
-                      <span
-                        class="c28"
-                      >
-                        Bold
-                      </span>
                       <svg
-                        aria-hidden="true"
                         fill="none"
-                        focusable="false"
                         height="1em"
                         viewBox="0 0 24 24"
                         width="1em"
@@ -1184,15 +1165,8 @@ describe('Wysiwyg render and actions buttons', () => {
                       tabindex="0"
                       type="button"
                     >
-                      <span
-                        class="c28"
-                      >
-                        Italic
-                      </span>
                       <svg
-                        aria-hidden="true"
                         fill="none"
-                        focusable="false"
                         height="1em"
                         viewBox="0 0 24 24"
                         width="1em"
@@ -1217,15 +1191,8 @@ describe('Wysiwyg render and actions buttons', () => {
                       tabindex="0"
                       type="button"
                     >
-                      <span
-                        class="c28"
-                      >
-                        Underline
-                      </span>
                       <svg
-                        aria-hidden="true"
                         fill="none"
-                        focusable="false"
                         height="1em"
                         viewBox="0 0 24 24"
                         width="1em"
@@ -1243,20 +1210,13 @@ describe('Wysiwyg render and actions buttons', () => {
                   <button
                     aria-disabled="false"
                     aria-labelledby="tooltip-7"
-                    class="c24 c25 c26 c29"
+                    class="c24 c25 c26 c28"
                     id="more"
                     tabindex="0"
                     type="button"
                   >
-                    <span
-                      class="c28"
-                    >
-                      More
-                    </span>
                     <svg
-                      aria-hidden="true"
                       fill="none"
-                      focusable="false"
                       height="1em"
                       viewBox="0 0 24 24"
                       width="1em"
@@ -1272,12 +1232,12 @@ describe('Wysiwyg render and actions buttons', () => {
               </div>
               <button
                 aria-disabled="false"
-                class="c30 c31"
+                class="c29 c30"
                 id="preview"
                 type="button"
               >
                 <span
-                  class="c32 c33"
+                  class="c31 c32"
                 >
                   Preview mode
                 </span>
@@ -1285,10 +1245,10 @@ describe('Wysiwyg render and actions buttons', () => {
             </div>
           </div>
           <div
-            class="c34"
+            class="c33"
           >
             <div
-              class="c35"
+              class="c34"
             >
               <textarea
                 style="display: none;"
@@ -1387,19 +1347,19 @@ describe('Wysiwyg render and actions buttons', () => {
             </div>
           </div>
           <div
-            class="c36"
+            class="c35"
           >
             <div
-              class="c37"
+              class="c36"
             >
               <button
                 aria-disabled="false"
-                class="c38 c39"
+                class="c37 c38"
                 id="expand"
                 type="button"
               >
                 <span
-                  class="c40"
+                  class="c39"
                 >
                   Expand
                 </span>
