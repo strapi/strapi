@@ -284,7 +284,7 @@ program
   .addOption(
     new Option(
       '--archive [boolean]',
-      'Export all backup files into a tar archive instead of a folder'
+      'Export all backup files into a single tar archive instead of a folder'
     )
       .default(true)
       .argParser(parseInputBool)
