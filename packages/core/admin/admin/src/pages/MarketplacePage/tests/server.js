@@ -3,14 +3,6 @@ import { rest } from 'msw';
 import { responses as pluginResponses } from './mocks/plugins';
 import { responses as providerResponses } from './mocks/providers';
 
-rest.get('https://market-api.strapi.io/plugins?collections[]', (req, res, ctx) => {
-  return {
-    data: [
-      
-    ]
-  }
-}
-
 const handlers = [
   rest.get('https://market-api.strapi.io/plugins', (req, res, ctx) => {
     let responseData;

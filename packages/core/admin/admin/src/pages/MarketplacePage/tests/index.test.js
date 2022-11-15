@@ -12,7 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { useTracking, useAppInfos } from '@strapi/helper-plugin';
+import { useTracking, useAppInfos, TrackingProvider } from '@strapi/helper-plugin';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import useNavigatorOnLine from '../../../hooks/useNavigatorOnLine';
@@ -54,13 +54,15 @@ const history = createMemoryHistory();
 
 const App = (
   <QueryClientProvider client={client}>
-    <IntlProvider locale="en" messages={{}} textComponent="span">
-      <ThemeProvider theme={lightTheme}>
-        <Router history={history}>
-          <MarketPlacePage />
-        </Router>
-      </ThemeProvider>
-    </IntlProvider>
+    <TrackingProvider>
+      <IntlProvider locale="en" messages={{}} textComponent="span">
+        <ThemeProvider theme={lightTheme}>
+          <Router history={history}>
+            <MarketPlacePage />
+          </Router>
+        </ThemeProvider>
+      </IntlProvider>
+    </TrackingProvider>
   </QueryClientProvider>
 );
 

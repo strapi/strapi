@@ -506,6 +506,12 @@ const plugins = {
       Deployment: 2,
       Monitoring: 1,
     },
+    pagination: {
+      page: 1,
+      pageSize: 24,
+      pageCount: 4,
+      total: 96,
+    },
   },
 };
 

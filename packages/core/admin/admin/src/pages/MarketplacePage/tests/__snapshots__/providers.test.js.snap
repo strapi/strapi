@@ -954,20 +954,22 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
     class="c1 c2"
   >
     <main
+      aria-busy="true"
       aria-labelledby="main-content-title"
       class="c3"
       id="main-content"
       tabindex="-1"
     >
       <div
-        style="height: 0px;"
+        class="c4 c5"
+        data-testid="loader"
       >
         <div
-          class="c4"
-          data-strapi-header="true"
+          aria-live="assertive"
+          role="alert"
         >
           <div
-            class="c5"
+            class="c6"
           >
             <div
               class="c6 c7"
