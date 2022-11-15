@@ -7,7 +7,7 @@ import { AssetDefinition } from '../../constants';
 import { tableHeaders } from './utils/tableHeaders';
 import { TableRows } from './TableRows';
 
-export const AssetTableList = ({ assets }) => {
+export const AssetTableList = ({ assets, onEditAsset }) => {
   const { formatMessage } = useIntl();
 
   const headers = tableHeaders.map((header) => ({
@@ -19,12 +19,17 @@ export const AssetTableList = ({ assets }) => {
   }));
 
   return (
-    <DynamicTable contentType="assets" headers={headers} rows={assets}>
-      <TableRows assets={assets} />
+    <DynamicTable withBulkActions contentType="assets" headers={headers} rows={assets}>
+      <TableRows onEditAsset={onEditAsset} assets={assets} />
     </DynamicTable>
   );
 };
 
+AssetTableList.defaultProps = {
+  onEditAsset: null,
+};
+
 AssetTableList.propTypes = {
   assets: PropTypes.arrayOf(AssetDefinition).isRequired,
+  onEditAsset: PropTypes.func,
 };
