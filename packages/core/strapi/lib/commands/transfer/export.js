@@ -126,7 +126,7 @@ module.exports = async (filename, opts) => {
 
       table.push([chalk.bold(key), item.count, readableBytes(item.bytes, 1, 12)]);
       totalBytes += item.bytes;
-      totalItems += 1;
+      totalItems += item.count;
 
       if (item.aggregates) {
         Object.keys(item.aggregates).forEach((subkey) => {
