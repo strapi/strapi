@@ -18,8 +18,7 @@ import Pencil from '@strapi/icons/Pencil';
 import { InjectionZone } from '../../../shared/components';
 import permissions from '../../../permissions';
 import DynamicZone from '../../components/DynamicZone';
-import FieldComponent from '../../components/FieldComponent';
-import Inputs from '../../components/Inputs';
+
 import CollectionTypeFormWrapper from '../../components/CollectionTypeFormWrapper';
 import EditViewDataManagerProvider from '../../components/EditViewDataManagerProvider';
 import SingleTypeFormWrapper from '../../components/SingleTypeFormWrapper';
@@ -29,6 +28,7 @@ import Informations from './Informations';
 import Header from './Header';
 import { createAttributesLayout, getFieldsActionMatchingPermissions } from './utils';
 import DeleteLink from './DeleteLink';
+import GridRow from './GridRow';
 
 const cmPermissions = permissions.contentManager;
 const ctbPermissions = [{ action: 'plugin::content-type-builder.read', subject: null }];
@@ -171,65 +171,9 @@ const EditView = ({
                               borderColor="neutral150"
                             >
                               <Stack spacing={6}>
-                                {row.map((grid, gridIndex) => {
-                                  return (
-                                    <Grid gap={4} key={gridIndex}>
-                                      {grid.map(
-                                        ({
-                                          fieldSchema,
-                                          labelAction,
-                                          metadatas,
-                                          name,
-                                          size,
-                                          queryInfos,
-                                        }) => {
-                                          const isComponent = fieldSchema.type === 'component';
-
-                                          if (isComponent) {
-                                            const {
-                                              component,
-                                              max,
-                                              min,
-                                              repeatable = false,
-                                              required = false,
-                                            } = fieldSchema;
-
-                                            return (
-                                              <GridItem col={size} s={12} xs={12} key={component}>
-                                                <FieldComponent
-                                                  componentUid={component}
-                                                  labelAction={labelAction}
-                                                  isRepeatable={repeatable}
-                                                  intlLabel={{
-                                                    id: metadatas.label,
-                                                    defaultMessage: metadatas.label,
-                                                  }}
-                                                  max={max}
-                                                  min={min}
-                                                  name={name}
-                                                  required={required}
-                                                />
-                                              </GridItem>
-                                            );
-                                          }
-
-                                          return (
-                                            <GridItem col={size} key={name} s={12} xs={12}>
-                                              <Inputs
-                                                size={size}
-                                                fieldSchema={fieldSchema}
-                                                keys={name}
-                                                labelAction={labelAction}
-                                                metadatas={metadatas}
-                                                queryInfos={queryInfos}
-                                              />
-                                            </GridItem>
-                                          );
-                                        }
-                                      )}
-                                    </Grid>
-                                  );
-                                })}
+                                {row.map((grid, gridRowIndex) => (
+                                  <GridRow grid={grid} key={gridRowIndex} />
+                                ))}
                               </Stack>
                             </Box>
                           );
