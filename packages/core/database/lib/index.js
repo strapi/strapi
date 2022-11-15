@@ -48,9 +48,7 @@ class Database {
   }
 
   getConnection(tableName) {
-    const schema = this.connection.getSchemaName();
-    const connection = tableName ? this.connection(tableName) : this.connection;
-    return schema ? connection.withSchema(schema) : connection;
+    return tableName ? this.connection(tableName) : this.connection;
   }
 
   getSchemaConnection(trx = this.connection) {

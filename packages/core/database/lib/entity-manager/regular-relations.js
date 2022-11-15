@@ -243,9 +243,8 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
         .transacting(trx);
       break;
     default: {
-      const dbConnection =
-        strapi.db.dialect.client === 'postgres' ? db.connection : db.getConnection();
-      await dbConnection
+      await db
+        .getConnection()
         .raw(
           `UPDATE ?? as a
               SET ${update.join(', ')}
