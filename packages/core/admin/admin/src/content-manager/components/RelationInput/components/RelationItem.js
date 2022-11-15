@@ -1,15 +1,23 @@
-import React, { useRef } from 'react';
+import React, { forwardRef, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useDrag, useDrop } from 'react-dnd';
 
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
 import { IconButton } from '@strapi/design-system/IconButton';
 
 import Drag from '@strapi/icons/Drag';
 
 import { composeRefs } from '../../../utils';
+import { RELATION_GUTTER } from '../constants';
+
+const StackWrapper = styled(Stack)`
+  width: 100%;
+  /* Used to prevent endAction to be pushed out of container */
+  min-width: 0;
+`;
 
 const ChildrenWrapper = styled(Flex)`
   width: 100%;
@@ -20,16 +28,22 @@ const ChildrenWrapper = styled(Flex)`
 const RELATION_ITEM_DRAG_TYPE = 'RelationItem';
 
 export const RelationItem = ({
+  ariaDescribedBy,
   children,
   canDrag,
   disabled,
   endAction,
+  iconButtonAriaLabel,
   style,
   id,
   index,
+  onCancel,
+  onDropItem,
+  onGrabItem,
   updatePositionOfRelation,
   ...props
 }) => {
+  const [isSelected, setIsSelected] = useState(false);
   const relationRef = useRef(null);
 
   const [{ handlerId }, dropRef] = useDrop({
@@ -85,22 +99,87 @@ export const RelationItem = ({
 
   const composedRefs = composeRefs(relationRef, dragRef);
 
+  /**
+   * @type {(movement: 'UP' | 'DOWN') => void})}
+   */
+  const handleMove = (movement) => {
+    if (!isSelected) {
+      return;
+    }
+
+    if (movement === 'UP') {
+      updatePositionOfRelation(index - 1, index);
+    } else if (movement === 'DOWN') {
+      updatePositionOfRelation(index + 1, index);
+    }
+  };
+
+  const handleDragClick = () => {
+    if (isSelected) {
+      if (onDropItem) {
+        onDropItem(index);
+      }
+      setIsSelected(false);
+    } else {
+      if (onGrabItem) {
+        onGrabItem(index);
+      }
+      setIsSelected(true);
+    }
+  };
+
+  const handleCancel = () => {
+    setIsSelected(false);
+
+    if (onCancel) {
+      onCancel(index);
+    }
+  };
+
+  /**
+   * @type {React.KeyboardEventHandler<HTMLButtonElement>}
+   */
+  const handleKeyDown = (e) => {
+    if (e.key === 'Tab' && !isSelected) {
+      return;
+    }
+
+    e.preventDefault();
+
+    switch (e.key) {
+      case ' ':
+      case 'Enter':
+        handleDragClick();
+        break;
+
+      case 'Escape':
+        handleCancel();
+        break;
+
+      case 'ArrowDown':
+      case 'ArrowRight':
+        handleMove('DOWN');
+        break;
+
+      case 'ArrowUp':
+      case 'ArrowLeft':
+        handleMove('UP');
+        break;
+
+      default:
+    }
+  };
+
   return (
-    <Box style={style} as="li" ref={dropRef}>
+    <Box
+      style={style}
+      as="li"
+      ref={dropRef}
+      aria-describedby={ariaDescribedBy}
+      cursor={canDrag ? 'all-scroll' : 'default'}
+    >
       {isDragging ? (
-        <Box
-          ref={dragPreviewRef}
-          paddingTop={2}
-          paddingBottom={2}
-          paddingLeft={4}
-          paddingRight={4}
-          hasRadius
-          borderStyle="dashed"
-          borderColor="primary600"
-          borderWidth="1px"
-          background="primary100"
-          height="100%"
-        />
+        <RelationItemPlaceholder ref={dragPreviewRef} />
       ) : (
         <Flex
           paddingTop={2}
@@ -116,9 +195,21 @@ export const RelationItem = ({
           data-handler-id={handlerId}
           {...props}
         >
-          {/* TODO: swap this out for using children when DS is updated */}
-          {canDrag && <IconButton marginRight={1} aria-label="Drag" noBorder icon={<Drag />} />}
-          <ChildrenWrapper justifyContent="space-between">{children}</ChildrenWrapper>
+          <StackWrapper spacing={1} horizontal>
+            {canDrag ? (
+              <IconButton
+                forwardedAs="div"
+                role="button"
+                tabIndex={0}
+                aria-label={iconButtonAriaLabel}
+                noBorder
+                onKeyDown={handleKeyDown}
+              >
+                <Drag />
+              </IconButton>
+            ) : null}
+            <ChildrenWrapper justifyContent="space-between">{children}</ChildrenWrapper>
+          </StackWrapper>
           {endAction && <Box paddingLeft={4}>{endAction}</Box>}
         </Flex>
       )}
@@ -126,21 +217,46 @@ export const RelationItem = ({
   );
 };
 
+const RelationItemPlaceholder = forwardRef((_, ref) => (
+  <Box
+    ref={ref}
+    paddingTop={2}
+    paddingBottom={2}
+    paddingLeft={4}
+    paddingRight={4}
+    hasRadius
+    borderStyle="dashed"
+    borderColor="primary600"
+    borderWidth="1px"
+    background="primary100"
+    height={`calc(100% - ${RELATION_GUTTER}px)`}
+  />
+));
+
 RelationItem.defaultProps = {
+  ariaDescribedBy: '',
   canDrag: false,
   disabled: false,
   endAction: undefined,
+  onCancel: undefined,
+  onDropItem: undefined,
+  onGrabItem: undefined,
   style: undefined,
   updatePositionOfRelation: undefined,
 };
 
 RelationItem.propTypes = {
+  ariaDescribedBy: PropTypes.string,
   canDrag: PropTypes.bool,
   children: PropTypes.node.isRequired,
   disabled: PropTypes.bool,
   endAction: PropTypes.node,
+  iconButtonAriaLabel: PropTypes.string.isRequired,
   id: PropTypes.number.isRequired,
   index: PropTypes.number.isRequired,
+  onCancel: PropTypes.func,
+  onDropItem: PropTypes.func,
+  onGrabItem: PropTypes.func,
   style: PropTypes.shape({
     height: PropTypes.number,
     left: PropTypes.number,

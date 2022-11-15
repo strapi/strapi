@@ -391,9 +391,9 @@ describe('RelationInputDataManager', () => {
 
   test('Reorder an entity', () => {
     const { relationReorder } = useCMEditViewDataManager();
-    setup();
+    setup({ relationType: 'manyToMany' });
 
-    const [draggedItem, dropZone] = screen.getAllByLabelText('Drag');
+    const [draggedItem, dropZone] = screen.getAllByText('Drag');
 
     fireEvent.dragStart(draggedItem);
     fireEvent.dragEnter(dropZone);
@@ -401,6 +401,62 @@ describe('RelationInputDataManager', () => {
     fireEvent.drop(dropZone);
 
     expect(relationReorder).toBeCalledWith({ name: 'relation', newIndex: 0, oldIndex: 1 });
+  });
+
+  describe('Accessibility', () => {
+    it('should have have description text', () => {
+      setup({ relationType: 'manyToMany' });
+
+      expect(screen.queryByText('Press spacebar to grab and re-order')).toBeInTheDocument();
+    });
+
+    it('should update the live text when an item has been grabbed', async () => {
+      setup({ relationType: 'manyToMany' });
+
+      const [draggedItem] = screen.getAllByText('Drag');
+
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+
+      expect(
+        screen.queryByText(
+          /Press up and down arrow to change position, Spacebar to drop, Escape to cancel/
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('should change the live text when an item has been moved', () => {
+      setup({ relationType: 'manyToMany' });
+
+      const [draggedItem] = screen.getAllByText('Drag');
+
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
+
+      expect(screen.queryByText(/New position in list/)).toBeInTheDocument();
+    });
+
+    it('should change the live text when an item has been dropped', () => {
+      setup({ relationType: 'manyToMany' });
+
+      const [draggedItem] = screen.getAllByText('Drag');
+
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+
+      expect(screen.queryByText(/Final position in list/)).toBeInTheDocument();
+    });
+
+    it('should change the live text after the reordering interaction has been cancelled', () => {
+      setup({ relationType: 'manyToMany' });
+
+      const [draggedItem] = screen.getAllByText('Drag');
+
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'Escape', code: 'Escape' });
+
+      expect(screen.queryByText(/Re-order cancelled/)).toBeInTheDocument();
+    });
   });
 
   describe('Counting relations', () => {

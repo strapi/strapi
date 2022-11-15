@@ -53,11 +53,14 @@ const Component = (props) => (
       <IntlProvider locale="en">
         <DndProvider backend={HTML5Backend}>
           <RelationInput
+            canReorder
             description="this is a description"
+            iconButtonAriaLabel="Drag"
             id="1"
             name="some-relation-1"
             label="Some Relation"
             labelLoadMore="Load more"
+            listAriaDescription="Press spacebar to grab and re-order"
             loadingMessage="Relations are loading"
             labelDisconnectRelation="Remove"
             numberOfRelationsToDisplay={5}
@@ -156,7 +159,7 @@ describe('Content-Manager || RelationInput', () => {
       const spy = jest.fn();
       setup({ onRelationReorder: spy });
 
-      const [draggedItem, dropZone] = screen.getAllByLabelText('Drag');
+      const [draggedItem, dropZone] = screen.getAllByText('Drag');
 
       fireEvent.dragStart(draggedItem);
       fireEvent.dragEnter(dropZone);
@@ -164,6 +167,18 @@ describe('Content-Manager || RelationInput', () => {
       fireEvent.drop(dropZone);
 
       expect(spy).toHaveBeenCalled();
+    });
+
+    it('should not call onRelationReorder when the indices are the same', () => {
+      const spy = jest.fn();
+      setup({ onRelationReorder: spy });
+
+      const [draggedItem] = screen.getAllByText('Drag');
+
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'ArrowUp', code: 'ArrowUp' });
+
+      expect(spy).not.toHaveBeenCalled();
     });
 
     test('should scroll to the bottom when a new relation has been added & scroll to the top when load more is clicked', async () => {

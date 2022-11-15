@@ -2,7 +2,6 @@ import React, { useRef, useState, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { FixedSizeList as List } from 'react-window';
-import { useIntl } from 'react-intl';
 
 import { ReactSelect } from '@strapi/helper-plugin';
 import { Status } from '@strapi/design-system/Status';
@@ -13,6 +12,7 @@ import { FieldLabel, FieldError, FieldHint, Field } from '@strapi/design-system/
 import { TextButton } from '@strapi/design-system/TextButton';
 import { Typography } from '@strapi/design-system/Typography';
 import { Tooltip } from '@strapi/design-system/Tooltip';
+import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 
 import Cross from '@strapi/icons/Cross';
 import Refresh from '@strapi/icons/Refresh';
@@ -23,7 +23,6 @@ import { RelationList } from './components/RelationList';
 import { Option } from './components/Option';
 import { RELATION_GUTTER, RELATION_ITEM_HEIGHT } from './constants';
 
-import { getTrad } from '../../utils';
 import { usePrev } from '../../hooks';
 
 const LinkEllipsis = styled(Link)`
@@ -54,9 +53,11 @@ const DisconnectButton = styled.button`
 `;
 
 const RelationInput = ({
+  canReorder,
   description,
   disabled,
   error,
+  iconButtonAriaLabel,
   id,
   name,
   numberOfRelationsToDisplay,
@@ -64,7 +65,12 @@ const RelationInput = ({
   labelAction,
   labelLoadMore,
   labelDisconnectRelation,
+  listAriaDescription,
+  liveText,
   loadingMessage,
+  onCancel,
+  onDropItem,
+  onGrabItem,
   noRelationsMessage,
   onRelationConnect,
   onRelationLoadMore,
@@ -80,13 +86,12 @@ const RelationInput = ({
   size,
 }) => {
   const [value, setValue] = useState(null);
-  const listRef = useRef();
-  const outerListRef = useRef();
   const [overflow, setOverflow] = useState('');
 
-  const { data } = searchResults;
+  const listRef = useRef();
+  const outerListRef = useRef();
 
-  const { formatMessage } = useIntl();
+  const { data } = searchResults;
 
   const relations = paginatedRelations.data;
   const totalNumberOfRelations = relations.length ?? 0;
@@ -219,8 +224,15 @@ const RelationInput = ({
     onSearch();
   };
 
+  /**
+   *
+   * @param {number} newIndex
+   * @param {number} currentIndex
+   *
+   * @returns {void}
+   */
   const handleUpdatePositionOfRelation = (newIndex, currentIndex) => {
-    if (onRelationReorder) {
+    if (onRelationReorder && newIndex >= 0 && newIndex < relations.length) {
       onRelationReorder(currentIndex, newIndex);
     }
   };
@@ -249,6 +261,8 @@ const RelationInput = ({
       listRef.current.scrollToItem(0, 'start');
     }
   }, [previewRelationsLength, relations]);
+
+  const ariaDescriptionId = `${name}-item-instructions`;
 
   return (
     <Field error={error} name={name} hint={description} id={id}>
@@ -312,6 +326,8 @@ const RelationInput = ({
         }
       >
         <RelationList overflow={overflow}>
+          <VisuallyHidden id={ariaDescriptionId}>{listAriaDescription}</VisuallyHidden>
+          <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
           <List
             height={dynamicListHeight}
             ref={listRef}
@@ -319,16 +335,17 @@ const RelationInput = ({
             itemCount={totalNumberOfRelations}
             itemSize={RELATION_ITEM_HEIGHT + RELATION_GUTTER}
             itemData={{
+              ariaDescribedBy: ariaDescriptionId,
+              canDrag: canReorder,
               disabled,
-              iconButtonAriaLabel: formatMessage({
-                id: getTrad('components.RelationInput.icon-button-aria-label'),
-                defaultMessage: 'Drag',
-              }),
+              handleCancel: onCancel,
+              handleDropItem: onDropItem,
+              handleGrabItem: onGrabItem,
+              iconButtonAriaLabel,
               labelDisconnectRelation,
               onRelationDisconnect,
               publicationStateTranslations,
               relations,
-              totalNumberOfRelations,
               updatePositionOfRelation: handleUpdatePositionOfRelation,
             }}
             itemKey={(index, { relations: relationsItems }) => relationsItems[index].id}
@@ -378,11 +395,16 @@ const SearchResults = PropTypes.shape({
 });
 
 RelationInput.defaultProps = {
+  canReorder: false,
   description: undefined,
   disabled: false,
   error: undefined,
   labelAction: null,
   labelLoadMore: null,
+  liveText: undefined,
+  onCancel: undefined,
+  onDropItem: undefined,
+  onGrabItem: undefined,
   required: false,
   relations: { data: [] },
   searchResults: { data: [] },
@@ -390,17 +412,24 @@ RelationInput.defaultProps = {
 
 RelationInput.propTypes = {
   error: PropTypes.string,
+  canReorder: PropTypes.bool,
   description: PropTypes.string,
   disabled: PropTypes.bool,
+  iconButtonAriaLabel: PropTypes.string.isRequired,
   id: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   labelAction: PropTypes.element,
   labelLoadMore: PropTypes.string,
   labelDisconnectRelation: PropTypes.string.isRequired,
+  listAriaDescription: PropTypes.string.isRequired,
+  liveText: PropTypes.string,
   loadingMessage: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   noRelationsMessage: PropTypes.string.isRequired,
   numberOfRelationsToDisplay: PropTypes.number.isRequired,
+  onCancel: PropTypes.func,
+  onDropItem: PropTypes.func,
+  onGrabItem: PropTypes.func,
   onRelationConnect: PropTypes.func.isRequired,
   onRelationDisconnect: PropTypes.func.isRequired,
   onRelationLoadMore: PropTypes.func.isRequired,
@@ -424,25 +453,30 @@ RelationInput.propTypes = {
  */
 const ListItem = ({ data, index, style }) => {
   const {
+    ariaDescribedBy,
+    canDrag,
     disabled,
+    handleCancel,
+    handleDropItem,
+    handleGrabItem,
+    iconButtonAriaLabel,
     labelDisconnectRelation,
     onRelationDisconnect,
     publicationStateTranslations,
     relations,
-    totalNumberOfRelations,
     updatePositionOfRelation,
   } = data;
   const { publicationState, href, mainField, id } = relations[index];
   const statusColor = publicationState === 'draft' ? 'secondary' : 'success';
-  const canDrag = totalNumberOfRelations > 1;
 
   return (
     <RelationItem
-      disabled={disabled}
+      ariaDescribedBy={ariaDescribedBy}
       canDrag={canDrag}
+      disabled={disabled}
+      iconButtonAriaLabel={iconButtonAriaLabel}
       id={id}
       index={index}
-      updatePositionOfRelation={updatePositionOfRelation}
       endAction={
         <DisconnectButton
           data-testid={`remove-relation-${id}`}
@@ -454,11 +488,15 @@ const ListItem = ({ data, index, style }) => {
           <Icon width="12px" as={Cross} />
         </DisconnectButton>
       }
+      onCancel={handleCancel}
+      onDropItem={handleDropItem}
+      onGrabItem={handleGrabItem}
       style={{
         ...style,
         bottom: style.bottom ?? 0 + RELATION_GUTTER,
         height: style.height ?? 0 - RELATION_GUTTER,
       }}
+      updatePositionOfRelation={updatePositionOfRelation}
     >
       <BoxEllipsis minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
         <Tooltip description={mainField ?? `${id}`}>
@@ -491,7 +529,13 @@ ListItem.defaultProps = {
 
 ListItem.propTypes = {
   data: PropTypes.shape({
+    ariaDescribedBy: PropTypes.string.isRequired,
+    canDrag: PropTypes.bool.isRequired,
     disabled: PropTypes.bool.isRequired,
+    handleCancel: PropTypes.func,
+    handleDropItem: PropTypes.func,
+    handleGrabItem: PropTypes.func,
+    iconButtonAriaLabel: PropTypes.string.isRequired,
     labelDisconnectRelation: PropTypes.string.isRequired,
     onRelationDisconnect: PropTypes.func.isRequired,
     publicationStateTranslations: PropTypes.shape({
@@ -506,7 +550,6 @@ ListItem.propTypes = {
         mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
       })
     ),
-    totalNumberOfRelations: PropTypes.number.isRequired,
     updatePositionOfRelation: PropTypes.func.isRequired,
   }),
   index: PropTypes.number.isRequired,
