@@ -127,7 +127,7 @@
     "reselect": "^4.0.0",
     "rimraf": "3.0.2",
     "sanitize-html": "2.7.1",
-    "semver": "7.3.7",
+    "semver": "7.3.8",
     "sift": "16.0.0",
     "style-loader": "3.3.1",
     "styled-components": "5.3.3",

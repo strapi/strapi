@@ -74,7 +74,12 @@ class Database {
 
 // TODO: move into strapi
 Database.transformContentTypes = transformContentTypes;
-Database.init = async (config) => new Database(config);
+Database.init = async (config) => {
+  const instance = new Database(config);
+  instance.databaseInformation = await instance.dialect.schemaInspector.getDatabaseInformation();
+
+  return instance;
+};
 
 module.exports = {
   Database,

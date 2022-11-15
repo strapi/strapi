@@ -53,6 +53,9 @@ const SQL_QUERIES = {
     AND rc.constraint_schema = database()
     AND rc.table_name = ?;
   `,
+  VERSION: /* sql */ `
+    SELECT version();
+  `,
 };
 
 const toStrapiType = (column) => {
@@ -228,6 +231,19 @@ class MysqlSchemaInspector {
     }
 
     return Object.values(ret);
+  }
+
+  async getDatabaseInformation() {
+    const [results] = await this.db.connection.raw(SQL_QUERIES.VERSION);
+    const version = results[0]['version()'];
+
+    const [versionNumber, databaseName] = version.split('-');
+    const database = databaseName && databaseName.toLowerCase() === 'mariadb' ? 'MariaDB' : 'MySQL';
+
+    return {
+      database,
+      version: versionNumber,
+    };
   }
 }
 
