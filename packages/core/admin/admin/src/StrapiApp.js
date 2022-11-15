@@ -22,7 +22,7 @@ import {
 import injectionZones from './injectionZones';
 import favicon from './favicon.png';
 import localStorageKey from './components/LanguageProvider/utils/localStorageKey';
-import { fetchClient } from './utils';
+import { getFetchClient } from './utils';
 
 class StrapiApp {
   constructor({ adminConfig, appPlugins, library, middlewares, reducers }) {
@@ -452,7 +452,7 @@ class StrapiApp {
         showTutorials={this.configurations.tutorials}
         showReleaseNotification={this.configurations.notifications.releases}
         store={store}
-        fetchClient={fetchClient}
+        getFetchClient={getFetchClient}
       >
         <>
           <Helmet

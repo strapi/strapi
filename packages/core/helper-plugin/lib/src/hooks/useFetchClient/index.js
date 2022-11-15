@@ -2,9 +2,9 @@ import { useContext } from 'react';
 import StrapiAppContext from '../../contexts/StrapiAppContext';
 
 const useFetchClient = () => {
-  const { fetchClient } = useContext(StrapiAppContext);
+  const { getFetchClient } = useContext(StrapiAppContext);
 
-  return fetchClient;
+  return getFetchClient();
 };
 
 export default useFetchClient;

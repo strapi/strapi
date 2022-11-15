@@ -1,10 +1,8 @@
 import axios from 'axios';
-import { auth, wrapAxiosInstance } from '@strapi/helper-plugin';
-// TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from getFetchClient
-import pluginId from '../pluginId';
+import { auth } from '@strapi/helper-plugin';
 
 const instance = axios.create({
-  baseURL: `${process.env.STRAPI_ADMIN_BACKEND_URL}/${pluginId}`,
+  baseURL: process.env.STRAPI_ADMIN_BACKEND_URL,
 });
 
 instance.interceptors.request.use(
@@ -26,7 +24,7 @@ instance.interceptors.response.use(
   (response) => response,
   (error) => {
     // whatever you want to do with the error
-    if (error.response?.status === 401) {
+    if (error?.response?.status === 401) {
       auth.clearAppStorage();
       window.location.reload();
     }
@@ -35,6 +33,13 @@ instance.interceptors.response.use(
   }
 );
 
-const wrapper = wrapAxiosInstance(instance);
+const getFetchClient = () => {
+  return {
+    get: (url, config) => instance.get(url, config),
+    put: (url, data, config) => instance.put(url, data, config),
+    post: (url, data, config) => instance.post(url, data, config),
+    delete: (url, config) => instance.get(url, config),
+  };
+};
 
-export default wrapper;
+export default getFetchClient;
