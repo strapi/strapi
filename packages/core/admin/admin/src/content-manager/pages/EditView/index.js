@@ -1,4 +1,4 @@
-import React, { Suspense, memo, useMemo } from 'react';
+import React, { Suspense, memo } from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
 import {
@@ -47,15 +47,11 @@ const EditView = ({
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const { createActionAllowedFields, readActionAllowedFields, updateActionAllowedFields } =
-    useMemo(() => {
-      return getFieldsActionMatchingPermissions(userPermissions, slug);
-    }, [userPermissions, slug]);
+    getFieldsActionMatchingPermissions(userPermissions, slug);
 
-  const configurationPermissions = useMemo(() => {
-    return isSingleType
-      ? cmPermissions.singleTypesConfigurations
-      : cmPermissions.collectionTypesConfigurations;
-  }, [isSingleType]);
+  const configurationPermissions = isSingleType
+    ? cmPermissions.singleTypesConfigurations
+    : cmPermissions.collectionTypesConfigurations;
 
   // // FIXME when changing the routing
   const configurationsURL = `/content-manager/${
