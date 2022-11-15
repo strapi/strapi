@@ -72,7 +72,7 @@
     "@strapi/design-system": "1.2.7",
     "@strapi/icons": "1.2.7",
     "@testing-library/react": "11.2.7",
-    "@testing-library/react-hooks": "3.7.0",
+    "@testing-library/react-hooks": "8.0.1",
     "cross-env": "^7.0.3",
     "esbuild-loader": "^2.20.0",
     "react-test-renderer": "^17.0.2",

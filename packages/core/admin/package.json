@@ -141,7 +141,7 @@
   "devDependencies": {
     "@testing-library/dom": "8.19.0",
     "@testing-library/react": "11.2.7",
-    "@testing-library/react-hooks": "3.7.0",
+    "@testing-library/react-hooks": "8.0.1",
     "@testing-library/user-event": "13.5.0",
     "duplicate-dependencies-webpack-plugin": "^1.0.2",
     "glob": "8.0.3",
