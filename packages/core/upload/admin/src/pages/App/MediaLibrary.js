@@ -355,7 +355,7 @@ export const MediaLibrary = () => {
                       }
                     />
                   ) : (
-                    <AssetTableList assets={assets} />
+                    <AssetTableList assets={assets} onEditAsset={setAssetToEdit} />
                   )}
 
                   {assetsData?.pagination && (
