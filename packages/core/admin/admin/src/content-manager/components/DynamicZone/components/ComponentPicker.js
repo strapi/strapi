@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import groupBy from 'lodash/groupBy';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -6,9 +6,11 @@ import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
-import { getTrad } from '../../../../utils';
-import { useContentTypeLayout } from '../../../../hooks';
-import Category from './Category';
+
+import { getTrad } from '../../../utils';
+import { useContentTypeLayout } from '../../../hooks';
+
+import ComponentCategory from './ComponentCategory';
 
 const ComponentPicker = ({ components, isOpen, onClickAddComponent }) => {
   const { formatMessage } = useIntl();
@@ -32,27 +34,22 @@ const ComponentPicker = ({ components, isOpen, onClickAddComponent }) => {
   }, [components, getComponentLayout]);
 
   useEffect(() => {
-    if (isOpen && dynamicComponentCategories.length) {
+    if (isOpen && dynamicComponentCategories.length > 0) {
       setCategoryToOpen(dynamicComponentCategories[0].category);
     }
   }, [isOpen, dynamicComponentCategories]);
 
-  const handleAddComponentToDz = useCallback(
-    (componentUid) => {
-      onClickAddComponent(componentUid);
-      setCategoryToOpen('');
-    },
-    [onClickAddComponent]
-  );
+  const handleAddComponentToDz = (componentUid) => () => {
+    onClickAddComponent(componentUid);
+    setCategoryToOpen('');
+  };
 
-  const handleClickToggle = useCallback(
-    (categoryName) => {
-      const nextCategoryToOpen = categoryToOpen === categoryName ? '' : categoryName;
-
-      setCategoryToOpen(nextCategoryToOpen);
-    },
-    [categoryToOpen]
-  );
+  /**
+   * @type {(categoryName: string) => void}
+   */
+  const handleClickToggle = (categoryName) => {
+    setCategoryToOpen((currentCat) => (currentCat === categoryName ? '' : categoryName));
+  };
 
   if (!isOpen) {
     return null;
@@ -80,21 +77,17 @@ const ComponentPicker = ({ components, isOpen, onClickAddComponent }) => {
         </Flex>
         <Box paddingTop={2}>
           <KeyboardNavigable attributeName="data-strapi-accordion-toggle">
-            {dynamicComponentCategories.map(({ category, components }, index) => {
-              return (
-                <Category
-                  key={category}
-                  category={category}
-                  components={components}
-                  isOdd={index % 2 === 1}
-                  isOpen={category === categoryToOpen}
-                  // TODO?
-                  // isFirst={index === 0}
-                  onAddComponent={handleAddComponentToDz}
-                  onToggle={handleClickToggle}
-                />
-              );
-            })}
+            {dynamicComponentCategories.map(({ category, components }, index) => (
+              <ComponentCategory
+                key={category}
+                category={category}
+                components={components}
+                onAddComponent={handleAddComponentToDz}
+                isOpen={category === categoryToOpen}
+                onToggle={handleClickToggle}
+                variant={index % 2 === 1 ? 'primary' : 'secondary'}
+              />
+            ))}
           </KeyboardNavigable>
         </Box>
       </Box>
@@ -102,10 +95,15 @@ const ComponentPicker = ({ components, isOpen, onClickAddComponent }) => {
   );
 };
 
+ComponentPicker.defaultProps = {
+  components: [],
+  isOpen: false,
+};
+
 ComponentPicker.propTypes = {
-  components: PropTypes.array.isRequired,
-  isOpen: PropTypes.bool.isRequired,
+  components: PropTypes.array,
+  isOpen: PropTypes.bool,
   onClickAddComponent: PropTypes.func.isRequired,
 };
 
-export default memo(ComponentPicker);
+export default ComponentPicker;
