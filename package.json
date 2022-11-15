@@ -41,7 +41,7 @@
     "format": "npm-run-all -p format:*",
     "format:code": "npm run prettier:code -- --write",
     "format:other": "npm run prettier:other -- --write",
-    "prettier:code": "prettier \"**/*.js\"",
+    "prettier:code": "prettier \"**/*.{js,ts}\"",
     "prettier:other": "prettier \"**/*.{md,css,scss,yaml,yml}\"",
     "test:clean": "rimraf ./coverage",
     "test:front": "npm run test:clean && cross-env IS_EE=true jest --config ./jest.config.front.js",
@@ -56,10 +56,10 @@
     "doc:api": "node scripts/open-api/serve.js"
   },
   "lint-staged": {
-    "*.{js,md,css,scss,yaml,yml}": [
+    "*.{js,ts,md,css,scss,yaml,yml}": [
       "prettier --write"
     ],
-    "*.js": [
+    "*.{js,ts}": [
       "eslint --fix"
     ]
   },
@@ -70,6 +70,7 @@
     "@strapi/eslint-config": "0.1.2",
     "@swc/core": "1.2.224",
     "@swc/jest": "0.2.22",
+    "@typescript-eslint/parser": "5.42.1",
     "babel-eslint": "10.1.0",
     "chalk": "4.1.2",
     "chokidar": "3.5.3",
@@ -105,6 +106,7 @@
     "stylelint-processor-styled-components": "1.10.0",
     "supertest": "6.2.4",
     "ts-jest": "29.0.3",
+    "typescript": "4.6.2",
     "yargs": "17.6.0"
   },
   "engines": {
