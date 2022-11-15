@@ -295,8 +295,7 @@ const cleanOrderColumnsForOldDatabases = async ({
 
   if (hasOrderColumn(attribute) && id) {
     const tempOrderTableName = `tempOrderTableName_${now}`;
-    await db
-      .getConnection()
+    await db.connection
       .raw(
         `
         CREATE TEMPORARY TABLE :tempOrderTableName:
@@ -317,8 +316,7 @@ const cleanOrderColumnsForOldDatabases = async ({
         }
       )
       .transacting(trx);
-    await db
-      .getConnection()
+    await db.connection
       .raw(
         `UPDATE ?? as a, (SELECT * FROM ??) AS b
           SET ?? = b.src_order
@@ -326,12 +324,11 @@ const cleanOrderColumnsForOldDatabases = async ({
         [joinTable.name, tempOrderTableName, orderColumnName]
       )
       .transacting(trx);
-    await db.getConnection().raw(`DROP TEMPORARY TABLE ${tempOrderTableName}`).transacting(trx);
+    await db.connection.raw(`DROP TEMPORARY TABLE ${tempOrderTableName}`).transacting(trx);
   }
   if (hasInverseOrderColumn(attribute) && !isEmpty(inverseRelIds)) {
     const tempInvOrderTableName = `tempInvOrderTableName_${now}`;
-    await db
-      .getConnection()
+    await db.connection
       .raw(
         `
         CREATE TEMPORARY TABLE ??
@@ -358,8 +355,7 @@ const cleanOrderColumnsForOldDatabases = async ({
         ]
       )
       .transacting(trx);
-    await db
-      .getConnection()
+    await db.connection
       .raw(
         `UPDATE ?? as a, (SELECT * FROM ??) AS b
           SET ?? = b.inv_order
@@ -367,7 +363,7 @@ const cleanOrderColumnsForOldDatabases = async ({
         [joinTable.name, tempInvOrderTableName, inverseOrderColumnName]
       )
       .transacting(trx);
-    await db.getConnection().raw(`DROP TEMPORARY TABLE ${tempInvOrderTableName}`).transacting(trx);
+    await db.connection.raw(`DROP TEMPORARY TABLE ${tempInvOrderTableName}`).transacting(trx);
   }
 };
 
