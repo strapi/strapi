@@ -130,7 +130,7 @@ class TransferEngine<
     );
   }
 
-  async boostrap(): Promise<void> {
+  async bootstrap(): Promise<void> {
     await Promise.all([
       // bootstrap source provider
       this.sourceProvider.bootstrap?.(),
@@ -175,7 +175,7 @@ class TransferEngine<
 
   async transfer(): Promise<ITransferResults<S, D>> {
     try {
-      await this.boostrap();
+      await this.bootstrap();
 
       const isValidTransfer = await this.integrityCheck();
 
