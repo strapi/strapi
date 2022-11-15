@@ -46,7 +46,7 @@
     "url-join": "4.0.1"
   },
   "devDependencies": {
-    "@testing-library/dom": "8.17.1",
+    "@testing-library/dom": "8.19.0",
     "@testing-library/react": "12.1.4",
     "@testing-library/react-hooks": "8.0.1",
     "@testing-library/user-event": "14.4.2",

@@ -190,6 +190,18 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         height: 0.25rem;
       }
 
+      .c26 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
       .c24 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -534,8 +546,15 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                             tabindex="-1"
                             type="button"
                           >
+                            <span
+                              class="c26"
+                            >
+                              Edit a template
+                            </span>
                             <svg
+                              aria-hidden="true"
                               fill="none"
+                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -605,8 +624,15 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                             tabindex="-1"
                             type="button"
                           >
+                            <span
+                              class="c26"
+                            >
+                              Edit a template
+                            </span>
                             <svg
+                              aria-hidden="true"
                               fill="none"
+                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"

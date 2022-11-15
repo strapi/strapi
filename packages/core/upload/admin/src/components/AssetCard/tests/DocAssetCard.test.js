@@ -29,7 +29,7 @@ describe('DocAssetCard', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c31 {
+      .c32 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -41,12 +41,12 @@ describe('DocAssetCard', () => {
         width: 1px;
       }
 
-      .c15 {
+      .c16 {
         width: 100%;
         height: 5.5rem;
       }
 
-      .c16 {
+      .c17 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -64,8 +64,20 @@ describe('DocAssetCard', () => {
         justify-content: center;
       }
 
-      .c22 {
+      .c23 {
         padding-top: 4px;
+      }
+
+      .c15 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
       }
 
       .c13 {
@@ -184,14 +196,14 @@ describe('DocAssetCard', () => {
         position: end;
       }
 
-      .c19 {
+      .c20 {
         padding-top: 8px;
         padding-right: 12px;
         padding-bottom: 8px;
         padding-left: 12px;
       }
 
-      .c27 {
+      .c28 {
         background: #f6f6f9;
         padding: 4px;
         border-radius: 4px;
@@ -230,7 +242,7 @@ describe('DocAssetCard', () => {
         flex-direction: row;
       }
 
-      .c20 {
+      .c21 {
         -webkit-align-items: flex-start;
         -webkit-box-align: flex-start;
         -ms-flex-align: flex-start;
@@ -244,7 +256,7 @@ describe('DocAssetCard', () => {
         flex-direction: row;
       }
 
-      .c28 {
+      .c29 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -283,20 +295,20 @@ describe('DocAssetCard', () => {
         right: 12px;
       }
 
-      .c23 {
+      .c24 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c24 {
+      .c25 {
         color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c30 {
+      .c31 {
         color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
@@ -304,14 +316,14 @@ describe('DocAssetCard', () => {
         text-transform: uppercase;
       }
 
-      .c26 {
+      .c27 {
         margin-left: auto;
         -webkit-flex-shrink: 0;
         -ms-flex-negative: 0;
         flex-shrink: 0;
       }
 
-      .c29 {
+      .c30 {
         margin-left: 4px;
       }
 
@@ -383,7 +395,7 @@ describe('DocAssetCard', () => {
         background-color: #8e8ea9;
       }
 
-      .c21 {
+      .c22 {
         word-break: break-all;
       }
 
@@ -392,7 +404,7 @@ describe('DocAssetCard', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c25 {
+      .c26 {
         text-transform: uppercase;
       }
 
@@ -412,11 +424,11 @@ describe('DocAssetCard', () => {
         opacity: 1;
       }
 
-      .c18 svg {
+      .c19 svg {
         font-size: 3rem;
       }
 
-      .c17 {
+      .c18 {
         border-radius: 4px 4px 0 0;
         background: linear-gradient(180deg,#ffffff 0%,#f6f6f9 121.48%);
       }
@@ -437,11 +449,15 @@ describe('DocAssetCard', () => {
                 class="c4 c5 c6 c7"
                 spacing="2"
               >
-                <input
-                  aria-labelledby="card-1-title"
-                  class="c8"
-                  type="checkbox"
-                />
+                <div
+                  class=""
+                >
+                  <input
+                    aria-labelledby="card-1-title"
+                    class="c8"
+                    type="checkbox"
+                  />
+                </div>
               </div>
             </div>
             <div
@@ -456,8 +472,15 @@ describe('DocAssetCard', () => {
                   tabindex="0"
                   type="button"
                 >
+                  <span
+                    class="c15"
+                  >
+                    Edit
+                  </span>
                   <svg
+                    aria-hidden="true"
                     fill="none"
+                    focusable="false"
                     height="1em"
                     viewBox="0 0 24 24"
                     width="1em"
@@ -474,12 +497,12 @@ describe('DocAssetCard', () => {
               </span>
             </div>
             <div
-              class="c15 c16 c17"
+              class="c16 c17 c18"
               height="5.5rem"
               width="100%"
             >
               <span
-                class="c18"
+                class="c19"
               >
                 <svg
                   aria-label="hello.png"
@@ -500,29 +523,29 @@ describe('DocAssetCard', () => {
             </div>
           </div>
           <div
-            class="c19"
+            class="c20"
           >
             <div
-              class="c20"
+              class="c21"
             >
               <div
-                class="c21"
+                class="c22"
               >
                 <div
-                  class="c22"
+                  class="c23"
                 >
                   <h2
-                    class="c23"
+                    class="c24"
                     id="card-1-title"
                   >
                     hello.png
                   </h2>
                 </div>
                 <div
-                  class="c24"
+                  class="c25"
                 >
                   <span
-                    class="c25"
+                    class="c26"
                   >
                     png
                   </span>
@@ -530,13 +553,13 @@ describe('DocAssetCard', () => {
                 </div>
               </div>
               <div
-                class="c26"
+                class="c27"
               >
                 <div
-                  class="c27 c28 c29"
+                  class="c28 c29 c30"
                 >
                   <span
-                    class="c30"
+                    class="c31"
                   >
                     Doc
                   </span>
@@ -546,7 +569,7 @@ describe('DocAssetCard', () => {
           </div>
         </article>
         <div
-          class="c31"
+          class="c32"
         >
           <p
             aria-live="polite"
