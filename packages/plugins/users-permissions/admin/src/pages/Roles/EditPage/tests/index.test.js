@@ -851,7 +851,7 @@ describe('Admin | containers | RoleEditPage', () => {
         border: 1px solid #4945ff;
       }
 
-      .c49:hover:not([aria-disabled='true']) .sc-eHyqeh {
+      .c49:hover:not([aria-disabled='true']) .sc-igcPbY {
         color: #271fe0;
       }
 
@@ -1263,7 +1263,7 @@ describe('Admin | containers | RoleEditPage', () => {
                                   class="c60 c61"
                                 >
                                   <span
-                                    class="c60 sc-eHyqeh c62"
+                                    class="c60 sc-igcPbY c62"
                                     id="accordion-label-accordion-1"
                                   >
                                     Address
@@ -1346,6 +1346,7 @@ describe('Admin | containers | RoleEditPage', () => {
 
   it("can edit a users-permissions role's name and description", async () => {
     const { getByLabelText, getByRole, getByTestId, getAllByText } = makeAndRenderApp();
+    const user = userEvent.setup();
 
     // Check loading screen
     const loader = getByTestId('loader');
@@ -1361,19 +1362,20 @@ describe('Admin | containers | RoleEditPage', () => {
     expect(descriptionField).toBeInTheDocument();
 
     // Shows error when name is missing
-    await userEvent.clear(nameField);
+    await user.clear(nameField);
     expect(nameField).toHaveValue('');
-    await userEvent.clear(descriptionField);
+    await user.clear(descriptionField);
     expect(descriptionField).toHaveValue('');
 
     // Show errors after form submit
-    await userEvent.click(saveButton);
+    await user.click(saveButton);
     await waitFor(() => expect(saveButton).not.toBeDisabled());
     const errorMessages = await getAllByText(/invalid value/i);
     errorMessages.forEach((errorMessage) => expect(errorMessage).toBeInTheDocument());
   });
 
   it('can toggle the permissions accordions and actions', async () => {
+    const user = userEvent.setup();
     // Create app and wait for loading
     const { getByLabelText, queryByText, getByTestId, getByText, getAllByRole } =
       makeAndRenderApp();
@@ -1382,12 +1384,12 @@ describe('Admin | containers | RoleEditPage', () => {
 
     // Open the collapse
     const collapse = getByText(/define all allowed actions for the api::address plugin/i);
-    await userEvent.click(collapse);
+    await user.click(collapse);
     expect(getByLabelText(/select all/i)).toBeInTheDocument();
 
     // Display the selected action's bound route
     const actionCogButton = getByTestId('action-cog');
-    await userEvent.click(actionCogButton);
+    await user.click(actionCogButton);
     expect(getByText(/bound route to/i)).toBeInTheDocument();
     expect(getByText('POST')).toBeInTheDocument();
     expect(getByText('/addresses')).toBeInTheDocument();
@@ -1395,13 +1397,13 @@ describe('Admin | containers | RoleEditPage', () => {
     // Select all actions with the "select all" checkbox
     const [selectAllCheckbox, ...actionCheckboxes] = getAllByRole('checkbox');
     expect(selectAllCheckbox.checked).toBe(false);
-    await userEvent.click(selectAllCheckbox);
+    await user.click(selectAllCheckbox);
     actionCheckboxes.forEach((actionCheckbox) => {
       expect(actionCheckbox.checked).toBe(true);
     });
 
     // Close the collapse
-    await userEvent.click(collapse);
+    await user.click(collapse);
     expect(queryByText(/select all/i)).not.toBeInTheDocument();
   });
 });
