@@ -125,7 +125,7 @@ const cleanData = ({ browserState, serverState }, currentSchema, componentsSchem
 
           cleanedData = {
             disconnect: disconnectedRelations,
-            connect: connectedRelations,
+            connect: connectedRelations.reverse(),
           };
 
           break;
