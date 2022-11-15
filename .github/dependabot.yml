@@ -19,3 +19,10 @@ updates:
     labels:
       - 'source: dependencies'
       - 'pr: chore'
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
+    labels:
+      - 'source: dependencies'
+      - 'pr: chore'

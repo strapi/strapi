@@ -46,33 +46,72 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
     );
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c1 {
-        padding-top: 24px;
-        padding-right: 40px;
+      .c0 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: end;
+        -webkit-justify-content: flex-end;
+        -ms-flex-pack: end;
+        justify-content: flex-end;
       }
 
-      .c9 {
-        padding-top: 8px;
-        padding-bottom: 64px;
+      .c13 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
       }
 
-      .c10 {
-        background: #ffffff;
-        padding-top: 48px;
-        padding-right: 56px;
-        padding-bottom: 48px;
-        padding-left: 56px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      .c21 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
       }
 
-      .c16 {
-        padding-top: 24px;
-        padding-bottom: 4px;
+      .c22 > * {
+        margin-top: 0;
+        margin-bottom: 0;
       }
 
-      .c18 {
-        padding-bottom: 32px;
+      .c22 > * + * {
+        margin-top: 24px;
+      }
+
+      .c17 {
+        color: #32324d;
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+      }
+
+      .c20 {
+        color: #666687;
+        font-size: 1rem;
+        line-height: 1.5;
       }
 
       .c50 {
@@ -159,7 +198,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         width: 100%;
       }
 
-      .c48 .sc-eCImPb {
+      .c48 .sc-ieecCq {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -215,6 +254,39 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
       .c48 svg > g,
       .c48 svg path {
         fill: #ffffff;
+      }
+
+      .c1 {
+        padding-top: 24px;
+        padding-right: 40px;
+      }
+
+      .c9 {
+        padding-top: 8px;
+        padding-bottom: 64px;
+      }
+
+      .c10 {
+        background: #ffffff;
+        padding-top: 48px;
+        padding-right: 56px;
+        padding-bottom: 48px;
+        padding-left: 56px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c16 {
+        padding-top: 24px;
+        padding-bottom: 4px;
+      }
+
+      .c18 {
+        padding-bottom: 32px;
+      }
+
+      .c45 {
+        padding-left: 8px;
       }
 
       .c44 {
@@ -285,10 +357,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         background-color: #8e8ea9;
       }
 
-      .c45 {
-        padding-left: 8px;
-      }
-
       .c40 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
@@ -331,77 +399,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
 
       .c43 * {
         cursor: pointer;
-      }
-
-      .c37 {
-        border: none;
-        background: transparent;
-        font-size: 1.6rem;
-        width: auto;
-        padding: 0;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c0 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: end;
-        -webkit-justify-content: flex-end;
-        -ms-flex-pack: end;
-        justify-content: flex-end;
-      }
-
-      .c13 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c21 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c22 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c22 > * + * {
-        margin-top: 24px;
       }
 
       .c36 {
@@ -592,17 +589,20 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         margin-top: 4px;
       }
 
-      .c17 {
-        color: #32324d;
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-      }
-
-      .c20 {
-        color: #666687;
-        font-size: 1rem;
-        line-height: 1.5;
+      .c37 {
+        border: none;
+        background: transparent;
+        font-size: 1.6rem;
+        width: auto;
+        padding: 0;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
       }
 
       .c12:focus-visible {
@@ -1185,13 +1185,17 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                       <label
                         class="c42 c43"
                       >
-                        <input
-                          aria-label="news"
-                          class="c44"
-                          id="checkbox-1"
-                          name="news"
-                          type="checkbox"
-                        />
+                        <div
+                          class=""
+                        >
+                          <input
+                            aria-label="news"
+                            class="c44"
+                            id="checkbox-1"
+                            name="news"
+                            type="checkbox"
+                          />
+                        </div>
                         <div
                           class="c45"
                         >

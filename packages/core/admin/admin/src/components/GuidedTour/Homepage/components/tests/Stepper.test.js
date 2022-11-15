@@ -402,15 +402,6 @@ describe('GuidedTour Stepper', () => {
         flex-direction: row;
       }
 
-      .c4 {
-        color: #ffffff;
-        width: 1rem;
-      }
-
-      .c5 path {
-        fill: #ffffff;
-      }
-
       .c6 {
         color: #32324d;
         font-weight: 500;
@@ -430,6 +421,15 @@ describe('GuidedTour Stepper', () => {
         color: #666687;
         font-size: 0.875rem;
         line-height: 1.43;
+      }
+
+      .c4 {
+        color: #ffffff;
+        width: 1rem;
+      }
+
+      .c5 path {
+        fill: #ffffff;
       }
 
       <div
@@ -662,6 +662,13 @@ describe('GuidedTour Stepper', () => {
         flex-direction: row;
       }
 
+      .c6 {
+        color: #32324d;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
       .c4 {
         color: #ffffff;
         width: 1rem;
@@ -669,13 +676,6 @@ describe('GuidedTour Stepper', () => {
 
       .c5 path {
         fill: #ffffff;
-      }
-
-      .c6 {
-        color: #32324d;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
       }
 
       <div

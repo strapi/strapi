@@ -303,7 +303,7 @@ const RoleListPage = () => {
             }
           >
             <Thead>
-              <Tr>
+              <Tr aria-rowindex={1}>
                 <Th>
                   <Typography variant="sigma" textColor="neutral600">
                     {formatMessage({
@@ -339,7 +339,7 @@ const RoleListPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {sortedRoles?.map((role) => (
+              {sortedRoles?.map((role, index) => (
                 <BaseRoleRow
                   key={role.id}
                   id={role.id}
@@ -347,6 +347,7 @@ const RoleListPage = () => {
                   description={role.description}
                   usersCount={role.usersCount}
                   icons={getIcons(role)}
+                  rowIndex={index + 2}
                 />
               ))}
             </Tbody>

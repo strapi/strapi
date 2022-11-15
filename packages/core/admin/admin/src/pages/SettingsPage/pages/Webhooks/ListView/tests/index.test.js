@@ -53,74 +53,6 @@ describe('Admin | containers | ListView', () => {
     });
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c26 {
-        margin: 0;
-        height: 18px;
-        min-width: 18px;
-        border-radius: 4px;
-        border: 1px solid #c0c0cf;
-        -webkit-appearance: none;
-        background-color: #ffffff;
-        cursor: pointer;
-      }
-
-      .c26:checked {
-        background-color: #4945ff;
-        border: 1px solid #4945ff;
-      }
-
-      .c26:checked:after {
-        content: '';
-        display: block;
-        position: relative;
-        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSJ3aGl0ZSIKICAvPgo8L3N2Zz4=) no-repeat no-repeat center center;
-        width: 10px;
-        height: 10px;
-        left: 50%;
-        top: 50%;
-        -webkit-transform: translateX(-50%) translateY(-50%);
-        -ms-transform: translateX(-50%) translateY(-50%);
-        transform: translateX(-50%) translateY(-50%);
-      }
-
-      .c26:checked:disabled:after {
-        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
-      }
-
-      .c26:disabled {
-        background-color: #dcdce4;
-        border: 1px solid #c0c0cf;
-      }
-
-      .c26:indeterminate {
-        background-color: #4945ff;
-        border: 1px solid #4945ff;
-      }
-
-      .c26:indeterminate:after {
-        content: '';
-        display: block;
-        position: relative;
-        color: white;
-        height: 2px;
-        width: 10px;
-        background-color: #ffffff;
-        left: 50%;
-        top: 50%;
-        -webkit-transform: translateX(-50%) translateY(-50%);
-        -ms-transform: translateX(-50%) translateY(-50%);
-        transform: translateX(-50%) translateY(-50%);
-      }
-
-      .c26:indeterminate:disabled {
-        background-color: #dcdce4;
-        border: 1px solid #c0c0cf;
-      }
-
-      .c26:indeterminate:disabled:after {
-        background-color: #8e8ea9;
-      }
-
       .c35 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -133,105 +65,6 @@ describe('Admin | containers | ListView', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-      }
-
-      .c43 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
-      }
-
-      .c43 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c43 svg > g,
-      .c43 svg path {
-        fill: #ffffff;
-      }
-
-      .c43[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c43:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c43:focus-visible {
-        outline: none;
-      }
-
-      .c43:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c44 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        height: 2rem;
-        width: 2rem;
-        border: none;
-      }
-
-      .c44 svg > g,
-      .c44 svg path {
-        fill: #8e8ea9;
-      }
-
-      .c44:hover svg > g,
-      .c44:hover svg path {
-        fill: #666687;
-      }
-
-      .c44:active svg > g,
-      .c44:active svg path {
-        fill: #a5a5ba;
-      }
-
-      .c44[aria-disabled='true'] {
-        background-color: #eaeaef;
-      }
-
-      .c44[aria-disabled='true'] svg path {
-        fill: #666687;
       }
 
       .c41 {
@@ -257,6 +90,27 @@ describe('Admin | containers | ListView', () => {
         margin-left: 4px;
       }
 
+      .c29 {
+        color: #666687;
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+      }
+
+      .c33 {
+        font-weight: 500;
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c34 {
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
       .c16 {
         background: #ffffff;
         border-radius: 4px;
@@ -276,20 +130,20 @@ describe('Admin | containers | ListView', () => {
         width: 60%;
       }
 
-      .c46 {
+      .c47 {
         background: #eaeaef;
       }
 
-      .c48 {
+      .c49 {
         background: #f0f0ff;
         padding: 20px;
       }
 
-      .c50 {
+      .c51 {
         background: #d9d8ff;
       }
 
-      .c52 {
+      .c53 {
         padding-left: 12px;
       }
 
@@ -389,20 +243,20 @@ describe('Admin | containers | ListView', () => {
         height: 0.25rem;
       }
 
-      .c47 {
+      .c48 {
         height: 1px;
         border: none;
         margin: 0;
       }
 
-      .c53 {
+      .c54 {
         font-weight: 600;
         color: #4945ff;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c51 {
+      .c52 {
         height: 1.5rem;
         width: 1.5rem;
         border-radius: 50%;
@@ -420,41 +274,199 @@ describe('Admin | containers | ListView', () => {
         align-items: center;
       }
 
-      .c51 svg {
+      .c52 svg {
         height: 0.625rem;
         width: 0.625rem;
       }
 
-      .c51 svg path {
+      .c52 svg path {
         fill: #4945ff;
       }
 
-      .c49 {
+      .c50 {
         border-radius: 0 0 4px 4px;
         display: block;
         width: 100%;
         border: none;
       }
 
-      .c29 {
-        color: #666687;
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
+      .c26 {
+        margin: 0;
+        height: 18px;
+        min-width: 18px;
+        border-radius: 4px;
+        border: 1px solid #c0c0cf;
+        -webkit-appearance: none;
+        background-color: #ffffff;
+        cursor: pointer;
       }
 
-      .c33 {
-        font-weight: 500;
-        color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
+      .c26:checked {
+        background-color: #4945ff;
+        border: 1px solid #4945ff;
       }
 
-      .c34 {
-        color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
+      .c26:checked:after {
+        content: '';
+        display: block;
+        position: relative;
+        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSJ3aGl0ZSIKICAvPgo8L3N2Zz4=) no-repeat no-repeat center center;
+        width: 10px;
+        height: 10px;
+        left: 50%;
+        top: 50%;
+        -webkit-transform: translateX(-50%) translateY(-50%);
+        -ms-transform: translateX(-50%) translateY(-50%);
+        transform: translateX(-50%) translateY(-50%);
+      }
+
+      .c26:checked:disabled:after {
+        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
+      }
+
+      .c26:disabled {
+        background-color: #dcdce4;
+        border: 1px solid #c0c0cf;
+      }
+
+      .c26:indeterminate {
+        background-color: #4945ff;
+        border: 1px solid #4945ff;
+      }
+
+      .c26:indeterminate:after {
+        content: '';
+        display: block;
+        position: relative;
+        color: white;
+        height: 2px;
+        width: 10px;
+        background-color: #ffffff;
+        left: 50%;
+        top: 50%;
+        -webkit-transform: translateX(-50%) translateY(-50%);
+        -ms-transform: translateX(-50%) translateY(-50%);
+        transform: translateX(-50%) translateY(-50%);
+      }
+
+      .c26:indeterminate:disabled {
+        background-color: #dcdce4;
+        border: 1px solid #c0c0cf;
+      }
+
+      .c26:indeterminate:disabled:after {
+        background-color: #8e8ea9;
+      }
+
+      .c45 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c43 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
+      }
+
+      .c43 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c43 svg > g,
+      .c43 svg path {
+        fill: #ffffff;
+      }
+
+      .c43[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c43:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c43:focus-visible {
+        outline: none;
+      }
+
+      .c43:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c44 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        height: 2rem;
+        width: 2rem;
+        border: none;
+      }
+
+      .c44 svg > g,
+      .c44 svg path {
+        fill: #8e8ea9;
+      }
+
+      .c44:hover svg > g,
+      .c44:hover svg path {
+        fill: #666687;
+      }
+
+      .c44:active svg > g,
+      .c44:active svg path {
+        fill: #a5a5ba;
+      }
+
+      .c44[aria-disabled='true'] {
+        background-color: #eaeaef;
+      }
+
+      .c44[aria-disabled='true'] svg path {
+        fill: #666687;
       }
 
       .c31 {
@@ -685,7 +697,7 @@ describe('Admin | containers | ListView', () => {
         padding-left: 8px;
       }
 
-      .c45 {
+      .c46 {
         color: #d02b20;
         padding-left: 8px;
       }
@@ -857,12 +869,16 @@ describe('Admin | containers | ListView', () => {
                             <div
                               class="c25"
                             >
-                              <input
-                                aria-label="Select all entries"
-                                class="c26"
-                                tabindex="0"
-                                type="checkbox"
-                              />
+                              <div
+                                class=""
+                              >
+                                <input
+                                  aria-label="Select all entries"
+                                  class="c26"
+                                  tabindex="0"
+                                  type="checkbox"
+                                />
+                              </div>
                               <span
                                 class="c27"
                               />
@@ -959,14 +975,18 @@ describe('Admin | containers | ListView', () => {
                             class="c24"
                             role="button"
                           >
-                            <input
-                              aria-label="Select test"
-                              class="c26"
-                              id="select"
-                              name="select"
-                              tabindex="-1"
-                              type="checkbox"
-                            />
+                            <div
+                              class=""
+                            >
+                              <input
+                                aria-label="Select test"
+                                class="c26"
+                                id="select"
+                                name="select"
+                                tabindex="-1"
+                                type="checkbox"
+                              />
+                            </div>
                           </td>
                           <td
                             aria-colindex="2"
@@ -1048,8 +1068,15 @@ describe('Admin | containers | ListView', () => {
                                   tabindex="-1"
                                   type="button"
                                 >
+                                  <span
+                                    class="c45"
+                                  >
+                                    Update
+                                  </span>
                                   <svg
+                                    aria-hidden="true"
                                     fill="none"
+                                    focusable="false"
                                     height="1em"
                                     viewBox="0 0 24 24"
                                     width="1em"
@@ -1073,8 +1100,15 @@ describe('Admin | containers | ListView', () => {
                                   tabindex="-1"
                                   type="button"
                                 >
+                                  <span
+                                    class="c45"
+                                  >
+                                    Delete
+                                  </span>
                                   <svg
+                                    aria-hidden="true"
                                     fill="none"
+                                    focusable="false"
                                     height="1em"
                                     viewBox="0 0 24 24"
                                     width="1em"
@@ -1101,14 +1135,18 @@ describe('Admin | containers | ListView', () => {
                             class="c24"
                             role="button"
                           >
-                            <input
-                              aria-label="Select test2"
-                              class="c26"
-                              id="select"
-                              name="select"
-                              tabindex="-1"
-                              type="checkbox"
-                            />
+                            <div
+                              class=""
+                            >
+                              <input
+                                aria-label="Select test2"
+                                class="c26"
+                                id="select"
+                                name="select"
+                                tabindex="-1"
+                                type="checkbox"
+                              />
+                            </div>
                           </td>
                           <td
                             aria-colindex="2"
@@ -1164,7 +1202,7 @@ describe('Admin | containers | ListView', () => {
                                   </div>
                                   <span
                                     aria-hidden="true"
-                                    class="c45"
+                                    class="c46"
                                   >
                                     Disabled
                                   </span>
@@ -1190,8 +1228,15 @@ describe('Admin | containers | ListView', () => {
                                   tabindex="-1"
                                   type="button"
                                 >
+                                  <span
+                                    class="c45"
+                                  >
+                                    Update
+                                  </span>
                                   <svg
+                                    aria-hidden="true"
                                     fill="none"
+                                    focusable="false"
                                     height="1em"
                                     viewBox="0 0 24 24"
                                     width="1em"
@@ -1215,8 +1260,15 @@ describe('Admin | containers | ListView', () => {
                                   tabindex="-1"
                                   type="button"
                                 >
+                                  <span
+                                    class="c45"
+                                  >
+                                    Delete
+                                  </span>
                                   <svg
+                                    aria-hidden="true"
                                     fill="none"
+                                    focusable="false"
                                     height="1em"
                                     viewBox="0 0 24 24"
                                     width="1em"
@@ -1238,17 +1290,17 @@ describe('Admin | containers | ListView', () => {
                 </div>
                 <div>
                   <hr
-                    class="c46 c47"
+                    class="c47 c48"
                   />
                   <button
-                    class="c48 c49"
+                    class="c49 c50"
                   >
                     <div
                       class="c25"
                     >
                       <div
                         aria-hidden="true"
-                        class="c50 c51"
+                        class="c51 c52"
                       >
                         <svg
                           fill="none"
@@ -1264,10 +1316,10 @@ describe('Admin | containers | ListView', () => {
                         </svg>
                       </div>
                       <div
-                        class="c52"
+                        class="c53"
                       >
                         <span
-                          class="c53"
+                          class="c54"
                         >
                           Create new webhook
                         </span>

@@ -65,111 +65,18 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c21 {
+      .c19 {
         color: #666687;
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
       }
 
-      .c22 path {
-        fill: #666687;
-      }
-
-      .c24 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
-      }
-
-      .c24 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c24 svg > g,
-      .c24 svg path {
-        fill: #ffffff;
-      }
-
-      .c24[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c24:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c24:focus-visible {
-        outline: none;
-      }
-
-      .c24:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c25 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        height: 2rem;
-        width: 2rem;
-        border: none;
-      }
-
-      .c25 svg > g,
-      .c25 svg path {
-        fill: #8e8ea9;
-      }
-
-      .c25:hover svg > g,
-      .c25:hover svg path {
-        fill: #666687;
-      }
-
-      .c25:active svg > g,
-      .c25:active svg path {
-        fill: #a5a5ba;
-      }
-
-      .c25[aria-disabled='true'] {
-        background-color: #eaeaef;
-      }
-
-      .c25[aria-disabled='true'] svg path {
-        fill: #666687;
+      .c23 {
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       .c6 {
@@ -283,18 +190,115 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         height: 0.25rem;
       }
 
-      .c19 {
-        color: #666687;
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
+      .c26 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
       }
 
-      .c23 {
-        color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
+      .c24 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
+      }
+
+      .c24 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c24 svg > g,
+      .c24 svg path {
+        fill: #ffffff;
+      }
+
+      .c24[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c24:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c24:focus-visible {
+        outline: none;
+      }
+
+      .c24:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c25 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        height: 2rem;
+        width: 2rem;
+        border: none;
+      }
+
+      .c25 svg > g,
+      .c25 svg path {
+        fill: #8e8ea9;
+      }
+
+      .c25:hover svg > g,
+      .c25:hover svg path {
+        fill: #666687;
+      }
+
+      .c25:active svg > g,
+      .c25:active svg path {
+        fill: #a5a5ba;
+      }
+
+      .c25[aria-disabled='true'] {
+        background-color: #eaeaef;
+      }
+
+      .c25[aria-disabled='true'] svg path {
+        fill: #666687;
       }
 
       .c17 {
@@ -307,6 +311,14 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         padding: 0;
         position: absolute;
         width: 1px;
+      }
+
+      .c21 {
+        color: #666687;
+      }
+
+      .c22 path {
+        fill: #666687;
       }
 
       .c0:focus-visible {
@@ -534,8 +546,15 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                             tabindex="-1"
                             type="button"
                           >
+                            <span
+                              class="c26"
+                            >
+                              Edit a template
+                            </span>
                             <svg
+                              aria-hidden="true"
                               fill="none"
+                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -605,8 +624,15 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                             tabindex="-1"
                             type="button"
                           >
+                            <span
+                              class="c26"
+                            >
+                              Edit a template
+                            </span>
                             <svg
+                              aria-hidden="true"
                               fill="none"
+                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
