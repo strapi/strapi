@@ -19,6 +19,12 @@ const StackWrapper = styled(Stack)`
   min-width: 0;
 `;
 
+const ChildrenWrapper = styled(Flex)`
+  width: 100%;
+  /* Used to prevent endAction to be pushed out of container */
+  min-width: 0;
+`;
+
 const RELATION_ITEM_DRAG_TYPE = 'RelationItem';
 
 export const RelationItem = ({
@@ -202,7 +208,7 @@ export const RelationItem = ({
                 <Drag />
               </IconButton>
             ) : null}
-            {children}
+            <ChildrenWrapper justifyContent="space-between">{children}</ChildrenWrapper>
           </StackWrapper>
           {endAction && <Box paddingLeft={4}>{endAction}</Box>}
         </Flex>
