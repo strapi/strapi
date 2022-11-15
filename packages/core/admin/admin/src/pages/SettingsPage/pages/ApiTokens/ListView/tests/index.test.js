@@ -92,7 +92,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c34 {
+      .c35 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -118,14 +118,14 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         text-transform: uppercase;
       }
 
-      .c30 {
+      .c31 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
       }
 
-      .c32 {
+      .c33 {
         color: #32324d;
         display: block;
         white-space: nowrap;
@@ -135,13 +135,13 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         line-height: 1.43;
       }
 
-      .c33 {
+      .c34 {
         color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
       }
 
-      .c38 {
+      .c39 {
         padding-left: 4px;
       }
 
@@ -156,7 +156,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         padding-left: 24px;
       }
 
-      .c31 {
+      .c32 {
         max-width: 15.625rem;
       }
 
@@ -199,7 +199,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         overflow-x: auto;
       }
 
-      .c29 tr:last-of-type {
+      .c30 tr:last-of-type {
         border-bottom: none;
       }
 
@@ -254,6 +254,18 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
 
       .c24 svg {
         height: 0.25rem;
+      }
+
+      .c27 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
       }
 
       .c25 {
@@ -355,7 +367,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         fill: #666687;
       }
 
-      .c28 {
+      .c29 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -367,13 +379,13 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         width: 1px;
       }
 
-      .c37 {
+      .c38 {
         color: #4945ff;
         font-size: 0.875rem;
         line-height: 1.43;
       }
 
-      .c35 {
+      .c36 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -388,15 +400,15 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         outline: none;
       }
 
-      .c35 svg path {
+      .c36 svg path {
         fill: #4945ff;
       }
 
-      .c35 svg {
+      .c36 svg {
         font-size: 0.625rem;
       }
 
-      .c35:after {
+      .c36:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -411,11 +423,11 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         border: 2px solid transparent;
       }
 
-      .c35:focus-visible {
+      .c36:focus-visible {
         outline: none;
       }
 
-      .c35:focus-visible:after {
+      .c36:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -566,7 +578,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         fill: #ffffff;
       }
 
-      .c27 {
+      .c28 {
         -webkit-transform: rotate(180deg);
         -ms-transform: rotate(180deg);
         transform: rotate(180deg);
@@ -634,12 +646,12 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         outline: none;
       }
 
-      .c36 svg path {
+      .c37 svg path {
         fill: #8e8ea9;
       }
 
-      .c36:hover svg path,
-      .c36:focus svg path {
+      .c37:hover svg path,
+      .c37:focus svg path {
         fill: #32324d;
       }
 
@@ -760,9 +772,16 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                                 tabindex="-1"
                                 type="button"
                               >
-                                <svg
+                                <span
                                   class="c27"
+                                >
+                                  Sort on Name
+                                </span>
+                                <svg
+                                  aria-hidden="true"
+                                  class="c28"
                                   fill="none"
+                                  focusable="false"
                                   height="1em"
                                   viewBox="0 0 14 8"
                                   width="1em"
@@ -855,7 +874,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                           class="c22"
                         >
                           <div
-                            class="c28"
+                            class="c29"
                           >
                             Actions
                           </div>
@@ -867,7 +886,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                     </tr>
                   </thead>
                   <tbody
-                    class="c29"
+                    class="c30"
                   >
                     <tr
                       aria-rowindex="2"
@@ -880,18 +899,18 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                         tabindex="-1"
                       >
                         <span
-                          class="c30"
+                          class="c31"
                         >
                           My super token
                         </span>
                       </td>
                       <td
                         aria-colindex="2"
-                        class="c31 c21"
+                        class="c32 c21"
                         tabindex="-1"
                       >
                         <span
-                          class="c32"
+                          class="c33"
                         >
                           This describe my super token
                         </span>
@@ -902,7 +921,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                         tabindex="-1"
                       >
                         <span
-                          class="c33"
+                          class="c34"
                         >
                           <time
                             datetime="2021-11-15T00:00:00.000Z"
@@ -923,16 +942,16 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                         tabindex="-1"
                       >
                         <div
-                          class="c34"
+                          class="c35"
                         >
                           <a
-                            class="c35 c36"
+                            class="c36 c37"
                             href="/settings/api-tokens/1"
                             tabindex="-1"
                             title="Edit My super token"
                           >
                             <span
-                              class="c37"
+                              class="c38"
                             >
                               <svg
                                 fill="none"
@@ -952,7 +971,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                           </a>
                           <div
                             aria-hidden="true"
-                            class="c38"
+                            class="c39"
                             role="button"
                           >
                             <span>
@@ -964,8 +983,15 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                                 tabindex="-1"
                                 type="button"
                               >
+                                <span
+                                  class="c27"
+                                >
+                                  Delete My super token
+                                </span>
                                 <svg
+                                  aria-hidden="true"
                                   fill="none"
+                                  focusable="false"
                                   height="1em"
                                   viewBox="0 0 24 24"
                                   width="1em"
