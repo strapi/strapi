@@ -14,7 +14,7 @@ export const tableHeaders = [
     key: 'name',
     metadatas: {
       label: { id: getTrad('table-header-name'), defaultMessage: 'name' },
-      sortable: false,
+      sortable: true,
     },
   },
   {
@@ -34,11 +34,19 @@ export const tableHeaders = [
     },
   },
   {
-    name: 'date',
-    key: 'date',
+    name: 'createdAt',
+    key: 'createdAt',
     metadatas: {
-      label: { id: getTrad('table-header-date'), defaultMessage: 'date' },
-      sortable: false,
+      label: { id: getTrad('table-header-createdAt'), defaultMessage: 'Created' },
+      sortable: true,
+    },
+  },
+  {
+    name: 'updatedAt',
+    key: 'updatedAt',
+    metadatas: {
+      label: { id: getTrad('table-header-updatedAt'), defaultMessage: 'Last update' },
+      sortable: true,
     },
   },
 ];

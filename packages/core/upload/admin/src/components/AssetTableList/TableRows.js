@@ -17,7 +17,8 @@ export const TableRows = ({ assets, onEditAsset }) => {
   return (
     <Tbody>
       {assets.map((asset) => {
-        const { alternativeText, id, name, ext, size, createdAt, url, mime, formats } = asset;
+        const { alternativeText, id, name, ext, size, createdAt, updatedAt, url, mime, formats } =
+          asset;
 
         return (
           <Tr key={id}>
@@ -42,6 +43,9 @@ export const TableRows = ({ assets, onEditAsset }) => {
             </Td>
             <Td>
               <Typography>{formatDate(new Date(createdAt))}</Typography>
+            </Td>
+            <Td>
+              <Typography>{formatDate(new Date(updatedAt))}</Typography>
             </Td>
             {onEditAsset && (
               <Td>
