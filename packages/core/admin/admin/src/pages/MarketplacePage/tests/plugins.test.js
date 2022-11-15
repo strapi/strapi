@@ -12,6 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { TrackingProvider } from '@strapi/helper-plugin';
 
 import { Router } from 'react-router-dom';
 
@@ -78,13 +79,15 @@ describe('Marketplace page - plugins tab', () => {
     // Make sure each test isolated
     const { container } = render(
       <QueryClientProvider client={client}>
-        <IntlProvider locale="en" messages={{}} textComponent="span">
-          <ThemeProvider theme={lightTheme}>
-            <Router history={history}>
-              <MarketPlacePage />
-            </Router>
-          </ThemeProvider>
-        </IntlProvider>
+        <TrackingProvider>
+          <IntlProvider locale="en" messages={{}} textComponent="span">
+            <ThemeProvider theme={lightTheme}>
+              <Router history={history}>
+                <MarketPlacePage />
+              </Router>
+            </ThemeProvider>
+          </IntlProvider>
+        </TrackingProvider>
       </QueryClientProvider>
     );
 

@@ -219,7 +219,7 @@ const MarketPlacePage = () => {
   };
 
   const handleSelectClear = (filterType) => {
-    setQuery({ [filterType]: [] }, 'remove');
+    setQuery({ [filterType]: [], page: '' }, 'remove');
     setTabQuery((prev) => ({ ...prev, [npmPackageType]: {} }));
   };
 

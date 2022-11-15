@@ -12,6 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { TrackingProvider } from '@strapi/helper-plugin';
 
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
@@ -77,13 +78,15 @@ describe('Marketplace page - providers tab', () => {
     // Make sure each test isolated
     const { container } = render(
       <QueryClientProvider client={client}>
-        <IntlProvider locale="en" messages={{}} textComponent="span">
-          <ThemeProvider theme={lightTheme}>
-            <Router history={history}>
-              <MarketPlacePage />
-            </Router>
-          </ThemeProvider>
-        </IntlProvider>
+        <TrackingProvider>
+          <IntlProvider locale="en" messages={{}} textComponent="span">
+            <ThemeProvider theme={lightTheme}>
+              <Router history={history}>
+                <MarketPlacePage />
+              </Router>
+            </ThemeProvider>
+          </IntlProvider>
+        </TrackingProvider>
       </QueryClientProvider>
     );
 
@@ -126,8 +129,6 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('should return empty providers search results given a bad query', () => {
-    const providersTab = screen.getByRole('tab', { name: /providers/i });
-    userEvent.click(providersTab);
     const input = getByPlaceholderText(renderedContainer, 'Search');
     const badQuery = 'asdf';
     userEvent.type(input, badQuery);
@@ -137,10 +138,6 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('shows the installed text for installed providers', () => {
-    // Open providers tab
-    const providersTab = screen.getByRole('tab', { name: /providers/i });
-    userEvent.click(providersTab);
-
     // Provider that's already installed
     const alreadyInstalledCard = screen
       .getAllByTestId('npm-package-card')
@@ -160,8 +157,6 @@ describe('Marketplace page - providers tab', () => {
     const filtersButton = screen.getByTestId('filters-button');
 
     // Only show collections filters on providers
-    const providersTab = screen.getByRole('tab', { name: /providers/i });
-    userEvent.click(providersTab);
     userEvent.click(filtersButton);
     screen.getByLabelText(/no collections selected/i);
   });
@@ -252,7 +247,7 @@ describe('Marketplace page - providers tab', () => {
     userEvent.click(optionTag);
 
     expect(optionTag).not.toBeVisible();
-    expect(history.location.search).toBe('?npmPackageType=provider&sort=name:asc');
+    expect(history.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=1');
   });
 
   it('only filters in the providers tab', async () => {
@@ -300,9 +295,6 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('shows github stars and weekly downloads count for each provider', () => {
-    const providersTab = screen.getByRole('tab', { name: /providers/i });
-    userEvent.click(providersTab);
-
     const cloudinaryCard = screen
       .getAllByTestId('npm-package-card')
       .find((div) => div.innerHTML.includes('Cloudinary'));
