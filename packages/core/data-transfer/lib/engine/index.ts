@@ -73,21 +73,16 @@ class TransferEngine<
       objectMode: true,
       transform: (data, _encoding, callback) => {
         this.#increaseTransferProgress(transferStage, data, aggregateKey);
-        this.#progressStream.write({
-          type: 'progress',
-          name: transferStage,
-          data: this.transferProgress,
-        });
+        this.#updateStage('progress', transferStage);
         callback(null, data);
       },
     });
   };
 
-  #updateStage = (type: 'start' | 'complete', transferStage: TransferStage) => {
-    this.progressStream.write({
-      type,
+  #updateStage = (type: 'start' | 'complete' | 'progress', transferStage: TransferStage) => {
+    this.progressStream.emit(type, {
       data: this.transferProgress,
-      name: transferStage,
+      stage: transferStage,
     });
   };
 

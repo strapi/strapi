@@ -94,22 +94,18 @@ module.exports = async (filename, opts) => {
   try {
     let resultData = [];
     console.log(`Starting export...`);
-    engine.progressStream.on('data', ({ type, name, data }) => {
-      if (type === 'complete') {
-        // if (data[name]?.count) {
-        //   console.log(`${chalk.green(name)}: ${data[name]?.count} items`);
-        // }
-        console.log(`.${name} complete`);
-        resultData = data;
-      } else if (type === 'start') {
-        process.stdout.write(`Starting transfer of ${name}..`);
-      } else if (type === 'progress') {
-        // updated counts
-        // console.log(`Updated ${type}`, data);
-      } else {
-        console.warn('unknown type/name', type, name);
-      }
+    engine.progressStream.on('complete', ({ stage, data }) => {
+      console.log(`.${stage} complete`);
+      resultData = data;
     });
+
+    engine.progressStream.on('start', ({ stage }) => {
+      process.stdout.write(`Starting transfer of ${stage}..`);
+    });
+
+    // engine.progressStream.on('progress', ({ stage, data }) => {
+    //   console.log('progress');
+    // });
 
     const results = await engine.transfer();
 
