@@ -369,7 +369,10 @@ class TransferEngine<
   }
 }
 
-export const createTransferEngine = <S extends ISourceProvider, D extends IDestinationProvider>(
+export const createTransferEngine = <
+  S extends ISourceProvider = ISourceProvider,
+  D extends IDestinationProvider = IDestinationProvider
+>(
   sourceProvider: S,
   destinationProvider: D,
   options: ITransferEngineOptions
