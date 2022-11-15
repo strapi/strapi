@@ -1,5 +1,4 @@
-import { isEmpty } from 'lodash';
-import { uniq } from 'lodash/fp';
+import { isEmpty, uniq } from 'lodash/fp';
 import type {
   Diff,
   IDestinationProvider,
