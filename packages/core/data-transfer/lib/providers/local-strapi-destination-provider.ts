@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import { pick, mapValues } from 'lodash/fp';
 import { Duplex } from 'stream';
 import type { IDestinationProvider, IMetadata, ProviderType } from '../../types';
+import { mapSchemasValues } from '../utils';
 
 interface ILocalStrapiDestinationProviderOptions {
   getStrapi(): Promise<Strapi.Strapi>;
@@ -48,24 +49,12 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       throw new Error('Not able to get Schemas. Strapi instance not found');
     }
 
-    const selectedKeys = [
-      'collectionName',
-      'info',
-      'options',
-      'pluginOptions',
-      'attributes',
-      'kind',
-      'modelType',
-      'modelName',
-      'uid',
-      'plugin',
-      'globalId',
-    ];
-
-    return mapValues(pick(selectedKeys), {
+    const schemas = {
       ...this.strapi.contentTypes,
       ...this.strapi.components,
-    });
+    };
+
+    return mapSchemasValues(schemas);
   }
 
   getEntitiesStream(): Duplex {

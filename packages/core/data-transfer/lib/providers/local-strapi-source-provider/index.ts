@@ -6,6 +6,7 @@ import { Readable } from 'stream';
 import { createEntitiesStream, createEntitiesTransformStream } from './entities';
 import { createLinksStream } from './links';
 import { createConfigurationStream } from './configuration';
+import { mapSchemasValues } from '../../utils';
 
 export interface ILocalStrapiSourceProviderOptions {
   getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>;
@@ -94,10 +95,12 @@ class LocalStrapiSourceProvider implements ISourceProvider {
       'globalId',
     ];
 
-    return mapValues(pick(selectedKeys), {
+    const schemas = {
       ...this.strapi.contentTypes,
       ...this.strapi.components,
-    });
+    };
+
+    return mapSchemasValues(schemas);
   }
 
   streamSchemas(): NodeJS.ReadableStream {

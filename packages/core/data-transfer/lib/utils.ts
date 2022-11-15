@@ -1,4 +1,4 @@
-import { isArray, isObject, zip, isEqual, uniq } from 'lodash/fp';
+import { isArray, isObject, zip, isEqual, uniq, mapValues, pick } from 'lodash/fp';
 import type { Readable } from 'stream';
 import type { Context, Diff } from '../types';
 
@@ -92,3 +92,19 @@ export const jsonDiffs = (a: unknown, b: unknown, ctx: Context = createContext()
 
   return diffs;
 };
+
+const selectedKeys = [
+  'collectionName',
+  'info',
+  'options',
+  'pluginOptions',
+  'attributes',
+  'kind',
+  'modelType',
+  'modelName',
+  'uid',
+  'plugin',
+  'globalId',
+];
+
+export const mapSchemasValues = (schemas: any) => mapValues(pick(selectedKeys), schemas);

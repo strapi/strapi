@@ -7,7 +7,6 @@ import type {
   ITransferEngineOptions,
 } from '../../types';
 import calculateSchemaDiffs from '../strategies';
-import { jsonDiffs } from '../utils';
 
 class TransferEngine implements ITransferEngine {
   sourceProvider: ISourceProvider;
