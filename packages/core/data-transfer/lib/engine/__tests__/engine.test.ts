@@ -1,4 +1,5 @@
 import { Readable } from 'stream';
+import { Duplex } from 'stream-chain';
 import { createTransferEngine } from '..';
 import { IDestinationProvider, ISourceProvider, ITransferEngineOptions } from '../../../types';
 
@@ -61,9 +62,26 @@ describe('Transfer engine', () => {
   });
 
   describe('bootstrap', () => {
-    test('bootstraps all providers', async () => {
+    test('works for providers without a bootstrap', async () => {
       const engine = createTransferEngine(mockedSource, mockedDestination, defaultOptions);
+
       await engine.transfer();
+      expect(mockedSource.bootstrap).toHaveBeenCalledTimes(1);
+      expect(mockedDestination.bootstrap).toHaveBeenCalledTimes(1);
+    });
+    test('bootstraps all providers with a bootstrap', async () => {
+      const source = {
+        ...mockedSource,
+        bootstrap: jest.fn().mockReturnValue(new Duplex()),
+      };
+      const destination = {
+        ...mockedDestination,
+        bootstrap: jest.fn().mockReturnValue(new Duplex()),
+      };
+      const engine = createTransferEngine(source, destination, defaultOptions);
+
+      await engine.transfer();
+
       expect(mockedSource.bootstrap).toHaveBeenCalledTimes(1);
       expect(mockedDestination.bootstrap).toHaveBeenCalledTimes(1);
     });
