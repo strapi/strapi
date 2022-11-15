@@ -1,7 +1,7 @@
 'use strict';
 
 const bytesPerKb = 1024;
-const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+const sizes = ['B ', 'KB', 'MB', 'GB', 'TB', 'PB'];
 
 const readableBytes = (bytes, decimals = 1, padStart = 0) => {
   if (!bytes) {

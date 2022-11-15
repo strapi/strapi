@@ -116,7 +116,6 @@ module.exports = async (filename, opts) => {
     // Build pretty table
     const table = new Table({
       head: ['Type', 'Count', 'Size'],
-      colWidths: [55, 10, 15],
     });
 
     let totalBytes = 0;
@@ -124,7 +123,11 @@ module.exports = async (filename, opts) => {
     Object.keys(resultData).forEach((key) => {
       const item = resultData[key];
 
-      table.push([chalk.bold(key), item.count, readableBytes(item.bytes, 1, 12)]);
+      table.push([
+        { hAlign: 'left', content: chalk.bold(key) },
+        { hAlign: 'right', content: item.count },
+        { hAlign: 'right', content: `${readableBytes(item.bytes, 1, 11)} ` },
+      ]);
       totalBytes += item.bytes;
       totalItems += item.count;
 
@@ -133,17 +136,17 @@ module.exports = async (filename, opts) => {
           const subitem = item.aggregates[subkey];
 
           table.push([
-            `-- ${chalk.bold(subkey)}`,
-            subitem.count,
-            `(${chalk.grey(readableBytes(subitem.bytes, 1, 11))})`,
+            { hAlign: 'left', content: `-- ${chalk.bold(subkey)}` },
+            { hAlign: 'right', content: subitem.count },
+            { hAlign: 'right', content: `(${chalk.grey(readableBytes(subitem.bytes, 1, 11))})` },
           ]);
         });
       }
     });
     table.push([
-      chalk.bold.green('Total'),
-      chalk.bold.green(totalItems),
-      chalk.bold.green(readableBytes(totalBytes, 1, 12)),
+      { hAlign: 'left', content: chalk.bold.green('Total') },
+      { hAlign: 'right', content: chalk.bold.green(totalItems) },
+      { hAlign: 'right', content: `${chalk.bold.green(readableBytes(totalBytes, 1, 11))} ` },
     ]);
     console.log(table.toString());
 
