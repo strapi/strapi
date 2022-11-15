@@ -5,7 +5,7 @@ import { Writable } from 'stream';
 import { chain } from 'stream-chain';
 import { stringer } from 'stream-json/jsonl/Stringer';
 
-import type { IDestinationProvider, ProviderType, Stream } from '../../types';
+import type { IDestinationProvider, IMetadata, ProviderType, Stream } from '../../types';
 import { createEncryptionCipher } from '../encryption/encrypt';
 
 export interface ILocalFileDestinationProviderOptions {
@@ -38,9 +38,16 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   name: string = 'destination::local-file';
   type: ProviderType = 'destination';
   options: ILocalFileDestinationProviderOptions;
+  #providersMetadata: { source?: IMetadata; destination?: IMetadata } = {};
 
   constructor(options: ILocalFileDestinationProviderOptions) {
     this.options = options;
+  }
+
+  setMetadata(target: ProviderType, metadata: IMetadata): IDestinationProvider {
+    this.#providersMetadata[target] = metadata;
+
+    return this;
   }
 
   #getDataTransformers() {
@@ -88,6 +95,17 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     fs.mkdirSync(path.join(rootDir, 'links'));
     fs.mkdirSync(path.join(rootDir, 'media'));
     fs.mkdirSync(path.join(rootDir, 'configuration'));
+  }
+
+  close(): void | Promise<void> {
+    const metadata = this.#providersMetadata.source;
+
+    if (metadata !== undefined) {
+      const metadataPath = path.join(this.options.file.path, 'metadata.json');
+      const data = JSON.stringify(metadata, null, 2);
+
+      fs.writeFileSync(metadataPath, data);
+    }
   }
 
   rollback(): void | Promise<void> {

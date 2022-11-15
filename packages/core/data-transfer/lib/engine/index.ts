@@ -1,5 +1,6 @@
 import type {
   IDestinationProvider,
+  IMetadata,
   ISourceProvider,
   ITransferEngine,
   ITransferEngineOptions,
@@ -9,6 +10,7 @@ class TransferEngine implements ITransferEngine {
   sourceProvider: ISourceProvider;
   destinationProvider: IDestinationProvider;
   options: ITransferEngineOptions;
+  #metadata: { source?: IMetadata; destination?: IMetadata } = {};
 
   constructor(
     sourceProvider: ISourceProvider,
@@ -20,7 +22,7 @@ class TransferEngine implements ITransferEngine {
     this.options = options;
   }
 
-  private assertStrapiVersionIntegrity(sourceVersion?: string, destinationVersion?: string) {
+  #assertStrapiVersionIntegrity(sourceVersion?: string, destinationVersion?: string) {
     const strategy = this.options.versionMatching;
 
     if (!sourceVersion || !destinationVersion) {
@@ -73,9 +75,21 @@ class TransferEngine implements ITransferEngine {
     ]);
   }
 
-  async integrityCheck(): Promise<boolean> {
+  async #resolveProviderResource() {
     const sourceMetadata = await this.sourceProvider.getMetadata();
     const destinationMetadata = await this.destinationProvider.getMetadata();
+
+    if (sourceMetadata) {
+      this.#metadata.source = sourceMetadata;
+    }
+
+    if (destinationMetadata) {
+      this.#metadata.destination = destinationMetadata;
+    }
+  }
+
+  async integrityCheck(): Promise<boolean> {
+    const { source: sourceMetadata, destination: destinationMetadata } = this.#metadata;
 
     if (!sourceMetadata || !destinationMetadata) {
       return true;
@@ -83,7 +97,7 @@ class TransferEngine implements ITransferEngine {
 
     try {
       // Version check
-      this.assertStrapiVersionIntegrity(
+      this.#assertStrapiVersionIntegrity(
         sourceMetadata?.strapi?.version,
         destinationMetadata?.strapi?.version
       );
@@ -100,8 +114,14 @@ class TransferEngine implements ITransferEngine {
 
   async transfer(): Promise<void> {
     try {
+      // Bootstrap the providers
       await this.boostrap();
 
+      // Resolve providers' resource and store
+      // them in the engine's internal state
+      await this.#resolveProviderResource();
+
+      // Validate the transfer using the information given by the providers
       const isValidTransfer = await this.integrityCheck();
 
       if (!isValidTransfer) {
@@ -110,12 +130,21 @@ class TransferEngine implements ITransferEngine {
         );
       }
 
+      // Update the destination provider's source metadata
+      const { source: sourceMetadata } = this.#metadata;
+
+      if (sourceMetadata) {
+        this.destinationProvider.setMetadata?.('source', sourceMetadata);
+      }
+
+      // Run the transfer stages
       await this.transferSchemas();
       await this.transferEntities();
       await this.transferMedia();
       await this.transferLinks();
       await this.transferConfiguration();
 
+      // Gracefully close the providers
       await this.close();
     } catch (e) {
       console.log('error', e);
