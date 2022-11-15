@@ -41,8 +41,6 @@ class LocalStrapiSourceProvider implements ISourceProvider {
   }
 
   getMetadata(): IMetadata {
-    console.log(strapi.plugin('graphql').config('version'));
-
     const strapiVersion = strapi.config.get('info.strapi');
     const createdAt = new Date().toISOString();
 
