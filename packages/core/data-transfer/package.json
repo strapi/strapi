@@ -38,7 +38,9 @@
   },
   "dependencies": {
     "@strapi/logger": "4.5.0",
+    "@strapi/strapi": "4.5.0",
     "chalk": "4.1.2",
+    "lodash": "4.17.21",
     "prettier": "2.7.1",
     "stream-chain": "2.2.5",
     "stream-json": "1.7.4",
