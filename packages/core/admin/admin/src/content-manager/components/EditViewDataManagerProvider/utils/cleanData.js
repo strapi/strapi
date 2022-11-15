@@ -84,14 +84,28 @@ const cleanData = ({ browserState, serverState }, currentSchema, componentsSchem
            */
           let actualOldValue = oldValue ?? [];
 
+          const valuesWithPositions = value.map((relation, index, allRelations) => {
+            const nextRelation = allRelations[index + 1];
+
+            if (nextRelation) {
+              return { ...relation, position: { before: nextRelation.id } };
+            }
+
+            return { ...relation, position: { end: true } };
+          });
+
           /**
            * Instead of the full relation object, we only want to send its ID
            *  connectedRelations are the items that are in the browserState
            * array but not in the serverState
            */
-          const connectedRelations = value.reduce((acc, relation) => {
-            if (!actualOldValue.find((oldRelation) => oldRelation.id === relation.id)) {
-              return [...acc, { id: relation.id }];
+          const connectedRelations = valuesWithPositions.reduce((acc, relation, currentIndex) => {
+            const indexOfRelationOnServer = actualOldValue.findIndex(
+              (oldRelation) => oldRelation.id === relation.id
+            );
+
+            if (indexOfRelationOnServer === -1 || indexOfRelationOnServer !== currentIndex) {
+              return [...acc, { id: relation.id, position: relation.position }];
             }
 
             return acc;
@@ -102,7 +116,7 @@ const cleanData = ({ browserState, serverState }, currentSchema, componentsSchem
            * are no longer in the browserState
            */
           const disconnectedRelations = actualOldValue.reduce((acc, relation) => {
-            if (!value.find((newRelation) => newRelation.id === relation.id)) {
+            if (!valuesWithPositions.find((newRelation) => newRelation.id === relation.id)) {
               return [...acc, { id: relation.id }];
             }
 
@@ -111,7 +125,12 @@ const cleanData = ({ browserState, serverState }, currentSchema, componentsSchem
 
           cleanedData = {
             disconnect: disconnectedRelations,
-            connect: connectedRelations,
+            /**
+             * Reverse the array because the API sequentially goes through the list
+             * so in an instance where you add two to the end it would fail because index0
+             * would want to attach itself to index1 which doesn't exist yet.
+             */
+            connect: connectedRelations.reverse(),
           };
 
           break;
