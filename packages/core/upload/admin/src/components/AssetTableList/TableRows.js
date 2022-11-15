@@ -2,16 +2,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { getFileExtension } from '@strapi/helper-plugin';
+import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
+import { IconButton } from '@strapi/design-system/IconButton';
 import { Tbody, Td, Tr } from '@strapi/design-system/Table';
 import { Typography } from '@strapi/design-system/Typography';
-import { IconButton } from '@strapi/design-system/IconButton';
 import Pencil from '@strapi/icons/Pencil';
 
 import { PreviewCell } from './PreviewCell';
 import { AssetDefinition } from '../../constants';
 import { formatBytes, getTrad } from '../../utils';
 
-export const TableRows = ({ assets, onEditAsset }) => {
+export const TableRows = ({ assets, onEditAsset, onSelectAsset, selectedAssets }) => {
   const { formatDate, formatMessage } = useIntl();
 
   return (
@@ -20,8 +21,20 @@ export const TableRows = ({ assets, onEditAsset }) => {
         const { alternativeText, id, name, ext, size, createdAt, updatedAt, url, mime, formats } =
           asset;
 
+        const isSelected = !!selectedAssets.find((currentAsset) => currentAsset.id === id);
+
         return (
           <Tr key={id}>
+            <Td>
+              <BaseCheckbox
+                aria-label={formatMessage({
+                  id: 'global.select-all-entries',
+                  defaultMessage: 'Select all entries',
+                })}
+                onValueChange={() => onSelectAsset({ ...asset, type: 'asset' })}
+                checked={isSelected}
+              />
+            </Td>
             <Td>
               <PreviewCell
                 alternativeText={alternativeText}
@@ -68,9 +81,13 @@ export const TableRows = ({ assets, onEditAsset }) => {
 
 TableRows.defaultProps = {
   onEditAsset: null,
+  onSelectAsset: null,
+  selectedAssets: [],
 };
 
 TableRows.propTypes = {
   assets: PropTypes.arrayOf(AssetDefinition).isRequired,
   onEditAsset: PropTypes.func,
+  onSelectAsset: PropTypes.func,
+  selectedAssets: PropTypes.arrayOf(AssetDefinition),
 };
