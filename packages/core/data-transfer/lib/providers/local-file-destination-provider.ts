@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import zip from 'zlib';
-import { Writable } from 'stream';
+import { Writable, Readable } from 'stream';
 import { chain } from 'stream-chain';
 import { stringer } from 'stream-json/jsonl/Stringer';
 
@@ -50,11 +50,14 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return this;
   }
 
-  #getDataTransformers() {
+  #getDataTransformers(options: { jsonl?: boolean } = {}) {
+    const { jsonl = true } = options;
     const transforms = [];
 
-    // Convert to stringified JSON lines
-    transforms.push(stringer());
+    if (jsonl) {
+      // Convert to stringified JSON lines
+      transforms.push(stringer());
+    }
 
     // Compression
     if (this.options.compression.enabled) {
@@ -97,15 +100,8 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     fs.mkdirSync(path.join(rootDir, 'configuration'));
   }
 
-  close(): void {
-    const metadata = this.#providersMetadata.source;
-
-    if (metadata !== undefined) {
-      const metadataPath = path.join(this.options.file.path, 'metadata.json');
-      const data = JSON.stringify(metadata, null, 2);
-
-      fs.writeFileSync(metadataPath, data);
-    }
+  async close(): Promise<void> {
+    await this.#writeMetadata();
   }
 
   rollback(): void {
@@ -114,6 +110,34 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
   getMetadata() {
     return null;
+  }
+
+  async #writeMetadata(): Promise<void> {
+    const metadata = this.#providersMetadata.source;
+
+    if (metadata) {
+      await new Promise((resolve) => {
+        const outStream = this.#getMetadataStream();
+        const data = JSON.stringify(metadata, null, 2);
+
+        Readable.from(data).pipe(outStream).on('close', resolve);
+      });
+    }
+  }
+
+  #getMetadataStream() {
+    const metadataPath = path.join(this.options.file.path, 'metadata.json');
+
+    // Transform streams
+    const transforms: Writable[] = this.#getDataTransformers({ jsonl: false });
+
+    // FS write stream
+    const fileStream = fs.createWriteStream(metadataPath);
+
+    // Full pipeline
+    const streams = transforms.concat(fileStream);
+
+    return chain(streams);
   }
 
   getSchemasStream() {
