@@ -33,3 +33,8 @@ export interface ITransferResults<S extends ISourceProvider, D extends IDestinat
   source?: S['results'];
   destination?: D['results'];
 }
+
+// There aren't currently any universal results provided but there likely will be in the future, so providers that have their own results should extend from these to be safe
+export type IProviderTransferResults = {};
+export type ISourceProviderTransferResults = {};
+export type IDestinationProviderTransferResults = {};
