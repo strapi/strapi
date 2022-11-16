@@ -7,70 +7,123 @@ const { hasDraftAndPublish, isVisibleAttribute } = strapiUtils.contentTypes;
 const { isAnyToMany } = strapiUtils.relations;
 const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
 
+/**
+ * Populate the model for relation
+ * @param {Object} attribute - Attribute containing a relation
+ * @param {String} attribute.relation - type of relation
+ * @param model - Model of the populated entity
+ * @param attributeName
+ * @param {Object} options - Options to apply while populating
+ * @param {Boolean} options.countMany
+ * @param {Boolean} options.countOne
+ * @returns {true|{count: true}}
+ */
+function getRelationPopulate(attribute, model, attributeName, { countMany, countOne }) {
+  const isManyRelation = isAnyToMany(attribute);
+
+  // always populate createdBy, updatedBy, localizations etc.
+  if (!isVisibleAttribute(model, attributeName)) {
+    return true;
+  }
+  if ((isManyRelation && countMany) || (!isManyRelation && countOne)) {
+    return { count: true };
+  }
+
+  return true;
+}
+
+/**
+ * Populate the model for components
+ * @param {Object} attribute - Attribute containing the components
+ * @param {String[]} attribute.components - IDs of components
+ * @param {Object} options - Options to apply while populating
+ * @param {Boolean} options.countMany
+ * @param {Boolean} options.countOne
+ * @param {Number} options.maxLevel
+ * @param {Number} level
+ * @returns {{populate: Object}}
+ */
+function getPopulateForComponents(attribute, options, level) {
+  const populatedComponents = (attribute.components || []).map((componentUID) =>
+    getDeepPopulate(componentUID, options, level + 1)
+  );
+
+  return { populate: populatedComponents.reduce(merge, {}) };
+}
+
+/**
+ * Get the populated value based on the type of the attribute
+ * @param {String} attributeName - Name of the attribute
+ * @param {Object} model - Model of the populated entity
+ * @param {Object} model.attributes
+ * @param {Object} options - Options to apply while populating
+ * @param {Boolean} options.countMany
+ * @param {Boolean} options.countOne
+ * @param {Number} options.maxLevel
+ * @param {Number} level
+ * @returns {Object}
+ */
+function getPopulateByType(attributeName, model, options, level) {
+  const attribute = model.attributes[attributeName];
+
+  switch (attribute.type) {
+    case 'relation':
+      return {
+        [attributeName]: getRelationPopulate(attribute, model, attributeName, options),
+      };
+    case 'component':
+      return {
+        [attributeName]: {
+          populate: getDeepPopulate(attribute.component, options, level + 1),
+        },
+      };
+    case 'media':
+      return {
+        [attributeName]: { populate: 'folder' },
+      };
+    case 'dynamiczone':
+      return {
+        [attributeName]: getPopulateForComponents(attribute, options, level),
+      };
+    default:
+      return {};
+  }
+}
+
+/**
+ * Deeply populate a model based on UID
+ * @param {String} uid - Unique identifier of the model
+ * @param {Object} [options] - Options to apply while populating
+ * @param {Boolean} [options.countMany=false]
+ * @param {Boolean} [options.countOne=false]
+ * @param {Number} [options.maxLevel=Infinity]
+ * @param {Number} [level=1] - Current level of nested call
+ * @returns {Object}
+ */
 const getDeepPopulate = (
   uid,
-  populate,
   { countMany = false, countOne = false, maxLevel = Infinity } = {},
   level = 1
 ) => {
-  if (populate) {
-    return populate;
-  }
-
   if (level > maxLevel) {
     return {};
   }
 
   const model = strapi.getModel(uid);
 
-  return Object.keys(model.attributes).reduce((populateAcc, attributeName) => {
-    const attribute = model.attributes[attributeName];
-
-    if (attribute.type === 'relation') {
-      const isManyRelation = isAnyToMany(attribute);
-      // always populate createdBy, updatedBy, localizations etc.
-      if (!isVisibleAttribute(model, attributeName)) {
-        populateAcc[attributeName] = true;
-      } else if ((isManyRelation && countMany) || (!isManyRelation && countOne)) {
-        populateAcc[attributeName] = { count: true };
-      } else {
-        populateAcc[attributeName] = true;
-      }
-    }
-
-    if (attribute.type === 'component') {
-      populateAcc[attributeName] = {
-        populate: getDeepPopulate(
-          attribute.component,
-          null,
-          { countOne, countMany, maxLevel },
-          level + 1
-        ),
-      };
-    }
-
-    if (attribute.type === 'media') {
-      populateAcc[attributeName] = { populate: 'folder' };
-    }
-
-    if (attribute.type === 'dynamiczone') {
-      populateAcc[attributeName] = {
-        populate: (attribute.components || []).reduce((acc, componentUID) => {
-          return merge(
-            acc,
-            getDeepPopulate(componentUID, null, { countOne, countMany, maxLevel }, level + 1)
-          );
-        }, {}),
-      };
-    }
-
-    return populateAcc;
-  }, {});
+  return Object.keys(model.attributes).reduce(
+    (populateAcc, attributeName) =>
+      merge(
+        populateAcc,
+        getPopulateByType(attributeName, model, { countMany, countOne, maxLevel }, level)
+      ),
+    {}
+  );
 };
 
 /**
  * getDeepPopulateDraftCount works recursively on the attributes of a model
- * creating a populate object to count all the unpublished relations within the model
+ * creating a populated object to count all the unpublished relations within the model
  * These relations can be direct to this content type or contained within components/dynamic zones
  * @param {String} uid of the model
  * @returns {Object} result
