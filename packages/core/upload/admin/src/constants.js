@@ -106,3 +106,8 @@ export const sortOptions = [
   { key: 'sort.updated_at_desc', value: 'updatedAt:DESC' },
   { key: 'sort.updated_at_asc', value: 'updatedAt:ASC' },
 ];
+
+export const viewOptions = {
+  GRID: 0,
+  LIST: 1,
+};

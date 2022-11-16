@@ -3,6 +3,8 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
 import { stringify } from 'qs';
+import { toUpper } from 'lodash';
+
 import {
   LoadingIndicatorPage,
   useFocusWhenNavigate,
@@ -12,6 +14,7 @@ import {
   useQueryParams,
   useTracking,
   CheckPermissions,
+  usePersistentState,
 } from '@strapi/helper-plugin';
 import { Layout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -25,6 +28,8 @@ import { GridItem } from '@strapi/design-system/Grid';
 import { Flex } from '@strapi/design-system/Flex';
 import Pencil from '@strapi/icons/Pencil';
 import Cog from '@strapi/icons/Cog';
+import Layer from '@strapi/icons/Layer';
+
 import { UploadAssetDialog } from '../../../components/UploadAssetDialog/UploadAssetDialog';
 import { EditFolderDialog } from '../../../components/EditFolderDialog';
 import { EditAssetDialog } from '../../../components/EditAssetDialog';
@@ -48,6 +53,8 @@ import { Filters } from './components/Filters';
 import { Header } from './components/Header';
 import { EmptyOrNoPermissions } from './components/EmptyOrNoPermissions';
 import pluginPermissions from '../../../permissions';
+import { viewOptions } from '../../../constants';
+import pluginId from '../../../pluginId';
 
 const BoxWithHeight = styled(Box)`
   height: ${32 / 16}rem;
@@ -59,14 +66,13 @@ const TypographyMaxWidth = styled(Typography)`
   max-width: 100%;
 `;
 
-const ConfigureTheViewButton = styled(Box)`
+const ActionButton = styled(Box)`
   svg {
     path {
       fill: ${({ theme }) => theme.colors.neutral900};
     }
   }
 `;
-
 export const MediaLibrary = () => {
   const { push } = useHistory();
   const {
@@ -83,6 +89,8 @@ export const MediaLibrary = () => {
   const { trackUsage } = useTracking();
   const [{ query }, setQuery] = useQueryParams();
   const isFiltering = Boolean(query._q || query.filters);
+  const [view, setView] = usePersistentState(`${toUpper(pluginId)}_LIBRARY_VIEW`, viewOptions.GRID);
+  const isGridView = view === viewOptions.GRID;
 
   const {
     data: assetsData,
@@ -217,7 +225,25 @@ export const MediaLibrary = () => {
           endActions={
             <>
               <CheckPermissions permissions={pluginPermissions.configureView}>
-                <ConfigureTheViewButton paddingTop={1} paddingBottom={1}>
+                <ActionButton paddingTop={1} paddingBottom={1}>
+                  <IconButton
+                    // TODO add and use the correct icons
+                    icon={isGridView ? <Layer /> : <Cog />}
+                    label={
+                      isGridView
+                        ? formatMessage({
+                            id: 'app.links.FIXME',
+                            defaultMessage: 'List View',
+                          })
+                        : formatMessage({
+                            id: 'app.links.FIXME',
+                            defaultMessage: 'Grid View',
+                          })
+                    }
+                    onClick={() => setView(isGridView ? viewOptions.LIST : viewOptions.GRID)}
+                  />
+                </ActionButton>
+                <ActionButton paddingTop={1} paddingBottom={1}>
                   <IconButton
                     forwardedAs={ReactRouterLink}
                     to={{
@@ -230,7 +256,7 @@ export const MediaLibrary = () => {
                       defaultMessage: 'Configure the view',
                     })}
                   />
-                </ConfigureTheViewButton>
+                </ActionButton>
               </CheckPermissions>
               <SearchURLQuery
                 label={formatMessage({
