@@ -13,7 +13,7 @@ import { Tooltip } from '@strapi/design-system/Tooltip';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import CheckCircle from '@strapi/icons/CheckCircle';
 import { useTracking } from '@strapi/helper-plugin';
-import madeByStrapiIcon from '../../../../assets/images/icon_made-by-strapi.svg';
+import StrapiLogo from '../../../../assets/images/logo-strapi-2022.svg';
 import InstallPluginButton from './InstallPluginButton';
 import PackageStats from './PackageStats';
 
@@ -104,7 +104,7 @@ const NpmPackageCard = ({
                   <Flex>
                     <Box
                       as="img"
-                      src={madeByStrapiIcon}
+                      src={StrapiLogo}
                       alt={madeByStrapiMessage}
                       marginLeft={1}
                       width={6}
