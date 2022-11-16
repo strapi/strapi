@@ -43,7 +43,6 @@ export const TableRows = ({ assets, onEditAsset, onSelectAsset, selectedAssets }
                 alternativeText={alternativeText}
                 fileExtension={getFileExtension(ext)}
                 mime={mime}
-                name={name}
                 thumbnailURL={formats?.thumbnail?.url}
                 url={url}
               />
@@ -70,9 +69,10 @@ export const TableRows = ({ assets, onEditAsset, onSelectAsset, selectedAssets }
                     id: getTrad('control-card.edit'),
                     defaultMessage: 'Edit',
                   })}
-                  icon={<Pencil />}
                   onClick={() => onEditAsset(asset)}
-                />
+                >
+                  <Pencil />
+                </IconButton>
               </Td>
             )}
           </Tr>
