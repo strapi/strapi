@@ -361,7 +361,7 @@ describe('Marketplace page - plugins tab', () => {
     const collectionsButton = screen.getByTestId('Collections-button');
     await user.click(collectionsButton);
 
-    const option = screen.getByRole('option', { name: `Made by Strapi (13)` });
+    const option = screen.getByRole('option', { name: 'Made by Strapi (13)' });
     await user.click(option);
 
     await waitForReload();
@@ -372,7 +372,7 @@ describe('Marketplace page - plugins tab', () => {
     await user.click(optionTag);
 
     expect(optionTag).not.toBeVisible();
-    expect(history.location.search).toBe('');
+    expect(history.location.search).toBe('?page=1');
   });
 
   it('only filters in the plugins tab', async () => {
@@ -418,7 +418,7 @@ describe('Marketplace page - plugins tab', () => {
 
     const newestOption = screen.getByRole('option', { name: 'Newest' });
     await user.click(newestOption);
-    expect(history.location.search).toEqual('?sort=submissionDate:desc');
+    expect(history.location.search).toEqual('?sort=submissionDate:desc&page=1');
   });
 
   it('shows github stars and weekly downloads count for each plugin', () => {

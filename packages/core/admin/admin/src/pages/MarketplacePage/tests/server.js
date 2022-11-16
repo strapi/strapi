@@ -7,8 +7,6 @@ import { responses as providerResponses } from './mocks/providers';
 const handlers = [
   rest.get('https://market-api.strapi.io/plugins', (req, res, ctx) => {
     const { collections = [], categories = [] } = qs.parse(req.url.searchParams.toString());
-    const collection = req.url.searchParams.get('collections[]');
-    const category = req.url.searchParams.get('categories[]');
     const [madeByStrapi, verified] = collections;
     const [customFields, monitoring] = categories;
 
@@ -29,10 +27,10 @@ const handlers = [
         data: [...pluginResponses[customFields].data, ...pluginResponses[monitoring].data],
         meta: pluginResponses.plugins.meta,
       };
-    } else if (collection) {
-      responseData = pluginResponses[collection];
-    } else if (category) {
-      responseData = pluginResponses[category];
+    } else if (collections.length) {
+      responseData = pluginResponses[collections[0]];
+    } else if (categories.length) {
+      responseData = pluginResponses[categories[0]];
     } else {
       responseData = pluginResponses.plugins;
     }
