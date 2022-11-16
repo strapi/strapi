@@ -14,65 +14,65 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # lint:
-  #   name: 'lint (node: ${{ matrix.node }})'
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       node: [14, 16, 18]
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: actions/setup-node@v2
-  #       with:
-  #         node-version: ${{ matrix.node }}
-  #         cache: yarn
-  #     - uses: ./.github/actions/install-modules
-  #     - name: Run lint
-  #       run: yarn run -s lint
-  #
-  # unit_back:
-  #   name: 'unit_back (node: ${{ matrix.node }})'
-  #   needs: [lint]
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     CODECOV_TOKEN: ${{ secrets.codecov }}
-  #   strategy:
-  #     matrix:
-  #       node: [14, 16, 18]
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: actions/setup-node@v2
-  #       with:
-  #         node-version: ${{ matrix.node }}
-  #         cache: yarn
-  #     - uses: ./.github/actions/install-modules
-  #       with:
-  #         globalPackages: codecov
-  #     - name: Run tests
-  #       run: yarn run -s test:unit --coverage && codecov -C -F unit
-  #
-  # unit_front:
-  #   name: 'unit_front (node: ${{ matrix.node }})'
-  #   needs: [lint]
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     CODECOV_TOKEN: ${{ secrets.codecov }}
-  #   strategy:
-  #     matrix:
-  #       node: [14, 16, 18]
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: actions/setup-node@v2
-  #       with:
-  #         node-version: ${{ matrix.node }}
-  #         cache: yarn
-  #     - uses: ./.github/actions/install-modules
-  #       with:
-  #         globalPackages: codecov
-  #     - name: Build
-  #       run: yarn build
-  #     - name: Run test
-  #       run: yarn run -s test:front --coverage && codecov -C -F front
+  lint:
+    name: 'lint (node: ${{ matrix.node }})'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [14, 16, 18]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+      - uses: ./.github/actions/install-modules
+      - name: Run lint
+        run: yarn run -s lint
+
+  unit_back:
+    name: 'unit_back (node: ${{ matrix.node }})'
+    needs: [lint]
+    runs-on: ubuntu-latest
+    env:
+      CODECOV_TOKEN: ${{ secrets.codecov }}
+    strategy:
+      matrix:
+        node: [14, 16, 18]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+      - uses: ./.github/actions/install-modules
+        with:
+          globalPackages: codecov
+      - name: Run tests
+        run: yarn run -s test:unit --coverage && codecov -C -F unit
+
+  unit_front:
+    name: 'unit_front (node: ${{ matrix.node }})'
+    needs: [lint]
+    runs-on: ubuntu-latest
+    env:
+      CODECOV_TOKEN: ${{ secrets.codecov }}
+    strategy:
+      matrix:
+        node: [14, 16, 18]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+      - uses: ./.github/actions/install-modules
+        with:
+          globalPackages: codecov
+      - name: Build
+        run: yarn build
+      - name: Run test
+        run: yarn run -s test:front --coverage && codecov -C -F front
 
   # api_ce_pg:
   #   runs-on: ubuntu-latest
@@ -147,14 +147,14 @@ jobs:
 
   api_ce_mysql_5:
     runs-on: ubuntu-latest
-    # needs: [lint, unit_back, unit_front]
+    needs: [lint, unit_back, unit_front]
     name: '[CE] API Integration (mysql:5 , node: ${{ matrix.node }})'
     strategy:
       matrix:
         node: [14, 16, 18]
     services:
       mysql:
-        image: mysql:5.7
+        image: mysql:5
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
