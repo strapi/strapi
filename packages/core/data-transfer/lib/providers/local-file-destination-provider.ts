@@ -247,5 +247,3 @@ const createFilePathFactory =
       `${prefix}_${String(fileIndex).padStart(5, '0')}.jsonl`
     );
   };
-
-export type ILocalFileDestinationProvider = InstanceType<typeof LocalFileDestinationProvider>;
