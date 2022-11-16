@@ -6,7 +6,7 @@ import { Avatar } from '@strapi/design-system/Avatar';
 import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
 
-const FileWrapper = styled(Flex)`
+const GenericAssetWrapper = styled(Flex)`
   border-radius: 50%;
 
   span {
@@ -15,15 +15,15 @@ const FileWrapper = styled(Flex)`
   }
 `;
 
-export const PreviewCell = ({ alternativeText, fileExtension, mime, name, thumbnailURL, url }) => {
+export const PreviewCell = ({ alternativeText, fileExtension, mime, thumbnailURL, url }) => {
   if (mime.includes('image')) {
     const mediaURL = prefixFileUrlWithBackendUrl(thumbnailURL) ?? prefixFileUrlWithBackendUrl(url);
 
-    return <Avatar src={mediaURL} alt={alternativeText ?? name} preview />;
+    return <Avatar src={mediaURL} alt={alternativeText} preview />;
   }
 
   return (
-    <FileWrapper
+    <GenericAssetWrapper
       background="secondary100"
       height={pxToRem(26)}
       justifyContent="center"
@@ -32,7 +32,7 @@ export const PreviewCell = ({ alternativeText, fileExtension, mime, name, thumbn
       <Typography variant="sigma" textColor="secondary600">
         {fileExtension}
       </Typography>
-    </FileWrapper>
+    </GenericAssetWrapper>
   );
 };
 
@@ -45,7 +45,6 @@ PreviewCell.propTypes = {
   alternativeText: PropTypes.string,
   fileExtension: PropTypes.string.isRequired,
   mime: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
   thumbnailURL: PropTypes.string,
   url: PropTypes.string.isRequired,
 };

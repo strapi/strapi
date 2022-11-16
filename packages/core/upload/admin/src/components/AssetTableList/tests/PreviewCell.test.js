@@ -29,7 +29,7 @@ const ComponentFixture = (props) => {
 const setup = (props) => render(<ComponentFixture {...props} />);
 
 describe('AssetTableList | PreviewCell', () => {
-  describe('PreviewCell should renders an image', () => {
+  describe('rendering images', () => {
     it('should render an image with thumbnail if available', () => {
       const { getByRole } = setup();
 
@@ -62,7 +62,7 @@ describe('AssetTableList | PreviewCell', () => {
     });
   });
 
-  describe('PreviewCell should renders a file', () => {
+  describe('rendering files', () => {
     it('should render an image with thumbnail if available', () => {
       const { getByText } = setup({ mime: 'application/pdf', fileExtension: 'pdf' });
 

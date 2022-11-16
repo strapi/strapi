@@ -116,6 +116,7 @@ export const MediaLibrary = () => {
   const [assetToEdit, setAssetToEdit] = useState(undefined);
   const [folderToEdit, setFolderToEdit] = useState(undefined);
   const [selected, { selectOne, selectAll }] = useSelectionState(['type', 'id'], []);
+  const selectedAssets = selected.filter(({ type }) => type === 'asset');
   const toggleUploadAssetDialog = () => setShowUploadAssetDialog((prev) => !prev);
   const toggleEditFolderDialog = ({ created = false } = {}) => {
     // folders are only displayed on the first page, therefore
@@ -241,6 +242,9 @@ export const MediaLibrary = () => {
               {folderCount > 0 && (
                 <FolderList
                   title={
+                    // Folders title should only appear if:
+                    // user is filtering and there are assets to display, to divide both type of elements
+                    // user is not filtering
                     (((isFiltering && assetCount > 0) || !isFiltering) &&
                       formatMessage(
                         {
@@ -340,8 +344,12 @@ export const MediaLibrary = () => {
                       assets={assets}
                       onEditAsset={setAssetToEdit}
                       onSelectAsset={selectOne}
-                      selectedAssets={selected.filter(({ type }) => type === 'asset')}
+                      selectedAssets={selectedAssets}
                       title={
+                        // Assets title should only appear if:
+                        // - user is not filtering
+                        // - user is filtering and there are folders to display, to separate them
+                        // - user is on page 1 since folders won't appear on any other page than the first one (no need to visually separate them)
                         ((!isFiltering || (isFiltering && folderCount > 0)) &&
                           assetsData?.pagination?.page === 1 &&
                           formatMessage(
@@ -359,7 +367,7 @@ export const MediaLibrary = () => {
                       assets={assets}
                       onEditAsset={setAssetToEdit}
                       onSelectAsset={selectOne}
-                      selectedAssets={selected.filter(({ type }) => type === 'asset')}
+                      selectedAssets={selectedAssets}
                     />
                   )}
 

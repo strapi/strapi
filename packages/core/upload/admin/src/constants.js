@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { getTrad } from './utils';
 
 export const AssetType = {
   Video: 'video',
@@ -95,3 +96,65 @@ export const CrumbMenuDefinition = PropTypes.arrayOf(CrumbDefinition);
 export const BreadcrumbsDefinition = PropTypes.arrayOf(
   PropTypes.oneOfType([CrumbDefinition, CrumbMenuDefinition])
 );
+
+export const tableHeaders = [
+  {
+    name: 'preview',
+    key: 'preview',
+    metadatas: {
+      label: { id: getTrad('list-table-header-preview'), defaultMessage: 'preview' },
+      sortable: false,
+    },
+  },
+  {
+    name: 'name',
+    key: 'name',
+    metadatas: {
+      label: { id: getTrad('list-table-header-name'), defaultMessage: 'name' },
+      sortable: true,
+    },
+  },
+  {
+    name: 'ext',
+    key: 'extension',
+    metadatas: {
+      label: { id: getTrad('list-table-header-ext'), defaultMessage: 'extension' },
+      sortable: false,
+    },
+  },
+  {
+    name: 'size',
+    key: 'size',
+    metadatas: {
+      label: { id: getTrad('list-table-header-size'), defaultMessage: 'size' },
+      sortable: false,
+    },
+  },
+  {
+    name: 'createdAt',
+    key: 'createdAt',
+    metadatas: {
+      label: { id: getTrad('list-table-header-createdAt'), defaultMessage: 'created' },
+      sortable: true,
+    },
+  },
+  {
+    name: 'updatedAt',
+    key: 'updatedAt',
+    metadatas: {
+      label: { id: getTrad('list-table-header-updatedAt'), defaultMessage: 'last update' },
+      sortable: true,
+    },
+  },
+];
+
+export const pageSizes = [10, 20, 50, 100];
+
+export const sortOptions = [
+  { key: 'sort.created_at_desc', value: 'createdAt:DESC' },
+  { key: 'sort.created_at_asc', value: 'createdAt:ASC' },
+  { key: 'sort.name_asc', value: 'name:ASC' },
+  { key: 'sort.name_desc', value: 'name:DESC' },
+  { key: 'sort.updated_at_desc', value: 'updatedAt:DESC' },
+  { key: 'sort.updated_at_asc', value: 'updatedAt:ASC' },
+];

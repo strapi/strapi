@@ -61,6 +61,13 @@ describe('AssetTableList', () => {
   it('should render a visually hidden edit table headers label', () => {
     const { getByRole } = setup();
 
-    expect(getByRole('columnheader', { name: 'Edit' })).toBeInTheDocument();
+    expect(getByRole('columnheader', { name: 'actions' })).toBeInTheDocument();
+  });
+
+  it('should render assets', () => {
+    const { getByText } = setup();
+
+    expect(getByText('michka')).toBeInTheDocument();
+    expect(getByText('JPEG')).toBeInTheDocument();
   });
 });

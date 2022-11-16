@@ -7,20 +7,11 @@ import { Typography } from '@strapi/design-system/Typography';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 
 import { getTrad } from '../../utils';
-import { AssetDefinition } from '../../constants';
-import { tableHeaders } from './utils/tableHeaders';
+import { AssetDefinition, tableHeaders } from '../../constants';
 import { TableRows } from './TableRows';
 
 export const AssetTableList = ({ assets, onEditAsset, onSelectAsset, selectedAssets }) => {
   const { formatMessage } = useIntl();
-
-  const headers = tableHeaders.map((header) => ({
-    ...header,
-    metadatas: {
-      ...header.metadatas,
-      label: formatMessage(header.metadatas.label),
-    },
-  }));
 
   return (
     <Table colCount={tableHeaders.length} rowCount={assets.length}>
@@ -38,11 +29,11 @@ export const AssetTableList = ({ assets, onEditAsset, onSelectAsset, selectedAss
               disabled
             />
           </Th>
-          {headers.map(({ metadatas, key }) => {
+          {tableHeaders.map(({ metadatas, key }) => {
             return (
               <Th key={key}>
                 <Typography textColor="neutral600" variant="sigma">
-                  {metadatas.label}
+                  {formatMessage(metadatas.label)}
                 </Typography>
               </Th>
             );
@@ -50,8 +41,8 @@ export const AssetTableList = ({ assets, onEditAsset, onSelectAsset, selectedAss
           <Th>
             <VisuallyHidden>
               {formatMessage({
-                id: getTrad('control-card.edit'),
-                defaultMessage: 'Edit',
+                id: getTrad('list-table-header-actions'),
+                defaultMessage: 'actions',
               })}
             </VisuallyHidden>
           </Th>
