@@ -34,7 +34,7 @@ export interface ITransferEngine<
   /**
    * Start streaming selected data from the source to the destination
    */
-  transfer(): Promise<void | ITransferResults<S, D>>;
+  transfer(): Promise<ITransferResults<S, D>>;
 
   /**
    * Run the bootstrap lifecycle method of each provider
