@@ -133,6 +133,7 @@ describe('Marketplace page - layout', () => {
 
   it('shows compatibility tooltip message when no version provided', async () => {
     client.clear();
+    const user = userEvent.setup();
     const { getByTestId } = render(App);
     await waitForReload();
 
@@ -144,7 +145,7 @@ describe('Marketplace page - layout', () => {
       name: /copy install command/i,
     });
 
-    userEvent.hover(button);
+    user.hover(button);
     const tooltip = getByTestId(`tooltip-Config Sync`);
 
     await waitFor(() => {
@@ -190,7 +191,7 @@ describe('Marketplace page - layout', () => {
     await waitForReload();
 
     const providersTab = screen.getByRole('tab', { name: /providers/i });
-    userEvent.click(providersTab);
+    fireEvent.click(providersTab);
 
     const nodeMailerCard = screen
       .getAllByTestId('npm-package-card')

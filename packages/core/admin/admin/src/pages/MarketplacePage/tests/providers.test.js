@@ -92,8 +92,9 @@ describe('Marketplace page - providers tab', () => {
 
     await waitForReload();
 
+    const user = userEvent.setup();
     const providersTab = screen.getByRole('tab', { name: /providers/i });
-    userEvent.click(providersTab);
+    await user.click(providersTab);
 
     renderedContainer = container;
   });
@@ -117,8 +118,9 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('should return providers search results matching the query', async () => {
+    const user = userEvent.setup();
     const input = getByPlaceholderText(renderedContainer, 'Search');
-    userEvent.type(input, 'cloudina');
+    await user.type(input, 'cloudina');
     const match = screen.getByText('Cloudinary');
     const notMatch = screen.queryByText('Mailgun');
     const plugin = screen.queryByText('Comments');
@@ -131,7 +133,7 @@ describe('Marketplace page - providers tab', () => {
   it('should return empty providers search results given a bad query', () => {
     const input = getByPlaceholderText(renderedContainer, 'Search');
     const badQuery = 'asdf';
-    userEvent.type(input, badQuery);
+    await user.type(input, badQuery);
     const noResult = screen.getByText(`No result for "${badQuery}"`);
 
     expect(noResult).toBeVisible();
@@ -153,21 +155,23 @@ describe('Marketplace page - providers tab', () => {
     expect(notInstalledText).toBeVisible();
   });
 
-  it('shows providers filters popover', () => {
+  it('shows providers filters popover', async () => {
+    const user = userEvent.setup();
     const filtersButton = screen.getByTestId('filters-button');
 
     // Only show collections filters on providers
-    userEvent.click(filtersButton);
+    await user.click(filtersButton);
     screen.getByLabelText(/no collections selected/i);
   });
 
-  it('shows the collections filter options', () => {
+  it('shows the collections filter options', async () => {
+    const user = userEvent.setup();
     const filtersButton = screen.getByTestId('filters-button');
-    userEvent.click(filtersButton);
+    await user.click(filtersButton);
 
     const collectionsButton = screen.getByTestId('Collections-button');
 
-    userEvent.click(collectionsButton);
+    await user.click(collectionsButton);
 
     const mockedServerCollections = {
       'Made by official partners': 0,
@@ -183,14 +187,15 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('filters a collection option', async () => {
+    const user = userEvent.setup();
     const filtersButton = screen.getByTestId('filters-button');
-    userEvent.click(filtersButton);
+    await user.click(filtersButton);
 
     const collectionsButton = screen.getByTestId('Collections-button');
-    userEvent.click(collectionsButton);
+    await user.click(collectionsButton);
 
     const option = screen.getByRole('option', { name: `Made by Strapi (6)` });
-    userEvent.click(option);
+    await user.click(option);
 
     await waitForReload();
 
@@ -207,15 +212,17 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('filters multiple collection options', async () => {
-    userEvent.click(screen.getByTestId('filters-button'));
-    userEvent.click(screen.getByTestId('Collections-button'));
-    userEvent.click(screen.getByRole('option', { name: `Made by Strapi (6)` }));
+    const user = userEvent.setup();
+
+    await user.click(screen.getByTestId('filters-button'));
+    await user.click(screen.getByTestId('Collections-button'));
+    await user.click(screen.getByRole('option', { name: `Made by Strapi (6)` }));
 
     await waitForReload();
 
-    userEvent.click(screen.getByTestId('filters-button'));
-    userEvent.click(screen.getByRole('button', { name: `1 collection selected Made by Strapi` }));
-    userEvent.click(screen.getByRole('option', { name: `Verified (6)` }));
+    await user.click(screen.getByTestId('filters-button'));
+    await user.click(screen.getByRole('button', { name: `1 collection selected Made by Strapi` }));
+    await user.click(screen.getByRole('option', { name: `Verified (6)` }));
 
     await waitForReload();
 
@@ -230,53 +237,56 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('removes a filter option tag', async () => {
+    const user = userEvent.setup();
     const filtersButton = screen.getByTestId('filters-button');
-    userEvent.click(filtersButton);
+    await user.click(filtersButton);
 
     const collectionsButton = screen.getByTestId('Collections-button');
-    userEvent.click(collectionsButton);
+    await user.click(collectionsButton);
 
     const option = screen.getByRole('option', { name: `Made by Strapi (6)` });
-    userEvent.click(option);
+    await user.click(option);
 
     await waitForReload();
 
     const optionTag = screen.getByRole('button', { name: 'Made by Strapi' });
     expect(optionTag).toBeVisible();
 
-    userEvent.click(optionTag);
+    await user.click(optionTag);
 
     expect(optionTag).not.toBeVisible();
     expect(history.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=1');
   });
 
   it('only filters in the providers tab', async () => {
+    const user = userEvent.setup();
     const filtersButton = screen.getByTestId('filters-button');
-    userEvent.click(filtersButton);
+    await user.click(filtersButton);
 
     const collectionsButton = screen.getByTestId('Collections-button');
-    userEvent.click(collectionsButton);
+    await user.click(collectionsButton);
 
     const option = screen.getByRole('option', { name: `Made by Strapi (6)` });
-    userEvent.click(option);
+    await user.click(option);
 
     await waitForReload();
 
     const collectionCards = screen.getAllByTestId('npm-package-card');
     expect(collectionCards.length).toBe(2);
 
-    userEvent.click(screen.getByRole('tab', { name: /plugins/i }));
+    await user.click(screen.getByRole('tab', { name: /plugins/i }));
 
     const pluginCards = screen.getAllByTestId('npm-package-card');
     expect(pluginCards.length).toBe(5);
 
-    userEvent.click(screen.getByRole('tab', { name: /providers/i }));
+    await user.click(screen.getByRole('tab', { name: /providers/i }));
     expect(collectionCards.length).toBe(2);
   });
 
-  it('shows the correct options on sort select', () => {
+  it('shows the correct options on sort select', async () => {
+    const user = userEvent.setup();
     const sortButton = screen.getByRole('button', { name: /Sort by/i });
-    userEvent.click(sortButton);
+    await user.click(sortButton);
 
     const alphabeticalOption = screen.getByRole('option', { name: 'Alphabetical order' });
     const newestOption = screen.getByRole('option', { name: 'Newest' });
@@ -285,12 +295,13 @@ describe('Marketplace page - providers tab', () => {
     expect(newestOption).toBeVisible();
   });
 
-  it('changes the url on sort option select', () => {
+  it('changes the url on sort option select', async () => {
+    const user = userEvent.setup();
     const sortButton = screen.getByRole('button', { name: /Sort by/i });
-    userEvent.click(sortButton);
+    await user.click(sortButton);
 
     const newestOption = screen.getByRole('option', { name: 'Newest' });
-    userEvent.click(newestOption);
+    await user.click(newestOption);
     expect(history.location.search).toEqual('?npmPackageType=provider&sort=submissionDate:desc');
   });
 

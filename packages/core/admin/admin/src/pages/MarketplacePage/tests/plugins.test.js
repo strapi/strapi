@@ -43,6 +43,8 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
+const user = userEvent.setup();
+
 const client = new QueryClient({
   defaultOptions: {
     queries: {
@@ -115,9 +117,11 @@ describe('Marketplace page - plugins tab', () => {
     expect(providerCardText).toEqual(null);
   });
 
-  it('should return plugin search results matching the query', () => {
+  it('should return plugin search results matching the query', async () => {
     const input = getByPlaceholderText(renderedContainer, 'Search');
-    userEvent.type(input, 'comment');
+
+    await user.type(input, 'comment');
+
     const match = screen.getByText('Comments');
     const notMatch = screen.queryByText('Sentry');
     const provider = screen.queryByText('Cloudinary');
@@ -127,10 +131,13 @@ describe('Marketplace page - plugins tab', () => {
     expect(provider).toEqual(null);
   });
 
-  it('should return empty plugin search results given a bad query', () => {
+  it('should return empty plugin search results given a bad query', async () => {
     const input = getByPlaceholderText(renderedContainer, 'Search');
     const badQuery = 'asdf';
-    userEvent.type(input, badQuery);
+    const user = userEvent.setup();
+
+    await user.type(input, badQuery);
+
     const noResult = screen.getByText(`No result for "${badQuery}"`);
 
     expect(noResult).toBeVisible();
@@ -152,10 +159,11 @@ describe('Marketplace page - plugins tab', () => {
     expect(notInstalledText).toBeVisible();
   });
 
-  it('shows plugins filters popover', () => {
+  it('shows plugins filters popover', async () => {
     const filtersButton = screen.getByTestId('filters-button');
 
-    userEvent.click(filtersButton);
+    await user.click(filtersButton);
+
     const collectionsButton = screen.getByTestId('Collections-button');
     const categoriesButton = screen.getByTestId('Categories-button');
 
@@ -163,13 +171,14 @@ describe('Marketplace page - plugins tab', () => {
     expect(categoriesButton).toBeVisible();
   });
 
-  it('shows the collections filter options', () => {
+  it('shows the collections filter options', async () => {
     const filtersButton = screen.getByTestId('filters-button');
-    userEvent.click(filtersButton);
+
+    await user.click(filtersButton);
 
     const collectionsButton = screen.getByTestId('Collections-button');
 
-    userEvent.click(collectionsButton);
+    await user.click(collectionsButton);
 
     const mockedServerCollections = {
       'Made by official partners': 9,
@@ -184,13 +193,14 @@ describe('Marketplace page - plugins tab', () => {
     });
   });
 
-  it('shows the categories filter options', () => {
+  it('shows the categories filter options', async () => {
     const filtersButton = screen.getByTestId('filters-button');
-    userEvent.click(filtersButton);
+
+    await user.click(filtersButton);
 
     const categoriesButton = screen.getByTestId('Categories-button');
 
-    userEvent.click(categoriesButton);
+    await user.click(categoriesButton);
 
     const mockedServerCategories = {
       'Custom fields': 4,
@@ -206,13 +216,14 @@ describe('Marketplace page - plugins tab', () => {
 
   it('filters a collection option', async () => {
     const filtersButton = screen.getByTestId('filters-button');
-    userEvent.click(filtersButton);
+
+    await user.click(filtersButton);
 
     const collectionsButton = screen.getByTestId('Collections-button');
-    userEvent.click(collectionsButton);
+    await user.click(collectionsButton);
 
     const option = screen.getByRole('option', { name: `Made by Strapi (13)` });
-    userEvent.click(option);
+    await user.click(option);
 
     await waitForReload();
 
@@ -230,13 +241,14 @@ describe('Marketplace page - plugins tab', () => {
 
   it('filters a category option', async () => {
     const filtersButton = screen.getByTestId('filters-button');
-    userEvent.click(filtersButton);
+
+    await user.click(filtersButton);
 
     const categoriesButton = screen.getByTestId('Categories-button');
-    userEvent.click(categoriesButton);
+    await user.click(categoriesButton);
 
     const option = screen.getByRole('option', { name: `Custom fields (4)` });
-    userEvent.click(option);
+    await user.click(option);
 
     await waitForReload();
 
@@ -254,26 +266,26 @@ describe('Marketplace page - plugins tab', () => {
 
   it('filters a category and a collection option', async () => {
     // When a user clicks the filters button
-    userEvent.click(screen.getByTestId('filters-button'));
+    await user.click(screen.getByTestId('filters-button'));
     // They should see a select button for collections with no options selected
     const collectionsButton = screen.getByTestId('Collections-button');
     // When they click the select button
-    userEvent.click(collectionsButton);
+    await user.click(collectionsButton);
     // They should see a Made by Strapi option
     const collectionOption = screen.getByRole('option', { name: `Made by Strapi (13)` });
     // When they click the option
-    userEvent.click(collectionOption);
+    await user.click(collectionOption);
     // The page should reload
     await waitForReload();
     // When they click the filters button again
-    userEvent.click(screen.getByTestId('filters-button'));
+    await user.click(screen.getByTestId('filters-button'));
     // They should see the collections button indicating 1 option selected
-    userEvent.click(screen.getByRole('button', { name: '1 collection selected Made by Strapi' }));
+    await user.click(screen.getByRole('button', { name: '1 collection selected Made by Strapi' }));
     // They should the categories button with no options selected
     const categoriesButton = screen.getByTestId('Categories-button');
-    userEvent.click(categoriesButton);
+    await user.click(categoriesButton);
     const categoryOption = screen.getByRole('option', { name: `Custom fields (4)` });
-    userEvent.click(categoryOption);
+    await user.click(categoryOption);
     // The page should reload
     await waitForReload();
     // When the page reloads they should see a tag for the selected option
@@ -297,15 +309,15 @@ describe('Marketplace page - plugins tab', () => {
   });
 
   it('filters multiple collection options', async () => {
-    userEvent.click(screen.getByTestId('filters-button'));
-    userEvent.click(screen.getByTestId('Collections-button'));
-    userEvent.click(screen.getByRole('option', { name: `Made by Strapi (13)` }));
+    await user.click(screen.getByTestId('filters-button'));
+    await user.click(screen.getByTestId('Collections-button'));
+    await user.click(screen.getByRole('option', { name: `Made by Strapi (13)` }));
 
     await waitForReload();
 
-    userEvent.click(screen.getByTestId('filters-button'));
-    userEvent.click(screen.getByRole('button', { name: `1 collection selected Made by Strapi` }));
-    userEvent.click(screen.getByRole('option', { name: `Verified (29)` }));
+    await user.click(screen.getByTestId('filters-button'));
+    await user.click(screen.getByRole('button', { name: `1 collection selected Made by Strapi` }));
+    await user.click(screen.getByRole('option', { name: `Verified (29)` }));
 
     await waitForReload();
 
@@ -320,15 +332,15 @@ describe('Marketplace page - plugins tab', () => {
   });
 
   it('filters multiple category options', async () => {
-    userEvent.click(screen.getByTestId('filters-button'));
-    userEvent.click(screen.getByTestId('Categories-button'));
-    userEvent.click(screen.getByRole('option', { name: `Custom fields (4)` }));
+    await user.click(screen.getByTestId('filters-button'));
+    await user.click(screen.getByTestId('Categories-button'));
+    await user.click(screen.getByRole('option', { name: `Custom fields (4)` }));
 
     await waitForReload();
 
-    userEvent.click(screen.getByTestId('filters-button'));
-    userEvent.click(screen.getByRole('button', { name: `1 category selected Custom fields` }));
-    userEvent.click(screen.getByRole('option', { name: `Monitoring (1)` }));
+    await user.click(screen.getByTestId('filters-button'));
+    await user.click(screen.getByRole('button', { name: `1 category selected Custom fields` }));
+    await user.click(screen.getByRole('option', { name: `Monitoring (1)` }));
 
     await waitForReload();
 
@@ -344,20 +356,20 @@ describe('Marketplace page - plugins tab', () => {
 
   it('removes a filter option tag', async () => {
     const filtersButton = screen.getByTestId('filters-button');
-    userEvent.click(filtersButton);
+    await user.click(filtersButton);
 
     const collectionsButton = screen.getByTestId('Collections-button');
-    userEvent.click(collectionsButton);
+    await user.click(collectionsButton);
 
     const option = screen.getByRole('option', { name: `Made by Strapi (13)` });
-    userEvent.click(option);
+    await user.click(option);
 
     await waitForReload();
 
     const optionTag = screen.getByRole('button', { name: 'Made by Strapi' });
     expect(optionTag).toBeVisible();
 
-    userEvent.click(optionTag);
+    await user.click(optionTag);
 
     expect(optionTag).not.toBeVisible();
     expect(history.location.search).toBe('');
@@ -365,31 +377,33 @@ describe('Marketplace page - plugins tab', () => {
 
   it('only filters in the plugins tab', async () => {
     const filtersButton = screen.getByTestId('filters-button');
-    userEvent.click(filtersButton);
+
+    await user.click(filtersButton);
 
     const collectionsButton = screen.getByTestId('Collections-button');
-    userEvent.click(collectionsButton);
+    await user.click(collectionsButton);
 
     const option = screen.getByRole('option', { name: `Made by Strapi (13)` });
-    userEvent.click(option);
+    await user.click(option);
 
     await waitForReload();
 
     const collectionCards = screen.getAllByTestId('npm-package-card');
     expect(collectionCards.length).toBe(2);
 
-    userEvent.click(screen.getByRole('tab', { name: /providers/i }));
+    await user.click(screen.getByRole('tab', { name: /providers/i }));
 
     const providerCards = screen.getAllByTestId('npm-package-card');
     expect(providerCards.length).toBe(9);
 
-    userEvent.click(screen.getByRole('tab', { name: /plugins/i }));
+    await user.click(screen.getByRole('tab', { name: /plugins/i }));
     expect(collectionCards.length).toBe(2);
   });
 
-  it('shows the correct options on sort select', () => {
+  it('shows the correct options on sort select', async () => {
     const sortButton = screen.getByRole('button', { name: /Sort by/i });
-    userEvent.click(sortButton);
+
+    await user.click(sortButton);
 
     const alphabeticalOption = screen.getByRole('option', { name: 'Alphabetical order' });
     const newestOption = screen.getByRole('option', { name: 'Newest' });
@@ -398,12 +412,12 @@ describe('Marketplace page - plugins tab', () => {
     expect(newestOption).toBeVisible();
   });
 
-  it('changes the url on sort option select', () => {
+  it('changes the url on sort option select', async () => {
     const sortButton = screen.getByRole('button', { name: /Sort by/i });
-    userEvent.click(sortButton);
+    await user.click(sortButton);
 
     const newestOption = screen.getByRole('option', { name: 'Newest' });
-    userEvent.click(newestOption);
+    await user.click(newestOption);
     expect(history.location.search).toEqual('?sort=submissionDate:desc');
   });
 
