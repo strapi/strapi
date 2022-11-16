@@ -10,7 +10,7 @@ const FileWrapper = styled(Flex)`
   border-radius: 50%;
 
   span {
-    // The smallest fontSize in the DS is not small enough in this case
+    /* The smallest fontSize in the DS is not small enough in this case */
     font-size: ${pxToRem(10)};
   }
 `;
