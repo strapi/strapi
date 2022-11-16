@@ -5,7 +5,11 @@ import { Writable } from 'stream';
 import { chain } from 'stream-chain';
 import { stringer } from 'stream-json/jsonl/Stringer';
 
-import type { IDestinationProvider, ProviderType, TransferStage } from '../../types';
+import type {
+  IDestinationProvider,
+  IDestinationProviderTransferResults,
+  ProviderType,
+} from '../../types';
 import { createEncryptionCipher } from '../encryption/encrypt';
 
 export interface ILocalFileDestinationProviderOptions {
@@ -33,7 +37,8 @@ export interface ILocalFileDestinationProviderOptions {
   };
 }
 
-export interface ILocalFileDestinationProviderTransferResults {
+export interface ILocalFileDestinationProviderTransferResults
+  extends IDestinationProviderTransferResults {
   file?: {
     path?: string;
   };
