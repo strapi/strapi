@@ -95,6 +95,7 @@ describe('Marketplace page - providers tab', () => {
     const user = userEvent.setup();
     const providersTab = screen.getByRole('tab', { name: /providers/i });
     await user.click(providersTab);
+    await waitForReload();
 
     renderedContainer = container;
   });
@@ -303,7 +304,10 @@ describe('Marketplace page - providers tab', () => {
 
     const newestOption = screen.getByRole('option', { name: 'Newest' });
     await user.click(newestOption);
-    expect(history.location.search).toEqual('?npmPackageType=provider&sort=submissionDate:desc');
+
+    expect(history.location.search).toEqual(
+      '?npmPackageType=provider&sort=submissionDate:desc&page=1'
+    );
   });
 
   it('shows github stars and weekly downloads count for each provider', () => {
