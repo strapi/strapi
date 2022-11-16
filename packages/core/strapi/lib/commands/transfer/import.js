@@ -37,7 +37,7 @@ module.exports = async (filename, opts) => {
     getStrapi() {
       return strapi().load();
     },
-    strategy: opts.conflictStrategy || 'restore',
+    strategy: opts.conflictStrategy,
   };
   const destination = createLocalStrapiDestinationProvider(destinationOptions);
 
