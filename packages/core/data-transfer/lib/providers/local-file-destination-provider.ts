@@ -116,7 +116,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     const filePathFactory = createFilePathFactory(this.options.file.path, 'schemas');
 
     // Transform streams
-    const transforms: Writable[] = this.#getDataTransformers('schemas');
+    const transforms: Writable[] = this.#getDataTransformers();
 
     // FS write stream
     const fileStream = createMultiFilesWriteStream(filePathFactory, this.options.file.maxSizeJsonl);
@@ -131,7 +131,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     const filePathFactory = createFilePathFactory(this.options.file.path, 'entities');
 
     // Transform streams
-    const transforms: Writable[] = this.#getDataTransformers('entities');
+    const transforms: Writable[] = this.#getDataTransformers();
 
     // FS write stream
     const fileStream = createMultiFilesWriteStream(filePathFactory, this.options.file.maxSize);
@@ -146,7 +146,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     const filePathFactory = createFilePathFactory(this.options.file.path, 'links');
 
     // Transform streams
-    const transforms: Writable[] = this.#getDataTransformers('links');
+    const transforms: Writable[] = this.#getDataTransformers();
 
     // FS write stream
     const fileStream = createMultiFilesWriteStream(filePathFactory, this.options.file.maxSizeJsonl);
@@ -161,7 +161,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     const filePathFactory = createFilePathFactory(this.options.file.path, 'configuration');
 
     // Transform streams
-    const transforms: Writable[] = this.#getDataTransformers('configuration');
+    const transforms: Writable[] = this.#getDataTransformers();
 
     // FS write stream
     const fileStream = createMultiFilesWriteStream(filePathFactory, this.options.file.maxSize);
