@@ -1,19 +1,22 @@
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
+import qs from 'qs';
 import { responses as pluginResponses } from './mocks/plugins';
 import { responses as providerResponses } from './mocks/providers';
 
 const handlers = [
   rest.get('https://market-api.strapi.io/plugins', (req, res, ctx) => {
-    let responseData;
+    const { collections = [], categories = [] } = qs.parse(req.url.searchParams.toString());
     const collection = req.url.searchParams.get('collections[]');
     const category = req.url.searchParams.get('categories[]');
-    const [madeByStrapi, verified] = req.url.searchParams.getAll('collections[]');
-    const [customFields, monitoring] = req.url.searchParams.getAll('categories[]');
+    const [madeByStrapi, verified] = collections;
+    const [customFields, monitoring] = categories;
 
-    if (category && collection) {
+    let responseData;
+
+    if (categories.length && collections.length) {
       responseData = {
-        data: [...pluginResponses[collection].data, ...pluginResponses[category].data],
+        data: [...pluginResponses[collections[0]].data, ...pluginResponses[categories[0]].data],
         meta: pluginResponses.plugins.meta,
       };
     } else if (madeByStrapi && verified) {
@@ -58,22 +61,23 @@ const handlers = [
   }),
 
   rest.get('https://market-api.strapi.io/providers', (req, res, ctx) => {
+    const { collections = [] } = qs.parse(req.url.searchParams.toString());
+    const [madeByStrapi, verified] = collections;
+
     let responseData;
-    const collection = req.url.searchParams.get('collections[]');
-    const [madeByStrapi, verified] = req.url.searchParams.getAll('collections[]');
 
     if (madeByStrapi && verified) {
       responseData = {
         data: [...providerResponses[madeByStrapi].data, ...providerResponses[verified].data],
         meta: providerResponses.providers.meta,
       };
-    } else if (collection) {
-      responseData = providerResponses[collection];
+    } else if (collections.length) {
+      responseData = providerResponses[collections[0]];
     } else {
       responseData = providerResponses.providers;
     }
 
-    return res(ctx.delay(100), ctx.status(200), ctx.json(responseData));
+    return res(ctx.delay(10), ctx.status(200), ctx.json(responseData));
   }),
 ];
 

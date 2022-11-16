@@ -690,6 +690,19 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   max-width: 100%;
 }
 
+.c4 {
+  background: #f6f6f9;
+  padding-top: 40px;
+  padding-right: 56px;
+  padding-bottom: 40px;
+  padding-left: 56px;
+}
+
+.c16 {
+  padding-right: 56px;
+  padding-left: 56px;
+}
+
 .c0 {
   display: grid;
   grid-template-columns: 1fr;
@@ -697,6 +710,51 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
 
 .c2 {
   overflow-x: hidden;
+}
+
+.c5 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c6 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c7 {
+  color: #32324d;
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+}
+
+.c15 {
+  color: #666687;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 .c3:focus-visible {
@@ -954,22 +1012,20 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
     class="c1 c2"
   >
     <main
-      aria-busy="true"
       aria-labelledby="main-content-title"
       class="c3"
       id="main-content"
       tabindex="-1"
     >
       <div
-        class="c4 c5"
-        data-testid="loader"
+        style="height: 0px;"
       >
         <div
-          aria-live="assertive"
-          role="alert"
+          class="c4"
+          data-strapi-header="true"
         >
           <div
-            class="c6"
+            class="c5"
           >
             <div
               class="c6 c7"
