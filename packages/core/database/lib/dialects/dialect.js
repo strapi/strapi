@@ -7,6 +7,8 @@ class Dialect {
 
   configure() {}
 
+  getInfo() {}
+
   initialize() {}
 
   getSqlType(type) {

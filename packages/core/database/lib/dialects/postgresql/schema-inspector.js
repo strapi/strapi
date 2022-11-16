@@ -75,9 +75,6 @@ const SQL_QUERIES = {
     WHERE rel_kcu.constraint_name=?
     AND rel_kcu.table_schema = ?
 `,
-  VERSION: /* sql */ `
-    SELECT current_setting('server_version');
-`,
 };
 
 const toStrapiType = (column) => {
@@ -280,16 +277,6 @@ class PostgresqlSchemaInspector {
     }
 
     return Object.values(ret);
-  }
-
-  async getDatabaseInformation() {
-    const { rows } = await this.db.connection.raw(SQL_QUERIES.VERSION);
-    const version = rows[0].current_setting;
-
-    return {
-      database: 'Postgres',
-      version: version.split(' ')[0],
-    };
   }
 }
 

@@ -6,7 +6,6 @@ const SQL_QUERIES = {
   INDEX_LIST: 'pragma index_list(??)',
   INDEX_INFO: 'pragma index_info(??)',
   FOREIGN_KEY_LIST: 'pragma foreign_key_list(??)',
-  VERSION: `SELECT sqlite_version()`,
 };
 
 const toStrapiType = (column) => {
@@ -146,16 +145,6 @@ class SqliteSchemaInspector {
     }
 
     return Object.values(ret);
-  }
-
-  async getDatabaseInformation() {
-    const results = await this.db.connection.raw(SQL_QUERIES.VERSION);
-    const version = results[0]['sqlite_version()'];
-
-    return {
-      database: 'SQLite',
-      version,
-    };
   }
 }
 

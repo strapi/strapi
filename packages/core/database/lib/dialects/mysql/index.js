@@ -2,12 +2,15 @@
 
 const { Dialect } = require('../dialect');
 const MysqlSchemaInspector = require('./schema-inspector');
+const MysqlDatabaseInspector = require('./database-inspector');
 
 class MysqlDialect extends Dialect {
   constructor(db) {
     super(db);
 
     this.schemaInspector = new MysqlSchemaInspector(db);
+    this.databaseInspector = new MysqlDatabaseInspector(db);
+    this.info = null;
   }
 
   configure() {
@@ -32,12 +35,17 @@ class MysqlDialect extends Dialect {
     };
   }
 
+  getInfo() {
+    return this.info;
+  }
+
   async initialize() {
     try {
       await this.db.connection.raw(`set session sql_require_primary_key = 0;`);
     } catch (err) {
       // Ignore error due to lack of session permissions
     }
+    this.info = await this.databaseInspector.getInformation();
   }
 
   async startSchemaUpdate() {

@@ -2,6 +2,7 @@
 
 const { map, isEmpty } = require('lodash/fp');
 const semver = require('semver');
+const { MYSQL } = require('../utils/constants');
 const {
   isBidirectional,
   isOneToAny,
@@ -197,8 +198,8 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
   }
 
   // Handle databases that don't support window function ROW_NUMBER
-  const { database, version } = await strapi.db.getDatabaseInformation();
-  if (database === 'MySQL' && semver.lt(version, '8.0.0')) {
+  const { database, version } = strapi.db.getDatabaseInformation();
+  if (database === MYSQL && semver.lt(version, '8.0.0')) {
     await cleanOrderColumnsForOldDatabases({ id, attribute, db, inverseRelIds, transaction: trx });
     return;
   }

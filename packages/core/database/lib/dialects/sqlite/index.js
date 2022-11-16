@@ -5,13 +5,16 @@ const fse = require('fs-extra');
 
 const errors = require('../../errors');
 const { Dialect } = require('../dialect');
-const SqliteSchmeaInspector = require('./schema-inspector');
+const SqliteSchemaInspector = require('./schema-inspector');
+const SqliteDatabaseInspector = require('./database-inspector');
 
 class SqliteDialect extends Dialect {
   constructor(db) {
     super(db);
 
-    this.schemaInspector = new SqliteSchmeaInspector(db);
+    this.schemaInspector = new SqliteSchemaInspector(db);
+    this.databaseInspector = new SqliteDatabaseInspector(db);
+    this.info = null;
   }
 
   configure() {
@@ -24,12 +27,17 @@ class SqliteDialect extends Dialect {
     fse.ensureDirSync(dbDir);
   }
 
+  getInfo() {
+    return this.info;
+  }
+
   useReturning() {
     return true;
   }
 
   async initialize() {
     await this.db.connection.raw('pragma foreign_keys = on');
+    this.info = await this.databaseInspector.getInformation();
   }
 
   canAlterConstraints() {

@@ -37,8 +37,6 @@ class Database {
     this.lifecycles = createLifecyclesProvider(this);
 
     this.entityManager = createEntityManager(this);
-
-    this.databaseInformation = null;
   }
 
   query(uid) {
@@ -60,11 +58,8 @@ class Database {
     return schema ? trx.schema.withSchema(schema) : trx.schema;
   }
 
-  async getDatabaseInformation() {
-    if (!this.databaseInformation) {
-      this.databaseInformation = await this.dialect.schemaInspector.getDatabaseInformation();
-    }
-    return this.databaseInformation;
+  getDatabaseInformation() {
+    return this.dialect.getInfo();
   }
 
   transaction() {
