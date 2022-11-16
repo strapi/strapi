@@ -1,6 +1,6 @@
 'use strict';
 
-const relationsOrderer = require('../relations-sorter');
+const relationsOrderer = require('../relations-orderer');
 
 describe('relations orderer', () => {
   test('connect at the end', () => {

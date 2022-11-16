@@ -33,14 +33,14 @@ const _ = require('lodash/fp');
  * @param {number} [maxOrder=0] - Used to calculate the order of relations placed at the end
  * @return {*}
  */
-const relationsSorter = (initArr, idColumn, orderColumn, maxOrder = 0) => {
-  const arr = _.castArray(initArr || [])
-    .map((r) => ({
-      init: true,
-      id: r[idColumn],
-      order: r[orderColumn],
-    }))
-    .sort((a, b) => a.order - b.order);
+const relationsOrderer = (initArr, idColumn, orderColumn) => {
+  let arr = _.castArray(initArr || []).map((r) => ({
+    init: true,
+    id: r[idColumn],
+    order: r[orderColumn],
+  }));
+
+  const maxOrder = _.maxBy('order', arr).order;
 
   // TODO: Improve performance by using a map
   const findRelation = (id) => {
@@ -49,35 +49,27 @@ const relationsSorter = (initArr, idColumn, orderColumn, maxOrder = 0) => {
   };
 
   const removeRelation = (r) => {
-    const { idx } = findRelation(r.id);
-    if (idx >= 0) {
-      arr.splice(idx, 1);
-    }
+    // Remove relation with id r.id
+    arr = _.reject({ id: r.id }, arr);
   };
 
   const insertRelation = (r) => {
-    let idx;
-
     if (r.position?.before) {
-      const { idx: _idx, relation } = findRelation(r.position.before);
+      const { relation } = findRelation(r.position.before);
       if (relation.init) r.order = relation.order - 0.5;
       else r.order = relation.order;
-      idx = _idx;
     } else if (r.position?.after) {
-      const { idx: _idx, relation } = findRelation(r.position.after);
+      const { relation } = findRelation(r.position.after);
       if (relation.init) r.order = relation.order + 0.5;
       else r.order = relation.order;
-      idx = _idx + 1;
     } else if (r.position?.start) {
       r.order = 0.5;
-      idx = 0;
     } else {
       r.order = maxOrder + 0.5;
-      idx = arr.length;
     }
 
     // Insert the relation in the array
-    arr.splice(idx, 0, r);
+    arr.push(r);
   };
 
   return {
@@ -124,4 +116,4 @@ const relationsSorter = (initArr, idColumn, orderColumn, maxOrder = 0) => {
   };
 };
 
-module.exports = relationsSorter;
+module.exports = relationsOrderer;
