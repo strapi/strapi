@@ -62,7 +62,7 @@ class Database {
 
   async getDatabaseInformation() {
     if (!this.databaseInformation) {
-      this.databaseInformation = this.dialect.schemaInspector.getDatabaseInformation();
+      this.databaseInformation = await this.dialect.schemaInspector.getDatabaseInformation();
     }
     return this.databaseInformation;
   }
