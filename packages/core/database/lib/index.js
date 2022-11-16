@@ -37,6 +37,8 @@ class Database {
     this.lifecycles = createLifecyclesProvider(this);
 
     this.entityManager = createEntityManager(this);
+
+    this.databaseInformation = null;
   }
 
   query(uid) {
@@ -58,6 +60,13 @@ class Database {
     return schema ? trx.schema.withSchema(schema) : trx.schema;
   }
 
+  async getDatabaseInformation() {
+    if (!this.databaseInformation) {
+      this.databaseInformation = this.dialect.schemaInspector.getDatabaseInformation();
+    }
+    return this.databaseInformation;
+  }
+
   transaction() {
     return this.connection.transaction();
   }
@@ -74,12 +83,7 @@ class Database {
 
 // TODO: move into strapi
 Database.transformContentTypes = transformContentTypes;
-Database.init = async (config) => {
-  const instance = new Database(config);
-  instance.databaseInformation = await instance.dialect.schemaInspector.getDatabaseInformation();
-
-  return instance;
-};
+Database.init = async (config) => new Database(config);
 
 module.exports = {
   Database,
