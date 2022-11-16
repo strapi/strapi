@@ -320,19 +320,20 @@ describe('ADMIN | pages | SettingsPage', () => {
       },
     });
     const route = '/settings/application-infos';
+    const user = userEvent.setup();
     history.push(route);
 
     render(App);
 
     expect(screen.getByText(/App infos/)).toBeInTheDocument();
 
-    userEvent.click(screen.getByText('i18n.plugin.name'));
+    await user.click(screen.getByText('i18n.plugin.name'));
 
     await waitFor(() => {
       expect(screen.getByText(/i18n settings/)).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByText('email'));
+    await user.click(screen.getByText('email'));
 
     await waitFor(() => {
       expect(screen.getByText(/email settings/)).toBeInTheDocument();
