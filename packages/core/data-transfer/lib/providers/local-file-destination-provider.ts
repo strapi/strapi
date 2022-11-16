@@ -55,7 +55,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     this.options = options;
   }
 
-  #getDataTransformers(stage: TransferStage) {
+  #getDataTransformers() {
     const transforms = [];
 
     // Convert to stringified JSON lines
