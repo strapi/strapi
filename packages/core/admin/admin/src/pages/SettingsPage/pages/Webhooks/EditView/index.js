@@ -64,9 +64,7 @@ const EditView = () => {
     data: triggerResponse,
     isIdle: isTriggerIdle,
     mutate,
-  } = useMutation(() => {
-    return axiosInstance.post(`/admin/webhooks/${id}/trigger`);
-  });
+  } = useMutation(() => axiosInstance.post(`/admin/webhooks/${id}/trigger`));
 
   const triggerWebhook = () =>
     mutate(null, {
