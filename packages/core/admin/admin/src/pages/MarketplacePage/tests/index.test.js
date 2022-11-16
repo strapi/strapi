@@ -186,12 +186,14 @@ describe('Marketplace page - layout', () => {
 
   it('shows only downloads count and not github stars if there are no or 0 stars and no downloads available for any package', async () => {
     client.clear();
+    const user = userEvent.setup();
     render(App);
 
     await waitForReload();
 
     const providersTab = screen.getByRole('tab', { name: /providers/i });
-    fireEvent.click(providersTab);
+    await user.click(providersTab);
+    await waitForReload();
 
     const nodeMailerCard = screen
       .getAllByTestId('npm-package-card')
