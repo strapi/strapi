@@ -10,18 +10,16 @@ const FileWrapper = styled(Flex)`
   border-radius: 50%;
 
   span {
-    line-height: 0.6rem;
-    font-size: 0.6rem;
+    // The smallest fontSize in the DS is not small enough in this case
+    font-size: ${pxToRem(10)};
   }
 `;
 
 export const PreviewCell = ({ alternativeText, fileExtension, mime, name, thumbnailURL, url }) => {
-  const fileURL = prefixFileUrlWithBackendUrl(url);
-
   if (mime.includes('image')) {
-    const mediaURL = prefixFileUrlWithBackendUrl(thumbnailURL) ?? fileURL;
+    const mediaURL = prefixFileUrlWithBackendUrl(thumbnailURL) ?? prefixFileUrlWithBackendUrl(url);
 
-    return <Avatar src={mediaURL} alt={alternativeText || name} preview />;
+    return <Avatar src={mediaURL} alt={alternativeText ?? name} preview />;
   }
 
   return (

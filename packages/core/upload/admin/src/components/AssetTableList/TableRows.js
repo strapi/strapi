@@ -27,10 +27,13 @@ export const TableRows = ({ assets, onEditAsset, onSelectAsset, selectedAssets }
           <Tr key={id}>
             <Td>
               <BaseCheckbox
-                aria-label={formatMessage({
-                  id: 'global.select-all-entries',
-                  defaultMessage: 'Select all entries',
-                })}
+                aria-label={formatMessage(
+                  {
+                    id: 'list-assets-select',
+                    defaultMessage: 'Select {name} asset',
+                  },
+                  { name }
+                )}
                 onValueChange={() => onSelectAsset({ ...asset, type: 'asset' })}
                 checked={isSelected}
               />

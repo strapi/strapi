@@ -33,11 +33,14 @@ export const AssetTableList = ({ assets, onEditAsset, onSelectAsset, selectedAss
                 id: getTrad('bulk.select.label'),
                 defaultMessage: 'Select all folders & assets',
               })}
+              onValueChange={() => {}}
+              // TODO: remove disabled once this checkbox will replace the current one used to bulk select
+              disabled
             />
           </Th>
-          {headers.map(({ metadatas }) => {
+          {headers.map(({ metadatas, key }) => {
             return (
-              <Th>
+              <Th key={key}>
                 <Typography textColor="neutral600" variant="sigma">
                   {metadatas.label}
                 </Typography>
