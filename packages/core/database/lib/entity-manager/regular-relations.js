@@ -226,8 +226,7 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
   // https://github.com/knex/knex/issues/2504
   switch (strapi.db.dialect.client) {
     case 'mysql':
-      await db
-        .getConnection()
+      await db.connection
         .raw(
           `UPDATE
             ?? as a,
@@ -242,9 +241,14 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
         )
         .transacting(trx);
       break;
-    default:
-      await db
-        .getConnection()
+    default: {
+      const schemaName = db.connection.getSchemaName();
+      let joinTableName = joinTable.name;
+      if (schemaName) {
+        joinTableName = `${schemaName}.${joinTableName}`;
+      }
+
+      await db.connection
         .raw(
           `UPDATE ?? as a
               SET ${update.join(', ')}
@@ -254,9 +258,10 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
                 WHERE ${where.join(' OR ')}
               ) AS b
               WHERE b.id = a.id`,
-          [joinTable.name, ...updateBinding, ...selectBinding, joinTable.name, ...whereBinding]
+          [joinTableName, ...updateBinding, ...selectBinding, joinTableName, ...whereBinding]
         )
         .transacting(trx);
+    }
     /*
       `UPDATE :joinTable: as a
         SET :orderColumn: = b.src_order, :inverseOrderColumn: = b.inv_order
