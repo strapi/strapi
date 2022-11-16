@@ -18,10 +18,10 @@ export const tableHeaders = [
     },
   },
   {
-    name: 'extension',
+    name: 'ext',
     key: 'extension',
     metadatas: {
-      label: { id: getTrad('table-header-extension'), defaultMessage: 'extension' },
+      label: { id: getTrad('table-header-ext'), defaultMessage: 'extension' },
       sortable: false,
     },
   },
@@ -37,7 +37,7 @@ export const tableHeaders = [
     name: 'createdAt',
     key: 'createdAt',
     metadatas: {
-      label: { id: getTrad('table-header-createdAt'), defaultMessage: 'Created' },
+      label: { id: getTrad('table-header-createdAt'), defaultMessage: 'created' },
       sortable: true,
     },
   },
@@ -45,7 +45,7 @@ export const tableHeaders = [
     name: 'updatedAt',
     key: 'updatedAt',
     metadatas: {
-      label: { id: getTrad('table-header-updatedAt'), defaultMessage: 'Last update' },
+      label: { id: getTrad('table-header-updatedAt'), defaultMessage: 'last update' },
       sortable: true,
     },
   },

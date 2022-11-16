@@ -74,7 +74,7 @@ export const MediaLibrary = () => {
   const isFiltering = Boolean(query._q || query.filters);
 
   // TODO: remove and replace with data when available stored
-  const isGridView = false;
+  const isGridView = true;
 
   const {
     data: assetsData,
