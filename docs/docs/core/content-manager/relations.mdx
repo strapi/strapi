@@ -101,7 +101,7 @@ loosing the relations we had already loaded in the component. If the first part 
 
 However, if the first part of the path is either a repeatable component, a dynamic zone or a regular component then we
 recursively find the relation fields and replace the object with an array. This is handled by the `findLeafByPathAndReplace`
-utility function. This function in short, takes and end path (in this case the relational field) and a primitive to replace
+utility function. This function in short, takes an end path (in this case the relational field) and a primitive to replace
 when it finds the endpath (an empty array in this case). It then recursively reduces the paths to the relational field mapping
 through arrays if necessary (in the instance of repetable components for example) replacing the endpath with the primitive.
 
