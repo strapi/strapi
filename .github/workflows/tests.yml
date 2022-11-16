@@ -154,7 +154,7 @@ jobs:
         node: [14, 16, 18]
     services:
       mysql:
-        image: mysql:5.7.8
+        image: mysql:5.7
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
