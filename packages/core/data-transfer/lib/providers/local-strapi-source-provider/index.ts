@@ -63,7 +63,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
       throw new Error('Not able to stream links. Strapi instance not found');
     }
 
-    return chain([createLinksStream(this.strapi)]);
+    return createLinksStream(this.strapi);
   }
 
   streamConfiguration(): NodeJS.ReadableStream {
@@ -71,7 +71,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
       throw new Error('Not able to stream configuration. Strapi instance not found');
     }
 
-    return chain([createConfigurationStream(strapi)]);
+    return createConfigurationStream(strapi);
   }
 
   getSchemas() {
