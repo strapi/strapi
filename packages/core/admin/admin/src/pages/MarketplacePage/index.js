@@ -218,7 +218,7 @@ const MarketPlacePage = () => {
   };
 
   const handleSelectChange = (update) => {
-    setQuery(update);
+    setQuery({ ...update, page: 1 });
     setTabQuery((prev) => ({
       ...prev,
       [npmPackageType]: { ...prev[npmPackageType], ...update },
@@ -226,7 +226,7 @@ const MarketPlacePage = () => {
   };
 
   const handleSelectClear = (filterType) => {
-    setQuery({ [filterType]: [], page: '' }, 'remove');
+    setQuery({ [filterType]: [], page: null }, 'remove');
     setTabQuery((prev) => ({ ...prev, [npmPackageType]: {} }));
   };
 
