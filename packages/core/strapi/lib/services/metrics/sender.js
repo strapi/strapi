@@ -3,6 +3,7 @@
 const os = require('os');
 const path = require('path');
 const _ = require('lodash');
+const { map, get, values, isEqual, sumBy, sum } = require('lodash/fp');
 const isDocker = require('is-docker');
 const fetch = require('node-fetch');
 const ciEnv = require('ci-info');
@@ -42,6 +43,14 @@ module.exports = (strapi) => {
   const serverRootPath = strapi.dirs.app.root;
   const adminRootPath = path.join(strapi.dirs.app.root, 'src', 'admin');
 
+  const getNumberOfDynamicZones = () =>
+    sum(
+      map(
+        (ct) => sumBy(isEqual('dynamiczone'), map(get('type'), values(get('attributes', ct)))),
+        strapi.contentTypes
+      )
+    );
+
   const anonymousMetadata = {
     environment: strapi.config.environment,
     os: os.type(),
@@ -56,6 +65,9 @@ module.exports = (strapi) => {
     useTypescriptOnServer: isUsingTypeScriptSync(serverRootPath),
     useTypescriptOnAdmin: isUsingTypeScriptSync(adminRootPath),
     isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
+    numberOfContentTypes: _.size(strapi.contentTypes),
+    numberOfComponents: _.size(strapi.components),
+    numberOfDynamicZones: getNumberOfDynamicZones(),
   };
 
   addPackageJsonStrapiMetadata(anonymousMetadata, strapi);

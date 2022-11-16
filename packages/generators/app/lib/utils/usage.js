@@ -2,6 +2,7 @@
 
 const os = require('os');
 const _ = require('lodash');
+const { map, get, values, isEqual, sumBy, sum } = require('lodash/fp');
 const fetch = require('node-fetch');
 const sentry = require('@sentry/node');
 
@@ -53,6 +54,14 @@ function captureStderr(name, error) {
   return captureError(name);
 }
 
+const getNumberOfDynamicZones = () =>
+  sum(
+    map(
+      (ct) => sumBy(isEqual('dynamiczone'), map(get('type'), values(get('attributes', ct)))),
+      strapi.contentTypes
+    )
+  );
+
 const getProperties = (scope, error) => ({
   error: typeof error === 'string' ? error : error && error.message,
   os: os.type(),
@@ -67,6 +76,9 @@ const getProperties = (scope, error) => ({
   useTypescriptOnAdmin: scope.useTypescript,
   isHostedOnStrapiCloud: process.env.STRAPI_HOSTING === 'strapi.cloud',
   noRun: (scope.runQuickstartApp !== true).toString(),
+  numberOfContentTypes: _.size(strapi.contentTypes),
+  numberOfComponents: _.size(strapi.components),
+  numberOfDynamicZones: getNumberOfDynamicZones(),
 });
 
 function trackEvent(event, body) {
