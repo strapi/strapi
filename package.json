@@ -75,7 +75,7 @@
     "chokidar": "3.5.3",
     "cross-env": "7.0.3",
     "dotenv": "14.2.0",
-    "eslint": "8.21.0",
+    "eslint": "8.27.0",
     "execa": "1.0.0",
     "fs-extra": "10.1.0",
     "get-port": "5.1.1",

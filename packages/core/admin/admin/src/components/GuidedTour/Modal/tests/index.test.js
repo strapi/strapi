@@ -52,12 +52,12 @@ describe('<GuidedTourModal />', () => {
         padding: 40px;
       }
 
-      .c12 {
+      .c13 {
         margin-right: 40px;
         min-width: 1.875rem;
       }
 
-      .c17 {
+      .c18 {
         background: #4945ff;
         padding: 8px;
         border-radius: 50%;
@@ -101,7 +101,7 @@ describe('<GuidedTourModal />', () => {
         justify-content: flex-end;
       }
 
-      .c11 {
+      .c12 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
         -ms-flex-align: stretch;
@@ -115,7 +115,7 @@ describe('<GuidedTourModal />', () => {
         flex-direction: row;
       }
 
-      .c15 {
+      .c16 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -129,7 +129,7 @@ describe('<GuidedTourModal />', () => {
         flex-direction: row;
       }
 
-      .c20 {
+      .c21 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -155,7 +155,7 @@ describe('<GuidedTourModal />', () => {
         width: 41.25rem;
       }
 
-      .c21 {
+      .c22 {
         padding-bottom: 24px;
       }
 
@@ -182,16 +182,16 @@ describe('<GuidedTourModal />', () => {
         margin-top: 40px;
       }
 
-      .c22 > * {
+      .c23 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c22 > * + * {
+      .c23 > * + * {
         margin-top: 16px;
       }
 
-      .c14 {
+      .c15 {
         color: #4945ff;
         font-weight: 600;
         font-size: 0.6875rem;
@@ -199,14 +199,14 @@ describe('<GuidedTourModal />', () => {
         text-transform: uppercase;
       }
 
-      .c18 {
+      .c19 {
         font-weight: 500;
         color: #ffffff;
         font-size: 0.875rem;
         line-height: 1.43;
       }
 
-      .c19 {
+      .c20 {
         font-weight: 600;
         color: #32324d;
         font-weight: 600;
@@ -214,24 +214,24 @@ describe('<GuidedTourModal />', () => {
         line-height: 1.25;
       }
 
-      .c23 {
+      .c24 {
         color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
       }
 
-      .c27 {
+      .c28 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c29 {
+      .c30 {
         padding-left: 8px;
       }
 
-      .c24 {
+      .c25 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -245,21 +245,21 @@ describe('<GuidedTourModal />', () => {
         outline: none;
       }
 
-      .c24 svg {
+      .c25 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c24 svg > g,
-      .c24 svg path {
+      .c25 svg > g,
+      .c25 svg path {
         fill: #ffffff;
       }
 
-      .c24[aria-disabled='true'] {
+      .c25[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c24:after {
+      .c25:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -274,11 +274,11 @@ describe('<GuidedTourModal />', () => {
         border: 2px solid transparent;
       }
 
-      .c24:focus-visible {
+      .c25:focus-visible {
         outline: none;
       }
 
-      .c24:focus-visible:after {
+      .c25:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -289,7 +289,7 @@ describe('<GuidedTourModal />', () => {
         border: 2px solid #4945ff;
       }
 
-      .c25 {
+      .c26 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -299,7 +299,7 @@ describe('<GuidedTourModal />', () => {
         border: 1px solid #4945ff;
       }
 
-      .c25 .c28 {
+      .c26 .c29 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -310,54 +310,54 @@ describe('<GuidedTourModal />', () => {
         align-items: center;
       }
 
-      .c25 .c26 {
+      .c26 .c27 {
         color: #ffffff;
       }
 
-      .c25[aria-disabled='true'] {
+      .c26[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c25[aria-disabled='true'] .c26 {
+      .c26[aria-disabled='true'] .c27 {
         color: #666687;
       }
 
-      .c25[aria-disabled='true'] svg > g,
-      .c25[aria-disabled='true'] svg path {
+      .c26[aria-disabled='true'] svg > g,
+      .c26[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c25[aria-disabled='true']:active {
+      .c26[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c25[aria-disabled='true']:active .c26 {
+      .c26[aria-disabled='true']:active .c27 {
         color: #666687;
       }
 
-      .c25[aria-disabled='true']:active svg > g,
-      .c25[aria-disabled='true']:active svg path {
+      .c26[aria-disabled='true']:active svg > g,
+      .c26[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c25:hover {
+      .c26:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c25:active {
+      .c26:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
-      .c25 svg > g,
-      .c25 svg path {
+      .c26 svg > g,
+      .c26 svg path {
         fill: #ffffff;
       }
 
-      .c30 {
+      .c31 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -369,7 +369,7 @@ describe('<GuidedTourModal />', () => {
         background: #ffffff;
       }
 
-      .c30 .c28 {
+      .c31 .c29 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -380,62 +380,62 @@ describe('<GuidedTourModal />', () => {
         align-items: center;
       }
 
-      .c30 .c26 {
+      .c31 .c27 {
         color: #ffffff;
       }
 
-      .c30[aria-disabled='true'] {
+      .c31[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c30[aria-disabled='true'] .c26 {
+      .c31[aria-disabled='true'] .c27 {
         color: #666687;
       }
 
-      .c30[aria-disabled='true'] svg > g,
-      .c30[aria-disabled='true'] svg path {
+      .c31[aria-disabled='true'] svg > g,
+      .c31[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c30[aria-disabled='true']:active {
+      .c31[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c30[aria-disabled='true']:active .c26 {
+      .c31[aria-disabled='true']:active .c27 {
         color: #666687;
       }
 
-      .c30[aria-disabled='true']:active svg > g,
-      .c30[aria-disabled='true']:active svg path {
+      .c31[aria-disabled='true']:active svg > g,
+      .c31[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c30:hover {
+      .c31:hover {
         background-color: #f6f6f9;
       }
 
-      .c30:active {
+      .c31:active {
         background-color: #eaeaef;
       }
 
-      .c30 .c26 {
+      .c31 .c27 {
         color: #32324d;
       }
 
-      .c30 svg > g,
-      .c30 svg path {
+      .c31 svg > g,
+      .c31 svg path {
         fill: #32324d;
       }
 
-      .c10 {
+      .c11 {
         padding-right: 32px;
         padding-bottom: 0px;
         padding-left: 32px;
       }
 
-      .c13 {
+      .c14 {
         background: #7b79ff;
         border-radius: 4px;
         width: 0.125rem;
@@ -443,9 +443,21 @@ describe('<GuidedTourModal />', () => {
         min-height: 1.5rem;
       }
 
-      .c16 {
+      .c17 {
         padding-top: 12px;
         padding-bottom: 12px;
+      }
+
+      .c10 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
       }
 
       .c8 {
@@ -609,12 +621,18 @@ describe('<GuidedTourModal />', () => {
                 >
                   <button
                     aria-disabled="false"
-                    aria-label="Close"
                     class="c8 c9"
                     type="button"
                   >
+                    <span
+                      class="c10"
+                    >
+                      Close
+                    </span>
                     <svg
+                      aria-hidden="true"
                       fill="none"
+                      focusable="false"
                       height="1em"
                       viewBox="0 0 24 24"
                       width="1em"
@@ -628,42 +646,42 @@ describe('<GuidedTourModal />', () => {
                   </button>
                 </div>
                 <div
-                  class="c10"
+                  class="c11"
                 >
                   <div
-                    class="c11"
+                    class="c12"
                   >
                     <div
-                      class="c12 c2"
+                      class="c13 c2"
                     >
                       <div
-                        class="c13"
+                        class="c14"
                         height="100%"
                         width="0.125rem"
                       />
                     </div>
                     <span
-                      class="c14"
+                      class="c15"
                     >
                       3 steps to get started
                     </span>
                   </div>
                   <div
-                    class="c15"
+                    class="c16"
                   >
                     <div
-                      class="c12 c15"
+                      class="c13 c16"
                     >
                       <div
-                        class="c16"
+                        class="c17"
                       >
                         <div
-                          class="c17 c2"
+                          class="c18 c2"
                           height="1.875rem"
                           width="1.875rem"
                         >
                           <span
-                            class="c18"
+                            class="c19"
                           >
                             3
                           </span>
@@ -671,50 +689,50 @@ describe('<GuidedTourModal />', () => {
                       </div>
                     </div>
                     <h3
-                      class="c19"
+                      class="c20"
                       id="title"
                     >
                       🧠 Create a first Collection type
                     </h3>
                   </div>
                   <div
-                    class="c11"
+                    class="c12"
                   >
                     <div
-                      class="c12 c20"
+                      class="c13 c21"
                     />
                     <div
                       class=""
                     >
                       <div
-                        class="c21 c5 c22"
+                        class="c22 c5 c23"
                         spacing="4"
                       >
                         <span
-                          class="c23"
+                          class="c24"
                         >
                           Collection types help you manage several entries, Single types are suitable to manage only one entry.
                         </span>
                          
                         <span
-                          class="c23"
+                          class="c24"
                         >
                           Ex: For a Blog website, Articles would be a Collection type whereas a Homepage would be a Single type.
                         </span>
                       </div>
                       <button
                         aria-disabled="false"
-                        class="c24 c25"
+                        class="c25 c26"
                         type="button"
                       >
                         <span
-                          class="c26 c27"
+                          class="c27 c28"
                         >
                           Build a Collection type
                         </span>
                         <div
                           aria-hidden="true"
-                          class="c28 c29"
+                          class="c29 c30"
                         >
                           <svg
                             fill="none"
@@ -738,11 +756,11 @@ describe('<GuidedTourModal />', () => {
                 >
                   <button
                     aria-disabled="false"
-                    class="c24 c30"
+                    class="c25 c31"
                     type="button"
                   >
                     <span
-                      class="c26 c27"
+                      class="c27 c28"
                     >
                       Skip the tour
                     </span>
