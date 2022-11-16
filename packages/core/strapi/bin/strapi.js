@@ -289,7 +289,12 @@ program
       .default(true)
       .argParser(parseInputBool)
   )
-  .addOption(new Option('--key', 'Provide encryption key in command instead of using a prompt'))
+  .addOption(
+    new Option(
+      '--key [encryption key]',
+      'Provide encryption key in command instead of using a prompt'
+    )
+  )
   .addOption(
     new Option('--max-size <max MB per file>', 'split final file when exceeding size in MB')
   )

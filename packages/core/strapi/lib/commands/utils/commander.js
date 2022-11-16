@@ -28,8 +28,12 @@ const parseInputList = (value) => {
 const promptEncryptionKey = async (thisCommand) => {
   const opts = thisCommand.opts();
 
+  if (!opts.encrypt && opts.key) {
+    return 'Key may not be present unless encryption is used';
+  }
+
   // if encrypt is set but we have no key, prompt for it
-  if (opts.encrypt && !opts.key) {
+  if (opts.encrypt && !(opts.key && opts.key.length > 0)) {
     try {
       const answers = await inquirer.prompt([
         {
