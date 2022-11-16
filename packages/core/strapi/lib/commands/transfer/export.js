@@ -32,8 +32,8 @@ const yyyymmddHHMMSS = () => {
   );
 };
 
-const getDefaultExportBackupName = () => {
-  return `backup_${yyyymmddHHMMSS()}`;
+const getDefaultExportName = () => {
+  return `export_${yyyymmddHHMMSS()}`;
 };
 
 const logger = console;
@@ -56,8 +56,7 @@ module.exports = async (filename, opts) => {
   };
   const source = createLocalStrapiSourceProvider(sourceOptions);
 
-  const file =
-    _.isString(filename) && filename.length > 0 ? filename : getDefaultExportBackupName();
+  const file = _.isString(filename) && filename.length > 0 ? filename : getDefaultExportName();
 
   /**
    * To a Strapi backup file
