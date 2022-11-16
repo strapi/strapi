@@ -249,7 +249,7 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
         joinTableName = `${schemaName}.${joinTableName}`
       }
       await db
-        .getConnection()
+        .connection
         .raw(
           `UPDATE ?? as a
             SET ${update.join(', ')}
