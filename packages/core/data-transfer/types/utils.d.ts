@@ -1,5 +1,5 @@
-import { Readable, Writable, Duplex, Transform } from 'stream';
-import { IDestinationProvider, ISourceProvider } from './providers';
+import type { Readable, Writable, Duplex, Transform } from 'stream';
+import type { IDestinationProvider, ISourceProvider } from './providers';
 
 /**
  * Default signature for transfer rules' filter methods
