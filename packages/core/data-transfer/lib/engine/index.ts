@@ -12,11 +12,11 @@ import type {
 type TransferProgress = {
   [key in TransferStage]?: {
     count: number;
-    bytes?: number;
+    bytes: number;
     aggregates?: {
       [key: string]: {
         count: number;
-        bytes?: number;
+        bytes: number;
       };
     };
   };
