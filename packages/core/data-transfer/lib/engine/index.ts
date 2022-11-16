@@ -57,7 +57,7 @@ class TransferEngine implements ITransferEngine {
     );
   }
 
-  async boostrap(): Promise<void> {
+  async bootstrap(): Promise<void> {
     await Promise.all([
       // bootstrap source provider
       this.sourceProvider.bootstrap?.(),
@@ -115,7 +115,7 @@ class TransferEngine implements ITransferEngine {
   async transfer(): Promise<void> {
     try {
       // Bootstrap the providers
-      await this.boostrap();
+      await this.bootstrap();
 
       // Resolve providers' resource and store
       // them in the engine's internal state
