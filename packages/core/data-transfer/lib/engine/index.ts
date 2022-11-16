@@ -57,6 +57,19 @@ class TransferEngine implements ITransferEngine {
     );
   }
 
+  async init(): Promise<void> {
+    // Resolve providers' resource and store
+    // them in the engine's internal state
+    await this.#resolveProviderResource();
+
+    // Update the destination provider's source metadata
+    const { source: sourceMetadata } = this.#metadata;
+
+    if (sourceMetadata) {
+      this.destinationProvider.setMetadata?.('source', sourceMetadata);
+    }
+  }
+
   async bootstrap(): Promise<void> {
     await Promise.all([
       // bootstrap source provider
@@ -114,27 +127,15 @@ class TransferEngine implements ITransferEngine {
 
   async transfer(): Promise<void> {
     try {
-      // Bootstrap the providers
       await this.bootstrap();
+      await this.init();
 
-      // Resolve providers' resource and store
-      // them in the engine's internal state
-      await this.#resolveProviderResource();
-
-      // Validate the transfer using the information given by the providers
       const isValidTransfer = await this.integrityCheck();
 
       if (!isValidTransfer) {
         throw new Error(
           `Unable to transfer the data between ${this.sourceProvider.name} and ${this.destinationProvider.name}.\nPlease refer to the log above for more information.`
         );
-      }
-
-      // Update the destination provider's source metadata
-      const { source: sourceMetadata } = this.#metadata;
-
-      if (sourceMetadata) {
-        this.destinationProvider.setMetadata?.('source', sourceMetadata);
       }
 
       // Run the transfer stages

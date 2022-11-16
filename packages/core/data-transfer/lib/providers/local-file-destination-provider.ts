@@ -5,7 +5,7 @@ import { Writable } from 'stream';
 import { chain } from 'stream-chain';
 import { stringer } from 'stream-json/jsonl/Stringer';
 
-import type { IDestinationProvider, IMetadata, ProviderType, Stream } from '../../types';
+import type { IDestinationProvider, IMetadata, ProviderType } from '../../types';
 import { createEncryptionCipher } from '../encryption/encrypt';
 
 export interface ILocalFileDestinationProviderOptions {

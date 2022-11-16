@@ -2,6 +2,7 @@ import { SchemaUID } from '@strapi/strapi/lib/types/utils';
 import { IEntity, ILink, IMedia } from './common-entities';
 import { ITransferRule } from './utils';
 import { ISourceProvider, IDestinationProvider } from './provider';
+import { init } from 'lodash/fp';
 
 /**
  * Defines the capabilities and properties of the transfer engine
@@ -40,6 +41,11 @@ export interface ITransferEngine {
    * connections, open files, etc...
    */
   bootstrap(): Promise<void>;
+
+  /**
+   * Engine init step. Must be called after the providers bootstrap.
+   */
+  init(): Promise<void>;
 
   /**
    * Run the close lifecycle method of each provider
