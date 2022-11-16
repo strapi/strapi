@@ -2,7 +2,7 @@ import type { IEntity } from '../../../../types';
 
 import { Readable, PassThrough } from 'stream';
 
-import { collect, getStrapiFactory, getContentTypes, createMockedQueryBuilder } from './test-utils';
+import { collect, getStrapiFactory, getContentTypes, createMockedQueryBuilder } from '../../test-utils';
 import { createEntitiesStream, createEntitiesTransformStream } from '../entities';
 
 describe('Local Strapi Source Provider - Entities Streaming', () => {

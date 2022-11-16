@@ -110,6 +110,7 @@ class TransferEngine implements ITransferEngine {
         );
       }
 
+      await this.prepareTransfer();
       await this.transferSchemas();
       await this.transferEntities();
       await this.transferMedia();
@@ -123,6 +124,10 @@ class TransferEngine implements ITransferEngine {
       // Note: This will be configurable in the future
       // await this.destinationProvider?.rollback(e);
     }
+  }
+
+  async prepareTransfer(): Promise<void> {
+    await this.destinationProvider.prepareForStreaming?.();
   }
 
   async transferSchemas(): Promise<void> {

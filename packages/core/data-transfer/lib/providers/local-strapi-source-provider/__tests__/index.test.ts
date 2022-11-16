@@ -2,7 +2,7 @@ import type { IEntity } from '../../../../types';
 
 import { Readable } from 'stream';
 
-import { collect, createMockedQueryBuilder, getStrapiFactory } from './test-utils';
+import { collect, createMockedQueryBuilder, getStrapiFactory } from '../../test-utils';
 import { createLocalStrapiSourceProvider } from '../';
 
 describe('Local Strapi Source Provider', () => {
@@ -128,12 +128,12 @@ describe('Local Strapi Source Provider', () => {
         bar: { uid: 'bar', attributes: { age: { type: 'number' } } },
       };
 
-      const components ={
+      const components = {
         'basic.simple': {
           collectionName: 'components_basic_simples',
           info: { displayName: 'simple', icon: 'ambulance', description: '' },
           options: {},
-          attributes: { name: {type:'string'} },
+          attributes: { name: { type: 'string' } },
           uid: 'basic.simple',
           category: 'basic',
           modelType: 'component',
@@ -157,10 +157,12 @@ describe('Local Strapi Source Provider', () => {
         },
       }
 
-      const provider = createLocalStrapiSourceProvider({ getStrapi: getStrapiFactory({
-        contentTypes,
-        components
-      }) });
+      const provider = createLocalStrapiSourceProvider({
+        getStrapi: getStrapiFactory({
+          contentTypes,
+          components
+        })
+      });
 
       await provider.bootstrap();
 
@@ -177,7 +179,7 @@ describe('Local Strapi Source Provider', () => {
           collectionName: 'components_basic_simples',
           info: { displayName: 'simple', icon: 'ambulance', description: '' },
           options: {},
-          attributes: { name: {type:'string'} },
+          attributes: { name: { type: 'string' } },
           uid: 'basic.simple',
           category: 'basic',
           modelType: 'component',
