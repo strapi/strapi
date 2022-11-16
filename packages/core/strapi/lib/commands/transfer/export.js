@@ -95,18 +95,18 @@ module.exports = async (filename, opts) => {
 
   try {
     let resultData = [];
-    console.log(`Starting export...`);
+    logger.log(`Starting export...`);
 
     engine.progress.stream.on('start', ({ stage }) => {
-      process.stdout.write(`Starting transfer of ${stage}..`);
+      logger.write(`Starting transfer of ${stage}...`);
     });
 
     // engine.progress.stream..on('progress', ({ stage, data }) => {
-    //   console.log('progress');
+    //   logger.log('progress');
     // });
 
     engine.progress.stream.on('complete', ({ stage, data }) => {
-      console.log(`.${stage} complete`);
+      logger.log(`...${stage} complete`);
       resultData = data;
     });
 
@@ -147,7 +147,7 @@ module.exports = async (filename, opts) => {
       { hAlign: 'right', content: chalk.bold.green(totalItems) },
       { hAlign: 'right', content: `${chalk.bold.green(readableBytes(totalBytes, 1, 11))} ` },
     ]);
-    console.log(table.toString());
+    logger.log(table.toString());
 
     // TODO: once archiving is implemented, we need to check file extensions
     if (!fs.pathExistsSync(file)) {
