@@ -2,7 +2,6 @@ import { SchemaUID } from '@strapi/strapi/lib/types/utils';
 import { IEntity, ILink, IMedia } from './common-entities';
 import { ITransferRule } from './utils';
 import { ISourceProvider, IDestinationProvider } from './provider';
-import { init } from 'lodash/fp';
 
 /**
  * Defines the capabilities and properties of the transfer engine
