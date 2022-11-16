@@ -341,13 +341,18 @@ describe('Core API - Basic + dz', () => {
         error: {
           status: 400,
           name: 'ValidationError',
-          message: 'dz[0].__component is a required field',
+          message: '2 errors occurred',
           details: {
             errors: [
               {
                 path: ['dz', '0', '__component'],
                 message: 'dz[0].__component is a required field',
                 name: 'ValidationError',
+              },
+              {
+                message: "Cannot read properties of undefined (reading 'attributes')",
+                name: 'ValidationError',
+                path: [],
               },
             ],
           },

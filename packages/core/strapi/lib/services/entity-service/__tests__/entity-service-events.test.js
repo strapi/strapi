@@ -4,28 +4,22 @@ const createEntityService = require('..');
 const entityValidator = require('../../entity-validator');
 
 describe('Entity service triggers webhooks', () => {
-  global.strapi = {
-    getModel: () => ({}),
-    config: {
-      get: () => [],
-    },
-  };
-
   let instance;
   const eventHub = { emit: jest.fn() };
   let entity = { attr: 'value' };
 
   beforeAll(() => {
+    const model = {
+      kind: 'singleType',
+      modelName: 'test-model',
+      privateAttributes: [],
+      attributes: {
+        attr: { type: 'string' },
+      },
+    };
     instance = createEntityService({
       strapi: {
-        getModel: () => ({
-          kind: 'singleType',
-          modelName: 'test-model',
-          privateAttributes: [],
-          attributes: {
-            attr: { type: 'string' },
-          },
-        }),
+        getModel: () => model,
       },
       db: {
         query: () => ({
@@ -41,6 +35,13 @@ describe('Entity service triggers webhooks', () => {
       eventHub,
       entityValidator,
     });
+
+    global.strapi = {
+      getModel: () => model,
+      config: {
+        get: () => [],
+      },
+    };
   });
 
   test('Emit event: Create', async () => {

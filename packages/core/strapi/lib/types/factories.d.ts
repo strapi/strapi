@@ -1,8 +1,8 @@
-import { Service,GenericService } from '../core-api/service';
+import { Service, GenericService } from '../core-api/service';
 import { Controller, GenericController } from '../core-api/controller';
 import { Middleware } from '../middlewares';
 import { Policy } from '../core/registries/policies';
-import { Strapi } from '@strapi/strapi';
+import { Strapi } from './core/strapi';
 
 type ControllerConfig<T extends Controller = Controller> = T;
 
