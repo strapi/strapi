@@ -272,18 +272,21 @@ program
   .command('export')
   .description('Export data from Strapi to file')
   .addOption(
-    new Option('--encrypt [boolean]', `Encrypt output file using the 'aes-128-ecb' algorithm`)
+    new Option(
+      '--encrypt <boolean>',
+      `Encrypt output file using the 'aes-128-ecb' algorithm. Prompts for key unless key option is used.`
+    )
       .default(true)
       .argParser(parseInputBool)
   )
   .addOption(
-    new Option('--compress [boolean]', 'Compress output file using gzip compression')
+    new Option('--compress <boolean>', 'Compress output file using gzip compression')
       .default(true)
       .argParser(parseInputBool)
   )
   .addOption(
     new Option(
-      '--archive [boolean]',
+      '--archive <boolean>',
       'Export all backup files into a single tar archive instead of a folder'
     )
       .default(true)
@@ -291,8 +294,8 @@ program
   )
   .addOption(
     new Option(
-      '--key [encryption key]',
-      'Provide encryption key in command instead of using a prompt'
+      '--key <encryption key>',
+      'Provide encryption key directly instead of being prompted'
     )
   )
   .addOption(
