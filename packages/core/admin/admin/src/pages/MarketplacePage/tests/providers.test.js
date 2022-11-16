@@ -130,7 +130,8 @@ describe('Marketplace page - providers tab', () => {
     expect(plugin).toEqual(null);
   });
 
-  it('should return empty providers search results given a bad query', () => {
+  it('should return empty providers search results given a bad query', async () => {
+    const user = userEvent.setup();
     const input = getByPlaceholderText(renderedContainer, 'Search');
     const badQuery = 'asdf';
     await user.type(input, badQuery);
