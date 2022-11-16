@@ -326,7 +326,7 @@ const cleanOrderColumnsForOldDatabases = async ({
         .transacting(trx);
     } finally {
       await db.connection
-        .raw(`DROP TEMPORARY TABLE IF EXISTS ${tempOrderTableName}`)
+        .raw(`DROP TEMPORARY TABLE IF EXISTS ??`, [tempOrderTableName])
         .transacting(trx);
     }
   }
@@ -371,7 +371,7 @@ const cleanOrderColumnsForOldDatabases = async ({
         .transacting(trx);
     } finally {
       await db.connection
-        .raw(`DROP TEMPORARY TABLE IF EXISTS ${tempInvOrderTableName}`)
+        .raw(`DROP TEMPORARY TABLE IF EXISTS ??`, [tempInvOrderTableName])
         .transacting(trx);
     }
   }
