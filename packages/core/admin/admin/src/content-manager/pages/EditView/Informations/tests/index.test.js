@@ -15,6 +15,7 @@ import Informations from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   useCMEditViewDataManager: jest.fn(),
+  wrapAxiosInstance: jest.fn(() => {}),
 }));
 
 const makeApp = () => {
