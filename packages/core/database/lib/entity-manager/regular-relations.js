@@ -243,6 +243,11 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
         .transacting(trx);
       break;
     default:
+      const schemaName = db.connection.getSchemaName()
+      let joinTableName = joinTable.name;
+      if(schemaName) {
+        joinTableName = `${schemaName}.${joinTableName}`
+      }
       await db
         .getConnection()
         .raw(
@@ -254,7 +259,7 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
               WHERE ${where.join(' OR ')}
             ) AS b
             WHERE b.id = a.id`,
-          [joinTable.name, ...updateBinding, ...selectBinding, joinTable.name, ...whereBinding]
+          [joinTableName, ...updateBinding, ...selectBinding, joinTableName, ...whereBinding]
         )
         .transacting(trx);
     /*
