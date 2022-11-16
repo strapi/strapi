@@ -20,7 +20,7 @@
     "@buffetjs/utils": "3.3.8",
     "byte-size": "^7.0.1",
     "cropperjs": "^1.5.11",
-    "immer": "8.0.4",
+    "immer": "9.0.16",
     "immutable": "^3.8.2",
     "is-valid-domain": "0.0.17",
     "koa-range": "0.3.0",
