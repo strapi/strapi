@@ -13,11 +13,8 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { TrackingProvider } from '@strapi/helper-plugin';
-
 import { Router } from 'react-router-dom';
-
 import { createMemoryHistory } from 'history';
-
 import MarketPlacePage from '../index';
 import server from './server';
 
@@ -438,5 +435,34 @@ describe('Marketplace page - plugins tab', () => {
       /this plugin has \d+ weekly downloads/i
     );
     expect(downloadsLabel).toBeVisible();
+  });
+
+  it('paginates the results', async () => {
+    // Should have pagination section with 4 pages
+    const pagination = screen.getByLabelText(/pagination/i);
+    expect(pagination).toBeVisible();
+    const pageButtons = screen.getAllByRole('link', { name: /go to page \d+/i });
+    expect(pageButtons.length).toBe(4);
+
+    // Can't go to previous page since there isn't one
+    expect(screen.getByRole('link', { name: /go to previous page/i })).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+
+    // Can go to next page
+    await user.click(screen.getByRole('link', { name: /go to next page/i }));
+    await waitForReload();
+    expect(history.location.search).toBe('?page=2');
+
+    // Can go to previous page
+    await user.click(screen.getByRole('link', { name: /go to previous page/i }));
+    await waitForReload();
+    expect(history.location.search).toBe('?page=1');
+
+    // Can go to specific page
+    await user.click(screen.getByRole('link', { name: /go to page 3/i }));
+    await waitForReload();
+    expect(history.location.search).toBe('?page=3');
   });
 });
