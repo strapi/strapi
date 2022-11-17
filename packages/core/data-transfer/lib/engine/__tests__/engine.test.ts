@@ -213,16 +213,33 @@ describe('Transfer engine', () => {
     });
 
     test('calls all provider stages', async () => {
+      // TODO: use a source and destination that actually have all stages
       const engine = createTransferEngine(mockedSource, mockedDestination, defaultOptions);
-
       await engine.transfer();
 
       expect(mockedSource).toHaveSourceStagesCalledOnce();
       expect(mockedDestination).toHaveDestinationStagesCalledOnce();
     });
 
-    test.todo('returns provider results');
+    test('returns provider results', async () => {
+      const source = {
+        ...mockedSource,
+        results: { foo: 'bar' },
+      };
+      const destination = {
+        ...mockedDestination,
+        results: { foo: 'baz' },
+      };
+
+      const engine = createTransferEngine(source, destination, defaultOptions);
+      const results = await engine.transfer();
+      expect(results).toMatchObject({
+        source: { foo: 'bar' },
+        destination: { foo: 'baz' },
+      });
+    });
   });
+
   describe('progressStream', () => {
     test.todo('returns correct result count for each stage');
   });
