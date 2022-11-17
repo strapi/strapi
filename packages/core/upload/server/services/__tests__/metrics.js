@@ -41,7 +41,7 @@ describe('metrics', () => {
           metadata: {
             get: () => ({ attributes: { path: { columnName: 'path' } } }),
           },
-          connection() {
+          getConnection() {
             return {
               select() {
                 return {
@@ -53,7 +53,7 @@ describe('metrics', () => {
           },
         },
       };
-      strapi.db.connection.raw = raw;
+      strapi.db.connection = { raw };
 
       const { computeMetrics } = metricsService({ strapi });
 
