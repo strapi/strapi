@@ -5859,14 +5859,6 @@
   resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-1.2.8.tgz#e657c925f91c0caafd3381078d2a2a06d75aee24"
   integrity sha512-QDfygQi19W+i1ROCAcPZxAzHorsrwK+TV89bGezW+n4hZbXpr02R94neQHCk/TNNiaRU91gKXAcAREkGdc+Kzw==
 
-"@strapi/logger@4.4.6":
-  version "4.4.6"
-  resolved "https://registry.yarnpkg.com/@strapi/logger/-/logger-4.4.6.tgz#25b16279dc27512612f00fd1806e140004bd6b42"
-  integrity sha512-NPJ/9CsiqbvH9VL2ApVPOnUwJ204xsrEpyDklpEtCYmedepjtjPsEaW4uA7OSOzSNhmXrI2KC3ltsT3MRHhpTA==
-  dependencies:
-    lodash "4.17.21"
-    winston "3.3.3"
-
 "@stylelint/postcss-css-in-js@^0.37.2":
   version "0.37.3"
   resolved "https://registry.yarnpkg.com/@stylelint/postcss-css-in-js/-/postcss-css-in-js-0.37.3.tgz#d149a385e07ae365b0107314c084cb6c11adbf49"

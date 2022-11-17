@@ -9,6 +9,7 @@ interface IProvider {
   name: string;
 
   bootstrap?(): Promise<void> | void;
+  getSchemas?(): any;
   close?(): Promise<void> | void;
   getMetadata(): IMetadata | null | Promise<IMetadata | null>;
 }
@@ -19,15 +20,18 @@ export interface ISourceProvider extends IProvider {
   streamLinks?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
   streamMedia?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
   streamConfiguration?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
-  getSchemas?(): any;
   streamSchemas?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
 }
 
 export interface IDestinationProvider extends IProvider {
+  #providersMetadata?: { source?: IMetadata; destination?: IMetadata };
+
   /**
    * Optional rollback implementation
    */
   rollback?<T extends Error = Error>(e: T): void | Promise<void>;
+
+  setMetadata?(target: ProviderType, metadata: IMetadata): IDestinationProvider;
 
   // Getters for the destination's transfer streams
   getEntitiesStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
