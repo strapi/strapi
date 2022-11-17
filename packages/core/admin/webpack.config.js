@@ -169,7 +169,12 @@ module.exports = ({
             },
           },
         },
-
+        {
+          test: /\.m?jsx?$/,
+          resolve: {
+            fullySpecified: false,
+          },
+        },
         {
           test: /\.css$/i,
           use: ['style-loader', 'css-loader'],
