@@ -322,27 +322,27 @@ describe('Marketplace page - providers tab', () => {
     // Should have pagination section with 4 pages
     const pagination = screen.getByLabelText(/pagination/i);
     expect(pagination).toBeVisible();
-    const pageButtons = screen.getAllByRole('link', { name: /go to page \d+/i });
+    const pageButtons = screen.getAllByText(/go to page \d+/i).map((el) => el.closest('a'));
     expect(pageButtons.length).toBe(4);
 
     // Can't go to previous page since there isn't one
-    expect(screen.getByRole('link', { name: /go to previous page/i })).toHaveAttribute(
+    expect(screen.getByText(/go to previous page/i).closest('a')).toHaveAttribute(
       'aria-disabled',
       'true'
     );
 
     // Can go to next page
-    await user.click(screen.getByRole('link', { name: /go to next page/i }));
+    await user.click(screen.getByText(/go to next page/i).closest('a'));
     await waitForReload();
     expect(history.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=2');
 
     // Can go to previous page
-    await user.click(screen.getByRole('link', { name: /go to previous page/i }));
+    await user.click(screen.getByText(/go to previous page/i).closest('a'));
     await waitForReload();
     expect(history.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=1');
 
     // Can go to specific page
-    await user.click(screen.getByRole('link', { name: /go to page 3/i }));
+    await user.click(screen.getByText(/go to page 3/i).closest('a'));
     await waitForReload();
     expect(history.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=3');
   });

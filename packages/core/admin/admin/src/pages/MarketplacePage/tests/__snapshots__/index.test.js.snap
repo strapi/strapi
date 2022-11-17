@@ -1473,7 +1473,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                     Plugins
                      
                     (
-                    5
+                    96
                     )
                   </span>
                 </div>
@@ -1496,7 +1496,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                     Providers
                      
                     (
-                    9
+                    96
                     )
                   </span>
                 </div>

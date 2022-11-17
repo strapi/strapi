@@ -286,14 +286,14 @@ const MarketPlacePage = () => {
                     id: 'admin.pages.MarketPlacePage.plugins',
                     defaultMessage: 'Plugins',
                   })}{' '}
-                  ({pluginSearchResults.length})
+                  ({marketplacePluginsResponse.meta.pagination.total})
                 </Tab>
                 <Tab>
                   {formatMessage({
                     id: 'admin.pages.MarketPlacePage.providers',
                     defaultMessage: 'Providers',
                   })}{' '}
-                  ({providerSearchResults.length})
+                  ({marketplaceProvidersResponse.meta.pagination.total})
                 </Tab>
               </Tabs>
             </Box>
