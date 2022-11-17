@@ -28,7 +28,8 @@ import { GridItem } from '@strapi/design-system/Grid';
 import { Flex } from '@strapi/design-system/Flex';
 import Pencil from '@strapi/icons/Pencil';
 import Cog from '@strapi/icons/Cog';
-import Layer from '@strapi/icons/Layer';
+// import List from '@strapi/icons/List';
+// import Grid from '@strapi/icons/Grid';
 
 import { UploadAssetDialog } from '../../../components/UploadAssetDialog/UploadAssetDialog';
 import { EditFolderDialog } from '../../../components/EditFolderDialog';
@@ -224,25 +225,32 @@ export const MediaLibrary = () => {
           }
           endActions={
             <>
+              <ActionButton paddingTop={1} paddingBottom={1}>
+                <IconButton
+                  data-testid={`switch-to-${isGridView ? 'list' : 'grid'}-view`}
+                  icon={
+                    isGridView ? (
+                      // TODO change after DS release
+                      <Cog />
+                    ) : (
+                      <Cog />
+                    )
+                  }
+                  label={
+                    isGridView
+                      ? formatMessage({
+                          id: 'view-switch.list',
+                          defaultMessage: 'List View',
+                        })
+                      : formatMessage({
+                          id: 'view-switch.grid',
+                          defaultMessage: 'Grid View',
+                        })
+                  }
+                  onClick={() => setView(isGridView ? viewOptions.LIST : viewOptions.GRID)}
+                />
+              </ActionButton>
               <CheckPermissions permissions={pluginPermissions.configureView}>
-                <ActionButton paddingTop={1} paddingBottom={1}>
-                  <IconButton
-                    // TODO add and use the correct icons
-                    icon={isGridView ? <Layer /> : <Cog />}
-                    label={
-                      isGridView
-                        ? formatMessage({
-                            id: 'app.links.FIXME',
-                            defaultMessage: 'List View',
-                          })
-                        : formatMessage({
-                            id: 'app.links.FIXME',
-                            defaultMessage: 'Grid View',
-                          })
-                    }
-                    onClick={() => setView(isGridView ? viewOptions.LIST : viewOptions.GRID)}
-                  />
-                </ActionButton>
                 <ActionButton paddingTop={1} paddingBottom={1}>
                   <IconButton
                     forwardedAs={ReactRouterLink}

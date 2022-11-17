@@ -16,8 +16,9 @@ import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { IconButton } from '@strapi/design-system/IconButton';
 import PencilIcon from '@strapi/icons/Pencil';
 import PlusIcon from '@strapi/icons/Plus';
+// import Grid from '@strapi/icons/Grid';
+// import List from '@strapi/icons/List';
 import Cog from '@strapi/icons/Cog';
-import Layer from '@strapi/icons/Layer';
 
 import { FolderDefinition, AssetDefinition, viewOptions } from '../../../constants';
 import getTrad from '../../../utils/getTrad';
@@ -153,16 +154,17 @@ export const BrowseStep = ({
               <EndBlockActions pullRight>
                 <ActionButton paddingTop={1} paddingBottom={1}>
                   <IconButton
-                    // TODO add and use the correct icons
-                    icon={isGridView ? <Layer /> : <Cog />}
+                    data-testid={`switch-to-${isGridView ? 'list' : 'grid'}-view`}
+                    // TODO change after DS release
+                    icon={isGridView ? <Cog /> : <Cog />}
                     label={
                       isGridView
                         ? formatMessage({
-                            id: 'app.links.FIXME',
+                            id: 'view-switch.list',
                             defaultMessage: 'List View',
                           })
                         : formatMessage({
-                            id: 'app.links.FIXME',
+                            id: 'view-switch.grid',
                             defaultMessage: 'Grid View',
                           })
                     }
