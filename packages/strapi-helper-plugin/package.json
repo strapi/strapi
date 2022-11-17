@@ -71,7 +71,7 @@
     "immutable": "^3.8.2",
     "invariant": "^2.2.1",
     "lodash": "4.17.21",
-    "moment": "^2.29.1",
+    "moment": "^2.29.4",
     "react": "^16.14.0",
     "react-dom": "^16.9.0",
     "react-helmet": "^6.1.0",
