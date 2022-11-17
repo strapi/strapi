@@ -10,6 +10,7 @@ const {
   hasInverseOrderColumn,
 } = require('../metadata/relations');
 const { createQueryBuilder } = require('../query');
+const { addSchema } = require('../utils/add-schema');
 
 /**
  * If some relations currently exist for this oneToX relation, on the one side, this function removes them and update the inverse order if needed.
@@ -241,7 +242,8 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
         )
         .transacting(trx);
       break;
-    default:
+    default: {
+      const joinTableName = addSchema(joinTable.name);
       await db.connection
         .raw(
           `UPDATE ?? as a
@@ -252,9 +254,10 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
                 WHERE ${where.join(' OR ')}
               ) AS b
               WHERE b.id = a.id`,
-          [joinTable.name, ...updateBinding, ...selectBinding, joinTable.name, ...whereBinding]
+          [joinTableName, ...updateBinding, ...selectBinding, joinTableName, ...whereBinding]
         )
         .transacting(trx);
+    }
     /*
       `UPDATE :joinTable: as a
         SET :orderColumn: = b.src_order, :inverseOrderColumn: = b.inv_order
