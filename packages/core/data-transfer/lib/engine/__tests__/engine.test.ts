@@ -165,7 +165,7 @@ expect.extend({
   },
 });
 
-const createSource = () => {
+const createSource = (streamData?) => {
   return {
     type: 'source',
     name: 'completeSource',
@@ -175,11 +175,11 @@ const createSource = () => {
     bootstrap: jest.fn() as any,
     close: jest.fn() as any,
 
-    streamEntities: jest.fn().mockResolvedValue(getMockSourceStream()) as any,
-    streamLinks: jest.fn().mockResolvedValue(getMockSourceStream()) as any,
-    streamMedia: jest.fn().mockResolvedValue(getMockSourceStream()) as any,
-    streamConfiguration: jest.fn().mockResolvedValue(getMockSourceStream()) as any,
-    streamSchemas: jest.fn().mockReturnValue(getMockSourceStream()) as any,
+    streamEntities: jest.fn().mockResolvedValue(getMockSourceStream(streamData)) as any,
+    streamLinks: jest.fn().mockResolvedValue(getMockSourceStream(streamData)) as any,
+    streamMedia: jest.fn().mockResolvedValue(getMockSourceStream(streamData)) as any,
+    streamConfiguration: jest.fn().mockResolvedValue(getMockSourceStream(streamData)) as any,
+    streamSchemas: jest.fn().mockReturnValue(getMockSourceStream(streamData)) as any,
   } as ISourceProvider;
 };
 
@@ -370,6 +370,24 @@ describe('Transfer engine', () => {
   });
 
   describe('progressStream', () => {
-    test.todo('returns correct result count for each stage');
+    test(`emits 'progress' events`, async () => {
+      const streamData = [{ foo: 'bar' }, { bar: 'baz' }, { some: 'other', data: 'here' }];
+      const source = createSource(streamData);
+      const engine = createTransferEngine(source, completeDestination, defaultOptions);
+
+      let calls = 0;
+      engine.progress.stream.on('progress', ({ stage, data }) => {
+        expect(data).toMatchObject(engine.progress.data);
+        calls += 1;
+      });
+
+      await engine.transfer();
+
+      expect(calls).toEqual((sourceStages.length - providerStages.length) * streamData.length);
+    });
+
+    // TODO: to implement these, the mocked streams need to be improved
+    test.todo(`emits 'start' events`);
+    test.todo(`emits 'complete' events`);
   });
 });
