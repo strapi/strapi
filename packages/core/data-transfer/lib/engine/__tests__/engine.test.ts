@@ -188,6 +188,7 @@ describe('Transfer engine', () => {
       await mergeEngine.transfer();
       expect(mergeEngine).toBeValidTransferEngine();
 
+      // undefined strategy
       await expect(
         (async () => {
           const invalidEngine = createTransferEngine(
@@ -198,15 +199,21 @@ describe('Transfer engine', () => {
           await invalidEngine.transfer();
         })()
       ).rejects.toThrow();
+
+      // invalid strategy
+      await expect(
+        (async () => {
+          const invalidEngine = createTransferEngine(mockedSource, mockedDestination, {
+            ...engineOptions,
+            strategy: 'foo',
+          } as unknown as ITransferEngineOptions);
+          await invalidEngine.transfer();
+        })()
+      ).rejects.toThrow();
     });
 
     test('calls all provider stages', async () => {
-      const engineOptions = {
-        versionMatching: 'exact',
-        exclude: [],
-        strategy: 'restore',
-      } as unknown as ITransferEngineOptions;
-      const engine = createTransferEngine(mockedSource, mockedDestination, engineOptions);
+      const engine = createTransferEngine(mockedSource, mockedDestination, defaultOptions);
 
       await engine.transfer();
 
