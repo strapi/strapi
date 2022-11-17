@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { auth } from '@strapi/helper-plugin';
 
-const instance = axios.create({
+export const instance = axios.create({
   baseURL: process.env.STRAPI_ADMIN_BACKEND_URL,
 });
 
@@ -33,7 +33,7 @@ instance.interceptors.response.use(
   }
 );
 
-const getFetchClient = () => {
+export const getFetchClient = () => {
   return {
     get: (url, config) => instance.get(url, config),
     put: (url, data, config) => instance.put(url, data, config),
@@ -41,5 +41,3 @@ const getFetchClient = () => {
     delete: (url, config) => instance.get(url, config),
   };
 };
-
-export default getFetchClient;
