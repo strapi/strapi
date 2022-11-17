@@ -34,7 +34,7 @@ const _ = require('lodash/fp');
  * @return {*}
  */
 const relationsOrderer = (initArr, idColumn, orderColumn) => {
-  let arr = _.castArray(initArr || []).map((r) => ({
+  const arr = _.castArray(initArr || []).map((r) => ({
     init: true,
     id: r[idColumn],
     order: r[orderColumn],
@@ -49,27 +49,35 @@ const relationsOrderer = (initArr, idColumn, orderColumn) => {
   };
 
   const removeRelation = (r) => {
-    // Remove relation with id r.id
-    arr = _.reject({ id: r.id }, arr);
+    const { idx } = findRelation(r.id);
+    if (idx >= 0) {
+      arr.splice(idx, 1);
+    }
   };
 
   const insertRelation = (r) => {
+    let idx;
+
     if (r.position?.before) {
-      const { relation } = findRelation(r.position.before);
+      const { idx: _idx, relation } = findRelation(r.position.before);
       if (relation.init) r.order = relation.order - 0.5;
       else r.order = relation.order;
+      idx = _idx;
     } else if (r.position?.after) {
-      const { relation } = findRelation(r.position.after);
+      const { idx: _idx, relation } = findRelation(r.position.after);
       if (relation.init) r.order = relation.order + 0.5;
       else r.order = relation.order;
+      idx = _idx + 1;
     } else if (r.position?.start) {
       r.order = 0.5;
+      idx = 0;
     } else {
       r.order = maxOrder + 0.5;
+      idx = arr.length;
     }
 
     // Insert the relation in the array
-    arr.push(r);
+    arr.splice(idx, 0, r);
   };
 
   return {
