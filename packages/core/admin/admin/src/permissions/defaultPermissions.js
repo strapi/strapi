@@ -34,6 +34,10 @@ const permissions = {
     uninstall: [{ action: 'admin::marketplace.plugins.uninstall', subject: null }],
   },
   settings: {
+    auditLogs: {
+      // Note:update to admin::auditLogs permissions when set in BE
+      main: [{ action: 'admin::roles.create', subject: null }],
+    },
     roles: {
       main: [
         { action: 'admin::roles.create', subject: null },

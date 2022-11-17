@@ -25,6 +25,13 @@ const init = (initialState, { settings, shouldUpdateStrapi }) => {
       intlLabel: { id: 'Settings.permissions', defaultMessage: 'Administration Panel' },
       links: [
         {
+          intlLabel: { id: 'global.auditLogs', defaultMessage: 'Audit Logs' },
+          to: '/settings/audit-logs',
+          id: 'auditLogs',
+          isDisplayed: false,
+          permissions: adminPermissions.settings.auditLogs.main,
+        },
+        {
           intlLabel: { id: 'global.roles', defaultMessage: 'Roles' },
           to: '/settings/roles',
           id: 'roles',
