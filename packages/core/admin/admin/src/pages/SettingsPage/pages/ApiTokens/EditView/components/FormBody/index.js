@@ -50,7 +50,7 @@ FormBody.propTypes = {
   apiToken: PropTypes.shape({
     id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     type: PropTypes.string,
-    lifespan: PropTypes.string,
+    lifespan: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     name: PropTypes.string,
     accessKey: PropTypes.string,
     permissions: PropTypes.array,

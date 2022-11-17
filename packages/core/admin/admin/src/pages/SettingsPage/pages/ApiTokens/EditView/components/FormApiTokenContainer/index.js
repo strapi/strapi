@@ -229,7 +229,7 @@ FormApiTokenContainer.propTypes = {
   values: PropTypes.shape({
     name: PropTypes.string,
     description: PropTypes.string,
-    lifespan: PropTypes.string,
+    lifespan: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     type: PropTypes.string,
   }).isRequired,
   isCreating: PropTypes.bool.isRequired,
