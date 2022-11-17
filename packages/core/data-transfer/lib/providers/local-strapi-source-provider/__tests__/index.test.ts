@@ -6,7 +6,7 @@ import { collect, createMockedQueryBuilder, getStrapiFactory } from './test-util
 import { createLocalStrapiSourceProvider } from '../';
 
 describe('Local Strapi Source Provider', () => {
-  describe('Boostrap', () => {
+  describe('Bootstrap', () => {
     test('Should not have a defined Strapi instance if bootstrap has not been called', () => {
       const provider = createLocalStrapiSourceProvider({ getStrapi: getStrapiFactory() });
 
@@ -128,24 +128,24 @@ describe('Local Strapi Source Provider', () => {
         bar: { uid: 'bar', attributes: { age: { type: 'number' } } },
       };
 
-      const components ={
+      const components = {
         'basic.simple': {
           collectionName: 'components_basic_simples',
           info: { displayName: 'simple', icon: 'ambulance', description: '' },
           options: {},
-          attributes: { name: {type:'string'} },
+          attributes: { name: { type: 'string' } },
           uid: 'basic.simple',
           category: 'basic',
           modelType: 'component',
           modelName: 'simple',
-          globalId: 'ComponentBasicSimple'
+          globalId: 'ComponentBasicSimple',
         },
         'blog.test-como': {
           collectionName: 'components_blog_test_comos',
           info: {
             displayName: 'test comp',
             icon: 'air-freshener',
-            description: ''
+            description: '',
           },
           options: {},
           attributes: { name: { type: 'string' } },
@@ -153,14 +153,16 @@ describe('Local Strapi Source Provider', () => {
           category: 'blog',
           modelType: 'component',
           modelName: 'test-como',
-          globalId: 'ComponentBlogTestComo'
+          globalId: 'ComponentBlogTestComo',
         },
-      }
+      };
 
-      const provider = createLocalStrapiSourceProvider({ getStrapi: getStrapiFactory({
-        contentTypes,
-        components
-      }) });
+      const provider = createLocalStrapiSourceProvider({
+        getStrapi: getStrapiFactory({
+          contentTypes,
+          components,
+        }),
+      });
 
       await provider.bootstrap();
 
@@ -177,19 +179,19 @@ describe('Local Strapi Source Provider', () => {
           collectionName: 'components_basic_simples',
           info: { displayName: 'simple', icon: 'ambulance', description: '' },
           options: {},
-          attributes: { name: {type:'string'} },
+          attributes: { name: { type: 'string' } },
           uid: 'basic.simple',
           category: 'basic',
           modelType: 'component',
           modelName: 'simple',
-          globalId: 'ComponentBasicSimple'
+          globalId: 'ComponentBasicSimple',
         },
         {
           collectionName: 'components_blog_test_comos',
           info: {
             displayName: 'test comp',
             icon: 'air-freshener',
-            description: ''
+            description: '',
           },
           options: {},
           attributes: { name: { type: 'string' } },
@@ -197,9 +199,9 @@ describe('Local Strapi Source Provider', () => {
           category: 'blog',
           modelType: 'component',
           modelName: 'test-como',
-          globalId: 'ComponentBlogTestComo'
-        }
-      ])
+          globalId: 'ComponentBlogTestComo',
+        },
+      ]);
     });
-  })
+  });
 });

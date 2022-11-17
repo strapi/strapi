@@ -98,7 +98,7 @@ module.exports = async (filename, opts) => {
     logger.log(`Starting export...`);
 
     engine.progress.stream.on('start', ({ stage }) => {
-      logger.write(`Starting transfer of ${stage}...`);
+      logger.log(`Starting transfer of ${stage}...`);
     });
 
     // engine.progress.stream..on('progress', ({ stage, data }) => {

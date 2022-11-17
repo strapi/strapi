@@ -2,6 +2,7 @@ import _ from 'lodash/fp';
 import { PassThrough } from 'stream-chain';
 import type {
   IDestinationProvider,
+  IMetadata,
   ISourceProvider,
   ITransferEngine,
   ITransferEngineOptions,
@@ -35,6 +36,7 @@ class TransferEngine<
   sourceProvider: ISourceProvider;
   destinationProvider: IDestinationProvider;
   options: ITransferEngineOptions;
+  #metadata: { source?: IMetadata; destination?: IMetadata } = {};
 
   #transferProgress: TransferProgress = {};
   // TODO: Type the stream chunks. Doesn't seem trivial, especially since PassThrough doesn't provide a PassThroughOptions type
@@ -95,7 +97,7 @@ class TransferEngine<
     });
   };
 
-  private assertStrapiVersionIntegrity(sourceVersion?: string, destinationVersion?: string) {
+  #assertStrapiVersionIntegrity(sourceVersion?: string, destinationVersion?: string) {
     const strategy = this.options.versionMatching;
 
     if (!sourceVersion || !destinationVersion) {
@@ -130,7 +132,20 @@ class TransferEngine<
     );
   }
 
-  async boostrap(): Promise<void> {
+  async init(): Promise<void> {
+    // Resolve providers' resource and store
+    // them in the engine's internal state
+    await this.#resolveProviderResource();
+
+    // Update the destination provider's source metadata
+    const { source: sourceMetadata } = this.#metadata;
+
+    if (sourceMetadata) {
+      this.destinationProvider.setMetadata?.('source', sourceMetadata);
+    }
+  }
+
+  async bootstrap(): Promise<void> {
     await Promise.all([
       // bootstrap source provider
       this.sourceProvider.bootstrap?.(),
@@ -148,9 +163,21 @@ class TransferEngine<
     ]);
   }
 
-  async integrityCheck(): Promise<boolean> {
+  async #resolveProviderResource() {
     const sourceMetadata = await this.sourceProvider.getMetadata();
     const destinationMetadata = await this.destinationProvider.getMetadata();
+
+    if (sourceMetadata) {
+      this.#metadata.source = sourceMetadata;
+    }
+
+    if (destinationMetadata) {
+      this.#metadata.destination = destinationMetadata;
+    }
+  }
+
+  async integrityCheck(): Promise<boolean> {
+    const { source: sourceMetadata, destination: destinationMetadata } = this.#metadata;
 
     if (!sourceMetadata || !destinationMetadata) {
       return true;
@@ -158,7 +185,7 @@ class TransferEngine<
 
     try {
       // Version check
-      this.assertStrapiVersionIntegrity(
+      this.#assertStrapiVersionIntegrity(
         sourceMetadata?.strapi?.version,
         destinationMetadata?.strapi?.version
       );
@@ -175,7 +202,8 @@ class TransferEngine<
 
   async transfer(): Promise<ITransferResults<S, D>> {
     try {
-      await this.boostrap();
+      await this.bootstrap();
+      await this.init();
 
       const isValidTransfer = await this.integrityCheck();
 
@@ -184,11 +212,15 @@ class TransferEngine<
           `Unable to transfer the data between ${this.sourceProvider.name} and ${this.destinationProvider.name}.\nPlease refer to the log above for more information.`
         );
       }
+
+      // Run the transfer stages
       await this.transferSchemas();
       await this.transferEntities();
       await this.transferMedia();
       await this.transferLinks();
       await this.transferConfiguration();
+
+      // Gracefully close the providers
       await this.close();
     } catch (e: any) {
       throw e;
