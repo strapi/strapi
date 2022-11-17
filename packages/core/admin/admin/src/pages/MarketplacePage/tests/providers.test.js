@@ -42,6 +42,8 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
+const user = userEvent.setup();
+
 const client = new QueryClient({
   defaultOptions: {
     queries: {
@@ -92,7 +94,6 @@ describe('Marketplace page - providers tab', () => {
 
     await waitForReload();
 
-    const user = userEvent.setup();
     const providersTab = screen.getByRole('tab', { name: /providers/i });
     await user.click(providersTab);
     await waitForReload();
@@ -119,7 +120,6 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('should return providers search results matching the query', async () => {
-    const user = userEvent.setup();
     const input = getByPlaceholderText(renderedContainer, 'Search');
     await user.type(input, 'cloudina');
     const match = screen.getByText('Cloudinary');
@@ -165,7 +165,6 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('shows providers filters popover', async () => {
-    const user = userEvent.setup();
     const filtersButton = screen.getByTestId('filters-button');
 
     // Only show collections filters on providers
@@ -176,7 +175,6 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('shows the collections filter options', async () => {
-    const user = userEvent.setup();
     const filtersButton = screen.getByTestId('filters-button');
     await user.click(filtersButton);
 
@@ -198,7 +196,6 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('filters a collection option', async () => {
-    const user = userEvent.setup();
     const filtersButton = screen.getByTestId('filters-button');
     await user.click(filtersButton);
 
@@ -223,8 +220,6 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('filters multiple collection options', async () => {
-    const user = userEvent.setup();
-
     await user.click(screen.getByTestId('filters-button'));
     await user.click(screen.getByTestId('Collections-button'));
     await user.click(screen.getByRole('option', { name: `Made by Strapi (6)` }));
@@ -250,7 +245,6 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('removes a filter option tag', async () => {
-    const user = userEvent.setup();
     const filtersButton = screen.getByTestId('filters-button');
     await user.click(filtersButton);
 
@@ -272,7 +266,6 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('only filters in the providers tab', async () => {
-    const user = userEvent.setup();
     const filtersButton = screen.getByTestId('filters-button');
     await user.click(filtersButton);
 
@@ -297,8 +290,12 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('shows the correct options on sort select', async () => {
+<<<<<<< HEAD
     const user = userEvent.setup();
     const sortButton = screen.getByRole('combobox', { name: /Sort by/i });
+=======
+    const sortButton = screen.getByRole('button', { name: /Sort by/i });
+>>>>>>> 3a252b9b97 (Add pagination tests)
     await user.click(sortButton);
 
     const alphabeticalOption = screen.getByRole('option', { name: 'Alphabetical order' });
@@ -309,8 +306,12 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('changes the url on sort option select', async () => {
+<<<<<<< HEAD
     const user = userEvent.setup();
     const sortButton = screen.getByRole('combobox', { name: /Sort by/i });
+=======
+    const sortButton = screen.getByRole('button', { name: /Sort by/i });
+>>>>>>> 3a252b9b97 (Add pagination tests)
     await user.click(sortButton);
 
     const newestOption = screen.getByRole('option', { name: 'Newest' });
@@ -341,5 +342,34 @@ describe('Marketplace page - providers tab', () => {
       /this provider has \d+ weekly downloads/i
     );
     expect(downloadsLabel).toBeVisible();
+  });
+
+  it('paginates the results', async () => {
+    // Should have pagination section with 4 pages
+    const pagination = screen.getByLabelText(/pagination/i);
+    expect(pagination).toBeVisible();
+    const pageButtons = screen.getAllByRole('link', { name: /go to page \d+/i });
+    expect(pageButtons.length).toBe(4);
+
+    // Can't go to previous page since there isn't one
+    expect(screen.getByRole('link', { name: /go to previous page/i })).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+
+    // Can go to next page
+    await user.click(screen.getByRole('link', { name: /go to next page/i }));
+    await waitForReload();
+    expect(history.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=2');
+
+    // Can go to previous page
+    await user.click(screen.getByRole('link', { name: /go to previous page/i }));
+    await waitForReload();
+    expect(history.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=1');
+
+    // Can go to specific page
+    await user.click(screen.getByRole('link', { name: /go to page 3/i }));
+    await waitForReload();
+    expect(history.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=3');
   });
 });
