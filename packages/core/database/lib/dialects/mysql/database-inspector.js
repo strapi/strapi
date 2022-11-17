@@ -3,7 +3,7 @@
 const { MARIADB, MYSQL } = require('../../utils/constants');
 
 const SQL_QUERIES = {
-  VERSION: `SELECT version()`,
+  VERSION: `SELECT version() as version`,
 };
 
 class MysqlDatabaseInspector {
@@ -13,7 +13,7 @@ class MysqlDatabaseInspector {
 
   async getInformation() {
     const [results] = await this.db.connection.raw(SQL_QUERIES.VERSION);
-    const version = results[0]['version()'];
+    const version = results[0].version;
 
     const [versionNumber, databaseName] = version.split('-');
     const database = databaseName && databaseName.toLowerCase() === 'mariadb' ? MARIADB : MYSQL;

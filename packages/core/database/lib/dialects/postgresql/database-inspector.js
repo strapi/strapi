@@ -3,7 +3,7 @@
 const { POSTGRES } = require('../../utils/constants');
 
 const SQL_QUERIES = {
-  VERSION: `SELECT current_setting('server_version')`,
+  VERSION: `SELECT current_setting('server_version') as version`,
 };
 
 class PostgresqlDatabaseInspector {
@@ -13,7 +13,7 @@ class PostgresqlDatabaseInspector {
 
   async getInformation() {
     const { rows } = await this.db.connection.raw(SQL_QUERIES.VERSION);
-    const version = rows[0].current_setting;
+    const version = rows[0].version;
 
     return {
       database: POSTGRES,

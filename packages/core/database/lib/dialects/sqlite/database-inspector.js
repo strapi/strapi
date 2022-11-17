@@ -3,7 +3,7 @@
 const { SQLITE } = require('../../utils/constants');
 
 const SQL_QUERIES = {
-  VERSION: `SELECT sqlite_version()`,
+  VERSION: `SELECT sqlite_version() as version`,
 };
 
 class SqliteDatabaseInspector {
@@ -13,7 +13,7 @@ class SqliteDatabaseInspector {
 
   async getInformation() {
     const results = await this.db.connection.raw(SQL_QUERIES.VERSION);
-    const version = results[0]['sqlite_version()'];
+    const version = results[0].version;
 
     return {
       database: SQLITE,
