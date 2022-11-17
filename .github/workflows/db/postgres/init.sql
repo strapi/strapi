@@ -1,1 +1,1 @@
-CREATE SCHEMA myschema
+CREATE SCHEMA myschema;
