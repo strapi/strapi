@@ -70,7 +70,7 @@
     "@strapi/eslint-config": "0.1.2",
     "@swc/core": "1.2.224",
     "@swc/jest": "0.2.22",
-    "@typescript-eslint/parser": "5.42.1",
+    "@typescript-eslint/parser": "5.43.0",
     "babel-eslint": "10.1.0",
     "chalk": "4.1.2",
     "chokidar": "3.5.3",

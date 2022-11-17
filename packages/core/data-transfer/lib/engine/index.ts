@@ -147,11 +147,10 @@ class TransferEngine implements ITransferEngine {
 
       // Gracefully close the providers
       await this.close();
-    } catch (e) {
-      console.log('error', e);
+    } catch (e: unknown) {
       // Rollback the destination provider if an exception is thrown during the transfer
       // Note: This will be configurable in the future
-      // await this.destinationProvider?.rollback(e);
+      await this.destinationProvider.rollback?.(e as Error);
     }
   }
 
@@ -241,7 +240,7 @@ class TransferEngine implements ITransferEngine {
   }
 
   async transferMedia(): Promise<void> {
-    console.warn('transferMedia not yet implemented');
+    console.warn('> transferMedia not yet implemented');
     return new Promise((resolve) => resolve());
   }
 

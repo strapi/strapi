@@ -52,9 +52,6 @@ module.exports = async (filename, opts) => {
     compression: {
       enabled: opts.compress,
     },
-    archive: {
-      enabled: opts.archive,
-    },
   };
   const destination = createLocalFileDestinationProvider(destinationOptions);
 
