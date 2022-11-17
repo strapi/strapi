@@ -7,10 +7,6 @@ import {
   ITransferEngineOptions,
 } from '../../../types';
 
-import { getStrapiFactory } from '../../__tests__/test-utils';
-
-const strapiFactory = getStrapiFactory({});
-
 const providerStages = ['bootstrap', 'close'];
 
 const getMockSourceStream = (data: Iterable<any> = ['foo', 'bar']) => {
@@ -224,14 +220,11 @@ describe('Transfer engine', () => {
     exclude: [],
   } as ITransferEngineOptions;
 
-  let strapi = strapiFactory();
-
   let completeSource;
   let completeDestination;
 
   beforeEach(() => {
     jest.restoreAllMocks();
-    strapi = strapiFactory();
     completeSource = createSource();
     completeDestination = createDestination();
   });
