@@ -26,7 +26,7 @@ import { UploadAssetDialog } from '../../components/UploadAssetDialog/UploadAsse
 import { EditFolderDialog } from '../../components/EditFolderDialog';
 import { EditAssetDialog } from '../../components/EditAssetDialog';
 import { AssetGridList } from '../../components/AssetGridList';
-import { AssetTableList } from '../../components/AssetTableList';
+import { TableList } from '../../components/TableList';
 import { FolderList } from '../../components/FolderList';
 import SortPicker from '../../components/SortPicker';
 import { useAssets } from '../../hooks/useAssets';
@@ -240,7 +240,7 @@ export const MediaLibrary = () => {
 
           {/* TODO: fix AssetListTable should handle no assets views (loading) */}
           {canRead && !isGridView && (assetCount > 0 || folderCount > 0) && (
-            <AssetTableList
+            <TableList
               assetCount={assetCount}
               folderCount={folderCount}
               onEditAsset={setAssetToEdit}

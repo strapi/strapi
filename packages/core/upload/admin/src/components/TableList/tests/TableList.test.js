@@ -3,7 +3,7 @@ import { IntlProvider } from 'react-intl';
 import { render } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 
-import { AssetTableList } from '..';
+import { TableList } from '..';
 
 const PROPS_FIXTURE = {
   assets: [
@@ -38,7 +38,7 @@ const ComponentFixture = (props) => {
   return (
     <IntlProvider locale="en" messages={{}}>
       <ThemeProvider theme={lightTheme}>
-        <AssetTableList {...customProps} />
+        <TableList {...customProps} />
       </ThemeProvider>
     </IntlProvider>
   );

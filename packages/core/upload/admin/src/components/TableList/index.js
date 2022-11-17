@@ -11,7 +11,7 @@ import { getTrad } from '../../utils';
 import { AssetDefinition, tableHeaders, FolderDefinition } from '../../constants';
 import { TableRows } from './TableRows';
 
-export const AssetTableList = ({
+export const TableList = ({
   assetCount,
   folderCount,
   onEditAsset,
@@ -76,7 +76,7 @@ export const AssetTableList = ({
   );
 };
 
-AssetTableList.defaultProps = {
+TableList.defaultProps = {
   assetCount: 0,
   folderCount: 0,
   onEditAsset: null,
@@ -85,7 +85,7 @@ AssetTableList.defaultProps = {
   selected: [],
 };
 
-AssetTableList.propTypes = {
+TableList.propTypes = {
   assetCount: PropTypes.number,
   folderCount: PropTypes.number,
   onEditAsset: PropTypes.func,
