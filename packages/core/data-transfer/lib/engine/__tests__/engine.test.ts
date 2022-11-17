@@ -1,5 +1,4 @@
-import { Readable } from 'stream';
-import { Duplex } from 'stream-chain';
+import { ObjectWritableMock, ObjectReadableMock } from 'stream-mock';
 import { createTransferEngine } from '..';
 import {
   IDestinationProvider,
@@ -14,6 +13,21 @@ const strapiFactory = getStrapiFactory({});
 
 const providerStages = ['bootstrap', 'close'];
 
+const getMockSourceStream = (data: Iterable<any> = ['foo', 'bar']) => {
+  const stream = new ObjectReadableMock(data).on('close', () => {
+    stream.destroy();
+  });
+
+  return stream;
+};
+
+const getMockDestinationStream = () => {
+  const stream = new ObjectWritableMock().on('close', () => {
+    stream.destroy();
+  });
+  return stream;
+};
+
 const sourceStages = [
   ...providerStages,
   'streamEntities',
@@ -22,6 +36,7 @@ const sourceStages = [
   'streamConfiguration',
   'streamSchemas',
 ];
+
 const destinationStages = [
   ...providerStages,
   'getEntitiesStream',
@@ -64,7 +79,9 @@ expect.extend({
     const missing = sourceStages.filter((stage) => {
       if (provider[stage]) {
         try {
-          expect(provider[stage]).toHaveBeenCalledOnce();
+          // TODO: why is mock.calls an empty array? maybe an async function call that doesn't resolve?
+          // expect(provider[stage]).toHaveBeenCalledOnce();
+          expect(provider[stage].mock.results.length).toEqual(1);
           return false;
         } catch (e) {
           return true;
@@ -80,14 +97,15 @@ expect.extend({
     }
     return {
       pass: true,
-      message: () => `Expected provider not to have all stages called`,
+      message: () => `Expected source provider not to have all stages called`,
     };
   },
   toHaveDestinationStagesCalledOnce(provider: IDestinationProvider) {
     const missing = destinationStages.filter((stage) => {
       if (provider[stage]) {
         try {
-          expect(provider[stage]).toHaveBeenCalledOnce();
+          // expect(provider[stage]).toHaveBeenCalledOnce();
+          expect(provider[stage].mock.results.length).toEqual(1);
           return false;
         } catch (e) {
           return true;
@@ -109,6 +127,42 @@ expect.extend({
   },
 });
 
+const createSource = () => {
+  return {
+    type: 'source',
+    name: 'completeSource',
+    getMetadata: jest.fn() as any,
+    getSchemas: jest.fn() as any,
+
+    bootstrap: jest.fn() as any,
+    close: jest.fn() as any,
+
+    streamEntities: jest.fn().mockResolvedValue(getMockSourceStream()) as any,
+    streamLinks: jest.fn().mockResolvedValue(getMockSourceStream()) as any,
+    streamMedia: jest.fn().mockResolvedValue(getMockSourceStream()) as any,
+    streamConfiguration: jest.fn().mockResolvedValue(getMockSourceStream()) as any,
+    streamSchemas: jest.fn().mockReturnValue(getMockSourceStream()) as any,
+  } as ISourceProvider;
+};
+
+const createDestination = () => {
+  return {
+    type: 'destination',
+    name: 'completeDestination',
+    getMetadata: jest.fn() as any,
+    getSchemas: jest.fn() as any,
+
+    bootstrap: jest.fn() as any,
+    close: jest.fn() as any,
+
+    getEntitiesStream: jest.fn().mockResolvedValue(getMockDestinationStream()) as any,
+    getLinksStream: jest.fn().mockResolvedValue(getMockDestinationStream()) as any,
+    getMediaStream: jest.fn().mockResolvedValue(getMockDestinationStream()) as any,
+    getConfigurationStream: jest.fn().mockResolvedValue(getMockDestinationStream()) as any,
+    getSchemasStream: jest.fn().mockResolvedValue(getMockDestinationStream()) as any,
+  } as IDestinationProvider;
+};
+
 describe('Transfer engine', () => {
   // TODO: if these are needed for any other tests, a factory should be added to test-utils
 
@@ -126,38 +180,6 @@ describe('Transfer engine', () => {
     getSchemas: jest.fn() as any,
   } as IDestinationProvider;
 
-  const completeSource = {
-    type: 'source',
-    name: 'completeSource',
-    getMetadata: jest.fn() as any,
-    getSchemas: jest.fn() as any,
-
-    bootstrap: jest.fn() as any,
-    close: jest.fn() as any,
-
-    streamEntities: jest.fn() as any,
-    streamLinks: jest.fn() as any,
-    streamMedia: jest.fn() as any,
-    streamConfiguration: jest.fn() as any,
-    streamSchemas: jest.fn() as any,
-  } as ISourceProvider;
-
-  const completeDestination = {
-    type: 'source',
-    name: '',
-    getMetadata: jest.fn() as any,
-    getSchemas: jest.fn() as any,
-
-    bootstrap: jest.fn() as any,
-    close: jest.fn() as any,
-
-    getEntitiesStream: jest.fn() as any,
-    getLinksStream: jest.fn() as any,
-    getMediaStream: jest.fn() as any,
-    getConfigurationStream: jest.fn() as any,
-    getSchemasStream: jest.fn() as any,
-  } as IDestinationProvider;
-
   const defaultOptions = {
     strategy: 'restore',
     versionMatching: 'exact',
@@ -166,9 +188,14 @@ describe('Transfer engine', () => {
 
   let strapi = strapiFactory();
 
+  let completeSource;
+  let completeDestination;
+
   beforeEach(() => {
-    jest.resetAllMocks();
+    // jest.restoreAllMocks();
     strapi = strapiFactory();
+    completeSource = createSource();
+    completeDestination = createDestination();
   });
 
   describe('createTransferEngine', () => {
@@ -181,6 +208,8 @@ describe('Transfer engine', () => {
       const engine = createTransferEngine(minimalSource, minimalDestination, engineOptions);
       expect(engine).toBeValidTransferEngine();
     });
+    test.todo('throws error if source is not a source provider');
+    test.todo('throws error if destination is not a destination provider');
   });
 
   describe('bootstrap', () => {
@@ -194,11 +223,11 @@ describe('Transfer engine', () => {
     test('bootstraps all providers with a bootstrap', async () => {
       const source = {
         ...minimalSource,
-        bootstrap: jest.fn().mockReturnValue(new Duplex()),
+        bootstrap: jest.fn().mockResolvedValue(true),
       };
       const destination = {
         ...minimalDestination,
-        bootstrap: jest.fn().mockReturnValue(new Duplex()),
+        bootstrap: jest.fn().mockResolvedValue(true),
       };
       const engine = createTransferEngine(source, destination, defaultOptions);
       expect(engine).toBeValidTransferEngine();
@@ -253,8 +282,10 @@ describe('Transfer engine', () => {
       ).rejects.toThrow();
     });
 
-    test.only('calls all provider stages', async () => {
+    test('calls all provider stages', async () => {
       const engine = createTransferEngine(completeSource, completeDestination, defaultOptions);
+      expect(completeSource).not.toHaveSourceStagesCalledOnce();
+      expect(completeDestination).not.toHaveDestinationStagesCalledOnce();
       await engine.transfer();
 
       expect(completeSource).toHaveSourceStagesCalledOnce();

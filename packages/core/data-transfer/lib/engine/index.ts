@@ -1,4 +1,5 @@
-import _ from 'lodash/fp';
+import { has } from 'lodash/fp';
+
 import { PassThrough } from 'stream-chain';
 import type {
   IDestinationProvider,
@@ -66,12 +67,12 @@ class TransferEngine<
     const size = JSON.stringify(data).length;
     this.#transferProgress[transferStage]!.bytes! += size;
 
-    if (aggregateKey && _.has(aggregateKey, data)) {
+    if (aggregateKey && data && has(aggregateKey, data)) {
       const aggKeyValue = data[aggregateKey];
-      if (!_.has('aggregates', this.#transferProgress[transferStage])) {
+      if (!has('aggregates', this.#transferProgress[transferStage])) {
         this.#transferProgress[transferStage]!.aggregates = {};
       }
-      if (!_.has(aggKeyValue, this.#transferProgress[transferStage]!.aggregates)) {
+      if (!has(aggKeyValue, this.#transferProgress[transferStage]!.aggregates)) {
         this.#transferProgress[transferStage]!.aggregates![aggKeyValue] = { count: 0, bytes: 0 };
       }
       this.#transferProgress[transferStage]!.aggregates![aggKeyValue].count += 1;
@@ -133,21 +134,11 @@ class TransferEngine<
   }
 
   async bootstrap(): Promise<void> {
-    await Promise.all([
-      // bootstrap source provider
-      this.sourceProvider.bootstrap?.(),
-      // bootstrap destination provider
-      this.destinationProvider.bootstrap?.(),
-    ]);
+    await Promise.all([this.sourceProvider.bootstrap?.(), this.destinationProvider.bootstrap?.()]);
   }
 
   async close(): Promise<void> {
-    await Promise.all([
-      // close source provider
-      this.sourceProvider.close?.(),
-      // close destination provider
-      this.destinationProvider.close?.(),
-    ]);
+    await Promise.all([this.sourceProvider.close?.(), this.destinationProvider.close?.()]);
   }
 
   async integrityCheck(): Promise<boolean> {
@@ -218,13 +209,13 @@ class TransferEngine<
 
     const inStream = await this.sourceProvider.streamSchemas?.();
     if (!inStream) {
-      console.log('SourceProvider did not return a schemas stream');
+      // console.log('SourceProvider did not return a schemas stream');
       return;
     }
 
     const outStream = await this.destinationProvider.getSchemasStream?.();
     if (!outStream) {
-      console.log('DestinationProvider did not return a schemas stream');
+      // console.log('DestinationProvider did not return a schemas stream');
       return;
     }
 
@@ -252,13 +243,13 @@ class TransferEngine<
 
     const inStream = await this.sourceProvider.streamEntities?.();
     if (!inStream) {
-      console.log('SourceProvider did not return entities stream');
+      // console.log('SourceProvider did not return entities stream');
       return;
     }
 
     const outStream = await this.destinationProvider.getEntitiesStream?.();
     if (!outStream) {
-      console.log('DestinationProvider did not return entities stream');
+      // console.log('DestinationProvider did not return entities stream');
       return;
     }
 
@@ -291,13 +282,13 @@ class TransferEngine<
 
     const inStream = await this.sourceProvider.streamLinks?.();
     if (!inStream) {
-      console.log('SourceProvider did not return a links stream');
+      // console.log('SourceProvider did not return a links stream');
       return;
     }
 
     const outStream = await this.destinationProvider.getLinksStream?.();
     if (!outStream) {
-      console.log('DestinationProvider did not return a links stream');
+      //console.log('DestinationProvider did not return a links stream');
       return;
     }
 
@@ -338,13 +329,13 @@ class TransferEngine<
 
     const inStream = await this.sourceProvider.streamConfiguration?.();
     if (!inStream) {
-      console.log('SourceProvider did not return configuration stream');
+      // console.log('SourceProvider did not return configuration stream');
       return;
     }
 
     const outStream = await this.destinationProvider.getConfigurationStream?.();
     if (!outStream) {
-      console.log('DestinationProvider did not return configuration stream');
+      // console.log('DestinationProvider did not return configuration stream');
       return;
     }
 
