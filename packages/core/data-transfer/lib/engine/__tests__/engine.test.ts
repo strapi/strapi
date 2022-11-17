@@ -52,6 +52,9 @@ expect.extend({
     try {
       expect(engine).toBeDefined();
 
+      expect(engine.sourceProvider).toBeValidSourceProvider();
+      expect(engine.destinationProvider).toBeValidDestinationProvider();
+
       // All required methods exists
       expect(engine.integrityCheck).toBeInstanceOf(Function);
       expect(engine.transfer).toBeInstanceOf(Function);
@@ -75,7 +78,7 @@ expect.extend({
       message: () => `Expected engine not to be valid`,
     };
   },
-  toHaveSourceStagesCalledOnce(provider: ISourceProvider) {
+  toHaveSourceStagesCalledTimes(provider: ISourceProvider, times: number) {
     const missing = sourceStages.filter((stage) => {
       if (provider[stage]) {
         try {
@@ -92,7 +95,8 @@ expect.extend({
     if (missing.length) {
       return {
         pass: false,
-        message: () => `Expected source provider to have stages called once: ${missing.join(',')}`,
+        message: () =>
+          `Expected source provider to have stages called ${times} times: ${missing.join(',')}`,
       };
     }
     return {
@@ -100,7 +104,7 @@ expect.extend({
       message: () => `Expected source provider not to have all stages called`,
     };
   },
-  toHaveDestinationStagesCalledOnce(provider: IDestinationProvider) {
+  toHaveDestinationStagesCalledTimes(provider: IDestinationProvider, times: number) {
     const missing = destinationStages.filter((stage) => {
       if (provider[stage]) {
         try {
@@ -117,12 +121,46 @@ expect.extend({
       return {
         pass: false,
         message: () =>
-          `Expected destination provider to have stages called once: ${missing.join(',')}`,
+          `Expected destination provider to have stages called ${times} times: ${missing.join(
+            ','
+          )}`,
       };
     }
     return {
       pass: true,
       message: () => `Expected destination provider not to have all stages called`,
+    };
+  },
+  toBeValidSourceProvider(provider: ISourceProvider) {
+    try {
+      expect(provider.getMetadata).toBeDefined();
+      expect(provider.type).toEqual('source');
+      expect(provider.name.length).toBeGreaterThan(0);
+    } catch (e) {
+      return {
+        pass: false,
+        message: () => `Expected source provider to be valid: ${e.message}`,
+      };
+    }
+    return {
+      pass: true,
+      message: () => `Expected source provider not to be valid`,
+    };
+  },
+  toBeValidDestinationProvider(provider: IDestinationProvider) {
+    try {
+      expect(provider.getMetadata).toBeDefined();
+      expect(provider.type).toEqual('destination');
+      expect(provider.name.length).toBeGreaterThan(0);
+    } catch (e) {
+      return {
+        pass: false,
+        message: () => `Expected destination provider to be valid: ${e.message}`,
+      };
+    }
+    return {
+      pass: true,
+      message: () => `Expected destination provider not to be valid`,
     };
   },
 });
@@ -192,7 +230,7 @@ describe('Transfer engine', () => {
   let completeDestination;
 
   beforeEach(() => {
-    // jest.restoreAllMocks();
+    jest.restoreAllMocks();
     strapi = strapiFactory();
     completeSource = createSource();
     completeDestination = createDestination();
@@ -208,8 +246,28 @@ describe('Transfer engine', () => {
       const engine = createTransferEngine(minimalSource, minimalDestination, engineOptions);
       expect(engine).toBeValidTransferEngine();
     });
-    test.todo('throws error if source is not a source provider');
-    test.todo('throws error if destination is not a destination provider');
+
+    test('throws when given invalid source provider', () => {
+      const engineOptions = {
+        strategy: 'restore',
+        versionMatching: 'exact',
+        exclude: [],
+      } as ITransferEngineOptions;
+      expect(() => {
+        createTransferEngine(completeDestination, minimalDestination, engineOptions);
+      }).toThrow();
+    });
+
+    test('throws when given invalid destination provider', () => {
+      const engineOptions = {
+        strategy: 'restore',
+        versionMatching: 'exact',
+        exclude: [],
+      } as ITransferEngineOptions;
+      expect(() => {
+        createTransferEngine(minimalSource, completeSource, engineOptions);
+      }).toThrow();
+    });
   });
 
   describe('bootstrap', () => {
@@ -217,7 +275,7 @@ describe('Transfer engine', () => {
       const engine = createTransferEngine(minimalSource, minimalDestination, defaultOptions);
       expect(engine).toBeValidTransferEngine();
       await engine.transfer();
-      expect(minimalSource).toHaveSourceStagesCalledOnce();
+      expect(minimalSource).toHaveSourceStagesCalledTimes(1);
     });
 
     test('bootstraps all providers with a bootstrap', async () => {
@@ -233,7 +291,7 @@ describe('Transfer engine', () => {
       expect(engine).toBeValidTransferEngine();
       await engine.transfer();
 
-      expect(minimalSource).toHaveSourceStagesCalledOnce();
+      expect(minimalSource).toHaveSourceStagesCalledTimes(1);
     });
   });
 
@@ -284,12 +342,12 @@ describe('Transfer engine', () => {
 
     test('calls all provider stages', async () => {
       const engine = createTransferEngine(completeSource, completeDestination, defaultOptions);
-      expect(completeSource).not.toHaveSourceStagesCalledOnce();
-      expect(completeDestination).not.toHaveDestinationStagesCalledOnce();
+      expect(completeSource).not.toHaveSourceStagesCalledTimes(1);
+      expect(completeDestination).not.toHaveDestinationStagesCalledTimes(1);
       await engine.transfer();
 
-      expect(completeSource).toHaveSourceStagesCalledOnce();
-      expect(completeDestination).toHaveDestinationStagesCalledOnce();
+      expect(completeSource).toHaveSourceStagesCalledTimes(1);
+      expect(completeDestination).toHaveDestinationStagesCalledTimes(1);
     });
 
     test('returns provider results', async () => {

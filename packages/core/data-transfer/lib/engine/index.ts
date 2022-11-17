@@ -56,6 +56,12 @@ class TransferEngine<
     destinationProvider: IDestinationProvider,
     options: ITransferEngineOptions
   ) {
+    if (sourceProvider.type !== 'source') {
+      throw new Error("SourceProvider does not have type 'source'");
+    }
+    if (destinationProvider.type !== 'destination') {
+      throw new Error("SourceProvider does not have type 'source'");
+    }
     this.sourceProvider = sourceProvider;
     this.destinationProvider = destinationProvider;
     this.options = options;
