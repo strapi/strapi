@@ -64,7 +64,7 @@ expect.extend({
     const missing = sourceStages.filter((stage) => {
       if (provider[stage]) {
         try {
-          expect(provider[stage]).toHaveBeenCalledTimes(1);
+          expect(provider[stage]).toHaveBeenCalledOnce();
           return false;
         } catch (e) {
           return true;
@@ -75,7 +75,7 @@ expect.extend({
     if (missing.length) {
       return {
         pass: false,
-        message: () => `Expected source provider to have stages called: ${missing.join(',')}`,
+        message: () => `Expected source provider to have stages called once: ${missing.join(',')}`,
       };
     }
     return {
@@ -87,7 +87,7 @@ expect.extend({
     const missing = destinationStages.filter((stage) => {
       if (provider[stage]) {
         try {
-          expect(provider[stage]).toHaveBeenCalledTimes(1);
+          expect(provider[stage]).toHaveBeenCalledOnce();
           return false;
         } catch (e) {
           return true;
@@ -98,7 +98,8 @@ expect.extend({
     if (missing.length) {
       return {
         pass: false,
-        message: () => `Expected destination provider to have stages called: ${missing.join(',')}`,
+        message: () =>
+          `Expected destination provider to have stages called once: ${missing.join(',')}`,
       };
     }
     return {
@@ -113,21 +114,21 @@ describe('Transfer engine', () => {
 
   const minimalSource = {
     type: 'source',
-    name: '',
+    name: 'minimalSource',
     getMetadata: jest.fn() as any,
     getSchemas: jest.fn() as any,
   } as ISourceProvider;
 
   const minimalDestination = {
-    type: 'source',
-    name: '',
+    type: 'destination',
+    name: 'minimalDestination',
     getMetadata: jest.fn() as any,
     getSchemas: jest.fn() as any,
   } as IDestinationProvider;
 
   const completeSource = {
     type: 'source',
-    name: '',
+    name: 'completeSource',
     getMetadata: jest.fn() as any,
     getSchemas: jest.fn() as any,
 
@@ -252,8 +253,8 @@ describe('Transfer engine', () => {
       ).rejects.toThrow();
     });
 
-    test('calls all provider stages', async () => {
-      const engine = createTransferEngine(completeSource, completeSource, defaultOptions);
+    test.only('calls all provider stages', async () => {
+      const engine = createTransferEngine(completeSource, completeDestination, defaultOptions);
       await engine.transfer();
 
       expect(completeSource).toHaveSourceStagesCalledOnce();
