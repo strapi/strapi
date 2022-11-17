@@ -80,7 +80,7 @@ expect.extend({
         try {
           // TODO: why is mock.calls an empty array? maybe an async function call that doesn't resolve?
           // expect(provider[stage]).toHaveBeenCalledOnce();
-          expect(provider[stage].mock.results.length).toEqual(1);
+          expect(provider[stage].mock.results.length).toEqual(times);
           return false;
         } catch (e) {
           return true;
@@ -105,7 +105,7 @@ expect.extend({
       if (provider[stage]) {
         try {
           // expect(provider[stage]).toHaveBeenCalledOnce();
-          expect(provider[stage].mock.results.length).toEqual(1);
+          expect(provider[stage].mock.results.length).toEqual(times);
           return false;
         } catch (e) {
           return true;
@@ -335,8 +335,8 @@ describe('Transfer engine', () => {
 
     test('calls all provider stages', async () => {
       const engine = createTransferEngine(completeSource, completeDestination, defaultOptions);
-      expect(completeSource).not.toHaveSourceStagesCalledTimes(1);
-      expect(completeDestination).not.toHaveDestinationStagesCalledTimes(1);
+      expect(completeSource).toHaveSourceStagesCalledTimes(0);
+      expect(completeDestination).toHaveDestinationStagesCalledTimes(0);
       await engine.transfer();
 
       expect(completeSource).toHaveSourceStagesCalledTimes(1);
