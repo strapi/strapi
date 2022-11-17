@@ -1,4 +1,5 @@
 function wrapAxiosInstance(instance) {
+  if (process.env.NODE_ENV !== 'development') return instance;
   const wrapper = {};
   ['request', 'get', 'head', 'delete', 'options', 'post', 'put', 'patch', 'getUri'].forEach(
     (methodName) => {

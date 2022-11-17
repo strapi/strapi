@@ -35,6 +35,6 @@ instance.interceptors.response.use(
   }
 );
 
-const wrapper = process.env.NODE_ENV === 'development' ? wrapAxiosInstance(instance) : instance;
+const wrapper = wrapAxiosInstance(instance);
 
 export default wrapper;
