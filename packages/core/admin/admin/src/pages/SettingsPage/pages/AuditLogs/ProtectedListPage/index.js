@@ -1,11 +1,11 @@
 import React from 'react';
 import { CheckPagePermissions } from '@strapi/helper-plugin';
 import adminPermissions from '../../../../../permissions';
-import ListPage from '../ListPage';
+import ListView from '../ListView';
 
 const ProtectedListPage = () => (
   <CheckPagePermissions permissions={adminPermissions.settings.auditLogs.main}>
-    <ListPage />
+    <ListView />
   </CheckPagePermissions>
 );
 

@@ -4,7 +4,7 @@ import { HeaderLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { useIntl } from 'react-intl';
 
-const ListPage = () => {
+const ListView = () => {
   const { formatMessage } = useIntl();
 
   const title = formatMessage({
@@ -26,4 +26,4 @@ const ListPage = () => {
   );
 };
 
-export default ListPage;
+export default ListView;
