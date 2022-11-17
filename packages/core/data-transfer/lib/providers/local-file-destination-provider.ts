@@ -1,11 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 import zip from 'zlib';
-import { Writable } from 'stream';
+import { Writable, Readable } from 'stream';
 import { chain } from 'stream-chain';
 import { stringer } from 'stream-json/jsonl/Stringer';
 
-import type { IDestinationProvider, ProviderType, Stream } from '../../types';
+import type { IDestinationProvider, IMetadata, ProviderType } from '../../types';
 import { createEncryptionCipher } from '../encryption/encrypt';
 
 export interface ILocalFileDestinationProviderOptions {
@@ -43,16 +43,26 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   name: string = 'destination::local-file';
   type: ProviderType = 'destination';
   options: ILocalFileDestinationProviderOptions;
+  #providersMetadata: { source?: IMetadata; destination?: IMetadata } = {};
 
   constructor(options: ILocalFileDestinationProviderOptions) {
     this.options = options;
   }
 
-  #getDataTransformers() {
+  setMetadata(target: ProviderType, metadata: IMetadata): IDestinationProvider {
+    this.#providersMetadata[target] = metadata;
+
+    return this;
+  }
+
+  #getDataTransformers(options: { jsonl?: boolean } = {}) {
+    const { jsonl = true } = options;
     const transforms = [];
 
-    // Convert to stringified JSON lines
-    transforms.push(stringer());
+    if (jsonl) {
+      // Convert to stringified JSON lines
+      transforms.push(stringer());
+    }
 
     // Compression
     if (this.options.compression.enabled) {
@@ -95,12 +105,44 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     fs.mkdirSync(path.join(rootDir, 'configuration'));
   }
 
-  rollback(): void | Promise<void> {
+  async close(): Promise<void> {
+    await this.#writeMetadata();
+  }
+
+  rollback(): void {
     fs.rmSync(this.options.file.path, { force: true, recursive: true });
   }
 
   getMetadata() {
     return null;
+  }
+
+  async #writeMetadata(): Promise<void> {
+    const metadata = this.#providersMetadata.source;
+
+    if (metadata) {
+      await new Promise((resolve) => {
+        const outStream = this.#getMetadataStream();
+        const data = JSON.stringify(metadata, null, 2);
+
+        Readable.from(data).pipe(outStream).on('close', resolve);
+      });
+    }
+  }
+
+  #getMetadataStream() {
+    const metadataPath = path.join(this.options.file.path, 'metadata.json');
+
+    // Transform streams
+    const transforms: Writable[] = this.#getDataTransformers({ jsonl: false });
+
+    // FS write stream
+    const fileStream = fs.createWriteStream(metadataPath);
+
+    // Full pipeline
+    const streams = transforms.concat(fileStream);
+
+    return chain(streams);
   }
 
   getSchemasStream() {

@@ -39,7 +39,12 @@ export interface ITransferEngine {
    * Note: The bootstrap method can be used to initialize database
    * connections, open files, etc...
    */
-  boostrap(): Promise<void>;
+  bootstrap(): Promise<void>;
+
+  /**
+   * Engine init step. Must be called after the providers bootstrap.
+   */
+  init(): Promise<void>;
 
   /**
    * Run the close lifecycle method of each provider
@@ -50,10 +55,10 @@ export interface ITransferEngine {
 
   /**
    * Run the preparations before strating a transfer for each provider
-   * 
+   *
    * related source and destination providers
    */
-  prepareTransfer():Promise<void>;
+  prepareTransfer(): Promise<void>;
 
   /**
    * Start the schemas transfer by connecting the

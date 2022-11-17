@@ -303,7 +303,7 @@ program
   .arguments('[filename]')
   .allowExcessArguments(false)
   .hook('preAction', promptEncryptionKey)
-  .action(require('../lib/commands/transfer/export'));
+  .action(getLocalScript('transfer/export'));
 
 // `$ strapi import`
 program
@@ -329,6 +329,6 @@ program
   )
   .arguments('<filename>')
   .allowExcessArguments(false)
-  .action(require('../lib/commands/transfer/import'));
+  .action(getLocalScript('transfer/import'));
 
 program.parseAsync(process.argv);

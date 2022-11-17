@@ -71,12 +71,12 @@ describe('SSO', () => {
       jest.clearAllMocks();
     });
 
-    test('Cannot register after boostrap', () => {
+    test('Cannot register after bootstrap', () => {
       global.strapi = { isLoaded: true };
 
       const fn = () => registry.register(fooProvider);
 
-      expect(fn).toThrowError(`You can't register new provider after the boostrap`);
+      expect(fn).toThrowError(`You can't register new provider after the bootstrap`);
       expect(registry.size).toBe(0);
     });
 

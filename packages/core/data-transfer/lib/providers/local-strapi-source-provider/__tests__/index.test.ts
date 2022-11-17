@@ -6,7 +6,7 @@ import { collect, createMockedQueryBuilder, getStrapiFactory } from '../../test-
 import { createLocalStrapiSourceProvider } from '../';
 
 describe('Local Strapi Source Provider', () => {
-  describe('Boostrap', () => {
+  describe('Bootstrap', () => {
     test('Should not have a defined Strapi instance if bootstrap has not been called', () => {
       const provider = createLocalStrapiSourceProvider({ getStrapi: getStrapiFactory() });
 
@@ -138,14 +138,14 @@ describe('Local Strapi Source Provider', () => {
           category: 'basic',
           modelType: 'component',
           modelName: 'simple',
-          globalId: 'ComponentBasicSimple'
+          globalId: 'ComponentBasicSimple',
         },
         'blog.test-como': {
           collectionName: 'components_blog_test_comos',
           info: {
             displayName: 'test comp',
             icon: 'air-freshener',
-            description: ''
+            description: '',
           },
           options: {},
           attributes: { name: { type: 'string' } },
@@ -153,15 +153,15 @@ describe('Local Strapi Source Provider', () => {
           category: 'blog',
           modelType: 'component',
           modelName: 'test-como',
-          globalId: 'ComponentBlogTestComo'
+          globalId: 'ComponentBlogTestComo',
         },
-      }
+      };
 
       const provider = createLocalStrapiSourceProvider({
         getStrapi: getStrapiFactory({
           contentTypes,
-          components
-        })
+          components,
+        }),
       });
 
       await provider.bootstrap();
@@ -184,14 +184,14 @@ describe('Local Strapi Source Provider', () => {
           category: 'basic',
           modelType: 'component',
           modelName: 'simple',
-          globalId: 'ComponentBasicSimple'
+          globalId: 'ComponentBasicSimple',
         },
         {
           collectionName: 'components_blog_test_comos',
           info: {
             displayName: 'test comp',
             icon: 'air-freshener',
-            description: ''
+            description: '',
           },
           options: {},
           attributes: { name: { type: 'string' } },
@@ -199,9 +199,9 @@ describe('Local Strapi Source Provider', () => {
           category: 'blog',
           modelType: 'component',
           modelName: 'test-como',
-          globalId: 'ComponentBlogTestComo'
-        }
-      ])
+          globalId: 'ComponentBlogTestComo',
+        },
+      ]);
     });
-  })
+  });
 });
