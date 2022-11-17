@@ -50,10 +50,25 @@ module.exports = {
   setupFilesAfterEnv: [
     '<rootDir>/packages/admin-test-utils/lib/setup/styled-components.js',
     '<rootDir>/packages/admin-test-utils/lib/setup/strapi.js',
+    '<rootDir>/packages/admin-test-utils/lib/setup/prop-types.js',
   ],
   testEnvironment: 'jsdom',
   transform: {
-    '^.+\\.js$': ['@swc/jest', { jsc: { parser: { jsx: true, dynamicImport: true } } }],
+    '^.+\\.js$': [
+      '@swc/jest',
+      {
+        env: {
+          mode: 'usage',
+        },
+
+        jsc: {
+          parser: {
+            jsx: true,
+            dynamicImport: true,
+          },
+        },
+      },
+    ],
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
       '<rootDir>/fileTransformer.js',
   },

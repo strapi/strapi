@@ -59,23 +59,57 @@ describe('Application page', () => {
     await waitFor(() => expect(screen.getByText('Logo')).toBeInTheDocument());
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c19 {
-        background: #ffffff;
-        padding-top: 24px;
-        padding-right: 32px;
-        padding-bottom: 24px;
-        padding-left: 32px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      .c17 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
       }
 
-      .c32 {
-        padding-top: 4px;
+      .c18 > * {
+        margin-top: 0;
+        margin-bottom: 0;
       }
 
-      .c46 {
-        max-width: 40%;
-        max-height: 40%;
+      .c18 > * + * {
+        margin-top: 24px;
+      }
+
+      .c20 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c20 > * + * {
+        margin-top: 20px;
+      }
+
+      .c21 {
+        color: #32324d;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
+      .c25 {
+        color: #666687;
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+      }
+
+      .c26 {
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       .c14 {
@@ -219,6 +253,37 @@ describe('Application page', () => {
         fill: #ffffff;
       }
 
+      .c19 {
+        background: #ffffff;
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c32 {
+        padding-top: 4px;
+      }
+
+      .c46 {
+        max-width: 40%;
+        max-height: 40%;
+      }
+
+      .c51 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
       .c49 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -315,59 +380,6 @@ describe('Application page', () => {
 
       .c50[aria-disabled='true'] svg path {
         fill: #666687;
-      }
-
-      .c17 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c18 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c18 > * + * {
-        margin-top: 24px;
-      }
-
-      .c20 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c20 > * + * {
-        margin-top: 20px;
-      }
-
-      .c21 {
-        color: #32324d;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-      }
-
-      .c25 {
-        color: #666687;
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-      }
-
-      .c26 {
-        color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
       }
 
       .c29 {
@@ -553,6 +565,7 @@ describe('Application page', () => {
       .c41 {
         padding-right: 8px;
         padding-left: 8px;
+        overflow: hidden;
         width: 100%;
       }
 
@@ -566,7 +579,7 @@ describe('Application page', () => {
         width: 100%;
       }
 
-      .c51 {
+      .c52 {
         padding-top: 8px;
         padding-right: 16px;
         padding-left: 16px;
@@ -579,7 +592,7 @@ describe('Application page', () => {
         line-height: 1.33;
       }
 
-      .c52 {
+      .c53 {
         color: #666687;
         display: block;
         white-space: nowrap;
@@ -589,7 +602,7 @@ describe('Application page', () => {
         line-height: 1.33;
       }
 
-      .c53 {
+      .c54 {
         color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
@@ -984,6 +997,7 @@ describe('Application page', () => {
                                     <div
                                       aria-live="polite"
                                       class="c41 c42"
+                                      overflow="hidden"
                                       width="100%"
                                     >
                                       <div
@@ -1013,8 +1027,15 @@ describe('Application page', () => {
                                           tabindex="0"
                                           type="button"
                                         >
+                                          <span
+                                            class="c51"
+                                          >
+                                            Change logo
+                                          </span>
                                           <svg
+                                            aria-hidden="true"
                                             fill="none"
+                                            focusable="false"
                                             height="1em"
                                             viewBox="0 0 24 24"
                                             width="1em"
@@ -1035,8 +1056,15 @@ describe('Application page', () => {
                                           tabindex="0"
                                           type="button"
                                         >
+                                          <span
+                                            class="c51"
+                                          >
+                                            Reset logo
+                                          </span>
                                           <svg
+                                            aria-hidden="true"
                                             fill="none"
+                                            focusable="false"
                                             height="1em"
                                             viewBox="0 0 24 24"
                                             width="1em"
@@ -1054,7 +1082,7 @@ describe('Application page', () => {
                                     </div>
                                   </section>
                                   <div
-                                    class="c51"
+                                    class="c52"
                                   >
                                     <span>
                                       <div
@@ -1063,7 +1091,7 @@ describe('Application page', () => {
                                         tabindex="0"
                                       >
                                         <span
-                                          class="c52"
+                                          class="c53"
                                         >
                                           michka.svg
                                         </span>
@@ -1073,7 +1101,7 @@ describe('Application page', () => {
                                 </div>
                               </div>
                               <p
-                                class="c53"
+                                class="c54"
                                 id="carouselinput-1-hint"
                               >
                                 Change the admin panel logo (Max dimension: 750x750, Max file size: 100KB)
