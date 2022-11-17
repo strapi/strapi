@@ -9,19 +9,30 @@ import { Typography } from '@strapi/design-system/Typography';
 import Pencil from '@strapi/icons/Pencil';
 
 import { PreviewCell } from './PreviewCell';
-import { AssetDefinition } from '../../constants';
+import { AssetDefinition, FolderDefinition } from '../../constants';
 import { formatBytes, getTrad } from '../../utils';
 
-export const TableRows = ({ assets, onEditAsset, onSelectAsset, selectedAssets }) => {
+export const TableRows = ({ onEditAsset, onEditFolder, onSelectOne, rows, selected }) => {
   const { formatDate, formatMessage } = useIntl();
 
   return (
     <Tbody>
-      {assets.map((asset) => {
-        const { alternativeText, id, name, ext, size, createdAt, updatedAt, url, mime, formats } =
-          asset;
+      {rows.map((element) => {
+        const {
+          alternativeText,
+          id,
+          name,
+          ext,
+          size,
+          createdAt,
+          updatedAt,
+          url,
+          mime,
+          formats,
+          type,
+        } = element || {};
 
-        const isSelected = !!selectedAssets.find((currentAsset) => currentAsset.id === id);
+        const isSelected = !!selected.find((currentRow) => currentRow.id === id);
 
         return (
           <Tr key={id}>
@@ -29,12 +40,13 @@ export const TableRows = ({ assets, onEditAsset, onSelectAsset, selectedAssets }
               <BaseCheckbox
                 aria-label={formatMessage(
                   {
-                    id: 'list-assets-select',
-                    defaultMessage: 'Select {name} asset',
+                    id: type === 'asset' ? 'list-assets-select' : 'list.folder.select',
+                    defaultMessage:
+                      type === 'asset' ? 'Select {name} asset' : 'Select {name} folder',
                   },
                   { name }
                 )}
-                onValueChange={() => onSelectAsset({ ...asset, type: 'asset' })}
+                onValueChange={() => onSelectOne({ ...element, type })}
                 checked={isSelected}
               />
             </Td>
@@ -43,6 +55,7 @@ export const TableRows = ({ assets, onEditAsset, onSelectAsset, selectedAssets }
                 alternativeText={alternativeText}
                 fileExtension={getFileExtension(ext)}
                 mime={mime}
+                type={type}
                 thumbnailURL={formats?.thumbnail?.url}
                 url={url}
               />
@@ -51,10 +64,10 @@ export const TableRows = ({ assets, onEditAsset, onSelectAsset, selectedAssets }
               <Typography>{name}</Typography>
             </Td>
             <Td>
-              <Typography>{getFileExtension(ext).toUpperCase()}</Typography>
+              <Typography>{ext ? getFileExtension(ext).toUpperCase() : '-'}</Typography>
             </Td>
             <Td>
-              <Typography>{formatBytes(size)}</Typography>
+              <Typography>{size ? formatBytes(size) : '-'}</Typography>
             </Td>
             <Td>
               <Typography>{formatDate(new Date(createdAt))}</Typography>
@@ -62,14 +75,15 @@ export const TableRows = ({ assets, onEditAsset, onSelectAsset, selectedAssets }
             <Td>
               <Typography>{formatDate(new Date(updatedAt))}</Typography>
             </Td>
-            {onEditAsset && (
+            {onEditAsset && onEditFolder && (
               <Td>
                 <IconButton
                   label={formatMessage({
                     id: getTrad('control-card.edit'),
                     defaultMessage: 'Edit',
                   })}
-                  onClick={() => onEditAsset(asset)}
+                  onClick={() => (type === 'asset' ? onEditAsset(element) : onEditFolder(element))}
+                  noBorder
                 >
                   <Pencil />
                 </IconButton>
@@ -84,13 +98,14 @@ export const TableRows = ({ assets, onEditAsset, onSelectAsset, selectedAssets }
 
 TableRows.defaultProps = {
   onEditAsset: null,
-  onSelectAsset: null,
-  selectedAssets: [],
+  onEditFolder: null,
+  selected: [],
 };
 
 TableRows.propTypes = {
-  assets: PropTypes.arrayOf(AssetDefinition).isRequired,
+  rows: PropTypes.arrayOf(AssetDefinition, FolderDefinition).isRequired,
   onEditAsset: PropTypes.func,
-  onSelectAsset: PropTypes.func,
-  selectedAssets: PropTypes.arrayOf(AssetDefinition),
+  onEditFolder: PropTypes.func,
+  onSelectOne: PropTypes.func.isRequired,
+  selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition),
 };

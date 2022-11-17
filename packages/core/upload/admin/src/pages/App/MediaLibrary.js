@@ -74,7 +74,7 @@ export const MediaLibrary = () => {
   const isFiltering = Boolean(query._q || query.filters);
 
   // TODO: remove and replace with data when available stored
-  const isGridView = true;
+  const isGridView = false;
 
   const {
     data: assetsData,
@@ -116,7 +116,6 @@ export const MediaLibrary = () => {
   const [assetToEdit, setAssetToEdit] = useState(undefined);
   const [folderToEdit, setFolderToEdit] = useState(undefined);
   const [selected, { selectOne, selectAll }] = useSelectionState(['type', 'id'], []);
-  const selectedAssets = selected.filter(({ type }) => type === 'asset');
   const toggleUploadAssetDialog = () => setShowUploadAssetDialog((prev) => !prev);
   const toggleEditFolderDialog = ({ created = false } = {}) => {
     // folders are only displayed on the first page, therefore
@@ -171,7 +170,7 @@ export const MediaLibrary = () => {
         <ActionLayout
           startActions={
             <>
-              {canUpdate && (assetCount > 0 || folderCount > 0) && (
+              {canUpdate && isGridView && (assetCount > 0 || folderCount > 0) && (
                 <BoxWithHeight
                   paddingLeft={2}
                   paddingRight={2}
@@ -197,13 +196,15 @@ export const MediaLibrary = () => {
                       }
                       selectAll([
                         ...assets.map((asset) => ({ ...asset, type: 'asset' })),
-                        ...folders.map((folder) => ({ ...folder, type: 'folder' })),
+                        ...(folders
+                          ? folders.map((folder) => ({ ...folder, type: 'folder' }))
+                          : []),
                       ]);
                     }}
                   />
                 </BoxWithHeight>
               )}
-              {canRead && <SortPicker onChangeSort={handleChangeSort} />}
+              {canRead && isGridView && <SortPicker onChangeSort={handleChangeSort} />}
               {canRead && <Filters />}
             </>
           }
@@ -237,7 +238,24 @@ export const MediaLibrary = () => {
             />
           )}
 
-          {canRead && (
+          {/* TODO: fix AssetListTable should handle no assets views (loading) */}
+          {canRead && !isGridView && (assetCount > 0 || folderCount > 0) && (
+            <AssetTableList
+              assetCount={assetCount}
+              folderCount={folderCount}
+              onEditAsset={setAssetToEdit}
+              onEditFolder={handleEditFolder}
+              onSelectOne={selectOne}
+              onSelectAll={selectAll}
+              rows={[
+                ...(folders ? folders.map((folder) => ({ ...folder, type: 'folder' })) : []),
+                ...(assets ? assets.map((asset) => ({ ...asset, type: 'asset' })) : []),
+              ]}
+              selected={selected}
+            />
+          )}
+
+          {canRead && isGridView && (
             <>
               {folderCount > 0 && (
                 <FolderList
@@ -338,46 +356,33 @@ export const MediaLibrary = () => {
               )}
 
               {assetCount > 0 && (
-                <>
-                  {isGridView ? (
-                    <AssetGridList
-                      assets={assets}
-                      onEditAsset={setAssetToEdit}
-                      onSelectAsset={selectOne}
-                      selectedAssets={selectedAssets}
-                      title={
-                        // Assets title should only appear if:
-                        // - user is not filtering
-                        // - user is filtering and there are folders to display, to separate them
-                        // - user is on page 1 since folders won't appear on any other page than the first one (no need to visually separate them)
-                        ((!isFiltering || (isFiltering && folderCount > 0)) &&
-                          assetsData?.pagination?.page === 1 &&
-                          formatMessage(
-                            {
-                              id: getTrad('list.assets.title'),
-                              defaultMessage: 'Assets ({count})',
-                            },
-                            { count: assetCount }
-                          )) ||
-                        ''
-                      }
-                    />
-                  ) : (
-                    <AssetTableList
-                      assets={assets}
-                      onEditAsset={setAssetToEdit}
-                      onSelectAsset={selectOne}
-                      selectedAssets={selectedAssets}
-                    />
-                  )}
-
-                  {assetsData?.pagination && (
-                    <PaginationFooter pagination={assetsData.pagination} />
-                  )}
-                </>
+                <AssetGridList
+                  assets={assets}
+                  onEditAsset={setAssetToEdit}
+                  onSelectAsset={selectOne}
+                  selectedAssets={selected.filter(({ type }) => type === 'asset')}
+                  title={
+                    // Assets title should only appear if:
+                    // - user is not filtering
+                    // - user is filtering and there are folders to display, to separate them
+                    // - user is on page 1 since folders won't appear on any other page than the first one (no need to visually separate them)
+                    ((!isFiltering || (isFiltering && folderCount > 0)) &&
+                      assetsData?.pagination?.page === 1 &&
+                      formatMessage(
+                        {
+                          id: getTrad('list.assets.title'),
+                          defaultMessage: 'Assets ({count})',
+                        },
+                        { count: assetCount }
+                      )) ||
+                    ''
+                  }
+                />
               )}
             </>
           )}
+
+          {assetsData?.pagination && <PaginationFooter pagination={assetsData.pagination} />}
         </ContentLayout>
       </Main>
 
