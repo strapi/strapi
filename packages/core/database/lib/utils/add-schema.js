@@ -5,6 +5,6 @@ const addSchema = (tableName) => {
   return schemaName ? `${schemaName}.${tableName}` : tableName;
 };
 
-module.export = {
+module.exports = {
   addSchema,
 };
