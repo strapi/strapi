@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { NavLink as RouterNavLink } from 'react-router-dom';
+import { NavLink as RouterNavLink, useLocation } from 'react-router-dom';
 import { Divider } from '@strapi/design-system/Divider';
 import {
   MainNav,
@@ -60,6 +60,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   const { userDisplayName } = useAppInfos();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
+  const { pathname } = useLocation();
 
   const initials = userDisplayName
     .split(' ')
@@ -81,6 +82,10 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
     ) {
       setUserLinksVisible(false);
     }
+  };
+
+  const handleClickOnLink = (destination = null) => {
+    trackUsage('didNavigate', { from: pathname, to: destination });
   };
 
   const menuTitle = formatMessage({
@@ -111,7 +116,12 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
       <Divider />
 
       <NavSections>
-        <NavLink as={RouterNavLink} to="/content-manager" icon={<Write />}>
+        <NavLink
+          as={RouterNavLink}
+          to="/content-manager"
+          icon={<Write />}
+          onClick={() => handleClickOnLink('/content-manager')}
+        >
           {formatMessage({ id: 'global.content-manager', defaultMessage: 'Content manager' })}
         </NavLink>
 
@@ -131,17 +141,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
                   to={link.to}
                   key={link.to}
                   icon={<Icon />}
-                  isActive={(match, location) => {
-                    if (match) {
-                      if (location.pathname === '/plugins/content-type-builder') {
-                        trackUsage(`didGoToCTB`);
-                      }
-
-                      return true;
-                    }
-
-                    return false;
-                  }}
+                  onClick={() => handleClickOnLink(link.to)}
                 >
                   {formatMessage(link.intlLabel)}
                 </NavLink>
@@ -169,6 +169,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
                   to={link.to}
                   key={link.to}
                   icon={<LinkIcon />}
+                  onClick={() => handleClickOnLink(link.to)}
                 >
                   {formatMessage(link.intlLabel)}
                 </NavLink>
