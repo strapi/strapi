@@ -291,13 +291,13 @@ class TransferEngine<
 
     const inStream = await this.sourceProvider.streamLinks?.();
     if (!inStream) {
-      console.log('SourceProvider did not return a stream');
+      console.log('SourceProvider did not return a links stream');
       return;
     }
 
     const outStream = await this.destinationProvider.getLinksStream?.();
     if (!outStream) {
-      console.log('DestinationProvider did not return a stream');
+      console.log('DestinationProvider did not return a links stream');
       return;
     }
 
