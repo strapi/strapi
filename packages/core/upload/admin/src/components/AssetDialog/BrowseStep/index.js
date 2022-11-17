@@ -52,7 +52,7 @@ const TypographyMaxWidth = styled(Typography)`
   max-width: 100%;
 `;
 
-const ActionButton = styled(Box)`
+const ActionContainer = styled(Box)`
   svg {
     path {
       fill: ${({ theme }) => theme.colors.neutral900};
@@ -83,7 +83,10 @@ export const BrowseStep = ({
   selectedAssets,
 }) => {
   const { formatMessage } = useIntl();
-  const [view, setView] = usePersistentState(`${toUpper(pluginId)}_MODAL_VIEW`, viewOptions.GRID);
+  const [view, setView] = usePersistentState(
+    `STRAPI_${toUpper(pluginId)}_MODAL_VIEW`,
+    viewOptions.GRID
+  );
   const isGridView = view === viewOptions.GRID;
 
   const { data: currentFolder, isLoading: isCurrentFolderLoading } = useFolder(
@@ -152,7 +155,7 @@ export const BrowseStep = ({
 
             {(assetCount > 0 || folderCount > 0 || isSearching) && (
               <EndBlockActions pullRight>
-                <ActionButton paddingTop={1} paddingBottom={1}>
+                <ActionContainer paddingTop={1} paddingBottom={1}>
                   <IconButton
                     data-testid={`switch-to-${isGridView ? 'list' : 'grid'}-view`}
                     // TODO change after DS release
@@ -170,7 +173,7 @@ export const BrowseStep = ({
                     }
                     onClick={() => setView(isGridView ? viewOptions.LIST : viewOptions.GRID)}
                   />
-                </ActionButton>
+                </ActionContainer>
                 <SearchAsset onChangeSearch={onChangeSearch} queryValue={queryObject._q || ''} />
               </EndBlockActions>
             )}

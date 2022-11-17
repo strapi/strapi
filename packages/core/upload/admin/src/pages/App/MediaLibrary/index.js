@@ -67,7 +67,7 @@ const TypographyMaxWidth = styled(Typography)`
   max-width: 100%;
 `;
 
-const ActionButton = styled(Box)`
+const ActionContainer = styled(Box)`
   svg {
     path {
       fill: ${({ theme }) => theme.colors.neutral900};
@@ -90,7 +90,10 @@ export const MediaLibrary = () => {
   const { trackUsage } = useTracking();
   const [{ query }, setQuery] = useQueryParams();
   const isFiltering = Boolean(query._q || query.filters);
-  const [view, setView] = usePersistentState(`${toUpper(pluginId)}_LIBRARY_VIEW`, viewOptions.GRID);
+  const [view, setView] = usePersistentState(
+    `STRAPI_${toUpper(pluginId)}_LIBRARY_VIEW`,
+    viewOptions.GRID
+  );
   const isGridView = view === viewOptions.GRID;
 
   const {
@@ -225,7 +228,7 @@ export const MediaLibrary = () => {
           }
           endActions={
             <>
-              <ActionButton paddingTop={1} paddingBottom={1}>
+              <ActionContainer paddingTop={1} paddingBottom={1}>
                 <IconButton
                   data-testid={`switch-to-${isGridView ? 'list' : 'grid'}-view`}
                   icon={
@@ -249,9 +252,9 @@ export const MediaLibrary = () => {
                   }
                   onClick={() => setView(isGridView ? viewOptions.LIST : viewOptions.GRID)}
                 />
-              </ActionButton>
+              </ActionContainer>
               <CheckPermissions permissions={pluginPermissions.configureView}>
-                <ActionButton paddingTop={1} paddingBottom={1}>
+                <ActionContainer paddingTop={1} paddingBottom={1}>
                   <IconButton
                     forwardedAs={ReactRouterLink}
                     to={{
@@ -264,7 +267,7 @@ export const MediaLibrary = () => {
                       defaultMessage: 'Configure the view',
                     })}
                   />
-                </ActionButton>
+                </ActionContainer>
               </CheckPermissions>
               <SearchURLQuery
                 label={formatMessage({
