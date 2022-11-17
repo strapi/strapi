@@ -96,11 +96,10 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+          -v ./.github/workflows/db/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
-        volumes:
-          - ./db/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -228,11 +227,10 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+          -v ./.github/workflows/db/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
-        volumes:
-          - ./.github/workflows/db/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
