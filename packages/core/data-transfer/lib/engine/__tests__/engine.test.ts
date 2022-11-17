@@ -18,7 +18,7 @@ const sourceStages = [
   ...providerStages,
   'streamEntities',
   'streamLinks',
-  'streamMedia',
+  // 'streamMedia',
   'streamConfiguration',
   'streamSchemas',
 ];
@@ -26,7 +26,7 @@ const destinationStages = [
   ...providerStages,
   'getEntitiesStream',
   'getLinksStream',
-  'getMediaStream',
+  // 'getMediaStream',
   'getConfigurationStream',
   'getSchemasStream',
 ];
@@ -61,60 +61,100 @@ expect.extend({
     };
   },
   toHaveSourceStagesCalledOnce(provider: ISourceProvider) {
-    try {
-      sourceStages.forEach((stage) => {
-        if (provider[stage]) {
+    const missing = sourceStages.filter((stage) => {
+      if (provider[stage]) {
+        try {
           expect(provider[stage]).toHaveBeenCalledTimes(1);
+          return false;
+        } catch (e) {
+          return true;
         }
-      });
-    } catch (e) {
+      }
+    });
+
+    if (missing.length) {
       return {
         pass: false,
-        message: () => `Expected provider to have all stages called ${e.message}`,
+        message: () => `Expected source provider to have stages called: ${missing.join(',')}`,
       };
     }
-
     return {
       pass: true,
       message: () => `Expected provider not to have all stages called`,
     };
   },
   toHaveDestinationStagesCalledOnce(provider: IDestinationProvider) {
-    try {
-      destinationStages.forEach((stage) => {
-        // only check the stages that exist
-        if (provider[stage]) {
+    const missing = destinationStages.filter((stage) => {
+      if (provider[stage]) {
+        try {
           expect(provider[stage]).toHaveBeenCalledTimes(1);
+          return false;
+        } catch (e) {
+          return true;
         }
-      });
-    } catch (e) {
+      }
+    });
+
+    if (missing.length) {
       return {
         pass: false,
-        message: () => `Expected provider to have all stages called`,
+        message: () => `Expected destination provider to have stages called: ${missing.join(',')}`,
       };
     }
-
     return {
       pass: true,
-      message: () => `Expected provider not to have all stages called`,
+      message: () => `Expected destination provider not to have all stages called`,
     };
   },
 });
 
 describe('Transfer engine', () => {
   // TODO: if these are needed for any other tests, a factory should be added to test-utils
-  const mockedSource = {
+
+  const minimalSource = {
     type: 'source',
     name: '',
     getMetadata: jest.fn() as any,
     getSchemas: jest.fn() as any,
   } as ISourceProvider;
 
-  const mockedDestination = {
+  const minimalDestination = {
     type: 'source',
     name: '',
     getMetadata: jest.fn() as any,
     getSchemas: jest.fn() as any,
+  } as IDestinationProvider;
+
+  const completeSource = {
+    type: 'source',
+    name: '',
+    getMetadata: jest.fn() as any,
+    getSchemas: jest.fn() as any,
+
+    bootstrap: jest.fn() as any,
+    close: jest.fn() as any,
+
+    streamEntities: jest.fn() as any,
+    streamLinks: jest.fn() as any,
+    streamMedia: jest.fn() as any,
+    streamConfiguration: jest.fn() as any,
+    streamSchemas: jest.fn() as any,
+  } as ISourceProvider;
+
+  const completeDestination = {
+    type: 'source',
+    name: '',
+    getMetadata: jest.fn() as any,
+    getSchemas: jest.fn() as any,
+
+    bootstrap: jest.fn() as any,
+    close: jest.fn() as any,
+
+    getEntitiesStream: jest.fn() as any,
+    getLinksStream: jest.fn() as any,
+    getMediaStream: jest.fn() as any,
+    getConfigurationStream: jest.fn() as any,
+    getSchemasStream: jest.fn() as any,
   } as IDestinationProvider;
 
   const defaultOptions = {
@@ -137,33 +177,33 @@ describe('Transfer engine', () => {
         versionMatching: 'exact',
         exclude: [],
       } as ITransferEngineOptions;
-      const engine = createTransferEngine(mockedSource, mockedDestination, engineOptions);
+      const engine = createTransferEngine(minimalSource, minimalDestination, engineOptions);
       expect(engine).toBeValidTransferEngine();
     });
   });
 
   describe('bootstrap', () => {
     test('works for providers without a bootstrap', async () => {
-      const engine = createTransferEngine(mockedSource, mockedDestination, defaultOptions);
+      const engine = createTransferEngine(minimalSource, minimalDestination, defaultOptions);
       expect(engine).toBeValidTransferEngine();
       await engine.transfer();
-      expect(mockedSource).toHaveSourceStagesCalledOnce();
+      expect(minimalSource).toHaveSourceStagesCalledOnce();
     });
 
     test('bootstraps all providers with a bootstrap', async () => {
       const source = {
-        ...mockedSource,
+        ...minimalSource,
         bootstrap: jest.fn().mockReturnValue(new Duplex()),
       };
       const destination = {
-        ...mockedDestination,
+        ...minimalDestination,
         bootstrap: jest.fn().mockReturnValue(new Duplex()),
       };
       const engine = createTransferEngine(source, destination, defaultOptions);
       expect(engine).toBeValidTransferEngine();
       await engine.transfer();
 
-      expect(mockedSource).toHaveSourceStagesCalledOnce();
+      expect(minimalSource).toHaveSourceStagesCalledOnce();
     });
   });
 
@@ -174,14 +214,14 @@ describe('Transfer engine', () => {
         exclude: [],
       } as unknown as ITransferEngineOptions;
 
-      const restoreEngine = createTransferEngine(mockedSource, mockedDestination, {
+      const restoreEngine = createTransferEngine(minimalSource, minimalDestination, {
         ...engineOptions,
         strategy: 'restore',
       });
       await restoreEngine.transfer();
       expect(restoreEngine).toBeValidTransferEngine();
 
-      const mergeEngine = createTransferEngine(mockedSource, mockedDestination, {
+      const mergeEngine = createTransferEngine(minimalSource, minimalDestination, {
         ...engineOptions,
         strategy: 'merge',
       });
@@ -192,8 +232,8 @@ describe('Transfer engine', () => {
       await expect(
         (async () => {
           const invalidEngine = createTransferEngine(
-            mockedSource,
-            mockedDestination,
+            minimalSource,
+            minimalDestination,
             engineOptions
           );
           await invalidEngine.transfer();
@@ -203,7 +243,7 @@ describe('Transfer engine', () => {
       // invalid strategy
       await expect(
         (async () => {
-          const invalidEngine = createTransferEngine(mockedSource, mockedDestination, {
+          const invalidEngine = createTransferEngine(minimalSource, minimalDestination, {
             ...engineOptions,
             strategy: 'foo',
           } as unknown as ITransferEngineOptions);
@@ -212,22 +252,22 @@ describe('Transfer engine', () => {
       ).rejects.toThrow();
     });
 
-    test('calls all provider stages', async () => {
+    test.only('calls all provider stages', async () => {
       // TODO: use a source and destination that actually have all stages
-      const engine = createTransferEngine(mockedSource, mockedDestination, defaultOptions);
+      const engine = createTransferEngine(completeSource, completeSource, defaultOptions);
       await engine.transfer();
 
-      expect(mockedSource).toHaveSourceStagesCalledOnce();
-      expect(mockedDestination).toHaveDestinationStagesCalledOnce();
+      expect(completeSource).toHaveSourceStagesCalledOnce();
+      expect(completeDestination).toHaveDestinationStagesCalledOnce();
     });
 
     test('returns provider results', async () => {
       const source = {
-        ...mockedSource,
+        ...minimalSource,
         results: { foo: 'bar' },
       };
       const destination = {
-        ...mockedDestination,
+        ...minimalDestination,
         results: { foo: 'baz' },
       };
 
