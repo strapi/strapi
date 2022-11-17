@@ -1,11 +1,16 @@
 import fs from 'fs-extra';
 import path from 'path';
 import zip from 'zlib';
-import { Writable } from 'stream';
+import { Writable, Readable } from 'stream';
 import { chain } from 'stream-chain';
 import { stringer } from 'stream-json/jsonl/Stringer';
 
-import type { IDestinationProvider, ProviderType, TransferStage } from '../../types';
+import {
+  IDestinationProvider,
+  IDestinationProviderTransferResults,
+  ProviderType,
+  IMetadata,
+} from '../../types';
 import { createEncryptionCipher } from '../encryption/encrypt';
 
 export interface ILocalFileDestinationProviderOptions {
@@ -20,6 +25,11 @@ export interface ILocalFileDestinationProviderOptions {
     enabled: boolean;
   };
 
+  // Archive
+  archive: {
+    enabled: boolean;
+  };
+
   // File
   file: {
     path: string;
@@ -28,7 +38,8 @@ export interface ILocalFileDestinationProviderOptions {
   };
 }
 
-export interface ILocalFileDestinationProviderTransferResults {
+export interface ILocalFileDestinationProviderTransferResults
+  extends IDestinationProviderTransferResults {
   file?: {
     path?: string;
   };
@@ -45,16 +56,26 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   type: ProviderType = 'destination';
   options: ILocalFileDestinationProviderOptions;
   results: ILocalFileDestinationProviderTransferResults = {};
+  #providersMetadata: { source?: IMetadata; destination?: IMetadata } = {};
 
   constructor(options: ILocalFileDestinationProviderOptions) {
     this.options = options;
   }
 
-  #getDataTransformers(stage: TransferStage) {
+  setMetadata(target: ProviderType, metadata: IMetadata): IDestinationProvider {
+    this.#providersMetadata[target] = metadata;
+
+    return this;
+  }
+
+  #getDataTransformers(options: { jsonl?: boolean } = {}) {
+    const { jsonl = true } = options;
     const transforms = [];
 
-    // Convert to stringified JSON lines
-    transforms.push(stringer());
+    if (jsonl) {
+      // Convert to stringified JSON lines
+      transforms.push(stringer());
+    }
 
     // Compression
     if (this.options.compression.enabled) {
@@ -99,7 +120,12 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     this.results.file = { path: this.options.file.path };
   }
 
-  rollback(): void | Promise<void> {
+  async close(): Promise<void> {
+    await this.#writeMetadata();
+    this.results.file = { path: this.options.file.path };
+  }
+
+  rollback(): void {
     fs.rmSync(this.options.file.path, { force: true, recursive: true });
   }
 
@@ -107,11 +133,39 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return null;
   }
 
+  async #writeMetadata(): Promise<void> {
+    const metadata = this.#providersMetadata.source;
+
+    if (metadata) {
+      await new Promise((resolve) => {
+        const outStream = this.#getMetadataStream();
+        const data = JSON.stringify(metadata, null, 2);
+
+        Readable.from(data).pipe(outStream).on('close', resolve);
+      });
+    }
+  }
+
+  #getMetadataStream() {
+    const metadataPath = path.join(this.options.file.path, 'metadata.json');
+
+    // Transform streams
+    const transforms: Writable[] = this.#getDataTransformers({ jsonl: false });
+
+    // FS write stream
+    const fileStream = fs.createWriteStream(metadataPath);
+
+    // Full pipeline
+    const streams = transforms.concat(fileStream);
+
+    return chain(streams);
+  }
+
   getSchemasStream() {
     const filePathFactory = createFilePathFactory(this.options.file.path, 'schemas');
 
     // Transform streams
-    const transforms: Writable[] = this.#getDataTransformers('schemas');
+    const transforms: Writable[] = this.#getDataTransformers();
 
     // FS write stream
     const fileStream = createMultiFilesWriteStream(filePathFactory, this.options.file.maxSizeJsonl);
@@ -126,7 +180,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     const filePathFactory = createFilePathFactory(this.options.file.path, 'entities');
 
     // Transform streams
-    const transforms: Writable[] = this.#getDataTransformers('entities');
+    const transforms: Writable[] = this.#getDataTransformers();
 
     // FS write stream
     const fileStream = createMultiFilesWriteStream(filePathFactory, this.options.file.maxSize);
@@ -141,7 +195,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     const filePathFactory = createFilePathFactory(this.options.file.path, 'links');
 
     // Transform streams
-    const transforms: Writable[] = this.#getDataTransformers('links');
+    const transforms: Writable[] = this.#getDataTransformers();
 
     // FS write stream
     const fileStream = createMultiFilesWriteStream(filePathFactory, this.options.file.maxSizeJsonl);
@@ -156,7 +210,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     const filePathFactory = createFilePathFactory(this.options.file.path, 'configuration');
 
     // Transform streams
-    const transforms: Writable[] = this.#getDataTransformers('configuration');
+    const transforms: Writable[] = this.#getDataTransformers();
 
     // FS write stream
     const fileStream = createMultiFilesWriteStream(filePathFactory, this.options.file.maxSize);
@@ -166,11 +220,6 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
     return chain(streams);
   }
-
-  close = async () => {
-    // TODO: this will need to be updated with extension
-    this.results.file = { path: this.options.file.path };
-  };
 }
 
 /**
@@ -242,5 +291,3 @@ const createFilePathFactory =
       `${prefix}_${String(fileIndex).padStart(5, '0')}.jsonl`
     );
   };
-
-export type ILocalFileDestinationProvider = InstanceType<typeof LocalFileDestinationProvider>;

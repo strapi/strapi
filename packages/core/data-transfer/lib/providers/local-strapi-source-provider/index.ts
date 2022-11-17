@@ -1,6 +1,7 @@
-import type { ISourceProvider, ProviderType } from '../../../types';
 import { chain } from 'stream-chain';
 import { Readable } from 'stream';
+
+import type { IMetadata, ISourceProvider, ProviderType } from '../../../types';
 import { createEntitiesStream, createEntitiesTransformStream } from './entities';
 import { createLinksStream } from './links';
 import { createConfigurationStream } from './configuration';
@@ -39,9 +40,23 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     }
   }
 
-  // TODO: Implement the get metadata
-  async getMetadata() {
-    return null;
+  getMetadata(): IMetadata {
+    const strapiVersion = strapi.config.get('info.strapi');
+    const createdAt = new Date().toISOString();
+
+    const plugins = Object.keys(strapi.plugins);
+
+    return {
+      createdAt,
+      strapi: {
+        version: strapiVersion,
+        plugins: plugins.map((name) => ({
+          name,
+          // TODO: Get the plugin actual version when it'll be available
+          version: strapiVersion,
+        })),
+      },
+    };
   }
 
   async streamEntities(): Promise<NodeJS.ReadableStream> {
@@ -63,7 +78,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
       throw new Error('Not able to stream links. Strapi instance not found');
     }
 
-    return chain([createLinksStream(this.strapi)]);
+    return createLinksStream(this.strapi);
   }
 
   streamConfiguration(): NodeJS.ReadableStream {
@@ -71,7 +86,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
       throw new Error('Not able to stream configuration. Strapi instance not found');
     }
 
-    return chain([createConfigurationStream(strapi)]);
+    return createConfigurationStream(strapi);
   }
 
   getSchemas() {

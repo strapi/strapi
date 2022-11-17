@@ -34,7 +34,7 @@ export interface ITransferEngine<
   /**
    * Start streaming selected data from the source to the destination
    */
-  transfer(): Promise<void | ITransferResults<S, D>>;
+  transfer(): Promise<ITransferResults<S, D>>;
 
   /**
    * Run the bootstrap lifecycle method of each provider
@@ -43,6 +43,11 @@ export interface ITransferEngine<
    * connections, open files, etc...
    */
   bootstrap(): Promise<void>;
+
+  /**
+   * Engine init step. Must be called after the providers bootstrap.
+   */
+  init(): Promise<void>;
 
   /**
    * Run the close lifecycle method of each provider
