@@ -130,7 +130,7 @@ jobs:
           -e MYSQL_USER=strapi
           -e MYSQL_PASSWORD=strapi
           -e MYSQL_DATABASE=strapi_test
-        command: --default-authentication-plugin=mysql_native_password
+          --entrypoint sh mysql -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
         ports:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
@@ -263,7 +263,7 @@ jobs:
           -e MYSQL_USER=strapi
           -e MYSQL_PASSWORD=strapi
           -e MYSQL_DATABASE=strapi_test
-        command: --default-authentication-plugin=mysql_native_password
+          --entrypoint sh mysql -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
         ports:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
