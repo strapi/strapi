@@ -252,8 +252,7 @@ describe('Transfer engine', () => {
       ).rejects.toThrow();
     });
 
-    test.only('calls all provider stages', async () => {
-      // TODO: use a source and destination that actually have all stages
+    test('calls all provider stages', async () => {
       const engine = createTransferEngine(completeSource, completeSource, defaultOptions);
       await engine.transfer();
 
