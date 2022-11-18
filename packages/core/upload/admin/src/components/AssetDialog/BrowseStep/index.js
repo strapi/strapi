@@ -16,9 +16,8 @@ import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { IconButton } from '@strapi/design-system/IconButton';
 import PencilIcon from '@strapi/icons/Pencil';
 import PlusIcon from '@strapi/icons/Plus';
-// import Grid from '@strapi/icons/Grid';
-// import List from '@strapi/icons/List';
-import Cog from '@strapi/icons/Cog';
+import Grid from '@strapi/icons/Grid';
+import List from '@strapi/icons/List';
 
 import { FolderDefinition, AssetDefinition, viewOptions } from '../../../constants';
 import getTrad from '../../../utils/getTrad';
@@ -158,8 +157,7 @@ export const BrowseStep = ({
                 <ActionContainer paddingTop={1} paddingBottom={1}>
                   <IconButton
                     data-testid={`switch-to-${isGridView ? 'list' : 'grid'}-view`}
-                    // TODO change after DS release
-                    icon={isGridView ? <Cog /> : <Cog />}
+                    icon={isGridView ? <List /> : <Grid />}
                     label={
                       isGridView
                         ? formatMessage({

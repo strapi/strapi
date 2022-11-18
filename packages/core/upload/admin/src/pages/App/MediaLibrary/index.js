@@ -28,8 +28,8 @@ import { GridItem } from '@strapi/design-system/Grid';
 import { Flex } from '@strapi/design-system/Flex';
 import Pencil from '@strapi/icons/Pencil';
 import Cog from '@strapi/icons/Cog';
-// import List from '@strapi/icons/List';
-// import Grid from '@strapi/icons/Grid';
+import List from '@strapi/icons/List';
+import Grid from '@strapi/icons/Grid';
 
 import { UploadAssetDialog } from '../../../components/UploadAssetDialog/UploadAssetDialog';
 import { EditFolderDialog } from '../../../components/EditFolderDialog';
@@ -231,14 +231,7 @@ export const MediaLibrary = () => {
               <ActionContainer paddingTop={1} paddingBottom={1}>
                 <IconButton
                   data-testid={`switch-to-${isGridView ? 'list' : 'grid'}-view`}
-                  icon={
-                    isGridView ? (
-                      // TODO change after DS release
-                      <Cog />
-                    ) : (
-                      <Cog />
-                    )
-                  }
+                  icon={isGridView ? <List /> : <Grid />}
                   label={
                     isGridView
                       ? formatMessage({
