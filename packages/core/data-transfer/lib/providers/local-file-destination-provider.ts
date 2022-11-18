@@ -1,11 +1,16 @@
-import fs from 'fs';
+import fs from 'fs-extra';
 import path from 'path';
 import zip from 'zlib';
 import { Writable, Readable } from 'stream';
 import { chain } from 'stream-chain';
 import { stringer } from 'stream-json/jsonl/Stringer';
 
-import type { IDestinationProvider, IMetadata, ProviderType } from '../../types';
+import {
+  IDestinationProvider,
+  IDestinationProviderTransferResults,
+  ProviderType,
+  IMetadata,
+} from '../../types';
 import { createEncryptionCipher } from '../encryption/encrypt';
 
 export interface ILocalFileDestinationProviderOptions {
@@ -33,6 +38,13 @@ export interface ILocalFileDestinationProviderOptions {
   };
 }
 
+export interface ILocalFileDestinationProviderTransferResults
+  extends IDestinationProviderTransferResults {
+  file?: {
+    path?: string;
+  };
+}
+
 export const createLocalFileDestinationProvider = (
   options: ILocalFileDestinationProviderOptions
 ) => {
@@ -43,6 +55,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   name: string = 'destination::local-file';
   type: ProviderType = 'destination';
   options: ILocalFileDestinationProviderOptions;
+  results: ILocalFileDestinationProviderTransferResults = {};
   #providersMetadata: { source?: IMetadata; destination?: IMetadata } = {};
 
   constructor(options: ILocalFileDestinationProviderOptions) {
@@ -85,10 +98,10 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
   bootstrap(): void | Promise<void> {
     const rootDir = this.options.file.path;
-    const dirExists = fs.existsSync(rootDir);
+    const dirExists = fs.pathExistsSync(rootDir);
 
     if (dirExists) {
-      fs.rmSync(rootDir, { force: true, recursive: true });
+      throw new Error('File with that name already exists');
     }
 
     if (this.options.encryption.enabled) {
@@ -103,10 +116,13 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     fs.mkdirSync(path.join(rootDir, 'links'));
     fs.mkdirSync(path.join(rootDir, 'media'));
     fs.mkdirSync(path.join(rootDir, 'configuration'));
+
+    this.results.file = { path: this.options.file.path };
   }
 
   async close(): Promise<void> {
     await this.#writeMetadata();
+    this.results.file = { path: this.options.file.path };
   }
 
   rollback(): void {
