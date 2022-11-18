@@ -199,10 +199,11 @@ describe('Marketplace page - plugins tab', () => {
     const collectionsButton = screen.getByTestId('Collections-button');
     await user.click(collectionsButton);
 
-    const option = screen.getByRole('option', { name: `Made by Strapi (13)` });
+    const option = screen.getByRole('option', { name: 'Made by Strapi (13)' });
     await user.click(option);
+    await waitForReload();
 
-    const optionTag = await screen.findByRole('button', { name: 'Made by Strapi' });
+    const optionTag = screen.getByRole('button', { name: 'Made by Strapi' });
     expect(optionTag).toBeVisible();
 
     const collectionCards = screen.getAllByTestId('npm-package-card');
@@ -223,8 +224,9 @@ describe('Marketplace page - plugins tab', () => {
 
     const option = screen.getByRole('option', { name: `Custom fields (4)` });
     await user.click(option);
+    await waitForReload();
 
-    const optionTag = await screen.findByRole('button', { name: 'Custom fields' });
+    const optionTag = screen.getByRole('button', { name: 'Custom fields' });
     expect(optionTag).toBeVisible();
 
     const categoryCards = screen.getAllByTestId('npm-package-card');
@@ -257,7 +259,8 @@ describe('Marketplace page - plugins tab', () => {
     const categoryOption = screen.getByRole('option', { name: `Custom fields (4)` });
     await user.click(categoryOption);
     // When the page reloads they should see a tag for the selected option
-    const madeByStrapiTag = await screen.findByRole('button', { name: 'Made by Strapi' });
+    await waitForReload();
+    const madeByStrapiTag = screen.getByRole('button', { name: 'Made by Strapi' });
     const customFieldsTag = screen.getByRole('button', { name: 'Custom fields' });
     expect(madeByStrapiTag).toBeVisible();
     expect(customFieldsTag).toBeVisible();
@@ -284,8 +287,9 @@ describe('Marketplace page - plugins tab', () => {
     await user.click(await screen.findByTestId('filters-button'));
     await user.click(screen.getByRole('button', { name: `1 collection selected Made by Strapi` }));
     await user.click(screen.getByRole('option', { name: `Verified (29)` }));
+    await waitForReload();
 
-    const madeByStrapiTag = await screen.findByRole('button', { name: 'Made by Strapi' });
+    const madeByStrapiTag = screen.getByRole('button', { name: 'Made by Strapi' });
     const verifiedTag = screen.getByRole('button', { name: 'Verified' });
     expect(madeByStrapiTag).toBeVisible();
     expect(verifiedTag).toBeVisible();
@@ -303,8 +307,9 @@ describe('Marketplace page - plugins tab', () => {
     await user.click(await screen.findByTestId('filters-button'));
     await user.click(screen.getByRole('button', { name: `1 category selected Custom fields` }));
     await user.click(screen.getByRole('option', { name: `Monitoring (1)` }));
+    await waitForReload();
 
-    const customFieldsTag = await screen.findByRole('button', { name: 'Custom fields' });
+    const customFieldsTag = screen.getByRole('button', { name: 'Custom fields' });
     const monitoringTag = screen.getByRole('button', { name: 'Monitoring' });
     expect(customFieldsTag).toBeVisible();
     expect(monitoringTag).toBeVisible();
@@ -323,8 +328,9 @@ describe('Marketplace page - plugins tab', () => {
 
     const option = screen.getByRole('option', { name: 'Made by Strapi (13)' });
     await user.click(option);
+    await waitForReload();
 
-    const optionTag = await screen.findByRole('button', { name: 'Made by Strapi' });
+    const optionTag = screen.getByRole('button', { name: 'Made by Strapi' });
     expect(optionTag).toBeVisible();
 
     await user.click(optionTag);
