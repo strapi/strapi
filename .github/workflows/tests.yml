@@ -130,7 +130,7 @@ jobs:
           -e MYSQL_USER=strapi
           -e MYSQL_PASSWORD=strapi
           -e MYSQL_DATABASE=strapi_test
-          --entrypoint sh mysql -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
+          -v __w/.github/workflows/db/mysql-8:/etc/mysql/conf.d
         ports:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
@@ -165,6 +165,7 @@ jobs:
           -e MYSQL_USER=strapi
           -e MYSQL_PASSWORD=strapi
           -e MYSQL_DATABASE=strapi_test
+          -v __w/.github/workflows/db/mysql-5:/etc/mysql/conf.d
         ports:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
@@ -263,7 +264,7 @@ jobs:
           -e MYSQL_USER=strapi
           -e MYSQL_PASSWORD=strapi
           -e MYSQL_DATABASE=strapi_test
-          --entrypoint sh mysql -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
+          -v __w/.github/workflows/db/mysql-8:/etc/mysql/conf.d
         ports:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
