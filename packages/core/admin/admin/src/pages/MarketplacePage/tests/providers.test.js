@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  render,
-  waitFor,
-  getByPlaceholderText,
-  screen,
-  getByText,
-  queryByText,
-  getByLabelText,
-} from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -53,12 +45,7 @@ const client = new QueryClient({
 });
 
 const waitForReload = async () => {
-  await waitFor(
-    () => {
-      expect(screen.queryByTestId('loader')).toBe(null);
-    },
-    { timeout: 5000 }
-  );
+  await screen.findByText('Marketplace', { selector: 'h1' });
 };
 
 describe('Marketplace page - providers tab', () => {
@@ -76,7 +63,7 @@ describe('Marketplace page - providers tab', () => {
   afterAll(() => server.close());
 
   beforeEach(async () => {
-    history = createMemoryHistory();
+    history = createMemoryHistory({ initialEntries: ['/?npmPackageType=provider&sort=name:asc'] });
     // Make sure each test isolated
     const { container } = render(
       <QueryClientProvider client={client}>
@@ -94,33 +81,28 @@ describe('Marketplace page - providers tab', () => {
 
     await waitForReload();
 
-    const providersTab = screen.getByRole('tab', { name: /providers/i });
-    await user.click(providersTab);
-    await waitForReload();
-
     renderedContainer = container;
   });
 
   it('renders and matches the providers tab snapshot', async () => {
     // Check snapshot
     expect(renderedContainer.firstChild).toMatchSnapshot();
-
-    const button = screen.getByRole('tab', { selected: true });
-    const providersTabActive = getByText(button, /providers/i);
+    const providersTab = screen.getByText(/providers/i).closest('button');
 
     const tabPanel = screen.getByRole('tabpanel');
-    const providerCardText = getByText(tabPanel, 'Cloudinary');
-    const pluginCardText = queryByText(tabPanel, 'Comments');
-    const submitProviderText = queryByText(renderedContainer, 'Submit provider');
+    const providerCardText = within(tabPanel).getByText('Cloudinary');
+    const pluginCardText = within(tabPanel).queryByText('Comments');
+    const submitProviderText = within(renderedContainer).queryByText('Submit provider');
 
-    expect(providersTabActive).not.toBe(null);
+    expect(providersTab).toBeDefined();
+    expect(providersTab).toHaveAttribute('aria-selected', 'true');
     expect(providerCardText).toBeVisible();
     expect(submitProviderText).toBeVisible();
     expect(pluginCardText).toEqual(null);
   });
 
   it('should return providers search results matching the query', async () => {
-    const input = getByPlaceholderText(renderedContainer, 'Search');
+    const input = screen.getByPlaceholderText('Search');
     await user.type(input, 'cloudina');
     const match = screen.getByText('Cloudinary');
     const notMatch = screen.queryByText('Mailgun');
@@ -132,7 +114,7 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('should return empty providers search results given a bad query', async () => {
-    const input = getByPlaceholderText(renderedContainer, 'Search');
+    const input = screen.getByPlaceholderText('Search');
     const badQuery = 'asdf';
     await user.type(input, badQuery);
     const noResult = screen.getByText(`No result for "${badQuery}"`);
@@ -145,14 +127,14 @@ describe('Marketplace page - providers tab', () => {
     const alreadyInstalledCard = screen
       .getAllByTestId('npm-package-card')
       .find((div) => div.innerHTML.includes('Cloudinary'));
-    const alreadyInstalledText = queryByText(alreadyInstalledCard, /installed/i);
+    const alreadyInstalledText = within(alreadyInstalledCard).queryByText(/installed/i);
     expect(alreadyInstalledText).toBeVisible();
 
     // Provider that's not installed
     const notInstalledCard = screen
       .getAllByTestId('npm-package-card')
       .find((div) => div.innerHTML.includes('Rackspace'));
-    const notInstalledText = queryByText(notInstalledCard, /copy install command/i);
+    const notInstalledText = within(notInstalledCard).queryByText(/copy install command/i);
     expect(notInstalledText).toBeVisible();
   });
 
@@ -169,7 +151,6 @@ describe('Marketplace page - providers tab', () => {
     await user.click(filtersButton);
 
     const collectionsButton = screen.getByTestId('Collections-button');
-
     await user.click(collectionsButton);
 
     const mockedServerCollections = {
@@ -194,7 +175,6 @@ describe('Marketplace page - providers tab', () => {
 
     const option = screen.getByRole('option', { name: `Made by Strapi (6)` });
     await user.click(option);
-
     await waitForReload();
 
     const optionTag = screen.getByRole('button', { name: 'Made by Strapi' });
@@ -214,12 +194,9 @@ describe('Marketplace page - providers tab', () => {
     await user.click(screen.getByTestId('Collections-button'));
     await user.click(screen.getByRole('option', { name: `Made by Strapi (6)` }));
 
-    await waitForReload();
-
-    await user.click(screen.getByTestId('filters-button'));
+    await user.click(await screen.findByTestId('filters-button'));
     await user.click(screen.getByRole('button', { name: `1 collection selected Made by Strapi` }));
     await user.click(screen.getByRole('option', { name: `Verified (6)` }));
-
     await waitForReload();
 
     const madeByStrapiTag = screen.getByRole('button', { name: 'Made by Strapi' });
@@ -241,7 +218,6 @@ describe('Marketplace page - providers tab', () => {
 
     const option = screen.getByRole('option', { name: `Made by Strapi (6)` });
     await user.click(option);
-
     await waitForReload();
 
     const optionTag = screen.getByRole('button', { name: 'Made by Strapi' });
@@ -263,9 +239,7 @@ describe('Marketplace page - providers tab', () => {
     const option = screen.getByRole('option', { name: `Made by Strapi (6)` });
     await user.click(option);
 
-    await waitForReload();
-
-    const collectionCards = screen.getAllByTestId('npm-package-card');
+    const collectionCards = await screen.findAllByTestId('npm-package-card');
     expect(collectionCards.length).toBe(2);
 
     await user.click(screen.getByRole('tab', { name: /plugins/i }));
@@ -305,14 +279,12 @@ describe('Marketplace page - providers tab', () => {
       .getAllByTestId('npm-package-card')
       .find((div) => div.innerHTML.includes('Cloudinary'));
 
-    const githubStarsLabel = getByLabelText(
-      cloudinaryCard,
+    const githubStarsLabel = within(cloudinaryCard).getByLabelText(
       /this provider was starred \d+ on GitHub/i
     );
     expect(githubStarsLabel).toBeVisible();
 
-    const downloadsLabel = getByLabelText(
-      cloudinaryCard,
+    const downloadsLabel = within(cloudinaryCard).getByLabelText(
       /this provider has \d+ weekly downloads/i
     );
     expect(downloadsLabel).toBeVisible();
