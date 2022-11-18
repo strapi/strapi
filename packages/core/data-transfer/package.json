@@ -40,6 +40,7 @@
     "@strapi/logger": "4.5.0",
     "@strapi/strapi": "4.5.0",
     "chalk": "4.1.2",
+    "fs-extra": "10.0.0",
     "lodash": "4.17.21",
     "prettier": "2.7.1",
     "stream-chain": "2.2.5",
@@ -49,6 +50,7 @@
   },
   "devDependencies": {
     "@tsconfig/node16": "1.0.3",
+    "@types/fs-extra": "9.0.13",
     "@types/jest": "29.2.0",
     "@types/stream-chain": "2.0.1",
     "@types/stream-json": "1.7.2",

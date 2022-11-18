@@ -272,12 +272,15 @@ program
   .command('export')
   .description('Export data from Strapi to file')
   .addOption(
-    new Option('--encrypt [boolean]', `Encrypt output file using the 'aes-128-ecb' algorithm`)
+    new Option(
+      '--encrypt <boolean>',
+      `Encrypt output file using the 'aes-128-ecb' algorithm. Prompts for key unless key option is used.`
+    )
       .default(true)
       .argParser(parseInputBool)
   )
   .addOption(
-    new Option('--compress [boolean]', 'Compress output file using gzip compression')
+    new Option('--compress <boolean>', 'Compress output file using gzip compression')
       .default(true)
       .argParser(parseInputBool)
   )

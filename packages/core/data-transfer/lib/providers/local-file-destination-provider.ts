@@ -1,6 +1,11 @@
-import type { IDestinationProvider, IMetadata, ProviderType } from '../../types';
+import type {
+  IDestinationProvider,
+  IDestinationProviderTransferResults,
+  IMetadata,
+  ProviderType,
+} from '../../types';
 
-import fs from 'fs';
+import fs from 'fs-extra';
 import path from 'path';
 import tar from 'tar-stream';
 import zlib from 'zlib';
@@ -30,6 +35,13 @@ export interface ILocalFileDestinationProviderOptions {
   };
 }
 
+export interface ILocalFileDestinationProviderTransferResults
+  extends IDestinationProviderTransferResults {
+  file?: {
+    path?: string;
+  };
+}
+
 export const createLocalFileDestinationProvider = (
   options: ILocalFileDestinationProviderOptions
 ) => {
@@ -40,6 +52,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   name: string = 'destination::local-file';
   type: ProviderType = 'destination';
   options: ILocalFileDestinationProviderOptions;
+  results: ILocalFileDestinationProviderTransferResults = {};
 
   #providersMetadata: { source?: IMetadata; destination?: IMetadata } = {};
   #archive?: tar.Pack;
@@ -88,6 +101,8 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     }
 
     chain([this.#archive, ...archiveTransforms, outStream]);
+
+    this.results.file = { path: this.#archivePath };
   }
 
   async close() {
