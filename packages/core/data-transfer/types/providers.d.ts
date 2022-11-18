@@ -12,6 +12,7 @@ interface IProvider {
   getSchemas?(): any;
   close?(): Promise<void> | void;
   getMetadata(): IMetadata | null | Promise<IMetadata | null>;
+  beforeStreaming?(): Promise<void>;
 }
 
 export interface ISourceProvider extends IProvider {
@@ -39,5 +40,4 @@ export interface IDestinationProvider extends IProvider {
   getMediaStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
   getConfigurationStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
   getSchemasStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
-  prepareForStreaming?(): Promise<void>;
 }

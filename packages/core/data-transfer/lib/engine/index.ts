@@ -138,7 +138,7 @@ class TransferEngine implements ITransferEngine {
         );
       }
 
-      await this.prepareTransfer();
+      await this.beforeTransfer();
       // Run the transfer stages
       await this.transferSchemas();
       await this.transferEntities();
@@ -156,8 +156,9 @@ class TransferEngine implements ITransferEngine {
     }
   }
 
-  async prepareTransfer(): Promise<void> {
-    await this.destinationProvider.prepareForStreaming?.();
+  async beforeTransfer(): Promise<void> {
+    await this.sourceProvider.beforeStreaming?.();
+    await this.destinationProvider.beforeStreaming?.();
   }
 
   async transferSchemas(): Promise<void> {

@@ -3,12 +3,12 @@ import chalk from 'chalk';
 import { Duplex } from 'stream-chain';
 import type { IDestinationProvider, IMetadata, ProviderType } from '../../../types';
 
-import { deleteAllRecords, DeleteOptions } from './restore'
+import { deleteAllRecords, DeleteOptions } from './restore';
 
 interface ILocalStrapiDestinationProviderOptions {
   getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>;
   restore?: DeleteOptions;
-  strategy: 'restore' | 'merge'
+  strategy: 'restore' | 'merge';
 }
 
 // TODO: getting some type errors with @strapi/logger that need to be resolved first
@@ -42,14 +42,13 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   async deleteAll() {
     if (!this.strapi) {
-      throw new Error('Strapi instance not found')
+      throw new Error('Strapi instance not found');
     }
     return await deleteAllRecords(this.strapi, this.options.restore);
   }
 
-  async prepareForStreaming() {
-    if (this.options.strategy === 'restore')
-      await this.deleteAll();
+  async beforeStreaming() {
+    if (this.options.strategy === 'restore') await this.deleteAll();
   }
 
   // TODO
