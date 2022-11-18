@@ -30,15 +30,16 @@ describe('AssetCardBase', () => {
       expect(onSelect).toHaveBeenCalledTimes(1);
     });
 
-    it('should call onEdit when the edit button is clicked after the card has been hovered', () => {
+    it('should call onEdit when the edit button is clicked after the card has been hovered', async () => {
       const onEdit = jest.fn();
+      const user = userEvent.setup();
       const { getAllByRole } = render({
         onEdit,
       });
 
       const [card, button] = getAllByRole('button');
 
-      userEvent.hover(card);
+      await user.hover(card);
 
       waitFor(() => expect(button.parentElement).toHaveStyle('opacity: 1'));
 
@@ -47,19 +48,20 @@ describe('AssetCardBase', () => {
       expect(onEdit).toHaveBeenCalledTimes(1);
     });
 
-    it('should call onRemove when the remove button is clicked after the card has been hovered', () => {
+    it('should call onRemove when the remove button is clicked after the card has been hovered', async () => {
       const onRemove = jest.fn();
+      const user = userEvent.setup();
       const { getAllByRole } = render({
         onRemove,
       });
 
       const [card, button] = getAllByRole('button');
 
-      userEvent.hover(card);
+      await user.hover(card);
 
       waitFor(() => expect(button.parentElement).toHaveStyle('opacity: 1'));
 
-      fireEvent.click(button);
+      await user.click(button);
 
       expect(onRemove).toHaveBeenCalledTimes(1);
     });
@@ -79,27 +81,29 @@ describe('AssetCardBase', () => {
   });
 
   describe('Keyboard Navigation', () => {
-    it('should focus checkbox when the card is first tabbed too', () => {
+    it('should focus checkbox when the card is first tabbed too', async () => {
+      const user = userEvent.setup();
       const { getByRole } = render({
         onSelect: jest.fn(),
         onEdit: jest.fn(),
         onRemove: jest.fn(),
       });
 
-      userEvent.tab();
+      await user.tab();
 
       expect(getByRole('checkbox')).toHaveFocus();
     });
 
-    it('should focus the edit button and change their opacity when the card is tabbed too', () => {
+    it('should focus the edit button and change their opacity when the card is tabbed too', async () => {
+      const user = userEvent.setup();
       const { getAllByRole } = render({
         onSelect: jest.fn(),
         onEdit: jest.fn(),
         onRemove: jest.fn(),
       });
 
-      userEvent.tab();
-      userEvent.tab();
+      await user.tab();
+      await user.tab();
 
       const button = getAllByRole('button')[1];
 

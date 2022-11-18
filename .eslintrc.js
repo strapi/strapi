@@ -13,10 +13,20 @@ module.exports = {
   },
   overrides: [
     {
+      // Backend javascript
       files: ['packages/**/*.js', 'test/**/*.js', 'scripts/**/*.js'],
       excludedFiles: frontPaths,
       ...require('./.eslintrc.back.js'),
     },
+
+    // Backend typescript
+    {
+      files: ['packages/**/*.ts', 'test/**/*.ts', 'scripts/**/*.ts'],
+      excludedFiles: frontPaths,
+      ...require('./.eslintrc.back.typescript.js'),
+    },
+
+    // Frontend
     {
       files: frontPaths,
       ...require('./.eslintrc.front.js'),

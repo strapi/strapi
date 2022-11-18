@@ -6,7 +6,7 @@ import { collect, createMockedQueryBuilder, getStrapiFactory } from './test-util
 import { createLocalStrapiSourceProvider } from '../';
 
 describe('Local Strapi Source Provider', () => {
-  describe('Boostrap', () => {
+  describe('Bootstrap', () => {
     test('Should not have a defined Strapi instance if bootstrap has not been called', () => {
       const provider = createLocalStrapiSourceProvider({ getStrapi: getStrapiFactory() });
 

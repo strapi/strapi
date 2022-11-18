@@ -9,6 +9,7 @@ const FilterSelect = ({ message, value, onChange, possibleFilters, onClear, cust
 
   return (
     <Select
+      data-testid={`${message}-button`}
       aria-label={message}
       placeholder={message}
       size="M"
@@ -20,7 +21,7 @@ const FilterSelect = ({ message, value, onChange, possibleFilters, onClear, cust
     >
       {Object.entries(possibleFilters).map(([filterName, count]) => {
         return (
-          <Option key={filterName} value={filterName}>
+          <Option data-testid={`${filterName}-${count}`} key={filterName} value={filterName}>
             {computeFilterMessage(filterName, count)}
           </Option>
         );

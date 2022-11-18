@@ -272,16 +272,32 @@ program
   .command('export')
   .description('Export data from Strapi to file')
   .addOption(
-    new Option('--encrypt [boolean]', `Encrypt output file using the 'aes-128-ecb' algorithm`)
+    new Option(
+      '--encrypt <boolean>',
+      `Encrypt output file using the 'aes-128-ecb' algorithm. Prompts for key unless key option is used.`
+    )
       .default(true)
       .argParser(parseInputBool)
   )
   .addOption(
-    new Option('--compress [boolean]', 'Compress output file using gz')
+    new Option('--compress <boolean>', 'Compress output file using gzip compression')
       .default(true)
       .argParser(parseInputBool)
   )
-  .addOption(new Option('--key', 'Provide encryption key in command instead of using a prompt'))
+  .addOption(
+    new Option(
+      '--archive <boolean>',
+      'Export all backup files into a single tar archive instead of a folder'
+    )
+      .default(true)
+      .argParser(parseInputBool)
+  )
+  .addOption(
+    new Option(
+      '--key <encryption key>',
+      'Provide encryption key directly instead of being prompted'
+    )
+  )
   .addOption(
     new Option('--max-size <max MB per file>', 'split final file when exceeding size in MB')
   )
@@ -295,7 +311,7 @@ program
   .arguments('[filename]')
   .allowExcessArguments(false)
   .hook('preAction', promptEncryptionKey)
-  .action(require('../lib/commands/transfer/export'));
+  .action(getLocalScript('transfer/export'));
 
 // `$ strapi import`
 program
@@ -310,7 +326,7 @@ program
   .addOption(
     new Option(
       '--schemaComparison <schemaComparison>',
-      'exact requires every field to match, strict requires Strapi version and schemas to match, subset requires source schema to exist in destination, bypass skips checks',
+      'exact requires every field to match, strict requires Strapi version and content type schema fields do not break, subset requires source schema to exist in destination, bypass skips checks',
       parseInputList
     )
       .choices(['exact', 'strict', 'subset', 'bypass'])
@@ -321,6 +337,6 @@ program
   )
   .arguments('<filename>')
   .allowExcessArguments(false)
-  .action(require('../lib/commands/transfer/import'));
+  .action(getLocalScript('transfer/import'));
 
 program.parseAsync(process.argv);
