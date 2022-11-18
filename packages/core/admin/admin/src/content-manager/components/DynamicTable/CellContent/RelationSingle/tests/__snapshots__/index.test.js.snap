@@ -14,13 +14,13 @@ exports[`DynamicTabe / Cellcontent / RelationSingle renders and matches the snap
 }
 
 .c0 {
-  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
   display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
+  color: #32324d;
 }
 
 .c1 {
