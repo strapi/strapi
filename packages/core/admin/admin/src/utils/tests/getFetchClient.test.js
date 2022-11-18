@@ -1,9 +1,10 @@
 import { auth } from '@strapi/helper-plugin';
-import { getFetchClient } from '../getFetchClient';
+import { getFetchClient, instance } from '../getFetchClient';
 
 const token = 'coolToken';
 auth.getToken = jest.fn().mockReturnValue(token);
 auth.clearAppStorage = jest.fn().mockReturnValue(token);
+process.env.STRAPI_ADMIN_BACKEND_URL = 'http://localhost:1337';
 
 describe('ADMIN | utils | getFetchClient', () => {
   it('should return the 4 HTTP methods to call GET, POST, PUT and DELETE apis', () => {
@@ -32,13 +33,11 @@ describe('ADMIN | utils | getFetchClient', () => {
       expect(auth.clearAppStorage).toHaveBeenCalledTimes(1);
     }
   });
-  it('should respond with status 200 to a known API', async () => {
+  it('should respond with status 200 to a known API and create the instance with the correct base URL', async () => {
     const response = getFetchClient();
-    try {
-      const getData = await response.get('/admin/project-type');
-      expect(getData.status).toBe(200);
-    } catch (err) {
-      console.log('err', err);
-    }
+    const getData = await response.get('/admin/project-type');
+    expect(getData.status).toBe(200);
+
+    expect(instance.defaults.baseURL).toBe(process.env.STRAPI_ADMIN_BACKEND_URL);
   });
 });
