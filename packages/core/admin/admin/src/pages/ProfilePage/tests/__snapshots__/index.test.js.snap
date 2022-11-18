@@ -1,6 +1,83 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
+.c2 {
+  background: #f6f6f9;
+  padding-top: 40px;
+  padding-right: 56px;
+  padding-bottom: 40px;
+  padding-left: 56px;
+}
+
+.c13 {
+  padding-right: 56px;
+  padding-left: 56px;
+}
+
+.c9 {
+  padding-right: 8px;
+}
+
+.c12 {
+  padding-bottom: 56px;
+}
+
+.c16 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c29 {
+  padding-right: 12px;
+  padding-left: 8px;
+}
+
+.c37 {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.c40 {
+  padding-left: 12px;
+}
+
+.c3 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c4 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
 .c14 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
@@ -13,6 +90,63 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+}
+
+.c6 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c11 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 1.14;
+  color: #32324d;
+}
+
+.c18 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c22 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c23 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #d02b20;
+}
+
+.c32 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
+}
+
+.c38 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c42 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
 }
 
 .c15 > * {
@@ -33,40 +167,16 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   margin-top: 16px;
 }
 
-.c35 > * {
+.c21 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c35 > * + * {
+.c21 > * + * {
   margin-top: 4px;
 }
 
-.c18 {
-  color: #32324d;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-}
-
-.c36 {
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c11 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c8 {
-  padding-right: 8px;
-}
-
-.c5 {
+.c7 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -80,21 +190,21 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   outline: none;
 }
 
-.c5 svg {
+.c7 svg {
   height: 12px;
   width: 12px;
 }
 
-.c5 svg > g,
-.c5 svg path {
+.c7 svg > g,
+.c7 svg path {
   fill: #ffffff;
 }
 
-.c5[aria-disabled='true'] {
+.c7[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c5:after {
+.c7:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -109,11 +219,11 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c5:focus-visible {
+.c7:focus-visible {
   outline: none;
 }
 
-.c5:focus-visible:after {
+.c7:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -124,21 +234,23 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c9 {
+.c10 {
   height: 100%;
 }
 
-.c6 {
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
+  background-color: #4945ff;
   border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
-.c6 .c7 {
+.c8 .c1 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -149,296 +261,58 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c6 .c10 {
+.c8 .c5 {
   color: #ffffff;
 }
 
-.c6[aria-disabled='true'] {
+.c8[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c6[aria-disabled='true'] .c10 {
+.c8[aria-disabled='true'] .c5 {
   color: #666687;
 }
 
-.c6[aria-disabled='true'] svg > g,
-.c6[aria-disabled='true'] svg path {
+.c8[aria-disabled='true'] svg > g,
+.c8[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c6[aria-disabled='true']:active {
+.c8[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c6[aria-disabled='true']:active .c10 {
+.c8[aria-disabled='true']:active .c5 {
   color: #666687;
 }
 
-.c6[aria-disabled='true']:active svg > g,
-.c6[aria-disabled='true']:active svg path {
+.c8[aria-disabled='true']:active svg > g,
+.c8[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c6:hover {
+.c8:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c6:active {
+.c8:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c6 svg > g,
-.c6 svg path {
+.c8 svg > g,
+.c8 svg path {
   fill: #ffffff;
 }
 
-.c12 {
-  padding-bottom: 56px;
-}
-
-.c16 {
-  background: #ffffff;
-  padding-top: 24px;
-  padding-right: 32px;
-  padding-bottom: 24px;
-  padding-left: 32px;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-}
-
-.c43 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c43:focus {
-  outline: none;
-}
-
-.c43[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c46 {
-  padding-right: 16px;
-  padding-left: 16px;
-}
-
-.c49 {
-  padding-left: 12px;
-}
-
-.c38 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c41 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c44 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c40 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c47 {
-  color: #32324d;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c51 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c39 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c39 > * + * {
-  margin-top: 4px;
-}
-
-.c42 {
-  position: relative;
-  border: 1px solid #dcdce4;
-  padding-right: 12px;
-  border-radius: 4px;
-  background: #ffffff;
-  overflow: hidden;
-  min-height: 2.5rem;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c42:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c48 {
-  background: transparent;
-  border: none;
-  position: relative;
-  z-index: 1;
-}
-
-.c48 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
-}
-
-.c48 svg path {
-  fill: #666687;
-}
-
-.c50 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  background: none;
-  border: none;
-}
-
-.c50 svg {
-  width: 0.375rem;
-}
-
-.c45 {
-  width: 100%;
-}
-
-.c32 {
-  padding-right: 12px;
-  padding-left: 8px;
-}
-
-.c21 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
 .c24 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c27 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c23 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c25 {
-  color: #d02b20;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c26 {
   line-height: 0;
 }
 
-.c29 {
+.c26 {
   border: none;
   border-radius: 4px;
   padding-bottom: 0.65625rem;
@@ -453,36 +327,36 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   background: inherit;
 }
 
-.c29::-webkit-input-placeholder {
+.c26::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c29::-moz-placeholder {
+.c26::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c29:-ms-input-placeholder {
+.c26:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c29::placeholder {
+.c26::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c29[aria-disabled='true'] {
+.c26[aria-disabled='true'] {
   color: inherit;
 }
 
-.c29:focus {
+.c26:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c30 {
+.c27 {
   border: none;
   border-radius: 4px;
   padding-bottom: 0.65625rem;
@@ -497,36 +371,36 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   background: inherit;
 }
 
-.c30::-webkit-input-placeholder {
+.c27::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c30::-moz-placeholder {
+.c27::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c30:-ms-input-placeholder {
+.c27:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c30::placeholder {
+.c27::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c30[aria-disabled='true'] {
+.c27[aria-disabled='true'] {
   color: inherit;
 }
 
-.c30:focus {
+.c27:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c28 {
+.c25 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
@@ -538,21 +412,12 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   transition-duration: 0.2s;
 }
 
-.c28:focus-within {
+.c25:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c22 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c22 > * + * {
-  margin-top: 4px;
-}
-
-.c33 {
+.c30 {
   border: none;
   background: transparent;
   font-size: 1.6rem;
@@ -568,60 +433,81 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c0:focus-visible {
+.c35 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c35:focus {
   outline: none;
 }
 
-.c1 {
-  background: #f6f6f9;
-  padding-top: 40px;
-  padding-right: 56px;
-  padding-bottom: 40px;
-  padding-left: 56px;
+.c35[aria-disabled='true'] {
+  cursor: not-allowed;
 }
 
-.c13 {
-  padding-right: 56px;
-  padding-left: 56px;
+.c34 {
+  position: relative;
+  border: 1px solid #dcdce4;
+  padding-right: 12px;
+  border-radius: 4px;
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 2.5rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
 }
 
-.c2 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
+.c34:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c39 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c39 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c39 svg path {
+  fill: #666687;
+}
+
+.c41 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
+  background: none;
+  border: none;
 }
 
-.c3 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
+.c41 svg {
+  width: 0.375rem;
 }
 
-.c4 {
-  color: #32324d;
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
+.c36 {
+  width: 100%;
+}
+
+.c0:focus-visible {
+  outline: none;
 }
 
 .c19 {
@@ -635,20 +521,20 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   max-width: 100%;
 }
 
-.c37 {
+.c33 {
   color: #4945ff;
 }
 
-.c31::-ms-reveal {
+.c28::-ms-reveal {
   display: none;
 }
 
-.c34 svg {
+.c31 svg {
   height: 1rem;
   width: 1rem;
 }
 
-.c34 svg path {
+.c31 svg path {
   fill: #666687;
 }
 
@@ -679,29 +565,29 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
       style="height: 0px;"
     >
       <div
-        class="c1"
+        class="c1 c2"
         data-strapi-header="true"
       >
         <div
-          class="c2"
+          class="c1 c3"
         >
           <div
-            class="c3"
+            class="c1 c4"
           >
             <h1
-              class="c4"
+              class="c5 c6"
             >
               yolo
             </h1>
           </div>
           <button
             aria-disabled="false"
-            class="c5 c6"
+            class="c7 c8"
             type="submit"
           >
             <div
               aria-hidden="true"
-              class="c7 c8 c9"
+              class="c1 c9 c10"
             >
               <svg
                 fill="none"
@@ -717,7 +603,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
               </svg>
             </div>
             <span
-              class="c10 c11"
+              class="c5 c11"
             >
               Save
             </span>
@@ -726,65 +612,65 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
       </div>
     </div>
     <div
-      class="c12"
+      class="c1 c12"
     >
       <div
-        class="c13"
+        class="c1 c13"
       >
         <div
-          class="c14 c15"
+          class="c1 c14 c15"
           spacing="6"
         >
           <div
-            class="c16"
+            class="c1 c16"
           >
             <div
-              class="c14 c17"
+              class="c1 c14 c17"
               spacing="4"
             >
               <h2
-                class="c18"
+                class="c5 c18"
               >
                 Profile
               </h2>
               <div
-                class="c19"
+                class="c1 c19"
               >
                 <div
                   class="c20"
                 >
                   <div
-                    class=""
+                    class="c1 "
                   >
                     <div>
                       <div>
                         <div
-                          class="c21 c22"
+                          class="c1 c14 c21"
                           spacing="1"
                         >
                           <label
-                            class="c23"
+                            class="c5 c22"
                             for="firstname"
                             required=""
                           >
                             <div
-                              class="c24"
+                              class="c1 c4"
                             >
                               First name
                               <span
-                                class="c25 c26"
+                                class="c5 c23 c24"
                               >
                                 *
                               </span>
                             </div>
                           </label>
                           <div
-                            class="c27 c28"
+                            class="c1 c3 c25"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
-                              class="c29"
+                              class="c26"
                               id="firstname"
                               name="firstname"
                               placeholder=""
@@ -801,31 +687,31 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                   class="c20"
                 >
                   <div
-                    class=""
+                    class="c1 "
                   >
                     <div>
                       <div>
                         <div
-                          class="c21 c22"
+                          class="c1 c14 c21"
                           spacing="1"
                         >
                           <label
-                            class="c23"
+                            class="c5 c22"
                             for="lastname"
                           >
                             <div
-                              class="c24"
+                              class="c1 c4"
                             >
                               Last name
                             </div>
                           </label>
                           <div
-                            class="c27 c28"
+                            class="c1 c3 c25"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
-                              class="c29"
+                              class="c26"
                               id="lastname"
                               name="lastname"
                               placeholder=""
@@ -842,37 +728,37 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                   class="c20"
                 >
                   <div
-                    class=""
+                    class="c1 "
                   >
                     <div>
                       <div>
                         <div
-                          class="c21 c22"
+                          class="c1 c14 c21"
                           spacing="1"
                         >
                           <label
-                            class="c23"
+                            class="c5 c22"
                             for="email"
                             required=""
                           >
                             <div
-                              class="c24"
+                              class="c1 c4"
                             >
                               Email
                               <span
-                                class="c25 c26"
+                                class="c5 c23 c24"
                               >
                                 *
                               </span>
                             </div>
                           </label>
                           <div
-                            class="c27 c28"
+                            class="c1 c3 c25"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
-                              class="c29"
+                              class="c26"
                               id="email"
                               name="email"
                               placeholder=""
@@ -889,31 +775,31 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                   class="c20"
                 >
                   <div
-                    class=""
+                    class="c1 "
                   >
                     <div>
                       <div>
                         <div
-                          class="c21 c22"
+                          class="c1 c14 c21"
                           spacing="1"
                         >
                           <label
-                            class="c23"
+                            class="c5 c22"
                             for="username"
                           >
                             <div
-                              class="c24"
+                              class="c1 c4"
                             >
                               Username
                             </div>
                           </label>
                           <div
-                            class="c27 c28"
+                            class="c1 c3 c25"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
-                              class="c29"
+                              class="c26"
                               id="username"
                               name="username"
                               placeholder=""
@@ -930,60 +816,60 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
             </div>
           </div>
           <div
-            class="c16"
+            class="c1 c16"
           >
             <div
-              class="c14 c17"
+              class="c1 c14 c17"
               spacing="4"
             >
               <h2
-                class="c18"
+                class="c5 c18"
               >
                 Change password
               </h2>
               <div
-                class="c19"
+                class="c1 c19"
               >
                 <div
                   class="c20"
                 >
                   <div
-                    class=""
+                    class="c1 "
                   >
                     <div>
                       <div>
                         <div
-                          class="c21 c22"
+                          class="c1 c14 c21"
                           spacing="1"
                         >
                           <label
-                            class="c23"
+                            class="c5 c22"
                             for="textinput-1"
                           >
                             <div
-                              class="c24"
+                              class="c1 c4"
                             >
                               Current Password
                             </div>
                           </label>
                           <div
-                            class="c27 c28"
+                            class="c1 c3 c25"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
-                              class="c30 c31"
+                              class="c27 c28"
                               id="textinput-1"
                               name="currentPassword"
                               type="password"
                               value=""
                             />
                             <div
-                              class="c32"
+                              class="c1 c29"
                             >
                               <button
                                 aria-label="Hide password"
-                                class="c33 c34"
+                                class="c30 c31"
                                 type="button"
                               >
                                 <svg
@@ -1008,49 +894,49 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <div
-                class="c19"
+                class="c1 c19"
               >
                 <div
                   class="c20"
                 >
                   <div
-                    class=""
+                    class="c1 "
                   >
                     <div>
                       <div>
                         <div
-                          class="c21 c22"
+                          class="c1 c14 c21"
                           spacing="1"
                         >
                           <label
-                            class="c23"
+                            class="c5 c22"
                             for="textinput-2"
                           >
                             <div
-                              class="c24"
+                              class="c1 c4"
                             >
                               Password
                             </div>
                           </label>
                           <div
-                            class="c27 c28"
+                            class="c1 c3 c25"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
                               autocomplete="new-password"
-                              class="c30 c31"
+                              class="c27 c28"
                               id="textinput-2"
                               name="password"
                               type="password"
                               value=""
                             />
                             <div
-                              class="c32"
+                              class="c1 c29"
                             >
                               <button
                                 aria-label="Hide password"
-                                class="c33 c34"
+                                class="c30 c31"
                                 type="button"
                               >
                                 <svg
@@ -1077,43 +963,43 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                   class="c20"
                 >
                   <div
-                    class=""
+                    class="c1 "
                   >
                     <div>
                       <div>
                         <div
-                          class="c21 c22"
+                          class="c1 c14 c21"
                           spacing="1"
                         >
                           <label
-                            class="c23"
+                            class="c5 c22"
                             for="textinput-3"
                           >
                             <div
-                              class="c24"
+                              class="c1 c4"
                             >
                               Password confirmation
                             </div>
                           </label>
                           <div
-                            class="c27 c28"
+                            class="c1 c3 c25"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
                               autocomplete="new-password"
-                              class="c30 c31"
+                              class="c27 c28"
                               id="textinput-3"
                               name="confirmPassword"
                               type="password"
                               value=""
                             />
                             <div
-                              class="c32"
+                              class="c1 c29"
                             >
                               <button
                                 aria-label="Hide password"
-                                class="c33 c34"
+                                class="c30 c31"
                                 type="button"
                               >
                                 <svg
@@ -1140,27 +1026,27 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
             </div>
           </div>
           <div
-            class="c16"
+            class="c1 c16"
           >
             <div
-              class="c14 c17"
+              class="c1 c14 c17"
               spacing="4"
             >
               <div
-                class="c14 c35"
+                class="c1 c14 c21"
                 spacing="1"
               >
                 <h2
-                  class="c18"
+                  class="c5 c18"
                 >
                   Experience
                 </h2>
                 <span
-                  class="c36"
+                  class="c5 c32"
                 >
                   Preference changes will apply only to you. More information is available 
                   <a
-                    class="c37"
+                    class="c33"
                     href="https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#locales"
                     rel="noopener noreferrer"
                     target="_blank"
@@ -1171,67 +1057,67 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                 </span>
               </div>
               <div
-                class="c19"
+                class="c1 c19"
               >
                 <div
                   class="c20"
                 >
                   <div
-                    class=""
+                    class="c1 "
                   >
                     <div>
                       <div
-                        class="c38 c39"
+                        class="c1 c14 c21"
                         spacing="1"
                       >
                         <span
-                          class="c40"
-                          for="select-1"
-                          id="select-1-label"
+                          class="c5 c22"
+                          for="select-4"
+                          id="select-4-label"
                         >
                           <div
-                            class="c41"
+                            class="c1 c4"
                           >
                             Interface language
                           </div>
                         </span>
                         <div
-                          class="c41 c42"
+                          class="c1 c4 c34"
                         >
                           <button
-                            aria-describedby="select-1-hint"
+                            aria-describedby="select-4-hint"
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-1-label select-1-content"
-                            class="c43"
-                            id="select-1"
+                            aria-labelledby="select-4-label select-4-content"
+                            class="c35"
+                            id="select-4"
                             type="button"
                           />
                           <div
-                            class="c44 c45"
+                            class="c1 c3 c36"
                           >
                             <div
-                              class="c41"
+                              class="c1 c4"
                             >
                               <div
-                                class="c46"
+                                class="c1 c37"
                               >
                                 <span
-                                  class="c47"
-                                  id="select-1-content"
+                                  class="c5 c38"
+                                  id="select-4-content"
                                 >
                                   Select
                                 </span>
                               </div>
                             </div>
                             <div
-                              class="c41"
+                              class="c1 c4"
                             >
                               <button
                                 aria-disabled="false"
                                 aria-label="Clear the interface language selected"
-                                class="c48"
+                                class="c1 c39"
                                 type="button"
                               >
                                 <svg
@@ -1249,7 +1135,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                               </button>
                               <button
                                 aria-hidden="true"
-                                class="c49 c48 c50"
+                                class="c1 c40 c39 c41"
                                 tabindex="-1"
                                 type="button"
                               >
@@ -1272,8 +1158,8 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           </div>
                         </div>
                         <p
-                          class="c51"
-                          id="select-1-hint"
+                          class="c5 c42"
+                          id="select-4-hint"
                         >
                           This will only display your own interface in the chosen language.
                         </p>
@@ -1285,60 +1171,60 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                   class="c20"
                 >
                   <div
-                    class=""
+                    class="c1 "
                   >
                     <div>
                       <div
-                        class="c38 c39"
+                        class="c1 c14 c21"
                         spacing="1"
                       >
                         <span
-                          class="c40"
-                          for="select-2"
-                          id="select-2-label"
+                          class="c5 c22"
+                          for="select-5"
+                          id="select-5-label"
                         >
                           <div
-                            class="c41"
+                            class="c1 c4"
                           >
                             Interface mode
                           </div>
                         </span>
                         <div
-                          class="c41 c42"
+                          class="c1 c4 c34"
                         >
                           <button
-                            aria-describedby="select-2-hint"
+                            aria-describedby="select-5-hint"
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-2-label select-2-content"
-                            class="c43"
-                            id="select-2"
+                            aria-labelledby="select-5-label select-5-content"
+                            class="c35"
+                            id="select-5"
                             type="button"
                           />
                           <div
-                            class="c44 c45"
+                            class="c1 c3 c36"
                           >
                             <div
-                              class="c41"
+                              class="c1 c4"
                             >
                               <div
-                                class="c46"
+                                class="c1 c37"
                               >
                                 <span
-                                  class="c47"
-                                  id="select-2-content"
+                                  class="c5 c38"
+                                  id="select-5-content"
                                 >
                                   Light mode
                                 </span>
                               </div>
                             </div>
                             <div
-                              class="c41"
+                              class="c1 c4"
                             >
                               <button
                                 aria-hidden="true"
-                                class="c49 c48 c50"
+                                class="c1 c40 c39 c41"
                                 tabindex="-1"
                                 type="button"
                               >
@@ -1361,8 +1247,8 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           </div>
                         </div>
                         <p
-                          class="c51"
-                          id="select-2-hint"
+                          class="c5 c42"
+                          id="select-5-hint"
                         >
                           Displays your interface in the chosen mode.
                         </p>
