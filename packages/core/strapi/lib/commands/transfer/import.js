@@ -9,7 +9,7 @@ const {
 } = require('@strapi/data-transfer');
 const _ = require('lodash/fp');
 
-const strapi = require('../../Strapi');
+const strapi = require('../../index');
 
 const logger = console;
 
@@ -34,8 +34,10 @@ module.exports = async (filename, opts) => {
    * To local Strapi instance
    */
   const destinationOptions = {
-    getStrapi() {
-      return strapi().load();
+    async getStrapi() {
+      const appContext = await strapi.compile();
+      const app = strapi(appContext).load();
+      return app;
     },
   };
   const destination = createLocalStrapiDestinationProvider(destinationOptions);
