@@ -1,6 +1,6 @@
 'use strict';
 
-const { SQLITE } = require('../../utils/constants');
+const { SQLITE, UNKNOWN } = require('../../utils/constants');
 
 const SQL_QUERIES = {
   VERSION: `SELECT sqlite_version() as version`,
@@ -12,9 +12,14 @@ class SqliteDatabaseInspector {
   }
 
   async getInformation() {
-    const results = await this.db.connection.raw(SQL_QUERIES.VERSION);
-    const version = results[0].version;
-
+    let version;
+    try {
+      const results = await this.db.connection.raw(SQL_QUERIES.VERSION);
+      version = results[0].version;
+    } catch (e) {
+      version = UNKNOWN;
+      strapi.log.warn(`Database version couldn't be retrieved: ${e.message}`);
+    }
     return {
       database: SQLITE,
       version,
