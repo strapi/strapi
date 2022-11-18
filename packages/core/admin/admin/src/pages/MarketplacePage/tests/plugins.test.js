@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  render,
-  waitFor,
-  getByPlaceholderText,
-  screen,
-  getByText,
-  queryByText,
-  getByLabelText,
-} from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -51,12 +43,7 @@ const client = new QueryClient({
 });
 
 const waitForReload = async () => {
-  await waitFor(
-    () => {
-      expect(screen.queryByTestId('loader')).toBe(null);
-    },
-    { timeout: 5000 }
-  );
+  await screen.findByText(/marketplace/i, { selector: 'h1' });
 };
 
 describe('Marketplace page - plugins tab', () => {
@@ -101,11 +88,10 @@ describe('Marketplace page - plugins tab', () => {
 
     // Make sure it defaults to the plugins tab
     const button = screen.getByRole('tab', { selected: true });
-    const pluginsTabActive = getByText(button, /plugins/i);
+    const pluginsTabActive = within(button).getByText(/plugins/i);
 
-    const tabPanel = screen.getByRole('tabpanel');
-    const pluginCardText = getByText(tabPanel, 'Comments');
-    const providerCardText = queryByText(tabPanel, 'Cloudinary');
+    const pluginCardText = screen.getByText('Comments');
+    const providerCardText = screen.queryByText('Cloudinary');
     const submitPluginText = screen.queryByText('Submit plugin');
 
     expect(pluginsTabActive).not.toBe(null);
@@ -115,7 +101,7 @@ describe('Marketplace page - plugins tab', () => {
   });
 
   it('should return plugin search results matching the query', async () => {
-    const input = getByPlaceholderText(renderedContainer, 'Search');
+    const input = screen.getByPlaceholderText('Search');
 
     await user.type(input, 'comment');
 
@@ -129,7 +115,7 @@ describe('Marketplace page - plugins tab', () => {
   });
 
   it('should return empty plugin search results given a bad query', async () => {
-    const input = getByPlaceholderText(renderedContainer, 'Search');
+    const input = screen.getByPlaceholderText('Search');
     const badQuery = 'asdf';
     const user = userEvent.setup();
 
@@ -145,20 +131,19 @@ describe('Marketplace page - plugins tab', () => {
     const alreadyInstalledCard = screen
       .getAllByTestId('npm-package-card')
       .find((div) => div.innerHTML.includes('Documentation'));
-    const alreadyInstalledText = queryByText(alreadyInstalledCard, /installed/i);
+    const alreadyInstalledText = within(alreadyInstalledCard).queryByText(/installed/i);
     expect(alreadyInstalledText).toBeVisible();
 
     // Plugin that's not installed
     const notInstalledCard = screen
       .getAllByTestId('npm-package-card')
       .find((div) => div.innerHTML.includes('Comments'));
-    const notInstalledText = queryByText(notInstalledCard, /copy install command/i);
+    const notInstalledText = within(notInstalledCard).queryByText(/copy install command/i);
     expect(notInstalledText).toBeVisible();
   });
 
   it('shows plugins filters popover', async () => {
     const filtersButton = screen.getByTestId('filters-button');
-
     await user.click(filtersButton);
 
     const collectionsButton = screen.getByTestId('Collections-button');
@@ -170,11 +155,9 @@ describe('Marketplace page - plugins tab', () => {
 
   it('shows the collections filter options', async () => {
     const filtersButton = screen.getByTestId('filters-button');
-
     await user.click(filtersButton);
 
     const collectionsButton = screen.getByTestId('Collections-button');
-
     await user.click(collectionsButton);
 
     const mockedServerCollections = {
@@ -192,11 +175,9 @@ describe('Marketplace page - plugins tab', () => {
 
   it('shows the categories filter options', async () => {
     const filtersButton = screen.getByTestId('filters-button');
-
     await user.click(filtersButton);
 
     const categoriesButton = screen.getByTestId('Categories-button');
-
     await user.click(categoriesButton);
 
     const mockedServerCategories = {
@@ -213,7 +194,6 @@ describe('Marketplace page - plugins tab', () => {
 
   it('filters a collection option', async () => {
     const filtersButton = screen.getByTestId('filters-button');
-
     await user.click(filtersButton);
 
     const collectionsButton = screen.getByTestId('Collections-button');
@@ -222,9 +202,7 @@ describe('Marketplace page - plugins tab', () => {
     const option = screen.getByRole('option', { name: `Made by Strapi (13)` });
     await user.click(option);
 
-    await waitForReload();
-
-    const optionTag = screen.getByRole('button', { name: 'Made by Strapi' });
+    const optionTag = await screen.findByRole('button', { name: 'Made by Strapi' });
     expect(optionTag).toBeVisible();
 
     const collectionCards = screen.getAllByTestId('npm-package-card');
@@ -238,7 +216,6 @@ describe('Marketplace page - plugins tab', () => {
 
   it('filters a category option', async () => {
     const filtersButton = screen.getByTestId('filters-button');
-
     await user.click(filtersButton);
 
     const categoriesButton = screen.getByTestId('Categories-button');
@@ -247,9 +224,7 @@ describe('Marketplace page - plugins tab', () => {
     const option = screen.getByRole('option', { name: `Custom fields (4)` });
     await user.click(option);
 
-    await waitForReload();
-
-    const optionTag = screen.getByRole('button', { name: 'Custom fields' });
+    const optionTag = await screen.findByRole('button', { name: 'Custom fields' });
     expect(optionTag).toBeVisible();
 
     const categoryCards = screen.getAllByTestId('npm-package-card');
@@ -272,10 +247,8 @@ describe('Marketplace page - plugins tab', () => {
     const collectionOption = screen.getByRole('option', { name: `Made by Strapi (13)` });
     // When they click the option
     await user.click(collectionOption);
-    // The page should reload
-    await waitForReload();
     // When they click the filters button again
-    await user.click(screen.getByTestId('filters-button'));
+    await user.click(await screen.findByTestId('filters-button'));
     // They should see the collections button indicating 1 option selected
     await user.click(screen.getByRole('button', { name: '1 collection selected Made by Strapi' }));
     // They should the categories button with no options selected
@@ -283,10 +256,8 @@ describe('Marketplace page - plugins tab', () => {
     await user.click(categoriesButton);
     const categoryOption = screen.getByRole('option', { name: `Custom fields (4)` });
     await user.click(categoryOption);
-    // The page should reload
-    await waitForReload();
     // When the page reloads they should see a tag for the selected option
-    const madeByStrapiTag = screen.getByRole('button', { name: 'Made by Strapi' });
+    const madeByStrapiTag = await screen.findByRole('button', { name: 'Made by Strapi' });
     const customFieldsTag = screen.getByRole('button', { name: 'Custom fields' });
     expect(madeByStrapiTag).toBeVisible();
     expect(customFieldsTag).toBeVisible();
@@ -310,15 +281,11 @@ describe('Marketplace page - plugins tab', () => {
     await user.click(screen.getByTestId('Collections-button'));
     await user.click(screen.getByRole('option', { name: `Made by Strapi (13)` }));
 
-    await waitForReload();
-
-    await user.click(screen.getByTestId('filters-button'));
+    await user.click(await screen.findByTestId('filters-button'));
     await user.click(screen.getByRole('button', { name: `1 collection selected Made by Strapi` }));
     await user.click(screen.getByRole('option', { name: `Verified (29)` }));
 
-    await waitForReload();
-
-    const madeByStrapiTag = screen.getByRole('button', { name: 'Made by Strapi' });
+    const madeByStrapiTag = await screen.findByRole('button', { name: 'Made by Strapi' });
     const verifiedTag = screen.getByRole('button', { name: 'Verified' });
     expect(madeByStrapiTag).toBeVisible();
     expect(verifiedTag).toBeVisible();
@@ -333,15 +300,11 @@ describe('Marketplace page - plugins tab', () => {
     await user.click(screen.getByTestId('Categories-button'));
     await user.click(screen.getByRole('option', { name: `Custom fields (4)` }));
 
-    await waitForReload();
-
-    await user.click(screen.getByTestId('filters-button'));
+    await user.click(await screen.findByTestId('filters-button'));
     await user.click(screen.getByRole('button', { name: `1 category selected Custom fields` }));
     await user.click(screen.getByRole('option', { name: `Monitoring (1)` }));
 
-    await waitForReload();
-
-    const customFieldsTag = screen.getByRole('button', { name: 'Custom fields' });
+    const customFieldsTag = await screen.findByRole('button', { name: 'Custom fields' });
     const monitoringTag = screen.getByRole('button', { name: 'Monitoring' });
     expect(customFieldsTag).toBeVisible();
     expect(monitoringTag).toBeVisible();
@@ -361,9 +324,7 @@ describe('Marketplace page - plugins tab', () => {
     const option = screen.getByRole('option', { name: 'Made by Strapi (13)' });
     await user.click(option);
 
-    await waitForReload();
-
-    const optionTag = screen.getByRole('button', { name: 'Made by Strapi' });
+    const optionTag = await screen.findByRole('button', { name: 'Made by Strapi' });
     expect(optionTag).toBeVisible();
 
     await user.click(optionTag);
@@ -383,9 +344,7 @@ describe('Marketplace page - plugins tab', () => {
     const option = screen.getByRole('option', { name: `Made by Strapi (13)` });
     await user.click(option);
 
-    await waitForReload();
-
-    const collectionCards = screen.getAllByTestId('npm-package-card');
+    const collectionCards = await screen.findAllByTestId('npm-package-card');
     expect(collectionCards.length).toBe(2);
 
     await user.click(screen.getByRole('tab', { name: /providers/i }));
@@ -423,15 +382,13 @@ describe('Marketplace page - plugins tab', () => {
       .getAllByTestId('npm-package-card')
       .find((div) => div.innerHTML.includes('Documentation'));
 
-    const githubStarsLabel = getByLabelText(
-      documentationCard,
+    const githubStarsLabel = within(documentationCard).getByLabelText(
       /this plugin was starred \d+ on GitHub/i
     );
 
     expect(githubStarsLabel).toBeVisible();
 
-    const downloadsLabel = getByLabelText(
-      documentationCard,
+    const downloadsLabel = within(documentationCard).getByLabelText(
       /this plugin has \d+ weekly downloads/i
     );
     expect(downloadsLabel).toBeVisible();
