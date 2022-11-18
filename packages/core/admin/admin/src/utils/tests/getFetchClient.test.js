@@ -3,6 +3,7 @@ import { getFetchClient } from '../getFetchClient';
 
 const token = 'coolToken';
 auth.getToken = jest.fn().mockReturnValue(token);
+auth.clearAppStorage = jest.fn().mockReturnValue(token);
 
 describe('ADMIN | utils | getFetchClient', () => {
   it('should return the 4 HTTP methods to call GET, POST, PUT and DELETE apis', () => {
@@ -22,12 +23,13 @@ describe('ADMIN | utils | getFetchClient', () => {
       expect(headers.Accept).toBe('application/json');
     }
   });
-  it('should contain the headers config values and the data when we try to reach an API without authorization', async () => {
+  it('should contain the headers config values and the data when we try to reach an API without authorization and run the interceptor', async () => {
     const response = getFetchClient();
     try {
       await response.get('/admin/information');
     } catch (err) {
       expect(err.response.status).toBe(401);
+      expect(auth.clearAppStorage).toHaveBeenCalledTimes(1);
     }
   });
   it('should respond with status 200 to a known API', async () => {
