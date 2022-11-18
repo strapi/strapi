@@ -146,7 +146,7 @@ jobs:
           dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
 
   api_ce_mysql_5:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     needs: [lint, unit_back, unit_front]
     name: '[CE] API Integration (mysql:5 , node: ${{ matrix.node }})'
     strategy:
