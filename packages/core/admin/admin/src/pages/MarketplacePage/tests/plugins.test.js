@@ -43,7 +43,7 @@ const client = new QueryClient({
 });
 
 const waitForReload = async () => {
-  await screen.findByText(/marketplace/i, { selector: 'h1' });
+  await screen.findByText('Marketplace', { selector: 'h1' });
 };
 
 describe('Marketplace page - plugins tab', () => {
