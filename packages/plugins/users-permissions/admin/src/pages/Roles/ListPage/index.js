@@ -1,19 +1,11 @@
 import React, { useMemo, useState } from 'react';
-import {
-  Button,
-  HeaderLayout,
-  Layout,
-  ContentLayout,
-  ActionLayout,
-  Main,
-  Table,
-  Tr,
-  Thead,
-  Th,
-  VisuallyHidden,
-  Typography,
-  useNotifyAT,
-} from '@strapi/design-system';
+import { Button } from '@strapi/design-system/Button';
+import { HeaderLayout, Layout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
+import { Table, Tr, Thead, Th } from '@strapi/design-system/Table';
+import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
+import { Typography } from '@strapi/design-system/Typography';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import Plus from '@strapi/icons/Plus';
 import {
   useTracking,

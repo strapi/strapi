@@ -1,6 +1,8 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { Flex, ThemeProvider, lightTheme, Typography } from '@strapi/design-system';
+import { Flex } from '@strapi/design-system/Flex';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { Typography } from '@strapi/design-system/Typography';
 import { render, fireEvent, act } from '@testing-library/react';
 
 import { FolderCard } from '../FolderCard';

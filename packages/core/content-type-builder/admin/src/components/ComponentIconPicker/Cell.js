@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Flex } from '@strapi/design-system';
+import { Flex } from '@strapi/design-system/Flex';
 
 const Cell = styled(Flex)`
   svg {

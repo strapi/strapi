@@ -1,6 +1,8 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { Typography, Stack, GridItem } from '@strapi/design-system';
+import { Typography } from '@strapi/design-system/Typography';
+import { Stack } from '@strapi/design-system/Stack';
+import { GridItem } from '@strapi/design-system/Grid';
 import BoundRoute from '../BoundRoute';
 import { useApiTokenPermissionsContext } from '../../../../../../../contexts/ApiTokenPermissions';
 

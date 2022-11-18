@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
 import styled from 'styled-components';
 import sortBy from 'lodash/sortBy';
 import ContentTypeCollapses from '../ContentTypeCollapses';

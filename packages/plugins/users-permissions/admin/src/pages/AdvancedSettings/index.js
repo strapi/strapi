@@ -13,20 +13,15 @@ import {
   useOverlayBlocker,
   useRBAC,
 } from '@strapi/helper-plugin';
-import {
-  useNotifyAT,
-  Main,
-  HeaderLayout,
-  ContentLayout,
-  Button,
-  Box,
-  Stack,
-  Select,
-  Option,
-  Typography,
-  Grid,
-  GridItem,
-} from '@strapi/design-system';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import { Main } from '@strapi/design-system/Main';
+import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
+import { Button } from '@strapi/design-system/Button';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { Select, Option } from '@strapi/design-system/Select';
+import { Typography } from '@strapi/design-system/Typography';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
 import Check from '@strapi/icons/Check';
 import pluginPermissions from '../../permissions';
 import { getTrad } from '../../utils';

@@ -4,20 +4,15 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';
-import {
-  Button,
-  Grid,
-  GridItem,
-  ModalLayout,
-  ModalBody,
-  ModalFooter,
-  FieldLabel,
-  Flex,
-  Loader,
-  Stack,
-  TextInput,
-  Typography,
-} from '@strapi/design-system';
+import { Button } from '@strapi/design-system/Button';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { ModalLayout, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
+import { FieldLabel } from '@strapi/design-system/Field';
+import { Flex } from '@strapi/design-system/Flex';
+import { Loader } from '@strapi/design-system/Loader';
+import { Stack } from '@strapi/design-system/Stack';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { Typography } from '@strapi/design-system/Typography';
 import { Form, useNotification, getAPIInnerErrors, useTracking } from '@strapi/helper-plugin';
 
 import { getTrad, findRecursiveFolderByValue } from '../../utils';

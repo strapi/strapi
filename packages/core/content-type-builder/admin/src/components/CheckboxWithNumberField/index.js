@@ -7,7 +7,11 @@
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Box, Checkbox, Stack, NumberInput, TextInput } from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
+import { Checkbox } from '@strapi/design-system/Checkbox';
+import { Stack } from '@strapi/design-system/Stack';
+import { NumberInput } from '@strapi/design-system/NumberInput';
+import { TextInput } from '@strapi/design-system/TextInput';
 
 const CheckboxWithNumberField = ({ error, intlLabel, modifiedData, name, onChange, value }) => {
   const { formatMessage } = useIntl();

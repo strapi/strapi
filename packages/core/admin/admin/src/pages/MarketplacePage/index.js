@@ -12,21 +12,15 @@ import {
   useAppInfos,
   useQueryParams,
 } from '@strapi/helper-plugin';
-import {
-  Layout,
-  ContentLayout,
-  Main,
-  Searchbar,
-  Box,
-  useNotifyAT,
-  Typography,
-  Flex,
-  Tabs,
-  Tab,
-  TabGroup,
-  TabPanels,
-  TabPanel,
-} from '@strapi/design-system';
+import { Layout, ContentLayout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
+import { Searchbar } from '@strapi/design-system/Searchbar';
+import { Box } from '@strapi/design-system/Box';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import { Typography } from '@strapi/design-system/Typography';
+import { Flex } from '@strapi/design-system/Flex';
+import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
+
 import EmptyNpmPackageSearch from './components/EmptyNpmPackageSearch';
 import PageHeader from './components/PageHeader';
 import useFetchMarketplaceProviders from '../../hooks/useFetchMarketplaceProviders';

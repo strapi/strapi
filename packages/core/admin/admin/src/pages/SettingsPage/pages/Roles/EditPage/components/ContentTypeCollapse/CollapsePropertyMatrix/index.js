@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Box } from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
 import generateHeadersFromActions from './utils/generateHeadersFromActions';
 import Header from './Header';
 import ActionRow from './ActionRow';

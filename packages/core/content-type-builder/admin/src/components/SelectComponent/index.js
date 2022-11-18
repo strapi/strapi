@@ -7,7 +7,7 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Select, Option } from '@strapi/design-system';
+import { Select, Option } from '@strapi/design-system/Select';
 import useDataManager from '../../hooks/useDataManager';
 
 const SelectComponent = ({

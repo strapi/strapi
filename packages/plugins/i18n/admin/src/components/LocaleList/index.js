@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Button, Main, ContentLayout, EmptyStateLayout, HeaderLayout } from '@strapi/design-system';
+import { Button } from '@strapi/design-system/Button';
+import { Main } from '@strapi/design-system/Main';
+import { ContentLayout, EmptyStateLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import { useFocusWhenNavigate } from '@strapi/helper-plugin';
 import Plus from '@strapi/icons/Plus';
 import EmptyDocuments from '@strapi/icons/EmptyDocuments';

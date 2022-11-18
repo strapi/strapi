@@ -3,7 +3,7 @@ import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import Plus from '@strapi/icons/Plus';
-import { Box, TextButton } from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
 import {
   SubNav,
   SubNavHeader,
@@ -12,6 +12,7 @@ import {
   SubNavSection,
   SubNavSections,
 } from '@strapi/design-system/v2/SubNav';
+import { TextButton } from '@strapi/design-system/TextButton';
 import useContentTypeBuilderMenu from './useContentTypeBuilderMenu';
 import getTrad from '../../utils/getTrad';
 

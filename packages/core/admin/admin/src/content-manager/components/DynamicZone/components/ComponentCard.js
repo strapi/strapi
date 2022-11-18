@@ -9,7 +9,9 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { Box, Typography, Stack } from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
+import { Typography } from '@strapi/design-system/Typography';
+import { Stack } from '@strapi/design-system/Stack';
 import { pxToRem } from '@strapi/helper-plugin';
 
 const StyledFontAwesomeIcon = styled(FontAwesomeIcon)`

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Typography } from '@strapi/design-system';
+import { Typography } from '@strapi/design-system/Typography';
 import styled from 'styled-components';
 import CellValue from '../CellValue';
 

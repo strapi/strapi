@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { CardAsset, CardTimer, Box } from '@strapi/design-system';
+import { CardAsset, CardTimer } from '@strapi/design-system/Card';
+import { Box } from '@strapi/design-system/Box';
+
 import { VideoPreview } from './VideoPreview';
 import { AssetCardBase } from './AssetCardBase';
 

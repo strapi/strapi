@@ -1,6 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Flex, Divider, Typography } from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Divider } from '@strapi/design-system/Divider';
+import { Typography } from '@strapi/design-system/Typography';
 import { GenericInput } from '@strapi/helper-plugin';
 import getTrad from '../../../utils/getTrad';
 import RelationTargetPicker from './RelationTargetPicker';

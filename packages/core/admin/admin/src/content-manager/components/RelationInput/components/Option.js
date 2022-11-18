@@ -5,7 +5,9 @@ import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 
 import { pxToRem } from '@strapi/helper-plugin';
-import { Flex, Typography } from '@strapi/design-system';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
+
 import { getTrad } from '../../../utils';
 
 const StyledBullet = styled.div`

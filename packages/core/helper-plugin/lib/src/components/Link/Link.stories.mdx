@@ -1,7 +1,7 @@
 <!--- Link.stories.mdx --->
 
 import { Meta, Story, Canvas } from '@storybook/addon-docs/blocks';
-import { Box } from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
 import Link from './index';
 
 <Meta title="components/Link" component={Link} />
@@ -17,7 +17,7 @@ Basic usage
 <Canvas>
   <Story name="base">
     <Box padding={4}>
-      <Link to="/somewhere-internal">Internal link</Link>
+        <Link to="/somewhere-internal">Internal link</Link>
     </Box>
   </Story>
 </Canvas>

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { SimpleMenu, MenuItem } from '@strapi/design-system';
+import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
 import useLocalesProvider from '../../../components/LocalesProvider/useLocalesProvider';
 
 const LocaleToggle = () => {

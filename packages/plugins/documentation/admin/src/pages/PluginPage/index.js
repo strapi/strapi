@@ -16,22 +16,14 @@ import {
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
-import {
-  Button,
-  Layout,
-  HeaderLayout,
-  ContentLayout,
-  Main,
-  IconButton,
-  Typography,
-  Flex,
-  Table,
-  Tr,
-  Thead,
-  Th,
-  Tbody,
-  Td,
-} from '@strapi/design-system';
+import { Button } from '@strapi/design-system/Button';
+import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Typography } from '@strapi/design-system/Typography';
+import { Flex } from '@strapi/design-system/Flex';
+import { Table, Tr, Thead, Th, Tbody, Td } from '@strapi/design-system/Table';
+
 import Trash from '@strapi/icons/Trash';
 import Show from '@strapi/icons/Eye';
 import Reload from '@strapi/icons/Refresh';

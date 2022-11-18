@@ -8,14 +8,13 @@ import {
   ModalHeader,
   ModalFooter,
   ModalBody,
-  Typography,
-  Button,
-  Flex,
-  Grid,
-  GridItem,
-  TextInput,
-  ToggleInput,
-} from '@strapi/design-system';
+} from '@strapi/design-system/ModalLayout';
+import { Typography } from '@strapi/design-system/Typography';
+import { Button } from '@strapi/design-system/Button';
+import { Flex } from '@strapi/design-system/Flex';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { ToggleInput } from '@strapi/design-system/ToggleInput';
 import { getTrad } from '../../../utils';
 import FieldTypeIcon from '../../../components/FieldTypeIcon';
 

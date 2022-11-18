@@ -7,7 +7,10 @@ import { pxToRem } from '@strapi/helper-plugin';
 import Clock from '@strapi/icons/Clock';
 import Refresh from '@strapi/icons/Refresh';
 import { Link } from '@strapi/design-system/v2/Link';
-import { Box, Stack, Flex, Typography } from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
 import { Content, IconBox, Overlay } from './Overlay';
 
 const overlayContainer = document.createElement('div');

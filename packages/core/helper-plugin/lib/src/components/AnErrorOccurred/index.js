@@ -1,6 +1,6 @@
 import React from 'react';
 import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
-import { EmptyStateLayout } from '@strapi/design-system';
+import { EmptyStateLayout } from '@strapi/design-system/EmptyStateLayout';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 

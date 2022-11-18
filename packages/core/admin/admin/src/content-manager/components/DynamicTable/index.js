@@ -5,7 +5,9 @@ import { DynamicTable as Table, useStrapiApp } from '@strapi/helper-plugin';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { Status, Typography } from '@strapi/design-system';
+import { Status } from '@strapi/design-system/Status';
+import { Typography } from '@strapi/design-system/Typography';
+
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 import { selectDisplayedHeaders } from '../../pages/ListView/selectors';
 import { getTrad } from '../../utils';

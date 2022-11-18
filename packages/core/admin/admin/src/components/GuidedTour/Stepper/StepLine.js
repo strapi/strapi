@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { pxToRem } from '@strapi/helper-plugin';
-import { Box } from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
 import { IS_DONE, IS_ACTIVE, IS_NOT_DONE } from '../constants';
 
 const StepLine = ({ type, ...props }) => {

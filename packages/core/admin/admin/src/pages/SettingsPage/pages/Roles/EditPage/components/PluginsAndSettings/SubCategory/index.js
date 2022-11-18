@@ -1,7 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { Grid, GridItem, Box, Checkbox, Flex, Typography } from '@strapi/design-system';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Box } from '@strapi/design-system/Box';
+import { Checkbox } from '@strapi/design-system/Checkbox';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/PluginsAndSettings/SubCategory/utils/constants';

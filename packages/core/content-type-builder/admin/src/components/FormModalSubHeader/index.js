@@ -2,7 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import upperFirst from 'lodash/upperFirst';
-import { Stack, Typography } from '@strapi/design-system';
+import { Stack } from '@strapi/design-system/Stack';
+import { Typography } from '@strapi/design-system/Typography';
+
 import { getTrad } from '../../utils';
 
 import getModalTitleSubHeader from './getModalTitleSubHeader';

@@ -11,20 +11,16 @@ import {
   useTracking,
   Link,
 } from '@strapi/helper-plugin';
-import {
-  Box,
-  Button,
-  ContentLayout,
-  HeaderLayout,
-  Grid,
-  GridItem,
-  Main,
-  Flex,
-  Stack,
-  Typography,
-  TextInput,
-  Textarea,
-} from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
+import { Button } from '@strapi/design-system/Button';
+import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Main } from '@strapi/design-system/Main';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+import { Typography } from '@strapi/design-system/Typography';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { Textarea } from '@strapi/design-system/Textarea';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import { Formik } from 'formik';
 import get from 'lodash/get';

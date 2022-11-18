@@ -2,7 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useNotification, useTracking } from '@strapi/helper-plugin';
-import { Box, Icon, Typography } from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
+import { Icon } from '@strapi/design-system/Icon';
+import { Typography } from '@strapi/design-system/Typography';
 import Check from '@strapi/icons/Check';
 import CardButton from './CardButton';
 

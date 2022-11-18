@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Select, Option } from '@strapi/design-system';
+import { Select, Option } from '@strapi/design-system/Select';
 
 const SelectDateType = ({ intlLabel, error, modifiedData, name, onChange, options, value }) => {
   const { formatMessage } = useIntl();

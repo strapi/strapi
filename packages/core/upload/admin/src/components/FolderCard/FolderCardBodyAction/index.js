@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
-import { Box } from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
 
 const BoxOutline = styled(Box)`
   &:focus {

@@ -4,7 +4,9 @@ import styled from 'styled-components';
 import { NavLink } from 'react-router-dom';
 
 import { pxToRem } from '@strapi/helper-plugin';
-import { Box, CardAction, Stack } from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
+import { CardAction } from '@strapi/design-system/Card';
+import { Stack } from '@strapi/design-system/Stack';
 import Folder from '@strapi/icons/Folder';
 
 import { FolderCardContext } from '../contexts/FolderCard';

@@ -2,7 +2,9 @@ import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { useFormikContext } from 'formik';
-import { Grid, GridItem, TextInput, Select, Option } from '@strapi/design-system';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { Select, Option } from '@strapi/design-system/Select';
 import { getTrad } from '../../utils';
 import useDefaultLocales from '../../hooks/useDefaultLocales';
 

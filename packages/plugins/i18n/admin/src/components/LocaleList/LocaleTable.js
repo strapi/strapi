@@ -1,17 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  Typography,
-  IconButton,
-  Stack,
-  VisuallyHidden,
-  Table,
-  Thead,
-  Tr,
-  Th,
-  Td,
-  Tbody,
-} from '@strapi/design-system';
+import { Typography } from '@strapi/design-system/Typography';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Stack } from '@strapi/design-system/Stack';
+import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
+import { Table, Thead, Tr, Th, Td, Tbody } from '@strapi/design-system/Table';
 import Pencil from '@strapi/icons/Pencil';
 import Trash from '@strapi/icons/Trash';
 import { useIntl } from 'react-intl';

@@ -1,5 +1,8 @@
 import React from 'react';
-import { Tbody, Tr, Td, Box, Flex, Loader } from '@strapi/design-system';
+import { Tbody, Tr, Td } from '@strapi/design-system/Table';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Loader } from '@strapi/design-system/Loader';
 import PropTypes from 'prop-types';
 import EmptyStateLayout from '../EmptyStateLayout';
 

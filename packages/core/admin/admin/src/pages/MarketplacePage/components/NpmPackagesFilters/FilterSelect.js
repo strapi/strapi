@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Select, Option } from '@strapi/design-system';
+import { Select, Option } from '@strapi/design-system/Select';
 
 const FilterSelect = ({ message, value, onChange, possibleFilters, onClear, customizeContent }) => {
   const computeFilterMessage = (filterName, count) => {

@@ -1,5 +1,7 @@
 import styled from 'styled-components';
-import { IconButtonGroup, IconButton, BaseButton } from '@strapi/design-system';
+import { IconButtonGroup, IconButton } from '@strapi/design-system/IconButton';
+import { BaseButton } from '@strapi/design-system/BaseButton';
+
 // NAV BUTTONS
 export const CustomIconButton = styled(IconButton)`
   padding: ${({ theme }) => theme.spaces[2]};

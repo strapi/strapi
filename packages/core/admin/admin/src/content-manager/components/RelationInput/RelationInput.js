@@ -4,19 +4,15 @@ import styled from 'styled-components';
 import { FixedSizeList as List } from 'react-window';
 
 import { ReactSelect } from '@strapi/helper-plugin';
-import {
-  Status,
-  Box,
-  Link,
-  Icon,
-  FieldLabel,
-  FieldError,
-  FieldHint,
-  Field,
-  TextButton,
-  Typography,
-  Tooltip,
-} from '@strapi/design-system';
+import { Status } from '@strapi/design-system/Status';
+import { Box } from '@strapi/design-system/Box';
+import { Link } from '@strapi/design-system/Link';
+import { Icon } from '@strapi/design-system/Icon';
+import { FieldLabel, FieldError, FieldHint, Field } from '@strapi/design-system/Field';
+import { TextButton } from '@strapi/design-system/TextButton';
+import { Typography } from '@strapi/design-system/Typography';
+import { Tooltip } from '@strapi/design-system/Tooltip';
+
 import Cross from '@strapi/icons/Cross';
 import Refresh from '@strapi/icons/Refresh';
 

@@ -3,7 +3,7 @@ import React, { forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import FileIcon from '@strapi/icons/File';
 import FilePdfIcon from '@strapi/icons/FilePdf';
-import { Flex } from '@strapi/design-system';
+import { Flex } from '@strapi/design-system/Flex';
 import styled from 'styled-components';
 import { usePersistentState } from '@strapi/helper-plugin';
 import { AssetType } from '../../../constants';

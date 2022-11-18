@@ -11,7 +11,9 @@ import {
   useFocusWhenNavigate,
   LoadingIndicatorPage,
 } from '@strapi/helper-plugin';
-import { useNotifyAT, Main, ContentLayout, HeaderLayout } from '@strapi/design-system';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import { Main } from '@strapi/design-system/Main';
+import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import pluginPermissions from '../../permissions';
 import { getTrad } from '../../utils';
 import { fetchData, putEmailTemplate } from './utils/api';

@@ -2,7 +2,7 @@ import React, { memo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 import isEqual from 'react-fast-compare';
-import { Button } from '@strapi/design-system';
+import { Button } from '@strapi/design-system/Button';
 import Trash from '@strapi/icons/Trash';
 import { ConfirmDialog, useNotification } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';

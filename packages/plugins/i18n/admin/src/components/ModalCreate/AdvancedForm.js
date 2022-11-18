@@ -1,7 +1,7 @@
 import React from 'react';
 import { useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
-import { Checkbox } from '@strapi/design-system';
+import { Checkbox } from '@strapi/design-system/Checkbox';
 import { getTrad } from '../../utils';
 
 const AdvancedForm = () => {

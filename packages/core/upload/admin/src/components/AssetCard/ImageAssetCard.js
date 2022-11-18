@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { CardAsset } from '@strapi/design-system';
+import { CardAsset } from '@strapi/design-system/Card';
+
 import { AssetCardBase } from './AssetCardBase';
 
 export const ImageAssetCard = ({ height, width, thumbnail, size, alt, ...props }) => {

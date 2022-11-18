@@ -1,7 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { pxToRem } from '@strapi/helper-plugin';
-import { Flex, Typography, Icon } from '@strapi/design-system';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
+import { Icon } from '@strapi/design-system/Icon';
 import Check from '@strapi/icons/Check';
 import { IS_DONE, IS_ACTIVE, IS_NOT_DONE } from '../constants';
 

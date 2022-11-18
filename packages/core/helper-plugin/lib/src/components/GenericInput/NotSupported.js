@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { TextInput } from '@strapi/design-system';
+import { TextInput } from '@strapi/design-system/TextInput';
 import PropTypes from 'prop-types';
 
 const NotSupported = ({ hint, label, labelAction, error, name, required }) => {

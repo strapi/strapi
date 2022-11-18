@@ -8,13 +8,11 @@ import {
   ModalHeader,
   ModalFooter,
   ModalBody,
-  Grid,
-  GridItem,
-  Button,
-  Breadcrumbs,
-  Crumb,
-  Textarea,
-} from '@strapi/design-system';
+} from '@strapi/design-system/ModalLayout';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Button } from '@strapi/design-system/Button';
+import { Breadcrumbs, Crumb } from '@strapi/design-system/Breadcrumbs';
+import { Textarea } from '@strapi/design-system/Textarea';
 import { getTrad } from '../../../utils';
 import schema from '../utils/schema';
 

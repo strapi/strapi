@@ -1,19 +1,15 @@
 import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useTracking } from '@strapi/helper-plugin';
-import {
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Typography,
-  Button,
-  Flex,
-  Stack,
-  Grid,
-  GridItem,
-  KeyboardNavigable,
-} from '@strapi/design-system';
+import { ModalHeader, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
+import { Typography } from '@strapi/design-system/Typography';
+import { Button } from '@strapi/design-system/Button';
 import { useIntl } from 'react-intl';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
+
 import { AssetCard } from '../../AssetCard/AssetCard';
 import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
 import getTrad from '../../../utils/getTrad';

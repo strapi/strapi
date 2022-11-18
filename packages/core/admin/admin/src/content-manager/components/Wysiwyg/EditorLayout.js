@@ -1,7 +1,12 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Flex, Box, FocusTrap, Portal, BaseButton, Typography } from '@strapi/design-system';
+import { Flex } from '@strapi/design-system/Flex';
+import { Box } from '@strapi/design-system/Box';
+import { FocusTrap } from '@strapi/design-system/FocusTrap';
+import { Portal } from '@strapi/design-system/Portal';
+import { BaseButton } from '@strapi/design-system/BaseButton';
+import { Typography } from '@strapi/design-system/Typography';
 import { pxToRem } from '@strapi/helper-plugin';
 import Collapse from '@strapi/icons/Collapse';
 import { useIntl } from 'react-intl';

@@ -15,22 +15,13 @@ import {
 import has from 'lodash/has';
 import upperFirst from 'lodash/upperFirst';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  HeaderLayout,
-  Layout,
-  ContentLayout,
-  Main,
-  useNotifyAT,
-  Table,
-  Thead,
-  Tr,
-  Th,
-  Tbody,
-  Td,
-  Typography,
-  VisuallyHidden,
-  IconButton,
-} from '@strapi/design-system';
+import { HeaderLayout, Layout, ContentLayout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import { Table, Thead, Tr, Th, Tbody, Td } from '@strapi/design-system/Table';
+import { Typography } from '@strapi/design-system/Typography';
+import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
+import { IconButton } from '@strapi/design-system/IconButton';
 import Pencil from '@strapi/icons/Pencil';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import forms from './utils/forms';

@@ -5,15 +5,12 @@ import { useIntl } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import get from 'lodash/get';
 
-import {
-  Accordion,
-  AccordionToggle,
-  AccordionContent,
-  IconButton,
-  Box,
-  Flex,
-  Stack,
-} from '@strapi/design-system';
+import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
 import Trash from '@strapi/icons/Trash';

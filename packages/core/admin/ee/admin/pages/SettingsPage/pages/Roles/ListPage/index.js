@@ -13,21 +13,12 @@ import Plus from '@strapi/icons/Plus';
 import Trash from '@strapi/icons/Trash';
 import Duplicate from '@strapi/icons/Duplicate';
 import Pencil from '@strapi/icons/Pencil';
-import {
-  Button,
-  ActionLayout,
-  ContentLayout,
-  HeaderLayout,
-  VisuallyHidden,
-  Main,
-  Table,
-  Tbody,
-  TFooter,
-  Thead,
-  Th,
-  Tr,
-  Typography,
-} from '@strapi/design-system';
+import { Button } from '@strapi/design-system/Button';
+import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
+import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
+import { Main } from '@strapi/design-system/Main';
+import { Table, Tbody, TFooter, Thead, Th, Tr } from '@strapi/design-system/Table';
+import { Typography } from '@strapi/design-system/Typography';
 import { get } from 'lodash';
 import matchSorter from 'match-sorter';
 import { useIntl } from 'react-intl';

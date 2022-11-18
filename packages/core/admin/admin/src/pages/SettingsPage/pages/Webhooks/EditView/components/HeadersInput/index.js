@@ -1,16 +1,13 @@
 import React from 'react';
 import { RemoveRoundedButton } from '@strapi/helper-plugin';
 import Plus from '@strapi/icons/Plus';
-import {
-  Box,
-  FieldLabel,
-  Grid,
-  GridItem,
-  Flex,
-  Stack,
-  TextInput,
-  TextButton,
-} from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
+import { FieldLabel } from '@strapi/design-system/Field';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { TextButton } from '@strapi/design-system/TextButton';
 import { Field, FieldArray, useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
 import Combobox from './Combobox';

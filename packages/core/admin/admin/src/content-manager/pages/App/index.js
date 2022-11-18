@@ -7,7 +7,8 @@ import {
   NotFound,
   useGuidedTour,
 } from '@strapi/helper-plugin';
-import { Layout, HeaderLayout, Main } from '@strapi/design-system';
+import { Layout, HeaderLayout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
 import { useIntl } from 'react-intl';
 import sortBy from 'lodash/sortBy';
 import permissions from '../../../permissions';

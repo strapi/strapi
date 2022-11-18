@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { IconButton } from '@strapi/design-system';
+import { IconButton } from '@strapi/design-system/IconButton';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useNotification } from '@strapi/helper-plugin';
 import LinkIcon from '@strapi/icons/Link';

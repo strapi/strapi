@@ -1,7 +1,8 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Stack, Typography } from '@strapi/design-system';
+import { Stack } from '@strapi/design-system/Stack';
+import { Typography } from '@strapi/design-system/Typography';
 import { AssetList } from '../../AssetList';
 import getTrad from '../../../utils/getTrad';
 

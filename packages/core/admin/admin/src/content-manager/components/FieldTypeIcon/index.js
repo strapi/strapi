@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
 import { useCustomFields } from '@strapi/helper-plugin';
 import Date from '@strapi/icons/Date';
 import Boolean from '@strapi/icons/Boolean';

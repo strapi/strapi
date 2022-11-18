@@ -1,7 +1,7 @@
 <!--- Search.stories.mdx --->
 
 import { ArgsTable, Meta, Canvas, Story } from '@storybook/addon-docs';
-import { Stack } from '@strapi/design-system';
+import { Stack } from '@strapi/design-system/Stack';
 import matchSorter from 'match-sorter';
 import useQueryParams from '../../hooks/useQueryParams';
 import SearchURLQuery from './index';
@@ -30,7 +30,7 @@ const HomePage = () => {
   const { formatMessage } = useIntl();
   const _q = query?._q || ''
   const items = [{name: 'Paul', instrument: 'bass'}, {name: 'George', instrument: 'guitar'}]
-
+  
   const sortedList = matchSorter(items, _q, {keys: ['name', 'instrument']})
   const itemsList = sortedList?.length ? sortedList : items
 
@@ -59,13 +59,10 @@ const HomePage = () => {
 <Canvas>
   <Story name="base">
     {() => {
-      const [{ query }] = useQueryParams();
-      const _q = query?._q || '';
-      const items = [
-        { name: 'Paul', instrument: 'bass' },
-        { name: 'George', instrument: 'guitar' },
-      ];
-      const sortedList = matchSorter(items, _q, { keys: ['name', 'instrument'] });
+      const [{ query }] = useQueryParams()
+      const _q = query?._q || ''
+      const items = [{name: 'Paul', instrument: 'bass'}, {name: 'George', instrument: 'guitar'}]
+      const sortedList = matchSorter(items, _q, {keys: ['name', 'instrument']})
       const itemsList = sortedList?.length ? sortedList : items;
       return (
         <Stack paddingTop={6} spacing={4}>

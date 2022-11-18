@@ -1,15 +1,14 @@
 import React, { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
+import { Button } from '@strapi/design-system/Button';
 import {
-  Button,
   ModalFooter,
   ModalHeader,
   ModalLayout,
   ModalBody,
-  Breadcrumbs,
-  Crumb,
-  Typography,
-} from '@strapi/design-system';
+} from '@strapi/design-system/ModalLayout';
+import { Breadcrumbs, Crumb } from '@strapi/design-system/Breadcrumbs';
+import { Typography } from '@strapi/design-system/Typography';
 import produce from 'immer';
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';

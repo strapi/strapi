@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system';
+import { Typography } from '@strapi/design-system/Typography';
 
 export const FieldError = ({ id, error, name }) => {
   const { formatMessage } = useIntl();

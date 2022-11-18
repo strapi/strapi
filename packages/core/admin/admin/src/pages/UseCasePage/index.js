@@ -5,18 +5,15 @@ import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { parse } from 'qs';
 import { pxToRem, useNotification, auth } from '@strapi/helper-plugin';
-import {
-  Main,
-  Flex,
-  Box,
-  Stack,
-  Typography,
-  Select,
-  Option,
-  TextInput,
-  TextButton,
-  Button,
-} from '@strapi/design-system';
+import { Main } from '@strapi/design-system/Main';
+import { Flex } from '@strapi/design-system/Flex';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { Typography } from '@strapi/design-system/Typography';
+import { Select, Option } from '@strapi/design-system/Select';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { TextButton } from '@strapi/design-system/TextButton';
+import { Button } from '@strapi/design-system/Button';
 import Logo from '../../components/UnauthenticatedLogo';
 import UnauthenticatedLayout, { LayoutContent } from '../../layouts/UnauthenticatedLayout';
 

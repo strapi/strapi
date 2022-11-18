@@ -1,6 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { IconButton, Typography, Flex, Tbody, Tr, Td } from '@strapi/design-system';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Typography } from '@strapi/design-system/Typography';
+import { Flex } from '@strapi/design-system/Flex';
+import { Tbody, Tr, Td } from '@strapi/design-system/Table';
 import Pencil from '@strapi/icons/Pencil';
 import Trash from '@strapi/icons/Trash';
 import { CheckPermissions, onRowClick, stopPropagation } from '@strapi/helper-plugin';

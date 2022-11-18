@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ArgsTable, Meta, Canvas, Story } from '@storybook/addon-docs';
-import { Button } from '@strapi/design-system';
+import { Button } from '@strapi/design-system/Button';
 import Check from '@strapi/icons/Check';
 import Information from '@strapi/icons/Information';
 import ConfirmDialog from './index';
@@ -19,7 +19,7 @@ TODO
   <Story name="base">
     {() => {
       const [dialogOpen, setDialogOpen] = useState(false);
-      const handleToggle = () => setDialogOpen((prev) => !prev);
+      const handleToggle = () => setDialogOpen(prev => !prev);
       const handleDelete = () => {
         handleToggle();
         alert('you deleted your item');
@@ -41,7 +41,7 @@ TODO
   <Story name="confirm-loading">
     {() => {
       const [dialogOpen, setDialogOpen] = useState(false);
-      const handleToggle = () => setDialogOpen((prev) => !prev);
+      const handleToggle = () => setDialogOpen(prev => !prev);
       const handleDelete = () => {
         handleToggle();
         alert('you deleted your item');
@@ -63,7 +63,7 @@ TODO
   <Story name="confirm-custom">
     {() => {
       const [dialogOpen, setDialogOpen] = useState(false);
-      const handleToggle = () => setDialogOpen((prev) => !prev);
+      const handleToggle = () => setDialogOpen(prev => !prev);
       const handleDelete = () => {
         handleToggle();
         alert('you deleted your item');

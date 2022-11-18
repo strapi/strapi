@@ -7,11 +7,11 @@ import {
   ModalHeader,
   ModalFooter,
   ModalBody,
-  Typography,
-  Button,
-  Flex,
-  Grid,
-} from '@strapi/design-system';
+} from '@strapi/design-system/ModalLayout';
+import { Typography } from '@strapi/design-system/Typography';
+import { Button } from '@strapi/design-system/Button';
+import { Flex } from '@strapi/design-system/Flex';
+import { Grid } from '@strapi/design-system/Grid';
 import styled from 'styled-components';
 import { getTrad } from '../../../utils';
 import { useLayoutDnd } from '../../../hooks';

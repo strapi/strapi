@@ -11,20 +11,16 @@ import {
   useQueryParams,
   useTracking,
 } from '@strapi/helper-plugin';
-import {
-  Layout,
-  ContentLayout,
-  ActionLayout,
-  Main,
-  Box,
-  Divider,
-  BaseCheckbox,
-  VisuallyHidden,
-  IconButton,
-  Typography,
-  GridItem,
-  Flex,
-} from '@strapi/design-system';
+import { Layout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
+import { Box } from '@strapi/design-system/Box';
+import { Divider } from '@strapi/design-system/Divider';
+import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
+import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Typography } from '@strapi/design-system/Typography';
+import { GridItem } from '@strapi/design-system/Grid';
+import { Flex } from '@strapi/design-system/Flex';
 import Pencil from '@strapi/icons/Pencil';
 import { UploadAssetDialog } from '../../components/UploadAssetDialog/UploadAssetDialog';
 import { EditFolderDialog } from '../../components/EditFolderDialog';

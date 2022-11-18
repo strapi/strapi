@@ -6,7 +6,8 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { ThemeProvider } from '@strapi/design-system/ThemeProvider';
+import { lightTheme } from '@strapi/design-system/themes';
 import EditSettingsView from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({

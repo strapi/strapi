@@ -2,16 +2,12 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import {
-  Checkbox,
-  Dialog,
-  DialogBody,
-  DialogFooter,
-  Typography,
-  Flex,
-  Stack,
-  Button,
-} from '@strapi/design-system';
+import { Checkbox } from '@strapi/design-system/Checkbox';
+import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
+import { Typography } from '@strapi/design-system/Typography';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+import { Button } from '@strapi/design-system/Button';
 import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import { getTrad } from '../../utils';
 

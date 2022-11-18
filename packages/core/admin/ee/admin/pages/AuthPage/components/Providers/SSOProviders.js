@@ -1,6 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Grid, GridItem, Flex, Typography, Tooltip } from '@strapi/design-system';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
+import { Tooltip } from '@strapi/design-system/Tooltip';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';

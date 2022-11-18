@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { MultiSelectNested } from '@strapi/design-system';
+import { MultiSelectNested } from '@strapi/design-system/Select';
 import { useIntl } from 'react-intl';
 import useDataManager from '../../hooks/useDataManager';
 import findAttribute from '../../utils/findAttribute';

@@ -6,18 +6,16 @@
 
 import React from 'react';
 import { useIntl } from 'react-intl';
+import { Button } from '@strapi/design-system/Button';
+import { Stack } from '@strapi/design-system/Stack';
+import { Breadcrumbs, Crumb } from '@strapi/design-system/Breadcrumbs';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
 import {
-  Button,
-  Stack,
-  Breadcrumbs,
-  Crumb,
-  Grid,
-  GridItem,
   ModalLayout,
   ModalHeader,
   ModalFooter,
   ModalBody,
-} from '@strapi/design-system';
+} from '@strapi/design-system/ModalLayout';
 import PropTypes from 'prop-types';
 import { Formik } from 'formik';
 import { Form } from '@strapi/helper-plugin';

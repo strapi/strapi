@@ -1,7 +1,7 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { SimpleMenu, MenuItem } from '@strapi/design-system';
+import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
 import { getTrad } from '../../utils';
 
 const SortPicker = ({ onChangeSort }) => {

@@ -22,16 +22,13 @@ import {
   Link,
 } from '@strapi/helper-plugin';
 
-import {
-  IconButton,
-  Main,
-  Box,
-  ActionLayout,
-  ContentLayout,
-  HeaderLayout,
-  useNotifyAT,
-  Button,
-} from '@strapi/design-system';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Main } from '@strapi/design-system/Main';
+import { Box } from '@strapi/design-system/Box';
+import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import { Button } from '@strapi/design-system/Button';
+
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Plus from '@strapi/icons/Plus';
 import Cog from '@strapi/icons/Cog';

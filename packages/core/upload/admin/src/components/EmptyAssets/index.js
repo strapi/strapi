@@ -1,7 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Typography, Stack, Box, Icon } from '@strapi/design-system';
+import { Typography } from '@strapi/design-system/Typography';
+import { Stack } from '@strapi/design-system/Stack';
+import { Box } from '@strapi/design-system/Box';
+import { Icon } from '@strapi/design-system/Icon';
 import EmptyStateDocument from '@strapi/icons/EmptyDocuments';
 import { EmptyAssetGrid } from './EmptyAssetGrid';
 

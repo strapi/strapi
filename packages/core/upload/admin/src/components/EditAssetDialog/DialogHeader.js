@@ -1,6 +1,7 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { Typography, ModalHeader } from '@strapi/design-system';
+import { Typography } from '@strapi/design-system/Typography';
+import { ModalHeader } from '@strapi/design-system/ModalLayout';
 
 export const DialogHeader = () => {
   const { formatMessage } = useIntl();

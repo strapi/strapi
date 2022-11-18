@@ -13,21 +13,13 @@ import has from 'lodash/has';
 import set from 'lodash/set';
 import toLower from 'lodash/toLower';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
-import {
-  Box,
-  Button,
-  Divider,
-  ModalLayout,
-  ModalBody,
-  ModalFooter,
-  Tabs,
-  Tab,
-  TabGroup,
-  TabPanels,
-  TabPanel,
-  Flex,
-  Stack,
-} from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
+import { Button } from '@strapi/design-system/Button';
+import { Divider } from '@strapi/design-system/Divider';
+import { ModalLayout, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
+import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';

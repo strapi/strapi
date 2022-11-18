@@ -3,7 +3,7 @@
  * Wrapper
  *
  */
-import { Box } from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
 import styled from 'styled-components';
 
 const BoxWrapper = styled(Box)`

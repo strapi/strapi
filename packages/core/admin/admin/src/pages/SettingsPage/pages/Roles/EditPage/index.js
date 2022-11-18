@@ -8,7 +8,11 @@ import {
   SettingsPageTitle,
   Link,
 } from '@strapi/helper-plugin';
-import { Box, Button, ContentLayout, HeaderLayout, Main, Stack } from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
+import { Button } from '@strapi/design-system/Button';
+import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
+import { Stack } from '@strapi/design-system/Stack';
 import { Formik } from 'formik';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import get from 'lodash/get';

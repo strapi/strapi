@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { CheckPermissions } from '@strapi/helper-plugin';
-import { Button } from '@strapi/design-system';
+import { Button } from '@strapi/design-system/Button';
 import Layer from '@strapi/icons/Layer';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';

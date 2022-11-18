@@ -6,16 +6,11 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import toString from 'lodash/toString';
-import {
-  Accordion,
-  AccordionToggle,
-  AccordionContent,
-  Grid,
-  GridItem,
-  Stack,
-  Box,
-  Tooltip,
-} from '@strapi/design-system';
+import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Stack } from '@strapi/design-system/Stack';
+import { Box } from '@strapi/design-system/Box';
+import { Tooltip } from '@strapi/design-system/Tooltip';
 import Trash from '@strapi/icons/Trash';
 import Drag from '@strapi/icons/Drag';
 import ItemTypes from '../../../utils/ItemTypes';

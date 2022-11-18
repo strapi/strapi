@@ -1,7 +1,8 @@
 import React, { useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
-import { GridItem, Select, Option } from '@strapi/design-system';
+import { GridItem } from '@strapi/design-system/Grid';
+import { Select, Option } from '@strapi/design-system/Select';
 import { useSelector, shallowEqual } from 'react-redux';
 import { useIntl } from 'react-intl';
 import { useLayoutDnd } from '../../../hooks';

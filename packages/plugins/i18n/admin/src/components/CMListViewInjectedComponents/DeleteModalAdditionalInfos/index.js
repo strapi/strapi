@@ -1,6 +1,6 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system';
+import { Typography } from '@strapi/design-system/Typography';
 import { getTrad } from '../../../utils';
 import useHasI18n from '../../../hooks/useHasI18n';
 

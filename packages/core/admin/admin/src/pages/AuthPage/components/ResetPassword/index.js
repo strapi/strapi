@@ -4,7 +4,13 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Formik } from 'formik';
 import { Form, Link } from '@strapi/helper-plugin';
-import { Box, Stack, Main, Flex, Button, TextInput, Typography } from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { Main } from '@strapi/design-system/Main';
+import { Flex } from '@strapi/design-system/Flex';
+import { Button } from '@strapi/design-system/Button';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { Typography } from '@strapi/design-system/Typography';
 import EyeStriked from '@strapi/icons/EyeStriked';
 import Eye from '@strapi/icons/Eye';
 import UnauthenticatedLayout, {

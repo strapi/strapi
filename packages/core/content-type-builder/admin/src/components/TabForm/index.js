@@ -9,7 +9,10 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 import { GenericInput } from '@strapi/helper-plugin';
-import { Box, Grid, GridItem, Typography } from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Typography } from '@strapi/design-system/Typography';
+
 /* eslint-disable react/no-array-index-key */
 const TabForm = ({ form, formErrors, genericInputProps, modifiedData, onChange }) => {
   const { formatMessage } = useIntl();

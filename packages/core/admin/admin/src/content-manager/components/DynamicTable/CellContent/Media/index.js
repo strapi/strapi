@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Avatar, Tooltip } from '@strapi/design-system';
+import { Avatar } from '@strapi/design-system/Avatar';
+import { Tooltip } from '@strapi/design-system/Tooltip';
 import { getFileExtension, prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
 import FileWrapper from './FileWrapper';
 

@@ -2,7 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { FieldLabel, Box, Flex } from '@strapi/design-system';
+import { FieldLabel } from '@strapi/design-system/Field';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
 
 const LabelAction = styled(Box)`
   svg path {

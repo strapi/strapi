@@ -1,7 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Box, Flex, Typography, LinkButton, Icon } from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
+import { LinkButton } from '@strapi/design-system/LinkButton';
+import { Icon } from '@strapi/design-system/Icon';
 import Plus from '@strapi/icons/Plus';
 import EmptyStateDocument from '@strapi/icons/EmptyDocuments';
 import { getTrad } from '../../../utils';

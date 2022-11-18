@@ -11,20 +11,15 @@ import get from 'lodash/get';
 import set from 'lodash/set';
 import { useNotification, useTracking, ConfirmDialog, Link } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
-import {
-  Main,
-  HeaderLayout,
-  ContentLayout,
-  Button,
-  Box,
-  Typography,
-  Grid,
-  GridItem,
-  Select,
-  Option,
-  Stack,
-  Divider,
-} from '@strapi/design-system';
+import { Main } from '@strapi/design-system/Main';
+import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
+import { Button } from '@strapi/design-system/Button';
+import { Box } from '@strapi/design-system/Box';
+import { Typography } from '@strapi/design-system/Typography';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Select, Option } from '@strapi/design-system/Select';
+import { Stack } from '@strapi/design-system/Stack';
+import { Divider } from '@strapi/design-system/Divider';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Check from '@strapi/icons/Check';
 import { getTrad } from '../../utils';

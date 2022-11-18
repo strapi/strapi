@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Button } from '@strapi/design-system';
+import { Button } from '@strapi/design-system/Button';
 import Folder from '@strapi/icons/Folder';
 
 import { BulkMoveDialog } from '../../../components/BulkMoveDialog';

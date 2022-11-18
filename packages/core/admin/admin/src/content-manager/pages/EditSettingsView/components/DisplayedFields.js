@@ -1,7 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Button, Box, Typography, Stack, Flex, SimpleMenu, MenuItem } from '@strapi/design-system';
+import { Button } from '@strapi/design-system/Button';
+import { Box } from '@strapi/design-system/Box';
+import { Typography } from '@strapi/design-system/Typography';
+import { Stack } from '@strapi/design-system/Stack';
+import { Flex } from '@strapi/design-system/Flex';
+import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
 import Plus from '@strapi/icons/Plus';
 import { getTrad } from '../../../utils';
 import RowsLayout from './RowsLayout';

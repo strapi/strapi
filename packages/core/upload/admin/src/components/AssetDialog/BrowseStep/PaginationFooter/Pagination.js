@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { Flex } from '@strapi/design-system';
+import { Flex } from '@strapi/design-system/Flex';
 import { PaginationContext } from './PaginationContext';
 
 const PaginationWrapper = styled.nav``;

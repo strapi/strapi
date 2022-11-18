@@ -1,7 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { Stack, Flex, TextButton, Icon, Typography } from '@strapi/design-system';
+import { Stack } from '@strapi/design-system/Stack';
+import { Flex } from '@strapi/design-system/Flex';
+import { TextButton } from '@strapi/design-system/TextButton';
+import { Icon } from '@strapi/design-system/Icon';
+import { Typography } from '@strapi/design-system/Typography';
 import Trash from '@strapi/icons/Trash';
 import Drag from '@strapi/icons/Drag';
 import DropdownIcon from '@strapi/icons/CarretDown';

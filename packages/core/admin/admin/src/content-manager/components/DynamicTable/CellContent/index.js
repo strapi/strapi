@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Typography, Tooltip } from '@strapi/design-system';
+import { Typography } from '@strapi/design-system/Typography';
+import { Tooltip } from '@strapi/design-system/Tooltip';
 import Media from './Media';
 import MultipleMedias from './MultipleMedias';
 import RelationMultiple from './RelationMultiple';

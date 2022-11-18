@@ -1,5 +1,6 @@
 import styled from 'styled-components';
-import { Box } from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
+
 /* eslint-disable */
 /* stylelint-disable */
 const EditorWrapper = styled.div`

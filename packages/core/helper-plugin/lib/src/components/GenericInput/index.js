@@ -9,18 +9,15 @@ import PropTypes from 'prop-types';
 import parseISO from 'date-fns/parseISO';
 import formatISO from 'date-fns/formatISO';
 import { useIntl } from 'react-intl';
-import {
-  Checkbox,
-  DatePicker,
-  NumberInput,
-  Select,
-  Option,
-  Textarea,
-  TextInput,
-  TimePicker,
-  ToggleInput,
-  Icon,
-} from '@strapi/design-system';
+import { Checkbox } from '@strapi/design-system/Checkbox';
+import { DatePicker } from '@strapi/design-system/DatePicker';
+import { NumberInput } from '@strapi/design-system/NumberInput';
+import { Select, Option } from '@strapi/design-system/Select';
+import { Textarea } from '@strapi/design-system/Textarea';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { TimePicker } from '@strapi/design-system/TimePicker';
+import { ToggleInput } from '@strapi/design-system/ToggleInput';
+import { Icon } from '@strapi/design-system/Icon';
 import EyeStriked from '@strapi/icons/EyeStriked';
 import Eye from '@strapi/icons/Eye';
 import DateTimePicker from '../DateTimePicker';

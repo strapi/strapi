@@ -6,7 +6,12 @@
 
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Box, Popover, Stack, FocusTrap, Select, Option } from '@strapi/design-system';
+import { Button } from '@strapi/design-system/Button';
+import { Box } from '@strapi/design-system/Box';
+import { Popover } from '@strapi/design-system/Popover';
+import { Stack } from '@strapi/design-system/Stack';
+import { FocusTrap } from '@strapi/design-system/FocusTrap';
+import { Select, Option } from '@strapi/design-system/Select';
 import Plus from '@strapi/icons/Plus';
 import { useIntl } from 'react-intl';
 import useQueryParams from '../../hooks/useQueryParams';

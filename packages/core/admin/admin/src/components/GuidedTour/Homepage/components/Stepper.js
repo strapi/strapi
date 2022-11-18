@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system';
+import { Box } from '@strapi/design-system/Box';
 import StepHomepage from './Step';
 import { IS_DONE, IS_ACTIVE, IS_NOT_DONE } from '../../constants';
 
