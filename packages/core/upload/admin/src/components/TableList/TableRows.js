@@ -75,7 +75,7 @@ export const TableRows = ({ onEditAsset, onEditFolder, onSelectOne, rows, select
             <Td>
               <Typography>{formatDate(new Date(updatedAt))}</Typography>
             </Td>
-            {onEditAsset && onEditFolder && (
+            {((type === 'asset' && onEditAsset) || (type === 'folder' && onEditFolder)) && (
               <Td>
                 <IconButton
                   label={formatMessage({

@@ -6,7 +6,7 @@ import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { TableRows } from '../TableRows';
 
 const PROPS_FIXTURE = {
-  assets: [
+  rows: [
     {
       alternativeText: 'alternative text',
       createdAt: '2021-10-01T08:04:56.326Z',
@@ -22,11 +22,21 @@ const PROPS_FIXTURE = {
       size: 11.79,
       updatedAt: '2021-10-18T08:04:56.326Z',
       url: '/uploads/michka.jpg',
+      type: 'asset',
     },
   ],
   onEditAsset: jest.fn(),
-  onSelectAsset: jest.fn(),
-  selectedAssets: [],
+  onEditFolder: jest.fn(),
+  onSelectOne: jest.fn(),
+  selected: [],
+};
+
+const FOLDER_FIXTURE = {
+  createdAt: '2022-11-17T10:40:06.022Z',
+  id: 2,
+  name: 'folder 1',
+  type: 'folder',
+  updatedAt: '2022-11-17T10:40:06.022Z',
 };
 
 const ComponentFixture = (props) => {
@@ -38,7 +48,9 @@ const ComponentFixture = (props) => {
   return (
     <IntlProvider locale="en" messages={{}}>
       <ThemeProvider theme={lightTheme}>
-        <TableRows {...customProps} />
+        <table>
+          <TableRows {...customProps} />
+        </table>
       </ThemeProvider>
     </IntlProvider>
   );
@@ -47,46 +59,87 @@ const ComponentFixture = (props) => {
 const setup = (props) => render(<ComponentFixture {...props} />);
 
 describe('AssetTableList | TableRows', () => {
-  it('should properly render every asset attribute', () => {
-    const { getByRole, getByText } = setup();
+  describe('rendering assets', () => {
+    it('should properly render every asset attribute', () => {
+      const { getByRole, getByText } = setup();
 
-    expect(getByRole('img', { name: 'alternative text' })).toBeInTheDocument();
-    expect(getByText('michka')).toBeInTheDocument();
-    expect(getByText('JPEG')).toBeInTheDocument();
-    expect(getByText('12KB')).toBeInTheDocument();
-    expect(getByText('10/1/2021')).toBeInTheDocument();
-    expect(getByText('10/18/2021')).toBeInTheDocument();
-    expect(getByText('10/18/2021')).toBeInTheDocument();
+      expect(getByRole('img', { name: 'alternative text' })).toBeInTheDocument();
+      expect(getByText('michka')).toBeInTheDocument();
+      expect(getByText('JPEG')).toBeInTheDocument();
+      expect(getByText('12KB')).toBeInTheDocument();
+      expect(getByText('10/1/2021')).toBeInTheDocument();
+      expect(getByText('10/18/2021')).toBeInTheDocument();
+      expect(getByText('10/18/2021')).toBeInTheDocument();
+    });
+
+    it('should call onSelectAsset callback', () => {
+      const onSelectOneSpy = jest.fn();
+      const { getByRole } = setup({ onSelectOne: onSelectOneSpy });
+
+      fireEvent.click(getByRole('checkbox', { name: 'Select michka asset' }));
+
+      expect(onSelectOneSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should reflect non selected assets state', () => {
+      const { getByRole } = setup();
+
+      expect(getByRole('checkbox', { name: 'Select michka asset' })).not.toBeChecked();
+    });
+
+    it('should reflect selected assets state', () => {
+      const { getByRole } = setup({ selected: [{ id: 1 }] });
+
+      expect(getByRole('checkbox', { name: 'Select michka asset' })).toBeChecked();
+    });
+
+    it('should call onEditAsset callback', () => {
+      const onEditAssetSpy = jest.fn();
+      const { getByRole } = setup({ onEditAsset: onEditAssetSpy });
+
+      fireEvent.click(getByRole('button', { name: 'Edit' }));
+
+      expect(onEditAssetSpy).toHaveBeenCalledTimes(1);
+    });
   });
 
-  it('should call onSelectAsset callback', () => {
-    const onSelectAssetSpy = jest.fn();
-    const { getByRole } = setup({ onSelectAsset: onSelectAssetSpy });
+  describe('rendering folders', () => {
+    it('should render folder', () => {
+      const { getByText } = setup({
+        rows: [FOLDER_FIXTURE],
+      });
 
-    fireEvent.click(getByRole('checkbox', { name: 'Select michka asset' }));
+      expect(getByText('folder 1')).toBeInTheDocument();
+    });
 
-    expect(onSelectAssetSpy).toHaveBeenCalledTimes(1);
-  });
+    it('should call onEditFolder callback', () => {
+      const onEditFolderSpy = jest.fn();
+      const { getByRole } = setup({
+        rows: [FOLDER_FIXTURE],
+        onEditFolder: onEditFolderSpy,
+      });
 
-  it('should reflect non selected assets state', () => {
-    const { getByRole } = setup();
+      fireEvent.click(getByRole('button', { name: 'Edit' }));
 
-    expect(getByRole('checkbox', { name: 'Select michka asset' })).not.toBeChecked();
-  });
+      expect(onEditFolderSpy).toHaveBeenCalledTimes(1);
+    });
 
-  it('should reflect selected assets state', () => {
-    const { getByRole } = setup({ selectedAssets: [{ id: 1 }] });
+    it('should reflect non selected folder state', () => {
+      const { getByRole } = setup({ rows: [FOLDER_FIXTURE] });
 
-    expect(getByRole('checkbox', { name: 'Select michka asset' })).toBeChecked();
-  });
+      expect(getByRole('checkbox', { name: 'Select folder 1 folder' })).not.toBeChecked();
+    });
 
-  it('should call onEditAsset callback', () => {
-    const onEditAssetSpy = jest.fn();
-    const { getByRole } = setup({ onEditAsset: onEditAssetSpy });
+    it('should reflect selected folder state', () => {
+      const { getByRole } = setup({ rows: [FOLDER_FIXTURE], selected: [{ id: 2 }] });
 
-    const editAssetButton = getByRole('button', { name: 'Edit' });
-    fireEvent.click(editAssetButton);
+      expect(getByRole('checkbox', { name: 'Select folder 1 folder' })).toBeChecked();
+    });
 
-    expect(onEditAssetSpy).toHaveBeenCalledTimes(1);
+    it('should not display size and ext', () => {
+      const { getAllByText } = setup({ rows: [FOLDER_FIXTURE] });
+
+      expect(getAllByText('-').length).toEqual(2);
+    });
   });
 });

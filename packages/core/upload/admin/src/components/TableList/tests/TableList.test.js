@@ -5,8 +5,13 @@ import { ThemeProvider, lightTheme } from '@strapi/design-system';
 
 import { TableList } from '..';
 
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
+}));
+
 const PROPS_FIXTURE = {
-  assets: [
+  rows: [
     {
       alternativeText: 'alternative text',
       createdAt: '2021-10-18T08:04:56.326Z',
@@ -22,11 +27,13 @@ const PROPS_FIXTURE = {
       size: 11.79,
       updatedAt: '2021-10-18T08:04:56.326Z',
       url: '/uploads/michka.jpg',
+      type: 'asset',
     },
   ],
   onEditAsset: jest.fn(),
-  onSelectAsset: jest.fn(),
-  selectedAssets: [],
+  onSelectOne: jest.fn(),
+  onSelectAll: jest.fn(),
+  selected: [],
 };
 
 const ComponentFixture = (props) => {
@@ -46,7 +53,7 @@ const ComponentFixture = (props) => {
 
 const setup = (props) => render(<ComponentFixture {...props} />);
 
-describe('AssetTableList', () => {
+describe('TableList', () => {
   it('should render table headers labels', () => {
     const { getByText } = setup();
 
@@ -69,5 +76,21 @@ describe('AssetTableList', () => {
 
     expect(getByText('michka')).toBeInTheDocument();
     expect(getByText('JPEG')).toBeInTheDocument();
+  });
+
+  it('should render folders', () => {
+    const { getByText } = setup({
+      rows: [
+        {
+          createdAt: '2022-11-17T10:40:06.022Z',
+          id: 2,
+          name: 'folder 1',
+          type: 'folder',
+          updatedAt: '2022-11-17T10:40:06.022Z',
+        },
+      ],
+    });
+
+    expect(getByText('folder 1')).toBeInTheDocument();
   });
 });

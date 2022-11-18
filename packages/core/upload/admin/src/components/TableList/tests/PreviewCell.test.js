@@ -11,6 +11,7 @@ const PROPS_FIXTURE = {
   name: 'michka',
   thumbnailURL: 'michka-picture-url-thumbnail.jpeg',
   url: 'michka-picture-url-default.jpeg',
+  type: 'asset',
 };
 
 const ComponentFixture = (props) => {
@@ -54,19 +55,21 @@ describe('AssetTableList | PreviewCell', () => {
       expect(getByRole('img', { name: 'alternative alt' })).toBeInTheDocument();
       expect(queryByRole('img', { name: 'michka' })).not.toBeInTheDocument();
     });
-
-    it('should render name text if alternative text is not available', () => {
-      const { getByRole } = setup({ alternativeText: undefined });
-
-      expect(getByRole('img', { name: 'michka' })).toBeInTheDocument();
-    });
   });
 
   describe('rendering files', () => {
-    it('should render an image with thumbnail if available', () => {
+    it('should render a file with fileExtension', () => {
       const { getByText } = setup({ mime: 'application/pdf', fileExtension: 'pdf' });
 
       expect(getByText('pdf')).toBeInTheDocument();
+    });
+  });
+
+  describe('rendering folder', () => {
+    it('should render a folder', () => {
+      const { container } = setup({ type: 'folder' });
+
+      expect(container.querySelector('path')).toBeInTheDocument();
     });
   });
 });
