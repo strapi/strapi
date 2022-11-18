@@ -24,6 +24,20 @@ exports[`Content-Manager || RelationInput || RelationList should render and matc
   border: 1px solid #dcdce4;
 }
 
+.c1 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
 .c4 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -45,20 +59,6 @@ exports[`Content-Manager || RelationInput || RelationList should render and matc
 .c5 {
   width: 100%;
   min-width: 0;
-}
-
-.c1 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
 }
 
 .c2 > * {

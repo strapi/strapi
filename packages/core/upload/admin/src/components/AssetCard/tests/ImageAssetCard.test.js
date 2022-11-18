@@ -69,6 +69,10 @@ describe('ImageAssetCard', () => {
         padding-left: 12px;
       }
 
+      .c21 {
+        padding-top: 4px;
+      }
+
       .c26 {
         background: #f6f6f9;
         padding: 4px;
@@ -186,24 +190,24 @@ describe('ImageAssetCard', () => {
       }
 
       .c22 {
-        font-weight: 600;
-        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
       }
 
       .c23 {
-        color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
+        color: #666687;
       }
 
       .c29 {
-        color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
+        color: #666687;
       }
 
       .c25 {
@@ -292,10 +296,6 @@ describe('ImageAssetCard', () => {
       .c3 {
         position: relative;
         border-bottom: 1px solid #eaeaef;
-      }
-
-      .c21 {
-        padding-top: 4px;
       }
 
       .c15 {
@@ -462,7 +462,7 @@ describe('ImageAssetCard', () => {
               <span>
                 <button
                   aria-disabled="false"
-                  aria-labelledby="tooltip-1"
+                  aria-labelledby="tooltip-2"
                   class="c13 c14"
                   tabindex="0"
                   type="button"
