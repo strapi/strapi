@@ -151,7 +151,7 @@ jobs:
     name: '[CE] API Integration (mysql:5 , node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [14, 16, 18]
+        node: [14, 16]
     services:
       mysql:
         image: mysql:5.7.8
