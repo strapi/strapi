@@ -225,22 +225,26 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
   // raw query as knex doesn't allow updating from a subquery
   // https://github.com/knex/knex/issues/2504
   switch (strapi.db.dialect.client) {
-    case 'mysql':
+    case 'mysql': {
+      const [results] = await strapi.db.connection.raw('SELECT version() as version');
+      const version = results[0].version;
+      console.log('AAAA', version);
       await db.connection
         .raw(
           `UPDATE
-            ?? as a,
-            (
-              SELECT ${select.join(', ')}
-              FROM ??
-              WHERE ${where.join(' OR ')}
-            ) AS b
+          ?? as a,
+          (
+            SELECT ${select.join(', ')}
+            FROM ??
+            WHERE ${where.join(' OR ')}
+          ) AS b
           SET ${update.join(', ')}
           WHERE b.id = a.id`,
           [joinTable.name, ...selectBinding, joinTable.name, ...whereBinding, ...updateBinding]
         )
         .transacting(trx);
       break;
+    }
     default:
       await db.connection
         .raw(
