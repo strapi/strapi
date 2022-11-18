@@ -86,7 +86,7 @@ export const MediaLibrary = () => {
   });
 
   const {
-    data: folders,
+    data: foldersData,
     isLoading: foldersLoading,
     errors: foldersError,
   } = useFolders({
@@ -107,8 +107,9 @@ export const MediaLibrary = () => {
     push(pathname);
   }
 
+  const folders = foldersData ?? [];
   const folderCount = folders?.length || 0;
-  const assets = assetsData?.results;
+  const assets = assetsData?.results || [];
   const assetCount = assets?.length ?? 0;
   const isLoading = isCurrentFolderLoading || foldersLoading || permissionsLoading || assetsLoading;
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
@@ -116,6 +117,8 @@ export const MediaLibrary = () => {
   const [assetToEdit, setAssetToEdit] = useState(undefined);
   const [folderToEdit, setFolderToEdit] = useState(undefined);
   const [selected, { selectOne, selectAll }] = useSelectionState(['type', 'id'], []);
+  const indeterminateBulkSelect =
+    selected?.length > 0 && selected?.length !== assetCount + folderCount;
   const toggleUploadAssetDialog = () => setShowUploadAssetDialog((prev) => !prev);
   const toggleEditFolderDialog = ({ created = false } = {}) => {
     // folders are only displayed on the first page, therefore
@@ -183,9 +186,7 @@ export const MediaLibrary = () => {
                       id: getTrad('bulk.select.label'),
                       defaultMessage: 'Select all folders & assets',
                     })}
-                    indeterminate={
-                      selected?.length > 0 && selected?.length !== assetCount + folderCount
-                    }
+                    indeterminate={indeterminateBulkSelect}
                     value={
                       (assetCount > 0 || folderCount > 0) &&
                       selected.length === assetCount + folderCount
@@ -196,9 +197,7 @@ export const MediaLibrary = () => {
                       }
                       selectAll([
                         ...assets.map((asset) => ({ ...asset, type: 'asset' })),
-                        ...(folders
-                          ? folders.map((folder) => ({ ...folder, type: 'folder' }))
-                          : []),
+                        ...folders.map((folder) => ({ ...folder, type: 'folder' })),
                       ]);
                     }}
                   />
@@ -243,14 +242,22 @@ export const MediaLibrary = () => {
             <TableList
               assetCount={assetCount}
               folderCount={folderCount}
+              indeterminate={indeterminateBulkSelect}
               onEditAsset={setAssetToEdit}
               onEditFolder={handleEditFolder}
               onSelectOne={selectOne}
               onSelectAll={selectAll}
-              rows={[
-                ...(folders ? folders.map((folder) => ({ ...folder, type: 'folder' })) : []),
-                ...(assets ? assets.map((asset) => ({ ...asset, type: 'asset' })) : []),
-              ]}
+              rows={
+                // TODO: remove when fixed on DS side
+                // when number of rows in Table changes, the keyboard tab from a row to another
+                // is not working for 1st and last column
+                !assetsLoading && !foldersLoading
+                  ? [
+                      ...folders.map((folder) => ({ ...folder, type: 'folder' })),
+                      ...assets.map((asset) => ({ ...asset, type: 'asset' })),
+                    ]
+                  : []
+              }
               selected={selected}
             />
           )}

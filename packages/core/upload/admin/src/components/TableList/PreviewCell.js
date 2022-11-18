@@ -54,7 +54,7 @@ export const PreviewCell = ({ alternativeText, fileExtension, mime, thumbnailURL
 PreviewCell.defaultProps = {
   alternativeText: null,
   fileExtension: '',
-  mime: null,
+  mime: '',
   thumbnailURL: null,
   url: null,
 };

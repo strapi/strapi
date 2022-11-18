@@ -14,6 +14,7 @@ import { TableRows } from './TableRows';
 export const TableList = ({
   assetCount,
   folderCount,
+  indeterminate,
   onEditAsset,
   onEditFolder,
   onSelectAll,
@@ -34,7 +35,7 @@ export const TableList = ({
                 id: getTrad('bulk.select.label'),
                 defaultMessage: 'Select all folders & assets',
               })}
-              indeterminate={selected?.length > 0 && selected?.length !== assetCount + folderCount}
+              indeterminate={indeterminate}
               onChange={(e) => {
                 if (e.target.checked) {
                   trackUsage('didSelectAllMediaLibraryElements');
@@ -79,6 +80,7 @@ export const TableList = ({
 TableList.defaultProps = {
   assetCount: 0,
   folderCount: 0,
+  indeterminate: false,
   onEditAsset: null,
   onEditFolder: null,
   rows: [],
@@ -88,6 +90,7 @@ TableList.defaultProps = {
 TableList.propTypes = {
   assetCount: PropTypes.number,
   folderCount: PropTypes.number,
+  indeterminate: PropTypes.bool,
   onEditAsset: PropTypes.func,
   onEditFolder: PropTypes.func,
   onSelectAll: PropTypes.func.isRequired,

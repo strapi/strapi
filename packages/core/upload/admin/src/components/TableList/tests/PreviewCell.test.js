@@ -29,7 +29,7 @@ const ComponentFixture = (props) => {
 
 const setup = (props) => render(<ComponentFixture {...props} />);
 
-describe('AssetTableList | PreviewCell', () => {
+describe('TableList | PreviewCell', () => {
   describe('rendering images', () => {
     it('should render an image with thumbnail if available', () => {
       const { getByRole } = setup();

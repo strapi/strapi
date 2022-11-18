@@ -58,7 +58,7 @@ const ComponentFixture = (props) => {
 
 const setup = (props) => render(<ComponentFixture {...props} />);
 
-describe('AssetTableList | TableRows', () => {
+describe('TableList | TableRows', () => {
   describe('rendering assets', () => {
     it('should properly render every asset attribute', () => {
       const { getByRole, getByText } = setup();

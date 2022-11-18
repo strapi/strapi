@@ -5,10 +5,10 @@ import { getFileExtension } from '@strapi/helper-plugin';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Tbody, Td, Tr } from '@strapi/design-system/Table';
-import { Typography } from '@strapi/design-system/Typography';
 import Pencil from '@strapi/icons/Pencil';
 
 import { PreviewCell } from './PreviewCell';
+import { TextCell } from './TextCell';
 import { AssetDefinition, FolderDefinition } from '../../constants';
 import { formatBytes, getTrad } from '../../utils';
 
@@ -30,7 +30,7 @@ export const TableRows = ({ onEditAsset, onEditFolder, onSelectOne, rows, select
           mime,
           formats,
           type,
-        } = element || {};
+        } = element;
 
         const isSelected = !!selected.find((currentRow) => currentRow.id === id);
 
@@ -61,19 +61,19 @@ export const TableRows = ({ onEditAsset, onEditFolder, onSelectOne, rows, select
               />
             </Td>
             <Td>
-              <Typography>{name}</Typography>
+              <TextCell content={name} />
             </Td>
             <Td>
-              <Typography>{ext ? getFileExtension(ext).toUpperCase() : '-'}</Typography>
+              <TextCell content={ext && getFileExtension(ext).toUpperCase()} />
             </Td>
             <Td>
-              <Typography>{size ? formatBytes(size) : '-'}</Typography>
+              <TextCell content={size && formatBytes(size)} />
             </Td>
             <Td>
-              <Typography>{formatDate(new Date(createdAt))}</Typography>
+              <TextCell content={formatDate(new Date(createdAt))} />
             </Td>
             <Td>
-              <Typography>{formatDate(new Date(updatedAt))}</Typography>
+              <TextCell content={formatDate(new Date(updatedAt))} />
             </Td>
             {((type === 'asset' && onEditAsset) || (type === 'folder' && onEditFolder)) && (
               <Td>
@@ -99,11 +99,12 @@ export const TableRows = ({ onEditAsset, onEditFolder, onSelectOne, rows, select
 TableRows.defaultProps = {
   onEditAsset: null,
   onEditFolder: null,
+  rows: [],
   selected: [],
 };
 
 TableRows.propTypes = {
-  rows: PropTypes.arrayOf(AssetDefinition, FolderDefinition).isRequired,
+  rows: PropTypes.arrayOf(AssetDefinition, FolderDefinition),
   onEditAsset: PropTypes.func,
   onEditFolder: PropTypes.func,
   onSelectOne: PropTypes.func.isRequired,
