@@ -19,7 +19,7 @@ const ListView = () => {
         title={title}
         subtitle={formatMessage({
           id: 'Settings.permissions.auditLogs.listview.header.subtitle',
-          defaultMessage: 'Logs of all the activities than happened on your environment',
+          defaultMessage: 'Logs of all the activities that happened on your environment',
         })}
       />
     </Main>
