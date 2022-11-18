@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Box } from '@strapi/design-system/Box';
-import { GridLayout } from '@strapi/design-system/Layout';
+import { Box, GridLayout } from '@strapi/design-system';
 
 const EmptyPluginCard = styled(Box)`
   background: ${({ theme }) =>

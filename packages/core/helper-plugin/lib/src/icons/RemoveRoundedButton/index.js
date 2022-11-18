@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconButton } from '@strapi/design-system/IconButton';
+import { IconButton } from '@strapi/design-system';
 import Minus from '@strapi/icons/Minus';
 import styled from 'styled-components';
 import pxToRem from '../../utils/pxToRem';

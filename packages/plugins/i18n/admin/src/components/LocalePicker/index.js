@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useQueryParams } from '@strapi/helper-plugin';
 import { useRouteMatch } from 'react-router-dom';
 import get from 'lodash/get';
-import { Select, Option } from '@strapi/design-system/Select';
+import { Select, Option } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import useContentTypePermissions from '../../hooks/useContentTypePermissions';
 import useHasI18n from '../../hooks/useHasI18n';

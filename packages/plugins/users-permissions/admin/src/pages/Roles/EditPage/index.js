@@ -10,17 +10,21 @@ import {
   useNotification,
   Link,
 } from '@strapi/helper-plugin';
-import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { Button } from '@strapi/design-system/Button';
-import { Stack } from '@strapi/design-system/Stack';
-import { Box } from '@strapi/design-system/Box';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Textarea } from '@strapi/design-system/Textarea';
-import { Typography } from '@strapi/design-system/Typography';
+import {
+  ContentLayout,
+  HeaderLayout,
+  Main,
+  Button,
+  Stack,
+  Box,
+  TextInput,
+  Textarea,
+  Typography,
+  GridItem,
+  Grid,
+} from '@strapi/design-system';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Check from '@strapi/icons/Check';
-import { GridItem, Grid } from '@strapi/design-system/Grid';
 import UsersPermissions from '../../../components/UsersPermissions';
 import getTrad from '../../../utils/getTrad';
 import pluginId from '../../../pluginId';

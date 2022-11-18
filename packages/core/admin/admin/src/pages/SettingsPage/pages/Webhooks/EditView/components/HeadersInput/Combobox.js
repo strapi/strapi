@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { ComboboxOption, CreatableCombobox } from '@strapi/design-system/Combobox';
+import { ComboboxOption, CreatableCombobox } from '@strapi/design-system';
 import keys from './keys';
 
 const Combobox = ({ name, onChange, value, ...props }) => {

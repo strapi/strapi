@@ -4,12 +4,16 @@ import { Form, Link } from '@strapi/helper-plugin';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Check from '@strapi/icons/Check';
 import Publish from '@strapi/icons/Play';
-import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { Box } from '@strapi/design-system/Box';
-import { Button } from '@strapi/design-system/Button';
-import { Stack } from '@strapi/design-system/Stack';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
+import {
+  ContentLayout,
+  HeaderLayout,
+  Box,
+  Button,
+  Stack,
+  TextInput,
+  Grid,
+  GridItem,
+} from '@strapi/design-system';
 import { Field, Formik } from 'formik';
 
 import { useIntl } from 'react-intl';

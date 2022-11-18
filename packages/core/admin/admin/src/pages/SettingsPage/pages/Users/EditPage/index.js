@@ -19,13 +19,17 @@ import {
 } from '@strapi/helper-plugin';
 import { useQuery } from 'react-query';
 import { Formik } from 'formik';
-import { Box } from '@strapi/design-system/Box';
-import { Button } from '@strapi/design-system/Button';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
-import { Typography } from '@strapi/design-system/Typography';
-import { Main } from '@strapi/design-system/Main';
-import { Stack } from '@strapi/design-system/Stack';
+import {
+  Box,
+  Button,
+  Grid,
+  GridItem,
+  HeaderLayout,
+  ContentLayout,
+  Typography,
+  Main,
+  Stack,
+} from '@strapi/design-system';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Check from '@strapi/icons/Check';
 import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';

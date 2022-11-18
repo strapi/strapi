@@ -2,10 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import Cross from '@strapi/icons/Cross';
-import { Typography } from '@strapi/design-system/Typography';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { ProgressBar } from '@strapi/design-system/ProgressBar';
+import { Typography, Box, Flex, ProgressBar } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 const BoxWrapper = styled(Flex)`

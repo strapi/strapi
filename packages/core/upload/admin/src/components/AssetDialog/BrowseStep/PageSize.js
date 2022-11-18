@@ -6,10 +6,7 @@
 
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Select, Option } from '@strapi/design-system/Select';
-import { Typography } from '@strapi/design-system/Typography';
+import { Box, Flex, Select, Option, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 
 const PageSize = ({ onChangePageSize, pageSize }) => {

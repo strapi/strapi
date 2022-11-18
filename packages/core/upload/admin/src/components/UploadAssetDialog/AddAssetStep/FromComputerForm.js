@@ -2,12 +2,8 @@
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
+import { Box, Flex, Typography, ModalFooter, Button } from '@strapi/design-system';
 import { useTracking } from '@strapi/helper-plugin';
-import { ModalFooter } from '@strapi/design-system/ModalLayout';
-import { Button } from '@strapi/design-system/Button';
 import PicturePlus from '@strapi/icons/PicturePlus';
 import { useIntl } from 'react-intl';
 import getTrad from '../../../utils/getTrad';

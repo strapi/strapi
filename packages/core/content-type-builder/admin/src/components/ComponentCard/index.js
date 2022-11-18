@@ -7,9 +7,7 @@
 import React from 'react';
 import get from 'lodash/get';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
+import { Box, Stack, Typography } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
 import Cross from '@strapi/icons/Cross';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

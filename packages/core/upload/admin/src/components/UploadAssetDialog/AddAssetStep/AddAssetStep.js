@@ -1,11 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ModalHeader } from '@strapi/design-system/ModalLayout';
-import { Typography } from '@strapi/design-system/Typography';
-import { Divider } from '@strapi/design-system/Divider';
-import { Box } from '@strapi/design-system/Box';
+import {
+  ModalHeader,
+  Typography,
+  Divider,
+  Box,
+  Tabs,
+  Tab,
+  TabGroup,
+  TabPanels,
+  TabPanel,
+} from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
 import { FromUrlForm } from './FromUrlForm';
 import { FromComputerForm } from './FromComputerForm';
 import getTrad from '../../../utils/getTrad';

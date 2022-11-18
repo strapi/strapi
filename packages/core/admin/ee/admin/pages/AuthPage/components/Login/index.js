@@ -1,11 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Divider } from '@strapi/design-system/Divider';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
+import { Box, Flex, Divider, Stack, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import BaseLogin from '../../../../../../admin/src/pages/AuthPage/components/Login/BaseLogin';
 import { useAuthProviders } from '../../../../hooks';

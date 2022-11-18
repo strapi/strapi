@@ -1,8 +1,7 @@
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/design-system/Box';
-import { Button } from '@strapi/design-system/Button';
+import { Box, Button } from '@strapi/design-system';
 import Filter from '@strapi/icons/Filter';
 import { FilterListURLQuery, FilterPopoverURLQuery, useTracking } from '@strapi/helper-plugin';
 

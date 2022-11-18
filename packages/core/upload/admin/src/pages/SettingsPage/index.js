@@ -9,15 +9,20 @@ import {
   useOverlayBlocker,
 } from '@strapi/helper-plugin';
 import Check from '@strapi/icons/Check';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { ToggleInput } from '@strapi/design-system/ToggleInput';
-import { Typography } from '@strapi/design-system/Typography';
-import { Button } from '@strapi/design-system/Button';
-import { Main } from '@strapi/design-system/Main';
-import { Stack } from '@strapi/design-system/Stack';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { ContentLayout, HeaderLayout, Layout } from '@strapi/design-system/Layout';
+import {
+  Box,
+  Flex,
+  ToggleInput,
+  Typography,
+  Button,
+  Main,
+  Stack,
+  Grid,
+  GridItem,
+  ContentLayout,
+  HeaderLayout,
+  Layout,
+} from '@strapi/design-system';
 import axios from 'axios';
 import isEqual from 'lodash/isEqual';
 import { axiosInstance, getRequestUrl, getTrad } from '../../utils';

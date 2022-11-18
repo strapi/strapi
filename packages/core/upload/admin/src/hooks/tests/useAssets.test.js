@@ -6,8 +6,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
 import { NotificationsProvider, useNotification } from '@strapi/helper-plugin';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-
+import { useNotifyAT } from '@strapi/design-system';
 import { axiosInstance } from '../../utils';
 import { useAssets } from '../useAssets';
 

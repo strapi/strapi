@@ -2,11 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import groupBy from 'lodash/groupBy';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-
+import { KeyboardNavigable, Box, Flex, Typography } from '@strapi/design-system';
 import { getTrad } from '../../../utils';
 import { useContentTypeLayout } from '../../../hooks';
 

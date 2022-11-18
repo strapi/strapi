@@ -3,13 +3,18 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { useIntl } from 'react-intl';
-import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
-import { Select, Option } from '@strapi/design-system/Select';
-import { Button } from '@strapi/design-system/Button';
-import { Box } from '@strapi/design-system/Box';
-import { Typography } from '@strapi/design-system/Typography';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
+import {
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  Select,
+  Option,
+  Button,
+  Box,
+  Typography,
+  Flex,
+  Stack,
+} from '@strapi/design-system';
 import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import Duplicate from '@strapi/icons/Duplicate';
 import { useCMEditViewDataManager, useNotification } from '@strapi/helper-plugin';

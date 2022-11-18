@@ -1,9 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
+import { Flex, Stack, Typography } from '@strapi/design-system';
 
 const IconWrapper = styled(Flex)`
   margin-right: ${({ theme }) => theme.spaces[6]};

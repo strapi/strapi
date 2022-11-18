@@ -9,11 +9,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import PlusCircle from '@strapi/icons/PlusCircle';
-import { BaseButton } from '@strapi/design-system/BaseButton';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-
+import { BaseButton, Box, Flex, Typography } from '@strapi/design-system';
 import { getTrad } from '../../../utils';
 
 const StyledAddIcon = styled(PlusCircle)`

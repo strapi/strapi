@@ -1,9 +1,7 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
-import { Box } from '@strapi/design-system/Box';
-import { Divider } from '@strapi/design-system/Divider';
+import { Tabs, Tab, TabGroup, TabPanels, TabPanel, Box, Divider } from '@strapi/design-system';
 import FromComputerForm from './FromComputerForm';
 import FromUrlForm from './FromUrlForm';
 

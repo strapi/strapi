@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { CarouselInput, CarouselSlide } from '@strapi/design-system/CarouselInput';
+import { CarouselInput, CarouselSlide } from '@strapi/design-system';
 import getTrad from '../../../utils/getTrad';
 import { AssetDefinition } from '../../../constants';
 import { CarouselAssetActions } from './CarouselAssetActions';

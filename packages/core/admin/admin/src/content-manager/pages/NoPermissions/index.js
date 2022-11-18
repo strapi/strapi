@@ -1,7 +1,6 @@
 import React from 'react';
 import { useFocusWhenNavigate, NoPermissions as NoPermissionsCompo } from '@strapi/helper-plugin';
-import { Main } from '@strapi/design-system/Main';
-import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
+import { Main, ContentLayout, HeaderLayout } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
 

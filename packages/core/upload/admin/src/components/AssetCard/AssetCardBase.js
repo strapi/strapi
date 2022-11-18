@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Box } from '@strapi/design-system/Box';
 import {
+  Box,
   Card,
   CardAction,
   CardBadge,
@@ -12,8 +12,8 @@ import {
   CardHeader,
   CardTitle,
   CardSubtitle,
-} from '@strapi/design-system/Card';
-import { IconButton } from '@strapi/design-system/IconButton';
+  IconButton,
+} from '@strapi/design-system';
 import Pencil from '@strapi/icons/Pencil';
 import Trash from '@strapi/icons/Trash';
 import { useIntl } from 'react-intl';

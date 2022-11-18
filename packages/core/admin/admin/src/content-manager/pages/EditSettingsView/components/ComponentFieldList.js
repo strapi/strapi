@@ -1,13 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from '@strapi/helper-plugin';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
+import { Box, Flex, Typography, Grid, GridItem } from '@strapi/design-system';
 import Cog from '@strapi/icons/Cog';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
 import useLayoutDnd from '../../../hooks/useLayoutDnd';
 import getTrad from '../../../utils/getTrad';
 

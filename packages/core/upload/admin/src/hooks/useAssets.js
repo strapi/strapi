@@ -1,6 +1,6 @@
 import { stringify } from 'qs';
 import { useQuery } from 'react-query';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import { useNotifyAT } from '@strapi/design-system';
 import { useNotification } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 

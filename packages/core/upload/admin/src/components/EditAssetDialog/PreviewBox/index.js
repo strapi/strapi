@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Stack } from '@strapi/design-system/Stack';
-import { IconButton } from '@strapi/design-system/IconButton';
+import { Stack, IconButton } from '@strapi/design-system';
 import Trash from '@strapi/icons/Trash';
 import DownloadIcon from '@strapi/icons/Download';
 import Resize from '@strapi/icons/Crop';

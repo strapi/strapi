@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
   CardSubtitle,
-} from '@strapi/design-system/Card';
+} from '@strapi/design-system';
 
 const ImageCardAsset = ({ asset }) => {
   const { formatMessage } = useIntl();

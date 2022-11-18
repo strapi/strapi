@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
+import { Box } from '@strapi/design-system';
 import Component from '@strapi/icons/Component';
 import CollectionType from '@strapi/icons/CollectionType';
 import Date from '@strapi/icons/Date';

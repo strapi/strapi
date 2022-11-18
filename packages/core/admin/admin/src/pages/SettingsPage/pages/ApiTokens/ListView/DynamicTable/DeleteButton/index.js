@@ -1,7 +1,6 @@
 import React from 'react';
 import Trash from '@strapi/icons/Trash';
-import { IconButton } from '@strapi/design-system/IconButton';
-import { Box } from '@strapi/design-system/Box';
+import { IconButton, Box } from '@strapi/design-system';
 import { stopPropagation, useTracking } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';

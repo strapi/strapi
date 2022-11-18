@@ -9,13 +9,17 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-} from '@strapi/design-system/ModalLayout';
-import { TabGroup, Tabs, Tab, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
-import { Flex } from '@strapi/design-system/Flex';
-import { Box } from '@strapi/design-system/Box';
-import { Button } from '@strapi/design-system/Button';
-import { Divider } from '@strapi/design-system/Divider';
-import { Typography } from '@strapi/design-system/Typography';
+  TabGroup,
+  Tabs,
+  Tab,
+  TabPanels,
+  TabPanel,
+  Flex,
+  Box,
+  Button,
+  Divider,
+  Typography,
+} from '@strapi/design-system';
 import localeFormSchema from '../../schemas';
 import useEditLocale from '../../hooks/useEditLocale';
 import { getTrad } from '../../utils';

@@ -1,7 +1,7 @@
 import { useNotification, useRBACProvider, useStrapiApp } from '@strapi/helper-plugin';
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import { useNotifyAT } from '@strapi/design-system';
 import axios from 'axios';
 import { useIntl } from 'react-intl';
 import { axiosInstance } from '../../../core/utils';

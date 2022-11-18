@@ -2,15 +2,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Button } from '@strapi/design-system/Button';
-import { Flex } from '@strapi/design-system/Flex';
-import { Box } from '@strapi/design-system/Box';
-import { Divider } from '@strapi/design-system/Divider';
-import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import { GridItem } from '@strapi/design-system/Grid';
-import { Typography } from '@strapi/design-system/Typography';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { IconButton } from '@strapi/design-system/IconButton';
+import {
+  Button,
+  Flex,
+  Box,
+  Divider,
+  BaseCheckbox,
+  GridItem,
+  Typography,
+  VisuallyHidden,
+  IconButton,
+} from '@strapi/design-system';
 import PencilIcon from '@strapi/icons/Pencil';
 import PlusIcon from '@strapi/icons/Plus';
 

@@ -8,12 +8,16 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
-import { ToggleInput } from '@strapi/design-system/ToggleInput';
-import { Typography } from '@strapi/design-system/Typography';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import { Button } from '@strapi/design-system/Button';
+import {
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  ToggleInput,
+  Typography,
+  Flex,
+  Stack,
+  Button,
+} from '@strapi/design-system';
 import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import { getTrad } from '../../utils';
 

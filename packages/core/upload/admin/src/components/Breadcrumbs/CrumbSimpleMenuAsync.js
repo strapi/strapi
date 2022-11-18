@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 import { useQueryParams } from '@strapi/helper-plugin';
 import { CrumbSimpleMenu } from '@strapi/design-system/v2/Breadcrumbs';
 import { MenuItem } from '@strapi/design-system/v2/SimpleMenu';
-import { Loader } from '@strapi/design-system/Loader';
+import { Loader } from '@strapi/design-system';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { getFolderParents, getFolderURL, getTrad } from '../../utils';
 

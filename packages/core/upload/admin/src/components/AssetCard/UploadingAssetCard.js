@@ -11,11 +11,10 @@ import {
   CardTitle,
   CardSubtitle,
   CardBadge,
-} from '@strapi/design-system/Card';
-import { Typography } from '@strapi/design-system/Typography';
-import { Stack } from '@strapi/design-system/Stack';
-import { Box } from '@strapi/design-system/Box';
-
+  Typography,
+  Stack,
+  Box,
+} from '@strapi/design-system';
 import { getTrad } from '../../utils';
 import { AssetType } from '../../constants';
 import { useUpload } from '../../hooks/useUpload';

@@ -1,6 +1,5 @@
 import styled from 'styled-components';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
+import { Box, Stack } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
 
 const Overlay = styled(Box)`

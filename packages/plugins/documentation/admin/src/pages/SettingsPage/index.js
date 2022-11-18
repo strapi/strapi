@@ -9,15 +9,19 @@ import {
 } from '@strapi/helper-plugin';
 
 // Strapi Parts
-import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { Button } from '@strapi/design-system/Button';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
-import { ToggleInput } from '@strapi/design-system/ToggleInput';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
+import {
+  ContentLayout,
+  HeaderLayout,
+  Main,
+  Button,
+  Box,
+  Stack,
+  Typography,
+  ToggleInput,
+  TextInput,
+  Grid,
+  GridItem,
+} from '@strapi/design-system';
 
 // Strapi Icons
 import Show from '@strapi/icons/Eye';

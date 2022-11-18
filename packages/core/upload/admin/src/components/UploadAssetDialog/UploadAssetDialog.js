@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { ModalLayout } from '@strapi/design-system/ModalLayout';
+import { ModalLayout } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { AddAssetStep } from './AddAssetStep/AddAssetStep';

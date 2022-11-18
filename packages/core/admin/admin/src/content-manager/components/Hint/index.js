@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
+import { Typography } from '@strapi/design-system';
 
 export const Hint = ({ id, error, name, description }) => {
   const { formatMessage } = useIntl();

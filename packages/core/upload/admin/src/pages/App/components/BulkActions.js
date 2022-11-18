@@ -1,9 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
-
+import { Stack, Typography } from '@strapi/design-system';
 import { AssetDefinition, FolderDefinition } from '../../../constants';
 import getTrad from '../../../utils/getTrad';
 import { BulkDeleteButton } from './BulkDeleteButton';

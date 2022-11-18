@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Field } from '@strapi/design-system/Field';
+import { Field } from '@strapi/design-system';
 
 const FieldWrapper = ({ name, hint, error, children }) => {
   const { formatMessage } = useIntl();

@@ -6,10 +6,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Typography, Box, Stack, Grid, GridItem } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2/LinkButton';
 import { Link } from '@strapi/design-system/v2/Link';
 import ExternalLink from '@strapi/icons/ExternalLink';

@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { useIntl } from 'react-intl';
 import { ContentBox, useNotification, useTracking } from '@strapi/helper-plugin';
-import { IconButton } from '@strapi/design-system/IconButton';
+import { IconButton } from '@strapi/design-system';
 import Duplicate from '@strapi/icons/Duplicate';
 import PropTypes from 'prop-types';
 import { CopyToClipboard } from 'react-copy-to-clipboard';

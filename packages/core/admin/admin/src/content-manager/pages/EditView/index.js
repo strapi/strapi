@@ -8,11 +8,7 @@ import {
   LinkButton,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { ContentLayout } from '@strapi/design-system/Layout';
-import { Box } from '@strapi/design-system/Box';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Main } from '@strapi/design-system/Main';
-import { Stack } from '@strapi/design-system/Stack';
+import { ContentLayout, Box, Grid, GridItem, Main, Stack } from '@strapi/design-system';
 import Layer from '@strapi/icons/Layer';
 import Pencil from '@strapi/icons/Pencil';
 import { InjectionZone } from '../../../shared/components';

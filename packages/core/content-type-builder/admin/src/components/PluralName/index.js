@@ -8,7 +8,7 @@ import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import pluralize from 'pluralize';
-import { TextInput } from '@strapi/design-system/TextInput';
+import { TextInput } from '@strapi/design-system';
 import nameToSlug from '../../utils/nameToSlug';
 
 const PluralName = ({ description, error, intlLabel, modifiedData, name, onChange, value }) => {

@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
+import { Box, Tag } from '@strapi/design-system';
 import Cross from '@strapi/icons/Cross';
-import { Tag } from '@strapi/design-system/Tag';
 import { useIntl } from 'react-intl';
 
 const AttributeTag = ({ attribute, filter, onClick, operator, value }) => {

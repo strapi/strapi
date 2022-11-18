@@ -10,12 +10,20 @@ import Plus from '@strapi/icons/Plus';
 import Trash from '@strapi/icons/Trash';
 import Pencil from '@strapi/icons/Pencil';
 import Duplicate from '@strapi/icons/Duplicate';
-import { Button } from '@strapi/design-system/Button';
-import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { Table, Tbody, Th, Thead, Tr, TFooter } from '@strapi/design-system/Table';
-import { Typography } from '@strapi/design-system/Typography';
-import { Main } from '@strapi/design-system/Main';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
+import {
+  Button,
+  ContentLayout,
+  HeaderLayout,
+  Table,
+  Tbody,
+  Th,
+  Thead,
+  Tr,
+  TFooter,
+  Typography,
+  Main,
+  VisuallyHidden,
+} from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import RoleRow from './components/RoleRow';

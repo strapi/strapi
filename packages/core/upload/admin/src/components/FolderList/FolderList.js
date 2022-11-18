@@ -1,9 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
-import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
-import { Grid } from '@strapi/design-system/Grid';
-import { Typography } from '@strapi/design-system/Typography';
+import { Box, KeyboardNavigable, Grid, Typography } from '@strapi/design-system';
 
 export const FolderList = ({ title, children }) => {
   return (

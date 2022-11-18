@@ -2,10 +2,7 @@ import React, { Children, cloneElement } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { Box } from '@strapi/design-system/Box';
-import { Typography } from '@strapi/design-system/Typography';
-import { Flex } from '@strapi/design-system/Flex';
-import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
+import { Box, Typography, Flex, KeyboardNavigable } from '@strapi/design-system';
 
 const AccordionFooter = styled(Box)`
   overflow: hidden;

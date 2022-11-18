@@ -2,15 +2,15 @@
 
 import { useEffect } from 'react';
 import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
-import { Main } from '@strapi/design-system/Main';
-import { Button } from '@strapi/design-system/Button';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
-import { Tbody, Td, Tr, TFooter } from '@strapi/design-system/Table';
-import { Typography } from '@strapi/design-system/Typography';
-import { IconButton } from '@strapi/design-system/IconButton';
+import { Main } from '@strapi/design-system';
+import { Button } from '@strapi/design-system';
+import { Box } from '@strapi/design-system';
+import { Flex } from '@strapi/design-system';
+import { BaseCheckbox } from '@strapi/design-system';
+import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system';
+import { Tbody, Td, Tr, TFooter } from '@strapi/design-system';
+import { Typography } from '@strapi/design-system';
+import { IconButton } from '@strapi/design-system';
 import { Plus, Pencil, Trash } from '@strapi/icons';
 import useQueryParams from '../../hooks/useQueryParams';
 import DynamicTable from './index';
@@ -122,7 +122,11 @@ import { DynamicTable } from '@strapi/helper-plugin';
       return (
         <Main>
           <Box paddingTop={6}>
-            <DynamicTable headers={headers} contentType="users" footer={<TFooter icon={<Plus />}>Add another user</TFooter>}/>
+            <DynamicTable
+              headers={headers}
+              contentType="users"
+              footer={<TFooter icon={<Plus />}>Add another user</TFooter>}
+            />
           </Box>
         </Main>
       );
@@ -205,8 +209,8 @@ import { DynamicTable } from '@strapi/helper-plugin';
       }) => {
         return (
           <Tbody>
-            {rows.map(data => {
-              const isChecked = entriesToDelete.findIndex(id => id === data.id) !== -1;
+            {rows.map((data) => {
+              const isChecked = entriesToDelete.findIndex((id) => id === data.id) !== -1;
               return (
                 <Tr key={data.id}>
                   {withMainAction && (
@@ -259,10 +263,10 @@ import { DynamicTable } from '@strapi/helper-plugin';
             <DynamicTable
               headers={headers}
               contentType="users"
-              onConfirmDeleteAll={ids => {
+              onConfirmDeleteAll={(ids) => {
                 alert(`Delete ${ids.join(' ')}`);
               }}
-              onConfirmDelete={id => {
+              onConfirmDelete={(id) => {
                 alert(`Delete ${id}`);
               }}
               rows={rows}
@@ -316,8 +320,8 @@ import { DynamicTable } from '@strapi/helper-plugin';
       }) => {
         return (
           <Tbody>
-            {rows.map(data => {
-              const isChecked = entriesToDelete.findIndex(id => id === data.id) !== -1;
+            {rows.map((data) => {
+              const isChecked = entriesToDelete.findIndex((id) => id === data.id) !== -1;
               return (
                 <Tr key={data.id}>
                   {withMainAction && (
@@ -410,10 +414,10 @@ import { DynamicTable } from '@strapi/helper-plugin';
                   );
                 },
               }}
-              onConfirmDeleteAll={ids => {
+              onConfirmDeleteAll={(ids) => {
                 alert(`Delete ${ids.join(' ')}`);
               }}
-              onConfirmDelete={id => {
+              onConfirmDelete={(id) => {
                 alert(`Delete ${id}`);
               }}
               rows={rows}

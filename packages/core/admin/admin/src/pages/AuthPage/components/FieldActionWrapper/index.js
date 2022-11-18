@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { FieldAction } from '@strapi/design-system/Field';
+import { FieldAction } from '@strapi/design-system';
 
 const FieldActionWrapper = styled(FieldAction)`
   svg {

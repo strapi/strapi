@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { IconButton } from '@strapi/design-system/IconButton';
+import { IconButton } from '@strapi/design-system';
 
 export const CustomIconButton = styled(IconButton)`
   background-color: transparent;

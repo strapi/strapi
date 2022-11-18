@@ -3,9 +3,7 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import ChevronLeft from '@strapi/icons/ChevronLeft';
 import ChevronRight from '@strapi/icons/ChevronRight';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { Typography } from '@strapi/design-system/Typography';
-import { buttonFocusStyle } from '@strapi/design-system/themes';
+import { VisuallyHidden, Typography, buttonFocusStyle } from '@strapi/design-system';
 import { usePagination } from './PaginationContext';
 
 const PaginationText = styled(Typography)`

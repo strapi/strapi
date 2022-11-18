@@ -1,6 +1,5 @@
 import React, { useCallback } from 'react';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { TextInput } from '@strapi/design-system/TextInput';
+import { Grid, GridItem, TextInput } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useFormikContext } from 'formik';
 import { getTrad } from '../../utils';

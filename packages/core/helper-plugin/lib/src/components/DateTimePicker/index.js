@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Stack } from '@strapi/design-system/Stack';
-import { DatePicker } from '@strapi/design-system/DatePicker';
-import { TimePicker } from '@strapi/design-system/TimePicker';
-import { Field, FieldHint, FieldLabel, FieldError } from '@strapi/design-system/Field';
-import { Flex } from '@strapi/design-system/Flex';
-import { Box } from '@strapi/design-system/Box';
+import {
+  Stack,
+  DatePicker,
+  TimePicker,
+  Field,
+  FieldHint,
+  FieldLabel,
+  FieldError,
+  Flex,
+  Box,
+} from '@strapi/design-system';
 import { parseDate } from './parseDate';
 
 const CustomField = styled(Field)`

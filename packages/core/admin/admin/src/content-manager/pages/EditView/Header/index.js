@@ -8,13 +8,17 @@ import isEqual from 'lodash/isEqual';
 import isEmpty from 'lodash/isEmpty';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import { Link } from '@strapi/helper-plugin';
-import { HeaderLayout } from '@strapi/design-system/Layout';
-import { Box } from '@strapi/design-system/Box';
-import { Button } from '@strapi/design-system/Button';
-import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import { Stack } from '@strapi/design-system/Stack';
+import {
+  HeaderLayout,
+  Box,
+  Button,
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  Flex,
+  Typography,
+  Stack,
+} from '@strapi/design-system';
 import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import Check from '@strapi/icons/Check';
 import styled from 'styled-components';

@@ -2,12 +2,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Flex } from '@strapi/design-system/Flex';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Select, Option } from '@strapi/design-system/Select';
-import { ToggleInput } from '@strapi/design-system/ToggleInput';
-import { Box } from '@strapi/design-system/Box';
-import { Typography } from '@strapi/design-system/Typography';
+import {
+  Flex,
+  Grid,
+  GridItem,
+  Select,
+  Option,
+  ToggleInput,
+  Box,
+  Typography,
+} from '@strapi/design-system';
 import { getTrad } from '../../../utils';
 
 const FlexGap = styled(Flex)`

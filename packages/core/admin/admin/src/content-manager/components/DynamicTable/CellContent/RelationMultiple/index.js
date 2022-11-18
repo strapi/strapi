@@ -2,13 +2,16 @@ import React, { useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useQuery } from 'react-query';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
-import { Box } from '@strapi/design-system/Box';
-import { Badge } from '@strapi/design-system/Badge';
-import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
-import { Loader } from '@strapi/design-system/Loader';
+import {
+  Typography,
+  Box,
+  Badge,
+  SimpleMenu,
+  MenuItem,
+  Loader,
+  useNotifyAT,
+} from '@strapi/design-system';
 import styled from 'styled-components';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { stopPropagation } from '@strapi/helper-plugin';
 import CellValue from '../CellValue';
 import { axiosInstance } from '../../../../../core/utils';

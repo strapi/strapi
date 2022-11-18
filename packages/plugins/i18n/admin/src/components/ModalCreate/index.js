@@ -6,13 +6,17 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-} from '@strapi/design-system/ModalLayout';
-import { TabGroup, Tabs, Tab, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
-import { Button } from '@strapi/design-system/Button';
-import { Typography } from '@strapi/design-system/Typography';
-import { Divider } from '@strapi/design-system/Divider';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
+  TabGroup,
+  Tabs,
+  Tab,
+  TabPanels,
+  TabPanel,
+  Button,
+  Typography,
+  Divider,
+  Box,
+  Flex,
+} from '@strapi/design-system';
 import Check from '@strapi/icons/Check';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';

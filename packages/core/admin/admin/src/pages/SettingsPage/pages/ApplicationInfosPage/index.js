@@ -9,13 +9,18 @@ import {
   useNotification,
   useTracking,
 } from '@strapi/helper-plugin';
-import { HeaderLayout, Layout, ContentLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { Box } from '@strapi/design-system/Box';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Typography } from '@strapi/design-system/Typography';
-import { Stack } from '@strapi/design-system/Stack';
-import { Button } from '@strapi/design-system/Button';
+import {
+  HeaderLayout,
+  Layout,
+  ContentLayout,
+  Main,
+  Box,
+  Grid,
+  GridItem,
+  Typography,
+  Stack,
+  Button,
+} from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2/Link';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import Check from '@strapi/icons/Check';

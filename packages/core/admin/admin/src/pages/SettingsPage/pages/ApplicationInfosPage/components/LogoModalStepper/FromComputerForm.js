@@ -2,14 +2,18 @@ import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { Flex } from '@strapi/design-system/Flex';
-import { Icon } from '@strapi/design-system/Icon';
-import { Typography } from '@strapi/design-system/Typography';
-import { ModalFooter } from '@strapi/design-system/ModalLayout';
-import { Button } from '@strapi/design-system/Button';
-import { Field, FieldError, FieldInput } from '@strapi/design-system/Field';
+import {
+  Box,
+  Stack,
+  Flex,
+  Icon,
+  Typography,
+  ModalFooter,
+  Button,
+  Field,
+  FieldError,
+  FieldInput,
+} from '@strapi/design-system';
 import PicturePlus from '@strapi/icons/PicturePlus';
 import { parseFileMetadatas } from '../../utils/parseFileMetadatas';
 import { ACCEPTED_FORMAT, SIZE, DIMENSION } from '../../utils/constants';

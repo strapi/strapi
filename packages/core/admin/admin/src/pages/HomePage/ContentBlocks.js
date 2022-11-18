@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { ContentBox, useTracking } from '@strapi/helper-plugin';
-import { Stack } from '@strapi/design-system/Stack';
+import { Stack } from '@strapi/design-system';
 import InformationSquare from '@strapi/icons/InformationSquare';
 import CodeSquare from '@strapi/icons/CodeSquare';
 import PlaySquare from '@strapi/icons/PlaySquare';

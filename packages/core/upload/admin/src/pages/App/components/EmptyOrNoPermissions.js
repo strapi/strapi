@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { useIntl } from 'react-intl';
 
-import { Button } from '@strapi/design-system/Button';
+import { Button } from '@strapi/design-system';
 import EmptyPermissions from '@strapi/icons/EmptyPermissions';
 import Plus from '@strapi/icons/Plus';
 

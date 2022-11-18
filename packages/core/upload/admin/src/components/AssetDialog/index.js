@@ -2,15 +2,23 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { ModalLayout, ModalBody, ModalHeader } from '@strapi/design-system/ModalLayout';
-import { Flex } from '@strapi/design-system/Flex';
-import { Button } from '@strapi/design-system/Button';
-import { Divider } from '@strapi/design-system/Divider';
-import { Typography } from '@strapi/design-system/Typography';
-import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
-import { Badge } from '@strapi/design-system/Badge';
-import { Loader } from '@strapi/design-system/Loader';
-import { Stack } from '@strapi/design-system/Stack';
+import {
+  ModalLayout,
+  ModalBody,
+  ModalHeader,
+  Flex,
+  Button,
+  Divider,
+  Typography,
+  Tabs,
+  Tab,
+  TabGroup,
+  TabPanels,
+  TabPanel,
+  Badge,
+  Loader,
+  Stack,
+} from '@strapi/design-system';
 import { NoPermissions, AnErrorOccurred, useSelectionState, pxToRem } from '@strapi/helper-plugin';
 import { getTrad, containsAssetFilter } from '../../utils';
 import { SelectedStep } from './SelectedStep';

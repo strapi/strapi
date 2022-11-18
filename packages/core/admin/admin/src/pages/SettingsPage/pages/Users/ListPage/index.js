@@ -8,10 +8,14 @@ import {
   useFocusWhenNavigate,
   NoPermissions,
 } from '@strapi/helper-plugin';
-import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { Button } from '@strapi/design-system/Button';
-import { Main } from '@strapi/design-system/Main';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import {
+  ActionLayout,
+  ContentLayout,
+  HeaderLayout,
+  Button,
+  Main,
+  useNotifyAT,
+} from '@strapi/design-system';
 import Envelop from '@strapi/icons/Envelop';
 import { useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';

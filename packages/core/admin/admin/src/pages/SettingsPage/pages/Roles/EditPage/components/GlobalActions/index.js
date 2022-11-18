@@ -1,9 +1,6 @@
 import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
+import { BaseCheckbox, Box, Stack, Typography } from '@strapi/design-system';
 import styled from 'styled-components';
 import get from 'lodash/get';
 import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/GlobalActions/utils/constants';

@@ -17,17 +17,22 @@ import upperFirst from 'lodash/upperFirst';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import pick from 'lodash/pick';
 import { Helmet } from 'react-helmet';
-import { Main } from '@strapi/design-system/Main';
-import { Typography } from '@strapi/design-system/Typography';
-import { Box } from '@strapi/design-system/Box';
-import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { Button } from '@strapi/design-system/Button';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Stack } from '@strapi/design-system/Stack';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import { Select, Option } from '@strapi/design-system/Select';
-import { FieldAction } from '@strapi/design-system/Field';
-import { TextInput } from '@strapi/design-system/TextInput';
+import {
+  Main,
+  Typography,
+  Box,
+  ContentLayout,
+  HeaderLayout,
+  Button,
+  Grid,
+  GridItem,
+  Stack,
+  useNotifyAT,
+  Select,
+  Option,
+  FieldAction,
+  TextInput,
+} from '@strapi/design-system';
 import Eye from '@strapi/icons/Eye';
 import EyeStriked from '@strapi/icons/EyeStriked';
 import Check from '@strapi/icons/Check';

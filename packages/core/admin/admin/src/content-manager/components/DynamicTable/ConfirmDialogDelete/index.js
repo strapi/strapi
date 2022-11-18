@@ -1,11 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
-import { Stack } from '@strapi/design-system/Stack';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import { Button } from '@strapi/design-system/Button';
+import {
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  Stack,
+  Flex,
+  Typography,
+  Button,
+} from '@strapi/design-system';
 import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import Trash from '@strapi/icons/Trash';
 import InjectionZoneList from '../../InjectionZoneList';

@@ -7,12 +7,7 @@
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Button } from '@strapi/design-system/Button';
-import { Box } from '@strapi/design-system/Box';
-import { Popover } from '@strapi/design-system/Popover';
-import { Stack } from '@strapi/design-system/Stack';
-import { FocusTrap } from '@strapi/design-system/FocusTrap';
-import { Select, Option } from '@strapi/design-system/Select';
+import { Button, Box, Popover, Stack, FocusTrap, Select, Option } from '@strapi/design-system';
 import Plus from '@strapi/icons/Plus';
 import FilterValueInput from './FilterValueInput';
 import getFilterList from './utils/getFilterList';

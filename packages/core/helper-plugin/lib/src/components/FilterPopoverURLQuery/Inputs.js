@@ -2,11 +2,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import parseISO from 'date-fns/parseISO';
 import formatISO from 'date-fns/formatISO';
-import { DatePicker } from '@strapi/design-system/DatePicker';
-import { Field, FieldInput } from '@strapi/design-system/Field';
-import { NumberInput } from '@strapi/design-system/NumberInput';
-import { TimePicker } from '@strapi/design-system/TimePicker';
-import { Select, Option } from '@strapi/design-system/Select';
+import {
+  DatePicker,
+  Field,
+  FieldInput,
+  NumberInput,
+  TimePicker,
+  Select,
+  Option,
+} from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import DateTimePicker from '../DateTimePicker';
 

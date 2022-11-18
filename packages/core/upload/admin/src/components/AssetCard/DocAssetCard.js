@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Flex } from '@strapi/design-system/Flex';
+import { Flex } from '@strapi/design-system';
 import FileIcon from '@strapi/icons/File';
 import FilePdfIcon from '@strapi/icons/FilePdf';
 import { pxToRem } from '@strapi/helper-plugin';

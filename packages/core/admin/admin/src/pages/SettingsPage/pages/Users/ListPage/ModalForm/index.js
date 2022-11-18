@@ -6,14 +6,15 @@ import {
   ModalHeader,
   ModalFooter,
   ModalBody,
-} from '@strapi/design-system/ModalLayout';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Breadcrumbs, Crumb } from '@strapi/design-system/Breadcrumbs';
-import { Box } from '@strapi/design-system/Box';
-import { Button } from '@strapi/design-system/Button';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
-
+  Grid,
+  GridItem,
+  Breadcrumbs,
+  Crumb,
+  Box,
+  Button,
+  Stack,
+  Typography,
+} from '@strapi/design-system';
 import { Formik } from 'formik';
 import { Form, GenericInput, useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
 import { useQueryClient, useMutation } from 'react-query';

@@ -1,8 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { Flex } from '@strapi/design-system/Flex';
-
+import { Flex } from '@strapi/design-system';
 import { useFolderCard } from '../contexts/FolderCard';
 
 const StyledBox = styled(Flex)`

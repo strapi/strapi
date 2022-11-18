@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { AvatarGroup } from '@strapi/design-system/Avatar';
+import { AvatarGroup } from '@strapi/design-system';
 import Media from './Media';
 import FileWrapper from './Media/FileWrapper';
 

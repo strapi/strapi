@@ -1,11 +1,7 @@
 import React, { useRef } from 'react';
 import { useIntl } from 'react-intl';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { Box } from '@strapi/design-system/Box';
-import { Divider } from '@strapi/design-system/Divider';
-import { Typography } from '@strapi/design-system/Typography';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
+import { Box, Divider, Typography, Flex, Stack } from '@strapi/design-system';
 import { getTrad } from '../../../utils';
 import getUnits from './utils/getUnits';
 import { getFullName } from '../../../../utils';

@@ -2,9 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 
-import { Typography } from '@strapi/design-system/Typography';
-import { Tbody, Tr, Td } from '@strapi/design-system/Table';
-import { Flex } from '@strapi/design-system/Flex';
+import { Typography, Tbody, Tr, Td, Flex } from '@strapi/design-system';
 import {
   RelativeTime,
   useQueryParams,

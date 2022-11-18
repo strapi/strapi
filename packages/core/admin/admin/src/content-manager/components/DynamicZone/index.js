@@ -2,8 +2,7 @@ import React, { memo, useMemo, useState } from 'react';
 import get from 'lodash/get';
 import isEqual from 'react-fast-compare';
 import PropTypes from 'prop-types';
-import { Stack } from '@strapi/design-system/Stack';
-import { Box } from '@strapi/design-system/Box';
+import { Stack, Box } from '@strapi/design-system';
 import { NotAllowedInput, useNotification } from '@strapi/helper-plugin';
 
 import { getTrad } from '../../utils';

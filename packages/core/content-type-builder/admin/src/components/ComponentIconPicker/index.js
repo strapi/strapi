@@ -2,15 +2,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { FixedSizeGrid } from 'react-window';
-import { Searchbar } from '@strapi/design-system/Searchbar';
-import { IconButton } from '@strapi/design-system/IconButton';
+import { Searchbar, IconButton, Box, Flex, Stack, Typography } from '@strapi/design-system';
 import Search from '@strapi/icons/Search';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
-
 import { getIndexFromColAndRow } from './utils/getIndexFromColAndRow';
 import useDataManager from '../../hooks/useDataManager';
 import getTrad from '../../utils/getTrad';

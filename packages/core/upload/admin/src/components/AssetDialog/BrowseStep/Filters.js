@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Button } from '@strapi/design-system/Button';
+import { Button } from '@strapi/design-system';
 import FilterIcon from '@strapi/icons/Filter';
 import { useIntl } from 'react-intl';
 import FilterList from '../../FilterList';

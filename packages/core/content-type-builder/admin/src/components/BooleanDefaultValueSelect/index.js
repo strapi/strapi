@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Select, Option } from '@strapi/design-system/Select';
+import { Select, Option } from '@strapi/design-system';
 
 const BooleanDefaultValueSelect = ({ intlLabel, name, options, onChange, value }) => {
   const { formatMessage } = useIntl();

@@ -2,11 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { pxToRem } from '@strapi/helper-plugin';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Button } from '@strapi/design-system/Button';
-import { ModalFooter } from '@strapi/design-system/ModalLayout';
-import { Typography } from '@strapi/design-system/Typography';
+import { Box, Flex, Button, ModalFooter, Typography } from '@strapi/design-system';
 import ImageCardAsset from './ImageCardAsset';
 
 const PendingLogoDialog = ({ onClose, asset, prev, next, goTo, setLocalImage, onChangeLogo }) => {

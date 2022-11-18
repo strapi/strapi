@@ -1,7 +1,5 @@
 import styled from 'styled-components';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
-import { inputFocusStyle } from '@strapi/design-system/themes';
+import { Stack, Typography, inputFocusStyle } from '@strapi/design-system';
 
 const Wrapper = styled(Stack)`
   position: relative;

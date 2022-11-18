@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ContentLayout } from '@strapi/design-system/Layout';
-import { Stack } from '@strapi/design-system/Stack';
+import { ContentLayout, Stack } from '@strapi/design-system';
 import HeaderContentBox from '../ContentBox';
 import FormApiTokenContainer from '../FormApiTokenContainer';
 import Permissions from '../Permissions';

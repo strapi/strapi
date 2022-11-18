@@ -16,7 +16,7 @@ import {
   useAppInfos,
 } from '@strapi/helper-plugin';
 import axios from 'axios';
-import { SkipToContent } from '@strapi/design-system/Main';
+import { SkipToContent } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import PrivateRoute from '../../components/PrivateRoute';
 import { createRoute, makeUniqueRoutes } from '../../utils';
