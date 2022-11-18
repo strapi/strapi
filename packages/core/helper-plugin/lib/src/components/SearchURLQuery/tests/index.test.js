@@ -45,6 +45,10 @@ describe('<SearchURLQuery />', () => {
         width: 1px;
       }
 
+      .c3 {
+        color: #32324d;
+      }
+
       .c2 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
@@ -153,10 +157,6 @@ describe('<SearchURLQuery />', () => {
 
       .c1[aria-disabled='true'] svg path {
         fill: #666687;
-      }
-
-      .c3 {
-        color: #32324d;
       }
 
       .c4 path {
@@ -279,10 +279,10 @@ describe('<SearchURLQuery />', () => {
       }
 
       .c2 {
-        font-weight: 600;
-        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
       }
 
       .c10 {
@@ -404,7 +404,7 @@ describe('<SearchURLQuery />', () => {
                 >
                   <label
                     class="c2"
-                    for="field-1"
+                    for="field-5"
                   >
                     <div
                       class="c3"
@@ -443,7 +443,7 @@ describe('<SearchURLQuery />', () => {
                     aria-disabled="false"
                     aria-invalid="false"
                     class="c10"
-                    id="field-1"
+                    id="field-5"
                     name="search"
                     value=""
                   />
