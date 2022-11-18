@@ -10,7 +10,7 @@ const {
   hasInverseOrderColumn,
 } = require('../metadata/relations');
 const { createQueryBuilder } = require('../query');
-const { addSchema } = require('../utils/add-schema');
+const { addSchema } = require('../utils/knex');
 
 /**
  * If some relations currently exist for this oneToX relation, on the one side, this function removes them and update the inverse order if needed.
