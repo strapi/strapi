@@ -510,7 +510,12 @@ const FormModal = () => {
         } else {
           // We cannot switch from collection type to single when the modal is making relations other than oneWay or manyWay
           if (canEditContentType(allDataSchema, modifiedData)) {
+            // allDataSchema.contentType.schema.displayName
             onCloseModal();
+
+            if (modifiedData?.displayName !== allDataSchema?.contentType?.schema?.displayName) {
+              trackUsage('didEditFieldOnContentTypeInCTB');
+            }
 
             submitData(modifiedData);
           } else {
