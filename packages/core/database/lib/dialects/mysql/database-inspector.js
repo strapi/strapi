@@ -20,7 +20,6 @@ class MysqlDatabaseInspector {
       const databaseName = versionSplit[1];
       versionNumber = versionSplit[0];
       database = databaseName && databaseName.toLowerCase() === 'mariadb' ? MARIADB : MYSQL;
-      throw new Error('oups');
     } catch (e) {
       database = UNKNOWN;
       versionNumber = UNKNOWN;
