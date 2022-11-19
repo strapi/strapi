@@ -30,6 +30,8 @@ const databases = {
       database: 'strapi_test',
       username: 'strapi',
       password: 'strapi',
+      charset: 'utf8mb4',
+      collation: 'utf8mb4_unicode_ci',
     },
   },
   sqlite: {

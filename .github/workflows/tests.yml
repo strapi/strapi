@@ -130,7 +130,6 @@ jobs:
           -e MYSQL_USER=strapi
           -e MYSQL_PASSWORD=strapi
           -e MYSQL_DATABASE=strapi_test
-          -v /__w/.github/workflows/db/mysql-8/config.cnf:/etc/mysql/conf.d/config.cnf
         ports:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
@@ -146,12 +145,12 @@ jobs:
           dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
 
   api_ce_mysql_5:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
     name: '[CE] API Integration (mysql:5 , node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [14, 16]
+        node: [14, 16, 18]
     services:
       mysql:
         image: mysql:5.7.8
@@ -165,7 +164,6 @@ jobs:
           -e MYSQL_USER=strapi
           -e MYSQL_PASSWORD=strapi
           -e MYSQL_DATABASE=strapi_test
-          -v /__w/.github/workflows/db/mysql-5/config.cnf:/etc/mysql/conf.d/config.cnf
         ports:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
@@ -264,7 +262,6 @@ jobs:
           -e MYSQL_USER=strapi
           -e MYSQL_PASSWORD=strapi
           -e MYSQL_DATABASE=strapi_test
-          -v /__w/.github/workflows/db/mysql-8/config.cnf:/etc/mysql/conf.d/config.cnf
         ports:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
