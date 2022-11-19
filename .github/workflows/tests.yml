@@ -96,6 +96,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+          -v /__w/.github/workflows/db/postgres:/docker-entrypoint-initdb.d
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
@@ -226,6 +227,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+          -v /__w/.github/workflows/db/postgres:/docker-entrypoint-initdb.d
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
