@@ -204,7 +204,6 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
     [MYSQL, UNKNOWN].includes(database) &&
     (!semver.valid(version) || semver.lt(version, '8.0.0'))
   ) {
-    console.log('DEDANS');
     await cleanOrderColumnsForOldDatabases({ id, attribute, db, inverseRelIds, transaction: trx });
     return;
   }
