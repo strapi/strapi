@@ -858,6 +858,7 @@ const createEntityManager = (db) => {
                         },
                       },
                       {
+                        [joinColumn.name]: id,
                         [orderColumnName]: this.createQueryBuilder(joinTable.name)
                           .max(orderColumnName)
                           .where({ [joinColumn.name]: id })
