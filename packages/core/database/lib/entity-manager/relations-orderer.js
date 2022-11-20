@@ -40,7 +40,7 @@ const relationsOrderer = (initArr, idColumn, orderColumn) => {
     order: r[orderColumn],
   }));
 
-  const maxOrder = _.maxBy('order', arr).order;
+  const maxOrder = _.maxBy('order', arr)?.order || 0;
 
   // TODO: Improve performance by using a map
   const findRelation = (id) => {

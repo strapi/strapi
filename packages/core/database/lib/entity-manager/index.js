@@ -869,7 +869,6 @@ const createEntityManager = (db) => {
                     ],
                   })
                   .where(joinTable.on || {})
-                  .sort(orderColumnName, 'ASC')
                   .transacting(trx)
                   .execute();
 
