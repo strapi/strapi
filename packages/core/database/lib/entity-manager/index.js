@@ -579,11 +579,23 @@ const createEntityManager = (db) => {
           });
 
           // add order value
-          if (hasOrderColumn(attribute)) {
-            insert.forEach((rel, idx) => {
-              rel[orderColumnName] = idx + 1;
+          if (cleanRelationData.set && hasOrderColumn(attribute)) {
+            insert.forEach((data, idx) => {
+              data[orderColumnName] = idx + 1;
+            });
+          } else if (cleanRelationData.connect && hasOrderColumn(attribute)) {
+            // use position attributes to calculate order
+            const orderMap = relationsOrderer([], inverseJoinColumn.name, joinTable.orderColumnName)
+              .connect(relsToAdd)
+              .get()
+              // set the order based on the order of the ids
+              .reduce((acc, rel, idx) => Object.assign(acc, { [rel.id]: idx }), {});
+
+            insert.forEach((row) => {
+              row[orderColumnName] = orderMap[row[inverseJoinColumn.name]];
             });
           }
+
           // add inv_order value
           if (hasInverseOrderColumn(attribute)) {
             const maxResults = await db
