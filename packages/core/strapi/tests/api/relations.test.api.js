@@ -14,6 +14,7 @@ const data = {
 let id1;
 let id2;
 let id3;
+
 const populateShop = [
   'products_ow',
   'products_oo',
@@ -130,6 +131,86 @@ const updateEntry = async (pluralName, id, data, populate) => {
     qs: { populate },
   });
   return body.data;
+};
+
+const createShop = async ({
+  anyToOneRel = [{ id: id1 }],
+  anyToManyRel = [{ id: id1 }, { id: id2 }, { id: id3 }],
+  data = {},
+  populate,
+}) => {
+  return createEntry(
+    'shops',
+    {
+      name: 'Cazotte Shop',
+      products_ow: { connect: anyToOneRel },
+      products_oo: { connect: anyToOneRel },
+      products_mo: { connect: anyToOneRel },
+      products_om: { connect: anyToManyRel },
+      products_mm: { connect: anyToManyRel },
+      products_mw: { connect: anyToManyRel },
+      myCompo: {
+        compo_products_ow: { connect: anyToOneRel },
+        compo_products_mw: { connect: anyToManyRel },
+      },
+      ...data,
+    },
+    populate || populateShop
+  );
+};
+
+const updateShop = async (
+  shop,
+  {
+    anyToOneRel = [{ id: id1 }],
+    anyToManyRel = [{ id: id1 }, { id: id2 }, { id: id3 }],
+    relAction = 'connect',
+    data = {},
+    populate,
+  }
+) => {
+  return updateEntry(
+    'shops',
+    shop.id,
+    {
+      name: 'Cazotte Shop',
+      products_ow: { [relAction]: anyToOneRel },
+      products_oo: { [relAction]: anyToOneRel },
+      products_mo: { [relAction]: anyToOneRel },
+      products_om: { [relAction]: anyToManyRel },
+      products_mm: { [relAction]: anyToManyRel },
+      products_mw: { [relAction]: anyToManyRel },
+      myCompo: {
+        id: shop.attributes?.myCompo?.id,
+        compo_products_ow: { [relAction]: anyToOneRel },
+        compo_products_mw: { [relAction]: anyToManyRel },
+      },
+      ...data,
+    },
+    populate || populateShop
+  );
+};
+
+const shopFactory = ({
+  anyToOneRel = { id: id1 },
+  anyToManyRel = [{ id: id1 }, { id: id2 }, { id: id3 }],
+  data = {},
+}) => {
+  return {
+    attributes: {
+      myCompo: {
+        compo_products_mw: { data: anyToManyRel },
+        compo_products_ow: { data: anyToOneRel },
+      },
+      products_mm: { data: anyToManyRel },
+      products_mo: { data: anyToOneRel },
+      products_mw: { data: anyToManyRel },
+      products_om: { data: anyToManyRel },
+      products_oo: { data: anyToOneRel },
+      products_ow: { data: anyToOneRel },
+      ...data,
+    },
+  };
 };
 
 describe('Relations', () => {
@@ -685,6 +766,62 @@ describe('Relations', () => {
           },
         });
       });
+    });
+  });
+
+  // TODO: Use createShop and updateShop in other tests
+  describe.only('Reorder entity relations', () => {
+    test('Connect new relation at the start', async () => {
+      // Add two products at the start
+      const createdShop = await createShop({
+        anyToManyRel: [
+          { id: id1, position: { start: true } },
+          { id: id2, position: { start: true } },
+        ],
+      });
+      // Relation order should be [id2, id1]
+      const expectedCreatedShop = shopFactory({ anyToManyRel: [{ id: id2 }, { id: id1 }] });
+      expect(createdShop).toMatchObject(expectedCreatedShop);
+    });
+
+    test('Connect new relation at the end', async () => {
+      // Add two products at the end
+      const createdShop = await createShop({
+        anyToManyRel: [
+          { id: id1, position: { end: true } },
+          { id: id2, position: { end: true } },
+        ],
+      });
+      // Relation order should be [id1, id2]
+      const expectedCreatedShop = shopFactory({ anyToManyRel: [{ id: id1 }, { id: id2 }] });
+
+      expect(createdShop).toMatchObject(expectedCreatedShop);
+    });
+
+    test('Connect relations using before and after', async () => {
+      // Add two products at the end
+      const shop = await createShop({
+        anyToManyRel: [
+          { id: id1, position: { end: true } },
+          { id: id2, position: { end: true } },
+        ],
+      });
+
+      // Move product relations
+      const updatedShop = await updateShop(shop, {
+        anyToManyRel: [
+          { id: id3, position: { after: id1 } },
+          { id: id1, position: { before: id2 } },
+          { id: id2, position: { start: true } },
+          { id: id3, position: { end: true } },
+        ],
+      });
+
+      const expectedShop = shopFactory({
+        anyToManyRel: [{ id: id2 }, { id: id1 }, { id: id3 }],
+      });
+
+      expect(updatedShop).toMatchObject(expectedShop);
     });
   });
 });
