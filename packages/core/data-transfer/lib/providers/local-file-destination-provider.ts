@@ -221,6 +221,24 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
     return chain(streams);
   }
+
+  getMediaStream(): NodeJS.WritableStream {
+    return chain([
+      (data) => {
+        console.log(data.file);
+        return data;
+      },
+      (data) => {
+        const fsStream = fs.createWriteStream(path.join(this.options.file.path, data.file));
+        data.stream.pipe(fsStream);
+        fsStream.on('close', () => {
+          console.log('closed', data.file);
+          data.stream.destroy();
+        });
+        return data;
+      },
+    ]);
+  }
 }
 
 /**

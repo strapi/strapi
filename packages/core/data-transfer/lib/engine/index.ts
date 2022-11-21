@@ -377,14 +377,35 @@ class TransferEngine<
 
   async transferMedia(): Promise<void> {
     const stageName: TransferStage = 'media';
-    this.#updateStage('start', stageName);
-    console.warn('transferMedia not yet implemented');
-    return new Promise((resolve) =>
-      (() => {
-        this.#updateStage('complete', stageName);
-        resolve();
-      })()
-    );
+    const inStream = await this.sourceProvider.streamMedia?.();
+    const outStream = await this.destinationProvider.getMediaStream?.();
+
+    if (!inStream) {
+      throw new Error('Unable to transfer links, source stream is missing');
+    }
+
+    if (!outStream) {
+      throw new Error('Unable to transfer links, destination stream is missing');
+    }
+
+    this.#updateStage('start', 'media');
+
+    return new Promise((resolve, reject) => {
+      inStream
+        // Throw on error in the source
+        .on('error', reject);
+
+      outStream
+        // Throw on error in the destination
+        .on('error', reject)
+        // Resolve the promise when the destination has finished reading all the data from the source
+        .on('close', () => {
+          this.#updateStage('complete', stageName);
+          resolve();
+        });
+
+      inStream.pipe(this.#countRecorder(stageName)).pipe(outStream);
+    });
   }
 
   async transferConfiguration(): Promise<void> {
