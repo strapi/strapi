@@ -16,6 +16,7 @@ const {
   parseInputList,
   parseInputBool,
   promptEncryptionKey,
+  confirmKeyValue,
 } = require('../lib/commands/utils/commander');
 
 const checkCwdIsStrapiApp = (name) => {
@@ -337,6 +338,14 @@ program
   )
   .arguments('<filename>')
   .allowExcessArguments(false)
+  .hook(
+    'preAction',
+    confirmKeyValue(
+      'conflictStrategy',
+      'restore',
+      "Using strategy 'restore' will delete all data in your database. Are you sure you want to proceed?"
+    )
+  )
   .action(getLocalScript('transfer/import'));
 
 program.parseAsync(process.argv);
