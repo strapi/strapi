@@ -28,10 +28,22 @@ const mysql = {
   },
 };
 
+const mariadb = {
+  client: 'mysql',
+  connection: {
+    database: 'strapi',
+    user: 'strapi',
+    password: 'strapi',
+    port: 3307,
+    host: 'localhost',
+  },
+};
+
 const db = {
   mysql,
   sqlite,
   postgres,
+  mariadb,
 };
 
 module.exports = {
