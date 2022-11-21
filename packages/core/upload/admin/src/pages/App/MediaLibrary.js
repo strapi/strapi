@@ -25,7 +25,8 @@ import Pencil from '@strapi/icons/Pencil';
 import { UploadAssetDialog } from '../../components/UploadAssetDialog/UploadAssetDialog';
 import { EditFolderDialog } from '../../components/EditFolderDialog';
 import { EditAssetDialog } from '../../components/EditAssetDialog';
-import { AssetList } from '../../components/AssetList';
+import { AssetGridList } from '../../components/AssetGridList';
+import { TableList } from '../../components/TableList';
 import { FolderList } from '../../components/FolderList';
 import SortPicker from '../../components/SortPicker';
 import { useAssets } from '../../hooks/useAssets';
@@ -72,6 +73,9 @@ export const MediaLibrary = () => {
   const [{ query }, setQuery] = useQueryParams();
   const isFiltering = Boolean(query._q || query.filters);
 
+  // TODO: remove and replace with data when available stored
+  const isGridView = true;
+
   const {
     data: assetsData,
     isLoading: assetsLoading,
@@ -82,7 +86,7 @@ export const MediaLibrary = () => {
   });
 
   const {
-    data: folders,
+    data: foldersData,
     isLoading: foldersLoading,
     errors: foldersError,
   } = useFolders({
@@ -103,15 +107,19 @@ export const MediaLibrary = () => {
     push(pathname);
   }
 
+  const folders = foldersData?.map((folder) => ({ ...folder, type: 'folder' })) ?? [];
   const folderCount = folders?.length || 0;
-  const assets = assetsData?.results;
+  const assets = assetsData?.results?.map((asset) => ({ ...asset, type: 'asset' })) || [];
   const assetCount = assets?.length ?? 0;
+
   const isLoading = isCurrentFolderLoading || foldersLoading || permissionsLoading || assetsLoading;
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
   const [showEditFolderDialog, setShowEditFolderDialog] = useState(false);
   const [assetToEdit, setAssetToEdit] = useState(undefined);
   const [folderToEdit, setFolderToEdit] = useState(undefined);
   const [selected, { selectOne, selectAll }] = useSelectionState(['type', 'id'], []);
+  const indeterminateBulkSelect =
+    selected?.length > 0 && selected?.length !== assetCount + folderCount;
   const toggleUploadAssetDialog = () => setShowUploadAssetDialog((prev) => !prev);
   const toggleEditFolderDialog = ({ created = false } = {}) => {
     // folders are only displayed on the first page, therefore
@@ -125,6 +133,14 @@ export const MediaLibrary = () => {
     }
 
     setShowEditFolderDialog((prev) => !prev);
+  };
+
+  const handleBulkSelect = (event, elements) => {
+    if (event.target.checked) {
+      trackUsage('didSelectAllMediaLibraryElements');
+    }
+
+    selectAll(elements);
   };
 
   const handleChangeSort = (value) => {
@@ -166,7 +182,7 @@ export const MediaLibrary = () => {
         <ActionLayout
           startActions={
             <>
-              {canUpdate && (assetCount > 0 || folderCount > 0) && (
+              {canUpdate && isGridView && (assetCount > 0 || folderCount > 0) && (
                 <BoxWithHeight
                   paddingLeft={2}
                   paddingRight={2}
@@ -179,26 +195,16 @@ export const MediaLibrary = () => {
                       id: getTrad('bulk.select.label'),
                       defaultMessage: 'Select all folders & assets',
                     })}
-                    indeterminate={
-                      selected?.length > 0 && selected?.length !== assetCount + folderCount
-                    }
+                    indeterminate={indeterminateBulkSelect}
                     value={
                       (assetCount > 0 || folderCount > 0) &&
                       selected.length === assetCount + folderCount
                     }
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        trackUsage('didSelectAllMediaLibraryElements');
-                      }
-                      selectAll([
-                        ...assets.map((asset) => ({ ...asset, type: 'asset' })),
-                        ...folders.map((folder) => ({ ...folder, type: 'folder' })),
-                      ]);
-                    }}
+                    onChange={(e) => handleBulkSelect(e, [...assets, ...folders])}
                   />
                 </BoxWithHeight>
               )}
-              {canRead && <SortPicker onChangeSort={handleChangeSort} />}
+              {canRead && isGridView && <SortPicker onChangeSort={handleChangeSort} />}
               {canRead && <Filters />}
             </>
           }
@@ -232,11 +238,34 @@ export const MediaLibrary = () => {
             />
           )}
 
-          {canRead && (
+          {/* TODO: fix AssetListTable should handle no assets views (loading) */}
+          {canRead && !isGridView && (assetCount > 0 || folderCount > 0) && (
+            <TableList
+              assetCount={assetCount}
+              folderCount={folderCount}
+              indeterminate={indeterminateBulkSelect}
+              onEditAsset={setAssetToEdit}
+              onEditFolder={handleEditFolder}
+              onSelectOne={selectOne}
+              onSelectAll={handleBulkSelect}
+              rows={
+                // TODO: remove when fixed on DS side
+                // when number of rows in Table changes, the keyboard tab from a row to another
+                // is not working for 1st and last column
+                !assetsLoading && !foldersLoading ? [...folders, ...assets] : []
+              }
+              selected={selected}
+            />
+          )}
+
+          {canRead && isGridView && (
             <>
               {folderCount > 0 && (
                 <FolderList
                   title={
+                    // Folders title should only appear if:
+                    // user is filtering and there are assets to display, to divide both type of elements
+                    // user is not filtering
                     (((isFiltering && assetCount > 0) || !isFiltering) &&
                       formatMessage(
                         {
@@ -272,7 +301,7 @@ export const MediaLibrary = () => {
                               <FolderCardCheckbox
                                 data-testid={`folder-checkbox-${folder.id}`}
                                 value={isSelected}
-                                onChange={() => selectOne({ ...folder, type: 'folder' })}
+                                onChange={() => selectOne(folder)}
                               />
                             )
                           }
@@ -330,33 +359,33 @@ export const MediaLibrary = () => {
               )}
 
               {assetCount > 0 && (
-                <>
-                  <AssetList
-                    assets={assets}
-                    onEditAsset={setAssetToEdit}
-                    onSelectAsset={selectOne}
-                    selectedAssets={selected.filter(({ type }) => type === 'asset')}
-                    title={
-                      ((!isFiltering || (isFiltering && folderCount > 0)) &&
-                        assetsData?.pagination?.page === 1 &&
-                        formatMessage(
-                          {
-                            id: getTrad('list.assets.title'),
-                            defaultMessage: 'Assets ({count})',
-                          },
-                          { count: assetCount }
-                        )) ||
-                      ''
-                    }
-                  />
-
-                  {assetsData?.pagination && (
-                    <PaginationFooter pagination={assetsData.pagination} />
-                  )}
-                </>
+                <AssetGridList
+                  assets={assets}
+                  onEditAsset={setAssetToEdit}
+                  onSelectAsset={selectOne}
+                  selectedAssets={selected.filter(({ type }) => type === 'asset')}
+                  title={
+                    // Assets title should only appear if:
+                    // - user is not filtering
+                    // - user is filtering and there are folders to display, to separate them
+                    // - user is on page 1 since folders won't appear on any other page than the first one (no need to visually separate them)
+                    ((!isFiltering || (isFiltering && folderCount > 0)) &&
+                      assetsData?.pagination?.page === 1 &&
+                      formatMessage(
+                        {
+                          id: getTrad('list.assets.title'),
+                          defaultMessage: 'Assets ({count})',
+                        },
+                        { count: assetCount }
+                      )) ||
+                    ''
+                  }
+                />
               )}
             </>
           )}
+
+          {assetsData?.pagination && <PaginationFooter pagination={assetsData.pagination} />}
         </ContentLayout>
       </Main>
 
