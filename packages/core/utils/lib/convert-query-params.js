@@ -186,7 +186,7 @@ const convertPopulateObject = (populate, schema) => {
       return acc;
     }
 
-    // Allow adding a 'on' strategy to populate queries for polymorphic relations, media and dynamic zones
+    // Allow adding an 'on' strategy to populate queries for polymorphic relations, media and dynamic zones
     const isAllowedAttributeForFragmentPopulate =
       attribute.type === 'dynamiczone' ||
       attribute.type === 'media' ||

@@ -317,7 +317,7 @@ describe('Populate filters', () => {
   });
 
   describe('Populate a dynamic zone', () => {
-    test('Populate every components in the dynamic zone', async () => {
+    test('Populate every component in the dynamic zone', async () => {
       const qs = {
         populate: {
           dz: '*',
