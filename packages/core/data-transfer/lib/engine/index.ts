@@ -63,7 +63,7 @@ class TransferEngine<
       throw new Error("SourceProvider does not have type 'source'");
     }
     if (destinationProvider.type !== 'destination') {
-      throw new Error("SourceProvider does not have type 'source'");
+      throw new Error("DestinationProvider does not have type 'destination'");
     }
     this.sourceProvider = sourceProvider;
     this.destinationProvider = destinationProvider;
