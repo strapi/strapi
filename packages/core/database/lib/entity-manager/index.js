@@ -589,7 +589,7 @@ const createEntityManager = (db) => {
               .connect(relsToAdd)
               .get()
               // set the order based on the order of the ids
-              .reduce((acc, rel, idx) => Object.assign(acc, { [rel.id]: idx }), {});
+              .reduce((acc, rel, idx) => ({ ...acc, [rel.id]: idx }), {});
 
             insert.forEach((row) => {
               row[orderColumnName] = orderMap[row[inverseJoinColumn.name]];

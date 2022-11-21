@@ -817,11 +817,11 @@ describe('Relations', () => {
         ],
       });
 
-      // const expectedShop = shopFactory({
-      //   anyToManyRel: [{ id: id2 }, { id: id1 }, { id: id3 }],
-      // });
+      const expectedShop = shopFactory({
+        anyToManyRel: [{ id: id2 }, { id: id1 }, { id: id3 }],
+      });
 
-      expect(updatedShop).toMatchObject({ a: 'test' });
+      expect(updatedShop).toMatchObject(expectedShop);
     });
   });
 });
