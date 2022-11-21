@@ -4,10 +4,10 @@ import { Grid, GridItem } from '@strapi/design-system/Grid';
 import Inputs from '../../../components/Inputs';
 import FieldComponent from '../../../components/FieldComponent';
 
-const GridRow = ({ grid }) => {
+const GridRow = ({ columns }) => {
   return (
     <Grid gap={4}>
-      {grid.map(({ fieldSchema, labelAction, metadatas, name, size, queryInfos }) => {
+      {columns.map(({ fieldSchema, labelAction, metadatas, name, size, queryInfos }) => {
         const isComponent = fieldSchema.type === 'component';
 
         if (isComponent) {
@@ -50,7 +50,7 @@ const GridRow = ({ grid }) => {
 };
 
 GridRow.propTypes = {
-  grid: PropTypes.array.isRequired,
+  columns: PropTypes.array.isRequired,
 };
 
 export default GridRow;

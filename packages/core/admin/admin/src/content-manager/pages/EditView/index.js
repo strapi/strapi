@@ -156,7 +156,7 @@ const EditView = ({
                             >
                               <Stack spacing={6}>
                                 {row.map((grid, gridRowIndex) => (
-                                  <GridRow grid={grid} key={gridRowIndex} />
+                                  <GridRow columns={grid} key={gridRowIndex} />
                                 ))}
                               </Stack>
                             </Box>
