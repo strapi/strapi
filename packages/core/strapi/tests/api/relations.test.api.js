@@ -770,7 +770,7 @@ describe('Relations', () => {
   });
 
   // TODO: Use createShop and updateShop in other tests
-  describe.only('Reorder entity relations', () => {
+  describe('Reorder entity relations', () => {
     test('Connect new relation at the start', async () => {
       // Add two products at the start
       const createdShop = await createShop({
