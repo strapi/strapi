@@ -284,13 +284,11 @@ class TransferEngine<
 
     const inStream = await this.sourceProvider.streamSchemas?.();
     if (!inStream) {
-      // console.log('SourceProvider did not return a schemas stream');
       return;
     }
 
     const outStream = await this.destinationProvider.getSchemasStream?.();
     if (!outStream) {
-      // console.log('DestinationProvider did not return a schemas stream');
       return;
     }
 
@@ -318,13 +316,11 @@ class TransferEngine<
 
     const inStream = await this.sourceProvider.streamEntities?.();
     if (!inStream) {
-      // console.log('SourceProvider did not return entities stream');
       return;
     }
 
     const outStream = await this.destinationProvider.getEntitiesStream?.();
     if (!outStream) {
-      // console.log('DestinationProvider did not return entities stream');
       return;
     }
 
@@ -357,13 +353,11 @@ class TransferEngine<
 
     const inStream = await this.sourceProvider.streamLinks?.();
     if (!inStream) {
-      // console.log('SourceProvider did not return a links stream');
       return;
     }
 
     const outStream = await this.destinationProvider.getLinksStream?.();
     if (!outStream) {
-      //console.log('DestinationProvider did not return a links stream');
       return;
     }
 
@@ -404,13 +398,11 @@ class TransferEngine<
 
     const inStream = await this.sourceProvider.streamConfiguration?.();
     if (!inStream) {
-      // console.log('SourceProvider did not return configuration stream');
       return;
     }
 
     const outStream = await this.destinationProvider.getConfigurationStream?.();
     if (!outStream) {
-      // console.log('DestinationProvider did not return configuration stream');
       return;
     }
 
