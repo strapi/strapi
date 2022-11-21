@@ -24,13 +24,19 @@ const CancelButton = styled.button`
   border: none;
   background: none;
   width: min-content;
+  color: ${({ theme }) => theme.colors.neutral600};
+
+  &:hover,
+  &:focus {
+    color: ${({ theme }) => theme.colors.neutral700};
+  }
 
   svg {
-    height: ${({ theme }) => theme.spaces[2]};
-    width: ${({ theme }) => theme.spaces[2]};
+    height: 10px;
+    width: 10px;
 
     path {
-      fill: ${({ theme }) => theme.colors.neutral600};
+      fill: currentColor;
     }
   }
 `;
@@ -47,8 +53,8 @@ export const UploadProgress = ({ onCancel, progress, error }) => {
           <ProgressBar value={progress}>{`${progress}/100%`}</ProgressBar>
 
           <CancelButton type="button" onClick={onCancel}>
-            <Stack horizontal spacing={1}>
-              <Typography variant="pi" as="span" textColor="neutral600">
+            <Stack horizontal spacing={2}>
+              <Typography variant="pi" as="span" textColor="inherit">
                 {formatMessage({
                   id: 'app.components.Button.cancel',
                   defaultMessage: 'Cancel',
