@@ -129,7 +129,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     }
 
     if (encryption.enabled) {
-      path += '.gpg';
+      path += '.enc';
     }
 
     return path;
@@ -153,7 +153,6 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   }
 
   getSchemasStream() {
-    // const filePathFactory = createFilePathFactory(this.options.file.path, 'schemas');
     const filePathFactory = createFilePathFactory('schemas');
 
     // FS write stream
