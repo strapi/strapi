@@ -30,6 +30,18 @@ describe('<SearchURLQuery />', () => {
     const { container } = render(makeApp(null));
 
     expect(container).toMatchInlineSnapshot(`
+      .c3 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
       .c2 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
@@ -149,8 +161,15 @@ describe('<SearchURLQuery />', () => {
             tabindex="0"
             type="button"
           >
+            <span
+              class="c2"
+            >
+              Search
+            </span>
             <svg
+              aria-hidden="true"
               fill="none"
+              focusable="false"
               height="1em"
               viewBox="0 0 24 24"
               width="1em"
@@ -166,7 +185,7 @@ describe('<SearchURLQuery />', () => {
           </button>
         </span>
         <div
-          class="c2"
+          class="c3"
         >
           <p
             aria-live="polite"

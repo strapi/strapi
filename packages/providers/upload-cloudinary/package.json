@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-cloudinary",
-  "version": "4.5.0",
+  "version": "4.5.1",
   "description": "Cloudinary provider for strapi upload",
   "keywords": [
     "upload",
@@ -36,7 +36,7 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@strapi/utils": "4.5.0",
+    "@strapi/utils": "4.5.1",
     "cloudinary": "^1.30.1",
     "into-stream": "^5.1.0"
   },
