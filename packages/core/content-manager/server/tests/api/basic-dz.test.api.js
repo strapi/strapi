@@ -310,7 +310,7 @@ describe('CM API - Basic + dz', () => {
                 name: 'ValidationError',
               },
               {
-                message: "Cannot read properties of undefined (reading 'attributes')",
+                message: 'cannot build relations store: "uid" is undefined',
                 name: 'ValidationError',
                 path: [],
               },
