@@ -34,10 +34,8 @@ module.exports = async (filename, opts) => {
    * To local Strapi instance
    */
   const destinationOptions = {
-    async getStrapi() {
-      const appContext = await strapi.compile();
-      const app = strapi(appContext).load();
-      return app;
+    getStrapi() {
+      return strapi(strapi.compile()).load();
     },
   };
   const destination = createLocalStrapiDestinationProvider(destinationOptions);
