@@ -69,15 +69,11 @@ const main = async ({ database, generateApp }, args) => {
     }
 
     await runAllTests(args).catch(() => {
-      process.stdout.write('Tests failed\n', () => {
-        process.exit(1);
-      });
+      process.exit(1);
     });
   } catch (error) {
     console.error(error);
-    process.stdout.write('Tests failed\n', () => {
-      process.exit(1);
-    });
+    process.exit(1);
   }
 };
 
