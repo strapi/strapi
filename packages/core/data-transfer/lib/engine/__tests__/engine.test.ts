@@ -217,6 +217,7 @@ describe('Transfer engine', () => {
   const defaultOptions = {
     strategy: 'restore',
     versionMatching: 'exact',
+    schemasMatching: 'exact',
     exclude: [],
   } as ITransferEngineOptions;
 
@@ -234,6 +235,7 @@ describe('Transfer engine', () => {
       const engineOptions = {
         strategy: 'restore',
         versionMatching: 'exact',
+        schemasMatching: 'exact',
         exclude: [],
       } as ITransferEngineOptions;
       const engine = createTransferEngine(minimalSource, minimalDestination, engineOptions);
@@ -244,6 +246,7 @@ describe('Transfer engine', () => {
       const engineOptions = {
         strategy: 'restore',
         versionMatching: 'exact',
+        schemasMatching: 'exact',
         exclude: [],
       } as ITransferEngineOptions;
       expect(() => {
@@ -255,6 +258,7 @@ describe('Transfer engine', () => {
       const engineOptions = {
         strategy: 'restore',
         versionMatching: 'exact',
+        schemasMatching: 'exact',
         exclude: [],
       } as ITransferEngineOptions;
       expect(() => {
