@@ -47,7 +47,6 @@ const waitForReload = async () => {
 };
 
 describe('Marketplace page - plugins tab', () => {
-  let renderedContainer;
   let history;
 
   beforeAll(() => server.listen());
@@ -62,8 +61,9 @@ describe('Marketplace page - plugins tab', () => {
 
   beforeEach(async () => {
     history = createMemoryHistory();
+
     // Make sure each test isolated
-    const { container } = render(
+    render(
       <QueryClientProvider client={client}>
         <TrackingProvider>
           <IntlProvider locale="en" messages={{}} textComponent="span">
@@ -78,14 +78,9 @@ describe('Marketplace page - plugins tab', () => {
     );
 
     await waitForReload();
-
-    renderedContainer = container;
   });
 
-  it('renders and matches the plugin tab snapshot', async () => {
-    // Check snapshot
-    expect(renderedContainer.firstChild).toMatchSnapshot();
-
+  it('renders the plugins tab', async () => {
     // Make sure it defaults to the plugins tab
     const button = screen.getByRole('tab', { selected: true });
     const pluginsTabActive = within(button).getByText(/plugins/i);
@@ -117,12 +112,9 @@ describe('Marketplace page - plugins tab', () => {
   it('should return empty plugin search results given a bad query', async () => {
     const input = screen.getByPlaceholderText('Search');
     const badQuery = 'asdf';
-    const user = userEvent.setup();
-
     await user.type(input, badQuery);
 
     const noResult = screen.getByText(`No result for "${badQuery}"`);
-
     expect(noResult).toBeVisible();
   });
 

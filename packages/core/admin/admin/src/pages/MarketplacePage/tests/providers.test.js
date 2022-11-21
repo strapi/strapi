@@ -49,7 +49,6 @@ const waitForReload = async () => {
 };
 
 describe('Marketplace page - providers tab', () => {
-  let renderedContainer;
   let history;
 
   beforeAll(() => server.listen());
@@ -64,8 +63,9 @@ describe('Marketplace page - providers tab', () => {
 
   beforeEach(async () => {
     history = createMemoryHistory({ initialEntries: ['/?npmPackageType=provider&sort=name:asc'] });
+
     // Make sure each test isolated
-    const { container } = render(
+    render(
       <QueryClientProvider client={client}>
         <TrackingProvider>
           <IntlProvider locale="en" messages={{}} textComponent="span">
@@ -80,19 +80,14 @@ describe('Marketplace page - providers tab', () => {
     );
 
     await waitForReload();
-
-    renderedContainer = container;
   });
 
-  it('renders and matches the providers tab snapshot', async () => {
-    // Check snapshot
-    expect(renderedContainer.firstChild).toMatchSnapshot();
+  it('renders the providers tab', async () => {
     const providersTab = screen.getByText(/providers/i).closest('button');
-
     const tabPanel = screen.getByRole('tabpanel');
     const providerCardText = within(tabPanel).getByText('Cloudinary');
     const pluginCardText = within(tabPanel).queryByText('Comments');
-    const submitProviderText = within(renderedContainer).queryByText('Submit provider');
+    const submitProviderText = screen.queryByText('Submit provider');
 
     expect(providersTab).toBeDefined();
     expect(providersTab).toHaveAttribute('aria-selected', 'true');
