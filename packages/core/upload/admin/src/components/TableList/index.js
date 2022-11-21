@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useTracking } from '@strapi/helper-plugin';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { Table, Th, Thead, Tr } from '@strapi/design-system/Table';
 import { Typography } from '@strapi/design-system/Typography';
@@ -23,7 +22,6 @@ export const TableList = ({
   selected,
 }) => {
   const { formatMessage } = useIntl();
-  const { trackUsage } = useTracking();
 
   return (
     <Table colCount={tableHeaders.length + 2} rowCount={assetCount + folderCount + 1}>
@@ -36,12 +34,7 @@ export const TableList = ({
                 defaultMessage: 'Select all folders & assets',
               })}
               indeterminate={indeterminate}
-              onChange={(e) => {
-                if (e.target.checked) {
-                  trackUsage('didSelectAllMediaLibraryElements');
-                }
-                onSelectAll(rows);
-              }}
+              onChange={(e) => onSelectAll(e, rows)}
               value={
                 (assetCount > 0 || folderCount > 0) && selected.length === assetCount + folderCount
               }

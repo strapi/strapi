@@ -41,7 +41,7 @@ export const AssetGridList = ({
                     asset={asset}
                     isSelected={isSelected}
                     onEdit={onEditAsset ? () => onEditAsset(asset) : undefined}
-                    onSelect={() => onSelectAsset({ ...asset, type: 'asset' })}
+                    onSelect={() => onSelectAsset(asset)}
                     size={size}
                   />
                 </Draggable>
@@ -57,7 +57,7 @@ export const AssetGridList = ({
                 asset={asset}
                 isSelected={isSelected}
                 onEdit={onEditAsset ? () => onEditAsset(asset) : undefined}
-                onSelect={() => onSelectAsset({ ...asset, type: 'asset' })}
+                onSelect={() => onSelectAsset(asset)}
                 size={size}
               />
             </GridItem>

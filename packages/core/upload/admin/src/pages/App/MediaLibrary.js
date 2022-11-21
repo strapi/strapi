@@ -107,10 +107,11 @@ export const MediaLibrary = () => {
     push(pathname);
   }
 
-  const folders = foldersData ?? [];
+  const folders = foldersData?.map((folder) => ({ ...folder, type: 'folder' })) ?? [];
   const folderCount = folders?.length || 0;
-  const assets = assetsData?.results || [];
+  const assets = assetsData?.results?.map((asset) => ({ ...asset, type: 'asset' })) || [];
   const assetCount = assets?.length ?? 0;
+
   const isLoading = isCurrentFolderLoading || foldersLoading || permissionsLoading || assetsLoading;
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
   const [showEditFolderDialog, setShowEditFolderDialog] = useState(false);
@@ -132,6 +133,14 @@ export const MediaLibrary = () => {
     }
 
     setShowEditFolderDialog((prev) => !prev);
+  };
+
+  const handleBulkSelect = (event, elements) => {
+    if (event.target.checked) {
+      trackUsage('didSelectAllMediaLibraryElements');
+    }
+
+    selectAll(elements);
   };
 
   const handleChangeSort = (value) => {
@@ -191,15 +200,7 @@ export const MediaLibrary = () => {
                       (assetCount > 0 || folderCount > 0) &&
                       selected.length === assetCount + folderCount
                     }
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        trackUsage('didSelectAllMediaLibraryElements');
-                      }
-                      selectAll([
-                        ...assets.map((asset) => ({ ...asset, type: 'asset' })),
-                        ...folders.map((folder) => ({ ...folder, type: 'folder' })),
-                      ]);
-                    }}
+                    onChange={(e) => handleBulkSelect(e, [...assets, ...folders])}
                   />
                 </BoxWithHeight>
               )}
@@ -246,17 +247,12 @@ export const MediaLibrary = () => {
               onEditAsset={setAssetToEdit}
               onEditFolder={handleEditFolder}
               onSelectOne={selectOne}
-              onSelectAll={selectAll}
+              onSelectAll={handleBulkSelect}
               rows={
                 // TODO: remove when fixed on DS side
                 // when number of rows in Table changes, the keyboard tab from a row to another
                 // is not working for 1st and last column
-                !assetsLoading && !foldersLoading
-                  ? [
-                      ...folders.map((folder) => ({ ...folder, type: 'folder' })),
-                      ...assets.map((asset) => ({ ...asset, type: 'asset' })),
-                    ]
-                  : []
+                !assetsLoading && !foldersLoading ? [...folders, ...assets] : []
               }
               selected={selected}
             />
@@ -305,7 +301,7 @@ export const MediaLibrary = () => {
                               <FolderCardCheckbox
                                 data-testid={`folder-checkbox-${folder.id}`}
                                 value={isSelected}
-                                onChange={() => selectOne({ ...folder, type: 'folder' })}
+                                onChange={() => selectOne(folder)}
                               />
                             )
                           }
