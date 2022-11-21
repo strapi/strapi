@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  render,
-  waitFor,
-  screen,
-  getByRole,
-  fireEvent,
-  queryByLabelText,
-  getByLabelText,
-} from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -69,15 +61,17 @@ const App = (
 );
 
 const waitForReload = async () => {
-  await waitFor(() => {
-    expect(screen.getByRole('heading', { name: /marketplace/i })).toBeInTheDocument();
-  });
+  await screen.findByText('Marketplace', { selector: 'h1' });
 };
 
 describe('Marketplace page - layout', () => {
   beforeAll(() => server.listen());
 
-  afterEach(() => server.resetHandlers());
+  afterEach(() => {
+    server.resetHandlers();
+    // Clear the cache to isolate each test
+    client.clear();
+  });
 
   afterAll(() => server.close());
 
@@ -98,7 +92,7 @@ describe('Marketplace page - layout', () => {
     const sortButton = screen.getByRole('button', { name: /Sort by/i });
     expect(sortButton).toBeVisible();
     // Shows the filters button
-    const filtersButton = screen.getByRole('button', { name: /filters/i });
+    const filtersButton = screen.getByText(/Filters/i).closest('button');
     expect(filtersButton).toBeVisible();
   });
 
@@ -112,46 +106,38 @@ describe('Marketplace page - layout', () => {
   });
 
   it('disables the button and shows compatibility tooltip message when version provided', async () => {
-    client.clear();
-    const { getByTestId } = render(App);
-    await waitForReload();
+    const { findByTestId } = render(App);
 
-    const alreadyInstalledCard = screen
-      .getAllByTestId('npm-package-card')
-      .find((div) => div.innerHTML.includes('Transformer'));
+    const alreadyInstalledCard = (await screen.findAllByTestId('npm-package-card')).find((div) =>
+      div.innerHTML.includes('Transformer')
+    );
 
-    const button = getByRole(alreadyInstalledCard, 'button', { name: /copy install command/i });
+    const button = within(alreadyInstalledCard)
+      .getByText(/copy install command/i)
+      .closest('button');
 
     // User event throws an error that there are no pointer events
     fireEvent.mouseOver(button);
-    const tooltip = getByTestId(`tooltip-Transformer`);
-    await waitFor(() => {
-      expect(tooltip).toBeVisible();
-    });
+    const tooltip = await findByTestId('tooltip-Transformer');
     expect(button).toBeDisabled();
     expect(tooltip).toBeInTheDocument();
     expect(tooltip).toHaveTextContent('Update your Strapi version: "4.1.0" to: "4.0.7"');
   });
 
   it('shows compatibility tooltip message when no version provided', async () => {
-    client.clear();
-    const { getByTestId } = render(App);
-    await waitForReload();
+    const { findByTestId } = render(App);
 
-    const alreadyInstalledCard = screen
-      .getAllByTestId('npm-package-card')
-      .find((div) => div.innerHTML.includes('Config Sync'));
+    const alreadyInstalledCard = (await screen.findAllByTestId('npm-package-card')).find((div) =>
+      div.innerHTML.includes('Config Sync')
+    );
 
-    const button = getByRole(alreadyInstalledCard, 'button', {
-      name: /copy install command/i,
-    });
+    const button = within(alreadyInstalledCard)
+      .getByText(/copy install command/i)
+      .closest('button');
 
     user.hover(button);
-    const tooltip = getByTestId(`tooltip-Config Sync`);
+    const tooltip = await findByTestId(`tooltip-Config Sync`);
 
-    await waitFor(() => {
-      expect(tooltip).toBeVisible();
-    });
     expect(button).not.toBeDisabled();
     expect(tooltip).toBeInTheDocument();
     expect(tooltip).toHaveTextContent(
@@ -160,7 +146,6 @@ describe('Marketplace page - layout', () => {
   });
 
   it('handles production environment', async () => {
-    client.clear();
     // Simulate production environment
     useAppInfos.mockImplementation(() => ({
       autoReload: false,
@@ -169,8 +154,8 @@ describe('Marketplace page - layout', () => {
     }));
 
     render(App);
-
     await waitForReload();
+
     // Should display notification
     expect(toggleNotification).toHaveBeenCalledWith({
       type: 'info',
@@ -186,28 +171,22 @@ describe('Marketplace page - layout', () => {
   });
 
   it('shows only downloads count and not github stars if there are no or 0 stars and no downloads available for any package', async () => {
-    client.clear();
     render(App);
 
-    await waitForReload();
-
-    const providersTab = screen.getByRole('tab', { name: /providers/i });
+    const providersTab = (await screen.findByText(/providers/i)).closest('button');
     await user.click(providersTab);
-    await waitForReload();
 
-    const nodeMailerCard = screen
-      .getAllByTestId('npm-package-card')
-      .find((div) => div.innerHTML.includes('Nodemailer'));
+    const nodeMailerCard = (await screen.findAllByTestId('npm-package-card')).find((div) =>
+      div.innerHTML.includes('Nodemailer')
+    );
 
-    const githubStarsLabel = queryByLabelText(
-      nodeMailerCard,
+    const githubStarsLabel = within(nodeMailerCard).queryByLabelText(
       /this provider was starred \d+ on GitHub/i
     );
 
     expect(githubStarsLabel).toBe(null);
 
-    const downloadsLabel = getByLabelText(
-      nodeMailerCard,
+    const downloadsLabel = within(nodeMailerCard).getByLabelText(
       /this provider has \d+ weekly downloads/i
     );
     expect(downloadsLabel).toBeVisible();

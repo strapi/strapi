@@ -35,7 +35,7 @@ const handlers = [
       responseData = pluginResponses.plugins;
     }
 
-    return res(ctx.delay(100), ctx.status(200), ctx.json(responseData));
+    return res(ctx.status(200), ctx.json(responseData));
   }),
 
   rest.get('*/admin/information', (req, res, ctx) => {
@@ -75,7 +75,7 @@ const handlers = [
       responseData = providerResponses.providers;
     }
 
-    return res(ctx.delay(10), ctx.status(200), ctx.json(responseData));
+    return res(ctx.status(200), ctx.json(responseData));
   }),
 ];
 
