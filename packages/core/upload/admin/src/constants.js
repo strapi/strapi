@@ -95,3 +95,8 @@ export const CrumbMenuDefinition = PropTypes.arrayOf(CrumbDefinition);
 export const BreadcrumbsDefinition = PropTypes.arrayOf(
   PropTypes.oneOfType([CrumbDefinition, CrumbMenuDefinition])
 );
+
+export const viewOptions = {
+  GRID: 0,
+  LIST: 1,
+};

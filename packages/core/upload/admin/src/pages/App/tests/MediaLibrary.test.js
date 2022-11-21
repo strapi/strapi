@@ -2,7 +2,12 @@ import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { render as renderTL, screen, waitFor, fireEvent } from '@testing-library/react';
-import { useSelectionState, useQueryParams, TrackingProvider } from '@strapi/helper-plugin';
+import {
+  useSelectionState,
+  useQueryParams,
+  TrackingProvider,
+  usePersistentState,
+} from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
 
@@ -11,6 +16,7 @@ import { useFolders } from '../../../hooks/useFolders';
 import { useAssets } from '../../../hooks/useAssets';
 import { useFolder } from '../../../hooks/useFolder';
 import { MediaLibrary } from '../MediaLibrary';
+import { viewOptions } from '../../../constants';
 
 const FIXTURE_ASSET_PAGINATION = {
   pageCount: 1,
@@ -65,6 +71,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   useSelectionState: jest
     .fn()
     .mockReturnValue([[], { selectOne: jest.fn(), selectAll: jest.fn() }]),
+  usePersistentState: jest.fn().mockReturnValue([0, jest.fn()]),
 }));
 jest.mock('../../../utils', () => ({
   ...jest.requireActual('../../../utils'),
@@ -492,6 +499,21 @@ describe('Media library homepage', () => {
         screen.queryByText('There are no elements with the applied filters')
       ).toBeInTheDocument();
       expect(screen.queryByText('header.actions.add-assets')).not.toBeInTheDocument();
+    });
+
+    it('displays the appropriate switch to change the view', () => {
+      const setView = jest.fn();
+      usePersistentState.mockReturnValueOnce([viewOptions.GRID, setView]);
+      renderML();
+
+      const listSwitch = screen.queryByTestId('switch-to-list-view');
+      const gridSwitch = screen.queryByTestId('switch-to-grid-view');
+
+      expect(listSwitch).toBeInTheDocument();
+      expect(gridSwitch).not.toBeInTheDocument();
+
+      fireEvent.click(listSwitch);
+      expect(setView).toHaveBeenCalledWith(viewOptions.LIST);
     });
   });
 });
