@@ -58,10 +58,6 @@ class Database {
     return schema ? trx.schema.withSchema(schema) : trx.schema;
   }
 
-  getDatabaseInformation() {
-    return this.dialect.getInfo();
-  }
-
   transaction() {
     return this.connection.transaction();
   }

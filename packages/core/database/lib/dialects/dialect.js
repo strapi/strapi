@@ -7,8 +7,6 @@ class Dialect {
 
   configure() {}
 
-  getInfo() {}
-
   initialize() {}
 
   getSqlType(type) {
@@ -48,6 +46,10 @@ class Dialect {
   }
 
   canAddIncrements() {
+    return true;
+  }
+
+  supportsWindowRowNumber() {
     return true;
   }
 }

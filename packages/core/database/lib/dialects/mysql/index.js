@@ -1,8 +1,11 @@
 'use strict';
 
+const semver = require('semver');
+
 const { Dialect } = require('../dialect');
 const MysqlSchemaInspector = require('./schema-inspector');
 const MysqlDatabaseInspector = require('./database-inspector');
+const { MYSQL } = require('./constants');
 
 class MysqlDialect extends Dialect {
   constructor(db) {
@@ -35,16 +38,13 @@ class MysqlDialect extends Dialect {
     };
   }
 
-  getInfo() {
-    return this.info;
-  }
-
   async initialize() {
     try {
       await this.db.connection.raw(`set session sql_require_primary_key = 0;`);
     } catch (err) {
       // Ignore error due to lack of session permissions
     }
+
     this.info = await this.databaseInspector.getInformation();
   }
 
@@ -66,6 +66,17 @@ class MysqlDialect extends Dialect {
   }
 
   usesForeignKeys() {
+    return true;
+  }
+
+  supportsWindowRowNumber() {
+    const isMysqlDB = !this.info.database || this.info.database === MYSQL;
+    const isBeforeV8 = !semver.valid(this.info.version) || semver.lt(this.info.version, '8.0.0');
+
+    if (isMysqlDB && isBeforeV8) {
+      return false;
+    }
+
     return true;
   }
 
