@@ -280,7 +280,7 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
                   name: 'ValidationError',
                 },
                 {
-                  message: 'cannot build relations store: "uid" is undefined',
+                  message: 'Cannot build relations store: "uid" is undefined',
                   name: 'ValidationError',
                   path: [],
                 },

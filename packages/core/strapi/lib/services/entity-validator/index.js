@@ -248,7 +248,7 @@ const createValidateEntity =
  */
 const buildRelationsStore = ({ uid, data }) => {
   if (!uid) {
-    throw new ValidationError(`cannot build relations store: "uid" is undefined`);
+    throw new ValidationError(`Cannot build relations store: "uid" is undefined`);
   }
 
   if (isEmpty(data)) {

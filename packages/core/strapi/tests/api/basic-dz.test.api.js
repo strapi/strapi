@@ -350,7 +350,7 @@ describe('Core API - Basic + dz', () => {
                 name: 'ValidationError',
               },
               {
-                message: 'cannot build relations store: "uid" is undefined',
+                message: 'Cannot build relations store: "uid" is undefined',
                 name: 'ValidationError',
                 path: [],
               },
