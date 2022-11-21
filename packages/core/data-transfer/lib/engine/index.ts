@@ -70,12 +70,17 @@ class TransferEngine<
     const size = JSON.stringify(data).length;
     this.#transferProgress[transferStage]!.bytes! += size;
 
-    if (aggregateKey && has(aggregateKey, data)) {
+    if (aggregateKey && data && data[aggregateKey]) {
       const aggKeyValue = data[aggregateKey];
-      if (!has('aggregates', this.#transferProgress[transferStage])) {
+      if (!this.#transferProgress[transferStage]!['aggregates']) {
         this.#transferProgress[transferStage]!.aggregates = {};
       }
-      if (!has(aggKeyValue, this.#transferProgress[transferStage]!.aggregates)) {
+      if (
+        !(
+          this.#transferProgress[transferStage]!.aggregates &&
+          this.#transferProgress[transferStage]!.aggregates![aggKeyValue]
+        )
+      ) {
         this.#transferProgress[transferStage]!.aggregates![aggKeyValue] = { count: 0, bytes: 0 };
       }
       this.#transferProgress[transferStage]!.aggregates![aggKeyValue].count += 1;
