@@ -513,7 +513,7 @@ const FormModal = () => {
             onCloseModal();
 
             if (modifiedData?.displayName !== allDataSchema?.contentType?.schema?.displayName) {
-              trackUsage('didEditFieldOnContentTypeInCTB');
+              trackUsage('didEditFieldNameOnContentType');
             }
 
             submitData(modifiedData);
