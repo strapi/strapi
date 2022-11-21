@@ -87,9 +87,10 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   async getSchemas() {
-    const schemas = await collect(this.streamSchemas() as Readable);
+    // const schemas = await collect(this.streamSchemas() as Readable);
 
-    return keyBy('uid', schemas);
+    // return keyBy('uid', schemas);
+    return null;
   }
 
   streamEntities(): NodeJS.ReadableStream {
