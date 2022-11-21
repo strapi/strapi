@@ -105,6 +105,7 @@ export const tableHeaders = [
       label: { id: getTrad('list-table-header-preview'), defaultMessage: 'preview' },
       sortable: false,
     },
+    type: 'image',
   },
   {
     name: 'name',
@@ -113,6 +114,7 @@ export const tableHeaders = [
       label: { id: getTrad('list-table-header-name'), defaultMessage: 'name' },
       sortable: true,
     },
+    type: 'text',
   },
   {
     name: 'ext',
@@ -121,6 +123,7 @@ export const tableHeaders = [
       label: { id: getTrad('list-table-header-ext'), defaultMessage: 'extension' },
       sortable: false,
     },
+    type: 'ext',
   },
   {
     name: 'size',
@@ -129,6 +132,7 @@ export const tableHeaders = [
       label: { id: getTrad('list-table-header-size'), defaultMessage: 'size' },
       sortable: false,
     },
+    type: 'size',
   },
   {
     name: 'createdAt',
@@ -137,6 +141,7 @@ export const tableHeaders = [
       label: { id: getTrad('list-table-header-createdAt'), defaultMessage: 'created' },
       sortable: true,
     },
+    type: 'date',
   },
   {
     name: 'updatedAt',
@@ -145,6 +150,7 @@ export const tableHeaders = [
       label: { id: getTrad('list-table-header-updatedAt'), defaultMessage: 'last update' },
       sortable: true,
     },
+    type: 'date',
   },
 ];
 

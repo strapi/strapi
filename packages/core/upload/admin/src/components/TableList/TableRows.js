@@ -7,30 +7,17 @@ import { IconButton } from '@strapi/design-system/IconButton';
 import { Tbody, Td, Tr } from '@strapi/design-system/Table';
 import Pencil from '@strapi/icons/Pencil';
 
-import { PreviewCell } from './PreviewCell';
-import { TextCell } from './TextCell';
-import { AssetDefinition, FolderDefinition } from '../../constants';
-import { formatBytes, getTrad } from '../../utils';
+import { CellContent } from './CellContent';
+import { AssetDefinition, FolderDefinition, tableHeaders as cells } from '../../constants';
+import { getTrad } from '../../utils';
 
 export const TableRows = ({ onEditAsset, onEditFolder, onSelectOne, rows, selected }) => {
-  const { formatDate, formatMessage } = useIntl();
+  const { formatMessage } = useIntl();
 
   return (
     <Tbody>
       {rows.map((element) => {
-        const {
-          alternativeText,
-          id,
-          name,
-          ext,
-          size,
-          createdAt,
-          updatedAt,
-          url,
-          mime,
-          formats,
-          type,
-        } = element;
+        const { alternativeText, id, name, ext, url, mime, formats, type: elementType } = element;
 
         const isSelected = !!selected.find((currentRow) => currentRow.id === id);
 
@@ -40,49 +27,43 @@ export const TableRows = ({ onEditAsset, onEditFolder, onSelectOne, rows, select
               <BaseCheckbox
                 aria-label={formatMessage(
                   {
-                    id: type === 'asset' ? 'list-assets-select' : 'list.folder.select',
+                    id: elementType === 'asset' ? 'list-assets-select' : 'list.folder.select',
                     defaultMessage:
-                      type === 'asset' ? 'Select {name} asset' : 'Select {name} folder',
+                      elementType === 'asset' ? 'Select {name} asset' : 'Select {name} folder',
                   },
                   { name }
                 )}
-                onValueChange={() => onSelectOne({ ...element, type })}
+                onValueChange={() => onSelectOne({ ...element, elementType })}
                 checked={isSelected}
               />
             </Td>
-            <Td>
-              <PreviewCell
-                alternativeText={alternativeText}
-                fileExtension={getFileExtension(ext)}
-                mime={mime}
-                type={type}
-                thumbnailURL={formats?.thumbnail?.url}
-                url={url}
-              />
-            </Td>
-            <Td>
-              <TextCell content={name} />
-            </Td>
-            <Td>
-              <TextCell content={ext && getFileExtension(ext).toUpperCase()} />
-            </Td>
-            <Td>
-              <TextCell content={size && formatBytes(size)} />
-            </Td>
-            <Td>
-              <TextCell content={formatDate(new Date(createdAt))} />
-            </Td>
-            <Td>
-              <TextCell content={formatDate(new Date(updatedAt))} />
-            </Td>
-            {((type === 'asset' && onEditAsset) || (type === 'folder' && onEditFolder)) && (
+            {cells.map(({ name, type: cellType }) => {
+              return (
+                <Td key={name}>
+                  <CellContent
+                    alternativeText={alternativeText}
+                    content={element[name]}
+                    fileExtension={getFileExtension(ext)}
+                    mime={mime}
+                    cellType={cellType}
+                    elementType={elementType}
+                    thumbnailURL={formats?.thumbnail?.url}
+                    url={url}
+                  />
+                </Td>
+              );
+            })}
+            {((elementType === 'asset' && onEditAsset) ||
+              (elementType === 'folder' && onEditFolder)) && (
               <Td>
                 <IconButton
                   label={formatMessage({
                     id: getTrad('control-card.edit'),
                     defaultMessage: 'Edit',
                   })}
-                  onClick={() => (type === 'asset' ? onEditAsset(element) : onEditFolder(element))}
+                  onClick={() =>
+                    elementType === 'asset' ? onEditAsset(element) : onEditFolder(element)
+                  }
                   noBorder
                 >
                   <Pencil />
