@@ -128,7 +128,7 @@
     "package-json": "7.0.0",
     "qs": "6.10.1",
     "resolve-cwd": "3.0.0",
-    "semver": "7.3.7",
+    "semver": "7.3.8",
     "statuses": "2.0.1",
     "uuid": "^8.3.2"
   },
