@@ -1,5 +1,6 @@
 import { PassThrough } from 'stream-chain';
 import type {
+  Diff,
   IDestinationProvider,
   IMetadata,
   ISourceProvider,
@@ -8,6 +9,10 @@ import type {
   ITransferResults,
   TransferStage,
 } from '../../types';
+
+import { isEmpty, uniq, has } from 'lodash/fp';
+
+import compareSchemas from '../strategies';
 
 type TransferProgress = {
   [key in TransferStage]?: {
@@ -132,8 +137,32 @@ class TransferEngine<
     }
 
     throw new Error(
-      `Strapi versions doesn't match (${strategy} check): ${sourceVersion} does not match with ${destinationVersion} `
+      `Strapi versions doesn't match (${strategy} check): ${sourceVersion} does not match with ${destinationVersion}`
     );
+  }
+
+  #assertSchemasMatching(sourceSchemas: any, destinationSchemas: any) {
+    const strategy = this.options.schemasMatching || 'strict';
+    const keys = uniq(Object.keys(sourceSchemas).concat(Object.keys(destinationSchemas)));
+    const diffs: { [key: string]: Diff[] } = {};
+
+    keys.forEach((key) => {
+      const sourceSchema = sourceSchemas[key];
+      const destinationSchema = destinationSchemas[key];
+      const schemaDiffs = compareSchemas(sourceSchema, destinationSchema, strategy);
+
+      if (schemaDiffs.length) {
+        diffs[key] = schemaDiffs;
+      }
+    });
+
+    if (!isEmpty(diffs)) {
+      throw new Error(
+        `Import process failed because the project doesn't have a matching data structure 
+        ${JSON.stringify(diffs, null, 2)}        
+        `
+      );
+    }
   }
 
   async init(): Promise<void> {
@@ -181,18 +210,23 @@ class TransferEngine<
   }
 
   async integrityCheck(): Promise<boolean> {
-    const { source: sourceMetadata, destination: destinationMetadata } = this.#metadata;
-
-    if (!sourceMetadata || !destinationMetadata) {
-      return true;
-    }
-
     try {
-      // Version check
-      this.#assertStrapiVersionIntegrity(
-        sourceMetadata?.strapi?.version,
-        destinationMetadata?.strapi?.version
-      );
+      const sourceMetadata = await this.sourceProvider.getMetadata();
+      const destinationMetadata = await this.destinationProvider.getMetadata();
+
+      if (sourceMetadata && destinationMetadata) {
+        this.#assertStrapiVersionIntegrity(
+          sourceMetadata?.strapi?.version,
+          destinationMetadata?.strapi?.version
+        );
+      }
+
+      const sourceSchemas = await this.sourceProvider.getSchemas?.();
+      const destinationSchemas = await this.destinationProvider.getSchemas?.();
+
+      if (sourceSchemas && destinationSchemas) {
+        this.#assertSchemasMatching(sourceSchemas, destinationSchemas);
+      }
 
       return true;
     } catch (error) {
