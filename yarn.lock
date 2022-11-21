@@ -20830,11 +20830,6 @@ stream-json@1.7.4:
   dependencies:
     stream-chain "^2.2.5"
 
-stream-mock@2.0.5:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/stream-mock/-/stream-mock-2.0.5.tgz#c99d24bd6dbb0eaa57cf6ffefdb064150747826e"
-  integrity sha512-dx9skT8QYjwLsal+MhGHr4UtgS49brw851C/oTixmhCi4Ip+/qnZmhV1qOcznYYAED6gYKmKea+jjza4/wjpSg==
-
 stream-shift@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/stream-shift/-/stream-shift-1.0.1.tgz#d7088281559ab2778424279b0877da3c392d5a3d"

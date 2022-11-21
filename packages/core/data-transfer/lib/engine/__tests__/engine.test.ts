@@ -1,4 +1,4 @@
-import { ObjectWritableMock, ObjectReadableMock } from 'stream-mock';
+import { Readable, Writable } from 'stream-chain';
 import { createTransferEngine } from '..';
 import {
   IDestinationProvider,
@@ -10,16 +10,17 @@ import {
 const providerStages = ['bootstrap', 'close'];
 
 const getMockSourceStream = (data: Iterable<any> = ['foo', 'bar']) => {
-  const stream = new ObjectReadableMock(data).on('close', () => {
-    stream.destroy();
-  });
+  const stream = Readable.from(data);
 
   return stream;
 };
 
 const getMockDestinationStream = () => {
-  const stream = new ObjectWritableMock().on('close', () => {
-    stream.destroy();
+  const stream = new Writable({
+    objectMode: true,
+    write(chunk, encoding, callback) {
+      callback();
+    },
   });
   return stream;
 };

@@ -55,7 +55,6 @@
     "@types/stream-json": "1.7.2",
     "@types/tar": "6.1.3",
     "rimraf": "3.0.2",
-    "stream-mock": "2.0.5",
     "typescript": "4.6.2"
   },
   "engines": {
