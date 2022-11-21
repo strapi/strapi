@@ -3,6 +3,7 @@ import type {
   IDestinationProviderTransferResults,
   IMetadata,
   ProviderType,
+  Stream,
 } from '../../types';
 
 import fs from 'fs-extra';
@@ -55,68 +56,10 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   results: ILocalFileDestinationProviderTransferResults = {};
 
   #providersMetadata: { source?: IMetadata; destination?: IMetadata } = {};
-  #archive?: tar.Pack;
+  #archive: { stream?: tar.Pack } = {};
 
   constructor(options: ILocalFileDestinationProviderOptions) {
     this.options = options;
-  }
-
-  setMetadata(target: ProviderType, metadata: IMetadata): IDestinationProvider {
-    this.#providersMetadata[target] = metadata;
-
-    return this;
-  }
-
-  #getDataTransformers(options: { jsonl?: boolean } = {}) {
-    const { jsonl = true } = options;
-    const transforms = [];
-
-    if (jsonl) {
-      // Convert to stringified JSON lines
-      transforms.push(stringer());
-    }
-
-    return transforms;
-  }
-
-  bootstrap(): void | Promise<void> {
-    const { compression, encryption } = this.options;
-
-    if (encryption.enabled && !encryption.key) {
-      throw new Error("Can't encrypt without a key");
-    }
-
-    this.#archive = tar.pack();
-
-    const outStream = fs.createWriteStream(this.#archivePath);
-
-    const archiveTransforms = [];
-
-    if (compression.enabled) {
-      archiveTransforms.push(zlib.createGzip());
-    }
-
-    if (encryption.enabled && encryption.key) {
-      archiveTransforms.push(createEncryptionCipher(encryption.key));
-    }
-
-    chain([this.#archive, ...archiveTransforms, outStream]);
-
-    this.results.file = { path: this.#archivePath };
-  }
-
-  async close() {
-    await this.#writeMetadata();
-    this.#archive?.finalize();
-  }
-
-  async rollback(): Promise<void> {
-    await this.close();
-    fs.rmSync(this.#archivePath, { force: true });
-  }
-
-  getMetadata() {
-    return null;
   }
 
   get #archivePath() {
@@ -135,6 +78,77 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return path;
   }
 
+  setMetadata(target: ProviderType, metadata: IMetadata): IDestinationProvider {
+    this.#providersMetadata[target] = metadata;
+
+    return this;
+  }
+
+  #getDataTransformers(options: { jsonl?: boolean } = {}) {
+    const { jsonl = true } = options;
+    const transforms: Stream[] = [];
+
+    if (jsonl) {
+      // Convert to stringified JSON lines
+      transforms.push(stringer());
+    }
+
+    return transforms;
+  }
+
+  bootstrap(): void | Promise<void> {
+    const { compression, encryption } = this.options;
+
+    if (encryption.enabled && !encryption.key) {
+      throw new Error("Can't encrypt without a key");
+    }
+
+    this.#archive.stream = tar.pack();
+
+    const outStream = fs.createWriteStream(this.#archivePath);
+
+    const archiveTransforms: Stream[] = [];
+
+    if (compression.enabled) {
+      archiveTransforms.push(zlib.createGzip());
+    }
+
+    if (encryption.enabled && encryption.key) {
+      archiveTransforms.push(createEncryptionCipher(encryption.key));
+    }
+
+    chain([this.#archive.stream, ...archiveTransforms, outStream]);
+
+    this.results.file = { path: this.#archivePath };
+  }
+
+  async close() {
+    const { stream } = this.#archive;
+
+    if (!stream) {
+      return;
+    }
+
+    await this.#writeMetadata();
+
+    stream.finalize();
+
+    if (!stream.closed) {
+      await new Promise<void>((resolve, reject) => {
+        stream.on('close', resolve).on('error', reject);
+      });
+    }
+  }
+
+  async rollback(): Promise<void> {
+    await this.close();
+    fs.rmSync(this.#archivePath, { force: true });
+  }
+
+  getMetadata() {
+    return null;
+  }
+
   async #writeMetadata(): Promise<void> {
     const metadata = this.#providersMetadata.source;
 
@@ -149,15 +163,24 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   }
 
   #getMetadataStream() {
-    return createTarEntryStream(this.#archive!, () => 'metadata.json');
+    const { stream } = this.#archive;
+
+    if (!stream) {
+      throw new Error('Archive stream is unavailable');
+    }
+
+    return createTarEntryStream(stream, () => 'metadata.json');
   }
 
   getSchemasStream() {
+    if (!this.#archive.stream) {
+      throw new Error('Archive stream is unavailable');
+    }
+
     const filePathFactory = createFilePathFactory('schemas');
 
-    // FS write stream
     const entryStream = createTarEntryStream(
-      this.#archive!,
+      this.#archive.stream,
       filePathFactory,
       this.options.file.maxSize
     );
@@ -166,12 +189,14 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   }
 
   getEntitiesStream(): NodeJS.WritableStream {
-    // const filePathFactory = createFilePathFactory(this.options.file.path, 'entities');
+    if (!this.#archive.stream) {
+      throw new Error('Archive stream is unavailable');
+    }
+
     const filePathFactory = createFilePathFactory('entities');
 
-    // FS write stream
     const entryStream = createTarEntryStream(
-      this.#archive!,
+      this.#archive.stream,
       filePathFactory,
       this.options.file.maxSize
     );
@@ -180,11 +205,14 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   }
 
   getLinksStream(): NodeJS.WritableStream {
+    if (!this.#archive.stream) {
+      throw new Error('Archive stream is unavailable');
+    }
+
     const filePathFactory = createFilePathFactory('links');
 
-    // FS write stream
     const entryStream = createTarEntryStream(
-      this.#archive!,
+      this.#archive.stream,
       filePathFactory,
       this.options.file.maxSize
     );
@@ -193,11 +221,14 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   }
 
   getConfigurationStream(): NodeJS.WritableStream {
+    if (!this.#archive.stream) {
+      throw new Error('Archive stream is unavailable');
+    }
+
     const filePathFactory = createFilePathFactory('configuration');
 
-    // FS write stream
     const entryStream = createTarEntryStream(
-      this.#archive!,
+      this.#archive.stream,
       filePathFactory,
       this.options.file.maxSize
     );
