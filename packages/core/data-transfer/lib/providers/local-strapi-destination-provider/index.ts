@@ -1,5 +1,5 @@
 // import { createLogger } from '@strapi/logger';
-import type { IDestinationProvider, IMetadata, ProviderType } from '../../types';
+import type { IDestinationProvider, IMetadata, ProviderType } from '../../../types';
 import { deleteAllRecords, DeleteOptions } from './restore';
 
 import chalk from 'chalk';
