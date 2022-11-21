@@ -85,7 +85,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   };
 
   const handleClickOnLink = (destination = null) => {
-    trackUsage('didNavigate', { from: pathname, to: destination });
+    trackUsage('willNavigate', { from: pathname, to: destination });
   };
 
   const menuTitle = formatMessage({
