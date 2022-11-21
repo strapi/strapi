@@ -68,6 +68,7 @@ $RECYCLE.BIN/
 .tmp
 *.log
 *.sql
+!.github/workflows/db/**/*.sql
 *.sqlite
 
 

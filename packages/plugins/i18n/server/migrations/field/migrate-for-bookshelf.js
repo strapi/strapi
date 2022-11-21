@@ -18,6 +18,7 @@ const batchInsertInTmpTable = async ({ updatesInfo }, { transacting: trx }) => {
 const updateFromTmpTable = async ({ model, attributesToMigrate }, { transacting: trx }) => {
   const { collectionName } = model;
   if (model.client === 'pg') {
+    // IMPORTANT TODO: use postgres schema
     const substitutes = attributesToMigrate.map(() => '?? = ??.??').join(',');
     const bindings = [collectionName];
     attributesToMigrate.forEach((attr) => bindings.push(attr, TMP_TABLE_NAME, attr));
