@@ -186,7 +186,15 @@ const convertPopulateObject = (populate, schema) => {
       return acc;
     }
 
-    if (typeof subPopulate === 'object' && 'on' in subPopulate) {
+    // Allow adding a 'on' strategy to populate queries for polymorphic relations, media and dynamic zones
+    const isAllowedAttributeForFragmentPopulate =
+      attribute.type === 'dynamiczone' ||
+      attribute.type === 'media' ||
+      (attribute.relation && attribute.relation.startsWith('morphTo'));
+
+    const hasFragmentPopulateDefined = typeof subPopulate === 'object' && 'on' in subPopulate;
+
+    if (isAllowedAttributeForFragmentPopulate && hasFragmentPopulateDefined) {
       return {
         ...acc,
         [key]: {
@@ -201,8 +209,8 @@ const convertPopulateObject = (populate, schema) => {
       };
     }
 
-    // TODO: Deprecated way of handling dynamic zone populate queries. It's kept as is,
-    // as removing it could break existing user queries but should be removed in V5.
+    // TODO: This is a query's populate fallback for DynamicZone and is kept for legacy purpose.
+    //       Removing it could break existing user queries but it should be removed in V5.
     if (attribute.type === 'dynamiczone') {
       const populates = attribute.components
         .map((uid) => strapi.getModel(uid))

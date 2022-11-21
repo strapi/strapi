@@ -315,4 +315,64 @@ describe('Populate filters', () => {
       expect(body.data[0].attributes.third).toBeUndefined();
     });
   });
+
+  describe('Populate a dynamic zone', () => {
+    test('Populate every components in the dynamic zone', async () => {
+      const qs = {
+        populate: {
+          dz: '*',
+        },
+      };
+
+      const { status, body } = await rq.get(`/${schemas.contentTypes.b.pluralName}`, { qs });
+
+      expect(status).toBe(200);
+      expect(body.data).toHaveLength(2);
+      expect(body.data[0].attributes.dz).toHaveLength(3);
+      expect(body.data[1].attributes.dz).toHaveLength(1);
+    });
+
+    test('Populate only one component type using fragment', async () => {
+      const qs = {
+        populate: {
+          dz: {
+            on: {
+              'default.foo': true,
+            },
+          },
+        },
+      };
+
+      const { status, body } = await rq.get(`/${schemas.contentTypes.b.pluralName}`, { qs });
+
+      expect(status).toBe(200);
+      expect(body.data).toHaveLength(2);
+      expect(body.data[0].attributes.dz).toHaveLength(2);
+      expect(body.data[1].attributes.dz).toHaveLength(0);
+    });
+
+    test('Populate the dynamic zone with filters in fragments', async () => {
+      const qs = {
+        populate: {
+          dz: {
+            on: {
+              'default.foo': {
+                filters: { number: { $lt: 2 } },
+              },
+              'default.bar': {
+                filters: { title: { $contains: 'another' } },
+              },
+            },
+          },
+        },
+      };
+
+      const { status, body } = await rq.get(`/${schemas.contentTypes.b.pluralName}`, { qs });
+
+      expect(status).toBe(200);
+      expect(body.data).toHaveLength(2);
+      expect(body.data[0].attributes.dz).toHaveLength(1);
+      expect(body.data[1].attributes.dz).toHaveLength(1);
+    });
+  });
 });

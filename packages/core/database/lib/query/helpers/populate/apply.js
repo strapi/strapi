@@ -490,7 +490,7 @@ const morphToMany = async (input, ctx) => {
     const qb = db.entityManager.createQueryBuilder(type);
 
     const rows = await qb
-      .init(on && type in on ? on[type] : typePopulate)
+      .init(on?.[type] ?? typePopulate)
       .addSelect(`${qb.alias}.${idColumn.referencedColumn}`)
       .where({ [idColumn.referencedColumn]: ids })
       .execute({ mapResults: false });
@@ -561,7 +561,7 @@ const morphToOne = async (input, ctx) => {
     const qb = db.entityManager.createQueryBuilder(type);
 
     const rows = await qb
-      .init(on && type in on ? on[type] : typePopulate)
+      .init(on?.[type] ?? typePopulate)
       .addSelect(`${qb.alias}.${idColumn.referencedColumn}`)
       .where({ [idColumn.referencedColumn]: ids })
       .execute({ mapResults: false });
