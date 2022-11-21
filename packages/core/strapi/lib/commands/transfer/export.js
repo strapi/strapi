@@ -12,7 +12,7 @@ const Table = require('cli-table3');
 const fs = require('fs-extra');
 
 const chalk = require('chalk');
-const strapi = require('../../Strapi');
+const strapi = require('../../index');
 const { readableBytes } = require('../utils');
 
 const pad = (n) => {
@@ -50,8 +50,8 @@ module.exports = async (filename, opts) => {
    * From local Strapi instance
    */
   const sourceOptions = {
-    getStrapi() {
-      return strapi().load();
+    async getStrapi() {
+      return strapi(await strapi.compile()).load();
     },
   };
   const source = createLocalStrapiSourceProvider(sourceOptions);

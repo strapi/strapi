@@ -14,14 +14,14 @@ module.exports = {
   overrides: [
     {
       // Backend javascript
-      files: ['packages/**/*.js', 'test/**/*.js', 'scripts/**/*.js'],
+      files: ['packages/**/*.js', 'test/**/*.js', 'scripts/**/*.js', 'jest.*.js'],
       excludedFiles: frontPaths,
       ...require('./.eslintrc.back.js'),
     },
 
     // Backend typescript
     {
-      files: ['packages/**/*.ts', 'test/**/*.ts', 'scripts/**/*.ts'],
+      files: ['packages/**/*.ts', 'test/**/*.ts', 'scripts/**/*.ts', 'jest.*.ts'],
       excludedFiles: frontPaths,
       ...require('./.eslintrc.back.typescript.js'),
     },
