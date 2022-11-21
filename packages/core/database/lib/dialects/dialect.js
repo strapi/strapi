@@ -29,6 +29,10 @@ class Dialect {
     return false;
   }
 
+  supportsWindowRowNumber() {
+    return true;
+  }
+
   async startSchemaUpdate() {
     // noop
   }
@@ -46,10 +50,6 @@ class Dialect {
   }
 
   canAddIncrements() {
-    return true;
-  }
-
-  supportsWindowRowNumber() {
     return true;
   }
 }

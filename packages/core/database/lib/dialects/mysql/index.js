@@ -65,10 +65,6 @@ class MysqlDialect extends Dialect {
     return true;
   }
 
-  usesForeignKeys() {
-    return true;
-  }
-
   supportsWindowRowNumber() {
     const isMysqlDB = !this.info.database || this.info.database === MYSQL;
     const isBeforeV8 = !semver.valid(this.info.version) || semver.lt(this.info.version, '8.0.0');
@@ -77,6 +73,10 @@ class MysqlDialect extends Dialect {
       return false;
     }
 
+    return true;
+  }
+
+  usesForeignKeys() {
     return true;
   }
 
