@@ -73,8 +73,6 @@ const main = async ({ database, generateApp }, args) => {
         process.exit(1);
       });
     });
-
-    process.exit(0);
   } catch (error) {
     console.error(error);
     process.stdout.write('Tests failed\n', () => {
