@@ -1,6 +1,6 @@
 import React, { Suspense, memo } from 'react';
 import PropTypes from 'prop-types';
-import get from 'lodash/get';
+import { useSelector } from 'react-redux';
 import {
   CheckPermissions,
   LoadingIndicatorPage,
@@ -34,20 +34,20 @@ const cmPermissions = permissions.contentManager;
 const ctbPermissions = [{ action: 'plugin::content-type-builder.read', subject: null }];
 
 /* eslint-disable  react/no-array-index-key */
-const EditView = ({
-  allowedActions,
-  isSingleType,
-  goBack,
-  layout,
-  slug,
-  id,
-  origin,
-  userPermissions,
-}) => {
+const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, userPermissions }) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const { createActionAllowedFields, readActionAllowedFields, updateActionAllowedFields } =
     getFieldsActionMatchingPermissions(userPermissions, slug);
+
+  const { layout, formattedContentTypeLayout } = useSelector((state) => {
+    const layout = state['content-manager_editViewLayoutManager'].currentLayout;
+
+    return {
+      layout,
+      formattedContentTypeLayout: createAttributesLayout(layout?.contentType ?? {}),
+    };
+  });
 
   const configurationPermissions = isSingleType
     ? cmPermissions.singleTypesConfigurations
@@ -57,7 +57,6 @@ const EditView = ({
   const configurationsURL = `/content-manager/${
     isSingleType ? 'singleType' : 'collectionType'
   }/${slug}/configurations/edit`;
-  const currentContentTypeLayoutData = get(layout, ['contentType'], {});
 
   const DataManagementWrapper = isSingleType ? SingleTypeFormWrapper : CollectionTypeFormWrapper;
 
@@ -67,8 +66,6 @@ const EditView = ({
       return subBlock.every((obj) => obj.fieldSchema.type === 'dynamiczone');
     });
   };
-
-  const formattedContentTypeLayout = createAttributesLayout(currentContentTypeLayoutData);
 
   return (
     <DataManagementWrapper allLayoutData={layout} slug={slug} id={id} origin={origin}>
@@ -255,16 +252,6 @@ EditView.propTypes = {
     canUpdate: PropTypes.bool.isRequired,
     canCreate: PropTypes.bool.isRequired,
     canDelete: PropTypes.bool.isRequired,
-  }).isRequired,
-  layout: PropTypes.shape({
-    components: PropTypes.object.isRequired,
-    contentType: PropTypes.shape({
-      uid: PropTypes.string.isRequired,
-      settings: PropTypes.object.isRequired,
-      metadatas: PropTypes.object.isRequired,
-      options: PropTypes.object.isRequired,
-      attributes: PropTypes.object.isRequired,
-    }).isRequired,
   }).isRequired,
   id: PropTypes.string,
   isSingleType: PropTypes.bool,
