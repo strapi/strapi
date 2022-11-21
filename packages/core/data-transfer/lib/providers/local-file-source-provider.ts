@@ -1,13 +1,17 @@
+import type { Readable } from 'stream';
+
+import type { IMetadata, ISourceProvider, ProviderType } from '../../types';
+
 import fs from 'fs';
 import zip from 'zlib';
 import tar from 'tar';
+import { keyBy } from 'lodash/fp';
 import { chain } from 'stream-chain';
 import { pipeline, PassThrough } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
 
 import { createDecryptionCipher } from '../encryption';
-
-import { IMetadata, ISourceProvider, ProviderType } from '../../types';
+import { collect } from '../utils';
 
 type StreamItemArray = Parameters<typeof chain>[0];
 
@@ -82,12 +86,18 @@ class LocalFileSourceProvider implements ISourceProvider {
     // return this.#parseJSONFile<IMetadata>(backupStream, METADATA_FILE_PATH);
   }
 
-  streamSchemas(): NodeJS.ReadableStream {
-    return this.#streamJsonlDirectory('schemas');
+  async getSchemas() {
+    const schemas = await collect(this.streamSchemas() as Readable);
+
+    return keyBy('uid', schemas);
   }
 
   streamEntities(): NodeJS.ReadableStream {
     return this.#streamJsonlDirectory('entities');
+  }
+
+  streamSchemas(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream> {
+    return this.#streamJsonlDirectory('schemas');
   }
 
   streamLinks(): NodeJS.ReadableStream {

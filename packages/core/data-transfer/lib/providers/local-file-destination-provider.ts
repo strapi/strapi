@@ -1,3 +1,10 @@
+import type {
+  IDestinationProvider,
+  IDestinationProviderTransferResults,
+  ProviderType,
+  IMetadata,
+} from '../../types';
+
 import fs from 'fs-extra';
 import path from 'path';
 import zip from 'zlib';
@@ -5,12 +12,6 @@ import { Writable, Readable } from 'stream';
 import { chain } from 'stream-chain';
 import { stringer } from 'stream-json/jsonl/Stringer';
 
-import {
-  IDestinationProvider,
-  IDestinationProviderTransferResults,
-  ProviderType,
-  IMetadata,
-} from '../../types';
 import { createEncryptionCipher } from '../encryption/encrypt';
 
 export interface ILocalFileDestinationProviderOptions {
