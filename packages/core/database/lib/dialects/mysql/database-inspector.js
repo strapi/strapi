@@ -1,6 +1,6 @@
 'use strict';
 
-const { MARIADB, MYSQL, UNKNOWN } = require('../../utils/constants');
+const { MARIADB, MYSQL } = require('./constants');
 
 const SQL_QUERIES = {
   VERSION: `SELECT version() as version`,
@@ -21,9 +21,10 @@ class MysqlDatabaseInspector {
       versionNumber = versionSplit[0];
       database = databaseName && databaseName.toLowerCase() === 'mariadb' ? MARIADB : MYSQL;
     } catch (e) {
-      database = UNKNOWN;
-      versionNumber = UNKNOWN;
-      strapi.log.warn(`Database version couldn't be retrieved: ${e.message}`);
+      return {
+        database: null,
+        version: null,
+      };
     }
 
     return {

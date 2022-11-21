@@ -7,8 +7,6 @@ class Dialect {
 
   configure() {}
 
-  getInfo() {}
-
   initialize() {}
 
   getSqlType(type) {
@@ -29,6 +27,10 @@ class Dialect {
 
   supportsUnsigned() {
     return false;
+  }
+
+  supportsWindowFunctions() {
+    return true;
   }
 
   async startSchemaUpdate() {
