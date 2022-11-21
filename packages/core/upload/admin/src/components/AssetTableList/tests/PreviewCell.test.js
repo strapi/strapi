@@ -54,12 +54,6 @@ describe('AssetTableList | PreviewCell', () => {
       expect(getByRole('img', { name: 'alternative alt' })).toBeInTheDocument();
       expect(queryByRole('img', { name: 'michka' })).not.toBeInTheDocument();
     });
-
-    it('should render name text if alternative text is not available', () => {
-      const { getByRole } = setup({ alternativeText: undefined });
-
-      expect(getByRole('img', { name: 'michka' })).toBeInTheDocument();
-    });
   });
 
   describe('rendering files', () => {

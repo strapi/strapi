@@ -23,25 +23,6 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c8 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c8:focus {
-  outline: none;
-}
-
-.c8[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
 .c11 {
   padding-right: 16px;
   padding-left: 16px;
@@ -98,26 +79,26 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 }
 
 .c5 {
-  font-weight: 600;
-  color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
 }
 
 .c12 {
-  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
   display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
+  color: #32324d;
 }
 
 .c16 {
-  color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
+  color: #666687;
 }
 
 .c4 > * {
@@ -127,6 +108,25 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 
 .c4 > * + * {
   margin-top: 4px;
+}
+
+.c8 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c8:focus {
+  outline: none;
+}
+
+.c8[aria-disabled='true'] {
+  cursor: not-allowed;
 }
 
 .c7 {
