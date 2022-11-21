@@ -72,16 +72,16 @@ describe('ContentBox', () => {
       }
 
       .c6 {
-        font-weight: 500;
-        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
+        font-weight: 500;
+        color: #32324d;
       }
 
       .c8 {
-        color: #666687;
         font-size: 0.875rem;
         line-height: 1.43;
+        color: #666687;
       }
 
       .c3 {
