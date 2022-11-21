@@ -10,6 +10,7 @@ const {
   hasInverseOrderColumn,
 } = require('../metadata/relations');
 const { createQueryBuilder } = require('../query');
+const { addSchema } = require('../utils/knex');
 
 /**
  * If some relations currently exist for this oneToX relation, on the one side, this function removes them and update the inverse order if needed.
@@ -226,8 +227,7 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
   // https://github.com/knex/knex/issues/2504
   switch (strapi.db.dialect.client) {
     case 'mysql':
-      await db
-        .getConnection()
+      await db.connection
         .raw(
           `UPDATE
             ?? as a,
@@ -242,21 +242,22 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
         )
         .transacting(trx);
       break;
-    default:
-      await db
-        .getConnection()
+    default: {
+      const joinTableName = addSchema(joinTable.name);
+      await db.connection
         .raw(
           `UPDATE ?? as a
-            SET ${update.join(', ')}
-            FROM (
-              SELECT ${select.join(', ')}
-              FROM ??
-              WHERE ${where.join(' OR ')}
-            ) AS b
-            WHERE b.id = a.id`,
-          [joinTable.name, ...updateBinding, ...selectBinding, joinTable.name, ...whereBinding]
+              SET ${update.join(', ')}
+              FROM (
+                SELECT ${select.join(', ')}
+                FROM ??
+                WHERE ${where.join(' OR ')}
+              ) AS b
+              WHERE b.id = a.id`,
+          [joinTableName, ...updateBinding, ...selectBinding, joinTableName, ...whereBinding]
         )
         .transacting(trx);
+    }
     /*
       `UPDATE :joinTable: as a
         SET :orderColumn: = b.src_order, :inverseOrderColumn: = b.inv_order

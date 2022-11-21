@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
-.c35 {
+.c34 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -11,60 +11,10 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   padding: 0;
   position: absolute;
   width: 1px;
-}
-
-.c17 {
-  padding-top: 4px;
 }
 
 .c2 {
   height: 100%;
-}
-
-.c0 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
-}
-
-.c1 {
-  grid-column: span 3;
-  max-width: 100%;
-}
-
-.c31 {
-  width: 100%;
-  height: 10.25rem;
-}
-
-.c32 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c27 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c3 {
@@ -88,6 +38,10 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   padding-left: 12px;
 }
 
+.c17 {
+  padding-top: 4px;
+}
+
 .c22 {
   background: #f6f6f9;
   padding: 4px;
@@ -100,6 +54,61 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   color: #ffffff;
   padding: 4px;
   border-radius: 4px;
+}
+
+.c31 {
+  width: 100%;
+  height: 10.25rem;
+}
+
+.c0 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c1 {
+  grid-column: span 3;
+  max-width: 100%;
+}
+
+.c18 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c19 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c25 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c30 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #ffffff;
+}
+
+.c27 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .c5 {
@@ -175,74 +184,6 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   margin-left: 8px;
 }
 
-.c10 {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-}
-
-.c13 {
-  margin: 0;
-  padding: 0;
-  max-height: 100%;
-  max-width: 100%;
-  object-fit: contain;
-}
-
-.c12 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 10.25rem;
-  width: 100%;
-  background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-}
-
-.c18 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c19 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c25 {
-  color: #666687;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.c30 {
-  color: #ffffff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c21 {
-  margin-left: auto;
-  -webkit-flex-shrink: 0;
-  -ms-flex-negative: 0;
-  flex-shrink: 0;
-}
-
-.c24 {
-  margin-left: 4px;
-}
-
 .c11 {
   margin: 0;
   height: 18px;
@@ -311,6 +252,47 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   background-color: #8e8ea9;
 }
 
+.c10 {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+}
+
+.c13 {
+  margin: 0;
+  padding: 0;
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.c12 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 10.25rem;
+  width: 100%;
+  background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.c21 {
+  margin-left: auto;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+}
+
+.c24 {
+  margin-left: 4px;
+}
+
 .c16 {
   word-break: break-all;
 }
@@ -334,7 +316,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   cursor: pointer;
 }
 
-.c4:hover .sc-uWCef {
+.c4:hover .sc-cOLXoO {
   opacity: 1;
 }
 
@@ -345,11 +327,11 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   max-height: 10.25rem;
 }
 
-.c34 svg {
+.c33 svg {
   font-size: 3rem;
 }
 
-.c33 {
+.c32 {
   border-radius: 4px 4px 0 0;
   background: linear-gradient(180deg,#ffffff 0%,#f6f6f9 121.48%);
 }
@@ -395,11 +377,15 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   class="c7 c8 c9 c10"
                   spacing="2"
                 >
-                  <input
-                    aria-labelledby="card-1-title"
-                    class="c11"
-                    type="checkbox"
-                  />
+                  <div
+                    class=""
+                  >
+                    <input
+                      aria-labelledby="card-1-title"
+                      class="c11"
+                      type="checkbox"
+                    />
+                  </div>
                 </div>
               </div>
               <div
@@ -483,11 +469,15 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   class="c7 c8 c9 c10"
                   spacing="2"
                 >
-                  <input
-                    aria-labelledby="card-2-title"
-                    class="c11"
-                    type="checkbox"
-                  />
+                  <div
+                    class=""
+                  >
+                    <input
+                      aria-labelledby="card-2-title"
+                      class="c11"
+                      type="checkbox"
+                    />
+                  </div>
                 </div>
               </div>
               <div
@@ -599,20 +589,24 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   class="c7 c8 c9 c10"
                   spacing="2"
                 >
-                  <input
-                    aria-labelledby="card-3-title"
-                    class="c11"
-                    type="checkbox"
-                  />
+                  <div
+                    class=""
+                  >
+                    <input
+                      aria-labelledby="card-3-title"
+                      class="c11"
+                      type="checkbox"
+                    />
+                  </div>
                 </div>
               </div>
               <div
-                class="c31 c32 c33"
+                class="c31 c5 c32"
                 height="10.25rem"
                 width="100%"
               >
                 <span
-                  class="c34"
+                  class="c33"
                 >
                   <svg
                     aria-label="CARTE MARIAGE AVS - Printemps.pdf"
@@ -687,7 +681,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
     </div>
   </div>
   <div
-    class="c35"
+    class="c34"
   >
     <p
       aria-live="polite"
