@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const findRoot = require('find-root');
 
 const aliasExactMatch = [
   '@strapi/design-system',
@@ -39,8 +40,8 @@ const aliasExactMatch = [
 
 // See https://webpack.js.org/configuration/resolve/
 module.exports = {
-  ...aliasExactMatch.reduce((acc, name) => {
-    acc[`${name}$`] = require.resolve(name);
+  ...aliasExactMatch.reduce((acc, moduleName) => {
+    acc[`${moduleName}$`] = findRoot(require.resolve(moduleName));
     return acc;
   }, {}),
 
