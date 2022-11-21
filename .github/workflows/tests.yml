@@ -34,8 +34,6 @@ jobs:
     name: 'unit_back (node: ${{ matrix.node }})'
     needs: [lint]
     runs-on: ubuntu-latest
-    env:
-      CODECOV_TOKEN: ${{ secrets.codecov }}
     strategy:
       matrix:
         node: [14, 16, 18]
@@ -46,17 +44,19 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: yarn
       - uses: ./.github/actions/install-modules
-        with:
-          globalPackages: codecov
       - name: Run tests
-        run: yarn run -s test:unit --coverage && codecov -C -F unit
+        run: yarn run -s test:unit --coverage
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./coverage
+          flags: back,unit_back
 
   unit_front:
     name: 'unit_front (node: ${{ matrix.node }})'
     needs: [lint]
     runs-on: ubuntu-latest
-    env:
-      CODECOV_TOKEN: ${{ secrets.codecov }}
     strategy:
       matrix:
         node: [14, 16, 18]
@@ -67,12 +67,16 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: yarn
       - uses: ./.github/actions/install-modules
-        with:
-          globalPackages: codecov
       - name: Build
         run: yarn build
       - name: Run test
-        run: yarn run -s test:front --coverage && codecov -C -F front
+        run: yarn run -s test:front --coverage
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./coverage
+          flags: front,unit_front
 
   api_ce_pg:
     runs-on: ubuntu-latest
@@ -96,6 +100,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+          -v /__w/.github/workflows/db/postgres:/docker-entrypoint-initdb.d
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
@@ -226,6 +231,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+          -v /__w/.github/workflows/db/postgres:/docker-entrypoint-initdb.d
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
