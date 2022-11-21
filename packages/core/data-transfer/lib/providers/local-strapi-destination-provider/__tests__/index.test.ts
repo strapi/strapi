@@ -79,7 +79,7 @@ describe('Local Strapi Source Destination', () => {
       expect((await provider.deleteAll()).count).toBe(entities.length);
     });
 
-    test('Should not delete exceptions if it is a restore', async () => {
+    test('Should delete only chosen contentTypes', async () => {
       const entities = [
         {
           entity: { id: 1, title: 'My first foo' },
@@ -126,15 +126,17 @@ describe('Local Strapi Source Destination', () => {
         }),
         strategy: 'restore',
         restore: {
-          exceptions: ['foo'],
+          /* @ts-ignore: disable-next-line */
+          contentTypes: [getContentTypes()['foo']],
         },
       });
+
       const deleteAllSpy = jest.spyOn(provider, 'deleteAll');
       await provider.bootstrap();
       await provider.beforeStreaming();
 
       expect(deleteAllSpy).toBeCalledTimes(1);
-      expect((await provider.deleteAll()).count).toBe(4);
+      expect((await provider.deleteAll()).count).toBe(3);
     });
 
     test('Should not delete if it is a merge strategy', async () => {
