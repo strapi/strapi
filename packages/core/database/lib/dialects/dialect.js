@@ -29,7 +29,7 @@ class Dialect {
     return false;
   }
 
-  supportsWindowRowNumber() {
+  supportsWindowFunctions() {
     return true;
   }
 

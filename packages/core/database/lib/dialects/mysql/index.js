@@ -65,7 +65,7 @@ class MysqlDialect extends Dialect {
     return true;
   }
 
-  supportsWindowRowNumber() {
+  supportsWindowFunctions() {
     const isMysqlDB = !this.info.database || this.info.database === MYSQL;
     const isBeforeV8 = !semver.valid(this.info.version) || semver.lt(this.info.version, '8.0.0');
 

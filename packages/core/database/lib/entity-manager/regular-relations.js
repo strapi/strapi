@@ -197,7 +197,7 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
   }
 
   // Handle databases that don't support window function ROW_NUMBER
-  if (!strapi.db.dialect.supportsWindowRowNumber()) {
+  if (!strapi.db.dialect.supportsWindowFunctions()) {
     await cleanOrderColumnsForOldDatabases({ id, attribute, db, inverseRelIds, transaction: trx });
     return;
   }
