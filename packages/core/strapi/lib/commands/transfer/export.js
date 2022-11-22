@@ -77,9 +77,6 @@ module.exports = async (filename, opts) => {
     compression: {
       enabled: opts.compress,
     },
-    archive: {
-      enabled: opts.archive,
-    },
   };
   const destination = createLocalFileDestinationProvider(destinationOptions);
 
@@ -150,7 +147,7 @@ module.exports = async (filename, opts) => {
     logger.log(table.toString());
 
     // TODO: once archiving is implemented, we need to check file extensions
-    if (!fs.pathExistsSync(file)) {
+    if (!fs.pathExistsSync(results.destination.file.path)) {
       logger.log(file);
       throw new Error('Export file not created');
     }

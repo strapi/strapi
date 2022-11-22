@@ -266,11 +266,11 @@ class TransferEngine<
 
       // Gracefully close the providers
       await this.close();
-    } catch (e: any) {
-      throw e;
+    } catch (e: unknown) {
       // Rollback the destination provider if an exception is thrown during the transfer
       // Note: This will be configurable in the future
-      // await this.destinationProvider?.rollback(e);
+      await this.destinationProvider.rollback?.(e as Error);
+      throw e;
     }
 
     return {
