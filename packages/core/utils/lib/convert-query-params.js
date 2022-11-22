@@ -23,6 +23,11 @@ const _ = require('lodash');
 const parseType = require('./parse-type');
 const contentTypesUtils = require('./content-types');
 const { PaginationError } = require('./errors');
+const {
+  isMediaAttribute,
+  isDynamicZoneAttribute,
+  isMorphToRelationalAttribute,
+} = require('./content-types');
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
@@ -188,9 +193,9 @@ const convertPopulateObject = (populate, schema) => {
 
     // Allow adding an 'on' strategy to populate queries for polymorphic relations, media and dynamic zones
     const isAllowedAttributeForFragmentPopulate =
-      attribute.type === 'dynamiczone' ||
-      attribute.type === 'media' ||
-      (attribute.relation && attribute.relation.startsWith('morphTo'));
+      isDynamicZoneAttribute(attribute) ||
+      isMediaAttribute(attribute) ||
+      isMorphToRelationalAttribute(attribute);
 
     const hasFragmentPopulateDefined = typeof subPopulate === 'object' && 'on' in subPopulate;
 
