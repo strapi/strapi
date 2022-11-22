@@ -21,7 +21,7 @@ module.exports = {
     ctx.body = { data };
   },
 
-  async getViewConfiguration(ctx) {
+  async findViewConfiguration(ctx) {
     const data = await getService('upload').getConfiguration();
 
     ctx.body = { data };

@@ -1,12 +1,14 @@
 'use strict';
 
+const { ACTIONS } = require('../constants');
+
 module.exports = {
   type: 'admin',
   routes: [
     {
       method: 'GET',
       path: '/configuration',
-      handler: 'view-configuration.getViewConfiguration',
+      handler: 'view-configuration.findViewConfiguration',
       config: {
         policies: ['admin::isAuthenticatedAdmin'],
       },
@@ -21,7 +23,7 @@ module.exports = {
           {
             name: 'admin::hasPermissions',
             config: {
-              actions: ['plugin::upload.configure-view'],
+              actions: [ACTIONS.configureView],
             },
           },
         ],
