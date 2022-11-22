@@ -10,6 +10,7 @@ describe('Entity service triggers webhooks', () => {
 
   beforeAll(() => {
     const model = {
+      uid: 'api::test.test',
       kind: 'singleType',
       modelName: 'test-model',
       privateAttributes: [],
