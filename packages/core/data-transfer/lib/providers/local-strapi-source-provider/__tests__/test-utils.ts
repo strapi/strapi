@@ -6,12 +6,13 @@ import { Readable } from 'stream';
 export const collect = <T = unknown>(stream: Readable): Promise<T[]> => {
   const chunks: T[] = [];
 
-  return new Promise((resolve) => {
-    stream.on('data', (chunk) => chunks.push(chunk));
-    stream.on('end', () => {
-      stream.destroy();
-      resolve(chunks);
-    });
+  return new Promise((resolve, reject) => {
+    stream
+      .on('data', (chunk) => chunks.push(chunk))
+      .on('close', () => {
+        resolve(chunks);
+      })
+      .on('error', reject);
   });
 };
 

@@ -1,11 +1,11 @@
-import { Duplex } from 'stream';
 import { chain } from 'stream-chain';
+import { Readable } from 'stream';
 import { set } from 'lodash/fp';
 
 /**
  * Create a readable stream that export the Strapi app configuration
  */
-export const createConfigurationStream = (strapi: Strapi.Strapi): Duplex => {
+export const createConfigurationStream = (strapi: Strapi.Strapi): Readable => {
   // Core Store
   const coreStoreStream = chain([
     strapi.db.queryBuilder('strapi::core-store').stream(),
@@ -22,13 +22,15 @@ export const createConfigurationStream = (strapi: Strapi.Strapi): Duplex => {
   const streams = [coreStoreStream, webhooksStream];
 
   // Readable configuration stream
-  return Duplex.from(async function* () {
-    for (const stream of streams) {
-      for await (const item of stream) {
-        yield item;
+  return Readable.from(
+    (async function* () {
+      for (const stream of streams) {
+        for await (const item of stream) {
+          yield item;
+        }
       }
-    }
-  });
+    })()
+  );
 };
 
 const wrapConfigurationItem = (type: 'core-store' | 'webhook') => (value: unknown) => ({
