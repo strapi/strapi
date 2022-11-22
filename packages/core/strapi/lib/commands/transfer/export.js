@@ -87,8 +87,8 @@ module.exports = async (filename, opts) => {
    * Configure and run the transfer engine
    */
   const engineOptions = {
-    strategy: opts.conflictStrategy,
-    versionMatching: opts.schemaComparison,
+    strategy: 'restore', // for an export to file, strategy will always be 'restore'
+    versionMatching: 'ignore', // for an export to file, versionMatching will always be skipped
     exclude: opts.exclude,
   };
   const engine = createTransferEngine(source, destination, engineOptions);

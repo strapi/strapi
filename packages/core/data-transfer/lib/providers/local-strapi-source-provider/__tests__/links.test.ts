@@ -2,7 +2,7 @@ import { Readable } from 'stream';
 
 import { createLinksStream } from '../links';
 import { getDeepPopulateQuery } from '../links/utils';
-import { collect, getStrapiFactory } from './test-utils';
+import { collect, getStrapiFactory } from '../../../__tests__/test-utils';
 
 describe('Local Strapi Source Provider - Entities Streaming', () => {
   describe('Create Links Stream', () => {
