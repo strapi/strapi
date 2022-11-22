@@ -1,6 +1,6 @@
 {
   "name": "@strapi/helper-plugin",
-  "version": "4.5.1",
+  "version": "4.5.2",
   "description": "Helper for Strapi plugins development",
   "repository": {
     "type": "git",
@@ -69,8 +69,8 @@
     "@storybook/builder-webpack5": "6.5.9",
     "@storybook/manager-webpack5": "6.4.10",
     "@storybook/react": "^6.5.10",
-    "@strapi/design-system": "1.2.8",
-    "@strapi/icons": "1.2.8",
+    "@strapi/design-system": "1.3.1",
+    "@strapi/icons": "1.3.1",
     "@testing-library/react": "12.1.4",
     "@testing-library/react-hooks": "8.0.1",
     "cross-env": "^7.0.3",

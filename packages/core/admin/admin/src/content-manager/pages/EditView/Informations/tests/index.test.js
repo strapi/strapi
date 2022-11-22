@@ -71,24 +71,38 @@ describe('CONTENT MANAGER | EditView | Header', () => {
       }
 
       .c0 {
-        color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
+        color: #666687;
       }
 
       .c7 {
-        font-weight: 600;
-        color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
+        font-weight: 600;
+        color: #32324d;
       }
 
       .c8 {
-        color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
+        color: #32324d;
+      }
+
+      .c4 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
       }
 
       .c6 {
@@ -107,20 +121,6 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
-      }
-
-      .c4 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
       }
 
       .c5 > * {
