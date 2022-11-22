@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the snapshot 1`] = `
-.c11 {
+.c12 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -13,14 +13,36 @@ exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the sn
   width: 1px;
 }
 
-.c5 {
+.c7 {
   background: #f6f6f9;
   padding: 4px;
   border-radius: 4px;
   min-width: 20px;
 }
 
+.c10 {
+  padding-left: 8px;
+}
+
 .c6 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-flex-wrap: nowrap;
+  -ms-flex-wrap: nowrap;
+  flex-wrap: nowrap;
+  gap: 4px;
+}
+
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -38,26 +60,23 @@ exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the sn
   justify-content: center;
 }
 
-.c7 {
-  color: #666687;
+.c5 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 1.14;
+  color: #32324d;
+}
+
+.c9 {
   font-weight: 600;
   font-size: 0.6875rem;
   line-height: 1.45;
   text-transform: uppercase;
+  color: #666687;
 }
 
-.c4 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c9 {
-  padding-left: 8px;
-}
-
-.c0 {
+.c1 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -71,21 +90,21 @@ exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the sn
   outline: none;
 }
 
-.c0 svg {
+.c1 svg {
   height: 12px;
   width: 12px;
 }
 
-.c0 svg > g,
-.c0 svg path {
+.c1 svg > g,
+.c1 svg path {
   fill: #ffffff;
 }
 
-.c0[aria-disabled='true'] {
+.c1[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c0:after {
+.c1:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -100,11 +119,11 @@ exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the sn
   border: 2px solid transparent;
 }
 
-.c0:focus-visible {
+.c1:focus-visible {
   outline: none;
 }
 
-.c0:focus-visible:after {
+.c1:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -115,19 +134,21 @@ exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the sn
   border: 2px solid #4945ff;
 }
 
-.c1 {
+.c2 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
+  background-color: #4945ff;
   border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
   border: 1px solid transparent;
   background: transparent;
 }
 
-.c1 .c8 {
+.c2 .c0 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -138,57 +159,57 @@ exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the sn
   align-items: center;
 }
 
-.c1 .c3 {
+.c2 .c4 {
   color: #ffffff;
 }
 
-.c1[aria-disabled='true'] {
+.c2[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c1[aria-disabled='true'] .c3 {
+.c2[aria-disabled='true'] .c4 {
   color: #666687;
 }
 
-.c1[aria-disabled='true'] svg > g,
-.c1[aria-disabled='true'] svg path {
+.c2[aria-disabled='true'] svg > g,
+.c2[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c1[aria-disabled='true']:active {
+.c2[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c1[aria-disabled='true']:active .c3 {
+.c2[aria-disabled='true']:active .c4 {
   color: #666687;
 }
 
-.c1[aria-disabled='true']:active svg > g,
-.c1[aria-disabled='true']:active svg path {
+.c2[aria-disabled='true']:active svg > g,
+.c2[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c1:hover {
+.c2:hover {
   background-color: #f6f6f9;
 }
 
-.c1:active {
+.c2:active {
   border: 1px solid undefined;
   background: undefined;
 }
 
-.c1 .c3 {
+.c2 .c4 {
   color: #32324d;
 }
 
-.c1 svg > g,
-.c1 svg path {
+.c2 svg > g,
+.c2 svg path {
   fill: #8e8ea9;
 }
 
-.c10 {
+.c11 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -199,19 +220,19 @@ exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the sn
   align-items: center;
 }
 
-.c10 svg {
+.c11 svg {
   height: 4px;
   width: 6px;
 }
 
-.c2 {
+.c3 {
   padding: 4px 12px;
 }
 
 <div>
   <div
     aria-hidden="true"
-    class=""
+    class="c0 "
     role="button"
   >
     <div>
@@ -220,30 +241,34 @@ exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the sn
         aria-disabled="false"
         aria-expanded="false"
         aria-haspopup="true"
-        class="c0 c1 c2"
+        class="c1 c2 c3"
         type="button"
       >
         <span
-          class="c3 c4"
+          class="c4 c5"
         >
           <div
-            class="c5 c6"
+            class="c0 c6"
+            wrap="nowrap"
           >
-            <span
-              class="c7"
+            <div
+              class="c0 c7 c8"
             >
-              1
-            </span>
+              <span
+                class="c4 c9"
+              >
+                1
+              </span>
+            </div>
+            item
           </div>
-           
-          item
         </span>
         <div
           aria-hidden="true"
-          class="c8 c9"
+          class="c0 c10"
         >
           <span
-            class="c10"
+            class="c11"
           >
             <svg
               aria-hidden="true"
@@ -266,7 +291,7 @@ exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the sn
     </div>
   </div>
   <div
-    class="c11"
+    class="c12"
   >
     <p
       aria-live="polite"
