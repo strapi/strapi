@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [12, 14]
+        node: [14]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2-beta
@@ -32,7 +32,7 @@ jobs:
       CODECOV_TOKEN: ${{ secrets.codecov }}
     strategy:
       matrix:
-        node: [12, 14]
+        node: [14]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2-beta
@@ -52,7 +52,7 @@ jobs:
       CODECOV_TOKEN: ${{ secrets.codecov }}
     strategy:
       matrix:
-        node: [12, 14]
+        node: [14]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2-beta
@@ -72,7 +72,7 @@ jobs:
     name: '[CE] E2E (postgres, node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [12, 14]
+        node: [14]
       max-parallel: 2
     services:
       postgres:
@@ -108,7 +108,7 @@ jobs:
     name: '[CE] E2E (mysql, node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [12, 14]
+        node: [14]
       max-parallel: 2
     services:
       mysql:
@@ -143,7 +143,7 @@ jobs:
     name: '[CE] E2E (sqlite, node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [12, 14]
+        node: [14]
       max-parallel: 2
     steps:
       - uses: actions/checkout@v2
@@ -161,7 +161,7 @@ jobs:
     name: '[CE] E2E (mongo, node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [12, 14]
+        node: [14]
       max-parallel: 2
     services:
       mongo:
@@ -188,7 +188,7 @@ jobs:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [12, 14]
+        node: [14]
       max-parallel: 2
     services:
       postgres:
@@ -228,7 +228,7 @@ jobs:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [12, 14]
+        node: [14]
       max-parallel: 2
     services:
       mysql:
@@ -267,7 +267,7 @@ jobs:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [12, 14]
+        node: [14]
       max-parallel: 2
     steps:
       - uses: actions/checkout@v2
@@ -289,7 +289,7 @@ jobs:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [12, 14]
+        node: [14]
       max-parallel: 2
     services:
       mongo:
