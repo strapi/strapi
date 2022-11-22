@@ -2,7 +2,7 @@ import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { AssetList } from '..';
+import { AssetGridList } from '..';
 import en from '../../../translations/en.json';
 
 jest.mock('../../../utils', () => ({
@@ -123,7 +123,7 @@ const setup = (props = { assets: data, selectedAssets: [], onSelectAsset: jest.f
   renderTL(
     <MemoryRouter>
       <ThemeProvider theme={lightTheme}>
-        <AssetList {...props} />
+        <AssetGridList {...props} />
       </ThemeProvider>
     </MemoryRouter>
   );
