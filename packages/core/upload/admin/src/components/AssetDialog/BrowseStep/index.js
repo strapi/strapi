@@ -1,5 +1,4 @@
 import React from 'react';
-import { toUpper } from 'lodash';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
@@ -19,7 +18,12 @@ import PlusIcon from '@strapi/icons/Plus';
 import Grid from '@strapi/icons/Grid';
 import List from '@strapi/icons/List';
 
-import { FolderDefinition, AssetDefinition, viewOptions } from '../../../constants';
+import {
+  FolderDefinition,
+  AssetDefinition,
+  viewOptions,
+  localStorageKeys,
+} from '../../../constants';
 import getTrad from '../../../utils/getTrad';
 import { getBreadcrumbDataCM } from '../../../utils';
 import getAllowedFiles from '../../../utils/getAllowedFiles';
@@ -34,7 +38,6 @@ import { Filters } from './Filters';
 import PaginationFooter from './PaginationFooter';
 import PageSize from './PageSize';
 import SearchAsset from './SearchAsset';
-import pluginId from '../../../pluginId';
 
 const StartBlockActions = styled(Flex)`
   & > * + * {
@@ -54,7 +57,7 @@ const TypographyMaxWidth = styled(Typography)`
 const ActionContainer = styled(Box)`
   svg {
     path {
-      fill: ${({ theme }) => theme.colors.neutral900};
+      fill: ${({ theme }) => theme.colors.neutral500};
     }
   }
 `;
@@ -82,10 +85,7 @@ export const BrowseStep = ({
   selectedAssets,
 }) => {
   const { formatMessage } = useIntl();
-  const [view, setView] = usePersistentState(
-    `STRAPI_${toUpper(pluginId)}_MODAL_VIEW`,
-    viewOptions.GRID
-  );
+  const [view, setView] = usePersistentState(localStorageKeys.modalView, viewOptions.GRID);
   const isGridView = view === viewOptions.GRID;
 
   const { data: currentFolder, isLoading: isCurrentFolderLoading } = useFolder(
@@ -156,7 +156,6 @@ export const BrowseStep = ({
               <EndBlockActions pullRight>
                 <ActionContainer paddingTop={1} paddingBottom={1}>
                   <IconButton
-                    data-testid={`switch-to-${isGridView ? 'list' : 'grid'}-view`}
                     icon={isGridView ? <List /> : <Grid />}
                     label={
                       isGridView

@@ -803,7 +803,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
 }
 
 .c16 svg path {
-  fill: #212134;
+  fill: #8e8ea9;
 }
 
 @media (max-width:68.75rem) {
@@ -915,7 +915,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                 aria-disabled="false"
                 aria-labelledby="tooltip-2"
                 class="c4 c17"
-                data-testid="switch-to-list-view"
                 tabindex="0"
                 type="button"
               >

@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react'; // useState
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { useHistory, useLocation } from 'react-router-dom';
-import { toUpper } from 'lodash';
 
 import {
   LoadingIndicatorPage,
@@ -51,8 +50,7 @@ import {
 import { Filters } from './components/Filters';
 import { Header } from './components/Header';
 import { EmptyOrNoPermissions } from './components/EmptyOrNoPermissions';
-import { viewOptions } from '../../constants';
-import pluginId from '../../pluginId';
+import { localStorageKeys, viewOptions } from '../../constants';
 
 const BoxWithHeight = styled(Box)`
   height: ${32 / 16}rem;
@@ -67,7 +65,7 @@ const TypographyMaxWidth = styled(Typography)`
 const ActionContainer = styled(Box)`
   svg {
     path {
-      fill: ${({ theme }) => theme.colors.neutral900};
+      fill: ${({ theme }) => theme.colors.neutral500};
     }
   }
 `;
@@ -87,10 +85,7 @@ export const MediaLibrary = () => {
   const { trackUsage } = useTracking();
   const [{ query }, setQuery] = useQueryParams();
   const isFiltering = Boolean(query._q || query.filters);
-  const [view, setView] = usePersistentState(
-    `STRAPI_${toUpper(pluginId)}_LIBRARY_VIEW`,
-    viewOptions.GRID
-  );
+  const [view, setView] = usePersistentState(localStorageKeys.view, viewOptions.GRID);
   const isGridView = view === viewOptions.GRID;
 
   const {
@@ -229,7 +224,6 @@ export const MediaLibrary = () => {
             <>
               <ActionContainer paddingTop={1} paddingBottom={1}>
                 <IconButton
-                  data-testid={`switch-to-${isGridView ? 'list' : 'grid'}-view`}
                   icon={isGridView ? <List /> : <Grid />}
                   label={
                     isGridView

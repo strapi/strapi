@@ -1,5 +1,6 @@
 // TODO @soupette we need to refactor this file
 
+import { isNil } from 'lodash';
 import isEmpty from 'lodash/isEmpty';
 
 const TOKEN_KEY = 'jwtToken';
@@ -8,6 +9,8 @@ const CURRENT_STEP = 'GUIDED_TOUR_CURRENT_STEP';
 const COMPLETED_STEPS = 'GUIDED_TOUR_COMPLETED_STEPS';
 const SKIPPED = 'GUIDED_TOUR_SKIPPED';
 const THEME_KEY = 'STRAPI_THEME'; // Also used in packages/core/admin/admin/src/components/ThemeToggleProvider/index.js
+const UPLOAD_MODAL_VIEW = 'STRAPI_UPLOAD_MODAL_VIEW';
+const UPLOAD_VIEW = 'STRAPI_UPLOAD_LIBRARY_VIEW';
 
 const parse = JSON.parse;
 const stringify = JSON.stringify;
@@ -35,6 +38,8 @@ const auth = {
       const guidedTourState = auth.get(COMPLETED_STEPS);
       const guidedTourSkipped = parse(localStorage.getItem(SKIPPED));
       const applicationTheme = localStorage.getItem(THEME_KEY);
+      const uploadMediaLibraryView = localStorage.getItem(UPLOAD_VIEW);
+      const uploadMediaLibraryModalView = localStorage.getItem(UPLOAD_MODAL_VIEW);
 
       localStorage.clear();
 
@@ -46,6 +51,9 @@ const auth = {
       localStorage.setItem(COMPLETED_STEPS, stringify(guidedTourState));
       localStorage.setItem(SKIPPED, stringify(guidedTourSkipped));
       localStorage.setItem(THEME_KEY, applicationTheme);
+      !isNil(uploadMediaLibraryView) && localStorage.setItem(UPLOAD_VIEW, uploadMediaLibraryView);
+      !isNil(uploadMediaLibraryModalView) &&
+        localStorage.setItem(UPLOAD_MODAL_VIEW, uploadMediaLibraryModalView);
     }
 
     if (sessionStorage) {

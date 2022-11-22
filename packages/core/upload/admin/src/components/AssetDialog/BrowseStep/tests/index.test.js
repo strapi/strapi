@@ -214,18 +214,34 @@ describe('BrowseStep', () => {
     expect(screen.getByText('Assets (1)')).toBeInTheDocument();
   });
 
-  it('displays the appropriate switch to change the view', () => {
+  describe('displays the appropriate switch to change the view', () => {
     const setView = jest.fn();
-    usePersistentState.mockReturnValueOnce([viewOptions.GRID, setView]);
-    setup();
+    it('Start with Grid View', () => {
+      usePersistentState.mockReturnValueOnce([viewOptions.GRID, setView]);
+      const { queryByRole } = setup();
 
-    const listSwitch = screen.queryByTestId('switch-to-list-view');
-    const gridSwitch = screen.queryByTestId('switch-to-grid-view');
+      const listSwitch = queryByRole('button', { name: 'List View' });
+      const gridSwitch = queryByRole('button', { name: 'Grid View' });
 
-    expect(listSwitch).toBeInTheDocument();
-    expect(gridSwitch).not.toBeInTheDocument();
+      expect(listSwitch).toBeInTheDocument();
+      expect(gridSwitch).not.toBeInTheDocument();
 
-    fireEvent.click(listSwitch);
-    expect(setView).toHaveBeenCalledWith(viewOptions.LIST);
+      fireEvent.click(listSwitch);
+      expect(setView).toHaveBeenCalledWith(viewOptions.LIST);
+    });
+
+    it('Start with List View', () => {
+      usePersistentState.mockReturnValueOnce([viewOptions.LIST, setView]);
+      const { queryByRole } = setup();
+
+      const listSwitch = queryByRole('button', { name: 'List View' });
+      const gridSwitch = queryByRole('button', { name: 'Grid View' });
+
+      expect(gridSwitch).toBeInTheDocument();
+      expect(listSwitch).not.toBeInTheDocument();
+
+      fireEvent.click(gridSwitch);
+      expect(setView).toHaveBeenCalledWith(viewOptions.GRID);
+    });
   });
 });
