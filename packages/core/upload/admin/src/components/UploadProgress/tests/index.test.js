@@ -49,23 +49,31 @@ describe('<UploadProgress />', () => {
     } = renderCompo();
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c6 {
-        color: #dcdce4;
+      .c7 {
         font-size: 0.75rem;
         line-height: 1.33;
+        color: #dcdce4;
+      }
+
+      .c0 {
+        background: #4a4a6a;
+        border-radius: 4px;
       }
 
       .c3 {
         padding-bottom: 8px;
       }
 
-      .c7 {
-        padding-left: 8px;
+      .c4 {
+        background: #666687;
+        border-radius: 4px;
+        position: relative;
+        width: 78px;
+        height: 4px;
       }
 
-      .c0 {
-        background: #4a4a6a;
-        border-radius: 4px;
+      .c8 {
+        padding-left: 8px;
       }
 
       .c1 {
@@ -86,22 +94,14 @@ describe('<UploadProgress />', () => {
         justify-content: center;
       }
 
-      .c4 {
-        background: #666687;
+      .c5:before {
+        background-color: #ffffff;
         border-radius: 4px;
-        position: relative;
-        width: 78px;
-        height: 4px;
-      }
-
-      .c4:before {
+        bottom: 0;
         content: '';
         position: absolute;
         top: 0;
-        bottom: 0;
-        border-radius: 4px;
         width: 0%;
-        background: #eaeaef;
       }
 
       .c2 {
@@ -112,7 +112,7 @@ describe('<UploadProgress />', () => {
         flex-direction: column;
       }
 
-      .c5 {
+      .c6 {
         border: none;
         background: none;
         display: -webkit-box;
@@ -125,12 +125,12 @@ describe('<UploadProgress />', () => {
         align-items: center;
       }
 
-      .c5 svg {
+      .c6 svg {
         height: 10px;
         width: 10px;
       }
 
-      .c5 svg path {
+      .c6 svg path {
         fill: #dcdce4;
       }
 
@@ -145,23 +145,25 @@ describe('<UploadProgress />', () => {
             aria-valuemax="100"
             aria-valuemin="0"
             aria-valuenow="0"
-            class="c4"
+            class="c4 c5"
+            height="1"
             role="progressbar"
             value="0"
+            width="78px"
           />
         </div>
         <button
-          class="c5"
+          class="c6"
           type="button"
         >
           <span
-            class="c6"
+            class="c7"
           >
             Cancel
           </span>
           <span
             aria-hidden="true"
-            class="c7"
+            class="c8"
           >
             <svg
               fill="none"
