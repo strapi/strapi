@@ -8,13 +8,14 @@ const useFetchClient = () => {
       // when unmount cancel the axios request
       source.cancel();
     };
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // const options = {
-  //   cancelToken: source.token,
-  // };
+  const options = {
+    cancelToken: source.token,
+  };
 
-  return getFetchClient();
+  return getFetchClient(options);
 };
 
 export default useFetchClient;
