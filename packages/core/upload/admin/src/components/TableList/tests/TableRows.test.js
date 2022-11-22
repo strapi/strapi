@@ -84,7 +84,7 @@ describe('TableList | TableRows', () => {
       const onSelectOneSpy = jest.fn();
       const { getByRole } = setup({ onSelectOne: onSelectOneSpy });
 
-      fireEvent.click(getByRole('checkbox', { name: 'Select michka asset' }));
+      fireEvent.click(getByRole('checkbox', { name: 'Select michka asset', hidden: true }));
 
       expect(onSelectOneSpy).toHaveBeenCalledTimes(1);
     });
@@ -92,13 +92,15 @@ describe('TableList | TableRows', () => {
     it('should reflect non selected assets state', () => {
       const { getByRole } = setup();
 
-      expect(getByRole('checkbox', { name: 'Select michka asset' })).not.toBeChecked();
+      expect(
+        getByRole('checkbox', { name: 'Select michka asset', hidden: true })
+      ).not.toBeChecked();
     });
 
     it('should reflect selected assets state', () => {
       const { getByRole } = setup({ selected: [{ id: 1 }] });
 
-      expect(getByRole('checkbox', { name: 'Select michka asset' })).toBeChecked();
+      expect(getByRole('checkbox', { name: 'Select michka asset', hidden: true })).toBeChecked();
     });
 
     it('should call onEditAsset callback', () => {
@@ -141,13 +143,15 @@ describe('TableList | TableRows', () => {
     it('should reflect non selected folder state', () => {
       const { getByRole } = setup({ rows: [FOLDER_FIXTURE] });
 
-      expect(getByRole('checkbox', { name: 'Select folder 1 folder' })).not.toBeChecked();
+      expect(
+        getByRole('checkbox', { name: 'Select folder 1 folder', hidden: true })
+      ).not.toBeChecked();
     });
 
     it('should reflect selected folder state', () => {
       const { getByRole } = setup({ rows: [FOLDER_FIXTURE], selected: [{ id: 2 }] });
 
-      expect(getByRole('checkbox', { name: 'Select folder 1 folder' })).toBeChecked();
+      expect(getByRole('checkbox', { name: 'Select folder 1 folder', hidden: true })).toBeChecked();
     });
 
     it('should not display size and ext', () => {

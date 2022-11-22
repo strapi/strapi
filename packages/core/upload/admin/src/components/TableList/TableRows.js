@@ -42,7 +42,7 @@ export const TableRows = ({ onEditAsset, onEditFolder, onSelectOne, rows, select
                   : push(getFolderURL(pathname, query, element)),
             })}
           >
-            <Td>
+            <Td {...stopPropagation}>
               <BaseCheckbox
                 aria-label={formatMessage(
                   {
