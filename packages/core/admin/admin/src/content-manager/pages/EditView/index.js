@@ -26,9 +26,10 @@ import { getTrad } from '../../utils';
 import DraftAndPublishBadge from './DraftAndPublishBadge';
 import Informations from './Informations';
 import Header from './Header';
-import { createAttributesLayout, getFieldsActionMatchingPermissions } from './utils';
+import { getFieldsActionMatchingPermissions } from './utils';
 import DeleteLink from './DeleteLink';
 import GridRow from './GridRow';
+import { selectCurrentLayout, selectAttributesLayout } from './selectors';
 
 const cmPermissions = permissions.contentManager;
 const ctbPermissions = [{ action: 'plugin::content-type-builder.read', subject: null }];
@@ -40,14 +41,10 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
   const { createActionAllowedFields, readActionAllowedFields, updateActionAllowedFields } =
     getFieldsActionMatchingPermissions(userPermissions, slug);
 
-  const { layout, formattedContentTypeLayout } = useSelector((state) => {
-    const layout = state['content-manager_editViewLayoutManager'].currentLayout;
-
-    return {
-      layout,
-      formattedContentTypeLayout: createAttributesLayout(layout?.contentType ?? {}),
-    };
-  });
+  const { layout, formattedContentTypeLayout } = useSelector((state) => ({
+    layout: selectCurrentLayout(state),
+    formattedContentTypeLayout: selectAttributesLayout(state),
+  }));
 
   const configurationPermissions = isSingleType
     ? cmPermissions.singleTypesConfigurations
