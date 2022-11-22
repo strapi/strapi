@@ -244,6 +244,7 @@ export const MediaLibrary = () => {
               assetCount={assetCount}
               folderCount={folderCount}
               indeterminate={indeterminateBulkSelect}
+              onChangeSort={handleChangeSort}
               onEditAsset={setAssetToEdit}
               onEditFolder={handleEditFolder}
               onSelectOne={selectOne}
@@ -255,6 +256,7 @@ export const MediaLibrary = () => {
                 !assetsLoading && !foldersLoading ? [...folders, ...assets] : []
               }
               selected={selected}
+              sortQuery={query?.sort}
             />
           )}
 
