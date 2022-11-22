@@ -623,7 +623,13 @@ const createEntityManager = (db) => {
           }
 
           // insert new relations
-          await this.createQueryBuilder(joinTable.name).insert(insert).transacting(trx).execute();
+          // ignore duplicates, as connect syntax can contain duplicated ids to add
+          await this.createQueryBuilder(joinTable.name)
+            .insert(insert)
+            .onConflict(joinTable.pivotColumns)
+            .ignore()
+            .transacting(trx)
+            .execute();
         }
       }
     },

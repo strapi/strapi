@@ -769,37 +769,48 @@ describe('Relations', () => {
     });
   });
 
-  // TODO: Use createShop and updateShop in other tests
   describe('Reorder entity relations', () => {
     test('Connect new relation at the start', async () => {
-      // Add two products at the start
       const createdShop = await createShop({
         anyToManyRel: [
           { id: id1, position: { start: true } },
           { id: id2, position: { start: true } },
         ],
       });
-      // Relation order should be [id2, id1]
+
       const expectedCreatedShop = shopFactory({ anyToManyRel: [{ id: id2 }, { id: id1 }] });
       expect(createdShop).toMatchObject(expectedCreatedShop);
     });
 
     test('Connect new relation at the end', async () => {
-      // Add two products at the end
       const createdShop = await createShop({
         anyToManyRel: [
           { id: id1, position: { end: true } },
           { id: id2, position: { end: true } },
         ],
       });
-      // Relation order should be [id1, id2]
-      const expectedCreatedShop = shopFactory({ anyToManyRel: [{ id: id1 }, { id: id2 }] });
 
+      const expectedCreatedShop = shopFactory({ anyToManyRel: [{ id: id1 }, { id: id2 }] });
       expect(createdShop).toMatchObject(expectedCreatedShop);
     });
 
-    test('Connect relations using before and after', async () => {
-      // Add two products at the end
+    test('Create relations using before and after', async () => {
+      const createdShop = await createShop({
+        anyToManyRel: [
+          { id: id1, position: { start: true } },
+          { id: id2, position: { start: true } },
+          { id: id3, position: { after: id1 } },
+          { id: id1, position: { after: id2 } },
+        ],
+      });
+
+      const expectedShop = shopFactory({
+        anyToManyRel: [{ id: id2 }, { id: id1 }, { id: id3 }],
+      });
+      expect(createdShop).toMatchObject(expectedShop);
+    });
+
+    test('Update relations using before and after', async () => {
       const shop = await createShop({
         anyToManyRel: [
           { id: id1, position: { end: true } },
@@ -807,7 +818,6 @@ describe('Relations', () => {
         ],
       });
 
-      // Move product relations
       const updatedShop = await updateShop(shop, {
         anyToManyRel: [
           { id: id3, position: { after: id1 } },
@@ -820,7 +830,6 @@ describe('Relations', () => {
       const expectedShop = shopFactory({
         anyToManyRel: [{ id: id2 }, { id: id1 }, { id: id3 }],
       });
-
       expect(updatedShop).toMatchObject(expectedShop);
     });
   });

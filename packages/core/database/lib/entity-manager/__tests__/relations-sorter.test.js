@@ -65,4 +65,21 @@ describe('relations orderer', () => {
       { id: 3, order: 10 },
     ]);
   });
+
+  test('connect with no initial relations', () => {
+    const orderer = relationsOrderer([], 'id', 'order');
+
+    orderer.connect([
+      { id: 1, position: { start: true } },
+      { id: 2, position: { start: true } },
+      { id: 3, position: { after: 1 } },
+      { id: 1, position: { after: 2 } },
+    ]);
+
+    expect(orderer.get()).toMatchObject([
+      { id: 2, order: 0.5 },
+      { id: 1, order: 0.5 },
+      { id: 3, order: 0.5 },
+    ]);
+  });
 });
