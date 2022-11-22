@@ -1,9 +1,15 @@
 import React from 'react';
 import { IntlProvider } from 'react-intl';
+import { MemoryRouter } from 'react-router-dom';
 import { render, fireEvent } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 
 import { TableRows } from '../TableRows';
+
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useQueryParams: jest.fn(() => [{ query: {} }]),
+}));
 
 const PROPS_FIXTURE = {
   rows: [
@@ -46,13 +52,15 @@ const ComponentFixture = (props) => {
   };
 
   return (
-    <IntlProvider locale="en" messages={{}}>
-      <ThemeProvider theme={lightTheme}>
-        <table>
-          <TableRows {...customProps} />
-        </table>
-      </ThemeProvider>
-    </IntlProvider>
+    <MemoryRouter>
+      <IntlProvider locale="en" messages={{}}>
+        <ThemeProvider theme={lightTheme}>
+          <table>
+            <TableRows {...customProps} />
+          </table>
+        </ThemeProvider>
+      </IntlProvider>
+    </MemoryRouter>
   );
 };
 
@@ -97,7 +105,7 @@ describe('TableList | TableRows', () => {
       const onEditAssetSpy = jest.fn();
       const { getByRole } = setup({ onEditAsset: onEditAssetSpy });
 
-      fireEvent.click(getByRole('button', { name: 'Edit' }));
+      fireEvent.click(getByRole('button', { name: 'Edit', hidden: true }));
 
       expect(onEditAssetSpy).toHaveBeenCalledTimes(1);
     });
@@ -119,9 +127,15 @@ describe('TableList | TableRows', () => {
         onEditFolder: onEditFolderSpy,
       });
 
-      fireEvent.click(getByRole('button', { name: 'Edit' }));
+      fireEvent.click(getByRole('button', { name: 'Edit', hidden: true }));
 
       expect(onEditFolderSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should display folder link', () => {
+      const { getByRole } = setup({ rows: [FOLDER_FIXTURE] });
+
+      expect(getByRole('link', { name: 'Access folder', hidden: true })).toBeInTheDocument();
     });
 
     it('should reflect non selected folder state', () => {

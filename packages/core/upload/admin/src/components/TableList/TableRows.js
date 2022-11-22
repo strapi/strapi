@@ -1,18 +1,29 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { getFileExtension } from '@strapi/helper-plugin';
+import { useHistory, useLocation, Link } from 'react-router-dom';
+import {
+  getFileExtension,
+  onRowClick,
+  stopPropagation,
+  useQueryParams,
+} from '@strapi/helper-plugin';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
+import { Flex } from '@strapi/design-system/Flex';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Tbody, Td, Tr } from '@strapi/design-system/Table';
 import Pencil from '@strapi/icons/Pencil';
+import Eye from '@strapi/icons/Eye';
 
 import { CellContent } from './CellContent';
 import { AssetDefinition, FolderDefinition, tableHeaders as cells } from '../../constants';
-import { getTrad } from '../../utils';
+import { getFolderURL, getTrad } from '../../utils';
 
 export const TableRows = ({ onEditAsset, onEditFolder, onSelectOne, rows, selected }) => {
   const { formatMessage } = useIntl();
+  const { pathname } = useLocation();
+  const [{ query }] = useQueryParams();
+  const { push } = useHistory();
 
   return (
     <Tbody>
@@ -22,7 +33,15 @@ export const TableRows = ({ onEditAsset, onEditFolder, onSelectOne, rows, select
         const isSelected = !!selected.find((currentRow) => currentRow.id === id);
 
         return (
-          <Tr key={id}>
+          <Tr
+            key={id}
+            {...onRowClick({
+              fn: () =>
+                elementType === 'asset'
+                  ? onEditAsset(element)
+                  : push(getFolderURL(pathname, query, element)),
+            })}
+          >
             <Td>
               <BaseCheckbox
                 aria-label={formatMessage(
@@ -33,7 +52,7 @@ export const TableRows = ({ onEditAsset, onEditFolder, onSelectOne, rows, select
                   },
                   { name }
                 )}
-                onValueChange={() => onSelectOne({ ...element, elementType })}
+                onValueChange={() => onSelectOne(element)}
                 checked={isSelected}
               />
             </Td>
@@ -53,23 +72,40 @@ export const TableRows = ({ onEditAsset, onEditFolder, onSelectOne, rows, select
                 </Td>
               );
             })}
-            {((elementType === 'asset' && onEditAsset) ||
-              (elementType === 'folder' && onEditFolder)) && (
-              <Td>
-                <IconButton
-                  label={formatMessage({
-                    id: getTrad('control-card.edit'),
-                    defaultMessage: 'Edit',
-                  })}
-                  onClick={() =>
-                    elementType === 'asset' ? onEditAsset(element) : onEditFolder(element)
-                  }
-                  noBorder
-                >
-                  <Pencil />
-                </IconButton>
-              </Td>
-            )}
+
+            <Td {...stopPropagation}>
+              <Flex justifyContent="flex-end">
+                {elementType === 'folder' && (
+                  <IconButton
+                    forwardedAs={Link}
+                    label={formatMessage({
+                      // TODO: fix trad
+                      id: getTrad('app'),
+                      defaultMessage: 'Access folder',
+                    })}
+                    to={getFolderURL(pathname, query, element)}
+                    noBorder
+                  >
+                    <Eye />
+                  </IconButton>
+                )}
+                {((elementType === 'asset' && onEditAsset) ||
+                  (elementType === 'folder' && onEditFolder)) && (
+                  <IconButton
+                    label={formatMessage({
+                      id: getTrad('control-card.edit'),
+                      defaultMessage: 'Edit',
+                    })}
+                    onClick={() =>
+                      elementType === 'asset' ? onEditAsset(element) : onEditFolder(element)
+                    }
+                    noBorder
+                  >
+                    <Pencil />
+                  </IconButton>
+                )}
+              </Flex>
+            </Td>
           </Tr>
         );
       })}
