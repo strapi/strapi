@@ -49,14 +49,25 @@ describe('<UploadProgress />', () => {
     } = renderCompo();
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c11 {
-        color: #666687;
+      .c10 {
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
       .c0 {
         background: #eaeaef;
+      }
+
+      .c3 {
+        width: 100%;
+      }
+
+      .c6 {
+        background: #666687;
+        border-radius: 4px;
+        position: relative;
+        width: 102px;
+        height: 8px;
       }
 
       .c1 {
@@ -73,10 +84,6 @@ describe('<UploadProgress />', () => {
         flex-direction: row;
       }
 
-      .c3 {
-        width: 100%;
-      }
-
       .c4 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -91,20 +98,6 @@ describe('<UploadProgress />', () => {
         flex-direction: column;
       }
 
-      .c9 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
       .c5 > * {
         margin-top: 0;
         margin-bottom: 0;
@@ -114,36 +107,23 @@ describe('<UploadProgress />', () => {
         margin-top: 8px;
       }
 
-      .c10 > * {
+      .c9 > * {
         margin-left: 0;
         margin-right: 0;
       }
 
-      .c10 > * + * {
-        margin-left: 4px;
+      .c9 > * + * {
+        margin-left: 8px;
       }
 
-      .c6 {
-        background: #666687;
+      .c7:before {
+        background-color: #ffffff;
         border-radius: 4px;
-        position: relative;
-        width: 78px;
-        height: 4px;
-      }
-
-      .c6:before {
+        bottom: 0;
         content: '';
         position: absolute;
         top: 0;
-        bottom: 0;
-        border-radius: 4px;
         width: 0%;
-        background: #eaeaef;
-      }
-
-      .c7 {
-        width: 102px;
-        height: 8px;
       }
 
       .c2 {
@@ -158,15 +138,21 @@ describe('<UploadProgress />', () => {
         width: -webkit-min-content;
         width: -moz-min-content;
         width: min-content;
+        color: #666687;
+      }
+
+      .c8:hover,
+      .c8:focus {
+        color: #4a4a6a;
       }
 
       .c8 svg {
-        height: 8px;
-        width: 8px;
+        height: 10px;
+        width: 10px;
       }
 
       .c8 svg path {
-        fill: #666687;
+        fill: currentColor;
       }
 
       <div
@@ -183,19 +169,21 @@ describe('<UploadProgress />', () => {
             aria-valuemin="0"
             aria-valuenow="0"
             class="c6 c7"
+            height="2"
             role="progressbar"
             value="0"
+            width="102px"
           />
           <button
             class="c8"
             type="button"
           >
             <div
-              class="c9 c10"
-              spacing="1"
+              class="c1 c9"
+              spacing="2"
             >
               <span
-                class="c11"
+                class="c10"
               >
                 Cancel
               </span>

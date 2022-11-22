@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
-.c37 {
+.c35 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -11,82 +11,10 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   padding: 0;
   position: absolute;
   width: 1px;
-}
-
-.c17 {
-  padding-top: 4px;
 }
 
 .c2 {
   height: 100%;
-}
-
-.c0 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
-}
-
-.c1 {
-  grid-column: span 3;
-  max-width: 100%;
-}
-
-.c21 {
-  padding-top: 4px;
-  -webkit-box-flex: 1;
-  -webkit-flex-grow: 1;
-  -ms-flex-positive: 1;
-  flex-grow: 1;
-}
-
-.c33 {
-  width: 100%;
-  height: 10.25rem;
-}
-
-.c22 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c34 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c29 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c3 {
@@ -110,18 +38,85 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   padding-left: 12px;
 }
 
-.c24 {
+.c17 {
+  padding-top: 4px;
+}
+
+.c21 {
+  padding-top: 4px;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+}
+
+.c23 {
   background: #f6f6f9;
   padding: 4px;
   border-radius: 4px;
   min-width: 20px;
 }
 
-.c30 {
+.c29 {
   background: #32324d;
   color: #ffffff;
   padding: 4px;
   border-radius: 4px;
+}
+
+.c32 {
+  width: 100%;
+  height: 10.25rem;
+}
+
+.c0 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c1 {
+  grid-column: span 3;
+  max-width: 100%;
+}
+
+.c18 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c19 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c26 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c31 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #ffffff;
+}
+
+.c28 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .c5 {
@@ -170,7 +165,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   flex-direction: row;
 }
 
-.c25 {
+.c24 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -195,74 +190,6 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
 
 .c9 > * + * {
   margin-left: 8px;
-}
-
-.c10 {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-}
-
-.c13 {
-  margin: 0;
-  padding: 0;
-  max-height: 100%;
-  max-width: 100%;
-  object-fit: contain;
-}
-
-.c12 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 10.25rem;
-  width: 100%;
-  background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-}
-
-.c18 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c19 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c27 {
-  color: #666687;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.c32 {
-  color: #ffffff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c23 {
-  margin-left: auto;
-  -webkit-flex-shrink: 0;
-  -ms-flex-negative: 0;
-  flex-shrink: 0;
-}
-
-.c26 {
-  margin-left: 4px;
 }
 
 .c11 {
@@ -333,6 +260,47 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   background-color: #8e8ea9;
 }
 
+.c10 {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+}
+
+.c13 {
+  margin: 0;
+  padding: 0;
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.c12 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 10.25rem;
+  width: 100%;
+  background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.c22 {
+  margin-left: auto;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+}
+
+.c25 {
+  margin-left: 4px;
+}
+
 .c16 {
   word-break: break-all;
 }
@@ -342,7 +310,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   border-bottom: 1px solid #eaeaef;
 }
 
-.c31 {
+.c30 {
   position: absolute;
   bottom: 4px;
   right: 4px;
@@ -356,22 +324,22 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   cursor: pointer;
 }
 
-.c4:hover .sc-uWCef {
+.c4:hover .sc-cOLXoO {
   opacity: 1;
 }
 
-.c28 canvas,
-.c28 video {
+.c27 canvas,
+.c27 video {
   display: block;
   max-width: 100%;
   max-height: 10.25rem;
 }
 
-.c36 svg {
+.c34 svg {
   font-size: 3rem;
 }
 
-.c35 {
+.c33 {
   border-radius: 4px 4px 0 0;
   background: linear-gradient(180deg,#ffffff 0%,#f6f6f9 121.48%);
 }
@@ -417,11 +385,15 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   class="c7 c8 c9 c10"
                   spacing="2"
                 >
-                  <input
-                    aria-labelledby="card-1-title"
-                    class="c11"
-                    type="checkbox"
-                  />
+                  <div
+                    class=""
+                  >
+                    <input
+                      aria-labelledby="card-1-title"
+                      class="c11"
+                      type="checkbox"
+                    />
+                  </div>
                 </div>
               </div>
               <div
@@ -466,16 +438,16 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c21 c22"
+                  class="c21 c8"
                 >
                   <div
-                    class="c23"
+                    class="c22"
                   >
                     <div
-                      class="c24 c25 c26"
+                      class="c23 c24 c25"
                     >
                       <span
-                        class="c27"
+                        class="c26"
                       >
                         Image
                       </span>
@@ -509,11 +481,15 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   class="c7 c8 c9 c10"
                   spacing="2"
                 >
-                  <input
-                    aria-labelledby="card-2-title"
-                    class="c11"
-                    type="checkbox"
-                  />
+                  <div
+                    class=""
+                  >
+                    <input
+                      aria-labelledby="card-2-title"
+                      class="c11"
+                      type="checkbox"
+                    />
+                  </div>
                 </div>
               </div>
               <div
@@ -523,7 +499,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   class="c8"
                 >
                   <div
-                    class="c28"
+                    class="c27"
                   >
                     <figure
                       class=""
@@ -537,7 +513,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                         />
                       </video>
                       <figcaption
-                        class="c29"
+                        class="c28"
                       >
                         mov_bbb.mp4
                       </figcaption>
@@ -546,10 +522,10 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                 </div>
               </div>
               <time
-                class="c30 c31"
+                class="c29 c30"
               >
                 <span
-                  class="c32"
+                  class="c31"
                 >
                   ...
                 </span>
@@ -586,16 +562,16 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c21 c22"
+                  class="c21 c8"
                 >
                   <div
-                    class="c23"
+                    class="c22"
                   >
                     <div
-                      class="c24 c25 c26"
+                      class="c23 c24 c25"
                     >
                       <span
-                        class="c27"
+                        class="c26"
                       >
                         Video
                       </span>
@@ -629,20 +605,24 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   class="c7 c8 c9 c10"
                   spacing="2"
                 >
-                  <input
-                    aria-labelledby="card-3-title"
-                    class="c11"
-                    type="checkbox"
-                  />
+                  <div
+                    class=""
+                  >
+                    <input
+                      aria-labelledby="card-3-title"
+                      class="c11"
+                      type="checkbox"
+                    />
+                  </div>
                 </div>
               </div>
               <div
-                class="c33 c34 c35"
+                class="c32 c5 c33"
                 height="10.25rem"
                 width="100%"
               >
                 <span
-                  class="c36"
+                  class="c34"
                 >
                   <svg
                     aria-label="CARTE MARIAGE AVS - Printemps.pdf"
@@ -697,16 +677,16 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c21 c22"
+                  class="c21 c8"
                 >
                   <div
-                    class="c23"
+                    class="c22"
                   >
                     <div
-                      class="c24 c25 c26"
+                      class="c23 c24 c25"
                     >
                       <span
-                        class="c27"
+                        class="c26"
                       >
                         Doc
                       </span>
@@ -721,7 +701,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
     </div>
   </div>
   <div
-    class="c37"
+    class="c35"
   >
     <p
       aria-live="polite"
