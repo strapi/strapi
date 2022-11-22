@@ -79,8 +79,7 @@ export const TableRows = ({ onEditAsset, onEditFolder, onSelectOne, rows, select
                   <IconButton
                     forwardedAs={Link}
                     label={formatMessage({
-                      // TODO: fix trad
-                      id: getTrad('app'),
+                      id: getTrad('list.folders.link-label'),
                       defaultMessage: 'Access folder',
                     })}
                     to={getFolderURL(pathname, query, element)}
