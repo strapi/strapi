@@ -1,5 +1,5 @@
 import { auth } from '@strapi/helper-plugin';
-import { getFetchClient, instance } from '../getFetchClient';
+import { getFetchClient } from '../getFetchClient';
 
 const token = 'coolToken';
 auth.getToken = jest.fn().mockReturnValue(token);
@@ -38,6 +38,6 @@ describe('ADMIN | utils | getFetchClient', () => {
     const getData = await response.get('/admin/project-type');
     expect(getData.status).toBe(200);
 
-    expect(instance.defaults.baseURL).toBe(process.env.STRAPI_ADMIN_BACKEND_URL);
+    expect(getData.request.responseURL).toContain(process.env.STRAPI_ADMIN_BACKEND_URL);
   });
 });
