@@ -23,13 +23,14 @@ jest.spyOn(axiosInstance, 'get').mockResolvedValue({
 });
 
 const DEFAULT_PROPS_FIXTURE = {
+  contentType: {
+    uid: 'api::address.address',
+  },
+  entityId: 1,
   fieldSchema: {
     type: 'relation',
     relation: 'manyToMany',
     target: 'api::category.category',
-  },
-  queryInfos: {
-    endPoint: 'collection-types/api::address.address',
   },
   metadatas: {
     mainField: {

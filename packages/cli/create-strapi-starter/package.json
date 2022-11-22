@@ -1,6 +1,6 @@
 {
   "name": "create-strapi-starter",
-  "version": "4.4.5",
+  "version": "4.5.1",
   "description": "Generate a new Strapi application.",
   "keywords": [
     "create-strapi-starter",
@@ -38,9 +38,9 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@strapi/generate-new": "4.4.5",
+    "@strapi/generate-new": "4.5.1",
     "chalk": "4.1.1",
-    "ci-info": "3.3.2",
+    "ci-info": "3.5.0",
     "commander": "7.1.0",
     "execa": "5.1.1",
     "fs-extra": "10.0.0",

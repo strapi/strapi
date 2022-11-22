@@ -1,5 +1,5 @@
 /* eslint-disable  import/no-cycle */
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import size from 'lodash/size';
 import isEqual from 'react-fast-compare';
@@ -17,6 +17,7 @@ import RepeatableComponent from '../RepeatableComponent';
 import connect from './utils/connect';
 import select from './utils/select';
 import Label from './Label';
+import { useContentTypeLayout } from '../../hooks';
 
 const FieldComponent = ({
   addNonRepeatableComponentToField,
@@ -46,6 +47,12 @@ const FieldComponent = ({
   const showResetComponent =
     !isRepeatable && isInitialized && !isFromDynamicZone && hasChildrenAllowedFields;
 
+  const { getComponentLayout, components } = useContentTypeLayout();
+  const componentLayoutData = useMemo(
+    () => getComponentLayout(componentUid),
+    [componentUid, getComponentLayout]
+  );
+
   if (!hasChildrenAllowedFields && isCreatingEntry) {
     return <NotAllowedInput labelAction={labelAction} intlLabel={intlLabel} name={name} />;
   }
@@ -55,7 +62,7 @@ const FieldComponent = ({
   }
 
   const handleClickAddNonRepeatableComponentToField = () => {
-    addNonRepeatableComponentToField(name, componentUid);
+    addNonRepeatableComponentToField(name, componentLayoutData, components);
   };
 
   return (

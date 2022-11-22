@@ -13,47 +13,6 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c12 {
-  width: 100%;
-  height: 100%;
-}
-
-.c13 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c16 {
-  font-weight: 600;
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c14 {
-  color: #4945ff;
-  margin-bottom: 12px;
-  width: 30px;
-  height: 24px;
-}
-
-.c15 path {
-  fill: #4945ff;
-}
-
 .c4 {
   background: #f6f6f9;
   padding: 8px;
@@ -69,6 +28,7 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
 .c7 {
   padding-right: 8px;
   padding-left: 8px;
+  overflow: hidden;
   width: 100%;
 }
 
@@ -76,11 +36,16 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   height: 124px;
 }
 
-.c2 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
+.c12 {
+  width: 100%;
+  height: 100%;
+}
+
+.c14 {
+  color: #4945ff;
+  margin-bottom: 12px;
+  width: 30px;
+  height: 24px;
 }
 
 .c0 {
@@ -129,14 +94,36 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   justify-content: center;
 }
 
-.c6 {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  grid-template-areas: 'startAction slides endAction';
+.c13 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
 }
 
-.c8 {
-  grid-area: slides;
+.c2 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c16 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #666687;
 }
 
 .c1 > * {
@@ -146,6 +133,20 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
 
 .c1 > * + * {
   margin-top: 4px;
+}
+
+.c15 path {
+  fill: #4945ff;
+}
+
+.c6 {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: 'startAction slides endAction';
+}
+
+.c8 {
+  grid-area: slides;
 }
 
 .c11 {
@@ -194,6 +195,7 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
               <div
                 aria-live="polite"
                 class="c7 c8"
+                overflow="hidden"
                 width="100%"
               >
                 <div
