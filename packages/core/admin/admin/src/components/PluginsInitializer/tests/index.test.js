@@ -21,7 +21,6 @@ describe('ADMIN | COMPONENTS | PluginsInitializer', () => {
           runHookSeries={jest.fn()}
           menu={[]}
           settings={{}}
-          getFetchClient={jest.fn()}
         >
           <PluginsInitializer />
         </StrapiAppProvider>

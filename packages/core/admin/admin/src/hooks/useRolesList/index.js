@@ -23,6 +23,7 @@ const useRolesList = (shouldFetchData = true) => {
       dispatch({
         type: 'GET_DATA',
       });
+
       const {
         data: { data },
       } = await axiosInstance.get('/admin/roles');

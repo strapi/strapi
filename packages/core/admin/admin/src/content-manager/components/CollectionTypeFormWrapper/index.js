@@ -302,6 +302,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         `collection-types/${slug}/${id}/actions/numberOfDraftRelations`
       );
       dispatch(setStatus('draft-relation-check-pending'));
+
       const numberOfDraftRelations = await axiosInstance.get(endPoint);
       trackUsageRef.current('didCheckDraftRelations');
 

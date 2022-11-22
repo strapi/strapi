@@ -109,6 +109,7 @@ function ListView({
 
       try {
         const opts = source ? { cancelToken: source.token } : null;
+
         const {
           data: { results, pagination: paginationResult },
         } = await axiosInstance.get(endPoint, opts);

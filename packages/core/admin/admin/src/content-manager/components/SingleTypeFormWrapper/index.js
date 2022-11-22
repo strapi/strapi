@@ -243,7 +243,6 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       dispatch(setStatus('draft-relation-check-pending'));
 
       const numberOfDraftRelations = await axiosInstance.get(endPoint);
-
       trackUsageRef.current('didCheckDraftRelations');
 
       dispatch(setStatus('resolved'));

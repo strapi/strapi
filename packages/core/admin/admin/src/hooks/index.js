@@ -10,3 +10,4 @@ export { default as usePermissionsDataManager } from './usePermissionsDataManage
 export { default as useReleaseNotification } from './useReleaseNotification';
 export { default as useThemeToggle } from './useThemeToggle';
 export { default as useRegenerate } from './useRegenerate';
+export { default as useFetchClient } from './useFetchClient';

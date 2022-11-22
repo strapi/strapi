@@ -43,7 +43,6 @@ const makeApp = (history, settings) => (
             runHookWaterfall={jest.fn()}
             runHookSeries={jest.fn()}
             menu={[]}
-            getFetchClient={jest.fn()}
           >
             <Router history={history}>
               <Route path="/settings/:settingId" component={SettingsPage} />
