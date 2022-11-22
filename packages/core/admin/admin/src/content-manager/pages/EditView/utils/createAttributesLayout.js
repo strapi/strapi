@@ -1,16 +1,17 @@
 import { get, isEmpty } from 'lodash';
 
 const createAttributesLayout = (currentContentTypeLayoutData) => {
-  const getType = (name) => get(attributes, [name, 'type'], '');
-  let currentRowIndex = 0;
-  const newLayout = [];
-
   if (!currentContentTypeLayoutData.layouts) {
-    return newLayout;
+    return [];
   }
 
   const currentLayout = currentContentTypeLayoutData.layouts.edit;
   const attributes = currentContentTypeLayoutData.attributes;
+
+  const getType = (name) => get(attributes, [name, 'type'], '');
+
+  let currentRowIndex = 0;
+  const newLayout = [];
 
   currentLayout.forEach((row) => {
     const hasDynamicZone = row.some(({ name }) => getType(name) === 'dynamiczone');
