@@ -16,14 +16,14 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   height: 100%;
 }
 
-.c93 {
+.c107 {
   background: #ffffff;
   padding: 24px;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c94 {
+.c108 {
   background: #f6ecfc;
   padding: 12px;
   border-radius: 4px;
@@ -94,6 +94,24 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   flex-direction: row;
 }
 
+.c92 {
+  -webkit-align-items: flex-end;
+  -webkit-box-align: flex-end;
+  -ms-flex-align: flex-end;
+  align-items: flex-end;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
 .c82 {
   padding-top: 24px;
 }
@@ -112,7 +130,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   flex-direction: row;
 }
 
-.c96 {
+.c110 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -126,7 +144,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   flex-direction: column;
 }
 
-.c97 > * {
+.c111 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
@@ -175,7 +193,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   line-height: 1.43;
 }
 
-.c98 {
+.c112 {
   font-weight: 500;
   color: #32324d;
   font-size: 0.75rem;
@@ -447,8 +465,12 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   padding-left: 16px;
 }
 
-.c92 {
-  padding-top: 32px;
+.c93 {
+  padding-left: 8px;
+}
+
+.c106 {
+  padding-top: 40px;
 }
 
 .c43 {
@@ -614,7 +636,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   height: 12;
 }
 
-.c100 {
+.c114 {
   color: #666687;
   margin-left: 8px;
   width: 12px;
@@ -782,6 +804,184 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
+.c94 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c95 > * + * {
+  margin-left: 4px;
+}
+
+.c98 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c101 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c104 {
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c102 {
+  line-height: revert;
+}
+
+.c96 {
+  padding: 12px;
+  border-radius: 4px;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  position: relative;
+  outline: none;
+}
+
+.c96:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c96:focus-visible {
+  outline: none;
+}
+
+.c96:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c99 {
+  padding: 12px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  position: relative;
+  outline: none;
+}
+
+.c99:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c99:focus-visible {
+  outline: none;
+}
+
+.c99:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c100 {
+  color: #271fe0;
+  background: #ffffff;
+}
+
+.c100:hover {
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c103 {
+  color: #32324d;
+}
+
+.c103:hover {
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c97 {
+  font-size: 0.7rem;
+  pointer-events: none;
+}
+
+.c97 svg path {
+  fill: #c0c0cf;
+}
+
+.c97:focus svg path,
+.c97:hover svg path {
+  fill: #c0c0cf;
+}
+
+.c105 {
+  font-size: 0.7rem;
+}
+
+.c105 svg path {
+  fill: #666687;
+}
+
+.c105:focus svg path,
+.c105:hover svg path {
+  fill: #4a4a6a;
+}
+
 .c14 {
   font-weight: 600;
   color: #32324d;
@@ -934,16 +1134,16 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   fill: #32324d;
 }
 
-.c95 {
+.c109 {
   margin-right: 24px;
 }
 
-.c95 svg {
+.c109 svg {
   width: 2rem;
   height: 2rem;
 }
 
-.c99 {
+.c113 {
   word-break: break-all;
 }
 
@@ -1273,7 +1473,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                     Plugins
                      
                     (
-                    5
+                    96
                     )
                   </span>
                 </div>
@@ -1296,7 +1496,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                     Providers
                      
                     (
-                    9
+                    96
                     )
                   </span>
                 </div>
@@ -2294,7 +2494,232 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
           </div>
         </div>
         <div
-          class="c92"
+          class="c76"
+        >
+          <div
+            class="c92"
+          >
+            <div
+              class="c78"
+            >
+              <div>
+                <div
+                  class="c39 c40"
+                >
+                  <div
+                    class="c41 c42"
+                  >
+                    <button
+                      aria-disabled="false"
+                      aria-expanded="false"
+                      aria-haspopup="listbox"
+                      aria-label="Entries per page"
+                      aria-labelledby="select-1-label select-1-content"
+                      class="c43"
+                      id="select-1"
+                      type="button"
+                    />
+                    <div
+                      class="c44 c45"
+                    >
+                      <div
+                        class="c41"
+                      >
+                        <div
+                          class="c46"
+                        >
+                          <span
+                            class="c47"
+                            id="select-1-content"
+                          >
+                            24
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="c41"
+                      >
+                        <button
+                          aria-hidden="true"
+                          class="c48 c49 c50"
+                          tabindex="-1"
+                          type="button"
+                        >
+                          <svg
+                            fill="none"
+                            height="1em"
+                            viewBox="0 0 14 8"
+                            width="1em"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              clip-rule="evenodd"
+                              d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                              fill="#32324D"
+                              fill-rule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="c93"
+              >
+                <label
+                  class="c80"
+                  for="page-size"
+                >
+                  Entries per page
+                </label>
+              </div>
+            </div>
+            <nav
+              aria-label="pagination"
+              class="sc-bIaGFe"
+            >
+              <ul
+                class="c94 c95"
+              >
+                <li>
+                  <a
+                    aria-current="page"
+                    aria-disabled="true"
+                    class="c96 c97 active"
+                    href="/"
+                    tabindex="-1"
+                  >
+                    <div
+                      class="c98"
+                    >
+                      Go to previous page
+                    </div>
+                    <svg
+                      aria-hidden="true"
+                      fill="none"
+                      height="1em"
+                      viewBox="0 0 10 16"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M9.88 14.12L3.773 8 9.88 1.88 8 0 0 8l8 8 1.88-1.88z"
+                        fill="#32324D"
+                      />
+                    </svg>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    aria-current="page"
+                    class="c99 c100 active"
+                    href="/?page=1"
+                  >
+                    <div
+                      class="c98"
+                    >
+                      Go to page 1
+                    </div>
+                    <span
+                      aria-hidden="true"
+                      class="c101 c102"
+                    >
+                      1
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    aria-current="page"
+                    class="c96 c103 active"
+                    href="/?page=2"
+                  >
+                    <div
+                      class="c98"
+                    >
+                      Go to page 2
+                    </div>
+                    <span
+                      aria-hidden="true"
+                      class="c104 c102"
+                    >
+                      2
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    aria-current="page"
+                    class="c96 c103 active"
+                    href="/?page=3"
+                  >
+                    <div
+                      class="c98"
+                    >
+                      Go to page 3
+                    </div>
+                    <span
+                      aria-hidden="true"
+                      class="c104 c102"
+                    >
+                      3
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    aria-current="page"
+                    class="c96 c103 active"
+                    href="/?page=4"
+                  >
+                    <div
+                      class="c98"
+                    >
+                      Go to page 4
+                    </div>
+                    <span
+                      aria-hidden="true"
+                      class="c104 c102"
+                    >
+                      4
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    aria-current="page"
+                    aria-disabled="false"
+                    class="c96 c105 active"
+                    href="/?page=2"
+                  >
+                    <div
+                      class="c98"
+                    >
+                      Go to next page
+                    </div>
+                    <svg
+                      aria-hidden="true"
+                      fill="none"
+                      height="1em"
+                      viewBox="0 0 10 16"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M0 1.88L6.107 8 0 14.12 1.88 16l8-8-8-8L0 1.88z"
+                        fill="#32324D"
+                      />
+                    </svg>
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+        <div
+          class="c106"
         >
           <a
             href="https://strapi.canny.io/plugin-requests"
@@ -2303,10 +2728,10 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
             target="_blank"
           >
             <div
-              class="c93 c78"
+              class="c107 c78"
             >
               <div
-                class="c94 c78 c95"
+                class="c108 c78 c109"
               >
                 <svg
                   fill="none"
@@ -2328,18 +2753,18 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                 </svg>
               </div>
               <div
-                class="c96 c97"
+                class="c110 c111"
               >
                 <div
                   class="c78"
                 >
                   <span
-                    class="c98 c99"
+                    class="c112 c113"
                   >
                     Documentation
                   </span>
                   <svg
-                    class="c100 c69"
+                    class="c114 c69"
                     fill="none"
                     height="3"
                     viewBox="0 0 24 24"

@@ -1,17 +1,10 @@
 import React from 'react';
-import {
-  render,
-  waitFor,
-  getByPlaceholderText,
-  screen,
-  getByText,
-  queryByText,
-  getByLabelText,
-} from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { TrackingProvider } from '@strapi/helper-plugin';
 
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
@@ -41,6 +34,8 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
+const user = userEvent.setup();
+
 const client = new QueryClient({
   defaultOptions: {
     queries: {
@@ -50,16 +45,10 @@ const client = new QueryClient({
 });
 
 const waitForReload = async () => {
-  await waitFor(
-    () => {
-      expect(screen.queryByTestId('loader')).toBe(null);
-    },
-    { timeout: 5000 }
-  );
+  await screen.findByText('Marketplace', { selector: 'h1' });
 };
 
 describe('Marketplace page - providers tab', () => {
-  let renderedContainer;
   let history;
 
   beforeAll(() => server.listen());
@@ -73,50 +62,42 @@ describe('Marketplace page - providers tab', () => {
   afterAll(() => server.close());
 
   beforeEach(async () => {
-    history = createMemoryHistory();
+    history = createMemoryHistory({ initialEntries: ['/?npmPackageType=provider&sort=name:asc'] });
+
     // Make sure each test isolated
-    const { container } = render(
+    render(
       <QueryClientProvider client={client}>
-        <IntlProvider locale="en" messages={{}} textComponent="span">
-          <ThemeProvider theme={lightTheme}>
-            <Router history={history}>
-              <MarketPlacePage />
-            </Router>
-          </ThemeProvider>
-        </IntlProvider>
+        <TrackingProvider>
+          <IntlProvider locale="en" messages={{}} textComponent="span">
+            <ThemeProvider theme={lightTheme}>
+              <Router history={history}>
+                <MarketPlacePage />
+              </Router>
+            </ThemeProvider>
+          </IntlProvider>
+        </TrackingProvider>
       </QueryClientProvider>
     );
 
     await waitForReload();
-
-    const user = userEvent.setup();
-    const providersTab = screen.getByRole('tab', { name: /providers/i });
-    await user.click(providersTab);
-
-    renderedContainer = container;
   });
 
-  it('renders and matches the providers tab snapshot', async () => {
-    // Check snapshot
-    expect(renderedContainer.firstChild).toMatchSnapshot();
-
-    const button = screen.getByRole('tab', { selected: true });
-    const providersTabActive = getByText(button, /providers/i);
-
+  it('renders the providers tab', async () => {
+    const providersTab = screen.getByText(/providers/i).closest('button');
     const tabPanel = screen.getByRole('tabpanel');
-    const providerCardText = getByText(tabPanel, 'Cloudinary');
-    const pluginCardText = queryByText(tabPanel, 'Comments');
-    const submitProviderText = queryByText(renderedContainer, 'Submit provider');
+    const providerCardText = within(tabPanel).getByText('Cloudinary');
+    const pluginCardText = within(tabPanel).queryByText('Comments');
+    const submitProviderText = screen.queryByText('Submit provider');
 
-    expect(providersTabActive).not.toBe(null);
+    expect(providersTab).toBeDefined();
+    expect(providersTab).toHaveAttribute('aria-selected', 'true');
     expect(providerCardText).toBeVisible();
     expect(submitProviderText).toBeVisible();
     expect(pluginCardText).toEqual(null);
   });
 
   it('should return providers search results matching the query', async () => {
-    const user = userEvent.setup();
-    const input = getByPlaceholderText(renderedContainer, 'Search');
+    const input = screen.getByPlaceholderText('Search');
     await user.type(input, 'cloudina');
     const match = screen.getByText('Cloudinary');
     const notMatch = screen.queryByText('Mailgun');
@@ -128,10 +109,7 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('should return empty providers search results given a bad query', async () => {
-    const user = userEvent.setup();
-    const providersTab = screen.getByRole('tab', { name: /providers/i });
-    await user.click(providersTab);
-    const input = getByPlaceholderText(renderedContainer, 'Search');
+    const input = screen.getByPlaceholderText('Search');
     const badQuery = 'asdf';
     await user.type(input, badQuery);
     const noResult = screen.getByText(`No result for "${badQuery}"`);
@@ -139,45 +117,35 @@ describe('Marketplace page - providers tab', () => {
     expect(noResult).toBeVisible();
   });
 
-  it('shows the installed text for installed providers', async () => {
-    const user = userEvent.setup();
-    // Open providers tab
-    const providersTab = screen.getByRole('tab', { name: /providers/i });
-    await user.click(providersTab);
-
+  it('shows the installed text for installed providers', () => {
     // Provider that's already installed
     const alreadyInstalledCard = screen
       .getAllByTestId('npm-package-card')
       .find((div) => div.innerHTML.includes('Cloudinary'));
-    const alreadyInstalledText = queryByText(alreadyInstalledCard, /installed/i);
+    const alreadyInstalledText = within(alreadyInstalledCard).queryByText(/installed/i);
     expect(alreadyInstalledText).toBeVisible();
 
     // Provider that's not installed
     const notInstalledCard = screen
       .getAllByTestId('npm-package-card')
       .find((div) => div.innerHTML.includes('Rackspace'));
-    const notInstalledText = queryByText(notInstalledCard, /copy install command/i);
+    const notInstalledText = within(notInstalledCard).queryByText(/copy install command/i);
     expect(notInstalledText).toBeVisible();
   });
 
   it('shows providers filters popover', async () => {
-    const user = userEvent.setup();
     const filtersButton = screen.getByTestId('filters-button');
 
     // Only show collections filters on providers
-    const providersTab = screen.getByRole('tab', { name: /providers/i });
-    await user.click(providersTab);
     await user.click(filtersButton);
     screen.getByLabelText(/no collections selected/i);
   });
 
   it('shows the collections filter options', async () => {
-    const user = userEvent.setup();
     const filtersButton = screen.getByTestId('filters-button');
     await user.click(filtersButton);
 
     const collectionsButton = screen.getByTestId('Collections-button');
-
     await user.click(collectionsButton);
 
     const mockedServerCollections = {
@@ -194,7 +162,6 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('filters a collection option', async () => {
-    const user = userEvent.setup();
     const filtersButton = screen.getByTestId('filters-button');
     await user.click(filtersButton);
 
@@ -203,7 +170,6 @@ describe('Marketplace page - providers tab', () => {
 
     const option = screen.getByRole('option', { name: `Made by Strapi (6)` });
     await user.click(option);
-
     await waitForReload();
 
     const optionTag = screen.getByRole('button', { name: 'Made by Strapi' });
@@ -219,18 +185,13 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('filters multiple collection options', async () => {
-    const user = userEvent.setup();
-
     await user.click(screen.getByTestId('filters-button'));
     await user.click(screen.getByTestId('Collections-button'));
     await user.click(screen.getByRole('option', { name: `Made by Strapi (6)` }));
 
-    await waitForReload();
-
-    await user.click(screen.getByTestId('filters-button'));
+    await user.click(await screen.findByTestId('filters-button'));
     await user.click(screen.getByRole('button', { name: `1 collection selected Made by Strapi` }));
     await user.click(screen.getByRole('option', { name: `Verified (6)` }));
-
     await waitForReload();
 
     const madeByStrapiTag = screen.getByRole('button', { name: 'Made by Strapi' });
@@ -244,7 +205,6 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('removes a filter option tag', async () => {
-    const user = userEvent.setup();
     const filtersButton = screen.getByTestId('filters-button');
     await user.click(filtersButton);
 
@@ -253,7 +213,6 @@ describe('Marketplace page - providers tab', () => {
 
     const option = screen.getByRole('option', { name: `Made by Strapi (6)` });
     await user.click(option);
-
     await waitForReload();
 
     const optionTag = screen.getByRole('button', { name: 'Made by Strapi' });
@@ -262,11 +221,10 @@ describe('Marketplace page - providers tab', () => {
     await user.click(optionTag);
 
     expect(optionTag).not.toBeVisible();
-    expect(history.location.search).toBe('?npmPackageType=provider&sort=name:asc');
+    expect(history.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=1');
   });
 
   it('only filters in the providers tab', async () => {
-    const user = userEvent.setup();
     const filtersButton = screen.getByTestId('filters-button');
     await user.click(filtersButton);
 
@@ -276,9 +234,7 @@ describe('Marketplace page - providers tab', () => {
     const option = screen.getByRole('option', { name: `Made by Strapi (6)` });
     await user.click(option);
 
-    await waitForReload();
-
-    const collectionCards = screen.getAllByTestId('npm-package-card');
+    const collectionCards = await screen.findAllByTestId('npm-package-card');
     expect(collectionCards.length).toBe(2);
 
     await user.click(screen.getByRole('tab', { name: /plugins/i }));
@@ -291,7 +247,6 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('shows the correct options on sort select', async () => {
-    const user = userEvent.setup();
     const sortButton = screen.getByRole('button', { name: /Sort by/i });
     await user.click(sortButton);
 
@@ -303,34 +258,59 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('changes the url on sort option select', async () => {
-    const user = userEvent.setup();
     const sortButton = screen.getByRole('button', { name: /Sort by/i });
     await user.click(sortButton);
 
     const newestOption = screen.getByRole('option', { name: 'Newest' });
     await user.click(newestOption);
-    expect(history.location.search).toEqual('?npmPackageType=provider&sort=submissionDate:desc');
+
+    expect(history.location.search).toEqual(
+      '?npmPackageType=provider&sort=submissionDate:desc&page=1'
+    );
   });
 
-  it('shows github stars and weekly downloads count for each provider', async () => {
-    const user = userEvent.setup();
-    const providersTab = screen.getByRole('tab', { name: /providers/i });
-    await user.click(providersTab);
-
+  it('shows github stars and weekly downloads count for each provider', () => {
     const cloudinaryCard = screen
       .getAllByTestId('npm-package-card')
       .find((div) => div.innerHTML.includes('Cloudinary'));
 
-    const githubStarsLabel = getByLabelText(
-      cloudinaryCard,
+    const githubStarsLabel = within(cloudinaryCard).getByLabelText(
       /this provider was starred \d+ on GitHub/i
     );
     expect(githubStarsLabel).toBeVisible();
 
-    const downloadsLabel = getByLabelText(
-      cloudinaryCard,
+    const downloadsLabel = within(cloudinaryCard).getByLabelText(
       /this provider has \d+ weekly downloads/i
     );
     expect(downloadsLabel).toBeVisible();
+  });
+
+  it('paginates the results', async () => {
+    // Should have pagination section with 4 pages
+    const pagination = screen.getByLabelText(/pagination/i);
+    expect(pagination).toBeVisible();
+    const pageButtons = screen.getAllByText(/go to page \d+/i).map((el) => el.closest('a'));
+    expect(pageButtons.length).toBe(4);
+
+    // Can't go to previous page since there isn't one
+    expect(screen.getByText(/go to previous page/i).closest('a')).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+
+    // Can go to next page
+    await user.click(screen.getByText(/go to next page/i).closest('a'));
+    await waitForReload();
+    expect(history.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=2');
+
+    // Can go to previous page
+    await user.click(screen.getByText(/go to previous page/i).closest('a'));
+    await waitForReload();
+    expect(history.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=1');
+
+    // Can go to specific page
+    await user.click(screen.getByText(/go to page 3/i).closest('a'));
+    await waitForReload();
+    expect(history.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=3');
   });
 });
