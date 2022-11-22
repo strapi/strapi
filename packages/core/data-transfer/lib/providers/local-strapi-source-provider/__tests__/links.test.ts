@@ -1,4 +1,4 @@
-import { Duplex } from 'stream';
+import { Readable } from 'stream';
 
 import { createLinksStream } from '../links';
 import { getDeepPopulateQuery } from '../links/utils';
@@ -15,7 +15,7 @@ describe('Local Strapi Source Provider - Entities Streaming', () => {
 
       const stream = createLinksStream(strapi);
 
-      expect(stream).toBeInstanceOf(Duplex);
+      expect(stream).toBeInstanceOf(Readable);
 
       const links = await collect(stream);
 
@@ -60,7 +60,7 @@ describe('Local Strapi Source Provider - Entities Streaming', () => {
 
       const stream = createLinksStream(strapi);
 
-      expect(stream).toBeInstanceOf(Duplex);
+      expect(stream).toBeInstanceOf(Readable);
 
       const links = await collect(stream);
 
@@ -140,7 +140,7 @@ describe('Local Strapi Source Provider - Entities Streaming', () => {
 
       const stream = createLinksStream(strapi);
 
-      expect(stream).toBeInstanceOf(Duplex);
+      expect(stream).toBeInstanceOf(Readable);
 
       const links = await collect(stream);
 
@@ -238,7 +238,7 @@ describe('Local Strapi Source Provider - Entities Streaming', () => {
 
       const stream = createLinksStream(strapi);
 
-      expect(stream).toBeInstanceOf(Duplex);
+      expect(stream).toBeInstanceOf(Readable);
 
       const links = await collect(stream);
 
