@@ -6,7 +6,10 @@ import { ISourceProvider, IDestinationProvider } from './provider';
 /**
  * Defines the capabilities and properties of the transfer engine
  */
-export interface ITransferEngine {
+export interface ITransferEngine<
+  S extends ISourceProvider = ISourceProvider,
+  D extends IDestinationProvider = IDestinationProvider
+> {
   /**
    * Provider used as a source which that will stream its data to the transfer engine
    */
@@ -31,7 +34,7 @@ export interface ITransferEngine {
   /**
    * Start streaming selected data from the source to the destination
    */
-  transfer(): Promise<void>;
+  transfer(): Promise<ITransferResults<S, D>>;
 
   /**
    * Run the bootstrap lifecycle method of each provider
@@ -39,7 +42,12 @@ export interface ITransferEngine {
    * Note: The bootstrap method can be used to initialize database
    * connections, open files, etc...
    */
-  boostrap(): Promise<void>;
+  bootstrap(): Promise<void>;
+
+  /**
+   * Engine init step. Must be called after the providers bootstrap.
+   */
+  init(): Promise<void>;
 
   /**
    * Run the close lifecycle method of each provider
@@ -47,6 +55,12 @@ export interface ITransferEngine {
    * Note: The close method can be used to gracefully close connections, cleanup the filesystem, etc..
    */
   close(): Promise<void>;
+
+  /**
+   * Start the schemas transfer by connecting the
+   * related source and destination providers streams
+   */
+  transferSchemas(): Promise<void>;
 
   /**
    * Start the entities transfer by connecting the
@@ -97,6 +111,11 @@ export interface ITransferEngineOptions {
    * "patch" // every part of the version should match. Similar to "exact" but only work on semver.
    */
   versionMatching: 'exact' | 'ignore' | 'major' | 'minor' | 'patch';
+
+  /**
+   * Strategy used to do the schema matching in the integrity checks
+   */
+  schemasMatching: 'exact' | 'strict';
 
   // List of global transform streams to integrate into the final pipelines
   common?: {

@@ -1,9 +1,12 @@
-import type { ISourceProvider, ProviderType } from '../../../types';
-
 import { chain } from 'stream-chain';
+import { mapValues, pick } from 'lodash/fp';
+import { Readable } from 'stream';
 
+import type { IMetadata, ISourceProvider, ProviderType } from '../../../types';
 import { createEntitiesStream, createEntitiesTransformStream } from './entities';
 import { createLinksStream } from './links';
+import { createConfigurationStream } from './configuration';
+import { mapSchemasValues } from '../../utils';
 
 export interface ILocalStrapiSourceProviderOptions {
   getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>;
@@ -39,9 +42,23 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     }
   }
 
-  // TODO: Implement the get metadata
-  async getMetadata() {
-    return null;
+  getMetadata(): IMetadata {
+    const strapiVersion = strapi.config.get('info.strapi');
+    const createdAt = new Date().toISOString();
+
+    const plugins = Object.keys(strapi.plugins);
+
+    return {
+      createdAt,
+      strapi: {
+        version: strapiVersion,
+        plugins: plugins.map((name) => ({
+          name,
+          // TODO: Get the plugin actual version when it'll be available
+          version: strapiVersion,
+        })),
+      },
+    };
   }
 
   async streamEntities(): Promise<NodeJS.ReadableStream> {
@@ -52,6 +69,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     return chain([
       // Entities stream
       createEntitiesStream(this.strapi),
+
       // Transform stream
       createEntitiesTransformStream(),
     ]);
@@ -64,4 +82,31 @@ class LocalStrapiSourceProvider implements ISourceProvider {
 
     return createLinksStream(this.strapi);
   }
+
+  streamConfiguration(): NodeJS.ReadableStream {
+    if (!this.strapi) {
+      throw new Error('Not able to stream configuration. Strapi instance not found');
+    }
+
+    return createConfigurationStream(strapi);
+  }
+
+  getSchemas() {
+    if (!this.strapi) {
+      throw new Error('Not able to get Schemas. Strapi instance not found');
+    }
+
+    const schemas = {
+      ...this.strapi.contentTypes,
+      ...this.strapi.components,
+    };
+
+    return mapSchemasValues(schemas);
+  }
+
+  streamSchemas(): NodeJS.ReadableStream {
+    return Readable.from(Object.values(this.getSchemas()));
+  }
 }
+
+export type ILocalStrapiSourceProvider = InstanceType<typeof LocalStrapiSourceProvider>;

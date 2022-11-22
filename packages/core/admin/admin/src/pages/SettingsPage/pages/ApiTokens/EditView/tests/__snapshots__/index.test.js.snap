@@ -1,6 +1,135 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot when creating token 1`] = `
+.c70 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c2 {
+  background: #f6f6f9;
+  padding-top: 24px;
+  padding-right: 56px;
+  padding-bottom: 40px;
+  padding-left: 56px;
+}
+
+.c3 {
+  padding-bottom: 8px;
+}
+
+.c5 {
+  padding-right: 8px;
+}
+
+.c18 {
+  padding-right: 56px;
+  padding-left: 56px;
+}
+
+.c21 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c38 {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.c40 {
+  padding-left: 12px;
+}
+
+.c44 {
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c47 {
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+}
+
+.c50 {
+  background: #ffffff;
+  padding: 16px;
+}
+
+.c69 {
+  background: #eaeaef;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+}
+
+.c51 {
+  border-radius: 4px;
+}
+
+.c53 {
+  background: #f6f6f9;
+  padding-top: 24px;
+  padding-right: 24px;
+  padding-bottom: 24px;
+  padding-left: 24px;
+}
+
+.c55 {
+  max-width: 100%;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c57 {
+  min-width: 0px;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c62 {
+  background: #dcdce4;
+  border-radius: 50%;
+  cursor: pointer;
+  width: 2rem;
+  height: 2rem;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.c64 {
+  color: #666687;
+  width: 0.6875rem;
+}
+
+.c67 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 24px;
+  padding-bottom: 24px;
+  padding-left: 24px;
+}
+
 .c10 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -13,412 +142,13 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-}
-
-.c20 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c21 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c21 > * + * {
-  margin-top: 24px;
-}
-
-.c23 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c23 > * + * {
-  margin-top: 16px;
-}
-
-.c63 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c63 > * + * {
-  margin-top: 8px;
-}
-
-.c11 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c11 > * + * {
-  margin-left: 8px;
-}
-
-.c24 {
-  color: #32324d;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-}
-
-.c58 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c64 {
-  color: #666687;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c18 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c15 {
-  padding-right: 8px;
-}
-
-.c12 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c12 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c12 svg > g,
-.c12 svg path {
-  fill: #ffffff;
-}
-
-.c12[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c12:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c12:focus-visible {
-  outline: none;
-}
-
-.c12:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c16 {
-  height: 100%;
-}
-
-.c13 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: 1px solid #4945ff;
-}
-
-.c13 .c14 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c13 .c17 {
-  color: #ffffff;
-}
-
-.c13[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c13[aria-disabled='true'] .c17 {
-  color: #666687;
-}
-
-.c13[aria-disabled='true'] svg > g,
-.c13[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c13[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c13[aria-disabled='true']:active .c17 {
-  color: #666687;
-}
-
-.c13[aria-disabled='true']:active svg > g,
-.c13[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c13:hover {
-  border: 1px solid #7b79ff;
-  background: #7b79ff;
-}
-
-.c13:active {
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c13 svg > g,
-.c13 svg path {
-  fill: #ffffff;
-}
-
-.c22 {
-  background: #ffffff;
-  padding-top: 24px;
-  padding-right: 32px;
-  padding-bottom: 24px;
-  padding-left: 32px;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-}
-
-.c65 {
-  background: #ffffff;
-  padding: 16px;
-}
-
-.c50 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c50:focus {
-  outline: none;
-}
-
-.c50[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c53 {
-  padding-right: 16px;
-  padding-left: 16px;
-}
-
-.c55 {
-  padding-left: 12px;
-}
-
-.c43 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c46 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c51 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
   -ms-flex-pack: justify;
   justify-content: space-between;
 }
 
-.c45 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c47 {
-  color: #d02b20;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c54 {
-  color: #666687;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c48 {
-  line-height: 0;
-}
-
-.c44 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c44 > * + * {
-  margin-top: 4px;
-}
-
-.c49 {
-  position: relative;
-  border: 1px solid #dcdce4;
-  padding-right: 12px;
-  border-radius: 4px;
-  background: #ffffff;
-  overflow: hidden;
-  min-height: 2.5rem;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c49:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c56 {
-  background: transparent;
-  border: none;
-  position: relative;
-  z-index: 1;
-}
-
-.c56 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
-}
-
-.c56 svg path {
-  fill: #666687;
-}
-
-.c57 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  background: none;
-  border: none;
-}
-
-.c57 svg {
-  width: 0.375rem;
-}
-
-.c52 {
-  width: 100%;
-}
-
-.c37 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c39 {
+.c11 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -430,541 +160,23 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-}
-
-.c40 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c41 {
-  border: 1px solid #dcdce4;
-  border-radius: 4px;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 12px;
-  padding-bottom: 12px;
-  background: #ffffff;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c41:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c42 {
-  display: block;
-  width: 100%;
-  font-weight: 400;
-  font-size: 0.875rem;
-  border: none;
-  color: #32324d;
-  resize: none;
-  background: inherit;
-}
-
-.c42::-webkit-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c42::-moz-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c42:-ms-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c42::placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c42:focus-within {
-  outline: none;
-}
-
-.c38 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c38 > * + * {
-  margin-top: 4px;
-}
-
-.c36 textarea {
-  height: 5rem;
-  line-height: 1.25rem;
-}
-
-.c36 textarea::-webkit-input-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c36 textarea::-moz-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c36 textarea:-ms-input-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c36 textarea::placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c27 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c30 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c33 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c29 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c31 {
-  color: #d02b20;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c32 {
-  line-height: 0;
-}
-
-.c35 {
-  border: none;
-  border-radius: 4px;
-  padding-bottom: 0.65625rem;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 0.65625rem;
-  color: #32324d;
-  font-weight: 400;
-  font-size: 0.875rem;
-  display: block;
-  width: 100%;
-  background: inherit;
-}
-
-.c35::-webkit-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c35::-moz-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c35:-ms-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c35::placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c35[aria-disabled='true'] {
-  color: inherit;
-}
-
-.c35:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-.c34 {
-  border: 1px solid #dcdce4;
-  border-radius: 4px;
-  background: #ffffff;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c34:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c28 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c28 > * + * {
-  margin-top: 4px;
-}
-
-.c6 {
-  color: #4945ff;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c4 {
-  padding-right: 8px;
-}
-
-.c3 {
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  position: relative;
-  outline: none;
-}
-
-.c3 svg path {
-  fill: #4945ff;
-}
-
-.c3 svg {
-  font-size: 0.625rem;
-}
-
-.c3:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c3:focus-visible {
-  outline: none;
-}
-
-.c3:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c5 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-}
-
-.c89 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
-.c0:focus-visible {
-  outline: none;
-}
-
-.c1 {
-  background: #f6f6f9;
-  padding-top: 24px;
-  padding-right: 56px;
-  padding-bottom: 40px;
-  padding-left: 56px;
-}
-
-.c2 {
-  padding-bottom: 8px;
 }
 
 .c19 {
-  padding-right: 56px;
-  padding-left: 56px;
-}
-
-.c7 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
 }
 
-.c8 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c9 {
-  color: #32324d;
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-}
-
-.c59 {
-  background: #ffffff;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-}
-
-.c62 {
-  padding-top: 24px;
-  padding-right: 32px;
-  padding-bottom: 24px;
-  padding-left: 32px;
-}
-
-.c88 {
-  background: #eaeaef;
-  padding-top: 24px;
-  padding-right: 32px;
-  padding-bottom: 24px;
-  padding-left: 32px;
-}
-
-.c25 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 20px;
-}
-
-.c60 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 0px;
-}
-
-.c26 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c61 {
-  grid-column: span 7;
-  max-width: 100%;
-}
-
-.c87 {
-  grid-column: span 5;
-  max-width: 100%;
-}
-
-.c79 {
-  color: #4945ff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c80 {
-  color: #4a4a6a;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-}
-
-.c66 {
-  border-radius: 4px;
-}
-
-.c69 {
-  background: #f6f6f9;
-  padding-top: 24px;
-  padding-right: 24px;
-  padding-bottom: 24px;
-  padding-left: 24px;
-}
-
-.c72 {
-  max-width: 100%;
-  -webkit-flex: 1;
-  -ms-flex: 1;
-  flex: 1;
-}
-
-.c75 {
-  min-width: 0px;
-  -webkit-flex: 1;
-  -ms-flex: 1;
-  flex: 1;
-}
-
-.c81 {
-  background: #dcdce4;
-  border-radius: 50%;
-  cursor: pointer;
-  width: 2rem;
-  height: 2rem;
-  -webkit-flex-shrink: 0;
-  -ms-flex-negative: 0;
-  flex-shrink: 0;
-  cursor: pointer;
-}
-
-.c83 {
-  color: #666687;
-  width: 0.6875rem;
-}
-
-.c86 {
-  background: #ffffff;
-  padding-top: 24px;
-  padding-right: 24px;
-  padding-bottom: 24px;
-  padding-left: 24px;
-}
-
-.c70 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c73 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c82 {
+.c63 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -985,82 +197,169 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   justify-content: center;
 }
 
-.c67 {
-  border: 1px solid #f6f6f9;
-}
-
-.c67:hover:not([aria-disabled='true']) {
-  border: 1px solid #4945ff;
-}
-
-.c67:hover:not([aria-disabled='true']) .sc-dTBbbW {
-  color: #271fe0;
-}
-
-.c67:hover:not([aria-disabled='true']) .c78 {
+.c8 {
+  font-size: 0.875rem;
+  line-height: 1.43;
   color: #4945ff;
 }
 
-.c67:hover:not([aria-disabled='true']) > .c68 {
-  background: #f0f0ff;
+.c12 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
 }
 
-.c67:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
-  background: #d9d8ff;
+.c17 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 1.14;
+  color: #32324d;
 }
 
-.c85 {
-  border: 1px solid #ffffff;
+.c23 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
 }
 
-.c85:hover:not([aria-disabled='true']) {
-  border: 1px solid #4945ff;
+.c27 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
 }
 
-.c85:hover:not([aria-disabled='true']) .sc-dTBbbW {
-  color: #271fe0;
+.c28 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #d02b20;
 }
 
-.c85:hover:not([aria-disabled='true']) .c78 {
+.c39 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c43 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c49 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #666687;
+}
+
+.c60 {
+  font-size: 0.75rem;
+  line-height: 1.33;
   color: #4945ff;
 }
 
-.c85:hover:not([aria-disabled='true']) > .c68 {
-  background: #f0f0ff;
+.c61 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #4a4a6a;
 }
 
-.c85:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
-  background: #d9d8ff;
+.c20 > * {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
-.c76 {
-  background: transparent;
-  border: none;
-  position: relative;
-  outline: none;
+.c20 > * + * {
+  margin-top: 24px;
 }
 
-.c76[aria-disabled='true'] {
-  pointer-events: none;
+.c22 > * {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
-.c76[aria-disabled='true'] svg path {
-  fill: #666687;
+.c22 > * + * {
+  margin-top: 16px;
 }
 
-.c76 svg {
+.c26 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c26 > * + * {
+  margin-top: 4px;
+}
+
+.c48 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c48 > * + * {
+  margin-top: 8px;
+}
+
+.c13 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c13 > * + * {
+  margin-left: 8px;
+}
+
+.c56 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c56 > * + * {
+  margin-left: 12px;
+}
+
+.c14 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  font-size: 0.625rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
 }
 
-.c76 svg path {
-  fill: #4945ff;
+.c14 svg {
+  height: 12px;
+  width: 12px;
 }
 
-.c76:after {
+.c14 svg > g,
+.c14 svg path {
+  fill: #ffffff;
+}
+
+.c14[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c14:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -1075,11 +374,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 2px solid transparent;
 }
 
-.c76:focus-visible {
+.c14:focus-visible {
   outline: none;
 }
 
-.c76:focus-visible:after {
+.c14:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -1090,77 +389,569 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 2px solid #4945ff;
 }
 
-.c74 > * {
-  margin-left: 0;
-  margin-right: 0;
+.c16 {
+  height: 100%;
 }
 
-.c74 > * + * {
-  margin-left: 12px;
+.c15 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: #4945ff;
+  border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
-.c84 path {
+.c15 .c1 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c15 .c7 {
+  color: #ffffff;
+}
+
+.c15[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c15[aria-disabled='true'] .c7 {
+  color: #666687;
+}
+
+.c15[aria-disabled='true'] svg > g,
+.c15[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c77 {
-  text-align: left;
+.c15[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
 }
 
-.c77 > span {
+.c15[aria-disabled='true']:active .c7 {
+  color: #666687;
+}
+
+.c15[aria-disabled='true']:active svg > g,
+.c15[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c15:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c15:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c15 svg > g,
+.c15 svg path {
+  fill: #ffffff;
+}
+
+.c29 {
+  line-height: 0;
+}
+
+.c31 {
+  border: none;
+  border-radius: 4px;
+  padding-bottom: 0.65625rem;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 0.65625rem;
+  color: #32324d;
+  font-weight: 400;
+  font-size: 0.875rem;
+  display: block;
+  width: 100%;
+  background: inherit;
+}
+
+.c31::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c31::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c31:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c31::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c31[aria-disabled='true'] {
+  color: inherit;
+}
+
+.c31:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.c30 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c30:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c65 path {
+  fill: #666687;
+}
+
+.c36 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c36:focus {
+  outline: none;
+}
+
+.c36[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c35 {
+  position: relative;
+  border: 1px solid #dcdce4;
+  padding-right: 12px;
+  border-radius: 4px;
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 2.5rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c35:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c41 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c41 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c41 svg path {
+  fill: #666687;
+}
+
+.c42 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+}
+
+.c42 svg {
+  width: 0.375rem;
+}
+
+.c37 {
+  width: 100%;
+}
+
+.c33 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c33:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c34 {
+  display: block;
+  width: 100%;
+  font-weight: 400;
+  font-size: 0.875rem;
+  border: none;
+  color: #32324d;
+  resize: none;
+  background: inherit;
+}
+
+.c34::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c34::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c34:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c34::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c34:focus-within {
+  outline: none;
+}
+
+.c32 textarea {
+  height: 5rem;
+  line-height: 1.25rem;
+}
+
+.c32 textarea::-webkit-input-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c32 textarea::-moz-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c32 textarea:-ms-input-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c32 textarea::placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c58 {
+  background: transparent;
+  border: none;
+  position: relative;
+  outline: none;
+}
+
+.c58[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c58[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c58 svg {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  font-size: 0.625rem;
+}
+
+.c58 svg path {
+  fill: #4945ff;
+}
+
+.c58:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c58:focus-visible {
+  outline: none;
+}
+
+.c58:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c4 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  position: relative;
+  outline: none;
+}
+
+.c4 svg path {
+  fill: #4945ff;
+}
+
+.c4 svg {
+  font-size: 0.625rem;
+}
+
+.c4:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c4:focus-visible {
+  outline: none;
+}
+
+.c4:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c6 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.c0:focus-visible {
+  outline: none;
+}
+
+.c24 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 20px;
+}
+
+.c45 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 0px;
+}
+
+.c25 {
+  grid-column: span 6;
   max-width: 100%;
 }
 
-.c77 svg {
+.c46 {
+  grid-column: span 7;
+  max-width: 100%;
+}
+
+.c68 {
+  grid-column: span 5;
+  max-width: 100%;
+}
+
+.c52 {
+  border: 1px solid #f6f6f9;
+}
+
+.c52:hover:not([aria-disabled='true']) {
+  border: 1px solid #4945ff;
+}
+
+.c52:hover:not([aria-disabled='true']) .sc-gwNDlS {
+  color: #271fe0;
+}
+
+.c52:hover:not([aria-disabled='true']) .c7 {
+  color: #4945ff;
+}
+
+.c52:hover:not([aria-disabled='true']) > .c9 {
+  background: #f0f0ff;
+}
+
+.c52:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+  background: #d9d8ff;
+}
+
+.c66 {
+  border: 1px solid #ffffff;
+}
+
+.c66:hover:not([aria-disabled='true']) {
+  border: 1px solid #4945ff;
+}
+
+.c66:hover:not([aria-disabled='true']) .sc-gwNDlS {
+  color: #271fe0;
+}
+
+.c66:hover:not([aria-disabled='true']) .c7 {
+  color: #4945ff;
+}
+
+.c66:hover:not([aria-disabled='true']) > .c9 {
+  background: #f0f0ff;
+}
+
+.c66:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+  background: #d9d8ff;
+}
+
+.c59 {
+  text-align: left;
+}
+
+.c59 > span {
+  max-width: 100%;
+}
+
+.c59 svg {
   width: 0.875rem;
   height: 0.875rem;
 }
 
-.c77 svg path {
+.c59 svg path {
   fill: #8e8ea9;
 }
 
-.c71 {
+.c54 {
   min-height: 5.5rem;
   border-radius: 4px;
 }
 
-.c71:hover svg path {
+.c54:hover svg path {
   fill: #4945ff;
 }
 
 @media (max-width:68.75rem) {
-  .c26 {
+  .c25 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c26 {
+  .c25 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c61 {
+  .c46 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c61 {
+  .c46 {
     grid-column: span;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c87 {
+  .c68 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c87 {
+  .c68 {
     grid-column: span;
   }
 }
@@ -1180,20 +971,20 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
         style="height: 0px;"
       >
         <div
-          class="c1"
+          class="c1 c2"
           data-strapi-header="true"
         >
           <div
-            class="c2"
+            class="c1 c3"
           >
             <a
               aria-current="page"
-              class="c3 active"
+              class="c4 active"
               href="/settings/api-tokens"
             >
               <span
                 aria-hidden="true"
-                class="c4 c5"
+                class="c1 c5 c6"
               >
                 <svg
                   fill="none"
@@ -1209,36 +1000,36 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                 </svg>
               </span>
               <span
-                class="c6"
+                class="c7 c8"
               >
                 Back
               </span>
             </a>
           </div>
           <div
-            class="c7"
+            class="c1 c9 c10"
           >
             <div
-              class="c8"
+              class="c1 c9 c11"
             >
               <h1
-                class="c9"
+                class="c7 c12"
               >
                 Create API Token
               </h1>
             </div>
             <div
-              class="c10 c11"
+              class="c1 c9 c11 c13"
               spacing="2"
             >
               <button
                 aria-disabled="false"
-                class="c12 c13"
+                class="c14 c15"
                 type="submit"
               >
                 <div
                   aria-hidden="true"
-                  class="c14 c15 c16"
+                  class="c1 c5 c16"
                 >
                   <svg
                     fill="none"
@@ -1254,7 +1045,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   </svg>
                 </div>
                 <span
-                  class="c17 c18"
+                  class="c7 c17"
                 >
                   Save
                 </span>
@@ -1264,62 +1055,62 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
         </div>
       </div>
       <div
-        class="c19"
+        class="c1 c18"
       >
         <div
-          class="c20 c21"
+          class="c1 c9 c19 c20"
           spacing="6"
         >
           <div
-            class="c22"
+            class="c1 c21"
           >
             <div
-              class="c20 c23"
+              class="c1 c9 c19 c22"
               spacing="4"
             >
               <h2
-                class="c24"
+                class="c7 c23"
               >
                 Details
               </h2>
               <div
-                class="c25"
+                class="c1 c24"
               >
                 <div
-                  class="c26"
+                  class="c25"
                 >
                   <div
-                    class=""
+                    class="c1 "
                   >
                     <div>
                       <div>
                         <div
-                          class="c27 c28"
+                          class="c1 c9 c19 c26"
                           spacing="1"
                         >
                           <label
-                            class="c29"
+                            class="c7 c27"
                             for="textinput-1"
                             required=""
                           >
                             <div
-                              class="c30"
+                              class="c1 c9 c11"
                             >
                               Name
                               <span
-                                class="c31 c32"
+                                class="c7 c28 c29"
                               >
                                 *
                               </span>
                             </div>
                           </label>
                           <div
-                            class="c33 c34"
+                            class="c1 c9 c10 c30"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
-                              class="c35"
+                              class="c31"
                               id="textinput-1"
                               name="name"
                               value=""
@@ -1331,40 +1122,40 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   </div>
                 </div>
                 <div
-                  class="c26"
+                  class="c25"
                 >
                   <div
-                    class=""
+                    class="c1 "
                   >
                     <div
-                      class="c36"
+                      class="c32"
                     >
                       <div>
                         <div
-                          class="c37 c38"
+                          class="c1 c9 c19 c26"
                           spacing="1"
                         >
                           <div
-                            class="c39"
+                            class="c1 c9 c11"
                           >
                             <label
-                              class="c40"
-                              for="textarea-1"
+                              class="c7 c27"
+                              for="textarea-2"
                             >
                               <div
-                                class="c39"
+                                class="c1 c9 c11"
                               >
                                 Description
                               </div>
                             </label>
                           </div>
                           <div
-                            class="c41"
+                            class="c33"
                           >
                             <textarea
                               aria-invalid="false"
-                              class="c42"
-                              id="textarea-1"
+                              class="c34"
+                              id="textarea-2"
                               name="description"
                             />
                           </div>
@@ -1374,69 +1165,69 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   </div>
                 </div>
                 <div
-                  class="c26"
+                  class="c25"
                 >
                   <div
-                    class=""
+                    class="c1 "
                   >
                     <div>
                       <div
-                        class="c43 c44"
+                        class="c1 c9 c19 c26"
                         spacing="1"
                       >
                         <span
-                          class="c45"
-                          for="select-1"
-                          id="select-1-label"
+                          class="c7 c27"
+                          for="select-3"
+                          id="select-3-label"
                           required=""
                         >
                           <div
-                            class="c46"
+                            class="c1 c9 c11"
                           >
                             Token duration
                             <span
-                              class="c47 c48"
+                              class="c7 c28 c29"
                             >
                               *
                             </span>
                           </div>
                         </span>
                         <div
-                          class="c46 c49"
+                          class="c1 c9 c11 c35"
                         >
                           <button
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-1-label select-1-content"
-                            class="c50"
-                            id="select-1"
+                            aria-labelledby="select-3-label select-3-content"
+                            class="c36"
+                            id="select-3"
                             name="lifespan"
                             type="button"
                           />
                           <div
-                            class="c51 c52"
+                            class="c1 c9 c10 c37"
                           >
                             <div
-                              class="c46"
+                              class="c1 c9 c11"
                             >
                               <div
-                                class="c53"
+                                class="c1 c38"
                               >
                                 <span
-                                  class="c54"
-                                  id="select-1-content"
+                                  class="c7 c39"
+                                  id="select-3-content"
                                 >
                                   Select
                                 </span>
                               </div>
                             </div>
                             <div
-                              class="c46"
+                              class="c1 c9 c11"
                             >
                               <button
                                 aria-hidden="true"
-                                class="c55 c56 c57"
+                                class="c1 c40 c41 c42"
                                 tabindex="-1"
                                 type="button"
                               >
@@ -1461,74 +1252,74 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                       </div>
                     </div>
                     <span
-                      class="c58"
+                      class="c7 c43"
                     />
                   </div>
                 </div>
                 <div
-                  class="c26"
+                  class="c25"
                 >
                   <div
-                    class=""
+                    class="c1 "
                   >
                     <div>
                       <div
-                        class="c43 c44"
+                        class="c1 c9 c19 c26"
                         spacing="1"
                       >
                         <span
-                          class="c45"
-                          for="select-2"
-                          id="select-2-label"
+                          class="c7 c27"
+                          for="select-4"
+                          id="select-4-label"
                           required=""
                         >
                           <div
-                            class="c46"
+                            class="c1 c9 c11"
                           >
                             Token type
                             <span
-                              class="c47 c48"
+                              class="c7 c28 c29"
                             >
                               *
                             </span>
                           </div>
                         </span>
                         <div
-                          class="c46 c49"
+                          class="c1 c9 c11 c35"
                         >
                           <button
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-2-label select-2-content"
-                            class="c50"
-                            id="select-2"
+                            aria-labelledby="select-4-label select-4-content"
+                            class="c36"
+                            id="select-4"
                             name="type"
                             type="button"
                           />
                           <div
-                            class="c51 c52"
+                            class="c1 c9 c10 c37"
                           >
                             <div
-                              class="c46"
+                              class="c1 c9 c11"
                             >
                               <div
-                                class="c53"
+                                class="c1 c38"
                               >
                                 <span
-                                  class="c54"
-                                  id="select-2-content"
+                                  class="c7 c39"
+                                  id="select-4-content"
                                 >
                                   Select
                                 </span>
                               </div>
                             </div>
                             <div
-                              class="c46"
+                              class="c1 c9 c11"
                             >
                               <button
                                 aria-hidden="true"
-                                class="c55 c56 c57"
+                                class="c1 c40 c41 c42"
                                 tabindex="-1"
                                 type="button"
                               >
@@ -1558,79 +1349,79 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
             </div>
           </div>
           <div
-            class="c59 c60"
+            class="c1 c44 c45"
           >
             <div
-              class="c61"
+              class="c46"
             >
               <div
-                class="c62"
+                class="c1 c47"
               >
                 <div
-                  class="c20 c63"
+                  class="c1 c9 c19 c48"
                   spacing="2"
                 >
                   <h2
-                    class="c24"
+                    class="c7 c23"
                   >
                     Permissions
                   </h2>
                   <p
-                    class="c64"
+                    class="c7 c49"
                   >
                     Only actions bound by a route are listed below.
                   </p>
                 </div>
                 <div
-                  class="c65"
+                  class="c1 c50"
                 >
                   <div
                     aria-disabled="false"
-                    class="c66 c67"
+                    class="c1 c51 c52"
                     data-strapi-expanded="false"
                   >
                     <div
-                      class="c68 c69 c70 c71"
+                      class="c1 c9 c53 c10 c54"
                       cursor=""
                     >
                       <div
-                        class="c68 c72 c73 c74"
+                        class="c1 c9 c55 c11 c56"
                         spacing="3"
                       >
                         <button
-                          aria-controls="accordion-content-accordion-1"
+                          aria-controls="accordion-content-accordion-13"
                           aria-disabled="false"
                           aria-expanded="false"
-                          aria-labelledby="accordion-label-accordion-1"
-                          class="c68 c75 c73 c76 c77"
+                          aria-labelledby="accordion-label-accordion-13"
+                          class="c1 c9 c57 c11 c58 c59"
                           data-strapi-accordion-toggle="true"
                           type="button"
                         >
                           <span
-                            class="c78 c79"
+                            class="c7 c60"
                           >
                             <span
-                              class="c78 sc-dTBbbW c80"
-                              id="accordion-label-accordion-1"
+                              class="c7 sc-gwNDlS c61"
+                              id="accordion-label-accordion-13"
                             >
                               Address
                             </span>
                           </span>
                         </button>
                         <div
-                          class="c68 c73 c74"
+                          class="c1 c9 c11 c56"
                           spacing="3"
                         >
                           <span
                             aria-hidden="true"
-                            class="c68 c81 c82"
+                            class="c1 c9 c62 c63"
                             cursor="pointer"
                             data-strapi-dropdown="true"
                             height="2rem"
                             width="2rem"
                           >
                             <svg
-                              class="c83 c84"
+                              class="c1 c64 c65"
                               fill="none"
                               height="1em"
                               viewBox="0 0 14 8"
@@ -1651,51 +1442,51 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   </div>
                   <div
                     aria-disabled="false"
-                    class="c66 c85"
+                    class="c1 c51 c66"
                     data-strapi-expanded="false"
                   >
                     <div
-                      class="c68 c86 c70 c71"
+                      class="c1 c9 c67 c10 c54"
                       cursor=""
                     >
                       <div
-                        class="c68 c72 c73 c74"
+                        class="c1 c9 c55 c11 c56"
                         spacing="3"
                       >
                         <button
-                          aria-controls="accordion-content-accordion-2"
+                          aria-controls="accordion-content-accordion-14"
                           aria-disabled="false"
                           aria-expanded="false"
-                          aria-labelledby="accordion-label-accordion-2"
-                          class="c68 c75 c73 c76 c77"
+                          aria-labelledby="accordion-label-accordion-14"
+                          class="c1 c9 c57 c11 c58 c59"
                           data-strapi-accordion-toggle="true"
                           type="button"
                         >
                           <span
-                            class="c78 c79"
+                            class="c7 c60"
                           >
                             <span
-                              class="c78 sc-dTBbbW c80"
-                              id="accordion-label-accordion-2"
+                              class="c7 sc-gwNDlS c61"
+                              id="accordion-label-accordion-14"
                             >
                               Category
                             </span>
                           </span>
                         </button>
                         <div
-                          class="c68 c73 c74"
+                          class="c1 c9 c11 c56"
                           spacing="3"
                         >
                           <span
                             aria-hidden="true"
-                            class="c68 c81 c82"
+                            class="c1 c9 c62 c63"
                             cursor="pointer"
                             data-strapi-dropdown="true"
                             height="2rem"
                             width="2rem"
                           >
                             <svg
-                              class="c83 c84"
+                              class="c1 c64 c65"
                               fill="none"
                               height="1em"
                               viewBox="0 0 14 8"
@@ -1718,23 +1509,23 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
               </div>
             </div>
             <div
-              class="c87"
+              class="c68"
             >
               <div
-                class="c88"
+                class="c1 c69"
                 style="min-height: 100%;"
               >
                 <div
-                  class="c20 c63"
+                  class="c1 c9 c19 c48"
                   spacing="2"
                 >
                   <h3
-                    class="c24"
+                    class="c7 c23"
                   >
                     Advanced settings
                   </h3>
                   <p
-                    class="c64"
+                    class="c7 c49"
                   >
                     Select the application's actions or the plugin's actions and click on the cog icon to display the bound route
                   </p>
@@ -1747,7 +1538,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
     </form>
   </main>
   <div
-    class="c89"
+    class="c70"
   >
     <p
       aria-live="polite"
@@ -1772,31 +1563,146 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
 `;
 
 exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot when editing existing token 1`] = `
-.c23 {
+.c79 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c5 {
+  padding-right: 8px;
+}
+
+.c19 {
+  padding-right: 56px;
+  padding-left: 56px;
+}
+
+.c2 {
+  background: #f6f6f9;
+  padding-top: 24px;
+  padding-right: 56px;
+  padding-bottom: 40px;
+  padding-left: 56px;
+}
+
+.c3 {
+  padding-bottom: 8px;
+}
+
+.c22 {
   background: #ffffff;
   padding: 24px;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c25 {
+.c23 {
   background: #f6f6f9;
   padding: 12px;
   border-radius: 4px;
 }
 
-.c24 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
+.c29 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c45 {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.c47 {
+  padding-left: 12px;
+}
+
+.c54 {
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c57 {
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+}
+
+.c59 {
+  background: #ffffff;
+  padding: 16px;
+}
+
+.c78 {
+  background: #eaeaef;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+}
+
+.c60 {
+  border-radius: 4px;
+}
+
+.c62 {
+  background: #f6f6f9;
+  padding-top: 24px;
+  padding-right: 24px;
+  padding-bottom: 24px;
+  padding-left: 24px;
+}
+
+.c64 {
+  max-width: 100%;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c66 {
+  min-width: 0px;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c71 {
+  background: #dcdce4;
+  border-radius: 50%;
+  cursor: pointer;
+  width: 2rem;
+  height: 2rem;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.c73 {
+  color: #666687;
+  width: 0.6875rem;
+}
+
+.c76 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 24px;
+  padding-bottom: 24px;
+  padding-left: 24px;
 }
 
 .c10 {
@@ -1811,570 +1717,13 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-}
-
-.c21 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c22 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c22 > * + * {
-  margin-top: 24px;
-}
-
-.c27 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c27 > * + * {
-  margin-top: 4px;
-}
-
-.c32 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c32 > * + * {
-  margin-top: 16px;
-}
-
-.c75 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c75 > * + * {
-  margin-top: 8px;
-}
-
-.c11 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c11 > * + * {
-  margin-left: 8px;
-}
-
-.c28 {
-  font-weight: 500;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c30 {
-  color: #666687;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c33 {
-  color: #32324d;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-}
-
-.c67 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c18 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c15 {
-  padding-right: 8px;
-}
-
-.c12 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c12 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c12 svg > g,
-.c12 svg path {
-  fill: #ffffff;
-}
-
-.c12[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c12:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c12:focus-visible {
-  outline: none;
-}
-
-.c12:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c16 {
-  height: 100%;
-}
-
-.c101 .c14 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c101 .c17 {
-  color: #ffffff;
-}
-
-.c101[aria-disabled='true'] .c17 {
-  color: #666687;
-}
-
-.c101[aria-disabled='true']:active .c17 {
-  color: #666687;
-}
-
-.c13 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: 1px solid #4945ff;
-  border: 1px solid #dcdce4;
-  background: #ffffff;
-}
-
-.c13 .c14 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c13 .c17 {
-  color: #ffffff;
-}
-
-.c13[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c13[aria-disabled='true'] .c17 {
-  color: #666687;
-}
-
-.c13[aria-disabled='true'] svg > g,
-.c13[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c13[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c13[aria-disabled='true']:active .c17 {
-  color: #666687;
-}
-
-.c13[aria-disabled='true']:active svg > g,
-.c13[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c13:hover {
-  background-color: #f6f6f9;
-}
-
-.c13:active {
-  background-color: #eaeaef;
-}
-
-.c13 .c17 {
-  color: #32324d;
-}
-
-.c13 svg > g,
-.c13 svg path {
-  fill: #32324d;
-}
-
-.c19 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: 1px solid #4945ff;
-}
-
-.c19 .c14 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c19 .c17 {
-  color: #ffffff;
-}
-
-.c19[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c19[aria-disabled='true'] .c17 {
-  color: #666687;
-}
-
-.c19[aria-disabled='true'] svg > g,
-.c19[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c19[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c19[aria-disabled='true']:active .c17 {
-  color: #666687;
-}
-
-.c19[aria-disabled='true']:active svg > g,
-.c19[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c19:hover {
-  border: 1px solid #7b79ff;
-  background: #7b79ff;
-}
-
-.c19:active {
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c19 svg > g,
-.c19 svg path {
-  fill: #ffffff;
-}
-
-.c31 {
-  background: #ffffff;
-  padding-top: 24px;
-  padding-right: 32px;
-  padding-bottom: 24px;
-  padding-left: 32px;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-}
-
-.c76 {
-  background: #ffffff;
-  padding: 16px;
-}
-
-.c59 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c59:focus {
-  outline: none;
-}
-
-.c59[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c62 {
-  padding-right: 16px;
-  padding-left: 16px;
-}
-
-.c64 {
-  padding-left: 12px;
-}
-
-.c52 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c55 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c60 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
   -ms-flex-pack: justify;
   justify-content: space-between;
 }
 
-.c54 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c56 {
-  color: #d02b20;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c63 {
-  color: #666687;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c69 {
-  color: #32324d;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c57 {
-  line-height: 0;
-}
-
-.c53 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c53 > * + * {
-  margin-top: 4px;
-}
-
-.c58 {
-  position: relative;
-  border: 1px solid #dcdce4;
-  padding-right: 12px;
-  border-radius: 4px;
-  background: #ffffff;
-  overflow: hidden;
-  min-height: 2.5rem;
-  color: #666687;
-  background: #eaeaef;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c58:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c68 {
-  position: relative;
-  border: 1px solid #dcdce4;
-  padding-right: 12px;
-  border-radius: 4px;
-  background: #ffffff;
-  overflow: hidden;
-  min-height: 2.5rem;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c68:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c65 {
-  background: transparent;
-  border: none;
-  position: relative;
-  z-index: 1;
-}
-
-.c65 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
-}
-
-.c65 svg path {
-  fill: #666687;
-}
-
-.c66 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  background: none;
-  border: none;
-  cursor: not-allowed;
-}
-
-.c66 svg {
-  width: 0.375rem;
-}
-
-.c70 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  background: none;
-  border: none;
-}
-
-.c70 svg {
-  width: 0.375rem;
-}
-
-.c61 {
-  width: 100%;
-}
-
-.c46 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c48 {
+.c11 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -2386,554 +1735,23 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-}
-
-.c49 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c50 {
-  border: 1px solid #dcdce4;
-  border-radius: 4px;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 12px;
-  padding-bottom: 12px;
-  background: #ffffff;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c50:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c51 {
-  display: block;
-  width: 100%;
-  font-weight: 400;
-  font-size: 0.875rem;
-  border: none;
-  color: #32324d;
-  resize: none;
-  background: inherit;
-}
-
-.c51::-webkit-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c51::-moz-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c51:-ms-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c51::placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c51:focus-within {
-  outline: none;
-}
-
-.c47 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c47 > * + * {
-  margin-top: 4px;
-}
-
-.c45 textarea {
-  height: 5rem;
-  line-height: 1.25rem;
-}
-
-.c45 textarea::-webkit-input-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c45 textarea::-moz-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c45 textarea:-ms-input-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c45 textarea::placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c36 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c39 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c42 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c38 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c40 {
-  color: #d02b20;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c41 {
-  line-height: 0;
-}
-
-.c44 {
-  border: none;
-  border-radius: 4px;
-  padding-bottom: 0.65625rem;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 0.65625rem;
-  color: #32324d;
-  font-weight: 400;
-  font-size: 0.875rem;
-  display: block;
-  width: 100%;
-  background: inherit;
-}
-
-.c44::-webkit-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c44::-moz-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c44:-ms-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c44::placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c44[aria-disabled='true'] {
-  color: inherit;
-}
-
-.c44:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-.c43 {
-  border: 1px solid #dcdce4;
-  border-radius: 4px;
-  background: #ffffff;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c43:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c37 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c37 > * + * {
-  margin-top: 4px;
-}
-
-.c6 {
-  color: #4945ff;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c4 {
-  padding-right: 8px;
-}
-
-.c3 {
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  position: relative;
-  outline: none;
-}
-
-.c3 svg path {
-  fill: #4945ff;
-}
-
-.c3 svg {
-  font-size: 0.625rem;
-}
-
-.c3:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c3:focus-visible {
-  outline: none;
-}
-
-.c3:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c5 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-}
-
-.c26 {
-  margin-right: 24px;
-}
-
-.c26 svg {
-  width: 2rem;
-  height: 2rem;
-}
-
-.c29 {
-  word-break: break-all;
-}
-
-.c100 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
-.c0:focus-visible {
-  outline: none;
 }
 
 .c20 {
-  padding-right: 56px;
-  padding-left: 56px;
-}
-
-.c1 {
-  background: #f6f6f9;
-  padding-top: 24px;
-  padding-right: 56px;
-  padding-bottom: 40px;
-  padding-left: 56px;
-}
-
-.c2 {
-  padding-bottom: 8px;
-}
-
-.c7 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c8 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c9 {
-  color: #32324d;
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-}
-
-.c71 {
-  background: #ffffff;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-}
-
-.c74 {
-  padding-top: 24px;
-  padding-right: 32px;
-  padding-bottom: 24px;
-  padding-left: 32px;
-}
-
-.c99 {
-  background: #eaeaef;
-  padding-top: 24px;
-  padding-right: 32px;
-  padding-bottom: 24px;
-  padding-left: 32px;
-}
-
-.c34 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 20px;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
 }
 
 .c72 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 0px;
-}
-
-.c35 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c73 {
-  grid-column: span 7;
-  max-width: 100%;
-}
-
-.c98 {
-  grid-column: span 5;
-  max-width: 100%;
-}
-
-.c90 {
-  color: #4945ff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c91 {
-  color: #4a4a6a;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-}
-
-.c77 {
-  border-radius: 4px;
-}
-
-.c80 {
-  background: #f6f6f9;
-  padding-top: 24px;
-  padding-right: 24px;
-  padding-bottom: 24px;
-  padding-left: 24px;
-}
-
-.c83 {
-  max-width: 100%;
-  -webkit-flex: 1;
-  -ms-flex: 1;
-  flex: 1;
-}
-
-.c86 {
-  min-width: 0px;
-  -webkit-flex: 1;
-  -ms-flex: 1;
-  flex: 1;
-}
-
-.c92 {
-  background: #dcdce4;
-  border-radius: 50%;
-  cursor: pointer;
-  width: 2rem;
-  height: 2rem;
-  -webkit-flex-shrink: 0;
-  -ms-flex-negative: 0;
-  flex-shrink: 0;
-  cursor: pointer;
-}
-
-.c94 {
-  color: #666687;
-  width: 0.6875rem;
-}
-
-.c97 {
-  background: #ffffff;
-  padding-top: 24px;
-  padding-right: 24px;
-  padding-bottom: 24px;
-  padding-left: 24px;
-}
-
-.c81 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c84 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c93 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -2954,82 +1772,186 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   justify-content: center;
 }
 
-.c78 {
-  border: 1px solid #f6f6f9;
+.c12 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
 }
 
-.c78:hover:not([aria-disabled='true']) {
-  border: 1px solid #4945ff;
-}
-
-.c78:hover:not([aria-disabled='true']) .sc-dTBbbW {
-  color: #271fe0;
-}
-
-.c78:hover:not([aria-disabled='true']) .c89 {
+.c8 {
+  font-size: 0.875rem;
+  line-height: 1.43;
   color: #4945ff;
 }
 
-.c78:hover:not([aria-disabled='true']) > .c79 {
-  background: #f0f0ff;
+.c17 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 1.14;
+  color: #32324d;
 }
 
-.c78:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
-  background: #d9d8ff;
+.c26 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 500;
+  color: #32324d;
 }
 
-.c96 {
-  border: 1px solid #ffffff;
+.c28 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #666687;
 }
 
-.c96:hover:not([aria-disabled='true']) {
-  border: 1px solid #4945ff;
+.c31 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
 }
 
-.c96:hover:not([aria-disabled='true']) .sc-dTBbbW {
-  color: #271fe0;
+.c34 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
 }
 
-.c96:hover:not([aria-disabled='true']) .c89 {
+.c35 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #d02b20;
+}
+
+.c46 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c50 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c52 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c69 {
+  font-size: 0.75rem;
+  line-height: 1.33;
   color: #4945ff;
 }
 
-.c96:hover:not([aria-disabled='true']) > .c79 {
-  background: #f0f0ff;
+.c70 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #4a4a6a;
 }
 
-.c96:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
-  background: #d9d8ff;
+.c21 > * {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
-.c87 {
-  background: transparent;
-  border: none;
-  position: relative;
-  outline: none;
+.c21 > * + * {
+  margin-top: 24px;
 }
 
-.c87[aria-disabled='true'] {
-  pointer-events: none;
+.c25 > * {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
-.c87[aria-disabled='true'] svg path {
-  fill: #666687;
+.c25 > * + * {
+  margin-top: 4px;
 }
 
-.c87 svg {
+.c30 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c30 > * + * {
+  margin-top: 16px;
+}
+
+.c58 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c58 > * + * {
+  margin-top: 8px;
+}
+
+.c13 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c13 > * + * {
+  margin-left: 8px;
+}
+
+.c65 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c65 > * + * {
+  margin-left: 12px;
+}
+
+.c14 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  font-size: 0.625rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
 }
 
-.c87 svg path {
-  fill: #4945ff;
+.c14 svg {
+  height: 12px;
+  width: 12px;
 }
 
-.c87:after {
+.c14 svg > g,
+.c14 svg path {
+  fill: #ffffff;
+}
+
+.c14[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c14:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -3044,11 +1966,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 2px solid transparent;
 }
 
-.c87:focus-visible {
+.c14:focus-visible {
   outline: none;
 }
 
-.c87:focus-visible:after {
+.c14:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -3059,77 +1981,716 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 2px solid #4945ff;
 }
 
-.c85 > * {
-  margin-left: 0;
-  margin-right: 0;
+.c16 {
+  height: 100%;
 }
 
-.c85 > * + * {
-  margin-left: 12px;
+.c80 .c1 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
 }
 
-.c95 path {
+.c80 .c7 {
+  color: #ffffff;
+}
+
+.c80[aria-disabled='true'] .c7 {
+  color: #666687;
+}
+
+.c80[aria-disabled='true']:active .c7 {
+  color: #666687;
+}
+
+.c15 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: #4945ff;
+  border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+}
+
+.c15 .c1 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c15 .c7 {
+  color: #ffffff;
+}
+
+.c15[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c15[aria-disabled='true'] .c7 {
+  color: #666687;
+}
+
+.c15[aria-disabled='true'] svg > g,
+.c15[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c88 {
-  text-align: left;
+.c15[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
 }
 
-.c88 > span {
+.c15[aria-disabled='true']:active .c7 {
+  color: #666687;
+}
+
+.c15[aria-disabled='true']:active svg > g,
+.c15[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c15:hover {
+  background-color: #f6f6f9;
+}
+
+.c15:active {
+  background-color: #eaeaef;
+}
+
+.c15 .c7 {
+  color: #32324d;
+}
+
+.c15 svg > g,
+.c15 svg path {
+  fill: #32324d;
+}
+
+.c18 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: #4945ff;
+  border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.c18 .c1 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c18 .c7 {
+  color: #ffffff;
+}
+
+.c18[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c18[aria-disabled='true'] .c7 {
+  color: #666687;
+}
+
+.c18[aria-disabled='true'] svg > g,
+.c18[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c18[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c18[aria-disabled='true']:active .c7 {
+  color: #666687;
+}
+
+.c18[aria-disabled='true']:active svg > g,
+.c18[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c18:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c18:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c18 svg > g,
+.c18 svg path {
+  fill: #ffffff;
+}
+
+.c36 {
+  line-height: 0;
+}
+
+.c38 {
+  border: none;
+  border-radius: 4px;
+  padding-bottom: 0.65625rem;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 0.65625rem;
+  color: #32324d;
+  font-weight: 400;
+  font-size: 0.875rem;
+  display: block;
+  width: 100%;
+  background: inherit;
+}
+
+.c38::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c38::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c38:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c38::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c38[aria-disabled='true'] {
+  color: inherit;
+}
+
+.c38:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.c37 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c37:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c74 path {
+  fill: #666687;
+}
+
+.c43 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c43:focus {
+  outline: none;
+}
+
+.c43[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c42 {
+  position: relative;
+  border: 1px solid #dcdce4;
+  padding-right: 12px;
+  border-radius: 4px;
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 2.5rem;
+  color: #666687;
+  background: #eaeaef;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c42:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c51 {
+  position: relative;
+  border: 1px solid #dcdce4;
+  padding-right: 12px;
+  border-radius: 4px;
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 2.5rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c51:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c48 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c48 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c48 svg path {
+  fill: #666687;
+}
+
+.c49 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+  cursor: not-allowed;
+}
+
+.c49 svg {
+  width: 0.375rem;
+}
+
+.c53 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+}
+
+.c53 svg {
+  width: 0.375rem;
+}
+
+.c44 {
+  width: 100%;
+}
+
+.c40 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c40:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c41 {
+  display: block;
+  width: 100%;
+  font-weight: 400;
+  font-size: 0.875rem;
+  border: none;
+  color: #32324d;
+  resize: none;
+  background: inherit;
+}
+
+.c41::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c41::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c41:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c41::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c41:focus-within {
+  outline: none;
+}
+
+.c39 textarea {
+  height: 5rem;
+  line-height: 1.25rem;
+}
+
+.c39 textarea::-webkit-input-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c39 textarea::-moz-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c39 textarea:-ms-input-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c39 textarea::placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c67 {
+  background: transparent;
+  border: none;
+  position: relative;
+  outline: none;
+}
+
+.c67[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c67[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c67 svg {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  font-size: 0.625rem;
+}
+
+.c67 svg path {
+  fill: #4945ff;
+}
+
+.c67:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c67:focus-visible {
+  outline: none;
+}
+
+.c67:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c4 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  position: relative;
+  outline: none;
+}
+
+.c4 svg path {
+  fill: #4945ff;
+}
+
+.c4 svg {
+  font-size: 0.625rem;
+}
+
+.c4:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c4:focus-visible {
+  outline: none;
+}
+
+.c4:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c6 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.c24 {
+  margin-right: 24px;
+}
+
+.c24 svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.c27 {
+  word-break: break-all;
+}
+
+.c0:focus-visible {
+  outline: none;
+}
+
+.c32 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 20px;
+}
+
+.c55 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 0px;
+}
+
+.c33 {
+  grid-column: span 6;
   max-width: 100%;
 }
 
-.c88 svg {
+.c56 {
+  grid-column: span 7;
+  max-width: 100%;
+}
+
+.c77 {
+  grid-column: span 5;
+  max-width: 100%;
+}
+
+.c61 {
+  border: 1px solid #f6f6f9;
+}
+
+.c61:hover:not([aria-disabled='true']) {
+  border: 1px solid #4945ff;
+}
+
+.c61:hover:not([aria-disabled='true']) .sc-gwNDlS {
+  color: #271fe0;
+}
+
+.c61:hover:not([aria-disabled='true']) .c7 {
+  color: #4945ff;
+}
+
+.c61:hover:not([aria-disabled='true']) > .c9 {
+  background: #f0f0ff;
+}
+
+.c61:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+  background: #d9d8ff;
+}
+
+.c75 {
+  border: 1px solid #ffffff;
+}
+
+.c75:hover:not([aria-disabled='true']) {
+  border: 1px solid #4945ff;
+}
+
+.c75:hover:not([aria-disabled='true']) .sc-gwNDlS {
+  color: #271fe0;
+}
+
+.c75:hover:not([aria-disabled='true']) .c7 {
+  color: #4945ff;
+}
+
+.c75:hover:not([aria-disabled='true']) > .c9 {
+  background: #f0f0ff;
+}
+
+.c75:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+  background: #d9d8ff;
+}
+
+.c68 {
+  text-align: left;
+}
+
+.c68 > span {
+  max-width: 100%;
+}
+
+.c68 svg {
   width: 0.875rem;
   height: 0.875rem;
 }
 
-.c88 svg path {
+.c68 svg path {
   fill: #8e8ea9;
 }
 
-.c82 {
+.c63 {
   min-height: 5.5rem;
   border-radius: 4px;
 }
 
-.c82:hover svg path {
+.c63:hover svg path {
   fill: #4945ff;
 }
 
 @media (max-width:68.75rem) {
-  .c35 {
+  .c33 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c35 {
+  .c33 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c73 {
+  .c56 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c73 {
+  .c56 {
     grid-column: span;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c98 {
+  .c77 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c98 {
+  .c77 {
     grid-column: span;
   }
 }
@@ -3149,20 +2710,20 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
         style="height: 0px;"
       >
         <div
-          class="c1"
+          class="c1 c2"
           data-strapi-header="true"
         >
           <div
-            class="c2"
+            class="c1 c3"
           >
             <a
               aria-current="page"
-              class="c3 active"
+              class="c4 active"
               href="/settings/api-tokens"
             >
               <span
                 aria-hidden="true"
-                class="c4 c5"
+                class="c1 c5 c6"
               >
                 <svg
                   fill="none"
@@ -3178,37 +2739,37 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                 </svg>
               </span>
               <span
-                class="c6"
+                class="c7 c8"
               >
                 Back
               </span>
             </a>
           </div>
           <div
-            class="c7"
+            class="c1 c9 c10"
           >
             <div
-              class="c8"
+              class="c1 c9 c11"
             >
               <h1
-                class="c9"
+                class="c7 c12"
               >
                 My super token
               </h1>
             </div>
             <div
-              class="c10 c11"
+              class="c1 c9 c11 c13"
               spacing="2"
             >
               <button
                 aria-disabled="false"
-                class="c12 c13"
+                class="c14 c15"
                 name="regenerate"
                 type="button"
               >
                 <div
                   aria-hidden="true"
-                  class="c14 c15 c16"
+                  class="c1 c5 c16"
                 >
                   <svg
                     fill="none"
@@ -3226,19 +2787,19 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   </svg>
                 </div>
                 <span
-                  class="c17 c18"
+                  class="c7 c17"
                 >
                   Regenerate
                 </span>
               </button>
               <button
                 aria-disabled="false"
-                class="c12 c19"
+                class="c14 c18"
                 type="submit"
               >
                 <div
                   aria-hidden="true"
-                  class="c14 c15 c16"
+                  class="c1 c5 c16"
                 >
                   <svg
                     fill="none"
@@ -3254,7 +2815,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   </svg>
                 </div>
                 <span
-                  class="c17 c18"
+                  class="c7 c17"
                 >
                   Save
                 </span>
@@ -3264,17 +2825,17 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
         </div>
       </div>
       <div
-        class="c20"
+        class="c1 c19"
       >
         <div
-          class="c21 c22"
+          class="c1 c9 c20 c21"
           spacing="6"
         >
           <div
-            class="c23 c24"
+            class="c1 c9 c22 c11"
           >
             <div
-              class="c25 c24 c26"
+              class="c1 c9 c23 c11 c24"
             >
               <svg
                 fill="none"
@@ -3290,76 +2851,76 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
               </svg>
             </div>
             <div
-              class="c21 c27"
+              class="c1 c9 c20 c25"
               spacing="1"
             >
               <div
-                class="c24"
+                class="c1 c9 c11"
               >
                 <span
-                  class="c28 c29"
+                  class="c7 c26 c27"
                 >
                   This token isn’t accessible anymore.
                 </span>
               </div>
               <span
-                class="c30"
+                class="c7 c28"
               >
                 For security reasons, you can only see your token once.
               </span>
             </div>
           </div>
           <div
-            class="c31"
+            class="c1 c29"
           >
             <div
-              class="c21 c32"
+              class="c1 c9 c20 c30"
               spacing="4"
             >
               <h2
-                class="c33"
+                class="c7 c31"
               >
                 Details
               </h2>
               <div
-                class="c34"
+                class="c1 c32"
               >
                 <div
-                  class="c35"
+                  class="c33"
                 >
                   <div
-                    class=""
+                    class="c1 "
                   >
                     <div>
                       <div>
                         <div
-                          class="c36 c37"
+                          class="c1 c9 c20 c25"
                           spacing="1"
                         >
                           <label
-                            class="c38"
-                            for="textinput-6"
+                            class="c7 c34"
+                            for="textinput-28"
                             required=""
                           >
                             <div
-                              class="c39"
+                              class="c1 c9 c11"
                             >
                               Name
                               <span
-                                class="c40 c41"
+                                class="c7 c35 c36"
                               >
                                 *
                               </span>
                             </div>
                           </label>
                           <div
-                            class="c42 c43"
+                            class="c1 c9 c10 c37"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
-                              class="c44"
-                              id="textinput-6"
+                              class="c38"
+                              id="textinput-28"
                               name="name"
                               value="My super token"
                             />
@@ -3370,40 +2931,40 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   </div>
                 </div>
                 <div
-                  class="c35"
+                  class="c33"
                 >
                   <div
-                    class=""
+                    class="c1 "
                   >
                     <div
-                      class="c45"
+                      class="c39"
                     >
                       <div>
                         <div
-                          class="c46 c47"
+                          class="c1 c9 c20 c25"
                           spacing="1"
                         >
                           <div
-                            class="c48"
+                            class="c1 c9 c11"
                           >
                             <label
-                              class="c49"
-                              for="textarea-6"
+                              class="c7 c34"
+                              for="textarea-29"
                             >
                               <div
-                                class="c48"
+                                class="c1 c9 c11"
                               >
                                 Description
                               </div>
                             </label>
                           </div>
                           <div
-                            class="c50"
+                            class="c40"
                           >
                             <textarea
                               aria-invalid="false"
-                              class="c51"
-                              id="textarea-6"
+                              class="c41"
+                              id="textarea-29"
                               name="description"
                             >
                               This describe my super token
@@ -3415,70 +2976,70 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   </div>
                 </div>
                 <div
-                  class="c35"
+                  class="c33"
                 >
                   <div
-                    class=""
+                    class="c1 "
                   >
                     <div>
                       <div
-                        class="c52 c53"
+                        class="c1 c9 c20 c25"
                         spacing="1"
                       >
                         <span
-                          class="c54"
-                          for="select-11"
-                          id="select-11-label"
+                          class="c7 c34"
+                          for="select-30"
+                          id="select-30-label"
                           required=""
                         >
                           <div
-                            class="c55"
+                            class="c1 c9 c11"
                           >
                             Token duration
                             <span
-                              class="c56 c57"
+                              class="c7 c35 c36"
                             >
                               *
                             </span>
                           </div>
                         </span>
                         <div
-                          class="c55 c58"
+                          class="c1 c9 c11 c42"
                           disabled=""
                         >
                           <button
                             aria-disabled="true"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-11-label select-11-content"
-                            class="c59"
-                            id="select-11"
+                            aria-labelledby="select-30-label select-30-content"
+                            class="c43"
+                            id="select-30"
                             name="lifespan"
                             type="button"
                           />
                           <div
-                            class="c60 c61"
+                            class="c1 c9 c10 c44"
                           >
                             <div
-                              class="c55"
+                              class="c1 c9 c11"
                             >
                               <div
-                                class="c62"
+                                class="c1 c45"
                               >
                                 <span
-                                  class="c63"
-                                  id="select-11-content"
+                                  class="c7 c46"
+                                  id="select-30-content"
                                 >
                                   Select
                                 </span>
                               </div>
                             </div>
                             <div
-                              class="c55"
+                              class="c1 c9 c11"
                             >
                               <button
                                 aria-hidden="true"
-                                class="c64 c65 c66"
+                                class="c1 c47 c48 c49"
                                 disabled=""
                                 tabindex="-1"
                                 type="button"
@@ -3504,76 +3065,76 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                       </div>
                     </div>
                     <span
-                      class="c67"
+                      class="c7 c50"
                     >
                       Expiration date: Unlimited
                     </span>
                   </div>
                 </div>
                 <div
-                  class="c35"
+                  class="c33"
                 >
                   <div
-                    class=""
+                    class="c1 "
                   >
                     <div>
                       <div
-                        class="c52 c53"
+                        class="c1 c9 c20 c25"
                         spacing="1"
                       >
                         <span
-                          class="c54"
-                          for="select-12"
-                          id="select-12-label"
+                          class="c7 c34"
+                          for="select-31"
+                          id="select-31-label"
                           required=""
                         >
                           <div
-                            class="c55"
+                            class="c1 c9 c11"
                           >
                             Token type
                             <span
-                              class="c56 c57"
+                              class="c7 c35 c36"
                             >
                               *
                             </span>
                           </div>
                         </span>
                         <div
-                          class="c55 c68"
+                          class="c1 c9 c11 c51"
                         >
                           <button
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-12-label select-12-content"
-                            class="c59"
-                            id="select-12"
+                            aria-labelledby="select-31-label select-31-content"
+                            class="c43"
+                            id="select-31"
                             name="type"
                             type="button"
                           />
                           <div
-                            class="c60 c61"
+                            class="c1 c9 c10 c44"
                           >
                             <div
-                              class="c55"
+                              class="c1 c9 c11"
                             >
                               <div
-                                class="c62"
+                                class="c1 c45"
                               >
                                 <span
-                                  class="c69"
-                                  id="select-12-content"
+                                  class="c7 c52"
+                                  id="select-31-content"
                                 >
                                   Read-only
                                 </span>
                               </div>
                             </div>
                             <div
-                              class="c55"
+                              class="c1 c9 c11"
                             >
                               <button
                                 aria-hidden="true"
-                                class="c64 c65 c70"
+                                class="c1 c47 c48 c53"
                                 tabindex="-1"
                                 type="button"
                               >
@@ -3603,79 +3164,79 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
             </div>
           </div>
           <div
-            class="c71 c72"
+            class="c1 c54 c55"
           >
             <div
-              class="c73"
+              class="c56"
             >
               <div
-                class="c74"
+                class="c1 c57"
               >
                 <div
-                  class="c21 c75"
+                  class="c1 c9 c20 c58"
                   spacing="2"
                 >
                   <h2
-                    class="c33"
+                    class="c7 c31"
                   >
                     Permissions
                   </h2>
                   <p
-                    class="c30"
+                    class="c7 c28"
                   >
                     Only actions bound by a route are listed below.
                   </p>
                 </div>
                 <div
-                  class="c76"
+                  class="c1 c59"
                 >
                   <div
                     aria-disabled="false"
-                    class="c77 c78"
+                    class="c1 c60 c61"
                     data-strapi-expanded="false"
                   >
                     <div
-                      class="c79 c80 c81 c82"
+                      class="c1 c9 c62 c10 c63"
                       cursor=""
                     >
                       <div
-                        class="c79 c83 c84 c85"
+                        class="c1 c9 c64 c11 c65"
                         spacing="3"
                       >
                         <button
-                          aria-controls="accordion-content-accordion-7"
+                          aria-controls="accordion-content-accordion-42"
                           aria-disabled="false"
                           aria-expanded="false"
-                          aria-labelledby="accordion-label-accordion-7"
-                          class="c79 c86 c84 c87 c88"
+                          aria-labelledby="accordion-label-accordion-42"
+                          class="c1 c9 c66 c11 c67 c68"
                           data-strapi-accordion-toggle="true"
                           type="button"
                         >
                           <span
-                            class="c89 c90"
+                            class="c7 c69"
                           >
                             <span
-                              class="c89 sc-dTBbbW c91"
-                              id="accordion-label-accordion-7"
+                              class="c7 sc-gwNDlS c70"
+                              id="accordion-label-accordion-42"
                             >
                               Address
                             </span>
                           </span>
                         </button>
                         <div
-                          class="c79 c84 c85"
+                          class="c1 c9 c11 c65"
                           spacing="3"
                         >
                           <span
                             aria-hidden="true"
-                            class="c79 c92 c93"
+                            class="c1 c9 c71 c72"
                             cursor="pointer"
                             data-strapi-dropdown="true"
                             height="2rem"
                             width="2rem"
                           >
                             <svg
-                              class="c94 c95"
+                              class="c1 c73 c74"
                               fill="none"
                               height="1em"
                               viewBox="0 0 14 8"
@@ -3696,51 +3257,51 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   </div>
                   <div
                     aria-disabled="false"
-                    class="c77 c96"
+                    class="c1 c60 c75"
                     data-strapi-expanded="false"
                   >
                     <div
-                      class="c79 c97 c81 c82"
+                      class="c1 c9 c76 c10 c63"
                       cursor=""
                     >
                       <div
-                        class="c79 c83 c84 c85"
+                        class="c1 c9 c64 c11 c65"
                         spacing="3"
                       >
                         <button
-                          aria-controls="accordion-content-accordion-8"
+                          aria-controls="accordion-content-accordion-43"
                           aria-disabled="false"
                           aria-expanded="false"
-                          aria-labelledby="accordion-label-accordion-8"
-                          class="c79 c86 c84 c87 c88"
+                          aria-labelledby="accordion-label-accordion-43"
+                          class="c1 c9 c66 c11 c67 c68"
                           data-strapi-accordion-toggle="true"
                           type="button"
                         >
                           <span
-                            class="c89 c90"
+                            class="c7 c69"
                           >
                             <span
-                              class="c89 sc-dTBbbW c91"
-                              id="accordion-label-accordion-8"
+                              class="c7 sc-gwNDlS c70"
+                              id="accordion-label-accordion-43"
                             >
                               Category
                             </span>
                           </span>
                         </button>
                         <div
-                          class="c79 c84 c85"
+                          class="c1 c9 c11 c65"
                           spacing="3"
                         >
                           <span
                             aria-hidden="true"
-                            class="c79 c92 c93"
+                            class="c1 c9 c71 c72"
                             cursor="pointer"
                             data-strapi-dropdown="true"
                             height="2rem"
                             width="2rem"
                           >
                             <svg
-                              class="c94 c95"
+                              class="c1 c73 c74"
                               fill="none"
                               height="1em"
                               viewBox="0 0 14 8"
@@ -3763,23 +3324,23 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
               </div>
             </div>
             <div
-              class="c98"
+              class="c77"
             >
               <div
-                class="c99"
+                class="c1 c78"
                 style="min-height: 100%;"
               >
                 <div
-                  class="c21 c75"
+                  class="c1 c9 c20 c58"
                   spacing="2"
                 >
                   <h3
-                    class="c33"
+                    class="c7 c31"
                   >
                     Advanced settings
                   </h3>
                   <p
-                    class="c30"
+                    class="c7 c28"
                   >
                     Select the application's actions or the plugin's actions and click on the cog icon to display the bound route
                   </p>
@@ -3792,7 +3353,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
     </form>
   </main>
   <div
-    class="c100"
+    class="c79"
   >
     <p
       aria-live="polite"

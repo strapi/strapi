@@ -16,6 +16,7 @@ const databases = {
       database: 'strapi_test',
       username: 'strapi',
       password: 'strapi',
+      schema: 'myschema',
     },
   },
   mysql: {
@@ -33,6 +34,7 @@ const databases = {
     connection: {
       filename: './tmp/data.db',
     },
+    useNullAsDefault: true,
   },
 };
 

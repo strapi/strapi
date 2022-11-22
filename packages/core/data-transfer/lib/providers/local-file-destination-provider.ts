@@ -1,22 +1,29 @@
-import fs from 'fs';
-import path from 'path';
-import zip from 'zlib';
-import { Duplex } from 'stream';
-import { chain, Writable } from 'stream-chain';
-import { stringer } from 'stream-json/jsonl/Stringer';
-import type { Cipher } from 'crypto';
+import type {
+  IDestinationProvider,
+  IDestinationProviderTransferResults,
+  IMetadata,
+  ProviderType,
+  Stream,
+} from '../../types';
 
-import type { IDestinationProvider, ProviderType, Stream } from '../../types';
-import { createCipher } from '../encryption/encrypt';
+import fs from 'fs-extra';
+import path from 'path';
+import tar from 'tar-stream';
+import zlib from 'zlib';
+import { Writable, Readable } from 'stream';
+import { stringer } from 'stream-json/jsonl/Stringer';
+import { chain } from 'stream-chain';
+
+import { createEncryptionCipher } from '../encryption/encrypt';
 
 export interface ILocalFileDestinationProviderOptions {
   // Encryption
   encryption: {
     enabled: boolean;
-    key: string;
+    key?: string;
   };
 
-  // Compressions
+  // Compression
   compression: {
     enabled: boolean;
   };
@@ -25,6 +32,14 @@ export interface ILocalFileDestinationProviderOptions {
   file: {
     path: string;
     maxSize?: number;
+    maxSizeJsonl?: number;
+  };
+}
+
+export interface ILocalFileDestinationProviderTransferResults
+  extends IDestinationProviderTransferResults {
+  file?: {
+    path?: string;
   };
 }
 
@@ -38,163 +53,259 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   name: string = 'destination::local-file';
   type: ProviderType = 'destination';
   options: ILocalFileDestinationProviderOptions;
+  results: ILocalFileDestinationProviderTransferResults = {};
+
+  #providersMetadata: { source?: IMetadata; destination?: IMetadata } = {};
+  #archive: { stream?: tar.Pack } = {};
 
   constructor(options: ILocalFileDestinationProviderOptions) {
     this.options = options;
   }
 
-  bootstrap(): void | Promise<void> {
-    const rootDir = this.options.file.path;
-    const dirExists = fs.existsSync(rootDir);
+  get #archivePath() {
+    const { encryption, compression, file } = this.options;
 
-    if (dirExists) {
-      fs.rmSync(rootDir, { force: true, recursive: true });
+    let path = `${file.path}.tar`;
+
+    if (compression.enabled) {
+      path += '.gz';
     }
 
-    fs.mkdirSync(rootDir, { recursive: true });
-    fs.mkdirSync(path.join(rootDir, 'entities'));
-    fs.mkdirSync(path.join(rootDir, 'links'));
-    fs.mkdirSync(path.join(rootDir, 'media'));
-    fs.mkdirSync(path.join(rootDir, 'configuration'));
+    if (encryption.enabled) {
+      path += '.enc';
+    }
+
+    return path;
   }
 
-  rollback(): void | Promise<void> {
-    fs.rmSync(this.options.file.path, { force: true, recursive: true });
+  setMetadata(target: ProviderType, metadata: IMetadata): IDestinationProvider {
+    this.#providersMetadata[target] = metadata;
+
+    return this;
+  }
+
+  #getDataTransformers(options: { jsonl?: boolean } = {}) {
+    const { jsonl = true } = options;
+    const transforms: Stream[] = [];
+
+    if (jsonl) {
+      // Convert to stringified JSON lines
+      transforms.push(stringer());
+    }
+
+    return transforms;
+  }
+
+  bootstrap(): void | Promise<void> {
+    const { compression, encryption } = this.options;
+
+    if (encryption.enabled && !encryption.key) {
+      throw new Error("Can't encrypt without a key");
+    }
+
+    this.#archive.stream = tar.pack();
+
+    const outStream = fs.createWriteStream(this.#archivePath);
+
+    const archiveTransforms: Stream[] = [];
+
+    if (compression.enabled) {
+      archiveTransforms.push(zlib.createGzip());
+    }
+
+    if (encryption.enabled && encryption.key) {
+      archiveTransforms.push(createEncryptionCipher(encryption.key));
+    }
+
+    chain([this.#archive.stream, ...archiveTransforms, outStream]);
+
+    this.results.file = { path: this.#archivePath };
+  }
+
+  async close() {
+    const { stream } = this.#archive;
+
+    if (!stream) {
+      return;
+    }
+
+    await this.#writeMetadata();
+
+    stream.finalize();
+
+    if (!stream.closed) {
+      await new Promise<void>((resolve, reject) => {
+        stream.on('close', resolve).on('error', reject);
+      });
+    }
+  }
+
+  async rollback(): Promise<void> {
+    await this.close();
+    fs.rmSync(this.#archivePath, { force: true });
   }
 
   getMetadata() {
     return null;
   }
 
-  getEntitiesStream(): Duplex {
-    const filePathFactory = (fileIndex: number = 0) => {
-      return path.join(
-        // Backup path
-        this.options.file.path,
-        // "entities/" directory
-        'entities',
-        // "entities_00000.jsonl" file
-        `entities_${String(fileIndex).padStart(5, '0')}.jsonl`
-      );
-    };
+  async #writeMetadata(): Promise<void> {
+    const metadata = this.#providersMetadata.source;
 
-    const streams: any[] = [
-      // create jsonl strings from object entities
-      stringer(),
-    ];
+    if (metadata) {
+      await new Promise((resolve) => {
+        const outStream = this.#getMetadataStream();
+        const data = JSON.stringify(metadata, null, 2);
 
-    // Compression
-    if (this.options.compression.enabled) {
-      streams.push(zip.createGzip());
+        Readable.from(data).pipe(outStream).on('close', resolve);
+      });
     }
-
-    // Encryption
-    if (this.options.encryption.enabled) {
-      streams.push(createCipher(this.options.encryption.key));
-    }
-
-    // FS write stream
-    streams.push(createMultiFilesWriteStream(filePathFactory, this.options.file.maxSize));
-
-    return chain(streams);
   }
 
-  getLinksStream(): Duplex | Promise<Duplex> {
-    const options = {
-      encryption: {
-        enabled: true,
-        key: 'Hello World!',
-      },
-      compression: {
-        enabled: false,
-      },
-      file: {
-        maxSize: 100000,
-      },
-    };
+  #getMetadataStream() {
+    const { stream } = this.#archive;
 
-    const filePathFactory = (fileIndex: number = 0) => {
-      return path.join(
-        // Backup path
-        this.options.file.path,
-        // "links/" directory
-        'links',
-        // "links_00000.jsonl" file
-        `links_${String(fileIndex).padStart(5, '0')}.jsonl`
-      );
-    };
-
-    const streams: any[] = [
-      // create jsonl strings from object links
-      stringer(),
-    ];
-
-    // Compression
-    if (options.compression.enabled) {
-      streams.push(zip.createGzip());
+    if (!stream) {
+      throw new Error('Archive stream is unavailable');
     }
 
-    // Encryption
-    // if (options.encryption?.enabled) {
-    //   streams.push(encrypt(options.encryption.key).cipher());
-    // }
+    return createTarEntryStream(stream, () => 'metadata.json');
+  }
 
-    // FS write stream
-    streams.push(createMultiFilesWriteStream(filePathFactory, options.file.maxSize));
+  getSchemasStream() {
+    if (!this.#archive.stream) {
+      throw new Error('Archive stream is unavailable');
+    }
 
-    return chain(streams);
+    const filePathFactory = createFilePathFactory('schemas');
+
+    const entryStream = createTarEntryStream(
+      this.#archive.stream,
+      filePathFactory,
+      this.options.file.maxSize
+    );
+
+    return chain([stringer(), entryStream]);
+  }
+
+  getEntitiesStream(): NodeJS.WritableStream {
+    if (!this.#archive.stream) {
+      throw new Error('Archive stream is unavailable');
+    }
+
+    const filePathFactory = createFilePathFactory('entities');
+
+    const entryStream = createTarEntryStream(
+      this.#archive.stream,
+      filePathFactory,
+      this.options.file.maxSize
+    );
+
+    return chain([stringer(), entryStream]);
+  }
+
+  getLinksStream(): NodeJS.WritableStream {
+    if (!this.#archive.stream) {
+      throw new Error('Archive stream is unavailable');
+    }
+
+    const filePathFactory = createFilePathFactory('links');
+
+    const entryStream = createTarEntryStream(
+      this.#archive.stream,
+      filePathFactory,
+      this.options.file.maxSize
+    );
+
+    return chain([stringer(), entryStream]);
+  }
+
+  getConfigurationStream(): NodeJS.WritableStream {
+    if (!this.#archive.stream) {
+      throw new Error('Archive stream is unavailable');
+    }
+
+    const filePathFactory = createFilePathFactory('configuration');
+
+    const entryStream = createTarEntryStream(
+      this.#archive.stream,
+      filePathFactory,
+      this.options.file.maxSize
+    );
+
+    return chain([stringer(), entryStream]);
   }
 }
 
 /**
- * Create a writable stream that can split the streamed data into
- * multiple files based on a provided maximum file size value.
+ * Create a file path factory for a given path & prefix.
+ * Upon being called, the factory will return a file path for a given index
  */
-const createMultiFilesWriteStream = (
-  filePathFactory: (index?: number) => string,
-  maxFileSize?: number
-): Stream => {
+const createFilePathFactory =
+  (type: string) =>
+  (fileIndex: number = 0): string => {
+    return path.join(
+      // "{type}" directory
+      type,
+      // "${type}_XXXXX.jsonl" file
+      `${type}_${String(fileIndex).padStart(5, '0')}.jsonl`
+    );
+  };
+
+const createTarEntryStream = (
+  archive: tar.Pack,
+  pathFactory: (index?: number) => string,
+  maxSize: number = 2.56e8
+) => {
   let fileIndex = 0;
-  let fileSize = 0;
-  let maxSize = maxFileSize;
+  let buffer = '';
 
-  let writeStream: fs.WriteStream;
+  const flush = async () => {
+    if (!buffer) {
+      return;
+    }
 
-  const createIndexedWriteStream = () => fs.createWriteStream(filePathFactory(fileIndex));
+    const name = pathFactory(fileIndex++);
+    const size = buffer.length;
 
-  // If no maximum file size is provided, then return a basic fs write stream
-  if (maxFileSize === undefined) {
-    return createIndexedWriteStream();
-  }
+    await new Promise<void>((resolve, reject) => {
+      archive.entry({ name, size }, buffer, (err) => {
+        if (err) {
+          reject(err);
+        }
 
-  if (maxFileSize <= 0) {
-    throw new Error('Max file size must be a positive number');
-  }
+        resolve();
+      });
+    });
+
+    buffer = '';
+  };
+
+  const push = (chunk: string | Buffer) => {
+    buffer += chunk;
+  };
 
   return new Writable({
-    write(chunk, encoding, callback) {
-      // Initialize the write stream value if undefined
-      if (!writeStream) {
-        writeStream = createIndexedWriteStream();
+    async destroy(err, callback) {
+      await flush();
+      callback(err);
+    },
+
+    async write(chunk, _encoding, callback) {
+      const size = chunk.length;
+
+      if (chunk.length > maxSize) {
+        callback(new Error(`payload too large: ${chunk.length}>${maxSize}`));
+        return;
       }
 
-      // Check that by adding this new chunk of data, we
-      // are not going to reach the maximum file size.
-      if (maxSize && fileSize + chunk.length > maxSize) {
-        // Update the counters' value
-        fileIndex++;
-        fileSize = 0;
-
-        // Replace old write stream
-        writeStream.destroy();
-        writeStream = createIndexedWriteStream();
+      if (buffer.length + size > maxSize) {
+        await flush();
       }
 
-      // Update the actual file size
-      fileSize += chunk.length;
+      push(chunk);
 
-      // Transfer the data to the up-to-date write stream
-      writeStream.write(chunk, encoding, callback);
+      callback(null);
     },
   });
 };

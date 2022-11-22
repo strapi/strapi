@@ -2,11 +2,11 @@ import type { IEntity } from '../../../../types';
 
 import { Readable } from 'stream';
 
-import { collect, createMockedQueryBuilder, getStrapiFactory } from './test-utils';
+import { collect, createMockedQueryBuilder, getStrapiFactory } from '../../../__tests__/test-utils';
 import { createLocalStrapiSourceProvider } from '../';
 
 describe('Local Strapi Source Provider', () => {
-  describe('Boostrap', () => {
+  describe('Bootstrap', () => {
     test('Should not have a defined Strapi instance if bootstrap has not been called', () => {
       const provider = createLocalStrapiSourceProvider({ getStrapi: getStrapiFactory() });
 
@@ -118,6 +118,86 @@ describe('Local Strapi Source Provider', () => {
           data: expect.any(Object),
         });
       });
+    });
+  });
+
+  describe('Streaming Schemas', () => {
+    test('Should successfully create a readable stream with all Schemas', async () => {
+      const contentTypes = {
+        foo: { uid: 'foo', attributes: { title: { type: 'string' } } },
+        bar: { uid: 'bar', attributes: { age: { type: 'number' } } },
+      };
+
+      const components = {
+        'basic.simple': {
+          collectionName: 'components_basic_simples',
+          info: { displayName: 'simple', icon: 'ambulance', description: '' },
+          options: {},
+          attributes: { name: { type: 'string' } },
+          uid: 'basic.simple',
+          modelType: 'component',
+          modelName: 'simple',
+          globalId: 'ComponentBasicSimple',
+        },
+        'blog.test-como': {
+          collectionName: 'components_blog_test_comos',
+          info: {
+            displayName: 'test comp',
+            icon: 'air-freshener',
+            description: '',
+          },
+          options: {},
+          attributes: { name: { type: 'string' } },
+          uid: 'blog.test-como',
+          modelType: 'component',
+          modelName: 'test-como',
+          globalId: 'ComponentBlogTestComo',
+        },
+      };
+
+      const provider = createLocalStrapiSourceProvider({
+        getStrapi: getStrapiFactory({
+          contentTypes,
+          components,
+        }),
+      });
+
+      await provider.bootstrap();
+
+      const schemasStream = provider.streamSchemas() as Readable;
+      const schemas = await collect(schemasStream);
+
+      expect(schemasStream).toBeInstanceOf(Readable);
+      expect(schemas).toHaveLength(4);
+
+      expect(schemas).toEqual([
+        { uid: 'foo', attributes: { title: { type: 'string' } } },
+        { uid: 'bar', attributes: { age: { type: 'number' } } },
+        {
+          collectionName: 'components_basic_simples',
+          info: { displayName: 'simple', icon: 'ambulance', description: '' },
+          options: {},
+          attributes: { name: { type: 'string' } },
+          uid: 'basic.simple',
+          modelType: 'component',
+          modelName: 'simple',
+          globalId: 'ComponentBasicSimple',
+        },
+        {
+          collectionName: 'components_blog_test_comos',
+          info: {
+            displayName: 'test comp',
+            icon: 'air-freshener',
+            description: '',
+          },
+          options: {},
+          attributes: { name: { type: 'string' } },
+          uid: 'blog.test-como',
+          modelType: 'component',
+          modelName: 'test-como',
+          globalId: 'ComponentBlogTestComo',
+        },
+      ]);
     });
   });
 });

@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Header renders 1`] = `
-.c19 {
+.c17 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -13,253 +13,7 @@ exports[`Header renders 1`] = `
   width: 1px;
 }
 
-.c9 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c10 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c10 > * + * {
-  margin-left: 8px;
-}
-
-.c17 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c14 {
-  padding-right: 8px;
-}
-
-.c11 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c11 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c11 svg > g,
-.c11 svg path {
-  fill: #ffffff;
-}
-
-.c11[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c11:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c11:focus-visible {
-  outline: none;
-}
-
-.c11:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c15 {
-  height: 100%;
-}
-
-.c12 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: 1px solid #4945ff;
-  border: 1px solid #d9d8ff;
-  background: #f0f0ff;
-}
-
-.c12 .c13 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c12 .c16 {
-  color: #ffffff;
-}
-
-.c12[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c12[aria-disabled='true'] .c16 {
-  color: #666687;
-}
-
-.c12[aria-disabled='true'] svg > g,
-.c12[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c12[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c12[aria-disabled='true']:active .c16 {
-  color: #666687;
-}
-
-.c12[aria-disabled='true']:active svg > g,
-.c12[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c12:hover {
-  background-color: #ffffff;
-}
-
-.c12:active {
-  background-color: #ffffff;
-  border: 1px solid #4945ff;
-}
-
-.c12:active .c16 {
-  color: #4945ff;
-}
-
-.c12:active svg > g,
-.c12:active svg path {
-  fill: #4945ff;
-}
-
-.c12 .c16 {
-  color: #271fe0;
-}
-
-.c12 svg > g,
-.c12 svg path {
-  fill: #271fe0;
-}
-
-.c18 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: 1px solid #4945ff;
-}
-
-.c18 .c13 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c18 .c16 {
-  color: #ffffff;
-}
-
-.c18[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c18[aria-disabled='true'] .c16 {
-  color: #666687;
-}
-
-.c18[aria-disabled='true'] svg > g,
-.c18[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c18[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c18[aria-disabled='true']:active .c16 {
-  color: #666687;
-}
-
-.c18[aria-disabled='true']:active svg > g,
-.c18[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c18:hover {
-  border: 1px solid #7b79ff;
-  background: #7b79ff;
-}
-
-.c18:active {
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c18 svg > g,
-.c18 svg path {
-  fill: #ffffff;
-}
-
-.c0 {
+.c1 {
   background: #f6f6f9;
   padding-top: 24px;
   padding-right: 56px;
@@ -267,11 +21,15 @@ exports[`Header renders 1`] = `
   padding-left: 56px;
 }
 
-.c1 {
+.c2 {
   padding-bottom: 8px;
 }
 
-.c6 {
+.c4 {
+  padding-right: 8px;
+}
+
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -289,7 +47,7 @@ exports[`Header renders 1`] = `
   justify-content: space-between;
 }
 
-.c7 {
+.c9 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -303,47 +61,65 @@ exports[`Header renders 1`] = `
   flex-direction: row;
 }
 
-.c8 {
+.c7 {
+  font-size: 0.875rem;
+  line-height: 1.43;
   color: #32324d;
+}
+
+.c10 {
   font-weight: 600;
   font-size: 2rem;
   line-height: 1.25;
+  color: #32324d;
 }
 
-.c5 {
-  color: #4945ff;
-  font-size: 0.875rem;
-  line-height: 1.43;
+.c15 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 1.14;
+  color: #32324d;
 }
 
-.c3 {
-  padding-right: 8px;
+.c11 > * {
+  margin-left: 0;
+  margin-right: 0;
 }
 
-.c2 {
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-text-decoration: none;
-  text-decoration: none;
+.c11 > * + * {
+  margin-left: 8px;
+}
+
+.c12 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
   position: relative;
   outline: none;
 }
 
-.c2 svg path {
-  fill: #4945ff;
+.c12 svg {
+  height: 12px;
+  width: 12px;
 }
 
-.c2 svg {
-  font-size: 0.625rem;
+.c12 svg > g,
+.c12 svg path {
+  fill: #ffffff;
 }
 
-.c2:after {
+.c12[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c12:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -358,11 +134,11 @@ exports[`Header renders 1`] = `
   border: 2px solid transparent;
 }
 
-.c2:focus-visible {
+.c12:focus-visible {
   outline: none;
 }
 
-.c2:focus-visible:after {
+.c12:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -373,7 +149,235 @@ exports[`Header renders 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c4 {
+.c14 {
+  height: 100%;
+}
+
+.c13 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: #4945ff;
+  border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
+  border: 1px solid #d9d8ff;
+  background: #f0f0ff;
+}
+
+.c13 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c13 .c6 {
+  color: #ffffff;
+}
+
+.c13[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c13[aria-disabled='true'] .c6 {
+  color: #666687;
+}
+
+.c13[aria-disabled='true'] svg > g,
+.c13[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c13[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c13[aria-disabled='true']:active .c6 {
+  color: #666687;
+}
+
+.c13[aria-disabled='true']:active svg > g,
+.c13[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c13:hover {
+  background-color: #ffffff;
+}
+
+.c13:active {
+  background-color: #ffffff;
+  border: 1px solid #4945ff;
+}
+
+.c13:active .c6 {
+  color: #4945ff;
+}
+
+.c13:active svg > g,
+.c13:active svg path {
+  fill: #4945ff;
+}
+
+.c13 .c6 {
+  color: #271fe0;
+}
+
+.c13 svg > g,
+.c13 svg path {
+  fill: #271fe0;
+}
+
+.c16 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: #4945ff;
+  border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.c16 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c16 .c6 {
+  color: #ffffff;
+}
+
+.c16[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c16[aria-disabled='true'] .c6 {
+  color: #666687;
+}
+
+.c16[aria-disabled='true'] svg > g,
+.c16[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c16[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c16[aria-disabled='true']:active .c6 {
+  color: #666687;
+}
+
+.c16[aria-disabled='true']:active svg > g,
+.c16[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c16:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c16:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c16 svg > g,
+.c16 svg path {
+  fill: #ffffff;
+}
+
+.c3 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  color: #4945ff;
+  position: relative;
+  outline: none;
+}
+
+.c3 svg path {
+  -webkit-transition: fill 150ms ease-out;
+  transition: fill 150ms ease-out;
+  fill: currentColor;
+}
+
+.c3 svg {
+  font-size: 0.625rem;
+}
+
+.c3 .c6 {
+  -webkit-transition: color 150ms ease-out;
+  transition: color 150ms ease-out;
+  color: currentColor;
+}
+
+.c3:hover {
+  color: #7b79ff;
+}
+
+.c3:active {
+  color: #271fe0;
+}
+
+.c3:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c3:focus-visible {
+  outline: none;
+}
+
+.c3:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c5 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -385,20 +389,20 @@ exports[`Header renders 1`] = `
     style="height: 0px;"
   >
     <div
-      class="c0"
+      class="c0 c1"
       data-strapi-header="true"
     >
       <div
-        class="c1"
+        class="c0 c2"
       >
         <a
           aria-current="page"
-          class="c2 active"
+          class="c3 active"
           href="/?folder=2"
         >
           <span
             aria-hidden="true"
-            class="c3 c4"
+            class="c0 c4 c5"
           >
             <svg
               fill="none"
@@ -414,36 +418,36 @@ exports[`Header renders 1`] = `
             </svg>
           </span>
           <span
-            class="c5"
+            class="c6 c7"
           >
             Back
           </span>
         </a>
       </div>
       <div
-        class="c6"
+        class="c0 c8"
       >
         <div
-          class="c7"
+          class="c0 c9"
         >
           <h1
-            class="c8"
+            class="c6 c10"
           >
             Media Library
           </h1>
         </div>
         <div
-          class="c9 c10"
+          class="c0 c9 c11"
           spacing="2"
         >
           <button
             aria-disabled="false"
-            class="c11 c12"
+            class="c12 c13"
             type="button"
           >
             <div
               aria-hidden="true"
-              class="c13 c14 c15"
+              class="c0 c4 c14"
             >
               <svg
                 fill="none"
@@ -459,19 +463,19 @@ exports[`Header renders 1`] = `
               </svg>
             </div>
             <span
-              class="c16 c17"
+              class="c6 c15"
             >
               Add new folder
             </span>
           </button>
           <button
             aria-disabled="false"
-            class="c11 c18"
+            class="c12 c16"
             type="button"
           >
             <div
               aria-hidden="true"
-              class="c13 c14 c15"
+              class="c0 c4 c14"
             >
               <svg
                 fill="none"
@@ -487,7 +491,7 @@ exports[`Header renders 1`] = `
               </svg>
             </div>
             <span
-              class="c16 c17"
+              class="c6 c15"
             >
               Add new assets
             </span>
@@ -497,7 +501,7 @@ exports[`Header renders 1`] = `
     </div>
   </div>
   <div
-    class="c19"
+    class="c17"
   >
     <p
       aria-live="polite"

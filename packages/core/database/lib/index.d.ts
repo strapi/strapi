@@ -1,6 +1,6 @@
 import { LifecycleProvider } from './lifecycles';
 import { MigrationProvider } from './migrations';
-import { SchemaProvideer } from './schema';
+import { SchemaProvider } from './schema';
 
 type LogicalOperators<T> = {
   $and?: WhereParams<T>[];
@@ -153,7 +153,7 @@ interface DatabaseConfig {
   models: ModelConfig[];
 }
 export interface Database {
-  schema: SchemaProvideer;
+  schema: SchemaProvider;
   lifecycles: LifecycleProvider;
   migrations: MigrationProvider;
   entityManager: EntityManager;
