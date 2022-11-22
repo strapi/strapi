@@ -1,5 +1,13 @@
+import axios from 'axios';
 import { useEffect } from 'react';
-import { cancelToken, getFetchClient } from '../../utils/getFetchClient';
+import { getFetchClient } from '../../utils/getFetchClient';
+
+const cancelToken = () => {
+  const CancelToken = axios.CancelToken;
+  const source = CancelToken.source();
+
+  return source;
+};
 
 const useFetchClient = () => {
   const source = cancelToken();
@@ -11,11 +19,11 @@ const useFetchClient = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const options = {
+  const defaultOptions = {
     cancelToken: source.token,
   };
 
-  return getFetchClient(options);
+  return getFetchClient(defaultOptions);
 };
 
 export default useFetchClient;

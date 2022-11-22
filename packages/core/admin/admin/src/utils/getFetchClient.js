@@ -1,19 +1,10 @@
-import axios from 'axios';
-
 import instance from './fetchClient';
 
-export const cancelToken = () => {
-  const CancelToken = axios.CancelToken;
-  const source = CancelToken.source();
-
-  return source;
-};
-
-export const getFetchClient = (options = {}) => {
+export const getFetchClient = (defaultOptions = {}) => {
   return {
-    get: (url, config) => instance.get(url, { ...options, ...config }),
-    put: (url, data, config) => instance.put(url, data, { ...options, ...config }),
-    post: (url, data, config) => instance.post(url, data, { ...options, ...config }),
-    delete: (url, config) => instance.get(url, { ...options, ...config }),
+    get: (url, config) => instance.get(url, { ...defaultOptions, ...config }),
+    put: (url, data, config) => instance.put(url, data, { ...defaultOptions, ...config }),
+    post: (url, data, config) => instance.post(url, data, { ...defaultOptions, ...config }),
+    delete: (url, config) => instance.delete(url, { ...defaultOptions, ...config }),
   };
 };
