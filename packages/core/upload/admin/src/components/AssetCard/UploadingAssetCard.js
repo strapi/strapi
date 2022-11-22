@@ -87,7 +87,7 @@ export const UploadingAssetCard = ({
 
   return (
     <Stack spacing={1}>
-      <Card borderColor={error ? 'danger600' : undefined}>
+      <Card borderColor={error ? 'danger600' : 'neutral150'}>
         <CardHeader>
           <UploadProgressWrapper>
             <UploadProgress error={error} onCancel={handleCancel} progress={progress} />
