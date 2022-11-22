@@ -32,7 +32,7 @@ describe('ImageAssetCard', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c30 {
+      .c31 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -69,7 +69,19 @@ describe('ImageAssetCard', () => {
         padding-left: 12px;
       }
 
-      .c26 {
+      .c21 {
+        padding-top: 4px;
+      }
+
+      .c25 {
+        padding-top: 4px;
+        -webkit-box-flex: 1;
+        -webkit-flex-grow: 1;
+        -ms-flex-positive: 1;
+        flex-grow: 1;
+      }
+
+      .c27 {
         background: #f6f6f9;
         padding: 4px;
         border-radius: 4px;
@@ -122,7 +134,7 @@ describe('ImageAssetCard', () => {
         flex-direction: row;
       }
 
-      .c27 {
+      .c28 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -186,34 +198,34 @@ describe('ImageAssetCard', () => {
       }
 
       .c22 {
-        font-weight: 600;
-        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
       }
 
       .c23 {
-        color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
+        color: #666687;
       }
 
-      .c29 {
-        color: #666687;
+      .c30 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
+        color: #666687;
       }
 
-      .c25 {
+      .c26 {
         margin-left: auto;
         -webkit-flex-shrink: 0;
         -ms-flex-negative: 0;
         flex-shrink: 0;
       }
 
-      .c28 {
+      .c29 {
         margin-left: 4px;
       }
 
@@ -292,10 +304,6 @@ describe('ImageAssetCard', () => {
       .c3 {
         position: relative;
         border-bottom: 1px solid #eaeaef;
-      }
-
-      .c21 {
-        padding-top: 4px;
       }
 
       .c15 {
@@ -462,7 +470,7 @@ describe('ImageAssetCard', () => {
               <span>
                 <button
                   aria-disabled="false"
-                  aria-labelledby="tooltip-1"
+                  aria-labelledby="tooltip-2"
                   class="c13 c14"
                   tabindex="0"
                   type="button"
@@ -533,23 +541,27 @@ describe('ImageAssetCard', () => {
                 </div>
               </div>
               <div
-                class="c25"
+                class="c25 c5"
               >
                 <div
-                  class="c26 c27 c28"
+                  class="c26"
                 >
-                  <span
-                    class="c29"
+                  <div
+                    class="c27 c28 c29"
                   >
-                    Image
-                  </span>
+                    <span
+                      class="c30"
+                    >
+                      Image
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </article>
         <div
-          class="c30"
+          class="c31"
         >
           <p
             aria-live="polite"

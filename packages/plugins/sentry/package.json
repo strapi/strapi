@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-sentry",
-  "version": "4.5.0",
+  "version": "4.5.2",
   "description": "Send Strapi error events to Sentry",
   "repository": {
     "type": "git",
