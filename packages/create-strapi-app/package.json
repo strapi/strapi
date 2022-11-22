@@ -1,6 +1,6 @@
 {
   "name": "create-strapi-app",
-  "version": "3.6.10",
+  "version": "3.6.11",
   "description": "Generate a new Strapi application.",
   "license": "SEE LICENSE IN LICENSE",
   "homepage": "https://strapi.io",
@@ -21,7 +21,7 @@
     "inquirer": "8.1.0",
     "js-yaml": "4.1.0",
     "node-fetch": "^2.6.1",
-    "strapi-generate-new": "3.6.10"
+    "strapi-generate-new": "3.6.11"
   },
   "scripts": {
     "test": "echo \"no tests yet\""

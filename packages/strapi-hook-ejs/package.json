@@ -1,6 +1,6 @@
 {
   "name": "strapi-hook-ejs",
-  "version": "3.6.10",
+  "version": "3.6.11",
   "description": "EJS hook for the Strapi framework",
   "homepage": "https://strapi.io",
   "keywords": [

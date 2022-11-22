@@ -1,6 +1,6 @@
 {
   "name": "create-strapi-starter",
-  "version": "3.6.10",
+  "version": "3.6.11",
   "description": "Generate a new Strapi application.",
   "license": "SEE LICENSE IN LICENSE",
   "homepage": "https://strapi.io",
@@ -26,7 +26,7 @@
     "js-yaml": "4.1.0",
     "node-fetch": "^2.6.1",
     "ora": "5.4.0",
-    "strapi-generate-new": "3.6.10",
+    "strapi-generate-new": "3.6.11",
     "tar": "6.1.9"
   },
   "scripts": {
