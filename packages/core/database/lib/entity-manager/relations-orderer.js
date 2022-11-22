@@ -13,15 +13,15 @@ const _ = require('lodash/fp');
  *
  * Example:
  *  - Having a connect array like:
- *      [  { id: 4, before: 2 }, { id: 4, before: 3}, {id: 5, before: 4} ]
+ *      [ { id: 4, before: 2 }, { id: 4, before: 3}, {id: 5, before: 4} ]
  * - With the initial relations:
  *      [ { id: 2, order: 4 }, { id: 3, order: 10 } ]
  * - Step by step, going through the connect array, the array of relations would be:
  *      [ { id: 4, order: 3.5 }, { id: 2, order: 4 }, { id: 3, order: 10 } ]
  *      [ { id: 2, order: 4 }, { id: 4, order: 3.5 }, { id: 3, order: 10 } ]
- *      [ { id: 2, order: 4 }, {id: 5, order: 3.5},  { id: 4, order: 3.5 }, { id: 3, order: 10 } ]
+ *      [ { id: 2, order: 4 }, { id: 5, order: 3.5 },  { id: 4, order: 3.5 }, { id: 3, order: 10 } ]
  * - The final step would be to recalculate fractional order values.
- *      [ { id: 2, order: 4 }, {id: 5, order: 3.33},  { id: 4, order: 3.66 }, { id: 3, order: 10 } ]
+ *      [ { id: 2, order: 4 }, { id: 5, order: 3.33 },  { id: 4, order: 3.66 }, { id: 3, order: 10 } ]
  *
  * Constraints:
  * - Expects you will never connect a relation before / after one that does not exist
