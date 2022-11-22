@@ -31,7 +31,13 @@ const sidebars = {
             type: 'doc',
             id: 'core/content-manager/intro',
           },
-          items: ['example'],
+          items: [
+            {
+              type: 'doc',
+              label: 'Relations',
+              id: 'core/content-manager/relations',
+            },
+          ],
         },
         {
           type: 'category',

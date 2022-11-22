@@ -13,7 +13,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   width: 1px;
 }
 
-.c32 {
+.c31 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -60,15 +60,11 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c22 {
-  padding-bottom: 16px;
+.c26 {
+  width: 100%;
 }
 
-.c24 {
-  padding-bottom: 24px;
-}
-
-.c33 {
+.c32 {
   background: #f6f6f9;
   padding: 4px;
   border-radius: 4px;
@@ -81,28 +77,32 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   display: flex;
 }
 
-.c35 {
+.c34 {
   padding-right: 12px;
   padding-left: 12px;
   border-radius: 4px;
 }
 
-.c48 {
+.c47 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c50 {
+.c49 {
   padding-left: 12px;
 }
 
-.c55 {
+.c54 {
   padding-top: 24px;
   padding-bottom: 24px;
 }
 
-.c56 {
+.c55 {
   background: #eaeaef;
+}
+
+.c57 {
+  padding-bottom: 16px;
 }
 
 .c58 {
@@ -154,28 +154,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   flex-direction: row;
 }
 
-.c25 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-flex-wrap: wrap;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c28 {
+.c22 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -189,7 +168,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   flex-direction: column;
 }
 
-.c36 {
+.c35 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -234,21 +213,21 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   color: #666687;
 }
 
-.c23 {
+.c24 {
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
   color: #32324d;
 }
 
-.c30 {
+.c29 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
   color: #32324d;
 }
 
-.c38 {
+.c37 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
@@ -256,7 +235,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   text-transform: uppercase;
 }
 
-.c40 {
+.c39 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
@@ -264,7 +243,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   text-transform: uppercase;
 }
 
-.c42 {
+.c41 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
@@ -272,7 +251,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   text-transform: uppercase;
 }
 
-.c49 {
+.c48 {
   font-size: 0.875rem;
   line-height: 1.43;
   display: block;
@@ -282,7 +261,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   color: #32324d;
 }
 
-.c53 {
+.c52 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
@@ -295,13 +274,31 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   color: #32324d;
 }
 
-.c29 > * {
+.c23 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c29 > * + * {
+.c23 > * + * {
+  margin-top: 16px;
+}
+
+.c28 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c28 > * + * {
   margin-top: 4px;
+}
+
+.c25 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c25 > * + * {
+  margin-left: 16px;
 }
 
 .c61 > * {
@@ -445,7 +442,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   fill: #ffffff;
 }
 
-.c57 {
+.c56 {
   height: 1px;
   border: none;
   margin: 0;
@@ -491,7 +488,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   fill: #666687;
 }
 
-.c46 {
+.c45 {
   position: absolute;
   left: 0;
   right: 0;
@@ -502,15 +499,15 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   border: none;
 }
 
-.c46:focus {
+.c45:focus {
   outline: none;
 }
 
-.c46[aria-disabled='true'] {
+.c45[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c45 {
+.c44 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -526,28 +523,28 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   transition-duration: 0.2s;
 }
 
-.c45:focus-within {
+.c44:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c51 {
+.c50 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c51 svg {
+.c50 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c51 svg path {
+.c50 svg path {
   fill: #666687;
 }
 
-.c52 {
+.c51 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -556,22 +553,22 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   border: none;
 }
 
-.c52 svg {
+.c51 svg {
   width: 0.375rem;
 }
 
-.c47 {
+.c46 {
   width: 100%;
 }
 
-.c31 {
+.c30 {
   position: relative;
   display: inline-block;
   z-index: 0;
   width: 100%;
 }
 
-.c34 {
+.c33 {
   overflow: hidden;
   -webkit-flex-wrap: wrap;
   -ms-flex-wrap: wrap;
@@ -584,12 +581,12 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   transition-duration: 0.2s;
 }
 
-.c34:focus-within {
+.c33:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c37 {
+.c36 {
   background-color: transparent;
   border: 1px solid #f6f6f9;
   position: relative;
@@ -605,7 +602,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   padding-bottom: 6px;
 }
 
-.c39 {
+.c38 {
   background-color: #ffffff;
   border: 1px solid #dcdce4;
   position: relative;
@@ -621,7 +618,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   padding-bottom: 6px;
 }
 
-.c41 {
+.c40 {
   height: 100%;
   left: 0;
   opacity: 0;
@@ -704,28 +701,24 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   overflow-x: hidden;
 }
 
-.c43 {
+.c42 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
   gap: 16px;
 }
 
-.c44 {
+.c43 {
   grid-column: span 6;
   max-width: 100%;
 }
 
-.c54 {
+.c53 {
   grid-column: span 3;
   max-width: 100%;
 }
 
 .c4:focus-visible {
   outline: none;
-}
-
-.c26 {
-  gap: 16px;
 }
 
 .c66 {
@@ -812,25 +805,25 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
 }
 
 @media (max-width:68.75rem) {
-  .c44 {
+  .c43 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c44 {
+  .c43 {
     grid-column: span;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c54 {
+  .c53 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c54 {
+  .c53 {
     grid-column: span;
   }
 }
@@ -945,465 +938,481 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
               class="c0 c21"
             >
               <div
-                class="c0 c22"
+                class="c0 c22 c23"
+                spacing="4"
               >
                 <h2
-                  class="c10 c23"
+                  class="c10 c24"
                 >
                   Settings
                 </h2>
-              </div>
-              <div
-                class="c0 c24 c25 c26"
-                wrap="wrap"
-              >
                 <div
-                  class="c27"
+                  class="c0 c12 c25"
+                  spacing="4"
                 >
                   <div
-                    class="c0 c28 c29"
-                    spacing="1"
+                    class="c0 c26"
+                    width="100%"
                   >
                     <div
-                      class="c0 c13"
+                      class="c27"
                     >
-                      <label
-                        class="c10 c30"
-                        for="toggleinput-1"
+                      <div
+                        class="c0 c22 c28"
+                        spacing="1"
                       >
                         <div
                           class="c0 c13"
                         >
-                          Enable search
+                          <label
+                            class="c10 c29"
+                            for="toggleinput-1"
+                          >
+                            <div
+                              class="c0 c13"
+                            >
+                              Enable search
+                            </div>
+                          </label>
                         </div>
-                      </label>
+                        <label
+                          class="c30"
+                        >
+                          <div
+                            class="c31"
+                          >
+                            Enable search
+                          </div>
+                          <div
+                            class="c0 c32 c33"
+                            display="flex"
+                          >
+                            <div
+                              aria-hidden="true"
+                              class="c0 c34 c35 c36"
+                            >
+                              <span
+                                class="c10 c37"
+                              >
+                                off
+                              </span>
+                            </div>
+                            <div
+                              aria-hidden="true"
+                              class="c0 c34 c35 c38"
+                            >
+                              <span
+                                class="c10 c39"
+                              >
+                                on
+                              </span>
+                            </div>
+                            <input
+                              aria-disabled="false"
+                              checked=""
+                              class="c40"
+                              id="toggleinput-1"
+                              name="settings.searchable"
+                              type="checkbox"
+                            />
+                          </div>
+                        </label>
+                      </div>
                     </div>
-                    <label
-                      class="c31"
-                    >
-                      <div
-                        class="c32"
-                      >
-                        Enable search
-                      </div>
-                      <div
-                        class="c0 c33 c34"
-                        display="flex"
-                      >
-                        <div
-                          aria-hidden="true"
-                          class="c0 c35 c36 c37"
-                        >
-                          <span
-                            class="c10 c38"
-                          >
-                            off
-                          </span>
-                        </div>
-                        <div
-                          aria-hidden="true"
-                          class="c0 c35 c36 c39"
-                        >
-                          <span
-                            class="c10 c40"
-                          >
-                            on
-                          </span>
-                        </div>
-                        <input
-                          aria-disabled="false"
-                          checked=""
-                          class="c41"
-                          id="toggleinput-1"
-                          name="settings.searchable"
-                          type="checkbox"
-                        />
-                      </div>
-                    </label>
                   </div>
-                </div>
-                <div
-                  class="c27"
-                >
                   <div
-                    class="c0 c28 c29"
-                    spacing="1"
+                    class="c0 c26"
+                    width="100%"
                   >
                     <div
-                      class="c0 c13"
+                      class="c27"
                     >
-                      <label
-                        class="c10 c30"
-                        for="toggleinput-2"
+                      <div
+                        class="c0 c22 c28"
+                        spacing="1"
                       >
                         <div
                           class="c0 c13"
                         >
-                          Enable filters
+                          <label
+                            class="c10 c29"
+                            for="toggleinput-2"
+                          >
+                            <div
+                              class="c0 c13"
+                            >
+                              Enable filters
+                            </div>
+                          </label>
                         </div>
-                      </label>
+                        <label
+                          class="c30"
+                        >
+                          <div
+                            class="c31"
+                          >
+                            Enable filters
+                          </div>
+                          <div
+                            class="c0 c32 c33"
+                            display="flex"
+                          >
+                            <div
+                              aria-hidden="true"
+                              class="c0 c34 c35 c36"
+                            >
+                              <span
+                                class="c10 c37"
+                              >
+                                off
+                              </span>
+                            </div>
+                            <div
+                              aria-hidden="true"
+                              class="c0 c34 c35 c38"
+                            >
+                              <span
+                                class="c10 c39"
+                              >
+                                on
+                              </span>
+                            </div>
+                            <input
+                              aria-disabled="false"
+                              checked=""
+                              class="c40"
+                              id="toggleinput-2"
+                              name="settings.filterable"
+                              type="checkbox"
+                            />
+                          </div>
+                        </label>
+                      </div>
                     </div>
-                    <label
-                      class="c31"
-                    >
-                      <div
-                        class="c32"
-                      >
-                        Enable filters
-                      </div>
-                      <div
-                        class="c0 c33 c34"
-                        display="flex"
-                      >
-                        <div
-                          aria-hidden="true"
-                          class="c0 c35 c36 c37"
-                        >
-                          <span
-                            class="c10 c38"
-                          >
-                            off
-                          </span>
-                        </div>
-                        <div
-                          aria-hidden="true"
-                          class="c0 c35 c36 c39"
-                        >
-                          <span
-                            class="c10 c40"
-                          >
-                            on
-                          </span>
-                        </div>
-                        <input
-                          aria-disabled="false"
-                          checked=""
-                          class="c41"
-                          id="toggleinput-2"
-                          name="settings.filterable"
-                          type="checkbox"
-                        />
-                      </div>
-                    </label>
                   </div>
-                </div>
-                <div
-                  class="c27"
-                >
                   <div
-                    class="c0 c28 c29"
-                    spacing="1"
+                    class="c0 c26"
+                    width="100%"
                   >
                     <div
-                      class="c0 c13"
+                      class="c27"
                     >
-                      <label
-                        class="c10 c30"
-                        for="toggleinput-3"
+                      <div
+                        class="c0 c22 c28"
+                        spacing="1"
                       >
                         <div
                           class="c0 c13"
                         >
-                          Enable bulk actions
+                          <label
+                            class="c10 c29"
+                            for="toggleinput-3"
+                          >
+                            <div
+                              class="c0 c13"
+                            >
+                              Enable bulk actions
+                            </div>
+                          </label>
                         </div>
-                      </label>
+                        <label
+                          class="c30"
+                        >
+                          <div
+                            class="c31"
+                          >
+                            Enable bulk actions
+                          </div>
+                          <div
+                            class="c0 c32 c33"
+                            display="flex"
+                          >
+                            <div
+                              aria-hidden="true"
+                              class="c0 c34 c35 c38"
+                            >
+                              <span
+                                class="c10 c41"
+                              >
+                                off
+                              </span>
+                            </div>
+                            <div
+                              aria-hidden="true"
+                              class="c0 c34 c35 c36"
+                            >
+                              <span
+                                class="c10 c37"
+                              >
+                                on
+                              </span>
+                            </div>
+                            <input
+                              aria-disabled="false"
+                              class="c40"
+                              id="toggleinput-3"
+                              name="settings.bulkable"
+                              type="checkbox"
+                            />
+                          </div>
+                        </label>
+                      </div>
                     </div>
-                    <label
-                      class="c31"
+                  </div>
+                </div>
+                <div
+                  class="c0 c42"
+                >
+                  <div
+                    class="c43"
+                  >
+                    <div
+                      class="c0 "
                     >
-                      <div
-                        class="c32"
-                      >
-                        Enable bulk actions
-                      </div>
-                      <div
-                        class="c0 c33 c34"
-                        display="flex"
-                      >
+                      <div>
                         <div
-                          aria-hidden="true"
-                          class="c0 c35 c36 c39"
+                          class="c0 c22 c28"
+                          spacing="1"
                         >
                           <span
-                            class="c10 c42"
-                          >
-                            off
-                          </span>
-                        </div>
-                        <div
-                          aria-hidden="true"
-                          class="c0 c35 c36 c37"
-                        >
-                          <span
-                            class="c10 c38"
-                          >
-                            on
-                          </span>
-                        </div>
-                        <input
-                          aria-disabled="false"
-                          class="c41"
-                          id="toggleinput-3"
-                          name="settings.bulkable"
-                          type="checkbox"
-                        />
-                      </div>
-                    </label>
-                  </div>
-                </div>
-              </div>
-              <div
-                class="c0 c43"
-              >
-                <div
-                  class="c44"
-                >
-                  <div
-                    class="c0 "
-                  >
-                    <div>
-                      <div
-                        class="c0 c28 c29"
-                        spacing="1"
-                      >
-                        <span
-                          class="c10 c30"
-                          for="select-4"
-                          id="select-4-label"
-                        >
-                          <div
-                            class="c0 c13"
-                          >
-                            Entries per page
-                          </div>
-                        </span>
-                        <div
-                          class="c0 c13 c45"
-                        >
-                          <button
-                            aria-describedby="select-4-hint"
-                            aria-disabled="false"
-                            aria-expanded="false"
-                            aria-haspopup="listbox"
-                            aria-labelledby="select-4-label select-4-content"
-                            class="c46"
-                            id="select-4"
-                            name="settings.pageSize"
-                            type="button"
-                          />
-                          <div
-                            class="c0 c12 c47"
+                            class="c10 c29"
+                            for="select-4"
+                            id="select-4-label"
                           >
                             <div
                               class="c0 c13"
+                            >
+                              Entries per page
+                            </div>
+                          </span>
+                          <div
+                            class="c0 c13 c44"
+                          >
+                            <button
+                              aria-describedby="select-4-hint"
+                              aria-disabled="false"
+                              aria-expanded="false"
+                              aria-haspopup="listbox"
+                              aria-labelledby="select-4-label select-4-content"
+                              class="c45"
+                              id="select-4"
+                              name="settings.pageSize"
+                              type="button"
+                            />
+                            <div
+                              class="c0 c12 c46"
                             >
                               <div
-                                class="c0 c48"
+                                class="c0 c13"
                               >
-                                <span
-                                  class="c10 c49"
-                                  id="select-4-content"
+                                <div
+                                  class="c0 c47"
                                 >
-                                  10
-                                </span>
+                                  <span
+                                    class="c10 c48"
+                                    id="select-4-content"
+                                  >
+                                    10
+                                  </span>
+                                </div>
+                              </div>
+                              <div
+                                class="c0 c13"
+                              >
+                                <button
+                                  aria-hidden="true"
+                                  class="c0 c49 c50 c51"
+                                  tabindex="-1"
+                                  type="button"
+                                >
+                                  <svg
+                                    fill="none"
+                                    height="1em"
+                                    viewBox="0 0 14 8"
+                                    width="1em"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      clip-rule="evenodd"
+                                      d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                      fill="#32324D"
+                                      fill-rule="evenodd"
+                                    />
+                                  </svg>
+                                </button>
                               </div>
                             </div>
-                            <div
-                              class="c0 c13"
-                            >
-                              <button
-                                aria-hidden="true"
-                                class="c0 c50 c51 c52"
-                                tabindex="-1"
-                                type="button"
-                              >
-                                <svg
-                                  fill="none"
-                                  height="1em"
-                                  viewBox="0 0 14 8"
-                                  width="1em"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
                           </div>
+                          <p
+                            class="c10 c52"
+                            id="select-4-hint"
+                          >
+                            Note: You can override this value in the Collection Type settings page.
+                          </p>
                         </div>
-                        <p
-                          class="c10 c53"
-                          id="select-4-hint"
-                        >
-                          Note: You can override this value in the Collection Type settings page.
-                        </p>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div
-                  class="c54"
-                >
                   <div
-                    class="c0 "
+                    class="c53"
                   >
-                    <div>
-                      <div
-                        class="c0 c28 c29"
-                        spacing="1"
-                      >
-                        <span
-                          class="c10 c30"
-                          for="select-5"
-                          id="select-5-label"
-                        >
-                          <div
-                            class="c0 c13"
-                          >
-                            Default sort attribute
-                          </div>
-                        </span>
+                    <div
+                      class="c0 "
+                    >
+                      <div>
                         <div
-                          class="c0 c13 c45"
+                          class="c0 c22 c28"
+                          spacing="1"
                         >
-                          <button
-                            aria-disabled="false"
-                            aria-expanded="false"
-                            aria-haspopup="listbox"
-                            aria-labelledby="select-5-label select-5-content"
-                            class="c46"
-                            id="select-5"
-                            name="settings.defaultSortBy"
-                            type="button"
-                          />
-                          <div
-                            class="c0 c12 c47"
+                          <span
+                            class="c10 c29"
+                            for="select-5"
+                            id="select-5-label"
                           >
                             <div
                               class="c0 c13"
+                            >
+                              Default sort attribute
+                            </div>
+                          </span>
+                          <div
+                            class="c0 c13 c44"
+                          >
+                            <button
+                              aria-disabled="false"
+                              aria-expanded="false"
+                              aria-haspopup="listbox"
+                              aria-labelledby="select-5-label select-5-content"
+                              class="c45"
+                              id="select-5"
+                              name="settings.defaultSortBy"
+                              type="button"
+                            />
+                            <div
+                              class="c0 c12 c46"
                             >
                               <div
-                                class="c0 c48"
+                                class="c0 c13"
                               >
-                                <span
-                                  class="c10 c49"
-                                  id="select-5-content"
+                                <div
+                                  class="c0 c47"
                                 >
-                                  id
-                                </span>
+                                  <span
+                                    class="c10 c48"
+                                    id="select-5-content"
+                                  >
+                                    id
+                                  </span>
+                                </div>
                               </div>
-                            </div>
-                            <div
-                              class="c0 c13"
-                            >
-                              <button
-                                aria-hidden="true"
-                                class="c0 c50 c51 c52"
-                                tabindex="-1"
-                                type="button"
+                              <div
+                                class="c0 c13"
                               >
-                                <svg
-                                  fill="none"
-                                  height="1em"
-                                  viewBox="0 0 14 8"
-                                  width="1em"
-                                  xmlns="http://www.w3.org/2000/svg"
+                                <button
+                                  aria-hidden="true"
+                                  class="c0 c49 c50 c51"
+                                  tabindex="-1"
+                                  type="button"
                                 >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </button>
+                                  <svg
+                                    fill="none"
+                                    height="1em"
+                                    viewBox="0 0 14 8"
+                                    width="1em"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      clip-rule="evenodd"
+                                      d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                      fill="#32324D"
+                                      fill-rule="evenodd"
+                                    />
+                                  </svg>
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div
-                  class="c54"
-                >
                   <div
-                    class="c0 "
+                    class="c53"
                   >
-                    <div>
-                      <div
-                        class="c0 c28 c29"
-                        spacing="1"
-                      >
-                        <span
-                          class="c10 c30"
-                          for="select-6"
-                          id="select-6-label"
-                        >
-                          <div
-                            class="c0 c13"
-                          >
-                            Default sort order
-                          </div>
-                        </span>
+                    <div
+                      class="c0 "
+                    >
+                      <div>
                         <div
-                          class="c0 c13 c45"
+                          class="c0 c22 c28"
+                          spacing="1"
                         >
-                          <button
-                            aria-disabled="false"
-                            aria-expanded="false"
-                            aria-haspopup="listbox"
-                            aria-labelledby="select-6-label select-6-content"
-                            class="c46"
-                            id="select-6"
-                            name="settings.defaultSortOrder"
-                            type="button"
-                          />
-                          <div
-                            class="c0 c12 c47"
+                          <span
+                            class="c10 c29"
+                            for="select-6"
+                            id="select-6-label"
                           >
                             <div
                               class="c0 c13"
+                            >
+                              Default sort order
+                            </div>
+                          </span>
+                          <div
+                            class="c0 c13 c44"
+                          >
+                            <button
+                              aria-disabled="false"
+                              aria-expanded="false"
+                              aria-haspopup="listbox"
+                              aria-labelledby="select-6-label select-6-content"
+                              class="c45"
+                              id="select-6"
+                              name="settings.defaultSortOrder"
+                              type="button"
+                            />
+                            <div
+                              class="c0 c12 c46"
                             >
                               <div
-                                class="c0 c48"
+                                class="c0 c13"
                               >
-                                <span
-                                  class="c10 c49"
-                                  id="select-6-content"
+                                <div
+                                  class="c0 c47"
                                 >
-                                  ASC
-                                </span>
+                                  <span
+                                    class="c10 c48"
+                                    id="select-6-content"
+                                  >
+                                    ASC
+                                  </span>
+                                </div>
                               </div>
-                            </div>
-                            <div
-                              class="c0 c13"
-                            >
-                              <button
-                                aria-hidden="true"
-                                class="c0 c50 c51 c52"
-                                tabindex="-1"
-                                type="button"
+                              <div
+                                class="c0 c13"
                               >
-                                <svg
-                                  fill="none"
-                                  height="1em"
-                                  viewBox="0 0 14 8"
-                                  width="1em"
-                                  xmlns="http://www.w3.org/2000/svg"
+                                <button
+                                  aria-hidden="true"
+                                  class="c0 c49 c50 c51"
+                                  tabindex="-1"
+                                  type="button"
                                 >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </button>
+                                  <svg
+                                    fill="none"
+                                    height="1em"
+                                    viewBox="0 0 14 8"
+                                    width="1em"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      clip-rule="evenodd"
+                                      d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                      fill="#32324D"
+                                      fill-rule="evenodd"
+                                    />
+                                  </svg>
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1413,17 +1422,17 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                 </div>
               </div>
               <div
-                class="c0 c55"
+                class="c0 c54"
               >
                 <hr
-                  class="c0 c56 c57"
+                  class="c0 c55 c56"
                 />
               </div>
               <div
-                class="c0 c22"
+                class="c0 c57"
               >
                 <h2
-                  class="c10 c23"
+                  class="c10 c24"
                 >
                   View
                 </h2>
@@ -1432,7 +1441,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                 class="c0 c58 c13"
               >
                 <div
-                  class="c0 c22 c59 c60"
+                  class="c0 c57 c59 c60"
                   size="1"
                 >
                   <div
@@ -1499,7 +1508,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           </span>
                         </div>
                         <div
-                          class="c0 c50 c13"
+                          class="c0 c49 c13"
                         >
                           <button
                             aria-label="Edit id"
@@ -1603,7 +1612,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           </span>
                         </div>
                         <div
-                          class="c0 c50 c13"
+                          class="c0 c49 c13"
                         >
                           <button
                             aria-label="Edit address"
@@ -1650,7 +1659,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                   </div>
                 </div>
                 <div
-                  class="c0 c22 c69 c70"
+                  class="c0 c57 c69 c70"
                 >
                   <div>
                     <span>
@@ -1666,7 +1675,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         type="button"
                       >
                         <span
-                          class="c32"
+                          class="c31"
                         >
                           Add a field
                         </span>
@@ -1733,7 +1742,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   width: 1px;
 }
 
-.c32 {
+.c31 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -1780,15 +1789,11 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c22 {
-  padding-bottom: 16px;
+.c26 {
+  width: 100%;
 }
 
-.c24 {
-  padding-bottom: 24px;
-}
-
-.c33 {
+.c32 {
   background: #f6f6f9;
   padding: 4px;
   border-radius: 4px;
@@ -1801,28 +1806,32 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   display: flex;
 }
 
-.c35 {
+.c34 {
   padding-right: 12px;
   padding-left: 12px;
   border-radius: 4px;
 }
 
-.c48 {
+.c47 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c50 {
+.c49 {
   padding-left: 12px;
 }
 
-.c55 {
+.c54 {
   padding-top: 24px;
   padding-bottom: 24px;
 }
 
-.c56 {
+.c55 {
   background: #eaeaef;
+}
+
+.c57 {
+  padding-bottom: 16px;
 }
 
 .c58 {
@@ -1874,28 +1883,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   flex-direction: row;
 }
 
-.c25 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-flex-wrap: wrap;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c28 {
+.c22 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -1909,7 +1897,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   flex-direction: column;
 }
 
-.c36 {
+.c35 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1954,21 +1942,21 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   color: #666687;
 }
 
-.c23 {
+.c24 {
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
   color: #32324d;
 }
 
-.c30 {
+.c29 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
   color: #32324d;
 }
 
-.c38 {
+.c37 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
@@ -1976,7 +1964,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   text-transform: uppercase;
 }
 
-.c40 {
+.c39 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
@@ -1984,7 +1972,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   text-transform: uppercase;
 }
 
-.c42 {
+.c41 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
@@ -1992,7 +1980,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   text-transform: uppercase;
 }
 
-.c49 {
+.c48 {
   font-size: 0.875rem;
   line-height: 1.43;
   display: block;
@@ -2002,7 +1990,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   color: #32324d;
 }
 
-.c53 {
+.c52 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
@@ -2015,13 +2003,31 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   color: #32324d;
 }
 
-.c29 > * {
+.c23 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c29 > * + * {
+.c23 > * + * {
+  margin-top: 16px;
+}
+
+.c28 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c28 > * + * {
   margin-top: 4px;
+}
+
+.c25 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c25 > * + * {
+  margin-left: 16px;
 }
 
 .c61 > * {
@@ -2165,7 +2171,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   fill: #ffffff;
 }
 
-.c57 {
+.c56 {
   height: 1px;
   border: none;
   margin: 0;
@@ -2211,7 +2217,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   fill: #666687;
 }
 
-.c46 {
+.c45 {
   position: absolute;
   left: 0;
   right: 0;
@@ -2222,15 +2228,15 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   border: none;
 }
 
-.c46:focus {
+.c45:focus {
   outline: none;
 }
 
-.c46[aria-disabled='true'] {
+.c45[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c45 {
+.c44 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -2246,28 +2252,28 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   transition-duration: 0.2s;
 }
 
-.c45:focus-within {
+.c44:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c51 {
+.c50 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c51 svg {
+.c50 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c51 svg path {
+.c50 svg path {
   fill: #666687;
 }
 
-.c52 {
+.c51 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2276,22 +2282,22 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   border: none;
 }
 
-.c52 svg {
+.c51 svg {
   width: 0.375rem;
 }
 
-.c47 {
+.c46 {
   width: 100%;
 }
 
-.c31 {
+.c30 {
   position: relative;
   display: inline-block;
   z-index: 0;
   width: 100%;
 }
 
-.c34 {
+.c33 {
   overflow: hidden;
   -webkit-flex-wrap: wrap;
   -ms-flex-wrap: wrap;
@@ -2304,12 +2310,12 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   transition-duration: 0.2s;
 }
 
-.c34:focus-within {
+.c33:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c37 {
+.c36 {
   background-color: transparent;
   border: 1px solid #f6f6f9;
   position: relative;
@@ -2325,7 +2331,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   padding-bottom: 6px;
 }
 
-.c39 {
+.c38 {
   background-color: #ffffff;
   border: 1px solid #dcdce4;
   position: relative;
@@ -2341,7 +2347,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   padding-bottom: 6px;
 }
 
-.c41 {
+.c40 {
   height: 100%;
   left: 0;
   opacity: 0;
@@ -2424,28 +2430,24 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   overflow-x: hidden;
 }
 
-.c43 {
+.c42 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
   gap: 16px;
 }
 
-.c44 {
+.c43 {
   grid-column: span 6;
   max-width: 100%;
 }
 
-.c54 {
+.c53 {
   grid-column: span 3;
   max-width: 100%;
 }
 
 .c4:focus-visible {
   outline: none;
-}
-
-.c26 {
-  gap: 16px;
 }
 
 .c66 {
@@ -2532,25 +2534,25 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
 }
 
 @media (max-width:68.75rem) {
-  .c44 {
+  .c43 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c44 {
+  .c43 {
     grid-column: span;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c54 {
+  .c53 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c54 {
+  .c53 {
     grid-column: span;
   }
 }
@@ -2664,465 +2666,481 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
               class="c0 c21"
             >
               <div
-                class="c0 c22"
+                class="c0 c22 c23"
+                spacing="4"
               >
                 <h2
-                  class="c10 c23"
+                  class="c10 c24"
                 >
                   Settings
                 </h2>
-              </div>
-              <div
-                class="c0 c24 c25 c26"
-                wrap="wrap"
-              >
                 <div
-                  class="c27"
+                  class="c0 c12 c25"
+                  spacing="4"
                 >
                   <div
-                    class="c0 c28 c29"
-                    spacing="1"
+                    class="c0 c26"
+                    width="100%"
                   >
                     <div
-                      class="c0 c13"
+                      class="c27"
                     >
-                      <label
-                        class="c10 c30"
-                        for="toggleinput-31"
+                      <div
+                        class="c0 c22 c28"
+                        spacing="1"
                       >
                         <div
                           class="c0 c13"
                         >
-                          Enable search
+                          <label
+                            class="c10 c29"
+                            for="toggleinput-31"
+                          >
+                            <div
+                              class="c0 c13"
+                            >
+                              Enable search
+                            </div>
+                          </label>
                         </div>
-                      </label>
+                        <label
+                          class="c30"
+                        >
+                          <div
+                            class="c31"
+                          >
+                            Enable search
+                          </div>
+                          <div
+                            class="c0 c32 c33"
+                            display="flex"
+                          >
+                            <div
+                              aria-hidden="true"
+                              class="c0 c34 c35 c36"
+                            >
+                              <span
+                                class="c10 c37"
+                              >
+                                off
+                              </span>
+                            </div>
+                            <div
+                              aria-hidden="true"
+                              class="c0 c34 c35 c38"
+                            >
+                              <span
+                                class="c10 c39"
+                              >
+                                on
+                              </span>
+                            </div>
+                            <input
+                              aria-disabled="false"
+                              checked=""
+                              class="c40"
+                              id="toggleinput-31"
+                              name="settings.searchable"
+                              type="checkbox"
+                            />
+                          </div>
+                        </label>
+                      </div>
                     </div>
-                    <label
-                      class="c31"
-                    >
-                      <div
-                        class="c32"
-                      >
-                        Enable search
-                      </div>
-                      <div
-                        class="c0 c33 c34"
-                        display="flex"
-                      >
-                        <div
-                          aria-hidden="true"
-                          class="c0 c35 c36 c37"
-                        >
-                          <span
-                            class="c10 c38"
-                          >
-                            off
-                          </span>
-                        </div>
-                        <div
-                          aria-hidden="true"
-                          class="c0 c35 c36 c39"
-                        >
-                          <span
-                            class="c10 c40"
-                          >
-                            on
-                          </span>
-                        </div>
-                        <input
-                          aria-disabled="false"
-                          checked=""
-                          class="c41"
-                          id="toggleinput-31"
-                          name="settings.searchable"
-                          type="checkbox"
-                        />
-                      </div>
-                    </label>
                   </div>
-                </div>
-                <div
-                  class="c27"
-                >
                   <div
-                    class="c0 c28 c29"
-                    spacing="1"
+                    class="c0 c26"
+                    width="100%"
                   >
                     <div
-                      class="c0 c13"
+                      class="c27"
                     >
-                      <label
-                        class="c10 c30"
-                        for="toggleinput-32"
+                      <div
+                        class="c0 c22 c28"
+                        spacing="1"
                       >
                         <div
                           class="c0 c13"
                         >
-                          Enable filters
+                          <label
+                            class="c10 c29"
+                            for="toggleinput-32"
+                          >
+                            <div
+                              class="c0 c13"
+                            >
+                              Enable filters
+                            </div>
+                          </label>
                         </div>
-                      </label>
+                        <label
+                          class="c30"
+                        >
+                          <div
+                            class="c31"
+                          >
+                            Enable filters
+                          </div>
+                          <div
+                            class="c0 c32 c33"
+                            display="flex"
+                          >
+                            <div
+                              aria-hidden="true"
+                              class="c0 c34 c35 c36"
+                            >
+                              <span
+                                class="c10 c37"
+                              >
+                                off
+                              </span>
+                            </div>
+                            <div
+                              aria-hidden="true"
+                              class="c0 c34 c35 c38"
+                            >
+                              <span
+                                class="c10 c39"
+                              >
+                                on
+                              </span>
+                            </div>
+                            <input
+                              aria-disabled="false"
+                              checked=""
+                              class="c40"
+                              id="toggleinput-32"
+                              name="settings.filterable"
+                              type="checkbox"
+                            />
+                          </div>
+                        </label>
+                      </div>
                     </div>
-                    <label
-                      class="c31"
-                    >
-                      <div
-                        class="c32"
-                      >
-                        Enable filters
-                      </div>
-                      <div
-                        class="c0 c33 c34"
-                        display="flex"
-                      >
-                        <div
-                          aria-hidden="true"
-                          class="c0 c35 c36 c37"
-                        >
-                          <span
-                            class="c10 c38"
-                          >
-                            off
-                          </span>
-                        </div>
-                        <div
-                          aria-hidden="true"
-                          class="c0 c35 c36 c39"
-                        >
-                          <span
-                            class="c10 c40"
-                          >
-                            on
-                          </span>
-                        </div>
-                        <input
-                          aria-disabled="false"
-                          checked=""
-                          class="c41"
-                          id="toggleinput-32"
-                          name="settings.filterable"
-                          type="checkbox"
-                        />
-                      </div>
-                    </label>
                   </div>
-                </div>
-                <div
-                  class="c27"
-                >
                   <div
-                    class="c0 c28 c29"
-                    spacing="1"
+                    class="c0 c26"
+                    width="100%"
                   >
                     <div
-                      class="c0 c13"
+                      class="c27"
                     >
-                      <label
-                        class="c10 c30"
-                        for="toggleinput-33"
+                      <div
+                        class="c0 c22 c28"
+                        spacing="1"
                       >
                         <div
                           class="c0 c13"
                         >
-                          Enable bulk actions
+                          <label
+                            class="c10 c29"
+                            for="toggleinput-33"
+                          >
+                            <div
+                              class="c0 c13"
+                            >
+                              Enable bulk actions
+                            </div>
+                          </label>
                         </div>
-                      </label>
+                        <label
+                          class="c30"
+                        >
+                          <div
+                            class="c31"
+                          >
+                            Enable bulk actions
+                          </div>
+                          <div
+                            class="c0 c32 c33"
+                            display="flex"
+                          >
+                            <div
+                              aria-hidden="true"
+                              class="c0 c34 c35 c38"
+                            >
+                              <span
+                                class="c10 c41"
+                              >
+                                off
+                              </span>
+                            </div>
+                            <div
+                              aria-hidden="true"
+                              class="c0 c34 c35 c36"
+                            >
+                              <span
+                                class="c10 c37"
+                              >
+                                on
+                              </span>
+                            </div>
+                            <input
+                              aria-disabled="false"
+                              class="c40"
+                              id="toggleinput-33"
+                              name="settings.bulkable"
+                              type="checkbox"
+                            />
+                          </div>
+                        </label>
+                      </div>
                     </div>
-                    <label
-                      class="c31"
+                  </div>
+                </div>
+                <div
+                  class="c0 c42"
+                >
+                  <div
+                    class="c43"
+                  >
+                    <div
+                      class="c0 "
                     >
-                      <div
-                        class="c32"
-                      >
-                        Enable bulk actions
-                      </div>
-                      <div
-                        class="c0 c33 c34"
-                        display="flex"
-                      >
+                      <div>
                         <div
-                          aria-hidden="true"
-                          class="c0 c35 c36 c39"
+                          class="c0 c22 c28"
+                          spacing="1"
                         >
                           <span
-                            class="c10 c42"
-                          >
-                            off
-                          </span>
-                        </div>
-                        <div
-                          aria-hidden="true"
-                          class="c0 c35 c36 c37"
-                        >
-                          <span
-                            class="c10 c38"
-                          >
-                            on
-                          </span>
-                        </div>
-                        <input
-                          aria-disabled="false"
-                          class="c41"
-                          id="toggleinput-33"
-                          name="settings.bulkable"
-                          type="checkbox"
-                        />
-                      </div>
-                    </label>
-                  </div>
-                </div>
-              </div>
-              <div
-                class="c0 c43"
-              >
-                <div
-                  class="c44"
-                >
-                  <div
-                    class="c0 "
-                  >
-                    <div>
-                      <div
-                        class="c0 c28 c29"
-                        spacing="1"
-                      >
-                        <span
-                          class="c10 c30"
-                          for="select-34"
-                          id="select-34-label"
-                        >
-                          <div
-                            class="c0 c13"
-                          >
-                            Entries per page
-                          </div>
-                        </span>
-                        <div
-                          class="c0 c13 c45"
-                        >
-                          <button
-                            aria-describedby="select-34-hint"
-                            aria-disabled="false"
-                            aria-expanded="false"
-                            aria-haspopup="listbox"
-                            aria-labelledby="select-34-label select-34-content"
-                            class="c46"
-                            id="select-34"
-                            name="settings.pageSize"
-                            type="button"
-                          />
-                          <div
-                            class="c0 c12 c47"
+                            class="c10 c29"
+                            for="select-34"
+                            id="select-34-label"
                           >
                             <div
                               class="c0 c13"
+                            >
+                              Entries per page
+                            </div>
+                          </span>
+                          <div
+                            class="c0 c13 c44"
+                          >
+                            <button
+                              aria-describedby="select-34-hint"
+                              aria-disabled="false"
+                              aria-expanded="false"
+                              aria-haspopup="listbox"
+                              aria-labelledby="select-34-label select-34-content"
+                              class="c45"
+                              id="select-34"
+                              name="settings.pageSize"
+                              type="button"
+                            />
+                            <div
+                              class="c0 c12 c46"
                             >
                               <div
-                                class="c0 c48"
+                                class="c0 c13"
                               >
-                                <span
-                                  class="c10 c49"
-                                  id="select-34-content"
+                                <div
+                                  class="c0 c47"
                                 >
-                                  10
-                                </span>
+                                  <span
+                                    class="c10 c48"
+                                    id="select-34-content"
+                                  >
+                                    10
+                                  </span>
+                                </div>
+                              </div>
+                              <div
+                                class="c0 c13"
+                              >
+                                <button
+                                  aria-hidden="true"
+                                  class="c0 c49 c50 c51"
+                                  tabindex="-1"
+                                  type="button"
+                                >
+                                  <svg
+                                    fill="none"
+                                    height="1em"
+                                    viewBox="0 0 14 8"
+                                    width="1em"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      clip-rule="evenodd"
+                                      d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                      fill="#32324D"
+                                      fill-rule="evenodd"
+                                    />
+                                  </svg>
+                                </button>
                               </div>
                             </div>
-                            <div
-                              class="c0 c13"
-                            >
-                              <button
-                                aria-hidden="true"
-                                class="c0 c50 c51 c52"
-                                tabindex="-1"
-                                type="button"
-                              >
-                                <svg
-                                  fill="none"
-                                  height="1em"
-                                  viewBox="0 0 14 8"
-                                  width="1em"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
                           </div>
+                          <p
+                            class="c10 c52"
+                            id="select-34-hint"
+                          >
+                            Note: You can override this value in the Collection Type settings page.
+                          </p>
                         </div>
-                        <p
-                          class="c10 c53"
-                          id="select-34-hint"
-                        >
-                          Note: You can override this value in the Collection Type settings page.
-                        </p>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div
-                  class="c54"
-                >
                   <div
-                    class="c0 "
+                    class="c53"
                   >
-                    <div>
-                      <div
-                        class="c0 c28 c29"
-                        spacing="1"
-                      >
-                        <span
-                          class="c10 c30"
-                          for="select-35"
-                          id="select-35-label"
-                        >
-                          <div
-                            class="c0 c13"
-                          >
-                            Default sort attribute
-                          </div>
-                        </span>
+                    <div
+                      class="c0 "
+                    >
+                      <div>
                         <div
-                          class="c0 c13 c45"
+                          class="c0 c22 c28"
+                          spacing="1"
                         >
-                          <button
-                            aria-disabled="false"
-                            aria-expanded="false"
-                            aria-haspopup="listbox"
-                            aria-labelledby="select-35-label select-35-content"
-                            class="c46"
-                            id="select-35"
-                            name="settings.defaultSortBy"
-                            type="button"
-                          />
-                          <div
-                            class="c0 c12 c47"
+                          <span
+                            class="c10 c29"
+                            for="select-35"
+                            id="select-35-label"
                           >
                             <div
                               class="c0 c13"
+                            >
+                              Default sort attribute
+                            </div>
+                          </span>
+                          <div
+                            class="c0 c13 c44"
+                          >
+                            <button
+                              aria-disabled="false"
+                              aria-expanded="false"
+                              aria-haspopup="listbox"
+                              aria-labelledby="select-35-label select-35-content"
+                              class="c45"
+                              id="select-35"
+                              name="settings.defaultSortBy"
+                              type="button"
+                            />
+                            <div
+                              class="c0 c12 c46"
                             >
                               <div
-                                class="c0 c48"
+                                class="c0 c13"
                               >
-                                <span
-                                  class="c10 c49"
-                                  id="select-35-content"
+                                <div
+                                  class="c0 c47"
                                 >
-                                  id
-                                </span>
+                                  <span
+                                    class="c10 c48"
+                                    id="select-35-content"
+                                  >
+                                    id
+                                  </span>
+                                </div>
                               </div>
-                            </div>
-                            <div
-                              class="c0 c13"
-                            >
-                              <button
-                                aria-hidden="true"
-                                class="c0 c50 c51 c52"
-                                tabindex="-1"
-                                type="button"
+                              <div
+                                class="c0 c13"
                               >
-                                <svg
-                                  fill="none"
-                                  height="1em"
-                                  viewBox="0 0 14 8"
-                                  width="1em"
-                                  xmlns="http://www.w3.org/2000/svg"
+                                <button
+                                  aria-hidden="true"
+                                  class="c0 c49 c50 c51"
+                                  tabindex="-1"
+                                  type="button"
                                 >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </button>
+                                  <svg
+                                    fill="none"
+                                    height="1em"
+                                    viewBox="0 0 14 8"
+                                    width="1em"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      clip-rule="evenodd"
+                                      d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                      fill="#32324D"
+                                      fill-rule="evenodd"
+                                    />
+                                  </svg>
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div
-                  class="c54"
-                >
                   <div
-                    class="c0 "
+                    class="c53"
                   >
-                    <div>
-                      <div
-                        class="c0 c28 c29"
-                        spacing="1"
-                      >
-                        <span
-                          class="c10 c30"
-                          for="select-36"
-                          id="select-36-label"
-                        >
-                          <div
-                            class="c0 c13"
-                          >
-                            Default sort order
-                          </div>
-                        </span>
+                    <div
+                      class="c0 "
+                    >
+                      <div>
                         <div
-                          class="c0 c13 c45"
+                          class="c0 c22 c28"
+                          spacing="1"
                         >
-                          <button
-                            aria-disabled="false"
-                            aria-expanded="false"
-                            aria-haspopup="listbox"
-                            aria-labelledby="select-36-label select-36-content"
-                            class="c46"
-                            id="select-36"
-                            name="settings.defaultSortOrder"
-                            type="button"
-                          />
-                          <div
-                            class="c0 c12 c47"
+                          <span
+                            class="c10 c29"
+                            for="select-36"
+                            id="select-36-label"
                           >
                             <div
                               class="c0 c13"
+                            >
+                              Default sort order
+                            </div>
+                          </span>
+                          <div
+                            class="c0 c13 c44"
+                          >
+                            <button
+                              aria-disabled="false"
+                              aria-expanded="false"
+                              aria-haspopup="listbox"
+                              aria-labelledby="select-36-label select-36-content"
+                              class="c45"
+                              id="select-36"
+                              name="settings.defaultSortOrder"
+                              type="button"
+                            />
+                            <div
+                              class="c0 c12 c46"
                             >
                               <div
-                                class="c0 c48"
+                                class="c0 c13"
                               >
-                                <span
-                                  class="c10 c49"
-                                  id="select-36-content"
+                                <div
+                                  class="c0 c47"
                                 >
-                                  ASC
-                                </span>
+                                  <span
+                                    class="c10 c48"
+                                    id="select-36-content"
+                                  >
+                                    ASC
+                                  </span>
+                                </div>
                               </div>
-                            </div>
-                            <div
-                              class="c0 c13"
-                            >
-                              <button
-                                aria-hidden="true"
-                                class="c0 c50 c51 c52"
-                                tabindex="-1"
-                                type="button"
+                              <div
+                                class="c0 c13"
                               >
-                                <svg
-                                  fill="none"
-                                  height="1em"
-                                  viewBox="0 0 14 8"
-                                  width="1em"
-                                  xmlns="http://www.w3.org/2000/svg"
+                                <button
+                                  aria-hidden="true"
+                                  class="c0 c49 c50 c51"
+                                  tabindex="-1"
+                                  type="button"
                                 >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </button>
+                                  <svg
+                                    fill="none"
+                                    height="1em"
+                                    viewBox="0 0 14 8"
+                                    width="1em"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      clip-rule="evenodd"
+                                      d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                      fill="#32324D"
+                                      fill-rule="evenodd"
+                                    />
+                                  </svg>
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -3132,17 +3150,17 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                 </div>
               </div>
               <div
-                class="c0 c55"
+                class="c0 c54"
               >
                 <hr
-                  class="c0 c56 c57"
+                  class="c0 c55 c56"
                 />
               </div>
               <div
-                class="c0 c22"
+                class="c0 c57"
               >
                 <h2
-                  class="c10 c23"
+                  class="c10 c24"
                 >
                   View
                 </h2>
@@ -3151,7 +3169,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                 class="c0 c58 c13"
               >
                 <div
-                  class="c0 c22 c59 c60"
+                  class="c0 c57 c59 c60"
                   size="1"
                 >
                   <div
@@ -3218,7 +3236,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           </span>
                         </div>
                         <div
-                          class="c0 c50 c13"
+                          class="c0 c49 c13"
                         >
                           <button
                             aria-label="Edit id"
@@ -3322,7 +3340,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           </span>
                         </div>
                         <div
-                          class="c0 c50 c13"
+                          class="c0 c49 c13"
                         >
                           <button
                             aria-label="Edit address"
@@ -3426,7 +3444,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           </span>
                         </div>
                         <div
-                          class="c0 c50 c13"
+                          class="c0 c49 c13"
                         >
                           <button
                             aria-label="Edit Cover"
@@ -3473,7 +3491,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c0 c22 c69 c70"
+                  class="c0 c57 c69 c70"
                 >
                   <div>
                     <span>
@@ -3489,7 +3507,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         type="button"
                       >
                         <span
-                          class="c32"
+                          class="c31"
                         >
                           Add a field
                         </span>

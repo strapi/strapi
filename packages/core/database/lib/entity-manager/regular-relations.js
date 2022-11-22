@@ -1,6 +1,7 @@
 'use strict';
 
 const { map, isEmpty } = require('lodash/fp');
+
 const {
   isBidirectional,
   isOneToAny,
@@ -10,6 +11,7 @@ const {
   hasInverseOrderColumn,
 } = require('../metadata/relations');
 const { createQueryBuilder } = require('../query');
+const { addSchema } = require('../utils/knex');
 
 /**
  * If some relations currently exist for this oneToX relation, on the one side, this function removes them and update the inverse order if needed.
@@ -195,6 +197,12 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
     return;
   }
 
+  // Handle databases that don't support window function ROW_NUMBER
+  if (!strapi.db.dialect.supportsWindowFunctions()) {
+    await cleanOrderColumnsForOldDatabases({ id, attribute, db, inverseRelIds, transaction: trx });
+    return;
+  }
+
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } = joinTable;
   const update = [];
@@ -241,7 +249,8 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
         )
         .transacting(trx);
       break;
-    default:
+    default: {
+      const joinTableName = addSchema(joinTable.name);
       await db.connection
         .raw(
           `UPDATE ?? as a
@@ -252,9 +261,10 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
                 WHERE ${where.join(' OR ')}
               ) AS b
               WHERE b.id = a.id`,
-          [joinTable.name, ...updateBinding, ...selectBinding, joinTable.name, ...whereBinding]
+          [joinTableName, ...updateBinding, ...selectBinding, joinTableName, ...whereBinding]
         )
         .transacting(trx);
+    }
     /*
       `UPDATE :joinTable: as a
         SET :orderColumn: = b.src_order, :inverseOrderColumn: = b.inv_order
@@ -268,6 +278,103 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
         ) AS b
         WHERE b.id = a.id`,
     */
+  }
+};
+
+const cleanOrderColumnsForOldDatabases = async ({
+  id,
+  attribute,
+  db,
+  inverseRelIds,
+  transaction: trx,
+}) => {
+  const { joinTable } = attribute;
+  const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } = joinTable;
+
+  const now = new Date().valueOf();
+
+  if (hasOrderColumn(attribute) && id) {
+    const tempOrderTableName = `tempOrderTableName_${now}`;
+    try {
+      await db.connection
+        .raw(
+          `
+          CREATE TEMPORARY TABLE :tempOrderTableName:
+            SELECT
+              id,
+              (
+                SELECT count(*)
+                FROM :joinTableName: b
+                WHERE a.:orderColumnName: >= b.:orderColumnName: AND a.:joinColumnName: = b.:joinColumnName: AND a.:joinColumnName: = :id
+              ) AS src_order
+            FROM :joinTableName: a`,
+          {
+            tempOrderTableName,
+            joinTableName: joinTable.name,
+            orderColumnName,
+            joinColumnName: joinColumn.name,
+            id,
+          }
+        )
+        .transacting(trx);
+      await db.connection
+        .raw(
+          `UPDATE ?? as a, (SELECT * FROM ??) AS b
+          SET ?? = b.src_order
+          WHERE a.id = b.id`,
+          [joinTable.name, tempOrderTableName, orderColumnName]
+        )
+        .transacting(trx);
+    } finally {
+      await db.connection
+        .raw(`DROP TEMPORARY TABLE IF EXISTS ??`, [tempOrderTableName])
+        .transacting(trx);
+    }
+  }
+
+  if (hasInverseOrderColumn(attribute) && !isEmpty(inverseRelIds)) {
+    const tempInvOrderTableName = `tempInvOrderTableName_${now}`;
+    try {
+      await db.connection
+        .raw(
+          `
+          CREATE TEMPORARY TABLE ??
+            SELECT
+              id,
+              (
+                SELECT count(*)
+                FROM ?? b
+                WHERE a.?? >= b.?? AND a.?? = b.?? AND a.?? IN (${inverseRelIds
+                  .map(() => '?')
+                  .join(', ')})
+              ) AS inv_order
+            FROM ?? a`,
+          [
+            tempInvOrderTableName,
+            joinTable.name,
+            inverseOrderColumnName,
+            inverseOrderColumnName,
+            inverseJoinColumn.name,
+            inverseJoinColumn.name,
+            inverseJoinColumn.name,
+            ...inverseRelIds,
+            joinTable.name,
+          ]
+        )
+        .transacting(trx);
+      await db.connection
+        .raw(
+          `UPDATE ?? as a, (SELECT * FROM ??) AS b
+            SET ?? = b.inv_order
+            WHERE a.id = b.id`,
+          [joinTable.name, tempInvOrderTableName, inverseOrderColumnName]
+        )
+        .transacting(trx);
+    } finally {
+      await db.connection
+        .raw(`DROP TEMPORARY TABLE IF EXISTS ??`, [tempInvOrderTableName])
+        .transacting(trx);
+    }
   }
 };
 
