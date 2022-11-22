@@ -30,6 +30,13 @@ export const TableList = ({
   const { formatMessage } = useIntl();
   const [sortBy, sortOrder] = sortQuery.split(':');
 
+  const handleClickSort = (isSorted, name) => {
+    const nextSortOrder = isSorted && sortOrder === 'ASC' ? 'DESC' : 'ASC';
+    const nextSort = `${name}:${nextSortOrder}`;
+
+    onChangeSort(nextSort);
+  };
+
   return (
     <Table colCount={tableHeaders.length + 2} rowCount={assetCount + folderCount + 1}>
       <Thead>
@@ -56,22 +63,13 @@ export const TableList = ({
               { label: tableHeaderLabel }
             );
 
-            const handleClickSort = () => {
-              if (isSortable) {
-                const nextSortOrder = isSorted && sortOrder === 'ASC' ? 'DESC' : 'ASC';
-                const nextSort = `${name}:${nextSortOrder}`;
-
-                onChangeSort(nextSort);
-              }
-            };
-
             return (
               <Th
                 action={
                   isSorted && (
                     <IconButton
                       label={sortLabel}
-                      onClick={handleClickSort}
+                      onClick={() => handleClickSort(isSorted, name)}
                       icon={isUp ? <CarretUp /> : <CarretDown />}
                       noBorder
                     />
@@ -82,7 +80,7 @@ export const TableList = ({
                 {isSortable ? (
                   <Tooltip label={sortLabel}>
                     <Typography
-                      onClick={() => handleClickSort(!isSorted)}
+                      onClick={() => handleClickSort(isSorted, name)}
                       as={isSorted ? 'span' : 'button'}
                       label={!isSorted ? sortLabel : ''}
                       textColor="neutral600"
