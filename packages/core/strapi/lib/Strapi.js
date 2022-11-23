@@ -126,10 +126,6 @@ class Strapi {
     return this.container.get('config');
   }
 
-  get EE() {
-    return ee({ dir: this.dirs.app.root, logger: this.log });
-  }
-
   get services() {
     return this.container.get('services').getAll();
   }
@@ -473,7 +469,18 @@ class Strapi {
     return this;
   }
 
+  loadEE() {
+    Object.defineProperty(this, 'EE', {
+      get() {
+        return ee({ dir: this.dirs.app.root, logger: this.log });
+      },
+      configurable: false,
+      enumerable: false,
+    });
+  }
+
   async load() {
+    await this.loadEE();
     await this.register();
     await this.bootstrap();
 
