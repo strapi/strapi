@@ -4,7 +4,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
 <body
   class="lock-body-scroll"
 >
-  .c20 {
+  .c23 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -16,7 +16,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   width: 1px;
 }
 
-.c4 {
+.c6 {
   background: #f6f6f9;
   padding: 8px;
   border-radius: 4px;
@@ -24,56 +24,62 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   border: 1px solid #dcdce4;
 }
 
-.c5 {
+.c7 {
   position: relative;
 }
 
-.c7 {
+.c9 {
   padding-right: 8px;
   padding-left: 8px;
+  overflow: hidden;
   width: 100%;
 }
 
-.c9 {
+.c11 {
   height: 124px;
 }
 
-.c13 {
+.c14 {
+  max-width: 40%;
+  max-height: 40%;
+}
+
+.c15 {
   position: absolute;
   bottom: 4px;
   width: 100%;
 }
 
-.c17 {
+.c20 {
   padding-top: 8px;
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c2 {
-  font-weight: 600;
-  color: #32324d;
+.c4 {
   font-size: 0.75rem;
   line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
 }
 
-.c18 {
-  color: #666687;
+.c21 {
+  font-size: 0.75rem;
+  line-height: 1.33;
   display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c19 {
   color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
 }
 
-.c0 {
+.c22 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c1 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -87,7 +93,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   flex-direction: column;
 }
 
-.c3 {
+.c5 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -101,7 +107,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   flex-direction: row;
 }
 
-.c10 {
+.c12 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -119,42 +125,54 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   justify-content: center;
 }
 
-.c6 {
+.c19 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c8 {
   display: grid;
   grid-template-columns: auto 1fr auto;
   grid-template-areas: 'startAction slides endAction';
 }
 
-.c8 {
+.c10 {
   grid-area: slides;
 }
 
-.c1 > * {
+.c2 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c1 > * + * {
+.c2 > * + * {
   margin-top: 4px;
 }
 
-.c14 > * {
+.c16 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c14 > * + * {
+.c16 > * + * {
   margin-left: 4px;
 }
 
-.c11 {
+.c13 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
 }
 
-.c15 {
+.c17 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -168,21 +186,21 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   outline: none;
 }
 
-.c15 svg {
+.c17 svg {
   height: 12px;
   width: 12px;
 }
 
-.c15 svg > g,
-.c15 svg path {
+.c17 svg > g,
+.c17 svg path {
   fill: #ffffff;
 }
 
-.c15[aria-disabled='true'] {
+.c17[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c15:after {
+.c17:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -197,11 +215,11 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   border: 2px solid transparent;
 }
 
-.c15:focus-visible {
+.c17:focus-visible {
   outline: none;
 }
 
-.c15:focus-visible:after {
+.c17:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -212,7 +230,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   border: 2px solid #4945ff;
 }
 
-.c16 {
+.c18 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -229,96 +247,149 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   width: 2rem;
 }
 
-.c16 svg > g,
-.c16 svg path {
+.c18 svg > g,
+.c18 svg path {
   fill: #8e8ea9;
 }
 
-.c16:hover svg > g,
-.c16:hover svg path {
+.c18:hover svg > g,
+.c18:hover svg path {
   fill: #666687;
 }
 
-.c16:active svg > g,
-.c16:active svg path {
+.c18:active svg > g,
+.c18:active svg path {
   fill: #a5a5ba;
 }
 
-.c16[aria-disabled='true'] {
+.c18[aria-disabled='true'] {
   background-color: #eaeaef;
 }
 
-.c16[aria-disabled='true'] svg path {
+.c18[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c12 {
-  max-width: 40%;
-  max-height: 40%;
+.c24 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c24 .c3 {
+  color: #ffffff;
+}
+
+.c24[aria-disabled='true'] .c3 {
+  color: #666687;
+}
+
+.c24[aria-disabled='true']:active .c3 {
+  color: #666687;
+}
+
+.c25 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c25 .c3 {
+  color: #ffffff;
+}
+
+.c25[aria-disabled='true'] .c3 {
+  color: #666687;
+}
+
+.c25[aria-disabled='true']:active .c3 {
+  color: #666687;
+}
+
+.c25 .c3 {
+  color: #32324d;
 }
 
 <div>
     <div>
       <div
-        class="c0 c1"
+        class="c0 c1 c2"
         spacing="1"
       >
         <label
-          class="c2"
-          for="carouselinput-4"
+          class="c3 c4"
+          for="carouselinput-6"
         >
           <div
-            class="c3"
+            class="c0 c5"
           >
             Logo
           </div>
         </label>
         <div
-          class=""
-          id="carouselinput-4"
+          class="c0 "
+          id="carouselinput-6"
         >
           <div
-            class="c4"
+            class="c0 c6"
           >
             <section
               aria-label="Logo"
               aria-roledescription="carousel"
-              class="c5 c6"
+              class="c0 c7 c8"
             >
               <div
                 aria-live="polite"
-                class="c7 c8"
+                class="c0 c9 c10"
+                overflow="hidden"
                 width="100%"
               >
                 <div
                   aria-label="Logo slide"
                   aria-roledescription="slide"
-                  class="c9 c10 c11"
+                  class="c0 c11 c12 c13"
                   height="124px"
                   role="group"
                 >
                   <img
                     alt="Logo"
-                    class="c12"
+                    class="c0 c14"
                     src="/admin/defaultLogo.png"
                   />
                 </div>
               </div>
               <div
-                class="c13 c10 c14"
+                class="c0 c15 c12 c16"
                 spacing="1"
                 width="100%"
               >
                 <span>
                   <button
                     aria-disabled="false"
-                    aria-labelledby="tooltip-3"
-                    class="c15 c16"
+                    aria-labelledby="tooltip-7"
+                    class="c17 c18"
                     tabindex="0"
                     type="button"
                   >
+                    <span
+                      class="c19"
+                    >
+                      Change logo
+                    </span>
                     <svg
+                      aria-hidden="true"
                       fill="none"
+                      focusable="false"
                       height="1em"
                       viewBox="0 0 24 24"
                       width="1em"
@@ -334,16 +405,16 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
               </div>
             </section>
             <div
-              class="c17"
+              class="c0 c20"
             >
               <span>
                 <div
-                  aria-labelledby="tooltip-5"
-                  class="c10"
+                  aria-labelledby="tooltip-9"
+                  class="c0 c12"
                   tabindex="0"
                 >
                   <span
-                    class="c18"
+                    class="c3 c21"
                   >
                     logo.png
                   </span>
@@ -353,15 +424,15 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
           </div>
         </div>
         <p
-          class="c19"
-          id="carouselinput-4-hint"
+          class="c3 c22"
+          id="carouselinput-6-hint"
         >
           Change the admin panel logo (Max dimension: 750x750, Max file size: 100KB)
         </p>
       </div>
     </div>
     <div
-      class="c20"
+      class="c23"
     >
       <p
         aria-live="polite"
@@ -383,107 +454,463 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
       />
     </div>
   </div>
-  .c0 {
+  .c1 {
   background: #212134;
   padding: 8px;
   border-radius: 4px;
 }
 
-.c2 {
-  font-weight: 600;
-  color: #ffffff;
+.c4 {
   font-size: 0.75rem;
   line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
 }
 
-.c1 {
+.c2 {
   position: absolute;
   z-index: 4;
   display: none;
+}
+
+.c5 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c5 .c3 {
+  color: #ffffff;
+}
+
+.c5[aria-disabled='true'] .c3 {
+  color: #666687;
+}
+
+.c5[aria-disabled='true']:active .c3 {
+  color: #666687;
+}
+
+.c6 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c6 .c3 {
+  color: #ffffff;
+}
+
+.c6[aria-disabled='true'] .c3 {
+  color: #666687;
+}
+
+.c6[aria-disabled='true']:active .c3 {
+  color: #666687;
+}
+
+.c6 .c3 {
+  color: #32324d;
 }
 
 <div
     data-react-portal="true"
   >
     <div
-      class="c0 c1"
-      id="tooltip-3"
+      class="c0 c1 c2"
+      id="tooltip-7"
       role="tooltip"
     >
       <p
-        class="c2"
+        class="c3 c4"
       >
         Change logo
       </p>
     </div>
   </div>
-  .c0 {
+  .c1 {
   background: #212134;
   padding: 8px;
   border-radius: 4px;
 }
 
-.c2 {
-  font-weight: 600;
-  color: #ffffff;
+.c4 {
   font-size: 0.75rem;
   line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
 }
 
-.c1 {
+.c2 {
   position: absolute;
   z-index: 4;
   display: none;
+}
+
+.c5 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c5 .c3 {
+  color: #ffffff;
+}
+
+.c5[aria-disabled='true'] .c3 {
+  color: #666687;
+}
+
+.c5[aria-disabled='true']:active .c3 {
+  color: #666687;
+}
+
+.c6 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c6 .c3 {
+  color: #ffffff;
+}
+
+.c6[aria-disabled='true'] .c3 {
+  color: #666687;
+}
+
+.c6[aria-disabled='true']:active .c3 {
+  color: #666687;
+}
+
+.c6 .c3 {
+  color: #32324d;
 }
 
 <div
     data-react-portal="true"
   >
     <div
-      class="c0 c1"
-      id="tooltip-5"
+      class="c0 c1 c2"
+      id="tooltip-9"
       role="tooltip"
     >
       <p
-        class="c2"
+        class="c3 c4"
       >
         logo.png
       </p>
     </div>
   </div>
-  .c9 {
+  .c2 {
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
+}
+
+.c4 {
+  background: #f6f6f9;
+  padding-top: 16px;
+  padding-right: 20px;
+  padding-bottom: 16px;
+  padding-left: 20px;
+}
+
+.c12 {
   padding-right: 40px;
   padding-left: 40px;
 }
 
-.c18 {
+.c14 {
+  padding: 16px;
+}
+
+.c19 {
+  background: #eaeaef;
+}
+
+.c21 {
   padding-top: 24px;
   padding-right: 40px;
   padding-bottom: 24px;
   padding-left: 40px;
 }
 
-.c25 {
+.c24 {
+  background: #f6f6f9;
+  padding-top: 48px;
+  padding-bottom: 32px;
+  border-radius: 4px;
+  border-style: dashed;
+  border-width: 1px;
+  border-color: #c0c0cf;
+  position: relative;
+}
+
+.c26 {
+  color: #4945ff;
+  width: 3.75rem;
+  height: 3.75rem;
+}
+
+.c28 {
   padding-top: 12px;
   padding-bottom: 20px;
 }
 
-.c32 {
+.c33 {
   padding-top: 24px;
 }
 
-.c1 {
-  background: #ffffff;
-  border-radius: 4px;
-  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
+.c27 path {
+  fill: #4945ff;
 }
 
-.c3 {
-  background: #f6f6f9;
-  padding-top: 16px;
-  padding-right: 20px;
-  padding-bottom: 16px;
-  padding-left: 20px;
+.c34 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c8 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c16 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #4945ff;
+}
+
+.c18 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c29 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c32 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 1.14;
+  color: #32324d;
+}
+
+.c22 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c36 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c6 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c25 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c11 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c23 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c23 > * + * {
+  margin-top: 8px;
+}
+
+.c9 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c9 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c9 svg > g,
+.c9 svg path {
+  fill: #ffffff;
+}
+
+.c9[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c9:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c9:focus-visible {
+  outline: none;
+}
+
+.c9:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c10 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
+}
+
+.c10 svg > g,
+.c10 svg path {
+  fill: #8e8ea9;
+}
+
+.c10:hover svg > g,
+.c10:hover svg path {
+  fill: #666687;
+}
+
+.c10:active svg > g,
+.c10:active svg path {
+  fill: #a5a5ba;
+}
+
+.c10[aria-disabled='true'] {
+  background-color: #eaeaef;
+}
+
+.c10[aria-disabled='true'] svg path {
+  fill: #666687;
 }
 
 .c0 {
@@ -506,354 +933,55 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   justify-content: center;
 }
 
-.c2 {
+.c3 {
   width: 51.875rem;
 }
 
 .c5 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c35 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c7 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c7 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c7 svg > g,
-.c7 svg path {
-  fill: #ffffff;
-}
-
-.c7[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c7:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c7:focus-visible {
-  outline: none;
-}
-
-.c7:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c8 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-}
-
-.c8 svg > g,
-.c8 svg path {
-  fill: #8e8ea9;
-}
-
-.c8:hover svg > g,
-.c8:hover svg path {
-  fill: #666687;
-}
-
-.c8:active svg > g,
-.c8:active svg path {
-  fill: #a5a5ba;
-}
-
-.c8[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c8[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c4 {
   border-radius: 4px 4px 0 0;
   border-bottom: 1px solid #eaeaef;
 }
 
-.c34 {
+.c35 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
 
-.c36 > * + * {
+.c37 > * + * {
   margin-left: 8px;
 }
 
-.c6 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c26 {
-  color: #32324d;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-}
-
-.c33 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c13 {
-  color: #4945ff;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
 .c15 {
-  color: #666687;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.c11 {
-  padding: 16px;
-}
-
-.c12 {
   border-bottom: 2px solid #4945ff;
 }
 
-.c14 {
+.c17 {
   border-bottom: 2px solid transparent;
 }
 
-.c10[aria-disabled='true'] {
+.c13[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c16 {
-  background: #eaeaef;
-}
-
-.c17 {
+.c20 {
   height: 1px;
   border: none;
   margin: 0;
 }
 
-.c19 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c20 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c20 > * + * {
-  margin-top: 8px;
-}
-
-.c21 {
-  background: #f6f6f9;
-  padding-top: 48px;
-  padding-bottom: 32px;
-  border-radius: 4px;
-  border-style: dashed;
-  border-width: 1px;
-  border-color: #c0c0cf;
-  position: relative;
-}
-
-.c22 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c23 {
-  color: #4945ff;
-  width: 3.75rem;
-  height: 3.75rem;
-}
-
-.c24 path {
-  fill: #4945ff;
-}
-
 .c31 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c28 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c28 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c28 svg > g,
-.c28 svg path {
-  fill: #ffffff;
-}
-
-.c28[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c28:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c28:focus-visible {
-  outline: none;
-}
-
-.c28:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c29 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
+  background-color: #4945ff;
   border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
-.c29 .sc-eZhRLC {
+.c31 .c1 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -864,66 +992,68 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   align-items: center;
 }
 
-.c29 .c30 {
+.c31 .c7 {
   color: #ffffff;
 }
 
-.c29[aria-disabled='true'] {
+.c31[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c29[aria-disabled='true'] .c30 {
+.c31[aria-disabled='true'] .c7 {
   color: #666687;
 }
 
-.c29[aria-disabled='true'] svg > g,
-.c29[aria-disabled='true'] svg path {
+.c31[aria-disabled='true'] svg > g,
+.c31[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c29[aria-disabled='true']:active {
+.c31[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c29[aria-disabled='true']:active .c30 {
+.c31[aria-disabled='true']:active .c7 {
   color: #666687;
 }
 
-.c29[aria-disabled='true']:active svg > g,
-.c29[aria-disabled='true']:active svg path {
+.c31[aria-disabled='true']:active svg > g,
+.c31[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c29:hover {
+.c31:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c29:active {
+.c31:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c29 svg > g,
-.c29 svg path {
+.c31 svg > g,
+.c31 svg path {
   fill: #ffffff;
 }
 
-.c37 {
+.c38 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
+  background-color: #4945ff;
   border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
   border: 1px solid #dcdce4;
   background: #ffffff;
 }
 
-.c37 .sc-eZhRLC {
+.c38 .c1 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -934,56 +1064,56 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   align-items: center;
 }
 
-.c37 .c30 {
+.c38 .c7 {
   color: #ffffff;
 }
 
-.c37[aria-disabled='true'] {
+.c38[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c37[aria-disabled='true'] .c30 {
+.c38[aria-disabled='true'] .c7 {
   color: #666687;
 }
 
-.c37[aria-disabled='true'] svg > g,
-.c37[aria-disabled='true'] svg path {
+.c38[aria-disabled='true'] svg > g,
+.c38[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c37[aria-disabled='true']:active {
+.c38[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c37[aria-disabled='true']:active .c30 {
+.c38[aria-disabled='true']:active .c7 {
   color: #666687;
 }
 
-.c37[aria-disabled='true']:active svg > g,
-.c37[aria-disabled='true']:active svg path {
+.c38[aria-disabled='true']:active svg > g,
+.c38[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c37:hover {
+.c38:hover {
   background-color: #f6f6f9;
 }
 
-.c37:active {
+.c38:active {
   background-color: #eaeaef;
 }
 
-.c37 .c30 {
+.c38 .c7 {
   color: #32324d;
 }
 
-.c37 svg > g,
-.c37 svg path {
+.c38 svg > g,
+.c38 svg path {
   fill: #32324d;
 }
 
-.c27 {
+.c30 {
   opacity: 0;
   position: absolute;
   top: 0;
@@ -1000,205 +1130,213 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
       class="c0"
     >
       <div>
-        <div
-          aria-labelledby="modal"
-          aria-modal="true"
-          class="c1 c2"
-          role="dialog"
-        >
+        <div>
           <div
-            class="c3 c4"
+            aria-labelledby="modal"
+            aria-modal="true"
+            class="c1 c2 c3"
+            role="dialog"
           >
             <div
-              class="c5"
-            >
-              <h2
-                class="c6"
-                id="modal"
-              >
-                Upload logo
-              </h2>
-              <button
-                aria-disabled="false"
-                aria-label="Close the modal"
-                class="c7 c8"
-                type="button"
-              >
-                <svg
-                  fill="none"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                    fill="#212134"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div>
-            <div
-              class="c9"
+              class="c1 c4 c5"
             >
               <div
-                aria-label="How do you want to upload your assets?"
-                role="tablist"
+                class="c1 c6"
               >
-                <button
-                  aria-controls="tabgroup-1-0-tabpanel"
-                  aria-disabled="false"
-                  aria-selected="true"
-                  class="c10"
-                  id="tabgroup-1-0-tab"
-                  role="tab"
-                  tabindex="0"
-                  type="button"
+                <h2
+                  class="c7 c8"
+                  id="modal"
                 >
-                  <div
-                    class="c11 c12"
-                  >
-                    <span
-                      class="c13"
-                    >
-                      From computer
-                    </span>
-                  </div>
-                </button>
+                  Upload logo
+                </h2>
                 <button
                   aria-disabled="false"
-                  aria-selected="false"
-                  class="c10"
-                  id="tabgroup-1-1-tab"
-                  role="tab"
-                  tabindex="-1"
+                  class="c9 c10"
                   type="button"
                 >
-                  <div
-                    class="c11 c14"
+                  <span
+                    class="c11"
                   >
-                    <span
-                      class="c15"
-                    >
-                      From url
-                    </span>
-                  </div>
+                    Close the modal
+                  </span>
+                  <svg
+                    aria-hidden="true"
+                    fill="none"
+                    focusable="false"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                      fill="#212134"
+                    />
+                  </svg>
                 </button>
               </div>
-              <hr
-                class="c16 c17"
-              />
             </div>
             <div>
               <div
-                aria-labelledby="tabgroup-1-0-tab"
-                id="tabgroup-1-0-tabpanel"
-                role="tabpanel"
-                tabindex="0"
+                class="c1 c12"
               >
-                <form>
-                  <div
-                    class="c18"
+                <div
+                  aria-label="How do you want to upload your assets?"
+                  role="tablist"
+                >
+                  <button
+                    aria-controls="tabgroup-16-0-tabpanel"
+                    aria-disabled="false"
+                    aria-selected="true"
+                    class="c13"
+                    id="tabgroup-16-0-tab"
+                    role="tab"
+                    tabindex="0"
+                    type="button"
                   >
-                    <div>
-                      <label
-                        for="logo-upload"
+                    <div
+                      class="c1 c14 c15"
+                    >
+                      <span
+                        class="c7 c16"
                       >
-                        <div
-                          class="c19 c20"
-                          spacing="2"
+                        From computer
+                      </span>
+                    </div>
+                  </button>
+                  <button
+                    aria-disabled="false"
+                    aria-selected="false"
+                    class="c13"
+                    id="tabgroup-16-1-tab"
+                    role="tab"
+                    tabindex="-1"
+                    type="button"
+                  >
+                    <div
+                      class="c1 c14 c17"
+                    >
+                      <span
+                        class="c7 c18"
+                      >
+                        From url
+                      </span>
+                    </div>
+                  </button>
+                </div>
+                <hr
+                  class="c1 c19 c20"
+                />
+              </div>
+              <div>
+                <div
+                  aria-labelledby="tabgroup-16-0-tab"
+                  id="tabgroup-16-0-tabpanel"
+                  role="tabpanel"
+                  tabindex="0"
+                >
+                  <form>
+                    <div
+                      class="c1 c21"
+                    >
+                      <div>
+                        <label
+                          for="logo-upload"
                         >
                           <div
-                            class="c21 c22"
+                            class="c1 c22 c23"
+                            spacing="2"
                           >
-                            <svg
-                              aria-hidden="true"
-                              class="c23 c24"
-                              fill="none"
-                              height="3.75rem"
-                              viewBox="0 0 24 20"
-                              width="3.75rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M21.569 2.398H7.829v1.586h13.74c.47 0 .826.5.826 1.094v9.853l-2.791-3.17a2.13 2.13 0 00-.74-.55 2.214 2.214 0 00-.912-.196 2.215 2.215 0 00-.912.191 2.131 2.131 0 00-.74.546l-2.93 3.385-2.973-3.36a2.147 2.147 0 00-.741-.545 2.228 2.228 0 00-1.824.007c-.286.13-.538.319-.739.553l-2.931 3.432V7.653H2.51v9.894c.023.153.06.304.108.452v.127l.041.095c.057.142.126.28.207.412l.099.15c.074.107.157.207.247.302l.124.119c.13.118.275.222.43.309h.024c.36.214.775.327 1.198.325h16.515c.36-.004.716-.085 1.039-.24.323-.153.606-.375.827-.648a2.78 2.78 0 00.504-.888c.066-.217.108-.44.124-.666V5.078a2.497 2.497 0 00-.652-1.81 2.706 2.706 0 00-1.776-.87z"
-                                fill="#32324D"
-                              />
-                              <path
-                                d="M12.552 9.199c.912 0 1.651-.71 1.651-1.585 0-.876-.74-1.586-1.651-1.586-.912 0-1.652.71-1.652 1.586 0 .875.74 1.585 1.652 1.585zM3.303 6.408h.826V3.997h2.477v-.793-.793H4.129V0h-.826c-.219 0-.85.002-.826 0v2.411H0v1.586h2.477v2.41h.826z"
-                                fill="#32324D"
-                              />
-                            </svg>
                             <div
-                              class="c25"
+                              class="c1 c24 c25"
                             >
-                              <span
-                                class="c26"
+                              <svg
+                                aria-hidden="true"
+                                class="c1 c26 c27"
+                                fill="none"
+                                height="3.75rem"
+                                viewBox="0 0 24 20"
+                                width="3.75rem"
+                                xmlns="http://www.w3.org/2000/svg"
                               >
-                                Drag and Drop here or
-                              </span>
-                            </div>
-                            <input
-                              accept="image/jpeg,image/png,image/svg+xml"
-                              class="c27"
-                              cursor="pointer"
-                              id="logo-upload"
-                              name="files"
-                              tabindex="-1"
-                              type="file"
-                            />
-                            <button
-                              aria-disabled="false"
-                              class="c28 c29"
-                              type="button"
-                            >
-                              <span
-                                class="c30 c31"
+                                <path
+                                  d="M21.569 2.398H7.829v1.586h13.74c.47 0 .826.5.826 1.094v9.853l-2.791-3.17a2.13 2.13 0 00-.74-.55 2.214 2.214 0 00-.912-.196 2.215 2.215 0 00-.912.191 2.131 2.131 0 00-.74.546l-2.93 3.385-2.973-3.36a2.147 2.147 0 00-.741-.545 2.228 2.228 0 00-1.824.007c-.286.13-.538.319-.739.553l-2.931 3.432V7.653H2.51v9.894c.023.153.06.304.108.452v.127l.041.095c.057.142.126.28.207.412l.099.15c.074.107.157.207.247.302l.124.119c.13.118.275.222.43.309h.024c.36.214.775.327 1.198.325h16.515c.36-.004.716-.085 1.039-.24.323-.153.606-.375.827-.648a2.78 2.78 0 00.504-.888c.066-.217.108-.44.124-.666V5.078a2.497 2.497 0 00-.652-1.81 2.706 2.706 0 00-1.776-.87z"
+                                  fill="#32324D"
+                                />
+                                <path
+                                  d="M12.552 9.199c.912 0 1.651-.71 1.651-1.585 0-.876-.74-1.586-1.651-1.586-.912 0-1.652.71-1.652 1.586 0 .875.74 1.585 1.652 1.585zM3.303 6.408h.826V3.997h2.477v-.793-.793H4.129V0h-.826c-.219 0-.85.002-.826 0v2.411H0v1.586h2.477v2.41h.826z"
+                                  fill="#32324D"
+                                />
+                              </svg>
+                              <div
+                                class="c1 c28"
                               >
-                                Browse files
-                              </span>
-                            </button>
-                            <div
-                              class="c32"
-                            >
-                              <span
-                                class="c33"
+                                <span
+                                  class="c7 c29"
+                                >
+                                  Drag and Drop here or
+                                </span>
+                              </div>
+                              <input
+                                accept="image/jpeg,image/png,image/svg+xml"
+                                class="c30"
+                                cursor="pointer"
+                                id="logo-upload"
+                                name="files"
+                                tabindex="-1"
+                                type="file"
+                              />
+                              <button
+                                aria-disabled="false"
+                                class="c9 c31"
+                                type="button"
                               >
-                                Max dimension: 750x750, Max size: 100KB
-                              </span>
+                                <span
+                                  class="c7 c32"
+                                >
+                                  Browse files
+                                </span>
+                              </button>
+                              <div
+                                class="c1 c33"
+                              >
+                                <span
+                                  class="c7 c34"
+                                >
+                                  Max dimension: 750x750, Max size: 100KB
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </label>
+                        </label>
+                      </div>
                     </div>
-                  </div>
-                </form>
-                <div
-                  class="c3 c34"
-                >
+                  </form>
                   <div
-                    class="c5"
+                    class="c1 c4 c35"
                   >
                     <div
-                      class="c35 c36"
+                      class="c1 c6"
                     >
-                      <button
-                        aria-disabled="false"
-                        class="c28 c37"
-                        type="button"
+                      <div
+                        class="c1 c36 c37"
                       >
-                        <span
-                          class="c30 c31"
+                        <button
+                          aria-disabled="false"
+                          class="c9 c38"
+                          type="button"
                         >
-                          Cancel
-                        </span>
-                      </button>
+                          <span
+                            class="c7 c32"
+                          >
+                            Cancel
+                          </span>
+                        </button>
+                      </div>
+                      <div
+                        class="c1 c36 c37"
+                      />
                     </div>
-                    <div
-                      class="c35 c36"
-                    />
                   </div>
                 </div>
               </div>
@@ -1215,7 +1353,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
 <body
   class="lock-body-scroll"
 >
-  .c20 {
+  .c23 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -1227,7 +1365,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   width: 1px;
 }
 
-.c4 {
+.c6 {
   background: #f6f6f9;
   padding: 8px;
   border-radius: 4px;
@@ -1235,56 +1373,62 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   border: 1px solid #dcdce4;
 }
 
-.c5 {
+.c7 {
   position: relative;
 }
 
-.c7 {
+.c9 {
   padding-right: 8px;
   padding-left: 8px;
+  overflow: hidden;
   width: 100%;
 }
 
-.c9 {
+.c11 {
   height: 124px;
 }
 
-.c13 {
+.c14 {
+  max-width: 40%;
+  max-height: 40%;
+}
+
+.c15 {
   position: absolute;
   bottom: 4px;
   width: 100%;
 }
 
-.c17 {
+.c20 {
   padding-top: 8px;
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c2 {
-  font-weight: 600;
-  color: #32324d;
+.c4 {
   font-size: 0.75rem;
   line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
 }
 
-.c18 {
-  color: #666687;
+.c21 {
+  font-size: 0.75rem;
+  line-height: 1.33;
   display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c19 {
   color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
 }
 
-.c0 {
+.c22 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c1 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -1298,7 +1442,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   flex-direction: column;
 }
 
-.c3 {
+.c5 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1312,7 +1456,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   flex-direction: row;
 }
 
-.c10 {
+.c12 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1330,42 +1474,54 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   justify-content: center;
 }
 
-.c6 {
+.c19 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c8 {
   display: grid;
   grid-template-columns: auto 1fr auto;
   grid-template-areas: 'startAction slides endAction';
 }
 
-.c8 {
+.c10 {
   grid-area: slides;
 }
 
-.c1 > * {
+.c2 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c1 > * + * {
+.c2 > * + * {
   margin-top: 4px;
 }
 
-.c14 > * {
+.c16 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c14 > * + * {
+.c16 > * + * {
   margin-left: 4px;
 }
 
-.c11 {
+.c13 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
 }
 
-.c15 {
+.c17 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1379,21 +1535,21 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   outline: none;
 }
 
-.c15 svg {
+.c17 svg {
   height: 12px;
   width: 12px;
 }
 
-.c15 svg > g,
-.c15 svg path {
+.c17 svg > g,
+.c17 svg path {
   fill: #ffffff;
 }
 
-.c15[aria-disabled='true'] {
+.c17[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c15:after {
+.c17:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -1408,11 +1564,11 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   border: 2px solid transparent;
 }
 
-.c15:focus-visible {
+.c17:focus-visible {
   outline: none;
 }
 
-.c15:focus-visible:after {
+.c17:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -1423,7 +1579,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   border: 2px solid #4945ff;
 }
 
-.c16 {
+.c18 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1440,96 +1596,149 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   width: 2rem;
 }
 
-.c16 svg > g,
-.c16 svg path {
+.c18 svg > g,
+.c18 svg path {
   fill: #8e8ea9;
 }
 
-.c16:hover svg > g,
-.c16:hover svg path {
+.c18:hover svg > g,
+.c18:hover svg path {
   fill: #666687;
 }
 
-.c16:active svg > g,
-.c16:active svg path {
+.c18:active svg > g,
+.c18:active svg path {
   fill: #a5a5ba;
 }
 
-.c16[aria-disabled='true'] {
+.c18[aria-disabled='true'] {
   background-color: #eaeaef;
 }
 
-.c16[aria-disabled='true'] svg path {
+.c18[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c12 {
-  max-width: 40%;
-  max-height: 40%;
+.c24 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c24 .c3 {
+  color: #ffffff;
+}
+
+.c24[aria-disabled='true'] .c3 {
+  color: #666687;
+}
+
+.c24[aria-disabled='true']:active .c3 {
+  color: #666687;
+}
+
+.c25 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c25 .c3 {
+  color: #ffffff;
+}
+
+.c25[aria-disabled='true'] .c3 {
+  color: #666687;
+}
+
+.c25[aria-disabled='true']:active .c3 {
+  color: #666687;
+}
+
+.c25 .c3 {
+  color: #32324d;
 }
 
 <div>
     <div>
       <div
-        class="c0 c1"
+        class="c0 c1 c2"
         spacing="1"
       >
         <label
-          class="c2"
-          for="carouselinput-49"
+          class="c3 c4"
+          for="carouselinput-104"
         >
           <div
-            class="c3"
+            class="c0 c5"
           >
             Logo
           </div>
         </label>
         <div
-          class=""
-          id="carouselinput-49"
+          class="c0 "
+          id="carouselinput-104"
         >
           <div
-            class="c4"
+            class="c0 c6"
           >
             <section
               aria-label="Logo"
               aria-roledescription="carousel"
-              class="c5 c6"
+              class="c0 c7 c8"
             >
               <div
                 aria-live="polite"
-                class="c7 c8"
+                class="c0 c9 c10"
+                overflow="hidden"
                 width="100%"
               >
                 <div
                   aria-label="Logo slide"
                   aria-roledescription="slide"
-                  class="c9 c10 c11"
+                  class="c0 c11 c12 c13"
                   height="124px"
                   role="group"
                 >
                   <img
                     alt="Logo"
-                    class="c12"
+                    class="c0 c14"
                     src="/admin/defaultLogo.png"
                   />
                 </div>
               </div>
               <div
-                class="c13 c10 c14"
+                class="c0 c15 c12 c16"
                 spacing="1"
                 width="100%"
               >
                 <span>
                   <button
                     aria-disabled="false"
-                    aria-labelledby="tooltip-33"
-                    class="c15 c16"
+                    aria-labelledby="tooltip-105"
+                    class="c17 c18"
                     tabindex="0"
                     type="button"
                   >
+                    <span
+                      class="c19"
+                    >
+                      Change logo
+                    </span>
                     <svg
+                      aria-hidden="true"
                       fill="none"
+                      focusable="false"
                       height="1em"
                       viewBox="0 0 24 24"
                       width="1em"
@@ -1545,16 +1754,16 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
               </div>
             </section>
             <div
-              class="c17"
+              class="c0 c20"
             >
               <span>
                 <div
-                  aria-labelledby="tooltip-50"
-                  class="c10"
+                  aria-labelledby="tooltip-107"
+                  class="c0 c12"
                   tabindex="0"
                 >
                   <span
-                    class="c18"
+                    class="c3 c21"
                   >
                     logo.png
                   </span>
@@ -1564,15 +1773,15 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
           </div>
         </div>
         <p
-          class="c19"
-          id="carouselinput-49-hint"
+          class="c3 c22"
+          id="carouselinput-104-hint"
         >
           Change the admin panel logo (Max dimension: 750x750, Max file size: 100KB)
         </p>
       </div>
     </div>
     <div
-      class="c20"
+      class="c23"
     >
       <p
         aria-live="polite"
@@ -1594,98 +1803,470 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
       />
     </div>
   </div>
-  .c0 {
+  .c1 {
   background: #212134;
   padding: 8px;
   border-radius: 4px;
 }
 
-.c2 {
-  font-weight: 600;
-  color: #ffffff;
+.c4 {
   font-size: 0.75rem;
   line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
 }
 
-.c1 {
+.c2 {
   position: absolute;
   z-index: 4;
   display: none;
+}
+
+.c5 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c5 .c3 {
+  color: #ffffff;
+}
+
+.c5[aria-disabled='true'] .c3 {
+  color: #666687;
+}
+
+.c5[aria-disabled='true']:active .c3 {
+  color: #666687;
+}
+
+.c6 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c6 .c3 {
+  color: #ffffff;
+}
+
+.c6[aria-disabled='true'] .c3 {
+  color: #666687;
+}
+
+.c6[aria-disabled='true']:active .c3 {
+  color: #666687;
+}
+
+.c6 .c3 {
+  color: #32324d;
 }
 
 <div
     data-react-portal="true"
   >
     <div
-      class="c0 c1"
-      id="tooltip-33"
+      class="c0 c1 c2"
+      id="tooltip-105"
       role="tooltip"
     >
       <p
-        class="c2"
+        class="c3 c4"
       >
         Change logo
       </p>
     </div>
   </div>
-  .c0 {
+  .c1 {
   background: #212134;
   padding: 8px;
   border-radius: 4px;
 }
 
-.c2 {
-  font-weight: 600;
-  color: #ffffff;
+.c4 {
   font-size: 0.75rem;
   line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
 }
 
-.c1 {
+.c2 {
   position: absolute;
   z-index: 4;
   display: none;
+}
+
+.c5 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c5 .c3 {
+  color: #ffffff;
+}
+
+.c5[aria-disabled='true'] .c3 {
+  color: #666687;
+}
+
+.c5[aria-disabled='true']:active .c3 {
+  color: #666687;
+}
+
+.c6 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c6 .c3 {
+  color: #ffffff;
+}
+
+.c6[aria-disabled='true'] .c3 {
+  color: #666687;
+}
+
+.c6[aria-disabled='true']:active .c3 {
+  color: #666687;
+}
+
+.c6 .c3 {
+  color: #32324d;
 }
 
 <div
     data-react-portal="true"
   >
     <div
-      class="c0 c1"
-      id="tooltip-50"
+      class="c0 c1 c2"
+      id="tooltip-107"
       role="tooltip"
     >
       <p
-        class="c2"
+        class="c3 c4"
       >
         logo.png
       </p>
     </div>
   </div>
-  .c9 {
+  .c2 {
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
+}
+
+.c4 {
+  background: #f6f6f9;
+  padding-top: 16px;
+  padding-right: 20px;
+  padding-bottom: 16px;
+  padding-left: 20px;
+}
+
+.c12 {
   padding-right: 40px;
   padding-left: 40px;
 }
 
-.c18 {
+.c14 {
+  padding: 16px;
+}
+
+.c19 {
+  background: #eaeaef;
+}
+
+.c21 {
   padding-top: 24px;
   padding-right: 40px;
   padding-bottom: 24px;
   padding-left: 40px;
 }
 
-.c1 {
-  background: #ffffff;
-  border-radius: 4px;
-  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
+.c24 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
 }
 
-.c3 {
-  background: #f6f6f9;
-  padding-top: 16px;
-  padding-right: 20px;
-  padding-bottom: 16px;
-  padding-left: 20px;
+.c8 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c18 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #4945ff;
+}
+
+.c16 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c31 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 1.14;
+  color: #32324d;
+}
+
+.c22 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c25 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c6 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c11 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c27 {
+  border: none;
+  border-radius: 4px;
+  padding-bottom: 0.65625rem;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 0.65625rem;
+  color: #32324d;
+  font-weight: 400;
+  font-size: 0.875rem;
+  display: block;
+  width: 100%;
+  background: inherit;
+}
+
+.c27::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c27::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c27:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c27::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c27[aria-disabled='true'] {
+  color: inherit;
+}
+
+.c27:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.c26 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c26:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c23 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c23 > * + * {
+  margin-top: 4px;
+}
+
+.c9 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c9 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c9 svg > g,
+.c9 svg path {
+  fill: #ffffff;
+}
+
+.c9[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c9:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c9:focus-visible {
+  outline: none;
+}
+
+.c9:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c10 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
+}
+
+.c10 svg > g,
+.c10 svg path {
+  fill: #8e8ea9;
+}
+
+.c10:hover svg > g,
+.c10:hover svg path {
+  fill: #666687;
+}
+
+.c10:active svg > g,
+.c10:active svg path {
+  fill: #a5a5ba;
+}
+
+.c10[aria-disabled='true'] {
+  background-color: #eaeaef;
+}
+
+.c10[aria-disabled='true'] svg path {
+  fill: #666687;
 }
 
 .c0 {
@@ -1708,279 +2289,55 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   justify-content: center;
 }
 
-.c2 {
+.c3 {
   width: 51.875rem;
 }
 
 .c5 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c27 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c7 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c7 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c7 svg > g,
-.c7 svg path {
-  fill: #ffffff;
-}
-
-.c7[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c7:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c7:focus-visible {
-  outline: none;
-}
-
-.c7:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c8 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-}
-
-.c8 svg > g,
-.c8 svg path {
-  fill: #8e8ea9;
-}
-
-.c8:hover svg > g,
-.c8:hover svg path {
-  fill: #666687;
-}
-
-.c8:active svg > g,
-.c8:active svg path {
-  fill: #a5a5ba;
-}
-
-.c8[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c8[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c4 {
   border-radius: 4px 4px 0 0;
   border-bottom: 1px solid #eaeaef;
 }
 
-.c26 {
+.c28 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
 
-.c28 > * + * {
+.c29 > * + * {
   margin-left: 8px;
 }
 
-.c6 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c15 {
-  color: #4945ff;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.c13 {
-  color: #666687;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.c11 {
-  padding: 16px;
-}
-
-.c14 {
+.c17 {
   border-bottom: 2px solid #4945ff;
 }
 
-.c12 {
+.c15 {
   border-bottom: 2px solid transparent;
 }
 
-.c10[aria-disabled='true'] {
+.c13[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c16 {
-  background: #eaeaef;
-}
-
-.c17 {
+.c20 {
   height: 1px;
   border: none;
   margin: 0;
 }
 
 .c32 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c29 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c29 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c29 svg > g,
-.c29 svg path {
-  fill: #ffffff;
-}
-
-.c29[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c29:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c29:focus-visible {
-  outline: none;
-}
-
-.c29:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c33 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
+  background-color: #4945ff;
   border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
-.c33 .sc-eZhRLC {
+.c32 .c1 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1991,50 +2348,50 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   align-items: center;
 }
 
-.c33 .c31 {
+.c32 .c7 {
   color: #ffffff;
 }
 
-.c33[aria-disabled='true'] {
+.c32[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c33[aria-disabled='true'] .c31 {
+.c32[aria-disabled='true'] .c7 {
   color: #666687;
 }
 
-.c33[aria-disabled='true'] svg > g,
-.c33[aria-disabled='true'] svg path {
+.c32[aria-disabled='true'] svg > g,
+.c32[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c33[aria-disabled='true']:active {
+.c32[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c33[aria-disabled='true']:active .c31 {
+.c32[aria-disabled='true']:active .c7 {
   color: #666687;
 }
 
-.c33[aria-disabled='true']:active svg > g,
-.c33[aria-disabled='true']:active svg path {
+.c32[aria-disabled='true']:active svg > g,
+.c32[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c33:hover {
+.c32:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c33:active {
+.c32:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c33 svg > g,
-.c33 svg path {
+.c32 svg > g,
+.c32 svg path {
   fill: #ffffff;
 }
 
@@ -2043,14 +2400,16 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
+  background-color: #4945ff;
   border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
   border: 1px solid #dcdce4;
   background: #ffffff;
 }
 
-.c30 .sc-eZhRLC {
+.c30 .c1 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2061,7 +2420,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   align-items: center;
 }
 
-.c30 .c31 {
+.c30 .c7 {
   color: #ffffff;
 }
 
@@ -2070,7 +2429,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   background: #eaeaef;
 }
 
-.c30[aria-disabled='true'] .c31 {
+.c30[aria-disabled='true'] .c7 {
   color: #666687;
 }
 
@@ -2084,7 +2443,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   background: #eaeaef;
 }
 
-.c30[aria-disabled='true']:active .c31 {
+.c30[aria-disabled='true']:active .c7 {
   color: #666687;
 }
 
@@ -2101,136 +2460,13 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   background-color: #eaeaef;
 }
 
-.c30 .c31 {
+.c30 .c7 {
   color: #32324d;
 }
 
 .c30 svg > g,
 .c30 svg path {
   fill: #32324d;
-}
-
-.c19 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c22 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c23 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c21 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c25 {
-  border: none;
-  border-radius: 4px;
-  padding-bottom: 0.65625rem;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 0.65625rem;
-  color: #32324d;
-  font-weight: 400;
-  font-size: 0.875rem;
-  display: block;
-  width: 100%;
-  background: inherit;
-}
-
-.c25::-webkit-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c25::-moz-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c25:-ms-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c25::placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c25[aria-disabled='true'] {
-  color: inherit;
-}
-
-.c25:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-.c24 {
-  border: 1px solid #dcdce4;
-  border-radius: 4px;
-  background: #ffffff;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c24:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c20 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c20 > * + * {
-  margin-top: 4px;
 }
 
 <div
@@ -2240,179 +2476,187 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
       class="c0"
     >
       <div>
-        <div
-          aria-labelledby="modal"
-          aria-modal="true"
-          class="c1 c2"
-          role="dialog"
-        >
+        <div>
           <div
-            class="c3 c4"
+            aria-labelledby="modal"
+            aria-modal="true"
+            class="c1 c2 c3"
+            role="dialog"
           >
             <div
-              class="c5"
-            >
-              <h2
-                class="c6"
-                id="modal"
-              >
-                Upload logo
-              </h2>
-              <button
-                aria-disabled="false"
-                aria-label="Close the modal"
-                class="c7 c8"
-                type="button"
-              >
-                <svg
-                  fill="none"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                    fill="#212134"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div>
-            <div
-              class="c9"
+              class="c1 c4 c5"
             >
               <div
-                aria-label="How do you want to upload your assets?"
-                role="tablist"
+                class="c1 c6"
               >
+                <h2
+                  class="c7 c8"
+                  id="modal"
+                >
+                  Upload logo
+                </h2>
                 <button
                   aria-disabled="false"
-                  aria-selected="false"
-                  class="c10"
-                  id="tabgroup-10-0-tab"
-                  role="tab"
-                  tabindex="-1"
+                  class="c9 c10"
                   type="button"
                 >
-                  <div
-                    class="c11 c12"
+                  <span
+                    class="c11"
                   >
-                    <span
-                      class="c13"
-                    >
-                      From computer
-                    </span>
-                  </div>
-                </button>
-                <button
-                  aria-controls="tabgroup-10-1-tabpanel"
-                  aria-disabled="false"
-                  aria-selected="true"
-                  class="c10"
-                  id="tabgroup-10-1-tab"
-                  role="tab"
-                  tabindex="0"
-                  type="button"
-                >
-                  <div
-                    class="c11 c14"
+                    Close the modal
+                  </span>
+                  <svg
+                    aria-hidden="true"
+                    fill="none"
+                    focusable="false"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <span
-                      class="c15"
-                    >
-                      From url
-                    </span>
-                  </div>
+                    <path
+                      d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                      fill="#212134"
+                    />
+                  </svg>
                 </button>
               </div>
-              <hr
-                class="c16 c17"
-              />
             </div>
             <div>
               <div
-                aria-labelledby="tabgroup-10-1-tab"
-                id="tabgroup-10-1-tabpanel"
-                role="tabpanel"
-                tabindex="0"
+                class="c1 c12"
               >
-                <form>
-                  <div
-                    class="c18"
+                <div
+                  aria-label="How do you want to upload your assets?"
+                  role="tablist"
+                >
+                  <button
+                    aria-disabled="false"
+                    aria-selected="false"
+                    class="c13"
+                    id="tabgroup-114-0-tab"
+                    role="tab"
+                    tabindex="-1"
+                    type="button"
                   >
-                    <div>
+                    <div
+                      class="c1 c14 c15"
+                    >
+                      <span
+                        class="c7 c16"
+                      >
+                        From computer
+                      </span>
+                    </div>
+                  </button>
+                  <button
+                    aria-controls="tabgroup-114-1-tabpanel"
+                    aria-disabled="false"
+                    aria-selected="true"
+                    class="c13"
+                    id="tabgroup-114-1-tab"
+                    role="tab"
+                    tabindex="0"
+                    type="button"
+                  >
+                    <div
+                      class="c1 c14 c17"
+                    >
+                      <span
+                        class="c7 c18"
+                      >
+                        From url
+                      </span>
+                    </div>
+                  </button>
+                </div>
+                <hr
+                  class="c1 c19 c20"
+                />
+              </div>
+              <div>
+                <div
+                  aria-labelledby="tabgroup-114-1-tab"
+                  id="tabgroup-114-1-tabpanel"
+                  role="tabpanel"
+                  tabindex="0"
+                >
+                  <form>
+                    <div
+                      class="c1 c21"
+                    >
                       <div>
-                        <div
-                          class="c19 c20"
-                          spacing="1"
-                        >
-                          <label
-                            class="c21"
-                            for="textinput-1"
-                          >
-                            <div
-                              class="c22"
-                            >
-                              URL
-                            </div>
-                          </label>
+                        <div>
                           <div
-                            class="c23 c24"
+                            class="c1 c22 c23"
+                            spacing="1"
                           >
-                            <input
-                              aria-disabled="false"
-                              aria-invalid="false"
-                              class="c25"
-                              id="textinput-1"
-                              name="logo-url"
-                              value=""
-                            />
+                            <label
+                              class="c7 c24"
+                              for="textinput-117"
+                            >
+                              <div
+                                class="c1 c25"
+                              >
+                                URL
+                              </div>
+                            </label>
+                            <div
+                              class="c1 c6 c26"
+                            >
+                              <input
+                                aria-disabled="false"
+                                aria-invalid="false"
+                                class="c27"
+                                id="textinput-117"
+                                name="logo-url"
+                                value=""
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div
-                    class="c3 c26"
-                  >
                     <div
-                      class="c5"
+                      class="c1 c4 c28"
                     >
                       <div
-                        class="c27 c28"
+                        class="c1 c6"
                       >
-                        <button
-                          aria-disabled="false"
-                          class="c29 c30"
-                          type="button"
+                        <div
+                          class="c1 c25 c29"
                         >
-                          <span
-                            class="c31 c32"
+                          <button
+                            aria-disabled="false"
+                            class="c9 c30"
+                            type="button"
                           >
-                            Cancel
-                          </span>
-                        </button>
-                      </div>
-                      <div
-                        class="c27 c28"
-                      >
-                        <button
-                          aria-disabled="false"
-                          class="c29 c33"
-                          type="submit"
+                            <span
+                              class="c7 c31"
+                            >
+                              Cancel
+                            </span>
+                          </button>
+                        </div>
+                        <div
+                          class="c1 c25 c29"
                         >
-                          <span
-                            class="c31 c32"
+                          <button
+                            aria-disabled="false"
+                            class="c9 c32"
+                            type="submit"
                           >
-                            Next
-                          </span>
-                        </button>
+                            <span
+                              class="c7 c31"
+                            >
+                              Next
+                            </span>
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </form>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
@@ -2424,7 +2668,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
 `;
 
 exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`] = `
-.c20 {
+.c21 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -2451,11 +2695,17 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
 .c7 {
   padding-right: 8px;
   padding-left: 8px;
+  overflow: hidden;
   width: 100%;
 }
 
 .c9 {
   height: 124px;
+}
+
+.c12 {
+  max-width: 40%;
+  max-height: 40%;
 }
 
 .c13 {
@@ -2464,46 +2714,46 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   width: 100%;
 }
 
-.c17 {
+.c18 {
   padding-top: 8px;
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c24 {
+.c22 {
   background: #212134;
   padding: 8px;
   border-radius: 4px;
 }
 
 .c2 {
-  font-weight: 600;
-  color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
 }
 
-.c18 {
-  color: #666687;
+.c19 {
+  font-size: 0.75rem;
+  line-height: 1.33;
   display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c19 {
   color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
 }
 
-.c26 {
+.c20 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c24 {
+  font-size: 0.75rem;
+  line-height: 1.33;
   font-weight: 600;
   color: #ffffff;
-  font-size: 0.75rem;
-  line-height: 1.33;
 }
 
 .c0 {
@@ -2552,7 +2802,19 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   justify-content: center;
 }
 
-.c25 {
+.c17 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c23 {
   position: absolute;
   z-index: 4;
   display: none;
@@ -2591,25 +2853,6 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-}
-
-.c21 {
-  background: #212134;
-  padding: 8px;
-  border-radius: 4px;
-}
-
-.c23 {
-  font-weight: 600;
-  color: #ffffff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c22 {
-  position: absolute;
-  z-index: 4;
-  display: none;
 }
 
 .c15 {
@@ -2708,11 +2951,6 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
 
 .c16[aria-disabled='true'] svg path {
   fill: #666687;
-}
-
-.c12 {
-  max-width: 40%;
-  max-height: 40%;
 }
 
 <body>
@@ -2747,6 +2985,7 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
               <div
                 aria-live="polite"
                 class="c7 c8"
+                overflow="hidden"
                 width="100%"
               >
                 <div
@@ -2771,13 +3010,20 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
                 <span>
                   <button
                     aria-disabled="false"
-                    aria-labelledby="tooltip-1"
+                    aria-labelledby="tooltip-2"
                     class="c15 c16"
                     tabindex="0"
                     type="button"
                   >
+                    <span
+                      class="c17"
+                    >
+                      Change logo
+                    </span>
                     <svg
+                      aria-hidden="true"
                       fill="none"
+                      focusable="false"
                       height="1em"
                       viewBox="0 0 24 24"
                       width="1em"
@@ -2793,16 +3039,16 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
               </div>
             </section>
             <div
-              class="c17"
+              class="c18"
             >
               <span>
                 <div
-                  aria-labelledby="tooltip-2"
+                  aria-labelledby="tooltip-4"
                   class="c10"
                   tabindex="0"
                 >
                   <span
-                    class="c18"
+                    class="c19"
                   >
                     logo.png
                   </span>
@@ -2812,7 +3058,7 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
           </div>
         </div>
         <p
-          class="c19"
+          class="c20"
           id="carouselinput-1-hint"
         >
           Change the admin panel logo (Max dimension: 750x750, Max file size: 100KB)
@@ -2820,7 +3066,7 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
       </div>
     </div>
     <div
-      class="c20"
+      class="c21"
     >
       <p
         aria-live="polite"
@@ -2846,12 +3092,12 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
     data-react-portal="true"
   >
     <div
-      class="c21 c22"
-      id="tooltip-1"
+      class="c22 c23"
+      id="tooltip-2"
       role="tooltip"
     >
       <p
-        class="c23"
+        class="c24"
       >
         Change logo
       </p>
@@ -2861,12 +3107,12 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
     data-react-portal="true"
   >
     <div
-      class="c24 c25"
-      id="tooltip-2"
+      class="c22 c23"
+      id="tooltip-4"
       role="tooltip"
     >
       <p
-        class="c26"
+        class="c24"
       >
         logo.png
       </p>

@@ -13,14 +13,14 @@ exports[`FromComputerForm snapshots the component 1`] = `
   width: 1px;
 }
 
-.c0 {
+.c1 {
   padding-top: 24px;
   padding-right: 40px;
   padding-bottom: 24px;
   padding-left: 40px;
 }
 
-.c1 {
+.c2 {
   background: #f6f6f9;
   padding-top: 64px;
   padding-bottom: 64px;
@@ -30,12 +30,12 @@ exports[`FromComputerForm snapshots the component 1`] = `
   position: relative;
 }
 
-.c7 {
+.c8 {
   padding-top: 12px;
   padding-bottom: 20px;
 }
 
-.c9 {
+.c11 {
   position: absolute;
   left: 0px;
   right: 0px;
@@ -45,216 +45,19 @@ exports[`FromComputerForm snapshots the component 1`] = `
   width: 100%;
 }
 
-.c11 {
-  position: relative;
-}
-
-.c15 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c12 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c12 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c12 svg > g,
-.c12 svg path {
-  fill: #ffffff;
-}
-
-.c12[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c12:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c12:focus-visible {
-  outline: none;
-}
-
-.c12:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
 .c13 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: 1px solid #4945ff;
+  position: relative;
 }
 
-.c13 .sc-kBzgEd {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
+.c17 {
+  background: #f6f6f9;
+  padding-top: 16px;
+  padding-right: 20px;
+  padding-bottom: 16px;
+  padding-left: 20px;
 }
 
-.c13 .c14 {
-  color: #ffffff;
-}
-
-.c13[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c13[aria-disabled='true'] .c14 {
-  color: #666687;
-}
-
-.c13[aria-disabled='true'] svg > g,
-.c13[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c13[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c13[aria-disabled='true']:active .c14 {
-  color: #666687;
-}
-
-.c13[aria-disabled='true']:active svg > g,
-.c13[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c13:hover {
-  border: 1px solid #7b79ff;
-  background: #7b79ff;
-}
-
-.c13:active {
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c13 svg > g,
-.c13 svg path {
-  fill: #ffffff;
-}
-
-.c21 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: 1px solid #4945ff;
-  border: 1px solid #dcdce4;
-  background: #ffffff;
-}
-
-.c21 .sc-kBzgEd {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c21 .c14 {
-  color: #ffffff;
-}
-
-.c21[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c21[aria-disabled='true'] .c14 {
-  color: #666687;
-}
-
-.c21[aria-disabled='true'] svg > g,
-.c21[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c21[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c21[aria-disabled='true']:active .c14 {
-  color: #666687;
-}
-
-.c21[aria-disabled='true']:active svg > g,
-.c21[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c21:hover {
-  background-color: #f6f6f9;
-}
-
-.c21:active {
-  background-color: #eaeaef;
-}
-
-.c21 .c14 {
-  color: #32324d;
-}
-
-.c21 svg > g,
-.c21 svg path {
-  fill: #32324d;
-}
-
-.c3 {
+.c4 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -272,7 +75,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
   justify-content: center;
 }
 
-.c4 {
+.c5 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -286,22 +89,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
   flex-direction: row;
 }
 
-.c8 {
-  color: #666687;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-}
-
-.c16 {
-  background: #f6f6f9;
-  padding-top: 16px;
-  padding-right: 20px;
-  padding-bottom: 16px;
-  padding-left: 20px;
-}
-
-.c18 {
+.c19 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -319,21 +107,224 @@ exports[`FromComputerForm snapshots the component 1`] = `
   justify-content: space-between;
 }
 
-.c19 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
+.c10 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #666687;
+}
+
+.c16 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 1.14;
+  color: #32324d;
+}
+
+.c14 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
 }
 
-.c17 {
+.c14 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c14 svg > g,
+.c14 svg path {
+  fill: #ffffff;
+}
+
+.c14[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c14:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c14:focus-visible {
+  outline: none;
+}
+
+.c14:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c15 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: #4945ff;
+  border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.c15 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c15 .c9 {
+  color: #ffffff;
+}
+
+.c15[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c15[aria-disabled='true'] .c9 {
+  color: #666687;
+}
+
+.c15[aria-disabled='true'] svg > g,
+.c15[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c15[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c15[aria-disabled='true']:active .c9 {
+  color: #666687;
+}
+
+.c15[aria-disabled='true']:active svg > g,
+.c15[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c15:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c15:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c15 svg > g,
+.c15 svg path {
+  fill: #ffffff;
+}
+
+.c21 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: #4945ff;
+  border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+}
+
+.c21 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c21 .c9 {
+  color: #ffffff;
+}
+
+.c21[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c21[aria-disabled='true'] .c9 {
+  color: #666687;
+}
+
+.c21[aria-disabled='true'] svg > g,
+.c21[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c21[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c21[aria-disabled='true']:active .c9 {
+  color: #666687;
+}
+
+.c21[aria-disabled='true']:active svg > g,
+.c21[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c21:hover {
+  background-color: #f6f6f9;
+}
+
+.c21:active {
+  background-color: #eaeaef;
+}
+
+.c21 .c9 {
+  color: #32324d;
+}
+
+.c21 svg > g,
+.c21 svg path {
+  fill: #32324d;
+}
+
+.c18 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
@@ -342,25 +333,25 @@ exports[`FromComputerForm snapshots the component 1`] = `
   margin-left: 8px;
 }
 
-.c5 {
+.c6 {
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
 }
 
-.c6 {
+.c7 {
   font-size: 3.75rem;
 }
 
-.c6 svg path {
+.c7 svg path {
   fill: #4945ff;
 }
 
-.c2 {
+.c3 {
   border-style: dashed;
 }
 
-.c10 {
+.c12 {
   opacity: 0;
   cursor: pointer;
 }
@@ -368,20 +359,20 @@ exports[`FromComputerForm snapshots the component 1`] = `
 <div>
   <form>
     <div
-      class="c0"
+      class="c0 c1"
     >
       <label>
         <div
-          class="c1 c2"
+          class="c0 c2 c3"
         >
           <div
-            class="c3"
+            class="c0 c4"
           >
             <div
-              class="c4 c5"
+              class="c0 c5 c6"
             >
               <div
-                class="c6"
+                class="c7"
               >
                 <svg
                   aria-hidden="true"
@@ -402,16 +393,16 @@ exports[`FromComputerForm snapshots the component 1`] = `
                 </svg>
               </div>
               <div
-                class="c7"
+                class="c0 c8"
               >
                 <span
-                  class="c8"
+                  class="c9 c10"
                 >
                   Drag & Drop here or
                 </span>
               </div>
               <input
-                class="c9 c10"
+                class="c0 c11 c12"
                 multiple=""
                 name="files"
                 tabindex="-1"
@@ -419,15 +410,15 @@ exports[`FromComputerForm snapshots the component 1`] = `
                 width="100%"
               />
               <div
-                class="c11"
+                class="c0 c13"
               >
                 <button
                   aria-disabled="false"
-                  class="c12 c13"
+                  class="c14 c15"
                   type="button"
                 >
                   <span
-                    class="c14 c15"
+                    class="c9 c16"
                   >
                     Browse files
                   </span>
@@ -439,28 +430,28 @@ exports[`FromComputerForm snapshots the component 1`] = `
       </label>
     </div>
     <div
-      class="c16 c17"
+      class="c0 c17 c18"
     >
       <div
-        class="c18"
+        class="c0 c19"
       >
         <div
-          class="c19 c20"
+          class="c0 c5 c20"
         >
           <button
             aria-disabled="false"
-            class="c12 c21"
+            class="c14 c21"
             type="button"
           >
             <span
-              class="c14 c15"
+              class="c9 c16"
             >
               cancel
             </span>
           </button>
         </div>
         <div
-          class="c19 c20"
+          class="c0 c5 c20"
         />
       </div>
     </div>

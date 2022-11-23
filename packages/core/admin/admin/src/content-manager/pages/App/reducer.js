@@ -14,6 +14,9 @@ const initialState = {
   singleTypeLinks: [],
 };
 
+/**
+ * Known as content-manager_app in the redux store
+ */
 const mainReducer = (state = initialState, action) =>
   produce(state, (draftState) => {
     switch (action.type) {

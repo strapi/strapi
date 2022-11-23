@@ -7,16 +7,15 @@ const getSelectStyles = (theme, error) => {
       lineHeight: 'normal',
     }),
     control(base, state) {
-      let border = `1px solid ${theme.colors.neutral200} !important`;
-      let boxShadow = 0;
+      let borderColor = theme.colors.neutral200;
+      let boxShadowColor;
       let backgroundColor;
 
       if (state.isFocused) {
-        border = `1px solid ${theme.colors.primary600} !important`;
-        boxShadow = `${theme.colors.primary600} 0px 0px 0px 2px`;
+        borderColor = theme.colors.primary600;
+        boxShadowColor = theme.colors.primary600;
       } else if (error) {
-        border = `1px solid ${theme.colors.danger600} !important`;
-        boxShadow = `${theme.colors.danger600} 0px 0px 0px 2px`;
+        borderColor = theme.colors.danger600;
       }
 
       if (state.isDisabled) {
@@ -25,17 +24,13 @@ const getSelectStyles = (theme, error) => {
 
       return {
         ...base,
-        fontSize: 14,
+        fontSize: theme.fontSizes[2],
         height: 40,
-        border,
+        border: `1px solid ${borderColor} !important`,
         outline: 0,
-        borderRadius: '2px !important',
         backgroundColor,
-        borderTopLeftRadius: '4px !important',
-        borderTopRightRadius: '4px !important',
-        borderBottomLeftRadius: '4px !important',
-        borderBottomRightRadius: '4px !important',
-        boxShadow,
+        borderRadius: theme.borderRadius,
+        boxShadow: boxShadowColor ? `${boxShadowColor} 0px 0px 0px 2px` : 0,
       };
     },
     indicatorContainer: (base) => ({ ...base, padding: 0, paddingRight: theme.spaces[3] }),
@@ -47,12 +42,10 @@ const getSelectStyles = (theme, error) => {
         marginTop: theme.spaces[1],
         backgroundColor: theme.colors.neutral0,
         color: theme.colors.neutral800,
-        borderRadius: '4px !important',
-        borderTopLeftRadius: '4px !important',
-        borderTopRightRadius: '4px !important',
-        border: `1px solid ${theme.colors.neutral200} !important`,
-        boxShadow: 0,
-        fontSize: '14px',
+        borderRadius: theme.borderRadius,
+        border: `1px solid ${theme.colors.neutral200}`,
+        boxShadow: theme.shadows.tableShadow,
+        fontSize: theme.fontSizes[2],
         zIndex: 2,
       };
     },
@@ -84,7 +77,15 @@ const getSelectStyles = (theme, error) => {
         },
       };
     },
-    placeholder: (base) => ({ ...base, marginLeft: 0 }),
+    placeholder: (base) => ({
+      ...base,
+      color: theme.colors.neutral600,
+      marginLeft: 0,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      maxWidth: '80%',
+    }),
     singleValue(base, state) {
       let color = theme.colors.neutral800;
 

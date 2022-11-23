@@ -65,111 +65,29 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c21 {
-        color: #666687;
-      }
-
-      .c22 path {
-        fill: #666687;
-      }
-
-      .c24 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
-      }
-
-      .c24 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c24 svg > g,
-      .c24 svg path {
-        fill: #ffffff;
-      }
-
-      .c24[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c24:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
+      .c16 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
         position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
+        width: 1px;
       }
 
-      .c24:focus-visible {
-        outline: none;
+      .c1 {
+        background: #f6f6f9;
+        padding-top: 40px;
+        padding-right: 56px;
+        padding-bottom: 40px;
+        padding-left: 56px;
       }
 
-      .c24:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c25 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        height: 2rem;
-        width: 2rem;
-        border: none;
-      }
-
-      .c25 svg > g,
-      .c25 svg path {
-        fill: #8e8ea9;
-      }
-
-      .c25:hover svg > g,
-      .c25:hover svg path {
-        fill: #666687;
-      }
-
-      .c25:active svg > g,
-      .c25:active svg path {
-        fill: #a5a5ba;
-      }
-
-      .c25[aria-disabled='true'] {
-        background-color: #eaeaef;
-      }
-
-      .c25[aria-disabled='true'] svg path {
-        fill: #666687;
+      .c5 {
+        padding-right: 56px;
+        padding-left: 56px;
       }
 
       .c6 {
@@ -185,6 +103,121 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
 
       .c14 {
         width: 1%;
+      }
+
+      .c20 {
+        color: #666687;
+      }
+
+      .c2 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+      }
+
+      .c3 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c4 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c18 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
+      }
+
+      .c22 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
+      .c23 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
+      }
+
+      .c23 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c23 svg > g,
+      .c23 svg path {
+        fill: #ffffff;
+      }
+
+      .c23[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c23:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c23:focus-visible {
+        outline: none;
+      }
+
+      .c23:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c7 {
@@ -226,7 +259,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         overflow-x: auto;
       }
 
-      .c20 tr:last-of-type {
+      .c19 tr:last-of-type {
         border-bottom: none;
       }
 
@@ -254,20 +287,6 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         height: 3.5rem;
       }
 
-      .c16 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
       .c15 {
         vertical-align: middle;
         text-align: left;
@@ -279,90 +298,57 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         vertical-align: sub;
       }
 
-      .c18 svg {
+      .c17 svg {
         height: 0.25rem;
       }
 
-      .c19 {
-        color: #666687;
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
+      .c24 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        height: 2rem;
+        width: 2rem;
+        border: none;
       }
 
-      .c23 {
-        color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
+      .c24 svg > g,
+      .c24 svg path {
+        fill: #8e8ea9;
       }
 
-      .c17 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
+      .c24:hover svg > g,
+      .c24:hover svg path {
+        fill: #666687;
+      }
+
+      .c24:active svg > g,
+      .c24:active svg path {
+        fill: #a5a5ba;
+      }
+
+      .c24[aria-disabled='true'] {
+        background-color: #eaeaef;
+      }
+
+      .c24[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c21 path {
+        fill: #666687;
       }
 
       .c0:focus-visible {
         outline: none;
-      }
-
-      .c1 {
-        background: #f6f6f9;
-        padding-top: 40px;
-        padding-right: 56px;
-        padding-bottom: 40px;
-        padding-left: 56px;
-      }
-
-      .c5 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
-
-      .c2 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-      }
-
-      .c3 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c4 {
-        color: #32324d;
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
       }
 
       <main
@@ -425,15 +411,15 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                         width="1%"
                       >
                         <div
-                          class="c16"
+                          class="c3"
                         >
                           <div
-                            class="c17"
+                            class="c16"
                           >
                             icon
                           </div>
                           <span
-                            class="c18"
+                            class="c17"
                           />
                         </div>
                       </th>
@@ -443,15 +429,15 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                         tabindex="-1"
                       >
                         <div
-                          class="c16"
+                          class="c3"
                         >
                           <span
-                            class="c19"
+                            class="c18"
                           >
                             name
                           </span>
                           <span
-                            class="c18"
+                            class="c17"
                           />
                         </div>
                       </th>
@@ -462,22 +448,22 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                         width="1%"
                       >
                         <div
-                          class="c16"
+                          class="c3"
                         >
                           <div
-                            class="c17"
+                            class="c16"
                           >
                             action
                           </div>
                           <span
-                            class="c18"
+                            class="c17"
                           />
                         </div>
                       </th>
                     </tr>
                   </thead>
                   <tbody
-                    class="c20"
+                    class="c19"
                   >
                     <tr
                       aria-rowindex="2"
@@ -490,7 +476,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                         tabindex="-1"
                       >
                         <div
-                          class="c21 c22"
+                          class="c20 c21"
                         >
                           <svg
                             aria-label="Reset password"
@@ -515,7 +501,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                         tabindex="-1"
                       >
                         <span
-                          class="c23"
+                          class="c22"
                         >
                           Reset password
                         </span>
@@ -530,12 +516,19 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                           <button
                             aria-disabled="false"
                             aria-labelledby="tooltip-1"
-                            class="c24 c25"
+                            class="c23 c24"
                             tabindex="-1"
                             type="button"
                           >
+                            <span
+                              class="c16"
+                            >
+                              Edit a template
+                            </span>
                             <svg
+                              aria-hidden="true"
                               fill="none"
+                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -563,7 +556,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                         tabindex="-1"
                       >
                         <div
-                          class="c21 c22"
+                          class="c20 c21"
                         >
                           <svg
                             aria-label="Email address confirmation"
@@ -586,7 +579,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                         tabindex="-1"
                       >
                         <span
-                          class="c23"
+                          class="c22"
                         >
                           Email address confirmation
                         </span>
@@ -601,12 +594,19 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                           <button
                             aria-disabled="false"
                             aria-labelledby="tooltip-3"
-                            class="c24 c25"
+                            class="c23 c24"
                             tabindex="-1"
                             type="button"
                           >
+                            <span
+                              class="c16"
+                            >
+                              Edit a template
+                            </span>
                             <svg
+                              aria-hidden="true"
                               fill="none"
+                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"

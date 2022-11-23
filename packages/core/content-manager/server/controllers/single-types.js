@@ -176,4 +176,31 @@ module.exports = {
 
     ctx.body = await permissionChecker.sanitizeOutput(unpublishedEntity);
   },
+
+  async getNumberOfDraftRelations(ctx) {
+    const { userAbility } = ctx.state;
+    const { model } = ctx.params;
+
+    const entityManager = getService('entity-manager');
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    if (permissionChecker.cannot.read()) {
+      return ctx.forbidden();
+    }
+
+    const entity = await findEntity({}, model);
+    if (!entity) {
+      return ctx.notFound();
+    }
+
+    if (permissionChecker.cannot.read(entity)) {
+      return ctx.forbidden();
+    }
+
+    const number = await entityManager.getNumberOfDraftRelations(entity.id, model);
+
+    return {
+      data: number,
+    };
+  },
 };
