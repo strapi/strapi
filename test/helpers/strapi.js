@@ -19,7 +19,7 @@ const TEST_APP_URL = path.resolve(__dirname, '../../testApp');
 
 const createStrapiInstance = async ({
   ensureSuperAdmin = true,
-  logLevel = 'fatal',
+  logLevel = 'error',
   bypassAuth = true,
 } = {}) => {
   // read .env file as it could have been updated

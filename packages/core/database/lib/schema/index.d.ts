@@ -38,7 +38,7 @@ export interface Model {
   };
 }
 
-export interface SchemaProvideer {
+export interface SchemaProvider {
   sync(): Promise<void>;
   syncSchema(): Promise<void>;
   reset(): Promise<void>;
@@ -46,4 +46,4 @@ export interface SchemaProvideer {
   drop(): Promise<void>;
 }
 
-export default function(db: Database): SchemaProvideer;
+export default function(db: Database): SchemaProvider;
