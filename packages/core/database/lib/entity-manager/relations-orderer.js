@@ -30,7 +30,6 @@ const _ = require('lodash/fp');
  * @param {Array<*>} initArr - array of relations to initialize the class with
  * @param {string} idColumn - the column name of the id
  * @param {string} orderColumn - the column name of the order
- * @param {number} [maxOrder=0] - Used to calculate the order of relations placed at the end
  * @return {*}
  */
 const relationsOrderer = (initArr, idColumn, orderColumn) => {
