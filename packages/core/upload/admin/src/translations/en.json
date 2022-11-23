@@ -120,8 +120,9 @@
   "list-table-header-name": "name",
   "list-table-header-ext": "extension",
   "list-table-header-size": "size",
-  "list-table-header-createdAt": "Created",
-  "list-table-header-updatedAt": "Last update",
+  "list-table-header-createdAt": "created",
+  "list-table-header-updatedAt": "last update",
+  "list-table-header-sort": "Sort on {label}",
   "tabs.title": "How do you want to upload your assets?",
   "window.confirm.close-modal.file": "Are you sure? Your changes will be lost.",
   "window.confirm.close-modal.files": "Are you sure? You have some files that have not been uploaded yet."
