@@ -256,7 +256,7 @@ export const MediaLibrary = () => {
                 !assetsLoading && !foldersLoading ? [...folders, ...assets] : []
               }
               selected={selected}
-              sortQuery={query?.sort}
+              sortQuery={query?.sort ?? ''}
             />
           )}
 

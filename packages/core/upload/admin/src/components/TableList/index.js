@@ -7,8 +7,7 @@ import { Table, Th, Thead, Tr } from '@strapi/design-system/Table';
 import { Tooltip } from '@strapi/design-system/Tooltip';
 import { Typography } from '@strapi/design-system/Typography';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import CarretDown from '@strapi/icons/CarretDown';
-import CarretUp from '@strapi/icons/CarretUp';
+import { CarretDown, CarretUp } from '@strapi/icons';
 
 import { getTrad } from '../../utils';
 import { AssetDefinition, tableHeaders, FolderDefinition } from '../../constants';
@@ -70,9 +69,10 @@ export const TableList = ({
                     <IconButton
                       label={sortLabel}
                       onClick={() => handleClickSort(isSorted, name)}
-                      icon={isUp ? <CarretUp /> : <CarretDown />}
                       noBorder
-                    />
+                    >
+                      {isUp ? <CarretUp /> : <CarretDown />}
+                    </IconButton>
                   )
                 }
                 key={key}
