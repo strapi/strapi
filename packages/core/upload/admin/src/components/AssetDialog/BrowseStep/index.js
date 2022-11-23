@@ -19,7 +19,7 @@ import getTrad from '../../../utils/getTrad';
 import { getBreadcrumbDataCM } from '../../../utils';
 import getAllowedFiles from '../../../utils/getAllowedFiles';
 import { AssetGridList } from '../../AssetGridList';
-import { FolderList } from '../../FolderList';
+import { FolderGridList } from '../../FolderGridList';
 import { EmptyAssets } from '../../EmptyAssets';
 import { Breadcrumbs } from '../../Breadcrumbs';
 import SortPicker from '../../SortPicker';
@@ -196,7 +196,7 @@ export const BrowseStep = ({
       )}
 
       {folderCount > 0 && (
-        <FolderList
+        <FolderGridList
           title={
             (((isSearchingOrFiltering && assetCount > 0) || !isSearchingOrFiltering) &&
               formatMessage(
@@ -256,7 +256,7 @@ export const BrowseStep = ({
               </GridItem>
             );
           })}
-        </FolderList>
+        </FolderGridList>
       )}
 
       {assetCount > 0 && folderCount > 0 && (
