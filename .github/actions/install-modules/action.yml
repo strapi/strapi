@@ -1,7 +1,0 @@
-name: 'Install modules'
-description: 'Install yarn dependencies'
-runs:
-  using: 'composite'
-  steps:
-    - run: $GITHUB_ACTION_PATH/script.sh
-      shell: bash
