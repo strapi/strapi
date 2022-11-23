@@ -6,11 +6,8 @@ import PropTypes from 'prop-types';
 import get from 'lodash/get';
 
 import { useNotification, useCMEditViewDataManager } from '@strapi/helper-plugin';
-
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { TextButton } from '@strapi/design-system/TextButton';
-import Plus from '@strapi/icons/Plus';
+import { Box, Flex, TextButton } from '@strapi/design-system';
+import { Plus } from '@strapi/icons';
 
 import { getMaxTempKey, getTrad } from '../../utils';
 import { useContentTypeLayout } from '../../hooks';
