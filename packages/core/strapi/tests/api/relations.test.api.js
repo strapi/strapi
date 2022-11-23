@@ -820,7 +820,6 @@ describe('Relations', () => {
 
       const updatedShop = await updateShop(shop, {
         anyToManyRel: [
-          { id: id3, position: { after: id1 } },
           { id: id1, position: { before: id2 } },
           { id: id2, position: { start: true } },
           { id: id3, position: { end: true } },
