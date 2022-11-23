@@ -273,6 +273,7 @@ export const MediaLibrary = () => {
           {canRead && !isGridView && (assetCount > 0 || folderCount > 0) && (
             <TableList
               assetCount={assetCount}
+              canUpdate={canUpdate}
               folderCount={folderCount}
               indeterminate={indeterminateBulkSelect}
               onChangeSort={handleChangeSort}
