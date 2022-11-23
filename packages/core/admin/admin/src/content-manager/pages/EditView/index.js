@@ -1,6 +1,6 @@
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import get from 'lodash/get';
+import { useSelector } from 'react-redux';
 import {
   CheckPermissions,
   useTracking,
@@ -18,82 +18,56 @@ import Pencil from '@strapi/icons/Pencil';
 import { InjectionZone } from '../../../shared/components';
 import permissions from '../../../permissions';
 import DynamicZone from '../../components/DynamicZone';
-import FieldComponent from '../../components/FieldComponent';
-import Inputs from '../../components/Inputs';
+
 import CollectionTypeFormWrapper from '../../components/CollectionTypeFormWrapper';
 import EditViewDataManagerProvider from '../../components/EditViewDataManagerProvider';
 import SingleTypeFormWrapper from '../../components/SingleTypeFormWrapper';
 import { getTrad } from '../../utils';
+import useLazyComponents from '../../hooks/useLazyComponents';
 import DraftAndPublishBadge from './DraftAndPublishBadge';
 import Informations from './Informations';
 import Header from './Header';
-import {
-  createAttributesLayout,
-  getFieldsActionMatchingPermissions,
-  getCustomFieldUidsFromLayout,
-} from './utils';
+import { getFieldsActionMatchingPermissions, getCustomFieldUidsFromLayout } from './utils';
 import DeleteLink from './DeleteLink';
-import useLazyComponents from '../../hooks/useLazyComponents';
+import GridRow from './GridRow';
+import { selectCurrentLayout, selectAttributesLayout } from './selectors';
 
 const cmPermissions = permissions.contentManager;
 const ctbPermissions = [{ action: 'plugin::content-type-builder.read', subject: null }];
 
 /* eslint-disable  react/no-array-index-key */
-const EditView = ({
-  allowedActions,
-  isSingleType,
-  goBack,
-  layout,
-  slug,
-  id,
-  origin,
-  userPermissions,
-}) => {
+const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, userPermissions }) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
+
+  const { layout, formattedContentTypeLayout } = useSelector((state) => ({
+    layout: selectCurrentLayout(state),
+    formattedContentTypeLayout: selectAttributesLayout(state),
+  }));
 
   const customFieldUids = getCustomFieldUidsFromLayout(layout);
   const { isLazyLoading, lazyComponentStore } = useLazyComponents(customFieldUids);
 
   const { createActionAllowedFields, readActionAllowedFields, updateActionAllowedFields } =
-    useMemo(() => {
-      return getFieldsActionMatchingPermissions(userPermissions, slug);
-    }, [userPermissions, slug]);
+    getFieldsActionMatchingPermissions(userPermissions, slug);
 
-  const configurationPermissions = useMemo(() => {
-    return isSingleType
-      ? cmPermissions.singleTypesConfigurations
-      : cmPermissions.collectionTypesConfigurations;
-  }, [isSingleType]);
+  const configurationPermissions = isSingleType
+    ? cmPermissions.singleTypesConfigurations
+    : cmPermissions.collectionTypesConfigurations;
 
   // // FIXME when changing the routing
   const configurationsURL = `/content-manager/${
     isSingleType ? 'singleType' : 'collectionType'
   }/${slug}/configurations/edit`;
-  const currentContentTypeLayoutData = get(layout, ['contentType'], {});
 
-  const DataManagementWrapper = useMemo(
-    () => (isSingleType ? SingleTypeFormWrapper : CollectionTypeFormWrapper),
-    [isSingleType]
-  );
+  const DataManagementWrapper = isSingleType ? SingleTypeFormWrapper : CollectionTypeFormWrapper;
 
   // Check if a block is a dynamic zone
-  const isDynamicZone = useCallback((block) => {
+  const isDynamicZone = (block) => {
     return block.every((subBlock) => {
       return subBlock.every((obj) => obj.fieldSchema.type === 'dynamiczone');
     });
-  }, []);
-
-  const formattedContentTypeLayout = useMemo(() => {
-    if (!currentContentTypeLayoutData.layouts) {
-      return [];
-    }
-
-    return createAttributesLayout(
-      currentContentTypeLayoutData.layouts.edit,
-      currentContentTypeLayoutData.attributes
-    );
-  }, [currentContentTypeLayoutData]);
+  };
 
   if (isLazyLoading) {
     return <LoadingIndicatorPage />;
@@ -183,66 +157,13 @@ const EditView = ({
                             borderColor="neutral150"
                           >
                             <Stack spacing={6}>
-                              {row.map((grid, gridIndex) => {
-                                return (
-                                  <Grid gap={4} key={gridIndex}>
-                                    {grid.map(
-                                      ({
-                                        fieldSchema,
-                                        labelAction,
-                                        metadatas,
-                                        name,
-                                        size,
-                                        queryInfos,
-                                      }) => {
-                                        const isComponent = fieldSchema.type === 'component';
-
-                                        if (isComponent) {
-                                          const {
-                                            component,
-                                            max,
-                                            min,
-                                            repeatable = false,
-                                            required = false,
-                                          } = fieldSchema;
-
-                                          return (
-                                            <GridItem col={size} s={12} xs={12} key={component}>
-                                              <FieldComponent
-                                                componentUid={component}
-                                                labelAction={labelAction}
-                                                isRepeatable={repeatable}
-                                                intlLabel={{
-                                                  id: metadatas.label,
-                                                  defaultMessage: metadatas.label,
-                                                }}
-                                                max={max}
-                                                min={min}
-                                                name={name}
-                                                required={required}
-                                              />
-                                            </GridItem>
-                                          );
-                                        }
-
-                                        return (
-                                          <GridItem col={size} key={name} s={12} xs={12}>
-                                            <Inputs
-                                              size={size}
-                                              fieldSchema={fieldSchema}
-                                              keys={name}
-                                              labelAction={labelAction}
-                                              metadatas={metadatas}
-                                              queryInfos={queryInfos}
-                                              customFieldInputs={lazyComponentStore}
-                                            />
-                                          </GridItem>
-                                        );
-                                      }
-                                    )}
-                                  </Grid>
-                                );
-                              })}
+                              {row.map((grid, gridRowIndex) => (
+                                <GridRow
+                                  columns={grid}
+                                  customFieldInputs={lazyComponentStore}
+                                  key={gridRowIndex}
+                                />
+                              ))}
                             </Stack>
                           </Box>
                         );
@@ -340,16 +261,6 @@ EditView.propTypes = {
     canCreate: PropTypes.bool.isRequired,
     canDelete: PropTypes.bool.isRequired,
   }).isRequired,
-  layout: PropTypes.shape({
-    components: PropTypes.object.isRequired,
-    contentType: PropTypes.shape({
-      uid: PropTypes.string.isRequired,
-      settings: PropTypes.object.isRequired,
-      metadatas: PropTypes.object.isRequired,
-      options: PropTypes.object.isRequired,
-      attributes: PropTypes.object.isRequired,
-    }).isRequired,
-  }).isRequired,
   id: PropTypes.string,
   isSingleType: PropTypes.bool,
   goBack: PropTypes.func.isRequired,
@@ -358,7 +269,4 @@ EditView.propTypes = {
   userPermissions: PropTypes.array,
 };
 
-export { EditView };
 export default memo(EditView);
-
-// export default () => 'TODO Edit view';
