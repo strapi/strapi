@@ -1,26 +1,27 @@
-import axios from 'axios';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { getFetchClient } from '../../utils/getFetchClient';
 
 const cancelToken = () => {
-  const CancelToken = axios.CancelToken;
-  const source = CancelToken.source();
+  const controller = new AbortController();
 
-  return source;
+  return controller;
 };
 
 const useFetchClient = () => {
-  const source = cancelToken();
+  const controller = useRef(null);
+
+  if (controller.current === null) {
+    controller.current = cancelToken();
+  }
   useEffect(() => {
     return () => {
       // when unmount cancel the axios request
-      source.cancel();
+      controller.current.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const defaultOptions = {
-    cancelToken: source.token,
+    signal: controller.current.signal,
   };
 
   return getFetchClient(defaultOptions);
