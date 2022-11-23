@@ -33,6 +33,7 @@ const PROPS_FIXTURE = {
     },
   ],
   onEditAsset: jest.fn(),
+  onEditFolder: jest.fn(),
   onSelectOne: jest.fn(),
   onSelectAll: jest.fn(),
   selected: [],

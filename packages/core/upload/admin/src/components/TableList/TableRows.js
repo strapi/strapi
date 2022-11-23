@@ -25,6 +25,14 @@ export const TableRows = ({ onEditAsset, onEditFolder, onSelectOne, rows, select
   const [{ query }] = useQueryParams();
   const { push } = useHistory();
 
+  const handleRowClickFn = (element, elementType) => {
+    if (elementType === 'asset') {
+      onEditAsset(element);
+    } else {
+      push(getFolderURL(pathname, query, element));
+    }
+  };
+
   return (
     <Tbody>
       {rows.map((element) => {
@@ -36,10 +44,7 @@ export const TableRows = ({ onEditAsset, onEditFolder, onSelectOne, rows, select
           <Tr
             key={id}
             {...onRowClick({
-              fn: () =>
-                elementType === 'asset'
-                  ? onEditAsset(element)
-                  : push(getFolderURL(pathname, query, element)),
+              fn: () => handleRowClickFn(element, elementType),
             })}
           >
             <Td {...stopPropagation}>
@@ -88,21 +93,18 @@ export const TableRows = ({ onEditAsset, onEditFolder, onSelectOne, rows, select
                     <Eye />
                   </IconButton>
                 )}
-                {((elementType === 'asset' && onEditAsset) ||
-                  (elementType === 'folder' && onEditFolder)) && (
-                  <IconButton
-                    label={formatMessage({
-                      id: getTrad('control-card.edit'),
-                      defaultMessage: 'Edit',
-                    })}
-                    onClick={() =>
-                      elementType === 'asset' ? onEditAsset(element) : onEditFolder(element)
-                    }
-                    noBorder
-                  >
-                    <Pencil />
-                  </IconButton>
-                )}
+                <IconButton
+                  label={formatMessage({
+                    id: getTrad('control-card.edit'),
+                    defaultMessage: 'Edit',
+                  })}
+                  onClick={() =>
+                    elementType === 'asset' ? onEditAsset(element) : onEditFolder(element)
+                  }
+                  noBorder
+                >
+                  <Pencil />
+                </IconButton>
               </Flex>
             </Td>
           </Tr>
@@ -113,16 +115,14 @@ export const TableRows = ({ onEditAsset, onEditFolder, onSelectOne, rows, select
 };
 
 TableRows.defaultProps = {
-  onEditAsset: null,
-  onEditFolder: null,
   rows: [],
   selected: [],
 };
 
 TableRows.propTypes = {
   rows: PropTypes.arrayOf(AssetDefinition, FolderDefinition),
-  onEditAsset: PropTypes.func,
-  onEditFolder: PropTypes.func,
+  onEditAsset: PropTypes.func.isRequired,
+  onEditFolder: PropTypes.func.isRequired,
   onSelectOne: PropTypes.func.isRequired,
   selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition),
 };
