@@ -1,6 +1,6 @@
 import React from 'react';
 import { IntlProvider } from 'react-intl';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 
 import { TableList } from '..';
@@ -69,6 +69,30 @@ describe('TableList', () => {
     const { getByRole } = setup();
 
     expect(getByRole('columnheader', { name: 'actions' })).toBeInTheDocument();
+  });
+
+  it('should call onChangeSort callback when changing sort order', () => {
+    const onChangeSortSpy = jest.fn();
+    const { getByRole } = setup({ sortQuery: 'updatedAt:ASC', onChangeSort: onChangeSortSpy });
+
+    const sortButton = getByRole('button', { name: 'Sort on last update' });
+    expect(sortButton).toBeInTheDocument();
+
+    fireEvent.click(sortButton);
+
+    expect(onChangeSortSpy).toHaveBeenCalledWith('updatedAt:DESC');
+  });
+
+  it('should call onChangeSort callback when changing sort by', () => {
+    const onChangeSortSpy = jest.fn();
+    const { getByRole } = setup({ sortQuery: 'updatedAt:ASC', onChangeSort: onChangeSortSpy });
+
+    const sortButton = getByRole('button', { name: 'Sort on name' });
+    expect(sortButton).toBeInTheDocument();
+
+    fireEvent.click(sortButton);
+
+    expect(onChangeSortSpy).toHaveBeenCalledWith('name:ASC');
   });
 
   it('should render assets', () => {

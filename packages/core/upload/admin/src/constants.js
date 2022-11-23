@@ -103,7 +103,7 @@ export const tableHeaders = [
     key: 'preview',
     metadatas: {
       label: { id: getTrad('list-table-header-preview'), defaultMessage: 'preview' },
-      sortable: false,
+      isSortable: false,
     },
     type: 'image',
   },
@@ -112,7 +112,7 @@ export const tableHeaders = [
     key: 'name',
     metadatas: {
       label: { id: getTrad('list-table-header-name'), defaultMessage: 'name' },
-      sortable: true,
+      isSortable: true,
     },
     type: 'text',
   },
@@ -121,7 +121,7 @@ export const tableHeaders = [
     key: 'extension',
     metadatas: {
       label: { id: getTrad('list-table-header-ext'), defaultMessage: 'extension' },
-      sortable: false,
+      isSortable: false,
     },
     type: 'ext',
   },
@@ -130,7 +130,7 @@ export const tableHeaders = [
     key: 'size',
     metadatas: {
       label: { id: getTrad('list-table-header-size'), defaultMessage: 'size' },
-      sortable: false,
+      isSortable: false,
     },
     type: 'size',
   },
@@ -139,7 +139,7 @@ export const tableHeaders = [
     key: 'createdAt',
     metadatas: {
       label: { id: getTrad('list-table-header-createdAt'), defaultMessage: 'created' },
-      sortable: true,
+      isSortable: true,
     },
     type: 'date',
   },
@@ -148,7 +148,7 @@ export const tableHeaders = [
     key: 'updatedAt',
     metadatas: {
       label: { id: getTrad('list-table-header-updatedAt'), defaultMessage: 'last update' },
-      sortable: true,
+      isSortable: true,
     },
     type: 'date',
   },
