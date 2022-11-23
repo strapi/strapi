@@ -1,11 +1,11 @@
 import type { ContentTypeSchema } from '@strapi/strapi';
 
-import { Readable, Duplex, PassThrough } from 'stream';
+import { Readable, PassThrough } from 'stream';
 
 /**
  * Generate and consume content-types streams in order to stream each entity individually
  */
-export const createEntitiesStream = (strapi: Strapi.Strapi): Duplex => {
+export const createEntitiesStream = (strapi: Strapi.Strapi): Readable => {
   const contentTypes: ContentTypeSchema[] = Object.values(strapi.contentTypes);
 
   async function* contentTypeStreamGenerator() {
@@ -22,15 +22,17 @@ export const createEntitiesStream = (strapi: Strapi.Strapi): Duplex => {
     }
   }
 
-  return Duplex.from(async function* () {
-    for await (const { stream, contentType } of contentTypeStreamGenerator()) {
-      for await (const entity of stream) {
-        yield { entity, contentType };
-      }
+  return Readable.from(
+    (async function* () {
+      for await (const { stream, contentType } of contentTypeStreamGenerator()) {
+        for await (const entity of stream) {
+          yield { entity, contentType };
+        }
 
-      stream.destroy();
-    }
-  });
+        stream.destroy();
+      }
+    })()
+  );
 };
 
 /**

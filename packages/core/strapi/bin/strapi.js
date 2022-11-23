@@ -16,6 +16,7 @@ const {
   parseInputList,
   parseInputBool,
   promptEncryptionKey,
+  confirmKeyValue,
 } = require('../lib/commands/utils/commander');
 
 const checkCwdIsStrapiApp = (name) => {
@@ -284,20 +285,7 @@ program
       .default(true)
       .argParser(parseInputBool)
   )
-  .addOption(
-    new Option(
-      '--archive <boolean>',
-      'Export all backup files into a single tar archive instead of a folder'
-    )
-      .default(true)
-      .argParser(parseInputBool)
-  )
-  .addOption(
-    new Option(
-      '--key <encryption key>',
-      'Provide encryption key directly instead of being prompted'
-    )
-  )
+  .addOption(new Option('--key', 'Provide encryption key in command instead of using a prompt'))
   .addOption(
     new Option('--max-size <max MB per file>', 'split final file when exceeding size in MB')
   )
@@ -337,6 +325,14 @@ program
   )
   .arguments('<filename>')
   .allowExcessArguments(false)
+  .hook(
+    'preAction',
+    confirmKeyValue(
+      'conflictStrategy',
+      'restore',
+      "Using strategy 'restore' will delete all data in your database. Are you sure you want to proceed?"
+    )
+  )
   .action(getLocalScript('transfer/import'));
 
 program.parseAsync(process.argv);
