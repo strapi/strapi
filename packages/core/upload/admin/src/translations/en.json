@@ -125,5 +125,7 @@
   "list-table-header-sort": "Sort on {label}",
   "tabs.title": "How do you want to upload your assets?",
   "window.confirm.close-modal.file": "Are you sure? Your changes will be lost.",
-  "window.confirm.close-modal.files": "Are you sure? You have some files that have not been uploaded yet."
+  "window.confirm.close-modal.files": "Are you sure? You have some files that have not been uploaded yet.",
+  "view-switch.list": "List View",
+  "view-switch.grid": "Grid View"
 }
