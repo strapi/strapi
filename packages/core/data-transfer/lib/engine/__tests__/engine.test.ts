@@ -427,6 +427,27 @@ describe('Transfer engine', () => {
     });
 
     describe('version matching', () => {
+      test('works with invalid version string', async () => {
+        const versionsThatFail = ['foo', 'z1.2.3', '1.2.3z'];
+        const options: ITransferEngineOptions = {
+          ...defaultOptions,
+          versionMatching: 'exact',
+        };
+
+        versionsThatFail.forEach((version) => {
+          const modifiedMetadata = cloneDeep(metadata);
+          modifiedMetadata.strapi.version = version;
+          const source = createSource();
+          source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
+          const engine = createTransferEngine(source, completeDestination, options);
+          expect(
+            (async () => {
+              await engine.transfer();
+            })()
+          ).rejects.toThrow();
+        });
+      });
+
       test('exact works', async () => {
         const versionsThatFail = ['1.2.3-alpha', '1.2.4', '2.2.3'];
         const versionsThatSucceed = ['1.2.3'];

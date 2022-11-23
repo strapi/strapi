@@ -122,12 +122,19 @@ class TransferEngine<
       !sourceVersion ||
       !destinationVersion ||
       strategy === 'ignore' ||
-      (strategy === 'exact' && destinationVersion === sourceVersion)
+      destinationVersion === sourceVersion
     ) {
       return;
     }
 
-    const diff = semverDiff(sourceVersion, destinationVersion);
+    let diff;
+    try {
+      diff = semverDiff(sourceVersion, destinationVersion);
+    } catch (e: unknown) {
+      throw new Error(
+        `Strapi versions doesn't match (${strategy} check): ${sourceVersion} does not match with ${destinationVersion}`
+      );
+    }
     if (!diff) {
       return;
     }
