@@ -104,7 +104,7 @@ describe('TableList | TableRows', () => {
       expect(getByRole('checkbox', { name: 'Select michka asset', hidden: true })).toBeChecked();
     });
 
-    it('should disabled select asset checkbox when users do not have the permission to update', () => {
+    it('should disable select asset checkbox when users do not have the permission to update', () => {
       const { getByRole } = setup({ canUpdate: false });
 
       expect(getByRole('checkbox', { name: 'Select michka asset', hidden: true })).toBeDisabled();
@@ -161,7 +161,7 @@ describe('TableList | TableRows', () => {
       expect(getByRole('checkbox', { name: 'Select folder 1 folder', hidden: true })).toBeChecked();
     });
 
-    it('should disabled select folder checkbox when users do not have the permission to update', () => {
+    it('should disable select folder checkbox when users do not have the permission to update', () => {
       const { getByRole } = setup({ rows: [FOLDER_FIXTURE], canUpdate: false });
 
       expect(
