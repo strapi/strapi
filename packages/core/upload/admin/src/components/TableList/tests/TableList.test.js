@@ -1,5 +1,6 @@
 import React from 'react';
 import { IntlProvider } from 'react-intl';
+import { MemoryRouter } from 'react-router-dom';
 import { render, fireEvent } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 
@@ -8,6 +9,7 @@ import { TableList } from '..';
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
+  useQueryParams: jest.fn(() => [{ query: {} }]),
 }));
 
 const PROPS_FIXTURE = {
@@ -31,6 +33,7 @@ const PROPS_FIXTURE = {
     },
   ],
   onEditAsset: jest.fn(),
+  onEditFolder: jest.fn(),
   onSelectOne: jest.fn(),
   onSelectAll: jest.fn(),
   selected: [],
@@ -43,11 +46,13 @@ const ComponentFixture = (props) => {
   };
 
   return (
-    <IntlProvider locale="en" messages={{}}>
-      <ThemeProvider theme={lightTheme}>
-        <TableList {...customProps} />
-      </ThemeProvider>
-    </IntlProvider>
+    <MemoryRouter>
+      <IntlProvider locale="en" messages={{}}>
+        <ThemeProvider theme={lightTheme}>
+          <TableList {...customProps} />
+        </ThemeProvider>
+      </IntlProvider>
+    </MemoryRouter>
   );
 };
 

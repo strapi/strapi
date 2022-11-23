@@ -58,6 +58,7 @@
   "list.folder.select": "Select {name} folder",
   "list.folder.subtitle": "{folderCount, plural, =0 {# folder} one {# folder} other {# folders}}, {filesCount, plural, =0 {# asset} one {# asset} other {# assets}}",
   "list.folders.title": "Folders ({count})",
+  "list.folders.link-label": "Access folder",
   "mediaLibraryInput.actions.nextSlide": "Next slide",
   "mediaLibraryInput.actions.previousSlide": "Previous slide",
   "mediaLibraryInput.placeholder": "Click to add an asset or drag and drop one in this area",
