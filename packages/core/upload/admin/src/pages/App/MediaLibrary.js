@@ -30,9 +30,9 @@ import Grid from '@strapi/icons/Grid';
 import { UploadAssetDialog } from '../../components/UploadAssetDialog/UploadAssetDialog';
 import { EditFolderDialog } from '../../components/EditFolderDialog';
 import { EditAssetDialog } from '../../components/EditAssetDialog';
-import { AssetGridList } from '../../components/AssetGridList';
 import { TableList } from '../../components/TableList';
-import { FolderList } from '../../components/FolderList';
+import { AssetGridList } from '../../components/AssetGridList';
+import { FolderGridList } from '../../components/FolderGridList';
 import SortPicker from '../../components/SortPicker';
 import { useAssets } from '../../hooks/useAssets';
 import { useFolders } from '../../hooks/useFolders';
@@ -294,7 +294,7 @@ export const MediaLibrary = () => {
           {canRead && isGridView && (
             <>
               {folderCount > 0 && (
-                <FolderList
+                <FolderGridList
                   title={
                     // Folders title should only appear if:
                     // user is filtering and there are assets to display, to divide both type of elements
@@ -382,7 +382,7 @@ export const MediaLibrary = () => {
                       </GridItem>
                     );
                   })}
-                </FolderList>
+                </FolderGridList>
               )}
 
               {assetCount > 0 && folderCount > 0 && (
