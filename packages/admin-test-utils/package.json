@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin-test-utils",
-  "version": "4.5.0",
+  "version": "4.5.2",
   "private": true,
   "description": "Test utilities for the Strapi administration panel",
   "license": "MIT",
@@ -19,6 +19,7 @@
   "main": "lib/index.js",
   "devDependencies": {
     "@testing-library/jest-dom": "5.16.5",
+    "core-js": "3.26.1",
     "jest-styled-components": "7.0.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

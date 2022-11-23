@@ -13,58 +13,8 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   width: 1px;
 }
 
-.c17 {
-  padding-top: 4px;
-}
-
 .c2 {
   height: 100%;
-}
-
-.c0 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
-}
-
-.c1 {
-  grid-column: span 3;
-  max-width: 100%;
-}
-
-.c31 {
-  width: 100%;
-  height: 10.25rem;
-}
-
-.c32 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c27 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c3 {
@@ -88,18 +38,85 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   padding-left: 12px;
 }
 
-.c22 {
+.c17 {
+  padding-top: 4px;
+}
+
+.c21 {
+  padding-top: 4px;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+}
+
+.c23 {
   background: #f6f6f9;
   padding: 4px;
   border-radius: 4px;
   min-width: 20px;
 }
 
-.c28 {
+.c29 {
   background: #32324d;
   color: #ffffff;
   padding: 4px;
   border-radius: 4px;
+}
+
+.c32 {
+  width: 100%;
+  height: 10.25rem;
+}
+
+.c0 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c1 {
+  grid-column: span 3;
+  max-width: 100%;
+}
+
+.c18 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c19 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c26 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c31 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #ffffff;
+}
+
+.c28 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .c5 {
@@ -148,7 +165,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   flex-direction: row;
 }
 
-.c23 {
+.c24 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -173,74 +190,6 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
 
 .c9 > * + * {
   margin-left: 8px;
-}
-
-.c10 {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-}
-
-.c13 {
-  margin: 0;
-  padding: 0;
-  max-height: 100%;
-  max-width: 100%;
-  object-fit: contain;
-}
-
-.c12 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 10.25rem;
-  width: 100%;
-  background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-}
-
-.c18 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c19 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c25 {
-  color: #666687;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.c30 {
-  color: #ffffff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c21 {
-  margin-left: auto;
-  -webkit-flex-shrink: 0;
-  -ms-flex-negative: 0;
-  flex-shrink: 0;
-}
-
-.c24 {
-  margin-left: 4px;
 }
 
 .c11 {
@@ -311,6 +260,47 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   background-color: #8e8ea9;
 }
 
+.c10 {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+}
+
+.c13 {
+  margin: 0;
+  padding: 0;
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.c12 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 10.25rem;
+  width: 100%;
+  background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.c22 {
+  margin-left: auto;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+}
+
+.c25 {
+  margin-left: 4px;
+}
+
 .c16 {
   word-break: break-all;
 }
@@ -320,7 +310,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   border-bottom: 1px solid #eaeaef;
 }
 
-.c29 {
+.c30 {
   position: absolute;
   bottom: 4px;
   right: 4px;
@@ -334,12 +324,12 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   cursor: pointer;
 }
 
-.c4:hover .sc-dTBbbW {
+.c4:hover .sc-cOLXoO {
   opacity: 1;
 }
 
-.c26 canvas,
-.c26 video {
+.c27 canvas,
+.c27 video {
   display: block;
   max-width: 100%;
   max-height: 10.25rem;
@@ -448,16 +438,20 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c21"
+                  class="c21 c8"
                 >
                   <div
-                    class="c22 c23 c24"
+                    class="c22"
                   >
-                    <span
-                      class="c25"
+                    <div
+                      class="c23 c24 c25"
                     >
-                      Image
-                    </span>
+                      <span
+                        class="c26"
+                      >
+                        Image
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -505,7 +499,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   class="c8"
                 >
                   <div
-                    class="c26"
+                    class="c27"
                   >
                     <figure
                       class=""
@@ -519,7 +513,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                         />
                       </video>
                       <figcaption
-                        class="c27"
+                        class="c28"
                       >
                         mov_bbb.mp4
                       </figcaption>
@@ -528,10 +522,10 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                 </div>
               </div>
               <time
-                class="c28 c29"
+                class="c29 c30"
               >
                 <span
-                  class="c30"
+                  class="c31"
                 >
                   ...
                 </span>
@@ -568,16 +562,20 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c21"
+                  class="c21 c8"
                 >
                   <div
-                    class="c22 c23 c24"
+                    class="c22"
                   >
-                    <span
-                      class="c25"
+                    <div
+                      class="c23 c24 c25"
                     >
-                      Video
-                    </span>
+                      <span
+                        class="c26"
+                      >
+                        Video
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -619,7 +617,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                 </div>
               </div>
               <div
-                class="c31 c32 c33"
+                class="c32 c5 c33"
                 height="10.25rem"
                 width="100%"
               >
@@ -679,16 +677,20 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c21"
+                  class="c21 c8"
                 >
                   <div
-                    class="c22 c23 c24"
+                    class="c22"
                   >
-                    <span
-                      class="c25"
+                    <div
+                      class="c23 c24 c25"
                     >
-                      Doc
-                    </span>
+                      <span
+                        class="c26"
+                      >
+                        Doc
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
