@@ -25,7 +25,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
       - uses: actions/cache@v3
         with:
           path: '**/node_modules'
@@ -47,7 +46,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
       - uses: actions/cache@v3
         with:
           path: '**/node_modules'
@@ -75,7 +73,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
       - uses: actions/cache@v3
         with:
           path: '**/node_modules'
@@ -124,7 +121,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         with:
@@ -159,7 +159,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         with:
@@ -194,7 +197,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         with:
@@ -213,7 +219,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         env:
@@ -255,7 +264,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         with:
@@ -293,7 +305,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         with:
@@ -316,7 +331,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         env:
