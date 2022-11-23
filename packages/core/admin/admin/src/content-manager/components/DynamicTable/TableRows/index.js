@@ -1,23 +1,30 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Link, useHistory } from 'react-router-dom';
+import { useIntl } from 'react-intl';
+
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { Box } from '@strapi/design-system/Box';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Tbody, Td, Tr } from '@strapi/design-system/Table';
 import { Flex } from '@strapi/design-system/Flex';
+
 import Trash from '@strapi/icons/Trash';
 import Duplicate from '@strapi/icons/Duplicate';
 import Pencil from '@strapi/icons/Pencil';
+
 import { useTracking, stopPropagation, onRowClick } from '@strapi/helper-plugin';
-import { useHistory } from 'react-router-dom';
-import { useIntl } from 'react-intl';
+
 import { usePluginsQueryParams } from '../../../hooks';
-import CellContent from '../CellContent';
+
 import { getFullName } from '../../../../utils';
+
+import CellContent from '../CellContent';
 
 const TableRows = ({
   canCreate,
   canDelete,
+  contentType,
   headers,
   entriesToDelete,
   onClickDelete,
@@ -88,6 +95,7 @@ const TableRows = ({
                     <CellContent
                       content={data[name.split('.')[0]]}
                       name={name}
+                      contentType={contentType}
                       {...rest}
                       rowId={data.id}
                     />
@@ -100,13 +108,14 @@ const TableRows = ({
               <Td>
                 <Flex justifyContent="end" {...stopPropagation}>
                   <IconButton
+                    forwardedAs={Link}
                     onClick={() => {
                       trackUsage('willEditEntryFromButton');
-                      push({
-                        pathname: `${pathname}/${data.id}`,
-                        state: { from: pathname },
-                        search: pluginsQueryParams,
-                      });
+                    }}
+                    to={{
+                      pathname: `${pathname}/${data.id}`,
+                      state: { from: pathname },
+                      search: pluginsQueryParams,
                     }}
                     label={formatMessage(
                       { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
@@ -119,12 +128,11 @@ const TableRows = ({
                   {canCreate && (
                     <Box paddingLeft={1}>
                       <IconButton
-                        onClick={() => {
-                          push({
-                            pathname: `${pathname}/create/clone/${data.id}`,
-                            state: { from: pathname },
-                            search: pluginsQueryParams,
-                          });
+                        forwardedAs={Link}
+                        to={{
+                          pathname: `${pathname}/create/clone/${data.id}`,
+                          state: { from: pathname },
+                          search: pluginsQueryParams,
                         }}
                         label={formatMessage(
                           {
@@ -144,7 +152,6 @@ const TableRows = ({
                       <IconButton
                         onClick={() => {
                           trackUsage('willDeleteEntryFromList');
-
                           onClickDelete(data.id);
                         }}
                         label={formatMessage(
@@ -180,6 +187,9 @@ TableRows.defaultProps = {
 TableRows.propTypes = {
   canCreate: PropTypes.bool,
   canDelete: PropTypes.bool,
+  contentType: PropTypes.shape({
+    uid: PropTypes.string.isRequired,
+  }).isRequired,
   entriesToDelete: PropTypes.array,
   headers: PropTypes.array.isRequired,
   onClickDelete: PropTypes.func,

@@ -19,7 +19,7 @@ export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
   if (_q) {
     params = {
       ...paramsExceptFolderAndQ,
-      _q,
+      _q: encodeURIComponent(_q),
     };
   } else {
     params = {
@@ -42,7 +42,10 @@ export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
   const getAssets = async () => {
     try {
       const { data } = await axiosInstance.get(
-        `${dataRequestURL}?${stringify(params, { encode: false })}`
+        `${dataRequestURL}${stringify(params, {
+          encode: false,
+          addQueryPrefix: true,
+        })}`
       );
 
       notifyStatus(

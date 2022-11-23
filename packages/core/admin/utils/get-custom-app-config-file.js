@@ -11,6 +11,11 @@ const { isUsingTypeScript } = require('@strapi/typescript-utils');
  */
 const getCustomAppConfigFile = async (dir) => {
   const adminSrcPath = join(dir, 'src', 'admin');
+
+  if (!fse.pathExistsSync(adminSrcPath)) {
+    return undefined;
+  }
+
   const useTypeScript = await isUsingTypeScript(adminSrcPath, 'tsconfig.json');
 
   const files = await fse.readdir(adminSrcPath);

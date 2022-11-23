@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-i18n",
-  "version": "4.3.8",
+  "version": "4.5.2",
   "description": "This plugin enables to create, to read and to update content in different languages, both from the Admin Panel and from the API",
   "repository": {
     "type": "git",
@@ -24,7 +24,7 @@
     "test:unit": "jest --verbose"
   },
   "dependencies": {
-    "@strapi/utils": "4.3.8",
+    "@strapi/utils": "4.5.2",
     "lodash": "4.17.21"
   },
   "devDependencies": {

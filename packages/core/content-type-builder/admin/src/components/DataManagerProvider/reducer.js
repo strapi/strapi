@@ -161,6 +161,34 @@ const reducer = (state = initialState, action) =>
 
         break;
       }
+      case actions.ADD_CUSTOM_FIELD_ATTRIBUTE: {
+        const {
+          attributeToSet: { name, ...rest },
+          forTarget,
+          targetUid,
+        } = action;
+
+        const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
+          ? [forTarget]
+          : [forTarget, targetUid];
+
+        const currentAttributes = get(
+          state,
+          ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'],
+          []
+        ).slice();
+
+        // Add the createdAttribute
+        const updatedAttributes = [...currentAttributes, { ...rest, name }];
+
+        set(
+          draftState,
+          ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'],
+          updatedAttributes
+        );
+
+        break;
+      }
       case actions.CHANGE_DYNAMIC_ZONE_COMPONENTS: {
         const { dynamicZoneTarget, newComponents } = action;
 
@@ -283,6 +311,10 @@ const reducer = (state = initialState, action) =>
           toSet.private = rest.private;
         }
 
+        if (rest.pluginOptions) {
+          toSet.pluginOptions = rest.pluginOptions;
+        }
+
         const currentAttributeIndex = updatedAttributes.findIndex(
           ({ name }) => name === initialAttribute.name
         );
@@ -295,6 +327,7 @@ const reducer = (state = initialState, action) =>
         let oppositeAttributeNameToRemove = null;
         let oppositeAttributeNameToUpdate = null;
         let oppositeAttributeToCreate = null;
+        let initialOppositeAttribute = null;
 
         const currentUid = get(state, ['modifiedData', ...pathToDataToEdit, 'uid']);
         const didChangeTargetRelation = initialAttribute.target !== rest.target;
@@ -350,6 +383,29 @@ const reducer = (state = initialState, action) =>
           updatedAttributes.splice(indexToRemove, 1);
         }
 
+        // In order to preserve plugin options need to get the initial opposite attribute settings
+        if (!shouldRemoveOppositeAttributeBecauseOfTargetChange) {
+          const initialTargetContentType = get(state, [
+            'initialContentTypes',
+            initialAttribute.target,
+          ]);
+
+          if (initialTargetContentType) {
+            const oppositeAttributeIndex = findAttributeIndex(
+              initialTargetContentType,
+              initialAttribute.targetAttribute
+            );
+
+            initialOppositeAttribute = get(state, [
+              'initialContentTypes',
+              initialAttribute.target,
+              'schema',
+              'attributes',
+              oppositeAttributeIndex,
+            ]);
+          }
+        }
+
         // Create the opposite attribute
         if (
           shouldCreateOppositeAttributeBecauseOfRelationTypeChange ||
@@ -365,6 +421,10 @@ const reducer = (state = initialState, action) =>
 
           if (rest.private) {
             oppositeAttributeToCreate.private = rest.private;
+          }
+
+          if (initialOppositeAttribute && initialOppositeAttribute.pluginOptions) {
+            oppositeAttributeToCreate.pluginOptions = initialOppositeAttribute.pluginOptions;
           }
 
           const indexOfInitialAttribute = updatedAttributes.findIndex(
@@ -396,6 +456,10 @@ const reducer = (state = initialState, action) =>
             oppositeAttributeToCreate.private = rest.private;
           }
 
+          if (initialOppositeAttribute && initialOppositeAttribute.pluginOptions) {
+            oppositeAttributeToCreate.pluginOptions = initialOppositeAttribute.pluginOptions;
+          }
+
           if (oppositeAttributeNameToUpdate) {
             const indexToUpdate = updatedAttributes.findIndex(
               ({ name }) => name === oppositeAttributeNameToUpdate
@@ -409,6 +473,27 @@ const reducer = (state = initialState, action) =>
           draftState,
           ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'],
           updatedAttributes
+        );
+
+        break;
+      }
+      case actions.EDIT_CUSTOM_FIELD_ATTRIBUTE: {
+        const { forTarget, targetUid, initialAttribute, attributeToSet } = action;
+
+        const initialAttributeName = initialAttribute.name;
+        const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
+          ? [forTarget]
+          : [forTarget, targetUid];
+
+        const initialAttributeIndex = findAttributeIndex(
+          get(state, ['modifiedData', ...pathToDataToEdit]),
+          initialAttributeName
+        );
+
+        set(
+          draftState,
+          ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes', initialAttributeIndex],
+          attributeToSet
         );
 
         break;
