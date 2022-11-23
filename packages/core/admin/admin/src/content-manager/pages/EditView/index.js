@@ -27,10 +27,10 @@ import useLazyComponents from '../../hooks/useLazyComponents';
 import DraftAndPublishBadge from './DraftAndPublishBadge';
 import Informations from './Informations';
 import Header from './Header';
-import { getFieldsActionMatchingPermissions, getCustomFieldUidsFromLayout } from './utils';
+import { getFieldsActionMatchingPermissions } from './utils';
 import DeleteLink from './DeleteLink';
 import GridRow from './GridRow';
-import { selectCurrentLayout, selectAttributesLayout } from './selectors';
+import { selectCurrentLayout, selectAttributesLayout, selectCustomFieldUids } from './selectors';
 
 const cmPermissions = permissions.contentManager;
 const ctbPermissions = [{ action: 'plugin::content-type-builder.read', subject: null }];
@@ -40,12 +40,12 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
 
-  const { layout, formattedContentTypeLayout } = useSelector((state) => ({
+  const { layout, formattedContentTypeLayout, customFieldUids } = useSelector((state) => ({
     layout: selectCurrentLayout(state),
     formattedContentTypeLayout: selectAttributesLayout(state),
+    customFieldUids: selectCustomFieldUids(state),
   }));
 
-  const customFieldUids = getCustomFieldUidsFromLayout(layout);
   const { isLazyLoading, lazyComponentStore } = useLazyComponents(customFieldUids);
 
   const { createActionAllowedFields, readActionAllowedFields, updateActionAllowedFields } =

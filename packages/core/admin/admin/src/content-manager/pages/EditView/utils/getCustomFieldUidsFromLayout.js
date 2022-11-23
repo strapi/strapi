@@ -1,4 +1,5 @@
 const getCustomFieldUidsFromLayout = (layout) => {
+  if (!layout) return [];
   // Get all the fields on the content-type and its components
   const allFields = [
     ...layout.contentType.layouts.edit,
