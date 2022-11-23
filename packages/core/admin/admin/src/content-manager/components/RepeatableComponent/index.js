@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
@@ -16,8 +16,8 @@ import { getMaxTempKey, getTrad } from '../../utils';
 import { useContentTypeLayout } from '../../hooks';
 
 import ComponentInitializer from '../ComponentInitializer';
-import DraggedItem from './DraggedItem';
-import AccordionGroupCustom from './AccordionGroupCustom';
+import Component from './components/Component';
+import * as Accordion from './components/Accordion';
 
 import getComponentErrorKeys from './utils/getComponentErrorKeys';
 
@@ -59,15 +59,15 @@ const RepeatableComponent = ({
 
   const componentErrorKeys = getComponentErrorKeys(name, formErrors);
 
-  const toggleCollapses = () => {
-    setCollapseToOpen('');
-  };
-
   const missingComponentsValue = min - componentValueLength;
 
   const hasMinError = get(formErrors, name, { id: '' }).id.includes('min');
 
-  const handleClick = useCallback(() => {
+  const toggleCollapses = () => {
+    setCollapseToOpen('');
+  };
+
+  const handleClick = () => {
     if (!isReadOnly) {
       if (componentValueLength < max) {
         const shouldCheckErrors = hasMinError;
@@ -82,18 +82,25 @@ const RepeatableComponent = ({
         });
       }
     }
-  }, [
-    components,
-    addRepeatableComponentToField,
-    componentLayoutData,
-    componentValueLength,
-    hasMinError,
-    isReadOnly,
-    max,
-    name,
-    nextTempKey,
-    toggleNotification,
-  ]);
+  };
+
+  const handleMoveComponentField = (newIndex, currentIndex) => {
+    moveComponentField({
+      name,
+      newIndex,
+      currentIndex,
+    });
+  };
+
+  const mainField = get(componentLayoutData, ['settings', 'mainField'], 'id');
+
+  const handleToggle = (key) => () => {
+    if (collapseToOpen === key) {
+      setCollapseToOpen('');
+    } else {
+      setCollapseToOpen(key);
+    }
+  };
 
   let errorMessage = formErrors[name];
 
@@ -104,6 +111,11 @@ const RepeatableComponent = ({
         'There {number, plural, =0 {are # missing components} one {is # missing component} other {are # missing components}}',
       values: { number: missingComponentsValue },
     };
+  } else if (componentErrorKeys.some((error) => error.split('.').length > 1) && !hasMinError) {
+    errorMessage = {
+      id: getTrad('components.RepeatableComponent.error-message'),
+      defaultMessage: 'The component(s) contain error(s)',
+    };
   }
 
   if (componentValueLength === 0) {
@@ -112,30 +124,34 @@ const RepeatableComponent = ({
     );
   }
 
-  const doesRepComponentHasChildError = componentErrorKeys.some(
-    (error) => error.split('.').length > 1
-  );
-
-  if (doesRepComponentHasChildError && !hasMinError) {
-    errorMessage = {
-      id: getTrad('components.RepeatableComponent.error-message'),
-      defaultMessage: 'The component(s) contain error(s)',
-    };
-  }
-
-  const handleMoveComponentField = (newIndex, currentIndex) => {
-    moveComponentField({
-      name,
-      newIndex,
-      currentIndex,
-    });
-  };
-
   return (
     <Box hasRadius>
-      <AccordionGroupCustom
-        error={errorMessage}
-        footer={
+      <Accordion.Group error={errorMessage}>
+        <Accordion.Content>
+          {componentValue.map((data, index) => {
+            const key = data.__temp_key__;
+            const componentFieldName = `${name}.${index}`;
+            const hasErrors = componentErrorKeys.includes(componentFieldName);
+
+            return (
+              <Component
+                componentFieldName={componentFieldName}
+                componentUid={componentUid}
+                fields={componentLayoutData.layouts.edit}
+                hasErrors={hasErrors}
+                key={key}
+                index={index}
+                isOpen={collapseToOpen === key}
+                isReadOnly={isReadOnly}
+                mainField={mainField}
+                moveComponentField={handleMoveComponentField}
+                onClickToggle={handleToggle(key)}
+                toggleCollapses={toggleCollapses}
+              />
+            );
+          })}
+        </Accordion.Content>
+        <Accordion.Footer>
           <Flex justifyContent="center" height="48px" background="neutral0">
             <TextButtonCustom disabled={isReadOnly} onClick={handleClick} startIcon={<Plus />}>
               {formatMessage({
@@ -144,39 +160,8 @@ const RepeatableComponent = ({
               })}
             </TextButtonCustom>
           </Flex>
-        }
-      >
-        {componentValue.map((data, index) => {
-          const key = data.__temp_key__;
-          const isOpen = collapseToOpen === key;
-          const componentFieldName = `${name}.${index}`;
-          const hasErrors = componentErrorKeys.includes(componentFieldName);
-
-          return (
-            <DraggedItem
-              componentFieldName={componentFieldName}
-              componentUid={componentUid}
-              hasErrors={hasErrors}
-              hasMinError={hasMinError}
-              isOpen={isOpen}
-              isReadOnly={isReadOnly}
-              key={key}
-              onClickToggle={() => {
-                if (isOpen) {
-                  setCollapseToOpen('');
-                } else {
-                  setCollapseToOpen(key);
-                }
-              }}
-              moveComponentField={handleMoveComponentField}
-              parentName={name}
-              schema={componentLayoutData}
-              toggleCollapses={toggleCollapses}
-              index={index}
-            />
-          );
-        })}
-      </AccordionGroupCustom>
+        </Accordion.Footer>
+      </Accordion.Group>
     </Box>
   );
 };

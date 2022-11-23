@@ -6,15 +6,21 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import toString from 'lodash/toString';
+import get from 'lodash/get';
 
-import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Stack } from '@strapi/design-system/Stack';
-import { Box } from '@strapi/design-system/Box';
-import { Tooltip } from '@strapi/design-system/Tooltip';
-
-import Trash from '@strapi/icons/Trash';
-import Drag from '@strapi/icons/Drag';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
+import {
+  Accordion,
+  AccordionToggle,
+  AccordionContent,
+  Grid,
+  GridItem,
+  Stack,
+  Box,
+  Tooltip,
+  IconButton,
+} from '@strapi/design-system';
+import { Trash, Drag } from '@strapi/icons';
 
 import { composeRefs, getTrad, ItemTypes } from '../../../utils';
 
@@ -22,24 +28,46 @@ import Inputs from '../../Inputs';
 import FieldComponent from '../../FieldComponent';
 
 import Preview from './Preview';
-import { CustomIconButton } from './IconButtonCustoms';
-import { connect, select } from './utils';
 
-const DragButton = styled.span`
-  display: flex;
-  align-items: center;
-  height: ${({ theme }) => theme.spaces[7]};
-
-  padding: 0 ${({ theme }) => theme.spaces[3]};
-  cursor: all-scroll;
+const CustomIconButton = styled(IconButton)`
+  background-color: transparent;
 
   svg {
-    width: ${12 / 16}rem;
-    height: ${12 / 16}rem;
+    path {
+      fill: ${({ theme, expanded }) =>
+        expanded ? theme.colors.primary600 : theme.colors.neutral600};
+    }
+  }
+
+  &:hover {
+    svg {
+      path {
+        fill: ${({ theme }) => theme.colors.primary600};
+      }
+    }
   }
 `;
 
-/* eslint-disable react/no-array-index-key */
+const ActionsStack = styled(Stack)`
+  & .drag-handle {
+    background: unset;
+
+    svg {
+      path {
+        fill: ${({ theme, expanded }) => (expanded ? theme.colors.primary600 : undefined)};
+      }
+    }
+
+    &:hover {
+      svg {
+        path {
+          /* keeps the hover style of the accordion */
+          fill: ${({ theme }) => theme.colors.primary600};
+        }
+      }
+    }
+  }
+`;
 
 // Issues:
 // https://github.com/react-dnd/react-dnd/issues/1368
@@ -48,26 +76,24 @@ const DragButton = styled.span`
 const DraggedItem = ({
   componentFieldName,
   componentUid,
-  // Errors are retrieved from the AccordionGroupCustom cloneElement
-  hasErrorMessage,
+  fields,
   hasErrors,
   index,
   isOpen,
   isReadOnly,
-  onClickToggle,
-  schema,
-  toggleCollapses,
-  // Retrieved from the select function
+  mainField,
   moveComponentField,
-  removeRepeatableField,
-  triggerFormValidation,
-  displayedValue,
+  onClickToggle,
+  toggleCollapses,
 }) => {
+  const { modifiedData, removeRepeatableField, triggerFormValidation } = useCMEditViewDataManager();
+
+  const displayedValue = toString(
+    get(modifiedData, [...componentFieldName.split('.'), mainField], '')
+  );
   const accordionRef = useRef(null);
   const boxRef = useRef(null);
   const { formatMessage } = useIntl();
-
-  const fields = schema.layouts.edit;
 
   const [{ handlerId }, dropRef] = useDrop({
     accept: ItemTypes.COMPONENT,
@@ -114,7 +140,7 @@ const DraggedItem = ({
     type: ItemTypes.COMPONENT,
     item() {
       // Close all collapses
-      toggleCollapses(-1);
+      toggleCollapses();
 
       return {
         index,
@@ -146,7 +172,7 @@ const DraggedItem = ({
       ) : (
         <Accordion
           error={accordionHasError}
-          hasErrorMessage={hasErrorMessage}
+          hasErrorMessage={false}
           expanded={isOpen}
           onToggle={onClickToggle}
           id={componentFieldName}
@@ -155,7 +181,7 @@ const DraggedItem = ({
           <AccordionToggle
             action={
               isReadOnly ? null : (
-                <Stack horizontal spacing={0}>
+                <ActionsStack horizontal spacing={0} expanded={isOpen}>
                   <CustomIconButton
                     expanded={isOpen}
                     noBorder
@@ -176,17 +202,20 @@ const DraggedItem = ({
                       defaultMessage: 'Drag',
                     })}
                   >
-                    <DragButton
-                      role="button"
-                      tabIndex={-1}
+                    <IconButton
+                      className="drag-handle"
                       ref={composedAccordionRefs}
+                      forwardedAs="div"
+                      role="button"
+                      noBorder
+                      tabIndex={0}
                       onClick={(e) => e.stopPropagation()}
                       data-handler-id={handlerId}
                     >
                       <Drag />
-                    </DragButton>
+                    </IconButton>
                   </Tooltip>
-                </Stack>
+                </ActionsStack>
               )
             }
             title={accordionTitle}
@@ -196,6 +225,7 @@ const DraggedItem = ({
             <Stack background="neutral100" padding={6} spacing={6}>
               {fields.map((fieldRow, key) => {
                 return (
+                  // eslint-disable-next-line react/no-array-index-key
                   <Grid gap={4} key={key}>
                     {fieldRow.map(({ name, fieldSchema, metadatas, queryInfos, size }) => {
                       const isComponent = fieldSchema.type === 'component';
@@ -230,7 +260,6 @@ const DraggedItem = ({
                             fieldSchema={fieldSchema}
                             keys={keys}
                             metadatas={metadatas}
-                            // onBlur={hasErrors ? checkFormErrors : null}
                             queryInfos={queryInfos}
                             size={size}
                           />
@@ -250,6 +279,8 @@ const DraggedItem = ({
 
 DraggedItem.defaultProps = {
   componentUid: undefined,
+  fields: [],
+  hasErrors: false,
   isOpen: false,
   toggleCollapses() {},
 };
@@ -257,22 +288,15 @@ DraggedItem.defaultProps = {
 DraggedItem.propTypes = {
   componentFieldName: PropTypes.string.isRequired,
   componentUid: PropTypes.string,
-  hasErrorMessage: PropTypes.bool.isRequired,
-  hasErrors: PropTypes.bool.isRequired,
+  fields: PropTypes.array,
+  hasErrors: PropTypes.bool,
   index: PropTypes.number.isRequired,
   isOpen: PropTypes.bool,
   isReadOnly: PropTypes.bool.isRequired,
-  onClickToggle: PropTypes.func.isRequired,
-  schema: PropTypes.object.isRequired,
-  toggleCollapses: PropTypes.func,
+  mainField: PropTypes.string.isRequired,
   moveComponentField: PropTypes.func.isRequired,
-  removeRepeatableField: PropTypes.func.isRequired,
-  triggerFormValidation: PropTypes.func.isRequired,
-  displayedValue: PropTypes.string.isRequired,
+  onClickToggle: PropTypes.func.isRequired,
+  toggleCollapses: PropTypes.func,
 };
 
-const Memoized = memo(DraggedItem);
-
-export default connect(Memoized, select);
-
-export { DraggedItem };
+export default memo(DraggedItem);
