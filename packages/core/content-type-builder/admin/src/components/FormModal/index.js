@@ -942,11 +942,13 @@ const FormModal = () => {
 
   const schemaKind = get(contentTypes, [targetUid, 'schema', 'kind']);
 
-  const isEditingFieldName =
+  const checkIsEditingFieldName = () =>
     actionType === 'edit' && attributes.every(({ name }) => name !== modifiedData?.name);
 
   const handleClickFinish = () => {
-    trackUsage('didEditFieldNameOnContentType');
+    if (checkIsEditingFieldName()) {
+      trackUsage('didEditFieldNameOnContentType');
+    }
   };
 
   return (
@@ -1079,7 +1081,7 @@ const FormModal = () => {
                 onSubmitEditContentType={handleSubmit}
                 onSubmitEditCustomFieldAttribute={handleSubmit}
                 onSubmitEditDz={handleSubmit}
-                onClickFinish={isEditingFieldName ? handleClickFinish : undefined}
+                onClickFinish={handleClickFinish}
               />
             }
             startActions={
