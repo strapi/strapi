@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 
-import { collect, createMockedQueryBuilder, getStrapiFactory } from '../../test-utils';
+import { collect, createMockedQueryBuilder, getStrapiFactory } from '../../../__tests__/test-utils';
 import { createConfigurationStream } from '../configuration';
 
 describe('Configuration', () => {

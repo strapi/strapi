@@ -60,8 +60,33 @@ const promptEncryptionKey = async (thisCommand) => {
   }
 };
 
+/**
+ * hook: confirm that key has a value with a provided message
+ */
+const confirmKeyValue = (key, value, message) => {
+  return async (thisCommand) => {
+    const opts = thisCommand.opts();
+
+    if (!opts[key] || opts[key] !== value) {
+      console.error(`Could not confirm key ${key}, halting operation.`);
+      process.exit(1);
+    }
+    const answers = await inquirer.prompt([
+      {
+        type: 'confirm',
+        message,
+        name: `confirm_${key}`,
+      },
+    ]);
+    if (!answers[`confirm_${key}`]) {
+      process.exit(0);
+    }
+  };
+};
+
 module.exports = {
   parseInputList,
   parseInputBool,
   promptEncryptionKey,
+  confirmKeyValue,
 };
