@@ -29,7 +29,7 @@ describe('DocAssetCard', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c31 {
+      .c32 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -75,7 +75,15 @@ describe('DocAssetCard', () => {
         padding-top: 4px;
       }
 
-      .c27 {
+      .c26 {
+        padding-top: 4px;
+        -webkit-box-flex: 1;
+        -webkit-flex-grow: 1;
+        -ms-flex-positive: 1;
+        flex-grow: 1;
+      }
+
+      .c28 {
         background: #f6f6f9;
         padding: 4px;
         border-radius: 4px;
@@ -128,7 +136,7 @@ describe('DocAssetCard', () => {
         flex-direction: row;
       }
 
-      .c28 {
+      .c29 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -171,7 +179,7 @@ describe('DocAssetCard', () => {
         color: #666687;
       }
 
-      .c30 {
+      .c31 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
@@ -366,14 +374,14 @@ describe('DocAssetCard', () => {
         right: 12px;
       }
 
-      .c26 {
+      .c27 {
         margin-left: auto;
         -webkit-flex-shrink: 0;
         -ms-flex-negative: 0;
         flex-shrink: 0;
       }
 
-      .c29 {
+      .c30 {
         margin-left: 4px;
       }
 
@@ -535,23 +543,27 @@ describe('DocAssetCard', () => {
                 </div>
               </div>
               <div
-                class="c26"
+                class="c26 c5"
               >
                 <div
-                  class="c27 c28 c29"
+                  class="c27"
                 >
-                  <span
-                    class="c30"
+                  <div
+                    class="c28 c29 c30"
                   >
-                    Doc
-                  </span>
+                    <span
+                      class="c31"
+                    >
+                      Doc
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </article>
         <div
-          class="c31"
+          class="c32"
         >
           <p
             aria-live="polite"
