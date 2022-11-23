@@ -61,7 +61,7 @@ export interface ITransferEngine<
    *
    * related source and destination providers
    */
-  beforeTransfer(): Promise<void>;
+  beforeStreaming(): Promise<void>;
 
   /**
    * Start the schemas transfer by connecting the
