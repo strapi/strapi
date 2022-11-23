@@ -45,10 +45,10 @@ describe('Local File Destination Provider', () => {
 
       await provider.bootstrap();
 
-      expect(provider.results.file.path).toEqual(`${filePath}.tar.gz`);
+      expect(provider.results.file!.path).toEqual(`${filePath}.tar.gz`);
     });
 
-    it('Adds .gpg extension to the archive path when encryption is enabled', async () => {
+    it('Adds .enc extension to the archive path when encryption is enabled', async () => {
       const providerOptions: ILocalFileDestinationProviderOptions = {
         encryption: { enabled: true, key: 'key' },
         compression: { enabled: false },
@@ -58,10 +58,10 @@ describe('Local File Destination Provider', () => {
 
       await provider.bootstrap();
 
-      expect(provider.results.file.path).toEqual(`${filePath}.tar.gpg`);
+      expect(provider.results.file!.path).toEqual(`${filePath}.tar.enc`);
     });
 
-    it('Adds .gz.gpg extension to the archive path when encryption and compression are enabled', async () => {
+    it('Adds .gz.enc extension to the archive path when encryption and compression are enabled', async () => {
       const providerOptions: ILocalFileDestinationProviderOptions = {
         encryption: { enabled: true, key: 'key' },
         compression: { enabled: true },
@@ -71,7 +71,7 @@ describe('Local File Destination Provider', () => {
 
       await provider.bootstrap();
 
-      expect(provider.results.file.path).toEqual(`${filePath}.tar.gz.gpg`);
+      expect(provider.results.file!.path).toEqual(`${filePath}.tar.gz.enc`);
     });
 
     it('Adds the compression step to the stream chain when compression is enabled', async () => {
@@ -105,7 +105,7 @@ describe('Local File Destination Provider', () => {
   });
 
   describe('Streaming entities', () => {
-    it('Creates a tar entry stream', () => {
+    it('Creates a tar entry stream', async () => {
       const providerOptions: ILocalFileDestinationProviderOptions = {
         encryption: { enabled: false },
         compression: { enabled: false },
@@ -114,6 +114,8 @@ describe('Local File Destination Provider', () => {
 
       const provider = createLocalFileDestinationProvider(providerOptions);
       (createTarEntryStream as jest.Mock).mockImplementation(jest.fn());
+
+      await provider.bootstrap();
       provider.getEntitiesStream();
 
       expect(createTarEntryStream).toHaveBeenCalled();
@@ -122,7 +124,7 @@ describe('Local File Destination Provider', () => {
   });
 
   describe('Streaming schemas', () => {
-    it('Creates a tar entry stream for schemas', () => {
+    it('Creates a tar entry stream for schemas', async () => {
       const providerOptions: ILocalFileDestinationProviderOptions = {
         encryption: { enabled: false },
         compression: { enabled: false },
@@ -131,6 +133,8 @@ describe('Local File Destination Provider', () => {
 
       const provider = createLocalFileDestinationProvider(providerOptions);
       (createTarEntryStream as jest.Mock).mockImplementation(jest.fn());
+
+      await provider.bootstrap();
       provider.getSchemasStream();
 
       expect(createTarEntryStream).toHaveBeenCalled();
@@ -139,7 +143,7 @@ describe('Local File Destination Provider', () => {
   });
 
   describe('Streaming links', () => {
-    it('Creates a tar entry stream for links', () => {
+    it('Creates a tar entry stream for links', async () => {
       const providerOptions: ILocalFileDestinationProviderOptions = {
         encryption: { enabled: false },
         compression: { enabled: false },
@@ -148,6 +152,8 @@ describe('Local File Destination Provider', () => {
 
       const provider = createLocalFileDestinationProvider(providerOptions);
       (createTarEntryStream as jest.Mock).mockImplementation(jest.fn());
+
+      await provider.bootstrap();
       provider.getLinksStream();
 
       expect(createTarEntryStream).toHaveBeenCalled();
@@ -156,7 +162,7 @@ describe('Local File Destination Provider', () => {
   });
 
   describe('Streaming configuration', () => {
-    it('Creates a tar entry stream for configuration', () => {
+    it('Creates a tar entry stream for configuration', async () => {
       const providerOptions: ILocalFileDestinationProviderOptions = {
         encryption: { enabled: false },
         compression: { enabled: false },
@@ -165,6 +171,8 @@ describe('Local File Destination Provider', () => {
 
       const provider = createLocalFileDestinationProvider(providerOptions);
       (createTarEntryStream as jest.Mock).mockImplementation(jest.fn());
+
+      await provider.bootstrap();
       provider.getConfigurationStream();
 
       expect(createTarEntryStream).toHaveBeenCalled();

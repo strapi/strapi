@@ -3,18 +3,19 @@ import type {
   IDestinationProviderTransferResults,
   IMetadata,
   ProviderType,
+  Stream,
 } from '../../../types';
 
-import { Readable } from 'stream';
 import fs from 'fs-extra';
+import path from 'path';
 import tar from 'tar-stream';
 import zlib from 'zlib';
+import { Writable, Readable } from 'stream';
 import { stringer } from 'stream-json/jsonl/Stringer';
 import { chain } from 'stream-chain';
 
 import { createEncryptionCipher } from '../../encryption/encrypt';
 import { createFilePathFactory, createTarEntryStream } from './utils';
-
 export interface ILocalFileDestinationProviderOptions {
   // Encryption
   encryption: {
@@ -55,10 +56,26 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   results: ILocalFileDestinationProviderTransferResults = {};
 
   #providersMetadata: { source?: IMetadata; destination?: IMetadata } = {};
-  #archive?: tar.Pack;
+  #archive: { stream?: tar.Pack } = {};
 
   constructor(options: ILocalFileDestinationProviderOptions) {
     this.options = options;
+  }
+
+  get #archivePath() {
+    const { encryption, compression, file } = this.options;
+
+    let path = `${file.path}.tar`;
+
+    if (compression.enabled) {
+      path += '.gz';
+    }
+
+    if (encryption.enabled) {
+      path += '.enc';
+    }
+
+    return path;
   }
 
   setMetadata(target: ProviderType, metadata: IMetadata): IDestinationProvider {
@@ -69,7 +86,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
   #getDataTransformers(options: { jsonl?: boolean } = {}) {
     const { jsonl = true } = options;
-    const transforms = [];
+    const transforms: Stream[] = [];
 
     if (jsonl) {
       // Convert to stringified JSON lines
@@ -90,11 +107,11 @@ class LocalFileDestinationProvider implements IDestinationProvider {
       throw new Error("Can't encrypt without a key");
     }
 
-    this.#archive = tar.pack();
+    this.#archive.stream = tar.pack();
 
     const outStream = fs.createWriteStream(this.#archivePath);
 
-    const archiveTransforms = [];
+    const archiveTransforms: Stream[] = [];
 
     if (compression.enabled) {
       archiveTransforms.push(this.createGzip());
@@ -104,13 +121,27 @@ class LocalFileDestinationProvider implements IDestinationProvider {
       archiveTransforms.push(createEncryptionCipher(encryption.key));
     }
 
-    chain([this.#archive, ...archiveTransforms, outStream]);
+    chain([this.#archive.stream, ...archiveTransforms, outStream]);
+
     this.results.file = { path: this.#archivePath };
   }
 
   async close() {
+    const { stream } = this.#archive;
+
+    if (!stream) {
+      return;
+    }
+
     await this.#writeMetadata();
-    this.#archive?.finalize();
+
+    stream.finalize();
+
+    if (!stream.closed) {
+      await new Promise<void>((resolve, reject) => {
+        stream.on('close', resolve).on('error', reject);
+      });
+    }
   }
 
   async rollback(): Promise<void> {
@@ -120,22 +151,6 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
   getMetadata() {
     return null;
-  }
-
-  get #archivePath() {
-    const { encryption, compression, file } = this.options;
-
-    let path = `${file.path}.tar`;
-
-    if (compression.enabled) {
-      path += '.gz';
-    }
-
-    if (encryption.enabled) {
-      path += '.gpg';
-    }
-
-    return path;
   }
 
   async #writeMetadata(): Promise<void> {
@@ -152,16 +167,24 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   }
 
   #getMetadataStream() {
-    return createTarEntryStream(this.#archive!, () => 'metadata.json');
+    const { stream } = this.#archive;
+
+    if (!stream) {
+      throw new Error('Archive stream is unavailable');
+    }
+
+    return createTarEntryStream(stream, () => 'metadata.json');
   }
 
   getSchemasStream() {
-    // const filePathFactory = createFilePathFactory(this.options.file.path, 'schemas');
+    if (!this.#archive.stream) {
+      throw new Error('Archive stream is unavailable');
+    }
+
     const filePathFactory = createFilePathFactory('schemas');
 
-    // FS write stream
     const entryStream = createTarEntryStream(
-      this.#archive!,
+      this.#archive.stream,
       filePathFactory,
       this.options.file.maxSize
     );
@@ -170,12 +193,14 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   }
 
   getEntitiesStream(): NodeJS.WritableStream {
-    // const filePathFactory = createFilePathFactory(this.options.file.path, 'entities');
+    if (!this.#archive.stream) {
+      throw new Error('Archive stream is unavailable');
+    }
+
     const filePathFactory = createFilePathFactory('entities');
 
-    // FS write stream
     const entryStream = createTarEntryStream(
-      this.#archive!,
+      this.#archive.stream,
       filePathFactory,
       this.options.file.maxSize
     );
@@ -184,11 +209,14 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   }
 
   getLinksStream(): NodeJS.WritableStream {
+    if (!this.#archive.stream) {
+      throw new Error('Archive stream is unavailable');
+    }
+
     const filePathFactory = createFilePathFactory('links');
 
-    // FS write stream
     const entryStream = createTarEntryStream(
-      this.#archive!,
+      this.#archive.stream,
       filePathFactory,
       this.options.file.maxSize
     );
@@ -197,11 +225,14 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   }
 
   getConfigurationStream(): NodeJS.WritableStream {
+    if (!this.#archive.stream) {
+      throw new Error('Archive stream is unavailable');
+    }
+
     const filePathFactory = createFilePathFactory('configuration');
 
-    // FS write stream
     const entryStream = createTarEntryStream(
-      this.#archive!,
+      this.#archive.stream,
       filePathFactory,
       this.options.file.maxSize
     );
