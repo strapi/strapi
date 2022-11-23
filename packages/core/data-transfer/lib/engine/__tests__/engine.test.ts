@@ -384,25 +384,45 @@ describe('Transfer engine', () => {
 
   describe('integrity checks', () => {
     describe('schema matching', () => {
-      test('source with source schema missing in destination fails', async () => {
-        const source = createSource();
-        source.getSchemas = jest.fn().mockResolvedValue([...schemas, { foo: 'bar' }]);
-        const engine = createTransferEngine(source, completeDestination, defaultOptions);
-        expect(
-          (async () => {
-            await engine.transfer();
-          })()
-        ).rejects.toThrow();
-      });
-      test('source with destination schema missing in source fails', async () => {
-        const destination = createDestination();
-        destination.getSchemas = jest.fn().mockResolvedValue([...schemas, { foo: 'bar' }]);
-        const engine = createTransferEngine(completeSource, destination, defaultOptions);
-        expect(
-          (async () => {
-            await engine.transfer();
-          })()
-        ).rejects.toThrow();
+      describe('exact', () => {
+        const engineOptions = {
+          strategy: 'restore',
+          versionMatching: 'exact',
+          schemasMatching: 'exact',
+          exclude: [],
+        } as ITransferEngineOptions;
+        test('source with source schema missing in destination fails', async () => {
+          const source = createSource();
+          source.getSchemas = jest.fn().mockResolvedValue([...schemas, { foo: 'bar' }]);
+          const engine = createTransferEngine(source, completeDestination, engineOptions);
+          expect(
+            (async () => {
+              await engine.transfer();
+            })()
+          ).rejects.toThrow();
+        });
+        test('source with destination schema missing in source fails', async () => {
+          const destination = createDestination();
+          destination.getSchemas = jest.fn().mockResolvedValue([...schemas, { foo: 'bar' }]);
+          const engine = createTransferEngine(completeSource, destination, engineOptions);
+          expect(
+            (async () => {
+              await engine.transfer();
+            })()
+          ).rejects.toThrow();
+        });
+        test('differing nested field fails', async () => {
+          const destination = createDestination();
+          const fakeSchema = cloneDeep(schemas);
+          fakeSchema[0].attributes.action.minLength = 2;
+          destination.getSchemas = jest.fn().mockResolvedValue(fakeSchema);
+          const engine = createTransferEngine(completeSource, destination, engineOptions);
+          expect(
+            (async () => {
+              await engine.transfer();
+            })()
+          ).rejects.toThrow();
+        });
       });
     });
 
