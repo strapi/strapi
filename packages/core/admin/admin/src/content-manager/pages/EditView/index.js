@@ -258,7 +258,4 @@ EditView.propTypes = {
   userPermissions: PropTypes.array,
 };
 
-export { EditView };
 export default memo(EditView);
-
-// export default () => 'TODO Edit view';
