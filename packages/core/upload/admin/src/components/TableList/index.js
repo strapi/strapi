@@ -15,6 +15,7 @@ import { TableRows } from './TableRows';
 
 export const TableList = ({
   assetCount,
+  canUpdate,
   folderCount,
   indeterminate,
   onChangeSort,
@@ -46,6 +47,7 @@ export const TableList = ({
                 id: getTrad('bulk.select.label'),
                 defaultMessage: 'Select all folders & assets',
               })}
+              disabled={!canUpdate}
               indeterminate={indeterminate}
               onChange={(e) => onSelectAll(e, rows)}
               value={
@@ -108,6 +110,7 @@ export const TableList = ({
         </Tr>
       </Thead>
       <TableRows
+        canUpdate={canUpdate}
         onEditAsset={onEditAsset}
         onEditFolder={onEditFolder}
         rows={rows}
@@ -120,6 +123,7 @@ export const TableList = ({
 
 TableList.defaultProps = {
   assetCount: 0,
+  canUpdate: false,
   folderCount: 0,
   indeterminate: false,
   onChangeSort: null,
@@ -132,6 +136,7 @@ TableList.defaultProps = {
 
 TableList.propTypes = {
   assetCount: PropTypes.number,
+  canUpdate: PropTypes.bool,
   folderCount: PropTypes.number,
   indeterminate: PropTypes.bool,
   onChangeSort: PropTypes.func,

@@ -19,7 +19,14 @@ import { CellContent } from './CellContent';
 import { AssetDefinition, FolderDefinition, tableHeaders as cells } from '../../constants';
 import { getFolderURL, getTrad } from '../../utils';
 
-export const TableRows = ({ onEditAsset, onEditFolder, onSelectOne, rows, selected }) => {
+export const TableRows = ({
+  canUpdate,
+  onEditAsset,
+  onEditFolder,
+  onSelectOne,
+  rows,
+  selected,
+}) => {
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
   const [{ query }] = useQueryParams();
@@ -57,6 +64,7 @@ export const TableRows = ({ onEditAsset, onEditFolder, onSelectOne, rows, select
                   },
                   { name }
                 )}
+                disabled={!canUpdate}
                 onValueChange={() => onSelectOne(element)}
                 checked={isSelected}
               />
@@ -115,11 +123,13 @@ export const TableRows = ({ onEditAsset, onEditFolder, onSelectOne, rows, select
 };
 
 TableRows.defaultProps = {
+  canUpdate: false,
   rows: [],
   selected: [],
 };
 
 TableRows.propTypes = {
+  canUpdate: PropTypes.bool,
   rows: PropTypes.arrayOf(AssetDefinition, FolderDefinition),
   onEditAsset: PropTypes.func.isRequired,
   onEditFolder: PropTypes.func.isRequired,

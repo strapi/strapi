@@ -12,6 +12,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 const PROPS_FIXTURE = {
+  canUpdate: true,
   rows: [
     {
       alternativeText: 'alternative text',
@@ -103,6 +104,12 @@ describe('TableList | TableRows', () => {
       expect(getByRole('checkbox', { name: 'Select michka asset', hidden: true })).toBeChecked();
     });
 
+    it('should disabled select asset checkbox when users do not have the permission to update', () => {
+      const { getByRole } = setup({ canUpdate: false });
+
+      expect(getByRole('checkbox', { name: 'Select michka asset', hidden: true })).toBeDisabled();
+    });
+
     it('should call onEditAsset callback', () => {
       const onEditAssetSpy = jest.fn();
       const { getByRole } = setup({ onEditAsset: onEditAssetSpy });
@@ -152,6 +159,14 @@ describe('TableList | TableRows', () => {
       const { getByRole } = setup({ rows: [FOLDER_FIXTURE], selected: [{ id: 2 }] });
 
       expect(getByRole('checkbox', { name: 'Select folder 1 folder', hidden: true })).toBeChecked();
+    });
+
+    it('should disabled select folder checkbox when users do not have the permission to update', () => {
+      const { getByRole } = setup({ rows: [FOLDER_FIXTURE], canUpdate: false });
+
+      expect(
+        getByRole('checkbox', { name: 'Select folder 1 folder', hidden: true })
+      ).toBeDisabled();
     });
 
     it('should not display size and ext', () => {

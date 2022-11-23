@@ -13,6 +13,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 const PROPS_FIXTURE = {
+  canUpdate: false,
   rows: [
     {
       alternativeText: 'alternative text',
@@ -98,6 +99,21 @@ describe('TableList', () => {
     fireEvent.click(sortButton);
 
     expect(onChangeSortSpy).toHaveBeenCalledWith('name:ASC');
+  });
+
+  it('should call onSelectAll callback when bulk selecting', () => {
+    const onSelectAllSpy = jest.fn();
+    const { getByRole } = setup({ onSelectAll: onSelectAllSpy });
+
+    fireEvent.click(getByRole('checkbox', { name: 'Select all folders & assets' }));
+
+    expect(onSelectAllSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call disable bulk select when users do not have update persmission', () => {
+    const { getByRole } = setup({ canUpdate: false });
+
+    expect(getByRole('checkbox', { name: 'Select all folders & assets' })).toBeDisabled();
   });
 
   it('should render assets', () => {
