@@ -9,9 +9,7 @@ const getCustomFieldUidsFromLayout = (layout) => {
     .filter((field) => field.fieldSchema.customField)
     .map((customField) => customField.fieldSchema.customField);
   // Make sure the list is unique
-  const uniqueCustomFieldUids = customFieldUids.filter(
-    (uid, index) => customFieldUids.indexOf(uid) === index
-  );
+  const uniqueCustomFieldUids = [...new Set(customFieldUids)];
 
   return uniqueCustomFieldUids;
 };
