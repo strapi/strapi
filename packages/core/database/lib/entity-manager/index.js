@@ -38,7 +38,7 @@ const {
   deleteRelations,
   cleanOrderColumns,
 } = require('./regular-relations');
-const relationsSorter = require('./relations-sorter');
+const relationsOrderer = require('./relations-orderer');
 
 const toId = (value) => value.id || value;
 const toIds = (value) => castArray(value || []).map(toId);
@@ -579,11 +579,23 @@ const createEntityManager = (db) => {
           });
 
           // add order value
-          if (hasOrderColumn(attribute)) {
-            insert.forEach((rel, idx) => {
-              rel[orderColumnName] = idx + 1;
+          if (cleanRelationData.set && hasOrderColumn(attribute)) {
+            insert.forEach((data, idx) => {
+              data[orderColumnName] = idx + 1;
+            });
+          } else if (cleanRelationData.connect && hasOrderColumn(attribute)) {
+            // use position attributes to calculate order
+            const orderMap = relationsOrderer([], inverseJoinColumn.name, joinTable.orderColumnName)
+              .connect(relsToAdd)
+              .get()
+              // set the order based on the order of the ids
+              .reduce((acc, rel, idx) => ({ ...acc, [rel.id]: idx }), {});
+
+            insert.forEach((row) => {
+              row[orderColumnName] = orderMap[row[inverseJoinColumn.name]];
             });
           }
+
           // add inv_order value
           if (hasInverseOrderColumn(attribute)) {
             const maxResults = await db
@@ -611,7 +623,13 @@ const createEntityManager = (db) => {
           }
 
           // insert new relations
-          await this.createQueryBuilder(joinTable.name).insert(insert).transacting(trx).execute();
+          // ignore duplicates, as connect syntax can contain duplicated ids to add
+          await this.createQueryBuilder(joinTable.name)
+            .insert(insert)
+            .onConflict(joinTable.pivotColumns)
+            .ignore()
+            .transacting(trx)
+            .execute();
         }
       }
     },
@@ -846,6 +864,7 @@ const createEntityManager = (db) => {
                         },
                       },
                       {
+                        [joinColumn.name]: id,
                         [orderColumnName]: this.createQueryBuilder(joinTable.name)
                           .max(orderColumnName)
                           .where({ [joinColumn.name]: id })
@@ -856,20 +875,13 @@ const createEntityManager = (db) => {
                     ],
                   })
                   .where(joinTable.on || {})
-                  .orderBy({ [orderColumnName]: 'ASC' })
                   .transacting(trx)
                   .execute();
 
-                const maxOrder = adjacentRelations.reduce(
-                  (acc, curr) => Math.max(acc, curr[orderColumnName]),
-                  0
-                );
-
-                const orderMap = relationsSorter(
+                const orderMap = relationsOrderer(
                   adjacentRelations,
                   inverseJoinColumn.name,
-                  joinTable.orderColumnName,
-                  maxOrder
+                  joinTable.orderColumnName
                 )
                   .connect(cleanRelationData.connect)
                   .getOrderMap();

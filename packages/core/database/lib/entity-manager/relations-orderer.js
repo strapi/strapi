@@ -13,15 +13,15 @@ const _ = require('lodash/fp');
  *
  * Example:
  *  - Having a connect array like:
- *      [  { id: 4, before: 2 }, { id: 4, before: 3}, {id: 5, before: 4} ]
+ *      [ { id: 4, before: 2 }, { id: 4, before: 3}, {id: 5, before: 4} ]
  * - With the initial relations:
  *      [ { id: 2, order: 4 }, { id: 3, order: 10 } ]
  * - Step by step, going through the connect array, the array of relations would be:
  *      [ { id: 4, order: 3.5 }, { id: 2, order: 4 }, { id: 3, order: 10 } ]
  *      [ { id: 2, order: 4 }, { id: 4, order: 3.5 }, { id: 3, order: 10 } ]
- *      [ { id: 2, order: 4 }, {id: 5, order: 3.5},  { id: 4, order: 3.5 }, { id: 3, order: 10 } ]
+ *      [ { id: 2, order: 4 }, { id: 5, order: 3.5 },  { id: 4, order: 3.5 }, { id: 3, order: 10 } ]
  * - The final step would be to recalculate fractional order values.
- *      [ { id: 2, order: 4 }, {id: 5, order: 3.33},  { id: 4, order: 3.66 }, { id: 3, order: 10 } ]
+ *      [ { id: 2, order: 4 }, { id: 5, order: 3.33 },  { id: 4, order: 3.66 }, { id: 3, order: 10 } ]
  *
  * Constraints:
  * - Expects you will never connect a relation before / after one that does not exist
@@ -30,17 +30,16 @@ const _ = require('lodash/fp');
  * @param {Array<*>} initArr - array of relations to initialize the class with
  * @param {string} idColumn - the column name of the id
  * @param {string} orderColumn - the column name of the order
- * @param {number} [maxOrder=0] - Used to calculate the order of relations placed at the end
  * @return {*}
  */
-const relationsSorter = (initArr, idColumn, orderColumn, maxOrder = 0) => {
-  const arr = _.castArray(initArr || [])
-    .map((r) => ({
-      init: true,
-      id: r[idColumn],
-      order: r[orderColumn],
-    }))
-    .sort((a, b) => a.order - b.order);
+const relationsOrderer = (initArr, idColumn, orderColumn) => {
+  const arr = _.castArray(initArr || []).map((r) => ({
+    init: true,
+    id: r[idColumn],
+    order: r[orderColumn],
+  }));
+
+  const maxOrder = _.maxBy('order', arr)?.order || 0;
 
   // TODO: Improve performance by using a map
   const findRelation = (id) => {
@@ -124,4 +123,4 @@ const relationsSorter = (initArr, idColumn, orderColumn, maxOrder = 0) => {
   };
 };
 
-module.exports = relationsSorter;
+module.exports = relationsOrderer;
