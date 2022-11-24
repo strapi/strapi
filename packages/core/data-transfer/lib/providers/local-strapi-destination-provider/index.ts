@@ -59,7 +59,9 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async beforeStreaming() {
-    if (this.options.strategy === 'restore') await this.deleteAll();
+    if (this.options.strategy === 'restore') {
+      await this.deleteAll();
+    }
   }
 
   // TODO
