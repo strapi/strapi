@@ -119,7 +119,7 @@ describe('BrowseStep', () => {
     jest.clearAllMocks();
   });
 
-  it.only('renders and match snapshot', () => {
+  it('renders and match snapshot', () => {
     const { container } = setup();
     expect(container).toMatchSnapshot();
   });
