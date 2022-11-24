@@ -1,4 +1,5 @@
 import { Readable } from 'stream';
+import type { ITransferEngine, ISourceProvider, IDestinationProvider } from '../../types';
 
 /**
  * Collect every entity in a Readable stream
@@ -76,3 +77,146 @@ export const createMockedQueryBuilder = <T extends string = ContentType>(data: {
       },
     };
   });
+
+export const providerStages = ['bootstrap', 'close'];
+
+export const sourceStages = [
+  ...providerStages,
+  'streamEntities',
+  'streamLinks',
+  // 'streamMedia',
+  'streamConfiguration',
+  'streamSchemas',
+];
+
+export const destinationStages = [
+  ...providerStages,
+  'getEntitiesStream',
+  'getLinksStream',
+  // 'getMediaStream',
+  'getConfigurationStream',
+  'getSchemasStream',
+];
+
+/**
+ * Add jest expect helpers
+ */
+export const extendExpectForDataTransferTests = () => {
+  expect.extend({
+    toBeValidTransferEngine(engine: ITransferEngine) {
+      try {
+        expect(engine).toBeDefined();
+
+        expect(engine.sourceProvider).toBeValidSourceProvider();
+        expect(engine.destinationProvider).toBeValidDestinationProvider();
+
+        // All required methods exists
+        expect(engine.integrityCheck).toBeInstanceOf(Function);
+        expect(engine.transfer).toBeInstanceOf(Function);
+        expect(engine.bootstrap).toBeInstanceOf(Function);
+        expect(engine.close).toBeInstanceOf(Function);
+        expect(engine.transferSchemas).toBeInstanceOf(Function);
+        expect(engine.transferEntities).toBeInstanceOf(Function);
+        expect(engine.transferLinks).toBeInstanceOf(Function);
+        expect(engine.transferMedia).toBeInstanceOf(Function);
+        expect(engine.transferConfiguration).toBeInstanceOf(Function);
+        expect(engine.close).toBeInstanceOf(Function);
+        expect(engine.transfer).toBeInstanceOf(Function);
+      } catch (e) {
+        return {
+          pass: false,
+          message: () => `Expected engine to be valid: ${e.message}`,
+        };
+      }
+      return {
+        pass: true,
+        message: () => `Expected engine not to be valid`,
+      };
+    },
+    toHaveSourceStagesCalledTimes(provider: ISourceProvider, times: number) {
+      const missing = sourceStages.filter((stage) => {
+        if (provider[stage]) {
+          try {
+            // TODO: why is mock.calls an empty array? maybe an async function call that doesn't resolve?
+            // expect(provider[stage]).toHaveBeenCalledOnce();
+            expect(provider[stage].mock.results.length).toEqual(times);
+            return false;
+          } catch (e) {
+            return true;
+          }
+        }
+      });
+
+      if (missing.length) {
+        return {
+          pass: false,
+          message: () =>
+            `Expected source provider to have stages called ${times} times: ${missing.join(',')}`,
+        };
+      }
+      return {
+        pass: true,
+        message: () => `Expected source provider not to have all stages called`,
+      };
+    },
+    toHaveDestinationStagesCalledTimes(provider: IDestinationProvider, times: number) {
+      const missing = destinationStages.filter((stage) => {
+        if (provider[stage]) {
+          try {
+            // expect(provider[stage]).toHaveBeenCalledOnce();
+            expect(provider[stage].mock.results.length).toEqual(times);
+            return false;
+          } catch (e) {
+            return true;
+          }
+        }
+      });
+
+      if (missing.length) {
+        return {
+          pass: false,
+          message: () =>
+            `Expected destination provider to have stages called ${times} times: ${missing.join(
+              ','
+            )}`,
+        };
+      }
+      return {
+        pass: true,
+        message: () => `Expected destination provider not to have all stages called`,
+      };
+    },
+    toBeValidSourceProvider(provider: ISourceProvider) {
+      try {
+        expect(provider.getMetadata).toBeDefined();
+        expect(provider.type).toEqual('source');
+        expect(provider.name.length).toBeGreaterThan(0);
+      } catch (e) {
+        return {
+          pass: false,
+          message: () => `Expected source provider to be valid: ${e.message}`,
+        };
+      }
+      return {
+        pass: true,
+        message: () => `Expected source provider not to be valid`,
+      };
+    },
+    toBeValidDestinationProvider(provider: IDestinationProvider) {
+      try {
+        expect(provider.getMetadata).toBeDefined();
+        expect(provider.type).toEqual('destination');
+        expect(provider.name.length).toBeGreaterThan(0);
+      } catch (e) {
+        return {
+          pass: false,
+          message: () => `Expected destination provider to be valid: ${e.message}`,
+        };
+      }
+      return {
+        pass: true,
+        message: () => `Expected destination provider not to be valid`,
+      };
+    },
+  });
+};
