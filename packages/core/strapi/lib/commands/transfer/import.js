@@ -7,12 +7,17 @@ const {
   // TODO: we need to solve this issue with typescript modules
   // eslint-disable-next-line import/no-unresolved, node/no-missing-require
 } = require('@strapi/data-transfer');
-
+const { isObject } = require('lodash/fp');
 const strapi = require('../../index');
 
 const logger = console;
 
 module.exports = async (opts) => {
+  // validate inputs from Commander
+  if (!isObject(opts)) {
+    logger.error('Could not parse arguments');
+    process.exit(1);
+  }
   const filename = opts.file;
 
   /**
