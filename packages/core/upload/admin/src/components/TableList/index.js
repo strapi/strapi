@@ -15,9 +15,6 @@ import { TableRows } from './TableRows';
 
 export const TableList = ({
   assetCount,
-  isFolderSelectionAllowed,
-  allowedTypes,
-  canUpdate,
   folderCount,
   indeterminate,
   onChangeSort,
@@ -114,9 +111,6 @@ export const TableList = ({
         </Tr>
       </Thead>
       <TableRows
-        isFolderSelectionAllowed={isFolderSelectionAllowed}
-        allowedTypes={allowedTypes}
-        canUpdate={canUpdate}
         onChangeFolder={onChangeFolder}
         onEditAsset={onEditAsset}
         onEditFolder={onEditFolder}
@@ -130,11 +124,8 @@ export const TableList = ({
 
 TableList.defaultProps = {
   assetCount: 0,
-  allowedTypes: ['images', 'files', 'videos', 'audios'],
-  canUpdate: true,
   folderCount: 0,
   indeterminate: false,
-  isFolderSelectionAllowed: true,
   onChangeSort: null,
   onChangeFolder: null,
   onEditAsset: null,
@@ -146,12 +137,9 @@ TableList.defaultProps = {
 };
 
 TableList.propTypes = {
-  allowedTypes: PropTypes.arrayOf(PropTypes.string),
   assetCount: PropTypes.number,
-  canUpdate: PropTypes.bool,
   folderCount: PropTypes.number,
   indeterminate: PropTypes.bool,
-  isFolderSelectionAllowed: PropTypes.bool,
   onChangeSort: PropTypes.func,
   onChangeFolder: PropTypes.func,
   onEditAsset: PropTypes.func,

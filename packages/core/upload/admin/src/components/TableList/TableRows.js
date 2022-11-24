@@ -11,14 +11,10 @@ import Pencil from '@strapi/icons/Pencil';
 import Eye from '@strapi/icons/Eye';
 
 import { CellContent } from './CellContent';
-import { isSelectable } from './utils/isSelectable';
 import { AssetDefinition, FolderDefinition, tableHeaders as cells } from '../../constants';
-import { getTrad, toSingularTypes } from '../../utils';
+import { getTrad } from '../../utils';
 
 export const TableRows = ({
-  allowedTypes,
-  canUpdate,
-  isFolderSelectionAllowed,
   onChangeFolder,
   onEditAsset,
   onEditFolder,
@@ -36,14 +32,13 @@ export const TableRows = ({
     }
   };
 
-  const singularTypes = toSingularTypes(allowedTypes);
-
   return (
     <Tbody>
       {rows.map((element) => {
         const {
           alternativeText,
           id,
+          isSelectable,
           name,
           ext,
           url,
@@ -52,10 +47,6 @@ export const TableRows = ({
           formats,
           type: elementType,
         } = element;
-
-        const fileType = mime?.split('/')?.[0];
-        const canBeSelected =
-          isSelectable(singularTypes, elementType, fileType, isFolderSelectionAllowed) && canUpdate;
 
         const isSelected = !!selected.find((currentRow) => currentRow.id === id);
 
@@ -76,7 +67,7 @@ export const TableRows = ({
                   },
                   { name }
                 )}
-                disabled={!canBeSelected}
+                disabled={!isSelectable}
                 onValueChange={() => onSelectOne(element)}
                 checked={isSelected}
               />
@@ -136,22 +127,16 @@ export const TableRows = ({
 };
 
 TableRows.defaultProps = {
-  allowedTypes: ['images', 'files', 'videos', 'audios'],
-  canUpdate: true,
   onChangeFolder: null,
-  isFolderSelectionAllowed: true,
   rows: [],
   selected: [],
 };
 
 TableRows.propTypes = {
-  allowedTypes: PropTypes.arrayOf(PropTypes.string),
-  canUpdate: PropTypes.bool,
-  isFolderSelectionAllowed: PropTypes.bool,
-  rows: PropTypes.arrayOf(AssetDefinition, FolderDefinition),
   onChangeFolder: PropTypes.func,
   onEditAsset: PropTypes.func.isRequired,
   onEditFolder: PropTypes.func.isRequired,
   onSelectOne: PropTypes.func.isRequired,
+  rows: PropTypes.arrayOf(AssetDefinition, FolderDefinition),
   selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition),
 };

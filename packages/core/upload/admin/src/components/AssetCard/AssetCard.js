@@ -6,34 +6,21 @@ import { VideoAssetCard } from './VideoAssetCard';
 import { DocAssetCard } from './DocAssetCard';
 import { AudioAssetCard } from './AudioAssetCard';
 import { AssetType, AssetDefinition } from '../../constants';
-import { createAssetUrl, toSingularTypes } from '../../utils';
+import { createAssetUrl } from '../../utils';
 
-export const AssetCard = ({
-  allowedTypes,
-  asset,
-  isSelected,
-  onSelect,
-  onEdit,
-  onRemove,
-  size,
-  local,
-}) => {
-  const singularTypes = toSingularTypes(allowedTypes);
-  const fileType = asset.mime.split('/')[0];
+export const AssetCard = ({ asset, isSelected, onSelect, onEdit, onRemove, size, local }) => {
   const handleSelect = onSelect ? () => onSelect(asset) : undefined;
-  const canSelectAsset =
-    singularTypes.includes(fileType) ||
-    (singularTypes.includes('file') && !['video', 'image', 'audio'].includes(fileType));
 
   const commonAssetCardProps = {
     id: asset.id,
+    isSelectable: asset.isSelectable,
     extension: getFileExtension(asset.ext),
     key: asset.id,
     name: asset.name,
     url: local ? asset.url : createAssetUrl(asset, true),
     mime: asset.mime,
     onEdit: onEdit ? () => onEdit(asset) : undefined,
-    onSelect: !canSelectAsset && !isSelected ? undefined : handleSelect,
+    onSelect: handleSelect,
     onRemove: onRemove ? () => onRemove(asset) : undefined,
     selected: isSelected,
     size,
@@ -63,7 +50,6 @@ export const AssetCard = ({
 };
 
 AssetCard.defaultProps = {
-  allowedTypes: ['images', 'files', 'videos', 'audios'],
   isSelected: false,
   // Determine if the asset is loaded locally or from a remote resource
   local: false,
@@ -74,7 +60,6 @@ AssetCard.defaultProps = {
 };
 
 AssetCard.propTypes = {
-  allowedTypes: PropTypes.array,
   asset: AssetDefinition.isRequired,
   local: PropTypes.bool,
   onSelect: PropTypes.func,
