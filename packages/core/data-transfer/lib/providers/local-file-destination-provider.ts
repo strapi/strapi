@@ -56,7 +56,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   results: ILocalFileDestinationProviderTransferResults = {};
 
   #providersMetadata: { source?: IMetadata; destination?: IMetadata } = {};
-  #archive: { stream?: tar.Pack } = {};
+  #archive: { stream?: tar.Pack; pipeline?: Stream } = {};
 
   constructor(options: ILocalFileDestinationProviderOptions) {
     this.options = options;
@@ -117,25 +117,30 @@ class LocalFileDestinationProvider implements IDestinationProvider {
       archiveTransforms.push(createEncryptionCipher(encryption.key));
     }
 
-    chain([this.#archive.stream, ...archiveTransforms, outStream]);
+    this.#archive.pipeline = chain([this.#archive.stream, ...archiveTransforms, outStream]);
 
     this.results.file = { path: this.#archivePath };
   }
 
   async close() {
-    const { stream } = this.#archive;
+    const { stream, pipeline } = this.#archive;
 
     if (!stream) {
       return;
     }
 
     await this.#writeMetadata();
-
     stream.finalize();
 
-    if (!stream.closed) {
+    if (pipeline && !pipeline.closed) {
       await new Promise<void>((resolve, reject) => {
-        stream.on('close', resolve).on('error', reject);
+        pipeline
+          .on('close', () => {
+            resolve();
+          })
+          .on('error', (e) => {
+            reject(e);
+          });
       });
     }
   }
