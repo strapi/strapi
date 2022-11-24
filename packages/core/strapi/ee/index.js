@@ -15,7 +15,7 @@ const noLog = {
 };
 
 const internals = {};
-const features = {
+const defaultFeatures = {
   bronze: [],
   silver: [],
   gold: ['sso'],
@@ -97,14 +97,18 @@ Object.defineProperty(module.exports, 'isEE', {
 
 Object.defineProperty(module.exports, 'features', {
   get() {
+    const licenseInfo = module.exports.licenseInfo;
+
     const { type: licenseType } = module.exports.licenseInfo;
+
+    const features = licenseInfo.features || defaultFeatures[licenseType];
 
     return {
       isEnabled(feature) {
-        return features[licenseType].includes(feature);
+        return features.includes(feature);
       },
       getEnabled() {
-        return features[licenseType];
+        return features;
       },
     };
   },
