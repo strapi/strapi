@@ -59,6 +59,133 @@ describe('Application page', () => {
     await waitFor(() => expect(screen.getByText('Logo')).toBeInTheDocument());
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c47 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c2 {
+        padding-bottom: 56px;
+      }
+
+      .c5 {
+        background: #f6f6f9;
+        padding-top: 40px;
+        padding-right: 56px;
+        padding-bottom: 40px;
+        padding-left: 56px;
+      }
+
+      .c12 {
+        padding-right: 8px;
+      }
+
+      .c16 {
+        padding-right: 56px;
+        padding-left: 56px;
+      }
+
+      .c19 {
+        background: #ffffff;
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c22 {
+        padding-top: 4px;
+      }
+
+      .c30 {
+        padding-left: 8px;
+      }
+
+      .c32 {
+        padding-top: 16px;
+      }
+
+      .c35 {
+        background: #f6f6f9;
+        padding: 8px;
+        border-radius: 4px;
+        border-color: #dcdce4;
+        border: 1px solid #dcdce4;
+      }
+
+      .c36 {
+        position: relative;
+      }
+
+      .c38 {
+        padding-right: 8px;
+        padding-left: 8px;
+        overflow: hidden;
+        width: 100%;
+      }
+
+      .c40 {
+        height: 124px;
+      }
+
+      .c43 {
+        max-width: 40%;
+        max-height: 40%;
+      }
+
+      .c44 {
+        position: absolute;
+        bottom: 4px;
+        width: 100%;
+      }
+
+      .c48 {
+        padding-top: 8px;
+        padding-right: 16px;
+        padding-left: 16px;
+      }
+
+      .c6 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+      }
+
+      .c7 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
       .c17 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
@@ -71,6 +198,95 @@ describe('Application page', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+      }
+
+      .c41 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+      }
+
+      .c9 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c14 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        line-height: 1.14;
+        color: #32324d;
+      }
+
+      .c15 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c21 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c25 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
+      }
+
+      .c26 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
+      .c29 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #4945ff;
+      }
+
+      .c34 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c49 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #666687;
+      }
+
+      .c50 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #666687;
       }
 
       .c18 > * {
@@ -91,39 +307,25 @@ describe('Application page', () => {
         margin-top: 20px;
       }
 
-      .c21 {
-        color: #32324d;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
+      .c33 > * {
+        margin-top: 0;
+        margin-bottom: 0;
       }
 
-      .c25 {
-        color: #666687;
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
+      .c33 > * + * {
+        margin-top: 4px;
       }
 
-      .c26 {
-        color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
+      .c45 > * {
+        margin-left: 0;
+        margin-right: 0;
       }
 
-      .c14 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
+      .c45 > * + * {
+        margin-left: 4px;
       }
 
-      .c11 {
-        padding-right: 8px;
-      }
-
-      .c8 {
+      .c10 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -137,21 +339,21 @@ describe('Application page', () => {
         outline: none;
       }
 
-      .c8 svg {
+      .c10 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c8 svg > g,
-      .c8 svg path {
+      .c10 svg > g,
+      .c10 svg path {
         fill: #ffffff;
       }
 
-      .c8[aria-disabled='true'] {
+      .c10[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c8:after {
+      .c10:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -166,11 +368,11 @@ describe('Application page', () => {
         border: 2px solid transparent;
       }
 
-      .c8:focus-visible {
+      .c10:focus-visible {
         outline: none;
       }
 
-      .c8:focus-visible:after {
+      .c10:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -181,21 +383,23 @@ describe('Application page', () => {
         border: 2px solid #4945ff;
       }
 
-      .c12 {
+      .c13 {
         height: 100%;
       }
 
-      .c9 {
+      .c11 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-        padding: 8px 16px;
-        background: #4945ff;
+        background-color: #4945ff;
         border: 1px solid #4945ff;
+        height: 2rem;
+        padding-left: 16px;
+        padding-right: 16px;
       }
 
-      .c9 .c10 {
+      .c11 .c0 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -206,131 +410,54 @@ describe('Application page', () => {
         align-items: center;
       }
 
-      .c9 .c13 {
+      .c11 .c8 {
         color: #ffffff;
       }
 
-      .c9[aria-disabled='true'] {
+      .c11[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c9[aria-disabled='true'] .c13 {
+      .c11[aria-disabled='true'] .c8 {
         color: #666687;
       }
 
-      .c9[aria-disabled='true'] svg > g,
-      .c9[aria-disabled='true'] svg path {
+      .c11[aria-disabled='true'] svg > g,
+      .c11[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c9[aria-disabled='true']:active {
+      .c11[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c9[aria-disabled='true']:active .c13 {
+      .c11[aria-disabled='true']:active .c8 {
         color: #666687;
       }
 
-      .c9[aria-disabled='true']:active svg > g,
-      .c9[aria-disabled='true']:active svg path {
+      .c11[aria-disabled='true']:active svg > g,
+      .c11[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c9:hover {
+      .c11:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c9:active {
+      .c11:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
-      .c9 svg > g,
-      .c9 svg path {
+      .c11 svg > g,
+      .c11 svg path {
         fill: #ffffff;
-      }
-
-      .c19 {
-        background: #ffffff;
-        padding-top: 24px;
-        padding-right: 32px;
-        padding-bottom: 24px;
-        padding-left: 32px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c32 {
-        padding-top: 4px;
       }
 
       .c46 {
-        max-width: 40%;
-        max-height: 40%;
-      }
-
-      .c49 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
-      }
-
-      .c49 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c49 svg > g,
-      .c49 svg path {
-        fill: #ffffff;
-      }
-
-      .c49[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c49:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c49:focus-visible {
-        outline: none;
-      }
-
-      .c49:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c50 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -347,37 +474,27 @@ describe('Application page', () => {
         width: 2rem;
       }
 
-      .c50 svg > g,
-      .c50 svg path {
+      .c46 svg > g,
+      .c46 svg path {
         fill: #8e8ea9;
       }
 
-      .c50:hover svg > g,
-      .c50:hover svg path {
+      .c46:hover svg > g,
+      .c46:hover svg path {
         fill: #666687;
       }
 
-      .c50:active svg > g,
-      .c50:active svg path {
+      .c46:active svg > g,
+      .c46:active svg path {
         fill: #a5a5ba;
       }
 
-      .c50[aria-disabled='true'] {
+      .c46[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c50[aria-disabled='true'] svg path {
+      .c46[aria-disabled='true'] svg path {
         fill: #666687;
-      }
-
-      .c29 {
-        color: #4945ff;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c30 {
-        padding-left: 8px;
       }
 
       .c27 {
@@ -445,86 +562,12 @@ describe('Application page', () => {
       }
 
       .c1 {
-        padding-bottom: 56px;
-      }
-
-      .c4 {
-        background: #f6f6f9;
-        padding-top: 40px;
-        padding-right: 56px;
-        padding-bottom: 40px;
-        padding-left: 56px;
-      }
-
-      .c16 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
-
-      .c0 {
         display: grid;
         grid-template-columns: 1fr;
       }
 
-      .c2 {
+      .c3 {
         overflow-x: hidden;
-      }
-
-      .c5 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-      }
-
-      .c6 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c7 {
-        color: #32324d;
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-      }
-
-      .c15 {
-        color: #666687;
-        font-size: 1rem;
-        line-height: 1.5;
-      }
-
-      .c3:focus-visible {
-        outline: none;
-      }
-
-      .c22 {
-        padding-top: 4px;
-      }
-
-      .c33 {
-        padding-top: 16px;
       }
 
       .c23 {
@@ -538,139 +581,21 @@ describe('Application page', () => {
         max-width: 100%;
       }
 
-      .c38 {
-        background: #f6f6f9;
-        padding: 8px;
-        border-radius: 4px;
-        border-color: #dcdce4;
-        border: 1px solid #dcdce4;
-      }
-
-      .c39 {
-        position: relative;
-      }
-
-      .c41 {
-        padding-right: 8px;
-        padding-left: 8px;
-        overflow: hidden;
-        width: 100%;
-      }
-
-      .c43 {
-        height: 124px;
-      }
-
-      .c47 {
-        position: absolute;
-        bottom: 4px;
-        width: 100%;
-      }
-
-      .c51 {
-        padding-top: 8px;
-        padding-right: 16px;
-        padding-left: 16px;
-      }
-
-      .c36 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c52 {
-        color: #666687;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c53 {
-        color: #666687;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c34 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
+      .c4:focus-visible {
+        outline: none;
       }
 
       .c37 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c44 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-      }
-
-      .c40 {
         display: grid;
         grid-template-columns: auto 1fr auto;
         grid-template-areas: 'startAction slides endAction';
       }
 
-      .c42 {
+      .c39 {
         grid-area: slides;
       }
 
-      .c35 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c35 > * + * {
-        margin-top: 4px;
-      }
-
-      .c48 > * {
-        margin-left: 0;
-        margin-right: 0;
-      }
-
-      .c48 > * + * {
-        margin-left: 4px;
-      }
-
-      .c45 {
+      .c42 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -690,14 +615,14 @@ describe('Application page', () => {
       }
 
       <div
-        class="c0"
+        class="c0 c1"
       >
         <div
-          class="c1 c2"
+          class="c0 c2 c3"
         >
           <main
             aria-labelledby="main-content-title"
-            class="c3"
+            class="c4"
             id="main-content"
             tabindex="-1"
           >
@@ -705,29 +630,29 @@ describe('Application page', () => {
               style="height: 0px;"
             >
               <div
-                class="c4"
+                class="c0 c5"
                 data-strapi-header="true"
               >
                 <div
-                  class="c5"
+                  class="c0 c6"
                 >
                   <div
-                    class="c6"
+                    class="c0 c7"
                   >
                     <h1
-                      class="c7"
+                      class="c8 c9"
                     >
                       Overview
                     </h1>
                   </div>
                   <button
                     aria-disabled="false"
-                    class="c8 c9"
+                    class="c10 c11"
                     type="button"
                   >
                     <div
                       aria-hidden="true"
-                      class="c10 c11 c12"
+                      class="c0 c12 c13"
                     >
                       <svg
                         fill="none"
@@ -743,54 +668,54 @@ describe('Application page', () => {
                       </svg>
                     </div>
                     <span
-                      class="c13 c14"
+                      class="c8 c14"
                     >
                       Save
                     </span>
                   </button>
                 </div>
                 <p
-                  class="c15"
+                  class="c8 c15"
                 >
                   Administration panel’s global information
                 </p>
               </div>
             </div>
             <div
-              class="c16"
+              class="c0 c16"
             >
               <div
-                class="c17 c18"
+                class="c0 c17 c18"
                 spacing="6"
               >
                 <div
-                  class="c19"
+                  class="c0 c19"
                 >
                   <div
-                    class="c17 c20"
+                    class="c0 c17 c20"
                     spacing="5"
                   >
                     <h3
-                      class="c21"
+                      class="c8 c21"
                     >
                       Details
                     </h3>
                     <div
-                      class="c22 c23"
+                      class="c0 c22 c23"
                     >
                       <div
                         class="c24"
                       >
                         <div
-                          class=""
+                          class="c0 "
                         >
                           <span
-                            class="c25"
+                            class="c8 c25"
                           >
                             strapi version
                           </span>
                           <p
-                            class="c26"
+                            class="c8 c26"
                           >
                             v
                             4.0.0
@@ -802,13 +727,13 @@ describe('Application page', () => {
                             target="_blank"
                           >
                             <span
-                              class="c29"
+                              class="c8 c29"
                             >
                               Get help
                             </span>
                             <span
                               aria-hidden="true"
-                              class="c30 c31"
+                              class="c0 c30 c31"
                             >
                               <svg
                                 fill="none"
@@ -830,15 +755,15 @@ describe('Application page', () => {
                         class="c24"
                       >
                         <div
-                          class=""
+                          class="c0 "
                         >
                           <span
-                            class="c25"
+                            class="c8 c25"
                           >
                             current plan
                           </span>
                           <p
-                            class="c26"
+                            class="c8 c26"
                           >
                             Enterprise Edition
                           </p>
@@ -846,13 +771,13 @@ describe('Application page', () => {
                       </div>
                     </div>
                     <div
-                      class="c22 c23"
+                      class="c0 c22 c23"
                     >
                       <div
                         class="c24"
                       >
                         <div
-                          class=""
+                          class="c0 "
                         >
                           <a
                             class="c27 c28"
@@ -861,13 +786,13 @@ describe('Application page', () => {
                             target="_blank"
                           >
                             <span
-                              class="c29"
+                              class="c8 c29"
                             >
                               Upgrade your admin panel
                             </span>
                             <span
                               aria-hidden="true"
-                              class="c30 c31"
+                              class="c0 c30 c31"
                             >
                               <svg
                                 fill="none"
@@ -889,7 +814,7 @@ describe('Application page', () => {
                         class="c24"
                       >
                         <div
-                          class=""
+                          class="c0 "
                         >
                           <a
                             class="c27 c28"
@@ -898,13 +823,13 @@ describe('Application page', () => {
                             target="_blank"
                           >
                             <span
-                              class="c29"
+                              class="c8 c29"
                             >
                               See all pricing plans
                             </span>
                             <span
                               aria-hidden="true"
-                              class="c30 c31"
+                              class="c0 c30 c31"
                             >
                               <svg
                                 fill="none"
@@ -924,99 +849,106 @@ describe('Application page', () => {
                       </div>
                     </div>
                     <div
-                      class="c32"
+                      class="c0 c22"
                     >
                       <span
-                        class="c25"
+                        class="c8 c25"
                       >
                         node version
                       </span>
                       <p
-                        class="c26"
+                        class="c8 c26"
                       />
                     </div>
                   </div>
                 </div>
                 <div>
                   <div
-                    class="c19"
+                    class="c0 c19"
                   >
                     <h3
-                      class="c21"
+                      class="c8 c21"
                     >
                       Customization
                     </h3>
                     <div
-                      class="c33 c23"
+                      class="c0 c32 c23"
                     >
                       <div
                         class="c24"
                       >
                         <div
-                          class=""
+                          class="c0 "
                         >
                           <div>
                             <div
-                              class="c34 c35"
+                              class="c0 c17 c33"
                               spacing="1"
                             >
                               <label
-                                class="c36"
+                                class="c8 c34"
                                 for="carouselinput-1"
                               >
                                 <div
-                                  class="c37"
+                                  class="c0 c7"
                                 >
                                   Logo
                                 </div>
                               </label>
                               <div
-                                class=""
+                                class="c0 "
                                 id="carouselinput-1"
                               >
                                 <div
-                                  class="c38"
+                                  class="c0 c35"
                                 >
                                   <section
                                     aria-label="Logo"
                                     aria-roledescription="carousel"
-                                    class="c39 c40"
+                                    class="c0 c36 c37"
                                   >
                                     <div
                                       aria-live="polite"
-                                      class="c41 c42"
+                                      class="c0 c38 c39"
                                       overflow="hidden"
                                       width="100%"
                                     >
                                       <div
                                         aria-label="Logo slide"
                                         aria-roledescription="slide"
-                                        class="c43 c44 c45"
+                                        class="c0 c40 c41 c42"
                                         height="124px"
                                         role="group"
                                       >
                                         <img
                                           alt="Logo"
-                                          class="c46"
+                                          class="c0 c43"
                                           src="http://localhost:1337/uploads/michka.svg"
                                         />
                                       </div>
                                     </div>
                                     <div
-                                      class="c47 c44 c48"
+                                      class="c0 c44 c41 c45"
                                       spacing="1"
                                       width="100%"
                                     >
                                       <span>
                                         <button
                                           aria-disabled="false"
-                                          aria-labelledby="tooltip-1"
-                                          class="c49 c50"
+                                          aria-labelledby="tooltip-2"
+                                          class="c10 c46"
                                           tabindex="0"
                                           type="button"
                                         >
+                                          <span
+                                            class="c47"
+                                          >
+                                            Change logo
+                                          </span>
                                           <svg
+                                            aria-hidden="true"
                                             fill="none"
+                                            focusable="false"
                                             height="1em"
                                             viewBox="0 0 24 24"
                                             width="1em"
@@ -1032,13 +964,20 @@ describe('Application page', () => {
                                       <span>
                                         <button
                                           aria-disabled="false"
-                                          aria-labelledby="tooltip-3"
-                                          class="c49 c50"
+                                          aria-labelledby="tooltip-4"
+                                          class="c10 c46"
                                           tabindex="0"
                                           type="button"
                                         >
+                                          <span
+                                            class="c47"
+                                          >
+                                            Reset logo
+                                          </span>
                                           <svg
+                                            aria-hidden="true"
                                             fill="none"
+                                            focusable="false"
                                             height="1em"
                                             viewBox="0 0 24 24"
                                             width="1em"
@@ -1056,16 +995,16 @@ describe('Application page', () => {
                                     </div>
                                   </section>
                                   <div
-                                    class="c51"
+                                    class="c0 c48"
                                   >
                                     <span>
                                       <div
-                                        aria-labelledby="tooltip-2"
-                                        class="c44"
+                                        aria-labelledby="tooltip-6"
+                                        class="c0 c41"
                                         tabindex="0"
                                       >
                                         <span
-                                          class="c52"
+                                          class="c8 c49"
                                         >
                                           michka.svg
                                         </span>
@@ -1075,7 +1014,7 @@ describe('Application page', () => {
                                 </div>
                               </div>
                               <p
-                                class="c53"
+                                class="c8 c50"
                                 id="carouselinput-1-hint"
                               >
                                 Change the admin panel logo (Max dimension: 750x750, Max file size: 100KB)

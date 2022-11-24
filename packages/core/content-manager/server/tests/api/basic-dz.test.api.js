@@ -301,13 +301,18 @@ describe('CM API - Basic + dz', () => {
         error: {
           status: 400,
           name: 'ValidationError',
-          message: 'dz[0].__component is a required field',
+          message: '2 errors occurred',
           details: {
             errors: [
               {
                 path: ['dz', '0', '__component'],
                 message: 'dz[0].__component is a required field',
                 name: 'ValidationError',
+              },
+              {
+                message: 'Cannot build relations store: "uid" is undefined',
+                name: 'ValidationError',
+                path: [],
               },
             ],
           },

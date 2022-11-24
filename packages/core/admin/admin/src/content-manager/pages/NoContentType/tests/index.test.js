@@ -30,206 +30,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c11 {
-        color: #666687;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-      }
-
-      .c6 {
-        background: #ffffff;
-        padding: 64px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c8 {
-        padding-bottom: 24px;
-      }
-
-      .c10 {
-        padding-bottom: 16px;
-      }
-
-      .c7 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        text-align: center;
-      }
-
-      .c9 svg {
-        height: 5.5rem;
-      }
-
-      .c17 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c15 {
-        padding-right: 8px;
-      }
-
-      .c12 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
-      }
-
-      .c12 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c12 svg > g,
-      .c12 svg path {
-        fill: #ffffff;
-      }
-
-      .c12[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c12:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c12:focus-visible {
-        outline: none;
-      }
-
-      .c12:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c13 {
-        padding: 8px 16px;
-        background: #4945ff;
-        border: 1px solid #4945ff;
-        border-radius: 4px;
-        border: 1px solid #d9d8ff;
-        background: #f0f0ff;
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        -webkit-text-decoration: none;
-        text-decoration: none;
-      }
-
-      .c13 .c14 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c13 .c16 {
-        color: #ffffff;
-      }
-
-      .c13[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c13[aria-disabled='true'] .c16 {
-        color: #666687;
-      }
-
-      .c13[aria-disabled='true'] svg > g,
-      .c13[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c13[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c13[aria-disabled='true']:active .c16 {
-        color: #666687;
-      }
-
-      .c13[aria-disabled='true']:active svg > g,
-      .c13[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c13:hover {
-        background-color: #ffffff;
-      }
-
-      .c13:active {
-        background-color: #ffffff;
-        border: 1px solid #4945ff;
-      }
-
-      .c13:active .c16 {
-        color: #4945ff;
-      }
-
-      .c13:active svg > g,
-      .c13:active svg path {
-        fill: #4945ff;
-      }
-
-      .c13 .c16 {
-        color: #271fe0;
-      }
-
-      .c13 svg > g,
-      .c13 svg path {
-        fill: #271fe0;
-      }
-
-      .c0:focus-visible {
-        outline: none;
-      }
-
-      .c1 {
+      .c2 {
         background: #f6f6f9;
         padding-top: 40px;
         padding-right: 56px;
@@ -237,12 +38,31 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         padding-left: 56px;
       }
 
-      .c5 {
+      .c7 {
         padding-right: 56px;
         padding-left: 56px;
       }
 
-      .c2 {
+      .c8 {
+        background: #ffffff;
+        padding: 64px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c10 {
+        padding-bottom: 24px;
+      }
+
+      .c12 {
+        padding-bottom: 16px;
+      }
+
+      .c16 {
+        padding-right: 8px;
+      }
+
+      .c3 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -260,7 +80,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         justify-content: space-between;
       }
 
-      .c3 {
+      .c4 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -274,11 +94,191 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         flex-direction: row;
       }
 
-      .c4 {
-        color: #32324d;
+      .c6 {
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c13 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #666687;
+      }
+
+      .c17 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c14 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
+      }
+
+      .c14 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c14 svg > g,
+      .c14 svg path {
+        fill: #ffffff;
+      }
+
+      .c14[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c14:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c14:focus-visible {
+        outline: none;
+      }
+
+      .c14:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c9 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        text-align: center;
+      }
+
+      .c11 svg {
+        height: 5.5rem;
+      }
+
+      .c15 {
+        padding: 8px 16px;
+        background: #4945ff;
+        border: 1px solid #4945ff;
+        border-radius: 4px;
+        border: 1px solid #d9d8ff;
+        background: #f0f0ff;
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+      }
+
+      .c15 .c1 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c15 .c5 {
+        color: #ffffff;
+      }
+
+      .c15[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c15[aria-disabled='true'] .c5 {
+        color: #666687;
+      }
+
+      .c15[aria-disabled='true'] svg > g,
+      .c15[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c15[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c15[aria-disabled='true']:active .c5 {
+        color: #666687;
+      }
+
+      .c15[aria-disabled='true']:active svg > g,
+      .c15[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c15:hover {
+        background-color: #ffffff;
+      }
+
+      .c15:active {
+        background-color: #ffffff;
+        border: 1px solid #4945ff;
+      }
+
+      .c15:active .c5 {
+        color: #4945ff;
+      }
+
+      .c15:active svg > g,
+      .c15:active svg path {
+        fill: #4945ff;
+      }
+
+      .c15 .c5 {
+        color: #271fe0;
+      }
+
+      .c15 svg > g,
+      .c15 svg path {
+        fill: #271fe0;
+      }
+
+      .c0:focus-visible {
+        outline: none;
       }
 
       <main
@@ -291,17 +291,17 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
           style="height: 0px;"
         >
           <div
-            class="c1"
+            class="c1 c2"
             data-strapi-header="true"
           >
             <div
-              class="c2"
+              class="c1 c3"
             >
               <div
-                class="c3"
+                class="c1 c4"
               >
                 <h1
-                  class="c4"
+                  class="c5 c6"
                 >
                   Content
                 </h1>
@@ -310,14 +310,14 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
           </div>
         </div>
         <div
-          class="c5"
+          class="c1 c7"
         >
           <div
-            class="c6 c7"
+            class="c1 c8 c9"
           >
             <div
               aria-hidden="true"
-              class="c8 c9"
+              class="c1 c10 c11"
             >
               <svg
                 fill="none"
@@ -383,23 +383,23 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
               </svg>
             </div>
             <div
-              class="c10"
+              class="c1 c12"
             >
               <p
-                class="c11"
+                class="c5 c13"
               >
                 You don't have any content yet, we recommend you to create your first Content-Type.
               </p>
             </div>
             <a
               aria-disabled="false"
-              class="c12 c13"
+              class="c14 c15"
               href="/plugins/content-type-builder/content-types/create-content-type"
               variant="secondary"
             >
               <div
                 aria-hidden="true"
-                class="c14 c15"
+                class="c1 c16"
               >
                 <svg
                   fill="none"
@@ -415,7 +415,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
                 </svg>
               </div>
               <span
-                class="c16 c17"
+                class="c5 c17"
               >
                 Create your first Content-type
               </span>
