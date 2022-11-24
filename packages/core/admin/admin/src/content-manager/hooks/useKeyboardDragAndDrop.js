@@ -49,10 +49,12 @@ export const useKeyboardDragAndDrop = (index, { onCancel, onDropItem, onGrabItem
   };
 
   const handleCancel = () => {
-    setIsSelected(false);
+    if (isSelected) {
+      setIsSelected(false);
 
-    if (onCancel) {
-      onCancel(index);
+      if (onCancel) {
+        onCancel(index);
+      }
     }
   };
 
