@@ -1,4 +1,4 @@
-import type { ComponentAttribute, ContentTypeSchema } from '@strapi/strapi';
+import type { ContentTypeSchema } from '@strapi/strapi';
 
 import { isObject, isArray, size } from 'lodash/fp';
 import { Readable, PassThrough } from 'stream';
