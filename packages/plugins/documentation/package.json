@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "@testing-library/react": "12.1.4",
-    "msw": "0.42.3"
+    "msw": "0.49.0"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",
