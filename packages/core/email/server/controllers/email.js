@@ -1,6 +1,6 @@
 'use strict';
 
-const { isNil, pick } = require('lodash/fp');
+const { pick } = require('lodash/fp');
 const { ApplicationError } = require('@strapi/utils').errors;
 
 /**
