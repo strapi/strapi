@@ -2,6 +2,8 @@ import * as React from 'react';
 import { render } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import Component from '../Component';
 
@@ -10,7 +12,13 @@ jest.mock('../../../Inputs', () => () => "I'm inputs");
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useCMEditViewDataManager: jest.fn().mockImplementation(() => ({ modifiedData: {} })),
+  useCMEditViewDataManager: jest.fn().mockImplementation(() => ({
+    modifiedData: {
+      test: {
+        test: 'repetable-component',
+      },
+    },
+  })),
 }));
 
 describe('RepeatableComponent | Component', () => {
@@ -18,27 +26,94 @@ describe('RepeatableComponent | Component', () => {
     jest.restoreAllMocks();
   });
 
-  const defaultProps = {};
+  const defaultProps = {
+    componentFieldName: 'test',
+    index: 0,
+    mainField: 'test',
+    moveComponentField: jest.fn(),
+    onClickToggle: jest.fn(),
+  };
 
   const TestComponent = (props) => (
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} defaultLocale="en">
-        <Component {...defaultProps} {...props} />
+        <DndProvider backend={HTML5Backend}>
+          <Component {...defaultProps} {...props} />
+        </DndProvider>
       </IntlProvider>
     </ThemeProvider>
   );
 
   const setup = (props) => render(<TestComponent {...props} />);
 
-  it.todo('should render my accordion by default');
+  it('should render my accordion by default', () => {
+    const { getByRole, queryByText } = setup();
 
-  it.todo('should not render my accordion actions if the component is read only');
+    expect(getByRole('button', { name: 'repetable-component' })).toBeInTheDocument();
+    expect(queryByText("I'm a field component")).not.toBeInTheDocument();
+    expect(queryByText("I'm inputs")).not.toBeInTheDocument();
+  });
 
-  it.todo('should render an input per field');
+  it('should not render my accordion actions if the component is read only', () => {
+    const { queryByRole } = setup({ isReadOnly: true });
 
-  it.todo('should render the field component if there is a component field passed');
+    expect(queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument();
+    expect(queryByRole('button', { name: 'Drag' })).not.toBeInTheDocument();
+  });
 
-  it.todo('should render an error message if the component has errors');
+  it('should render an input per field', () => {
+    const { getAllByText } = setup({
+      isOpen: true,
+      fields: [
+        [
+          {
+            name: 'input1',
+            fieldSchema: {
+              type: 'text',
+            },
+          },
+          {
+            name: 'input2',
+            fieldSchema: {
+              type: 'text',
+            },
+          },
+        ],
+      ],
+    });
+
+    expect(getAllByText("I'm inputs")).toHaveLength(2);
+  });
+
+  it('should render the field component if there is a component field passed', () => {
+    const { getAllByText } = setup({
+      isOpen: true,
+      fields: [
+        [
+          {
+            name: 'input1',
+            fieldSchema: {
+              type: 'component',
+            },
+            metadatas: {
+              label: 'input1-label',
+            },
+          },
+          {
+            name: 'input2',
+            fieldSchema: {
+              type: 'component',
+            },
+            metadatas: {
+              label: 'input2-label',
+            },
+          },
+        ],
+      ],
+    });
+
+    expect(getAllByText("I'm a field component")).toHaveLength(2);
+  });
 
   describe('Keyboard drag and drop', () => {
     it.skip('should not move with arrow keys if the button is not pressed first', () => {

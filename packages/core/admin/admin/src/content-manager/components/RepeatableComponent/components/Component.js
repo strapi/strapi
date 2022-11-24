@@ -17,7 +17,6 @@ import {
   GridItem,
   Stack,
   Box,
-  Tooltip,
   IconButton,
 } from '@strapi/design-system';
 import { Trash, Drag } from '@strapi/icons';
@@ -77,7 +76,6 @@ const DraggedItem = ({
   componentFieldName,
   componentUid,
   fields,
-  hasErrors,
   index,
   isOpen,
   isReadOnly,
@@ -159,9 +157,6 @@ const DraggedItem = ({
     previewRef(getEmptyImage(), { captureDraggingState: false });
   }, [previewRef]);
 
-  const accordionTitle = toString(displayedValue);
-  const accordionHasError = hasErrors ? 'error' : undefined;
-
   const composedAccordionRefs = composeRefs(accordionRef, dragRef);
   const composedBoxRefs = composeRefs(boxRef, dropRef);
 
@@ -170,14 +165,7 @@ const DraggedItem = ({
       {isDragging ? (
         <Preview ref={previewRef} />
       ) : (
-        <Accordion
-          error={accordionHasError}
-          hasErrorMessage={false}
-          expanded={isOpen}
-          onToggle={onClickToggle}
-          id={componentFieldName}
-          size="S"
-        >
+        <Accordion expanded={isOpen} onToggle={onClickToggle} id={componentFieldName} size="S">
           <AccordionToggle
             action={
               isReadOnly ? null : (
@@ -196,29 +184,26 @@ const DraggedItem = ({
                     icon={<Trash />}
                   />
                   {/* react-dnd is broken in firefox with our IconButton, maybe a ref issue */}
-                  <Tooltip
-                    description={formatMessage({
+                  <IconButton
+                    className="drag-handle"
+                    ref={composedAccordionRefs}
+                    forwardedAs="div"
+                    role="button"
+                    noBorder
+                    tabIndex={0}
+                    onClick={(e) => e.stopPropagation()}
+                    data-handler-id={handlerId}
+                    label={formatMessage({
                       id: getTrad('components.DragHandle-label'),
                       defaultMessage: 'Drag',
                     })}
                   >
-                    <IconButton
-                      className="drag-handle"
-                      ref={composedAccordionRefs}
-                      forwardedAs="div"
-                      role="button"
-                      noBorder
-                      tabIndex={0}
-                      onClick={(e) => e.stopPropagation()}
-                      data-handler-id={handlerId}
-                    >
-                      <Drag />
-                    </IconButton>
-                  </Tooltip>
+                    <Drag />
+                  </IconButton>
                 </ActionsStack>
               )
             }
-            title={accordionTitle}
+            title={displayedValue}
             togglePosition="left"
           />
           <AccordionContent>
@@ -280,7 +265,7 @@ const DraggedItem = ({
 DraggedItem.defaultProps = {
   componentUid: undefined,
   fields: [],
-  hasErrors: false,
+  isReadOnly: false,
   isOpen: false,
   toggleCollapses() {},
 };
@@ -289,10 +274,9 @@ DraggedItem.propTypes = {
   componentFieldName: PropTypes.string.isRequired,
   componentUid: PropTypes.string,
   fields: PropTypes.array,
-  hasErrors: PropTypes.bool,
   index: PropTypes.number.isRequired,
   isOpen: PropTypes.bool,
-  isReadOnly: PropTypes.bool.isRequired,
+  isReadOnly: PropTypes.bool,
   mainField: PropTypes.string.isRequired,
   moveComponentField: PropTypes.func.isRequired,
   onClickToggle: PropTypes.func.isRequired,
