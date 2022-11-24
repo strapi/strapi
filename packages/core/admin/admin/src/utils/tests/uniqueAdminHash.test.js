@@ -1,4 +1,3 @@
-import { Crypto } from '@peculiar/webcrypto';
 import { TextEncoder } from 'util';
 import hashAdminUserEmail, { utils } from '../uniqueAdminHash';
 
@@ -24,7 +23,11 @@ describe('Creating admin user email hash in admin', () => {
 
   it('should return hash using crypto subtle', async () => {
     Object.defineProperty(global.self, 'crypto', {
-      value: new Crypto(),
+      value: {
+        subtle: {
+          digest: jest.fn(() => testHashValue),
+        },
+      },
     });
 
     Object.defineProperty(global.self, 'TextEncoder', {

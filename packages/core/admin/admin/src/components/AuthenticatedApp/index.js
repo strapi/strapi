@@ -78,17 +78,17 @@ const AuthenticatedApp = () => {
 
   const shouldShowLoader = isLoading || shouldShowNotDependentQueriesLoader;
 
-  const adminUserId = hashAdminUserEmail(userInfo);
+  const userId = hashAdminUserEmail(userInfo);
   const appInfosValue = useMemo(() => {
     return {
       ...appInfos,
-      adminUserId,
+      userId,
       latestStrapiReleaseTag: tag_name,
       setUserDisplayName,
       shouldUpdateStrapi,
       userDisplayName,
     };
-  }, [appInfos, tag_name, shouldUpdateStrapi, userDisplayName, adminUserId]);
+  }, [appInfos, tag_name, shouldUpdateStrapi, userDisplayName, userId]);
 
   if (shouldShowLoader) {
     return <LoadingIndicatorPage />;

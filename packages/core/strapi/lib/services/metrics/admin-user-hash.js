@@ -2,7 +2,8 @@
 
 const crypto = require('crypto');
 
-const generateAdminUserHash = (ctx) => {
+const generateAdminUserHash = () => {
+  const ctx = strapi?.requestContext?.get();
   if (!ctx?.state?.user) {
     return '';
   }

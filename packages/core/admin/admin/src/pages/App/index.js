@@ -98,7 +98,7 @@ function App() {
               body: JSON.stringify({
                 // This event is anonymous
                 event: 'didInitializeAdministration',
-                adminUserId: '',
+                userId: '',
                 deviceId,
                 eventPropeties: {},
                 userProperties: { environment: appInfo.currentEnvironment },

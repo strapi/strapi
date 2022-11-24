@@ -141,7 +141,6 @@
     "yup": "^0.32.9"
   },
   "devDependencies": {
-    "@peculiar/webcrypto": "1.4.1",
     "@testing-library/dom": "8.19.0",
     "@testing-library/react": "12.1.4",
     "@testing-library/react-hooks": "8.0.1",

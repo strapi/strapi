@@ -65,19 +65,16 @@ module.exports = (strapi) => {
   addPackageJsonStrapiMetadata(anonymousGroupProperties, strapi);
 
   return async (event, payload = {}, opts = {}) => {
-    const ctx = strapi.requestContext.get();
-    const adminUserId = generateAdminUserHash(ctx);
+    const userId = generateAdminUserHash();
 
     const reqParams = {
       method: 'POST',
       body: JSON.stringify({
         event,
-        adminUserId,
+        userId,
         deviceId,
         eventProperties: payload.eventProperties,
-        userProperties: adminUserId
-          ? { ...anonymousUserProperties, ...payload.userProperties }
-          : {},
+        userProperties: userId ? { ...anonymousUserProperties, ...payload.userProperties } : {},
         groupProperties: {
           ...anonymousGroupProperties,
           ...payload.groupProperties,

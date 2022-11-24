@@ -7,7 +7,7 @@ const useTracking = () => {
   const trackRef = useRef();
   const { uuid, telemetryProperties, deviceId } = useContext(TrackingContext);
   const appInfo = useAppInfos();
-  const adminUserId = appInfo?.adminUserId;
+  const userId = appInfo?.userId;
 
   trackRef.current = async (event, properties) => {
     if (uuid && !window.strapi.telemetryDisabled) {
@@ -16,7 +16,7 @@ const useTracking = () => {
           'https://analytics.strapi.io/api/v2/track',
           {
             event,
-            adminUserId,
+            userId,
             deviceId,
             eventProperties: { ...properties },
             userProperties: {},

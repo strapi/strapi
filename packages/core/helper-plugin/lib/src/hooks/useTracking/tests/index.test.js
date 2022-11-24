@@ -46,7 +46,7 @@ describe('useTracking', () => {
   test('Call trackUsage() with all attributes', async () => {
     useAppInfos.mockReturnValue({
       currentEnvironment: 'testing',
-      adminUserId: 'someTestUserId',
+      userId: 'someTestUserId',
     });
 
     const { result } = await setup();
@@ -56,7 +56,7 @@ describe('useTracking', () => {
     expect(axios.post).toBeCalledWith(
       expect.any(String),
       {
-        adminUserId: 'someTestUserId',
+        userId: 'someTestUserId',
         deviceId: 'someTestDeviceId',
         event: 'event',
         eventProperties: {
