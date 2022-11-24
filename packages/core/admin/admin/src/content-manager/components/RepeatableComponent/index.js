@@ -128,14 +128,12 @@ const RepeatableComponent = ({
           {componentValue.map((data, index) => {
             const key = data.__temp_key__;
             const componentFieldName = `${name}.${index}`;
-            const hasErrors = componentErrorKeys.includes(componentFieldName);
 
             return (
               <Component
                 componentFieldName={componentFieldName}
                 componentUid={componentUid}
                 fields={componentLayoutData.layouts.edit}
-                hasErrors={hasErrors}
                 key={key}
                 index={index}
                 isOpen={collapseToOpen === key}
@@ -166,6 +164,7 @@ const RepeatableComponent = ({
 RepeatableComponent.defaultProps = {
   componentValue: null,
   componentValueLength: 0,
+  isReadOnly: false,
   max: Infinity,
   min: 0,
 };
@@ -174,7 +173,7 @@ RepeatableComponent.propTypes = {
   componentUid: PropTypes.string.isRequired,
   componentValue: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   componentValueLength: PropTypes.number,
-  isReadOnly: PropTypes.bool.isRequired,
+  isReadOnly: PropTypes.bool,
   max: PropTypes.number,
   min: PropTypes.number,
   name: PropTypes.string.isRequired,
