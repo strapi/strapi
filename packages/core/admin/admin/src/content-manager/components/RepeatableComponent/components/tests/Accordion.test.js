@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 
@@ -7,7 +8,9 @@ import * as Accordion from '../Accordion';
 
 describe('RepeatableComponent | Accordion', () => {
   describe('Group', () => {
-    const defaultProps = {};
+    const defaultProps = {
+      children: 'I am a child',
+    };
 
     const TestComponent = (props) => (
       <ThemeProvider theme={lightTheme}>
@@ -19,11 +22,52 @@ describe('RepeatableComponent | Accordion', () => {
 
     const setup = (props) => render(<TestComponent {...props} />);
 
-    it.todo('should render the children passed to it');
+    it('should render the children passed to it', () => {
+      const { container, getByText } = setup();
 
-    it.todo('should render the error if there is one');
+      expect(getByText('I am a child')).toBeInTheDocument();
 
-    it.todo('should make the children keyboard navigable');
+      expect(container).toMatchSnapshot();
+    });
+
+    it('should render the error if there is one', () => {
+      const { container, getByText } = setup({
+        error: { id: 'error', defaultMessage: 'I have an error' },
+      });
+
+      expect(getByText('I have an error')).toBeInTheDocument();
+
+      expect(container).toMatchSnapshot();
+    });
+
+    it('should make the children keyboard navigable', async () => {
+      const user = userEvent.setup();
+
+      const { getByText } = setup({
+        children: (
+          <div>
+            <div>
+              <button data-strapi-accordion-toggle type="button">
+                I am a first button
+              </button>
+            </div>
+            <div>
+              <button data-strapi-accordion-toggle type="button">
+                I am a second button
+              </button>
+            </div>
+          </div>
+        ),
+      });
+
+      await user.tab();
+
+      expect(getByText('I am a first button')).toHaveFocus();
+
+      await user.keyboard('[ArrowDown]');
+
+      expect(getByText('I am a second button')).toHaveFocus();
+    });
   });
 
   describe('Content', () => {

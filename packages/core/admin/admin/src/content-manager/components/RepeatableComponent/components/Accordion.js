@@ -50,7 +50,10 @@ export const Group = ({ children, error }) => {
       {error && (
         <Box paddingTop={1}>
           <Typography variant="pi" textColor="danger600">
-            {formatMessage({ id: error.id, defaultMessage: error.id }, { ...error.values })}
+            {formatMessage(
+              { id: error.id, defaultMessage: error.defaultMessage },
+              { ...error.values }
+            )}
           </Typography>
         </Box>
       )}

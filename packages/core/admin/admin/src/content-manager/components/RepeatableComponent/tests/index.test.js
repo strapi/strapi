@@ -5,8 +5,8 @@ import { IntlProvider } from 'react-intl';
 
 import RepeatableComponent from '../index';
 
-jest.mock('../../../FieldComponent', () => () => "I'm a field component");
-jest.mock('../../../Inputs', () => () => "I'm inputs");
+jest.mock('../../FieldComponent', () => () => "I'm a field component");
+jest.mock('../../Inputs', () => () => "I'm inputs");
 
 const toggleNotification = jest.fn();
 
