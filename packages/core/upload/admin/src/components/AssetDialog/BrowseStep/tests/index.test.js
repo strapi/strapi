@@ -2,18 +2,20 @@ import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render, fireEvent, screen } from '@testing-library/react';
-import { NotificationsProvider } from '@strapi/helper-plugin';
+import { NotificationsProvider, usePersistentState } from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClientProvider, QueryClient } from 'react-query';
 
 import { useFolder } from '../../../../hooks/useFolder';
 import { BrowseStep } from '..';
+import { viewOptions } from '../../../../constants';
 
 jest.mock('../../../../hooks/useFolder');
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
+  usePersistentState: jest.fn().mockReturnValue([0, jest.fn()]),
 }));
 
 const FIXTURE_ASSETS = [
@@ -210,5 +212,36 @@ describe('BrowseStep', () => {
 
     expect(screen.getByText('Folders (1)')).toBeInTheDocument();
     expect(screen.getByText('Assets (1)')).toBeInTheDocument();
+  });
+
+  describe('displays the appropriate switch to change the view', () => {
+    const setView = jest.fn();
+    it('Start with Grid View', () => {
+      usePersistentState.mockReturnValueOnce([viewOptions.GRID, setView]);
+      const { queryByRole } = setup();
+
+      const listSwitch = queryByRole('button', { name: 'List View' });
+      const gridSwitch = queryByRole('button', { name: 'Grid View' });
+
+      expect(listSwitch).toBeInTheDocument();
+      expect(gridSwitch).not.toBeInTheDocument();
+
+      fireEvent.click(listSwitch);
+      expect(setView).toHaveBeenCalledWith(viewOptions.LIST);
+    });
+
+    it('Start with List View', () => {
+      usePersistentState.mockReturnValueOnce([viewOptions.LIST, setView]);
+      const { queryByRole } = setup();
+
+      const listSwitch = queryByRole('button', { name: 'List View' });
+      const gridSwitch = queryByRole('button', { name: 'Grid View' });
+
+      expect(gridSwitch).toBeInTheDocument();
+      expect(listSwitch).not.toBeInTheDocument();
+
+      fireEvent.click(gridSwitch);
+      expect(setView).toHaveBeenCalledWith(viewOptions.GRID);
+    });
   });
 });

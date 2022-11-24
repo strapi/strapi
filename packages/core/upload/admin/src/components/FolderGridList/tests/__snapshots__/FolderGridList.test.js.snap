@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`FolderList renders and match snapshots 1`] = `
+exports[`FolderGridList renders and match snapshots 1`] = `
 .c3 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -42,13 +42,13 @@ exports[`FolderList renders and match snapshots 1`] = `
       <h2
         class="c1"
       >
-        Folder list title
+        Folder grid list title
       </h2>
     </div>
     <div
       class="c2"
     >
-      Folder list children
+      Folder grid list children
     </div>
   </div>
   <div

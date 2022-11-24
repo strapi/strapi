@@ -110,7 +110,7 @@ describe('TableList', () => {
     expect(onSelectAllSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('should disable bulk select when users do not have update persmission', () => {
+  it('should disable bulk select when users do not have update permissions', () => {
     const { getByRole } = setup({ canUpdate: false });
 
     expect(getByRole('checkbox', { name: 'Select all folders & assets' })).toBeDisabled();

@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react'; // useState
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
+
 import {
   LoadingIndicatorPage,
   useFocusWhenNavigate,
@@ -10,6 +11,7 @@ import {
   useSelectionState,
   useQueryParams,
   useTracking,
+  usePersistentState,
 } from '@strapi/helper-plugin';
 import { Layout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -22,19 +24,22 @@ import { Typography } from '@strapi/design-system/Typography';
 import { GridItem } from '@strapi/design-system/Grid';
 import { Flex } from '@strapi/design-system/Flex';
 import Pencil from '@strapi/icons/Pencil';
+import List from '@strapi/icons/List';
+import Grid from '@strapi/icons/Grid';
+
 import { UploadAssetDialog } from '../../components/UploadAssetDialog/UploadAssetDialog';
 import { EditFolderDialog } from '../../components/EditFolderDialog';
 import { EditAssetDialog } from '../../components/EditAssetDialog';
-import { AssetGridList } from '../../components/AssetGridList';
 import { TableList } from '../../components/TableList';
-import { FolderList } from '../../components/FolderList';
+import { AssetGridList } from '../../components/AssetGridList';
+import { FolderGridList } from '../../components/FolderGridList';
 import SortPicker from '../../components/SortPicker';
 import { useAssets } from '../../hooks/useAssets';
 import { useFolders } from '../../hooks/useFolders';
+import { useFolder } from '../../hooks/useFolder';
+import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { getTrad, containsAssetFilter, getBreadcrumbDataML, getFolderURL } from '../../utils';
 import { PaginationFooter } from '../../components/PaginationFooter';
-import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
-import { useFolder } from '../../hooks/useFolder';
 import { BulkActions } from './components/BulkActions';
 import {
   FolderCard,
@@ -45,6 +50,7 @@ import {
 import { Filters } from './components/Filters';
 import { Header } from './components/Header';
 import { EmptyOrNoPermissions } from './components/EmptyOrNoPermissions';
+import { localStorageKeys, viewOptions } from '../../constants';
 
 const BoxWithHeight = styled(Box)`
   height: ${32 / 16}rem;
@@ -56,6 +62,13 @@ const TypographyMaxWidth = styled(Typography)`
   max-width: 100%;
 `;
 
+const ActionContainer = styled(Box)`
+  svg {
+    path {
+      fill: ${({ theme }) => theme.colors.neutral500};
+    }
+  }
+`;
 export const MediaLibrary = () => {
   const { push } = useHistory();
   const {
@@ -72,9 +85,8 @@ export const MediaLibrary = () => {
   const { trackUsage } = useTracking();
   const [{ query }, setQuery] = useQueryParams();
   const isFiltering = Boolean(query._q || query.filters);
-
-  // TODO: remove and replace with data when available stored
-  const isGridView = true;
+  const [view, setView] = usePersistentState(localStorageKeys.view, viewOptions.GRID);
+  const isGridView = view === viewOptions.GRID;
 
   const {
     data: assetsData,
@@ -209,14 +221,33 @@ export const MediaLibrary = () => {
             </>
           }
           endActions={
-            <SearchURLQuery
-              label={formatMessage({
-                id: getTrad('search.label'),
-                defaultMessage: 'Search for an asset',
-              })}
-              trackedEvent="didSearchMediaLibraryElements"
-              trackedEventDetails={{ location: 'upload' }}
-            />
+            <>
+              <ActionContainer paddingTop={1} paddingBottom={1}>
+                <IconButton
+                  icon={isGridView ? <List /> : <Grid />}
+                  label={
+                    isGridView
+                      ? formatMessage({
+                          id: 'view-switch.list',
+                          defaultMessage: 'List View',
+                        })
+                      : formatMessage({
+                          id: 'view-switch.grid',
+                          defaultMessage: 'Grid View',
+                        })
+                  }
+                  onClick={() => setView(isGridView ? viewOptions.LIST : viewOptions.GRID)}
+                />
+              </ActionContainer>
+              <SearchURLQuery
+                label={formatMessage({
+                  id: getTrad('search.label'),
+                  defaultMessage: 'Search for an asset',
+                })}
+                trackedEvent="didSearchMediaLibraryElements"
+                trackedEventDetails={{ location: 'upload' }}
+              />
+            </>
           }
         />
 
@@ -266,7 +297,7 @@ export const MediaLibrary = () => {
           {canRead && isGridView && (
             <>
               {folderCount > 0 && (
-                <FolderList
+                <FolderGridList
                   title={
                     // Folders title should only appear if:
                     // user is filtering and there are assets to display, to divide both type of elements
@@ -354,7 +385,7 @@ export const MediaLibrary = () => {
                       </GridItem>
                     );
                   })}
-                </FolderList>
+                </FolderGridList>
               )}
 
               {assetCount > 0 && folderCount > 0 && (
