@@ -25,7 +25,7 @@ import { CopyLinkButton } from '../../CopyLinkButton';
 import { UploadProgress } from '../../UploadProgress';
 import { AssetType, AssetDefinition } from '../../../constants';
 import { AssetPreview } from './AssetPreview';
-import { createAssetUrl } from '../../../utils/createAssetUrl';
+import { createAssetUrl } from '../../../utils';
 
 export const PreviewBox = ({
   asset,

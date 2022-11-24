@@ -1,11 +1,11 @@
 import { stringify } from 'qs';
 
-const getFolderURL = (pathname, query, folder) => {
+const getFolderURL = (pathname, query, folderID) => {
   const { _q, ...queryParamsWithoutQ } = query;
   const queryParamsString = stringify(
     {
       ...queryParamsWithoutQ,
-      folder: folder?.id,
+      folder: folderID,
     },
     { encode: false }
   );

@@ -9,7 +9,7 @@ export const FolderList = ({ title, children }) => {
   return (
     <KeyboardNavigable tagName="article">
       {title && (
-        <Box paddingTop={2} paddingBottom={2}>
+        <Box paddingBottom={2}>
           <Typography as="h2" variant="delta" fontWeight="semiBold">
             {title}
           </Typography>
