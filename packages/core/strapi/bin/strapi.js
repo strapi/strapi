@@ -285,7 +285,9 @@ program
       .default(true)
       .argParser(parseInputBool)
   )
-  .addOption(new Option('--key', 'Provide encryption key in command instead of using a prompt'))
+  .addOption(
+    new Option('--key <string>', 'Provide encryption key in command instead of using a prompt')
+  )
   .addOption(
     new Option('--max-size <max MB per file>', 'split final file when exceeding size in MB')
   )
@@ -295,8 +297,8 @@ program
       'split internal jsonl files when exceeding max size in MB'
     )
   )
+  .addOption(new Option('-f, --file <file>', 'name to use for exported file (without extensions)'))
   .addOption(excludeOption)
-  .arguments('[filename]')
   .allowExcessArguments(false)
   .hook('preAction', promptEncryptionKey)
   .action(getLocalScript('transfer/export'));
@@ -321,9 +323,14 @@ program
       .default('exact')
   )
   .addOption(
-    new Option('--key [encryptionKey]', 'prompt for [or provide directly] the decryption key')
+    new Option('--key <string>', 'Provide encryption key in command instead of using a prompt')
   )
-  .arguments('<filename>')
+  .addOption(
+    new Option(
+      '-f, --file <file>',
+      'path and filename to the Strapi export file you want to import'
+    )
+  )
   .allowExcessArguments(false)
   .hook(
     'preAction',
