@@ -264,7 +264,7 @@ class TransferEngine<
       // Run the transfer stages
       await this.transferSchemas();
       await this.transferEntities();
-      await this.transferMedia();
+      await this.transferAssets();
       await this.transferLinks();
       await this.transferConfiguration();
 
@@ -385,10 +385,10 @@ class TransferEngine<
     });
   }
 
-  async transferMedia(): Promise<void> {
-    const stageName: TransferStage = 'media';
-    const inStream = await this.sourceProvider.streamMedia?.();
-    const outStream = await this.destinationProvider.getMediaStream?.();
+  async transferAssets(): Promise<void> {
+    const stageName: TransferStage = 'assets';
+    const inStream = await this.sourceProvider.streamAssets?.();
+    const outStream = await this.destinationProvider.getAssetsStream?.();
 
     if (!inStream) {
       throw new Error('Unable to transfer links, source stream is missing');
@@ -398,7 +398,7 @@ class TransferEngine<
       throw new Error('Unable to transfer links, destination stream is missing');
     }
 
-    this.#updateStage('start', 'media');
+    this.#updateStage('start', stageName);
 
     return new Promise((resolve, reject) => {
       inStream

@@ -70,7 +70,7 @@ const getLocalScript =
 // TODO: validate these inputs. Hopefully here, but worst case it may require adding a hook on each command
 const excludeOption = new Option(
   '--exclude <data,to,exclude>',
-  'Comma-separated list of data to exclude (files [localMediaFiles, providerMediaFiles], content [entities, links], schema, configuration)' // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
+  'Comma-separated list of data to exclude (files [localAssets, providerAssets], content [entities, links], schema, configuration)'
 ).argParser(parseInputList);
 
 // Initial program setup

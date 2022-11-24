@@ -236,7 +236,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return chain([stringer(), entryStream]);
   }
 
-  getMediaStream(): NodeJS.WritableStream {
+  getAssetsStream(): NodeJS.WritableStream {
     const { stream: archiveStream } = this.#archive;
 
     if (!archiveStream) {
@@ -246,7 +246,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return new Writable({
       objectMode: true,
       write(data, _encoding, callback) {
-        const entryPath = path.join('media', 'uploads', data.file);
+        const entryPath = path.join('assets', 'uploads', data.file);
 
         const entry = archiveStream.entry({
           name: entryPath,
