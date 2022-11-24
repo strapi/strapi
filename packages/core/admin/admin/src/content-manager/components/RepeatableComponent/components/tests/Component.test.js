@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import { DndProvider } from 'react-dnd';
@@ -16,6 +16,7 @@ jest.mock('@strapi/helper-plugin', () => ({
     modifiedData: {
       test: {
         test: 'repetable-component',
+        drag: 'repetable-component2',
       },
     },
   })),
@@ -34,11 +35,13 @@ describe('RepeatableComponent | Component', () => {
     onClickToggle: jest.fn(),
   };
 
-  const TestComponent = (props) => (
+  // eslint-disable-next-line react/prop-types
+  const TestComponent = ({ testingDnd, ...props }) => (
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} defaultLocale="en">
         <DndProvider backend={HTML5Backend}>
           <Component {...defaultProps} {...props} />
+          {testingDnd ? <Component {...defaultProps} {...props} mainField="drag" /> : null}
         </DndProvider>
       </IntlProvider>
     </ThemeProvider>
@@ -116,45 +119,45 @@ describe('RepeatableComponent | Component', () => {
   });
 
   describe('Keyboard drag and drop', () => {
-    it.skip('should not move with arrow keys if the button is not pressed first', () => {
-      // const updatePositionOfRelationMock = jest.fn();
-      // setup({
-      //   updatePositionOfRelation: updatePositionOfRelationMock,
-      //   testingDnd: true,
-      // });
-      // const [draggedItem] = screen.getAllByText('Drag');
-      // fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
-      // expect(updatePositionOfRelationMock).not.toBeCalled();
+    it('should not move with arrow keys if the button is not pressed first', () => {
+      const moveComponentField = jest.fn();
+      setup({
+        moveComponentField,
+        testingDnd: true,
+      });
+      const [draggedItem] = screen.getAllByText('Drag');
+      fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
+      expect(moveComponentField).not.toBeCalled();
     });
 
-    it.skip('should move with the arrow keys if the button has been activated first', () => {
-      // const updatePositionOfRelationMock = jest.fn();
-      // setup({ updatePositionOfRelation: updatePositionOfRelationMock, testingDnd: true });
-      // const [draggedItem] = screen.getAllByText('Drag');
-      // fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
-      // fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
-      // expect(updatePositionOfRelationMock).toBeCalledWith(1, 0);
+    it('should move with the arrow keys if the button has been activated first', () => {
+      const moveComponentField = jest.fn();
+      setup({ moveComponentField, testingDnd: true });
+      const [draggedItem] = screen.getAllByText('Drag');
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
+      expect(moveComponentField).toBeCalledWith(1, 0);
     });
 
-    it.skip('should move with the arrow keys if the button has been activated and then not move after the button has been deactivated', () => {
-      // const updatePositionOfRelationMock = jest.fn();
-      // setup({ updatePositionOfRelation: updatePositionOfRelationMock, testingDnd: true });
-      // const [draggedItem] = screen.getAllByText('Drag');
-      // fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
-      // fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
-      // fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
-      // fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
-      // expect(updatePositionOfRelationMock).toBeCalledTimes(1);
+    it('should move with the arrow keys if the button has been activated and then not move after the button has been deactivated', () => {
+      const moveComponentField = jest.fn();
+      setup({ moveComponentField, testingDnd: true });
+      const [draggedItem] = screen.getAllByText('Drag');
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
+      expect(moveComponentField).toBeCalledTimes(1);
     });
 
-    it.skip('should exit drag and drop mode when the escape key is pressed', () => {
-      // const updatePositionOfRelationMock = jest.fn();
-      // setup({ updatePositionOfRelation: updatePositionOfRelationMock, testingDnd: true });
-      // const [draggedItem] = screen.getAllByText('Drag');
-      // fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
-      // fireEvent.keyDown(draggedItem, { key: 'Escape', code: 'Escape' });
-      // fireEvent.keyDown(draggedItem, { key: 'ArrowUp', code: 'ArrowUp' });
-      // expect(updatePositionOfRelationMock).not.toBeCalled();
+    it('should exit drag and drop mode when the escape key is pressed', () => {
+      const moveComponentField = jest.fn();
+      setup({ moveComponentField, testingDnd: true });
+      const [draggedItem] = screen.getAllByText('Drag');
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'Escape', code: 'Escape' });
+      fireEvent.keyDown(draggedItem, { key: 'ArrowUp', code: 'ArrowUp' });
+      expect(moveComponentField).not.toBeCalled();
     });
   });
 });

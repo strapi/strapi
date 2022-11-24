@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { DndProvider } from 'react-dnd';
@@ -50,6 +50,7 @@ jest.mock('@strapi/helper-plugin', () => ({
       'error-min': { id: 'min-error', defaultMessage: 'This is an min error' },
     },
     triggerFormValidation: jest.fn(),
+    moveComponentField: jest.fn(),
   })),
 }));
 
@@ -293,6 +294,7 @@ describe('RepeatableComponents', () => {
           'error-field': { id: 'error', defaultMessage: 'This is an error' },
         },
         addRepeatableComponentToField,
+        moveComponentField: jest.fn(),
       }));
 
       const { getByRole, rerender } = setup({
@@ -315,6 +317,77 @@ describe('RepeatableComponents', () => {
       expect(getByRole('button', { name: /accordion1/ })).toHaveAttribute('aria-expanded', 'false');
       expect(getByRole('button', { name: /accordion2/ })).toHaveAttribute('aria-expanded', 'false');
       expect(getByRole('button', { name: /accordion3/ })).toHaveAttribute('aria-expanded', 'true');
+    });
+  });
+
+  describe('Accessibility', () => {
+    it('should have have description text', () => {
+      setup({
+        componentValue: [{ __temp_key__: 1 }, { __temp_key__: 2 }],
+        componentValueLength: 2,
+      });
+
+      expect(screen.queryByText('Press spacebar to grab and re-order')).toBeInTheDocument();
+    });
+
+    it('should update the live text when an item has been grabbed', async () => {
+      setup({
+        componentValue: [{ __temp_key__: 1 }, { __temp_key__: 2 }],
+        componentValueLength: 2,
+      });
+
+      const [draggedItem] = screen.getAllByText('Drag');
+
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+
+      expect(
+        screen.queryByText(
+          /Press up and down arrow to change position, Spacebar to drop, Escape to cancel/
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('should change the live text when an item has been moved', () => {
+      setup({
+        componentValue: [{ __temp_key__: 1 }, { __temp_key__: 2 }],
+        componentValueLength: 2,
+      });
+
+      const [draggedItem] = screen.getAllByText('Drag');
+
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
+
+      expect(screen.queryByText(/New position in list/)).toBeInTheDocument();
+    });
+
+    it('should change the live text when an item has been dropped', () => {
+      setup({
+        componentValue: [{ __temp_key__: 1 }, { __temp_key__: 2 }],
+        componentValueLength: 2,
+      });
+
+      const [draggedItem] = screen.getAllByText('Drag');
+
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+
+      expect(screen.queryByText(/Final position in list/)).toBeInTheDocument();
+    });
+
+    it('should change the live text after the reordering interaction has been cancelled', () => {
+      setup({
+        componentValue: [{ __temp_key__: 1 }, { __temp_key__: 2 }],
+        componentValueLength: 2,
+      });
+
+      const [draggedItem] = screen.getAllByText('Drag');
+
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'Escape', code: 'Escape' });
+
+      expect(screen.queryByText(/Re-order cancelled/)).toBeInTheDocument();
     });
   });
 });

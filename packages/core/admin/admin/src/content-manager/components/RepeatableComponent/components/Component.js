@@ -1,7 +1,6 @@
 /* eslint-disable import/no-cycle */
 import React, { memo, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
@@ -20,6 +19,8 @@ import {
   IconButton,
 } from '@strapi/design-system';
 import { Trash, Drag } from '@strapi/icons';
+
+import { useDragAndDrop } from '../../../hooks/useDragAndDrop';
 
 import { composeRefs, getTrad, ItemTypes } from '../../../utils';
 
@@ -83,6 +84,9 @@ const DraggedItem = ({
   moveComponentField,
   onClickToggle,
   toggleCollapses,
+  onGrabItem,
+  onDropItem,
+  onCancel,
 }) => {
   const { modifiedData, removeRepeatableField, triggerFormValidation } = useCMEditViewDataManager();
 
@@ -90,72 +94,29 @@ const DraggedItem = ({
     get(modifiedData, [...componentFieldName.split('.'), mainField], '')
   );
   const accordionRef = useRef(null);
-  const boxRef = useRef(null);
   const { formatMessage } = useIntl();
 
-  const [{ handlerId }, dropRef] = useDrop({
-    accept: ItemTypes.COMPONENT,
-    collect(monitor) {
-      return {
-        handlerId: monitor.getHandlerId(),
-      };
-    },
-    hover(item, monitor) {
-      if (!boxRef.current) {
-        return;
-      }
-
-      const dragIndex = item.index;
-      const currentIndex = index;
-
-      // Don't replace items with themselves
-      if (dragIndex === currentIndex) {
-        return;
-      }
-
-      const hoverBoundingRect = boxRef.current.getBoundingClientRect();
-      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      const clientOffset = monitor.getClientOffset();
-      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
-
-      // Dragging downwards
-      if (dragIndex < currentIndex && hoverClientY < hoverMiddleY) {
-        return;
-      }
-
-      // Dragging upwards
-      if (dragIndex > currentIndex && hoverClientY > hoverMiddleY) {
-        return;
-      }
-
-      // Time to actually perform the action
-      moveComponentField(dragIndex, currentIndex);
-
-      item.index = currentIndex;
-    },
-  });
-  const [{ isDragging }, dragRef, previewRef] = useDrag({
-    type: ItemTypes.COMPONENT,
-    item() {
-      // Close all collapses
-      toggleCollapses();
-
-      return {
-        index,
-      };
-    },
-    end() {
-      // Update the errors
-      triggerFormValidation();
-    },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  });
+  const [{ handlerId, isDragging, handleKeyDown }, boxRef, dropRef, dragRef, dragPreviewRef] =
+    useDragAndDrop(!isReadOnly, {
+      type: ItemTypes.COMPONENT,
+      index,
+      onMoveItem: moveComponentField,
+      onStart() {
+        // Close all collapses
+        toggleCollapses();
+      },
+      onEnd() {
+        // Update the errors
+        triggerFormValidation();
+      },
+      onGrabItem,
+      onDropItem,
+      onCancel,
+    });
 
   useEffect(() => {
-    previewRef(getEmptyImage(), { captureDraggingState: false });
-  }, [previewRef]);
+    dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
+  }, [dragPreviewRef]);
 
   const composedAccordionRefs = composeRefs(accordionRef, dragRef);
   const composedBoxRefs = composeRefs(boxRef, dropRef);
@@ -163,7 +124,7 @@ const DraggedItem = ({
   return (
     <Box ref={composedBoxRefs}>
       {isDragging ? (
-        <Preview ref={previewRef} />
+        <Preview ref={dragPreviewRef} />
       ) : (
         <Accordion expanded={isOpen} onToggle={onClickToggle} id={componentFieldName} size="S">
           <AccordionToggle
@@ -197,6 +158,7 @@ const DraggedItem = ({
                       id: getTrad('components.DragHandle-label'),
                       defaultMessage: 'Drag',
                     })}
+                    onKeyDown={handleKeyDown}
                   >
                     <Drag />
                   </IconButton>
@@ -267,6 +229,9 @@ DraggedItem.defaultProps = {
   fields: [],
   isReadOnly: false,
   isOpen: false,
+  onGrabItem: undefined,
+  onDropItem: undefined,
+  onCancel: undefined,
   toggleCollapses() {},
 };
 
@@ -279,6 +244,9 @@ DraggedItem.propTypes = {
   isReadOnly: PropTypes.bool,
   mainField: PropTypes.string.isRequired,
   moveComponentField: PropTypes.func.isRequired,
+  onGrabItem: PropTypes.func,
+  onDropItem: PropTypes.func,
+  onCancel: PropTypes.func,
   onClickToggle: PropTypes.func.isRequired,
   toggleCollapses: PropTypes.func,
 };

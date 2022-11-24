@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import get from 'lodash/get';
 
 import { useNotification, useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { Box, Flex, TextButton } from '@strapi/design-system';
+import { Box, Flex, TextButton, VisuallyHidden } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 
 import { getMaxTempKey, getTrad } from '../../utils';
@@ -44,6 +44,7 @@ const RepeatableComponent = ({
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const [collapseToOpen, setCollapseToOpen] = useState('');
+  const [liveText, setLiveText] = useState('');
   const { getComponentLayout, components } = useContentTypeLayout();
   const componentLayoutData = useMemo(
     () => getComponentLayout(componentUid),
@@ -82,6 +83,19 @@ const RepeatableComponent = ({
   };
 
   const handleMoveComponentField = (newIndex, currentIndex) => {
+    setLiveText(
+      formatMessage(
+        {
+          id: getTrad('dnd.reorder'),
+          defaultMessage: '{item}, moved. New position in list: {position}.',
+        },
+        {
+          item: `${name}.${currentIndex}`,
+          position: getItemPos(newIndex),
+        }
+      )
+    );
+
     moveComponentField({
       name,
       newIndex,
@@ -97,6 +111,57 @@ const RepeatableComponent = ({
     } else {
       setCollapseToOpen(key);
     }
+  };
+
+  /**
+   *
+   * @param {number} index
+   * @returns {string}
+   */
+  const getItemPos = (index) => `${index + 1} of ${componentValueLength}`;
+
+  const handleCancel = (index) => {
+    setLiveText(
+      formatMessage(
+        {
+          id: getTrad('dnd.cancel-item'),
+          defaultMessage: '{item}, dropped. Re-order cancelled.',
+        },
+        {
+          item: `${name}.${index}`,
+        }
+      )
+    );
+  };
+
+  const handleGrabItem = (index) => {
+    setLiveText(
+      formatMessage(
+        {
+          id: getTrad('dnd.grab-item'),
+          defaultMessage: `{item}, grabbed. Current position in list: {position}. Press up and down arrow to change position, Spacebar to drop, Escape to cancel.`,
+        },
+        {
+          item: `${name}.${index}`,
+          position: getItemPos(index),
+        }
+      )
+    );
+  };
+
+  const handleDropItem = (index) => {
+    setLiveText(
+      formatMessage(
+        {
+          id: getTrad('dnd.drop-item'),
+          defaultMessage: `{item}, dropped. Final position in list: {position}.`,
+        },
+        {
+          item: `${name}.${index}`,
+          position: getItemPos(index),
+        }
+      )
+    );
   };
 
   let errorMessage = formErrors[name];
@@ -121,10 +186,19 @@ const RepeatableComponent = ({
     );
   }
 
+  const ariaDescriptionId = `${name}-item-instructions`;
+
   return (
     <Box hasRadius>
-      <Accordion.Group error={errorMessage}>
-        <Accordion.Content>
+      <VisuallyHidden id={ariaDescriptionId}>
+        {formatMessage({
+          id: getTrad('dnd.instructions'),
+          defaultMessage: `Press spacebar to grab and re-order`,
+        })}
+      </VisuallyHidden>
+      <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
+      <Accordion.Group error={errorMessage} ariaDescribedBy={ariaDescriptionId}>
+        <Accordion.Content aria-describedby={ariaDescriptionId}>
           {componentValue.map((data, index) => {
             const key = data.__temp_key__;
             const componentFieldName = `${name}.${index}`;
@@ -142,6 +216,9 @@ const RepeatableComponent = ({
                 moveComponentField={handleMoveComponentField}
                 onClickToggle={handleToggle(key)}
                 toggleCollapses={toggleCollapses}
+                onCancel={handleCancel}
+                onDropItem={handleDropItem}
+                onGrabItem={handleGrabItem}
               />
             );
           })}
