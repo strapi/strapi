@@ -8,6 +8,7 @@ const _ = require('lodash');
 const resolveCwd = require('resolve-cwd');
 const { yellow } = require('chalk');
 const { Command, Option } = require('commander');
+const inquirer = require('inquirer');
 
 const program = new Command();
 
@@ -285,7 +286,9 @@ program
       .default(true)
       .argParser(parseInputBool)
   )
-  .addOption(new Option('--key', 'Provide encryption key in command instead of using a prompt'))
+  .addOption(
+    new Option('--key <string>', 'Provide encryption key in command instead of using a prompt')
+  )
   .addOption(
     new Option('--max-size <max MB per file>', 'split final file when exceeding size in MB')
   )
@@ -295,8 +298,8 @@ program
       'split internal jsonl files when exceeding max size in MB'
     )
   )
+  .addOption(new Option('-f, --file <file>', 'name to use for exported file (without extensions)'))
   .addOption(excludeOption)
-  .arguments('[filename]')
   .allowExcessArguments(false)
   .hook('preAction', promptEncryptionKey)
   .action(getLocalScript('transfer/export'));
@@ -320,11 +323,35 @@ program
       .choices(['exact', 'strict', 'subset', 'bypass'])
       .default('exact')
   )
-  .addOption(
-    new Option('--key [encryptionKey]', 'prompt for [or provide directly] the decryption key')
+  .requiredOption(
+    '-f, --file <file>',
+    'path and filename to the Strapi export file you want to import'
   )
-  .arguments('<filename>')
+  .addOption(
+    new Option('--key <string>', 'Provide encryption key in command instead of using a prompt')
+  )
   .allowExcessArguments(false)
+  .hook('preAction', async (thisCommand) => {
+    const opts = thisCommand.opts();
+
+    // check extension to guess if we should prompt for key
+    if (String(opts.file).endsWith('.enc')) {
+      if (!opts.key) {
+        const answers = await inquirer.prompt([
+          {
+            type: 'password',
+            message: 'Please enter your decryption key',
+            name: 'key',
+          },
+        ]);
+        if (!answers.key?.length) {
+          console.log('No key entered, aborting import.');
+          process.exit(0);
+        }
+        opts.key = answers.key;
+      }
+    }
+  })
   .hook(
     'preAction',
     confirmKeyValue(
