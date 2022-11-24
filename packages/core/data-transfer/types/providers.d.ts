@@ -19,6 +19,7 @@ interface IProvider {
   close?(): Promise<void> | void;
   getMetadata(): IMetadata | null | Promise<IMetadata | null>;
   beforeStreaming?(): Promise<void>;
+  validateOptions?(): void;
 }
 
 export interface ISourceProvider extends IProvider {

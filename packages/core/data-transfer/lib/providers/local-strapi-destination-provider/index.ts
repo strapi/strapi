@@ -7,6 +7,8 @@ import { Duplex } from 'stream';
 
 import { mapSchemasValues } from '../../utils';
 
+export const VALID_STRATEGIES = ['restore', 'merge'];
+
 interface ILocalStrapiDestinationProviderOptions {
   getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>;
   restore?: DeleteOptions;
@@ -35,11 +37,18 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async bootstrap(): Promise<void> {
+    this.validateOptions();
     this.strapi = await this.options.getStrapi();
   }
 
   async close(): Promise<void> {
     await this.strapi?.destroy?.();
+  }
+
+  validateOptions() {
+    if (!VALID_STRATEGIES.includes(this.options.strategy)) {
+      throw new Error('Invalid stategy ' + this.options.strategy);
+    }
   }
 
   async deleteAll() {

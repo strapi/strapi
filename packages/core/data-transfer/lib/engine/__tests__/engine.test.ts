@@ -294,50 +294,6 @@ describe('Transfer engine', () => {
   });
 
   describe('transfer', () => {
-    test('requires strategy to be either restore or merge', async () => {
-      const engineOptions = {
-        versionMatching: 'exact',
-        exclude: [],
-      } as unknown as ITransferEngineOptions;
-
-      const restoreEngine = createTransferEngine(minimalSource, minimalDestination, {
-        ...engineOptions,
-        strategy: 'restore',
-      });
-      await restoreEngine.transfer();
-      expect(restoreEngine).toBeValidTransferEngine();
-
-      const mergeEngine = createTransferEngine(minimalSource, minimalDestination, {
-        ...engineOptions,
-        strategy: 'merge',
-      });
-      await mergeEngine.transfer();
-      expect(mergeEngine).toBeValidTransferEngine();
-
-      // undefined strategy
-      await expect(
-        (async () => {
-          const invalidEngine = createTransferEngine(
-            minimalSource,
-            minimalDestination,
-            engineOptions
-          );
-          await invalidEngine.transfer();
-        })()
-      ).rejects.toThrow();
-
-      // invalid strategy
-      await expect(
-        (async () => {
-          const invalidEngine = createTransferEngine(minimalSource, minimalDestination, {
-            ...engineOptions,
-            strategy: 'foo',
-          } as unknown as ITransferEngineOptions);
-          await invalidEngine.transfer();
-        })()
-      ).rejects.toThrow();
-    });
-
     test('calls all provider stages', async () => {
       const engine = createTransferEngine(completeSource, completeDestination, defaultOptions);
       expect(completeSource).toHaveSourceStagesCalledTimes(0);

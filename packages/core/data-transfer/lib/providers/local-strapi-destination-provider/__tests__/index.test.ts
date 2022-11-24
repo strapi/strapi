@@ -24,6 +24,33 @@ describe('Local Strapi Source Destination', () => {
   });
 
   describe('Strategy', () => {
+    test('requires strategy to be either restore or merge', async () => {
+      const restoreProvider = createLocalStrapiDestinationProvider({
+        getStrapi: getStrapiFactory(),
+        strategy: 'restore',
+      });
+      await restoreProvider.bootstrap();
+      expect(restoreProvider.strapi).toBeDefined();
+
+      const mergeProvider = createLocalStrapiDestinationProvider({
+        getStrapi: getStrapiFactory(),
+        strategy: 'merge',
+      });
+      await mergeProvider.bootstrap();
+      expect(mergeProvider.strapi).toBeDefined();
+
+      await expect(
+        (async () => {
+          const invalidProvider = createLocalStrapiDestinationProvider({
+            getStrapi: getStrapiFactory(),
+            /* @ts-ignore: disable-next-line */
+            strategy: 'foo',
+          });
+          await invalidProvider.bootstrap();
+        })()
+      ).rejects.toThrow();
+    });
+
     test('Should delete all entities if it is a restore', async () => {
       const entities = [
         {

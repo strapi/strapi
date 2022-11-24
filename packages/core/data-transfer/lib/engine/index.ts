@@ -32,8 +32,6 @@ type TransferEngineProgress = {
   stream: PassThrough;
 };
 
-export const VALID_STRATEGIES = ['restore', 'merge'];
-
 class TransferEngine<
   S extends ISourceProvider = ISourceProvider,
   D extends IDestinationProvider = IDestinationProvider
@@ -236,16 +234,8 @@ class TransferEngine<
     }
   }
 
-  validateTransferOptions() {
-    if (!VALID_STRATEGIES.includes(this.options.strategy)) {
-      throw new Error('Invalid stategy ' + this.options.strategy);
-    }
-  }
-
   async transfer(): Promise<ITransferResults<S, D>> {
     try {
-      this.validateTransferOptions();
-
       await this.bootstrap();
       await this.init();
 

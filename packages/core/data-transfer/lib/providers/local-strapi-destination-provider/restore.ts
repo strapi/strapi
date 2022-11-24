@@ -24,7 +24,6 @@ export const deleteAllRecords = async (strapi: Strapi.Strapi, deleteOptions?: De
   );
   const contentTypes: ContentTypeSchema[] = deleteOptions?.contentTypes ?? defaultContentTypes;
   let count = 0;
-  console.log(deleteOptions?.contentTypes);
   await Promise.all(
     contentTypes.map(async (contentType) => {
       const filters = conditions[contentType.uid] ?? {};
