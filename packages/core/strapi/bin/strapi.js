@@ -345,6 +345,7 @@ program
           },
         ]);
         if (!answers.key?.length) {
+          console.log('No key entered, aborting import.');
           process.exit(0);
         }
         opts.key = answers.key;
