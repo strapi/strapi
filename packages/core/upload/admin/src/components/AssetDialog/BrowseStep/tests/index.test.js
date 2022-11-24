@@ -97,6 +97,7 @@ const ComponentFixture = (props) => {
                 onChangeSort={jest.fn()}
                 onChangeFolder={jest.fn()}
                 onEditAsset={jest.fn()}
+                onEditFolder={jest.fn()}
                 onSelectAllAsset={jest.fn()}
                 onSelectAsset={jest.fn()}
                 pagination={{ pageCount: 1 }}
@@ -118,7 +119,7 @@ describe('BrowseStep', () => {
     jest.clearAllMocks();
   });
 
-  it('renders and match snapshot', () => {
+  it.only('renders and match snapshot', () => {
     const { container } = setup();
     expect(container).toMatchSnapshot();
   });

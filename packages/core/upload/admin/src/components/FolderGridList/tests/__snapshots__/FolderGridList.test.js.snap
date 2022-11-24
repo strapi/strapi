@@ -14,7 +14,6 @@ exports[`FolderGridList renders and match snapshots 1`] = `
 }
 
 .c0 {
-  padding-top: 8px;
   padding-bottom: 8px;
 }
 

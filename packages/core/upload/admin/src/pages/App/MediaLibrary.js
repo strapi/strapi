@@ -119,7 +119,12 @@ export const MediaLibrary = () => {
     push(pathname);
   }
 
-  const folders = foldersData?.map((folder) => ({ ...folder, type: 'folder' })) ?? [];
+  const folders =
+    foldersData?.map((folder) => ({
+      ...folder,
+      type: 'folder',
+      folderURL: getFolderURL(pathname, query, folder.id),
+    })) ?? [];
   const folderCount = folders?.length || 0;
   const assets = assetsData?.results?.map((asset) => ({ ...asset, type: 'asset' })) || [];
   const assetCount = assets?.length ?? 0;
@@ -275,6 +280,7 @@ export const MediaLibrary = () => {
               assetCount={assetCount}
               canUpdate={canUpdate}
               folderCount={folderCount}
+              // folderURL={getFolderURL(pathname, query, folderID)}
               indeterminate={indeterminateBulkSelect}
               onChangeSort={handleChangeSort}
               onChangeFolder={(folderID) => push(getFolderURL(pathname, query, folderID))}

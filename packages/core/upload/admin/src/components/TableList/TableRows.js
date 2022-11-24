@@ -28,11 +28,11 @@ export const TableRows = ({
 }) => {
   const { formatMessage } = useIntl();
 
-  const handleRowClickFn = (element, elementType) => {
+  const handleRowClickFn = (element, elementType, id) => {
     if (elementType === 'asset') {
       onEditAsset(element);
     } else {
-      onChangeFolder(element.id);
+      onChangeFolder(id);
     }
   };
 
@@ -41,7 +41,17 @@ export const TableRows = ({
   return (
     <Tbody>
       {rows.map((element) => {
-        const { alternativeText, id, name, ext, url, mime, formats, type: elementType } = element;
+        const {
+          alternativeText,
+          id,
+          name,
+          ext,
+          url,
+          mime,
+          folderURL,
+          formats,
+          type: elementType,
+        } = element;
 
         const fileType = mime?.split('/')?.[0];
         const canBeSelected =
@@ -53,7 +63,7 @@ export const TableRows = ({
           <Tr
             key={id}
             {...onRowClick({
-              fn: () => handleRowClickFn(element, elementType),
+              fn: () => handleRowClickFn(element, elementType, id),
             })}
           >
             <Td {...stopPropagation}>
@@ -92,12 +102,13 @@ export const TableRows = ({
               <Flex justifyContent="flex-end">
                 {elementType === 'folder' && (
                   <IconButton
-                    forwardedAs={Link}
+                    forwardedAs={folderURL ? Link : 'button'}
                     label={formatMessage({
                       id: getTrad('list.folders.link-label'),
                       defaultMessage: 'Access folder',
                     })}
-                    // to={getFolderURL(pathname, query, element)}
+                    to={folderURL}
+                    onClick={() => !folderURL && onChangeFolder(id)}
                     noBorder
                   >
                     <Eye />

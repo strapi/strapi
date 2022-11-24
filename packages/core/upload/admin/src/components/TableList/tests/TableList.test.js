@@ -13,7 +13,8 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 const PROPS_FIXTURE = {
-  canUpdate: false,
+  canUpdate: true,
+  indeterminate: false,
   rows: [
     {
       alternativeText: 'alternative text',
@@ -110,8 +111,22 @@ describe('TableList', () => {
     expect(onSelectAllSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('should display indeterminate state of bulk select checkbox', () => {
+    const { getByRole } = setup({ indeterminate: true });
+
+    expect(getByRole('checkbox', { name: 'Select all folders & assets' })).toBePartiallyChecked();
+  });
+
+  it('should not display indeterminate state of bulk select checkbox if checkbox is disabled', () => {
+    const { getByRole } = setup({ indeterminate: true, shouldDisableBulkSelect: true });
+
+    expect(
+      getByRole('checkbox', { name: 'Select all folders & assets' })
+    ).not.toBePartiallyChecked();
+  });
+
   it('should disable bulk select when users do not have update permissions', () => {
-    const { getByRole } = setup({ canUpdate: false });
+    const { getByRole } = setup({ shouldDisableBulkSelect: true });
 
     expect(getByRole('checkbox', { name: 'Select all folders & assets' })).toBeDisabled();
   });
