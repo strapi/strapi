@@ -7,10 +7,9 @@ import type {
 } from '../../../types';
 
 import fs from 'fs-extra';
-import path from 'path';
 import tar from 'tar-stream';
 import zlib from 'zlib';
-import { Writable, Readable } from 'stream';
+import { Readable } from 'stream';
 import { stringer } from 'stream-json/jsonl/Stringer';
 import { chain } from 'stream-chain';
 

@@ -29,7 +29,7 @@ describe('Local File Destination Provider - Utils', () => {
 
       test.each(cases)(
         'Given type: %s and fileIndex: %d, returns the right file path: %s',
-        (type: string, fileIndex: number, filePath) => {
+        (type: any, fileIndex: any, filePath: any) => {
           const filePathFactory = createFilePathFactory(type);
 
           const path = filePathFactory(fileIndex);
@@ -40,7 +40,7 @@ describe('Local File Destination Provider - Utils', () => {
     });
   });
   describe('Create Tar Entry Stream', () => {
-    it('Throws an error when the paylod is too large', async () => {
+    it('Throws an error when the payload is too large', async () => {
       const maxSize = 3;
       const chunk = 'test';
       const archive = tar.pack();
@@ -56,7 +56,7 @@ describe('Local File Destination Provider - Utils', () => {
 
       await expect(write).rejects.toThrow(`payload too large: ${chunk.length}>${maxSize}`);
     });
-    it('Resolves when the paylod is smaller than the max size', async () => {
+    it('Resolves when the payload is smaller than the max size', async () => {
       const maxSize = 30;
       const chunk = 'test';
       const archive = tar.pack();

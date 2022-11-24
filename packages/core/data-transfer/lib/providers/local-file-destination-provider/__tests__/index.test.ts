@@ -1,3 +1,5 @@
+import stream from 'stream';
+
 import { createLocalFileDestinationProvider, ILocalFileDestinationProviderOptions } from '../';
 import * as encryption from '../../../encryption/encrypt';
 import {
@@ -105,15 +107,15 @@ describe('Local File Destination Provider', () => {
   });
 
   describe('Streaming entities', () => {
-    it('Creates a tar entry stream', async () => {
-      const providerOptions: ILocalFileDestinationProviderOptions = {
-        encryption: { enabled: false },
-        compression: { enabled: false },
-        file: { path: filePath },
-      };
+    const providerOptions: ILocalFileDestinationProviderOptions = {
+      encryption: { enabled: false },
+      compression: { enabled: false },
+      file: { path: filePath },
+    };
+    (createTarEntryStream as jest.Mock).mockImplementation(jest.fn());
 
+    it('Creates a tar entry stream', async () => {
       const provider = createLocalFileDestinationProvider(providerOptions);
-      (createTarEntryStream as jest.Mock).mockImplementation(jest.fn());
 
       await provider.bootstrap();
       provider.getEntitiesStream();
@@ -121,18 +123,26 @@ describe('Local File Destination Provider', () => {
       expect(createTarEntryStream).toHaveBeenCalled();
       expect(createFilePathFactory).toHaveBeenCalledWith('entities');
     });
+    it('Returns a stream', async () => {
+      const provider = createLocalFileDestinationProvider(providerOptions);
+
+      await provider.bootstrap();
+      const entitiesStream = provider.getEntitiesStream();
+
+      expect(entitiesStream instanceof stream.Writable).toBeTruthy();
+    });
   });
 
   describe('Streaming schemas', () => {
-    it('Creates a tar entry stream for schemas', async () => {
-      const providerOptions: ILocalFileDestinationProviderOptions = {
-        encryption: { enabled: false },
-        compression: { enabled: false },
-        file: { path: filePath },
-      };
+    const providerOptions: ILocalFileDestinationProviderOptions = {
+      encryption: { enabled: false },
+      compression: { enabled: false },
+      file: { path: filePath },
+    };
+    (createTarEntryStream as jest.Mock).mockImplementation(jest.fn());
 
+    it('Creates a tar entry stream for schemas', async () => {
       const provider = createLocalFileDestinationProvider(providerOptions);
-      (createTarEntryStream as jest.Mock).mockImplementation(jest.fn());
 
       await provider.bootstrap();
       provider.getSchemasStream();
@@ -140,18 +150,27 @@ describe('Local File Destination Provider', () => {
       expect(createTarEntryStream).toHaveBeenCalled();
       expect(createFilePathFactory).toHaveBeenCalledWith('schemas');
     });
+
+    it('Returns a stream', async () => {
+      const provider = createLocalFileDestinationProvider(providerOptions);
+
+      await provider.bootstrap();
+      const schemasStream = provider.getSchemasStream();
+
+      expect(schemasStream instanceof stream.Writable).toBeTruthy();
+    });
   });
 
   describe('Streaming links', () => {
-    it('Creates a tar entry stream for links', async () => {
-      const providerOptions: ILocalFileDestinationProviderOptions = {
-        encryption: { enabled: false },
-        compression: { enabled: false },
-        file: { path: filePath },
-      };
+    const providerOptions: ILocalFileDestinationProviderOptions = {
+      encryption: { enabled: false },
+      compression: { enabled: false },
+      file: { path: filePath },
+    };
+    (createTarEntryStream as jest.Mock).mockImplementation(jest.fn());
 
+    it('Creates a tar entry stream for links', async () => {
       const provider = createLocalFileDestinationProvider(providerOptions);
-      (createTarEntryStream as jest.Mock).mockImplementation(jest.fn());
 
       await provider.bootstrap();
       provider.getLinksStream();
@@ -159,24 +178,42 @@ describe('Local File Destination Provider', () => {
       expect(createTarEntryStream).toHaveBeenCalled();
       expect(createFilePathFactory).toHaveBeenCalledWith('links');
     });
+
+    it('Returns a stream', async () => {
+      const provider = createLocalFileDestinationProvider(providerOptions);
+
+      await provider.bootstrap();
+      const linksStream = provider.getLinksStream();
+
+      expect(linksStream instanceof stream.Writable).toBeTruthy();
+    });
   });
 
   describe('Streaming configuration', () => {
-    it('Creates a tar entry stream for configuration', async () => {
-      const providerOptions: ILocalFileDestinationProviderOptions = {
-        encryption: { enabled: false },
-        compression: { enabled: false },
-        file: { path: filePath },
-      };
+    const providerOptions: ILocalFileDestinationProviderOptions = {
+      encryption: { enabled: false },
+      compression: { enabled: false },
+      file: { path: filePath },
+    };
+    (createTarEntryStream as jest.Mock).mockImplementation(jest.fn());
 
+    it('Creates a tar entry stream for configuration', async () => {
       const provider = createLocalFileDestinationProvider(providerOptions);
-      (createTarEntryStream as jest.Mock).mockImplementation(jest.fn());
 
       await provider.bootstrap();
       provider.getConfigurationStream();
 
       expect(createTarEntryStream).toHaveBeenCalled();
       expect(createFilePathFactory).toHaveBeenCalledWith('configuration');
+    });
+
+    it('Returns a stream', async () => {
+      const provider = createLocalFileDestinationProvider(providerOptions);
+
+      await provider.bootstrap();
+      const configurationStream = provider.getConfigurationStream();
+
+      expect(configurationStream instanceof stream.Writable).toBeTruthy();
     });
   });
 });
