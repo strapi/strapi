@@ -4,7 +4,7 @@ export type DeleteOptions = {
   contentTypes?: ContentTypeSchema[];
   conditions?: {
     [contentTypeUid: string]: {
-      where: any;
+      params: any;
     };
   };
 };
@@ -26,11 +26,9 @@ export const deleteAllRecords = async (strapi: Strapi.Strapi, deleteOptions?: De
   let count = 0;
   await Promise.all(
     contentTypes.map(async (contentType) => {
-      const filters = conditions[contentType.uid] ?? {};
-      const result = await strapi?.db.query(contentType.uid).deleteMany({
-        filters,
-      });
-      count += result.count;
+      const params = conditions[contentType.uid]?.params ?? {};
+      const result = await strapi?.entityService.deleteMany(contentType.uid, params);
+      count += result ? result.count : 0;
     })
   );
 

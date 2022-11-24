@@ -82,18 +82,15 @@ describe('Local Strapi Source Destination', () => {
           contentType: { uid: 'bar' },
         },
       ];
-      const query = jest.fn((uid: string) => {
-        return {
-          deleteMany: async () => ({
-            count: entities.filter((entity) => entity.contentType.uid === uid).length,
-          }),
-        };
-      });
+      const deleteMany = jest.fn(async (uid: string) => ({
+        count: entities.filter((entity) => entity.contentType.uid === uid).length,
+      }));
+
       const provider = createLocalStrapiDestinationProvider({
         getStrapi: getStrapiFactory({
           contentTypes: getContentTypes(),
-          db: {
-            query,
+          entityService: {
+            deleteMany,
           },
         }),
         strategy: 'restore',
@@ -137,18 +134,14 @@ describe('Local Strapi Source Destination', () => {
           contentType: { uid: 'bar' },
         },
       ];
-      const query = jest.fn((uid: string) => {
-        return {
-          deleteMany: async () => ({
-            count: entities.filter((entity) => entity.contentType.uid === uid).length,
-          }),
-        };
-      });
+      const deleteMany = jest.fn(async (uid: string) => ({
+        count: entities.filter((entity) => entity.contentType.uid === uid).length,
+      }));
       const provider = createLocalStrapiDestinationProvider({
         getStrapi: getStrapiFactory({
           contentTypes: getContentTypes(),
-          db: {
-            query,
+          entityService: {
+            deleteMany,
           },
         }),
         strategy: 'restore',
