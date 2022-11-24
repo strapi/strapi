@@ -107,61 +107,6 @@ describe('Local Strapi Source Destination', () => {
       expect(deleteAllSpy).toBeCalledTimes(1);
     });
 
-    test('Should delete only chosen contentTypes', async () => {
-      const entities = [
-        {
-          entity: { id: 1, title: 'My first foo' },
-          contentType: { uid: 'foo' },
-        },
-        {
-          entity: { id: 4, title: 'Another Foo' },
-          contentType: { uid: 'foo' },
-        },
-        {
-          entity: { id: 12, title: 'Last foo' },
-          contentType: { uid: 'foo' },
-        },
-        {
-          entity: { id: 1, age: 21 },
-          contentType: { uid: 'bar' },
-        },
-        {
-          entity: { id: 2, age: 42 },
-          contentType: { uid: 'bar' },
-        },
-        {
-          entity: { id: 7, age: 84 },
-          contentType: { uid: 'bar' },
-        },
-        {
-          entity: { id: 9, age: 0 },
-          contentType: { uid: 'bar' },
-        },
-      ];
-      const deleteMany = jest.fn(async (uid: string) => ({
-        count: entities.filter((entity) => entity.contentType.uid === uid).length,
-      }));
-      const provider = createLocalStrapiDestinationProvider({
-        getStrapi: getStrapiFactory({
-          contentTypes: getContentTypes(),
-          entityService: {
-            deleteMany,
-          },
-        }),
-        strategy: 'restore',
-        restore: {
-          /* @ts-ignore: disable-next-line */
-          contentTypes: [getContentTypes()['foo']],
-        },
-      });
-
-      const deleteAllSpy = jest.spyOn(restoreApi, 'deleteAllRecords');
-      await provider.bootstrap();
-      await provider.beforeStreaming();
-
-      expect(deleteAllSpy).toBeCalledTimes(1);
-    });
-
     test('Should not delete if it is a merge strategy', async () => {
       const provider = createLocalStrapiDestinationProvider({
         getStrapi: getStrapiFactory({}),
