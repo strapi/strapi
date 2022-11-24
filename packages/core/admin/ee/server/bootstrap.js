@@ -17,5 +17,7 @@ module.exports = async () => {
     await actionProvider.registerMany(actions.auditLogs);
   }
 
+  // TODO: check admin seats
+
   await executeCEBootstrap();
 };

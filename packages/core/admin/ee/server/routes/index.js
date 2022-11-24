@@ -1,17 +1,14 @@
 'use strict';
 
-// eslint-disable-next-line node/no-extraneous-require
 const { features } = require('@strapi/strapi/lib/utils/ee');
-const featuresRoutes = require('./features-routes');
 
-const getFeaturesRoutes = () => {
-  return Object.entries(featuresRoutes).flatMap(([featureName, featureRoutes]) => {
-    if (features.isEnabled(featureName)) {
-      return featureRoutes;
-    }
+const enableFeatureMiddleware = (featureName) => (ctx, next) => {
+  console.log(featureName, features.isEnabled(featureName));
+  if (features.isEnabled(featureName)) {
+    return next();
+  }
 
-    return [];
-  });
+  ctx.status = 404;
 };
 
 module.exports = [
@@ -63,5 +60,93 @@ module.exports = [
       ],
     },
   },
-  ...getFeaturesRoutes(),
+
+  // SSO
+  {
+    method: 'GET',
+    path: '/providers',
+    handler: 'authentication.getProviders',
+    config: {
+      middlewares: [enableFeatureMiddleware('sso')],
+      auth: false,
+    },
+  },
+  {
+    method: 'GET',
+    path: '/connect/:provider',
+    handler: 'authentication.providerLogin',
+    config: {
+      middlewares: [enableFeatureMiddleware('sso')],
+      auth: false,
+    },
+  },
+  {
+    method: 'POST',
+    path: '/connect/:provider',
+    handler: 'authentication.providerLogin',
+    config: {
+      middlewares: [enableFeatureMiddleware('sso')],
+      auth: false,
+    },
+  },
+  {
+    method: 'GET',
+    path: '/providers/options',
+    handler: 'authentication.getProviderLoginOptions',
+    config: {
+      middlewares: [enableFeatureMiddleware('sso')],
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        { name: 'admin::hasPermissions', config: { actions: ['admin::provider-login.read'] } },
+      ],
+    },
+  },
+  {
+    method: 'PUT',
+    path: '/providers/options',
+    handler: 'authentication.updateProviderLoginOptions',
+    config: {
+      middlewares: [enableFeatureMiddleware('sso')],
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        { name: 'admin::hasPermissions', config: { actions: ['admin::provider-login.update'] } },
+      ],
+    },
+  },
+
+  // Audit logs
+  {
+    method: 'GET',
+    path: '/audit-logs',
+    handler: 'auditLogs.findMany',
+    config: {
+      middlewares: [enableFeatureMiddleware('audit-logs')],
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        {
+          name: 'admin::hasPermissions',
+          config: {
+            actions: ['admin::audit-logs.read'],
+          },
+        },
+      ],
+    },
+  },
+  {
+    method: 'GET',
+    path: '/audit-logs/:id',
+    handler: 'auditLogs.findOne',
+    config: {
+      middlewares: [enableFeatureMiddleware('audit-logs')],
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        {
+          name: 'admin::hasPermissions',
+          config: {
+            actions: ['admin::audit-logs.read'],
+          },
+        },
+      ],
+    },
+  },
 ];

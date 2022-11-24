@@ -47,6 +47,7 @@ const createTelemetryInstance = (strapi) => {
       }
     },
     bootstrap() {
+      // TODO: remove
       if (strapi.EE === true && ee.isEE === true) {
         const pingDisabled =
           isTruthy(process.env.STRAPI_LICENSE_PING_DISABLED) && ee.licenseInfo.type === 'gold';

@@ -21,7 +21,7 @@ const defaultFeatures = {
   gold: ['sso'],
 };
 
-module.exports = ({ dir, logger = noLog }) => {
+const EEService = ({ dir, logger = noLog }) => {
   if (_.has(internals, 'isEE')) return internals.isEE;
 
   const warnAndReturn = (msg = 'Invalid license. Starting in CE.') => {
@@ -49,6 +49,8 @@ module.exports = ({ dir, logger = noLog }) => {
     return false;
   }
 
+  // TODO: optimistically return true if license key is valid
+
   try {
     const plainLicense = Buffer.from(license, 'base64').toString();
     const [signatureb64, contentb64] = plainLicense.split('\n');
@@ -64,6 +66,8 @@ module.exports = ({ dir, logger = noLog }) => {
     if (!isValid) return warnAndReturn();
 
     internals.licenseInfo = JSON.parse(content);
+    internals.licenseInfo.features =
+      internals.licenseInfo.features || defaultFeatures[internals.licenseInfo.type];
 
     const expirationTime = new Date(internals.licenseInfo.expireAt).getTime();
     if (expirationTime < new Date().getTime()) {
@@ -77,7 +81,14 @@ module.exports = ({ dir, logger = noLog }) => {
   return true;
 };
 
-Object.defineProperty(module.exports, 'licenseInfo', {
+EEService.checkLicense = async () => {
+  // TODO: online / DB check of the license info
+  // TODO: refresh info if the DB info is outdated
+  // TODO: register cron
+  // internals.licenseInfo = await db.getLicense();
+};
+
+Object.defineProperty(EEService, 'licenseInfo', {
   get() {
     mustHaveKey('licenseInfo');
     return internals.licenseInfo;
@@ -86,7 +97,7 @@ Object.defineProperty(module.exports, 'licenseInfo', {
   enumerable: false,
 });
 
-Object.defineProperty(module.exports, 'isEE', {
+Object.defineProperty(EEService, 'isEE', {
   get() {
     mustHaveKey('isEE');
     return internals.isEE;
@@ -95,20 +106,14 @@ Object.defineProperty(module.exports, 'isEE', {
   enumerable: false,
 });
 
-Object.defineProperty(module.exports, 'features', {
+Object.defineProperty(EEService, 'features', {
   get() {
-    const licenseInfo = module.exports.licenseInfo;
-
-    const { type: licenseType } = module.exports.licenseInfo;
-
-    const features = licenseInfo.features || defaultFeatures[licenseType];
-
     return {
       isEnabled(feature) {
-        return features.includes(feature);
+        return internals.licenseInfo.features.includes(feature);
       },
       getEnabled() {
-        return features;
+        return internals.licenseInfo.features;
       },
     };
   },
@@ -123,3 +128,5 @@ const mustHaveKey = (key) => {
     throw err;
   }
 };
+
+module.exports = EEService;
