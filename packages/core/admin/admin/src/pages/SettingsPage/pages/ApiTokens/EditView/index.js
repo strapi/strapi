@@ -12,7 +12,6 @@ import {
 } from '@strapi/helper-plugin';
 import { Main } from '@strapi/design-system/Main';
 import { Formik } from 'formik';
-import { get } from 'lodash';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { formatAPIErrors } from '../../../../../utils';
@@ -205,12 +204,12 @@ const ApiTokenCreateView = () => {
       if (err?.response?.data?.error?.message === MSG_ERROR_NAME_TAKEN) {
         toggleNotification({
           type: 'warning',
-          message: get(err, 'response.data.message', 'notification.error.tokennamenotunique'),
+          message: err.response.data.message || 'notification.error.tokennamenotunique',
         });
       } else {
         toggleNotification({
           type: 'warning',
-          message: get(err, 'response.data.message', 'notification.error'),
+          message: err?.response?.data?.message || 'notification.error',
         });
       }
       unlockApp();

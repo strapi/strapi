@@ -63,7 +63,7 @@ const SettingsPage = () => {
 
         setConfig(config);
 
-        const testAddressFound = get(config, 'settings.testAddress');
+        const testAddressFound = config?.settings?.testAddress;
 
         if (testAddressFound) {
           setTestAddress(testAddressFound);

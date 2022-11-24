@@ -29,7 +29,7 @@ module.exports = {
   async test(ctx) {
     const { to } = ctx.request.body;
 
-    if (isNil(to)) {
+    if (!to) {
       throw new ApplicationError('No recipient(s) are given');
     }
 
