@@ -1,5 +1,10 @@
 import { createLocalStrapiDestinationProvider } from '../index';
+import * as restoreApi from '../restore';
 import { getStrapiFactory, getContentTypes } from '../../test-utils';
+
+afterEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('Local Strapi Source Destination', () => {
   describe('Bootstrap', () => {
@@ -95,12 +100,11 @@ describe('Local Strapi Source Destination', () => {
         }),
         strategy: 'restore',
       });
-      const deleteAllSpy = jest.spyOn(provider, 'deleteAll');
+      const deleteAllSpy = jest.spyOn(restoreApi, 'deleteAllRecords');
       await provider.bootstrap();
       await provider.beforeStreaming();
 
       expect(deleteAllSpy).toBeCalledTimes(1);
-      expect((await provider.deleteAll()).count).toBe(entities.length);
     });
 
     test('Should delete only chosen contentTypes', async () => {
@@ -151,12 +155,11 @@ describe('Local Strapi Source Destination', () => {
         },
       });
 
-      const deleteAllSpy = jest.spyOn(provider, 'deleteAll');
+      const deleteAllSpy = jest.spyOn(restoreApi, 'deleteAllRecords');
       await provider.bootstrap();
       await provider.beforeStreaming();
 
       expect(deleteAllSpy).toBeCalledTimes(1);
-      expect((await provider.deleteAll()).count).toBe(3);
     });
 
     test('Should not delete if it is a merge strategy', async () => {
@@ -164,7 +167,7 @@ describe('Local Strapi Source Destination', () => {
         getStrapi: getStrapiFactory({}),
         strategy: 'merge',
       });
-      const deleteAllSpy = jest.spyOn(provider, 'deleteAll');
+      const deleteAllSpy = jest.spyOn(restoreApi, 'deleteAllRecords');
       await provider.bootstrap();
       await provider.beforeStreaming();
 

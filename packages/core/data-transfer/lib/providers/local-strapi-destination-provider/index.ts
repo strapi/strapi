@@ -37,7 +37,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async bootstrap(): Promise<void> {
-    this.validateOptions();
+    this.#validateOptions();
     this.strapi = await this.options.getStrapi();
   }
 
@@ -45,13 +45,13 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     await this.strapi?.destroy?.();
   }
 
-  validateOptions() {
+  #validateOptions() {
     if (!VALID_STRATEGIES.includes(this.options.strategy)) {
       throw new Error('Invalid stategy ' + this.options.strategy);
     }
   }
 
-  async deleteAll() {
+  async #deleteAll() {
     if (!this.strapi) {
       throw new Error('Strapi instance not found');
     }
@@ -60,7 +60,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   async beforeStreaming() {
     if (this.options.strategy === 'restore') {
-      await this.deleteAll();
+      await this.#deleteAll();
     }
   }
 
