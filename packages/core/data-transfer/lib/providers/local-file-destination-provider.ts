@@ -134,7 +134,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
     if (pipeline && !pipeline.closed) {
       await new Promise<void>((resolve, reject) => {
-        pipeline.on('close', resolve).on('error', resolve);
+        pipeline.on('close', resolve).on('error', reject);
       });
     }
   }
