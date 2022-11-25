@@ -3,7 +3,7 @@ name: 'Tests'
 on:
   push:
     branches:
-      - main-bis
+      - main
   pull_request:
     paths-ignore:
       - 'docs/**'
@@ -130,7 +130,7 @@ jobs:
           -e MYSQL_USER=strapi
           -e MYSQL_PASSWORD=strapi
           -e MYSQL_DATABASE=strapi_test
-          -v /__w/.github/workflows/db/mysql-8/config.cnf:/etc/mysql/conf.d/config.cnf
+          -v /__w/.github/db/mysql-8/config.cnf:/etc/mysql/conf.d/config.cnf
         ports:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
@@ -165,7 +165,7 @@ jobs:
           -e MYSQL_USER=strapi
           -e MYSQL_PASSWORD=strapi
           -e MYSQL_DATABASE=strapi_test
-          -v /__w/.github/workflows/db/mysql-5/config.cnf:/etc/mysql/conf.d/config.cnf
+          -v /__w/.github/db/mysql-5/config.cnf:/etc/mysql/conf.d/config.cnf
         ports:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
