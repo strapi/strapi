@@ -7,7 +7,7 @@ import { prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
  * if there's no thumbnail, return the URL of the original image.
  * @return {String} URL
  */
-export const createAssetUrl = (asset, forThumbnail = true) => {
+const createAssetUrl = (asset, forThumbnail = true) => {
   if (asset.isLocal) {
     return asset.url;
   }
@@ -17,3 +17,5 @@ export const createAssetUrl = (asset, forThumbnail = true) => {
 
   return `${backendUrl}?updated_at=${asset.updatedAt}`;
 };
+
+export default createAssetUrl;

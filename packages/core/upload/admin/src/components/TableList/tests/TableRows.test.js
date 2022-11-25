@@ -110,6 +110,12 @@ describe('TableList | TableRows', () => {
       expect(getByRole('checkbox', { name: 'Select michka asset', hidden: true })).toBeDisabled();
     });
 
+    it('should disable select asset checkbox when users if the file type is not allowed', () => {
+      const { getByRole } = setup({ allowedTypes: [] });
+
+      expect(getByRole('checkbox', { name: 'Select michka asset', hidden: true })).toBeDisabled();
+    });
+
     it('should call onEditAsset callback', () => {
       const onEditAssetSpy = jest.fn();
       const { getByRole } = setup({ onEditAsset: onEditAssetSpy });
@@ -141,10 +147,25 @@ describe('TableList | TableRows', () => {
       expect(onEditFolderSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('should display folder link', () => {
-      const { getByRole } = setup({ rows: [FOLDER_FIXTURE] });
+    it('should display folder navigation as a link if no folder url exists', () => {
+      const { getByRole } = setup({ rows: [{ ...FOLDER_FIXTURE, folderURL: 'plugins/upload' }] });
 
       expect(getByRole('link', { name: 'Access folder', hidden: true })).toBeInTheDocument();
+    });
+
+    it('should display folder nagivation as a button if a folder url exists', () => {
+      const { getByRole } = setup({ rows: [FOLDER_FIXTURE] });
+
+      expect(getByRole('button', { name: 'Access folder', hidden: true })).toBeInTheDocument();
+    });
+
+    it('should call onChangeFolder when clicking on folder navigation button', () => {
+      const onChangeFolderSpy = jest.fn();
+      const { getByRole } = setup({ rows: [FOLDER_FIXTURE], onChangeFolder: onChangeFolderSpy });
+
+      fireEvent.click(getByRole('button', { name: 'Access folder', hidden: true }));
+
+      expect(onChangeFolderSpy).toHaveBeenCalledWith(2);
     });
 
     it('should reflect non selected folder state', () => {
@@ -163,6 +184,14 @@ describe('TableList | TableRows', () => {
 
     it('should disable select folder checkbox when users do not have the permission to update', () => {
       const { getByRole } = setup({ rows: [FOLDER_FIXTURE], canUpdate: false });
+
+      expect(
+        getByRole('checkbox', { name: 'Select folder 1 folder', hidden: true })
+      ).toBeDisabled();
+    });
+
+    it('should disable select folder checkbox when folder selection is not allowed', () => {
+      const { getByRole } = setup({ rows: [FOLDER_FIXTURE], isFolderSelectionAllowed: false });
 
       expect(
         getByRole('checkbox', { name: 'Select folder 1 folder', hidden: true })

@@ -119,7 +119,12 @@ export const MediaLibrary = () => {
     push(pathname);
   }
 
-  const folders = foldersData?.map((folder) => ({ ...folder, type: 'folder' })) ?? [];
+  const folders =
+    foldersData?.map((folder) => ({
+      ...folder,
+      type: 'folder',
+      folderURL: getFolderURL(pathname, query, folder.id),
+    })) ?? [];
   const folderCount = folders?.length || 0;
   const assets = assetsData?.results?.map((asset) => ({ ...asset, type: 'asset' })) || [];
   const assetCount = assets?.length ?? 0;
@@ -275,8 +280,10 @@ export const MediaLibrary = () => {
               assetCount={assetCount}
               canUpdate={canUpdate}
               folderCount={folderCount}
+              // folderURL={getFolderURL(pathname, query, folderID)}
               indeterminate={indeterminateBulkSelect}
               onChangeSort={handleChangeSort}
+              onChangeFolder={(folderID) => push(getFolderURL(pathname, query, folderID))}
               onEditAsset={setAssetToEdit}
               onEditFolder={handleEditFolder}
               onSelectOne={selectOne}
@@ -288,6 +295,7 @@ export const MediaLibrary = () => {
                 !assetsLoading && !foldersLoading ? [...folders, ...assets] : []
               }
               selected={selected}
+              shouldDisableBulkSelect={!canUpdate}
               sortQuery={query?.sort ?? ''}
             />
           )}
@@ -317,7 +325,7 @@ export const MediaLibrary = () => {
                       (currentFolder) => currentFolder.id === folder.id
                     );
 
-                    const url = getFolderURL(pathname, query, folder);
+                    const url = getFolderURL(pathname, query, folder?.id);
 
                     return (
                       <GridItem col={3} key={`folder-${folder.id}`}>

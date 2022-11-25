@@ -15,16 +15,20 @@ import { TableRows } from './TableRows';
 
 export const TableList = ({
   assetCount,
+  isFolderSelectionAllowed,
+  allowedTypes,
   canUpdate,
   folderCount,
   indeterminate,
   onChangeSort,
+  onChangeFolder,
   onEditAsset,
   onEditFolder,
   onSelectAll,
   onSelectOne,
   rows,
   selected,
+  shouldDisableBulkSelect,
   sortQuery,
 }) => {
   const { formatMessage } = useIntl();
@@ -47,8 +51,8 @@ export const TableList = ({
                 id: getTrad('bulk.select.label'),
                 defaultMessage: 'Select all folders & assets',
               })}
-              disabled={!canUpdate}
-              indeterminate={indeterminate}
+              disabled={shouldDisableBulkSelect}
+              indeterminate={indeterminate && !shouldDisableBulkSelect}
               onChange={(e) => onSelectAll(e, rows)}
               value={
                 (assetCount > 0 || folderCount > 0) && selected.length === assetCount + folderCount
@@ -110,7 +114,10 @@ export const TableList = ({
         </Tr>
       </Thead>
       <TableRows
+        isFolderSelectionAllowed={isFolderSelectionAllowed}
+        allowedTypes={allowedTypes}
         canUpdate={canUpdate}
+        onChangeFolder={onChangeFolder}
         onEditAsset={onEditAsset}
         onEditFolder={onEditFolder}
         rows={rows}
@@ -123,28 +130,36 @@ export const TableList = ({
 
 TableList.defaultProps = {
   assetCount: 0,
-  canUpdate: false,
+  allowedTypes: ['images', 'files', 'videos', 'audios'],
+  canUpdate: true,
   folderCount: 0,
   indeterminate: false,
+  isFolderSelectionAllowed: true,
   onChangeSort: null,
+  onChangeFolder: null,
   onEditAsset: null,
   onEditFolder: null,
   rows: [],
   selected: [],
+  shouldDisableBulkSelect: false,
   sortQuery: '',
 };
 
 TableList.propTypes = {
+  allowedTypes: PropTypes.arrayOf(PropTypes.string),
   assetCount: PropTypes.number,
   canUpdate: PropTypes.bool,
   folderCount: PropTypes.number,
   indeterminate: PropTypes.bool,
+  isFolderSelectionAllowed: PropTypes.bool,
   onChangeSort: PropTypes.func,
+  onChangeFolder: PropTypes.func,
   onEditAsset: PropTypes.func,
   onEditFolder: PropTypes.func,
   onSelectAll: PropTypes.func.isRequired,
   onSelectOne: PropTypes.func.isRequired,
   rows: PropTypes.arrayOf(AssetDefinition, FolderDefinition),
   selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition),
+  shouldDisableBulkSelect: PropTypes.bool,
   sortQuery: PropTypes.string,
 };

@@ -6,8 +6,7 @@ import { VideoAssetCard } from './VideoAssetCard';
 import { DocAssetCard } from './DocAssetCard';
 import { AudioAssetCard } from './AudioAssetCard';
 import { AssetType, AssetDefinition } from '../../constants';
-import { createAssetUrl } from '../../utils/createAssetUrl';
-import toSingularTypes from '../../utils/toSingularTypes';
+import { createAssetUrl, toSingularTypes } from '../../utils';
 
 export const AssetCard = ({
   allowedTypes,

@@ -97,6 +97,7 @@ const ComponentFixture = (props) => {
                 onChangeSort={jest.fn()}
                 onChangeFolder={jest.fn()}
                 onEditAsset={jest.fn()}
+                onEditFolder={jest.fn()}
                 onSelectAllAsset={jest.fn()}
                 onSelectAsset={jest.fn()}
                 pagination={{ pageCount: 1 }}
@@ -160,7 +161,7 @@ describe('BrowseStep', () => {
     const { getByRole } = setup({ onChangeFolder: spy });
     fireEvent.click(
       getByRole('button', {
-        name: /folder 1 : 1 folder, 1 asset/i,
+        name: /folder 1 - 1 folder, 1 asset/i,
       })
     );
     expect(spy).toHaveBeenCalled();

@@ -1,13 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useHistory, useLocation, Link } from 'react-router-dom';
-import {
-  getFileExtension,
-  onRowClick,
-  stopPropagation,
-  useQueryParams,
-} from '@strapi/helper-plugin';
+import { Link } from 'react-router-dom';
+import { getFileExtension, onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { Flex } from '@strapi/design-system/Flex';
 import { IconButton } from '@strapi/design-system/IconButton';
@@ -16,11 +11,15 @@ import Pencil from '@strapi/icons/Pencil';
 import Eye from '@strapi/icons/Eye';
 
 import { CellContent } from './CellContent';
+import { isSelectable } from './utils/isSelectable';
 import { AssetDefinition, FolderDefinition, tableHeaders as cells } from '../../constants';
-import { getFolderURL, getTrad } from '../../utils';
+import { getTrad, toSingularTypes } from '../../utils';
 
 export const TableRows = ({
+  allowedTypes,
   canUpdate,
+  isFolderSelectionAllowed,
+  onChangeFolder,
   onEditAsset,
   onEditFolder,
   onSelectOne,
@@ -28,22 +27,35 @@ export const TableRows = ({
   selected,
 }) => {
   const { formatMessage } = useIntl();
-  const { pathname } = useLocation();
-  const [{ query }] = useQueryParams();
-  const { push } = useHistory();
 
-  const handleRowClickFn = (element, elementType) => {
+  const handleRowClickFn = (element, elementType, id) => {
     if (elementType === 'asset') {
       onEditAsset(element);
     } else {
-      push(getFolderURL(pathname, query, element));
+      onChangeFolder(id);
     }
   };
+
+  const singularTypes = toSingularTypes(allowedTypes);
 
   return (
     <Tbody>
       {rows.map((element) => {
-        const { alternativeText, id, name, ext, url, mime, formats, type: elementType } = element;
+        const {
+          alternativeText,
+          id,
+          name,
+          ext,
+          url,
+          mime = '',
+          folderURL,
+          formats,
+          type: elementType,
+        } = element;
+
+        const fileType = mime.split('/')[0];
+        const canBeSelected =
+          isSelectable(singularTypes, elementType, fileType, isFolderSelectionAllowed) && canUpdate;
 
         const isSelected = !!selected.find((currentRow) => currentRow.id === id);
 
@@ -51,7 +63,7 @@ export const TableRows = ({
           <Tr
             key={id}
             {...onRowClick({
-              fn: () => handleRowClickFn(element, elementType),
+              fn: () => handleRowClickFn(element, elementType, id),
             })}
           >
             <Td {...stopPropagation}>
@@ -64,7 +76,7 @@ export const TableRows = ({
                   },
                   { name }
                 )}
-                disabled={!canUpdate}
+                disabled={!canBeSelected}
                 onValueChange={() => onSelectOne(element)}
                 checked={isSelected}
               />
@@ -90,12 +102,13 @@ export const TableRows = ({
               <Flex justifyContent="flex-end">
                 {elementType === 'folder' && (
                   <IconButton
-                    forwardedAs={Link}
+                    forwardedAs={folderURL ? Link : undefined}
                     label={formatMessage({
                       id: getTrad('list.folders.link-label'),
                       defaultMessage: 'Access folder',
                     })}
-                    to={getFolderURL(pathname, query, element)}
+                    to={folderURL}
+                    onClick={() => !folderURL && onChangeFolder(id)}
                     noBorder
                   >
                     <Eye />
@@ -123,14 +136,20 @@ export const TableRows = ({
 };
 
 TableRows.defaultProps = {
-  canUpdate: false,
+  allowedTypes: ['images', 'files', 'videos', 'audios'],
+  canUpdate: true,
+  onChangeFolder: null,
+  isFolderSelectionAllowed: true,
   rows: [],
   selected: [],
 };
 
 TableRows.propTypes = {
+  allowedTypes: PropTypes.arrayOf(PropTypes.string),
   canUpdate: PropTypes.bool,
+  isFolderSelectionAllowed: PropTypes.bool,
   rows: PropTypes.arrayOf(AssetDefinition, FolderDefinition),
+  onChangeFolder: PropTypes.func,
   onEditAsset: PropTypes.func.isRequired,
   onEditFolder: PropTypes.func.isRequired,
   onSelectOne: PropTypes.func.isRequired,

@@ -58,7 +58,7 @@ export const CrumbSimpleMenuAsync = ({ parentsToOmit, currentFolderId, onChangeF
             );
           }
 
-          const url = getFolderURL(pathname, query, ascendant);
+          const url = getFolderURL(pathname, query, ascendant?.id);
 
           return (
             <MenuItem isLink as={NavLink} to={url} key={ascendant.id}>
