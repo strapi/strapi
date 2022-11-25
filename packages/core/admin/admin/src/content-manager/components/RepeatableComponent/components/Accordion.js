@@ -40,7 +40,7 @@ export const Content = styled(Box)`
   }
 
   & [data-strapi-expanded='true'] {
-    border-bottom: 1px solid ${({ theme }) => theme.colors.primary600};
+    border: 1px solid ${({ theme }) => theme.colors.primary600};
   }
 `;
 
