@@ -100,6 +100,9 @@ const DraggedItem = ({
     useDragAndDrop(!isReadOnly, {
       type: ItemTypes.COMPONENT,
       index,
+      item: {
+        displayedValue,
+      },
       onMoveItem: moveComponentField,
       onStart() {
         // Close all collapses

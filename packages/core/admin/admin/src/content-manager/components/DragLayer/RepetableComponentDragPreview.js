@@ -61,11 +61,11 @@ const DragPreview = ({ displayedValue }) => {
         </ToggleButton>
         <Box paddingLeft={3}>
           <Flex>
-            <IconButton>
+            <IconButton noBorder>
               <Trash />
             </IconButton>
             <Box paddingLeft={2}>
-              <IconButton>
+              <IconButton noBorder>
                 <Drag />
               </IconButton>
             </Box>

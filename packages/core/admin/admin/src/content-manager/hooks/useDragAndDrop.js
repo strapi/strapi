@@ -9,6 +9,7 @@ import { useKeyboardDragAndDrop } from './useKeyboardDragAndDrop';
  * @type {{
  *  type?: string,
  *  index: number,
+ *  item?: object,
  *  onStart?: () => void,
  *  onEnd?: () => void,
  * } & import('./useKeyboardDragAndDrop').UseKeyboardDragAndDropCallbacks}
@@ -28,7 +29,17 @@ import { useKeyboardDragAndDrop } from './useKeyboardDragAndDrop';
  */
 export const useDragAndDrop = (
   active,
-  { type = 'STRAPI_DND', index, onStart, onEnd, onGrabItem, onDropItem, onCancel, onMoveItem }
+  {
+    type = 'STRAPI_DND',
+    index,
+    item = {},
+    onStart,
+    onEnd,
+    onGrabItem,
+    onDropItem,
+    onCancel,
+    onMoveItem,
+  }
 ) => {
   const objectRef = useRef(null);
 
@@ -79,7 +90,7 @@ export const useDragAndDrop = (
         onStart();
       }
 
-      return { index };
+      return { index, ...item };
     },
     end() {
       if (onEnd) {
