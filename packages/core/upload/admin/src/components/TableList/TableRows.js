@@ -47,13 +47,13 @@ export const TableRows = ({
           name,
           ext,
           url,
-          mime,
+          mime = '',
           folderURL,
           formats,
           type: elementType,
         } = element;
 
-        const fileType = mime?.split('/')?.[0];
+        const fileType = mime.split('/')[0];
         const canBeSelected =
           isSelectable(singularTypes, elementType, fileType, isFolderSelectionAllowed) && canUpdate;
 
@@ -102,7 +102,7 @@ export const TableRows = ({
               <Flex justifyContent="flex-end">
                 {elementType === 'folder' && (
                   <IconButton
-                    forwardedAs={folderURL ? Link : 'button'}
+                    forwardedAs={folderURL ? Link : undefined}
                     label={formatMessage({
                       id: getTrad('list.folders.link-label'),
                       defaultMessage: 'Access folder',
