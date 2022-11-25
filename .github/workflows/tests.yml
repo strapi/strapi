@@ -14,12 +14,109 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lint:
+    name: 'lint (node: ${{ matrix.node }})'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [14, 16, 18]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+      - uses: ./.github/actions/install-modules
+      - name: Run lint
+        run: yarn run -s lint
+
+  unit_back:
+    name: 'unit_back (node: ${{ matrix.node }})'
+    needs: [lint]
+    runs-on: ubuntu-latest
+    env:
+      CODECOV_TOKEN: ${{ secrets.codecov }}
+    strategy:
+      matrix:
+        node: [14, 16, 18]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+      - uses: ./.github/actions/install-modules
+        with:
+          globalPackages: codecov
+      - name: Run tests
+        run: yarn run -s test:unit --coverage && codecov -C -F unit
+
+  unit_front:
+    name: 'unit_front (node: ${{ matrix.node }})'
+    needs: [lint]
+    runs-on: ubuntu-latest
+    env:
+      CODECOV_TOKEN: ${{ secrets.codecov }}
+    strategy:
+      matrix:
+        node: [14, 18]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+      - uses: ./.github/actions/install-modules
+        with:
+          globalPackages: codecov
+      - name: Build
+        run: yarn build
+      - name: Run test
+        run: yarn run -s test:front --coverage && codecov -C -F front
+
+  api_ce_pg:
+    runs-on: ubuntu-latest
+    needs: [lint, unit_back, unit_front]
+    name: '[CE] API Integration (postgres, node: ${{ matrix.node }})'
+    strategy:
+      matrix:
+        node: [14, 16, 18]
+    services:
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_USER: strapi
+          POSTGRES_PASSWORD: strapi
+          POSTGRES_DB: strapi_test
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+      - uses: ./.github/actions/install-modules
+      - uses: ./.github/actions/run-api-tests
+        with:
+          dbOptions: '--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+
   api_ce_mysql:
     runs-on: ubuntu-latest
+    needs: [lint, unit_back, unit_front]
     name: '[CE] API Integration (mysql, node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [14]
+        node: [14, 16, 18]
     services:
       mysql:
         image: mysql
@@ -50,10 +147,11 @@ jobs:
 
   api_ce_mysql_5:
     runs-on: ubuntu-latest
+    needs: [lint, unit_back, unit_front]
     name: '[CE] API Integration (mysql:5 , node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [14]
+        node: [14, 16, 18]
     services:
       mysql:
         image: mysql:5.7.8
@@ -81,3 +179,128 @@ jobs:
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+
+  api_ce_sqlite:
+    runs-on: ubuntu-latest
+    needs: [lint, unit_back, unit_front]
+    name: '[CE] API Integration (sqlite: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }})'
+    strategy:
+      matrix:
+        node: [14, 16, 18]
+        sqlite_pkg: ['better-sqlite3', 'sqlite3', '@vscode/sqlite3']
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+      - uses: ./.github/actions/install-modules
+      - uses: ./.github/actions/run-api-tests
+        env:
+          SQLITE_PKG: ${{ matrix.sqlite_pkg }}
+        with:
+          dbOptions: '--dbclient=sqlite-legacy --dbfile=./tmp/data.db'
+  # EE
+  api_ee_pg:
+    runs-on: ubuntu-latest
+    needs: [lint, unit_back, unit_front]
+    name: '[EE] API Integration (postgres, node: ${{ matrix.node }})'
+    if: github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
+    env:
+      STRAPI_LICENSE: ${{ secrets.strapiLicense }}
+    strategy:
+      matrix:
+        node: [14, 16, 18]
+    services:
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_USER: strapi
+          POSTGRES_PASSWORD: strapi
+          POSTGRES_DB: strapi_test
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+      - uses: ./.github/actions/install-modules
+      - uses: ./.github/actions/run-api-tests
+        with:
+          dbOptions: '--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+          runEE: true
+
+  api_ee_mysql:
+    runs-on: ubuntu-latest
+    needs: [lint, unit_back, unit_front]
+    name: '[EE] API Integration (mysql, node: ${{ matrix.node }})'
+    if: github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
+    env:
+      STRAPI_LICENSE: ${{ secrets.strapiLicense }}
+    strategy:
+      matrix:
+        node: [14, 16, 18]
+    services:
+      mysql:
+        image: mysql
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+          -e MYSQL_ROOT_PASSWORD=strapi
+          -e MYSQL_ROOT_HOST="%"
+          -e MYSQL_USER=strapi
+          -e MYSQL_PASSWORD=strapi
+          -e MYSQL_DATABASE=strapi_test
+          -v /__w/.github/workflows/db/mysql-8/config.cnf:/etc/mysql/conf.d/config.cnf
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 3306:3306
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+      - uses: ./.github/actions/install-modules
+      - uses: ./.github/actions/run-api-tests
+        with:
+          dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+          runEE: true
+
+  api_ee_sqlite:
+    runs-on: ubuntu-latest
+    needs: [lint, unit_back, unit_front]
+    name: '[EE] API Integration (sqlite: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }})'
+    if: github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
+    env:
+      STRAPI_LICENSE: ${{ secrets.strapiLicense }}
+    strategy:
+      matrix:
+        node: [14, 16, 18]
+        sqlite_pkg: ['better-sqlite3', 'sqlite3', '@vscode/sqlite3']
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+      - uses: ./.github/actions/install-modules
+      - uses: ./.github/actions/run-api-tests
+        env:
+          SQLITE_PKG: ${{ matrix.sqlite_pkg }}
+        with:
+          dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'
+          runEE: true
