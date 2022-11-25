@@ -121,7 +121,7 @@ const convertSingleSortQueryParam = (sortQuery, schema) => {
 
 const convertNestedSortQueryParam = (sortQuery, schema) => {
   const transformedSort = {};
-  for (const field in sortQuery) {
+  for (const field of Object.keys(sortQuery)) {
     if (!_.get(schema, `attributes.${field}`) && field !== 'id' && !isRelationalSortField(field)) {
       continue;
     }
