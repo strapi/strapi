@@ -1122,7 +1122,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                         <div
                           class="c19"
                         >
-                          :
+                          -
                         </div>
                       </span>
                       <span

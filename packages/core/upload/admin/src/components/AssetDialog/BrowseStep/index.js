@@ -301,7 +301,9 @@ export const BrowseStep = ({
                           <Flex as="h2" direction="column" alignItems="start" maxWidth="100%">
                             <TypographyMaxWidth fontWeight="semiBold" ellipsis>
                               {folder.name}
-                              <VisuallyHidden>:</VisuallyHidden>
+                              {/* VisuallyHidden dash here allows to separate folder title and count informations 
+                              for voice reading structure purpose */}
+                              <VisuallyHidden>-</VisuallyHidden>
                             </TypographyMaxWidth>
                             <TypographyMaxWidth
                               as="span"
