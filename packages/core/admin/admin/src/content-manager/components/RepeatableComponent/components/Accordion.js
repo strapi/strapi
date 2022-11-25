@@ -39,7 +39,7 @@ export const Content = styled(Box)`
     border-radius: ${({ theme }) => theme.borderRadius} ${({ theme }) => theme.borderRadius} 0 0;
   }
 
-  & [data-strapi-expanded='true'] {
+  & > div > div[data-strapi-expanded='true'] {
     border: 1px solid ${({ theme }) => theme.colors.primary600};
   }
 `;

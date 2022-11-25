@@ -37,7 +37,7 @@ exports[`RepeatableComponent | Accordion Content should render and match the sna
   border-radius: 4px 4px 0 0;
 }
 
-.c0 [data-strapi-expanded='true'] {
+.c0 > div > div[data-strapi-expanded='true'] {
   border: 1px solid #4945ff;
 }
 
