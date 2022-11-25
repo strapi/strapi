@@ -63,6 +63,10 @@ class InvalidSortError extends Error {
   }
 }
 
+const isRelationalSortField = (field) => {
+  return field.includes('.');
+};
+
 const validateOrder = (order) => {
   if (!['asc', 'desc'].includes(order.toLocaleLowerCase())) {
     throw new InvalidOrderError();
@@ -105,7 +109,8 @@ const convertSingleSortQueryParam = (sortQuery, schema) => {
     throw new Error('Field cannot be empty');
   }
 
-  if (!_.get(schema, `attributes.${field}` && field !== 'id')) {
+  // Skip the check for relational sorts as there is not enough information in the schema.
+  if (!_.get(schema, `attributes.${field}`) && field !== 'id' && !isRelationalSortField(field)) {
     return {};
   }
 
@@ -117,7 +122,7 @@ const convertSingleSortQueryParam = (sortQuery, schema) => {
 const convertNestedSortQueryParam = (sortQuery, schema) => {
   const transformedSort = {};
   for (const field in sortQuery) {
-    if (!_.get(schema, `attributes.${field}`) && field !== 'id') {
+    if (!_.get(schema, `attributes.${field}`) && field !== 'id' && !isRelationalSortField(field)) {
       continue;
     }
 
@@ -297,7 +302,7 @@ const convertNestedPopulate = (subPopulate, schema) => {
   }
 
   if (fields) {
-    query.select = convertFieldsQueryParams(fields, 0, schema);
+    query.select = convertFieldsQueryParams(fields, schema);
   }
 
   if (populate) {
@@ -315,7 +320,7 @@ const convertNestedPopulate = (subPopulate, schema) => {
   return query;
 };
 
-const convertFieldsQueryParams = (fields, depth = 0, schema) => {
+const convertFieldsQueryParams = (fields, schema, depth = 0) => {
   if (depth === 0 && fields === '*') {
     return undefined;
   }
@@ -330,7 +335,7 @@ const convertFieldsQueryParams = (fields, depth = 0, schema) => {
   if (Array.isArray(fields)) {
     // map convert
     const fieldsValues = fields.flatMap((value) =>
-      convertFieldsQueryParams(value, depth + 1, schema)
+      convertFieldsQueryParams(value, schema, depth + 1)
     );
     return _.uniq(['id', ...fieldsValues]);
   }
