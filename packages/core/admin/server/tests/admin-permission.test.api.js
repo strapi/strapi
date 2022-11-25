@@ -21,6 +21,12 @@ describe('Role CRUD End to End', () => {
   });
 
   test('Can get the existing permissions', async () => {
+    const result = await strapi.db.connection.raw(`
+      SELECT default_character_set_name, schema_name
+      FROM information_schema.SCHEMATA
+      
+    `);
+    console.log('result', JSON.stringify(result, null, 2));
     const res = await rq({
       url: '/admin/permissions',
       method: 'GET',
