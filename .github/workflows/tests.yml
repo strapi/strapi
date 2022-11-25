@@ -112,12 +112,11 @@ jobs:
 
   api_ce_mysql:
     runs-on: ubuntu-latest
-    # needs: [lint, unit_back, unit_front]
+    needs: [lint, unit_back, unit_front]
     name: '[CE] API Integration (mysql, node: ${{ matrix.node }})'
     strategy:
       matrix:
-        # node: [14, 16, 18]
-        node: [14]
+        node: [14, 16, 18]
     services:
       mysql:
         image: mysql
@@ -148,12 +147,11 @@ jobs:
 
   api_ce_mysql_5:
     runs-on: ubuntu-latest
-    # needs: [lint, unit_back, unit_front]
+    needs: [lint, unit_back, unit_front]
     name: '[CE] API Integration (mysql:5 , node: ${{ matrix.node }})'
     strategy:
       matrix:
-        # node: [14, 16, 18]
-        node: [14]
+        node: [14, 16, 18]
     services:
       mysql:
         image: mysql:5.7.8
