@@ -41,12 +41,17 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
     expect(screen.getByText('Update')).toBeInTheDocument();
   });
 
-  it('should open a modal when clicked on a table row', async () => {
+  it('should open a modal when clicked on a table row and close modal when clicked', async () => {
     const { container } = render(App);
     expect(screen.queryByText(/log details/i)).not.toBeInTheDocument();
 
     const rows = container.querySelector('tbody').querySelectorAll('tr');
     await user.click(rows[0]);
     expect(screen.getByText(/log details/i)).toBeInTheDocument();
+
+    const label = screen.getByText(/close the modal/i);
+    const closeButton = label.closest('button');
+    await user.click(closeButton);
+    expect(screen.queryByText(/log details/i)).not.toBeInTheDocument();
   });
 });

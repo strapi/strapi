@@ -36,8 +36,8 @@ const data = [
 
 const ListView = () => {
   const { formatMessage } = useIntl();
-  const [openModal, setOpenModal] = useState(false);
-  const [detailsActionData, setActionData] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [detailsActionData, setDetailsActionData] = useState(null);
 
   const title = formatMessage({
     id: 'global.auditLogs',
@@ -53,11 +53,11 @@ const ListView = () => {
   }));
 
   const handleToggle = (id) => {
-    setOpenModal((prev) => !prev);
+    setIsModalOpen((prev) => !prev);
 
     if (id) {
       const actionData = data.find((action) => action.id === id);
-      setActionData(actionData);
+      setDetailsActionData(actionData);
     }
   };
 
@@ -76,7 +76,7 @@ const ListView = () => {
           <TableRows headers={headers} rows={data} onModalToggle={handleToggle} />
         </DynamicTable>
       </ContentLayout>
-      {openModal && <ModalDialog onToggle={handleToggle} data={detailsActionData} />}
+      {isModalOpen && <ModalDialog onToggle={handleToggle} data={detailsActionData} />}
     </Main>
   );
 };

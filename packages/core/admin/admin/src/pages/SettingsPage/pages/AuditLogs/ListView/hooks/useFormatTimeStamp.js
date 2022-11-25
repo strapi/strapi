@@ -1,15 +1,24 @@
 import { useIntl } from 'react-intl';
+import parseISO from 'date-fns/parseISO';
 
-const useFormatTimeStamp = (value) => {
+const useFormatTimeStamp = () => {
   const { formatDate } = useIntl();
 
-  const formattedDateTime = formatDate(new Date(value), {
-    dateStyle: 'long',
-    timeStyle: 'medium',
-    hourCycle: 'h24',
-  });
+  const formatTimeStamp = (value) => {
+    const date = parseISO(value);
 
-  return formattedDateTime.replace(/\s+at/, ',');
+    const formattedDate = formatDate(date, {
+      dateStyle: 'long',
+    });
+    const formattedTime = formatDate(date, {
+      timeStyle: 'medium',
+      hourCycle: 'h24',
+    });
+
+    return `${formattedDate}, ${formattedTime}`;
+  };
+
+  return formatTimeStamp;
 };
 
 export default useFormatTimeStamp;
