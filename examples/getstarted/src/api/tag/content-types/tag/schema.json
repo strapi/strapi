@@ -38,11 +38,6 @@
       "relation": "oneToOne",
       "target": "api::kitchensink.kitchensink",
       "mappedBy": "one_to_one_tag"
-    },
-    "tags": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::tag.tag"
     }
   }
 }

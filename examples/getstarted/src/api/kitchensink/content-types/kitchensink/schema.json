@@ -57,33 +57,19 @@
     },
     "enumeration": {
       "type": "enumeration",
-      "enum": [
-        "A",
-        "B",
-        "C",
-        "D",
-        "E"
-      ]
+      "enum": ["A", "B", "C", "D", "E"]
     },
     "single_media": {
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos"
-      ]
+      "allowedTypes": ["images", "files", "videos"]
     },
     "multiple_media": {
       "type": "media",
       "multiple": true,
       "required": false,
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos"
-      ]
+      "allowedTypes": ["images", "files", "videos"]
     },
     "json": {
       "type": "json"
@@ -100,9 +86,7 @@
     },
     "dynamiczone": {
       "type": "dynamiczone",
-      "components": [
-        "basic.simple"
-      ]
+      "components": ["basic.simple"]
     },
     "one_way_tag": {
       "type": "relation",

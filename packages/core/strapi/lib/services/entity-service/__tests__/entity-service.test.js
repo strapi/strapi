@@ -151,17 +151,10 @@ describe('Entity service', () => {
               default: 'a',
               required: true,
             },
-          },
-          [relationUID]: {
-            uid: relationUID,
-            kind: 'contentType',
-            modelName: 'relation',
-            attributes: {
-              Name: {
-                type: 'string',
-                default: 'default value',
-                required: true,
-              },
+            attrEnumDefault: {
+              type: 'enumeration',
+              enum: ['a', 'b', 'c'],
+              default: 'b',
             },
             attrPassword: { type: 'password' },
             attrRelation: {
