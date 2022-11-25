@@ -59,7 +59,7 @@ jobs:
       CODECOV_TOKEN: ${{ secrets.codecov }}
     strategy:
       matrix:
-        node: [14, 18]
+        node: [14, 16, 18]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
