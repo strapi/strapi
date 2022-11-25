@@ -390,8 +390,6 @@ BrowseStep.defaultProps = {
   folders: [],
   multiple: false,
   onSelectAllAsset: undefined,
-  onEditAsset: undefined,
-  onEditFolder: undefined,
 };
 BrowseStep.propTypes = {
   allowedTypes: PropTypes.arrayOf(PropTypes.string),
@@ -407,8 +405,8 @@ BrowseStep.propTypes = {
   onChangePageSize: PropTypes.func.isRequired,
   onChangeSort: PropTypes.func.isRequired,
   onChangeSearch: PropTypes.func.isRequired,
-  onEditAsset: PropTypes.func,
-  onEditFolder: PropTypes.func,
+  onEditAsset: PropTypes.func.isRequired,
+  onEditFolder: PropTypes.func.isRequired,
   onSelectAsset: PropTypes.func.isRequired,
   onSelectAllAsset: PropTypes.func,
   queryObject: PropTypes.shape({
