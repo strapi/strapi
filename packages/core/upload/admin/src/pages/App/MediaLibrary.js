@@ -124,9 +124,12 @@ export const MediaLibrary = () => {
       ...folder,
       type: 'folder',
       folderURL: getFolderURL(pathname, query, folder.id),
+      isSelectable: canUpdate,
     })) ?? [];
   const folderCount = folders?.length || 0;
-  const assets = assetsData?.results?.map((asset) => ({ ...asset, type: 'asset' })) || [];
+  const assets =
+    assetsData?.results?.map((asset) => ({ ...asset, type: 'asset', isSelectable: canUpdate })) ||
+    [];
   const assetCount = assets?.length ?? 0;
 
   const isLoading = isCurrentFolderLoading || foldersLoading || permissionsLoading || assetsLoading;
@@ -278,9 +281,7 @@ export const MediaLibrary = () => {
           {canRead && !isGridView && (assetCount > 0 || folderCount > 0) && (
             <TableList
               assetCount={assetCount}
-              canUpdate={canUpdate}
               folderCount={folderCount}
-              // folderURL={getFolderURL(pathname, query, folderID)}
               indeterminate={indeterminateBulkSelect}
               onChangeSort={handleChangeSort}
               onChangeFolder={(folderID) => push(getFolderURL(pathname, query, folderID))}
@@ -339,13 +340,13 @@ export const MediaLibrary = () => {
                           id={`folder-${folder.id}`}
                           to={url}
                           startAction={
-                            selectOne && (
+                            selectOne && folder.isSelectable ? (
                               <FolderCardCheckbox
                                 data-testid={`folder-checkbox-${folder.id}`}
                                 value={isSelected}
                                 onChange={() => selectOne(folder)}
                               />
-                            )
+                            ) : null
                           }
                           cardActions={
                             <IconButton

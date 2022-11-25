@@ -25,7 +25,7 @@ import {
   localStorageKeys,
 } from '../../../constants';
 import getTrad from '../../../utils/getTrad';
-import { getBreadcrumbDataCM } from '../../../utils';
+import { getBreadcrumbDataCM, toSingularTypes } from '../../../utils';
 import getAllowedFiles from '../../../utils/getAllowedFiles';
 import { AssetGridList } from '../../AssetGridList';
 import { TableList } from '../../TableList';
@@ -39,6 +39,7 @@ import { Filters } from './Filters';
 import PaginationFooter from './PaginationFooter';
 import PageSize from './PageSize';
 import SearchAsset from './SearchAsset';
+import { isSelectable } from './utils/isSelectable';
 
 const StartBlockActions = styled(Flex)`
   & > * + * {
@@ -65,7 +66,7 @@ const ActionContainer = styled(Box)`
 
 export const BrowseStep = ({
   allowedTypes,
-  assets,
+  assets: rawAssets,
   canCreate,
   canRead,
   folders,
@@ -95,6 +96,13 @@ export const BrowseStep = ({
       enabled: canRead && !!queryObject?.folder,
     }
   );
+
+  const singularTypes = toSingularTypes(allowedTypes);
+  const assets = rawAssets.map((asset) => ({
+    ...asset,
+    isSelectable: isSelectable(singularTypes, asset?.mime),
+    type: 'asset',
+  }));
 
   const breadcrumbs = !isCurrentFolderLoading && getBreadcrumbDataCM(currentFolder);
 
@@ -249,10 +257,7 @@ export const BrowseStep = ({
             // TODO: remove when fixed on DS side
             // when number of rows in Table changes, the keyboard tab from a row to another
             // is not working for 1st and last column
-            [
-              ...folders.map((folder) => ({ ...folder, type: 'folder' })),
-              ...assets.map((asset) => ({ ...asset, type: 'asset' })),
-            ]
+            [...folders.map((folder) => ({ ...folder, type: 'folder' })), ...assets]
           }
           selected={selectedAssets}
           shouldDisableBulkSelect={!multiple}

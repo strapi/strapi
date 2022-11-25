@@ -225,6 +225,11 @@ describe('Media library homepage', () => {
       });
 
       it('hides the select all button when the user is not allowed to update', () => {
+        useMediaLibraryPermissions.mockReturnValueOnce({
+          canUpdate: true,
+          canRead: true,
+          canCreate: true,
+        });
         useMediaLibraryPermissions.mockReturnValue({
           isLoading: false,
           canRead: true,
@@ -260,6 +265,11 @@ describe('Media library homepage', () => {
 
     describe('create folder', () => {
       it('shows the create button if the user has create permissions', () => {
+        useMediaLibraryPermissions.mockReturnValueOnce({
+          canUpdate: true,
+          canRead: true,
+          canCreate: true,
+        });
         renderML();
         expect(screen.getByText('Add new folder')).toBeInTheDocument();
       });
@@ -353,6 +363,11 @@ describe('Media library homepage', () => {
     });
 
     it('displays folder with checked checkbox when is selected', () => {
+      useMediaLibraryPermissions.mockReturnValueOnce({
+        canUpdate: true,
+        canRead: true,
+        canCreate: true,
+      });
       useSelectionState.mockReturnValueOnce([
         [
           {
@@ -374,7 +389,13 @@ describe('Media library homepage', () => {
     });
 
     it('doest not displays folder with checked checkbox when is not selected', () => {
+      useMediaLibraryPermissions.mockReturnValueOnce({
+        canUpdate: true,
+        canRead: true,
+        canCreate: true,
+      });
       renderML();
+
       expect(screen.getByTestId('folder-checkbox-1')).not.toBeChecked();
     });
 
