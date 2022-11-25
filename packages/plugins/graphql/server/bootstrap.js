@@ -18,12 +18,26 @@ const merge = mergeWith((a, b) => {
   }
 });
 
+/**
+ * Register the upload middleware powered by graphql-upload in Strapi
+ * @param {object} strapi
+ * @param {string} path
+ */
+const useUploadMiddleware = (strapi, path) => {
+  const uploadMiddleware = graphqlUploadKoa();
+
+  strapi.server.app.use((ctx, next) => {
+    if (ctx.path === path) {
+      return uploadMiddleware(ctx, next);
+    }
+
+    return next();
+  });
+};
+
 module.exports = async ({ strapi }) => {
   // Generate the GraphQL schema for the content API
-  const schema = strapi
-    .plugin('graphql')
-    .service('content-api')
-    .buildSchema();
+  const schema = strapi.plugin('graphql').service('content-api').buildSchema();
 
   if (isEmpty(schema)) {
     strapi.log.warn('The GraphQL schema has not been generated because it is empty');
@@ -137,21 +151,4 @@ module.exports = async ({ strapi }) => {
   strapi.plugin('graphql').destroy = async () => {
     await server.stop();
   };
-};
-
-/**
- * Register the upload middleware powered by graphql-upload in Strapi
- * @param {object} strapi
- * @param {string} path
- */
-const useUploadMiddleware = (strapi, path) => {
-  const uploadMiddleware = graphqlUploadKoa();
-
-  strapi.server.app.use((ctx, next) => {
-    if (ctx.path === path) {
-      return uploadMiddleware(ctx, next);
-    }
-
-    return next();
-  });
 };

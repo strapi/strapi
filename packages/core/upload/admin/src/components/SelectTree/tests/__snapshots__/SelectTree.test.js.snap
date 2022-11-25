@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`SelectTree renders 1`] = `
-Object {
+{
   "asFragment": [Function],
   "baseElement": .c3 {
   border: 0;
@@ -51,22 +51,37 @@ Object {
 <body>
     <div>
       <div
-        class=" css-1tkrshn-container"
+        class=" css-1iyvlxg-container"
       >
+        <span
+          class="css-1f43avz-a11yText-A11yText"
+          id="react-select-2-live-region"
+        />
+        <span
+          aria-atomic="false"
+          aria-live="polite"
+          aria-relevant="additions text"
+          class="css-1f43avz-a11yText-A11yText"
+        />
         <div
-          class=" css-1sb7bue-control"
+          class=" css-1e1stxh-control"
         >
           <div
-            class=" css-1kj7tu4-ValueContainer"
+            class=" css-do2euy-ValueContainer"
           >
             <div
-              class=" css-p5rves-singleValue"
+              class=" css-1sqm0gs-singleValue"
             />
             <input
               aria-autocomplete="list"
-              class="css-wmatm6-dummyInput-DummyInput"
+              aria-expanded="false"
+              aria-haspopup="true"
+              aria-invalid="false"
+              aria-readonly="true"
+              class="css-mohuvp-dummyInput-DummyInput"
               id="react-select-2-input"
-              readonly=""
+              inputmode="none"
+              role="combobox"
               tabindex="0"
               value=""
             />
@@ -122,22 +137,37 @@ Object {
   </body>,
   "container": <div>
     <div
-      class=" css-1tkrshn-container"
+      class=" css-1iyvlxg-container"
     >
+      <span
+        class="css-1f43avz-a11yText-A11yText"
+        id="react-select-2-live-region"
+      />
+      <span
+        aria-atomic="false"
+        aria-live="polite"
+        aria-relevant="additions text"
+        class="css-1f43avz-a11yText-A11yText"
+      />
       <div
-        class=" css-1sb7bue-control"
+        class=" css-1e1stxh-control"
       >
         <div
-          class=" css-1kj7tu4-ValueContainer"
+          class=" css-do2euy-ValueContainer"
         >
           <div
-            class=" css-p5rves-singleValue"
+            class=" css-1sqm0gs-singleValue"
           />
           <input
             aria-autocomplete="list"
-            class="css-wmatm6-dummyInput-DummyInput"
+            aria-expanded="false"
+            aria-haspopup="true"
+            aria-invalid="false"
+            aria-readonly="true"
+            class="css-mohuvp-dummyInput-DummyInput"
             id="react-select-2-input"
-            readonly=""
+            inputmode="none"
+            role="combobox"
             tabindex="0"
             value=""
           />
@@ -146,7 +176,7 @@ Object {
           class=" css-1hb7zxy-IndicatorsContainer"
         >
           <button
-            class="sc-eBTqsU sc-ksDcAU sc-bJcRwn elEUJG hjqBQK ddQtUR"
+            class="sc-ezHhwS sc-hrJsxi sc-bZSZLb dbMhVN hZwTtz eAfeLi"
             type="button"
           >
             <svg
@@ -168,7 +198,7 @@ Object {
       </div>
     </div>
     <div
-      class="sc-cxpSdN hEuJJy"
+      class="sc-llYSUQ PCyKi"
     >
       <p
         aria-live="polite"

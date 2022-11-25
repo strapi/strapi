@@ -31,7 +31,7 @@ const ContentTypeBuilderNav = () => {
         searchable
         value={searchValue}
         onClear={() => onSearchChange('')}
-        onChange={e => onSearchChange(e.target.value)}
+        onChange={(e) => onSearchChange(e.target.value)}
         label={formatMessage({
           id: `${getTrad('plugin.name')}`,
           defaultMessage: 'Content-Types Builder',
@@ -42,7 +42,7 @@ const ContentTypeBuilderNav = () => {
         })}
       />
       <SubNavSections>
-        {menu.map(section => (
+        {menu.map((section) => (
           <React.Fragment key={section.name}>
             <SubNavSection
               label={formatMessage({
@@ -52,11 +52,11 @@ const ContentTypeBuilderNav = () => {
               collapsable
               badgeLabel={section.links.length.toString()}
             >
-              {section.links.map(link => {
+              {section.links.map((link) => {
                 if (link.links) {
                   return (
                     <SubNavLinkSection key={link.name} label={upperFirst(link.title)}>
-                      {link.links.map(subLink => (
+                      {link.links.map((subLink) => (
                         <SubNavLink
                           as={NavLink}
                           to={subLink.to}

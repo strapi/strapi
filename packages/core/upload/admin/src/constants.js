@@ -12,18 +12,18 @@ export const AssetSource = {
   Computer: 'computer',
 };
 
-const ParentFolderDefinition = PropTypes.shape({
+const ParentFolderShape = {
   id: PropTypes.number.isRequired,
   createdAt: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   updatedAt: PropTypes.string.isRequired,
   pathId: PropTypes.number.isRequired,
   path: PropTypes.string.isRequired,
-});
+};
 
-ParentFolderDefinition.parent = PropTypes.shape(ParentFolderDefinition);
+ParentFolderShape.parent = PropTypes.shape(ParentFolderShape);
 
-export const FolderDefinition = PropTypes.shape({
+const FolderShape = {
   id: PropTypes.number.isRequired,
   children: PropTypes.shape({
     count: PropTypes.number.isRequired,
@@ -34,12 +34,15 @@ export const FolderDefinition = PropTypes.shape({
     count: PropTypes.number.isRequired,
   }),
   name: PropTypes.string.isRequired,
-  parent: PropTypes.oneOfType([ParentFolderDefinition, PropTypes.number]),
   updatedAt: PropTypes.string.isRequired,
   updatedBy: PropTypes.shape(),
   pathId: PropTypes.number.isRequired,
   path: PropTypes.string.isRequired,
-});
+};
+
+FolderShape.parent = PropTypes.shape(ParentFolderShape);
+
+export const FolderDefinition = PropTypes.shape(FolderShape);
 
 const FolderStructure = PropTypes.shape({
   value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
@@ -77,7 +80,13 @@ export const AssetDefinition = PropTypes.shape({
 
 export const CrumbDefinition = PropTypes.shape({
   id: PropTypes.number,
-  label: PropTypes.string.isRequired,
+  label: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      defaultMessage: PropTypes.string.isRequired,
+    }),
+  ]).isRequired,
   href: PropTypes.string,
 });
 

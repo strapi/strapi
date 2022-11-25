@@ -5,12 +5,8 @@ const { joinBy, setCreatorFields } = require('@strapi/utils');
 const { FOLDER_MODEL_UID, FILE_MODEL_UID } = require('../constants');
 const { getService } = require('../utils');
 
-const setPathIdAndPath = async folder => {
-  const { max } = await strapi.db
-    .queryBuilder(FOLDER_MODEL_UID)
-    .max('pathId')
-    .first()
-    .execute();
+const setPathIdAndPath = async (folder) => {
+  const { max } = await strapi.db.queryBuilder(FOLDER_MODEL_UID).max('pathId').first().execute();
 
   const pathId = max + 1;
   let parentPath = '/';
@@ -58,16 +54,16 @@ const deleteByIds = async (ids = []) => {
   // delete files
   const filesToDelete = await strapi.db.query(FILE_MODEL_UID).findMany({
     where: {
-      $or: pathsToDelete.map(path => ({ folderPath: { $startsWith: path } })),
+      $or: pathsToDelete.map((path) => ({ folderPath: { $startsWith: path } })),
     },
   });
 
-  await Promise.all(filesToDelete.map(file => getService('upload').remove(file)));
+  await Promise.all(filesToDelete.map((file) => getService('upload').remove(file)));
 
   // delete folders
   const { count: totalFolderNumber } = await strapi.db.query(FOLDER_MODEL_UID).deleteMany({
     where: {
-      $or: pathsToDelete.map(path => ({ path: { $startsWith: path } })),
+      $or: pathsToDelete.map((path) => ({ path: { $startsWith: path } })),
     },
   });
 
@@ -113,7 +109,7 @@ const update = async (id, { name, parent }, { user }) => {
         .execute();
 
       // update parent folder (delete + insert; upsert not possible)
-      const joinTable = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.parent.joinTable;
+      const { joinTable } = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.parent;
       await strapi.db
         .queryBuilder(joinTable.name)
         .transacting(trx)
@@ -145,13 +141,13 @@ const update = async (id, { name, parent }, { user }) => {
 
       const folderTable = strapi.getModel(FOLDER_MODEL_UID).collectionName;
       const fileTable = strapi.getModel(FILE_MODEL_UID).collectionName;
-      const folderPathColumnName = strapi.db.metadata.get(FILE_MODEL_UID).attributes.folderPath
-        .columnName;
+      const folderPathColumnName =
+        strapi.db.metadata.get(FILE_MODEL_UID).attributes.folderPath.columnName;
       const pathColumnName = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.path.columnName;
 
       // update folders below
       await strapi.db
-        .connection(folderTable)
+        .getConnection(folderTable)
         .transacting(trx)
         .where(pathColumnName, existingFolder.path)
         .orWhere(pathColumnName, 'like', `${existingFolder.path}/%`)
@@ -166,7 +162,7 @@ const update = async (id, { name, parent }, { user }) => {
 
       // update files below
       await strapi.db
-        .connection(fileTable)
+        .getConnection(fileTable)
         .transacting(trx)
         .where(folderPathColumnName, existingFolder.path)
         .orWhere(folderPathColumnName, 'like', `${existingFolder.path}/%`)
@@ -207,7 +203,7 @@ const exists = async (params = {}) => {
  * @returns {Promise<array>}
  */
 const getStructure = async () => {
-  const joinTable = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.parent.joinTable;
+  const { joinTable } = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.parent;
   const qb = strapi.db.queryBuilder(FOLDER_MODEL_UID);
   const alias = qb.getAlias();
   const folders = await qb

@@ -8,7 +8,7 @@ import { IntlProvider } from 'react-intl';
 import Oops from '..';
 
 jest.mock('../../../../../components/LocalesProvider/useLocalesProvider', () => () => ({
-  changeLocale: () => {},
+  changeLocale() {},
   localeNames: { en: 'English' },
   messages: ['test'],
 }));
@@ -32,9 +32,13 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
     );
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c1 {
+      .c2 {
         padding-top: 24px;
         padding-right: 40px;
+      }
+
+      .c7 {
+        padding-left: 8px;
       }
 
       .c9 {
@@ -61,7 +65,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         padding-top: 16px;
       }
 
-      .c0 {
+      .c1 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -111,23 +115,180 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         justify-content: center;
       }
 
-      .c17 {
+      .c6 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        line-height: 1.14;
         color: #32324d;
+      }
+
+      .c17 {
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
+        color: #32324d;
       }
 
       .c18 {
-        color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
+        color: #32324d;
       }
 
       .c22 {
+        font-size: 0.875rem;
+        line-height: 1.43;
         color: #4945ff;
-        font-size: 0.75rem;
-        line-height: 1.33;
+      }
+
+      .c3 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
+      }
+
+      .c3 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c3 svg > g,
+      .c3 svg path {
+        fill: #ffffff;
+      }
+
+      .c3[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c3:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c3:focus-visible {
+        outline: none;
+      }
+
+      .c3:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c4 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        background-color: #4945ff;
+        border: 1px solid #4945ff;
+        height: 2rem;
+        padding-left: 16px;
+        padding-right: 16px;
+        border: 1px solid transparent;
+        background: transparent;
+      }
+
+      .c4 .c0 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c4 .c5 {
+        color: #ffffff;
+      }
+
+      .c4[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c4[aria-disabled='true'] .c5 {
+        color: #666687;
+      }
+
+      .c4[aria-disabled='true'] svg > g,
+      .c4[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c4[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c4[aria-disabled='true']:active .c5 {
+        color: #666687;
+      }
+
+      .c4[aria-disabled='true']:active svg > g,
+      .c4[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c4:hover {
+        background-color: #f6f6f9;
+      }
+
+      .c4:active {
+        border: 1px solid undefined;
+        background: undefined;
+      }
+
+      .c4 .c5 {
+        color: #32324d;
+      }
+
+      .c4 svg > g,
+      .c4 svg path {
+        fill: #8e8ea9;
+      }
+
+      .c8 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c8 svg {
+        height: 4px;
+        width: 6px;
       }
 
       .c21 {
@@ -187,164 +348,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         outline: none;
       }
 
-      .c5 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c7 {
-        padding-left: 8px;
-      }
-
-      .c2 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
-      }
-
-      .c2 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c2 svg > g,
-      .c2 svg path {
-        fill: #ffffff;
-      }
-
-      .c2[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c2:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c2:focus-visible {
-        outline: none;
-      }
-
-      .c2:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c3 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        padding: 8px 16px;
-        background: #4945ff;
-        border: 1px solid #4945ff;
-        border: 1px solid transparent;
-        background: transparent;
-      }
-
-      .c3 .c6 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c3 .c4 {
-        color: #ffffff;
-      }
-
-      .c3[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c3[aria-disabled='true'] .c4 {
-        color: #666687;
-      }
-
-      .c3[aria-disabled='true'] svg > g,
-      .c3[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c3[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c3[aria-disabled='true']:active .c4 {
-        color: #666687;
-      }
-
-      .c3[aria-disabled='true']:active svg > g,
-      .c3[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c3:hover {
-        background-color: #f6f6f9;
-      }
-
-      .c3:active {
-        border: 1px solid undefined;
-        background: undefined;
-      }
-
-      .c3 .c4 {
-        color: #32324d;
-      }
-
-      .c3 svg > g,
-      .c3 svg path {
-        fill: #8e8ea9;
-      }
-
-      .c8 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c8 svg {
-        height: 4px;
-        width: 6px;
-      }
-
       .c12 {
         margin: 0 auto;
         width: 552px;
@@ -362,10 +365,10 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
 
       <div>
         <header
-          class="c0"
+          class="c0 c1"
         >
           <div
-            class="c1"
+            class="c0 c2"
           >
             <div>
               <button
@@ -373,18 +376,18 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
                 aria-disabled="false"
                 aria-expanded="false"
                 aria-haspopup="true"
-                class="c2 c3"
+                class="c3 c4"
                 label="English"
                 type="button"
               >
                 <span
-                  class="c4 c5"
+                  class="c5 c6"
                 >
                   English
                 </span>
                 <div
                   aria-hidden="true"
-                  class="c6 c7"
+                  class="c0 c7"
                 >
                   <span
                     class="c8"
@@ -411,7 +414,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
           </div>
         </header>
         <div
-          class="c9"
+          class="c0 c9"
         >
           <main
             aria-labelledby="main-content-title"
@@ -420,10 +423,10 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
             tabindex="-1"
           >
             <div
-              class="c11 c12"
+              class="c0 c11 c12"
             >
               <div
-                class="c13 c14"
+                class="c0 c13 c14"
               >
                 <img
                   alt=""
@@ -432,24 +435,24 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
                   src="defaultAuthLogo.png"
                 />
                 <div
-                  class="c16"
+                  class="c0 c16"
                 >
                   <h1
-                    class="c17"
+                    class="c5 c17"
                   >
                     Oops...
                   </h1>
                 </div>
                 <span
-                  class="c18"
+                  class="c5 c18"
                 >
                   Your account has been suspended.
                 </span>
                 <div
-                  class="c19"
+                  class="c0 c19"
                 >
                   <span
-                    class="c18"
+                    class="c5 c18"
                   >
                     If this is a mistake, please contact your administrator.
                   </span>
@@ -457,17 +460,17 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
               </div>
             </div>
             <div
-              class="c20"
+              class="c0 c20"
             >
               <div
-                class="c19"
+                class="c0 c19"
               >
                 <a
                   class="c21"
                   href="/auth/login"
                 >
                   <span
-                    class="c22"
+                    class="c5 c22"
                   >
                     Sign in
                   </span>

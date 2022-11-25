@@ -7,6 +7,7 @@ const isDocker = require('is-docker');
 const fetch = require('node-fetch');
 const ciEnv = require('ci-info');
 const { isUsingTypeScriptSync } = require('@strapi/typescript-utils');
+const { env } = require('@strapi/utils');
 const ee = require('../../utils/ee');
 const machineID = require('../../utils/machine-id');
 const stringifyDeep = require('./stringify-deep');
@@ -33,7 +34,7 @@ const addPackageJsonStrapiMetadata = (metadata, strapi) => {
  * @param {Object} strapi strapi app
  * @returns {Function} (event, payload) -> Promise{boolean}
  */
-module.exports = strapi => {
+module.exports = (strapi) => {
   const { uuid } = strapi.config;
   const deviceId = machineID();
   const isEE = strapi.EE === true && ee.isEE === true;
@@ -41,22 +42,23 @@ module.exports = strapi => {
   const serverRootPath = strapi.dirs.app.root;
   const adminRootPath = path.join(strapi.dirs.app.root, 'src', 'admin');
 
-  const anonymous_metadata = {
+  const anonymousMetadata = {
     environment: strapi.config.environment,
     os: os.type(),
     osPlatform: os.platform(),
+    osArch: os.arch(),
     osRelease: os.release(),
-    nodeVersion: process.version,
+    nodeVersion: process.versions.node,
     docker: process.env.DOCKER || isDocker(),
     isCI: ciEnv.isCI,
     version: strapi.config.get('info.strapi'),
-    strapiVersion: strapi.config.get('info.strapi'),
     projectType: isEE ? 'Enterprise' : 'Community',
     useTypescriptOnServer: isUsingTypeScriptSync(serverRootPath),
     useTypescriptOnAdmin: isUsingTypeScriptSync(adminRootPath),
+    isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
   };
 
-  addPackageJsonStrapiMetadata(anonymous_metadata, strapi);
+  addPackageJsonStrapiMetadata(anonymousMetadata, strapi);
 
   return async (event, payload = {}, opts = {}) => {
     const reqParams = {
@@ -67,7 +69,7 @@ module.exports = strapi => {
         deviceId,
         properties: stringifyDeep({
           ...payload,
-          ...anonymous_metadata,
+          ...anonymousMetadata,
         }),
       }),
       ..._.merge({}, defaultQueryOpts, opts),

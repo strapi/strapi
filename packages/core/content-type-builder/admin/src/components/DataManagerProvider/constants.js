@@ -1,4 +1,6 @@
 export const ADD_ATTRIBUTE = 'ContentTypeBuilder/DataManagerProvider/ADD_ATTRIBUTE';
+export const ADD_CUSTOM_FIELD_ATTRIBUTE =
+  'ContentTypeBuilder/DataManagerProvider/ADD_CUSTOM_FIELD_ATTRIBUTE';
 export const ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE =
   'ContentTypeBuilder/DataManagerProvider/ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE';
 export const CHANGE_DYNAMIC_ZONE_COMPONENTS =
@@ -8,6 +10,8 @@ export const CREATE_COMPONENT_SCHEMA =
   'ContentTypeBuilder/DataManagerProvider/CREATE_COMPONENT_SCHEMA';
 export const DELETE_NOT_SAVED_TYPE = 'ContentTypeBuilder/DataManagerProvider/DELETE_NOT_SAVED_TYPE';
 export const EDIT_ATTRIBUTE = 'ContentTypeBuilder/DataManagerProvider/EDIT_ATTRIBUTE';
+export const EDIT_CUSTOM_FIELD_ATTRIBUTE =
+  'ContentTypeBuilder/DataManagerProvider/EDIT_CUSTOM_FIELD_ATTRIBUTE';
 export const GET_DATA_SUCCEEDED = 'ContentTypeBuilder/DataManagerProvider/GET_DATA_SUCCEEDED';
 export const RELOAD_PLUGIN = 'ContentTypeBuilder/DataManagerProvider/RELOAD_PLUGIN';
 export const REMOVE_FIELD_FROM_DISPLAYED_COMPONENT =

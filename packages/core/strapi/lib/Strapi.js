@@ -21,7 +21,10 @@ const createEntityService = require('./services/entity-service');
 const createCronService = require('./services/cron');
 const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
+const requestContext = require('./services/request-context');
 const createAuth = require('./services/auth');
+const createCustomFields = require('./services/custom-fields');
+const createContentAPI = require('./services/content-api');
 const createUpdateNotifier = require('./utils/update-notifier');
 const createStartupLogger = require('./utils/startup-logger');
 const { LIFECYCLES } = require('./utils/lifecycles');
@@ -34,12 +37,14 @@ const hooksRegistry = require('./core/registries/hooks');
 const controllersRegistry = require('./core/registries/controllers');
 const modulesRegistry = require('./core/registries/modules');
 const pluginsRegistry = require('./core/registries/plugins');
+const customFieldsRegistry = require('./core/registries/custom-fields');
 const createConfigProvider = require('./core/registries/config');
 const apisRegistry = require('./core/registries/apis');
 const bootstrap = require('./core/bootstrap');
 const loaders = require('./core/loaders');
 const { destroyOnSignal } = require('./utils/signals');
 const sanitizersRegistry = require('./core/registries/sanitizers');
+const convertCustomFieldType = require('./utils/convert-custom-field-type');
 
 // TODO: move somewhere else
 const draftAndPublishSync = require('./migrations/draft-publish');
@@ -55,7 +60,7 @@ const draftAndPublishSync = require('./migrations/draft-publish');
  * - If `appDir` is `undefined`, it'll be set to `process.cwd()`
  * - If `distDir` is `undefined`, it'll be set to `appDir`
  */
-const resolveWorkingDirectories = opts => {
+const resolveWorkingDirectories = (opts) => {
   const cwd = process.cwd();
 
   const appDir = opts.appDir ? path.resolve(cwd, opts.appDir) : cwd;
@@ -74,7 +79,7 @@ class Strapi {
     // Load the app configuration from the dist directory
     const appConfig = loadConfiguration({ appDir: rootDirs.app, distDir: rootDirs.dist }, opts);
 
-    // Instanciate the Strapi container
+    // Instantiate the Strapi container
     this.container = createContainer(this);
 
     // Register every Strapi registry in the container
@@ -87,8 +92,10 @@ class Strapi {
     this.container.register('controllers', controllersRegistry(this));
     this.container.register('modules', modulesRegistry(this));
     this.container.register('plugins', pluginsRegistry(this));
+    this.container.register('custom-fields', customFieldsRegistry(this));
     this.container.register('apis', apisRegistry(this));
     this.container.register('auth', createAuth(this));
+    this.container.register('content-api', createContentAPI(this));
     this.container.register('sanitizers', sanitizersRegistry(this));
 
     // Create a mapping of every useful directory (for the app, dist and static directories)
@@ -98,7 +105,7 @@ class Strapi {
     this.isLoaded = false;
     this.reload = this.reload();
 
-    // Instanciate the Koa app & the HTTP server
+    // Instantiate the Koa app & the HTTP server
     this.server = createServer(this);
 
     // Strapi utils instanciation
@@ -108,6 +115,9 @@ class Strapi {
     this.log = createLogger(this.config.get('logger', {}));
     this.cron = createCronService();
     this.telemetry = createTelemetry(this);
+    this.requestContext = requestContext;
+
+    this.customFields = createCustomFields(this);
 
     createUpdateNotifier(this).notify();
   }
@@ -117,7 +127,7 @@ class Strapi {
   }
 
   get EE() {
-    return ee({ dir: this.dirs.dist.root, logger: this.log });
+    return ee({ dir: this.dirs.app.root, logger: this.log });
   }
 
   get services() {
@@ -186,6 +196,10 @@ class Strapi {
 
   get auth() {
     return this.container.get('auth');
+  }
+
+  get contentAPI() {
+    return this.container.get('content-api');
   }
 
   get sanitizers() {
@@ -265,7 +279,7 @@ class Strapi {
    */
   async listen() {
     return new Promise((resolve, reject) => {
-      const onListen = async error => {
+      const onListen = async (error) => {
         if (error) {
           return reject(error);
         }
@@ -282,11 +296,11 @@ class Strapi {
       const listenSocket = this.config.get('server.socket');
 
       if (listenSocket) {
-        return this.server.listen(listenSocket, onListen);
+        this.server.listen(listenSocket, onListen);
+      } else {
+        const { host, port } = this.config.get('server');
+        this.server.listen(port, host, onListen);
       }
-
-      const { host, port } = this.config.get('server');
-      return this.server.listen(port, host, onListen);
     });
   }
 
@@ -377,6 +391,8 @@ class Strapi {
     this.telemetry.register();
 
     await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
+    // NOTE: Swap type customField for underlying data type
+    convertCustomFieldType(this);
 
     return this;
   }
@@ -445,6 +461,8 @@ class Strapi {
     await this.server.initMiddlewares();
     await this.server.initRouting();
 
+    await this.contentAPI.permissions.registerActions();
+
     await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
 
     this.cron.start();
@@ -463,7 +481,7 @@ class Strapi {
 
   async startWebhooks() {
     const webhooks = await this.webhookStore.findWebhooks();
-    webhooks.forEach(webhook => this.webhookRunner.add(webhook));
+    webhooks.forEach((webhook) => this.webhookRunner.add(webhook));
   }
 
   reload() {
@@ -471,7 +489,7 @@ class Strapi {
       shouldReload: 0,
     };
 
-    const reload = function() {
+    const reload = function () {
       if (state.shouldReload > 0) {
         // Reset the reloading state
         state.shouldReload -= 1;
@@ -535,7 +553,7 @@ class Strapi {
   }
 }
 
-module.exports = options => {
+module.exports = (options) => {
   const strapi = new Strapi(options);
   global.strapi = strapi;
   return strapi;

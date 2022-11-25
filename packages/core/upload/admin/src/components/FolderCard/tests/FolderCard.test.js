@@ -40,7 +40,7 @@ const ComponentFixture = ({ to, ...props }) => {
   );
 };
 
-const setup = props => render(<ComponentFixture {...props} />);
+const setup = (props) => render(<ComponentFixture {...props} />);
 
 describe('FolderCard', () => {
   test('renders and matches the snapshot', () => {

@@ -5,7 +5,7 @@ const assert = require('assert').strict;
 const timestampsLifecyclesSubscriber = require('./subscribers/timestamps');
 const modelLifecyclesSubscriber = require('./subscribers/models-lifecycles');
 
-const isValidSubscriber = subscriber => {
+const isValidSubscriber = (subscriber) => {
   return (
     typeof subscriber === 'function' || (typeof subscriber === 'object' && subscriber !== null)
   );
@@ -14,7 +14,7 @@ const isValidSubscriber = subscriber => {
 /**
  * @type {import('.').createLifecyclesProvider}
  */
-const createLifecyclesProvider = db => {
+const createLifecyclesProvider = (db) => {
   let subscribers = [timestampsLifecyclesSubscriber, modelLifecyclesSubscriber];
 
   return {
@@ -54,7 +54,7 @@ const createLifecyclesProvider = db => {
      * @param {Map<any, any>} states
      */
     async run(action, uid, properties, states = new Map()) {
-      for (let i = 0; i < subscribers.length; i++) {
+      for (let i = 0; i < subscribers.length; i += 1) {
         const subscriber = subscribers[i];
         if (typeof subscriber === 'function') {
           const state = states.get(subscriber) || {};

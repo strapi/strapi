@@ -29,7 +29,7 @@ export const MediaLibraryDialog = ({ onClose, onSelectAssets, allowedTypes }) =>
           onValidate={onSelectAssets}
           onAddAsset={() => setStep(STEPS.AssetUpload)}
           onAddFolder={() => setStep(STEPS.FolderCreate)}
-          onChangeFolder={folderId => setFolderId(folderId)}
+          onChangeFolder={(folderId) => setFolderId(folderId)}
           multiple
         />
       );

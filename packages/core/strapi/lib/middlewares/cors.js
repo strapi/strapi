@@ -15,16 +15,9 @@ const defaults = {
 /**
  * @type {import('./').MiddlewareFactory}
  */
-module.exports = config => {
-  const {
-    origin,
-    expose,
-    maxAge,
-    credentials,
-    methods,
-    headers,
-    keepHeadersOnError,
-  } = defaultsDeep(defaults, config);
+module.exports = (config) => {
+  const { origin, expose, maxAge, credentials, methods, headers, keepHeadersOnError } =
+    defaultsDeep(defaults, config);
 
   return cors({
     async origin(ctx) {

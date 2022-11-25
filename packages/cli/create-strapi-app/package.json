@@ -1,7 +1,12 @@
 {
   "name": "create-strapi-app",
-  "version": "4.3.4",
+  "version": "4.5.2",
   "description": "Generate a new Strapi application.",
+  "dependencies": {
+    "@strapi/generate-new": "4.5.2",
+    "commander": "7.2.0",
+    "inquirer": "8.2.4"
+  },
   "keywords": [
     "create-strapi-app",
     "create",
@@ -37,13 +42,8 @@
   "scripts": {
     "test": "echo \"no tests yet\""
   },
-  "dependencies": {
-    "@strapi/generate-new": "4.3.4",
-    "commander": "6.1.0",
-    "inquirer": "8.2.4"
-  },
   "engines": {
-    "node": ">=14.19.1 <=16.x.x",
+    "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"
   }
 }

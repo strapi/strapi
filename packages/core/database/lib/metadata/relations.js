@@ -9,10 +9,13 @@ const _ = require('lodash/fp');
 const hasInversedBy = _.has('inversedBy');
 const hasMappedBy = _.has('mappedBy');
 
-const isOneToAny = attribute => ['oneToOne', 'oneToMany'].includes(attribute.relation);
-const isBidirectional = attribute => hasInversedBy(attribute) || hasMappedBy(attribute);
-const isOwner = attribute => !isBidirectional(attribute) || hasInversedBy(attribute);
-const shouldUseJoinTable = attribute => attribute.useJoinTable !== false;
+const isOneToAny = (attribute) => ['oneToOne', 'oneToMany'].includes(attribute.relation);
+const isManyToAny = (attribute) => ['manyToMany', 'manyToOne'].includes(attribute.relation);
+const isAnyToOne = (attribute) => ['oneToOne', 'manyToOne'].includes(attribute.relation);
+const isAnyToMany = (attribute) => ['oneToMany', 'manyToMany'].includes(attribute.relation);
+const isBidirectional = (attribute) => hasInversedBy(attribute) || hasMappedBy(attribute);
+const isOwner = (attribute) => !isBidirectional(attribute) || hasInversedBy(attribute);
+const shouldUseJoinTable = (attribute) => attribute.useJoinTable !== false;
 
 /**
  * Creates a oneToOne relation metadata
@@ -75,12 +78,8 @@ const createOneToMany = (attributeName, attribute, meta, metadata) => {
       attributeName,
       meta,
     });
-  } else {
-    if (isOwner(attribute)) {
-      throw new Error(
-        'one side of a oneToMany cannot be the owner side in a bidirectional relation'
-      );
-    }
+  } else if (isOwner(attribute)) {
+    throw new Error('one side of a oneToMany cannot be the owner side in a bidirectional relation');
   }
 };
 
@@ -169,7 +168,7 @@ const createManyToMany = (attributeName, attribute, meta, metadata) => {
  * @param {ModelMetadata} meta
  * @param {Metadata} metadata
  */
-const createMorphToOne = (attributeName, attribute /*meta, metadata*/) => {
+const createMorphToOne = (attributeName, attribute /* meta, metadata */) => {
   const idColumnName = 'target_id';
   const typeColumnName = 'target_type';
 
@@ -210,6 +209,9 @@ const createMorphToMany = (attributeName, attribute, meta, metadata) => {
     uid: joinTableName,
     tableName: joinTableName,
     attributes: {
+      id: {
+        type: 'increments',
+      },
       [joinColumnName]: {
         type: 'integer',
         column: {
@@ -270,6 +272,7 @@ const createMorphToMany = (attributeName, attribute, meta, metadata) => {
     orderBy: {
       order: 'asc',
     },
+    pivotColumns: [joinColumnName, typeColumnName, idColumnName],
   };
 
   attribute.joinTable = joinTable;
@@ -341,9 +344,10 @@ const createRelation = (attributeName, attribute, meta, metadata) => {
       return createMorphOne(attributeName, attribute, meta, metadata);
     case 'morphMany':
       return createMorphMany(attributeName, attribute, meta, metadata);
+    default: {
+      throw new Error(`Unknown relation ${attribute.relation}`);
+    }
   }
-
-  throw new Error(`Unknown relation ${attribute.relation}`);
 };
 
 /**
@@ -354,7 +358,7 @@ const createRelation = (attributeName, attribute, meta, metadata) => {
  * @param {string} param.attributeName name of the associated attribute
  * @param {Object} param.meta model metadata
  */
-const createJoinColum = (metadata, { attribute, attributeName /*meta */ }) => {
+const createJoinColum = (metadata, { attribute, attributeName /* meta */ }) => {
   const targetMeta = metadata.get(attribute.target);
 
   const joinColumnName = _.snakeCase(`${attributeName}_id`);
@@ -395,18 +399,29 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
 
   const joinTableName = _.snakeCase(`${meta.tableName}_${attributeName}_links`);
 
-  let joinColumnName = _.snakeCase(`${meta.singularName}_id`);
+  const joinColumnName = _.snakeCase(`${meta.singularName}_id`);
   let inverseJoinColumnName = _.snakeCase(`${targetMeta.singularName}_id`);
 
-  // if relation is slef referencing
+  // if relation is self referencing
   if (joinColumnName === inverseJoinColumnName) {
     inverseJoinColumnName = `inv_${inverseJoinColumnName}`;
   }
 
-  metadata.add({
+  const orderColumnName = _.snakeCase(`${targetMeta.singularName}_order`);
+  let inverseOrderColumnName = _.snakeCase(`${meta.singularName}_order`);
+
+  // if relation is self referencing
+  if (attribute.relation === 'manyToMany' && joinColumnName === inverseJoinColumnName) {
+    inverseOrderColumnName = `inv_${inverseOrderColumnName}`;
+  }
+
+  const metadataSchema = {
     uid: joinTableName,
     tableName: joinTableName,
     attributes: {
+      id: {
+        type: 'increments',
+      },
       [joinColumnName]: {
         type: 'integer',
         column: {
@@ -430,6 +445,11 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
         name: `${joinTableName}_inv_fk`,
         columns: [inverseJoinColumnName],
       },
+      {
+        name: `${joinTableName}_unique`,
+        columns: [joinColumnName, inverseJoinColumnName],
+        type: 'unique',
+      },
     ],
     foreignKeys: [
       {
@@ -447,7 +467,7 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
         onDelete: 'CASCADE',
       },
     ],
-  });
+  };
 
   const joinTable = {
     name: joinTableName,
@@ -459,7 +479,45 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
       name: inverseJoinColumnName,
       referencedColumn: 'id',
     },
+    pivotColumns: [joinColumnName, inverseJoinColumnName],
   };
+
+  // order
+  if (isAnyToMany(attribute)) {
+    metadataSchema.attributes[orderColumnName] = {
+      type: 'integer',
+      column: {
+        unsigned: true,
+        defaultTo: null,
+      },
+    };
+    metadataSchema.indexes.push({
+      name: `${joinTableName}_order_fk`,
+      columns: [orderColumnName],
+    });
+    joinTable.orderColumnName = orderColumnName;
+    joinTable.orderBy = { [orderColumnName]: 'asc' };
+  }
+
+  // inv order
+  if (isBidirectional(attribute) && isManyToAny(attribute)) {
+    metadataSchema.attributes[inverseOrderColumnName] = {
+      type: 'integer',
+      column: {
+        unsigned: true,
+        defaultTo: null,
+      },
+    };
+
+    metadataSchema.indexes.push({
+      name: `${joinTableName}_order_inv_fk`,
+      columns: [inverseOrderColumnName],
+    });
+
+    joinTable.inverseOrderColumnName = inverseOrderColumnName;
+  }
+
+  metadata.add(metadataSchema);
 
   attribute.joinTable = joinTable;
 
@@ -476,13 +534,30 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
       name: joinTableName,
       joinColumn: joinTable.inverseJoinColumn,
       inverseJoinColumn: joinTable.joinColumn,
+      pivotColumns: joinTable.pivotColumns,
     };
+
+    if (isManyToAny(attribute)) {
+      inverseAttribute.joinTable.orderColumnName = inverseOrderColumnName;
+      inverseAttribute.joinTable.orderBy = { [inverseOrderColumnName]: 'asc' };
+    }
+    if (isAnyToMany(attribute)) {
+      inverseAttribute.joinTable.inverseOrderColumnName = orderColumnName;
+    }
   }
 };
+
+const hasOrderColumn = (attribute) => isAnyToMany(attribute);
+const hasInverseOrderColumn = (attribute) => isBidirectional(attribute) && isManyToAny(attribute);
 
 module.exports = {
   createRelation,
 
   isBidirectional,
   isOneToAny,
+  isManyToAny,
+  isAnyToOne,
+  isAnyToMany,
+  hasOrderColumn,
+  hasInverseOrderColumn,
 };

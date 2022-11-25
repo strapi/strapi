@@ -7,31 +7,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import StrapiAppContext from '../../contexts/StrapiAppContext';
 
-const StrapiAppProvider = ({
-  children,
-  getPlugin,
-  menu,
-  plugins,
-  runHookParallel,
-  runHookWaterfall,
-  runHookSeries,
-  settings,
-}) => {
-  return (
-    <StrapiAppContext.Provider
-      value={{
-        getPlugin,
-        menu,
-        plugins,
-        runHookParallel,
-        runHookWaterfall,
-        runHookSeries,
-        settings,
-      }}
-    >
-      {children}
-    </StrapiAppContext.Provider>
-  );
+const StrapiAppProvider = ({ children, ...value }) => {
+  return <StrapiAppContext.Provider value={value}>{children}</StrapiAppContext.Provider>;
 };
 
 StrapiAppProvider.propTypes = {

@@ -9,25 +9,15 @@ const createSchema = require('./model-schema');
 const { removeEmptyDefaults } = require('./data-transform');
 
 const VALID_RELATIONS = ['oneToOne', 'oneToMany'];
-const VALID_TYPES = [...DEFAULT_TYPES, 'component'];
+const VALID_TYPES = [...DEFAULT_TYPES, 'component', 'customField'];
 
 const componentSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
   modelType: modelTypes.COMPONENT,
 })
   .shape({
-    displayName: yup
-      .string()
-      .min(1)
-      .required('displayName.required'),
-    icon: yup
-      .string()
-      .nullable()
-      .test(isValidIcon),
-    category: yup
-      .string()
-      .nullable()
-      .test(isValidCategoryName)
-      .required('category.required'),
+    displayName: yup.string().min(1).required('displayName.required'),
+    icon: yup.string().nullable().test(isValidIcon),
+    category: yup.string().nullable().test(isValidCategoryName).required('category.required'),
   })
   .required()
   .noUnknown();
@@ -67,13 +57,13 @@ const updateComponentInputSchema = yup
   })
   .noUnknown();
 
-const validateUpdateComponentInput = data => {
+const validateUpdateComponentInput = (data) => {
   if (_.has(data, 'component')) {
     removeEmptyDefaults(data.component);
   }
 
   if (_.has(data, 'components') && Array.isArray(data.components)) {
-    data.components.forEach(data => {
+    data.components.forEach((data) => {
       if (_.has(data, 'uid')) {
         removeEmptyDefaults(data);
       }

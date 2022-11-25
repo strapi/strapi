@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useQueryClient } from 'react-query';
 import { useHistory } from 'react-router-dom';
 import axios from 'axios';
 import get from 'lodash/get';
@@ -34,19 +35,15 @@ import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
 
 // This container is used to handle the CRUD
 const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }) => {
+  const queryClient = useQueryClient();
   const toggleNotification = useNotification();
   const { setCurrentStep } = useGuidedTour();
   const { trackUsage } = useTracking();
   const { push, replace } = useHistory();
   const [{ rawQuery }] = useQueryParams();
   const dispatch = useDispatch();
-  const {
-    componentsDataStructure,
-    contentTypeDataStructure,
-    data,
-    isLoading,
-    status,
-  } = useSelector(selectCrudReducer);
+  const { componentsDataStructure, contentTypeDataStructure, data, isLoading, status } =
+    useSelector(selectCrudReducer);
   const redirectionLink = useFindRedirectionLink(slug);
 
   const isMounted = useRef(true);
@@ -65,7 +62,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   }, [slug, id, isCreatingEntry, origin]);
 
   const cleanClonedData = useCallback(
-    data => {
+    (data) => {
       if (!origin) {
         return data;
       }
@@ -81,7 +78,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     [origin]
   );
 
-  const cleanReceivedData = useCallback(data => {
+  const cleanReceivedData = useCallback((data) => {
     const cleaned = removePasswordFieldsFromData(
       data,
       allLayoutDataRef.current.contentType,
@@ -136,7 +133,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source();
 
-    const fetchData = async source => {
+    const fetchData = async (source) => {
       dispatch(getData());
 
       try {
@@ -201,7 +198,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   ]);
 
   const displayErrors = useCallback(
-    err => {
+    (err) => {
       const errorPayload = err.response.data;
       let errorMessage = get(errorPayload, ['error', 'message'], 'Bad Request');
 
@@ -218,7 +215,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   );
 
   const onDelete = useCallback(
-    async trackerProperty => {
+    async (trackerProperty) => {
       try {
         trackUsageRef.current('willDeleteEntry', trackerProperty);
 
@@ -265,7 +262,11 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
         setCurrentStep('contentManager.success');
 
+        // TODO: need to find a better place, or a better abstraction
+        queryClient.invalidateQueries(['relation']);
+
         dispatch(submitSucceeded(cleanReceivedData(data)));
+
         // Enable navigation and remove loaders
         dispatch(setStatus('resolved'));
 
@@ -289,8 +290,32 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       rawQuery,
       toggleNotification,
       setCurrentStep,
+      queryClient,
     ]
   );
+
+  const onDraftRelationCheck = useCallback(async () => {
+    try {
+      trackUsageRef.current('willCheckDraftRelations');
+
+      const endPoint = getRequestUrl(
+        `collection-types/${slug}/${id}/actions/numberOfDraftRelations`
+      );
+      dispatch(setStatus('draft-relation-check-pending'));
+
+      const numberOfDraftRelations = await axiosInstance.get(endPoint);
+      trackUsageRef.current('didCheckDraftRelations');
+
+      dispatch(setStatus('resolved'));
+
+      return numberOfDraftRelations.data.data;
+    } catch (err) {
+      displayErrors(err);
+      dispatch(setStatus('resolved'));
+
+      return Promise.reject(err);
+    }
+  }, [displayErrors, id, slug, dispatch]);
 
   const onPublish = useCallback(async () => {
     try {
@@ -337,6 +362,9 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
           message: { id: getTrad('success.record.save') },
         });
 
+        // TODO: need to find a better place, or a better abstraction
+        queryClient.invalidateQueries(['relation']);
+
         dispatch(submitSucceeded(cleanReceivedData(data)));
 
         dispatch(setStatus('resolved'));
@@ -351,7 +379,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         return Promise.reject(err);
       }
     },
-    [cleanReceivedData, displayErrors, slug, id, dispatch, toggleNotification]
+    [cleanReceivedData, displayErrors, slug, id, dispatch, toggleNotification, queryClient]
   );
 
   const onUnpublish = useCallback(async () => {
@@ -392,6 +420,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     onDeleteSucceeded,
     onPost,
     onPublish,
+    onDraftRelationCheck,
     onPut,
     onUnpublish,
     status,

@@ -5,7 +5,7 @@
  * with basic info, dependencies, etc.
  */
 
-module.exports = opts => {
+module.exports = (opts) => {
   const {
     strapiDependencies,
     additionalsDependencies,
@@ -28,14 +28,13 @@ module.exports = opts => {
       strapi: 'strapi',
     },
     devDependencies: {},
-    dependencies: Object.assign(
-      {},
-      strapiDependencies.reduce((acc, key) => {
+    dependencies: {
+      ...strapiDependencies.reduce((acc, key) => {
         acc[key] = strapiVersion;
         return acc;
       }, {}),
-      additionalsDependencies
-    ),
+      ...additionalsDependencies,
+    },
     author: {
       name: 'A Strapi developer',
     },
@@ -44,7 +43,7 @@ module.exports = opts => {
       ...packageJsonStrapi,
     },
     engines: {
-      node: '>=12.x.x <=16.x.x',
+      node: '>=14.19.1 <=18.x.x',
       npm: '>=6.0.0',
     },
     license: 'MIT',

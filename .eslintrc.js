@@ -9,11 +9,11 @@ const frontPaths = [
 
 module.exports = {
   parserOptions: {
-    ecmaVersion: 2018,
+    ecmaVersion: 2020,
   },
   overrides: [
     {
-      files: ['packages/**/*.js', 'test/**/*.js', 'scripts/**/*.js'],
+      files: ['packages/**/*.js', 'test/**/*.js', 'scripts/**/*.js', 'jest.*.js'],
       excludedFiles: frontPaths,
       ...require('./.eslintrc.back.js'),
     },

@@ -202,24 +202,24 @@ describe('SettingsPage || components || SettingsNav', () => {
       }
 
       .c4 {
-        color: #32324d;
         font-weight: 600;
         font-size: 1.125rem;
         line-height: 1.22;
+        color: #32324d;
       }
 
       .c19 {
-        color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
+        color: #666687;
       }
 
       .c24 {
-        color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
+        color: #32324d;
       }
 
       .c7 {
@@ -417,7 +417,7 @@ describe('SettingsPage || components || SettingsNav', () => {
                         </div>
                       </div>
                       <div
-                        class="c16 sc-iuqRDJ c25"
+                        class="c16 sc-eBTqsU c25"
                       >
                         <svg
                           class="c26"

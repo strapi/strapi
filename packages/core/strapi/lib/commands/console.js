@@ -14,7 +14,7 @@ module.exports = async () => {
   app.start().then(() => {
     const repl = REPL.start(app.config.info.name + ' > ' || 'strapi > '); // eslint-disable-line prefer-template
 
-    repl.on('exit', function(err) {
+    repl.on('exit', function (err) {
       if (err) {
         app.log.error(err);
         process.exit(1);

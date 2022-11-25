@@ -12,10 +12,10 @@ import Inputs from '../Inputs';
 
 const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, name }) => {
   const { getComponentLayout } = useContentTypeLayout();
-  const componentLayoutData = useMemo(() => getComponentLayout(componentUid), [
-    componentUid,
-    getComponentLayout,
-  ]);
+  const componentLayoutData = useMemo(
+    () => getComponentLayout(componentUid),
+    [componentUid, getComponentLayout]
+  );
   const fields = componentLayoutData.layouts.edit;
 
   return (
@@ -61,10 +61,12 @@ const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, nam
                 return (
                   <GridItem col={size} key={fieldName} s={12} xs={12}>
                     <Inputs
+                      componentUid={componentUid}
                       keys={keys}
                       fieldSchema={fieldSchema}
                       metadatas={metadatas}
                       queryInfos={queryInfos}
+                      size={size}
                     />
                   </GridItem>
                 );

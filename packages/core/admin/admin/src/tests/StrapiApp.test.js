@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { fixtures } from '../../../../../admin-test-utils';
+import { fixtures } from '@strapi/admin-test-utils/lib';
 import { Components, Fields } from '../core/apis';
 import StrapiApp from '../StrapiApp';
 import appReducers from '../reducers';
@@ -13,45 +13,7 @@ describe('ADMIN | StrapiApp', () => {
     const app = StrapiApp({ middlewares, reducers, library });
     const { container } = render(app.render());
 
-    expect(container.firstChild).toMatchInlineSnapshot(`
-      .c0 {
-        margin-left: -250px;
-        position: fixed;
-        left: 50%;
-        top: 2.875rem;
-        z-index: 10;
-        width: 31.25rem;
-      }
-
-      .c1 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c2 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c2 > * + * {
-        margin-top: 8px;
-      }
-
-      <div
-        class="c0 c1 c2"
-        spacing="2"
-        width="31.25rem"
-      />
-    `);
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('should create a valid store', () => {
@@ -106,9 +68,9 @@ describe('ADMIN | StrapiApp', () => {
       app.createHook('moto');
 
       app.registerHook('hello', () => 5);
-      app.registerHook('moto', n => n + 1);
-      app.registerHook('moto', n => n + 2);
-      app.registerHook('moto', n => n + 3);
+      app.registerHook('moto', (n) => n + 1);
+      app.registerHook('moto', (n) => n + 2);
+      app.registerHook('moto', (n) => n + 3);
 
       const res = app.runHookWaterfall('moto', 1);
 
@@ -122,9 +84,9 @@ describe('ADMIN | StrapiApp', () => {
       app.createHook('moto');
 
       app.registerHook('hello', () => 5);
-      app.registerHook('moto', n => n + 1);
-      app.registerHook('moto', n => Promise.resolve(n + 2));
-      app.registerHook('moto', n => n + 3);
+      app.registerHook('moto', (n) => n + 1);
+      app.registerHook('moto', (n) => Promise.resolve(n + 2));
+      app.registerHook('moto', (n) => n + 3);
 
       const res = await app.runHookWaterfall('moto', 1, true);
 
@@ -205,6 +167,205 @@ describe('ADMIN | StrapiApp', () => {
 
       expect(app.settings.global.links).toHaveLength(1);
       expect(app.settings.global.links).toEqual(links);
+    });
+  });
+
+  describe('Custom fields api', () => {
+    it('should register a custom field', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+      const field = {
+        name: 'pluginCustomField',
+        pluginId: 'myplugin',
+        type: 'text',
+        icon: jest.fn(),
+        intlLabel: { id: 'foo', defaultMessage: 'foo' },
+        intlDescription: { id: 'foo', defaultMessage: 'foo' },
+        components: {
+          Input: jest.fn(),
+        },
+      };
+
+      app.customFields.register(field);
+      expect(app.customFields.get('plugin::myplugin.pluginCustomField')).toEqual(field);
+      expect(app.customFields.getAll()).toEqual({
+        'plugin::myplugin.pluginCustomField': field,
+      });
+    });
+
+    it('should register a custom field with valid options', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+      const field = {
+        name: 'optionsCustomField',
+        pluginId: 'myplugin',
+        type: 'text',
+        icon: jest.fn(),
+        intlLabel: { id: 'foo', defaultMessage: 'foo' },
+        intlDescription: { id: 'foo', defaultMessage: 'foo' },
+        components: {
+          Input: jest.fn(),
+        },
+        options: {
+          base: [{ name: 'regex' }],
+          advanced: [
+            { name: 'options.plop' },
+            { name: 'required' },
+            { sectionTitle: null, items: [{ name: 'options.deep' }] },
+            { sectionTitle: null, items: [{ name: 'private' }] },
+          ],
+        },
+      };
+
+      app.customFields.register(field);
+      expect(app.customFields.get('plugin::myplugin.optionsCustomField')).toEqual(field);
+    });
+
+    it('should register several custom fields at once', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+      const fields = [
+        {
+          name: 'field1',
+          pluginId: 'myplugin',
+          type: 'text',
+          icon: jest.fn(),
+          intlLabel: { id: 'foo', defaultMessage: 'foo' },
+          intlDescription: { id: 'foo', defaultMessage: 'foo' },
+          components: {
+            Input: jest.fn(),
+          },
+        },
+        {
+          name: 'field2',
+          pluginId: 'myplugin',
+          type: 'text',
+          icon: jest.fn(),
+          intlLabel: { id: 'foo', defaultMessage: 'foo' },
+          intlDescription: { id: 'foo', defaultMessage: 'foo' },
+          components: {
+            Input: jest.fn(),
+          },
+        },
+      ];
+
+      app.customFields.register(fields);
+      expect(app.customFields.get('plugin::myplugin.field1')).toEqual(fields[0]);
+      expect(app.customFields.get('plugin::myplugin.field2')).toEqual(fields[1]);
+    });
+
+    it('should register a custom field without pluginId', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+      const field = {
+        name: 'appCustomField',
+        type: 'text',
+        icon: jest.fn(),
+        intlLabel: { id: 'foo', defaultMessage: 'foo' },
+        intlDescription: { id: 'foo', defaultMessage: 'foo' },
+        components: {
+          Input: jest.fn(),
+        },
+      };
+
+      app.customFields.register(field);
+      const uid = 'global::appCustomField';
+      expect(app.customFields.get(uid)).toEqual(field);
+    });
+
+    it('should prevent registering same custom field twice', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+      const field = {
+        name: 'redundantCustomField',
+        pluginId: 'myplugin',
+        type: 'text',
+        icon: jest.fn(),
+        intlLabel: { id: 'foo', defaultMessage: 'foo' },
+        intlDescription: { id: 'foo', defaultMessage: 'foo' },
+        components: {
+          Input: jest.fn(),
+        },
+      };
+
+      // Second register call should throw
+      app.customFields.register(field);
+      expect(() => app.customFields.register(field)).toThrowError(
+        "Custom field: 'plugin::myplugin.redundantCustomField' has already been registered"
+      );
+    });
+
+    it('should validate the name can be used as an object key', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+      const field = {
+        name: 'test.boom',
+        pluginId: 'myplugin',
+        type: 'text',
+        intlLabel: { id: 'foo', defaultMessage: 'foo' },
+        intlDescription: { id: 'foo', defaultMessage: 'foo' },
+        components: {
+          Input: jest.fn(),
+        },
+      };
+
+      expect(() => app.customFields.register(field)).toThrowError(
+        "Custom field name: 'test.boom' is not a valid object key"
+      );
+    });
+
+    it('should prevent registering incomplete custom field', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+      const field = {
+        name: 'incompleteCustomField',
+        pluginId: 'myplugin',
+      };
+
+      expect(() => app.customFields.register(field)).toThrowError(/(a|an) .* must be provided/i);
+    });
+
+    it('should validate option path names', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+      const field = {
+        name: 'test',
+        pluginId: 'myplugin',
+        type: 'text',
+        intlLabel: { id: 'foo', defaultMessage: 'foo' },
+        intlDescription: { id: 'foo', defaultMessage: 'foo' },
+        components: {
+          Input: jest.fn(),
+        },
+        options: {
+          base: [{ name: 'regex' }],
+          advanced: [{ name: 'plop' }],
+        },
+      };
+
+      // Test shallow value
+      expect(() => app.customFields.register(field)).toThrowError(
+        "'plop' must be prefixed with 'options.'"
+      );
+      // Test deep value
+      field.options.advanced = [{ sectionTitle: null, items: [{ name: 'deep.plop' }] }];
+      expect(() => app.customFields.register(field)).toThrowError(
+        "'deep.plop' must be prefixed with 'options.'"
+      );
+    });
+
+    it('requires options to have a name property', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+      const field = {
+        name: 'test',
+        pluginId: 'myplugin',
+        type: 'text',
+        intlLabel: { id: 'foo', defaultMessage: 'foo' },
+        intlDescription: { id: 'foo', defaultMessage: 'foo' },
+        components: {
+          Input: jest.fn(),
+        },
+        options: {
+          base: [{ name: 'regex' }],
+          advanced: [{ boom: 'kapow' }],
+        },
+      };
+
+      expect(() => app.customFields.register(field)).toThrowError(
+        "The 'name' property is required on an options object"
+      );
     });
   });
 
@@ -296,7 +457,33 @@ describe('ADMIN | StrapiApp', () => {
       expect(app.configurations.head.favicon).toBe('fr');
     });
 
-    it('should override the theme', () => {
+    it('should override the light theme', () => {
+      const adminConfig = {
+        config: { theme: { light: { colors: { red: 'black' } } } },
+      };
+      const app = StrapiApp({ middlewares, reducers, library, adminConfig });
+
+      app.createCustomConfigurations();
+
+      expect(app.configurations.themes.light.colors.red).toBe('black');
+    });
+
+    it('should override the dark theme', () => {
+      const adminConfig = {
+        config: { theme: { dark: { colors: { red: 'black' } } } },
+      };
+      const app = StrapiApp({ middlewares, reducers, library, adminConfig });
+
+      app.createCustomConfigurations();
+
+      expect(app.configurations.themes.dark.colors.red).toBe('black');
+    });
+
+    it('should override the light theme with a legacy syntax (without light or dark keys) and log a warning', () => {
+      const origalConsoleWarning = console.warn;
+
+      console.warn = jest.fn();
+
       const adminConfig = {
         config: { theme: { colors: { red: 'black' } } },
       };
@@ -305,6 +492,9 @@ describe('ADMIN | StrapiApp', () => {
       app.createCustomConfigurations();
 
       expect(app.configurations.themes.light.colors.red).toBe('black');
+      expect(console.warn).toBeCalledTimes(1);
+
+      console.warn = origalConsoleWarning;
     });
 
     it('should override the tutorials', () => {

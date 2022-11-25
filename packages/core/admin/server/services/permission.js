@@ -10,10 +10,13 @@ const permissionQueries = require('./permission/queries');
 
 const actionProvider = createActionProvider();
 const conditionProvider = createConditionProvider();
-const engine = createPermissionEngine(conditionProvider);
 const sectionsBuilder = createSectionsBuilder();
 
 const sanitizePermission = domain.sanitizePermissionFields;
+
+const engine = createPermissionEngine({
+  providers: { action: actionProvider, condition: conditionProvider },
+});
 
 module.exports = {
   // Queries / Actions

@@ -54,7 +54,7 @@ const createContentType = (uid, definition) => {
     });
   } else {
     throw new Error(
-      `Incorrect Content Type UID "${uid}". The UID should start with api::, plugin:: or strapi::.`
+      `Incorrect Content Type UID "${uid}". The UID should start with api::, plugin:: or admin::.`
     );
   }
 
@@ -114,12 +114,12 @@ const createContentType = (uid, definition) => {
 };
 
 const getGlobalId = (model, modelName, prefix) => {
-  let globalId = prefix ? `${prefix}-${modelName}` : modelName;
+  const globalId = prefix ? `${prefix}-${modelName}` : modelName;
 
   return model.globalId || _.upperFirst(_.camelCase(globalId));
 };
 
-const pickSchema = model => {
+const pickSchema = (model) => {
   const schema = _.cloneDeep(
     _.pick(model, [
       'connection',

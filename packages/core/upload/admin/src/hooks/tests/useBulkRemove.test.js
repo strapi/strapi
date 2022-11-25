@@ -94,7 +94,7 @@ function ComponentFixture({ children }) {
 }
 
 function setup(...args) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     act(() => {
       resolve(renderHook(() => useBulkRemove(...args), { wrapper: ComponentFixture }));
     });

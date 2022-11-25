@@ -14,7 +14,7 @@ const { getService } = require('../../utils');
  * Add the has-locale-access condition if the locales property is defined
  * @param {WillRegisterPermissionContext} context
  */
-const willRegisterPermission = context => {
+const willRegisterPermission = (context) => {
   const { permission, condition, user } = context;
   const { subject, properties } = permission;
 
@@ -54,7 +54,7 @@ const willRegisterPermission = context => {
 const registerI18nPermissionsHandlers = () => {
   const { engine } = strapi.admin.services.permission;
 
-  engine.hooks.willRegisterPermission.register(willRegisterPermission);
+  engine.hooks['before-register.permission'].register(willRegisterPermission);
 };
 
 module.exports = {

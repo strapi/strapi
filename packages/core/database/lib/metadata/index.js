@@ -9,6 +9,21 @@ class Metadata extends Map {
   add(meta) {
     return this.set(meta.uid, meta);
   }
+
+  /**
+   * Validate the DB metadata, throwing an error if a duplicate DB table name is detected
+   */
+  validate() {
+    const seenTables = new Map();
+    for (const meta of this.values()) {
+      if (seenTables.get(meta.tableName)) {
+        throw new Error(
+          `DB table "${meta.tableName}" already exists. Change the collectionName of the related content type.`
+        );
+      }
+      seenTables.set(meta.tableName, true);
+    }
+  }
 }
 
 // TODO: check if there isn't an attribute with an id already
@@ -81,17 +96,18 @@ const createMetadata = (models = []) => {
     meta.columnToAttribute = columnToAttribute;
   }
 
+  metadata.validate();
   return metadata;
 };
 
-const hasComponentsOrDz = model => {
+const hasComponentsOrDz = (model) => {
   return Object.values(model.attributes).some(
     ({ type }) => types.isComponent(type) || types.isDynamicZone(type)
   );
 };
 
 // NOTE: we might just move the compo logic outside this layer too at some point
-const createCompoLinkModelMeta = baseModelMeta => {
+const createCompoLinkModelMeta = (baseModelMeta) => {
   return {
     // TODO: make sure there can't be any conflicts with a prefix
     // singularName: 'compo',
@@ -123,7 +139,7 @@ const createCompoLinkModelMeta = baseModelMeta => {
         type: 'integer',
         column: {
           unsigned: true,
-          defaultTo: 0,
+          defaultTo: null,
         },
       },
     },
@@ -141,6 +157,11 @@ const createCompoLinkModelMeta = baseModelMeta => {
       {
         name: `${baseModelMeta.tableName}_entity_fk`,
         columns: ['entity_id'],
+      },
+      {
+        name: `${baseModelMeta.tableName}_unique`,
+        columns: ['entity_id', 'component_id', 'field', 'component_type'],
+        type: 'unique',
       },
     ],
     foreignKeys: [
@@ -183,6 +204,7 @@ const createDynamicZone = (attributeName, attribute, meta) => {
       orderBy: {
         order: 'asc',
       },
+      pivotColumns: ['entity_id', 'component_id', 'field', 'component_type'],
     },
   });
 };
@@ -205,9 +227,11 @@ const createComponent = (attributeName, attribute, meta) => {
       on: {
         field: attributeName,
       },
+      orderColumnName: 'order',
       orderBy: {
         order: 'asc',
       },
+      pivotColumns: ['entity_id', 'component_id', 'field', 'component_type'],
     },
   });
 };

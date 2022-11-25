@@ -1,4 +1,7 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import { useHistory } from 'react-router-dom';
+
 import { Typography } from '@strapi/design-system/Typography';
 import { Tbody, Tr, Td } from '@strapi/design-system/Table';
 import { Flex } from '@strapi/design-system/Flex';
@@ -9,14 +12,11 @@ import {
   pxToRem,
   useTracking,
 } from '@strapi/helper-plugin';
-import { useIntl } from 'react-intl';
-import PropTypes from 'prop-types';
-import { useHistory } from 'react-router-dom';
 import DeleteButton from './DeleteButton';
 import UpdateButton from './UpdateButton';
+import ReadButton from './ReadButton';
 
-const TableRows = ({ canDelete, canUpdate, onClickDelete, withBulkActions, rows }) => {
-  const { formatMessage } = useIntl();
+const TableRows = ({ canDelete, canUpdate, canRead, onClickDelete, withBulkActions, rows }) => {
   const [{ query }] = useQueryParams();
   const [, sortOrder] = query.sort.split(':');
   const {
@@ -33,12 +33,12 @@ const TableRows = ({ canDelete, canUpdate, onClickDelete, withBulkActions, rows 
 
   return (
     <Tbody>
-      {apiTokens.map(apiToken => {
+      {apiTokens.map((apiToken) => {
         return (
           <Tr
             key={apiToken.id}
             {...onRowClick({
-              fn: () => {
+              fn() {
                 trackUsage('willEditTokenFromList');
                 push(`${pathname}/${apiToken.id}`);
               },
@@ -57,22 +57,24 @@ const TableRows = ({ canDelete, canUpdate, onClickDelete, withBulkActions, rows 
             </Td>
             <Td>
               <Typography textColor="neutral800">
-                {formatMessage({
-                  id: `Settings.apiTokens.types.${apiToken.type}`,
-                  defaultMessage: 'Type unknown',
-                })}
+                <RelativeTime timestamp={new Date(apiToken.createdAt)} />
               </Typography>
             </Td>
             <Td>
-              <Typography textColor="neutral800">
-                <RelativeTime timestamp={new Date(apiToken.createdAt)} />
-              </Typography>
+              {apiToken.lastUsedAt && (
+                <Typography textColor="neutral800">
+                  <RelativeTime timestamp={new Date(apiToken.lastUsedAt)} />
+                </Typography>
+              )}
             </Td>
 
             {withBulkActions && (
               <Td>
                 <Flex justifyContent="end">
                   {canUpdate && <UpdateButton tokenName={apiToken.name} tokenId={apiToken.id} />}
+                  {!canUpdate && canRead && (
+                    <ReadButton tokenName={apiToken.name} tokenId={apiToken.id} />
+                  )}
                   {canDelete && (
                     <DeleteButton
                       tokenName={apiToken.name}
@@ -92,7 +94,8 @@ const TableRows = ({ canDelete, canUpdate, onClickDelete, withBulkActions, rows 
 TableRows.defaultProps = {
   canDelete: false,
   canUpdate: false,
-  onClickDelete: () => {},
+  canRead: false,
+  onClickDelete() {},
   rows: [],
   withBulkActions: false,
 };
@@ -100,6 +103,7 @@ TableRows.defaultProps = {
 TableRows.propTypes = {
   canDelete: PropTypes.bool,
   canUpdate: PropTypes.bool,
+  canRead: PropTypes.bool,
   onClickDelete: PropTypes.func,
   rows: PropTypes.array,
   withBulkActions: PropTypes.bool,

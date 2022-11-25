@@ -28,7 +28,7 @@ describe('Metrics', () => {
       plugins: {
         i18n: {
           services: {
-            ['content-types']: {
+            'content-types': {
               isLocalizedContentType,
             },
           },

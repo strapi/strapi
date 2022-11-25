@@ -13,20 +13,54 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   width: 1px;
 }
 
-.c10 {
+.c12 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c3 {
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
+}
+
+.c5 {
+  background: #f6f6f9;
+  padding-top: 16px;
+  padding-right: 20px;
+  padding-bottom: 16px;
+  padding-left: 20px;
+}
+
+.c13 {
   padding-top: 24px;
   padding-right: 40px;
   padding-left: 40px;
 }
 
-.c19 {
+.c15 {
+  padding: 16px;
+}
+
+.c20 {
+  background: #eaeaef;
+}
+
+.c22 {
   padding-top: 24px;
   padding-right: 40px;
   padding-bottom: 24px;
   padding-left: 40px;
 }
 
-.c20 {
+.c23 {
   background: #f6f6f9;
   padding-top: 64px;
   padding-bottom: 64px;
@@ -36,12 +70,12 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   position: relative;
 }
 
-.c26 {
+.c29 {
   padding-top: 12px;
   padding-bottom: 20px;
 }
 
-.c28 {
+.c31 {
   position: absolute;
   left: 0px;
   right: 0px;
@@ -51,216 +85,29 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   width: 100%;
 }
 
-.c30 {
+.c33 {
   position: relative;
 }
 
-.c34 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c31 {
+.c7 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
 }
 
-.c31 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c31 svg > g,
-.c31 svg path {
-  fill: #ffffff;
-}
-
-.c31[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c31:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c31:focus-visible {
-  outline: none;
-}
-
-.c31:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c32 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: 1px solid #4945ff;
-}
-
-.c32 .sc-ezHhwS {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c32 .c33 {
-  color: #ffffff;
-}
-
-.c32[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c32[aria-disabled='true'] .c33 {
-  color: #666687;
-}
-
-.c32[aria-disabled='true'] svg > g,
-.c32[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c32[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c32[aria-disabled='true']:active .c33 {
-  color: #666687;
-}
-
-.c32[aria-disabled='true']:active svg > g,
-.c32[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c32:hover {
-  border: 1px solid #7b79ff;
-  background: #7b79ff;
-}
-
-.c32:active {
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c32 svg > g,
-.c32 svg path {
-  fill: #ffffff;
-}
-
-.c38 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: 1px solid #4945ff;
-  border: 1px solid #dcdce4;
-  background: #ffffff;
-}
-
-.c38 .sc-ezHhwS {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c38 .c33 {
-  color: #ffffff;
-}
-
-.c38[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c38[aria-disabled='true'] .c33 {
-  color: #666687;
-}
-
-.c38[aria-disabled='true'] svg > g,
-.c38[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c38[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c38[aria-disabled='true']:active .c33 {
-  color: #666687;
-}
-
-.c38[aria-disabled='true']:active svg > g,
-.c38[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c38:hover {
-  background-color: #f6f6f9;
-}
-
-.c38:active {
-  background-color: #eaeaef;
-}
-
-.c38 .c33 {
-  color: #32324d;
-}
-
-.c38 svg > g,
-.c38 svg path {
-  fill: #32324d;
-}
-
-.c22 {
+.c25 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -278,7 +125,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   justify-content: center;
 }
 
-.c23 {
+.c26 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -292,32 +139,290 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   flex-direction: row;
 }
 
-.c7 {
-  font-weight: 600;
-  color: #32324d;
+.c9 {
   font-size: 0.875rem;
   line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
 }
 
-.c27 {
+.c17 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #4945ff;
+}
+
+.c19 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
   color: #666687;
+}
+
+.c30 {
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
+  color: #666687;
 }
 
-.c2 {
-  background: #ffffff;
+.c35 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 1.14;
+  color: #32324d;
+}
+
+.c10 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
   border-radius: 4px;
-  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
 }
 
-.c4 {
-  background: #f6f6f9;
-  padding-top: 16px;
-  padding-right: 20px;
-  padding-bottom: 16px;
-  padding-left: 20px;
+.c10 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c10 svg > g,
+.c10 svg path {
+  fill: #ffffff;
+}
+
+.c10[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c10:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c10:focus-visible {
+  outline: none;
+}
+
+.c10:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c34 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: #4945ff;
+  border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.c34 .c2 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c34 .c8 {
+  color: #ffffff;
+}
+
+.c34[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c34[aria-disabled='true'] .c8 {
+  color: #666687;
+}
+
+.c34[aria-disabled='true'] svg > g,
+.c34[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c34[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c34[aria-disabled='true']:active .c8 {
+  color: #666687;
+}
+
+.c34[aria-disabled='true']:active svg > g,
+.c34[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c34:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c34:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c34 svg > g,
+.c34 svg path {
+  fill: #ffffff;
+}
+
+.c38 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: #4945ff;
+  border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+}
+
+.c38 .c2 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c38 .c8 {
+  color: #ffffff;
+}
+
+.c38[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c38[aria-disabled='true'] .c8 {
+  color: #666687;
+}
+
+.c38[aria-disabled='true'] svg > g,
+.c38[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c38[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c38[aria-disabled='true']:active .c8 {
+  color: #666687;
+}
+
+.c38[aria-disabled='true']:active svg > g,
+.c38[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c38:hover {
+  background-color: #f6f6f9;
+}
+
+.c38:active {
+  background-color: #eaeaef;
+}
+
+.c38 .c8 {
+  color: #32324d;
+}
+
+.c38 svg > g,
+.c38 svg path {
+  fill: #32324d;
+}
+
+.c21 {
+  height: 1px;
+  border: none;
+  margin: 0;
+}
+
+.c11 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
+}
+
+.c11 svg > g,
+.c11 svg path {
+  fill: #8e8ea9;
+}
+
+.c11:hover svg > g,
+.c11:hover svg path {
+  fill: #666687;
+}
+
+.c11:active svg > g,
+.c11:active svg path {
+  fill: #a5a5ba;
+}
+
+.c11[aria-disabled='true'] {
+  background-color: #eaeaef;
+}
+
+.c11[aria-disabled='true'] svg path {
+  fill: #666687;
 }
 
 .c1 {
@@ -340,146 +445,16 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   justify-content: center;
 }
 
-.c3 {
+.c4 {
   width: 51.875rem;
 }
 
 .c6 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c36 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c8 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c8 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c8 svg > g,
-.c8 svg path {
-  fill: #ffffff;
-}
-
-.c8[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c8:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c8:focus-visible {
-  outline: none;
-}
-
-.c8:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c9 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-}
-
-.c9 svg > g,
-.c9 svg path {
-  fill: #8e8ea9;
-}
-
-.c9:hover svg > g,
-.c9:hover svg path {
-  fill: #666687;
-}
-
-.c9:active svg > g,
-.c9:active svg path {
-  fill: #a5a5ba;
-}
-
-.c9[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c9[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c5 {
   border-radius: 4px 4px 0 0;
   border-bottom: 1px solid #eaeaef;
 }
 
-.c35 {
+.c36 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
@@ -488,67 +463,37 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   margin-left: 8px;
 }
 
-.c17 {
-  background: #eaeaef;
-}
-
-.c18 {
-  height: 1px;
-  border: none;
-  margin: 0;
-}
-
-.c14 {
-  color: #4945ff;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
 .c16 {
-  color: #666687;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.c12 {
-  padding: 16px;
-}
-
-.c13 {
   border-bottom: 2px solid #4945ff;
 }
 
-.c15 {
+.c18 {
   border-bottom: 2px solid transparent;
 }
 
-.c11[aria-disabled='true'] {
+.c14[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c24 {
+.c27 {
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
 }
 
-.c25 {
+.c28 {
   font-size: 3.75rem;
 }
 
-.c25 svg path {
+.c28 svg path {
   fill: #4945ff;
 }
 
-.c21 {
+.c24 {
   border-style: dashed;
 }
 
-.c29 {
+.c32 {
   opacity: 0;
   cursor: pointer;
 }
@@ -587,203 +532,211 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
       class="c1"
     >
       <div>
-        <div
-          aria-labelledby="title"
-          aria-modal="true"
-          class="c2 c3"
-          role="dialog"
-        >
+        <div>
           <div
-            class="c4 c5"
+            aria-labelledby="title"
+            aria-modal="true"
+            class="c2 c3 c4"
+            role="dialog"
           >
             <div
-              class="c6"
-            >
-              <h2
-                class="c7"
-                id="title"
-              >
-                Add new assets
-              </h2>
-              <button
-                aria-disabled="false"
-                aria-label="Close the modal"
-                class="c8 c9"
-                type="button"
-              >
-                <svg
-                  fill="none"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                    fill="#212134"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div>
-            <div
-              class="c10"
+              class="c2 c5 c6"
             >
               <div
-                aria-label="How do you want to upload your assets?"
-                role="tablist"
+                class="c2 c7"
               >
-                <button
-                  aria-controls="tabgroup-1-0-tabpanel"
-                  aria-disabled="false"
-                  aria-selected="true"
-                  class="c11"
-                  id="tabgroup-1-0-tab"
-                  role="tab"
-                  tabindex="0"
-                  type="button"
+                <h2
+                  class="c8 c9"
+                  id="title"
                 >
-                  <div
-                    class="c12 c13"
-                  >
-                    <span
-                      class="c14"
-                    >
-                      From computer
-                    </span>
-                  </div>
-                </button>
+                  Add new assets
+                </h2>
                 <button
                   aria-disabled="false"
-                  aria-selected="false"
-                  class="c11"
-                  id="tabgroup-1-1-tab"
-                  role="tab"
-                  tabindex="-1"
+                  class="c10 c11"
                   type="button"
                 >
-                  <div
-                    class="c12 c15"
+                  <span
+                    class="c12"
                   >
-                    <span
-                      class="c16"
-                    >
-                      From url
-                    </span>
-                  </div>
+                    Close the modal
+                  </span>
+                  <svg
+                    aria-hidden="true"
+                    fill="none"
+                    focusable="false"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                      fill="#212134"
+                    />
+                  </svg>
                 </button>
               </div>
-              <hr
-                class="c17 c18"
-              />
             </div>
             <div>
               <div
-                aria-labelledby="tabgroup-1-0-tab"
-                id="tabgroup-1-0-tabpanel"
-                role="tabpanel"
-                tabindex="0"
+                class="c2 c13"
               >
-                <form>
-                  <div
-                    class="c19"
+                <div
+                  aria-label="How do you want to upload your assets?"
+                  role="tablist"
+                >
+                  <button
+                    aria-controls="tabgroup-1-0-tabpanel"
+                    aria-disabled="false"
+                    aria-selected="true"
+                    class="c14"
+                    id="tabgroup-1-0-tab"
+                    role="tab"
+                    tabindex="0"
+                    type="button"
                   >
-                    <label>
-                      <div
-                        class="c20 c21"
+                    <div
+                      class="c2 c15 c16"
+                    >
+                      <span
+                        class="c8 c17"
                       >
+                        From computer
+                      </span>
+                    </div>
+                  </button>
+                  <button
+                    aria-disabled="false"
+                    aria-selected="false"
+                    class="c14"
+                    id="tabgroup-1-1-tab"
+                    role="tab"
+                    tabindex="-1"
+                    type="button"
+                  >
+                    <div
+                      class="c2 c15 c18"
+                    >
+                      <span
+                        class="c8 c19"
+                      >
+                        From url
+                      </span>
+                    </div>
+                  </button>
+                </div>
+                <hr
+                  class="c2 c20 c21"
+                />
+              </div>
+              <div>
+                <div
+                  aria-labelledby="tabgroup-1-0-tab"
+                  id="tabgroup-1-0-tabpanel"
+                  role="tabpanel"
+                  tabindex="0"
+                >
+                  <form>
+                    <div
+                      class="c2 c22"
+                    >
+                      <label>
                         <div
-                          class="c22"
+                          class="c2 c23 c24"
                         >
                           <div
-                            class="c23 c24"
+                            class="c2 c25"
                           >
                             <div
-                              class="c25"
+                              class="c2 c26 c27"
                             >
-                              <svg
-                                aria-hidden="true"
-                                fill="none"
-                                height="1em"
-                                viewBox="0 0 24 20"
-                                width="1em"
-                                xmlns="http://www.w3.org/2000/svg"
+                              <div
+                                class="c28"
                               >
-                                <path
-                                  d="M21.569 2.398H7.829v1.586h13.74c.47 0 .826.5.826 1.094v9.853l-2.791-3.17a2.13 2.13 0 00-.74-.55 2.214 2.214 0 00-.912-.196 2.215 2.215 0 00-.912.191 2.131 2.131 0 00-.74.546l-2.93 3.385-2.973-3.36a2.147 2.147 0 00-.741-.545 2.228 2.228 0 00-1.824.007c-.286.13-.538.319-.739.553l-2.931 3.432V7.653H2.51v9.894c.023.153.06.304.108.452v.127l.041.095c.057.142.126.28.207.412l.099.15c.074.107.157.207.247.302l.124.119c.13.118.275.222.43.309h.024c.36.214.775.327 1.198.325h16.515c.36-.004.716-.085 1.039-.24.323-.153.606-.375.827-.648a2.78 2.78 0 00.504-.888c.066-.217.108-.44.124-.666V5.078a2.497 2.497 0 00-.652-1.81 2.706 2.706 0 00-1.776-.87z"
-                                  fill="#32324D"
-                                />
-                                <path
-                                  d="M12.552 9.199c.912 0 1.651-.71 1.651-1.585 0-.876-.74-1.586-1.651-1.586-.912 0-1.652.71-1.652 1.586 0 .875.74 1.585 1.652 1.585zM3.303 6.408h.826V3.997h2.477v-.793-.793H4.129V0h-.826c-.219 0-.85.002-.826 0v2.411H0v1.586h2.477v2.41h.826z"
-                                  fill="#32324D"
-                                />
-                              </svg>
-                            </div>
-                            <div
-                              class="c26"
-                            >
-                              <span
-                                class="c27"
-                              >
-                                Drag & Drop here or
-                              </span>
-                            </div>
-                            <input
-                              class="c28 c29"
-                              multiple=""
-                              name="files"
-                              tabindex="-1"
-                              type="file"
-                              width="100%"
-                            />
-                            <div
-                              class="c30"
-                            >
-                              <button
-                                aria-disabled="false"
-                                class="c31 c32"
-                                type="button"
+                                <svg
+                                  aria-hidden="true"
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 24 20"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M21.569 2.398H7.829v1.586h13.74c.47 0 .826.5.826 1.094v9.853l-2.791-3.17a2.13 2.13 0 00-.74-.55 2.214 2.214 0 00-.912-.196 2.215 2.215 0 00-.912.191 2.131 2.131 0 00-.74.546l-2.93 3.385-2.973-3.36a2.147 2.147 0 00-.741-.545 2.228 2.228 0 00-1.824.007c-.286.13-.538.319-.739.553l-2.931 3.432V7.653H2.51v9.894c.023.153.06.304.108.452v.127l.041.095c.057.142.126.28.207.412l.099.15c.074.107.157.207.247.302l.124.119c.13.118.275.222.43.309h.024c.36.214.775.327 1.198.325h16.515c.36-.004.716-.085 1.039-.24.323-.153.606-.375.827-.648a2.78 2.78 0 00.504-.888c.066-.217.108-.44.124-.666V5.078a2.497 2.497 0 00-.652-1.81 2.706 2.706 0 00-1.776-.87z"
+                                    fill="#32324D"
+                                  />
+                                  <path
+                                    d="M12.552 9.199c.912 0 1.651-.71 1.651-1.585 0-.876-.74-1.586-1.651-1.586-.912 0-1.652.71-1.652 1.586 0 .875.74 1.585 1.652 1.585zM3.303 6.408h.826V3.997h2.477v-.793-.793H4.129V0h-.826c-.219 0-.85.002-.826 0v2.411H0v1.586h2.477v2.41h.826z"
+                                    fill="#32324D"
+                                  />
+                                </svg>
+                              </div>
+                              <div
+                                class="c2 c29"
                               >
                                 <span
-                                  class="c33 c34"
+                                  class="c8 c30"
                                 >
-                                  Browse files
+                                  Drag & Drop here or
                                 </span>
-                              </button>
+                              </div>
+                              <input
+                                class="c2 c31 c32"
+                                multiple=""
+                                name="files"
+                                tabindex="-1"
+                                type="file"
+                                width="100%"
+                              />
+                              <div
+                                class="c2 c33"
+                              >
+                                <button
+                                  aria-disabled="false"
+                                  class="c10 c34"
+                                  type="button"
+                                >
+                                  <span
+                                    class="c8 c35"
+                                  >
+                                    Browse files
+                                  </span>
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </label>
-                  </div>
-                  <div
-                    class="c4 c35"
-                  >
+                      </label>
+                    </div>
                     <div
-                      class="c6"
+                      class="c2 c5 c36"
                     >
                       <div
-                        class="c36 c37"
+                        class="c2 c7"
                       >
-                        <button
-                          aria-disabled="false"
-                          class="c31 c38"
-                          type="button"
+                        <div
+                          class="c2 c26 c37"
                         >
-                          <span
-                            class="c33 c34"
+                          <button
+                            aria-disabled="false"
+                            class="c10 c38"
+                            type="button"
                           >
-                            app.components.Button.cancel
-                          </span>
-                        </button>
+                            <span
+                              class="c8 c35"
+                            >
+                              app.components.Button.cancel
+                            </span>
+                          </button>
+                        </div>
+                        <div
+                          class="c2 c26 c37"
+                        />
                       </div>
-                      <div
-                        class="c36 c37"
-                      />
                     </div>
-                  </div>
-                </form>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
@@ -834,27 +787,153 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
       />
     </div>
   </div>
-  .c9 {
+  .c11 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c2 {
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
+}
+
+.c4 {
+  background: #f6f6f9;
+  padding-top: 16px;
+  padding-right: 20px;
+  padding-bottom: 16px;
+  padding-left: 20px;
+}
+
+.c12 {
   padding-top: 24px;
   padding-right: 40px;
   padding-left: 40px;
 }
 
-.c18 {
+.c14 {
+  padding: 16px;
+}
+
+.c19 {
+  background: #eaeaef;
+}
+
+.c21 {
   padding-top: 24px;
   padding-right: 40px;
   padding-bottom: 24px;
   padding-left: 40px;
 }
 
-.c33 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
+.c6 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
 }
 
-.c30 {
+.c25 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c23 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c8 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c18 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #4945ff;
+}
+
+.c16 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c33 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 1.14;
+  color: #32324d;
+}
+
+.c26 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c29 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c24 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c24 > * + * {
+  margin-top: 4px;
+}
+
+.c9 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -868,21 +947,21 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   outline: none;
 }
 
-.c30 svg {
+.c9 svg {
   height: 12px;
   width: 12px;
 }
 
-.c30 svg > g,
-.c30 svg path {
+.c9 svg > g,
+.c9 svg path {
   fill: #ffffff;
 }
 
-.c30[aria-disabled='true'] {
+.c9[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c30:after {
+.c9:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -897,11 +976,11 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   border: 2px solid transparent;
 }
 
-.c30:focus-visible {
+.c9:focus-visible {
   outline: none;
 }
 
-.c30:focus-visible:after {
+.c9:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -917,12 +996,14 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
+  background-color: #4945ff;
   border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
-.c34 .sc-ezHhwS {
+.c34 .c1 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -933,7 +1014,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   align-items: center;
 }
 
-.c34 .c32 {
+.c34 .c7 {
   color: #ffffff;
 }
 
@@ -942,7 +1023,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   background: #eaeaef;
 }
 
-.c34[aria-disabled='true'] .c32 {
+.c34[aria-disabled='true'] .c7 {
   color: #666687;
 }
 
@@ -956,7 +1037,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   background: #eaeaef;
 }
 
-.c34[aria-disabled='true']:active .c32 {
+.c34[aria-disabled='true']:active .c7 {
   color: #666687;
 }
 
@@ -980,19 +1061,21 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   fill: #ffffff;
 }
 
-.c31 {
+.c32 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
+  background-color: #4945ff;
   border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
   border: 1px solid #dcdce4;
   background: #ffffff;
 }
 
-.c31 .sc-ezHhwS {
+.c32 .c1 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1003,97 +1086,102 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   align-items: center;
 }
 
-.c31 .c32 {
+.c32 .c7 {
   color: #ffffff;
 }
 
-.c31[aria-disabled='true'] {
+.c32[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c31[aria-disabled='true'] .c32 {
+.c32[aria-disabled='true'] .c7 {
   color: #666687;
 }
 
-.c31[aria-disabled='true'] svg > g,
-.c31[aria-disabled='true'] svg path {
+.c32[aria-disabled='true'] svg > g,
+.c32[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c31[aria-disabled='true']:active {
+.c32[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c31[aria-disabled='true']:active .c32 {
+.c32[aria-disabled='true']:active .c7 {
   color: #666687;
 }
 
-.c31[aria-disabled='true']:active svg > g,
-.c31[aria-disabled='true']:active svg path {
+.c32[aria-disabled='true']:active svg > g,
+.c32[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c31:hover {
+.c32:hover {
   background-color: #f6f6f9;
 }
 
-.c31:active {
+.c32:active {
   background-color: #eaeaef;
 }
 
-.c31 .c32 {
+.c32 .c7 {
   color: #32324d;
 }
 
-.c31 svg > g,
-.c31 svg path {
+.c32 svg > g,
+.c32 svg path {
   fill: #32324d;
 }
 
 .c20 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
+  height: 1px;
+  border: none;
+  margin: 0;
+}
+
+.c10 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c22 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
 }
 
-.c23 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
+.c10 svg > g,
+.c10 svg path {
+  fill: #8e8ea9;
 }
 
-.c26 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
+.c10:hover svg > g,
+.c10:hover svg path {
+  fill: #666687;
 }
 
-.c24 {
+.c10:active svg > g,
+.c10:active svg path {
+  fill: #a5a5ba;
+}
+
+.c10[aria-disabled='true'] {
+  background-color: #eaeaef;
+}
+
+.c10[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c27 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   padding-left: 16px;
@@ -1109,12 +1197,12 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   transition-duration: 0.2s;
 }
 
-.c24:focus-within {
+.c27:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c25 {
+.c28 {
   display: block;
   width: 100%;
   font-weight: 400;
@@ -1125,45 +1213,36 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   background: inherit;
 }
 
-.c25::-webkit-input-placeholder {
+.c28::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c25::-moz-placeholder {
+.c28::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c25:-ms-input-placeholder {
+.c28:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c25::placeholder {
+.c28::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c25:focus-within {
+.c28:focus-within {
   outline: none;
 }
 
-.c21 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c21 > * + * {
-  margin-top: 4px;
-}
-
-.c19 textarea {
+.c22 textarea {
   height: 5rem;
   line-height: 1.25rem;
 }
 
-.c19 textarea::-webkit-input-placeholder {
+.c22 textarea::-webkit-input-placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
@@ -1171,7 +1250,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   opacity: 1;
 }
 
-.c19 textarea::-moz-placeholder {
+.c22 textarea::-moz-placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
@@ -1179,7 +1258,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   opacity: 1;
 }
 
-.c19 textarea:-ms-input-placeholder {
+.c22 textarea:-ms-input-placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
@@ -1187,33 +1266,12 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   opacity: 1;
 }
 
-.c19 textarea::placeholder {
+.c22 textarea::placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
   color: #8e8ea9;
   opacity: 1;
-}
-
-.c6 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c1 {
-  background: #ffffff;
-  border-radius: 4px;
-  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
-}
-
-.c3 {
-  background: #f6f6f9;
-  padding-top: 16px;
-  padding-right: 20px;
-  padding-bottom: 16px;
-  padding-left: 20px;
 }
 
 .c0 {
@@ -1236,193 +1294,33 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   justify-content: center;
 }
 
-.c2 {
+.c3 {
   width: 51.875rem;
 }
 
 .c5 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c28 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c7 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c7 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c7 svg > g,
-.c7 svg path {
-  fill: #ffffff;
-}
-
-.c7[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c7:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c7:focus-visible {
-  outline: none;
-}
-
-.c7:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c8 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-}
-
-.c8 svg > g,
-.c8 svg path {
-  fill: #8e8ea9;
-}
-
-.c8:hover svg > g,
-.c8:hover svg path {
-  fill: #666687;
-}
-
-.c8:active svg > g,
-.c8:active svg path {
-  fill: #a5a5ba;
-}
-
-.c8[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c8[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c4 {
   border-radius: 4px 4px 0 0;
   border-bottom: 1px solid #eaeaef;
 }
 
-.c27 {
+.c30 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
 
-.c29 > * + * {
+.c31 > * + * {
   margin-left: 8px;
 }
 
-.c16 {
-  background: #eaeaef;
-}
-
 .c17 {
-  height: 1px;
-  border: none;
-  margin: 0;
-}
-
-.c15 {
-  color: #4945ff;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.c13 {
-  color: #666687;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.c11 {
-  padding: 16px;
-}
-
-.c14 {
   border-bottom: 2px solid #4945ff;
 }
 
-.c12 {
+.c15 {
   border-bottom: 2px solid transparent;
 }
 
-.c10[aria-disabled='true'] {
+.c13[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
@@ -1433,193 +1331,201 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
       class="c0"
     >
       <div>
-        <div
-          aria-labelledby="title"
-          aria-modal="true"
-          class="c1 c2"
-          role="dialog"
-        >
+        <div>
           <div
-            class="c3 c4"
+            aria-labelledby="title"
+            aria-modal="true"
+            class="c1 c2 c3"
+            role="dialog"
           >
             <div
-              class="c5"
-            >
-              <h2
-                class="c6"
-                id="title"
-              >
-                Add new assets
-              </h2>
-              <button
-                aria-disabled="false"
-                aria-label="Close the modal"
-                class="c7 c8"
-                type="button"
-              >
-                <svg
-                  fill="none"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                    fill="#212134"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div>
-            <div
-              class="c9"
+              class="c1 c4 c5"
             >
               <div
-                aria-label="How do you want to upload your assets?"
-                role="tablist"
+                class="c1 c6"
               >
+                <h2
+                  class="c7 c8"
+                  id="title"
+                >
+                  Add new assets
+                </h2>
                 <button
                   aria-disabled="false"
-                  aria-selected="false"
-                  class="c10"
-                  id="tabgroup-8-0-tab"
-                  role="tab"
-                  tabindex="-1"
+                  class="c9 c10"
                   type="button"
                 >
-                  <div
-                    class="c11 c12"
+                  <span
+                    class="c11"
                   >
-                    <span
-                      class="c13"
-                    >
-                      From computer
-                    </span>
-                  </div>
-                </button>
-                <button
-                  aria-controls="tabgroup-8-1-tabpanel"
-                  aria-disabled="false"
-                  aria-selected="true"
-                  class="c10"
-                  id="tabgroup-8-1-tab"
-                  role="tab"
-                  tabindex="0"
-                  type="button"
-                >
-                  <div
-                    class="c11 c14"
+                    Close the modal
+                  </span>
+                  <svg
+                    aria-hidden="true"
+                    fill="none"
+                    focusable="false"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <span
-                      class="c15"
-                    >
-                      From url
-                    </span>
-                  </div>
+                    <path
+                      d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                      fill="#212134"
+                    />
+                  </svg>
                 </button>
               </div>
-              <hr
-                class="c16 c17"
-              />
             </div>
             <div>
               <div
-                aria-labelledby="tabgroup-8-1-tab"
-                id="tabgroup-8-1-tabpanel"
-                role="tabpanel"
-                tabindex="0"
+                class="c1 c12"
               >
-                <form
-                  action="#"
-                  novalidate=""
+                <div
+                  aria-label="How do you want to upload your assets?"
+                  role="tablist"
                 >
-                  <div
-                    class="c18"
+                  <button
+                    aria-disabled="false"
+                    aria-selected="false"
+                    class="c13"
+                    id="tabgroup-33-0-tab"
+                    role="tab"
+                    tabindex="-1"
+                    type="button"
                   >
                     <div
-                      class="c19"
+                      class="c1 c14 c15"
                     >
-                      <div>
-                        <div
-                          class="c20 c21"
-                          spacing="1"
-                        >
+                      <span
+                        class="c7 c16"
+                      >
+                        From computer
+                      </span>
+                    </div>
+                  </button>
+                  <button
+                    aria-controls="tabgroup-33-1-tabpanel"
+                    aria-disabled="false"
+                    aria-selected="true"
+                    class="c13"
+                    id="tabgroup-33-1-tab"
+                    role="tab"
+                    tabindex="0"
+                    type="button"
+                  >
+                    <div
+                      class="c1 c14 c17"
+                    >
+                      <span
+                        class="c7 c18"
+                      >
+                        From url
+                      </span>
+                    </div>
+                  </button>
+                </div>
+                <hr
+                  class="c1 c19 c20"
+                />
+              </div>
+              <div>
+                <div
+                  aria-labelledby="tabgroup-33-1-tab"
+                  id="tabgroup-33-1-tabpanel"
+                  role="tabpanel"
+                  tabindex="0"
+                >
+                  <form
+                    action="#"
+                    novalidate=""
+                  >
+                    <div
+                      class="c1 c21"
+                    >
+                      <div
+                        class="c22"
+                      >
+                        <div>
                           <div
-                            class="c22"
+                            class="c1 c23 c24"
+                            spacing="1"
                           >
-                            <label
-                              class="c23"
-                              for="textarea-1"
+                            <div
+                              class="c1 c25"
                             >
-                              <div
-                                class="c22"
+                              <label
+                                class="c7 c26"
+                                for="textarea-35"
                               >
-                                URL
-                              </div>
-                            </label>
+                                <div
+                                  class="c1 c25"
+                                >
+                                  URL
+                                </div>
+                              </label>
+                            </div>
+                            <div
+                              class="c27"
+                            >
+                              <textarea
+                                aria-describedby="textarea-35-hint"
+                                aria-invalid="false"
+                                class="c28"
+                                id="textarea-35"
+                                name="urls"
+                              />
+                            </div>
+                            <p
+                              class="c7 c29"
+                              id="textarea-35-hint"
+                            >
+                              Separate your URL links by a carriage return.
+                            </p>
                           </div>
-                          <div
-                            class="c24"
-                          >
-                            <textarea
-                              aria-describedby="textarea-1-hint"
-                              aria-invalid="false"
-                              class="c25"
-                              id="textarea-1"
-                              name="urls"
-                            />
-                          </div>
-                          <p
-                            class="c26"
-                            id="textarea-1-hint"
-                          >
-                            Separate your URL links by a carriage return.
-                          </p>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div
-                    class="c3 c27"
-                  >
                     <div
-                      class="c5"
+                      class="c1 c4 c30"
                     >
                       <div
-                        class="c28 c29"
+                        class="c1 c6"
                       >
-                        <button
-                          aria-disabled="false"
-                          class="c30 c31"
-                          type="button"
+                        <div
+                          class="c1 c25 c31"
                         >
-                          <span
-                            class="c32 c33"
+                          <button
+                            aria-disabled="false"
+                            class="c9 c32"
+                            type="button"
                           >
-                            app.components.Button.cancel
-                          </span>
-                        </button>
-                      </div>
-                      <div
-                        class="c28 c29"
-                      >
-                        <button
-                          aria-disabled="false"
-                          class="c30 c34"
-                          type="submit"
+                            <span
+                              class="c7 c33"
+                            >
+                              app.components.Button.cancel
+                            </span>
+                          </button>
+                        </div>
+                        <div
+                          class="c1 c25 c31"
                         >
-                          <span
-                            class="c32 c33"
+                          <button
+                            aria-disabled="false"
+                            class="c9 c34"
+                            type="submit"
                           >
-                            Next
-                          </span>
-                        </button>
+                            <span
+                              class="c7 c33"
+                            >
+                              Next
+                            </span>
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </form>
+                  </form>
+                </div>
               </div>
             </div>
           </div>

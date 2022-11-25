@@ -1,6 +1,6 @@
 # Contribute to Strapi
 
-Strapi is an open-source project administered by [the Strapi team](https://strapi.io/about-us). We appreciate your interest and efforts to contribute to Strapi. See the [LICENSE](https://github.com/strapi/strapi/blob/master/LICENSE) licensing information. All work done is available on GitHub.
+Strapi is an open-source project administered by [the Strapi team](https://strapi.io/about-us). We appreciate your interest and efforts to contribute to Strapi. See the [LICENSE](https://github.com/strapi/strapi/blob/main/LICENSE) licensing information. All work done is available on GitHub.
 
 We highly appreciate your effort to contribute, but we recommend you talk to a maintainer before spending a lot of time making a pull request that may not align with the project roadmap. Whether it is from Strapi or contributors, every pull request goes through the same process.
 
@@ -46,12 +46,12 @@ The Strapi core team will review your pull request and either merge it, request 
 
 ## Contribution Prerequisites
 
-- You have [Node.js](https://nodejs.org/en/) at version >= v14 and <= v16 and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
+- You have [Node.js](https://nodejs.org/en/) at version >= v14 and <= v18 and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
 - You are familiar with [Git](https://git-scm.com).
 
 **Before submitting your pull request** make sure the following requirements are fulfilled:
 
-- Fork the repository and create your new branch from `master`.
+- Fork the repository and create your new branch from `main`.
 - Run `yarn setup` in the root of the repository.
 - If you've fixed a bug or added code that should be tested, please make sure to add tests
 - Ensure the following test suites are passing:
@@ -89,7 +89,7 @@ cd ./examples/getstarted
 yarn develop
 ```
 
-Make sure to read the [`getstarted` application README](./examples/getstarted/README.md) for more details.
+Make sure to read the [`getstarted` application README](https://github.com/strapi/strapi/blob/main/examples/getstarted/README.md) for more details.
 
 ### 5. Running the administration panel in development mode
 
@@ -114,15 +114,15 @@ The administration panel should now be available at http://localhost:4000/admin.
 - `yarn test:front` runs front-end related tests.
 - `yarn test:front:watch` runs an interactive test watcher for the front-end.
 - `yarn test:unit` runs the back-end unit tests.
-- `yarn test:e2e` runs an end-to-end test suite.
+- `yarn test:api` runs the api integration tests.
 - `yarn test:generate-app` generates a test application.
 - `yarn test:start-app` starts the test application.
 
 ---
 
-## Running the End-To-End (e2e) tests
+## Running the API Integration tests
 
-The end-to-end tests require a Strapi app to be able to run. You can generate a "test app" using `yarn test:generate-app <database>`:
+The API integration tests require a Strapi app to be able to run. You can generate a "test app" using `yarn test:generate-app <database>`:
 
 ```bash
 $ yarn test:generate-app sqlite
@@ -130,34 +130,27 @@ $ yarn test:generate-app postgres
 $ yarn test:generate-app mysql
 ```
 
-A new app is required every time you run the end-to-end tests otherwise, the test suite will fail. A script is available to make this process easier: `node test/e2e.js`. It will delete the current test app, generate a new one and run the test suite.
+A new app is required every time you run the API integration tests, otherwise the test suite will fail. A command is available to make this process easier: `yarn test:api`.
+
+This command runs tests using jest behind the scenes. Options for jest can be passed to the command. (e.g. to update snapshots `yarn test:api -u`).
 
 ### Changing the database
 
-By default the script `test/e2e,js` creates an app that uses `sqlite`. But you can run the test suites using different databases:
+By default the script run by `test:api` an app that uses `sqlite` as a database. But you can run the test suites using different databases:
 
 ```bash
-$ node test/e2e.js --db=sqlite
-$ node test/e2e.js --db=postgres
-$ node test/e2e.js --db=mysql
+$ yarn test:api --db=sqlite
+$ yarn test:api --db=postgres
+$ yarn test:api --db=mysql
 ```
 
-### Running the tests for the Community Editon (CE)\*\*
+### Running the tests for the Enterprise Editon (EE)
 
-The test suites run the tests for the Enterprise Edition (EE) version of Strapi by default. Should you want to test the Community Edition (CE) version, you will need to set the environment variable `STRAPI_DISABLE_EE` to true:
-
-```bash
-$ STRAPI_DISABLE_EE=true node test/e2e.js
-$ STRAPI_DISABLE_EE=true yarn test:e2e
-```
-
-### Specifying a license to use for the Enterprise Edition (EE)
-
-The Enterprise Edition tests need a valid license to run correctly. To specify a license, you can use the environment variable `STRAPI_LICENSE`:
+The test suites run the tests for the Community Edition (CE) version of Strapi by default.
+In order to run the Enterprise Edition tests you need a valid license. To specify a license, you can use the environment variable `STRAPI_LICENSE`:
 
 ```bash
-$ STRAPI_LICENSE=<license> node test/e2e.js
-$ STRAPI_LICENSE=<license> yarn test:e2e
+$ STRAPI_LICENSE=<license> yarn test:api
 ```
 
 ---
@@ -184,7 +177,7 @@ Before submitting an issue you need to make sure:
 - You provide steps to reproduce the issue.
 - You have tried all the following (if relevant), and your issue remains:
   - Make sure you have the right application started.
-  - Make sure the [issue template](.github/ISSUE_TEMPLATE) is respected.
+  - Make sure the [issue template] is respected.
   - Make sure your issue body is readable and [well formatted](https://guides.github.com/features/mastering-markdown).
   - Make sure you've stopped the Strapi server with CTRL+C and restarted it.
   - Make sure your application has a clean `node_modules` directory, meaning:

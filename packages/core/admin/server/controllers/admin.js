@@ -4,6 +4,7 @@ const path = require('path');
 const execa = require('execa');
 const _ = require('lodash');
 const { exists } = require('fs-extra');
+const { env } = require('@strapi/utils');
 const { ValidationError } = require('@strapi/utils').errors;
 const { isUsingTypeScript } = require('@strapi/typescript-utils');
 // eslint-disable-next-line node/no-extraneous-require
@@ -21,7 +22,7 @@ const PLUGIN_NAME_REGEX = /^[A-Za-z][A-Za-z0-9-_]+$/;
 /**
  * Validates a plugin name format
  */
-const isValidPluginName = plugin => {
+const isValidPluginName = (plugin) => {
   return _.isString(plugin) && !_.isEmpty(plugin) && PLUGIN_NAME_REGEX.test(plugin);
 };
 
@@ -93,11 +94,13 @@ module.exports = {
     const useTypescriptOnAdmin = await isUsingTypeScript(
       path.join(strapi.dirs.app.root, 'src', 'admin')
     );
+    const isHostedOnStrapiCloud = env('STRAPI_HOSTING', null) === 'strapi.cloud';
 
     return {
       data: {
         useTypescriptOnServer,
         useTypescriptOnAdmin,
+        isHostedOnStrapiCloud,
       },
     };
   },

@@ -26,13 +26,8 @@ import LinkToCMSettingsView from './LinkToCMSettingsView';
 /* eslint-disable indent */
 
 const ListView = () => {
-  const {
-    initialData,
-    modifiedData,
-    isInDevelopmentMode,
-    isInContentTypeView,
-    submitData,
-  } = useDataManager();
+  const { initialData, modifiedData, isInDevelopmentMode, isInContentTypeView, submitData } =
+    useDataManager();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
@@ -43,6 +38,7 @@ const ListView = () => {
     onOpenModalAddField,
     onOpenModalEditField,
     onOpenModalEditSchema,
+    onOpenModalEditCustomField,
   } = useFormModalNavigation();
 
   const firstMainDataPath = isInContentTypeView ? 'contentType' : 'component';
@@ -57,21 +53,31 @@ const ListView = () => {
 
   const forTarget = isInContentTypeView ? 'contentType' : 'component';
 
-  const handleClickAddComponentToDZ = dynamicZoneTarget => {
+  const handleClickAddComponentToDZ = (dynamicZoneTarget) => {
     onOpenModalAddComponentsToDZ({ dynamicZoneTarget, targetUid });
   };
 
-  const handleClickEditField = async (forTarget, targetUid, attributeName, type) => {
+  const handleClickEditField = async (forTarget, targetUid, attributeName, type, customField) => {
     const attributeType = getAttributeDisplayedType(type);
     const step = type === 'component' ? '2' : null;
 
-    onOpenModalEditField({
-      forTarget,
-      targetUid,
-      attributeName,
-      attributeType,
-      step,
-    });
+    if (customField) {
+      onOpenModalEditCustomField({
+        forTarget,
+        targetUid,
+        attributeName,
+        attributeType,
+        customFieldUid: customField,
+      });
+    } else {
+      onOpenModalEditField({
+        forTarget,
+        targetUid,
+        attributeName,
+        attributeType,
+        step,
+      });
+    }
   };
 
   let label = get(modifiedData, [firstMainDataPath, 'schema', 'displayName'], '');
@@ -184,7 +190,7 @@ const ListView = () => {
           <Box background="neutral0" shadow="filterShadow" hasRadius>
             <List
               items={attributes}
-              customRowComponent={props => <ListRow {...props} onClick={handleClickEditField} />}
+              customRowComponent={(props) => <ListRow {...props} onClick={handleClickEditField} />}
               addComponentToDZ={handleClickAddComponentToDZ}
               targetUid={targetUid}
               editTarget={forTarget}

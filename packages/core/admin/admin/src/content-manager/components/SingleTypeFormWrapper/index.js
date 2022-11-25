@@ -1,5 +1,6 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useQueryClient } from 'react-query';
 import get from 'lodash/get';
 import {
   useTracking,
@@ -28,6 +29,7 @@ import buildQueryString from '../../pages/ListView/utils/buildQueryString';
 
 // This container is used to handle the CRUD
 const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
+  const queryClient = useQueryClient();
   const { trackUsage } = useTracking();
   const { push } = useHistory();
   const { setCurrentStep } = useGuidedTour();
@@ -38,16 +40,11 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   const toggleNotification = useNotification();
   const dispatch = useDispatch();
 
-  const {
-    componentsDataStructure,
-    contentTypeDataStructure,
-    data,
-    isLoading,
-    status,
-  } = useSelector(selectCrudReducer);
+  const { componentsDataStructure, contentTypeDataStructure, data, isLoading, status } =
+    useSelector(selectCrudReducer);
 
   const cleanReceivedData = useCallback(
-    data => {
+    (data) => {
       const cleaned = removePasswordFieldsFromData(
         data,
         allLayoutData.contentType,
@@ -100,7 +97,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source();
 
-    const fetchData = async source => {
+    const fetchData = async (source) => {
       dispatch(getData());
 
       setIsCreatingEntry(true);
@@ -142,7 +139,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   }, [cleanReceivedData, push, slug, dispatch, searchToSend, rawQuery, toggleNotification]);
 
   const displayErrors = useCallback(
-    err => {
+    (err) => {
       const errorPayload = err.response.data;
       let errorMessage = get(errorPayload, ['error', 'message'], 'Bad Request');
 
@@ -159,7 +156,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   );
 
   const onDelete = useCallback(
-    async trackerProperty => {
+    async (trackerProperty) => {
       try {
         trackUsageRef.current('willDeleteEntry', trackerProperty);
 
@@ -207,6 +204,9 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
         setCurrentStep('contentManager.success');
 
+        // TODO: need to find a better place, or a better abstraction
+        queryClient.invalidateQueries(['relation']);
+
         dispatch(submitSucceeded(cleanReceivedData(data)));
         setIsCreatingEntry(false);
 
@@ -223,8 +223,39 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         return Promise.reject(err);
       }
     },
-    [cleanReceivedData, displayErrors, slug, dispatch, rawQuery, toggleNotification, setCurrentStep]
+    [
+      cleanReceivedData,
+      displayErrors,
+      slug,
+      dispatch,
+      rawQuery,
+      toggleNotification,
+      setCurrentStep,
+      queryClient,
+    ]
   );
+
+  const onDraftRelationCheck = useCallback(async () => {
+    try {
+      trackUsageRef.current('willCheckDraftRelations');
+
+      const endPoint = getRequestUrl(`${slug}/actions/numberOfDraftRelations`);
+      dispatch(setStatus('draft-relation-check-pending'));
+
+      const numberOfDraftRelations = await axiosInstance.get(endPoint);
+      trackUsageRef.current('didCheckDraftRelations');
+
+      dispatch(setStatus('resolved'));
+
+      return numberOfDraftRelations.data.data;
+    } catch (err) {
+      displayErrors(err);
+      dispatch(setStatus('resolved'));
+
+      return Promise.reject(err);
+    }
+  }, [displayErrors, slug, dispatch]);
+
   const onPublish = useCallback(async () => {
     try {
       trackUsageRef.current('willPublishEntry');
@@ -272,6 +303,9 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
         trackUsageRef.current('didEditEntry', { trackerProperty });
 
+        // TODO: need to find a better place, or a better abstraction
+        queryClient.invalidateQueries(['relation']);
+
         dispatch(submitSucceeded(cleanReceivedData(data)));
 
         dispatch(setStatus('resolved'));
@@ -287,7 +321,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         return Promise.reject(err);
       }
     },
-    [cleanReceivedData, displayErrors, slug, dispatch, rawQuery, toggleNotification]
+    [cleanReceivedData, displayErrors, slug, dispatch, rawQuery, toggleNotification, queryClient]
   );
 
   // The publish and unpublish method could be refactored but let's leave the duplication for now
@@ -325,6 +359,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
     onDelete,
     onDeleteSucceeded,
     onPost,
+    onDraftRelationCheck,
     onPublish,
     onPut,
     onUnpublish,

@@ -5,9 +5,11 @@ import { connect } from 'react-redux';
 import isEqual from 'react-fast-compare';
 import { bindActionCreators, compose } from 'redux';
 import { useIntl } from 'react-intl';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
 import get from 'lodash/get';
 import { stringify } from 'qs';
+import axios from 'axios';
+
 import {
   NoPermissions,
   CheckPermissions,
@@ -19,31 +21,37 @@ import {
   useTracking,
   Link,
 } from '@strapi/helper-plugin';
+
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Main } from '@strapi/design-system/Main';
 import { Box } from '@strapi/design-system/Box';
 import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { Button } from '@strapi/design-system/Button';
+
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Plus from '@strapi/icons/Plus';
 import Cog from '@strapi/icons/Cog';
-import axios from 'axios';
+
 import { axiosInstance } from '../../../core/utils';
-import { InjectionZone } from '../../../shared/components';
+
 import DynamicTable from '../../components/DynamicTable';
+import AttributeFilter from '../../components/AttributeFilter';
+import { InjectionZone } from '../../../shared/components';
+
 import permissions from '../../../permissions';
+
 import { getRequestUrl, getTrad } from '../../utils';
+
 import FieldPicker from './FieldPicker';
 import PaginationFooter from './PaginationFooter';
 import { getData, getDataSucceeded, onChangeListHeaders, onResetListHeaders } from './actions';
 import makeSelectListView from './selectors';
 import { buildQueryString } from './utils';
-import AttributeFilter from '../../components/AttributeFilter';
 
 const cmPermissions = permissions.contentManager;
 
-const IconButtonCustom = styled(IconButton)`
+const ConfigureLayoutBox = styled(Box)`
   svg {
     path {
       fill: ${({ theme }) => theme.colors.neutral900};
@@ -51,7 +59,6 @@ const IconButtonCustom = styled(IconButton)`
   }
 `;
 
-/* eslint-disable react/no-array-index-key */
 function ListView({
   canCreate,
   canDelete,
@@ -151,7 +158,7 @@ function ListView({
   );
 
   const handleConfirmDeleteAllData = useCallback(
-    async ids => {
+    async (ids) => {
       try {
         await axiosInstance.post(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
           ids,
@@ -171,7 +178,7 @@ function ListView({
   );
 
   const handleConfirmDeleteData = useCallback(
-    async idToDelete => {
+    async (idToDelete) => {
       try {
         await axiosInstance.delete(getRequestUrl(`collection-types/${slug}/${idToDelete}`));
 
@@ -236,20 +243,22 @@ function ListView({
       )
     : null;
 
-  const getCreateAction = props =>
+  const getCreateAction = (props) =>
     canCreate ? (
       <Button
         {...props}
+        forwardedAs={ReactRouterLink}
         onClick={() => {
           const trackerProperty = hasDraftAndPublish ? { status: 'draft' } : {};
 
           trackUsageRef.current('willCreateEntry', trackerProperty);
-          push({
-            pathname: `${pathname}/create`,
-            search: query.plugins ? pluginsQueryParams : '',
-          });
+        }}
+        to={{
+          pathname: `${pathname}/create`,
+          search: query.plugins ? pluginsQueryParams : '',
         }}
         startIcon={<Plus />}
+        style={{ textDecoration: 'none' }}
       >
         {formatMessage({
           id: getTrad('HeaderLayout.button.label-add-entry'),
@@ -283,20 +292,20 @@ function ListView({
               <InjectionZone area="contentManager.listView.actions" />
               <FieldPicker layout={layout} />
               <CheckPermissions permissions={cmPermissions.collectionTypesConfigurations}>
-                <Box paddingTop={1} paddingBottom={1}>
-                  <IconButtonCustom
+                <ConfigureLayoutBox paddingTop={1} paddingBottom={1}>
+                  <IconButton
                     onClick={() => {
                       trackUsage('willEditListLayout');
-
-                      push({ pathname: `${slug}/configurations/list`, search: pluginsQueryParams });
                     }}
+                    forwardedAs={ReactRouterLink}
+                    to={{ pathname: `${slug}/configurations/list`, search: pluginsQueryParams }}
                     icon={<Cog />}
                     label={formatMessage({
                       id: 'app.links.configure-view',
                       defaultMessage: 'Configure the view',
                     })}
                   />
-                </Box>
+                </ConfigureLayoutBox>
               </CheckPermissions>
             </>
           }
@@ -361,7 +370,6 @@ ListView.propTypes = {
       info: PropTypes.shape({ displayName: PropTypes.string.isRequired }).isRequired,
       layouts: PropTypes.shape({
         list: PropTypes.array.isRequired,
-        editRelations: PropTypes.array,
       }).isRequired,
       options: PropTypes.object.isRequired,
       settings: PropTypes.object.isRequired,

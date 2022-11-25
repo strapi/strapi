@@ -24,6 +24,7 @@ const DeleteButton = ({ tokenName, onClickDelete }) => {
           },
           { target: `${tokenName}` }
         )}
+        name="delete"
         noBorder
         icon={<Trash />}
       />

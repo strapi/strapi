@@ -34,13 +34,13 @@ const defaultBreadcrumbs = [
   { id: 22, label: 'current folder' },
 ];
 
-const setup = props =>
+const setup = (props) =>
   renderTL(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter>
         <IntlProvider locale="en" messages={{}}>
           <ThemeProvider theme={lightTheme}>
-            <Breadcrumbs breadcrumbs={defaultBreadcrumbs} as="nav" {...props} />
+            <Breadcrumbs breadcrumbs={defaultBreadcrumbs} label="Navigation" as="nav" {...props} />
           </ThemeProvider>
         </IntlProvider>
       </MemoryRouter>

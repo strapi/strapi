@@ -1,13 +1,27 @@
+/* eslint-disable max-classes-per-file */
+
 'use strict';
 
 /**
  * Converts the standard Strapi REST query params to a more usable format for querying
  * You can read more here: https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest-api.html#filters
  */
-const { has, isEmpty, isObject, isPlainObject, cloneDeep, get, mergeAll } = require('lodash/fp');
+const {
+  has,
+  isEmpty,
+  isObject,
+  isPlainObject,
+  cloneDeep,
+  get,
+  mergeAll,
+  isNil,
+  toNumber,
+  isInteger,
+} = require('lodash/fp');
 const _ = require('lodash');
 const parseType = require('./parse-type');
 const contentTypesUtils = require('./content-types');
+const { PaginationError } = require('./errors');
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
@@ -49,14 +63,18 @@ class InvalidSortError extends Error {
   }
 }
 
-const validateOrder = order => {
+const validateOrder = (order) => {
   if (!['asc', 'desc'].includes(order.toLocaleLowerCase())) {
     throw new InvalidOrderError();
   }
 };
 
-const convertCountQueryParams = countQuery => {
+const convertCountQueryParams = (countQuery) => {
   return parseType({ type: 'boolean', value: countQuery });
+};
+
+const convertOrderingQueryParams = (ordering) => {
+  return ordering;
 };
 
 /**
@@ -65,11 +83,11 @@ const convertCountQueryParams = countQuery => {
  */
 const convertSortQueryParams = (sortQuery, schema) => {
   if (typeof sortQuery === 'string') {
-    return sortQuery.split(',').map(value => convertSingleSortQueryParam(value, schema));
+    return sortQuery.split(',').map((value) => convertSingleSortQueryParam(value, schema));
   }
 
   if (Array.isArray(sortQuery)) {
-    return sortQuery.flatMap(sortValue => convertSortQueryParams(sortValue, schema));
+    return sortQuery.flatMap((sortValue) => convertSortQueryParams(sortValue, schema));
   }
 
   if (_.isPlainObject(sortQuery)) {
@@ -121,7 +139,7 @@ const convertNestedSortQueryParam = (sortQuery, schema) => {
  * Start query parser
  * @param {string} startQuery
  */
-const convertStartQueryParams = startQuery => {
+const convertStartQueryParams = (startQuery) => {
   const startAsANumber = _.toNumber(startQuery);
 
   if (!_.isInteger(startAsANumber) || startAsANumber < 0) {
@@ -135,7 +153,7 @@ const convertStartQueryParams = startQuery => {
  * Limit query parser
  * @param {string} limitQuery
  */
-const convertLimitQueryParams = limitQuery => {
+const convertLimitQueryParams = (limitQuery) => {
   const limitAsANumber = _.toNumber(limitQuery);
 
   if (!_.isInteger(limitAsANumber) || (limitAsANumber !== -1 && limitAsANumber < 0)) {
@@ -162,18 +180,18 @@ const convertPopulateQueryParams = (populate, schema, depth = 0) => {
   }
 
   if (typeof populate === 'string') {
-    return populate.split(',').map(value => _.trim(value));
+    return populate.split(',').map((value) => _.trim(value));
   }
 
   if (Array.isArray(populate)) {
     // map convert
     return _.uniq(
-      populate.flatMap(value => {
+      populate.flatMap((value) => {
         if (typeof value !== 'string') {
           throw new InvalidPopulateError();
         }
 
-        return value.split(',').map(value => _.trim(value));
+        return value.split(',').map((value) => _.trim(value));
       })
     );
   }
@@ -203,8 +221,14 @@ const convertPopulateObject = (populate, schema) => {
     // fixed when we'll implement a more accurate way to query them
     if (attribute.type === 'dynamiczone') {
       const populates = attribute.components
-        .map(uid => strapi.getModel(uid))
-        .map(schema => convertNestedPopulate(subPopulate, schema));
+        .map((uid) => strapi.getModel(uid))
+        .map((schema) => convertNestedPopulate(subPopulate, schema))
+        .map((populate) => (populate === true ? {} : populate)) // cast boolean to empty object to avoid merging issues
+        .filter((populate) => populate !== false);
+
+      if (isEmpty(populates)) {
+        return acc;
+      }
 
       return {
         ...acc,
@@ -233,16 +257,22 @@ const convertPopulateObject = (populate, schema) => {
       return acc;
     }
 
+    const populateObject = convertNestedPopulate(subPopulate, targetSchema);
+
+    if (!populateObject) {
+      return acc;
+    }
+
     return {
       ...acc,
-      [key]: convertNestedPopulate(subPopulate, targetSchema),
+      [key]: populateObject,
     };
   }, {});
 };
 
 const convertNestedPopulate = (subPopulate, schema) => {
-  if (subPopulate === '*') {
-    return true;
+  if (_.isString(subPopulate)) {
+    return parseType({ type: 'boolean', value: subPopulate, forceCast: true });
   }
 
   if (_.isBoolean(subPopulate)) {
@@ -254,7 +284,7 @@ const convertNestedPopulate = (subPopulate, schema) => {
   }
 
   // TODO: We will need to consider a way to add limitation / pagination
-  const { sort, filters, fields, populate, count } = subPopulate;
+  const { sort, filters, fields, populate, count, ordering } = subPopulate;
 
   const query = {};
 
@@ -278,6 +308,10 @@ const convertNestedPopulate = (subPopulate, schema) => {
     query.count = convertCountQueryParams(count);
   }
 
+  if (ordering) {
+    query.ordering = convertOrderingQueryParams(ordering);
+  }
+
   return query;
 };
 
@@ -287,15 +321,15 @@ const convertFieldsQueryParams = (fields, depth = 0, schema) => {
   }
 
   if (typeof fields === 'string') {
-    const fieldsValues = fields.split(',').map(value => _.trim(value));
+    const fieldsValues = fields.split(',').map((value) => _.trim(value));
     return _.uniq(['id', ...fieldsValues]).filter(
-      field => Object.keys(schema.attributes).includes(field) || field === 'id'
+      (field) => Object.keys(schema.attributes).includes(field) || field === 'id'
     );
   }
 
   if (Array.isArray(fields)) {
     // map convert
-    const fieldsValues = fields.flatMap(value =>
+    const fieldsValues = fields.flatMap((value) =>
       convertFieldsQueryParams(value, depth + 1, schema)
     );
     return _.uniq(['id', ...fieldsValues]);
@@ -326,13 +360,13 @@ const convertAndSanitizeFilters = (filters, schema) => {
     return (
       filters
         // Sanitize each filter
-        .map(filter => convertAndSanitizeFilters(filter, schema))
+        .map((filter) => convertAndSanitizeFilters(filter, schema))
         // Filter out empty filters
-        .filter(filter => !isObject(filter) || !isEmpty(filter))
+        .filter((filter) => !isObject(filter) || !isEmpty(filter))
     );
   }
 
-  const removeOperator = operator => delete filters[operator];
+  const removeOperator = (operator) => delete filters[operator];
 
   // Here, `key` can either be an operator or an attribute name
   for (const [key, value] of Object.entries(filters)) {
@@ -360,14 +394,15 @@ const convertAndSanitizeFilters = (filters, schema) => {
         removeOperator(key);
       }
 
+      // Password attributes
+      else if (attribute.type === 'password') {
+        // Always remove password attributes from filters object
+        removeOperator(key);
+      }
+
       // Scalar attributes
       else {
-        // Always remove password attributes from filters object
-        if (attribute.type === 'password') {
-          removeOperator(key);
-        } else {
-          filters[key] = convertAndSanitizeFilters(value, schema);
-        }
+        filters[key] = convertAndSanitizeFilters(value, schema);
       }
     }
 
@@ -414,6 +449,80 @@ const convertPublicationStateParams = (type, params = {}, query = {}) => {
   }
 };
 
+const transformParamsToQuery = (uid, params) => {
+  // NOTE: can be a CT, a Compo or nothing in the case of polymorphism (DZ & morph relations)
+  const schema = strapi.getModel(uid);
+
+  const query = {};
+
+  const { _q, sort, filters, fields, populate, page, pageSize, start, limit } = params;
+
+  if (!isNil(_q)) {
+    query._q = _q;
+  }
+
+  if (!isNil(sort)) {
+    query.orderBy = convertSortQueryParams(sort, schema);
+  }
+
+  if (!isNil(filters)) {
+    query.where = convertFiltersQueryParams(filters, schema);
+  }
+
+  if (!isNil(fields)) {
+    query.select = convertFieldsQueryParams(fields, schema);
+  }
+
+  if (!isNil(populate)) {
+    query.populate = convertPopulateQueryParams(populate, schema);
+  }
+
+  const isPagePagination = !isNil(page) || !isNil(pageSize);
+  const isOffsetPagination = !isNil(start) || !isNil(limit);
+
+  if (isPagePagination && isOffsetPagination) {
+    throw new PaginationError(
+      'Invalid pagination attributes. You cannot use page and offset pagination in the same query'
+    );
+  }
+
+  if (!isNil(page)) {
+    const pageVal = toNumber(page);
+
+    if (!isInteger(pageVal) || pageVal <= 0) {
+      throw new PaginationError(
+        `Invalid 'page' parameter. Expected an integer > 0, received: ${page}`
+      );
+    }
+
+    query.page = pageVal;
+  }
+
+  if (!isNil(pageSize)) {
+    const pageSizeVal = toNumber(pageSize);
+
+    if (!isInteger(pageSizeVal) || pageSizeVal <= 0) {
+      throw new PaginationError(
+        `Invalid 'pageSize' parameter. Expected an integer > 0, received: ${page}`
+      );
+    }
+
+    query.pageSize = pageSizeVal;
+  }
+
+  if (!isNil(start)) {
+    query.offset = convertStartQueryParams(start);
+  }
+
+  if (!isNil(limit)) {
+    query.limit = convertLimitQueryParams(limit);
+  }
+
+  convertPublicationStateParams(schema, params, query);
+
+  return query;
+};
+
 module.exports = {
   convertSortQueryParams,
   convertStartQueryParams,
@@ -422,4 +531,5 @@ module.exports = {
   convertFiltersQueryParams,
   convertFieldsQueryParams,
   convertPublicationStateParams,
+  transformParamsToQuery,
 };

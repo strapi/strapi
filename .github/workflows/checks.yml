@@ -9,13 +9,13 @@ on:
       - labeled
       - unlabeled
     branches:
-      - master
+      - main
 
 jobs:
   check-pr-status:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/check-pr-status
   security-lockfile-analysis:
     runs-on: ubuntu-latest

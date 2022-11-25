@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { render, waitFor } from '@testing-library/react';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { useGuidedTour } from '@strapi/helper-plugin';
@@ -35,9 +36,19 @@ jest.mock('../utils/api', () => ({
   fetchUserRoles: jest.fn(),
 }));
 
-jest.mock('../../PluginsInitializer', () => () => <div>PluginsInitializer</div>);
+jest.mock('../../PluginsInitializer', () => () => {
+  return <div>PluginsInitializer</div>;
+});
 // eslint-disable-next-line react/prop-types
-jest.mock('../../RBACProvider', () => ({ children }) => <div>{children}</div>);
+jest.mock('../../RBACProvider', () => {
+  const Compo = ({ children }) => <div>{children}</div>;
+
+  Compo.propTypes = {
+    children: PropTypes.node.isRequired,
+  };
+
+  return Compo;
+});
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -47,11 +58,13 @@ const queryClient = new QueryClient({
   },
 });
 
-const app = (
+const configurationContextValue = { showReleaseNotification: false };
+
+const App = () => (
   <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
     <Theme>
       <QueryClientProvider client={queryClient}>
-        <ConfigurationsContext.Provider value={{ showReleaseNotification: false }}>
+        <ConfigurationsContext.Provider value={configurationContextValue}>
           <AuthenticatedApp />
         </ConfigurationsContext.Provider>
       </QueryClientProvider>
@@ -81,9 +94,27 @@ describe('Admin | components | AuthenticatedApp', () => {
     );
     fetchCurrentUserPermissions.mockImplementation(() => Promise.resolve([]));
 
-    const { container } = render(app);
+    const { container } = render(<App />);
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c2 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c3 {
+        -webkit-animation: gzYjWD 1s infinite linear;
+        animation: gzYjWD 1s infinite linear;
+        will-change: transform;
+      }
+
       .c0 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -100,23 +131,6 @@ describe('Admin | components | AuthenticatedApp', () => {
         -webkit-justify-content: space-around;
         -ms-flex-pack: space-around;
         justify-content: space-around;
-      }
-
-      .c2 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
-      .c3 {
-        -webkit-animation: gzYjWD 1s infinite linear;
-        animation: gzYjWD 1s infinite linear;
       }
 
       .c1 {
@@ -147,7 +161,7 @@ describe('Admin | components | AuthenticatedApp', () => {
   });
 
   it('should not fetch the latest release', () => {
-    render(app);
+    render(<App />);
 
     expect(fetchStrapiLatestRelease).not.toHaveBeenCalled();
   });
@@ -157,16 +171,28 @@ describe('Admin | components | AuthenticatedApp', () => {
     const setGuidedTourVisibility = jest.fn();
     useGuidedTour.mockImplementation(() => ({ setGuidedTourVisibility }));
 
-    render(app);
+    render(<App />);
 
     await waitFor(() => expect(setGuidedTourVisibility).not.toHaveBeenCalled());
   });
 
-  it('should call setGuidedTourVisibility when user is super admin', async () => {
+  it('should not setGuidedTourVisibility when user is a super admin and autoReload is false ', async () => {
     fetchUserRoles.mockImplementationOnce(() => [{ code: 'strapi-super-admin' }]);
+    fetchAppInfo.mockImplementationOnce(() => ({ autoReload: false }));
     const setGuidedTourVisibility = jest.fn();
     useGuidedTour.mockImplementation(() => ({ setGuidedTourVisibility }));
-    render(app);
+
+    render(<App />);
+
+    await waitFor(() => expect(setGuidedTourVisibility).not.toHaveBeenCalled());
+  });
+
+  it('should call setGuidedTourVisibility when user is super admin and autoReload is true', async () => {
+    fetchUserRoles.mockImplementationOnce(() => [{ code: 'strapi-super-admin' }]);
+    fetchAppInfo.mockImplementationOnce(() => ({ autoReload: true }));
+    const setGuidedTourVisibility = jest.fn();
+    useGuidedTour.mockImplementation(() => ({ setGuidedTourVisibility }));
+    render(<App />);
 
     await waitFor(() => expect(setGuidedTourVisibility).toHaveBeenCalledWith(true));
   });

@@ -16,6 +16,7 @@ const databases = {
       database: 'strapi_test',
       username: 'strapi',
       password: 'strapi',
+      schema: 'myschema',
     },
   },
   mysql: {
@@ -33,10 +34,11 @@ const databases = {
     connection: {
       filename: './tmp/data.db',
     },
+    useNullAsDefault: true,
   },
 };
 
-const main = async database => {
+const main = async (database) => {
   try {
     await cleanTestApp(appName);
     await generateTestApp({ appName, database });
@@ -46,16 +48,17 @@ const main = async database => {
   }
 };
 
+// eslint-disable-next-line no-unused-expressions
 yargs
   .command(
     '$0 [databaseName]',
     'Create test app',
-    yargs => {
-      yargs.positional('databaseName', {
+    (yarg) => {
+      yarg.positional('databaseName', {
         choices: Object.keys(databases),
       });
     },
-    argv => {
+    (argv) => {
       const { databaseName } = argv;
       if (databaseName) {
         return main(databases[databaseName]);

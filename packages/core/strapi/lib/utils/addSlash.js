@@ -1,10 +1,11 @@
 'use strict';
 
-module.exports = path => {
-  if (typeof path !== 'string') throw new Error('admin.url must be a string');
-  if (path === '' || path === '/') return '/';
+module.exports = (path) => {
+  let tmpPath = path;
+  if (typeof tmpPath !== 'string') throw new Error('admin.url must be a string');
+  if (tmpPath === '' || tmpPath === '/') return '/';
 
-  if (path[0] != '/') path = '/' + path;
-  if (path[path.length - 1] != '/') path = path + '/';
-  return path;
+  if (tmpPath[0] !== '/') tmpPath = `/${tmpPath}`;
+  if (tmpPath[tmpPath.length - 1] !== '/') tmpPath += '/';
+  return tmpPath;
 };

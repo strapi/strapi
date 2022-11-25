@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import makeUnique from '../../../utils/makeUnique';
 
-const retrieveNestedComponents = appComponents => {
+const retrieveNestedComponents = (appComponents) => {
   const nestedComponents = Object.keys(appComponents).reduce((acc, current) => {
     const componentAttributes = get(appComponents, [current, 'schema', 'attributes'], []);
     const currentComponentNestedCompos = getComponentsFromComponent(componentAttributes);
@@ -12,7 +12,7 @@ const retrieveNestedComponents = appComponents => {
   return makeUnique(nestedComponents);
 };
 
-const getComponentsFromComponent = componentAttributes => {
+const getComponentsFromComponent = (componentAttributes) => {
   return componentAttributes.reduce((acc, current) => {
     const { type, component } = current;
 

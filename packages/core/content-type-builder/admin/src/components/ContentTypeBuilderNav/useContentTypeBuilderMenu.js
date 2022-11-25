@@ -26,11 +26,11 @@ const useContentTypeBuilderMenu = () => {
   const { onOpenModalCreateSchema, onOpenModalEditCategory } = useFormModalNavigation();
 
   const componentsData = sortBy(
-    Object.keys(componentsGroupedByCategory).map(category => ({
+    Object.keys(componentsGroupedByCategory).map((category) => ({
       name: category,
       title: category,
       isEditable: isInDevelopmentMode,
-      onClickEdit: (e, data) => {
+      onClickEdit(e, data) {
         e.stopPropagation();
 
         if (canOpenModalCreateCTorComponent) {
@@ -40,20 +40,20 @@ const useContentTypeBuilderMenu = () => {
         }
       },
       links: sortBy(
-        componentsGroupedByCategory[category].map(compo => ({
+        componentsGroupedByCategory[category].map((compo) => ({
           name: compo.uid,
           to: `/plugins/${pluginId}/component-categories/${category}/${compo.uid}`,
           title: compo.schema.displayName,
         })),
-        obj => obj.title
+        (obj) => obj.title
       ),
     })),
-    obj => obj.title
+    (obj) => obj.title
   );
 
   const canOpenModalCreateCTorComponent =
-    !Object.keys(contentTypes).some(ct => contentTypes[ct].isTemporary === true) &&
-    !Object.keys(components).some(component => components[component].isTemporary === true) &&
+    !Object.keys(contentTypes).some((ct) => contentTypes[ct].isTemporary === true) &&
+    !Object.keys(components).some((component) => components[component].isTemporary === true) &&
     isEqual(modifiedData, initialData);
 
   const handleClickOpenModalCreateCollectionType = () => {
@@ -117,7 +117,7 @@ const useContentTypeBuilderMenu = () => {
     });
   };
 
-  const displayedContentTypes = sortedContentTypesList.filter(obj => obj.visible);
+  const displayedContentTypes = sortedContentTypesList.filter((obj) => obj.visible);
 
   const data = [
     {
@@ -131,7 +131,7 @@ const useContentTypeBuilderMenu = () => {
         defaultMessage: 'Create new collection type',
         onClick: handleClickOpenModalCreateCollectionType,
       },
-      links: displayedContentTypes.filter(contentType => contentType.kind === 'collectionType'),
+      links: displayedContentTypes.filter((contentType) => contentType.kind === 'collectionType'),
     },
     {
       name: 'singleTypes',
@@ -144,7 +144,7 @@ const useContentTypeBuilderMenu = () => {
         defaultMessage: 'Create new single type',
         onClick: handleClickOpenModalCreateSingleType,
       },
-      links: displayedContentTypes.filter(singleType => singleType.kind === 'singleType'),
+      links: displayedContentTypes.filter((singleType) => singleType.kind === 'singleType'),
     },
     {
       name: 'components',
@@ -161,18 +161,18 @@ const useContentTypeBuilderMenu = () => {
     },
   ];
 
-  const matchByTitle = links =>
-    matchSorter(links, toLower(search), { keys: [item => toLower(item.title)] });
+  const matchByTitle = (links) =>
+    matchSorter(links, toLower(search), { keys: [(item) => toLower(item.title)] });
 
   const getMenu = () => {
     // Maybe we can do it simpler with matchsorter wildcards ?
-    return data.map(section => {
-      const hasChild = section.links.some(l => !isEmpty(l.links));
+    return data.map((section) => {
+      const hasChild = section.links.some((l) => !isEmpty(l.links));
 
       if (hasChild) {
         return {
           ...section,
-          links: section.links.map(l => ({ ...l, links: matchByTitle(l.links) })),
+          links: section.links.map((l) => ({ ...l, links: matchByTitle(l.links) })),
         };
       }
 

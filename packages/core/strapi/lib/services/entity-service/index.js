@@ -2,27 +2,34 @@
 
 const _ = require('lodash');
 const delegate = require('delegates');
-const {
-  InvalidTimeError,
-  InvalidDateError,
-  InvalidDateTimeError,
-} = require('@strapi/database').errors;
+const { InvalidTimeError, InvalidDateError, InvalidDateTimeError } =
+  require('@strapi/database').errors;
 const {
   webhook: webhookUtils,
   contentTypes: contentTypesUtils,
   sanitize,
 } = require('@strapi/utils');
 const { ValidationError } = require('@strapi/utils').errors;
+const { isAnyToMany } = require('@strapi/utils').relations;
+const { transformParamsToQuery } = require('@strapi/utils').convertQueryParams;
 const uploadFiles = require('../utils/upload-files');
 
 const {
   omitComponentData,
+  getComponents,
   createComponents,
   updateComponents,
   deleteComponents,
 } = require('./components');
-const { transformParamsToQuery, pickSelectionParams } = require('./params');
+const { pickSelectionParams } = require('./params');
 const { applyTransforms } = require('./attributes');
+
+const transformLoadParamsToQuery = (uid, field, params = {}, pagination = {}) => {
+  return {
+    ...transformParamsToQuery(uid, { populate: { [field]: params } }).populate[field],
+    ...pagination,
+  };
+};
 
 // TODO: those should be strapi events used by the webhooks not the other way arround
 const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
@@ -35,51 +42,6 @@ const creationPipeline = (data, context) => {
 
 const updatePipeline = (data, context) => {
   return applyTransforms(data, context);
-};
-
-module.exports = ctx => {
-  const implementation = createDefaultImplementation(ctx);
-
-  const service = {
-    implementation,
-    decorate(decorator) {
-      if (typeof decorator !== 'function') {
-        throw new Error(`Decorator must be a function, received ${typeof decorator}`);
-      }
-
-      this.implementation = Object.assign({}, this.implementation, decorator(this.implementation));
-      return this;
-    },
-  };
-
-  const delegator = delegate(service, 'implementation');
-
-  // delegate every method in implementation
-  Object.keys(service.implementation).forEach(key => delegator.method(key));
-
-  // wrap methods to handle Database Errors
-  service.decorate(oldService => {
-    const newService = _.mapValues(
-      oldService,
-      (method, methodName) =>
-        async function(...args) {
-          try {
-            return await oldService[methodName].call(this, ...args);
-          } catch (error) {
-            if (
-              databaseErrorsToTransform.some(errorToTransform => error instanceof errorToTransform)
-            ) {
-              throw new ValidationError(error.message);
-            }
-            throw error;
-          }
-        }
-    );
-
-    return newService;
-  });
-
-  return service;
 };
 
 /**
@@ -130,12 +92,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const query = transformParamsToQuery(uid, wrappedParams);
 
-    const { results, pagination } = await db.query(uid).findPage(query);
-
-    return {
-      results,
-      pagination,
-    };
+    return db.query(uid).findPage(query);
   },
 
   async findWithRelationCounts(uid, opts) {
@@ -143,9 +100,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const query = transformParamsToQuery(uid, wrappedParams);
 
-    const results = await db.query(uid).findMany(query);
-
-    return results;
+    return db.query(uid).findMany(query);
   },
 
   async findOne(uid, entityId, opts) {
@@ -261,8 +216,10 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       return null;
     }
 
+    const componentsToDelete = await getComponents(uid, entityToDelete);
+
     await db.query(uid).delete({ where: { id: entityToDelete.id } });
-    await deleteComponents(uid, entityToDelete);
+    await deleteComponents(uid, componentsToDelete, { loadComponents: false });
 
     await this.emitEvent(uid, ENTRY_DELETE, entityToDelete);
 
@@ -276,35 +233,96 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     // select / populate
     const query = transformParamsToQuery(uid, wrappedParams);
 
-    return db.query(uid).deleteMany(query);
+    const entitiesToDelete = await db.query(uid).findMany(query);
+
+    if (!entitiesToDelete.length) {
+      return null;
+    }
+
+    const componentsToDelete = await Promise.all(
+      entitiesToDelete.map((entityToDelete) => getComponents(uid, entityToDelete))
+    );
+
+    const deletedEntities = await db.query(uid).deleteMany(query);
+    await Promise.all(
+      componentsToDelete.map((compos) => deleteComponents(uid, compos, { loadComponents: false }))
+    );
+
+    // Trigger webhooks. One for each entity
+    await Promise.all(entitiesToDelete.map((entity) => this.emitEvent(uid, ENTRY_DELETE, entity)));
+
+    return deletedEntities;
   },
 
   load(uid, entity, field, params = {}) {
-    const { attributes } = strapi.getModel(uid);
-
-    const attribute = attributes[field];
-
-    const loadParams = {};
-
-    switch (attribute.type) {
-      case 'relation': {
-        Object.assign(loadParams, transformParamsToQuery(attribute.target, params));
-        break;
-      }
-      case 'component': {
-        Object.assign(loadParams, transformParamsToQuery(attribute.component, params));
-        break;
-      }
-      case 'dynamiczone': {
-        Object.assign(loadParams, transformParamsToQuery(null, params));
-        break;
-      }
-      case 'media': {
-        Object.assign(loadParams, transformParamsToQuery('plugin::upload.file', params));
-        break;
-      }
+    if (!_.isString(field)) {
+      throw new Error(`Invalid load. Expected "${field}" to be a string`);
     }
 
-    return db.query(uid).load(entity, field, loadParams);
+    return db.query(uid).load(entity, field, transformLoadParamsToQuery(uid, field, params));
+  },
+
+  loadPages(uid, entity, field, params = {}, pagination = {}) {
+    if (!_.isString(field)) {
+      throw new Error(`Invalid load. Expected "${field}" to be a string`);
+    }
+
+    const { attributes } = strapi.getModel(uid);
+    const attribute = attributes[field];
+
+    if (!isAnyToMany(attribute)) {
+      throw new Error(`Invalid load. Expected "${field}" to be an anyToMany relational attribute`);
+    }
+
+    const query = transformLoadParamsToQuery(uid, field, params, pagination);
+
+    return db.query(uid).loadPages(entity, field, query);
   },
 });
+
+module.exports = (ctx) => {
+  const implementation = createDefaultImplementation(ctx);
+
+  const service = {
+    implementation,
+    decorate(decorator) {
+      if (typeof decorator !== 'function') {
+        throw new Error(`Decorator must be a function, received ${typeof decorator}`);
+      }
+
+      this.implementation = { ...this.implementation, ...decorator(this.implementation) };
+      return this;
+    },
+  };
+
+  const delegator = delegate(service, 'implementation');
+
+  // delegate every method in implementation
+  Object.keys(service.implementation).forEach((key) => delegator.method(key));
+
+  // wrap methods to handle Database Errors
+  service.decorate((oldService) => {
+    const newService = _.mapValues(
+      oldService,
+      (method, methodName) =>
+        async function (...args) {
+          try {
+            return await oldService[methodName].call(this, ...args);
+          } catch (error) {
+            if (
+              databaseErrorsToTransform.some(
+                (errorToTransform) => error instanceof errorToTransform
+              )
+            ) {
+              throw new ValidationError(error.message);
+            }
+            throw error;
+          }
+        }
+    );
+
+    return newService;
+  });
+
+  return service;
+};

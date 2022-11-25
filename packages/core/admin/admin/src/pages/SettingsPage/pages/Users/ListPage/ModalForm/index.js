@@ -34,14 +34,14 @@ const ModalForm = ({ queryName, onToggle }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
-  const postMutation = useMutation(body => axiosInstance.post('/admin/users', body), {
-    onSuccess: async ({ data }) => {
+  const postMutation = useMutation((body) => axiosInstance.post('/admin/users', body), {
+    async onSuccess({ data }) {
       setRegistrationToken(data.data.registrationToken);
       await queryClient.invalidateQueries(queryName);
       goNext();
       setIsSubmitting(false);
     },
-    onError: err => {
+    onError(err) {
       setIsSubmitting(false);
 
       toggleNotification({
@@ -51,7 +51,7 @@ const ModalForm = ({ queryName, onToggle }) => {
 
       throw err;
     },
-    onSettled: () => {
+    onSettled() {
       unlockApp();
     },
   });
@@ -69,8 +69,8 @@ const ModalForm = ({ queryName, onToggle }) => {
     } catch (err) {
       unlockApp();
 
-      if (err?.response?.data.message === 'Email already taken') {
-        setErrors({ email: err.response.data.message });
+      if (err?.response?.data?.error.message === 'Email already taken') {
+        setErrors({ email: err.response.data.error.message });
       }
     }
   };
@@ -124,8 +124,8 @@ const ModalForm = ({ queryName, onToggle }) => {
                     <Box paddingTop={4}>
                       <Stack spacing={1}>
                         <Grid gap={5}>
-                          {layout.map(row => {
-                            return row.map(input => {
+                          {layout.map((row) => {
+                            return row.map((input) => {
                               return (
                                 <GridItem key={input.name} {...input.size}>
                                   <GenericInput
@@ -160,8 +160,8 @@ const ModalForm = ({ queryName, onToggle }) => {
                             value={values.roles}
                           />
                         </GridItem>
-                        {roleSettingsForm.map(row => {
-                          return row.map(input => {
+                        {roleSettingsForm.map((row) => {
+                          return row.map((input) => {
                             return (
                               <GridItem key={input.name} {...input.size}>
                                 <GenericInput

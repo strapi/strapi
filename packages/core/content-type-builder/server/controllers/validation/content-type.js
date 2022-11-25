@@ -36,7 +36,7 @@ const VALID_RELATIONS = {
 /**
  * Allowed types
  */
-const VALID_TYPES = [...DEFAULT_TYPES, 'uid', 'component', 'dynamiczone'];
+const VALID_TYPES = [...DEFAULT_TYPES, 'uid', 'component', 'dynamiczone', 'customField'];
 
 /**
  * Returns a yup schema to validate a content type payload
@@ -48,10 +48,7 @@ const createContentTypeSchema = (data, { isEdition = false } = {}) => {
     modelType: modelTypes.CONTENT_TYPE,
   })
     .shape({
-      displayName: yup
-        .string()
-        .min(1)
-        .required(),
+      displayName: yup.string().min(1).required(),
       singularName: yup
         .string()
         .min(1)
@@ -70,7 +67,7 @@ const createContentTypeSchema = (data, { isEdition = false } = {}) => {
     .test(
       'singularName-not-equal-pluralName',
       '${path}: singularName and pluralName should be different',
-      value => value.singularName !== value.pluralName
+      (value) => value.singularName !== value.pluralName
     );
 
   return yup
@@ -84,20 +81,20 @@ const createContentTypeSchema = (data, { isEdition = false } = {}) => {
 /**
  * Validator for content type creation
  */
-const validateContentTypeInput = data => {
+const validateContentTypeInput = (data) => {
   return validateYupSchema(createContentTypeSchema(data))(data);
 };
 
 /**
  * Validator for content type edition
  */
-const validateUpdateContentTypeInput = data => {
+const validateUpdateContentTypeInput = (data) => {
   if (_.has(data, 'contentType')) {
     removeEmptyDefaults(data.contentType);
   }
 
   if (_.has(data, 'components') && Array.isArray(data.components)) {
-    data.components.forEach(data => {
+    data.components.forEach((data) => {
       if (_.has(data, 'uid')) {
         removeEmptyDefaults(data);
       }
@@ -125,8 +122,8 @@ const forbiddenContentTypeNameValidator = () => {
   };
 };
 
-const alreadyUsedContentTypeName = isEdition => {
-  const usedNames = _.flatMap(strapi.contentTypes, ct => [ct.singularName, ct.pluralName]);
+const alreadyUsedContentTypeName = (isEdition) => {
+  const usedNames = _.flatMap(strapi.contentTypes, (ct) => [ct.singularName, ct.pluralName]);
 
   return {
     name: 'nameAlreadyUsed',

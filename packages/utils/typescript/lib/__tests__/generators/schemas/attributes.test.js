@@ -23,11 +23,11 @@ describe('Attributes', () => {
     const schema = { uid: 'api::foo.foo' };
     const attributeName = 'foo';
 
-    const toPropertySignature = attribute => {
+    const toPropertySignature = (attribute) => {
       return attributeToPropertySignature(schema, attributeName, attribute);
     };
 
-    const defaultAssertion = node => {
+    const defaultAssertion = (node) => {
       expect(node.kind).toBe(ts.SyntaxKind.PropertySignature);
       expect(node.name.escapedText).toBe(attributeName);
       expect(node.type.kind).toBe(ts.SyntaxKind.IntersectionType);
@@ -435,6 +435,61 @@ describe('Attributes', () => {
           expect(modifiers).toHaveLength(1);
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
           expect(modifiers[0].typeName.escapedText).toBe('ConfigurableAttribute');
+        });
+      });
+
+      describe('Custom field', () => {
+        test('No custom field', () => {
+          const attribute = {};
+          const modifiers = getAttributeModifiers(attribute);
+
+          expect(modifiers).toHaveLength(0);
+        });
+
+        test('Basic custom field', () => {
+          const attribute = {
+            type: 'string',
+            customField: 'plugin::color-picker.color',
+          };
+          const modifiers = getAttributeModifiers(attribute);
+
+          expect(modifiers).toHaveLength(1);
+          expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
+          expect(modifiers[0].typeName.escapedText).toBe('CustomField');
+          expect(modifiers[0].typeArguments).toHaveLength(1);
+          expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
+          expect(modifiers[0].typeArguments[0].text).toBe('plugin::color-picker.color');
+        });
+
+        test('Advanced custom field', () => {
+          const attribute = {
+            type: 'string',
+            customField: 'plugin::color-picker.color',
+            options: {
+              format: 'hex',
+            },
+          };
+          const modifiers = getAttributeModifiers(attribute);
+
+          expect(modifiers).toHaveLength(1);
+          expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
+          expect(modifiers[0].typeName.escapedText).toBe('CustomField');
+          expect(modifiers[0].typeArguments).toHaveLength(2);
+          expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
+          expect(modifiers[0].typeArguments[0].text).toBe('plugin::color-picker.color');
+          expect(modifiers[0].typeArguments[1].kind).toBe(ts.SyntaxKind.TypeLiteral);
+          expect(modifiers[0].typeArguments[1].members).toHaveLength(1);
+          expect(modifiers[0].typeArguments[1].members[0].kind).toBe(
+            ts.SyntaxKind.PropertyDeclaration
+          );
+          expect(modifiers[0].typeArguments[1].members[0].name.escapedText).toBe('format');
+          expect(modifiers[0].typeArguments[1].members[0].kind).toBe(
+            ts.SyntaxKind.PropertyDeclaration
+          );
+          expect(modifiers[0].typeArguments[1].members[0].type.kind).toBe(
+            ts.SyntaxKind.StringLiteral
+          );
+          expect(modifiers[0].typeArguments[1].members[0].type.text).toBe('hex');
         });
       });
 

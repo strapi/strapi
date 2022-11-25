@@ -10,6 +10,7 @@ import {
   LoadingIndicatorPage,
   useNotification,
   useAppInfos,
+  useQueryParams,
 } from '@strapi/helper-plugin';
 import { Layout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -29,6 +30,8 @@ import offlineCloud from '../../assets/images/icon_offline-cloud.svg';
 import useNavigatorOnLine from '../../hooks/useNavigatorOnLine';
 import MissingPluginBanner from './components/MissingPluginBanner';
 import NpmPackagesGrid from './components/NpmPackagesGrid';
+import SortSelect from './components/SortSelect';
+import NpmPackagesFilters from './components/NpmPackagesFilters';
 
 const matchSearch = (npmPackages, search) => {
   return matchSorter(npmPackages, search, {
@@ -39,6 +42,7 @@ const matchSearch = (npmPackages, search) => {
       },
       { threshold: matchSorter.rankings.WORD_STARTS_WITH, key: 'attributes.description' },
     ],
+    baseSort: (a, b) => (a.index < b.index ? -1 : 1),
   });
 };
 
@@ -49,9 +53,17 @@ const MarketPlacePage = () => {
   const trackUsageRef = useRef(trackUsage);
   const toggleNotification = useNotification();
   const [searchQuery, setSearchQuery] = useState('');
-  const [npmPackageType, setNpmPackageType] = useState('plugin');
-  const { autoReload: isInDevelopmentMode, dependencies, useYarn } = useAppInfos();
+  const [{ query }, setQuery] = useQueryParams();
+
+  const { autoReload: isInDevelopmentMode, dependencies, useYarn, strapiVersion } = useAppInfos();
   const isOnline = useNavigatorOnLine();
+
+  const npmPackageType = query?.npmPackageType || 'plugin';
+
+  const [tabQuery, setTabQuery] = useState({
+    plugin: npmPackageType === 'plugin' ? { ...query } : {},
+    provider: npmPackageType === 'provider' ? { ...query } : {},
+  });
 
   useFocusWhenNavigate();
 
@@ -72,15 +84,11 @@ const MarketPlacePage = () => {
     );
   };
 
-  const {
-    status: marketplacePluginsStatus,
-    data: marketplacePluginsResponse,
-  } = useFetchMarketplacePlugins(notifyMarketplaceLoad);
+  const { status: marketplaceProvidersStatus, data: marketplaceProvidersResponse } =
+    useFetchMarketplaceProviders(notifyMarketplaceLoad, tabQuery.provider);
 
-  const {
-    status: marketplaceProvidersStatus,
-    data: marketplaceProvidersResponse,
-  } = useFetchMarketplaceProviders(notifyMarketplaceLoad);
+  const { status: marketplacePluginsStatus, data: marketplacePluginsResponse } =
+    useFetchMarketplacePlugins(notifyMarketplaceLoad, tabQuery.plugin);
 
   const isLoading = [marketplacePluginsStatus, marketplaceProvidersStatus].includes('loading');
 
@@ -172,13 +180,44 @@ const MarketPlacePage = () => {
     { target: searchQuery }
   );
 
-  const handleTabChange = selected => {
-    const packageType = selected === 0 ? 'plugin' : 'provider';
-    setNpmPackageType(packageType);
+  const handleTabChange = (selected) => {
+    const selectedTab = selected === 0 ? 'plugin' : 'provider';
+    const hasTabQuery = tabQuery[selectedTab] && Object.keys(tabQuery[selectedTab]).length;
+
+    if (hasTabQuery) {
+      setQuery({ ...tabQuery[selectedTab], npmPackageType: selectedTab });
+    } else {
+      setQuery({
+        npmPackageType: selectedTab,
+        // Clear filters
+        collections: [],
+        categories: [],
+        sort: 'name:asc',
+      });
+    }
+  };
+
+  const handleSelectChange = (update) => {
+    setQuery(update);
+    setTabQuery((prev) => ({
+      ...prev,
+      [npmPackageType]: { ...prev[npmPackageType], ...update },
+    }));
+  };
+
+  const handleSelectClear = (filterType) => {
+    setQuery({ [filterType]: [] }, 'remove');
+    setTabQuery((prev) => ({ ...prev, [npmPackageType]: {} }));
   };
 
   // Check if plugins and providers are installed already
   const installedPackageNames = Object.keys(dependencies);
+
+  const possibleCollections =
+    npmPackageType === 'plugin'
+      ? marketplacePluginsResponse.meta.collections
+      : marketplaceProvidersResponse.meta.collections;
+  const possibleCategories = marketplacePluginsResponse.meta.categories;
 
   return (
     <Layout>
@@ -196,7 +235,7 @@ const MarketPlacePage = () => {
               name="searchbar"
               onClear={() => setSearchQuery('')}
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value)}
               clearLabel={formatMessage({
                 id: 'admin.pages.MarketPlacePage.search.clear',
                 defaultMessage: 'Clear the search',
@@ -219,6 +258,7 @@ const MarketPlacePage = () => {
             })}
             id="tabs"
             variant="simple"
+            initialSelectedTabIndex={['plugin', 'provider'].indexOf(npmPackageType)}
             onTabChange={handleTabChange}
           >
             <Box paddingBottom={4}>
@@ -239,6 +279,21 @@ const MarketPlacePage = () => {
                 </Tab>
               </Tabs>
             </Box>
+            <Flex paddingBottom={4} gap={2}>
+              <SortSelect
+                sortQuery={query?.sort || 'name:asc'}
+                handleSelectChange={handleSelectChange}
+              />
+              <NpmPackagesFilters
+                npmPackageType={npmPackageType}
+                possibleCollections={possibleCollections}
+                possibleCategories={possibleCategories}
+                query={query || {}}
+                handleSelectChange={handleSelectChange}
+                handleSelectClear={handleSelectClear}
+              />
+            </Flex>
+
             <TabPanels>
               {/* Plugins panel */}
               <TabPanel>
@@ -251,6 +306,7 @@ const MarketPlacePage = () => {
                     useYarn={useYarn}
                     isInDevelopmentMode={isInDevelopmentMode}
                     npmPackageType="plugin"
+                    strapiAppVersion={strapiVersion}
                   />
                 )}
               </TabPanel>

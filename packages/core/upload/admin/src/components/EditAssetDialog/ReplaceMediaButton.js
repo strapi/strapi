@@ -11,7 +11,7 @@ export const ReplaceMediaButton = ({ onSelectMedia, acceptedMime, trackedLocatio
   const inputRef = useRef(null);
   const { trackUsage } = useTracking();
 
-  const handleClick = e => {
+  const handleClick = (e) => {
     e.preventDefault();
 
     if (trackedLocation) {

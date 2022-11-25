@@ -44,12 +44,13 @@ module.exports = async ({ buildDestDir, forceBuild = true, optimization, srcDir 
       options: {
         backend: serverUrl,
         adminPath: addSlash(adminPath),
+        telemetryIsDisabled: strapiInstance.telemetry.isDisabled,
       },
     })
     .then(() => {
       console.log('Admin UI built successfully');
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
       process.exit(1);
     });

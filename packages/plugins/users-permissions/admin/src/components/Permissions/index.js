@@ -12,11 +12,11 @@ import { initialState, reducer } from './reducer';
 const Permissions = () => {
   const { modifiedData } = useUsersPermissions();
   const { formatMessage } = useIntl();
-  const [{ collapses }, dispatch] = useReducer(reducer, initialState, state =>
+  const [{ collapses }, dispatch] = useReducer(reducer, initialState, (state) =>
     init(state, modifiedData)
   );
 
-  const handleToggle = index =>
+  const handleToggle = (index) =>
     dispatch({
       type: 'TOGGLE_COLLAPSE',
       index,

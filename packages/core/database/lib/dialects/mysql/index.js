@@ -1,13 +1,19 @@
 'use strict';
 
+const semver = require('semver');
+
 const { Dialect } = require('../dialect');
 const MysqlSchemaInspector = require('./schema-inspector');
+const MysqlDatabaseInspector = require('./database-inspector');
+const { MYSQL } = require('./constants');
 
 class MysqlDialect extends Dialect {
   constructor(db) {
     super(db);
 
     this.schemaInspector = new MysqlSchemaInspector(db);
+    this.databaseInspector = new MysqlDatabaseInspector(db);
+    this.info = null;
   }
 
   configure() {
@@ -15,12 +21,12 @@ class MysqlDialect extends Dialect {
     this.db.config.connection.connection.bigNumberStrings = true;
     this.db.config.connection.connection.typeCast = (field, next) => {
       if (field.type === 'DECIMAL' || field.type === 'NEWDECIMAL') {
-        var value = field.string();
+        const value = field.string();
         return value === null ? null : Number(value);
       }
 
       if (field.type === 'TINY' && field.length === 1) {
-        let value = field.string();
+        const value = field.string();
         return value ? value === '1' : null;
       }
 
@@ -38,6 +44,8 @@ class MysqlDialect extends Dialect {
     } catch (err) {
       // Ignore error due to lack of session permissions
     }
+
+    this.info = await this.databaseInspector.getInformation();
   }
 
   async startSchemaUpdate() {
@@ -54,6 +62,17 @@ class MysqlDialect extends Dialect {
   }
 
   supportsUnsigned() {
+    return true;
+  }
+
+  supportsWindowFunctions() {
+    const isMysqlDB = !this.info.database || this.info.database === MYSQL;
+    const isBeforeV8 = !semver.valid(this.info.version) || semver.lt(this.info.version, '8.0.0');
+
+    if (isMysqlDB && isBeforeV8) {
+      return false;
+    }
+
     return true;
   }
 

@@ -213,7 +213,7 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
 
                       <SelectTree
                         options={folderStructure}
-                        onChange={value => {
+                        onChange={(value) => {
                           setFieldValue('parent', value);
                         }}
                         isDisabled={formDisabled}

@@ -24,7 +24,7 @@ const FIXTURE_FOLDER = {
     count: 1,
   },
   path: '/1',
-  pathId: '1',
+  pathId: 1,
   updatedAt: '',
   parent: {
     id: 2,
@@ -37,12 +37,12 @@ const FIXTURE_FOLDER = {
       count: 1,
     },
     path: '/1',
-    pathId: '1',
+    pathId: 1,
     updatedAt: '',
   },
 };
 
-const setup = props => {
+const setup = (props) => {
   const withDefaults = {
     ...props,
     assetCount: 2,

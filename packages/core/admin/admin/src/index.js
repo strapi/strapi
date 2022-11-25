@@ -9,6 +9,7 @@ import appReducers from './reducers';
 window.strapi = {
   backendURL: process.env.STRAPI_ADMIN_BACKEND_URL,
   isEE: false,
+  telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED ?? false,
   features: {
     SSO: 'sso',
   },
@@ -38,7 +39,7 @@ const run = async () => {
     window.strapi.features = {
       ...window.strapi.features,
       allFeatures: features,
-      isEnabled: f => features.includes(f),
+      isEnabled: (f) => features.includes(f),
     };
 
     window.strapi.projectType = isEE ? 'Enterprise' : 'Community';

@@ -4,7 +4,7 @@ const path = require('path');
 const _ = require('lodash');
 const fse = require('fs-extra');
 
-const { importDefault } = require('../utils');
+const { importDefault } = require('@strapi/utils');
 const glob = require('./glob');
 const filePathToPath = require('./filepath-to-prop-path');
 
@@ -26,7 +26,7 @@ const loadFiles = async (
   const root = {};
   const files = await glob(pattern, { cwd: dir, ...globArgs });
 
-  for (let file of files) {
+  for (const file of files) {
     const absolutePath = path.resolve(dir, file);
 
     // load module

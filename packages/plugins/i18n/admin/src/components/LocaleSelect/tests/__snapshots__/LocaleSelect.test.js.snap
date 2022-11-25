@@ -1,0 +1,243 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
+.c9 {
+  padding-left: 12px;
+}
+
+.c1 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c4 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c6 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.c10 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c10 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c10 svg path {
+  fill: #666687;
+}
+
+.c11 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+}
+
+.c11 svg {
+  width: 0.375rem;
+}
+
+.c3 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c0 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c5 {
+  position: relative;
+  border: 1px solid #dcdce4;
+  padding-right: 12px;
+  padding-left: 12px;
+  border-radius: 4px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c5:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c7 {
+  display: grid;
+  -webkit-flex: 1 1 0%;
+  -ms-flex: 1 1 0%;
+  flex: 1 1 0%;
+  position: relative;
+}
+
+.c8 {
+  display: inline-grid;
+  grid-area: 1 / 1 / 2 / 3;
+  grid-template-columns: 0px min-content;
+  background: transparent;
+  min-height: 2.5rem;
+  border: none;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  font-size: 0.875rem;
+  color: #32324d;
+  outline: none;
+}
+
+.c8:focus-visible {
+  outline: none;
+  box-shadow: none;
+  outline-offset: 0;
+}
+
+.c8[aria-disabled='true'] {
+  background: inherit;
+  color: inherit;
+  cursor: not-allowed;
+}
+
+.c2 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c2 > * + * {
+  margin-top: 4px;
+}
+
+<div>
+  <div
+    aria-atomic="false"
+    aria-live="polite"
+    aria-relevant="additions text"
+    class="c0"
+  />
+  <div
+    class="c1 c2"
+    spacing="1"
+  >
+    <label
+      class="c3"
+      for="combobox-1"
+      id="combobox-1-label"
+    >
+      <div
+        class="c4"
+      >
+        Locales
+      </div>
+    </label>
+    <div
+      class="c4 c5"
+    >
+      <div
+        class="c6 c7"
+        wrap="wrap"
+      >
+        
+        <input
+          aria-activedescendant=""
+          aria-autocomplete="list"
+          aria-controls="combobox-1-listbox"
+          aria-disabled="false"
+          aria-expanded="false"
+          aria-haspopup="listbox"
+          aria-labelledby="combobox-1-label"
+          autocomplete="off"
+          autocorrect="off"
+          class="c8"
+          id="combobox-1"
+          placeholder="Select"
+          role="combobox"
+          spellcheck="off"
+          type="text"
+          value=""
+        />
+      </div>
+      <div
+        class="c4"
+      >
+        
+        <button
+          aria-hidden="true"
+          class="c9 c10 c11"
+          tabindex="-1"
+          type="button"
+        >
+          <svg
+            fill="none"
+            height="1em"
+            viewBox="0 0 14 8"
+            width="1em"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+              fill="#32324D"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;

@@ -17,10 +17,13 @@
     <img src="https://img.shields.io/npm/v/@strapi/strapi/latest.svg" alt="NPM Version" />
   </a>
   <a href="https://github.com/strapi/strapi/actions/workflows/tests.yml">
-    <img src="https://github.com/strapi/strapi/actions/workflows/tests.yml/badge.svg?branch=master" alt="Tests" />
+    <img src="https://github.com/strapi/strapi/actions/workflows/tests.yml/badge.svg?branch=main" alt="Tests" />
   </a>
   <a href="https://discord.strapi.io">
     <img src="https://img.shields.io/discord/811989166782021633?label=Discord" alt="Strapi on Discord" />
+  </a>
+  <a href="https://github.com/strapi/strapi/actions/workflows/nightly.yml">
+    <img src="https://github.com/strapi/strapi/actions/workflows/nightly.yml/badge.svg" alt="Strapi Nightly Release Build Status" />
   </a>
 </p>
 
@@ -77,21 +80,23 @@ Complete installation requirements can be found in the documentation under <a hr
 - CentOS/RHEL 8
 - macOS Mojave
 - Windows 10
-- Docker - [Docker-Repo](https://github.com/strapi/strapi-docker)
+- Docker
 
 (Please note that Strapi may work on other operating systems, but these are not tested nor officially supported at this time.)
 
 **Node:**
 
-- NodeJS >= 14 <= 16
+- NodeJS >= 14 <= 18
 - NPM >= 6.x
 
 **Database:**
 
-- MySQL >= 5.7.8
-- MariaDB >= 10.2.7
-- PostgreSQL >= 10
-- SQLite >= 3
+| Database   | Minimum | Recommended |
+| ---------- | ------- | ----------- |
+| MySQL      | 5.7.8   | 8.0         |
+| MariaDB    | 10.3    | 10.6        |
+| PostgreSQL | 11.0    | 14.0        |
+| SQLite     | 3       | 3           |
 
 **We recommend always using the latest version of Strapi to start your new projects**.
 

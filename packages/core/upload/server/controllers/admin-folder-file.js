@@ -112,13 +112,13 @@ module.exports = {
 
       const fileTable = strapi.getModel(FILE_MODEL_UID).collectionName;
       const folderTable = strapi.getModel(FOLDER_MODEL_UID).collectionName;
-      const folderPathColName = strapi.db.metadata.get(FILE_MODEL_UID).attributes.folderPath
-        .columnName;
+      const folderPathColName =
+        strapi.db.metadata.get(FILE_MODEL_UID).attributes.folderPath.columnName;
       const pathColName = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.path.columnName;
 
       if (existingFolders.length > 0) {
         // update folders' parent relation
-        const joinTable = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.parent.joinTable;
+        const { joinTable } = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.parent;
         await strapi.db
           .queryBuilder(joinTable.name)
           .transacting(trx)
@@ -131,7 +131,7 @@ module.exports = {
             .queryBuilder(joinTable.name)
             .transacting(trx)
             .insert(
-              existingFolders.map(folder => ({
+              existingFolders.map((folder) => ({
                 [joinTable.inverseJoinColumn.name]: destinationFolderId,
                 [joinTable.joinColumn.name]: folder.id,
               }))
@@ -154,7 +154,7 @@ module.exports = {
 
           // update path for folders themselves & folders below
           totalFolderNumber = await strapi.db
-            .connection(folderTable)
+            .getConnection(folderTable)
             .transacting(trx)
             .where(pathColName, existingFolder.path)
             .orWhere(pathColName, 'like', `${existingFolder.path}/%`)
@@ -169,7 +169,7 @@ module.exports = {
 
           // update path of files below
           totalFileNumber = await strapi.db
-            .connection(fileTable)
+            .getConnection(fileTable)
             .transacting(trx)
             .where(folderPathColName, existingFolder.path)
             .orWhere(folderPathColName, 'like', `${existingFolder.path}/%`)
@@ -199,7 +199,7 @@ module.exports = {
             .queryBuilder(fileJoinTable.name)
             .transacting(trx)
             .insert(
-              existingFiles.map(file => ({
+              existingFiles.map((file) => ({
                 [fileJoinTable.inverseJoinColumn.name]: destinationFolderId,
                 [fileJoinTable.joinColumn.name]: file.id,
               }))
@@ -209,7 +209,7 @@ module.exports = {
 
         // update files main fields (path + updatedBy)
         await strapi.db
-          .connection(fileTable)
+          .getConnection(fileTable)
           .transacting(trx)
           .whereIn('id', fileIds)
           .update(folderPathColName, destinationFolderPath);

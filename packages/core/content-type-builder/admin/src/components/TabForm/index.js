@@ -45,7 +45,7 @@ const TabForm = ({ form, formErrors, genericInputProps, modifiedData, onChange }
             // - lodash will try to access {pluginOptions: {i18n: {localized: true}}})
             // - and we just want to access { "pluginOptions.i18n.localized": {...} }
             // NOTE: this is a hack
-            const pluginOptionError = Object.keys(formErrors).find(key => key === input.name);
+            const pluginOptionError = Object.keys(formErrors).find((key) => key === input.name);
 
             // Retrieve the error for a specific input
             const errorId = pluginOptionError
@@ -60,7 +60,7 @@ const TabForm = ({ form, formErrors, genericInputProps, modifiedData, onChange }
                       // Since the component info is stored in the
                       // componentToCreate object we can access the error
                       // By removing the key
-                      .filter(key => key !== 'componentToCreate'),
+                      .filter((key) => key !== 'componentToCreate'),
                     'id',
                   ],
                   null

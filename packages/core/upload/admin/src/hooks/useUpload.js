@@ -18,8 +18,8 @@ const uploadAsset = (asset, folderId, cancelToken, onProgress) => {
     'fileInfo',
     JSON.stringify({
       name,
-      caption: caption || name,
-      alternativeText: alternativeText || name,
+      caption,
+      alternativeText,
       folder: folderId,
     })
   );
@@ -33,7 +33,7 @@ const uploadAsset = (asset, folderId, cancelToken, onProgress) => {
     onUploadProgress({ total, loaded }) {
       onProgress((loaded / total) * 100);
     },
-  }).then(res => res.data);
+  }).then((res) => res.data);
 };
 
 export const useUpload = () => {
@@ -47,7 +47,7 @@ export const useUpload = () => {
       return uploadAsset(asset, folderId, tokenRef.current, setProgress);
     },
     {
-      onSuccess: () => {
+      onSuccess() {
         queryClient.refetchQueries([pluginId, 'assets'], { active: true });
         queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
       },

@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { NavLink as RouterNavLink } from 'react-router-dom';
+import { NavLink as RouterNavLink, useLocation } from 'react-router-dom';
 import { Divider } from '@strapi/design-system/Divider';
 import {
   MainNav,
@@ -19,7 +19,7 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import Write from '@strapi/icons/Write';
 import Exit from '@strapi/icons/Exit';
-import { auth, usePersistentState, useAppInfos } from '@strapi/helper-plugin';
+import { auth, usePersistentState, useAppInfos, useTracking } from '@strapi/helper-plugin';
 import useConfigurations from '../../hooks/useConfigurations';
 
 const LinkUserWrapper = styled(Box)`
@@ -59,27 +59,33 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   const [condensed, setCondensed] = usePersistentState('navbar-condensed', false);
   const { userDisplayName } = useAppInfos();
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
+  const { pathname } = useLocation();
 
   const initials = userDisplayName
     .split(' ')
-    .map(name => name.substring(0, 1))
+    .map((name) => name.substring(0, 1))
     .join('')
     .substring(0, 2);
 
-  const handleToggleUserLinks = () => setUserLinksVisible(prev => !prev);
+  const handleToggleUserLinks = () => setUserLinksVisible((prev) => !prev);
 
   const handleLogout = () => {
     auth.clearAppStorage();
     handleToggleUserLinks();
   };
 
-  const handleBlur = e => {
+  const handleBlur = (e) => {
     if (
       !e.currentTarget.contains(e.relatedTarget) &&
       e.relatedTarget?.parentElement?.id !== 'main-nav-user-button'
     ) {
       setUserLinksVisible(false);
     }
+  };
+
+  const handleClickOnLink = (destination = null) => {
+    trackUsage('willNavigate', { from: pathname, to: destination });
   };
 
   const menuTitle = formatMessage({
@@ -110,7 +116,12 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
       <Divider />
 
       <NavSections>
-        <NavLink as={RouterNavLink} to="/content-manager" icon={<Write />}>
+        <NavLink
+          as={RouterNavLink}
+          to="/content-manager"
+          icon={<Write />}
+          onClick={() => handleClickOnLink('/content-manager')}
+        >
           {formatMessage({ id: 'global.content-manager', defaultMessage: 'Content manager' })}
         </NavLink>
 
@@ -121,11 +132,17 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
               defaultMessage: 'Plugins',
             })}
           >
-            {pluginsSectionLinks.map(link => {
+            {pluginsSectionLinks.map((link) => {
               const Icon = link.icon;
 
               return (
-                <NavLink as={RouterNavLink} to={link.to} key={link.to} icon={<Icon />}>
+                <NavLink
+                  as={RouterNavLink}
+                  to={link.to}
+                  key={link.to}
+                  icon={<Icon />}
+                  onClick={() => handleClickOnLink(link.to)}
+                >
                   {formatMessage(link.intlLabel)}
                 </NavLink>
               );
@@ -140,7 +157,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
               defaultMessage: 'General',
             })}
           >
-            {generalSectionLinks.map(link => {
+            {generalSectionLinks.map((link) => {
               const LinkIcon = link.icon;
 
               return (
@@ -152,6 +169,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
                   to={link.to}
                   key={link.to}
                   icon={<LinkIcon />}
+                  onClick={() => handleClickOnLink(link.to)}
                 >
                   {formatMessage(link.intlLabel)}
                 </NavLink>
@@ -201,7 +219,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
         </LinkUserWrapper>
       )}
 
-      <NavCondense onClick={() => setCondensed(s => !s)}>
+      <NavCondense onClick={() => setCondensed((s) => !s)}>
         {condensed
           ? formatMessage({
               id: 'app.components.LeftMenu.expand',

@@ -105,7 +105,7 @@ module.exports = {
         .query('plugin::users-permissions.user')
         .findOne({ where: { username } });
 
-      if (userWithSameUsername && userWithSameUsername.id != id) {
+      if (userWithSameUsername && _.toString(userWithSameUsername.id) !== _.toString(id)) {
         throw new ApplicationError('Username already taken');
       }
     }
@@ -115,13 +115,13 @@ module.exports = {
         .query('plugin::users-permissions.user')
         .findOne({ where: { email: email.toLowerCase() } });
 
-      if (userWithSameEmail && userWithSameEmail.id != id) {
+      if (userWithSameEmail && _.toString(userWithSameEmail.id) !== _.toString(id)) {
         throw new ApplicationError('Email already taken');
       }
       ctx.request.body.email = ctx.request.body.email.toLowerCase();
     }
 
-    let updateData = {
+    const updateData = {
       ...ctx.request.body,
     };
 
@@ -138,7 +138,7 @@ module.exports = {
   async find(ctx) {
     const users = await getService('user').fetchAll(ctx.query);
 
-    ctx.body = await Promise.all(users.map(user => sanitizeOutput(user, ctx)));
+    ctx.body = await Promise.all(users.map((user) => sanitizeOutput(user, ctx)));
   },
 
   /**

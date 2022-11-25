@@ -4,8 +4,8 @@ const { pickBy, has } = require('lodash/fp');
 const { createContentType } = require('../domain/content-type');
 const { addNamespace, hasNamespace } = require('../utils');
 
-const validateKeySameToSingularName = contentTypes => {
-  for (const ctName in contentTypes) {
+const validateKeySameToSingularName = (contentTypes) => {
+  for (const ctName of Object.keys(contentTypes)) {
     const contentType = contentTypes[ctName];
 
     if (ctName !== contentType.schema.info.singularName) {
@@ -63,7 +63,7 @@ const contentTypesRegistry = () => {
     add(namespace, newContentTypes) {
       validateKeySameToSingularName(newContentTypes);
 
-      for (const rawCtName in newContentTypes) {
+      for (const rawCtName of Object.keys(newContentTypes)) {
         const uid = addNamespace(rawCtName, namespace);
 
         if (has(uid, contentTypes)) {

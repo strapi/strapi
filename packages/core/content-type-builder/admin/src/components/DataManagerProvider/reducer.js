@@ -20,7 +20,7 @@ const initialState = {
 
 const ONE_SIDE_RELATIONS = ['oneWay', 'manyWay'];
 
-const getOppositeRelation = originalRelation => {
+const getOppositeRelation = (originalRelation) => {
   if (originalRelation === 'manyToOne') {
     return 'oneToMany';
   }
@@ -38,7 +38,7 @@ const findAttributeIndex = (schema, attributeToFind) => {
 
 const reducer = (state = initialState, action) =>
   // eslint-disable-next-line consistent-return
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case actions.ADD_ATTRIBUTE: {
         const {
@@ -87,11 +87,11 @@ const reducer = (state = initialState, action) =>
           );
 
           // We dont' need to set the already added components otherwise all modifications will be lost so we need to only add the not modified ones
-          const nestedComponentsToAddInModifiedData = nestedComponents.filter(compoUID => {
+          const nestedComponentsToAddInModifiedData = nestedComponents.filter((compoUID) => {
             return get(state, ['modifiedData', 'components', compoUID]) === undefined;
           });
 
-          nestedComponentsToAddInModifiedData.forEach(compoUID => {
+          nestedComponentsToAddInModifiedData.forEach((compoUID) => {
             const compoSchema = get(state, ['components', compoUID], {});
             const isTemporary = compoSchema.isTemporary || false;
 
@@ -153,11 +153,39 @@ const reducer = (state = initialState, action) =>
           dynamicZoneTarget
         );
 
-        componentsToAdd.forEach(componentUid => {
+        componentsToAdd.forEach((componentUid) => {
           draftState.modifiedData.contentType.schema.attributes[dzAttributeIndex].components.push(
             componentUid
           );
         });
+
+        break;
+      }
+      case actions.ADD_CUSTOM_FIELD_ATTRIBUTE: {
+        const {
+          attributeToSet: { name, ...rest },
+          forTarget,
+          targetUid,
+        } = action;
+
+        const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
+          ? [forTarget]
+          : [forTarget, targetUid];
+
+        const currentAttributes = get(
+          state,
+          ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'],
+          []
+        ).slice();
+
+        // Add the createdAttribute
+        const updatedAttributes = [...currentAttributes, { ...rest, name }];
+
+        set(
+          draftState,
+          ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'],
+          updatedAttributes
+        );
 
         break;
       }
@@ -174,9 +202,8 @@ const reducer = (state = initialState, action) =>
 
         const updatedComponents = makeUnique([...currentDZComponents, ...newComponents]);
 
-        draftState.modifiedData.contentType.schema.attributes[
-          dzAttributeIndex
-        ].components = updatedComponents;
+        draftState.modifiedData.contentType.schema.attributes[dzAttributeIndex].components =
+          updatedComponents;
 
         // Retrieve all the components that needs to be added to the modifiedData.components
         const nestedComponents = retrieveComponentsFromSchema(
@@ -185,11 +212,11 @@ const reducer = (state = initialState, action) =>
         );
 
         // We dont' need to set the already added components otherwise all modifications will be lost so we need to only add the not modified ones
-        const nestedComponentsToAddInModifiedData = nestedComponents.filter(compoUID => {
+        const nestedComponentsToAddInModifiedData = nestedComponents.filter((compoUID) => {
           return get(state, ['modifiedData', 'components', compoUID]) === undefined;
         });
 
-        nestedComponentsToAddInModifiedData.forEach(compoUID => {
+        nestedComponentsToAddInModifiedData.forEach((compoUID) => {
           const compoSchema = get(state, ['components', compoUID], {});
           const isTemporary = compoSchema.isTemporary || false;
 
@@ -284,6 +311,10 @@ const reducer = (state = initialState, action) =>
           toSet.private = rest.private;
         }
 
+        if (rest.pluginOptions) {
+          toSet.pluginOptions = rest.pluginOptions;
+        }
+
         const currentAttributeIndex = updatedAttributes.findIndex(
           ({ name }) => name === initialAttribute.name
         );
@@ -296,6 +327,7 @@ const reducer = (state = initialState, action) =>
         let oppositeAttributeNameToRemove = null;
         let oppositeAttributeNameToUpdate = null;
         let oppositeAttributeToCreate = null;
+        let initialOppositeAttribute = null;
 
         const currentUid = get(state, ['modifiedData', ...pathToDataToEdit, 'uid']);
         const didChangeTargetRelation = initialAttribute.target !== rest.target;
@@ -351,6 +383,29 @@ const reducer = (state = initialState, action) =>
           updatedAttributes.splice(indexToRemove, 1);
         }
 
+        // In order to preserve plugin options need to get the initial opposite attribute settings
+        if (!shouldRemoveOppositeAttributeBecauseOfTargetChange) {
+          const initialTargetContentType = get(state, [
+            'initialContentTypes',
+            initialAttribute.target,
+          ]);
+
+          if (initialTargetContentType) {
+            const oppositeAttributeIndex = findAttributeIndex(
+              initialTargetContentType,
+              initialAttribute.targetAttribute
+            );
+
+            initialOppositeAttribute = get(state, [
+              'initialContentTypes',
+              initialAttribute.target,
+              'schema',
+              'attributes',
+              oppositeAttributeIndex,
+            ]);
+          }
+        }
+
         // Create the opposite attribute
         if (
           shouldCreateOppositeAttributeBecauseOfRelationTypeChange ||
@@ -366,6 +421,10 @@ const reducer = (state = initialState, action) =>
 
           if (rest.private) {
             oppositeAttributeToCreate.private = rest.private;
+          }
+
+          if (initialOppositeAttribute && initialOppositeAttribute.pluginOptions) {
+            oppositeAttributeToCreate.pluginOptions = initialOppositeAttribute.pluginOptions;
           }
 
           const indexOfInitialAttribute = updatedAttributes.findIndex(
@@ -397,6 +456,10 @@ const reducer = (state = initialState, action) =>
             oppositeAttributeToCreate.private = rest.private;
           }
 
+          if (initialOppositeAttribute && initialOppositeAttribute.pluginOptions) {
+            oppositeAttributeToCreate.pluginOptions = initialOppositeAttribute.pluginOptions;
+          }
+
           if (oppositeAttributeNameToUpdate) {
             const indexToUpdate = updatedAttributes.findIndex(
               ({ name }) => name === oppositeAttributeNameToUpdate
@@ -410,6 +473,27 @@ const reducer = (state = initialState, action) =>
           draftState,
           ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'],
           updatedAttributes
+        );
+
+        break;
+      }
+      case actions.EDIT_CUSTOM_FIELD_ATTRIBUTE: {
+        const { forTarget, targetUid, initialAttribute, attributeToSet } = action;
+
+        const initialAttributeName = initialAttribute.name;
+        const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
+          ? [forTarget]
+          : [forTarget, targetUid];
+
+        const initialAttributeIndex = findAttributeIndex(
+          get(state, ['modifiedData', ...pathToDataToEdit]),
+          initialAttributeName
+        );
+
+        set(
+          draftState,
+          ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes', initialAttributeIndex],
+          attributeToSet
         );
 
         break;
@@ -469,7 +553,7 @@ const reducer = (state = initialState, action) =>
 
           if (shouldRemoveOppositeAttribute) {
             const attributes = state.modifiedData[mainDataKey].schema.attributes.slice();
-            const nextAttributes = attributes.filter(attribute => {
+            const nextAttributes = attributes.filter((attribute) => {
               if (attribute.name === attributeToRemoveName) {
                 return false;
               }
@@ -504,7 +588,7 @@ const reducer = (state = initialState, action) =>
             return acc;
           }, []);
 
-        uidFieldsToUpdate.forEach(fieldName => {
+        uidFieldsToUpdate.forEach((fieldName) => {
           const fieldIndex = findAttributeIndex(state.modifiedData[mainDataKey], fieldName);
 
           delete draftState.modifiedData[mainDataKey].schema.attributes[fieldIndex].targetField;
