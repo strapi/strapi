@@ -14,10 +14,17 @@ exports[`RepeatableComponent | Accordion Content should render and match the sna
 }
 
 .c0 {
-  border: 1px solid #dcdce4;
   border-bottom: none;
-  border-radius: 4px 4px 0 0;
   overflow: hidden;
+}
+
+.c0 > div > div {
+  border: 1px solid #dcdce4;
+  border-top-color: transparent;
+}
+
+.c0 > div:first-child > div {
+  border-top: 1px solid #dcdce4;
 }
 
 .c0 > div > div,
@@ -27,15 +34,11 @@ exports[`RepeatableComponent | Accordion Content should render and match the sna
 
 .c0 > div:first-child > div,
 .c0 > div:first-child > div > div {
-  border-radius: calc(4px - 1px) calc(4px - 1px) 0 0;
-}
-
-.c0 > div > div {
-  border-bottom: 1px solid #dcdce4;
+  border-radius: 4px 4px 0 0;
 }
 
 .c0 [data-strapi-expanded='true'] {
-  border-bottom: 1px solid #4945ff;
+  border: 1px solid #4945ff;
 }
 
 <div>
