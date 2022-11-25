@@ -7,7 +7,7 @@ import { Grid } from '@strapi/design-system/Grid';
 import { Box } from '@strapi/design-system/Box';
 import { Typography } from '@strapi/design-system/Typography';
 import { pxToRem } from '@strapi/helper-plugin';
-import useFormatTimeStamp from '../utils/useFormatTimeStamp';
+import useFormatTimeStamp from '../hooks/useFormatTimeStamp';
 import ActionItem from './ActionItem';
 
 const ModalDialog = ({ onToggle, data: { date, user, action } }) => {

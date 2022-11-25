@@ -7,7 +7,7 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Tbody, Td, Tr } from '@strapi/design-system/Table';
 import Eye from '@strapi/icons/Eye';
 import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
-import useFormatTimeStamp from '../../utils/useFormatTimeStamp';
+import useFormatTimeStamp from '../../hooks/useFormatTimeStamp';
 
 const FormatTimeStamp = ({ value }) => {
   return useFormatTimeStamp(value);
@@ -40,7 +40,7 @@ const TableRows = ({ headers, rows, onModalToggle }) => {
               <Flex justifyContent="end">
                 <IconButton
                   onClick={() => onModalToggle(data.id)}
-                  label={formatMessage(
+                  aria-label={formatMessage(
                     { id: 'app.component.table.view', defaultMessage: '{target} details' },
                     { target: `${data.action} action` }
                   )}
