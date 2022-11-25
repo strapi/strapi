@@ -5,7 +5,7 @@ import LayoutDndProvider from '../LayoutDndProvider';
 import ItemTypes from '../../utils/ItemTypes';
 import CardPreview from '../../pages/ListSettingsView/components/CardPreview';
 
-import RepeatableComponentPreview from './RepetableComponentDragPreview';
+import ComponentPreview from './ComponentDragPreview';
 
 const layerStyles = {
   position: 'fixed',
@@ -52,11 +52,14 @@ const CustomDragLayer = () => {
     <LayoutDndProvider>
       <div style={layerStyles}>
         <div style={getItemStyles(initialOffset, currentOffset, mouseOffset)} className="col-md-2">
-          {[ItemTypes.EDIT_RELATION, ItemTypes.EDIT_FIELD, ItemTypes.FIELD].includes(itemType) && (
+          {[ItemTypes.EDIT_FIELD, ItemTypes.FIELD].includes(itemType) && (
             <CardPreview labelField={item.labelField} />
           )}
           {itemType === ItemTypes.COMPONENT && (
-            <RepeatableComponentPreview displayedValue={item.displayedValue} />
+            <ComponentPreview displayedValue={item.displayedValue} />
+          )}
+          {itemType === ItemTypes.DYNAMIC_ZONE && (
+            <ComponentPreview icon={item.icon} displayedValue={item.displayedValue} />
           )}
         </div>
       </div>

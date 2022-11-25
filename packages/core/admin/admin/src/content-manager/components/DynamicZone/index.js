@@ -27,8 +27,7 @@ const DynamicZone = ({
   isFieldAllowed,
   isFieldReadable,
   labelAction,
-  moveComponentUp,
-  moveComponentDown,
+  moveComponentField,
   removeComponentFromDynamicZone,
   dynamicDisplayedComponents,
   fieldSchema,
@@ -82,12 +81,12 @@ const DynamicZone = ({
     }
   };
 
-  const handleMoveComponentDown = (name, componentIndex) => () => {
-    moveComponentDown(name, componentIndex);
-  };
-
-  const handleMoveComponentUp = (name, componentIndex) => () => {
-    moveComponentUp(name, componentIndex);
+  const handleMoveComponent = (newIndex, currentIndex) => {
+    moveComponentField({
+      name,
+      newIndex,
+      currentIndex,
+    });
   };
 
   const handleRemoveComponent = (name, currentIndex) => () => {
@@ -117,27 +116,19 @@ const DynamicZone = ({
             numberOfComponents={dynamicDisplayedComponentsLength}
             required={fieldSchema.required || false}
           />
-          {dynamicDisplayedComponents.map((componentUid, index) => {
-            const showDownIcon = isFieldAllowed && index < dynamicDisplayedComponentsLength - 1;
-            const showUpIcon = isFieldAllowed && index > 0;
-
-            return (
-              <DynamicZoneComponent
-                componentUid={componentUid}
-                formErrors={formErrors}
-                // eslint-disable-next-line react/no-array-index-key
-                key={index}
-                index={index}
-                isFieldAllowed={isFieldAllowed}
-                onMoveComponentDownClick={handleMoveComponentDown(name, index)}
-                onMoveComponentUpClick={handleMoveComponentUp(name, index)}
-                name={name}
-                onRemoveComponentClick={handleRemoveComponent(name, index)}
-                showDownIcon={showDownIcon}
-                showUpIcon={showUpIcon}
-              />
-            );
-          })}
+          {dynamicDisplayedComponents.map((componentUid, index) => (
+            <DynamicZoneComponent
+              componentUid={componentUid}
+              formErrors={formErrors}
+              // eslint-disable-next-line react/no-array-index-key
+              key={`${componentUid}-${index}`}
+              index={index}
+              isFieldAllowed={isFieldAllowed}
+              name={name}
+              onMoveComponent={handleMoveComponent}
+              onRemoveComponentClick={handleRemoveComponent(name, index)}
+            />
+          ))}
         </Box>
       )}
 
@@ -188,8 +179,7 @@ DynamicZone.propTypes = {
     description: PropTypes.string,
     label: PropTypes.string,
   }).isRequired,
-  moveComponentUp: PropTypes.func.isRequired,
-  moveComponentDown: PropTypes.func.isRequired,
+  moveComponentField: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
   removeComponentFromDynamicZone: PropTypes.func.isRequired,
 };

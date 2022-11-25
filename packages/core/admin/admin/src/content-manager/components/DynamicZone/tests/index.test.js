@@ -51,8 +51,7 @@ describe('DynamicZone', () => {
       label: 'dynamic zone',
       description: 'dynamic description',
     },
-    moveComponentDown: jest.fn(),
-    moveComponentUp: jest.fn(),
+    moveComponentField: jest.fn(),
     name: 'DynamicZoneComponent',
     removeComponentFromDynamicZone: jest.fn(),
   };

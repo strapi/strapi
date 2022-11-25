@@ -147,7 +147,6 @@ const DraggedItem = ({
                     })}
                     icon={<Trash />}
                   />
-                  {/* react-dnd is broken in firefox with our IconButton, maybe a ref issue */}
                   <IconButton
                     className="drag-handle"
                     ref={composedAccordionRefs}
