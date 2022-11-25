@@ -1,20 +1,26 @@
 /* eslint-disable import/no-cycle */
 import React, { memo, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import toString from 'lodash/toString';
+import get from 'lodash/get';
 
-import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Stack } from '@strapi/design-system/Stack';
-import { Box } from '@strapi/design-system/Box';
-import { Tooltip } from '@strapi/design-system/Tooltip';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
+import {
+  Accordion,
+  AccordionToggle,
+  AccordionContent,
+  Grid,
+  GridItem,
+  Stack,
+  Box,
+  IconButton,
+} from '@strapi/design-system';
+import { Trash, Drag } from '@strapi/icons';
 
-import Trash from '@strapi/icons/Trash';
-import Drag from '@strapi/icons/Drag';
+import { useDragAndDrop } from '../../../hooks/useDragAndDrop';
 
 import { composeRefs, getTrad, ItemTypes } from '../../../utils';
 
@@ -22,24 +28,46 @@ import Inputs from '../../Inputs';
 import FieldComponent from '../../FieldComponent';
 
 import Preview from './Preview';
-import { CustomIconButton } from './IconButtonCustoms';
-import { connect, select } from './utils';
 
-const DragButton = styled.span`
-  display: flex;
-  align-items: center;
-  height: ${({ theme }) => theme.spaces[7]};
-
-  padding: 0 ${({ theme }) => theme.spaces[3]};
-  cursor: all-scroll;
+const CustomIconButton = styled(IconButton)`
+  background-color: transparent;
 
   svg {
-    width: ${12 / 16}rem;
-    height: ${12 / 16}rem;
+    path {
+      fill: ${({ theme, expanded }) =>
+        expanded ? theme.colors.primary600 : theme.colors.neutral600};
+    }
+  }
+
+  &:hover {
+    svg {
+      path {
+        fill: ${({ theme }) => theme.colors.primary600};
+      }
+    }
   }
 `;
 
-/* eslint-disable react/no-array-index-key */
+const ActionsStack = styled(Stack)`
+  & .drag-handle {
+    background: unset;
+
+    svg {
+      path {
+        fill: ${({ theme, expanded }) => (expanded ? theme.colors.primary600 : undefined)};
+      }
+    }
+
+    &:hover {
+      svg {
+        path {
+          /* keeps the hover style of the accordion */
+          fill: ${({ theme }) => theme.colors.primary600};
+        }
+      }
+    }
+  }
+`;
 
 // Issues:
 // https://github.com/react-dnd/react-dnd/issues/1368
@@ -48,93 +76,50 @@ const DragButton = styled.span`
 const DraggedItem = ({
   componentFieldName,
   componentUid,
-  // Errors are retrieved from the AccordionGroupCustom cloneElement
-  hasErrorMessage,
-  hasErrors,
+  fields,
   index,
   isOpen,
   isReadOnly,
-  onClickToggle,
-  schema,
-  toggleCollapses,
-  // Retrieved from the select function
+  mainField,
   moveComponentField,
-  removeRepeatableField,
-  triggerFormValidation,
-  displayedValue,
+  onClickToggle,
+  toggleCollapses,
+  onGrabItem,
+  onDropItem,
+  onCancel,
 }) => {
+  const { modifiedData, removeRepeatableField, triggerFormValidation } = useCMEditViewDataManager();
+
+  const displayedValue = toString(
+    get(modifiedData, [...componentFieldName.split('.'), mainField], '')
+  );
   const accordionRef = useRef(null);
-  const boxRef = useRef(null);
   const { formatMessage } = useIntl();
 
-  const fields = schema.layouts.edit;
-
-  const [{ handlerId }, dropRef] = useDrop({
-    accept: ItemTypes.COMPONENT,
-    collect(monitor) {
-      return {
-        handlerId: monitor.getHandlerId(),
-      };
-    },
-    hover(item, monitor) {
-      if (!boxRef.current) {
-        return;
-      }
-
-      const dragIndex = item.index;
-      const currentIndex = index;
-
-      // Don't replace items with themselves
-      if (dragIndex === currentIndex) {
-        return;
-      }
-
-      const hoverBoundingRect = boxRef.current.getBoundingClientRect();
-      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      const clientOffset = monitor.getClientOffset();
-      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
-
-      // Dragging downwards
-      if (dragIndex < currentIndex && hoverClientY < hoverMiddleY) {
-        return;
-      }
-
-      // Dragging upwards
-      if (dragIndex > currentIndex && hoverClientY > hoverMiddleY) {
-        return;
-      }
-
-      // Time to actually perform the action
-      moveComponentField(dragIndex, currentIndex);
-
-      item.index = currentIndex;
-    },
-  });
-  const [{ isDragging }, dragRef, previewRef] = useDrag({
-    type: ItemTypes.COMPONENT,
-    item() {
-      // Close all collapses
-      toggleCollapses(-1);
-
-      return {
-        index,
-      };
-    },
-    end() {
-      // Update the errors
-      triggerFormValidation();
-    },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  });
+  const [{ handlerId, isDragging, handleKeyDown }, boxRef, dropRef, dragRef, dragPreviewRef] =
+    useDragAndDrop(!isReadOnly, {
+      type: ItemTypes.COMPONENT,
+      index,
+      item: {
+        displayedValue,
+      },
+      onMoveItem: moveComponentField,
+      onStart() {
+        // Close all collapses
+        toggleCollapses();
+      },
+      onEnd() {
+        // Update the errors
+        triggerFormValidation();
+      },
+      onGrabItem,
+      onDropItem,
+      onCancel,
+    });
 
   useEffect(() => {
-    previewRef(getEmptyImage(), { captureDraggingState: false });
-  }, [previewRef]);
-
-  const accordionTitle = toString(displayedValue);
-  const accordionHasError = hasErrors ? 'error' : undefined;
+    dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
+  }, [dragPreviewRef]);
 
   const composedAccordionRefs = composeRefs(accordionRef, dragRef);
   const composedBoxRefs = composeRefs(boxRef, dropRef);
@@ -142,20 +127,13 @@ const DraggedItem = ({
   return (
     <Box ref={composedBoxRefs}>
       {isDragging ? (
-        <Preview ref={previewRef} />
+        <Preview ref={dragPreviewRef} />
       ) : (
-        <Accordion
-          error={accordionHasError}
-          hasErrorMessage={hasErrorMessage}
-          expanded={isOpen}
-          onToggle={onClickToggle}
-          id={componentFieldName}
-          size="S"
-        >
+        <Accordion expanded={isOpen} onToggle={onClickToggle} id={componentFieldName} size="S">
           <AccordionToggle
             action={
               isReadOnly ? null : (
-                <Stack horizontal spacing={0}>
+                <ActionsStack horizontal spacing={0} expanded={isOpen}>
                   <CustomIconButton
                     expanded={isOpen}
                     noBorder
@@ -170,32 +148,34 @@ const DraggedItem = ({
                     icon={<Trash />}
                   />
                   {/* react-dnd is broken in firefox with our IconButton, maybe a ref issue */}
-                  <Tooltip
-                    description={formatMessage({
+                  <IconButton
+                    className="drag-handle"
+                    ref={composedAccordionRefs}
+                    forwardedAs="div"
+                    role="button"
+                    noBorder
+                    tabIndex={0}
+                    onClick={(e) => e.stopPropagation()}
+                    data-handler-id={handlerId}
+                    label={formatMessage({
                       id: getTrad('components.DragHandle-label'),
                       defaultMessage: 'Drag',
                     })}
+                    onKeyDown={handleKeyDown}
                   >
-                    <DragButton
-                      role="button"
-                      tabIndex={-1}
-                      ref={composedAccordionRefs}
-                      onClick={(e) => e.stopPropagation()}
-                      data-handler-id={handlerId}
-                    >
-                      <Drag />
-                    </DragButton>
-                  </Tooltip>
-                </Stack>
+                    <Drag />
+                  </IconButton>
+                </ActionsStack>
               )
             }
-            title={accordionTitle}
+            title={displayedValue}
             togglePosition="left"
           />
           <AccordionContent>
             <Stack background="neutral100" padding={6} spacing={6}>
               {fields.map((fieldRow, key) => {
                 return (
+                  // eslint-disable-next-line react/no-array-index-key
                   <Grid gap={4} key={key}>
                     {fieldRow.map(({ name, fieldSchema, metadatas, queryInfos, size }) => {
                       const isComponent = fieldSchema.type === 'component';
@@ -230,7 +210,6 @@ const DraggedItem = ({
                             fieldSchema={fieldSchema}
                             keys={keys}
                             metadatas={metadatas}
-                            // onBlur={hasErrors ? checkFormErrors : null}
                             queryInfos={queryInfos}
                             size={size}
                           />
@@ -250,29 +229,29 @@ const DraggedItem = ({
 
 DraggedItem.defaultProps = {
   componentUid: undefined,
+  fields: [],
+  isReadOnly: false,
   isOpen: false,
+  onGrabItem: undefined,
+  onDropItem: undefined,
+  onCancel: undefined,
   toggleCollapses() {},
 };
 
 DraggedItem.propTypes = {
   componentFieldName: PropTypes.string.isRequired,
   componentUid: PropTypes.string,
-  hasErrorMessage: PropTypes.bool.isRequired,
-  hasErrors: PropTypes.bool.isRequired,
+  fields: PropTypes.array,
   index: PropTypes.number.isRequired,
   isOpen: PropTypes.bool,
-  isReadOnly: PropTypes.bool.isRequired,
-  onClickToggle: PropTypes.func.isRequired,
-  schema: PropTypes.object.isRequired,
-  toggleCollapses: PropTypes.func,
+  isReadOnly: PropTypes.bool,
+  mainField: PropTypes.string.isRequired,
   moveComponentField: PropTypes.func.isRequired,
-  removeRepeatableField: PropTypes.func.isRequired,
-  triggerFormValidation: PropTypes.func.isRequired,
-  displayedValue: PropTypes.string.isRequired,
+  onGrabItem: PropTypes.func,
+  onDropItem: PropTypes.func,
+  onCancel: PropTypes.func,
+  onClickToggle: PropTypes.func.isRequired,
+  toggleCollapses: PropTypes.func,
 };
 
-const Memoized = memo(DraggedItem);
-
-export default connect(Memoized, select);
-
-export { DraggedItem };
+export default memo(DraggedItem);

@@ -1,14 +1,11 @@
-import React, { forwardRef, useRef, useState } from 'react';
+import React, { forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { useDrag, useDrop } from 'react-dnd';
 
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import { IconButton } from '@strapi/design-system/IconButton';
+import { Box, Flex, Stack, IconButton } from '@strapi/design-system';
+import { Drag } from '@strapi/icons';
 
-import Drag from '@strapi/icons/Drag';
+import { useDragAndDrop } from '../../../hooks/useDragAndDrop';
 
 import { composeRefs } from '../../../utils';
 import { RELATION_GUTTER } from '../constants';
@@ -43,132 +40,17 @@ export const RelationItem = ({
   updatePositionOfRelation,
   ...props
 }) => {
-  const [isSelected, setIsSelected] = useState(false);
-  const relationRef = useRef(null);
-
-  const [{ handlerId }, dropRef] = useDrop({
-    accept: RELATION_ITEM_DRAG_TYPE,
-    collect(monitor) {
-      return {
-        handlerId: monitor.getHandlerId(),
-      };
-    },
-    hover(item, monitor) {
-      if (!relationRef.current) {
-        return;
-      }
-      const dragIndex = item.index;
-      const currentIndex = index;
-
-      // Don't replace items with themselves
-      if (dragIndex === currentIndex) {
-        return;
-      }
-
-      const hoverBoundingRect = relationRef.current.getBoundingClientRect();
-      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      const clientOffset = monitor.getClientOffset();
-      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
-
-      // Dragging downwards
-      if (dragIndex < currentIndex && hoverClientY < hoverMiddleY) {
-        return;
-      }
-
-      // Dragging upwards
-      if (dragIndex > currentIndex && hoverClientY > hoverMiddleY) {
-        return;
-      }
-
-      // Time to actually perform the action
-      if (updatePositionOfRelation) {
-        updatePositionOfRelation(dragIndex, currentIndex);
-        item.index = currentIndex;
-      }
-    },
-  });
-
-  const [{ isDragging }, dragRef, dragPreviewRef] = useDrag({
-    type: RELATION_ITEM_DRAG_TYPE,
-    item: { index },
-    canDrag: canDrag && !disabled,
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  });
+  const [{ handlerId, isDragging, handleKeyDown }, relationRef, dropRef, dragRef, dragPreviewRef] =
+    useDragAndDrop(canDrag && !disabled, {
+      type: RELATION_ITEM_DRAG_TYPE,
+      index,
+      onGrabItem,
+      onDropItem,
+      onCancel,
+      onMoveItem: updatePositionOfRelation,
+    });
 
   const composedRefs = composeRefs(relationRef, dragRef);
-
-  /**
-   * @type {(movement: 'UP' | 'DOWN') => void})}
-   */
-  const handleMove = (movement) => {
-    if (!isSelected) {
-      return;
-    }
-
-    if (movement === 'UP') {
-      updatePositionOfRelation(index - 1, index);
-    } else if (movement === 'DOWN') {
-      updatePositionOfRelation(index + 1, index);
-    }
-  };
-
-  const handleDragClick = () => {
-    if (isSelected) {
-      if (onDropItem) {
-        onDropItem(index);
-      }
-      setIsSelected(false);
-    } else {
-      if (onGrabItem) {
-        onGrabItem(index);
-      }
-      setIsSelected(true);
-    }
-  };
-
-  const handleCancel = () => {
-    setIsSelected(false);
-
-    if (onCancel) {
-      onCancel(index);
-    }
-  };
-
-  /**
-   * @type {React.KeyboardEventHandler<HTMLButtonElement>}
-   */
-  const handleKeyDown = (e) => {
-    if (e.key === 'Tab' && !isSelected) {
-      return;
-    }
-
-    e.preventDefault();
-
-    switch (e.key) {
-      case ' ':
-      case 'Enter':
-        handleDragClick();
-        break;
-
-      case 'Escape':
-        handleCancel();
-        break;
-
-      case 'ArrowDown':
-      case 'ArrowRight':
-        handleMove('DOWN');
-        break;
-
-      case 'ArrowUp':
-      case 'ArrowLeft':
-        handleMove('UP');
-        break;
-
-      default:
-    }
-  };
 
   return (
     <Box
