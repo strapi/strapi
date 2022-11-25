@@ -15,7 +15,6 @@ const useFetchClient = () => {
   }
   useEffect(() => {
     return () => {
-      // when unmount cancel the axios request
       controller.current.abort();
     };
   }, []);

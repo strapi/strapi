@@ -12,7 +12,7 @@ describe('ADMIN | utils | getFetchClient', () => {
     expect(response).toHaveProperty('get');
     expect(response).toHaveProperty('post');
     expect(response).toHaveProperty('put');
-    expect(response).toHaveProperty('delete');
+    expect(response).toHaveProperty('del');
   });
   it('should contain the headers config values and the data when we try to reach an unknown API', async () => {
     const response = getFetchClient();
