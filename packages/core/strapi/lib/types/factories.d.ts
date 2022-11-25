@@ -30,7 +30,7 @@ type CollectionTypeRouterConfig = {
 
 type RouterConfig = {
   prefix?: string;
-  only: string[];
+  only?: string[];
   except?: string[];
   config: SingleTypeRouterConfig | CollectionTypeRouterConfig;
 };
