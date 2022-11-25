@@ -168,7 +168,7 @@ describe('Marketplace page - providers tab', () => {
     const collectionsButton = screen.getByTestId('Collections-button');
     await user.click(collectionsButton);
 
-    const option = screen.getByRole('option', { name: `Made by Strapi (6)` });
+    const option = screen.getByTestId('Made by Strapi-6');
     await user.click(option);
     await waitForReload();
 
@@ -187,11 +187,11 @@ describe('Marketplace page - providers tab', () => {
   it('filters multiple collection options', async () => {
     await user.click(screen.getByTestId('filters-button'));
     await user.click(screen.getByTestId('Collections-button'));
-    await user.click(screen.getByRole('option', { name: `Made by Strapi (6)` }));
+    await user.click(screen.getByTestId('Made by Strapi-6'));
 
     await user.click(await screen.findByTestId('filters-button'));
-    await user.click(screen.getByRole('button', { name: `1 collection selected Made by Strapi` }));
-    await user.click(screen.getByRole('option', { name: `Verified (6)` }));
+    await user.click(screen.getByTestId('Collections-button'));
+    await user.click(screen.getByTestId('Verified-6'));
     await waitForReload();
 
     const madeByStrapiTag = screen.getByRole('button', { name: 'Made by Strapi' });
@@ -211,7 +211,7 @@ describe('Marketplace page - providers tab', () => {
     const collectionsButton = screen.getByTestId('Collections-button');
     await user.click(collectionsButton);
 
-    const option = screen.getByRole('option', { name: `Made by Strapi (6)` });
+    const option = screen.getByTestId('Made by Strapi-6');
     await user.click(option);
     await waitForReload();
 
@@ -231,37 +231,37 @@ describe('Marketplace page - providers tab', () => {
     const collectionsButton = screen.getByTestId('Collections-button');
     await user.click(collectionsButton);
 
-    const option = screen.getByRole('option', { name: `Made by Strapi (6)` });
+    const option = screen.getByTestId('Made by Strapi-6');
     await user.click(option);
 
     const collectionCards = await screen.findAllByTestId('npm-package-card');
     expect(collectionCards.length).toBe(2);
 
-    await user.click(screen.getByRole('tab', { name: /plugins/i }));
+    await user.click((await screen.findByText(/plugins/i)).closest('button'));
 
     const pluginCards = screen.getAllByTestId('npm-package-card');
     expect(pluginCards.length).toBe(5);
 
-    await user.click(screen.getByRole('tab', { name: /providers/i }));
+    await user.click((await screen.findByText(/providers/i)).closest('button'));
     expect(collectionCards.length).toBe(2);
   });
 
   it('shows the correct options on sort select', async () => {
-    const sortButton = screen.getByRole('button', { name: /Sort by/i });
+    const sortButton = screen.getByLabelText(/Sort by/i);
     await user.click(sortButton);
 
-    const alphabeticalOption = screen.getByRole('option', { name: 'Alphabetical order' });
-    const newestOption = screen.getByRole('option', { name: 'Newest' });
+    const alphabeticalOption = screen.getByText('Alphabetical order').closest('li');
+    const newestOption = screen.getByText('Newest').closest('li');
 
     expect(alphabeticalOption).toBeVisible();
     expect(newestOption).toBeVisible();
   });
 
   it('changes the url on sort option select', async () => {
-    const sortButton = screen.getByRole('button', { name: /Sort by/i });
+    const sortButton = screen.getByLabelText(/Sort by/i);
     await user.click(sortButton);
 
-    const newestOption = screen.getByRole('option', { name: 'Newest' });
+    const newestOption = screen.getByText('Newest').closest('li');
     await user.click(newestOption);
 
     expect(history.location.search).toEqual(
