@@ -7,11 +7,7 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Tbody, Td, Tr } from '@strapi/design-system/Table';
 import Eye from '@strapi/icons/Eye';
 import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
-import useFormatTimeStamp from '../../hooks/useFormatTimeStamp';
-
-const FormatTimeStamp = ({ value }) => {
-  return useFormatTimeStamp(value);
-};
+import CellValue from './CellValue';
 
 const TableRows = ({ headers, rows, onModalToggle }) => {
   const { formatMessage } = useIntl();
@@ -30,7 +26,7 @@ const TableRows = ({ headers, rows, onModalToggle }) => {
               return (
                 <Td key={key}>
                   <Typography textColor="neutral800">
-                    {key === 'date' ? <FormatTimeStamp value={data[name]} /> : data[name] || '-'}
+                    <CellValue type={key} value={data[name]} />
                   </Typography>
                 </Td>
               );

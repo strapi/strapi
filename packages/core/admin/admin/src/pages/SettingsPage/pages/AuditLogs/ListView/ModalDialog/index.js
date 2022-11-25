@@ -12,7 +12,8 @@ import ActionItem from './ActionItem';
 
 const ModalDialog = ({ onToggle, data: { date, user, action } }) => {
   const { formatMessage } = useIntl();
-  const formattedDate = useFormatTimeStamp(date);
+  const formatTimeStamp = useFormatTimeStamp();
+  const formattedDate = formatTimeStamp(date);
 
   return (
     <ModalLayout onClose={onToggle} labelledBy="title">
