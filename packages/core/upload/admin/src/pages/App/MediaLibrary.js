@@ -346,7 +346,7 @@ export const MediaLibrary = () => {
                                 value={isSelected}
                                 onChange={() => selectOne(folder)}
                               />
-                            ) : undefined
+                            ) : null
                           }
                           cardActions={
                             <IconButton
