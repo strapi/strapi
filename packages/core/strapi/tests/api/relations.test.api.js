@@ -832,4 +832,26 @@ describe('Relations', () => {
       expect(updatedShop).toMatchObject(expectedShop);
     });
   });
+
+  test.only('Update relations using the same id multiple times', async () => {
+    const shop = await createShop({
+      anyToManyRel: [
+        { id: id1, position: { end: true } },
+        { id: id2, position: { end: true } },
+      ],
+    });
+
+    const updatedShop = await updateShop(shop, {
+      anyToManyRel: [
+        { id: id1, position: { end: true } },
+        { id: id1, position: { start: true } },
+        { id: id1, position: { after: id2 } },
+      ],
+    });
+
+    const expectedShop = shopFactory({
+      anyToManyRel: [{ id: id2 }, { id: id1 }],
+    });
+    expect(updatedShop).toMatchObject(expectedShop);
+  });
 });
