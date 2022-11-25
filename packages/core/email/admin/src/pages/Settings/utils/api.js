@@ -1,10 +1,7 @@
-import { getFetchClient } from '@strapi/admin/admin/src/utils/getFetchClient';
 import axiosInstance from '../../../utils/axiosInstance';
 
 const fetchEmailSettings = async () => {
-  // TODO: it is just an example of using the new getFetchClient
-  const { get } = getFetchClient();
-  const { data } = await get('/email/settings');
+  const { data } = await axiosInstance.get('/email/settings');
 
   return data.config;
 };
