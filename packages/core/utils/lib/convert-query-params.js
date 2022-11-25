@@ -109,7 +109,7 @@ const convertSingleSortQueryParam = (sortQuery, schema) => {
     throw new Error('Field cannot be empty');
   }
 
-  // Skip the check for relational sorts as there is not enough information in the schema.
+  // skip the check for relational sorts as there is not enough information in the schema.
   if (!_.get(schema, `attributes.${field}`) && field !== 'id' && !isRelationalSortField(field)) {
     return {};
   }
