@@ -157,7 +157,7 @@ export const RelationInputDataManager = ({
     setLiveText(
       formatMessage(
         {
-          id: getTrad('components.RelationInputDataManager.reorder'),
+          id: getTrad('dnd.reorder'),
           defaultMessage: '{item}, moved. New position in list: {position}.',
         },
         {
@@ -185,7 +185,7 @@ export const RelationInputDataManager = ({
     setLiveText(
       formatMessage(
         {
-          id: getTrad('components.RelationInputDataManager.grab-item'),
+          id: getTrad('dnd.grab-item'),
           defaultMessage: `{item}, grabbed. Current position in list: {position}. Press up and down arrow to change position, Spacebar to drop, Escape to cancel.`,
         },
         {
@@ -207,7 +207,7 @@ export const RelationInputDataManager = ({
     setLiveText(
       formatMessage(
         {
-          id: getTrad('components.RelationInputDataManager.drop-item'),
+          id: getTrad('dnd.drop-item'),
           defaultMessage: `{item}, dropped. Final position in list: {position}.`,
         },
         {
@@ -229,7 +229,7 @@ export const RelationInputDataManager = ({
     setLiveText(
       formatMessage(
         {
-          id: getTrad('components.RelationInputDataManager.cancel-item'),
+          id: getTrad('dnd.cancel-item'),
           defaultMessage: '{item}, dropped. Re-order cancelled.',
         },
         {
@@ -297,7 +297,7 @@ export const RelationInputDataManager = ({
         defaultMessage: 'Remove',
       })}
       listAriaDescription={formatMessage({
-        id: getTrad('components.RelationInput.instructions'),
+        id: getTrad('dnd.instructions'),
         defaultMessage: `Press spacebar to grab and re-order`,
       })}
       listHeight={320}

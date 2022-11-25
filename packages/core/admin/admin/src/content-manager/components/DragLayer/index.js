@@ -3,11 +3,9 @@ import { useDragLayer } from 'react-dnd';
 import LayoutDndProvider from '../LayoutDndProvider';
 
 import ItemTypes from '../../utils/ItemTypes';
-import RepeatableComponentPreview from '../RepeatableComponent/DragPreview';
 import CardPreview from '../../pages/ListSettingsView/components/CardPreview';
-// import RelationItem from '../SelectMany/Relation';
-// import { Li } from '../SelectMany/components';
-// import DraggedField from '../DraggedField';
+
+import RepeatableComponentPreview from './RepetableComponentDragPreview';
 
 const layerStyles = {
   position: 'fixed',
