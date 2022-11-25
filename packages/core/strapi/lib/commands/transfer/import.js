@@ -8,7 +8,9 @@ const {
   // eslint-disable-next-line import/no-unresolved, node/no-missing-require
 } = require('@strapi/data-transfer');
 const { isObject } = require('lodash/fp');
+
 const strapi = require('../../index');
+const { buildTransferTable } = require('./util');
 
 const logger = console;
 
@@ -51,12 +53,27 @@ module.exports = async (opts) => {
   const engine = createTransferEngine(source, destination, engineOptions);
 
   try {
-    logger.log('Importing data...');
-    const result = await engine.transfer();
-    logger.log('Import process has been completed successfully!');
+    logger.log('Starting import...');
 
-    // TODO: this won't dump the entire results, we will print a pretty summary
-    logger.log('Results:', result);
+    // eslint-disable-next-line no-unused-vars
+    engine.progress.stream.on('start', ({ stage, data }) => {
+      logger.log(`Starting transfer of ${stage}...`);
+    });
+
+    // engine.progress.stream.on('progress', ({ stage, data }) => {
+    //   logger.log('progress', stage, data);
+    // });
+
+    // eslint-disable-next-line no-unused-vars
+    engine.progress.stream.on('complete', ({ stage, data }) => {
+      logger.log(`...${stage} complete`);
+    });
+
+    const results = await engine.transfer();
+    const table = buildTransferTable(results.engine);
+    logger.log(table.toString());
+
+    logger.log('Import process has been completed successfully!');
     process.exit(0);
   } catch (e) {
     logger.log(`Import process failed unexpectedly: ${e.message}`);

@@ -280,6 +280,7 @@ class TransferEngine<
     return {
       source: this.sourceProvider.results,
       destination: this.destinationProvider.results,
+      engine: this.#transferProgress,
     };
   }
 
