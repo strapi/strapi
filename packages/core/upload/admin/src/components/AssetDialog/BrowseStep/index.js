@@ -98,11 +98,11 @@ export const BrowseStep = ({
   );
 
   const singularTypes = toSingularTypes(allowedTypes);
-  const assets = rawAssets.map((asset) => {
-    const fileType = asset?.mime?.split('/')?.[0];
-
-    return { ...asset, isSelectable: isSelectable(singularTypes, fileType) };
-  });
+  const assets = rawAssets.map((asset) => ({
+    ...asset,
+    isSelectable: isSelectable(singularTypes, asset?.mime),
+    type: 'asset',
+  }));
 
   const breadcrumbs = !isCurrentFolderLoading && getBreadcrumbDataCM(currentFolder);
 
