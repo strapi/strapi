@@ -116,12 +116,11 @@ const DynamicZone = ({
             numberOfComponents={dynamicDisplayedComponentsLength}
             required={fieldSchema.required || false}
           />
-          {dynamicDisplayedComponents.map((componentUid, index) => (
+          {dynamicDisplayedComponents.map(({ componentUid, id }, index) => (
             <DynamicZoneComponent
               componentUid={componentUid}
               formErrors={formErrors}
-              // eslint-disable-next-line react/no-array-index-key
-              key={`${componentUid}-${index}`}
+              key={`${componentUid}-${id}`}
               index={index}
               isFieldAllowed={isFieldAllowed}
               name={name}
@@ -163,7 +162,12 @@ DynamicZone.defaultProps = {
 
 DynamicZone.propTypes = {
   addComponentToDynamicZone: PropTypes.func.isRequired,
-  dynamicDisplayedComponents: PropTypes.array,
+  dynamicDisplayedComponents: PropTypes.arrayOf(
+    PropTypes.shape({
+      componentUid: PropTypes.string.isRequired,
+      id: PropTypes.number.isRequired,
+    })
+  ),
   fieldSchema: PropTypes.shape({
     components: PropTypes.array.isRequired,
     max: PropTypes.number,
