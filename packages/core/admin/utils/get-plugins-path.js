@@ -1,6 +1,6 @@
 'use strict';
 
-const { join, resolve } = require('path');
+const { join, resolve, sep } = require('path');
 const fs = require('fs-extra');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const glob = require('glob');
@@ -8,8 +8,16 @@ const glob = require('glob');
 // Only for dev environement
 const getPluginsPath = () => {
   const rootPath = resolve(__dirname, '..', join('..', '..', '..', 'packages'));
-  const corePath = join(rootPath, 'core', '*');
-  const pluginsPath = join(rootPath, 'plugins', '*');
+  /**
+   * So `glob` only supports '/' as a path separator, so we need to replace
+   * the path separator for the current OS with '/'. e.g. on windows it's `\`.
+   *
+   * see https://github.com/isaacs/node-glob/#windows for more information
+   *
+   * and see https://github.com/isaacs/node-glob/issues/467#issuecomment-1114240501 for the recommended fix.
+   */
+  const corePath = join(rootPath, 'core', '*').split(sep).join('/');
+  const pluginsPath = join(rootPath, 'plugins', '*').split(sep).join('/');
   const corePackageDirs = glob.sync(corePath);
   const pluginsPackageDirs = glob.sync(pluginsPath);
 
