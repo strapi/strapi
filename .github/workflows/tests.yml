@@ -13,6 +13,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
+permissions:
+  contents: read #  to fetch code (actions/checkout)
+
 jobs:
   lint:
     name: 'lint (node: ${{ matrix.node }})'
@@ -21,12 +24,16 @@ jobs:
       matrix:
         node: [14, 16, 18]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
-      - uses: ./.github/actions/install-modules
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
+
+      - run: yarn install --frozen-lockfile
       - name: Run lint
         run: yarn run -s lint
 
@@ -34,45 +41,57 @@ jobs:
     name: 'unit_back (node: ${{ matrix.node }})'
     needs: [lint]
     runs-on: ubuntu-latest
-    env:
-      CODECOV_TOKEN: ${{ secrets.codecov }}
     strategy:
       matrix:
         node: [14, 16, 18]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
-      - uses: ./.github/actions/install-modules
+      - uses: actions/cache@v3
         with:
-          globalPackages: codecov
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
+
+      - run: yarn install --frozen-lockfile
       - name: Run tests
-        run: yarn run -s test:unit --coverage && codecov -C -F unit
+        run: yarn run -s test:unit --coverage
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./coverage
+          flags: back,unit_back
 
   unit_front:
     name: 'unit_front (node: ${{ matrix.node }})'
     needs: [lint]
     runs-on: ubuntu-latest
-    env:
-      CODECOV_TOKEN: ${{ secrets.codecov }}
     strategy:
       matrix:
         node: [14, 16, 18]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
-      - uses: ./.github/actions/install-modules
+      - uses: actions/cache@v3
         with:
-          globalPackages: codecov
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
+
+      - run: yarn install --frozen-lockfile
       - name: Build
         run: yarn build
       - name: Run test
-        run: yarn run -s test:front --coverage && codecov -C -F front
+        run: yarn run -s test:front --coverage
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./coverage
+          flags: front,unit_front
 
   api_ce_pg:
     runs-on: ubuntu-latest
@@ -96,16 +115,20 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+          -v /__w/.github/workflows/db/postgres:/docker-entrypoint-initdb.d
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
-      - uses: ./.github/actions/install-modules
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
+      - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
@@ -135,12 +158,15 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
-      - uses: ./.github/actions/install-modules
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
+      - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
@@ -170,12 +196,15 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
-      - uses: ./.github/actions/install-modules
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
+      - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
@@ -189,12 +218,15 @@ jobs:
         node: [14, 16, 18]
         sqlite_pkg: ['better-sqlite3', 'sqlite3', '@vscode/sqlite3']
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
-      - uses: ./.github/actions/install-modules
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
+      - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         env:
           SQLITE_PKG: ${{ matrix.sqlite_pkg }}
@@ -226,21 +258,24 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+          -v /__w/.github/workflows/db/postgres:/docker-entrypoint-initdb.d
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
-      - uses: ./.github/actions/install-modules
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
+      - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
           runEE: true
-
   api_ee_mysql:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
@@ -269,12 +304,15 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
-      - uses: ./.github/actions/install-modules
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
+      - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
@@ -292,12 +330,15 @@ jobs:
         node: [14, 16, 18]
         sqlite_pkg: ['better-sqlite3', 'sqlite3', '@vscode/sqlite3']
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
-      - uses: ./.github/actions/install-modules
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
+      - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         env:
           SQLITE_PKG: ${{ matrix.sqlite_pkg }}

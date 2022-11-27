@@ -29,7 +29,7 @@ describe('DocAssetCard', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c32 {
+      .c34 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -44,6 +44,14 @@ describe('DocAssetCard', () => {
       .c16 {
         width: 100%;
         height: 5.5rem;
+      }
+
+      .c27 {
+        padding-top: 4px;
+        -webkit-box-flex: 1;
+        -webkit-flex-grow: 1;
+        -ms-flex-positive: 1;
+        flex-grow: 1;
       }
 
       .c17 {
@@ -62,6 +70,20 @@ describe('DocAssetCard', () => {
         -webkit-justify-content: center;
         -ms-flex-pack: center;
         justify-content: center;
+      }
+
+      .c28 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
       }
 
       .c23 {
@@ -203,7 +225,7 @@ describe('DocAssetCard', () => {
         padding-left: 12px;
       }
 
-      .c28 {
+      .c30 {
         background: #f6f6f9;
         padding: 4px;
         border-radius: 4px;
@@ -256,7 +278,7 @@ describe('DocAssetCard', () => {
         flex-direction: row;
       }
 
-      .c29 {
+      .c31 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -308,7 +330,7 @@ describe('DocAssetCard', () => {
         line-height: 1.33;
       }
 
-      .c31 {
+      .c33 {
         color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
@@ -316,14 +338,14 @@ describe('DocAssetCard', () => {
         text-transform: uppercase;
       }
 
-      .c27 {
+      .c29 {
         margin-left: auto;
         -webkit-flex-shrink: 0;
         -ms-flex-negative: 0;
         flex-shrink: 0;
       }
 
-      .c30 {
+      .c32 {
         margin-left: 4px;
       }
 
@@ -553,23 +575,27 @@ describe('DocAssetCard', () => {
                 </div>
               </div>
               <div
-                class="c27"
+                class="c27 c28"
               >
                 <div
-                  class="c28 c29 c30"
+                  class="c29"
                 >
-                  <span
-                    class="c31"
+                  <div
+                    class="c30 c31 c32"
                   >
-                    Doc
-                  </span>
+                    <span
+                      class="c33"
+                    >
+                      Doc
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </article>
         <div
-          class="c32"
+          class="c34"
         >
           <p
             aria-live="polite"

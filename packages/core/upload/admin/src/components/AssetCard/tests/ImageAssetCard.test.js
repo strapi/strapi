@@ -32,7 +32,7 @@ describe('ImageAssetCard', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c30 {
+      .c32 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -69,7 +69,7 @@ describe('ImageAssetCard', () => {
         padding-left: 12px;
       }
 
-      .c26 {
+      .c28 {
         background: #f6f6f9;
         padding: 4px;
         border-radius: 4px;
@@ -122,7 +122,7 @@ describe('ImageAssetCard', () => {
         flex-direction: row;
       }
 
-      .c27 {
+      .c29 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -198,7 +198,7 @@ describe('ImageAssetCard', () => {
         line-height: 1.33;
       }
 
-      .c29 {
+      .c31 {
         color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
@@ -206,14 +206,14 @@ describe('ImageAssetCard', () => {
         text-transform: uppercase;
       }
 
-      .c25 {
+      .c27 {
         margin-left: auto;
         -webkit-flex-shrink: 0;
         -ms-flex-negative: 0;
         flex-shrink: 0;
       }
 
-      .c28 {
+      .c30 {
         margin-left: 4px;
       }
 
@@ -296,6 +296,28 @@ describe('ImageAssetCard', () => {
 
       .c21 {
         padding-top: 4px;
+      }
+
+      .c25 {
+        padding-top: 4px;
+        -webkit-box-flex: 1;
+        -webkit-flex-grow: 1;
+        -ms-flex-positive: 1;
+        flex-grow: 1;
+      }
+
+      .c26 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
       }
 
       .c15 {
@@ -533,23 +555,27 @@ describe('ImageAssetCard', () => {
                 </div>
               </div>
               <div
-                class="c25"
+                class="c25 c26"
               >
                 <div
-                  class="c26 c27 c28"
+                  class="c27"
                 >
-                  <span
-                    class="c29"
+                  <div
+                    class="c28 c29 c30"
                   >
-                    Image
-                  </span>
+                    <span
+                      class="c31"
+                    >
+                      Image
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </article>
         <div
-          class="c30"
+          class="c32"
         >
           <p
             aria-live="polite"
