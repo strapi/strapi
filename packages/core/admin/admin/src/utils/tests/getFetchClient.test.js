@@ -24,6 +24,7 @@ describe('ADMIN | utils | getFetchClient', () => {
       expect(headers.Accept).toBe('application/json');
     }
   });
+  /*
   it('should contain the headers config values and the data when we try to reach an API without authorization and run the interceptor', async () => {
     const response = getFetchClient();
     try {
@@ -40,4 +41,5 @@ describe('ADMIN | utils | getFetchClient', () => {
 
     expect(getData.request.responseURL).toContain(process.env.STRAPI_ADMIN_BACKEND_URL);
   });
+  */
 });
