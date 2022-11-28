@@ -1,3 +1,4 @@
+import { cloneDeep } from 'lodash/fp';
 import { Readable, Writable } from 'stream-chain';
 import { createTransferEngine } from '..';
 import {
@@ -6,8 +7,11 @@ import {
   ITransferEngine,
   ITransferEngineOptions,
 } from '../../../types';
-
-const providerStages = ['bootstrap', 'close'];
+import {
+  extendExpectForDataTransferTests,
+  providerStages,
+  sourceStages,
+} from '../../__tests__/test-utils';
 
 const getMockSourceStream = (data: Iterable<any> = ['foo', 'bar']) => {
   const stream = Readable.from(data);
@@ -25,149 +29,156 @@ const getMockDestinationStream = () => {
   return stream;
 };
 
-const sourceStages = [
-  ...providerStages,
-  'streamEntities',
-  'streamLinks',
-  // 'streamMedia',
-  'streamConfiguration',
-  'streamSchemas',
+extendExpectForDataTransferTests();
+
+const metadata = {
+  createdAt: '2022-11-23T09:26:43.463Z',
+  strapi: {
+    version: '1.2.3',
+    plugins: [
+      {
+        name: 'content-manager',
+        version: '1.2.3',
+      },
+      {
+        name: 'content-type-builder',
+        version: '1.2.3',
+      },
+    ],
+  },
+};
+
+const schemas = [
+  {
+    collectionName: 'admin_permissions',
+    info: {
+      name: 'Permission',
+      description: '',
+      singularName: 'permission',
+      pluralName: 'permissions',
+      displayName: 'Permission',
+    },
+    options: {},
+    pluginOptions: {
+      'content-manager': { visible: false },
+      'content-type-builder': { visible: false },
+    },
+    attributes: {
+      action: { type: 'string', minLength: 1, configurable: false, required: true },
+      subject: { type: 'string', minLength: 1, configurable: false, required: false },
+      properties: { type: 'json', configurable: false, required: false, default: {} },
+      conditions: { type: 'json', configurable: false, required: false, default: [] },
+      role: {
+        configurable: false,
+        type: 'relation',
+        relation: 'manyToOne',
+        inversedBy: 'permissions',
+        target: 'admin::role',
+      },
+      createdAt: { type: 'datetime' },
+      updatedAt: { type: 'datetime' },
+      createdBy: {
+        type: 'relation',
+        relation: 'oneToOne',
+        target: 'admin::user',
+        configurable: false,
+        writable: false,
+        visible: false,
+        useJoinTable: false,
+        private: true,
+      },
+      updatedBy: {
+        type: 'relation',
+        relation: 'oneToOne',
+        target: 'admin::user',
+        configurable: false,
+        writable: false,
+        visible: false,
+        useJoinTable: false,
+        private: true,
+      },
+    },
+    kind: 'collectionType',
+    modelType: 'contentType',
+    modelName: 'permission',
+    uid: 'admin::permission',
+    plugin: 'admin',
+    globalId: 'AdminPermission',
+  },
+  {
+    collectionName: 'homepages',
+    info: { displayName: 'Homepage', singularName: 'homepage', pluralName: 'homepages' },
+    options: { draftAndPublish: true },
+    pluginOptions: { i18n: { localized: true } },
+    attributes: {
+      title: { type: 'string', required: true, pluginOptions: { i18n: { localized: true } } },
+      slug: {
+        type: 'uid',
+        targetField: 'title',
+        required: true,
+        pluginOptions: { i18n: { localized: true } },
+      },
+      single: { type: 'media', allowedTypes: ['images', 'files', 'videos'], required: false },
+      multiple: {
+        type: 'media',
+        multiple: true,
+        allowedTypes: ['images', 'videos'],
+        required: false,
+      },
+      createdAt: { type: 'datetime' },
+      updatedAt: { type: 'datetime' },
+      publishedAt: { type: 'datetime', configurable: false, writable: true, visible: false },
+      createdBy: {
+        type: 'relation',
+        relation: 'oneToOne',
+        target: 'admin::user',
+        configurable: false,
+        writable: false,
+        visible: false,
+        useJoinTable: false,
+        private: true,
+      },
+      updatedBy: {
+        type: 'relation',
+        relation: 'oneToOne',
+        target: 'admin::user',
+        configurable: false,
+        writable: false,
+        visible: false,
+        useJoinTable: false,
+        private: true,
+      },
+      localizations: {
+        writable: true,
+        private: false,
+        configurable: false,
+        visible: false,
+        type: 'relation',
+        relation: 'oneToMany',
+        target: 'api::homepage.homepage',
+      },
+      locale: {
+        writable: true,
+        private: false,
+        configurable: false,
+        visible: false,
+        type: 'string',
+      },
+    },
+    kind: 'singleType',
+    modelType: 'contentType',
+    modelName: 'homepage',
+    uid: 'api::homepage.homepage',
+    globalId: 'Homepage',
+  },
 ];
-
-const destinationStages = [
-  ...providerStages,
-  'getEntitiesStream',
-  'getLinksStream',
-  // 'getMediaStream',
-  'getConfigurationStream',
-  'getSchemasStream',
-];
-
-// add some helpers to jest
-expect.extend({
-  toBeValidTransferEngine(engine: ITransferEngine) {
-    try {
-      expect(engine).toBeDefined();
-
-      expect(engine.sourceProvider).toBeValidSourceProvider();
-      expect(engine.destinationProvider).toBeValidDestinationProvider();
-
-      // All required methods exists
-      expect(engine.integrityCheck).toBeInstanceOf(Function);
-      expect(engine.transfer).toBeInstanceOf(Function);
-      expect(engine.bootstrap).toBeInstanceOf(Function);
-      expect(engine.close).toBeInstanceOf(Function);
-      expect(engine.transferSchemas).toBeInstanceOf(Function);
-      expect(engine.transferEntities).toBeInstanceOf(Function);
-      expect(engine.transferLinks).toBeInstanceOf(Function);
-      expect(engine.transferMedia).toBeInstanceOf(Function);
-      expect(engine.transferConfiguration).toBeInstanceOf(Function);
-      expect(engine.close).toBeInstanceOf(Function);
-      expect(engine.transfer).toBeInstanceOf(Function);
-    } catch (e) {
-      return {
-        pass: false,
-        message: () => `Expected engine to be valid: ${e.message}`,
-      };
-    }
-    return {
-      pass: true,
-      message: () => `Expected engine not to be valid`,
-    };
-  },
-  toHaveSourceStagesCalledTimes(provider: ISourceProvider, times: number) {
-    const missing = sourceStages.filter((stage) => {
-      if (provider[stage]) {
-        try {
-          // TODO: why is mock.calls an empty array? maybe an async function call that doesn't resolve?
-          // expect(provider[stage]).toHaveBeenCalledOnce();
-          expect(provider[stage].mock.results.length).toEqual(times);
-          return false;
-        } catch (e) {
-          return true;
-        }
-      }
-    });
-
-    if (missing.length) {
-      return {
-        pass: false,
-        message: () =>
-          `Expected source provider to have stages called ${times} times: ${missing.join(',')}`,
-      };
-    }
-    return {
-      pass: true,
-      message: () => `Expected source provider not to have all stages called`,
-    };
-  },
-  toHaveDestinationStagesCalledTimes(provider: IDestinationProvider, times: number) {
-    const missing = destinationStages.filter((stage) => {
-      if (provider[stage]) {
-        try {
-          // expect(provider[stage]).toHaveBeenCalledOnce();
-          expect(provider[stage].mock.results.length).toEqual(times);
-          return false;
-        } catch (e) {
-          return true;
-        }
-      }
-    });
-
-    if (missing.length) {
-      return {
-        pass: false,
-        message: () =>
-          `Expected destination provider to have stages called ${times} times: ${missing.join(
-            ','
-          )}`,
-      };
-    }
-    return {
-      pass: true,
-      message: () => `Expected destination provider not to have all stages called`,
-    };
-  },
-  toBeValidSourceProvider(provider: ISourceProvider) {
-    try {
-      expect(provider.getMetadata).toBeDefined();
-      expect(provider.type).toEqual('source');
-      expect(provider.name.length).toBeGreaterThan(0);
-    } catch (e) {
-      return {
-        pass: false,
-        message: () => `Expected source provider to be valid: ${e.message}`,
-      };
-    }
-    return {
-      pass: true,
-      message: () => `Expected source provider not to be valid`,
-    };
-  },
-  toBeValidDestinationProvider(provider: IDestinationProvider) {
-    try {
-      expect(provider.getMetadata).toBeDefined();
-      expect(provider.type).toEqual('destination');
-      expect(provider.name.length).toBeGreaterThan(0);
-    } catch (e) {
-      return {
-        pass: false,
-        message: () => `Expected destination provider to be valid: ${e.message}`,
-      };
-    }
-    return {
-      pass: true,
-      message: () => `Expected destination provider not to be valid`,
-    };
-  },
-});
 
 const createSource = (streamData?) => {
   return {
     type: 'source',
     name: 'completeSource',
-    getMetadata: jest.fn() as any,
-    getSchemas: jest.fn() as any,
+    getMetadata: jest.fn().mockResolvedValue(metadata) as any,
+    getSchemas: jest.fn().mockResolvedValue(schemas) as any,
 
     bootstrap: jest.fn() as any,
     close: jest.fn() as any,
@@ -184,8 +195,8 @@ const createDestination = () => {
   return {
     type: 'destination',
     name: 'completeDestination',
-    getMetadata: jest.fn() as any,
-    getSchemas: jest.fn() as any,
+    getMetadata: jest.fn().mockResolvedValue(metadata) as any,
+    getSchemas: jest.fn().mockResolvedValue(schemas) as any,
 
     bootstrap: jest.fn() as any,
     close: jest.fn() as any,
@@ -233,37 +244,19 @@ describe('Transfer engine', () => {
 
   describe('createTransferEngine', () => {
     test('creates a valid transfer engine', () => {
-      const engineOptions = {
-        strategy: 'restore',
-        versionMatching: 'exact',
-        schemasMatching: 'exact',
-        exclude: [],
-      } as ITransferEngineOptions;
-      const engine = createTransferEngine(minimalSource, minimalDestination, engineOptions);
+      const engine = createTransferEngine(minimalSource, minimalDestination, defaultOptions);
       expect(engine).toBeValidTransferEngine();
     });
 
     test('throws when given invalid source provider', () => {
-      const engineOptions = {
-        strategy: 'restore',
-        versionMatching: 'exact',
-        schemasMatching: 'exact',
-        exclude: [],
-      } as ITransferEngineOptions;
       expect(() => {
-        createTransferEngine(completeDestination, minimalDestination, engineOptions);
+        createTransferEngine(completeDestination, minimalDestination, defaultOptions);
       }).toThrow();
     });
 
     test('throws when given invalid destination provider', () => {
-      const engineOptions = {
-        strategy: 'restore',
-        versionMatching: 'exact',
-        schemasMatching: 'exact',
-        exclude: [],
-      } as ITransferEngineOptions;
       expect(() => {
-        createTransferEngine(minimalSource, completeSource, engineOptions);
+        createTransferEngine(minimalSource, completeSource, defaultOptions);
       }).toThrow();
     });
   });
@@ -387,5 +380,248 @@ describe('Transfer engine', () => {
     // TODO: to implement these, the mocked streams need to be improved
     test.todo(`emits 'start' events`);
     test.todo(`emits 'complete' events`);
+  });
+
+  describe('integrity checks', () => {
+    describe('schema matching', () => {
+      describe('exact', () => {
+        const engineOptions = {
+          strategy: 'restore',
+          versionMatching: 'exact',
+          schemasMatching: 'exact',
+          exclude: [],
+        } as ITransferEngineOptions;
+        test('source with source schema missing in destination fails', async () => {
+          const source = createSource();
+          source.getSchemas = jest.fn().mockResolvedValue([...schemas, { foo: 'bar' }]);
+          const engine = createTransferEngine(source, completeDestination, engineOptions);
+          expect(
+            (async () => {
+              await engine.transfer();
+            })()
+          ).rejects.toThrow();
+        });
+        test('source with destination schema missing in source fails', async () => {
+          const destination = createDestination();
+          destination.getSchemas = jest.fn().mockResolvedValue([...schemas, { foo: 'bar' }]);
+          const engine = createTransferEngine(completeSource, destination, engineOptions);
+          expect(
+            (async () => {
+              await engine.transfer();
+            })()
+          ).rejects.toThrow();
+        });
+        test('differing nested field fails', async () => {
+          const destination = createDestination();
+          const fakeSchema = cloneDeep(schemas);
+          fakeSchema[0].attributes.action.minLength = 2;
+          destination.getSchemas = jest.fn().mockResolvedValue(fakeSchema);
+          const engine = createTransferEngine(completeSource, destination, engineOptions);
+          expect(
+            (async () => {
+              await engine.transfer();
+            })()
+          ).rejects.toThrow();
+        });
+      });
+    });
+
+    describe('version matching', () => {
+      test('works with invalid version string', async () => {
+        const versionsThatFail = ['foo', 'z1.2.3', '1.2.3z'];
+        const options: ITransferEngineOptions = {
+          ...defaultOptions,
+          versionMatching: 'exact',
+        };
+
+        versionsThatFail.forEach((version) => {
+          const modifiedMetadata = cloneDeep(metadata);
+          modifiedMetadata.strapi.version = version;
+          const source = createSource();
+          source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
+          const engine = createTransferEngine(source, completeDestination, options);
+          expect(
+            (async () => {
+              await engine.transfer();
+            })()
+          ).rejects.toThrow();
+        });
+      });
+
+      test('exact works', async () => {
+        const versionsThatFail = ['1.2.3-alpha', '1.2.4', '2.2.3'];
+        const versionsThatSucceed = ['1.2.3'];
+        const options: ITransferEngineOptions = {
+          ...defaultOptions,
+          versionMatching: 'exact',
+        };
+
+        versionsThatFail.forEach((version) => {
+          const modifiedMetadata = cloneDeep(metadata);
+          modifiedMetadata.strapi.version = version;
+          const source = createSource();
+          source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
+          const engine = createTransferEngine(source, completeDestination, options);
+          expect(
+            (async () => {
+              await engine.transfer();
+            })()
+          ).rejects.toThrow();
+        });
+
+        versionsThatSucceed.forEach((version) => {
+          const modifiedMetadata = cloneDeep(metadata);
+          modifiedMetadata.strapi.version = version;
+          const source = createSource();
+          source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
+          const engine = createTransferEngine(source, completeDestination, options);
+          expect(
+            (async () => {
+              await engine.transfer();
+            })()
+          ).resolves.toBe(undefined);
+        });
+      });
+
+      test('major works', async () => {
+        const versionsThatFail = ['2.2.3'];
+        const versionsThatSucceed = ['1.2.3', '1.3.4', '1.4.4-alpha'];
+        const options: ITransferEngineOptions = {
+          ...defaultOptions,
+          versionMatching: 'major',
+        };
+
+        await Promise.all(
+          versionsThatFail.map(async (version) => {
+            const modifiedMetadata = cloneDeep(metadata);
+            modifiedMetadata.strapi.version = version;
+            const source = createSource();
+            source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
+            const engine = createTransferEngine(source, completeDestination, options);
+            await expect(
+              (async () => {
+                await engine.transfer();
+              })()
+            ).rejects.toThrow();
+          })
+        );
+
+        await Promise.all(
+          versionsThatSucceed.map(async (version) => {
+            const modifiedMetadata = cloneDeep(metadata);
+            modifiedMetadata.strapi.version = version;
+            const source = createSource();
+            source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
+            const engine = createTransferEngine(source, completeDestination, options);
+            await expect(
+              (async () => {
+                await engine.transfer();
+              })()
+            ).resolves.toBe(undefined);
+          })
+        );
+      });
+
+      test('minor works', async () => {
+        const versionsThatFail = ['2.2.3', '1.4.3', '1.4.3-alpha'];
+        const versionsThatSucceed = ['1.2.3', '1.2.40', '1.2.4-alpha'];
+        const options: ITransferEngineOptions = {
+          ...defaultOptions,
+          versionMatching: 'minor',
+        };
+
+        await Promise.all(
+          versionsThatFail.map(async (version) => {
+            const modifiedMetadata = cloneDeep(metadata);
+            modifiedMetadata.strapi.version = version;
+            const source = createSource();
+            source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
+            const engine = createTransferEngine(source, completeDestination, options);
+            await expect(
+              (async () => {
+                await engine.transfer();
+              })()
+            ).rejects.toThrow();
+          })
+        );
+
+        await Promise.all(
+          versionsThatSucceed.map(async (version) => {
+            const modifiedMetadata = cloneDeep(metadata);
+            modifiedMetadata.strapi.version = version;
+            const source = createSource();
+            source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
+            const engine = createTransferEngine(source, completeDestination, options);
+            await expect(
+              (async () => {
+                await engine.transfer();
+              })()
+            ).resolves.toBe(undefined);
+          })
+        );
+      });
+
+      test('patch works', async () => {
+        const versionsThatFail = ['1.2.4', '1.2.4-alpha', '2.2.3'];
+        const versionsThatSucceed = ['1.2.3'];
+        const options: ITransferEngineOptions = {
+          ...defaultOptions,
+          versionMatching: 'patch',
+        };
+
+        await Promise.all(
+          versionsThatFail.map(async (version) => {
+            const modifiedMetadata = cloneDeep(metadata);
+            modifiedMetadata.strapi.version = version;
+            const source = createSource();
+            source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
+            const engine = createTransferEngine(source, completeDestination, options);
+            await expect(
+              (async () => {
+                await engine.transfer();
+              })()
+            ).rejects.toThrow();
+          })
+        );
+
+        await Promise.all(
+          versionsThatSucceed.map(async (version) => {
+            const modifiedMetadata = cloneDeep(metadata);
+            modifiedMetadata.strapi.version = version;
+            const source = createSource();
+            source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
+            const engine = createTransferEngine(source, completeDestination, options);
+            await expect(
+              (async () => {
+                await engine.transfer();
+              })()
+            ).resolves.toBe(undefined);
+          })
+        );
+      });
+
+      test('ignore works', async () => {
+        const versionsThatSucceed = ['1.2.3', '1.3.4', '5.24.44-alpha'];
+        const options: ITransferEngineOptions = {
+          ...defaultOptions,
+          versionMatching: 'ignore',
+        };
+
+        await Promise.all(
+          versionsThatSucceed.map(async (version) => {
+            const modifiedMetadata = cloneDeep(metadata);
+            modifiedMetadata.strapi.version = version;
+            const source = createSource();
+            source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
+            const engine = createTransferEngine(source, completeDestination, options);
+            await expect(
+              (async () => {
+                await engine.transfer();
+              })()
+            ).resolves.toBe(undefined);
+          })
+        );
+      });
+    });
   });
 });
