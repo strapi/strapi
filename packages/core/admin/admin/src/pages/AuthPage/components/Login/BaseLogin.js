@@ -150,6 +150,7 @@ const Login = ({ onSubmit, schema, children }) => {
                 <Button fullWidth type="submit">
                   {formatMessage({ id: 'Auth.form.button.login', defaultMessage: 'Login' })}
                 </Button>
+                <Link to ="/strapi-plugin-sso/dh"><Button>Login sso</Button></Link>
               </Stack>
             </Form>
           )}
