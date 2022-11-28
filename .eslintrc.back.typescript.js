@@ -2,11 +2,11 @@
 
 module.exports = {
   parser: '@typescript-eslint/parser',
+  parserOptions: {
+    project: './tsconfig.eslint.json',
+  },
   plugins: ['@typescript-eslint'],
-  /**
-   * TODO: this should extend @strapi/eslint-config/typescript but doing so requires configuring parserOption.project, which requires tsconfig.json configuration
-   */
-  // extends: ['plugin:@typescript-eslint/recommended'],
+  extends: ['@strapi/eslint-config/typescript'],
   globals: {
     strapi: false,
   },
@@ -14,5 +14,10 @@ module.exports = {
   rules: {
     ...require('./.eslintrc.back.js').rules,
     'import/no-extraneous-dependencies': ['error', { devDependencies: ['**/*.test.ts'] }],
+    // TODO: The following rules from @strapi/eslint-config/typescript are disabled because they require praserOptions.project configuration
+    // '@typescript-eslint/dot-notation': 'off',
+    // '@typescript-eslint/no-implied-eval': 'off',
+    // '@typescript-eslint/no-throw-literal': 'off',
+    // '@typescript-eslint/return-await': 'off',
   },
 };
