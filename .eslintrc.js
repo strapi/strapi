@@ -22,8 +22,15 @@ module.exports = {
     // Backend typescript
     {
       files: ['packages/**/*.ts', 'test/**/*.ts', 'scripts/**/*.ts', 'jest.*.ts'],
-      excludedFiles: frontPaths,
+      excludedFiles: [...frontPaths, '**/*.d.ts'],
       ...require('./.eslintrc.back.typescript.js'),
+    },
+
+    // Type definitions
+    {
+      files: ['packages/**/*.d.ts', 'test/**/*.d.ts', 'scripts/**/*.d.ts'],
+      excludedFiles: frontPaths,
+      ...require('./.eslintrc.back.type-definitions.js'),
     },
 
     // Frontend
