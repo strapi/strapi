@@ -1,6 +1,5 @@
-import type { IEntity } from '../../../../types';
-
 import { Readable, PassThrough } from 'stream';
+import type { IEntity } from '../../../../types';
 
 import {
   collect,

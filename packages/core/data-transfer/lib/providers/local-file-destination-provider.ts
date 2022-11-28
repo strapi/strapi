@@ -1,11 +1,3 @@
-import type {
-  IDestinationProvider,
-  IDestinationProviderTransferResults,
-  IMetadata,
-  ProviderType,
-  Stream,
-} from '../../types';
-
 import fs from 'fs-extra';
 import path from 'path';
 import tar from 'tar-stream';
@@ -13,6 +5,13 @@ import zlib from 'zlib';
 import { Writable, Readable } from 'stream';
 import { stringer } from 'stream-json/jsonl/Stringer';
 import { chain } from 'stream-chain';
+import type {
+  IDestinationProvider,
+  IDestinationProviderTransferResults,
+  IMetadata,
+  ProviderType,
+  Stream,
+} from '../../types';
 
 import { createEncryptionCipher } from '../encryption/encrypt';
 
@@ -50,12 +49,16 @@ export const createLocalFileDestinationProvider = (
 };
 
 class LocalFileDestinationProvider implements IDestinationProvider {
-  name: string = 'destination::local-file';
+  name = 'destination::local-file';
+
   type: ProviderType = 'destination';
+
   options: ILocalFileDestinationProviderOptions;
+
   results: ILocalFileDestinationProviderTransferResults = {};
 
   #providersMetadata: { source?: IMetadata; destination?: IMetadata } = {};
+
   #archive: { stream?: tar.Pack; pipeline?: Stream } = {};
 
   constructor(options: ILocalFileDestinationProviderOptions) {
@@ -65,17 +68,17 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   get #archivePath() {
     const { encryption, compression, file } = this.options;
 
-    let path = `${file.path}.tar`;
+    let filePath = `${file.path}.tar`;
 
     if (compression.enabled) {
-      path += '.gz';
+      filePath += '.gz';
     }
 
     if (encryption.enabled) {
-      path += '.enc';
+      filePath += '.enc';
     }
 
-    return path;
+    return filePath;
   }
 
   setMetadata(target: ProviderType, metadata: IMetadata): IDestinationProvider {
@@ -242,7 +245,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
  */
 const createFilePathFactory =
   (type: string) =>
-  (fileIndex: number = 0): string => {
+  (fileIndex = 0): string => {
     return path.join(
       // "{type}" directory
       type,
@@ -254,7 +257,7 @@ const createFilePathFactory =
 const createTarEntryStream = (
   archive: tar.Pack,
   pathFactory: (index?: number) => string,
-  maxSize: number = 2.56e8
+  maxSize = 2.56e8
 ) => {
   let fileIndex = 0;
   let buffer = '';
@@ -264,7 +267,8 @@ const createTarEntryStream = (
       return;
     }
 
-    const name = pathFactory(fileIndex++);
+    fileIndex += 1;
+    const name = pathFactory(fileIndex);
     const size = buffer.length;
 
     await new Promise<void>((resolve, reject) => {

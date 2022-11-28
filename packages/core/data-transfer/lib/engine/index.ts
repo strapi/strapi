@@ -1,4 +1,5 @@
 import { PassThrough } from 'stream-chain';
+import { isEmpty, uniq } from 'lodash/fp';
 import type {
   Diff,
   IDestinationProvider,
@@ -10,10 +11,10 @@ import type {
   TransferStage,
 } from '../../types';
 
-import { isEmpty, uniq, has } from 'lodash/fp';
-const semverDiff = require('semver/functions/diff');
-
 import compareSchemas from '../strategies';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const semverDiff = require('semver/functions/diff');
 
 type TransferProgress = {
   [key in TransferStage]?: {
@@ -41,13 +42,18 @@ class TransferEngine<
 > implements ITransferEngine
 {
   sourceProvider: ISourceProvider;
+
   destinationProvider: IDestinationProvider;
+
   options: ITransferEngineOptions;
+
   #metadata: { source?: IMetadata; destination?: IMetadata } = {};
 
   #transferProgress: TransferProgress = {};
+
   // TODO: Type the stream chunks. Doesn't seem trivial, especially since PassThrough doesn't provide a PassThroughOptions type
   #progressStream: PassThrough = new PassThrough({ objectMode: true });
+
   get progress(): TransferEngineProgress {
     return {
       data: this.#transferProgress,
@@ -81,7 +87,7 @@ class TransferEngine<
 
     if (aggregateKey && data && data[aggregateKey]) {
       const aggKeyValue = data[aggregateKey];
-      if (!this.#transferProgress[transferStage]!['aggregates']) {
+      if (!this.#transferProgress[transferStage]!.aggregates) {
         this.#transferProgress[transferStage]!.aggregates = {};
       }
       if (
@@ -242,7 +248,7 @@ class TransferEngine<
 
   validateTransferOptions() {
     if (!VALID_STRATEGIES.includes(this.options.strategy)) {
-      throw new Error('Invalid stategy ' + this.options.strategy);
+      throw new Error(`Invalid stategy ${this.options.strategy}`);
     }
   }
 
@@ -390,6 +396,7 @@ class TransferEngine<
     this.#updateStage('start', stageName);
     console.warn('transferMedia not yet implemented');
     return new Promise((resolve) =>
+      // eslint-disable-next-line no-promise-executor-return
       (() => {
         this.#updateStage('complete', stageName);
         resolve();

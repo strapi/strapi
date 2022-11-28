@@ -1,12 +1,7 @@
 import { cloneDeep } from 'lodash/fp';
 import { Readable, Writable } from 'stream-chain';
 import { createTransferEngine } from '..';
-import {
-  IDestinationProvider,
-  ISourceProvider,
-  ITransferEngine,
-  ITransferEngineOptions,
-} from '../../../types';
+import { IDestinationProvider, ISourceProvider, ITransferEngineOptions } from '../../../types';
 import {
   extendExpectForDataTransferTests,
   providerStages,
@@ -361,7 +356,7 @@ describe('Transfer engine', () => {
   });
 
   describe('progressStream', () => {
-    test(`emits 'progress' events`, async () => {
+    test("emits 'progress' events", async () => {
       const streamData = [{ foo: 'bar' }, { bar: 'baz' }, { some: 'other', data: 'here' }];
       const source = createSource(streamData);
       const engine = createTransferEngine(source, completeDestination, defaultOptions);
@@ -378,8 +373,8 @@ describe('Transfer engine', () => {
     });
 
     // TODO: to implement these, the mocked streams need to be improved
-    test.todo(`emits 'start' events`);
-    test.todo(`emits 'complete' events`);
+    test.todo("emits 'start' events");
+    test.todo("emits 'complete' events");
   });
 
   describe('integrity checks', () => {

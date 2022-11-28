@@ -1,7 +1,5 @@
 import type { Readable } from 'stream';
 
-import type { IMetadata, ISourceProvider, ProviderType } from '../../types';
-
 import fs from 'fs';
 import zip from 'zlib';
 import tar from 'tar';
@@ -9,6 +7,7 @@ import { keyBy } from 'lodash/fp';
 import { chain } from 'stream-chain';
 import { pipeline, PassThrough } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
+import type { IMetadata, ISourceProvider, ProviderType } from '../../types';
 
 import { createDecryptionCipher } from '../encryption';
 import { collect } from '../utils';
@@ -51,7 +50,8 @@ export const createLocalFileSourceProvider = (options: ILocalFileSourceProviderO
 
 class LocalFileSourceProvider implements ISourceProvider {
   type: ProviderType = 'source';
-  name: string = 'source::local-file';
+
+  name = 'source::local-file';
 
   options: ILocalFileSourceProviderOptions;
 
@@ -109,7 +109,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     return this.#streamJsonlDirectory('configuration');
   }
 
-  #getBackupStream(decompress: boolean = true) {
+  #getBackupStream(decompress = true) {
     const path = this.options.backupFilePath;
     const readStream = fs.createReadStream(path);
     const streams: StreamItemArray = [readStream];
@@ -184,7 +184,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     return outStream;
   }
 
-  async #parseJSONFile<T extends {} = any>(
+  async #parseJSONFile<T extends Record<string, unknown> = any>(
     fileStream: NodeJS.ReadableStream,
     filePath: string
   ): Promise<T> {
@@ -221,7 +221,7 @@ class LocalFileSourceProvider implements ISourceProvider {
         () => {
           // If the promise hasn't been resolved and we've parsed all
           // the archive entries, then the file doesn't exist
-          reject(`${filePath} not found in the archive stream`);
+          reject(new Error(`${filePath} not found in the archive stream`));
         }
       );
     });

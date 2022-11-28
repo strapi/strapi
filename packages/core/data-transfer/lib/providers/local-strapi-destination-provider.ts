@@ -1,8 +1,8 @@
 // import { createLogger } from '@strapi/logger';
-import type { IDestinationProvider, IMetadata, ProviderType } from '../../types';
 
 import chalk from 'chalk';
 import { Duplex } from 'stream';
+import type { IDestinationProvider, IMetadata, ProviderType } from '../../types';
 
 import { mapSchemasValues } from '../utils';
 
@@ -21,10 +21,12 @@ export const createLocalStrapiDestinationProvider = (
 };
 
 class LocalStrapiDestinationProvider implements IDestinationProvider {
-  name: string = 'destination::local-strapi';
+  name = 'destination::local-strapi';
+
   type: ProviderType = 'destination';
 
   options: ILocalStrapiDestinationProviderOptions;
+
   strapi?: Strapi.Strapi;
 
   constructor(options: ILocalStrapiDestinationProviderOptions) {
@@ -58,12 +60,10 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   getEntitiesStream(): Duplex {
-    const self = this;
-
     return new Duplex({
       objectMode: true,
-      async write(entity, _encoding, callback) {
-        if (!self.strapi) {
+      write: async (entity, _encoding, callback) => {
+        if (!this.strapi) {
           callback(new Error('Strapi instance not found'));
         }
 

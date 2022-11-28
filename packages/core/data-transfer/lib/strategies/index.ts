@@ -4,12 +4,12 @@ import { jsonDiffs } from '../utils';
 
 const strategies = {
   // No diffs
-  exact: (diffs: Diff[]) => {
+  exact(diffs: Diff[]) {
     return diffs;
   },
 
   // Diffs allowed on specific attributes properties
-  strict: (diffs: Diff[]) => {
+  strict(diffs: Diff[]) {
     const isIgnorableDiff = ({ path }: Diff) => {
       return (
         path.length === 3 &&

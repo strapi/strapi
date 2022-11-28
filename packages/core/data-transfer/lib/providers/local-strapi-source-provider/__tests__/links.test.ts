@@ -347,7 +347,7 @@ describe('Local Strapi Source Provider - Entities Streaming', () => {
       expect(populate).toEqual({});
     });
 
-    test(`Should return an empty object if there are components or dynamic zones but they doesn't contain relations`, () => {
+    test("Should return an empty object if there are components or dynamic zones but they doesn't contain relations", () => {
       const strapi = getStrapiFactory({
         contentTypes: {
           blog: {
