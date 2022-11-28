@@ -5,7 +5,8 @@ const inquirer = require('inquirer');
 const { isArray } = require('lodash');
 
 /**
- * argsParser: Parse a string argument from the command line as a boolean
+ * Parse a string argument from the command line as a boolean
+ * Can be passed to option.argParser
  */
 const parseInputBool = (arg) => {
   try {
@@ -17,7 +18,11 @@ const parseInputBool = (arg) => {
 };
 
 /**
- * argsParser: Parse a comma-delimited string as an array
+ * Parse a comma-delimited string as an array
+ * Return value can be passed to option.argParser
+ *
+ * @param {string[]|undefined} [validOptions=undefined] Array of string values that will be accepted in the list
+ * @returns {(string) => string[]}
  */
 const createListParser = (validOptions = undefined) => {
   return (value) => {
@@ -35,7 +40,7 @@ const createListParser = (validOptions = undefined) => {
 };
 
 /**
- * hook: if encrpyt=true and key not provided, prompt for it
+ * Command hook that if encrpyt=true and key is not provided, prompt for it
  */
 const promptEncryptionKey = async (thisCommand) => {
   const opts = thisCommand.opts();
@@ -73,7 +78,7 @@ const promptEncryptionKey = async (thisCommand) => {
 };
 
 /**
- * hook: confirm that key has a value with a provided message
+ * Command hook to confirm that key has a value with a provided message
  */
 const confirmKeyValue = (key, value, message) => {
   return async (thisCommand) => {
