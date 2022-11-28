@@ -1621,7 +1621,7 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
-"@babel/runtime@^7.12.0":
+"@babel/runtime@^7.12.0", "@babel/runtime@^7.13.10":
   version "7.20.1"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.20.1.tgz#1148bb33ab252b165a06698fde7576092a78b4a9"
   integrity sha512-mrzLkl6U9YLF8qpqI7TB82PESyEGjm/0Ly91jG575eVxMMlb8fYfOXFZIJ8XfLrJZQbm7dlKry2bJmXBUEkdFg==
@@ -3923,6 +3923,13 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==
 
+"@radix-ui/react-use-callback-ref@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-use-callback-ref/-/react-use-callback-ref-1.0.0.tgz#9e7b8b6b4946fe3cbe8f748c82a2cce54e7b6a90"
+  integrity sha512-GZtyzoHz95Rhs6S63D2t/eqvdFCm7I+yHMLVQheKM7nBD8mbZIt+ct1jz4536MDnaOGKIxynJ8eHTkVGVVkoTg==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+
 "@react-dnd/asap@^4.0.0":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@react-dnd/asap/-/asap-4.0.1.tgz#5291850a6b58ce6f2da25352a64f1b0674871aab"
@@ -5807,13 +5814,14 @@
     regenerator-runtime "^0.13.7"
     resolve-from "^5.0.0"
 
-"@strapi/design-system@1.4.0-beta.0":
-  version "1.4.0-beta.0"
-  resolved "https://registry.yarnpkg.com/@strapi/design-system/-/design-system-1.4.0-beta.0.tgz#56bdcf7c6d78fa9c5104bb9209b5ecebc69a3cde"
-  integrity sha512-D3GoNVWWIaohNLJ7FcclwA0F2/or+r+imd3Ebo89IPdjvlEyOxlrsQGQzAyaH5fYGzkf3atIHTJSpmkGARgzpw==
+"@strapi/design-system@1.4.0-beta.1":
+  version "1.4.0-beta.1"
+  resolved "https://registry.yarnpkg.com/@strapi/design-system/-/design-system-1.4.0-beta.1.tgz#6dcdfbd72fc5f96dd63e8d613517151af07e2abc"
+  integrity sha512-Nkv/kY0XwqbKclgkjlnUMW1mRBFX1JGKUsEEOUcWxD8FjG9+78RU5NIFtXSA5+1GfBuIGn0fUFSura6dVgMeSw==
   dependencies:
     "@floating-ui/react-dom" "^1.0.0"
     "@internationalized/number" "^3.1.1"
+    "@radix-ui/react-use-callback-ref" "^1.0.0"
     compute-scroll-into-view "^1.0.17"
     prop-types "^15.7.2"
 
@@ -5839,10 +5847,10 @@
   optionalDependencies:
     typescript "^4.6.2"
 
-"@strapi/icons@1.4.0-beta.0":
-  version "1.4.0-beta.0"
-  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-1.4.0-beta.0.tgz#66b7b149172f6a1c4c38ad17af00b3d40eaf4bb8"
-  integrity sha512-vHPXJujs15QYn2enQh5FLYFD6m1Q/lmA4l/SfYtQi7WK5Huyel3jO4tNo62ujj+5yNATtkmiutwU9C7JJtu8GQ==
+"@strapi/icons@1.4.0-beta.1":
+  version "1.4.0-beta.1"
+  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-1.4.0-beta.1.tgz#a0d627a29c0101bc0a8aaa53def6ba16394704eb"
+  integrity sha512-C2oJURuwoCQLoXtcPYp/B1byveen1SualBEe+8iUOTxRVcsFIJYemUbbwtxpcHeDwHAc9K/MlrGoWKxDoELOBg==
 
 "@stylelint/postcss-css-in-js@^0.37.2":
   version "0.37.3"
