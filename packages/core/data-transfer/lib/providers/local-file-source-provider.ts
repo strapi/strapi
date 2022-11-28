@@ -82,15 +82,13 @@ class LocalFileSourceProvider implements ISourceProvider {
     // TODO: need to read the file & extract the metadata json file
     // => we might also need to read the schema.jsonl files & implements a custom stream-check
     const backupStream = this.#getBackupStream();
-    return {};
-    // return this.#parseJSONFile<IMetadata>(backupStream, METADATA_FILE_PATH);
+    return this.#parseJSONFile<IMetadata>(backupStream, METADATA_FILE_PATH);
   }
 
   async getSchemas() {
-    // const schemas = await collect(this.streamSchemas() as Readable);
+    const schemas = await collect(this.streamSchemas() as Readable);
 
-    // return keyBy('uid', schemas);
-    return null;
+    return keyBy('uid', schemas);
   }
 
   streamEntities(): NodeJS.ReadableStream {

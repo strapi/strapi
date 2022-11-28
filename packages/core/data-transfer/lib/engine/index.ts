@@ -173,7 +173,7 @@ class TransferEngine<
     if (!isEmpty(diffs)) {
       throw new Error(
         `Import process failed because the project doesn't have a matching data structure 
-        ${JSON.stringify(diffs, null, 2)}        
+        ${JSON.stringify(diffs, null, 2)}
         `
       );
     }
@@ -246,6 +246,7 @@ class TransferEngine<
       const isValidTransfer = await this.integrityCheck();
 
       if (!isValidTransfer) {
+        // TODO: provide the log from the integrity check
         throw new Error(
           `Unable to transfer the data between ${this.sourceProvider.name} and ${this.destinationProvider.name}.\nPlease refer to the log above for more information.`
         );
