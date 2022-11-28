@@ -23,7 +23,7 @@ module.exports = {
             message: html,
             ...rest,
           };
-          client.sendEmail(removeUndefined(msg), (err) => {
+          client.sendEmail(removeUndefined(msg), (err, _, response) => {
             if (err) {
               if (err.Message) {
                 // eslint-disable-next-line prefer-promise-reject-errors
