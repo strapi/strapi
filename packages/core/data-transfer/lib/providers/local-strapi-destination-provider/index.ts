@@ -3,7 +3,7 @@ import type { IDestinationProvider, IMetadata, ProviderType } from '../../../typ
 import { deleteAllRecords, DeleteOptions } from './restore';
 
 import chalk from 'chalk';
-import { Duplex } from 'stream';
+import { Writable } from 'stream';
 
 import { mapSchemasValues } from '../../utils';
 
@@ -64,9 +64,23 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     }
   }
 
-  // TODO
   getMetadata(): IMetadata | Promise<IMetadata> {
-    return {};
+    const strapiVersion = strapi.config.get('info.strapi');
+    const createdAt = new Date().toISOString();
+
+    const plugins = Object.keys(strapi.plugins);
+
+    return {
+      createdAt,
+      strapi: {
+        version: strapiVersion,
+        plugins: plugins.map((name) => ({
+          name,
+          // TODO: Get the plugin actual version when it'll be available
+          version: strapiVersion,
+        })),
+      },
+    };
   }
 
   getSchemas() {
@@ -82,10 +96,10 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     return mapSchemasValues(schemas);
   }
 
-  getEntitiesStream(): Duplex {
+  getEntitiesStream(): Writable {
     const self = this;
 
-    return new Duplex({
+    return new Writable({
       objectMode: true,
       async write(entity, _encoding, callback) {
         if (!self.strapi) {
@@ -101,6 +115,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
           log.warn(
             chalk.bold(`Failed to import ${chalk.yellowBright(uid)} (${chalk.greenBright(id)})`)
           );
+
           e.details.errors
             .map((err: any, i: number) => {
               // TODO: add correct error type
