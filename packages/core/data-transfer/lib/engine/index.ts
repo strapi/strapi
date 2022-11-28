@@ -408,6 +408,7 @@ class TransferEngine<
     });
   }
 
+  // TODO: check exclude for localAssets and providerAssets
   async transferAssets(): Promise<void> {
     const stageName: TransferStage = 'assets';
     this.#updateStage('start', stageName);
