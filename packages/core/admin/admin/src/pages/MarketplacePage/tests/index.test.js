@@ -89,7 +89,7 @@ describe('Marketplace page - layout', () => {
     const offlineText = screen.queryByText('You are offline');
     expect(offlineText).toEqual(null);
     // Shows the sort button
-    const sortButton = screen.getByRole('button', { name: /Sort by/i });
+    const sortButton = screen.getByLabelText(/sort by/i);
     expect(sortButton).toBeVisible();
     // Shows the filters button
     const filtersButton = screen.getByText(/Filters/i).closest('button');
