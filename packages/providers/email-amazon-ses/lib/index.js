@@ -31,7 +31,7 @@ module.exports = {
               }
               reject(err);
             } else {
-              resolve();
+              resolve(response.toJSON());
             }
           });
         });
