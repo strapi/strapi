@@ -32,16 +32,26 @@ const entities = [
   },
 ];
 
+const deleteMany = jest.fn(async (uid: string) => ({
+  count: entities.filter((entity) => entity.contentType.uid === uid).length,
+}));
+
+const query = jest.fn(() => {
+  return {
+    deleteMany: jest.fn(() => ({
+      count: 0,
+    })),
+  };
+});
+
 describe('Restore ', () => {
   test('Should delete all contentTypes', async () => {
-    const deleteMany = jest.fn(async (uid: string) => ({
-      count: entities.filter((entity) => entity.contentType.uid === uid).length,
-    }));
     const strapi = getStrapiFactory({
       contentTypes: getContentTypes(),
       entityService: {
         deleteMany,
       },
+      query,
     })();
 
     const { count } = await deleteAllRecords(strapi);
@@ -49,14 +59,12 @@ describe('Restore ', () => {
   });
 
   test('Should only delete chosen contentTypes', async () => {
-    const deleteMany = jest.fn(async (uid: string) => ({
-      count: entities.filter((entity) => entity.contentType.uid === uid).length,
-    }));
     const strapi = getStrapiFactory({
       contentTypes: getContentTypes(),
       entityService: {
         deleteMany,
       },
+      query,
     })();
 
     const { count } = await deleteAllRecords(strapi, {

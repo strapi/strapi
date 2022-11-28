@@ -91,12 +91,21 @@ describe('Local Strapi Source Destination', () => {
         count: entities.filter((entity) => entity.contentType.uid === uid).length,
       }));
 
+      const query = jest.fn(() => {
+        return {
+          deleteMany: jest.fn(() => ({
+            count: 0,
+          })),
+        };
+      });
+
       const provider = createLocalStrapiDestinationProvider({
         getStrapi: getStrapiFactory({
           contentTypes: getContentTypes(),
           entityService: {
             deleteMany,
           },
+          query,
         }),
         strategy: 'restore',
       });
