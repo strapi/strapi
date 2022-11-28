@@ -93,7 +93,7 @@ export const destinationStages = [
   ...providerStages,
   'getEntitiesStream',
   'getLinksStream',
-  // 'getMediaStream',
+  // 'getAssetsStream',
   'getConfigurationStream',
   'getSchemasStream',
 ];
@@ -118,7 +118,7 @@ export const extendExpectForDataTransferTests = () => {
         expect(engine.transferSchemas).toBeInstanceOf(Function);
         expect(engine.transferEntities).toBeInstanceOf(Function);
         expect(engine.transferLinks).toBeInstanceOf(Function);
-        expect(engine.transferMedia).toBeInstanceOf(Function);
+        expect(engine.transferAssets).toBeInstanceOf(Function);
         expect(engine.transferConfiguration).toBeInstanceOf(Function);
         expect(engine.close).toBeInstanceOf(Function);
         expect(engine.transfer).toBeInstanceOf(Function);

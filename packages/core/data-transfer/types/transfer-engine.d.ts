@@ -1,6 +1,6 @@
 import { SchemaUID } from '@strapi/strapi/lib/types/utils';
 import { IEntity, ILink, IMedia } from './common-entities';
-import { ITransferRule } from './utils';
+import { ITransferRule, TransferStage } from './utils';
 import { ISourceProvider, IDestinationProvider } from './provider';
 
 /**
@@ -78,7 +78,7 @@ export interface ITransferEngine<
    * Start the media transfer by connecting the
    * related source and destination providers streams
    */
-  transferMedia(): Promise<void>;
+  transferAssets(): Promise<void>;
 
   /**
    * Start the configuration transfer by connecting the
@@ -117,10 +117,17 @@ export interface ITransferEngineOptions {
    */
   schemasMatching: 'exact' | 'strict';
 
-  // List of global transform streams to integrate into the final pipelines
+  /**
+   * List of global transform streams to integrate into the final pipelines
+   */
   common?: {
     rules?: ITransferRule[];
   };
+
+  /**
+   * List of transfer stages to exclude from the transfer process
+   */
+  exclude?: ExcludeStageOptions[];
 
   /**
    * Options related to the transfer of the entities

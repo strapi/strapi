@@ -1,4 +1,5 @@
 import type { Readable, Writable, Duplex, Transform } from 'stream';
+import { EXCLUDE_STAGE_OPTIONS, TRANSFER_STAGES } from '../lib';
 import type { IDestinationProvider, ISourceProvider } from './providers';
 
 /**
@@ -53,7 +54,9 @@ export type Diff = AddedDiff | ModifiedDiff | DeletedDiff;
 export interface Context {
   path: string[];
 }
-export type TransferStage = 'entities' | 'links' | 'media' | 'schemas' | 'configuration';
+
+export type TransferStage = typeof TRANSFER_STAGES[number];
+export type ExcludeStageOptions = typeof EXCLUDE_STAGE_OPTIONS[number];
 
 export interface ITransferResults<S extends ISourceProvider, D extends IDestinationProvider> {
   source?: S['results'];

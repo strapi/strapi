@@ -10,7 +10,7 @@ import type {
   TransferStage,
 } from '../../types';
 
-import { isEmpty, uniq, has } from 'lodash/fp';
+import { isEmpty, uniq } from 'lodash/fp';
 const semverDiff = require('semver/functions/diff');
 
 import compareSchemas from '../strategies';
@@ -33,7 +33,17 @@ type TransferEngineProgress = {
   stream: PassThrough;
 };
 
-export const VALID_STRATEGIES = ['restore', 'merge'];
+export const TRANSFER_STAGES = ['entities', 'links', 'schemas', 'configuration', 'assets'] as const;
+
+// valid options for 'exclude' (additional aliases for combinations or subsets)
+export const EXCLUDE_STAGE_OPTIONS = [
+  ...TRANSFER_STAGES,
+  'content',
+  'localAssets',
+  'providerAssets',
+] as const;
+
+export const VALID_STRATEGIES = ['restore', 'merge'] as const;
 
 class TransferEngine<
   S extends ISourceProvider = ISourceProvider,
@@ -262,11 +272,24 @@ class TransferEngine<
       }
 
       // Run the transfer stages
-      await this.transferSchemas();
-      await this.transferEntities();
-      await this.transferMedia();
-      await this.transferLinks();
-      await this.transferConfiguration();
+      if (!this.options.exclude?.includes('schemas')) {
+        await this.transferSchemas();
+      }
+      if (
+        !this.options.exclude?.includes('entities') &&
+        !this.options.exclude?.includes('content')
+      ) {
+        await this.transferEntities();
+      }
+      if (!this.options.exclude?.includes('assets')) {
+        await this.transferAssets();
+      }
+      if (!this.options.exclude?.includes('links') && !this.options.exclude?.includes('content')) {
+        await this.transferLinks();
+      }
+      if (!this.options.exclude?.includes('configuration')) {
+        await this.transferConfiguration();
+      }
 
       // Gracefully close the providers
       await this.close();
@@ -385,10 +408,10 @@ class TransferEngine<
     });
   }
 
-  async transferMedia(): Promise<void> {
-    const stageName: TransferStage = 'media';
+  async transferAssets(): Promise<void> {
+    const stageName: TransferStage = 'assets';
     this.#updateStage('start', stageName);
-    console.warn('transferMedia not yet implemented');
+    console.warn('transferAssets not yet implemented');
     return new Promise((resolve) =>
       (() => {
         this.#updateStage('complete', stageName);

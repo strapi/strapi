@@ -12,9 +12,10 @@ const inquirer = require('inquirer');
 
 const program = new Command();
 
+const { EXCLUDE_STAGE_OPTIONS } = require('@strapi/data-transfer');
 const packageJSON = require('../package.json');
 const {
-  parseInputList,
+  createListParser,
   parseInputBool,
   promptEncryptionKey,
   confirmKeyValue,
@@ -72,7 +73,7 @@ const getLocalScript =
 const excludeOption = new Option(
   '--exclude <data,to,exclude>',
   'Comma-separated list of data to exclude (files [localMediaFiles, providerMediaFiles], content [entities, links], schema, configuration)' // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
-).argParser(parseInputList);
+).argParser(createListParser(EXCLUDE_STAGE_OPTIONS));
 
 // Initial program setup
 program.storeOptionsAsProperties(false).allowUnknownOption(true);
@@ -318,7 +319,7 @@ program
     new Option(
       '--schemaComparison <schemaComparison>',
       'exact requires every field to match, strict requires Strapi version and content type schema fields do not break, subset requires source schema to exist in destination, bypass skips checks',
-      parseInputList
+      createListParser([['exact', 'strict', 'subset', 'bypass']])
     )
       .choices(['exact', 'strict', 'subset', 'bypass'])
       .default('exact')

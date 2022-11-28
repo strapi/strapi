@@ -2,6 +2,7 @@
 
 const { parseType } = require('@strapi/utils/lib');
 const inquirer = require('inquirer');
+const { isArray } = require('lodash');
 
 /**
  * argsParser: Parse a string argument from the command line as a boolean
@@ -18,8 +19,19 @@ const parseInputBool = (arg) => {
 /**
  * argsParser: Parse a comma-delimited string as an array
  */
-const parseInputList = (value) => {
-  return value.split(',');
+const createListParser = (validOptions = undefined) => {
+  return (value) => {
+    const values = value.split(',');
+    if (isArray(validOptions)) {
+      values.forEach((value) => {
+        if (!validOptions.includes(value)) {
+          console.error(`Value '${value}' is not recognized as a valid option`);
+          process.exit(1);
+        }
+      });
+    }
+    return values;
+  };
 };
 
 /**
@@ -85,7 +97,7 @@ const confirmKeyValue = (key, value, message) => {
 };
 
 module.exports = {
-  parseInputList,
+  createListParser,
   parseInputBool,
   promptEncryptionKey,
   confirmKeyValue,
