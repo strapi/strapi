@@ -80,7 +80,7 @@ const promptEncryptionKey = async (thisCommand) => {
 /**
  * Command hook to confirm that key has a value with a provided message
  */
-const confirmKeyValue = (key, value, message) => {
+const confirmKeyValue = (key, value, message, defaultYes = false) => {
   return async (thisCommand) => {
     const opts = thisCommand.opts();
 
@@ -93,6 +93,7 @@ const confirmKeyValue = (key, value, message) => {
         type: 'confirm',
         message,
         name: `confirm_${key}`,
+        default: defaultYes,
       },
     ]);
     if (!answers[`confirm_${key}`]) {
