@@ -7,6 +7,8 @@ const { ValidationError } = require('@strapi/utils').errors;
 const createEntityService = require('..');
 const entityValidator = require('../../entity-validator');
 
+jest.mock('../../utils/upload-files', () => jest.fn(() => Promise.resolve()));
+
 describe('Entity service', () => {
   global.strapi = {
     getModel: jest.fn(() => ({})),
@@ -15,6 +17,7 @@ describe('Entity service', () => {
         return [];
       },
     },
+    query: jest.fn(() => ({})),
   };
 
   describe('Decorator', () => {
@@ -80,6 +83,26 @@ describe('Entity service', () => {
   });
 
   describe('Create', () => {
+    const fakeQuery = {
+      count: jest.fn(() => 0),
+      create: jest.fn(({ data }) => ({
+        id: 1,
+        ...data,
+      })),
+      findOne: jest.fn(),
+    };
+    const fakeModels = {};
+
+    beforeAll(() => {
+      global.strapi.getModel.mockImplementation((modelName) => fakeModels[modelName]);
+      global.strapi.query.mockImplementation(() => fakeQuery);
+    });
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+    afterAll(() => {
+      global.strapi.getModel.mockImplementation(() => ({}));
+    });
     describe('assign default values', () => {
       let instance;
       const entityUID = 'api::entity.entity';
@@ -105,67 +128,59 @@ describe('Entity service', () => {
           },
         };
 
-        const fakeModels = {
-          [entityUID]: {
-            uid: entityUID,
-            kind: 'contentType',
-            modelName: 'test-model',
-            privateAttributes: [],
-            options: {},
-            attributes: {
-              attrStringDefaultRequired: {
-                type: 'string',
-                default: 'default value',
-                required: true,
-              },
-              attrStringDefault: { type: 'string', default: 'default value' },
-              attrBoolDefaultRequired: { type: 'boolean', default: true, required: true },
-              attrBoolDefault: { type: 'boolean', default: true },
-              attrIntDefaultRequired: { type: 'integer', default: 1, required: true },
-              attrIntDefault: { type: 'integer', default: 1 },
-              attrEnumDefaultRequired: {
-                type: 'enumeration',
-                enum: ['a', 'b', 'c'],
-                default: 'a',
-                required: true,
-              },
-              attrEnumDefault: {
-                type: 'enumeration',
-                enum: ['a', 'b', 'c'],
-                default: 'b',
-              },
-              attrPassword: { type: 'password' },
-              attrRelation: {
-                type: 'relation',
-                relation: 'oneToMany',
-                target: relationUID,
-                mappedBy: 'entity',
-              },
+        fakeModels[entityUID] = {
+          uid: entityUID,
+          kind: 'contentType',
+          modelName: 'test-model',
+          privateAttributes: [],
+          options: {},
+          attributes: {
+            attrStringDefaultRequired: {
+              type: 'string',
+              default: 'default value',
+              required: true,
+            },
+            attrStringDefault: { type: 'string', default: 'default value' },
+            attrBoolDefaultRequired: { type: 'boolean', default: true, required: true },
+            attrBoolDefault: { type: 'boolean', default: true },
+            attrIntDefaultRequired: { type: 'integer', default: 1, required: true },
+            attrIntDefault: { type: 'integer', default: 1 },
+            attrEnumDefaultRequired: {
+              type: 'enumeration',
+              enum: ['a', 'b', 'c'],
+              default: 'a',
+              required: true,
+            },
+            attrEnumDefault: {
+              type: 'enumeration',
+              enum: ['a', 'b', 'c'],
+              default: 'b',
+            },
+            attrPassword: { type: 'password' },
+            attrRelation: {
+              type: 'relation',
+              relation: 'oneToMany',
+              target: relationUID,
+              mappedBy: 'entity',
             },
           },
-          [relationUID]: {
-            uid: relationUID,
-            kind: 'contentType',
-            modelName: 'relation',
-            attributes: {
-              Name: {
-                type: 'string',
-                default: 'default value',
-                required: true,
-              },
+        };
+        fakeModels[relationUID] = {
+          uid: relationUID,
+          kind: 'contentType',
+          modelName: 'relation',
+          attributes: {
+            Name: {
+              type: 'string',
+              default: 'default value',
+              required: true,
             },
           },
         };
         const fakeQuery = (uid) => ({
           create: jest.fn(({ data }) => data),
           count: jest.fn(({ where }) => {
-            let ret = 0;
-            where.id.$in.forEach((id) => {
-              const entity = fakeEntities[uid][id];
-              if (!entity) return;
-              ret += 1;
-            });
-            return ret;
+            return where.id.$in.filter((id) => Boolean(fakeEntities[uid][id])).length;
           }),
         });
 
@@ -173,12 +188,7 @@ describe('Entity service', () => {
           query: jest.fn((uid) => fakeQuery(uid)),
         };
 
-        global.strapi = {
-          getModel: jest.fn((uid) => {
-            return fakeModels[uid];
-          }),
-          db: fakeDB,
-        };
+        global.strapi.db = fakeDB;
 
         instance = createEntityService({
           strapi: global.strapi,
@@ -187,7 +197,11 @@ describe('Entity service', () => {
           entityValidator,
         });
       });
-
+      afterAll(() => {
+        global.strapi.db = {
+          query: jest.fn(() => fakeQuery),
+        };
+      });
       test('should create record with all default attributes', async () => {
         const data = {};
 
@@ -295,6 +309,108 @@ describe('Entity service', () => {
           new ValidationError(
             `1 relation(s) of type api::relation.relation associated with this entity do not exist`
           )
+        );
+      });
+    });
+
+    describe('with files', () => {
+      let instance;
+      beforeAll(() => {
+        fakeModels['test-model'] = {
+          uid: 'test-model',
+          kind: 'collectionType',
+          collectionName: 'test-model',
+          options: {},
+          attributes: {
+            name: {
+              type: 'string',
+            },
+            activity: {
+              displayName: 'activity',
+              type: 'component',
+              repeatable: true,
+              component: 'basic.activity',
+            },
+          },
+          modelType: 'contentType',
+          modelName: 'test-model',
+        };
+        fakeModels['basic.activity'] = {
+          collectionName: 'components_basic_activities',
+          info: {
+            displayName: 'activity',
+          },
+          options: {},
+          attributes: {
+            docs: {
+              allowedTypes: ['images', 'files', 'videos', 'audios'],
+              type: 'media',
+              multiple: true,
+            },
+            name: {
+              type: 'string',
+            },
+          },
+          uid: 'basic.activity',
+          category: 'basic',
+          modelType: 'component',
+          modelName: 'activity',
+          globalId: 'ComponentBasicActivity',
+        };
+
+        const fakeDB = {
+          query: jest.fn(() => fakeQuery),
+        };
+
+        const fakeStrapi = {
+          getModel: jest.fn((modelName) => fakeModels[modelName]),
+        };
+        instance = createEntityService({
+          strapi: fakeStrapi,
+          db: fakeDB,
+          eventHub: new EventEmitter(),
+          entityValidator,
+        });
+      });
+      test('should create record with attached files', async () => {
+        const uploadFiles = require('../../utils/upload-files');
+        const data = {
+          name: 'demoEvent',
+          activity: [{ name: 'Powering the Aviation of the Future' }],
+        };
+        const files = {
+          'activity.0.docs': {
+            size: 381924,
+            path: '/tmp/upload_4cab76a3a443b584a1fd3aa52e045130',
+            name: 'thisisajpeg.jpeg',
+            type: 'image/jpeg',
+            mtime: '2022-11-03T13:36:51.764Z',
+          },
+        };
+
+        fakeQuery.findOne.mockResolvedValue({ id: 1, ...data });
+
+        await instance.create('test-model', { data, files });
+
+        expect(global.strapi.getModel).toBeCalled();
+        expect(uploadFiles).toBeCalled();
+        expect(uploadFiles).toBeCalledTimes(1);
+        expect(uploadFiles).toBeCalledWith(
+          'test-model',
+          {
+            id: 1,
+            name: 'demoEvent',
+            activity: [
+              {
+                id: 1,
+                __pivot: {
+                  field: 'activity',
+                  component_type: 'basic.activity',
+                },
+              },
+            ],
+          },
+          files
         );
       });
     });
