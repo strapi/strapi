@@ -25,20 +25,13 @@ describe('ADMIN | utils | fetchClient', () => {
       expect(result.headers.Accept).toBe('application/json');
     });
     describe('Test the addInterceptor funcion', () => {
-      // beforeEach(() => {
-      //   axios.create.mockReset();
-      //   axios.interceptors.request.use.mockReset();
-      //   axios.interceptors.request.eject.mockReset();
-      //   axios.interceptors.response.use.mockReset();
-      //   axios.interceptors.response.eject.mockReset();
-      // });
       afterEach(() => {
         // restore the spy created with spyOn
         jest.restoreAllMocks();
       });
       it('should add a response interceptor to the axios instance', () => {
         const apiInstance = fetchClient({
-          baseUrl: 'http://strapi',
+          baseUrl: 'http://strapi-test',
         });
         const spyReq = jest.spyOn(apiInstance.interceptors.request, 'use');
         const spyRes = jest.spyOn(apiInstance.interceptors.response, 'use');
