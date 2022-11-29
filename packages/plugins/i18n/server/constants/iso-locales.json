@@ -592,22 +592,6 @@
     "name":"English (Guernsey) (en-GG)"
   },
   {
-    "code":"en-CA",
-    "name":"English (Canada) (en-CA)"
-  },
-  {
-    "code":"en-EG",
-    "name":"English (Egypt) (en-EG)"
-  },
-  {
-    "code":"en-EU",
-    "name":"English (Europe) (en-EU)"
-  },
-  {
-    "code":"en-GU",
-    "name":"English (Guam) (en-GU)"
-  },
-  {
     "code":"en-GY",
     "name":"English (Guyana) (en-GY)"
   },
@@ -668,10 +652,6 @@
     "name":"English (Malaysia) (en-MY)"
   },
   {
-    "code":"en-JM",
-    "name":"English (Jamaica) (en-JM)"
-  },
-  {
     "code":"en-MT",
     "name":"English (Malta) (en-MT)"
   },
@@ -718,14 +698,6 @@
   {
     "code":"en-NF",
     "name":"English (Norfolk Island) (en-NF)"
-  },
-  {
-    "code":"en-NA",
-    "name":"English (Namibia) (en-NA)"
-  },
-  {
-    "code":"en-NZ",
-    "name":"English (New Zealand) (en-NZ)"
   },
   {
     "code":"en-MP",
@@ -796,10 +768,6 @@
     "name":"English (Solomon Islands) (en-SB)"
   },
   {
-    "code":"en-ZA",
-    "name":"English (South Africa) (en-ZA)"
-  },
-  {
     "code":"en-SS",
     "name":"English (South Sudan) (en-SS)"
   },
@@ -860,24 +828,8 @@
     "name":"English (Tuvalu) (en-TV)"
   },
   {
-    "code":"en-PH",
-    "name":"English (Philippines) (en-PH)"
-  },
-  {
-    "code":"en-SA",
-    "name":"English (Saudi Arabia) (en-SA)"
-  },
-  {
-    "code":"en-SG",
-    "name":"English (Singapore) (en-SG)"
-  },
-  {
     "code":"en-ZA",
     "name":"English (South Africa) (en-ZA)"
-  },
-  {
-    "code":"en-TT",
-    "name":"English (Trinidad and Tobago) (en-TT)"
   },
   {
     "code":"en-AE",
