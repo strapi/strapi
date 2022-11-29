@@ -102,8 +102,6 @@ const getPopulateAttributes = (strapi: Strapi.Strapi, contentType: ContentTypeSc
 
   const values = Object.values(populate);
 
-  // console.log(contentType.uid, JSON.stringify(populate, null, 2));
-
   if (values.length === 0) {
     return true;
   }
