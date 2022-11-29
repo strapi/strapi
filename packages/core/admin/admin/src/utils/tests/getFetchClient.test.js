@@ -24,22 +24,4 @@ describe('ADMIN | utils | getFetchClient', () => {
       expect(headers.Accept).toBe('application/json');
     }
   });
-  /*
-  it('should contain the headers config values and the data when we try to reach an API without authorization and run the interceptor', async () => {
-    const response = getFetchClient();
-    try {
-      await response.get('/admin/information');
-    } catch (err) {
-      expect(err.response.status).toBe(401);
-      expect(auth.clearAppStorage).toHaveBeenCalledTimes(1);
-    }
-  });
-  it('should respond with status 200 to a known API and create the instance with the correct base URL', async () => {
-    const response = getFetchClient();
-    const getData = await response.get('/admin/project-type');
-    expect(getData.status).toBe(200);
-
-    expect(getData.request.responseURL).toContain(process.env.STRAPI_ADMIN_BACKEND_URL);
-  });
-  */
 });
