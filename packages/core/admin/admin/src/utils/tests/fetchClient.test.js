@@ -5,6 +5,8 @@ import {
   reqErrorInterceptor,
   resInterceptor,
   resErrorInterceptor,
+  fetchClient,
+  addInterceptors,
 } from '../fetchClient';
 
 const token = 'coolToken';
@@ -13,6 +15,39 @@ auth.clearAppStorage = jest.fn().mockReturnValue(token);
 process.env.STRAPI_ADMIN_BACKEND_URL = 'http://localhost:1337';
 
 describe('ADMIN | utils | fetchClient', () => {
+  describe('Test the interceptors', () => {
+    it('API request should add authorization token to header', async () => {
+      const apiInstance = fetchClient({
+        baseUrl: 'http://strapi',
+      });
+      const result = await apiInstance.interceptors.request.handlers[0].fulfilled({ headers: {} });
+      expect(result.headers.Authorization).toContain(`Bearer ${token}`);
+      expect(result.headers.Accept).toBe('application/json');
+    });
+    describe('Test the addInterceptor funcion', () => {
+      // beforeEach(() => {
+      //   axios.create.mockReset();
+      //   axios.interceptors.request.use.mockReset();
+      //   axios.interceptors.request.eject.mockReset();
+      //   axios.interceptors.response.use.mockReset();
+      //   axios.interceptors.response.eject.mockReset();
+      // });
+      afterEach(() => {
+        // restore the spy created with spyOn
+        jest.restoreAllMocks();
+      });
+      it('should add a response interceptor to the axios instance', () => {
+        const apiInstance = fetchClient({
+          baseUrl: 'http://strapi',
+        });
+        const spyReq = jest.spyOn(apiInstance.interceptors.request, 'use');
+        const spyRes = jest.spyOn(apiInstance.interceptors.response, 'use');
+        addInterceptors(apiInstance);
+        expect(spyReq).toHaveBeenCalled();
+        expect(spyRes).toHaveBeenCalled();
+      });
+    });
+  });
   describe('Test the interceptors callbacks', () => {
     beforeAll(() => {
       Object.defineProperty(window, 'location', {
