@@ -184,7 +184,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     return outStream;
   }
 
-  async #parseJSONFile<T extends Record<string, unknown> = any>(
+  async #parseJSONFile<T extends Record<string, any> = any>(
     fileStream: NodeJS.ReadableStream,
     filePath: string
   ): Promise<T> {
