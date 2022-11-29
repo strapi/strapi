@@ -71,11 +71,7 @@ const getPopulateAttributes = (strapi: Strapi.Strapi, contentType: ContentTypeSc
       const component = strapi.getModel(attribute.component);
       const subPopulate = getPopulateAttributes(strapi, component);
 
-      if (isArray(subPopulate)) {
-        populate[key] = subPopulate;
-      }
-
-      if (isObject(subPopulate) && size(subPopulate) > 0) {
+      if ((isArray(subPopulate) || isObject(subPopulate)) && size(subPopulate) > 0) {
         populate[key] = { populate: subPopulate };
       }
 
@@ -93,7 +89,7 @@ const getPopulateAttributes = (strapi: Strapi.Strapi, contentType: ContentTypeSc
         const component = strapi.getModel(componentUID);
         const componentPopulate = getPopulateAttributes(strapi, component);
 
-        on[componentUID] = componentPopulate;
+        on[componentUID] = { populate: componentPopulate };
       }
 
       populate[key] = size(on) > 0 ? { on } : true;
