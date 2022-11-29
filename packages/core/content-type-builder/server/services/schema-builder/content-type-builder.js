@@ -286,10 +286,10 @@ const generateRelation = ({ key, attribute, uid, targetAttribute = {} }) => {
     case 'manyToMany': {
       opts.relation = 'manyToMany';
 
-      if (attribute.dominant) {
-        opts.mappedBy = key;
-      } else {
+      if (attribute.dominant === false) {
         opts.inversedBy = key;
+      } else {
+        opts.mappedBy = key;
       }
 
       break;
