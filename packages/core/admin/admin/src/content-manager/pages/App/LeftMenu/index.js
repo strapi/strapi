@@ -22,7 +22,7 @@ import getTrad from '../../../utils/getTrad';
 import { makeSelectModelLinks } from '../selectors';
 
 const matchByTitle = (links, search) =>
-  matchSorter(links, toLower(search), { keys: [(item) => toLower(item.title)] });
+  search ? matchSorter(links, toLower(search), { keys: [(item) => toLower(item.title)] }) : links;
 
 const LeftMenu = () => {
   const [search, setSearch] = useState('');
@@ -52,9 +52,7 @@ const LeftMenu = () => {
         defaultMessage: 'Collection Types',
       },
       searchable: true,
-      links: sortBy(matchByTitle(intlCollectionTypeLinks, search), (object) =>
-        object.title.toLowerCase()
-      ),
+      links: matchByTitle(intlCollectionTypeLinks, search),
     },
     {
       id: 'singleTypes',
@@ -63,9 +61,7 @@ const LeftMenu = () => {
         defaultMessage: 'Single Types',
       },
       searchable: true,
-      links: sortBy(matchByTitle(intlSingleTypeLinks, search), (object) =>
-        object.title.toLowerCase()
-      ),
+      links: matchByTitle(intlSingleTypeLinks, search),
     },
   ];
 
