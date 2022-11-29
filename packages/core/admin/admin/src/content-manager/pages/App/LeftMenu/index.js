@@ -8,7 +8,6 @@ import React, { useMemo, useState } from 'react';
 import { useSelector, shallowEqual } from 'react-redux';
 import { useIntl } from 'react-intl';
 import matchSorter from 'match-sorter';
-import sortBy from 'lodash/sortBy';
 import toLower from 'lodash/toLower';
 import { NavLink } from 'react-router-dom';
 import {
