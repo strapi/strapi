@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read  #  to fetch code (actions/checkout)
+  contents: read #  to fetch code (actions/checkout)
 
 jobs:
   lint:
