@@ -5,18 +5,19 @@ import { useTracking } from '@strapi/helper-plugin';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Box } from '@strapi/design-system/Box';
 import { Typography } from '@strapi/design-system/Typography';
-import LogoInput from '../LogoInput';
 import { useConfigurations } from '../../../../../../hooks';
+import LogoInput from '../LogoInput';
 import reducer, { initialState } from './reducer';
 import init from './init';
+import { DIMENSION, SIZE } from '../../utils/constants';
 
 const Form = forwardRef(({ projectSettingsStored }, ref) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const {
-    logos: { menu },
+    logos: { menu, auth },
   } = useConfigurations();
-  const [{ menuLogo }, dispatch] = useReducer(reducer, initialState, () =>
+  const [{ menuLogo, authLogo }, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, projectSettingsStored)
   );
 
@@ -35,8 +36,21 @@ const Form = forwardRef(({ projectSettingsStored }, ref) => {
     });
   };
 
+  const handleChangeAuthLogo = (asset) => {
+    dispatch({
+      type: 'SET_CUSTOM_AUTH_LOGO',
+      value: asset,
+    });
+  };
+
+  const handleResetAuthLogo = () => {
+    dispatch({
+      type: 'RESET_CUSTOM_AUTH_LOGO',
+    });
+  };
+
   useImperativeHandle(ref, () => ({
-    getValues: () => ({ menuLogo: menuLogo.submit }),
+    getValues: () => ({ menuLogo: menuLogo.submit, authLogo: authLogo.submit }),
   }));
 
   return (
@@ -55,13 +69,41 @@ const Form = forwardRef(({ projectSettingsStored }, ref) => {
           defaultMessage: 'Customization',
         })}
       </Typography>
-      <Grid paddingTop={4}>
+      <Grid paddingTop={4} gap={4}>
         <GridItem col={6} s={12}>
           <LogoInput
-            onChangeLogo={handleChangeMenuLogo}
             customLogo={menuLogo.display}
             defaultLogo={menu.default}
+            // TODO translation
+            hint={formatMessage(
+              {
+                id: 'app',
+                defaultMessage:
+                  'Change the admin panel logo (Max dimension: {dimension}x{dimension}, Max file size: {size}KB)',
+              },
+              { dimension: DIMENSION, size: SIZE }
+            )}
+            label={formatMessage({ id: 'app', defaultMessage: 'Menu logo' })}
+            onChangeLogo={handleChangeMenuLogo}
             onResetMenuLogo={handleResetMenuLogo}
+          />
+        </GridItem>
+        <GridItem col={6} s={12}>
+          <LogoInput
+            customLogo={authLogo.display}
+            defaultLogo={auth.default}
+            // TODO translation
+            hint={formatMessage(
+              {
+                id: 'app',
+                defaultMessage:
+                  'Change the authentication pages logo (Max dimension: {dimension}x{dimension}, Max file size: {size}KB)',
+              },
+              { dimension: DIMENSION, size: SIZE }
+            )}
+            label={formatMessage({ id: 'app', defaultMessage: 'Auth logo' })}
+            onChangeLogo={handleChangeAuthLogo}
+            onResetMenuLogo={handleResetAuthLogo}
           />
         </GridItem>
       </Grid>

@@ -6,12 +6,11 @@ import { IconButton } from '@strapi/design-system/IconButton';
 import { Box } from '@strapi/design-system/Box';
 import Plus from '@strapi/icons/Plus';
 import Refresh from '@strapi/icons/Refresh';
-import reducer, { initialState } from './reducer';
 import LogoModalStepper from '../LogoModalStepper';
-import { SIZE, DIMENSION } from '../../utils/constants';
+import reducer, { initialState } from './reducer';
 import stepper from './stepper';
 
-const LogoInput = ({ customLogo, defaultLogo, onChangeLogo, onResetMenuLogo }) => {
+const LogoInput = ({ customLogo, defaultLogo, hint, label, onChangeLogo, onResetMenuLogo }) => {
   const [{ currentStep }, dispatch] = useReducer(reducer, initialState);
   const { Component, next, prev, modalTitle } = stepper[currentStep] || {};
   const { formatMessage } = useIntl();
@@ -26,19 +25,9 @@ const LogoInput = ({ customLogo, defaultLogo, onChangeLogo, onResetMenuLogo }) =
   return (
     <>
       <CarouselInput
-        label={formatMessage({
-          id: 'Settings.application.customization.carousel.title',
-          defaultMessage: 'Logo',
-        })}
+        label={label}
         selectedSlide={0}
-        hint={formatMessage(
-          {
-            id: 'Settings.application.customization.carousel-hint',
-            defaultMessage:
-              'Change the admin panel logo (Max dimension: {dimension}x{dimension}, Max file size: {size}KB)',
-          },
-          { size: SIZE, dimension: DIMENSION }
-        )}
+        hint={hint}
         // Carousel is used here for a single media,
         // we don't need previous and next labels but these props are required
         previousLabel=""
@@ -103,6 +92,7 @@ const LogoInput = ({ customLogo, defaultLogo, onChangeLogo, onResetMenuLogo }) =
 
 LogoInput.defaultProps = {
   customLogo: null,
+  hint: null,
 };
 
 LogoInput.propTypes = {
@@ -110,6 +100,8 @@ LogoInput.propTypes = {
     url: PropTypes.string,
     name: PropTypes.string,
   }),
+  label: PropTypes.string.isRequired,
+  hint: PropTypes.string,
   defaultLogo: PropTypes.string.isRequired,
   onChangeLogo: PropTypes.func.isRequired,
   onResetMenuLogo: PropTypes.func.isRequired,

@@ -5,18 +5,19 @@ import reducer, { initialState } from './reducer';
 
 const ConfigurationsProvider = ({
   children,
-  authLogo,
+  authLogo: defaultAuthLogo,
   menuLogo: defaultMenuLogo,
   showReleaseNotification,
   showTutorials,
 }) => {
-  const [{ menuLogo }, dispatch] = useReducer(reducer, initialState);
+  const [{ menuLogo, authLogo }, dispatch] = useReducer(reducer, initialState);
 
-  const updateProjectSettings = ({ menuLogo }) => {
+  const updateProjectSettings = ({ menuLogo, authLogo }) => {
     return dispatch({
       type: 'UPDATE_PROJECT_SETTINGS',
       values: {
         menuLogo: menuLogo || defaultMenuLogo,
+        authLogo: authLogo || defaultAuthLogo,
       },
     });
   };
@@ -27,19 +28,19 @@ const ConfigurationsProvider = ({
     return {
       logos: {
         menu: { custom: menuLogo, default: defaultMenuLogo },
-        auth: { custom: null, default: authLogo },
+        auth: { custom: authLogo, default: defaultAuthLogo },
       },
       updateProjectSettings: updateProjectSettingsRef.current,
       showReleaseNotification,
       showTutorials,
     };
   }, [
-    authLogo,
     menuLogo,
+    defaultMenuLogo,
+    authLogo,
+    defaultAuthLogo,
     showReleaseNotification,
     showTutorials,
-    updateProjectSettingsRef,
-    defaultMenuLogo,
   ]);
 
   return (
