@@ -12,7 +12,7 @@ const inquirer = require('inquirer');
 
 const program = new Command();
 
-const { EXCLUDE_STAGE_OPTIONS } = require('@strapi/data-transfer');
+const { EXCLUDE_STAGE_OPTIONS } = require('../../data-transfer');
 const packageJSON = require('../package.json');
 const {
   createListParser,
