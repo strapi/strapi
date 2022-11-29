@@ -1,5 +1,5 @@
 import * as path from 'path';
-import * as fs from 'fs';
+import * as fse from 'fs-extra';
 import { Duplex } from 'stream';
 
 const IGNORED_FILES = ['.gitkeep'];
@@ -11,13 +11,14 @@ export const createAssetsStream = (strapi: Strapi.Strapi): Duplex => {
   const assetsDirectory = path.join(strapi.dirs.static.public, 'uploads');
 
   return Duplex.from(
-    (function* () {
-      const files = fs.readdirSync(assetsDirectory).filter((file) => !IGNORED_FILES.includes(file));
+    (async function* () {
+      const files = await fse.readdir(assetsDirectory);
+      const validFiles = files.filter((file) => !IGNORED_FILES.includes(file));
 
-      for (const file of files) {
+      for (const file of validFiles) {
         const filePath = path.join(assetsDirectory, file);
-        const stats = fs.statSync(filePath);
-        const stream = fs.createReadStream(filePath);
+        const stats = await fse.stat(filePath);
+        const stream = fse.createReadStream(filePath);
 
         yield { file, path: filePath, stats, stream };
       }
