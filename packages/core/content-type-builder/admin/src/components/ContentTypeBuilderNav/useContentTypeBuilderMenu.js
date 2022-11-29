@@ -162,7 +162,7 @@ const useContentTypeBuilderMenu = () => {
   ];
 
   const matchByTitle = (links) =>
-    matchSorter(links, toLower(search), { keys: [(item) => toLower(item.title)] });
+    search ? matchSorter(links, toLower(search), { keys: [(item) => toLower(item.title)] }) : links;
 
   const getMenu = () => {
     // Maybe we can do it simpler with matchsorter wildcards ?
