@@ -37,7 +37,7 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "aws-sdk": "2.1215.0",
+    "aws-sdk": "2.1260.0",
     "lodash": "4.17.21"
   },
   "engines": {

@@ -6,6 +6,7 @@ on:
       - opened
       - transferred
 
+permissions: {}
 jobs:
   add-to-project:
     name: Add issue to Support Team project
