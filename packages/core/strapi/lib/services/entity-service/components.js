@@ -43,9 +43,12 @@ const createComponents = async (uid, data) => {
           throw new Error('Expected an array to create repeatable component');
         }
 
-        const components = await Promise.all(
-          componentValue.map((value) => createComponent(componentUID, value))
-        );
+        // No Promise.all to avoid deadlocks
+        const components = [];
+        for (const value of componentValue) {
+          const compo = await createComponent(componentUID, value);
+          components.push(compo);
+        }
 
         componentBody[attributeName] = components.map(({ id }) => {
           return {
@@ -77,18 +80,18 @@ const createComponents = async (uid, data) => {
         throw new Error('Expected an array to create repeatable component');
       }
 
-      componentBody[attributeName] = await Promise.all(
-        dynamiczoneValues.map(async (value) => {
-          const { id } = await createComponent(value.__component, value);
-          return {
-            id,
-            __component: value.__component,
-            __pivot: {
-              field: attributeName,
-            },
-          };
-        })
-      );
+      // No Promise.all to avoid deadlocks
+      componentBody[attributeName] = [];
+      for (const value of dynamiczoneValues) {
+        const { id } = await createComponent(value.__component, value);
+        componentBody[attributeName].push({
+          id,
+          __component: value.__component,
+          __pivot: {
+            field: attributeName,
+          },
+        });
+      }
 
       continue;
     }
@@ -137,9 +140,12 @@ const updateComponents = async (uid, entityToUpdate, data) => {
           throw new Error('Expected an array to create repeatable component');
         }
 
-        const components = await Promise.all(
-          componentValue.map((value) => updateOrCreateComponent(componentUID, value))
-        );
+        // No Promise.all to avoid deadlocks
+        const components = [];
+        for (const value of componentValue) {
+          const compo = await updateOrCreateComponent(componentUID, value);
+          components.push(compo);
+        }
 
         componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }) => {
           return {
@@ -173,19 +179,18 @@ const updateComponents = async (uid, entityToUpdate, data) => {
         throw new Error('Expected an array to create repeatable component');
       }
 
-      componentBody[attributeName] = await Promise.all(
-        dynamiczoneValues.map(async (value) => {
-          const { id } = await updateOrCreateComponent(value.__component, value);
-
-          return {
-            id,
-            __component: value.__component,
-            __pivot: {
-              field: attributeName,
-            },
-          };
-        })
-      );
+      // No Promise.all to avoid deadlocks
+      componentBody[attributeName] = [];
+      for (const value of dynamiczoneValues) {
+        const { id } = await updateOrCreateComponent(value.__component, value);
+        componentBody[attributeName].push({
+          id,
+          __component: value.__component,
+          __pivot: {
+            field: attributeName,
+          },
+        });
+      }
 
       continue;
     }
@@ -287,14 +292,14 @@ const deleteComponents = async (uid, entityToDelete, { loadComponents = true } =
 
       if (attribute.type === 'component') {
         const { component: componentUID } = attribute;
-        await Promise.all(
-          _.castArray(value).map((subValue) => deleteComponent(componentUID, subValue))
-        );
+        for (const subValue of _.castArray(value)) {
+          await deleteComponent(componentUID, subValue);
+        }
       } else {
         // delete dynamic zone components
-        await Promise.all(
-          _.castArray(value).map((subValue) => deleteComponent(subValue.__component, subValue))
-        );
+        for (const subValue of _.castArray(value)) {
+          await deleteComponent(subValue.__component, subValue);
+        }
       }
 
       continue;
