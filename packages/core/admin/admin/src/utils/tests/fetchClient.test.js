@@ -23,6 +23,7 @@ describe('ADMIN | utils | fetchClient', () => {
       const result = await apiInstance.interceptors.request.handlers[0].fulfilled({ headers: {} });
       expect(result.headers.Authorization).toContain(`Bearer ${token}`);
       expect(result.headers.Accept).toBe('application/json');
+      expect(apiInstance.interceptors.response.handlers[0].fulfilled('foo')).toBe('foo');
     });
     describe('Test the addInterceptor funcion', () => {
       afterEach(() => {
