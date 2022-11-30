@@ -8,10 +8,11 @@ import type {
 
 import fs from 'fs-extra';
 import tar from 'tar-stream';
+import path from 'path';
 import zlib from 'zlib';
 import { Readable } from 'stream';
 import { stringer } from 'stream-json/jsonl/Stringer';
-import { chain } from 'stream-chain';
+import { chain, Writable } from 'stream-chain';
 
 import { createEncryptionCipher } from '../../encryption/encrypt';
 import { createFilePathFactory, createTarEntryStream } from './utils';
