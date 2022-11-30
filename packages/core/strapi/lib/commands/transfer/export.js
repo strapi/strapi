@@ -64,13 +64,19 @@ module.exports = async (opts) => {
    * To a Strapi backup file
    */
   // treat any unknown arguments as filenames
+  const maxSize = _.isFinite(_.toNumber(opts.maxSize))
+    ? _.toNumber(opts.maxSize) * BYTES_IN_MB
+    : undefined;
+
+  const maxSizeJsonl = _.isFinite(_.toNumber(opts.maxSizeJsonl))
+    ? _.toNumber(opts.maxSizeJsonl) * BYTES_IN_MB
+    : undefined;
+
   const destinationOptions = {
     file: {
       path: file,
-      maxSize: _.isFinite(opts.maxSize) ? Math.floor(opts.maxSize) * BYTES_IN_MB : undefined,
-      maxSizeJsonl: _.isFinite(opts.maxSizeJsonl)
-        ? Math.floor(opts.maxSizeJsonl) * BYTES_IN_MB
-        : undefined,
+      maxSize,
+      maxSizeJsonl,
     },
     encryption: {
       enabled: opts.encrypt,

@@ -273,13 +273,10 @@ program
     new Option('--key <string>', 'Provide encryption key in command instead of using a prompt')
   )
   .addOption(
-    new Option('--max-size <max MB per file>', 'split final file when exceeding size in MB')
-  )
-  .addOption(
     new Option(
       '--max-size-jsonl <max MB per internal backup file>',
       'split internal jsonl files when exceeding max size in MB'
-    )
+    ).default(256)
   )
   .addOption(new Option('-f, --file <file>', 'name to use for exported file (without extensions)'))
   .allowExcessArguments(false)

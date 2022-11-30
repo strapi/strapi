@@ -181,7 +181,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     const entryStream = createTarEntryStream(
       this.#archive.stream,
       filePathFactory,
-      this.options.file.maxSize
+      this.options.file.maxSizeJsonl
     );
 
     return chain([stringer(), entryStream]);
@@ -197,7 +197,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     const entryStream = createTarEntryStream(
       this.#archive.stream,
       filePathFactory,
-      this.options.file.maxSize
+      this.options.file.maxSizeJsonl
     );
 
     return chain([stringer(), entryStream]);
@@ -213,7 +213,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     const entryStream = createTarEntryStream(
       this.#archive.stream,
       filePathFactory,
-      this.options.file.maxSize
+      this.options.file.maxSizeJsonl
     );
 
     return chain([stringer(), entryStream]);
@@ -229,7 +229,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     const entryStream = createTarEntryStream(
       this.#archive.stream,
       filePathFactory,
-      this.options.file.maxSize
+      this.options.file.maxSizeJsonl
     );
 
     return chain([stringer(), entryStream]);
