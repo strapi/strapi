@@ -1090,6 +1090,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                   aria-colcount="8"
                   aria-rowcount="1"
                   class="c29"
+                  role="grid"
                 >
                   <thead
                     class="c30"
@@ -1101,6 +1102,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                       <th
                         aria-colindex="1"
                         class="c1 c32"
+                        role="gridcell"
                       >
                         <div
                           class="c1 c4"
@@ -1123,6 +1125,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                       <th
                         aria-colindex="2"
                         class="c1 c32"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <div
@@ -1179,6 +1182,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                       <th
                         aria-colindex="3"
                         class="c1 c32"
+                        role="gridcell"
                       >
                         <div
                           class="c1 c4"
@@ -1201,6 +1205,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                       <th
                         aria-colindex="4"
                         class="c1 c32"
+                        role="gridcell"
                       >
                         <div
                           class="c1 c4"
@@ -1223,6 +1228,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                       <th
                         aria-colindex="5"
                         class="c1 c32"
+                        role="gridcell"
                       >
                         <div
                           class="c1 c4"
@@ -1245,6 +1251,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                       <th
                         aria-colindex="6"
                         class="c1 c32"
+                        role="gridcell"
                       >
                         <div
                           class="c1 c4"
@@ -1267,6 +1274,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                       <th
                         aria-colindex="7"
                         class="c1 c32"
+                        role="gridcell"
                       >
                         <div
                           class="c1 c4"
@@ -1289,6 +1297,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                       <th
                         aria-colindex="8"
                         class="c1 c32"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <div
@@ -1317,6 +1326,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                         aria-colindex="1"
                         class="c1 c32"
                         colspan="8"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <div
@@ -1399,6 +1409,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             aria-hidden="true"
                             class="c1 c51 c52 c53"
                             tabindex="-1"
+                            title="Carret Down Button"
                             type="button"
                           >
                             <svg
