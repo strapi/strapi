@@ -26,9 +26,8 @@ describe('strapi command', () => {
     });
   });
 
-  it('throws on invalid command', async () => {
+  it('displays an error on invalid command', async () => {
     const cmd = 'wrongCommand';
-    const errString = `error: unknown command '${cmd}'`;
 
     await runStrapiCommand(makeArgv(cmd), command);
 
@@ -36,7 +35,8 @@ describe('strapi command', () => {
 
     expect(commanderWriteErr).toHaveBeenCalledTimes(1);
     // trim to ignore newlines
-    expect(commanderWriteErr.mock.calls[0][0].trim()).toEqual(errString);
+    expect(commanderWriteErr.mock.calls[0][0]).toContain(cmd);
+    expect(commanderWriteErr.mock.calls[0][0]).toContain('error');
   });
 
   it('--version outputs version', async () => {
