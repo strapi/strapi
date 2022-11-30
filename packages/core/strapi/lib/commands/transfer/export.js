@@ -63,7 +63,6 @@ module.exports = async (opts) => {
   /**
    * To a Strapi backup file
    */
-  // treat any unknown arguments as filenames
   const maxSize = _.isFinite(_.toNumber(opts.maxSize))
     ? _.toNumber(opts.maxSize) * BYTES_IN_MB
     : undefined;
