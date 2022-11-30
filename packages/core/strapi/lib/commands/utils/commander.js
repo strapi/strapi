@@ -1,19 +1,6 @@
 'use strict';
 
-const { parseType } = require('@strapi/utils/lib');
 const inquirer = require('inquirer');
-
-/**
- * argsParser: Parse a string argument from the command line as a boolean
- */
-const parseInputBool = (arg) => {
-  try {
-    return parseType({ type: 'boolean', value: arg });
-  } catch (e) {
-    console.error(e.message);
-    process.exit(1);
-  }
-};
 
 /**
  * argsParser: Parse a comma-delimited string as an array
@@ -86,7 +73,6 @@ const confirmKeyValue = (key, value, message) => {
 
 module.exports = {
   parseInputList,
-  parseInputBool,
   promptEncryptionKey,
   confirmKeyValue,
 };
