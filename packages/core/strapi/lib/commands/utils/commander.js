@@ -63,6 +63,7 @@ const confirmKeyValue = (key, value, message) => {
         type: 'confirm',
         message,
         name: `confirm_${key}`,
+        default: false,
       },
     ]);
     if (!answers[`confirm_${key}`]) {
