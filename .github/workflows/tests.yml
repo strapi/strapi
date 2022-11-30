@@ -13,6 +13,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
+permissions:
+  contents: read # to fetch code (actions/checkout)
+
 jobs:
   lint:
     name: 'lint (node: ${{ matrix.node }})'
@@ -25,7 +28,11 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
+
       - run: yarn install --frozen-lockfile
       - name: Run lint
         run: yarn run -s lint
@@ -42,7 +49,11 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
+
       - run: yarn install --frozen-lockfile
       - name: Run tests
         run: yarn run -s test:unit --coverage
@@ -65,7 +76,11 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
+
       - run: yarn install --frozen-lockfile
       - name: Build
         run: yarn build
@@ -109,7 +124,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         with:
@@ -124,18 +142,18 @@ jobs:
         node: [14, 16, 18]
     services:
       mysql:
-        image: mysql
+        image: bitnami/mysql:latest
+        env:
+          MYSQL_ROOT_PASSWORD: strapi
+          MYSQL_USER: strapi
+          MYSQL_PASSWORD: strapi
+          MYSQL_DATABASE: strapi_test
+          MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
-          -e MYSQL_ROOT_PASSWORD=strapi
-          -e MYSQL_ROOT_HOST="%"
-          -e MYSQL_USER=strapi
-          -e MYSQL_PASSWORD=strapi
-          -e MYSQL_DATABASE=strapi_test
-          --entrypoint sh mysql -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
         ports:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
@@ -144,7 +162,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         with:
@@ -159,18 +180,17 @@ jobs:
         node: [14, 16, 18]
     services:
       mysql:
-        image: mysql:5
+        image: bitnami/mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: strapi
+          MYSQL_USER: strapi
+          MYSQL_PASSWORD: strapi
+          MYSQL_DATABASE: strapi_test
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
-          -e MYSQL_ROOT_PASSWORD=strapi
-          -e MYSQL_ROOT_HOST="%"
-          -e MYSQL_USER=strapi
-          -e MYSQL_PASSWORD=strapi
-          -e MYSQL_DATABASE=strapi_test
-          --entrypoint sh mysql -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
         ports:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
@@ -179,7 +199,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         with:
@@ -198,7 +221,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         env:
@@ -240,7 +266,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         with:
@@ -258,18 +287,18 @@ jobs:
         node: [14, 16, 18]
     services:
       mysql:
-        image: mysql
+        image: bitnami/mysql:latest
+        env:
+          MYSQL_ROOT_PASSWORD: strapi
+          MYSQL_USER: strapi
+          MYSQL_PASSWORD: strapi
+          MYSQL_DATABASE: strapi_test
+          MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
-          -e MYSQL_ROOT_PASSWORD=strapi
-          -e MYSQL_ROOT_HOST="%"
-          -e MYSQL_USER=strapi
-          -e MYSQL_PASSWORD=strapi
-          -e MYSQL_DATABASE=strapi_test
-          --entrypoint sh mysql -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
         ports:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
@@ -278,7 +307,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         with:
@@ -301,7 +333,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: yarn
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         env:
