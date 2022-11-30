@@ -53,7 +53,7 @@ export type Diff = AddedDiff | ModifiedDiff | DeletedDiff;
 export interface Context {
   path: string[];
 }
-export type TransferStage = 'entities' | 'links' | 'media' | 'schemas' | 'configuration';
+export type TransferStage = 'entities' | 'links' | 'assets' | 'schemas' | 'configuration';
 
 export interface ITransferResults<S extends ISourceProvider, D extends IDestinationProvider> {
   source?: S['results'];
