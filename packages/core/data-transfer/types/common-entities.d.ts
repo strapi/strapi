@@ -121,28 +121,3 @@ interface IMorphLink extends IDefaultLink {
 interface ICircularLink extends IDefaultLink {
   kind: 'relation.circular';
 }
-
-/**
- * Represent a piece of a media file
- *
- * /!\ Draft Version /!\
- *
- * Note: even individual media will probably get streamed chunk by chunk,
- * we need a way to identify to which entity they're related to.
- *
- * Also, it might get tricky to apply specific transformations to media as a whole
- */
-export interface IMedia {
-  /**
-   * The media mime type
-   */
-  type: 'png' | 'pdf'; // | ... | ...
-  /**
-   * Reference ID for the media
-   */
-  ref: number | string;
-  /**
-   * Data chunk (as a buffer) that contains a part of the file
-   */
-  chunk: Buffer | Buffer[];
-}

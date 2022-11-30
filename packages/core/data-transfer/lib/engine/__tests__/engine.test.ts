@@ -185,7 +185,7 @@ const createSource = (streamData?) => {
 
     streamEntities: jest.fn().mockResolvedValue(getMockSourceStream(streamData)) as any,
     streamLinks: jest.fn().mockResolvedValue(getMockSourceStream(streamData)) as any,
-    streamMedia: jest.fn().mockResolvedValue(getMockSourceStream(streamData)) as any,
+    streamAssets: jest.fn().mockResolvedValue(getMockSourceStream(streamData)) as any,
     streamConfiguration: jest.fn().mockResolvedValue(getMockSourceStream(streamData)) as any,
     streamSchemas: jest.fn().mockReturnValue(getMockSourceStream(streamData)) as any,
   } as ISourceProvider;
@@ -203,7 +203,7 @@ const createDestination = () => {
 
     getEntitiesStream: jest.fn().mockResolvedValue(getMockDestinationStream()) as any,
     getLinksStream: jest.fn().mockResolvedValue(getMockDestinationStream()) as any,
-    getMediaStream: jest.fn().mockResolvedValue(getMockDestinationStream()) as any,
+    getAssetsStream: jest.fn().mockResolvedValue(getMockDestinationStream()) as any,
     getConfigurationStream: jest.fn().mockResolvedValue(getMockDestinationStream()) as any,
     getSchemasStream: jest.fn().mockResolvedValue(getMockDestinationStream()) as any,
   } as IDestinationProvider;

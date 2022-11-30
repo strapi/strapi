@@ -15,7 +15,6 @@ const program = new Command();
 const packageJSON = require('../package.json');
 const {
   parseInputList,
-  parseInputBool,
   promptEncryptionKey,
   confirmKeyValue,
 } = require('../lib/commands/utils/commander');
@@ -66,13 +65,6 @@ const getLocalScript =
         process.exit(1);
       });
   };
-
-// option to exclude types of data for the export, import, and transfer commands
-// TODO: validate these inputs. Hopefully here, but worst case it may require adding a hook on each command
-const excludeOption = new Option(
-  '--exclude <data,to,exclude>',
-  'Comma-separated list of data to exclude (files [localMediaFiles, providerMediaFiles], content [entities, links], schema, configuration)' // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
-).argParser(parseInputList);
 
 // Initial program setup
 program.storeOptionsAsProperties(false).allowUnknownOption(true);
@@ -274,34 +266,31 @@ program
   .command('export')
   .description('Export data from Strapi to file')
   .addOption(
-    new Option(
-      '--encrypt <boolean>',
-      `Encrypt output file using the 'aes-128-ecb' algorithm. Prompts for key unless key option is used.`
-    )
-      .default(true)
-      .argParser(parseInputBool)
+    new Option('--no-encrypt', `Disable 'aes-128-ecb' encryption of the output file`).default(true)
   )
-  .addOption(
-    new Option('--compress <boolean>', 'Compress output file using gzip compression')
-      .default(true)
-      .argParser(parseInputBool)
-  )
+  .addOption(new Option('--no-compress', 'Disable gzip compression of output file').default(true))
   .addOption(
     new Option('--key <string>', 'Provide encryption key in command instead of using a prompt')
-  )
-  .addOption(
-    new Option('--max-size <max MB per file>', 'split final file when exceeding size in MB')
   )
   .addOption(
     new Option(
       '--max-size-jsonl <max MB per internal backup file>',
       'split internal jsonl files when exceeding max size in MB'
     )
+      .argParser(parseFloat)
+      .default(256)
   )
   .addOption(new Option('-f, --file <file>', 'name to use for exported file (without extensions)'))
-  .addOption(excludeOption)
   .allowExcessArguments(false)
   .hook('preAction', promptEncryptionKey)
+  // validate inputs
+  .hook('preAction', (thisCommand) => {
+    const opts = thisCommand.opts();
+    if (!opts.maxSizeJsonl) {
+      console.error('Invalid max-size-jsonl provided. Must be a number value.');
+      process.exit(1);
+    }
+  })
   .action(getLocalScript('transfer/export'));
 
 // `$ strapi import`
@@ -313,7 +302,6 @@ program
       .choices(['restore', 'abort', 'keep', 'replace'])
       .default('restore')
   )
-  .addOption(excludeOption)
   .addOption(
     new Option(
       '--schemaComparison <schemaComparison>',

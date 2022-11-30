@@ -1,5 +1,5 @@
 import { SchemaUID } from '@strapi/strapi/lib/types/utils';
-import { IEntity, ILink, IMedia } from './common-entities';
+import { IEntity, ILink } from './common-entities';
 import { ITransferRule } from './utils';
 import { ISourceProvider, IDestinationProvider } from './provider';
 
@@ -82,10 +82,10 @@ export interface ITransferEngine<
   transferLinks(): Promise<void>;
 
   /**
-   * Start the media transfer by connecting the
+   * Start the asset transfer by connecting the
    * related source and destination providers streams
    */
-  transferMedia(): Promise<void>;
+  transferAssets(): Promise<void>;
 
   /**
    * Start the configuration transfer by connecting the
@@ -147,10 +147,10 @@ export interface ITransferEngineOptions {
   /**
    * Options related to the transfer of the links
    */
-  media?: {
+  assets?: {
     /**
-     * Transformation rules for media chunks
+     * Transformation rules for assets
      */
-    rules?: ITransferRule<<T extends IMedia>(media: T) => boolean>[];
+    rules?: ITransferRule<(asset: unknown) => boolean>[];
   };
 }

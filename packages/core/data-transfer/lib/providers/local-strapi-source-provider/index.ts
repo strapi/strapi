@@ -6,6 +6,7 @@ import type { IMetadata, ISourceProvider, ProviderType } from '../../../types';
 import { createEntitiesStream, createEntitiesTransformStream } from './entities';
 import { createLinksStream } from './links';
 import { createConfigurationStream } from './configuration';
+import { createAssetsStream } from './assets';
 import { mapSchemasValues } from '../../utils';
 
 export interface ILocalStrapiSourceProviderOptions {
@@ -106,6 +107,14 @@ class LocalStrapiSourceProvider implements ISourceProvider {
 
   streamSchemas(): NodeJS.ReadableStream {
     return Readable.from(Object.values(this.getSchemas()));
+  }
+
+  streamAssets(): NodeJS.ReadableStream {
+    if (!this.strapi) {
+      throw new Error('Not able to stream assets. Strapi instance not found');
+    }
+
+    return createAssetsStream(this.strapi);
   }
 }
 

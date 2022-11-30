@@ -28,7 +28,7 @@ export interface ISourceProvider extends IProvider {
   // Getters for the source's transfer streams
   streamEntities?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
   streamLinks?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
-  streamMedia?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
+  streamAssets?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
   streamConfiguration?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
   getSchemas?(): Strapi.Schemas;
   streamSchemas?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
@@ -48,7 +48,7 @@ export interface IDestinationProvider extends IProvider {
   // Getters for the destination's transfer streams
   getEntitiesStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
   getLinksStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
-  getMediaStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
+  getAssetsStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
   getConfigurationStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
   getSchemas?(): Strapi.Schemas;
   getSchemasStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
