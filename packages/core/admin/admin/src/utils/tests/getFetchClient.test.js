@@ -3,8 +3,6 @@ import { getFetchClient } from '../getFetchClient';
 
 const token = 'coolToken';
 auth.getToken = jest.fn().mockReturnValue(token);
-auth.clearAppStorage = jest.fn().mockReturnValue(token);
-process.env.STRAPI_ADMIN_BACKEND_URL = 'http://localhost:1337';
 
 describe('ADMIN | utils | getFetchClient', () => {
   it('should return the 4 HTTP methods to call GET, POST, PUT and DELETE apis', () => {

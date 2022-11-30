@@ -12,7 +12,6 @@ import {
 const token = 'coolToken';
 auth.getToken = jest.fn().mockReturnValue(token);
 auth.clearAppStorage = jest.fn().mockReturnValue(token);
-process.env.STRAPI_ADMIN_BACKEND_URL = 'http://localhost:1337';
 
 describe('ADMIN | utils | fetchClient', () => {
   describe('Test the interceptors', () => {
@@ -25,12 +24,12 @@ describe('ADMIN | utils | fetchClient', () => {
       expect(result.headers.Accept).toBe('application/json');
       expect(apiInstance.interceptors.response.handlers[0].fulfilled('foo')).toBe('foo');
     });
-    describe('Test the addInterceptor funcion', () => {
+    describe('Test the addInterceptor function', () => {
       afterEach(() => {
         // restore the spy created with spyOn
         jest.restoreAllMocks();
       });
-      it('should add a response interceptor to the axios instance', () => {
+      it('should add a response interceptor to the fetchClient instance', () => {
         const apiInstance = fetchClient({
           baseUrl: 'http://strapi-test',
         });
@@ -67,7 +66,7 @@ describe('ADMIN | utils | fetchClient', () => {
         url: '/test',
       };
       const configResponse = await reqInterceptor(configMock);
-      expect(configResponse.headers.Authorization).toBe('Bearer coolToken');
+      expect(configResponse.headers.Authorization).toBe(`Bearer ${token}`);
     });
   });
   it('should throw an error when the request interceptor error callback is called', () => {
