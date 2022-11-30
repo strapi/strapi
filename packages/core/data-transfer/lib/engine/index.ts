@@ -388,14 +388,13 @@ class TransferEngine<
   async transferAssets(): Promise<void> {
     const stageName: TransferStage = 'assets';
     const inStream = await this.sourceProvider.streamAssets?.();
-    const outStream = await this.destinationProvider.getAssetsStream?.();
-
     if (!inStream) {
-      throw new Error('Unable to transfer links, source stream is missing');
+      return;
     }
 
+    const outStream = await this.destinationProvider.getAssetsStream?.();
     if (!outStream) {
-      throw new Error('Unable to transfer links, destination stream is missing');
+      return;
     }
 
     this.#updateStage('start', stageName);
