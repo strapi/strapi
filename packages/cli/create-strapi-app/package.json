@@ -4,7 +4,7 @@
   "description": "Generate a new Strapi application.",
   "dependencies": {
     "@strapi/generate-new": "4.5.2",
-    "commander": "7.2.0",
+    "commander": "8.2.0",
     "inquirer": "8.2.4"
   },
   "keywords": [
