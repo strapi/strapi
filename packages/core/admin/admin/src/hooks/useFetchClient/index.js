@@ -1,17 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { getFetchClient } from '../../utils/getFetchClient';
 
-const cancelToken = () => {
-  const controller = new AbortController();
-
-  return controller;
-};
-
 const useFetchClient = () => {
   const controller = useRef(null);
 
   if (controller.current === null) {
-    controller.current = cancelToken();
+    controller.current = new AbortController();
   }
   useEffect(() => {
     return () => {
