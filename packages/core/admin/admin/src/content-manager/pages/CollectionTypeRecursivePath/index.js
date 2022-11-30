@@ -3,7 +3,7 @@ import { Switch, Route } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
-import { ErrorFallback, LoadingIndicatorPage, CheckPagePermissions } from '@strapi/helper-plugin';
+import { LoadingIndicatorPage, CheckPagePermissions } from '@strapi/helper-plugin';
 import permissions from '../../../permissions';
 import { ContentTypeLayoutContext } from '../../contexts';
 import { useFetchContentTypeLayout } from '../../hooks';
@@ -12,6 +12,7 @@ import EditViewLayoutManager from '../EditViewLayoutManager';
 import EditSettingsView from '../EditSettingsView';
 import ListViewLayout from '../ListViewLayoutManager';
 import ListSettingsView from '../ListSettingsView';
+import ErrorFallback from './components/ErrorFallback';
 
 const cmPermissions = permissions.contentManager;
 
