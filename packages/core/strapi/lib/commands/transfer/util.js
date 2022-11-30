@@ -24,7 +24,7 @@ const yyyymmddHHMMSS = () => {
 const buildTransferTable = (resultData) => {
   // Build pretty table
   const table = new Table({
-    head: ['Type', 'Count', 'Size'],
+    head: ['Type', 'Count', 'Size'].map((text) => chalk.bold.blue(text)),
   });
 
   let totalBytes = 0;

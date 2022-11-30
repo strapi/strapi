@@ -53,20 +53,6 @@ module.exports = async (opts) => {
   try {
     logger.log('Starting import...');
 
-    // eslint-disable-next-line no-unused-vars
-    engine.progress.stream.on('start', ({ stage, data }) => {
-      logger.log(`Starting transfer of ${stage}...`);
-    });
-
-    // engine.progress.stream.on('progress', ({ stage, data }) => {
-    //   logger.log('progress', stage, data);
-    // });
-
-    // eslint-disable-next-line no-unused-vars
-    engine.progress.stream.on('complete', ({ stage, data }) => {
-      logger.log(`...${stage} complete`);
-    });
-
     const results = await engine.transfer();
     const table = buildTransferTable(results.engine);
     logger.log(table.toString());
