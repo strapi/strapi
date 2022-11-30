@@ -15,7 +15,6 @@ const program = new Command();
 const packageJSON = require('../package.json');
 const {
   parseInputList,
-  parseInputBool,
   promptEncryptionKey,
   confirmKeyValue,
 } = require('../lib/commands/utils/commander');
@@ -274,18 +273,9 @@ program
   .command('export')
   .description('Export data from Strapi to file')
   .addOption(
-    new Option(
-      '--encrypt <boolean>',
-      `Encrypt output file using the 'aes-128-ecb' algorithm. Prompts for key unless key option is used.`
-    )
-      .default(true)
-      .argParser(parseInputBool)
+    new Option('--no-encrypt', `Disable 'aes-128-ecb' encryption of the output file`).default(true)
   )
-  .addOption(
-    new Option('--compress <boolean>', 'Compress output file using gzip compression')
-      .default(true)
-      .argParser(parseInputBool)
-  )
+  .addOption(new Option('--no-compress', 'Disable gzip compression of output file').default(true))
   .addOption(
     new Option('--key <string>', 'Provide encryption key in command instead of using a prompt')
   )
