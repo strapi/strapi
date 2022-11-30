@@ -207,6 +207,10 @@ module.exports = function createComponentBuilder() {
         const attribute = newAttributes[key];
 
         if (isRelation(attribute)) {
+          if (['manyToMany', 'oneToOne'].includes(attribute.relation)) {
+            attribute.dominant = true;
+          }
+
           this.setRelation({
             key,
             uid,
@@ -286,10 +290,10 @@ const generateRelation = ({ key, attribute, uid, targetAttribute = {} }) => {
     case 'manyToMany': {
       opts.relation = 'manyToMany';
 
-      if (attribute.dominant === false) {
-        opts.inversedBy = key;
-      } else {
+      if (attribute.dominant) {
         opts.mappedBy = key;
+      } else {
+        opts.inversedBy = key;
       }
 
       break;
