@@ -6,6 +6,7 @@ module.exports = {
     project: './tsconfig.eslint.json',
   },
   plugins: ['@typescript-eslint'],
+  // TODO: This should be turned on but causes hundreds of violations in .d.ts files throughout Strapi that would need to be fixed
   // extends: ['@strapi/eslint-config/typescript'],
   globals: {
     strapi: false,
