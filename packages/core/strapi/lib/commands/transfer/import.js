@@ -25,8 +25,6 @@ module.exports = async (opts) => {
   /**
    * From strapi backup file
    */
-
-  // treat any unknown arguments as filenames
   const sourceOptions = {
     backupFilePath: filename,
   };

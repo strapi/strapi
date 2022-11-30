@@ -35,7 +35,12 @@ module.exports = async (opts) => {
    */
   const sourceOptions = {
     async getStrapi() {
-      return strapi(await strapi.compile()).load();
+      const appContext = await strapi.compile();
+      const app = strapi(appContext);
+
+      app.log.level = 'error';
+
+      return app.load();
     },
   };
   const source = createLocalStrapiSourceProvider(sourceOptions);
@@ -45,14 +50,19 @@ module.exports = async (opts) => {
   /**
    * To a Strapi backup file
    */
-  // treat any unknown arguments as filenames
+  const maxSize = _.isFinite(_.toNumber(opts.maxSize))
+    ? _.toNumber(opts.maxSize) * BYTES_IN_MB
+    : undefined;
+
+  const maxSizeJsonl = _.isFinite(_.toNumber(opts.maxSizeJsonl))
+    ? _.toNumber(opts.maxSizeJsonl) * BYTES_IN_MB
+    : undefined;
+
   const destinationOptions = {
     file: {
       path: file,
-      maxSize: isFinite(opts.maxSize) ? Math.floor(opts.maxSize) * BYTES_IN_MB : undefined,
-      maxSizeJsonl: isFinite(opts.maxSizeJsonl)
-        ? Math.floor(opts.maxSizeJsonl) * BYTES_IN_MB
-        : undefined,
+      maxSize,
+      maxSizeJsonl,
     },
     encryption: {
       enabled: opts.encrypt,
@@ -77,22 +87,47 @@ module.exports = async (opts) => {
   try {
     logger.log(`Starting export...`);
 
-    // eslint-disable-next-line no-unused-vars
-    engine.progress.stream.on('start', ({ stage, data }) => {
-      logger.log(`Starting transfer of ${stage}...`);
-    });
-
-    // engine.progress.stream.on('progress', ({ stage, data }) => {
-    //   logger.log('progress', stage, data);
-    // });
-
-    // eslint-disable-next-line no-unused-vars
-    engine.progress.stream.on('complete', ({ stage, data }) => {
-      logger.log(`...${stage} complete`);
+    engine.progress.stream.on('complete', ({ data }) => {
+      resultData = data;
     });
 
     const results = await engine.transfer();
-    const table = buildTransferTable(results.engine);
+
+    // Build pretty table
+    const table = new Table({
+      head: ['Type', 'Count', 'Size'].map((text) => chalk.bold.blue(text)),
+    });
+
+    let totalBytes = 0;
+    let totalItems = 0;
+    Object.keys(resultData).forEach((key) => {
+      const item = resultData[key];
+
+      table.push([
+        { hAlign: 'left', content: chalk.bold(key) },
+        { hAlign: 'right', content: item.count },
+        { hAlign: 'right', content: `${readableBytes(item.bytes, 1, 11)} ` },
+      ]);
+      totalBytes += item.bytes;
+      totalItems += item.count;
+
+      if (item.aggregates) {
+        Object.keys(item.aggregates).forEach((subkey) => {
+          const subitem = item.aggregates[subkey];
+
+          table.push([
+            { hAlign: 'left', content: `-- ${chalk.bold(subkey)}` },
+            { hAlign: 'right', content: subitem.count },
+            { hAlign: 'right', content: `(${chalk.grey(readableBytes(subitem.bytes, 1, 11))})` },
+          ]);
+        });
+      }
+    });
+    table.push([
+      { hAlign: 'left', content: chalk.bold.green('Total') },
+      { hAlign: 'right', content: chalk.bold.green(totalItems) },
+      { hAlign: 'right', content: `${chalk.bold.green(readableBytes(totalBytes, 1, 11))} ` },
+    ]);
     logger.log(table.toString());
 
     if (!fs.pathExistsSync(results.destination.file.path)) {
