@@ -68,10 +68,10 @@ const getLocalScript =
 
 // option to exclude types of data for the export, import, and transfer commands
 // TODO: validate these inputs. Hopefully here, but worst case it may require adding a hook on each command
-const excludeOption = new Option(
-  '--exclude <data,to,exclude>',
-  'Comma-separated list of data to exclude (files [localMediaFiles, providerMediaFiles], content [entities, links], schema, configuration)' // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
-).argParser(parseInputList);
+// const excludeOption = new Option(
+//   '--exclude <data,to,exclude>',
+//   'Comma-separated list of data to exclude (files [localMediaFiles, providerMediaFiles], content [entities, links], schema, configuration)' // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
+// ).argParser(parseInputList);
 
 // Initial program setup
 program.storeOptionsAsProperties(false).allowUnknownOption(true);
@@ -289,7 +289,7 @@ program
     )
   )
   .addOption(new Option('-f, --file <file>', 'name to use for exported file (without extensions)'))
-  .addOption(excludeOption)
+  // .addOption(excludeOption)
   .allowExcessArguments(false)
   .hook('preAction', promptEncryptionKey)
   .action(getLocalScript('transfer/export'));
@@ -303,7 +303,7 @@ program
       .choices(['restore', 'abort', 'keep', 'replace'])
       .default('restore')
   )
-  .addOption(excludeOption)
+  // .addOption(excludeOption)
   .addOption(
     new Option(
       '--schemaComparison <schemaComparison>',
