@@ -10,7 +10,7 @@ const parseInputList = (value) => {
 };
 
 /**
- * hook: if encrpyt=true and key not provided, prompt for it
+ * hook: if encrypt==true and key not provided, prompt for it
  */
 const promptEncryptionKey = async (thisCommand) => {
   const opts = thisCommand.opts();
@@ -20,7 +20,7 @@ const promptEncryptionKey = async (thisCommand) => {
     process.exit(1);
   }
 
-  // if encrypt is set but we have no key, prompt for it
+  // if encrypt==true but we have no key, prompt for it
   if (opts.encrypt && !(opts.key && opts.key.length > 0)) {
     try {
       const answers = await inquirer.prompt([
