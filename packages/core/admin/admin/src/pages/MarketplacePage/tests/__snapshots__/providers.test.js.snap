@@ -1165,6 +1165,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           aria-hidden="true"
                           class="c0 c42 c43 c44"
                           tabindex="-1"
+                          title="Carret Down Button"
                           type="button"
                         >
                           <svg
