@@ -270,7 +270,7 @@ class TransferEngine<
       // Run the transfer stages
       await this.transferSchemas();
       await this.transferEntities();
-      await this.transferMedia();
+      await this.transferAssets();
       await this.transferLinks();
       await this.transferConfiguration();
 
@@ -391,17 +391,36 @@ class TransferEngine<
     });
   }
 
-  async transferMedia(): Promise<void> {
-    const stageName: TransferStage = 'media';
+  async transferAssets(): Promise<void> {
+    const stageName: TransferStage = 'assets';
+    const inStream = await this.sourceProvider.streamAssets?.();
+    if (!inStream) {
+      return;
+    }
+
+    const outStream = await this.destinationProvider.getAssetsStream?.();
+    if (!outStream) {
+      return;
+    }
+
     this.#updateStage('start', stageName);
-    console.warn('transferMedia not yet implemented');
-    return new Promise((resolve) =>
-      // eslint-disable-next-line no-promise-executor-return
-      (() => {
-        this.#updateStage('complete', stageName);
-        resolve();
-      })()
-    );
+
+    return new Promise((resolve, reject) => {
+      inStream
+        // Throw on error in the source
+        .on('error', reject);
+
+      outStream
+        // Throw on error in the destination
+        .on('error', reject)
+        // Resolve the promise when the destination has finished reading all the data from the source
+        .on('close', () => {
+          this.#updateStage('complete', stageName);
+          resolve();
+        });
+
+      inStream.pipe(this.#countRecorder(stageName)).pipe(outStream);
+    });
   }
 
   async transferConfiguration(): Promise<void> {
