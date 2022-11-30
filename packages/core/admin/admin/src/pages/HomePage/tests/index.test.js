@@ -562,15 +562,15 @@ describe('Homepage', () => {
       }
 
       .c53 > path:first-child {
-        fill: #8e75ff;
+        fill: #4945ff;
       }
 
       .c53 > path:nth-child(2) {
-        fill: #8e75ff;
+        fill: #fff;
       }
 
-      .c53 > path:nth-child(3) {
-        fill: #8e75ff;
+      .c53 > path:nth-child(4) {
+        fill: #9593ff;
       }
 
       .c51 path {
