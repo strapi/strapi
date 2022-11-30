@@ -84,7 +84,7 @@ export const sourceStages = [
   ...providerStages,
   'streamEntities',
   'streamLinks',
-  // 'streamAssets',
+  'streamAssets',
   'streamConfiguration',
   'streamSchemas',
 ];
@@ -93,7 +93,7 @@ export const destinationStages = [
   ...providerStages,
   'getEntitiesStream',
   'getLinksStream',
-  // 'getAssetsStream',
+  'getAssetsStream',
   'getConfigurationStream',
   'getSchemasStream',
 ];
