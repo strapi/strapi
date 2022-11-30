@@ -1223,6 +1223,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                                   aria-hidden="true"
                                   class="c0 c49 c50 c51"
                                   tabindex="-1"
+                                  title="Carret Down Button"
                                   type="button"
                                 >
                                   <svg
@@ -1312,6 +1313,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                                   aria-hidden="true"
                                   class="c0 c49 c50 c51"
                                   tabindex="-1"
+                                  title="Carret Down Button"
                                   type="button"
                                 >
                                   <svg
@@ -1395,6 +1397,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                                   aria-hidden="true"
                                   class="c0 c49 c50 c51"
                                   tabindex="-1"
+                                  title="Carret Down Button"
                                   type="button"
                                 >
                                   <svg
@@ -2951,6 +2954,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                                   aria-hidden="true"
                                   class="c0 c49 c50 c51"
                                   tabindex="-1"
+                                  title="Carret Down Button"
                                   type="button"
                                 >
                                   <svg
@@ -3040,6 +3044,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                                   aria-hidden="true"
                                   class="c0 c49 c50 c51"
                                   tabindex="-1"
+                                  title="Carret Down Button"
                                   type="button"
                                 >
                                   <svg
@@ -3123,6 +3128,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                                   aria-hidden="true"
                                   class="c0 c49 c50 c51"
                                   tabindex="-1"
+                                  title="Carret Down Button"
                                   type="button"
                                 >
                                   <svg

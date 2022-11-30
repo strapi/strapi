@@ -808,6 +808,7 @@ describe('Email | Pages | Settings', () => {
                                     class="c1 c27 c28 c29"
                                     disabled=""
                                     tabindex="-1"
+                                    title="Carret Down Button"
                                     type="button"
                                   >
                                     <svg
