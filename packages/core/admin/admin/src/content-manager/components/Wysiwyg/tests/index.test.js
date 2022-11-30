@@ -929,6 +929,7 @@ describe('Wysiwyg render and actions buttons', () => {
                             aria-hidden="true"
                             class="c0 c16 c17 c18"
                             tabindex="-1"
+                            title="Carret Down Button"
                             type="button"
                           >
                             <svg
