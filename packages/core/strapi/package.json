@@ -99,7 +99,7 @@
     "chokidar": "3.5.2",
     "ci-info": "3.5.0",
     "cli-table3": "0.6.2",
-    "commander": "8.2.0",
+    "commander": "9.4.1",
     "configstore": "5.0.1",
     "debug": "4.3.2",
     "delegates": "1.0.0",
