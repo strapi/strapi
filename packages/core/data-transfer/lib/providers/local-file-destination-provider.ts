@@ -1,4 +1,5 @@
 import type {
+  IAsset,
   IDestinationProvider,
   IDestinationProviderTransferResults,
   IMetadata,
@@ -244,8 +245,8 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
     return new Writable({
       objectMode: true,
-      write(data, _encoding, callback) {
-        const entryPath = path.join('assets', 'uploads', data.file);
+      write(data: IAsset, _encoding, callback) {
+        const entryPath = path.join('assets', 'uploads', data.filename);
 
         const entry = archiveStream.entry({
           name: entryPath,

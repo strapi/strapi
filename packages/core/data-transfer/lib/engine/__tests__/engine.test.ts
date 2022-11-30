@@ -1,17 +1,23 @@
+import * as path from 'path';
 import { cloneDeep } from 'lodash/fp';
 import { Readable, Writable } from 'stream-chain';
 import { createTransferEngine } from '..';
 import {
+  IAsset,
   IDestinationProvider,
+  IEntity,
+  ILink,
   ISourceProvider,
   ITransferEngine,
   ITransferEngineOptions,
+  TransferStage,
 } from '../../../types';
 import {
   extendExpectForDataTransferTests,
   providerStages,
   sourceStages,
 } from '../../__tests__/test-utils';
+import { Schema } from '@strapi/strapi';
 
 const getMockSourceStream = (data: Iterable<any> = ['foo', 'bar']) => {
   const stream = Readable.from(data);
@@ -173,7 +179,13 @@ const schemas = [
   },
 ];
 
-const createSource = (streamData?) => {
+const createSource = (streamData?: {
+  assets?: IAsset[];
+  entities?: IEntity<string>[];
+  links?: ILink[];
+  configuration?: any[];
+  schemas?: Schema[];
+}): ISourceProvider => {
   return {
     type: 'source',
     name: 'completeSource',
@@ -183,12 +195,14 @@ const createSource = (streamData?) => {
     bootstrap: jest.fn() as any,
     close: jest.fn() as any,
 
-    streamEntities: jest.fn().mockResolvedValue(getMockSourceStream(streamData)) as any,
-    streamLinks: jest.fn().mockResolvedValue(getMockSourceStream(streamData)) as any,
-    streamAssets: jest.fn().mockResolvedValue(getMockSourceStream(streamData)) as any,
-    streamConfiguration: jest.fn().mockResolvedValue(getMockSourceStream(streamData)) as any,
-    streamSchemas: jest.fn().mockReturnValue(getMockSourceStream(streamData)) as any,
-  } as ISourceProvider;
+    streamEntities: jest.fn().mockResolvedValue(getMockSourceStream(streamData?.entities)) as any,
+    streamLinks: jest.fn().mockResolvedValue(getMockSourceStream(streamData?.links)) as any,
+    streamAssets: jest.fn().mockResolvedValue(getMockSourceStream(streamData?.assets)) as any,
+    streamConfiguration: jest
+      .fn()
+      .mockResolvedValue(getMockSourceStream(streamData?.configuration)) as any,
+    streamSchemas: jest.fn().mockReturnValue(getMockSourceStream(streamData?.schemas)) as any,
+  };
 };
 
 const createDestination = () => {
@@ -363,7 +377,20 @@ describe('Transfer engine', () => {
   describe('progressStream', () => {
     test(`emits 'progress' events`, async () => {
       const streamData = [{ foo: 'bar' }, { bar: 'baz' }, { some: 'other', data: 'here' }];
-      const source = createSource(streamData);
+      const source = createSource({
+        entities: [
+          { id: 1, type: 'foo', data: { foo: 'bar' } },
+          { id: 2, type: 'bar', data: { bar: 'foo' } },
+        ],
+        assets: [
+          {
+            filename: 'foo.jpg',
+            filepath: path.join(__dirname, 'foo.jpg'),
+            stats: { size: 100 },
+            stream: Readable.from([1, 2, 3]),
+          },
+        ],
+      });
       const engine = createTransferEngine(source, completeDestination, defaultOptions);
 
       let calls = 0;

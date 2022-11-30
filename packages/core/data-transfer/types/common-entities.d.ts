@@ -121,3 +121,14 @@ interface IMorphLink extends IDefaultLink {
 interface ICircularLink extends IDefaultLink {
   kind: 'relation.circular';
 }
+
+export interface IAsset {
+  filename: string;
+  filepath: string;
+  stream: NodeJS.ReadableStream;
+  stats: IAssetStats;
+}
+
+export interface IAssetStats {
+  size: number;
+}
