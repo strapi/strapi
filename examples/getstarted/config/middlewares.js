@@ -5,14 +5,7 @@ const responseHandlers = require('./src/response-handlers');
 module.exports = [
   'strapi::errors',
   'strapi::security',
-  {
-    name: 'strapi::cors',
-    config: {
-      enabled: true,
-      headers: '*',
-      origin: ['*'],
-    },
-  },
+  'strapi::cors',
   'strapi::poweredBy',
   'strapi::logger',
   'strapi::query',
