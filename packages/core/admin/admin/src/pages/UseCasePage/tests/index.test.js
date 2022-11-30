@@ -781,6 +781,7 @@ describe('Admin | UseCasePage', () => {
                                 aria-hidden="true"
                                 class="c0 c30 c31 c32"
                                 tabindex="-1"
+                                title="Carret Down Button"
                                 type="button"
                               >
                                 <svg

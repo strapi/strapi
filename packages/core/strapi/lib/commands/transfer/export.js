@@ -53,7 +53,12 @@ module.exports = async (opts) => {
    */
   const sourceOptions = {
     async getStrapi() {
-      return strapi(await strapi.compile()).load();
+      const appContext = await strapi.compile();
+      const app = strapi(appContext);
+
+      app.log.level = 'error';
+
+      return app.load();
     },
   };
   const source = createLocalStrapiSourceProvider(sourceOptions);
@@ -63,14 +68,19 @@ module.exports = async (opts) => {
   /**
    * To a Strapi backup file
    */
-  // treat any unknown arguments as filenames
+  const maxSize = _.isFinite(_.toNumber(opts.maxSize))
+    ? _.toNumber(opts.maxSize) * BYTES_IN_MB
+    : undefined;
+
+  const maxSizeJsonl = _.isFinite(_.toNumber(opts.maxSizeJsonl))
+    ? _.toNumber(opts.maxSizeJsonl) * BYTES_IN_MB
+    : undefined;
+
   const destinationOptions = {
     file: {
       path: file,
-      maxSize: _.isFinite(opts.maxSize) ? Math.floor(opts.maxSize) * BYTES_IN_MB : undefined,
-      maxSizeJsonl: _.isFinite(opts.maxSizeJsonl)
-        ? Math.floor(opts.maxSizeJsonl) * BYTES_IN_MB
-        : undefined,
+      maxSize,
+      maxSizeJsonl,
     },
     encryption: {
       enabled: opts.encrypt,
@@ -97,16 +107,7 @@ module.exports = async (opts) => {
     let resultData = [];
     logger.log(`Starting export...`);
 
-    engine.progress.stream.on('start', ({ stage }) => {
-      logger.log(`Starting transfer of ${stage}...`);
-    });
-
-    // engine.progress.stream..on('progress', ({ stage, data }) => {
-    //   logger.log('progress');
-    // });
-
-    engine.progress.stream.on('complete', ({ stage, data }) => {
-      logger.log(`...${stage} complete`);
+    engine.progress.stream.on('complete', ({ data }) => {
       resultData = data;
     });
 
@@ -114,7 +115,7 @@ module.exports = async (opts) => {
 
     // Build pretty table
     const table = new Table({
-      head: ['Type', 'Count', 'Size'],
+      head: ['Type', 'Count', 'Size'].map((text) => chalk.bold.blue(text)),
     });
 
     let totalBytes = 0;
