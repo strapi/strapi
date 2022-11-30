@@ -40,12 +40,14 @@ const logger = console;
 
 const BYTES_IN_MB = 1024 * 1024;
 
-module.exports = async (filename, opts) => {
+module.exports = async (opts) => {
   // validate inputs from Commander
   if (!_.isObject(opts)) {
     logger.error('Could not parse arguments');
     process.exit(1);
   }
+  const filename = opts.file;
+
   /**
    * From local Strapi instance
    */

@@ -11,6 +11,7 @@ import type {
 } from '../../types';
 
 import { isEmpty, uniq, has } from 'lodash/fp';
+const semverDiff = require('semver/functions/diff');
 
 import compareSchemas from '../strategies';
 
@@ -117,30 +118,37 @@ class TransferEngine<
   #assertStrapiVersionIntegrity(sourceVersion?: string, destinationVersion?: string) {
     const strategy = this.options.versionMatching;
 
-    if (!sourceVersion || !destinationVersion) {
-      return;
-    }
-
-    if (strategy === 'ignore') {
-      return;
-    }
-
-    if (strategy === 'exact' && sourceVersion === destinationVersion) {
-      return;
-    }
-
-    const sourceTokens = sourceVersion.split('.');
-    const destinationTokens = destinationVersion.split('.');
-
-    const [major, minor, patch] = sourceTokens.map(
-      (value, index) => value === destinationTokens[index]
-    );
-
     if (
-      (strategy === 'major' && major) ||
-      (strategy === 'minor' && major && minor) ||
-      (strategy === 'patch' && major && minor && patch)
+      !sourceVersion ||
+      !destinationVersion ||
+      strategy === 'ignore' ||
+      destinationVersion === sourceVersion
     ) {
+      return;
+    }
+
+    let diff;
+    try {
+      diff = semverDiff(sourceVersion, destinationVersion);
+    } catch (e: unknown) {
+      throw new Error(
+        `Strapi versions doesn't match (${strategy} check): ${sourceVersion} does not match with ${destinationVersion}`
+      );
+    }
+    if (!diff) {
+      return;
+    }
+
+    const validPatch = ['prelease', 'build'];
+    const validMinor = [...validPatch, 'patch', 'prepatch'];
+    const validMajor = [...validMinor, 'minor', 'preminor'];
+    if (strategy === 'patch' && validPatch.includes(diff)) {
+      return;
+    }
+    if (strategy === 'minor' && validMinor.includes(diff)) {
+      return;
+    }
+    if (strategy === 'major' && validMajor.includes(diff)) {
       return;
     }
 
@@ -228,10 +236,6 @@ class TransferEngine<
 
       return true;
     } catch (error) {
-      if (error instanceof Error) {
-        console.error('Integrity checks failed:', error.message);
-      }
-
       return false;
     }
   }

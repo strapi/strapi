@@ -15,6 +15,7 @@ import {
 import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
 
 import { getTrad } from '../../utils';
 import { AssetType } from '../../constants';
@@ -40,7 +41,10 @@ export const UploadingAssetCard = ({
   const { upload, cancel, error, progress, status } = useUpload();
   const { formatMessage } = useIntl();
 
-  let badgeContent;
+  let badgeContent = formatMessage({
+    id: getTrad('settings.section.doc.label'),
+    defaultMessage: 'Doc',
+  });
 
   if (asset.type === AssetType.Image) {
     badgeContent = formatMessage({
@@ -56,11 +60,6 @@ export const UploadingAssetCard = ({
     badgeContent = formatMessage({
       id: getTrad('settings.section.audio.label'),
       defaultMessage: 'Audio',
-    });
-  } else {
-    badgeContent = formatMessage({
-      id: getTrad('settings.section.doc.label'),
-      defaultMessage: 'Doc',
     });
   }
 
@@ -88,7 +87,7 @@ export const UploadingAssetCard = ({
 
   return (
     <Stack spacing={1}>
-      <Card borderColor={error ? 'danger600' : undefined}>
+      <Card borderColor={error ? 'danger600' : 'neutral150'}>
         <CardHeader>
           <UploadProgressWrapper>
             <UploadProgress error={error} onCancel={handleCancel} progress={progress} />
@@ -103,7 +102,9 @@ export const UploadingAssetCard = ({
               <Extension>{asset.ext}</Extension>
             </CardSubtitle>
           </CardContent>
-          <CardBadge>{badgeContent}</CardBadge>
+          <Flex paddingTop={1} grow={1}>
+            <CardBadge>{badgeContent}</CardBadge>
+          </Flex>
         </CardBody>
       </Card>
       {error ? (
