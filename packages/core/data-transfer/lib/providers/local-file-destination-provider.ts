@@ -234,6 +234,41 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
     return chain([stringer(), entryStream]);
   }
+
+  getAssetsStream(): NodeJS.WritableStream {
+    const { stream: archiveStream } = this.#archive;
+
+    if (!archiveStream) {
+      throw new Error('Archive stream is unavailable');
+    }
+
+    return new Writable({
+      objectMode: true,
+      write(data, _encoding, callback) {
+        const entryPath = path.join('assets', 'uploads', data.file);
+
+        const entry = archiveStream.entry({
+          name: entryPath,
+          size: data.stats.size,
+        });
+
+        if (!entry) {
+          callback(new Error(`Failed to created a tar entry for ${entryPath}`));
+          return;
+        }
+
+        data.stream.pipe(entry);
+
+        entry
+          .on('finish', () => {
+            callback(null);
+          })
+          .on('error', (error) => {
+            callback(error);
+          });
+      },
+    });
+  }
 }
 
 /**
