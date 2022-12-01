@@ -39,7 +39,7 @@ const {
   deleteRelations,
   cleanOrderColumns,
 } = require('./regular-relations');
-const relationsOrderer = require('./relations-orderer');
+const { relationsOrderer } = require('./relations-orderer');
 
 const toId = (value) => value.id || value;
 const toIds = (value) => castArray(value || []).map(toId);

@@ -3,6 +3,73 @@
 const _ = require('lodash/fp');
 
 /**
+ * When connecting relations, the order you connect them matters.
+ *
+ * Example, if you connect the following relations:
+ *   { id: 5, position: { before: 1 } }
+ *   { id: 1, position: { before: 2 } }
+ *   { id: 2, position: { end: true } }
+ *
+ * Going through the connect array, id 5 has to be connected before id 1,
+ * so the order of id5 = id1 - 1. But the order value of id 1 is unknown.
+ * The only way to know the order of id 1 is to connect it first.
+ *
+ * This function makes sure the relations are connected in the right order:
+ *   { id: 2, position: { end: true } }
+ *   { id: 1, position: { before: 2 } }
+ *   { id: 5, position: { before: 1 } }
+ *
+ */
+const sortConnectArray = (connectArr, initialArr = []) => {
+  const sortedConnect = [];
+  // Map to validate if relation is already in sortedConnect or DB.
+  const relInArray = initialArr.reduce((acc, rel) => ({ ...acc, [rel.id]: true }), {});
+  // Map to validate if connect relation has already been computed
+  const computedIdx = {};
+  // Map to store the first index where a relation id is connected
+  const firstSeen = {};
+
+  // Populate firstSeen
+  connectArr.forEach((rel, idx) => {
+    if (!(rel.id in firstSeen)) firstSeen[rel.id] = idx;
+  });
+
+  // Iterate over connectArr and populate sortedConnect
+  connectArr.forEach((rel, idx) => {
+    const pushRelation = (rel) => {
+      sortedConnect.push(rel);
+      relInArray[rel.id] = true;
+    };
+
+    const computeRelation = (rel) => {
+      const adjacentRelId = rel.position?.before || rel.position?.after;
+
+      // This connect has already been computed
+      if (idx in computedIdx) return;
+
+      if (!adjacentRelId || relInArray[adjacentRelId]) {
+        return pushRelation(rel);
+      }
+
+      // Look if id is referenced elsewhere in the array
+      const adjacentRelIdx = firstSeen[adjacentRelId];
+      if (adjacentRelIdx) {
+        const adjacentRel = connectArr[adjacentRelIdx];
+        // Mark adjacent relation idx as computed,
+        // so it is not computed again later in the loop
+        computedIdx[adjacentRelIdx] = true;
+        computeRelation(adjacentRel);
+        pushRelation(rel);
+      }
+    };
+
+    computeRelation(rel);
+  });
+
+  return sortedConnect;
+};
+
+/**
  * Responsible for calculating the relations order when connecting them.
  *
  * The connect method takes an array of relations with positional attributes:
@@ -41,7 +108,6 @@ const relationsOrderer = (initArr, idColumn, orderColumn) => {
 
   const maxOrder = _.maxBy('order', arr)?.order || 0;
 
-  // TODO: Improve performance by using a map
   const findRelation = (id) => {
     const idx = arr.findIndex((r) => r.id === id);
     return { idx, relation: arr[idx] };
@@ -87,7 +153,8 @@ const relationsOrderer = (initArr, idColumn, orderColumn) => {
       return this;
     },
     connect(relations) {
-      _.castArray(relations).forEach((relation) => {
+      const sortedRelations = sortConnectArray(relations, arr);
+      sortedRelations.forEach((relation) => {
         this.disconnect(relation);
 
         try {
@@ -123,4 +190,4 @@ const relationsOrderer = (initArr, idColumn, orderColumn) => {
   };
 };
 
-module.exports = relationsOrderer;
+module.exports = { relationsOrderer, sortConnectArray };

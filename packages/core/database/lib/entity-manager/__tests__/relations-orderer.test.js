@@ -1,6 +1,6 @@
 'use strict';
 
-const relationsOrderer = require('../relations-orderer');
+const { relationsOrderer } = require('../relations-orderer');
 
 describe('relations orderer', () => {
   test('connect at the end', () => {
@@ -80,6 +80,24 @@ describe('relations orderer', () => {
       { id: 2, order: 0.5 },
       { id: 1, order: 0.5 },
       { id: 3, order: 0.5 },
+    ]);
+  });
+
+  test('connect with disordered relations', () => {
+    const orderer = relationsOrderer([], 'id', 'order');
+
+    orderer.connect([
+      { id: 5, position: { before: 1 } },
+      { id: 1, position: { before: 2 } },
+      { id: 2, position: { end: true } },
+      { id: 3, position: { after: 1 } },
+    ]);
+
+    expect(orderer.get()).toMatchObject([
+      { id: 5, order: 0.5 },
+      { id: 1, order: 0.5 },
+      { id: 3, order: 0.5 },
+      { id: 2, order: 0.5 },
     ]);
   });
 });
