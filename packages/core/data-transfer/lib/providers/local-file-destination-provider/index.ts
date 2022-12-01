@@ -1,19 +1,20 @@
 import fs from 'fs-extra';
-import path from 'path';
 import tar from 'tar-stream';
+import path from 'path';
 import zlib from 'zlib';
-import { Writable, Readable } from 'stream';
+import { Readable } from 'stream';
 import { stringer } from 'stream-json/jsonl/Stringer';
-import { chain } from 'stream-chain';
+import { chain, Writable } from 'stream-chain';
 import type {
   IDestinationProvider,
   IDestinationProviderTransferResults,
   IMetadata,
   ProviderType,
   Stream,
-} from '../../types';
+} from '../../../types';
 
-import { createEncryptionCipher } from '../encryption/encrypt';
+import { createEncryptionCipher } from '../../encryption/encrypt';
+import { createFilePathFactory, createTarEntryStream } from './utils';
 
 export interface ILocalFileDestinationProviderOptions {
   // Encryption
@@ -99,6 +100,10 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return transforms;
   }
 
+  createGzip(): zlib.Gzip {
+    return zlib.createGzip();
+  }
+
   bootstrap(): void | Promise<void> {
     const { compression, encryption } = this.options;
 
@@ -113,7 +118,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     const archiveTransforms: Stream[] = [];
 
     if (compression.enabled) {
-      archiveTransforms.push(zlib.createGzip());
+      archiveTransforms.push(this.createGzip());
     }
 
     if (encryption.enabled && encryption.key) {
@@ -273,77 +278,3 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     });
   }
 }
-
-/**
- * Create a file path factory for a given path & prefix.
- * Upon being called, the factory will return a file path for a given index
- */
-const createFilePathFactory =
-  (type: string) =>
-  (fileIndex = 0): string => {
-    return path.join(
-      // "{type}" directory
-      type,
-      // "${type}_XXXXX.jsonl" file
-      `${type}_${String(fileIndex).padStart(5, '0')}.jsonl`
-    );
-  };
-
-const createTarEntryStream = (
-  archive: tar.Pack,
-  pathFactory: (index?: number) => string,
-  maxSize = 2.56e8
-) => {
-  let fileIndex = 0;
-  let buffer = '';
-
-  const flush = async () => {
-    if (!buffer) {
-      return;
-    }
-
-    fileIndex += 1;
-    const name = pathFactory(fileIndex);
-    const size = buffer.length;
-
-    await new Promise<void>((resolve, reject) => {
-      archive.entry({ name, size }, buffer, (err) => {
-        if (err) {
-          reject(err);
-        }
-
-        resolve();
-      });
-    });
-
-    buffer = '';
-  };
-
-  const push = (chunk: string | Buffer) => {
-    buffer += chunk;
-  };
-
-  return new Writable({
-    async destroy(err, callback) {
-      await flush();
-      callback(err);
-    },
-
-    async write(chunk, _encoding, callback) {
-      const size = chunk.length;
-
-      if (chunk.length > maxSize) {
-        callback(new Error(`payload too large: ${chunk.length}>${maxSize}`));
-        return;
-      }
-
-      if (buffer.length + size > maxSize) {
-        await flush();
-      }
-
-      push(chunk);
-
-      callback(null);
-    },
-  });
-};
