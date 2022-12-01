@@ -5,6 +5,8 @@ import zlib from 'zlib';
 import { Readable } from 'stream';
 import { stringer } from 'stream-json/jsonl/Stringer';
 import { chain, Writable } from 'stream-chain';
+
+import { createEncryptionCipher } from '../../encryption/encrypt';
 import type {
   IDestinationProvider,
   IDestinationProviderTransferResults,
@@ -12,8 +14,6 @@ import type {
   ProviderType,
   Stream,
 } from '../../../types';
-
-import { createEncryptionCipher } from '../../encryption/encrypt';
 import { createFilePathFactory, createTarEntryStream } from './utils';
 
 export interface ILocalFileDestinationProviderOptions {

@@ -12,7 +12,6 @@ import type {
 } from '../../types';
 
 import compareSchemas from '../strategies';
-
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const semverDiff = require('semver/functions/diff');
 
@@ -286,6 +285,7 @@ class TransferEngine<
     return {
       source: this.sourceProvider.results,
       destination: this.destinationProvider.results,
+      engine: this.#transferProgress,
     };
   }
 
