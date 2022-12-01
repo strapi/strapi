@@ -872,6 +872,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                   aria-hidden="true"
                                   class="c1 c26 c27 c28"
                                   tabindex="-1"
+                                  title="Carret Down Button"
                                   type="button"
                                 >
                                   <svg

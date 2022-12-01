@@ -998,6 +998,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                               aria-hidden="true"
                               class="c1 c31 c32 c33"
                               tabindex="-1"
+                              title="Carret Down Button"
                               type="button"
                             >
                               <svg
@@ -2462,6 +2463,7 @@ exports[`EditSettingsView should add field 1`] = `
                               aria-hidden="true"
                               class="c1 c31 c32 c33"
                               tabindex="-1"
+                              title="Carret Down Button"
                               type="button"
                             >
                               <svg
