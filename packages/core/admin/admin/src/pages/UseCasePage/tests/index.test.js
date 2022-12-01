@@ -710,7 +710,7 @@ describe('Admin | UseCasePage', () => {
                       alt=""
                       aria-hidden="true"
                       class="c15"
-                      src="defaultAuthLogo.png"
+                      src="customAuthLogo.png"
                     />
                     <div
                       class="c0 c16"

@@ -47,9 +47,9 @@ const ApplicationInfosPage = () => {
     : 'app.components.UpgradePlanModal.text-ee';
 
   const submitMutation = useMutation((body) => postProjectSettings(body), {
-    async onSuccess({ menuLogo }) {
+    async onSuccess({ menuLogo, authLogo }) {
       await queryClient.invalidateQueries('project-settings', { refetchActive: true });
-      updateProjectSettings({ menuLogo: menuLogo?.url });
+      updateProjectSettings({ menuLogo: menuLogo?.url, authLogo: authLogo?.url });
     },
   });
 
