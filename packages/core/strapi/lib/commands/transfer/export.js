@@ -12,11 +12,7 @@ const fs = require('fs-extra');
 
 const chalk = require('chalk');
 const strapi = require('../../index');
-const { buildTransferTable, yyyymmddHHMMSS } = require('./util');
-
-const getDefaultExportName = () => {
-  return `export_${yyyymmddHHMMSS()}`;
-};
+const { getDefaultExportName, buildTransferTable } = require('./utils');
 
 const logger = console;
 
@@ -79,7 +75,7 @@ module.exports = async (opts) => {
    */
   const engineOptions = {
     strategy: 'restore', // for an export to file, strategy will always be 'restore'
-    versionMatching: 'ignore', // for an export to file, versionMatching will always be skipped
+    versionMatching: 'minor', // for an export to file, versionMatching will always be skipped
     exclude: opts.exclude,
   };
   const engine = createTransferEngine(source, destination, engineOptions);

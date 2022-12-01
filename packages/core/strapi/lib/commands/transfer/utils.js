@@ -21,6 +21,10 @@ const yyyymmddHHMMSS = () => {
   );
 };
 
+const getDefaultExportName = () => {
+  return `export_${yyyymmddHHMMSS()}`;
+};
+
 const buildTransferTable = (resultData) => {
   // Build pretty table
   const table = new Table({
@@ -63,5 +67,6 @@ const buildTransferTable = (resultData) => {
 
 module.exports = {
   buildTransferTable,
+  getDefaultExportName,
   yyyymmddHHMMSS,
 };

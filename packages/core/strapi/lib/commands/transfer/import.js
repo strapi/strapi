@@ -10,7 +10,7 @@ const {
 const { isObject } = require('lodash/fp');
 
 const strapi = require('../../index');
-const { buildTransferTable } = require('./util');
+const { buildTransferTable } = require('./utils');
 
 const logger = console;
 
