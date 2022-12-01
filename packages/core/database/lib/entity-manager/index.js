@@ -19,6 +19,7 @@ const {
   isNumber,
   map,
   difference,
+  uniqBy,
 } = require('lodash/fp');
 const types = require('../types');
 const { createField } = require('../fields');
@@ -569,7 +570,7 @@ const createEntityManager = (db) => {
           }
 
           // prepare new relations to insert
-          const insert = relsToAdd.map((data) => {
+          const insert = uniqBy('id', relsToAdd).map((data) => {
             return {
               [joinColumn.name]: id,
               [inverseJoinColumn.name]: data.id,
@@ -623,13 +624,7 @@ const createEntityManager = (db) => {
           }
 
           // insert new relations
-          // ignore duplicates, as connect syntax can contain duplicated ids to add
-          await this.createQueryBuilder(joinTable.name)
-            .insert(insert)
-            .onConflict(joinTable.pivotColumns)
-            .ignore()
-            .transacting(trx)
-            .execute();
+          await this.createQueryBuilder(joinTable.name).insert(insert).transacting(trx).execute();
         }
       }
     },
@@ -841,7 +836,7 @@ const createEntityManager = (db) => {
               }
 
               // prepare relations to insert
-              const insert = cleanRelationData.connect.map((relToAdd) => ({
+              const insert = uniqBy('id', cleanRelationData.connect).map((relToAdd) => ({
                 [joinColumn.name]: id,
                 [inverseJoinColumn.name]: relToAdd.id,
                 ...(joinTable.on || {}),
@@ -953,7 +948,7 @@ const createEntityManager = (db) => {
                 continue;
               }
 
-              const insert = cleanRelationData.set.map((relToAdd) => ({
+              const insert = uniqBy('id', cleanRelationData.set).map((relToAdd) => ({
                 [joinColumn.name]: id,
                 [inverseJoinColumn.name]: relToAdd.id,
                 ...(joinTable.on || {}),
