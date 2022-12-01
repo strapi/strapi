@@ -17,7 +17,7 @@ const LogoInput = ({
   hint,
   label,
   onChangeLogo,
-  onResetMenuLogo,
+  onResetLogo,
 }) => {
   const [{ currentStep }, dispatch] = useReducer(reducer, initialState);
   const { Component, next, prev, modalTitle } = stepper[currentStep] || {};
@@ -57,7 +57,7 @@ const LogoInput = ({
             {customLogo && (
               <IconButton
                 disabled={!canUpdate}
-                onClick={onResetMenuLogo}
+                onClick={onResetLogo}
                 label={formatMessage({
                   id: 'Settings.application.customization.carousel.reset-action',
                   defaultMessage: 'Reset logo',
@@ -116,7 +116,7 @@ LogoInput.propTypes = {
   hint: PropTypes.string,
   defaultLogo: PropTypes.string.isRequired,
   onChangeLogo: PropTypes.func.isRequired,
-  onResetMenuLogo: PropTypes.func.isRequired,
+  onResetLogo: PropTypes.func.isRequired,
 };
 
 export default LogoInput;

@@ -1,0 +1,1192 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ApplicationInfosPage shoud render from computer tab and match snapshot 1`] = `
+.c32 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c6 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #4945ff;
+}
+
+.c8 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c19 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c23 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 1.14;
+  color: #32324d;
+}
+
+.c25 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c1 {
+  padding-right: 40px;
+  padding-left: 40px;
+}
+
+.c3 {
+  padding: 16px;
+}
+
+.c9 {
+  background: #eaeaef;
+}
+
+.c11 {
+  padding-top: 24px;
+  padding-right: 40px;
+  padding-bottom: 24px;
+  padding-left: 40px;
+}
+
+.c14 {
+  background: #f6f6f9;
+  padding-top: 48px;
+  padding-bottom: 32px;
+  border-radius: 4px;
+  border-style: dashed;
+  border-width: 1px;
+  border-color: #c0c0cf;
+  position: relative;
+}
+
+.c16 {
+  color: #4945ff;
+  width: 3.75rem;
+  height: 3.75rem;
+}
+
+.c18 {
+  padding-top: 12px;
+  padding-bottom: 20px;
+}
+
+.c24 {
+  padding-top: 24px;
+}
+
+.c26 {
+  background: #f6f6f9;
+  padding-top: 16px;
+  padding-right: 20px;
+  padding-bottom: 16px;
+  padding-left: 20px;
+}
+
+.c12 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c15 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c28 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c29 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c4 {
+  border-bottom: 2px solid #4945ff;
+}
+
+.c7 {
+  border-bottom: 2px solid transparent;
+}
+
+.c2[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c10 {
+  height: 1px;
+  border: none;
+  margin: 0;
+}
+
+.c13 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c13 > * + * {
+  margin-top: 8px;
+}
+
+.c17 path {
+  fill: #4945ff;
+}
+
+.c21 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c21 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c21 svg > g,
+.c21 svg path {
+  fill: #ffffff;
+}
+
+.c21[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c21:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c21:focus-visible {
+  outline: none;
+}
+
+.c21:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c27 {
+  border-radius: 0 0 4px 4px;
+  border-top: 1px solid #eaeaef;
+}
+
+.c30 > * + * {
+  margin-left: 8px;
+}
+
+.c22 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: #4945ff;
+  border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.c22 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c22 .c5 {
+  color: #ffffff;
+}
+
+.c22[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c22[aria-disabled='true'] .c5 {
+  color: #666687;
+}
+
+.c22[aria-disabled='true'] svg > g,
+.c22[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c22[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c22[aria-disabled='true']:active .c5 {
+  color: #666687;
+}
+
+.c22[aria-disabled='true']:active svg > g,
+.c22[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c22:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c22:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c22 svg > g,
+.c22 svg path {
+  fill: #ffffff;
+}
+
+.c31 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: #4945ff;
+  border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+}
+
+.c31 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c31 .c5 {
+  color: #ffffff;
+}
+
+.c31[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c31[aria-disabled='true'] .c5 {
+  color: #666687;
+}
+
+.c31[aria-disabled='true'] svg > g,
+.c31[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c31[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c31[aria-disabled='true']:active .c5 {
+  color: #666687;
+}
+
+.c31[aria-disabled='true']:active svg > g,
+.c31[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c31:hover {
+  background-color: #f6f6f9;
+}
+
+.c31:active {
+  background-color: #eaeaef;
+}
+
+.c31 .c5 {
+  color: #32324d;
+}
+
+.c31 svg > g,
+.c31 svg path {
+  fill: #32324d;
+}
+
+.c20 {
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+}
+
+<div>
+  <div>
+    <div
+      class="c0 c1"
+    >
+      <div
+        aria-label="How do you want to upload your assets?"
+        role="tablist"
+      >
+        <button
+          aria-controls="tabgroup-1-0-tabpanel"
+          aria-disabled="false"
+          aria-selected="true"
+          class="c2"
+          id="tabgroup-1-0-tab"
+          role="tab"
+          tabindex="0"
+          type="button"
+        >
+          <div
+            class="c0 c3 c4"
+          >
+            <span
+              class="c5 c6"
+            >
+              From computer
+            </span>
+          </div>
+        </button>
+        <button
+          aria-disabled="false"
+          aria-selected="false"
+          class="c2"
+          id="tabgroup-1-1-tab"
+          role="tab"
+          tabindex="-1"
+          type="button"
+        >
+          <div
+            class="c0 c3 c7"
+          >
+            <span
+              class="c5 c8"
+            >
+              From url
+            </span>
+          </div>
+        </button>
+      </div>
+      <hr
+        class="c0 c9 c10"
+      />
+    </div>
+    <div>
+      <div
+        aria-labelledby="tabgroup-1-0-tab"
+        id="tabgroup-1-0-tabpanel"
+        role="tabpanel"
+        tabindex="0"
+      >
+        <form>
+          <div
+            class="c0 c11"
+          >
+            <div>
+              <label
+                for="logo-upload"
+              >
+                <div
+                  class="c0 c12 c13"
+                  spacing="2"
+                >
+                  <div
+                    class="c0 c14 c15"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="c0 c16 c17"
+                      fill="none"
+                      height="3.75rem"
+                      viewBox="0 0 24 20"
+                      width="3.75rem"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M21.569 2.398H7.829v1.586h13.74c.47 0 .826.5.826 1.094v9.853l-2.791-3.17a2.13 2.13 0 00-.74-.55 2.214 2.214 0 00-.912-.196 2.215 2.215 0 00-.912.191 2.131 2.131 0 00-.74.546l-2.93 3.385-2.973-3.36a2.147 2.147 0 00-.741-.545 2.228 2.228 0 00-1.824.007c-.286.13-.538.319-.739.553l-2.931 3.432V7.653H2.51v9.894c.023.153.06.304.108.452v.127l.041.095c.057.142.126.28.207.412l.099.15c.074.107.157.207.247.302l.124.119c.13.118.275.222.43.309h.024c.36.214.775.327 1.198.325h16.515c.36-.004.716-.085 1.039-.24.323-.153.606-.375.827-.648a2.78 2.78 0 00.504-.888c.066-.217.108-.44.124-.666V5.078a2.497 2.497 0 00-.652-1.81 2.706 2.706 0 00-1.776-.87z"
+                        fill="#32324D"
+                      />
+                      <path
+                        d="M12.552 9.199c.912 0 1.651-.71 1.651-1.585 0-.876-.74-1.586-1.651-1.586-.912 0-1.652.71-1.652 1.586 0 .875.74 1.585 1.652 1.585zM3.303 6.408h.826V3.997h2.477v-.793-.793H4.129V0h-.826c-.219 0-.85.002-.826 0v2.411H0v1.586h2.477v2.41h.826z"
+                        fill="#32324D"
+                      />
+                    </svg>
+                    <div
+                      class="c0 c18"
+                    >
+                      <span
+                        class="c5 c19"
+                      >
+                        Drag and Drop here or
+                      </span>
+                    </div>
+                    <input
+                      accept="image/jpeg,image/png,image/svg+xml"
+                      class="c20"
+                      cursor="pointer"
+                      id="logo-upload"
+                      name="files"
+                      tabindex="-1"
+                      type="file"
+                    />
+                    <button
+                      aria-disabled="false"
+                      class="c21 c22"
+                      type="button"
+                    >
+                      <span
+                        class="c5 c23"
+                      >
+                        Browse files
+                      </span>
+                    </button>
+                    <div
+                      class="c0 c24"
+                    >
+                      <span
+                        class="c5 c25"
+                      >
+                        Max dimension: 750x750, Max size: 100KB
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </form>
+        <div
+          class="c0 c26 c27"
+        >
+          <div
+            class="c0 c28"
+          >
+            <div
+              class="c0 c29 c30"
+            >
+              <button
+                aria-disabled="false"
+                class="c21 c31"
+                type="button"
+              >
+                <span
+                  class="c5 c23"
+                >
+                  Cancel
+                </span>
+              </button>
+            </div>
+            <div
+              class="c0 c29 c30"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="c32"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </div>
+</div>
+`;
+
+exports[`ApplicationInfosPage shoud render from url tab and match snapshot 1`] = `
+.c26 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c8 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #4945ff;
+}
+
+.c6 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c24 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 1.14;
+  color: #32324d;
+}
+
+.c14 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c1 {
+  padding-right: 40px;
+  padding-left: 40px;
+}
+
+.c3 {
+  padding: 16px;
+}
+
+.c9 {
+  background: #eaeaef;
+}
+
+.c11 {
+  padding-top: 24px;
+  padding-right: 40px;
+  padding-bottom: 24px;
+  padding-left: 40px;
+}
+
+.c19 {
+  background: #f6f6f9;
+  padding-top: 16px;
+  padding-right: 20px;
+  padding-bottom: 16px;
+  padding-left: 20px;
+}
+
+.c12 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c16 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c15 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c7 {
+  border-bottom: 2px solid #4945ff;
+}
+
+.c4 {
+  border-bottom: 2px solid transparent;
+}
+
+.c2[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c10 {
+  height: 1px;
+  border: none;
+  margin: 0;
+}
+
+.c13 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c13 > * + * {
+  margin-top: 4px;
+}
+
+.c22 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c22 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c22 svg > g,
+.c22 svg path {
+  fill: #ffffff;
+}
+
+.c22[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c22:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c22:focus-visible {
+  outline: none;
+}
+
+.c22:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c20 {
+  border-radius: 0 0 4px 4px;
+  border-top: 1px solid #eaeaef;
+}
+
+.c21 > * + * {
+  margin-left: 8px;
+}
+
+.c25 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: #4945ff;
+  border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.c25 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c25 .c5 {
+  color: #ffffff;
+}
+
+.c25[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c25[aria-disabled='true'] .c5 {
+  color: #666687;
+}
+
+.c25[aria-disabled='true'] svg > g,
+.c25[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c25[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c25[aria-disabled='true']:active .c5 {
+  color: #666687;
+}
+
+.c25[aria-disabled='true']:active svg > g,
+.c25[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c25:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c25:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c25 svg > g,
+.c25 svg path {
+  fill: #ffffff;
+}
+
+.c23 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: #4945ff;
+  border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+}
+
+.c23 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c23 .c5 {
+  color: #ffffff;
+}
+
+.c23[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c23[aria-disabled='true'] .c5 {
+  color: #666687;
+}
+
+.c23[aria-disabled='true'] svg > g,
+.c23[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c23[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c23[aria-disabled='true']:active .c5 {
+  color: #666687;
+}
+
+.c23[aria-disabled='true']:active svg > g,
+.c23[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c23:hover {
+  background-color: #f6f6f9;
+}
+
+.c23:active {
+  background-color: #eaeaef;
+}
+
+.c23 .c5 {
+  color: #32324d;
+}
+
+.c23 svg > g,
+.c23 svg path {
+  fill: #32324d;
+}
+
+.c18 {
+  border: none;
+  border-radius: 4px;
+  padding-bottom: 0.65625rem;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 0.65625rem;
+  color: #32324d;
+  font-weight: 400;
+  font-size: 0.875rem;
+  display: block;
+  width: 100%;
+  background: inherit;
+}
+
+.c18::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c18::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c18:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c18::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c18[aria-disabled='true'] {
+  color: inherit;
+}
+
+.c18:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.c17 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c17:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+<div>
+  <div>
+    <div
+      class="c0 c1"
+    >
+      <div
+        aria-label="How do you want to upload your assets?"
+        role="tablist"
+      >
+        <button
+          aria-disabled="false"
+          aria-selected="false"
+          class="c2"
+          id="tabgroup-3-0-tab"
+          role="tab"
+          tabindex="-1"
+          type="button"
+        >
+          <div
+            class="c0 c3 c4"
+          >
+            <span
+              class="c5 c6"
+            >
+              From computer
+            </span>
+          </div>
+        </button>
+        <button
+          aria-controls="tabgroup-3-1-tabpanel"
+          aria-disabled="false"
+          aria-selected="true"
+          class="c2"
+          id="tabgroup-3-1-tab"
+          role="tab"
+          tabindex="0"
+          type="button"
+        >
+          <div
+            class="c0 c3 c7"
+          >
+            <span
+              class="c5 c8"
+            >
+              From url
+            </span>
+          </div>
+        </button>
+      </div>
+      <hr
+        class="c0 c9 c10"
+      />
+    </div>
+    <div>
+      <div
+        aria-labelledby="tabgroup-3-1-tab"
+        id="tabgroup-3-1-tabpanel"
+        role="tabpanel"
+        tabindex="0"
+      >
+        <form>
+          <div
+            class="c0 c11"
+          >
+            <div>
+              <div>
+                <div
+                  class="c0 c12 c13"
+                  spacing="1"
+                >
+                  <label
+                    class="c5 c14"
+                    for="textinput-6"
+                  >
+                    <div
+                      class="c0 c15"
+                    >
+                      URL
+                    </div>
+                  </label>
+                  <div
+                    class="c0 c16 c17"
+                  >
+                    <input
+                      aria-disabled="false"
+                      aria-invalid="false"
+                      class="c18"
+                      id="textinput-6"
+                      name="logo-url"
+                      value=""
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="c0 c19 c20"
+          >
+            <div
+              class="c0 c16"
+            >
+              <div
+                class="c0 c15 c21"
+              >
+                <button
+                  aria-disabled="false"
+                  class="c22 c23"
+                  type="button"
+                >
+                  <span
+                    class="c5 c24"
+                  >
+                    Cancel
+                  </span>
+                </button>
+              </div>
+              <div
+                class="c0 c15 c21"
+              >
+                <button
+                  aria-disabled="false"
+                  class="c22 c25"
+                  type="submit"
+                >
+                  <span
+                    class="c5 c24"
+                  >
+                    Next
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div
+    class="c26"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </div>
+</div>
+`;

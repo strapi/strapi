@@ -86,7 +86,7 @@ const Form = forwardRef(({ canUpdate, projectSettingsStored }, ref) => {
             )}
             label={formatMessage({ id: 'app', defaultMessage: 'Menu logo' })}
             onChangeLogo={handleChangeMenuLogo}
-            onResetMenuLogo={handleResetMenuLogo}
+            onResetLogo={handleResetMenuLogo}
           />
         </GridItem>
         <GridItem col={6} s={12}>
@@ -105,7 +105,7 @@ const Form = forwardRef(({ canUpdate, projectSettingsStored }, ref) => {
             )}
             label={formatMessage({ id: 'app', defaultMessage: 'Auth logo' })}
             onChangeLogo={handleChangeAuthLogo}
-            onResetMenuLogo={handleResetAuthLogo}
+            onResetLogo={handleResetAuthLogo}
           />
         </GridItem>
       </Grid>

@@ -54,7 +54,7 @@ const render = (props) =>
           defaultLogo="/admin/defaultLogo.png"
           label="logo input label"
           onChangeLogo={jest.fn()}
-          onResetMenuLogo={jest.fn()}
+          onResetLogo={jest.fn()}
           {...props}
         />
       </IntlProvider>
@@ -81,11 +81,32 @@ describe('ApplicationsInfosPage || LogoInput', () => {
       expect(getByRole('button', { name: 'Reset logo' })).toBeInTheDocument();
     });
 
+    it('should call onResetMenuLogo callback', () => {
+      const onResetLogoSpy = jest.fn();
+      const { getByRole } = render({
+        customLogo: CUSTOM_IMAGE_FIXTURES,
+        onResetLogo: onResetLogoSpy,
+      });
+
+      fireEvent.click(getByRole('button', { name: 'Reset logo' }));
+
+      expect(onResetLogoSpy).toHaveBeenCalledTimes(1);
+    });
+
     it('should render disabled actions if no update permissions', () => {
-      const { getByRole } = render({ canUpdate: false, customLogo: CUSTOM_IMAGE_FIXTURES });
+      const onResetLogoSpy = jest.fn();
+      const { getByRole } = render({
+        canUpdate: false,
+        customLogo: CUSTOM_IMAGE_FIXTURES,
+        onResetLogo: onResetLogoSpy,
+      });
 
       expect(getByRole('button', { name: 'Change logo' })).toHaveAttribute('aria-disabled', 'true');
       expect(getByRole('button', { name: 'Reset logo' })).toHaveAttribute('aria-disabled', 'true');
+
+      fireEvent.click(getByRole('button', { name: 'Reset logo' }));
+
+      expect(onResetLogoSpy).toHaveBeenCalledTimes(0);
     });
   });
 

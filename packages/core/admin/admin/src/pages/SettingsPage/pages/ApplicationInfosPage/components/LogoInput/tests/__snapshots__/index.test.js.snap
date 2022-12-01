@@ -654,7 +654,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
       >
         <label
           class="c3 c4"
-          for="carouselinput-25"
+          for="carouselinput-32"
         >
           <div
             class="c0 c5"
@@ -664,7 +664,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
         </label>
         <div
           class="c0 "
-          id="carouselinput-25"
+          id="carouselinput-32"
         >
           <div
             class="c0 c6"
@@ -702,7 +702,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                 <span>
                   <button
                     aria-disabled="false"
-                    aria-labelledby="tooltip-26"
+                    aria-labelledby="tooltip-33"
                     class="c17 c18"
                     tabindex="0"
                     type="button"
@@ -735,7 +735,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
             >
               <span>
                 <div
-                  aria-labelledby="tooltip-28"
+                  aria-labelledby="tooltip-35"
                   class="c0 c12"
                   tabindex="0"
                 >
@@ -779,7 +779,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   >
     <div
       class="c0 c23 c24"
-      id="tooltip-26"
+      id="tooltip-33"
       role="tooltip"
     >
       <p
@@ -794,7 +794,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   >
     <div
       class="c0 c23 c24"
-      id="tooltip-28"
+      id="tooltip-35"
       role="tooltip"
     >
       <p
@@ -866,11 +866,11 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                   role="tablist"
                 >
                   <button
-                    aria-controls="tabgroup-35-0-tabpanel"
+                    aria-controls="tabgroup-42-0-tabpanel"
                     aria-disabled="false"
                     aria-selected="true"
                     class="c34"
-                    id="tabgroup-35-0-tab"
+                    id="tabgroup-42-0-tab"
                     role="tab"
                     tabindex="0"
                     type="button"
@@ -889,7 +889,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                     aria-disabled="false"
                     aria-selected="false"
                     class="c34"
-                    id="tabgroup-35-1-tab"
+                    id="tabgroup-42-1-tab"
                     role="tab"
                     tabindex="-1"
                     type="button"
@@ -911,8 +911,8 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
               </div>
               <div>
                 <div
-                  aria-labelledby="tabgroup-35-0-tab"
-                  id="tabgroup-35-0-tabpanel"
+                  aria-labelledby="tabgroup-42-0-tab"
+                  id="tabgroup-42-0-tabpanel"
                   role="tabpanel"
                   tabindex="0"
                 >
@@ -1352,7 +1352,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
       >
         <label
           class="c3 c4"
-          for="carouselinput-123"
+          for="carouselinput-130"
         >
           <div
             class="c0 c5"
@@ -1362,7 +1362,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
         </label>
         <div
           class="c0 "
-          id="carouselinput-123"
+          id="carouselinput-130"
         >
           <div
             class="c0 c6"
@@ -1400,7 +1400,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                 <span>
                   <button
                     aria-disabled="false"
-                    aria-labelledby="tooltip-124"
+                    aria-labelledby="tooltip-131"
                     class="c17 c18"
                     tabindex="0"
                     type="button"
@@ -1433,7 +1433,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
             >
               <span>
                 <div
-                  aria-labelledby="tooltip-126"
+                  aria-labelledby="tooltip-133"
                   class="c0 c12"
                   tabindex="0"
                 >
@@ -1546,7 +1546,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   >
     <div
       class="c0 c1 c2"
-      id="tooltip-124"
+      id="tooltip-131"
       role="tooltip"
     >
       <p
@@ -1630,7 +1630,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   >
     <div
       class="c0 c1 c2"
-      id="tooltip-126"
+      id="tooltip-133"
       role="tooltip"
     >
       <p
@@ -2203,7 +2203,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                     aria-disabled="false"
                     aria-selected="false"
                     class="c13"
-                    id="tabgroup-133-0-tab"
+                    id="tabgroup-140-0-tab"
                     role="tab"
                     tabindex="-1"
                     type="button"
@@ -2219,11 +2219,11 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                     </div>
                   </button>
                   <button
-                    aria-controls="tabgroup-133-1-tabpanel"
+                    aria-controls="tabgroup-140-1-tabpanel"
                     aria-disabled="false"
                     aria-selected="true"
                     class="c13"
-                    id="tabgroup-133-1-tab"
+                    id="tabgroup-140-1-tab"
                     role="tab"
                     tabindex="0"
                     type="button"
@@ -2245,8 +2245,8 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
               </div>
               <div>
                 <div
-                  aria-labelledby="tabgroup-133-1-tab"
-                  id="tabgroup-133-1-tabpanel"
+                  aria-labelledby="tabgroup-140-1-tab"
+                  id="tabgroup-140-1-tabpanel"
                   role="tabpanel"
                   tabindex="0"
                 >
@@ -2262,7 +2262,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                           >
                             <label
                               class="c7 c24"
-                              for="textinput-136"
+                              for="textinput-143"
                             >
                               <div
                                 class="c1 c25"
@@ -2277,7 +2277,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                                 aria-disabled="false"
                                 aria-invalid="false"
                                 class="c27"
-                                id="textinput-136"
+                                id="textinput-143"
                                 name="logo-url"
                                 value=""
                               />

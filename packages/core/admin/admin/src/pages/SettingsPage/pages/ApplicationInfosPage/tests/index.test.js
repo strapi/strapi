@@ -16,11 +16,13 @@ jest.mock('@strapi/helper-plugin', () => ({
   useNotification: jest.fn(),
   useRBAC: jest.fn(() => ({ allowedActions: { canRead: true, canUpdate: true } })),
 }));
-jest.mock('../../../../../hooks/useConfigurations', () => () => ({
-  logos: {
-    menu: { custom: 'customMenuLogo.png', default: 'defaultMenuLogo.png' },
-    auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
-  },
+jest.mock('../../../../../hooks', () => ({
+  useConfigurations: jest.fn(() => ({
+    logos: {
+      menu: { custom: 'customMenuLogo.png', default: 'defaultMenuLogo.png' },
+      auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
+    },
+  })),
 }));
 
 jest.spyOn(axiosInstance, 'get').mockResolvedValue({
