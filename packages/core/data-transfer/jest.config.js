@@ -5,8 +5,10 @@ const pkg = require('./package.json');
 
 module.exports = {
   ...baseConfig,
-  preset: 'ts-jest',
   displayName: (pkg.strapi && pkg.strapi.name) || pkg.name,
   roots: [__dirname],
   testMatch: ['**/__tests__/**/*.test.ts'],
+  transform: {
+    '^.+\\.(t|j)sx?$': ['@swc/jest'],
+  },
 };
