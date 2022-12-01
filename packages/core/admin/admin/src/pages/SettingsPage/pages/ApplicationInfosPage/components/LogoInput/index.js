@@ -10,7 +10,15 @@ import LogoModalStepper from '../LogoModalStepper';
 import reducer, { initialState } from './reducer';
 import stepper from './stepper';
 
-const LogoInput = ({ customLogo, defaultLogo, hint, label, onChangeLogo, onResetMenuLogo }) => {
+const LogoInput = ({
+  canUpdate,
+  customLogo,
+  defaultLogo,
+  hint,
+  label,
+  onChangeLogo,
+  onResetMenuLogo,
+}) => {
   const [{ currentStep }, dispatch] = useReducer(reducer, initialState);
   const { Component, next, prev, modalTitle } = stepper[currentStep] || {};
   const { formatMessage } = useIntl();
@@ -38,6 +46,7 @@ const LogoInput = ({ customLogo, defaultLogo, hint, label, onChangeLogo, onReset
         actions={
           <CarouselActions>
             <IconButton
+              disabled={!canUpdate}
               onClick={() => goTo(customLogo ? 'pending' : 'upload')}
               label={formatMessage({
                 id: 'Settings.application.customization.carousel.change-action',
@@ -47,6 +56,7 @@ const LogoInput = ({ customLogo, defaultLogo, hint, label, onChangeLogo, onReset
             />
             {customLogo && (
               <IconButton
+                disabled={!canUpdate}
                 onClick={onResetMenuLogo}
                 label={formatMessage({
                   id: 'Settings.application.customization.carousel.reset-action',
@@ -91,11 +101,13 @@ const LogoInput = ({ customLogo, defaultLogo, hint, label, onChangeLogo, onReset
 };
 
 LogoInput.defaultProps = {
+  canUpdate: false,
   customLogo: null,
   hint: null,
 };
 
 LogoInput.propTypes = {
+  canUpdate: PropTypes.bool,
   customLogo: PropTypes.shape({
     url: PropTypes.string,
     name: PropTypes.string,

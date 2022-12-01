@@ -5,8 +5,8 @@ import {
   useAppInfos,
   SettingsPageTitle,
   useFocusWhenNavigate,
-  CheckPermissions,
   useNotification,
+  useRBAC,
   useTracking,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, Layout, ContentLayout } from '@strapi/design-system/Layout';
@@ -19,12 +19,11 @@ import { Button } from '@strapi/design-system/Button';
 import { Link } from '@strapi/design-system/v2/Link';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import Check from '@strapi/icons/Check';
+import adminPermissions from '../../../../permissions';
 import { useConfigurations } from '../../../../hooks';
 import Form from './components/Form';
 import { fetchProjectSettings, postProjectSettings } from './utils/api';
 import getFormData from './utils/getFormData';
-
-const permissions = [{ action: 'admin::project-settings.update', subject: null }];
 
 const ApplicationInfosPage = () => {
   const inputsRef = useRef();
@@ -36,6 +35,10 @@ const ApplicationInfosPage = () => {
   const appInfos = useAppInfos();
   const { shouldUpdateStrapi, latestStrapiReleaseTag, strapiVersion } = appInfos;
   const { updateProjectSettings } = useConfigurations();
+
+  const {
+    allowedActions: { canRead, canUpdate },
+  } = useRBAC(adminPermissions.settings['project-settings']);
 
   const { data } = useQuery('project-settings', fetchProjectSettings);
 
@@ -89,9 +92,11 @@ const ApplicationInfosPage = () => {
               defaultMessage: 'Administration panel’s global information',
             })}
             primaryAction={
-              <Button type="submit" startIcon={<Check />}>
-                {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
-              </Button>
+              canRead && canUpdate ? (
+                <Button type="submit" startIcon={<Check />}>
+                  {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
+                </Button>
+              ) : null
             }
           />
           <ContentLayout>
@@ -195,10 +200,8 @@ const ApplicationInfosPage = () => {
                   </Box>
                 </Stack>
               </Box>
-              {data && (
-                <CheckPermissions permissions={permissions}>
-                  <Form ref={inputsRef} projectSettingsStored={data} />
-                </CheckPermissions>
+              {canRead && data && (
+                <Form canUpdate={canUpdate} ref={inputsRef} projectSettingsStored={data} />
               )}
             </Stack>
           </ContentLayout>

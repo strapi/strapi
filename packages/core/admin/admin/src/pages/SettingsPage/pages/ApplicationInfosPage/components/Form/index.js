@@ -11,7 +11,7 @@ import reducer, { initialState } from './reducer';
 import init from './init';
 import { DIMENSION, SIZE } from '../../utils/constants';
 
-const Form = forwardRef(({ projectSettingsStored }, ref) => {
+const Form = forwardRef(({ canUpdate, projectSettingsStored }, ref) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const {
@@ -72,6 +72,7 @@ const Form = forwardRef(({ projectSettingsStored }, ref) => {
       <Grid paddingTop={4} gap={4}>
         <GridItem col={6} s={12}>
           <LogoInput
+            canUpdate={canUpdate}
             customLogo={menuLogo.display}
             defaultLogo={menu.default}
             // TODO translation
@@ -90,6 +91,7 @@ const Form = forwardRef(({ projectSettingsStored }, ref) => {
         </GridItem>
         <GridItem col={6} s={12}>
           <LogoInput
+            canUpdate={canUpdate}
             customLogo={authLogo.display}
             defaultLogo={auth.default}
             // TODO translation
@@ -112,10 +114,12 @@ const Form = forwardRef(({ projectSettingsStored }, ref) => {
 });
 
 Form.defaultProps = {
+  canUpdate: false,
   projectSettingsStored: null,
 };
 
 Form.propTypes = {
+  canUpdate: PropTypes.bool,
   projectSettingsStored: PropTypes.shape({
     menuLogo: PropTypes.shape({
       url: PropTypes.string,
