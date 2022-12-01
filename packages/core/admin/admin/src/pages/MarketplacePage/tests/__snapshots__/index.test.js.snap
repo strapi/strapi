@@ -589,6 +589,25 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   border: none;
 }
 
+.c38 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c38:focus {
+  outline: none;
+}
+
+.c38[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
 .c25 {
   border: none;
   border-radius: 4px;
@@ -650,25 +669,6 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c38 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c38:focus {
-  outline: none;
-}
-
-.c38[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
 .c37 {
   position: relative;
   border: 1px solid #dcdce4;
@@ -723,18 +723,6 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   width: 100%;
 }
 
-.c58 path {
-  fill: #666687;
-}
-
-.c60 path {
-  fill: #f29d41;
-}
-
-.c75 path {
-  fill: #328048;
-}
-
 .c24 {
   font-size: 0.8rem;
 }
@@ -765,6 +753,18 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
 .c18 .c20:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c58 path {
+  fill: #666687;
+}
+
+.c60 path {
+  fill: #f29d41;
+}
+
+.c75 path {
+  fill: #328048;
 }
 
 .c10 {

@@ -1,16 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`GenericInput number renders and matches the snapshot 1`] = `
-.c14 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
+.c2 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c4 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #d02b20;
 }
 
 .c9 {
@@ -77,17 +78,20 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
   margin-top: 4px;
 }
 
-.c2 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
+.c12 path {
+  fill: #8e8ea9;
 }
 
-.c4 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #d02b20;
+.c14 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .c5 {
@@ -153,10 +157,6 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
 .c7:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c12 path {
-  fill: #8e8ea9;
 }
 
 .c10 {

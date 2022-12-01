@@ -476,22 +476,6 @@ describe('Admin | UseCasePage', () => {
         fill: #ffffff;
       }
 
-      .c8 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c8 svg {
-        height: 4px;
-        width: 6px;
-      }
-
       .c25 {
         position: absolute;
         left: 0;
@@ -565,6 +549,26 @@ describe('Admin | UseCasePage', () => {
         width: 100%;
       }
 
+      .c8 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c8 svg {
+        height: 4px;
+        width: 6px;
+      }
+
+      .c10:focus-visible {
+        outline: none;
+      }
+
       .c37 {
         background: transparent;
         border: none;
@@ -620,10 +624,6 @@ describe('Admin | UseCasePage', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
-      }
-
-      .c10:focus-visible {
-        outline: none;
       }
 
       .c15 {

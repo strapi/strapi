@@ -354,63 +354,6 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   fill: #666687;
 }
 
-.c36 {
-  background: transparent;
-  border: none;
-  position: relative;
-  outline: none;
-}
-
-.c36[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c36[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c36 svg {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  font-size: 0.625rem;
-}
-
-.c36 svg path {
-  fill: #4945ff;
-}
-
-.c36:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c36:focus-visible {
-  outline: none;
-}
-
-.c36:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
 .c1 {
   width: 14.5rem;
   background: #f6f6f9;
@@ -545,6 +488,63 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 .c18 svg path {
   fill: #8e8ea9;
+}
+
+.c36 {
+  background: transparent;
+  border: none;
+  position: relative;
+  outline: none;
+}
+
+.c36[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c36[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c36 svg {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  font-size: 0.625rem;
+}
+
+.c36 svg path {
+  fill: #4945ff;
+}
+
+.c36:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c36:focus-visible {
+  outline: none;
+}
+
+.c36:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
 }
 
 <div>

@@ -214,63 +214,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   fill: #666687;
 }
 
-.c11 {
-  background: transparent;
-  border: none;
-  position: relative;
-  outline: none;
-}
-
-.c11[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c11[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c11 svg {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  font-size: 0.625rem;
-}
-
-.c11 svg path {
-  fill: #4945ff;
-}
-
-.c11:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c11:focus-visible {
-  outline: none;
-}
-
-.c11:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
 .c9 {
   background: transparent;
   border: none;
@@ -368,6 +311,63 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
 }
 
 .c20:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c11 {
+  background: transparent;
+  border: none;
+  position: relative;
+  outline: none;
+}
+
+.c11[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c11[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c11 svg {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  font-size: 0.625rem;
+}
+
+.c11 svg path {
+  fill: #4945ff;
+}
+
+.c11:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c11:focus-visible {
+  outline: none;
+}
+
+.c11:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;

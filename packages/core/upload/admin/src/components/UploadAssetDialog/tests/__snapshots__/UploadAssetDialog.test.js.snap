@@ -1181,6 +1181,56 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   fill: #666687;
 }
 
+.c0 {
+  position: fixed;
+  z-index: 4;
+  inset: 0;
+  background: #32324d1F;
+  padding: 0 40px;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c3 {
+  width: 51.875rem;
+}
+
+.c5 {
+  border-radius: 4px 4px 0 0;
+  border-bottom: 1px solid #eaeaef;
+}
+
+.c30 {
+  border-radius: 0 0 4px 4px;
+  border-top: 1px solid #eaeaef;
+}
+
+.c31 > * + * {
+  margin-left: 8px;
+}
+
+.c17 {
+  border-bottom: 2px solid #4945ff;
+}
+
+.c15 {
+  border-bottom: 2px solid transparent;
+}
+
+.c13[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
 .c27 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
@@ -1272,56 +1322,6 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   line-height: 1.43;
   color: #8e8ea9;
   opacity: 1;
-}
-
-.c0 {
-  position: fixed;
-  z-index: 4;
-  inset: 0;
-  background: #32324d1F;
-  padding: 0 40px;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c3 {
-  width: 51.875rem;
-}
-
-.c5 {
-  border-radius: 4px 4px 0 0;
-  border-bottom: 1px solid #eaeaef;
-}
-
-.c30 {
-  border-radius: 0 0 4px 4px;
-  border-top: 1px solid #eaeaef;
-}
-
-.c31 > * + * {
-  margin-left: 8px;
-}
-
-.c17 {
-  border-bottom: 2px solid #4945ff;
-}
-
-.c15 {
-  border-bottom: 2px solid transparent;
-}
-
-.c13[aria-disabled='true'] {
-  cursor: not-allowed;
 }
 
 <div

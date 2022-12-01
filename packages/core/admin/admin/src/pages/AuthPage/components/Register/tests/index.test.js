@@ -625,21 +625,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         align-items: center;
       }
 
-      .c39 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: flex-start;
-        -webkit-box-align: flex-start;
-        -ms-flex-align: flex-start;
-        align-items: flex-start;
-      }
-
-      .c39 * {
-        cursor: pointer;
-      }
-
       .c8 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -658,6 +643,21 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
 
       .c12:focus-visible {
         outline: none;
+      }
+
+      .c39 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: flex-start;
+        -webkit-box-align: flex-start;
+        -ms-flex-align: flex-start;
+        align-items: flex-start;
+      }
+
+      .c39 * {
+        cursor: pointer;
       }
 
       .c23 {

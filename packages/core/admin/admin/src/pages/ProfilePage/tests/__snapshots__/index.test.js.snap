@@ -1,6 +1,139 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
+.c23 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c25 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #d02b20;
+}
+
+.c21 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c24 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c27 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c22 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c22 > * + * {
+  margin-top: 4px;
+}
+
+.c26 {
+  line-height: 0;
+}
+
+.c29 {
+  border: none;
+  border-radius: 4px;
+  padding-bottom: 0.65625rem;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 0.65625rem;
+  color: #32324d;
+  font-weight: 400;
+  font-size: 0.875rem;
+  display: block;
+  width: 100%;
+  background: inherit;
+}
+
+.c29::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c29::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c29:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c29::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c29[aria-disabled='true'] {
+  color: inherit;
+}
+
+.c29:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.c28 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c28:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
 .c2 {
   background: #f6f6f9;
   padding-top: 40px;
@@ -32,17 +165,17 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c29 {
+.c35 {
   padding-right: 12px;
   padding-left: 8px;
 }
 
-.c37 {
+.c43 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c40 {
+.c46 {
   padding-left: 12px;
 }
 
@@ -114,26 +247,20 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   color: #32324d;
 }
 
-.c22 {
+.c31 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
   color: #32324d;
 }
 
-.c23 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #d02b20;
-}
-
-.c32 {
+.c38 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #32324d;
 }
 
-.c38 {
+.c44 {
   font-size: 0.875rem;
   line-height: 1.43;
   display: block;
@@ -143,7 +270,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   color: #32324d;
 }
 
-.c42 {
+.c48 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
@@ -167,12 +294,12 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   margin-top: 16px;
 }
 
-.c21 > * {
+.c30 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c21 > * + * {
+.c30 > * + * {
   margin-top: 4px;
 }
 
@@ -308,55 +435,26 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   fill: #ffffff;
 }
 
-.c24 {
-  line-height: 0;
-}
-
-.c26 {
-  border: none;
-  border-radius: 4px;
-  padding-bottom: 0.65625rem;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 0.65625rem;
-  color: #32324d;
-  font-weight: 400;
-  font-size: 0.875rem;
-  display: block;
+.c41 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
   width: 100%;
-  background: inherit;
+  background: transparent;
+  border: none;
 }
 
-.c26::-webkit-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c26::-moz-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c26:-ms-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c26::placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c26[aria-disabled='true'] {
-  color: inherit;
-}
-
-.c26:focus {
+.c41:focus {
   outline: none;
-  box-shadow: none;
 }
 
-.c27 {
+.c41[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c33 {
   border: none;
   border-radius: 4px;
   padding-bottom: 0.65625rem;
@@ -371,36 +469,36 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   background: inherit;
 }
 
-.c27::-webkit-input-placeholder {
+.c33::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c27::-moz-placeholder {
+.c33::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c27:-ms-input-placeholder {
+.c33:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c27::placeholder {
+.c33::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c27[aria-disabled='true'] {
+.c33[aria-disabled='true'] {
   color: inherit;
 }
 
-.c27:focus {
+.c33:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c25 {
+.c32 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
@@ -412,12 +510,12 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   transition-duration: 0.2s;
 }
 
-.c25:focus-within {
+.c32:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c30 {
+.c36 {
   border: none;
   background: transparent;
   font-size: 1.6rem;
@@ -433,26 +531,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c35 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c35:focus {
-  outline: none;
-}
-
-.c35[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c34 {
+.c40 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -468,28 +547,28 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   transition-duration: 0.2s;
 }
 
-.c34:focus-within {
+.c40:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c39 {
+.c45 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c39 svg {
+.c45 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c39 svg path {
+.c45 svg path {
   fill: #666687;
 }
 
-.c41 {
+.c47 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -498,11 +577,11 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   border: none;
 }
 
-.c41 svg {
+.c47 svg {
   width: 0.375rem;
 }
 
-.c36 {
+.c42 {
   width: 100%;
 }
 
@@ -521,20 +600,20 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   max-width: 100%;
 }
 
-.c33 {
+.c39 {
   color: #4945ff;
 }
 
-.c28::-ms-reveal {
+.c34::-ms-reveal {
   display: none;
 }
 
-.c31 svg {
+.c37 svg {
   height: 1rem;
   width: 1rem;
 }
 
-.c31 svg path {
+.c37 svg path {
   fill: #666687;
 }
 
@@ -645,32 +724,32 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                     <div>
                       <div>
                         <div
-                          class="c1 c14 c21"
+                          class="c21 c22"
                           spacing="1"
                         >
                           <label
-                            class="c5 c22"
+                            class="c23"
                             for="firstname"
                             required=""
                           >
                             <div
-                              class="c1 c4"
+                              class="c24"
                             >
                               First name
                               <span
-                                class="c5 c23 c24"
+                                class="c25 c26"
                               >
                                 *
                               </span>
                             </div>
                           </label>
                           <div
-                            class="c1 c3 c25"
+                            class="c27 c28"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
-                              class="c26"
+                              class="c29"
                               id="firstname"
                               name="firstname"
                               placeholder=""
@@ -692,26 +771,26 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                     <div>
                       <div>
                         <div
-                          class="c1 c14 c21"
+                          class="c21 c22"
                           spacing="1"
                         >
                           <label
-                            class="c5 c22"
+                            class="c23"
                             for="lastname"
                           >
                             <div
-                              class="c1 c4"
+                              class="c24"
                             >
                               Last name
                             </div>
                           </label>
                           <div
-                            class="c1 c3 c25"
+                            class="c27 c28"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
-                              class="c26"
+                              class="c29"
                               id="lastname"
                               name="lastname"
                               placeholder=""
@@ -733,32 +812,32 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                     <div>
                       <div>
                         <div
-                          class="c1 c14 c21"
+                          class="c21 c22"
                           spacing="1"
                         >
                           <label
-                            class="c5 c22"
+                            class="c23"
                             for="email"
                             required=""
                           >
                             <div
-                              class="c1 c4"
+                              class="c24"
                             >
                               Email
                               <span
-                                class="c5 c23 c24"
+                                class="c25 c26"
                               >
                                 *
                               </span>
                             </div>
                           </label>
                           <div
-                            class="c1 c3 c25"
+                            class="c27 c28"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
-                              class="c26"
+                              class="c29"
                               id="email"
                               name="email"
                               placeholder=""
@@ -780,26 +859,26 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                     <div>
                       <div>
                         <div
-                          class="c1 c14 c21"
+                          class="c21 c22"
                           spacing="1"
                         >
                           <label
-                            class="c5 c22"
+                            class="c23"
                             for="username"
                           >
                             <div
-                              class="c1 c4"
+                              class="c24"
                             >
                               Username
                             </div>
                           </label>
                           <div
-                            class="c1 c3 c25"
+                            class="c27 c28"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
-                              class="c26"
+                              class="c29"
                               id="username"
                               name="username"
                               placeholder=""
@@ -839,11 +918,11 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                     <div>
                       <div>
                         <div
-                          class="c1 c14 c21"
+                          class="c1 c14 c30"
                           spacing="1"
                         >
                           <label
-                            class="c5 c22"
+                            class="c5 c31"
                             for="textinput-1"
                           >
                             <div
@@ -853,23 +932,23 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                             </div>
                           </label>
                           <div
-                            class="c1 c3 c25"
+                            class="c1 c3 c32"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
-                              class="c27 c28"
+                              class="c33 c34"
                               id="textinput-1"
                               name="currentPassword"
                               type="password"
                               value=""
                             />
                             <div
-                              class="c1 c29"
+                              class="c1 c35"
                             >
                               <button
                                 aria-label="Hide password"
-                                class="c30 c31"
+                                class="c36 c37"
                                 type="button"
                               >
                                 <svg
@@ -905,11 +984,11 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                     <div>
                       <div>
                         <div
-                          class="c1 c14 c21"
+                          class="c1 c14 c30"
                           spacing="1"
                         >
                           <label
-                            class="c5 c22"
+                            class="c5 c31"
                             for="textinput-2"
                           >
                             <div
@@ -919,24 +998,24 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                             </div>
                           </label>
                           <div
-                            class="c1 c3 c25"
+                            class="c1 c3 c32"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
                               autocomplete="new-password"
-                              class="c27 c28"
+                              class="c33 c34"
                               id="textinput-2"
                               name="password"
                               type="password"
                               value=""
                             />
                             <div
-                              class="c1 c29"
+                              class="c1 c35"
                             >
                               <button
                                 aria-label="Hide password"
-                                class="c30 c31"
+                                class="c36 c37"
                                 type="button"
                               >
                                 <svg
@@ -968,11 +1047,11 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                     <div>
                       <div>
                         <div
-                          class="c1 c14 c21"
+                          class="c1 c14 c30"
                           spacing="1"
                         >
                           <label
-                            class="c5 c22"
+                            class="c5 c31"
                             for="textinput-3"
                           >
                             <div
@@ -982,24 +1061,24 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                             </div>
                           </label>
                           <div
-                            class="c1 c3 c25"
+                            class="c1 c3 c32"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
                               autocomplete="new-password"
-                              class="c27 c28"
+                              class="c33 c34"
                               id="textinput-3"
                               name="confirmPassword"
                               type="password"
                               value=""
                             />
                             <div
-                              class="c1 c29"
+                              class="c1 c35"
                             >
                               <button
                                 aria-label="Hide password"
-                                class="c30 c31"
+                                class="c36 c37"
                                 type="button"
                               >
                                 <svg
@@ -1033,7 +1112,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
               spacing="4"
             >
               <div
-                class="c1 c14 c21"
+                class="c1 c14 c30"
                 spacing="1"
               >
                 <h2
@@ -1042,11 +1121,11 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                   Experience
                 </h2>
                 <span
-                  class="c5 c32"
+                  class="c5 c38"
                 >
                   Preference changes will apply only to you. More information is available 
                   <a
-                    class="c33"
+                    class="c39"
                     href="https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#locales"
                     rel="noopener noreferrer"
                     target="_blank"
@@ -1067,11 +1146,11 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                   >
                     <div>
                       <div
-                        class="c1 c14 c21"
+                        class="c1 c14 c30"
                         spacing="1"
                       >
                         <span
-                          class="c5 c22"
+                          class="c5 c31"
                           for="select-4"
                           id="select-4-label"
                         >
@@ -1082,7 +1161,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           </div>
                         </span>
                         <div
-                          class="c1 c4 c34"
+                          class="c1 c4 c40"
                         >
                           <button
                             aria-describedby="select-4-hint"
@@ -1090,21 +1169,21 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-labelledby="select-4-label select-4-content"
-                            class="c35"
+                            class="c41"
                             id="select-4"
                             type="button"
                           />
                           <div
-                            class="c1 c3 c36"
+                            class="c1 c3 c42"
                           >
                             <div
                               class="c1 c4"
                             >
                               <div
-                                class="c1 c37"
+                                class="c1 c43"
                               >
                                 <span
-                                  class="c5 c38"
+                                  class="c5 c44"
                                   id="select-4-content"
                                 >
                                   Select
@@ -1117,7 +1196,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                               <button
                                 aria-disabled="false"
                                 aria-label="Clear the interface language selected"
-                                class="c1 c39"
+                                class="c1 c45"
                                 title="Clear the interface language selected"
                                 type="button"
                               >
@@ -1136,7 +1215,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                               </button>
                               <button
                                 aria-hidden="true"
-                                class="c1 c40 c39 c41"
+                                class="c1 c46 c45 c47"
                                 tabindex="-1"
                                 title="Carret Down Button"
                                 type="button"
@@ -1160,7 +1239,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           </div>
                         </div>
                         <p
-                          class="c5 c42"
+                          class="c5 c48"
                           id="select-4-hint"
                         >
                           This will only display your own interface in the chosen language.
@@ -1177,11 +1256,11 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                   >
                     <div>
                       <div
-                        class="c1 c14 c21"
+                        class="c1 c14 c30"
                         spacing="1"
                       >
                         <span
-                          class="c5 c22"
+                          class="c5 c31"
                           for="select-5"
                           id="select-5-label"
                         >
@@ -1192,7 +1271,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           </div>
                         </span>
                         <div
-                          class="c1 c4 c34"
+                          class="c1 c4 c40"
                         >
                           <button
                             aria-describedby="select-5-hint"
@@ -1200,21 +1279,21 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-labelledby="select-5-label select-5-content"
-                            class="c35"
+                            class="c41"
                             id="select-5"
                             type="button"
                           />
                           <div
-                            class="c1 c3 c36"
+                            class="c1 c3 c42"
                           >
                             <div
                               class="c1 c4"
                             >
                               <div
-                                class="c1 c37"
+                                class="c1 c43"
                               >
                                 <span
-                                  class="c5 c38"
+                                  class="c5 c44"
                                   id="select-5-content"
                                 >
                                   Light mode
@@ -1226,7 +1305,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                             >
                               <button
                                 aria-hidden="true"
-                                class="c1 c40 c39 c41"
+                                class="c1 c46 c45 c47"
                                 tabindex="-1"
                                 title="Carret Down Button"
                                 type="button"
@@ -1250,7 +1329,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           </div>
                         </div>
                         <p
-                          class="c5 c42"
+                          class="c5 c48"
                           id="select-5-hint"
                         >
                           Displays your interface in the chosen mode.

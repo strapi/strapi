@@ -497,22 +497,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   fill: #666687;
 }
 
-.c9 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c9 svg {
-  height: 4px;
-  width: 6px;
-}
-
 .c53 {
   position: absolute;
   left: 0;
@@ -584,6 +568,22 @@ exports[`BrowseStep renders and match snapshot 1`] = `
 
 .c54 {
   width: 100%;
+}
+
+.c9 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c9 svg {
+  height: 4px;
+  width: 6px;
 }
 
 .c27 {
@@ -1180,7 +1180,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
       </div>
       <nav
         aria-label="pagination"
-        class="sc-jnSlpE"
+        class="sc-bQFuvY"
       >
         <ul
           class="c0 c12 c61"

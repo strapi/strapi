@@ -62,7 +62,128 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c33 {
+      .c35 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c43 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #b72b1a;
+        text-transform: uppercase;
+      }
+
+      .c45 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #666687;
+        text-transform: uppercase;
+      }
+
+      .c47 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
+      .c38 {
+        background: #f6f6f9;
+        padding: 4px;
+        border-radius: 4px;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #dcdce4;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+      }
+
+      .c40 {
+        padding-right: 12px;
+        padding-left: 12px;
+        border-radius: 4px;
+      }
+
+      .c32 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c34 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c41 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+      }
+
+      .c49 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+      }
+
+      .c33 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c33 > * + * {
+        margin-top: 4px;
+      }
+
+      .c37 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -72,6 +193,202 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         padding: 0;
         position: absolute;
         width: 1px;
+      }
+
+      .c51 {
+        border: none;
+        border-radius: 4px;
+        padding-bottom: 0.65625rem;
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-top: 0.65625rem;
+        color: #32324d;
+        font-weight: 400;
+        font-size: 0.875rem;
+        display: block;
+        width: 100%;
+        background: inherit;
+      }
+
+      .c51::-webkit-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c51::-moz-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c51:-ms-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c51::placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c51[aria-disabled='true'] {
+        color: inherit;
+      }
+
+      .c51:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
+      .c53 {
+        border: none;
+        border-radius: 4px;
+        padding-bottom: 0.65625rem;
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-top: 0.65625rem;
+        cursor: not-allowed;
+        color: #32324d;
+        font-weight: 400;
+        font-size: 0.875rem;
+        display: block;
+        width: 100%;
+        background: inherit;
+      }
+
+      .c53::-webkit-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c53::-moz-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c53:-ms-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c53::placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c53[aria-disabled='true'] {
+        color: inherit;
+      }
+
+      .c53:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
+      .c50 {
+        border: 1px solid #dcdce4;
+        border-radius: 4px;
+        background: #ffffff;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+      }
+
+      .c50:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c52 {
+        border: 1px solid #dcdce4;
+        border-radius: 4px;
+        background: #ffffff;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        color: #666687;
+        background: #eaeaef;
+      }
+
+      .c52:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c36 {
+        position: relative;
+        display: inline-block;
+        z-index: 0;
+        width: 100%;
+      }
+
+      .c39 {
+        overflow: hidden;
+        -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+      }
+
+      .c39:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c42 {
+        background-color: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        z-index: 2;
+        -webkit-flex: 1 1 50%;
+        -ms-flex: 1 1 50%;
+        flex: 1 1 50%;
+        padding-top: 6px;
+        padding-bottom: 6px;
+      }
+
+      .c44 {
+        background-color: transparent;
+        border: 1px solid #f6f6f9;
+        position: relative;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        z-index: 2;
+        -webkit-flex: 1 1 50%;
+        -ms-flex: 1 1 50%;
+        flex: 1 1 50%;
+        padding-top: 6px;
+        padding-bottom: 6px;
+      }
+
+      .c46 {
+        height: 100%;
+        left: 0;
+        opacity: 0;
+        position: absolute;
+        top: 0;
+        z-index: 1;
+        width: 100%;
+      }
+
+      .c31 {
+        max-width: 320px;
       }
 
       .c2 {
@@ -108,25 +425,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
 
       .c26 {
         padding-left: 12px;
-      }
-
-      .c34 {
-        background: #f6f6f9;
-        padding: 4px;
-        border-radius: 4px;
-        border-style: solid;
-        border-width: 1px;
-        border-color: #dcdce4;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-      }
-
-      .c36 {
-        padding-right: 12px;
-        padding-left: 12px;
-        border-radius: 4px;
       }
 
       .c3 {
@@ -175,24 +473,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         flex-direction: column;
       }
 
-      .c37 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-      }
-
       .c6 {
         font-weight: 600;
         font-size: 2rem;
@@ -236,22 +516,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
-      }
-
-      .c39 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #b72b1a;
-        text-transform: uppercase;
-      }
-
-      .c41 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #666687;
-        text-transform: uppercase;
       }
 
       .c15 > * {
@@ -404,131 +668,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         fill: #ffffff;
       }
 
-      .c45 {
-        border: none;
-        border-radius: 4px;
-        padding-bottom: 0.65625rem;
-        padding-left: 16px;
-        padding-right: 16px;
-        padding-top: 0.65625rem;
-        color: #32324d;
-        font-weight: 400;
-        font-size: 0.875rem;
-        display: block;
-        width: 100%;
-        background: inherit;
-      }
-
-      .c45::-webkit-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c45::-moz-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c45:-ms-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c45::placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c45[aria-disabled='true'] {
-        color: inherit;
-      }
-
-      .c45:focus {
-        outline: none;
-        box-shadow: none;
-      }
-
-      .c47 {
-        border: none;
-        border-radius: 4px;
-        padding-bottom: 0.65625rem;
-        padding-left: 16px;
-        padding-right: 16px;
-        padding-top: 0.65625rem;
-        cursor: not-allowed;
-        color: #32324d;
-        font-weight: 400;
-        font-size: 0.875rem;
-        display: block;
-        width: 100%;
-        background: inherit;
-      }
-
-      .c47::-webkit-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c47::-moz-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c47:-ms-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c47::placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c47[aria-disabled='true'] {
-        color: inherit;
-      }
-
-      .c47:focus {
-        outline: none;
-        box-shadow: none;
-      }
-
-      .c44 {
-        border: 1px solid #dcdce4;
-        border-radius: 4px;
-        background: #ffffff;
-        outline: none;
-        box-shadow: 0;
-        -webkit-transition-property: border-color,box-shadow,fill;
-        transition-property: border-color,box-shadow,fill;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-      }
-
-      .c44:focus-within {
-        border: 1px solid #4945ff;
-        box-shadow: #4945ff 0px 0px 0px 2px;
-      }
-
-      .c46 {
-        border: 1px solid #dcdce4;
-        border-radius: 4px;
-        background: #ffffff;
-        outline: none;
-        box-shadow: 0;
-        -webkit-transition-property: border-color,box-shadow,fill;
-        transition-property: border-color,box-shadow,fill;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        color: #666687;
-        background: #eaeaef;
-      }
-
-      .c46:focus-within {
-        border: 1px solid #4945ff;
-        box-shadow: #4945ff 0px 0px 0px 2px;
-      }
-
       .c22 {
         position: absolute;
         left: 0;
@@ -602,77 +741,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         width: 100%;
       }
 
-      .c32 {
-        position: relative;
-        display: inline-block;
-        z-index: 0;
-        width: 100%;
-      }
-
-      .c35 {
-        overflow: hidden;
-        -webkit-flex-wrap: wrap;
-        -ms-flex-wrap: wrap;
-        flex-wrap: wrap;
-        outline: none;
-        box-shadow: 0;
-        -webkit-transition-property: border-color,box-shadow,fill;
-        transition-property: border-color,box-shadow,fill;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-      }
-
-      .c35:focus-within {
-        border: 1px solid #4945ff;
-        box-shadow: #4945ff 0px 0px 0px 2px;
-      }
-
-      .c38 {
-        background-color: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        z-index: 2;
-        -webkit-flex: 1 1 50%;
-        -ms-flex: 1 1 50%;
-        flex: 1 1 50%;
-        padding-top: 6px;
-        padding-bottom: 6px;
-      }
-
-      .c40 {
-        background-color: transparent;
-        border: 1px solid #f6f6f9;
-        position: relative;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        z-index: 2;
-        -webkit-flex: 1 1 50%;
-        -ms-flex: 1 1 50%;
-        flex: 1 1 50%;
-        padding-top: 6px;
-        padding-bottom: 6px;
-      }
-
-      .c42 {
-        height: 100%;
-        left: 0;
-        opacity: 0;
-        position: absolute;
-        top: 0;
-        z-index: 1;
-        width: 100%;
-      }
-
-      .c31 {
-        max-width: 320px;
-      }
-
       .c0:focus-visible {
         outline: none;
       }
@@ -693,7 +761,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         max-width: 100%;
       }
 
-      .c43 {
+      .c48 {
         grid-column: span 6;
         max-width: 100%;
       }
@@ -723,13 +791,13 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c43 {
+        .c48 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c43 {
+        .c48 {
           grid-column: span 12;
         }
       }
@@ -913,67 +981,67 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                         class="c31"
                       >
                         <div
-                          class="c1 c14 c19"
+                          class="c32 c33"
                           spacing="1"
                         >
                           <div
-                            class="c1 c4"
+                            class="c34"
                           >
                             <label
-                              class="c5 c20"
-                              for="toggleinput-2"
+                              class="c35"
+                              for="toggleinput-1"
                             >
                               <div
-                                class="c1 c4"
+                                class="c34"
                               >
                                 One account per email address
                               </div>
                             </label>
                           </div>
                           <label
-                            class="c32"
+                            class="c36"
                           >
                             <div
-                              class="c33"
+                              class="c37"
                             >
                               One account per email address
                             </div>
                             <div
-                              class="c1 c34 c35"
+                              class="c38 c39"
                               display="flex"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c1 c36 c37 c38"
+                                class="c40 c41 c42"
                               >
                                 <span
-                                  class="c5 c39"
+                                  class="c43"
                                 >
                                   False
                                 </span>
                               </div>
                               <div
                                 aria-hidden="true"
-                                class="c1 c36 c37 c40"
+                                class="c40 c41 c44"
                               >
                                 <span
-                                  class="c5 c41"
+                                  class="c45"
                                 >
                                   True
                                 </span>
                               </div>
                               <input
                                 aria-disabled="false"
-                                class="c42"
-                                id="toggleinput-2"
+                                class="c46"
+                                id="toggleinput-1"
                                 name="unique_email"
                                 type="checkbox"
                               />
                             </div>
                           </label>
                           <p
-                            class="c5 c29"
-                            id="toggleinput-2-hint"
+                            class="c47"
+                            id="toggleinput-1-hint"
                           >
                             Disallow the user to create multiple accounts using the same email address with different authentication providers.
                           </p>
@@ -991,67 +1059,67 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                         class="c31"
                       >
                         <div
-                          class="c1 c14 c19"
+                          class="c32 c33"
                           spacing="1"
                         >
                           <div
-                            class="c1 c4"
+                            class="c34"
                           >
                             <label
-                              class="c5 c20"
-                              for="toggleinput-3"
+                              class="c35"
+                              for="toggleinput-2"
                             >
                               <div
-                                class="c1 c4"
+                                class="c34"
                               >
                                 Enable sign-ups
                               </div>
                             </label>
                           </div>
                           <label
-                            class="c32"
+                            class="c36"
                           >
                             <div
-                              class="c33"
+                              class="c37"
                             >
                               Enable sign-ups
                             </div>
                             <div
-                              class="c1 c34 c35"
+                              class="c38 c39"
                               display="flex"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c1 c36 c37 c38"
+                                class="c40 c41 c42"
                               >
                                 <span
-                                  class="c5 c39"
+                                  class="c43"
                                 >
                                   False
                                 </span>
                               </div>
                               <div
                                 aria-hidden="true"
-                                class="c1 c36 c37 c40"
+                                class="c40 c41 c44"
                               >
                                 <span
-                                  class="c5 c41"
+                                  class="c45"
                                 >
                                   True
                                 </span>
                               </div>
                               <input
                                 aria-disabled="false"
-                                class="c42"
-                                id="toggleinput-3"
+                                class="c46"
+                                id="toggleinput-2"
                                 name="allow_register"
                                 type="checkbox"
                               />
                             </div>
                           </label>
                           <p
-                            class="c5 c29"
-                            id="toggleinput-3-hint"
+                            class="c47"
+                            id="toggleinput-2-hint"
                           >
                             When disabled (OFF), the registration process is forbidden. No one can subscribe anymore no matter the used provider.
                           </p>
@@ -1060,7 +1128,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     </div>
                   </div>
                   <div
-                    class="c43"
+                    class="c48"
                   >
                     <div
                       class="c1 "
@@ -1068,27 +1136,27 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                       <div>
                         <div>
                           <div
-                            class="c1 c14 c19"
+                            class="c32 c33"
                             spacing="1"
                           >
                             <label
-                              class="c5 c20"
+                              class="c35"
                               for="email_reset_password"
                             >
                               <div
-                                class="c1 c4"
+                                class="c34"
                               >
                                 Reset password page
                               </div>
                             </label>
                             <div
-                              class="c1 c3 c44"
+                              class="c49 c50"
                             >
                               <input
                                 aria-describedby="email_reset_password-hint"
                                 aria-disabled="false"
                                 aria-invalid="false"
-                                class="c45"
+                                class="c51"
                                 id="email_reset_password"
                                 name="email_reset_password"
                                 placeholder="ex: https://youtfrontend.com/reset-password"
@@ -1097,7 +1165,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               />
                             </div>
                             <p
-                              class="c5 c29"
+                              class="c47"
                               id="email_reset_password-hint"
                             >
                               URL of your application's reset password page.
@@ -1117,67 +1185,67 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                         class="c31"
                       >
                         <div
-                          class="c1 c14 c19"
+                          class="c32 c33"
                           spacing="1"
                         >
                           <div
-                            class="c1 c4"
+                            class="c34"
                           >
                             <label
-                              class="c5 c20"
-                              for="toggleinput-4"
+                              class="c35"
+                              for="toggleinput-3"
                             >
                               <div
-                                class="c1 c4"
+                                class="c34"
                               >
                                 Enable email confirmation
                               </div>
                             </label>
                           </div>
                           <label
-                            class="c32"
+                            class="c36"
                           >
                             <div
-                              class="c33"
+                              class="c37"
                             >
                               Enable email confirmation
                             </div>
                             <div
-                              class="c1 c34 c35"
+                              class="c38 c39"
                               display="flex"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c1 c36 c37 c38"
+                                class="c40 c41 c42"
                               >
                                 <span
-                                  class="c5 c39"
+                                  class="c43"
                                 >
                                   False
                                 </span>
                               </div>
                               <div
                                 aria-hidden="true"
-                                class="c1 c36 c37 c40"
+                                class="c40 c41 c44"
                               >
                                 <span
-                                  class="c5 c41"
+                                  class="c45"
                                 >
                                   True
                                 </span>
                               </div>
                               <input
                                 aria-disabled="false"
-                                class="c42"
-                                id="toggleinput-4"
+                                class="c46"
+                                id="toggleinput-3"
                                 name="email_confirmation"
                                 type="checkbox"
                               />
                             </div>
                           </label>
                           <p
-                            class="c5 c29"
-                            id="toggleinput-4-hint"
+                            class="c47"
+                            id="toggleinput-3-hint"
                           >
                             When enabled (ON), new registered users receive a confirmation email.
                           </p>
@@ -1186,7 +1254,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     </div>
                   </div>
                   <div
-                    class="c43"
+                    class="c48"
                   >
                     <div
                       class="c1 "
@@ -1194,28 +1262,28 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                       <div>
                         <div>
                           <div
-                            class="c1 c14 c19"
+                            class="c32 c33"
                             spacing="1"
                           >
                             <label
-                              class="c5 c20"
+                              class="c35"
                               for="email_confirmation_redirection"
                             >
                               <div
-                                class="c1 c4"
+                                class="c34"
                               >
                                 Redirection url
                               </div>
                             </label>
                             <div
-                              class="c1 c3 c46"
+                              class="c49 c52"
                               disabled=""
                             >
                               <input
                                 aria-describedby="email_confirmation_redirection-hint"
                                 aria-disabled="true"
                                 aria-invalid="false"
-                                class="c47"
+                                class="c53"
                                 id="email_confirmation_redirection"
                                 name="email_confirmation_redirection"
                                 placeholder="ex: https://youtfrontend.com/email-confirmation"
@@ -1224,7 +1292,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               />
                             </div>
                             <p
-                              class="c5 c29"
+                              class="c47"
                               id="email_confirmation_redirection-hint"
                             >
                               After you confirmed your email, choose where you will be redirected.

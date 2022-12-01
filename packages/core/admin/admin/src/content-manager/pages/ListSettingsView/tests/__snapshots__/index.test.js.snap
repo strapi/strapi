@@ -561,77 +561,6 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   width: 100%;
 }
 
-.c30 {
-  position: relative;
-  display: inline-block;
-  z-index: 0;
-  width: 100%;
-}
-
-.c33 {
-  overflow: hidden;
-  -webkit-flex-wrap: wrap;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c33:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c36 {
-  background-color: transparent;
-  border: 1px solid #f6f6f9;
-  position: relative;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  z-index: 2;
-  -webkit-flex: 1 1 50%;
-  -ms-flex: 1 1 50%;
-  flex: 1 1 50%;
-  padding-top: 6px;
-  padding-bottom: 6px;
-}
-
-.c38 {
-  background-color: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  z-index: 2;
-  -webkit-flex: 1 1 50%;
-  -ms-flex: 1 1 50%;
-  flex: 1 1 50%;
-  padding-top: 6px;
-  padding-bottom: 6px;
-}
-
-.c40 {
-  height: 100%;
-  left: 0;
-  opacity: 0;
-  position: absolute;
-  top: 0;
-  z-index: 1;
-  width: 100%;
-}
-
-.c27 {
-  max-width: 320px;
-}
-
 .c7 {
   display: -webkit-inline-box;
   display: -webkit-inline-flex;
@@ -719,6 +648,77 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
 
 .c4:focus-visible {
   outline: none;
+}
+
+.c30 {
+  position: relative;
+  display: inline-block;
+  z-index: 0;
+  width: 100%;
+}
+
+.c33 {
+  overflow: hidden;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c33:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c36 {
+  background-color: transparent;
+  border: 1px solid #f6f6f9;
+  position: relative;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  z-index: 2;
+  -webkit-flex: 1 1 50%;
+  -ms-flex: 1 1 50%;
+  flex: 1 1 50%;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.c38 {
+  background-color: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  z-index: 2;
+  -webkit-flex: 1 1 50%;
+  -ms-flex: 1 1 50%;
+  flex: 1 1 50%;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.c40 {
+  height: 100%;
+  left: 0;
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  z-index: 1;
+  width: 100%;
+}
+
+.c27 {
+  max-width: 320px;
 }
 
 .c66 {
@@ -2293,77 +2293,6 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   width: 100%;
 }
 
-.c30 {
-  position: relative;
-  display: inline-block;
-  z-index: 0;
-  width: 100%;
-}
-
-.c33 {
-  overflow: hidden;
-  -webkit-flex-wrap: wrap;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c33:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c36 {
-  background-color: transparent;
-  border: 1px solid #f6f6f9;
-  position: relative;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  z-index: 2;
-  -webkit-flex: 1 1 50%;
-  -ms-flex: 1 1 50%;
-  flex: 1 1 50%;
-  padding-top: 6px;
-  padding-bottom: 6px;
-}
-
-.c38 {
-  background-color: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  z-index: 2;
-  -webkit-flex: 1 1 50%;
-  -ms-flex: 1 1 50%;
-  flex: 1 1 50%;
-  padding-top: 6px;
-  padding-bottom: 6px;
-}
-
-.c40 {
-  height: 100%;
-  left: 0;
-  opacity: 0;
-  position: absolute;
-  top: 0;
-  z-index: 1;
-  width: 100%;
-}
-
-.c27 {
-  max-width: 320px;
-}
-
 .c7 {
   display: -webkit-inline-box;
   display: -webkit-inline-flex;
@@ -2451,6 +2380,77 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
 
 .c4:focus-visible {
   outline: none;
+}
+
+.c30 {
+  position: relative;
+  display: inline-block;
+  z-index: 0;
+  width: 100%;
+}
+
+.c33 {
+  overflow: hidden;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c33:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c36 {
+  background-color: transparent;
+  border: 1px solid #f6f6f9;
+  position: relative;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  z-index: 2;
+  -webkit-flex: 1 1 50%;
+  -ms-flex: 1 1 50%;
+  flex: 1 1 50%;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.c38 {
+  background-color: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  z-index: 2;
+  -webkit-flex: 1 1 50%;
+  -ms-flex: 1 1 50%;
+  flex: 1 1 50%;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.c40 {
+  height: 100%;
+  left: 0;
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  z-index: 1;
+  width: 100%;
+}
+
+.c27 {
+  max-width: 320px;
 }
 
 .c66 {

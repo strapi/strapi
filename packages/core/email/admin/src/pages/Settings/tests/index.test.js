@@ -338,6 +338,25 @@ describe('Email | Pages | Settings', () => {
         fill: #ffffff;
       }
 
+      .c23 {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
+        width: 100%;
+        background: transparent;
+        border: none;
+      }
+
+      .c23:focus {
+        outline: none;
+      }
+
+      .c23[aria-disabled='true'] {
+        cursor: not-allowed;
+      }
+
       .c21 {
         border: none;
         border-radius: 4px;
@@ -461,25 +480,6 @@ describe('Email | Pages | Settings', () => {
       .c30:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
-      }
-
-      .c23 {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        top: 0;
-        width: 100%;
-        background: transparent;
-        border: none;
-      }
-
-      .c23:focus {
-        outline: none;
-      }
-
-      .c23[aria-disabled='true'] {
-        cursor: not-allowed;
       }
 
       .c22 {
