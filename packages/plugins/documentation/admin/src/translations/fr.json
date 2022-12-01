@@ -20,6 +20,7 @@
   "error.regenerateDoc": "Une erreur est survenue en recréant la documentation",
   "error.regenerateDoc.versionMissing": "La version que vous essayez de créer n'existe pas.",
   "notification.update.success": "Vos paramètres ont été enregistrés",
+  "pages.PluginPage.table.icon.download": "Télécharger {target}",
   "plugin.description.long": "Créez un document OpenAPI et visualisez votre API avec SWAGGER UI.",
   "plugin.description.short": "Créez un document OpenAPI et visualisez votre API avec SWAGGER UI.",
   "plugin.name": "Documentation"

@@ -28,6 +28,7 @@
   "pages.PluginPage.table.generated": "Last generated",
   "pages.PluginPage.table.icon.regenerate": "Regenerate {target}",
   "pages.PluginPage.table.icon.show": "Open {target}",
+  "pages.PluginPage.table.icon.download": "Download {target}",
   "pages.PluginPage.table.version": "Version",
   "pages.SettingsPage.Button.description": "Configure the documentation plugin",
   "pages.SettingsPage.header.save": "Save",

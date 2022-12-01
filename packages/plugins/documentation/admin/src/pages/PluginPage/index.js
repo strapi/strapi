@@ -27,7 +27,9 @@ import { Table, Tr, Thead, Th, Tbody, Td } from '@strapi/design-system/Table';
 import Trash from '@strapi/icons/Trash';
 import Show from '@strapi/icons/Eye';
 import Reload from '@strapi/icons/Refresh';
+import Download from '@strapi/icons/Download';
 
+import { downloadFile } from '@strapi/plugin-upload/admin/src/utils/downloadFile';
 import permissions from '../../permissions';
 import { getTrad } from '../../utils';
 import openWithNewTab from '../../utils/openWithNewTab';
@@ -47,6 +49,13 @@ const PluginPage = () => {
   const openDocVersion = () => {
     const slash = data?.prefix.startsWith('/') ? '' : '/';
     openWithNewTab(`${slash}${data?.prefix}/v${data?.currentVersion}`);
+  };
+
+  const downloadDocVersion = async () => {
+    const slash = data?.prefix.startsWith('/') ? '' : '/';
+    const url = `${strapi.backendURL}${slash}${data?.prefix}/v${data?.currentVersion}/download`;
+
+    return downloadFile(url, 'openapi_documentation_strapi.json');
   };
 
   const handleRegenerateDoc = (version) => {
@@ -133,6 +142,20 @@ const PluginPage = () => {
                       </Td>
                       <Td>
                         <Flex justifyContent="end" {...stopPropagation}>
+                          <CheckPermissions permissions={permissions.open}>
+                            <IconButton
+                              onClick={downloadDocVersion}
+                              noBorder
+                              icon={<Download />}
+                              label={formatMessage(
+                                {
+                                  id: getTrad('pages.PluginPage.table.icon.download'),
+                                  defaultMessage: 'Download OpenAPI Documentation',
+                                },
+                                { target: doc.version }
+                              )}
+                            />
+                          </CheckPermissions>
                           <IconButton
                             onClick={openDocVersion}
                             noBorder

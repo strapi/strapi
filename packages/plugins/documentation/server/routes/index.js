@@ -48,6 +48,15 @@ module.exports = [
     },
   },
   {
+    method: 'GET',
+    path: '/v:major(\\d+).:minor(\\d+).:patch(\\d+)/download',
+    handler: 'documentation.download',
+    config: {
+      auth: false,
+      middlewares: [restrictAccess],
+    },
+  },
+  {
     method: 'POST',
     path: '/regenerateDoc',
     handler: 'documentation.regenerateDoc',
