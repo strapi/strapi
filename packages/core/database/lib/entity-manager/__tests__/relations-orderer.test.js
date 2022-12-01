@@ -100,4 +100,29 @@ describe('relations orderer', () => {
       { id: 2, order: 0.5 },
     ]);
   });
+
+  test('connect with disordered relations and initial relations', () => {
+    const orderer = relationsOrderer(
+      [
+        { id: 1, order: 1 },
+        { id: 2, order: 2 },
+        { id: 3, order: 3 },
+      ],
+      'id',
+      'order'
+    );
+
+    orderer.connect([
+      { id: 5, position: { before: 1 } },
+      { id: 1, position: { before: 2 } },
+      { id: 2, position: { end: true } },
+    ]);
+
+    expect(orderer.get()).toMatchObject([
+      { id: 5, order: 0.5 },
+      { id: 1, order: 1.5 },
+      { id: 3, order: 3 },
+      { id: 2, order: 3.5 },
+    ]);
+  });
 });
