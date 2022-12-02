@@ -66,14 +66,16 @@ async function initProject(projectName, program) {
     .reduce((acc, { short, long }) => [...acc, short, long], [])
     .filter(Boolean);
 
-  if (program.template && programFlags.includes(program.template)) {
-    console.error(`${program.template} is not a valid template`);
+  const options = program.opts();
+
+  if (options.template && programFlags.includes(options.template)) {
+    console.error(`${options.template} is not a valid template`);
     process.exit(1);
   }
 
-  const hasDatabaseOptions = databaseOptions.some((opt) => program[opt]);
+  const hasDatabaseOptions = databaseOptions.some((opt) => options[opt]);
 
-  if (program.quickstart && hasDatabaseOptions) {
+  if (options.quickstart && hasDatabaseOptions) {
     console.error(
       `The quickstart option is incompatible with the following options: ${databaseOptions.join(
         ', '
@@ -83,25 +85,25 @@ async function initProject(projectName, program) {
   }
 
   if (hasDatabaseOptions) {
-    program.quickstart = false; // Will disable the quickstart question because != 'undefined'
+    options.quickstart = false; // Will disable the quickstart question because != 'undefined'
   }
 
-  if (program.quickstart) {
-    return generateApp(projectName, program);
+  if (options.quickstart) {
+    return generateApp(projectName, options);
   }
 
-  const prompt = await promptUser(projectName, program, hasDatabaseOptions);
+  const prompt = await promptUser(projectName, options, hasDatabaseOptions);
   const directory = prompt.directory || projectName;
   await checkInstallPath(resolve(directory));
 
-  const options = {
-    template: program.template,
-    quickstart: prompt.quick || program.quickstart,
+  const generateOptions = {
+    template: options.template,
+    quickstart: prompt.quick || options.quickstart,
   };
 
   const generateStrapiAppOptions = {
-    ...program,
     ...options,
+    ...generateOptions,
   };
 
   return generateApp(directory, generateStrapiAppOptions);

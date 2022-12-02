@@ -4,20 +4,22 @@ const inquirer = require('inquirer');
 
 /**
  * @param {string|null} projectName - The name/path of project
- * @param {string|null} template - The Github repo of the template
+ * @param {object} options - Parsed CLI options
+ * @param {boolean} hasDatabaseOptions - Whether database options has been passed via CLI options
  * @returns Object containting prompt answers
  */
-module.exports = async function promptUser(projectName, program, hasDatabaseOptions) {
-  const questions = await getPromptQuestions(projectName, program, hasDatabaseOptions);
+module.exports = async function promptUser(projectName, options, hasDatabaseOptions) {
+  const questions = await getPromptQuestions(projectName, options, hasDatabaseOptions);
   return inquirer.prompt(questions);
 };
 
 /**
  * @param {string|null} projectName - The name of the project
- * @param {string|null} template - The template the project should use
+ * @param {object} options - Prased CLI options
+ * @param {boolean} hasDatabaseOptions - Whether database options has been passed via CLI options
  * @returns Array of prompt question objects
  */
-async function getPromptQuestions(projectName, program, hasDatabaseOptions) {
+async function getPromptQuestions(projectName, options, hasDatabaseOptions) {
   return [
     {
       type: 'input',
@@ -30,7 +32,7 @@ async function getPromptQuestions(projectName, program, hasDatabaseOptions) {
       type: 'list',
       name: 'quick',
       message: 'Choose your installation type',
-      when: !program.quickstart && !hasDatabaseOptions,
+      when: !options.quickstart && !hasDatabaseOptions,
       choices: [
         {
           name: 'Quickstart (recommended)',
