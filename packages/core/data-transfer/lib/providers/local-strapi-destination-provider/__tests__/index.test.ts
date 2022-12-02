@@ -6,6 +6,13 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
+jest.mock('../restore', () => {
+  return {
+    __esModule: true,
+    ...jest.requireActual('../restore'),
+  };
+});
+
 describe('Local Strapi Source Destination', () => {
   describe('Bootstrap', () => {
     test('Should not have a defined Strapi instance if bootstrap has not been called', () => {
