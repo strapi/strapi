@@ -103,6 +103,8 @@ describe('i18n - Content API', () => {
       data.categories.push(res.body);
     });
 
+    // This tests is sensible to foreign keys deadlocks
+    // foreign keys deadlock example: https://gist.github.com/roustem/db2398aa38be0cc88364
     test('all related locales', async () => {
       let res;
       for (const locale of ['ko', 'it', 'fr', 'es-AR']) {
