@@ -10,24 +10,14 @@ const componentStore = new Map();
  * @returns object
  */
 const useLazyComponents = (componentUids = []) => {
-  const [lazyComponentStore, setLazyComponentStore] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [lazyComponentStore, setLazyComponentStore] = useState(Object.fromEntries(componentStore));
+  const [loading, setLoading] = useState(componentStore.size === 0);
   const customFieldsRegistry = useCustomFields();
 
   useEffect(() => {
     const setStore = (store) => {
       setLazyComponentStore(store);
       setLoading(false);
-    };
-
-    const populateStoreWithCache = () => {
-      const internalStore = {};
-
-      componentStore.forEach((comp, uid) => {
-        internalStore[uid] = comp;
-      });
-
-      setStore(internalStore);
     };
 
     const lazyLoadComponents = async (uids, components) => {
@@ -43,7 +33,7 @@ const useLazyComponents = (componentUids = []) => {
       setStore(internalStore);
     };
 
-    if (componentUids.length) {
+    if (componentUids.length && loading) {
       /**
        * These uids are not in the component store therefore we need to get the components
        */
@@ -58,10 +48,9 @@ const useLazyComponents = (componentUids = []) => {
       if (componentPromises.length > 0) {
         lazyLoadComponents(newUids, componentPromises);
       } else {
-        populateStoreWithCache();
+        const store = Object.fromEntries(componentStore);
+        setStore(store);
       }
-    } else if (loading) {
-      populateStoreWithCache();
     }
   }, [componentUids, customFieldsRegistry, loading]);
 
