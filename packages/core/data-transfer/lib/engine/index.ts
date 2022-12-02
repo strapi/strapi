@@ -282,8 +282,8 @@ class TransferEngine<
   }
 
   async beforeTransfer(): Promise<void> {
-    await this.sourceProvider.beforeStreaming?.();
-    await this.destinationProvider.beforeStreaming?.();
+    await this.sourceProvider.beforeTransfer?.();
+    await this.destinationProvider.beforeTransfer?.();
   }
 
   async transferSchemas(): Promise<void> {

@@ -18,7 +18,7 @@ interface IProvider {
   getSchemas?(): any;
   close?(): Promise<void> | void;
   getMetadata(): IMetadata | null | Promise<IMetadata | null>;
-  beforeStreaming?(): Promise<void>;
+  beforeTransfer?(): Promise<void>;
   validateOptions?(): void;
 }
 
