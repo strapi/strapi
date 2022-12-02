@@ -252,7 +252,7 @@ class TransferEngine<
         );
       }
 
-      await this.beforeStreaming();
+      await this.beforeTransfer();
       // Run the transfer stages
       await this.transferSchemas();
       await this.transferEntities();
@@ -275,7 +275,7 @@ class TransferEngine<
     };
   }
 
-  async beforeStreaming(): Promise<void> {
+  async beforeTransfer(): Promise<void> {
     await this.sourceProvider.beforeStreaming?.();
     await this.destinationProvider.beforeStreaming?.();
   }
