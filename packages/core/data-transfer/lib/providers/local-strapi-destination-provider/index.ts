@@ -95,44 +95,4 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
     return mapSchemasValues(schemas);
   }
-
-  // getEntitiesStream(): Writable {
-  //   const self = this;
-
-  //   return new Writable({
-  //     objectMode: true,
-  //     async write(entity, _encoding, callback) {
-  //       if (!self.strapi) {
-  //         callback(new Error('Strapi instance not found'));
-  //       }
-
-  //       const { type: uid, id, data } = entity;
-
-  //       try {
-  //         await strapi.entityService.create(uid, { data });
-  //       } catch (e: any) {
-  //         // TODO: remove "any" cast
-  //         log.warn(
-  //           chalk.bold(`Failed to import ${chalk.yellowBright(uid)} (${chalk.greenBright(id)})`)
-  //         );
-
-  //         e.details.errors
-  //           .map((err: any, i: number) => {
-  //             // TODO: add correct error type
-  //             const info = {
-  //               uid: chalk.yellowBright(`[${uid}]`),
-  //               path: chalk.blueBright(`[${err.path.join('.')}]`),
-  //               id: chalk.greenBright(`[${id}]`),
-  //               message: err.message,
-  //             };
-
-  //             return `(${i}) ${info.uid}${info.id}${info.path}: ${info.message}`;
-  //           })
-  //           .forEach((message: string) => log.warn(message));
-  //       } finally {
-  //         callback();
-  //       }
-  //     },
-  //   });
-  // }
 }
