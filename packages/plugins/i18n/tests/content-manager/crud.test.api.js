@@ -45,7 +45,12 @@ describe('i18n - Content API', () => {
   beforeAll(async () => {
     await builder
       .addContentTypes([categoryModel])
-      .addFixtures('plugin::i18n.locale', [{ name: 'Ko', code: 'ko' }])
+      .addFixtures('plugin::i18n.locale', [
+        { name: 'Korean', code: 'ko' },
+        { name: 'Italian', code: 'it' },
+        { name: 'French', code: 'fr' },
+        { name: 'Spanish (Argentina)', code: 'es-AR' },
+      ])
       .build();
 
     strapi = await createStrapiInstance();
@@ -95,6 +100,29 @@ describe('i18n - Content API', () => {
         localizations: [],
         name: 'category in korean',
       });
+      data.categories.push(res.body);
+    });
+
+    test('all related locales', async () => {
+      let res;
+      for (const locale of ['ko', 'it', 'fr', 'es-AR']) {
+        res = await rq({
+          method: 'POST',
+          url: `/content-manager/collection-types/api::category.category`,
+          qs: {
+            plugins: { i18n: { locale, relatedEntityId: data.categories[0].id } },
+          },
+          body: {
+            name: `category in ${locale}`,
+          },
+        });
+        expect(res.statusCode).toBe(200);
+      }
+
+      const { statusCode, body } = res;
+
+      expect(statusCode).toBe(200);
+      expect(body.localizations).toHaveLength(4);
       data.categories.push(res.body);
     });
   });
