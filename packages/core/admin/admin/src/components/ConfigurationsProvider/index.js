@@ -1,4 +1,4 @@
-import React, { useMemo, useReducer, useRef } from 'react';
+import React, { useCallback, useMemo, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { ConfigurationsContext } from '../../contexts';
 import reducer, { initialState } from './reducer';
@@ -12,17 +12,18 @@ const ConfigurationsProvider = ({
 }) => {
   const [{ menuLogo, authLogo }, dispatch] = useReducer(reducer, initialState);
 
-  const updateProjectSettings = ({ menuLogo, authLogo }) => {
-    return dispatch({
-      type: 'UPDATE_PROJECT_SETTINGS',
-      values: {
-        menuLogo: menuLogo || defaultMenuLogo,
-        authLogo: authLogo || defaultAuthLogo,
-      },
-    });
-  };
-
-  const updateProjectSettingsRef = useRef(updateProjectSettings);
+  const updateProjectSettings = useCallback(
+    ({ menuLogo, authLogo }) => {
+      return dispatch({
+        type: 'UPDATE_PROJECT_SETTINGS',
+        values: {
+          menuLogo: menuLogo || defaultMenuLogo,
+          authLogo: authLogo || defaultAuthLogo,
+        },
+      });
+    },
+    [defaultAuthLogo, defaultMenuLogo]
+  );
 
   const configurationValue = useMemo(() => {
     return {
@@ -30,7 +31,7 @@ const ConfigurationsProvider = ({
         menu: { custom: menuLogo, default: defaultMenuLogo },
         auth: { custom: authLogo, default: defaultAuthLogo },
       },
-      updateProjectSettings: updateProjectSettingsRef.current,
+      updateProjectSettings,
       showReleaseNotification,
       showTutorials,
     };
@@ -39,6 +40,7 @@ const ConfigurationsProvider = ({
     defaultMenuLogo,
     authLogo,
     defaultAuthLogo,
+    updateProjectSettings,
     showReleaseNotification,
     showTutorials,
   ]);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
@@ -8,12 +8,14 @@ import ApplicationInfosPage from '../index';
 import { axiosInstance } from '../../../../../core/utils';
 import server from './server';
 
+const updateProjectSettingsSpy = jest.fn();
+
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   // eslint-disable-next-line
   CheckPermissions: ({ children }) => <div>{children}</div>,
   useAppInfos: jest.fn(() => ({ shouldUpdateStrapi: false, latestStrapiReleaseTag: 'v3.6.8' })),
-  useNotification: jest.fn(),
+  useNotification: jest.fn(() => jest.fn()),
   useRBAC: jest.fn(() => ({ allowedActions: { canRead: true, canUpdate: true } })),
 }));
 jest.mock('../../../../../hooks', () => ({
@@ -22,6 +24,7 @@ jest.mock('../../../../../hooks', () => ({
       menu: { custom: 'customMenuLogo.png', default: 'defaultMenuLogo.png' },
       auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
     },
+    updateProjectSettings: updateProjectSettingsSpy,
   })),
 }));
 
@@ -57,6 +60,7 @@ describe('Application page', () => {
 
   afterEach(() => {
     server.resetHandlers();
+    jest.restoreAllMocks();
   });
 
   afterAll(() => server.close());
@@ -124,5 +128,12 @@ describe('Application page', () => {
     await waitFor(() => {
       expect(queryByText('Save')).not.toBeInTheDocument();
     });
+  });
+
+  it('should update project settings on save', async () => {
+    const { getByRole } = render(App);
+
+    fireEvent.click(getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(updateProjectSettingsSpy).toHaveBeenCalledTimes(1));
   });
 });
