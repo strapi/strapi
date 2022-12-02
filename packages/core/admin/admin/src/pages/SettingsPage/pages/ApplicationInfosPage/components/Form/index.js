@@ -75,16 +75,18 @@ const Form = forwardRef(({ canUpdate, projectSettingsStored }, ref) => {
             canUpdate={canUpdate}
             customLogo={menuLogo.display}
             defaultLogo={menu.default}
-            // TODO translation
             hint={formatMessage(
               {
-                id: 'app',
+                id: 'Settings.application.customization.menu-logo.carousel-hint',
                 defaultMessage:
                   'Change the admin panel logo (Max dimension: {dimension}x{dimension}, Max file size: {size}KB)',
               },
               { dimension: DIMENSION, size: SIZE }
             )}
-            label={formatMessage({ id: 'app', defaultMessage: 'Menu logo' })}
+            label={formatMessage({
+              id: 'Settings.application.customization.carousel.menu-logo.title',
+              defaultMessage: 'Menu logo',
+            })}
             onChangeLogo={handleChangeMenuLogo}
             onResetLogo={handleResetMenuLogo}
           />
@@ -94,16 +96,18 @@ const Form = forwardRef(({ canUpdate, projectSettingsStored }, ref) => {
             canUpdate={canUpdate}
             customLogo={authLogo.display}
             defaultLogo={auth.default}
-            // TODO translation
             hint={formatMessage(
               {
-                id: 'app',
+                id: 'Settings.application.customization.auth-logo.carousel-hint',
                 defaultMessage:
                   'Change the authentication pages logo (Max dimension: {dimension}x{dimension}, Max file size: {size}KB)',
               },
               { dimension: DIMENSION, size: SIZE }
             )}
-            label={formatMessage({ id: 'app', defaultMessage: 'Auth logo' })}
+            label={formatMessage({
+              id: 'Settings.application.customization.carousel.auth-logo.title',
+              defaultMessage: 'Auth logo',
+            })}
             onChangeLogo={handleChangeAuthLogo}
             onResetLogo={handleResetAuthLogo}
           />
