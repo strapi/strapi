@@ -21,6 +21,7 @@ import Preview from './Preview';
 import DraggingSibling from './DraggingSibling';
 import { CustomIconButton } from './IconButtonCustoms';
 import { connect, select } from './utils';
+import useLazyComponents from '../../../hooks/useLazyComponents';
 
 const DragButton = styled.span`
   display: flex;
@@ -177,6 +178,8 @@ const DraggedItem = ({
   const accordionTitle = toString(displayedValue);
   const accordionHasError = hasErrors ? 'error' : undefined;
 
+  const { lazyComponentStore } = useLazyComponents();
+
   return (
     <Box ref={refs ? refs.dropRef : null}>
       {isDragging && <Preview />}
@@ -273,6 +276,7 @@ const DraggedItem = ({
                             // onBlur={hasErrors ? checkFormErrors : null}
                             queryInfos={queryInfos}
                             size={size}
+                            customFieldInputs={lazyComponentStore}
                           />
                         </GridItem>
                       );
