@@ -1,18 +1,27 @@
+/* eslint-disable import/first */
 import stream from 'stream';
 
-import { createLocalFileDestinationProvider, ILocalFileDestinationProviderOptions } from '../';
+jest.mock('fs');
+
+import fs from 'fs-extra';
+import { Writable } from 'stream-chain';
+import { createLocalFileDestinationProvider, ILocalFileDestinationProviderOptions } from '..';
 import * as encryption from '../../../encryption/encrypt';
-import {
-  createFilePathFactory,
-  createTarEntryStream,
-} from '../../local-file-destination-provider/utils';
+import { createFilePathFactory, createTarEntryStream } from '../utils';
+
+fs.createWriteStream = jest.fn().mockReturnValue(
+  new Writable({
+    objectMode: true,
+    write() {},
+  })
+);
 
 const filePath = './test-file';
 
 jest.mock('../../../encryption/encrypt', () => {
   return {
     __esModule: true,
-    createEncryptionCipher: (key: string) => {},
+    createEncryptionCipher(key: string) {},
   };
 });
 
