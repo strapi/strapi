@@ -211,17 +211,13 @@ const createEntityManager = (db) => {
       }
 
       const dataToInsert = processData(metadata, data, { withDefaults: true });
-      let id;
+
+      const res = await this.createQueryBuilder(uid).insert(dataToInsert).execute();
+
+      const id = res[0].id || res[0];
 
       const trx = await strapi.db.transaction();
       try {
-        const res = await this.createQueryBuilder(uid)
-          .insert(dataToInsert)
-          .transacting(trx)
-          .execute();
-
-        id = res[0].id || res[0];
-
         await this.attachRelations(uid, id, data, { transaction: trx });
 
         await trx.commit();
@@ -293,18 +289,14 @@ const createEntityManager = (db) => {
 
       const { id } = entity;
 
+      const dataToUpdate = processData(metadata, data);
+
+      if (!isEmpty(dataToUpdate)) {
+        await this.createQueryBuilder(uid).where({ id }).update(dataToUpdate).execute();
+      }
+
       const trx = await strapi.db.transaction();
       try {
-        const dataToUpdate = processData(metadata, data);
-
-        if (!isEmpty(dataToUpdate)) {
-          await this.createQueryBuilder(uid)
-            .where({ id })
-            .update(dataToUpdate)
-            .transacting(trx)
-            .execute();
-        }
-
         await this.updateRelations(uid, id, data, { transaction: trx });
 
         await trx.commit();
@@ -372,10 +364,10 @@ const createEntityManager = (db) => {
 
       const { id } = entity;
 
+      await this.createQueryBuilder(uid).where({ id }).delete().execute();
+
       const trx = await strapi.db.transaction();
       try {
-        await this.createQueryBuilder(uid).where({ id }).delete().transacting(trx).execute();
-
         await this.deleteRelations(uid, id, { transaction: trx });
 
         await trx.commit();
