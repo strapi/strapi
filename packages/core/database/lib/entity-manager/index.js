@@ -223,6 +223,7 @@ const createEntityManager = (db) => {
         await trx.commit();
       } catch (e) {
         await trx.rollback();
+        await this.createQueryBuilder(uid).where({ id }).delete().execute();
         throw e;
       }
 
@@ -281,7 +282,11 @@ const createEntityManager = (db) => {
         throw new Error('Update requires a where parameter');
       }
 
-      const entity = await this.createQueryBuilder(uid).select('id').where(where).first().execute();
+      const entity = await this.createQueryBuilder(uid)
+        .select('*')
+        .where(where)
+        .first()
+        .execute({ mapResults: false });
 
       if (!entity) {
         return null;
@@ -298,10 +303,10 @@ const createEntityManager = (db) => {
       const trx = await strapi.db.transaction();
       try {
         await this.updateRelations(uid, id, data, { transaction: trx });
-
         await trx.commit();
       } catch (e) {
         await trx.rollback();
+        await this.createQueryBuilder(uid).where({ id }).update(entity).execute();
         throw e;
       }
 
