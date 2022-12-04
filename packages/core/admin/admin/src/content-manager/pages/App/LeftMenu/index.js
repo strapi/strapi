@@ -18,8 +18,17 @@ import {
   SubNavSections,
   SubNavLink,
 } from '@strapi/design-system/v2/SubNav';
-import getTrad from '../../../utils/getTrad';
+import styled from 'styled-components';
+import { Button } from '@strapi/design-system/Button';
+import ArrowRight from '@strapi/icons/ArrowRight';
 import { makeSelectModelLinks } from '../selectors';
+import getTrad from '../../../utils/getTrad';
+
+const ShowButton = styled(Button)`
+  position: absolute;
+  top: 18px;
+  margin-left: 0.3rem;
+`;
 
 const matchByTitle = (links, search) =>
   matchSorter(links, toLower(search), { keys: [(item) => toLower(item.title)] });
@@ -27,6 +36,8 @@ const matchByTitle = (links, search) =>
 const LeftMenu = () => {
   const [search, setSearch] = useState('');
   const { formatMessage } = useIntl();
+  const [condensed, setCondensed] = useState(false);
+
   const modelLinksSelector = useMemo(makeSelectModelLinks, []);
   const { collectionTypeLinks, singleTypeLinks } = useSelector(
     (state) => modelLinksSelector(state),
@@ -82,6 +93,18 @@ const LeftMenu = () => {
     defaultMessage: 'Content',
   });
 
+  const handleCondensed = () => {
+    setCondensed((s) => !s);
+  };
+
+  if (condensed) {
+    return (
+      <ShowButton onFocus={handleCondensed} onClick={handleCondensed}>
+        <ArrowRight />
+      </ShowButton>
+    );
+  }
+
   return (
     <SubNav ariaLabel={label}>
       <SubNavHeader
@@ -112,7 +135,12 @@ const LeftMenu = () => {
                 const search = link.search ? `?${link.search}` : '';
 
                 return (
-                  <SubNavLink as={NavLink} key={link.uid} to={`${link.to}${search}`}>
+                  <SubNavLink
+                    as={NavLink}
+                    key={link.uid}
+                    to={`${link.to}${search}`}
+                    onClick={() => setCondensed(true)}
+                  >
                     {link.title}
                   </SubNavLink>
                 );

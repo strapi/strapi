@@ -18,7 +18,7 @@ module.exports = () => {
   // to display the tree map of modules
   const env = analyzeBundle ? 'production' : 'development';
   const options = {
-    backend: 'http://localhost:1337',
+    backend: '/',
     adminPath: '/admin/',
 
     /**
