@@ -170,7 +170,9 @@ const relationsOrderer = (initArr, idColumn, orderColumn) => {
           insertRelation(relation);
         } catch (err) {
           throw new Error(
-            `There was a problem connecting id ${relation.id} with position ${JSON.stringify(
+            `There was a problem connecting relation with id ${
+              relation.id
+            } at position ${JSON.stringify(
               relation.position
             )}. The list of connect relations is not valid`
           );
