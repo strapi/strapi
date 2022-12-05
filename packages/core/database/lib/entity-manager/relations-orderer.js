@@ -22,17 +22,26 @@ const _ = require('lodash/fp');
  */
 const sortConnectArray = (connectArr, initialArr = []) => {
   const sortedConnect = [];
+  // Boolean to know if we have to recalculate the order of the relations
+  let needsSorting = false;
   // Map to validate if relation is already in sortedConnect or DB.
   const relInArray = initialArr.reduce((acc, rel) => ({ ...acc, [rel.id]: true }), {});
-  // Map to validate if connect relation has already been computed
-  const computedIdx = {};
   // Map to store the first index where a relation id is connected
   const firstSeen = {};
+  // Map to validate if connect relation has already been computed
+  const computedIdx = {};
 
-  // Populate firstSeen
   connectArr.forEach((rel, idx) => {
+    // If adjacent relation is not in the database or seen yet in the connect array
+    // then we need to sort the connect array
+    const adjacentRelId = rel.position?.before || rel.position?.after;
+    if (!relInArray[adjacentRelId] && !firstSeen[adjacentRelId]) needsSorting = true;
+    // Populate firstSeen
     if (!(rel.id in firstSeen)) firstSeen[rel.id] = idx;
   });
+
+  // If we don't need to sort the connect array, we can return it as is
+  if (!needsSorting) return connectArr;
 
   // Iterate over connectArr and populate sortedConnect
   connectArr.forEach((rel, idx) => {
