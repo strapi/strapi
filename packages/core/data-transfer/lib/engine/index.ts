@@ -33,11 +33,6 @@ type TransferProgress = {
   };
 };
 
-type TransferEngineProgress = {
-  data: any;
-  stream: PassThrough;
-};
-
 class TransferEngine<
   S extends ISourceProvider = ISourceProvider,
   D extends IDestinationProvider = IDestinationProvider
