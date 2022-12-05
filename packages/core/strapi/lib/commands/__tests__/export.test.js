@@ -10,9 +10,13 @@ const mockDataTransfer = {
   }),
 };
 
-jest.mock('@strapi/data-transfer', () => {
-  return mockDataTransfer;
-});
+jest.mock(
+  '@strapi/data-transfer',
+  () => {
+    return mockDataTransfer;
+  },
+  { virtual: true }
+);
 
 const exportCommand = require('../transfer/export');
 
