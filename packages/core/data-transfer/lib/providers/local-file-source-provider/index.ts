@@ -1,17 +1,18 @@
 import type { Readable } from 'stream';
 
-import type { IMetadata, ISourceProvider, ProviderType } from '../../types';
+import type { IMetadata, ISourceProvider, ProviderType } from '../../../types';
 
 import fs from 'fs';
 import zip from 'zlib';
 import tar from 'tar';
+import path from 'path';
 import { keyBy } from 'lodash/fp';
 import { chain } from 'stream-chain';
-import { pipeline, PassThrough } from 'stream';
+import { pipeline, PassThrough, Readable as ReadStream } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
 
-import { createDecryptionCipher } from '../encryption';
-import { collect } from '../utils';
+import { createDecryptionCipher } from '../../encryption';
+import { collect } from '../../utils';
 
 type StreamItemArray = Parameters<typeof chain>[0];
 
@@ -107,6 +108,35 @@ class LocalFileSourceProvider implements ISourceProvider {
   streamConfiguration(): NodeJS.ReadableStream {
     // NOTE: TBD
     return this.#streamJsonlDirectory('configuration');
+  }
+
+  streamAssets(): NodeJS.ReadableStream {
+    const inStream = this.#getBackupStream();
+    const outStream = new PassThrough({ objectMode: true });
+
+    pipeline(
+      [
+        inStream,
+        new tar.Parse({
+          filter(path, entry) {
+            if (entry.type !== 'File') {
+              return false;
+            }
+
+            const parts = path.split('/');
+            return parts[0] === 'assets' && parts[1] == 'uploads';
+          },
+          onentry(entry) {
+            const { path: filePath, size } = entry;
+            const file = path.basename(filePath);
+            outStream.write({ file, path: filePath, stats: { size }, stream: entry });
+          },
+        }),
+      ],
+      () => outStream.end()
+    );
+
+    return outStream;
   }
 
   #getBackupStream(decompress: boolean = true) {

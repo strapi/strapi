@@ -2,7 +2,9 @@
 import type { IDestinationProvider, IMetadata, ProviderType } from '../../types';
 
 import chalk from 'chalk';
-import { Duplex } from 'stream';
+import { Duplex, Writable } from 'stream';
+import path from 'path';
+import * as fse from 'fs-extra';
 
 import { mapSchemasValues } from '../utils';
 
@@ -55,6 +57,24 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     };
 
     return mapSchemasValues(schemas);
+  }
+
+  getAssetsStream(): NodeJS.WritableStream {
+    if (!this.strapi) {
+      throw new Error('Not able to stream Assets. Strapi instance not found');
+    }
+    const assetsDirectory = path.join(this.strapi.dirs.static.public, 'uploads');
+    return new Writable({
+      objectMode: true,
+      write(chunk, _encoding, callback) {
+        const entryPath = path.join(assetsDirectory, chunk.file);
+        const writableStream = fse.createWriteStream(entryPath);
+        chunk.stream
+          .pipe(writableStream)
+          .on('close', () => callback())
+          .on('error', callback);
+      },
+    });
   }
 
   getEntitiesStream(): Duplex {
