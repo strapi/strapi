@@ -192,7 +192,7 @@ const DynamicZone = ({
             })}
           </VisuallyHidden>
           <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
-          <ul aria-describedby={ariaDescriptionId}>
+          <ol aria-describedby={ariaDescriptionId}>
             {dynamicDisplayedComponents.map(({ componentUid, id }, index) => (
               <DynamicZoneComponent
                 componentUid={componentUid}
@@ -208,7 +208,7 @@ const DynamicZone = ({
                 onGrabItem={handleGrabItem}
               />
             ))}
-          </ul>
+          </ol>
         </Box>
       )}
 

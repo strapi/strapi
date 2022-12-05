@@ -28,8 +28,8 @@ const DropdownIconWrapper = styled(Box)`
 `;
 
 const Icon = styled(FontAwesomeIcon)`
-  width: 14px;
-  height: 14px;
+  width: ${pxToRem(12)};
+  height: ${pxToRem(12)};
 
   color: ${({ theme }) => theme.colors.neutral600};
 `;

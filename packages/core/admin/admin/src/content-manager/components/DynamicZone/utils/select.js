@@ -15,8 +15,6 @@ function useSelect(name) {
     updateActionAllowedFields,
   } = useCMEditViewDataManager();
 
-  console.log(modifiedData);
-
   const dynamicDisplayedComponents = useMemo(
     () =>
       get(modifiedData, [name], []).map((data) => ({
