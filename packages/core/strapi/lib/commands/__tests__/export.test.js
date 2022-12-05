@@ -4,7 +4,7 @@ const utils = require('../transfer/utils');
 
 const mockDataTransfer = {
   createLocalFileDestinationProvider: jest.fn(),
-  createLocalStrapiSourceProvider: jest.fn(() => {}),
+  createLocalStrapiSourceProvider: jest.fn(),
   createTransferEngine: jest.fn().mockReturnValue({
     transfer: jest.fn().mockReturnValue(Promise.resolve({})),
   }),
