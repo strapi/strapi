@@ -6,7 +6,8 @@
     "skipLibCheck": true,
     "outDir": "dist",
     "declaration": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "esModuleInterop": true
   },
   "include": ["types", "lib/**/*.ts"],
   "exclude": ["node_modules", "lib/**/__tests__"]

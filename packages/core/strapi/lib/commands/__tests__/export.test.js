@@ -19,37 +19,41 @@ const exportCommand = require('../transfer/export');
 const exit = jest.spyOn(process, 'exit').mockImplementation(() => {});
 jest.spyOn(console, 'error').mockImplementation(() => {});
 
-const defaultFileName = 'defaultFilename';
-
 jest.mock('../transfer/utils');
+
+const defaultFileName = 'defaultFilename';
 
 describe('export', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    utils.getDefaultExportBackupName.mockReturnValue(defaultFileName);
   });
 
   it('uses path provided by user', async () => {
     const filename = 'testfile';
-    await exportCommand({ output: filename });
+
+    await exportCommand({ file: filename });
+
     expect(mockDataTransfer.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         file: { path: filename },
       })
     );
-    expect(utils.getDefaultExportBackupName).not.toHaveBeenCalled();
+    expect(utils.getDefaultExportName).not.toHaveBeenCalled();
     expect(exit).toHaveBeenCalled();
   });
 
   it('uses default path if not provided by user', async () => {
+    utils.getDefaultExportName.mockReturnValue(defaultFileName);
+
     await exportCommand({});
+
     expect(mockDataTransfer.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         file: { path: defaultFileName },
       })
     );
 
-    expect(utils.getDefaultExportBackupName).toHaveBeenCalled();
+    expect(utils.getDefaultExportName).toHaveBeenCalled();
     expect(exit).toHaveBeenCalled();
   });
 
