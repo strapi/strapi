@@ -147,7 +147,7 @@ const update = async (id, { name, parent }, { user }) => {
 
       // update folders below
       await strapi.db
-        .connection(folderTable)
+        .getConnection(folderTable)
         .transacting(trx)
         .where(pathColumnName, existingFolder.path)
         .orWhere(pathColumnName, 'like', `${existingFolder.path}/%`)
@@ -162,7 +162,7 @@ const update = async (id, { name, parent }, { user }) => {
 
       // update files below
       await strapi.db
-        .connection(fileTable)
+        .getConnection(fileTable)
         .transacting(trx)
         .where(folderPathColumnName, existingFolder.path)
         .orWhere(folderPathColumnName, 'like', `${existingFolder.path}/%`)

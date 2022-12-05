@@ -77,7 +77,7 @@
   "Settings.permissions.conditions.anytime": "בכל עת",
   "Settings.permissions.conditions.apply": "החל",
   "Settings.permissions.conditions.can": "יכול",
-  "Settings.permissions.conditions.define-conditions": "הגדר תנאים",
+  "Settings.permissions.conditions.conditions": "הגדר תנאים",
   "Settings.permissions.conditions.links": "קישורים",
   "Settings.permissions.conditions.no-actions": "אין שום פעולה",
   "Settings.permissions.conditions.or": "או",

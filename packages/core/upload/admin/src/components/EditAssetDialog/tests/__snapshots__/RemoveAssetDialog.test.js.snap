@@ -13,18 +13,165 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   width: 1px;
 }
 
-.c22 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
+.c3 {
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
 }
 
-.c25 {
+.c5 {
+  padding: 24px;
+}
+
+.c10 {
+  padding-top: 40px;
+  padding-right: 24px;
+  padding-bottom: 40px;
+  padding-left: 24px;
+}
+
+.c11 {
+  padding-bottom: 8px;
+}
+
+.c16 {
+  padding: 16px;
+}
+
+.c24 {
   padding-right: 8px;
 }
 
-.c19 {
+.c6 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c13 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c18 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c9 {
+  font-weight: 600;
+  font-size: 1.125rem;
+  line-height: 1.22;
+  color: #32324d;
+}
+
+.c15 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
+}
+
+.c22 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 1.14;
+  color: #32324d;
+}
+
+.c1 {
+  position: fixed;
+  z-index: 4;
+  inset: 0;
+  background: #32324d33;
+  padding: 0 40px;
+}
+
+.c4 {
+  max-width: 25.75rem;
+  margin: 0 auto;
+  overflow: hidden;
+  margin-top: 10%;
+}
+
+.c7 {
+  border-bottom: 1px solid #eaeaef;
+}
+
+.c12 svg {
+  width: 24px;
+  height: 24px;
+}
+
+.c12 svg path {
+  fill: #d02b20;
+}
+
+.c14 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c14 > * + * {
+  margin-top: 8px;
+}
+
+.c19 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c19 > * + * {
+  margin-left: 8px;
+}
+
+.c17 {
+  border-top: 1px solid #eaeaef;
+}
+
+.c17 button {
+  width: 100%;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c20 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -38,21 +185,21 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   outline: none;
 }
 
-.c19 svg {
+.c20 svg {
   height: 12px;
   width: 12px;
 }
 
-.c19 svg > g,
-.c19 svg path {
+.c20 svg > g,
+.c20 svg path {
   fill: #ffffff;
 }
 
-.c19[aria-disabled='true'] {
+.c20[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c19:after {
+.c20:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -67,11 +214,11 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   border: 2px solid transparent;
 }
 
-.c19:focus-visible {
+.c20:focus-visible {
   outline: none;
 }
 
-.c19:focus-visible:after {
+.c20:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -82,23 +229,25 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c26 {
+.c25 {
   height: 100%;
 }
 
-.c20 {
+.c21 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
+  background-color: #4945ff;
   border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
   border: 1px solid #dcdce4;
   background: #ffffff;
 }
 
-.c20 .c24 {
+.c21 .c2 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -109,52 +258,52 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   align-items: center;
 }
 
-.c20 .c21 {
+.c21 .c8 {
   color: #ffffff;
 }
 
-.c20[aria-disabled='true'] {
+.c21[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c20[aria-disabled='true'] .c21 {
+.c21[aria-disabled='true'] .c8 {
   color: #666687;
 }
 
-.c20[aria-disabled='true'] svg > g,
-.c20[aria-disabled='true'] svg path {
+.c21[aria-disabled='true'] svg > g,
+.c21[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c20[aria-disabled='true']:active {
+.c21[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c20[aria-disabled='true']:active .c21 {
+.c21[aria-disabled='true']:active .c8 {
   color: #666687;
 }
 
-.c20[aria-disabled='true']:active svg > g,
-.c20[aria-disabled='true']:active svg path {
+.c21[aria-disabled='true']:active svg > g,
+.c21[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c20:hover {
+.c21:hover {
   background-color: #f6f6f9;
 }
 
-.c20:active {
+.c21:active {
   background-color: #eaeaef;
 }
 
-.c20 .c21 {
+.c21 .c8 {
   color: #32324d;
 }
 
-.c20 svg > g,
-.c20 svg path {
+.c21 svg > g,
+.c21 svg path {
   fill: #32324d;
 }
 
@@ -163,14 +312,16 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
+  background-color: #4945ff;
   border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
   border: 1px solid #f5c0b8;
   background: #fcecea;
 }
 
-.c23 .c24 {
+.c23 .c2 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -181,7 +332,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   align-items: center;
 }
 
-.c23 .c21 {
+.c23 .c8 {
   color: #ffffff;
 }
 
@@ -190,7 +341,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   background: #eaeaef;
 }
 
-.c23[aria-disabled='true'] .c21 {
+.c23[aria-disabled='true'] .c8 {
   color: #666687;
 }
 
@@ -204,7 +355,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   background: #eaeaef;
 }
 
-.c23[aria-disabled='true']:active .c21 {
+.c23[aria-disabled='true']:active .c8 {
   color: #666687;
 }
 
@@ -222,7 +373,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   border: 1px solid #d02b20;
 }
 
-.c23:active .c21 {
+.c23:active .c8 {
   color: #d02b20;
 }
 
@@ -231,177 +382,13 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   fill: #d02b20;
 }
 
-.c23 .c21 {
+.c23 .c8 {
   color: #b72b1a;
 }
 
 .c23 svg > g,
 .c23 svg path {
   fill: #b72b1a;
-}
-
-.c2 {
-  background: #ffffff;
-  border-radius: 4px;
-  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
-}
-
-.c4 {
-  padding: 24px;
-}
-
-.c8 {
-  padding-top: 40px;
-  padding-right: 24px;
-  padding-bottom: 40px;
-  padding-left: 24px;
-}
-
-.c9 {
-  padding-bottom: 8px;
-}
-
-.c15 {
-  padding: 16px;
-}
-
-.c5 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c17 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c7 {
-  color: #32324d;
-  font-weight: 600;
-  font-size: 1.125rem;
-  line-height: 1.22;
-}
-
-.c1 {
-  position: fixed;
-  z-index: 4;
-  inset: 0;
-  background: #32324d33;
-  padding: 0 40px;
-}
-
-.c3 {
-  max-width: 25.75rem;
-  margin: 0 auto;
-  overflow: hidden;
-  margin-top: 10%;
-}
-
-.c6 {
-  border-bottom: 1px solid #eaeaef;
-}
-
-.c10 svg {
-  width: 24px;
-  height: 24px;
-}
-
-.c10 svg path {
-  fill: #d02b20;
-}
-
-.c18 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c18 > * + * {
-  margin-left: 8px;
-}
-
-.c16 {
-  border-top: 1px solid #eaeaef;
-}
-
-.c16 button {
-  width: 100%;
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c13 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c11 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c12 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c12 > * + * {
-  margin-top: 8px;
-}
-
-.c14 {
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
 }
 
 <body
@@ -438,91 +425,34 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
       class="c1"
     >
       <div>
-        <div
-          aria-labelledby="dialog-1-label"
-          aria-modal="true"
-          class="c2 c3"
-          role="dialog"
-        >
+        <div>
           <div
-            class="c4 c5 c6"
-          >
-            <h2
-              class="c7"
-              id="dialog-1-label"
-            >
-              Confirmation
-            </h2>
-          </div>
-          <div
-            class=""
+            aria-labelledby="dialog-1-label"
+            aria-modal="true"
+            class="c2 c3 c4"
+            role="dialog"
           >
             <div
-              class="c8"
+              class="c2 c5 c6 c7"
             >
-              <div
-                class="c9 c10"
+              <h2
+                class="c8 c9"
+                id="dialog-1-label"
               >
-                <div
-                  class="c5"
-                >
-                  <svg
-                    fill="none"
-                    height="1em"
-                    viewBox="0 0 24 24"
-                    width="1em"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12 12-5.383 12-12S18.617 0 12 0zm1.154 18.456h-2.308V16.15h2.308v2.307zm-.23-3.687h-1.847l-.346-9.23h2.538l-.346 9.23z"
-                      fill="#212134"
-                    />
-                  </svg>
-                </div>
-              </div>
-              <div
-                class="c11 c12"
-                spacing="2"
-              >
-                <div
-                  class="c13"
-                >
-                  <span
-                    class="c14"
-                    id="confirm-description"
-                  >
-                    Are you sure you want to delete this?
-                  </span>
-                </div>
-              </div>
+                Confirmation
+              </h2>
             </div>
             <div
-              class="c15 c16"
+              class="c2 "
             >
               <div
-                class="c17 c18"
-                spacing="2"
+                class="c2 c10"
               >
-                <button
-                  aria-disabled="false"
-                  class="c19 c20"
-                  type="button"
-                >
-                  <span
-                    class="c21 c22"
-                  >
-                    Cancel
-                  </span>
-                </button>
-                <button
-                  aria-disabled="false"
-                  class="c19 c23"
-                  id="confirm-delete"
-                  type="button"
+                <div
+                  class="c2 c11 c12"
                 >
                   <div
-                    aria-hidden="true"
-                    class="c24 c25 c26"
+                    class="c2 c6"
                   >
                     <svg
                       fill="none"
@@ -532,17 +462,76 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
-                        fill="#32324D"
+                        d="M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12 12-5.383 12-12S18.617 0 12 0zm1.154 18.456h-2.308V16.15h2.308v2.307zm-.23-3.687h-1.847l-.346-9.23h2.538l-.346 9.23z"
+                        fill="#212134"
                       />
                     </svg>
                   </div>
-                  <span
-                    class="c21 c22"
+                </div>
+                <div
+                  class="c2 c13 c14"
+                  spacing="2"
+                >
+                  <div
+                    class="c2 c6"
                   >
-                    Confirm
-                  </span>
-                </button>
+                    <span
+                      class="c8 c15"
+                      id="confirm-description"
+                    >
+                      Are you sure you want to delete this?
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="c2 c16 c17"
+              >
+                <div
+                  class="c2 c18 c19"
+                  spacing="2"
+                >
+                  <button
+                    aria-disabled="false"
+                    class="c20 c21"
+                    type="button"
+                  >
+                    <span
+                      class="c8 c22"
+                    >
+                      Cancel
+                    </span>
+                  </button>
+                  <button
+                    aria-disabled="false"
+                    class="c20 c23"
+                    id="confirm-delete"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="c2 c24 c25"
+                    >
+                      <svg
+                        fill="none"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
+                          fill="#32324D"
+                        />
+                      </svg>
+                    </div>
+                    <span
+                      class="c8 c22"
+                    >
+                      Confirm
+                    </span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
