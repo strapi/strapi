@@ -6,10 +6,10 @@ import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Box } from '@strapi/design-system/Box';
 import { Typography } from '@strapi/design-system/Typography';
 import { useConfigurations } from '../../../../../../hooks';
+import { DIMENSION, SIZE } from '../../utils/constants';
 import LogoInput from '../LogoInput';
 import reducer, { initialState } from './reducer';
 import init from './init';
-import { DIMENSION, SIZE } from '../../utils/constants';
 
 const Form = forwardRef(({ canUpdate, projectSettingsStored }, ref) => {
   const { formatMessage } = useIntl();
@@ -69,20 +69,25 @@ const Form = forwardRef(({ canUpdate, projectSettingsStored }, ref) => {
           defaultMessage: 'Customization',
         })}
       </Typography>
+      <Typography variant="pi" textColor="neutral600">
+        {formatMessage(
+          {
+            id: 'Settings.application.customization.size-details',
+            defaultMessage: 'Max dimension: {dimension}×{dimension}, Max file size: {size}KB',
+          },
+          { dimension: DIMENSION, size: SIZE }
+        )}
+      </Typography>
       <Grid paddingTop={4} gap={4}>
         <GridItem col={6} s={12}>
           <LogoInput
             canUpdate={canUpdate}
             customLogo={menuLogo.display}
             defaultLogo={menu.default}
-            hint={formatMessage(
-              {
-                id: 'Settings.application.customization.menu-logo.carousel-hint',
-                defaultMessage:
-                  'Change the admin panel logo (Max dimension: {dimension}x{dimension}, Max file size: {size}KB)',
-              },
-              { dimension: DIMENSION, size: SIZE }
-            )}
+            hint={formatMessage({
+              id: 'Settings.application.customization.menu-logo.carousel-hint',
+              defaultMessage: 'Replace the logo in the main navigation',
+            })}
             label={formatMessage({
               id: 'Settings.application.customization.carousel.menu-logo.title',
               defaultMessage: 'Menu logo',
@@ -96,14 +101,10 @@ const Form = forwardRef(({ canUpdate, projectSettingsStored }, ref) => {
             canUpdate={canUpdate}
             customLogo={authLogo.display}
             defaultLogo={auth.default}
-            hint={formatMessage(
-              {
-                id: 'Settings.application.customization.auth-logo.carousel-hint',
-                defaultMessage:
-                  'Change the authentication pages logo (Max dimension: {dimension}x{dimension}, Max file size: {size}KB)',
-              },
-              { dimension: DIMENSION, size: SIZE }
-            )}
+            hint={formatMessage({
+              id: 'Settings.application.customization.auth-logo.carousel-hint',
+              defaultMessage: 'Replace the logo in the authentication pages',
+            })}
             label={formatMessage({
               id: 'Settings.application.customization.carousel.auth-logo.title',
               defaultMessage: 'Auth logo',
