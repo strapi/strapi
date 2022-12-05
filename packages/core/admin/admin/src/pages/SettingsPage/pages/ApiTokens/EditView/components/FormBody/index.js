@@ -19,7 +19,7 @@ const FormBody = ({
   return (
     <ContentLayout>
       <Stack spacing={6}>
-        {Boolean(apiToken?.name) && <HeaderContentBox apiToken={apiToken.accessKey} />}
+        {Boolean(apiToken?.name) && <HeaderContentBox apiToken={apiToken?.accessKey} />}
         <FormApiTokenContainer
           errors={errors}
           onChange={onChange}
@@ -48,15 +48,15 @@ FormBody.propTypes = {
     type: PropTypes.string,
   }),
   apiToken: PropTypes.shape({
-    id: PropTypes.string,
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     type: PropTypes.string,
-    lifespan: PropTypes.number,
+    lifespan: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     name: PropTypes.string,
     accessKey: PropTypes.string,
     permissions: PropTypes.array,
     description: PropTypes.string,
     createdAt: PropTypes.string,
-  }).isRequired,
+  }),
   onChange: PropTypes.func.isRequired,
   canEditInputs: PropTypes.bool.isRequired,
   isCreating: PropTypes.bool.isRequired,
@@ -72,6 +72,7 @@ FormBody.propTypes = {
 
 FormBody.defaultProps = {
   errors: {},
+  apiToken: {},
 };
 
 export default FormBody;

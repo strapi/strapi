@@ -5,13 +5,13 @@ import get from 'lodash/get';
 import omit from 'lodash/omit';
 import take from 'lodash/take';
 import isEqual from 'react-fast-compare';
-import { GenericInput, NotAllowedInput, useLibrary, useCustomFields } from '@strapi/helper-plugin';
+import { GenericInput, NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
 import Wysiwyg from '../Wysiwyg';
 import InputJSON from '../InputJSON';
 import InputUID from '../InputUID';
-import SelectWrapper from '../SelectWrapper';
+import { RelationInputDataManager } from '../RelationInputDataManager';
 
 import {
   connect,
@@ -24,6 +24,7 @@ import {
 
 function Inputs({
   allowedFields,
+  componentUid,
   fieldSchema,
   formErrors,
   isCreatingEntry,
@@ -35,11 +36,12 @@ function Inputs({
   shouldNotRunValidations,
   queryInfos,
   value,
+  size,
+  customFieldInputs,
 }) {
   const { fields } = useLibrary();
   const { formatMessage } = useIntl();
   const { contentType: currentContentTypeLayout } = useContentTypeLayout();
-  const customFieldsRegistry = useCustomFields();
 
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
   const { type, customField: customFieldUid } = fieldSchema;
@@ -192,19 +194,6 @@ function Inputs({
     return minutes % metadatas.step === 0 ? metadatas.step : step;
   }, [inputType, inputValue, metadatas.step, step]);
 
-  // Memoize the component to avoid remounting it and losing state
-  const CustomFieldInput = useMemo(() => {
-    if (customFieldUid) {
-      const customField = customFieldsRegistry.get(customFieldUid);
-      const CustomFieldInput = React.lazy(customField.components.Input);
-
-      return CustomFieldInput;
-    }
-
-    // Not a custom field, component won't be used
-    return null;
-  }, [customFieldUid, customFieldsRegistry]);
-
   if (visible === false) {
     return null;
   }
@@ -224,9 +213,10 @@ function Inputs({
 
   if (type === 'relation') {
     return (
-      <SelectWrapper
+      <RelationInputDataManager
         {...metadatas}
         {...fieldSchema}
+        componentUid={componentUid}
         description={
           metadatas.description
             ? formatMessage({
@@ -252,6 +242,7 @@ function Inputs({
             : null
         }
         queryInfos={queryInfos}
+        size={size}
         value={value}
         error={error && formatMessage(error)}
       />
@@ -264,11 +255,8 @@ function Inputs({
     media: fields.media,
     wysiwyg: Wysiwyg,
     ...fields,
+    ...customFieldInputs,
   };
-
-  if (customFieldUid) {
-    customInputs[customFieldUid] = CustomFieldInput;
-  }
 
   return (
     <GenericInput
@@ -299,14 +287,18 @@ function Inputs({
 }
 
 Inputs.defaultProps = {
+  componentUid: undefined,
   formErrors: {},
   labelAction: undefined,
-  queryInfos: {},
+  size: undefined,
   value: null,
+  queryInfos: {},
+  customFieldInputs: {},
 };
 
 Inputs.propTypes = {
   allowedFields: PropTypes.array.isRequired,
+  componentUid: PropTypes.string,
   fieldSchema: PropTypes.object.isRequired,
   formErrors: PropTypes.object,
   keys: PropTypes.string.isRequired,
@@ -315,13 +307,15 @@ Inputs.propTypes = {
   metadatas: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
   readableFields: PropTypes.array.isRequired,
+  size: PropTypes.number,
   shouldNotRunValidations: PropTypes.bool.isRequired,
+  value: PropTypes.any,
   queryInfos: PropTypes.shape({
     containsKey: PropTypes.string,
     defaultParams: PropTypes.object,
     endPoint: PropTypes.string,
   }),
-  value: PropTypes.any,
+  customFieldInputs: PropTypes.object,
 };
 
 const Memoized = memo(Inputs, isEqual);
