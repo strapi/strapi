@@ -18,7 +18,7 @@ const internals = {};
 const features = {
   bronze: [],
   silver: [],
-  gold: ['sso'],
+  gold: ['sso', 'audit-logs'],
 };
 
 module.exports = ({ dir, logger = noLog }) => {
