@@ -14,6 +14,7 @@ import {
   stopPropagation,
   EmptyStateLayout,
   useFocusWhenNavigate,
+  useNotification,
 } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { Button } from '@strapi/design-system/Button';
@@ -42,6 +43,7 @@ const PluginPage = () => {
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
   const [versionToDelete, setVersionToDelete] = useState();
+  const toggleNotification = useNotification();
 
   const colCount = 4;
   const rowCount = (data?.docVersions?.length || 0) + 1;
@@ -55,7 +57,16 @@ const PluginPage = () => {
     const slash = data?.prefix.startsWith('/') ? '' : '/';
     const url = `${strapi.backendURL}${slash}${data?.prefix}/v${data?.currentVersion}/download`;
 
-    return downloadFile(url, 'openapi_documentation_strapi.json');
+    return downloadFile(url, 'openapi_documentation_strapi.json', 'json').catch(({ response }) => {
+      const error = response.data?.error ?? {};
+      toggleNotification({
+        type: 'warning',
+        message: {
+          id: `notification.download.error.${error.status}`,
+          defaultMessage: error.message,
+        },
+      });
+    });
   };
 
   const handleRegenerateDoc = (version) => {

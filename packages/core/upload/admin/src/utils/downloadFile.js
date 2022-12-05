@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-export const downloadFile = (url, fileName) => {
-  axios({
+export const downloadFile = (url, fileName, responseType = 'blob') => {
+  return axios({
     url,
     method: 'GET',
-    responseType: 'blob',
+    responseType,
   }).then((response) => {
     const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement('a');
