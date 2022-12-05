@@ -1222,6 +1222,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                     aria-hidden="true"
                     class="c0 c62 c63 c64"
                     tabindex="-1"
+                    title="Carret Down Button"
                     type="button"
                   >
                     <svg
@@ -1257,7 +1258,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
       </div>
       <nav
         aria-label="pagination"
-        class="sc-hrjYtz"
+        class="sc-epFoly"
       >
         <ul
           class="c0 c13 c66"

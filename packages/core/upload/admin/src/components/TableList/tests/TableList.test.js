@@ -75,7 +75,7 @@ describe('TableList', () => {
   it('should render a visually hidden edit table headers label', () => {
     const { getByRole } = setup();
 
-    expect(getByRole('columnheader', { name: 'actions' })).toBeInTheDocument();
+    expect(getByRole('gridcell', { name: 'actions' })).toBeInTheDocument();
   });
 
   it('should call onChangeSort callback when changing sort order', () => {

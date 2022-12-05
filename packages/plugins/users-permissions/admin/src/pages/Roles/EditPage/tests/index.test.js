@@ -783,7 +783,7 @@ describe('Admin | containers | RoleEditPage', () => {
         border: 1px solid #4945ff;
       }
 
-      .c41:hover:not([aria-disabled='true']) .sc-cOLXoO {
+      .c41:hover:not([aria-disabled='true']) .sc-eqUgKp {
         color: #271fe0;
       }
 
@@ -1125,7 +1125,7 @@ describe('Admin | containers | RoleEditPage', () => {
                                   class="c7 c49"
                                 >
                                   <span
-                                    class="c7 sc-cOLXoO c50"
+                                    class="c7 sc-eqUgKp c50"
                                     id="accordion-label-accordion-3"
                                   >
                                     Address

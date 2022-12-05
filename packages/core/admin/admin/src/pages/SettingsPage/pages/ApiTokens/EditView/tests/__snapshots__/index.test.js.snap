@@ -854,7 +854,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 1px solid #4945ff;
 }
 
-.c52:hover:not([aria-disabled='true']) .sc-gwNDlS {
+.c52:hover:not([aria-disabled='true']) .sc-bhnkmi {
   color: #271fe0;
 }
 
@@ -878,7 +878,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 1px solid #4945ff;
 }
 
-.c66:hover:not([aria-disabled='true']) .sc-gwNDlS {
+.c66:hover:not([aria-disabled='true']) .sc-bhnkmi {
   color: #271fe0;
 }
 
@@ -1229,6 +1229,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                                 aria-hidden="true"
                                 class="c1 c40 c41 c42"
                                 tabindex="-1"
+                                title="Carret Down Button"
                                 type="button"
                               >
                                 <svg
@@ -1321,6 +1322,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                                 aria-hidden="true"
                                 class="c1 c40 c41 c42"
                                 tabindex="-1"
+                                title="Carret Down Button"
                                 type="button"
                               >
                                 <svg
@@ -1401,7 +1403,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             class="c7 c60"
                           >
                             <span
-                              class="c7 sc-gwNDlS c61"
+                              class="c7 sc-bhnkmi c61"
                               id="accordion-label-accordion-13"
                             >
                               Address
@@ -1466,7 +1468,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             class="c7 c60"
                           >
                             <span
-                              class="c7 sc-gwNDlS c61"
+                              class="c7 sc-bhnkmi c61"
                               id="accordion-label-accordion-14"
                             >
                               Category
@@ -2593,7 +2595,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 1px solid #4945ff;
 }
 
-.c61:hover:not([aria-disabled='true']) .sc-gwNDlS {
+.c61:hover:not([aria-disabled='true']) .sc-bhnkmi {
   color: #271fe0;
 }
 
@@ -2617,7 +2619,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 1px solid #4945ff;
 }
 
-.c75:hover:not([aria-disabled='true']) .sc-gwNDlS {
+.c75:hover:not([aria-disabled='true']) .sc-bhnkmi {
   color: #271fe0;
 }
 
@@ -3042,6 +3044,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                                 class="c1 c47 c48 c49"
                                 disabled=""
                                 tabindex="-1"
+                                title="Carret Down Button"
                                 type="button"
                               >
                                 <svg
@@ -3136,6 +3139,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                                 aria-hidden="true"
                                 class="c1 c47 c48 c53"
                                 tabindex="-1"
+                                title="Carret Down Button"
                                 type="button"
                               >
                                 <svg
@@ -3216,7 +3220,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             class="c7 c69"
                           >
                             <span
-                              class="c7 sc-gwNDlS c70"
+                              class="c7 sc-bhnkmi c70"
                               id="accordion-label-accordion-42"
                             >
                               Address
@@ -3281,7 +3285,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             class="c7 c69"
                           >
                             <span
-                              class="c7 sc-gwNDlS c70"
+                              class="c7 sc-bhnkmi c70"
                               id="accordion-label-accordion-43"
                             >
                               Category

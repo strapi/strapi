@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
-.c34 {
+.c36 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -42,21 +42,29 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   padding-top: 4px;
 }
 
-.c22 {
-  background: #f6f6f9;
-  padding: 4px;
-  border-radius: 4px;
+.c21 {
+  padding-top: 4px;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+}
+
+.c23 {
+  background: #eaeaef;
+  padding-right: 8px;
+  padding-left: 8px;
   min-width: 20px;
 }
 
-.c28 {
+.c30 {
   background: #32324d;
   color: #ffffff;
   padding: 4px;
   border-radius: 4px;
 }
 
-.c31 {
+.c33 {
   width: 100%;
   height: 10.25rem;
 }
@@ -85,7 +93,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   color: #666687;
 }
 
-.c25 {
+.c27 {
   font-weight: 600;
   font-size: 0.6875rem;
   line-height: 1.45;
@@ -93,13 +101,13 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   color: #666687;
 }
 
-.c30 {
+.c32 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #ffffff;
 }
 
-.c27 {
+.c29 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -157,7 +165,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   flex-direction: row;
 }
 
-.c23 {
+.c24 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -282,14 +290,19 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   border-top-right-radius: 4px;
 }
 
-.c21 {
+.c25 {
+  border-radius: 4px;
+  height: 1.5rem;
+}
+
+.c22 {
   margin-left: auto;
   -webkit-flex-shrink: 0;
   -ms-flex-negative: 0;
   flex-shrink: 0;
 }
 
-.c24 {
+.c26 {
   margin-left: 4px;
 }
 
@@ -302,7 +315,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   border-bottom: 1px solid #eaeaef;
 }
 
-.c29 {
+.c31 {
   position: absolute;
   bottom: 4px;
   right: 4px;
@@ -316,22 +329,22 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   cursor: pointer;
 }
 
-.c4:hover .sc-cOLXoO {
+.c4:hover .sc-ywFzA {
   opacity: 1;
 }
 
-.c26 canvas,
-.c26 video {
+.c28 canvas,
+.c28 video {
   display: block;
   max-width: 100%;
   max-height: 10.25rem;
 }
 
-.c33 svg {
+.c35 svg {
   font-size: 3rem;
 }
 
-.c32 {
+.c34 {
   border-radius: 4px 4px 0 0;
   background: linear-gradient(180deg,#ffffff 0%,#f6f6f9 121.48%);
 }
@@ -430,16 +443,20 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c21"
+                  class="c21 c8"
                 >
                   <div
-                    class="c22 c23 c24"
+                    class="c22"
                   >
-                    <span
-                      class="c25"
+                    <div
+                      class="c23 c24 c25 c26"
                     >
-                      Image
-                    </span>
+                      <span
+                        class="c27"
+                      >
+                        Image
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -487,7 +504,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   class="c8"
                 >
                   <div
-                    class="c26"
+                    class="c28"
                   >
                     <figure
                       class=""
@@ -501,7 +518,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                         />
                       </video>
                       <figcaption
-                        class="c27"
+                        class="c29"
                       >
                         mov_bbb.mp4
                       </figcaption>
@@ -510,10 +527,10 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                 </div>
               </div>
               <time
-                class="c28 c29"
+                class="c30 c31"
               >
                 <span
-                  class="c30"
+                  class="c32"
                 >
                   ...
                 </span>
@@ -550,16 +567,20 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c21"
+                  class="c21 c8"
                 >
                   <div
-                    class="c22 c23 c24"
+                    class="c22"
                   >
-                    <span
-                      class="c25"
+                    <div
+                      class="c23 c24 c25 c26"
                     >
-                      Video
-                    </span>
+                      <span
+                        class="c27"
+                      >
+                        Video
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -601,12 +622,12 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                 </div>
               </div>
               <div
-                class="c31 c5 c32"
+                class="c33 c5 c34"
                 height="10.25rem"
                 width="100%"
               >
                 <span
-                  class="c33"
+                  class="c35"
                 >
                   <svg
                     aria-label="CARTE MARIAGE AVS - Printemps.pdf"
@@ -661,16 +682,20 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c21"
+                  class="c21 c8"
                 >
                   <div
-                    class="c22 c23 c24"
+                    class="c22"
                   >
-                    <span
-                      class="c25"
+                    <div
+                      class="c23 c24 c25 c26"
                     >
-                      Doc
-                    </span>
+                      <span
+                        class="c27"
+                      >
+                        Doc
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -681,7 +706,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
     </div>
   </div>
   <div
-    class="c34"
+    class="c36"
   >
     <p
       aria-live="polite"
