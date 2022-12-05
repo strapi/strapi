@@ -29,7 +29,8 @@
   ],
   "scripts": {
     "prepare": "husky install",
-    "setup": "yarn && yarn build",
+    "setup": "yarn && yarn clean && yarn build",
+    "clean": "lerna run --stream clean --no-private",
     "watch": "lerna run --stream watch --no-private",
     "build": "lerna run --stream build --no-private",
     "generate": "plop --plopfile ./packages/generators/admin/plopfile.js",
