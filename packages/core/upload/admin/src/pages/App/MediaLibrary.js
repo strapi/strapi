@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'; // useState
+import React, { useState, useRef } from 'react'; // useState
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { useLocation, useHistory } from 'react-router-dom';
@@ -127,15 +127,6 @@ export const MediaLibrary = () => {
     setShowEditFolderDialog((prev) => !prev);
   };
 
-  useEffect(() => {
-    if (assetCount > 0) {
-      setQuery({
-        ...query,
-        assetCount,
-      });
-    }
-  }, [assetCount, query, setQuery]);
-
   const handleChangeSort = (value) => {
     trackUsage('didSortMediaLibraryElements', {
       location: 'upload',
@@ -156,6 +147,25 @@ export const MediaLibrary = () => {
     if (currentFolderToEditRef.current) {
       currentFolderToEditRef.current.focus();
     }
+  };
+
+  const handleAssetDeleted = (numberOfAssets) => {
+    if (
+      numberOfAssets === assetCount &&
+      assetsData.pagination.page === assetsData.pagination.pageCount &&
+      assetsData.pagination.page > 1
+    ) {
+      setQuery({
+        ...query,
+        page: assetsData.pagination.page - 1,
+      });
+    }
+  };
+
+  const handleBulkActionSuccess = () => {
+    selectAll();
+
+    handleAssetDeleted(selected.length);
   };
 
   useFocusWhenNavigate();
@@ -225,7 +235,11 @@ export const MediaLibrary = () => {
 
         <ContentLayout>
           {selected.length > 0 && (
-            <BulkActions currentFolder={currentFolder} selected={selected} onSuccess={selectAll} />
+            <BulkActions
+              currentFolder={currentFolder}
+              selected={selected}
+              onSuccess={handleBulkActionSuccess}
+            />
           )}
 
           {isLoading && <LoadingIndicatorPage />}
@@ -388,7 +402,14 @@ export const MediaLibrary = () => {
 
       {assetToEdit && (
         <EditAssetDialog
-          onClose={() => setAssetToEdit(undefined)}
+          onClose={(editedAsset) => {
+            // The asset has been deleted
+            if (editedAsset === null) {
+              handleAssetDeleted(1);
+            }
+
+            setAssetToEdit(undefined);
+          }}
           asset={assetToEdit}
           canUpdate={canUpdate}
           canCopyLink={canCopyLink}
