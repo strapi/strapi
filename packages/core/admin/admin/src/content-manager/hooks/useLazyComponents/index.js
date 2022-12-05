@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useCustomFields } from '@strapi/helper-plugin';
 
 const componentStore = new Map();
@@ -11,7 +11,13 @@ const componentStore = new Map();
  */
 const useLazyComponents = (componentUids = []) => {
   const [lazyComponentStore, setLazyComponentStore] = useState(Object.fromEntries(componentStore));
-  const [loading, setLoading] = useState(componentStore.size === 0);
+  const [loading, setLoading] = useState(() => {
+    if (componentStore.size === 0 && componentUids.length > 0) {
+      return true;
+    }
+
+    return false;
+  });
   const customFieldsRegistry = useCustomFields();
 
   useEffect(() => {
@@ -54,7 +60,16 @@ const useLazyComponents = (componentUids = []) => {
     }
   }, [componentUids, customFieldsRegistry, loading]);
 
-  return { isLazyLoading: loading, lazyComponentStore };
+  /**
+   * Wrap this in a callback so it can be used in
+   * effects to cleanup the cached store if required
+   */
+  const cleanup = useCallback(() => {
+    componentStore.clear();
+    setLazyComponentStore({});
+  }, []);
+
+  return { isLazyLoading: loading, lazyComponentStore, cleanup };
 };
 
 export default useLazyComponents;
