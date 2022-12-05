@@ -29,14 +29,11 @@ const useLazyComponents = (componentUids = []) => {
     const lazyLoadComponents = async (uids, components) => {
       const modules = await Promise.all(components);
 
-      const internalStore = {};
-
       uids.forEach((uid, index) => {
         componentStore.set(uid, modules[index].default);
-        internalStore[uid] = modules[index].default;
       });
 
-      setStore(internalStore);
+      setStore(Object.fromEntries(componentStore));
     };
 
     if (componentUids.length && loading) {
@@ -53,9 +50,6 @@ const useLazyComponents = (componentUids = []) => {
 
       if (componentPromises.length > 0) {
         lazyLoadComponents(newUids, componentPromises);
-      } else {
-        const store = Object.fromEntries(componentStore);
-        setStore(store);
       }
     }
   }, [componentUids, customFieldsRegistry, loading]);
