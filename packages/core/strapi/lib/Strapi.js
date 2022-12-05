@@ -475,7 +475,8 @@ class Strapi {
   async load() {
     await this.register();
     await this.bootstrap();
-
+    this.auditLogs.emitEvent('test', { meta: 'payload1' });
+    this.auditLogs.emitEvent('test', { meta: 'payload2' });
     this.isLoaded = true;
 
     return this;
