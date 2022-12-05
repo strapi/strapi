@@ -144,7 +144,7 @@ $ yarn test:api --db=postgres
 $ yarn test:api --db=mysql
 ```
 
-### Running the tests for the Enterprise Editon (EE)
+### Running the tests for the Enterprise Edition (EE)
 
 The test suites run the tests for the Community Edition (CE) version of Strapi by default.
 In order to run the Enterprise Edition tests you need a valid license. To specify a license, you can use the environment variable `STRAPI_LICENSE`:
