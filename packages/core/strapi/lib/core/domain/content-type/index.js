@@ -54,7 +54,7 @@ const createContentType = (uid, definition) => {
     });
   } else {
     throw new Error(
-      `Incorrect Content Type UID "${uid}". The UID should start with api::, plugin:: or strapi::.`
+      `Incorrect Content Type UID "${uid}". The UID should start with api::, plugin:: or admin::.`
     );
   }
 

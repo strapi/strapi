@@ -2,9 +2,7 @@
 
 const { resolve } = require('path');
 const { statSync, existsSync } = require('fs');
-const { yup } = require('@strapi/utils');
-
-const { importDefault } = require('../../utils');
+const { yup, importDefault } = require('@strapi/utils');
 
 const srcSchema = yup
   .object()
