@@ -169,11 +169,10 @@ const relationsOrderer = (initArr, idColumn, orderColumn) => {
         try {
           insertRelation(relation);
         } catch (err) {
-          strapi.log.error(err);
           throw new Error(
-            `Could not connect ${relation.id}, position ${JSON.stringify(
+            `There was a problem connecting id ${relation.id} with position ${JSON.stringify(
               relation.position
-            )} is invalid`
+            )}. The list of connect relations is not valid`
           );
         }
       });
