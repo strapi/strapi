@@ -58,6 +58,7 @@ export type TransferStage = 'entities' | 'links' | 'assets' | 'schemas' | 'confi
 export interface ITransferResults<S extends ISourceProvider, D extends IDestinationProvider> {
   source?: S['results'];
   destination?: D['results'];
+  engine?: ITransferResults;
 }
 
 // There aren't currently any universal results provided but there likely will be in the future, so providers that have their own results should extend from these to be safe

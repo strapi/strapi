@@ -1,15 +1,20 @@
 // import { createLogger } from '@strapi/logger';
-import type { IDestinationProvider, IMetadata, ProviderType } from '../../types';
+import type { IDestinationProvider, IMetadata, ProviderType } from '../../../types';
+import { deleteAllRecords, DeleteOptions } from './restore';
 
 import chalk from 'chalk';
 import { Duplex, Writable } from 'stream';
 import path from 'path';
 import * as fse from 'fs-extra';
 
-import { mapSchemasValues } from '../utils';
+import { mapSchemasValues } from '../../utils';
+
+export const VALID_STRATEGIES = ['restore', 'merge'];
 
 interface ILocalStrapiDestinationProviderOptions {
-  getStrapi(): Promise<Strapi.Strapi>;
+  getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>;
+  restore?: DeleteOptions;
+  strategy: 'restore' | 'merge';
 }
 
 // TODO: getting some type errors with @strapi/logger that need to be resolved first
@@ -34,6 +39,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async bootstrap(): Promise<void> {
+    this.#validateOptions();
     this.strapi = await this.options.getStrapi();
   }
 
@@ -41,9 +47,42 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     await this.strapi?.destroy?.();
   }
 
-  // TODO
+  #validateOptions() {
+    if (!VALID_STRATEGIES.includes(this.options.strategy)) {
+      throw new Error('Invalid stategy ' + this.options.strategy);
+    }
+  }
+
+  async #deleteAll() {
+    if (!this.strapi) {
+      throw new Error('Strapi instance not found');
+    }
+    return await deleteAllRecords(this.strapi, this.options.restore);
+  }
+
+  async beforeTransfer() {
+    if (this.options.strategy === 'restore') {
+      await this.#deleteAll();
+    }
+  }
+
   getMetadata(): IMetadata | Promise<IMetadata> {
-    return {};
+    const strapiVersion = strapi.config.get('info.strapi');
+    const createdAt = new Date().toISOString();
+
+    const plugins = Object.keys(strapi.plugins);
+
+    return {
+      createdAt,
+      strapi: {
+        version: strapiVersion,
+        plugins: plugins.map((name) => ({
+          name,
+          // TODO: Get the plugin actual version when it'll be available
+          version: strapiVersion,
+        })),
+      },
+    };
   }
 
   getSchemas() {
