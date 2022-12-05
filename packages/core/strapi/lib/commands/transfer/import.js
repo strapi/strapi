@@ -31,8 +31,6 @@ module.exports = async (opts) => {
     encryption: { enabled: opts.decrypt, key: opts.key },
   };
 
-  console.log(JSON.stringify(sourceOptions, null, 2));
-
   const source = createLocalFileSourceProvider(sourceOptions);
 
   /**
