@@ -46,8 +46,7 @@ const buildTransferTable = (resultData) => {
 
     if (item.aggregates) {
       Object.keys(item.aggregates)
-        // Sort aggregate keys by size
-        .sort((a, b) => (item.aggregates[a].bytes > item.aggregates[b].bytes ? -1 : 1))
+        .sort()
         .forEach((subkey) => {
           const subitem = item.aggregates[subkey];
 
