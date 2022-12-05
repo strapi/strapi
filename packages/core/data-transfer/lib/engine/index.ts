@@ -1,8 +1,13 @@
-import { PassThrough } from 'stream-chain';
+import { PassThrough, Stream } from 'stream-chain';
+import * as path from 'path';
 import { isEmpty, uniq } from 'lodash/fp';
+import type { Schema } from '@strapi/strapi';
+
 import type {
   Diff,
+  IAsset,
   IDestinationProvider,
+  IEntity,
   IMetadata,
   ISourceProvider,
   ITransferEngine,
@@ -48,17 +53,10 @@ class TransferEngine<
 
   #metadata: { source?: IMetadata; destination?: IMetadata } = {};
 
-  #transferProgress: TransferProgress = {};
-
-  // TODO: Type the stream chunks. Doesn't seem trivial, especially since PassThrough doesn't provide a PassThroughOptions type
-  #progressStream: PassThrough = new PassThrough({ objectMode: true });
-
-  get progress(): TransferEngineProgress {
-    return {
-      data: this.#transferProgress,
-      stream: this.#progressStream,
-    };
-  }
+  progress: {
+    data: TransferProgress;
+    stream: PassThrough;
+  };
 
   constructor(
     sourceProvider: ISourceProvider,
@@ -74,51 +72,70 @@ class TransferEngine<
     this.sourceProvider = sourceProvider;
     this.destinationProvider = destinationProvider;
     this.options = options;
+
+    this.progress = { data: {}, stream: new PassThrough() };
   }
 
-  #increaseTransferProgress(transferStage: TransferStage, data: any, aggregateKey?: string) {
-    if (!this.#transferProgress[transferStage]) {
-      this.#transferProgress[transferStage] = { count: 0, bytes: 0 };
+  #updateTransferProgress<T = unknown>(
+    stage: TransferStage,
+    data: T,
+    aggregate?: {
+      size?: (value: T) => number;
+      key?: (value: T) => string;
     }
-    this.#transferProgress[transferStage]!.count += 1;
-    const size = JSON.stringify(data).length;
-    this.#transferProgress[transferStage]!.bytes! += size;
+  ) {
+    if (!this.progress.data[stage]) {
+      this.progress.data[stage] = { count: 0, bytes: 0 };
+    }
 
-    if (aggregateKey && data && data[aggregateKey]) {
-      const aggKeyValue = data[aggregateKey];
-      if (!this.#transferProgress[transferStage]!.aggregates) {
-        this.#transferProgress[transferStage]!.aggregates = {};
+    const stageProgress = this.progress.data[stage]!;
+
+    const size = aggregate?.size?.(data) ?? JSON.stringify(data).length;
+    const key = aggregate?.key?.(data);
+
+    stageProgress.count += 1;
+    stageProgress.bytes += size;
+
+    // Handle aggregate updates if necessary
+    if (key) {
+      if (!stageProgress.aggregates) {
+        stageProgress.aggregates = {};
       }
-      if (
-        !(
-          this.#transferProgress[transferStage]!.aggregates &&
-          this.#transferProgress[transferStage]!.aggregates![aggKeyValue]
-        )
-      ) {
-        this.#transferProgress[transferStage]!.aggregates![aggKeyValue] = { count: 0, bytes: 0 };
+
+      const { aggregates } = stageProgress;
+
+      if (!aggregates[key]) {
+        aggregates[key] = { count: 0, bytes: 0 };
       }
-      this.#transferProgress[transferStage]!.aggregates![aggKeyValue].count += 1;
-      this.#transferProgress[transferStage]!.aggregates![aggKeyValue].bytes! += size;
+
+      aggregates[key].count += 1;
+      aggregates[key].bytes += size;
     }
   }
 
-  #countRecorder = (transferStage: TransferStage, aggregateKey?: string) => {
+  #progressTracker(
+    stage: TransferStage,
+    aggregate?: {
+      size?(value: unknown): number;
+      key?(value: unknown): string;
+    }
+  ) {
     return new PassThrough({
       objectMode: true,
       transform: (data, _encoding, callback) => {
-        this.#increaseTransferProgress(transferStage, data, aggregateKey);
-        this.#updateStage('progress', transferStage);
+        this.#updateTransferProgress(stage, data, aggregate);
+        this.#emitStageUpdate('progress', stage);
         callback(null, data);
       },
     });
-  };
+  }
 
-  #updateStage = (type: 'start' | 'complete' | 'progress', transferStage: TransferStage) => {
-    this.#progressStream.emit(type, {
-      data: this.#transferProgress,
+  #emitStageUpdate(type: 'start' | 'complete' | 'progress', transferStage: TransferStage) {
+    this.progress.stream.emit(type, {
+      data: this.progress.data,
       stage: transferStage,
     });
-  };
+  }
 
   #assertStrapiVersionIntegrity(sourceVersion?: string, destinationVersion?: string) {
     const strategy = this.options.versionMatching;
@@ -285,7 +302,7 @@ class TransferEngine<
     return {
       source: this.sourceProvider.results,
       destination: this.destinationProvider.results,
-      engine: this.#transferProgress,
+      engine: this.progress.data,
     };
   }
 
@@ -302,7 +319,7 @@ class TransferEngine<
       return;
     }
 
-    this.#updateStage('start', stageName);
+    this.#emitStageUpdate('start', stageName);
     return new Promise((resolve, reject) => {
       inStream
         // Throw on error in the source
@@ -313,11 +330,13 @@ class TransferEngine<
         .on('error', reject)
         // Resolve the promise when the destination has finished reading all the data from the source
         .on('close', () => {
-          this.#updateStage('complete', stageName);
+          this.#emitStageUpdate('complete', stageName);
           resolve();
         });
 
-      inStream.pipe(this.#countRecorder(stageName)).pipe(outStream);
+      inStream
+        .pipe(this.#progressTracker(stageName, { key: (value: Schema) => value.modelType }))
+        .pipe(outStream);
     });
   }
 
@@ -334,7 +353,7 @@ class TransferEngine<
       return;
     }
 
-    this.#updateStage('start', stageName);
+    this.#emitStageUpdate('start', stageName);
 
     return new Promise((resolve, reject) => {
       inStream
@@ -350,11 +369,13 @@ class TransferEngine<
         })
         // Resolve the promise when the destination has finished reading all the data from the source
         .on('close', () => {
-          this.#updateStage('complete', stageName);
+          this.#emitStageUpdate('complete', stageName);
           resolve();
         });
 
-      inStream.pipe(this.#countRecorder(stageName, 'type')).pipe(outStream);
+      inStream
+        .pipe(this.#progressTracker(stageName, { key: (value: IEntity) => value.type }))
+        .pipe(outStream);
     });
   }
 
@@ -371,7 +392,7 @@ class TransferEngine<
       return;
     }
 
-    this.#updateStage('start', 'links');
+    this.#emitStageUpdate('start', 'links');
 
     return new Promise((resolve, reject) => {
       inStream
@@ -383,11 +404,11 @@ class TransferEngine<
         .on('error', reject)
         // Resolve the promise when the destination has finished reading all the data from the source
         .on('close', () => {
-          this.#updateStage('complete', stageName);
+          this.#emitStageUpdate('complete', stageName);
           resolve();
         });
 
-      inStream.pipe(this.#countRecorder(stageName)).pipe(outStream);
+      inStream.pipe(this.#progressTracker(stageName)).pipe(outStream);
     });
   }
 
@@ -403,7 +424,7 @@ class TransferEngine<
       return;
     }
 
-    this.#updateStage('start', stageName);
+    this.#emitStageUpdate('start', stageName);
 
     return new Promise((resolve, reject) => {
       inStream
@@ -415,11 +436,18 @@ class TransferEngine<
         .on('error', reject)
         // Resolve the promise when the destination has finished reading all the data from the source
         .on('close', () => {
-          this.#updateStage('complete', stageName);
+          this.#emitStageUpdate('complete', stageName);
           resolve();
         });
 
-      inStream.pipe(this.#countRecorder(stageName)).pipe(outStream);
+      inStream
+        .pipe(
+          this.#progressTracker(stageName, {
+            size: (value: IAsset) => value.stats.size,
+            key: (value: IAsset) => path.extname(value.filename),
+          })
+        )
+        .pipe(outStream);
     });
   }
 
@@ -436,7 +464,7 @@ class TransferEngine<
       return;
     }
 
-    this.#updateStage('start', stageName);
+    this.#emitStageUpdate('start', stageName);
 
     return new Promise((resolve, reject) => {
       inStream
@@ -448,11 +476,11 @@ class TransferEngine<
         .on('error', reject)
         // Resolve the promise when the destination has finished reading all the data from the source
         .on('close', () => {
-          this.#updateStage('complete', stageName);
+          this.#emitStageUpdate('complete', stageName);
           resolve();
         });
 
-      inStream.pipe(this.#countRecorder(stageName)).pipe(outStream);
+      inStream.pipe(this.#progressTracker(stageName)).pipe(outStream);
     });
   }
 }
