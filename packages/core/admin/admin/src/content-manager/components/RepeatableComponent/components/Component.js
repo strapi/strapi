@@ -28,6 +28,7 @@ import Inputs from '../../Inputs';
 import FieldComponent from '../../FieldComponent';
 
 import Preview from './Preview';
+import useLazyComponents from '../../../hooks/useLazyComponents';
 
 const CustomIconButton = styled(IconButton)`
   background-color: transparent;
@@ -124,6 +125,8 @@ const DraggedItem = ({
   const composedAccordionRefs = composeRefs(accordionRef, dragRef);
   const composedBoxRefs = composeRefs(boxRef, dropRef);
 
+  const { lazyComponentStore } = useLazyComponents();
+
   return (
     <Box ref={composedBoxRefs}>
       {isDragging ? (
@@ -212,6 +215,7 @@ const DraggedItem = ({
                             metadatas={metadatas}
                             queryInfos={queryInfos}
                             size={size}
+                            customFieldInputs={lazyComponentStore}
                           />
                         </GridItem>
                       );
