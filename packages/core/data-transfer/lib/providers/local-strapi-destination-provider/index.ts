@@ -1,10 +1,6 @@
 // import { createLogger } from '@strapi/logger';
 import type { IDestinationProvider, IMetadata, ProviderType } from '../../../types';
 import { deleteAllRecords, DeleteOptions } from './restore';
-
-import chalk from 'chalk';
-import { Writable } from 'stream';
-
 import { mapSchemasValues } from '../../utils';
 
 export const VALID_STRATEGIES = ['restore', 'merge'];
@@ -14,10 +10,6 @@ interface ILocalStrapiDestinationProviderOptions {
   restore?: DeleteOptions;
   strategy: 'restore' | 'merge';
 }
-
-// TODO: getting some type errors with @strapi/logger that need to be resolved first
-// const log = createLogger();
-const log = console;
 
 export const createLocalStrapiDestinationProvider = (
   options: ILocalStrapiDestinationProviderOptions

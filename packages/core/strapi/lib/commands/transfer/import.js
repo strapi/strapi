@@ -26,8 +26,13 @@ module.exports = async (opts) => {
    * From strapi backup file
    */
   const sourceOptions = {
-    backupFilePath: filename,
+    file: { path: filename },
+    compression: { enabled: opts.decompress },
+    encryption: { enabled: opts.decrypt, key: opts.key },
   };
+
+  console.log(JSON.stringify(sourceOptions, null, 2));
+
   const source = createLocalFileSourceProvider(sourceOptions);
 
   /**
@@ -69,16 +74,16 @@ module.exports = async (opts) => {
   const engine = createTransferEngine(source, destination, engineOptions);
 
   try {
-    logger.log('Starting import...');
+    logger.info('Starting import...');
 
     const results = await engine.transfer();
     const table = buildTransferTable(results.engine);
-    logger.log(table.toString());
+    logger.info(table.toString());
 
-    logger.log('Import process has been completed successfully!');
+    logger.info('Import process has been completed successfully!');
     process.exit(0);
   } catch (e) {
-    logger.log(`Import process failed unexpectedly: ${e.message}`);
+    logger.error(`Import process failed unexpectedly: ${e.message}`);
     process.exit(1);
   }
 };

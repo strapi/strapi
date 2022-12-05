@@ -311,19 +311,21 @@ program
       .choices(['exact', 'strict', 'subset', 'bypass'])
       .default('exact')
   )
+  .option('-d, --decompress', 'Decompress', false)
+  .option('-x, --decrypt', 'Decrypt. Use --key to provide the decryption key', false)
   .requiredOption(
     '-f, --file <file>',
     'path and filename to the Strapi export file you want to import'
   )
   .addOption(
-    new Option('--key <string>', 'Provide encryption key in command instead of using a prompt')
+    new Option('-k, --key <string>', 'Provide encryption key in command instead of using a prompt')
   )
   .allowExcessArguments(false)
   .hook('preAction', async (thisCommand) => {
     const opts = thisCommand.opts();
 
     // check extension to guess if we should prompt for key
-    if (String(opts.file).endsWith('.enc')) {
+    if (opts.decrypt) {
       if (!opts.key) {
         const answers = await inquirer.prompt([
           {
