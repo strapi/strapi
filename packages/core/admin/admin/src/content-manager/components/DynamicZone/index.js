@@ -2,9 +2,9 @@ import React, { memo, useMemo, useState } from 'react';
 import get from 'lodash/get';
 import isEqual from 'react-fast-compare';
 import PropTypes from 'prop-types';
-import { Stack } from '@strapi/design-system/Stack';
-import { Box } from '@strapi/design-system/Box';
+import { Box, Stack, VisuallyHidden } from '@strapi/design-system';
 import { NotAllowedInput, useNotification } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../utils';
 
@@ -34,6 +34,9 @@ const DynamicZone = ({
   metadatas,
 }) => {
   const [addComponentIsOpen, setAddComponentIsOpen] = useState(false);
+  const [liveText, setLiveText] = useState('');
+
+  const { formatMessage } = useIntl();
 
   const toggleNotification = useNotification();
   const { getComponentLayout, components } = useContentTypeLayout();
@@ -82,11 +85,75 @@ const DynamicZone = ({
   };
 
   const handleMoveComponent = (newIndex, currentIndex) => {
+    setLiveText(
+      formatMessage(
+        {
+          id: getTrad('dnd.reorder'),
+          defaultMessage: '{item}, moved. New position in list: {position}.',
+        },
+        {
+          item: `${name}.${currentIndex}`,
+          position: getItemPos(newIndex),
+        }
+      )
+    );
+
     moveComponentField({
       name,
       newIndex,
       currentIndex,
     });
+  };
+
+  /**
+   *
+   * @param {number} index
+   * @returns {string}
+   */
+  const getItemPos = (index) => `${index + 1} of ${dynamicDisplayedComponents.length}`;
+
+  const handleCancel = (index) => {
+    setLiveText(
+      formatMessage(
+        {
+          id: getTrad('dnd.cancel-item'),
+          defaultMessage: '{item}, dropped. Re-order cancelled.',
+        },
+        {
+          item: `${name}.${index}`,
+        }
+      )
+    );
+  };
+
+  const handleGrabItem = (index) => {
+    setLiveText(
+      formatMessage(
+        {
+          id: getTrad('dnd.grab-item'),
+          defaultMessage: `{item}, grabbed. Current position in list: {position}. Press up and down arrow to change position, Spacebar to drop, Escape to cancel.`,
+        },
+        {
+          item: `${name}.${index}`,
+          position: getItemPos(index),
+        }
+      )
+    );
+  };
+
+  const handleDropItem = (index) => {
+    setLiveText(
+      formatMessage(
+        {
+          id: getTrad('dnd.drop-item'),
+          defaultMessage: `{item}, dropped. Final position in list: {position}.`,
+        },
+        {
+          item: `${name}.${index}`,
+          position: getItemPos(index),
+        }
+      )
+    );
   };
 
   const handleRemoveComponent = (name, currentIndex) => () => {
@@ -104,6 +171,8 @@ const DynamicZone = ({
     );
   }
 
+  const ariaDescriptionId = `${name}-item-instructions`;
+
   return (
     <Stack spacing={6}>
       {dynamicDisplayedComponentsLength > 0 && (
@@ -116,18 +185,30 @@ const DynamicZone = ({
             numberOfComponents={dynamicDisplayedComponentsLength}
             required={fieldSchema.required || false}
           />
-          {dynamicDisplayedComponents.map(({ componentUid, id }, index) => (
-            <DynamicZoneComponent
-              componentUid={componentUid}
-              formErrors={formErrors}
-              key={`${componentUid}-${id}`}
-              index={index}
-              isFieldAllowed={isFieldAllowed}
-              name={name}
-              onMoveComponent={handleMoveComponent}
-              onRemoveComponentClick={handleRemoveComponent(name, index)}
-            />
-          ))}
+          <VisuallyHidden id={ariaDescriptionId}>
+            {formatMessage({
+              id: getTrad('dnd.instructions'),
+              defaultMessage: `Press spacebar to grab and re-order`,
+            })}
+          </VisuallyHidden>
+          <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
+          <ul aria-describedby={ariaDescriptionId}>
+            {dynamicDisplayedComponents.map(({ componentUid, id }, index) => (
+              <DynamicZoneComponent
+                componentUid={componentUid}
+                formErrors={formErrors}
+                key={`${componentUid}-${id}`}
+                index={index}
+                isFieldAllowed={isFieldAllowed}
+                name={name}
+                onMoveComponent={handleMoveComponent}
+                onRemoveComponentClick={handleRemoveComponent(name, index)}
+                onCancel={handleCancel}
+                onDropItem={handleDropItem}
+                onGrabItem={handleGrabItem}
+              />
+            ))}
+          </ul>
         </Box>
       )}
 

@@ -2,6 +2,8 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import DynamicComponent from '../DynamicComponent';
 
@@ -12,6 +14,7 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
 }));
 
 jest.mock('../../../../hooks', () => ({
+  ...jest.requireActual('../../../../hooks'),
   useContentTypeLayout: jest.fn().mockReturnValue({
     getComponentLayout: jest.fn().mockImplementation((componentUid) => layoutData[componentUid]),
   }),
@@ -37,15 +40,18 @@ describe('DynamicComponent', () => {
   const defaultProps = {
     componentUid: 'component1',
     name: 'dynamiczone',
-    onMoveComponentDownClick: jest.fn(),
-    onMoveComponentUpClick: jest.fn(),
+    onMoveComponent: jest.fn(),
     onRemoveComponentClick: jest.fn(),
   };
 
-  const TestComponent = (props) => (
+  // eslint-disable-next-line react/prop-types
+  const TestComponent = ({ testingDnd, ...restProps }) => (
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} defaultLocale="en">
-        <DynamicComponent {...defaultProps} {...props} />
+        <DndProvider backend={HTML5Backend}>
+          <DynamicComponent {...defaultProps} {...restProps} />
+          {testingDnd ? <DynamicComponent {...defaultProps} {...restProps} /> : null}
+        </DndProvider>
       </IntlProvider>
     </ThemeProvider>
   );
@@ -83,44 +89,47 @@ describe('DynamicComponent', () => {
     expect(screen.queryByText("I'm a field component")).not.toBeInTheDocument();
   });
 
-  it('should show the up & down icons in a variety of boolean combinations', () => {
-    const { rerender } = setup({ showUpIcon: true, showDownIcon: true });
+  describe('Keyboard drag and drop', () => {
+    it('should not move with arrow keys if the button is not pressed first', () => {
+      const onMoveComponent = jest.fn();
+      setup({
+        onMoveComponent,
+        testingDnd: true,
+      });
+      const [draggedItem] = screen.getAllByText('Drag');
+      fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
+      expect(onMoveComponent).not.toBeCalled();
+    });
 
-    expect(screen.queryByRole('button', { name: 'Move component up' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Move component down' })).toBeInTheDocument();
+    it('should move with the arrow keys if the button has been activated first', () => {
+      const onMoveComponent = jest.fn();
+      setup({ onMoveComponent, testingDnd: true });
+      const [draggedItem] = screen.getAllByText('Drag');
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
+      expect(onMoveComponent).toBeCalledWith(1, 0);
+    });
 
-    rerender(<TestComponent {...defaultProps} showUpIcon={false} showDownIcon />);
+    it('should move with the arrow keys if the button has been activated and then not move after the button has been deactivated', () => {
+      const onMoveComponent = jest.fn();
+      setup({ onMoveComponent, testingDnd: true });
+      const [draggedItem] = screen.getAllByText('Drag');
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
+      expect(onMoveComponent).toBeCalledTimes(1);
+    });
 
-    expect(screen.queryByRole('button', { name: 'Move component up' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Move component down' })).toBeInTheDocument();
-
-    rerender(<TestComponent {...defaultProps} showUpIcon showDownIcon={false} />);
-
-    expect(screen.queryByRole('button', { name: 'Move component up' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Move component down' })).not.toBeInTheDocument();
-
-    rerender(<TestComponent {...defaultProps} showUpIcon={false} showDownIcon={false} />);
-
-    expect(screen.queryByRole('button', { name: 'Move component up' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Move component down' })).not.toBeInTheDocument();
-  });
-
-  it('should fire the onMoveComponentUpClick callback when the up icon is clicked', () => {
-    const onMoveComponentUpClick = jest.fn();
-    setup({ onMoveComponentUpClick, showUpIcon: true });
-
-    fireEvent.click(screen.getByRole('button', { name: 'Move component up' }));
-
-    expect(onMoveComponentUpClick).toHaveBeenCalled();
-  });
-
-  it('should fire the onMoveComponentDownClick callback when the down icon is clicked', () => {
-    const onMoveComponentDownClick = jest.fn();
-    setup({ onMoveComponentDownClick, showDownIcon: true });
-
-    fireEvent.click(screen.getByRole('button', { name: 'Move component down' }));
-
-    expect(onMoveComponentDownClick).toHaveBeenCalled();
+    it('should exit drag and drop mode when the escape key is pressed', () => {
+      const onMoveComponent = jest.fn();
+      setup({ onMoveComponent, testingDnd: true });
+      const [draggedItem] = screen.getAllByText('Drag');
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'Escape', code: 'Escape' });
+      fireEvent.keyDown(draggedItem, { key: 'ArrowUp', code: 'ArrowUp' });
+      expect(onMoveComponent).not.toBeCalled();
+    });
   });
 
   it.todo('should handle errors in the fields');

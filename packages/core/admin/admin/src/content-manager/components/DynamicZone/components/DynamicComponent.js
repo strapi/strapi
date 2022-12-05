@@ -55,6 +55,12 @@ const Preview = styled.span`
   padding: ${({ theme }) => theme.spaces[6]};
 `;
 
+const ComponentContainer = styled(Box)`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+`;
+
 const DynamicZoneComponent = ({
   componentUid,
   formErrors,
@@ -63,6 +69,9 @@ const DynamicZoneComponent = ({
   name,
   onRemoveComponentClick,
   onMoveComponent,
+  onGrabItem,
+  onDropItem,
+  onCancel,
 }) => {
   const [isOpen, setIsOpen] = useState(true);
   const { formatMessage } = useIntl();
@@ -118,6 +127,9 @@ const DynamicZoneComponent = ({
         icon,
       },
       onMoveItem: onMoveComponent,
+      onGrabItem,
+      onDropItem,
+      onCancel,
     });
 
   useEffect(() => {
@@ -127,7 +139,7 @@ const DynamicZoneComponent = ({
   const composedBoxRefs = composeRefs(boxRef, dropRef);
 
   return (
-    <Box>
+    <ComponentContainer as="li">
       <Flex justifyContent="center">
         <Rectangle background="neutral200" />
       </Flex>
@@ -189,7 +201,7 @@ const DynamicZoneComponent = ({
           </Accordion>
         )}
       </StyledBox>
-    </Box>
+    </ComponentContainer>
   );
 };
 
@@ -197,6 +209,9 @@ DynamicZoneComponent.defaultProps = {
   formErrors: {},
   index: 0,
   isFieldAllowed: true,
+  onGrabItem: undefined,
+  onDropItem: undefined,
+  onCancel: undefined,
 };
 
 DynamicZoneComponent.propTypes = {
@@ -205,6 +220,9 @@ DynamicZoneComponent.propTypes = {
   index: PropTypes.number,
   isFieldAllowed: PropTypes.bool,
   name: PropTypes.string.isRequired,
+  onGrabItem: PropTypes.func,
+  onDropItem: PropTypes.func,
+  onCancel: PropTypes.func,
   onMoveComponent: PropTypes.func.isRequired,
   onRemoveComponentClick: PropTypes.func.isRequired,
 };

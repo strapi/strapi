@@ -2,6 +2,8 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import { DynamicZone } from '../index';
 
@@ -21,6 +23,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 jest.mock('../../../hooks', () => ({
+  ...jest.requireActual('../../../hooks'),
   useContentTypeLayout: jest.fn().mockReturnValue({
     getComponentLayout: jest.fn().mockImplementation((componentUid) => layoutData[componentUid]),
   }),
@@ -59,7 +62,9 @@ describe('DynamicZone', () => {
   const TestComponent = (props) => (
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} defaultLocale="en">
-        <DynamicZone {...defaultProps} {...props} />
+        <DndProvider backend={HTML5Backend}>
+          <DynamicZone {...defaultProps} {...props} />
+        </DndProvider>
       </IntlProvider>
     </ThemeProvider>
   );
@@ -88,7 +93,10 @@ describe('DynamicZone', () => {
 
     it('should render the dynamic zone of components when there are dynamic components to render', () => {
       setup({
-        dynamicDisplayedComponents: ['component1', 'component2'],
+        dynamicDisplayedComponents: [
+          { componentUid: 'component1', id: 0 },
+          { componentUid: 'component2', id: 0 },
+        ],
       });
 
       expect(screen.getByText('dynamic zone')).toBeInTheDocument();
@@ -146,42 +154,15 @@ describe('DynamicZone', () => {
       );
     });
 
-    it('should call the moveComponentDown callback when the MoveDownButton is clicked', () => {
-      const moveComponentDown = jest.fn();
-
-      setup({
-        moveComponentDown,
-        dynamicDisplayedComponents: ['component1', 'component2'],
-      });
-
-      const moveDownButton = screen.getByRole('button', { name: /Move component down/i });
-
-      fireEvent.click(moveDownButton);
-
-      expect(moveComponentDown).toHaveBeenCalledWith('DynamicZoneComponent', 0);
-    });
-
-    it('should call the moveComponentUp callback when the MoveUpButton is clicked', () => {
-      const moveComponentUp = jest.fn();
-
-      setup({
-        moveComponentUp,
-        dynamicDisplayedComponents: ['component1', 'component2'],
-      });
-
-      const moveUpButton = screen.getByRole('button', { name: /Move component up/i });
-
-      fireEvent.click(moveUpButton);
-
-      expect(moveComponentUp).toHaveBeenCalledWith('DynamicZoneComponent', 1);
-    });
-
     it('should call the removeComponentFromDynamicZone callback when the RemoveButton is clicked', () => {
       const removeComponentFromDynamicZone = jest.fn();
 
       setup({
         removeComponentFromDynamicZone,
-        dynamicDisplayedComponents: ['component1', 'component2'],
+        dynamicDisplayedComponents: [
+          { componentUid: 'component1', id: 0 },
+          { componentUid: 'component2', id: 0 },
+        ],
       });
 
       const removeButton = screen.getByRole('button', { name: /Delete component1/i });
@@ -195,7 +176,11 @@ describe('DynamicZone', () => {
   describe('side effects', () => {
     it('should call the toggleNotification callback if the amount of dynamic components has hit its max and the user tries to add another', () => {
       setup({
-        dynamicDisplayedComponents: ['component1', 'component2', 'component3'],
+        dynamicDisplayedComponents: [
+          { componentUid: 'component1', id: 0 },
+          { componentUid: 'component2', id: 0 },
+          { componentUid: 'component3', id: 0 },
+        ],
         fieldSchema: {
           components: ['component1', 'component2', 'component3'],
           max: 3,
@@ -212,6 +197,87 @@ describe('DynamicZone', () => {
           id: 'content-manager.components.notification.info.maximum-requirement',
         },
       });
+    });
+  });
+
+  describe('Accessibility', () => {
+    it('should have have description text', () => {
+      setup({
+        dynamicDisplayedComponents: [
+          { componentUid: 'component1', id: 0 },
+          { componentUid: 'component2', id: 0 },
+        ],
+      });
+
+      expect(screen.queryByText('Press spacebar to grab and re-order')).toBeInTheDocument();
+    });
+
+    it('should update the live text when an item has been grabbed', async () => {
+      setup({
+        dynamicDisplayedComponents: [
+          { componentUid: 'component1', id: 0 },
+          { componentUid: 'component2', id: 0 },
+        ],
+      });
+
+      const [draggedItem] = screen.getAllByText('Drag');
+
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+
+      expect(
+        screen.queryByText(
+          /Press up and down arrow to change position, Spacebar to drop, Escape to cancel/
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('should change the live text when an item has been moved', () => {
+      setup({
+        dynamicDisplayedComponents: [
+          { componentUid: 'component1', id: 0 },
+          { componentUid: 'component2', id: 0 },
+        ],
+      });
+
+      const [draggedItem] = screen.getAllByText('Drag');
+
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
+
+      expect(screen.queryByText(/New position in list/)).toBeInTheDocument();
+    });
+
+    it('should change the live text when an item has been dropped', () => {
+      setup({
+        dynamicDisplayedComponents: [
+          { componentUid: 'component1', id: 0 },
+          { componentUid: 'component2', id: 0 },
+        ],
+      });
+
+      const [draggedItem] = screen.getAllByText('Drag');
+
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+
+      expect(screen.queryByText(/Final position in list/)).toBeInTheDocument();
+    });
+
+    it('should change the live text after the reordering interaction has been cancelled', () => {
+      setup({
+        dynamicDisplayedComponents: [
+          { componentUid: 'component1', id: 0 },
+          { componentUid: 'component2', id: 0 },
+        ],
+      });
+
+      const [draggedItem] = screen.getAllByText('Drag');
+
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'Escape', code: 'Escape' });
+
+      expect(screen.queryByText(/Re-order cancelled/)).toBeInTheDocument();
     });
   });
 });
