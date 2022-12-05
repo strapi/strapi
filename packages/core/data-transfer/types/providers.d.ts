@@ -18,6 +18,8 @@ interface IProvider {
   getSchemas?(): any;
   close?(): Promise<void> | void;
   getMetadata(): IMetadata | null | Promise<IMetadata | null>;
+  beforeTransfer?(): Promise<void>;
+  validateOptions?(): void;
 }
 
 export interface ISourceProvider extends IProvider {

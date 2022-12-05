@@ -33,8 +33,6 @@ type TransferEngineProgress = {
   stream: PassThrough;
 };
 
-export const VALID_STRATEGIES = ['restore', 'merge'];
-
 class TransferEngine<
   S extends ISourceProvider = ISourceProvider,
   D extends IDestinationProvider = IDestinationProvider
@@ -180,7 +178,7 @@ class TransferEngine<
     if (!isEmpty(diffs)) {
       throw new Error(
         `Import process failed because the project doesn't have a matching data structure 
-        ${JSON.stringify(diffs, null, 2)}        
+        ${JSON.stringify(diffs, null, 2)}
         `
       );
     }
@@ -245,27 +243,21 @@ class TransferEngine<
     }
   }
 
-  validateTransferOptions() {
-    if (!VALID_STRATEGIES.includes(this.options.strategy)) {
-      throw new Error(`Invalid stategy ${this.options.strategy}`);
-    }
-  }
-
   async transfer(): Promise<ITransferResults<S, D>> {
     try {
-      this.validateTransferOptions();
-
       await this.bootstrap();
       await this.init();
 
       const isValidTransfer = await this.integrityCheck();
 
       if (!isValidTransfer) {
+        // TODO: provide the log from the integrity check
         throw new Error(
           `Unable to transfer the data between ${this.sourceProvider.name} and ${this.destinationProvider.name}.\nPlease refer to the log above for more information.`
         );
       }
 
+      await this.beforeTransfer();
       // Run the transfer stages
       await this.transferSchemas();
       await this.transferEntities();
@@ -287,6 +279,11 @@ class TransferEngine<
       destination: this.destinationProvider.results,
       engine: this.#transferProgress,
     };
+  }
+
+  async beforeTransfer(): Promise<void> {
+    await this.sourceProvider.beforeTransfer?.();
+    await this.destinationProvider.beforeTransfer?.();
   }
 
   async transferSchemas(): Promise<void> {

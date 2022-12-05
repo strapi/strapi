@@ -57,6 +57,13 @@ export interface ITransferEngine<
   close(): Promise<void>;
 
   /**
+   * Run the preparations before starting a transfer for each provider
+   *
+   * related source and destination providers
+   */
+  beforeTransfer(): Promise<void>;
+
+  /**
    * Start the schemas transfer by connecting the
    * related source and destination providers streams
    */
@@ -96,11 +103,6 @@ export interface ITransferEngine<
  * Note: here, we're listing the TransferEngine options, not the individual providers' options
  */
 export interface ITransferEngineOptions {
-  /**
-   * The strategy to use when importing the data from the source to the destination
-   * Note: Should we keep this here or fully delegate the strategies logic to the destination?
-   */
-  strategy: 'restore' | 'merge';
   /**
    * What kind of version matching should be done between the source and the destination metadata?
    * @example

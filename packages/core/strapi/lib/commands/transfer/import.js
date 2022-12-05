@@ -33,9 +33,27 @@ module.exports = async (opts) => {
   /**
    * To local Strapi instance
    */
+  const strapiInstance = await strapi(await strapi.compile()).load();
+
+  const exceptions = [
+    'admin::permission',
+    'admin::user',
+    'admin::role',
+    'admin::api-token',
+    'admin::api-token-permission',
+  ];
+  const contentTypes = Object.values(strapiInstance.contentTypes);
+  const contentTypesToDelete = contentTypes.filter(
+    (contentType) => !exceptions.includes(contentType.uid)
+  );
   const destinationOptions = {
     async getStrapi() {
-      return strapi(await strapi.compile()).load();
+      return strapiInstance;
+    },
+    strategy: opts.conflictStrategy,
+    restore: {
+      contentTypes: contentTypesToDelete,
+      uidsOfModelsToDelete: ['webhook', 'strapi::core-store'],
     },
   };
   const destination = createLocalStrapiDestinationProvider(destinationOptions);
