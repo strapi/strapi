@@ -50,7 +50,7 @@
     "@testing-library/react": "12.1.4",
     "@testing-library/react-hooks": "8.0.1",
     "@testing-library/user-event": "14.4.3",
-    "msw": "0.42.3",
+    "msw": "0.49.1",
     "react-test-renderer": "^17.0.2"
   },
   "engines": {
