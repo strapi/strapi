@@ -16,15 +16,6 @@ const sanitizeLocale = (locale) => {
 };
 
 module.exports = {
-  async listLocales(ctx) {
-    const localesService = getService('locales');
-
-    const locales = await localesService.find();
-    const sanitizedLocales = await sanitizeLocale(locales);
-
-    ctx.body = await localesService.setIsDefault(sanitizedLocales);
-  },
-
   async createLocale(ctx) {
     const { user } = ctx.state;
     const { body } = ctx.request;
@@ -101,5 +92,27 @@ module.exports = {
     const sanitizedLocale = await sanitizeLocale(existingLocale);
 
     ctx.body = await localesService.setIsDefault(sanitizedLocale);
+  },
+  async find(ctx) {
+    const localesService = getService('locales');
+
+    const locales = await localesService.find();
+    const sanitizedLocales = await sanitizeLocale(locales);
+
+    ctx.body = await localesService.setIsDefault(sanitizedLocales);
+  },
+  async findOne(ctx) {
+    const {
+      params: { id },
+    } = ctx;
+
+    const localesService = getService('locales');
+    const locale = await localesService.findById(id);
+
+    if (!locale) {
+      return ctx.notFound('locale.notFound');
+    }
+
+    ctx.body = await localesService.setIsDefault(locale);
   },
 };

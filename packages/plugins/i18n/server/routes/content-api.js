@@ -6,7 +6,12 @@ module.exports = {
     {
       method: 'GET',
       path: '/locales',
-      handler: 'locales.listLocales',
+      handler: 'locales.find',
+    },
+    {
+      method: 'GET',
+      path: '/locales/:id',
+      handler: 'locales.findOne',
     },
   ],
 };
