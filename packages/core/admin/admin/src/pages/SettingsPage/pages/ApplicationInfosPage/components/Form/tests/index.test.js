@@ -46,15 +46,22 @@ const render = (props) =>
   );
 
 describe('ApplicationInfosPage | Form', () => {
-  it('should render and match snapshot', () => {
-    const { container } = render();
-    expect(container).toMatchSnapshot();
-  });
-
   it('should display logo inputs', () => {
     const { getByText } = render();
 
     expect(getByText('Menu logo')).toBeInTheDocument();
     expect(getByText('Auth logo')).toBeInTheDocument();
+  });
+
+  it('should disable logo input actions if users do not have update permissions', () => {
+    const { getAllByRole } = render({ canUpdate: false });
+
+    getAllByRole('button', { name: 'Change logo' }).map((button) =>
+      expect(button).toHaveAttribute('aria-disabled', 'true')
+    );
+
+    getAllByRole('button', { name: 'Reset logo' }).map((button) =>
+      expect(button).toHaveAttribute('aria-disabled', 'true')
+    );
   });
 });
