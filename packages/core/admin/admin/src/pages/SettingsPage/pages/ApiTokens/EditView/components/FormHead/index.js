@@ -67,19 +67,23 @@ const FormHead = ({ apiToken, setApiToken, canEditInputs, canRegenerate, isSubmi
 
 FormHead.propTypes = {
   apiToken: PropTypes.shape({
-    id: PropTypes.string,
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     type: PropTypes.string,
-    lifespan: PropTypes.number,
+    lifespan: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     name: PropTypes.string,
     accessKey: PropTypes.string,
     permissions: PropTypes.array,
     description: PropTypes.string,
     createdAt: PropTypes.string,
-  }).isRequired,
+  }),
   canEditInputs: PropTypes.bool.isRequired,
   canRegenerate: PropTypes.bool.isRequired,
   setApiToken: PropTypes.func.isRequired,
   isSubmitting: PropTypes.bool.isRequired,
+};
+
+FormHead.defaultProps = {
+  apiToken: undefined,
 };
 
 export default FormHead;

@@ -4,8 +4,13 @@ import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { useRBAC } from '@strapi/helper-plugin';
-import { ProvidersPage } from '../index';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faDiscord } from '@fortawesome/free-brands-svg-icons';
+import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import server from './server';
+import { ProvidersPage } from '../index';
+
+library.add(faDiscord, faEnvelope);
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -55,24 +60,6 @@ describe('Admin | containers | ProvidersPage', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c8 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: space-around;
-        -webkit-justify-content: space-around;
-        -ms-flex-pack: space-around;
-        justify-content: space-around;
-      }
-
       .c10 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
@@ -91,10 +78,6 @@ describe('Admin | containers | ProvidersPage', () => {
         will-change: transform;
       }
 
-      .c9 {
-        height: 100vh;
-      }
-
       .c1 {
         padding-bottom: 56px;
       }
@@ -105,15 +88,6 @@ describe('Admin | containers | ProvidersPage', () => {
         padding-right: 56px;
         padding-bottom: 40px;
         padding-left: 56px;
-      }
-
-      .c0 {
-        display: grid;
-        grid-template-columns: 1fr;
-      }
-
-      .c2 {
-        overflow-x: hidden;
       }
 
       .c5 {
@@ -148,11 +122,42 @@ describe('Admin | containers | ProvidersPage', () => {
         flex-direction: row;
       }
 
+      .c8 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: space-around;
+        -webkit-justify-content: space-around;
+        -ms-flex-pack: space-around;
+        justify-content: space-around;
+      }
+
       .c7 {
-        color: #32324d;
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c9 {
+        height: 100vh;
+      }
+
+      .c0 {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .c2 {
+        overflow-x: hidden;
       }
 
       .c3:focus-visible {

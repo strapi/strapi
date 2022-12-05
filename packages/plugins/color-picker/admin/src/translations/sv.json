@@ -1,0 +1,12 @@
+{
+  "color-picker.label": "Färgväljare",
+  "color-picker.description": "Välj färger",
+  "color-picker.settings": "Inställningar",
+  "color-picket.input.format": "HEX",
+  "color-picker.options.advanced.regex": "RegEx-mönster",
+  "color-picker.options.advanced.regex.description": "Ange ett regex-mönster för att validera HEX-värdet",
+  "color-picker.options.advanced.requiredField": "Obligatoriskt fält",
+  "color-picker.options.advanced.requiredField.description": "Du kommer inte att kunna skapa en post om det här fältet är tomt",
+  "color-picker.toggle.aria-label": "Växla färgväljare",
+  "color-picker.input.aria-label": "Färgväljarinmatning"
+}
