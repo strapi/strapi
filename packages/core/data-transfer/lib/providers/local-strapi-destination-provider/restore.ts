@@ -12,20 +12,8 @@ export type DeleteOptions = {
 
 export const deleteAllRecords = async (strapi: Strapi.Strapi, deleteOptions?: DeleteOptions) => {
   const conditions = deleteOptions?.conditions ?? {};
-  const exceptions = [
-    'admin::permission',
-    'admin::user',
-    'admin::role',
-    'admin::api-token',
-    'admin::api-token-permission',
-  ];
-  const defaultUids = ['webhook', 'strapi::core-store'];
-  const uids = deleteOptions?.uidsOfModelsToDelete ?? defaultUids;
-  const allContentTypes: ContentTypeSchema[] = Object.values(strapi.contentTypes);
-  const defaultContentTypes: ContentTypeSchema[] = allContentTypes.filter(
-    (contentType) => !exceptions.includes(contentType.uid)
-  );
-  const contentTypes: ContentTypeSchema[] = deleteOptions?.contentTypes ?? defaultContentTypes;
+  const contentTypes = deleteOptions?.contentTypes ?? [];
+  const uidsOfModelsToDelete = deleteOptions?.uidsOfModelsToDelete ?? [];
   let count = 0;
 
   await Promise.all(
@@ -37,7 +25,7 @@ export const deleteAllRecords = async (strapi: Strapi.Strapi, deleteOptions?: De
   );
 
   await Promise.all(
-    uids.map(async (uid) => {
+    uidsOfModelsToDelete.map(async (uid) => {
       const result = await strapi?.query(uid).deleteMany();
       count += result.count;
     })

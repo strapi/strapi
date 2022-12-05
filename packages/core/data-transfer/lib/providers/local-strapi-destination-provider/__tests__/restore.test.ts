@@ -59,11 +59,14 @@ describe('Restore ', () => {
       query,
     })();
 
-    const { count } = await deleteAllRecords(strapi);
+    const { count } = await deleteAllRecords(strapi, {
+      /* @ts-ignore: disable-next-line */
+      contentTypes: Object.values(getContentTypes()),
+    });
     expect(count).toBe(entities.length);
   });
 
-  test('Should only delete chosen contentTypes', async () => {
+  test('Should only delete chosen contentType', async () => {
     const strapi = getStrapiFactory({
       contentTypes: getContentTypes(),
       entityService: {

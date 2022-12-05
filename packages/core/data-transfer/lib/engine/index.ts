@@ -1,4 +1,5 @@
 import { PassThrough } from 'stream-chain';
+import { isEmpty, uniq } from 'lodash/fp';
 import type {
   Diff,
   IDestinationProvider,
@@ -10,10 +11,9 @@ import type {
   TransferStage,
 } from '../../types';
 
-import { isEmpty, uniq, has } from 'lodash/fp';
-const semverDiff = require('semver/functions/diff');
-
 import compareSchemas from '../strategies';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const semverDiff = require('semver/functions/diff');
 
 type TransferProgress = {
   [key in TransferStage]?: {
@@ -39,13 +39,18 @@ class TransferEngine<
 > implements ITransferEngine
 {
   sourceProvider: ISourceProvider;
+
   destinationProvider: IDestinationProvider;
+
   options: ITransferEngineOptions;
+
   #metadata: { source?: IMetadata; destination?: IMetadata } = {};
 
   #transferProgress: TransferProgress = {};
+
   // TODO: Type the stream chunks. Doesn't seem trivial, especially since PassThrough doesn't provide a PassThroughOptions type
   #progressStream: PassThrough = new PassThrough({ objectMode: true });
+
   get progress(): TransferEngineProgress {
     return {
       data: this.#transferProgress,
@@ -79,7 +84,7 @@ class TransferEngine<
 
     if (aggregateKey && data && data[aggregateKey]) {
       const aggKeyValue = data[aggregateKey];
-      if (!this.#transferProgress[transferStage]!['aggregates']) {
+      if (!this.#transferProgress[transferStage]!.aggregates) {
         this.#transferProgress[transferStage]!.aggregates = {};
       }
       if (
@@ -252,7 +257,7 @@ class TransferEngine<
         );
       }
 
-      await this.beforeStreaming();
+      await this.beforeTransfer();
       // Run the transfer stages
       await this.transferSchemas();
       await this.transferEntities();
@@ -272,12 +277,13 @@ class TransferEngine<
     return {
       source: this.sourceProvider.results,
       destination: this.destinationProvider.results,
+      engine: this.#transferProgress,
     };
   }
 
-  async beforeStreaming(): Promise<void> {
-    await this.sourceProvider.beforeStreaming?.();
-    await this.destinationProvider.beforeStreaming?.();
+  async beforeTransfer(): Promise<void> {
+    await this.sourceProvider.beforeTransfer?.();
+    await this.destinationProvider.beforeTransfer?.();
   }
 
   async transferSchemas(): Promise<void> {

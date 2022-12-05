@@ -6,6 +6,13 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
+jest.mock('../restore', () => {
+  return {
+    __esModule: true,
+    ...jest.requireActual('../restore'),
+  };
+});
+
 describe('Local Strapi Source Destination', () => {
   describe('Bootstrap', () => {
     test('Should not have a defined Strapi instance if bootstrap has not been called', () => {
@@ -111,7 +118,7 @@ describe('Local Strapi Source Destination', () => {
       });
       const deleteAllSpy = jest.spyOn(restoreApi, 'deleteAllRecords');
       await provider.bootstrap();
-      await provider.beforeStreaming();
+      await provider.beforeTransfer();
 
       expect(deleteAllSpy).toBeCalledTimes(1);
     });
@@ -123,7 +130,7 @@ describe('Local Strapi Source Destination', () => {
       });
       const deleteAllSpy = jest.spyOn(restoreApi, 'deleteAllRecords');
       await provider.bootstrap();
-      await provider.beforeStreaming();
+      await provider.beforeTransfer();
 
       expect(deleteAllSpy).not.toBeCalled();
     });

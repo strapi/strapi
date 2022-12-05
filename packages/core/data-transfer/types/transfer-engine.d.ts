@@ -57,11 +57,11 @@ export interface ITransferEngine<
   close(): Promise<void>;
 
   /**
-   * Run the preparations before strating a transfer for each provider
+   * Run the preparations before starting a transfer for each provider
    *
    * related source and destination providers
    */
-  beforeStreaming(): Promise<void>;
+  beforeTransfer(): Promise<void>;
 
   /**
    * Start the schemas transfer by connecting the
