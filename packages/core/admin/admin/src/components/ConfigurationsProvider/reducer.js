@@ -9,6 +9,7 @@ import produce from 'immer';
 
 const initialState = {
   menuLogo: null,
+  authLogo: null,
 };
 
 const reducer = (state = initialState, action) =>

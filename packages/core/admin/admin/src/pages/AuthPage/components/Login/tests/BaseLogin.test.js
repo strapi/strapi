@@ -638,7 +638,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                 alt=""
                 aria-hidden="true"
                 class="c6"
-                src="defaultAuthLogo.png"
+                src="customAuthLogo.png"
               />
               <div
                 class="c1 c7"

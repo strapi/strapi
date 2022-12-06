@@ -6,6 +6,15 @@ import axios from 'axios';
 
 import LogoInput from '../index';
 
+const CUSTOM_IMAGE_FIXTURES = {
+  ext: '.jpeg',
+  height: 250,
+  name: 'custom.jpeg',
+  size: 46.26,
+  url: 'uploads/custom.jpeg',
+  width: 340,
+};
+
 const getFakeSize = jest.fn(() => ({
   width: 500,
   height: 500,
@@ -41,10 +50,12 @@ const render = (props) =>
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} textComponent="span">
         <LogoInput
-          {...props}
+          canUpdate
           defaultLogo="/admin/defaultLogo.png"
+          label="logo input label"
           onChangeLogo={jest.fn()}
-          onResetMenuLogo={jest.fn()}
+          onResetLogo={jest.fn()}
+          {...props}
         />
       </IntlProvider>
     </ThemeProvider>
@@ -53,9 +64,49 @@ const render = (props) =>
 describe('ApplicationsInfosPage || LogoInput', () => {
   describe('logo input', () => {
     it('should match snapshot', () => {
-      render();
+      const { container } = render();
 
-      expect(document.body).toMatchSnapshot();
+      expect(container).toMatchSnapshot();
+    });
+
+    it('should render label', () => {
+      const { getByText } = render();
+
+      expect(getByText('logo input label')).toBeInTheDocument();
+    });
+
+    it('should render reset button if a custom logo exists', () => {
+      const { getByRole } = render({ customLogo: CUSTOM_IMAGE_FIXTURES });
+
+      expect(getByRole('button', { name: 'Reset logo' })).toBeInTheDocument();
+    });
+
+    it('should call onResetMenuLogo callback', () => {
+      const onResetLogoSpy = jest.fn();
+      const { getByRole } = render({
+        customLogo: CUSTOM_IMAGE_FIXTURES,
+        onResetLogo: onResetLogoSpy,
+      });
+
+      fireEvent.click(getByRole('button', { name: 'Reset logo' }));
+
+      expect(onResetLogoSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should render disabled actions if no update permissions', () => {
+      const onResetLogoSpy = jest.fn();
+      const { getByRole } = render({
+        canUpdate: false,
+        customLogo: CUSTOM_IMAGE_FIXTURES,
+        onResetLogo: onResetLogoSpy,
+      });
+
+      expect(getByRole('button', { name: 'Change logo' })).toHaveAttribute('aria-disabled', 'true');
+      expect(getByRole('button', { name: 'Reset logo' })).toHaveAttribute('aria-disabled', 'true');
+
+      fireEvent.click(getByRole('button', { name: 'Reset logo' }));
+
+      expect(onResetLogoSpy).toHaveBeenCalledTimes(0);
     });
   });
 

@@ -75,11 +75,14 @@ function App() {
       try {
         const {
           data: {
-            data: { hasAdmin, uuid, menuLogo },
+            data: { hasAdmin, uuid, menuLogo, authLogo },
           },
         } = await axios.get(`${strapi.backendURL}/admin/init`);
 
-        updateProjectSettings({ menuLogo: prefixFileUrlWithBackendUrl(menuLogo) });
+        updateProjectSettings({
+          menuLogo: prefixFileUrlWithBackendUrl(menuLogo),
+          authLogo: prefixFileUrlWithBackendUrl(authLogo),
+        });
 
         if (uuid) {
           const {

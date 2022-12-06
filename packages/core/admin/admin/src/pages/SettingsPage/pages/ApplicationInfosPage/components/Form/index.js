@@ -5,18 +5,19 @@ import { useTracking } from '@strapi/helper-plugin';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Box } from '@strapi/design-system/Box';
 import { Typography } from '@strapi/design-system/Typography';
-import LogoInput from '../LogoInput';
 import { useConfigurations } from '../../../../../../hooks';
+import { DIMENSION, SIZE } from '../../utils/constants';
+import LogoInput from '../LogoInput';
 import reducer, { initialState } from './reducer';
 import init from './init';
 
-const Form = forwardRef(({ projectSettingsStored }, ref) => {
+const Form = forwardRef(({ canUpdate, projectSettingsStored }, ref) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const {
-    logos: { menu },
+    logos: { menu, auth },
   } = useConfigurations();
-  const [{ menuLogo }, dispatch] = useReducer(reducer, initialState, () =>
+  const [{ menuLogo, authLogo }, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, projectSettingsStored)
   );
 
@@ -35,8 +36,21 @@ const Form = forwardRef(({ projectSettingsStored }, ref) => {
     });
   };
 
+  const handleChangeAuthLogo = (asset) => {
+    dispatch({
+      type: 'SET_CUSTOM_AUTH_LOGO',
+      value: asset,
+    });
+  };
+
+  const handleResetAuthLogo = () => {
+    dispatch({
+      type: 'RESET_CUSTOM_AUTH_LOGO',
+    });
+  };
+
   useImperativeHandle(ref, () => ({
-    getValues: () => ({ menuLogo: menuLogo.submit }),
+    getValues: () => ({ menuLogo: menuLogo.submit, authLogo: authLogo.submit }),
   }));
 
   return (
@@ -55,13 +69,48 @@ const Form = forwardRef(({ projectSettingsStored }, ref) => {
           defaultMessage: 'Customization',
         })}
       </Typography>
-      <Grid paddingTop={4}>
+      <Typography variant="pi" textColor="neutral600">
+        {formatMessage(
+          {
+            id: 'Settings.application.customization.size-details',
+            defaultMessage: 'Max dimension: {dimension}×{dimension}, Max file size: {size}KB',
+          },
+          { dimension: DIMENSION, size: SIZE }
+        )}
+      </Typography>
+      <Grid paddingTop={4} gap={4}>
         <GridItem col={6} s={12}>
           <LogoInput
-            onChangeLogo={handleChangeMenuLogo}
+            canUpdate={canUpdate}
             customLogo={menuLogo.display}
             defaultLogo={menu.default}
-            onResetMenuLogo={handleResetMenuLogo}
+            hint={formatMessage({
+              id: 'Settings.application.customization.menu-logo.carousel-hint',
+              defaultMessage: 'Replace the logo in the main navigation',
+            })}
+            label={formatMessage({
+              id: 'Settings.application.customization.carousel.menu-logo.title',
+              defaultMessage: 'Menu logo',
+            })}
+            onChangeLogo={handleChangeMenuLogo}
+            onResetLogo={handleResetMenuLogo}
+          />
+        </GridItem>
+        <GridItem col={6} s={12}>
+          <LogoInput
+            canUpdate={canUpdate}
+            customLogo={authLogo.display}
+            defaultLogo={auth.default}
+            hint={formatMessage({
+              id: 'Settings.application.customization.auth-logo.carousel-hint',
+              defaultMessage: 'Replace the logo in the authentication pages',
+            })}
+            label={formatMessage({
+              id: 'Settings.application.customization.carousel.auth-logo.title',
+              defaultMessage: 'Auth logo',
+            })}
+            onChangeLogo={handleChangeAuthLogo}
+            onResetLogo={handleResetAuthLogo}
           />
         </GridItem>
       </Grid>
@@ -70,10 +119,12 @@ const Form = forwardRef(({ projectSettingsStored }, ref) => {
 });
 
 Form.defaultProps = {
+  canUpdate: false,
   projectSettingsStored: null,
 };
 
 Form.propTypes = {
+  canUpdate: PropTypes.bool,
   projectSettingsStored: PropTypes.shape({
     menuLogo: PropTypes.shape({
       url: PropTypes.string,

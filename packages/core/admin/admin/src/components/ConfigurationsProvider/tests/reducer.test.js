@@ -17,12 +17,14 @@ describe('ConfigurationsProvider | reducer', () => {
     const action = {
       type: 'UPDATE_PROJECT_SETTINGS',
       values: {
-        menuLogo: 'strapi.jpeg',
+        menuLogo: 'menu-strapi.jpeg',
+        authLogo: 'auth-strapi.jpeg',
       },
     };
 
     const expected = {
-      menuLogo: 'strapi.jpeg',
+      menuLogo: 'menu-strapi.jpeg',
+      authLogo: 'auth-strapi.jpeg',
     };
 
     expect(reducer(state, action)).toEqual(expected);
