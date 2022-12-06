@@ -572,7 +572,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
         modifiedData: {
           name: 'name',
-          dz: [{ name: 'test', __component: 'blog.simple' }],
+          dz: [{ name: 'test', __component: 'blog.simple', __temp_key__: 0 }],
         },
         modifiedDZName: 'dz',
       };
@@ -620,11 +620,11 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
         initialData: {
           name: 'name',
-          dz: [{ name: 'test', __component: 'blog.simple' }],
+          dz: [{ name: 'test', __component: 'blog.simple', id: 0 }],
         },
         modifiedData: {
           name: 'name',
-          dz: [{ name: 'test', __component: 'blog.simple' }],
+          dz: [{ name: 'test', __component: 'blog.simple', id: 0 }],
         },
       };
 
@@ -635,13 +635,13 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
         initialData: {
           name: 'name',
-          dz: [{ name: 'test', __component: 'blog.simple' }],
+          dz: [{ name: 'test', __component: 'blog.simple', id: 0 }],
         },
         modifiedData: {
           name: 'name',
           dz: [
-            { name: 'test', __component: 'blog.simple' },
-            { name: 'test', __component: 'blog.simple' },
+            { name: 'test', __component: 'blog.simple', id: 0 },
+            { name: 'test', __component: 'blog.simple', __temp_key__: 1 },
           ],
         },
         modifiedDZName: 'dz',
@@ -701,7 +701,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
         modifiedData: {
           name: 'name',
-          dz: [{ relation: [], __component: 'blog.relation' }],
+          dz: [{ relation: [], __component: 'blog.relation', __temp_key__: 0 }],
         },
         modifiedDZName: 'dz',
       };
