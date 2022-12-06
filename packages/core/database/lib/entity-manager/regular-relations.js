@@ -296,7 +296,7 @@ const cleanOrderColumnsForOldDatabases = async ({
   const randomHex = randomBytes(16).toString('hex');
 
   if (hasOrderColumn(attribute) && id) {
-    const tempOrderTableName = `tempOrderTableName_${now}_${randomHex}`;
+    const tempOrderTableName = `orderTable_${now}_${randomHex}`;
     try {
       await db.connection
         .raw(
@@ -333,7 +333,7 @@ const cleanOrderColumnsForOldDatabases = async ({
   }
 
   if (hasInverseOrderColumn(attribute) && !isEmpty(inverseRelIds)) {
-    const tempInvOrderTableName = `tempInvOrderTableName_${now}_${randomHex}`;
+    const tempInvOrderTableName = `invOrderTable_${now}_${randomHex}`;
     try {
       await db.connection
         .raw(
