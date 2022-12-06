@@ -9,8 +9,8 @@ const {
 } = require('@strapi/data-transfer');
 const { isObject, isString, isFinite, toNumber } = require('lodash/fp');
 const fs = require('fs-extra');
-
 const chalk = require('chalk');
+
 const strapi = require('../../index');
 const { getDefaultExportName, buildTransferTable } = require('./utils');
 
