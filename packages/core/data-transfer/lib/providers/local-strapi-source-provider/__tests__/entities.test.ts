@@ -25,7 +25,7 @@ describe('Local Strapi Source Provider - Entities Streaming', () => {
       // The returned value should be a Readable stream instance
       expect(entitiesStream).toBeInstanceOf(Readable);
 
-      const entities = await collect<IEntity<never>>(entitiesStream);
+      const entities = await collect<IEntity>(entitiesStream);
 
       // The stream should not have been called since there is no content types
       // Note: This check must happen AFTER we've collected the results

@@ -23,4 +23,13 @@ module.exports = {
     // to be cleaned up throughout codebase (too many to fix at the moment)
     '@typescript-eslint/no-use-before-define': 'warn',
   },
+  // Disable only for tests
+  overrides: [
+    {
+      files: ['**.test.ts'],
+      rules: {
+        '@typescript-eslint/ban-ts-comment': 'warn', // as long as javascript is allowed in our codebase, we want to test erroneous typescript usage
+      },
+    },
+  ],
 };

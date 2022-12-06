@@ -18,7 +18,7 @@ export interface IMetadata {
  * Common TransferEngine format to represent a Strapi entity
  * @template T The schema UID this entity represents
  */
-export interface IEntity<T extends SchemaUID | string> {
+export interface IEntity<T extends SchemaUID | string = string> {
   /**
    * UID of the parent type (content-type, component, etc...)
    */
@@ -120,4 +120,15 @@ interface IMorphLink extends IDefaultLink {
  */
 interface ICircularLink extends IDefaultLink {
   kind: 'relation.circular';
+}
+
+export interface IAsset {
+  filename: string;
+  filepath: string;
+  stream: NodeJS.ReadableStream;
+  stats: IAssetStats;
+}
+
+export interface IAssetStats {
+  size: number;
 }

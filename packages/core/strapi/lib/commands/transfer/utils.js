@@ -45,15 +45,17 @@ const buildTransferTable = (resultData) => {
     totalItems += item.count;
 
     if (item.aggregates) {
-      Object.keys(item.aggregates).forEach((subkey) => {
-        const subitem = item.aggregates[subkey];
+      Object.keys(item.aggregates)
+        .sort()
+        .forEach((subkey) => {
+          const subitem = item.aggregates[subkey];
 
-        table.push([
-          { hAlign: 'left', content: `-- ${chalk.bold.grey(subkey)}` },
-          { hAlign: 'right', content: chalk.grey(subitem.count) },
-          { hAlign: 'right', content: chalk.grey(`(${readableBytes(subitem.bytes, 1, 11)})`) },
-        ]);
-      });
+          table.push([
+            { hAlign: 'left', content: `-- ${chalk.bold.grey(subkey)}` },
+            { hAlign: 'right', content: chalk.grey(subitem.count) },
+            { hAlign: 'right', content: chalk.grey(`(${readableBytes(subitem.bytes, 1, 11)})`) },
+          ]);
+        });
     }
   });
   table.push([

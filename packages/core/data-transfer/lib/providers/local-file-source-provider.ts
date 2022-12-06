@@ -82,7 +82,6 @@ class LocalFileSourceProvider implements ISourceProvider {
     // TODO: need to read the file & extract the metadata json file
     // => we might also need to read the schema.jsonl files & implements a custom stream-check
     const backupStream = this.#getBackupStream();
-
     return this.#parseJSONFile<IMetadata>(backupStream, METADATA_FILE_PATH);
   }
 

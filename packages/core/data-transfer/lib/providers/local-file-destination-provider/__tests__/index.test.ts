@@ -1,8 +1,20 @@
+/* eslint-disable import/first */
 import stream from 'stream';
 
+jest.mock('fs');
+
+import fs from 'fs-extra';
+import { Writable } from 'stream-chain';
 import { createLocalFileDestinationProvider, ILocalFileDestinationProviderOptions } from '..';
 import * as encryption from '../../../encryption/encrypt';
 import { createFilePathFactory, createTarEntryStream } from '../utils';
+
+fs.createWriteStream = jest.fn().mockReturnValue(
+  new Writable({
+    objectMode: true,
+    write() {},
+  })
+);
 
 const filePath = './test-file';
 
