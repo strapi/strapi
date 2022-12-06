@@ -308,8 +308,7 @@ describe('Wysiwyg render and actions buttons', () => {
         color: #666687;
       }
 
-      .c27[aria-disabled='true'] svg > g,
-      .c27[aria-disabled='true'] svg path {
+      .c27[aria-disabled='true'] svg > g,.c27[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -322,8 +321,7 @@ describe('Wysiwyg render and actions buttons', () => {
         color: #666687;
       }
 
-      .c27[aria-disabled='true']:active svg > g,
-      .c27[aria-disabled='true']:active svg path {
+      .c27[aria-disabled='true']:active svg > g,.c27[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 

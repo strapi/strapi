@@ -329,10 +329,6 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   cursor: pointer;
 }
 
-.c4:hover .sc-ywFzA {
-  opacity: 1;
-}
-
 .c28 canvas,
 .c28 video {
   display: block;
