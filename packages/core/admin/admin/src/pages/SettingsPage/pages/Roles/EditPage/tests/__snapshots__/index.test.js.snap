@@ -296,8 +296,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c14[aria-disabled='true'] svg > g,
-.c14[aria-disabled='true'] svg path {
+.c14[aria-disabled='true'] svg > g,.c14[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -310,8 +309,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c14[aria-disabled='true']:active svg > g,
-.c14[aria-disabled='true']:active svg path {
+.c14[aria-disabled='true']:active svg > g,.c14[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -368,8 +366,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c24[aria-disabled='true'] svg > g,
-.c24[aria-disabled='true'] svg path {
+.c24[aria-disabled='true'] svg > g,.c24[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -382,8 +379,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c24[aria-disabled='true']:active svg > g,
-.c24[aria-disabled='true']:active svg path {
+.c24[aria-disabled='true']:active svg > g,.c24[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 

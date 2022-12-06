@@ -330,8 +330,7 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         color: #666687;
       }
 
-      .c11[aria-disabled='true'] svg > g,
-      .c11[aria-disabled='true'] svg path {
+      .c11[aria-disabled='true'] svg > g,.c11[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -344,8 +343,7 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         color: #666687;
       }
 
-      .c11[aria-disabled='true']:active svg > g,
-      .c11[aria-disabled='true']:active svg path {
+      .c11[aria-disabled='true']:active svg > g,.c11[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
