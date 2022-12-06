@@ -31,8 +31,9 @@ describe('ApplicationInfosPage | ImageCardAsset', () => {
   });
 
   it('should display and format asset extension and size', () => {
-    const { getByText } = render();
+    const { getAllByText, getByText } = render();
 
-    expect(getByText('.JPEG - 340✕250')).toBeInTheDocument();
+    getAllByText(/\.jpeg/i).map((element) => expect(element).toBeInTheDocument());
+    expect(getByText(/340✕250/i)).toBeInTheDocument();
   });
 });
