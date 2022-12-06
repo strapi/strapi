@@ -1,5 +1,5 @@
 // import { createLogger } from '@strapi/logger';
-import type { IDestinationProvider, IMetadata, ProviderType } from '../../../types';
+import type { IDestinationProvider, IMetadata, ProviderType, IConfiguration } from '../../../types';
 import { deleteAllRecords, DeleteOptions, restoreConfigs } from './restore';
 
 import chalk from 'chalk';
@@ -97,17 +97,16 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async getConfigurationStream(): Promise<Writable> {
-    if (!this.strapi) {
-      throw new Error('Not able to stream Configurations. Strapi instance not found');
-    }
-
-    const strapi = this.strapi;
-
     return new Writable({
       objectMode: true,
-      async write(config, _encoding, callback) {
+      write: async (config: IConfiguration<any>, _encoding, callback) => {
+        if (!this.strapi) {
+          throw new Error('Not able to stream Configurations. Strapi instance not found');
+        }
         try {
-          await restoreConfigs(strapi, config);
+          if (this.options.strategy === 'restore') {
+            await restoreConfigs(this.strapi, config);
+          }
           callback();
         } catch (error) {
           callback(

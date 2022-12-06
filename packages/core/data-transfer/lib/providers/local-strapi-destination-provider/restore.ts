@@ -1,4 +1,5 @@
 import type { ContentTypeSchema } from '@strapi/strapi';
+import type { IConfiguration } from '../../../types';
 
 export type DeleteOptions = {
   contentTypes?: ContentTypeSchema[];
@@ -35,7 +36,7 @@ export const deleteAllRecords = async (strapi: Strapi.Strapi, deleteOptions?: De
 };
 
 const restoreCoreStore = async (strapi: Strapi.Strapi, data: any) => {
-  return await strapi.db.query('strapi::core-store').create({
+  return strapi.db.query('strapi::core-store').create({
     data: {
       ...data,
       value: JSON.stringify(data.value),
@@ -44,17 +45,17 @@ const restoreCoreStore = async (strapi: Strapi.Strapi, data: any) => {
 };
 
 const restoreWebhooks = async (strapi: Strapi.Strapi, data: any) => {
-  return await strapi.db.query('webhook').create({
+  return strapi.db.query('webhook').create({
     data,
   });
 };
 
-export const restoreConfigs = async (strapi: Strapi.Strapi, config: any) => {
+export const restoreConfigs = async (strapi: Strapi.Strapi, config: IConfiguration) => {
   if (config.type === 'core-store') {
-    return await restoreCoreStore(strapi, config.value);
+    return restoreCoreStore(strapi, config.value);
   }
 
   if (config.type === 'webhook') {
-    return await restoreWebhooks(strapi, config.value);
+    return restoreWebhooks(strapi, config.value);
   }
 };

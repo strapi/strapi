@@ -121,3 +121,11 @@ interface IMorphLink extends IDefaultLink {
 interface ICircularLink extends IDefaultLink {
   kind: 'relation.circular';
 }
+
+/**
+ * Strapi configurations
+ */
+interface IConfiguration<T = unknown> {
+  type: 'core-store' | 'webhook';
+  value: T;
+}
