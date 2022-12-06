@@ -524,7 +524,7 @@ describe('Media library homepage', () => {
 
     describe('displays the appropriate switch to change the view', () => {
       const setView = jest.fn();
-      it('Start with Grid View', () => {
+      it('starts with Grid View', () => {
         usePersistentState.mockReturnValueOnce([viewOptions.GRID, setView]);
         const { queryByRole } = renderML();
 
@@ -538,7 +538,7 @@ describe('Media library homepage', () => {
         expect(setView).toHaveBeenCalledWith(viewOptions.LIST);
       });
 
-      it('Start with List View', () => {
+      it('starts with List View', () => {
         usePersistentState.mockReturnValueOnce([viewOptions.LIST, setView]);
         const { queryByRole } = renderML();
 
@@ -550,6 +550,35 @@ describe('Media library homepage', () => {
 
         fireEvent.click(gridSwitch);
         expect(setView).toHaveBeenCalledWith(viewOptions.GRID);
+      });
+    });
+
+    describe('displays the list view', () => {
+      it('should render the table headers', () => {
+        usePersistentState.mockReturnValueOnce([viewOptions.LIST]);
+
+        const { getByText } = renderML();
+        expect(getByText('preview')).toBeInTheDocument();
+        expect(getByText('name')).toBeInTheDocument();
+        expect(getByText('extension')).toBeInTheDocument();
+        expect(getByText('size')).toBeInTheDocument();
+        expect(getByText('created')).toBeInTheDocument();
+        expect(getByText('last update')).toBeInTheDocument();
+      });
+
+      it('should not render the sort button', () => {
+        usePersistentState.mockReturnValueOnce([viewOptions.LIST]);
+        const { queryByRole } = renderML();
+
+        expect(queryByRole('button', { name: 'Sort by' })).not.toBeInTheDocument();
+      });
+
+      it('should not render the folders and assets titles', () => {
+        usePersistentState.mockReturnValueOnce([viewOptions.LIST]);
+        const { queryByText } = renderML();
+
+        expect(queryByText('Folders (1)')).not.toBeInTheDocument();
+        expect(queryByText('Assets (1)')).not.toBeInTheDocument();
       });
     });
   });
