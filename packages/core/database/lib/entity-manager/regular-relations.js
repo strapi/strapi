@@ -1,6 +1,7 @@
 'use strict';
 
 const { map, isEmpty } = require('lodash/fp');
+const { randomBytes } = require('crypto');
 
 const {
   isBidirectional,
@@ -292,14 +293,15 @@ const cleanOrderColumnsForOldDatabases = async ({
   const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } = joinTable;
 
   const now = new Date().valueOf();
+  const randomHex = randomBytes(16).toString('hex');
 
   if (hasOrderColumn(attribute) && id) {
-    const tempOrderTableName = `tempOrderTableName_${now}`;
+    const tempOrderTableName = `tempOrderTableName_${now}_${randomHex}`;
     try {
       await db.connection
         .raw(
           `
-          CREATE TEMPORARY TABLE :tempOrderTableName:
+          CREATE TABLE :tempOrderTableName:
             SELECT
               id,
               (
@@ -326,14 +328,12 @@ const cleanOrderColumnsForOldDatabases = async ({
         )
         .transacting(trx);
     } finally {
-      await db.connection
-        .raw(`DROP TEMPORARY TABLE IF EXISTS ??`, [tempOrderTableName])
-        .transacting(trx);
+      await db.connection.raw(`DROP TABLE IF EXISTS ??`, [tempOrderTableName]).transacting(trx);
     }
   }
 
   if (hasInverseOrderColumn(attribute) && !isEmpty(inverseRelIds)) {
-    const tempInvOrderTableName = `tempInvOrderTableName_${now}`;
+    const tempInvOrderTableName = `tempInvOrderTableName_${now}_${randomHex}`;
     try {
       await db.connection
         .raw(
