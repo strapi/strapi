@@ -88,6 +88,7 @@ const reducer = (state, action) =>
             ? {
                 ...state.componentsDataStructure[componentLayoutData.uid],
                 __component: componentLayoutData.uid,
+                __temp_key__: getMaxTempKey(currentValue) + 1,
               }
             : {
                 ...state.componentsDataStructure[componentLayoutData.uid],
