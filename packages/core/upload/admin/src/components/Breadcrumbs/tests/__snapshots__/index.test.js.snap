@@ -194,8 +194,7 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   color: #666687;
 }
 
-.c9[aria-disabled='true'] svg > g,
-.c9[aria-disabled='true'] svg path {
+.c9[aria-disabled='true'] svg > g,.c9[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -208,8 +207,7 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   color: #666687;
 }
 
-.c9[aria-disabled='true']:active svg > g,
-.c9[aria-disabled='true']:active svg path {
+.c9[aria-disabled='true']:active svg > g,.c9[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 

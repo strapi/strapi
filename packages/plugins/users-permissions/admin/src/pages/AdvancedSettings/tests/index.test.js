@@ -370,8 +370,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         color: #666687;
       }
 
-      .c8[aria-disabled='true'] svg > g,
-      .c8[aria-disabled='true'] svg path {
+      .c8[aria-disabled='true'] svg > g,.c8[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -384,8 +383,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         color: #666687;
       }
 
-      .c8[aria-disabled='true']:active svg > g,
-      .c8[aria-disabled='true']:active svg path {
+      .c8[aria-disabled='true']:active svg > g,.c8[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -872,6 +870,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                   aria-hidden="true"
                                   class="c1 c26 c27 c28"
                                   tabindex="-1"
+                                  title="Carret Down Button"
                                   type="button"
                                 >
                                   <svg

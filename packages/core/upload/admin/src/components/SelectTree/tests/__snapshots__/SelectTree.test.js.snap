@@ -135,7 +135,52 @@ exports[`SelectTree renders 1`] = `
       </div>
     </div>
   </body>,
-  "container": <div>
+  "container": .c3 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c0 {
+  padding-right: 12px;
+}
+
+.c1 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c1 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c1 svg path {
+  fill: #666687;
+}
+
+.c2 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+}
+
+.c2 svg {
+  width: 0.5625rem;
+}
+
+<div>
     <div
       class=" css-1iyvlxg-container"
     >
@@ -176,7 +221,7 @@ exports[`SelectTree renders 1`] = `
           class=" css-1hb7zxy-IndicatorsContainer"
         >
           <button
-            class="sc-ezHhwS sc-hrJsxi sc-bZSZLb dbMhVN hZwTtz eAfeLi"
+            class="c0 c1 c2"
             type="button"
           >
             <svg
@@ -198,7 +243,7 @@ exports[`SelectTree renders 1`] = `
       </div>
     </div>
     <div
-      class="sc-llYSUQ PCyKi"
+      class="c3"
     >
       <p
         aria-live="polite"

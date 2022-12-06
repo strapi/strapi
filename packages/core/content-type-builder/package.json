@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-content-type-builder",
-  "version": "4.5.2",
+  "version": "4.5.3",
   "description": "Strapi plugin to create content type",
   "repository": {
     "type": "git",
@@ -28,9 +28,9 @@
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/generators": "4.5.2",
-    "@strapi/helper-plugin": "4.5.2",
-    "@strapi/utils": "4.5.2",
+    "@strapi/generators": "4.5.3",
+    "@strapi/helper-plugin": "4.5.3",
+    "@strapi/utils": "4.5.3",
     "fs-extra": "10.0.0",
     "lodash": "4.17.21",
     "pluralize": "^8.0.0",
@@ -39,7 +39,7 @@
     "react-intl": "5.25.1",
     "react-redux": "7.2.8",
     "react-router": "^5.2.0",
-    "react-router-dom": "5.2.0",
+    "react-router-dom": "5.3.4",
     "redux": "^4.0.1",
     "reselect": "^4.0.0",
     "yup": "^0.32.9"

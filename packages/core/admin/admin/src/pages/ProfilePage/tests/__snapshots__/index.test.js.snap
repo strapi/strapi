@@ -274,8 +274,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c8[aria-disabled='true'] svg > g,
-.c8[aria-disabled='true'] svg path {
+.c8[aria-disabled='true'] svg > g,.c8[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -288,8 +287,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c8[aria-disabled='true']:active svg > g,
-.c8[aria-disabled='true']:active svg path {
+.c8[aria-disabled='true']:active svg > g,.c8[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -1118,6 +1116,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                                 aria-disabled="false"
                                 aria-label="Clear the interface language selected"
                                 class="c1 c39"
+                                title="Clear the interface language selected"
                                 type="button"
                               >
                                 <svg
@@ -1137,6 +1136,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                                 aria-hidden="true"
                                 class="c1 c40 c39 c41"
                                 tabindex="-1"
+                                title="Carret Down Button"
                                 type="button"
                               >
                                 <svg
@@ -1226,6 +1226,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                                 aria-hidden="true"
                                 class="c1 c40 c39 c41"
                                 tabindex="-1"
+                                title="Carret Down Button"
                                 type="button"
                               >
                                 <svg

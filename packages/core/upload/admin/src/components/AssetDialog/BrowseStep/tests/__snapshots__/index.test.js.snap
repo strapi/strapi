@@ -421,8 +421,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   color: #666687;
 }
 
-.c5[aria-disabled='true'] svg > g,
-.c5[aria-disabled='true'] svg path {
+.c5[aria-disabled='true'] svg > g,.c5[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -435,8 +434,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   color: #666687;
 }
 
-.c5[aria-disabled='true']:active svg > g,
-.c5[aria-disabled='true']:active svg path {
+.c5[aria-disabled='true']:active svg > g,.c5[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -1144,6 +1142,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                     aria-hidden="true"
                     class="c0 c57 c58 c59"
                     tabindex="-1"
+                    title="Carret Down Button"
                     type="button"
                   >
                     <svg
@@ -1179,7 +1178,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
       </div>
       <nav
         aria-label="pagination"
-        class="sc-eMHfQD"
+        class=""
       >
         <ul
           class="c0 c12 c61"

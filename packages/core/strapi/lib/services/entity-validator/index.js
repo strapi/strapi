@@ -293,40 +293,48 @@ const buildRelationsStore = ({ uid, data }) => {
         break;
       }
       case 'component': {
-        return castArray(value).reduce(
-          (relationsStore, componentValue) =>
-            mergeWith(
-              relationsStore,
-              buildRelationsStore({
-                uid: attribute.component,
-                data: componentValue,
-              }),
-              (objValue, srcValue) => {
-                if (isArray(objValue)) {
-                  return objValue.concat(srcValue);
-                }
+        return castArray(value).reduce((relationsStore, componentValue) => {
+          if (!attribute.component) {
+            throw new ValidationError(
+              `Cannot build relations store from component, component identifier is undefined`
+            );
+          }
+
+          return mergeWith(
+            relationsStore,
+            buildRelationsStore({
+              uid: attribute.component,
+              data: componentValue,
+            }),
+            (objValue, srcValue) => {
+              if (isArray(objValue)) {
+                return objValue.concat(srcValue);
               }
-            ),
-          result
-        );
+            }
+          );
+        }, result);
       }
       case 'dynamiczone': {
-        return value.reduce(
-          (relationsStore, dzValue) =>
-            mergeWith(
-              relationsStore,
-              buildRelationsStore({
-                uid: dzValue.__component,
-                data: dzValue,
-              }),
-              (objValue, srcValue) => {
-                if (isArray(objValue)) {
-                  return objValue.concat(srcValue);
-                }
+        return value.reduce((relationsStore, dzValue) => {
+          if (!dzValue.__component) {
+            throw new ValidationError(
+              `Cannot build relations store from dynamiczone, component identifier is undefined`
+            );
+          }
+
+          return mergeWith(
+            relationsStore,
+            buildRelationsStore({
+              uid: dzValue.__component,
+              data: dzValue,
+            }),
+            (objValue, srcValue) => {
+              if (isArray(objValue)) {
+                return objValue.concat(srcValue);
               }
-            ),
-          result
-        );
+            }
+          );
+        }, result);
       }
       default:
         break;

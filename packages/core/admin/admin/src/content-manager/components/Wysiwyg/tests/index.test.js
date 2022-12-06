@@ -308,8 +308,7 @@ describe('Wysiwyg render and actions buttons', () => {
         color: #666687;
       }
 
-      .c27[aria-disabled='true'] svg > g,
-      .c27[aria-disabled='true'] svg path {
+      .c27[aria-disabled='true'] svg > g,.c27[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -322,8 +321,7 @@ describe('Wysiwyg render and actions buttons', () => {
         color: #666687;
       }
 
-      .c27[aria-disabled='true']:active svg > g,
-      .c27[aria-disabled='true']:active svg path {
+      .c27[aria-disabled='true']:active svg > g,.c27[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -929,6 +927,7 @@ describe('Wysiwyg render and actions buttons', () => {
                             aria-hidden="true"
                             class="c0 c16 c17 c18"
                             tabindex="-1"
+                            title="Carret Down Button"
                             type="button"
                           >
                             <svg

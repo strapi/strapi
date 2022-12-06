@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 1`] = `
-.c15 {
+.c16 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -30,9 +30,9 @@ exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 
 }
 
 .c11 {
-  background: #f6f6f9;
-  padding: 4px;
-  border-radius: 4px;
+  background: #eaeaef;
+  padding-right: 8px;
+  padding-left: 8px;
   min-width: 20px;
 }
 
@@ -123,12 +123,17 @@ exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 
   color: #666687;
 }
 
-.c14 {
+.c15 {
   font-weight: 600;
   font-size: 0.6875rem;
   line-height: 1.45;
   text-transform: uppercase;
   color: #666687;
+}
+
+.c13 {
+  border-radius: 4px;
+  height: 1.5rem;
 }
 
 .c10 {
@@ -138,7 +143,7 @@ exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 
   flex-shrink: 0;
 }
 
-.c13 {
+.c14 {
   margin-left: 4px;
 }
 
@@ -195,10 +200,10 @@ exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 
           class="c10"
         >
           <div
-            class="c11 c12 c13"
+            class="c11 c12 c13 c14"
           >
             <span
-              class="c14"
+              class="c15"
             >
               image
             </span>
@@ -208,7 +213,7 @@ exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 
     </div>
   </article>
   <div
-    class="c15"
+    class="c16"
   >
     <p
       aria-live="polite"

@@ -284,8 +284,7 @@ describe('<ListPage />', () => {
         color: #666687;
       }
 
-      .c8[aria-disabled='true'] svg > g,
-      .c8[aria-disabled='true'] svg path {
+      .c8[aria-disabled='true'] svg > g,.c8[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -298,8 +297,7 @@ describe('<ListPage />', () => {
         color: #666687;
       }
 
-      .c8[aria-disabled='true']:active svg > g,
-      .c8[aria-disabled='true']:active svg path {
+      .c8[aria-disabled='true']:active svg > g,.c8[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -521,6 +519,7 @@ describe('<ListPage />', () => {
                   aria-colcount="5"
                   aria-rowcount="1"
                   class="c19"
+                  role="grid"
                 >
                   <thead
                     class="c20"
@@ -532,6 +531,7 @@ describe('<ListPage />', () => {
                       <th
                         aria-colindex="1"
                         class="c1 c22"
+                        role="gridcell"
                         tabindex="0"
                       >
                         <div
@@ -550,6 +550,7 @@ describe('<ListPage />', () => {
                       <th
                         aria-colindex="2"
                         class="c1 c22"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <div
@@ -568,6 +569,7 @@ describe('<ListPage />', () => {
                       <th
                         aria-colindex="3"
                         class="c1 c22"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <div
@@ -586,6 +588,7 @@ describe('<ListPage />', () => {
                       <th
                         aria-colindex="4"
                         class="c1 c22"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <div

@@ -302,8 +302,7 @@ exports[`ApplicationInfosPage shoud render from computer tab and match snapshot 
   color: #666687;
 }
 
-.c22[aria-disabled='true'] svg > g,
-.c22[aria-disabled='true'] svg path {
+.c22[aria-disabled='true'] svg > g,.c22[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -316,8 +315,7 @@ exports[`ApplicationInfosPage shoud render from computer tab and match snapshot 
   color: #666687;
 }
 
-.c22[aria-disabled='true']:active svg > g,
-.c22[aria-disabled='true']:active svg path {
+.c22[aria-disabled='true']:active svg > g,.c22[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -374,8 +372,7 @@ exports[`ApplicationInfosPage shoud render from computer tab and match snapshot 
   color: #666687;
 }
 
-.c31[aria-disabled='true'] svg > g,
-.c31[aria-disabled='true'] svg path {
+.c31[aria-disabled='true'] svg > g,.c31[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -388,8 +385,7 @@ exports[`ApplicationInfosPage shoud render from computer tab and match snapshot 
   color: #666687;
 }
 
-.c31[aria-disabled='true']:active svg > g,
-.c31[aria-disabled='true']:active svg path {
+.c31[aria-disabled='true']:active svg > g,.c31[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -859,8 +855,7 @@ exports[`ApplicationInfosPage shoud render from url tab and match snapshot 1`] =
   color: #666687;
 }
 
-.c25[aria-disabled='true'] svg > g,
-.c25[aria-disabled='true'] svg path {
+.c25[aria-disabled='true'] svg > g,.c25[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -873,8 +868,7 @@ exports[`ApplicationInfosPage shoud render from url tab and match snapshot 1`] =
   color: #666687;
 }
 
-.c25[aria-disabled='true']:active svg > g,
-.c25[aria-disabled='true']:active svg path {
+.c25[aria-disabled='true']:active svg > g,.c25[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -931,8 +925,7 @@ exports[`ApplicationInfosPage shoud render from url tab and match snapshot 1`] =
   color: #666687;
 }
 
-.c23[aria-disabled='true'] svg > g,
-.c23[aria-disabled='true'] svg path {
+.c23[aria-disabled='true'] svg > g,.c23[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -945,8 +938,7 @@ exports[`ApplicationInfosPage shoud render from url tab and match snapshot 1`] =
   color: #666687;
 }
 
-.c23[aria-disabled='true']:active svg > g,
-.c23[aria-disabled='true']:active svg path {
+.c23[aria-disabled='true']:active svg > g,.c23[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 

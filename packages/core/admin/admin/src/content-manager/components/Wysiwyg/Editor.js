@@ -43,7 +43,7 @@ const Editor = ({
   }, [editorRef, textareaRef, name, placeholder]);
 
   useEffect(() => {
-    if (value && !editorRef.current.state.focused) {
+    if (value && !editorRef.current.hasFocus()) {
       editorRef.current.setValue(value);
     }
   }, [editorRef, value]);
