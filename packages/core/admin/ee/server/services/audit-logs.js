@@ -1,6 +1,6 @@
 'use strict';
 
-const ee = require('../utils/ee');
+const { features } = require('@strapi/strapi/lib/utils/ee');
 
 const createAuditLogsService = (strapi) => {
   const saveEvent = (name, payload = {}) => {
@@ -12,7 +12,7 @@ const createAuditLogsService = (strapi) => {
     console.log(`Listened to event ${name} with payload: ${JSON.stringify(payload)}`);
   };
 
-  const isEnabled = strapi.EE && ee.features.isEnabled('audit-logs');
+  const isEnabled = strapi.EE && features.isEnabled('audit-logs');
 
   return {
     addEvent(name, payload) {

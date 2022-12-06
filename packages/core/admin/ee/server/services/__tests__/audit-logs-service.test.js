@@ -6,7 +6,7 @@ const mockIsEnabled = jest.fn();
 const EventEmitter = require('events');
 const createAuditLogsService = require('../audit-logs');
 
-jest.mock('../../utils/ee', () => {
+jest.mock('@strapi/strapi/lib/utils/ee', () => {
   return {
     features: {
       isEnabled: mockIsEnabled,
