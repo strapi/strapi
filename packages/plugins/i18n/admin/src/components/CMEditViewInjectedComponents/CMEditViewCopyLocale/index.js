@@ -69,7 +69,11 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
         cleanedData[key] = initialData[key];
       });
 
-      dispatch({ type: 'ContentManager/CrudReducer/GET_DATA_SUCCEEDED', data: cleanedData });
+      dispatch({
+        type: 'ContentManager/CrudReducer/GET_DATA_SUCCEEDED',
+        data: cleanedData,
+        setModifiedDataOnly: true,
+      });
 
       toggleNotification({
         type: 'success',

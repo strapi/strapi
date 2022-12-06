@@ -8,6 +8,7 @@ import produce from 'immer';
 // to do any of this.
 
 import {
+  CLEAR_SET_MODIFIED_DATA_ONLY,
   GET_DATA,
   GET_DATA_SUCCEEDED,
   INIT_FORM,
@@ -23,6 +24,7 @@ const crudInitialState = {
   isLoading: true,
   data: null,
   status: 'resolved',
+  setModifiedDataOnly: false,
 };
 
 const crudReducer = (state = crudInitialState, action) =>
@@ -36,6 +38,7 @@ const crudReducer = (state = crudInitialState, action) =>
       case GET_DATA_SUCCEEDED: {
         draftState.isLoading = false;
         draftState.data = action.data;
+        draftState.setModifiedDataOnly = action.setModifiedDataOnly ?? false;
         break;
       }
       case INIT_FORM: {
@@ -64,6 +67,10 @@ const crudReducer = (state = crudInitialState, action) =>
       }
       case SUBMIT_SUCCEEDED: {
         draftState.data = action.data;
+        break;
+      }
+      case CLEAR_SET_MODIFIED_DATA_ONLY: {
+        draftState.setModifiedDataOnly = false;
         break;
       }
       default:
