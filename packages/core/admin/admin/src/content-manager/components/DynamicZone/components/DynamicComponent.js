@@ -1,26 +1,38 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import get from 'lodash/get';
+import { getEmptyImage } from 'react-dnd-html5-backend';
 
-import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
-import { IconButton } from '@strapi/design-system/IconButton';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-
+import {
+  Accordion,
+  AccordionToggle,
+  AccordionContent,
+  IconButton,
+  Box,
+  Flex,
+  Stack,
+} from '@strapi/design-system';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
+import { Trash, Drag } from '@strapi/icons';
 
-import Trash from '@strapi/icons/Trash';
-import ArrowDown from '@strapi/icons/ArrowDown';
-import ArrowUp from '@strapi/icons/ArrowUp';
-
-import { useContentTypeLayout } from '../../../hooks';
-import { getTrad } from '../../../utils';
+import { useContentTypeLayout, useDragAndDrop } from '../../../hooks';
+import { composeRefs, getTrad, ItemTypes } from '../../../utils';
 
 import FieldComponent from '../../FieldComponent';
+
+const ActionsStack = styled(Stack)`
+  /* 
+    we need to remove the background from the button but we can't 
+    wrap the element in styled because it breaks the forwardedAs which
+    we need for drag handler to work on firefox
+  */
+  div[role='button'] {
+    background: transparent;
+  }
+`;
 
 const IconButtonCustom = styled(IconButton)`
   background-color: transparent;
@@ -46,17 +58,31 @@ const Rectangle = styled(Box)`
   height: ${({ theme }) => theme.spaces[4]};
 `;
 
+const Preview = styled.span`
+  display: block;
+  background-color: ${({ theme }) => theme.colors.primary100};
+  outline: 1px dashed ${({ theme }) => theme.colors.primary500};
+  outline-offset: -1px;
+  padding: ${({ theme }) => theme.spaces[6]};
+`;
+
+const ComponentContainer = styled(Box)`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+`;
+
 const DynamicZoneComponent = ({
   componentUid,
   formErrors,
   index,
   isFieldAllowed,
-  onMoveComponentDownClick,
-  onMoveComponentUpClick,
   name,
   onRemoveComponentClick,
-  showDownIcon,
-  showUpIcon,
+  onMoveComponent,
+  onGrabItem,
+  onDropItem,
+  onCancel,
 }) => {
   const [isOpen, setIsOpen] = useState(true);
   const { formatMessage } = useIntl();
@@ -103,71 +129,90 @@ const DynamicZoneComponent = ({
     setIsOpen((s) => !s);
   };
 
+  const [{ handlerId, isDragging, handleKeyDown }, boxRef, dropRef, dragRef, dragPreviewRef] =
+    useDragAndDrop(isFieldAllowed, {
+      type: ItemTypes.DYNAMIC_ZONE,
+      index,
+      item: {
+        displayedValue: `${friendlyName}${mainValue}`,
+        icon,
+      },
+      onMoveItem: onMoveComponent,
+      onGrabItem,
+      onDropItem,
+      onCancel,
+    });
+
+  useEffect(() => {
+    dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
+  }, [dragPreviewRef]);
+
+  const composedBoxRefs = composeRefs(boxRef, dropRef);
+
+  const accordionActions = !isFieldAllowed ? null : (
+    <ActionsStack horizontal spacing={0} expanded={isOpen}>
+      <IconButtonCustom
+        noBorder
+        label={formatMessage(
+          {
+            id: getTrad('components.DynamicZone.delete-label'),
+            defaultMessage: 'Delete {name}',
+          },
+          { name: friendlyName }
+        )}
+        onClick={onRemoveComponentClick}
+      >
+        <Trash />
+      </IconButtonCustom>
+      <IconButton
+        forwardedAs="div"
+        role="button"
+        noBorder
+        tabIndex={0}
+        onClick={(e) => e.stopPropagation()}
+        data-handler-id={handlerId}
+        ref={dragRef}
+        label={formatMessage({
+          id: getTrad('components.DragHandle-label'),
+          defaultMessage: 'Drag',
+        })}
+        onKeyDown={handleKeyDown}
+      >
+        <Drag />
+      </IconButton>
+    </ActionsStack>
+  );
+
   return (
-    <Box>
+    <ComponentContainer as="li">
       <Flex justifyContent="center">
         <Rectangle background="neutral200" />
       </Flex>
-      <StyledBox hasRadius>
-        <Accordion expanded={isOpen} onToggle={handleToggle} size="S" error={errorMessage}>
-          <AccordionToggle
-            startIcon={<FontAwesomeIcon icon={icon} />}
-            action={
-              <Stack horizontal spacing={0} expanded={isOpen}>
-                {showDownIcon && (
-                  <IconButtonCustom
-                    noBorder
-                    label={formatMessage({
-                      id: getTrad('components.DynamicZone.move-down-label'),
-                      defaultMessage: 'Move component down',
-                    })}
-                    onClick={onMoveComponentDownClick}
-                    icon={<ArrowDown />}
-                  />
-                )}
-                {showUpIcon && (
-                  <IconButtonCustom
-                    noBorder
-                    label={formatMessage({
-                      id: getTrad('components.DynamicZone.move-up-label'),
-                      defaultMessage: 'Move component up',
-                    })}
-                    onClick={onMoveComponentUpClick}
-                    icon={<ArrowUp />}
-                  />
-                )}
-                {isFieldAllowed && (
-                  <IconButtonCustom
-                    noBorder
-                    label={formatMessage(
-                      {
-                        id: getTrad('components.DynamicZone.delete-label'),
-                        defaultMessage: 'Delete {name}',
-                      },
-                      { name: friendlyName }
-                    )}
-                    onClick={onRemoveComponentClick}
-                    icon={<Trash />}
-                  />
-                )}
-              </Stack>
-            }
-            title={`${friendlyName}${mainValue}`}
-            togglePosition="left"
-          />
-          <AccordionContent>
-            <AccordionContentRadius background="neutral0">
-              <FieldComponent
-                componentUid={componentUid}
-                icon={icon}
-                name={`${name}.${index}`}
-                isFromDynamicZone
-              />
-            </AccordionContentRadius>
-          </AccordionContent>
-        </Accordion>
+      <StyledBox ref={composedBoxRefs} hasRadius>
+        {isDragging ? (
+          <Preview ref={dragPreviewRef} padding={6} background="primary100" />
+        ) : (
+          <Accordion expanded={isOpen} onToggle={handleToggle} size="S" error={errorMessage}>
+            <AccordionToggle
+              startIcon={<FontAwesomeIcon icon={icon} />}
+              action={accordionActions}
+              title={`${friendlyName}${mainValue}`}
+              togglePosition="left"
+            />
+            <AccordionContent>
+              <AccordionContentRadius background="neutral0">
+                <FieldComponent
+                  componentUid={componentUid}
+                  icon={icon}
+                  name={`${name}.${index}`}
+                  isFromDynamicZone
+                />
+              </AccordionContentRadius>
+            </AccordionContent>
+          </Accordion>
+        )}
       </StyledBox>
-    </Box>
+    </ComponentContainer>
   );
 };
 
@@ -175,8 +220,9 @@ DynamicZoneComponent.defaultProps = {
   formErrors: {},
   index: 0,
   isFieldAllowed: true,
-  showDownIcon: true,
-  showUpIcon: true,
+  onGrabItem: undefined,
+  onDropItem: undefined,
+  onCancel: undefined,
 };
 
 DynamicZoneComponent.propTypes = {
@@ -185,11 +231,11 @@ DynamicZoneComponent.propTypes = {
   index: PropTypes.number,
   isFieldAllowed: PropTypes.bool,
   name: PropTypes.string.isRequired,
-  onMoveComponentDownClick: PropTypes.func.isRequired,
-  onMoveComponentUpClick: PropTypes.func.isRequired,
+  onGrabItem: PropTypes.func,
+  onDropItem: PropTypes.func,
+  onCancel: PropTypes.func,
+  onMoveComponent: PropTypes.func.isRequired,
   onRemoveComponentClick: PropTypes.func.isRequired,
-  showDownIcon: PropTypes.bool,
-  showUpIcon: PropTypes.bool,
 };
 
 export default DynamicZoneComponent;

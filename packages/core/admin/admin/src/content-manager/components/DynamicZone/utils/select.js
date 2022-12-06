@@ -9,15 +9,20 @@ function useSelect(name) {
     isCreatingEntry,
     formErrors,
     modifiedData,
-    moveComponentUp,
-    moveComponentDown,
+    moveComponentField,
     removeComponentFromDynamicZone,
     readActionAllowedFields,
     updateActionAllowedFields,
   } = useCMEditViewDataManager();
 
   const dynamicDisplayedComponents = useMemo(
-    () => get(modifiedData, [name], []).map((data) => data.__component),
+    () =>
+      get(modifiedData, [name], []).map((data) => {
+        return {
+          componentUid: data.__component,
+          id: data.id ?? data.__temp_key__,
+        };
+      }),
     [modifiedData, name]
   );
 
@@ -39,8 +44,7 @@ function useSelect(name) {
     isCreatingEntry,
     isFieldAllowed,
     isFieldReadable,
-    moveComponentUp,
-    moveComponentDown,
+    moveComponentField,
     removeComponentFromDynamicZone,
     dynamicDisplayedComponents,
   };

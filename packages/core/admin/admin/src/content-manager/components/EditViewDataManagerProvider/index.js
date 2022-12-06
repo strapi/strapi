@@ -597,8 +597,14 @@ const EditViewDataManagerProvider = ({
         status,
         layout: currentContentTypeLayout,
         modifiedData,
-        moveComponentDown,
         moveComponentField,
+        /**
+         * @deprecated use `moveComponentField` instead. This will be removed in v5.
+         */
+        moveComponentDown,
+        /**
+         * @deprecated use `moveComponentField` instead. This will be removed in v5.
+         */
         moveComponentUp,
         onChange: handleChange,
         onPublish: handlePublish,
