@@ -3,9 +3,9 @@
 const ee = require('../utils/ee');
 
 const createAuditLogsService = (strapi) => {
-  const eventListener = (name, payload = {}) => {
-    if (!name && !Object.keys(payload).length) {
-      throw Error('No name or payload');
+  const saveEvent = (name, payload = {}) => {
+    if (!name || !Object.keys(payload).length) {
+      throw Error('Name and payload are required');
     }
     // TODO: filter events here
     // TODO: save events here via provider
@@ -15,7 +15,7 @@ const createAuditLogsService = (strapi) => {
   const isEnabled = strapi.EE && ee.features.isEnabled('audit-logs');
 
   return {
-    emitEvent(name, payload) {
+    addEvent(name, payload) {
       // Don't emit events if audit logs are not enabled
       if (!isEnabled) {
         return;
@@ -25,7 +25,7 @@ const createAuditLogsService = (strapi) => {
       const existingsEvents = strapi.eventHub.eventNames();
       if (!existingsEvents.includes(name)) {
         strapi.eventHub.addListener(name, (payload) => {
-          eventListener(name, payload);
+          saveEvent(name, payload);
         });
       }
 

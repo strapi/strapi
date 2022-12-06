@@ -15,7 +15,11 @@ jest.mock('../../utils/ee', () => {
 });
 
 describe('Audit logs service', () => {
-  it('emits an event with the proper license', () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('emits an event when the proper license is provided', () => {
     const logSpy = jest.spyOn(console, 'log');
     mockIsEnabled.mockReturnValueOnce(true);
     const strapi = {
@@ -24,8 +28,8 @@ describe('Audit logs service', () => {
     };
 
     strapi.auditLogs = createAuditLogsService(strapi);
-    strapi.auditLogs.emitEvent('test', { meta: 'payload1' });
-    strapi.auditLogs.emitEvent('test', { meta: 'payload2' });
+    strapi.auditLogs.addEvent('test', { meta: 'payload1' });
+    strapi.auditLogs.addEvent('test', { meta: 'payload2' });
 
     expect(strapi.eventHub.eventNames().includes('test')).toBe(true);
     expect(strapi.eventHub.eventNames().length).toBe(1);
@@ -38,7 +42,7 @@ describe('Audit logs service', () => {
     );
   });
 
-  it('does not emit event without the proper license', () => {
+  it('does not emit event when the proper license is not provided', () => {
     mockIsEnabled.mockReturnValueOnce(false);
     const strapi = {
       EE: false,
@@ -46,8 +50,25 @@ describe('Audit logs service', () => {
     };
 
     strapi.auditLogs = createAuditLogsService(strapi);
-    strapi.auditLogs.emitEvent('test', { meta: 'sphere' });
+    strapi.auditLogs.addEvent('test', { meta: 'sphere' });
 
     expect(strapi.eventHub.eventNames()).toEqual([]);
+  });
+
+  it('throws when event is missing name or payload', () => {
+    mockIsEnabled.mockReturnValueOnce(true);
+    const strapi = {
+      EE: true,
+      eventHub: new EventEmitter(),
+    };
+
+    strapi.auditLogs = createAuditLogsService(strapi);
+
+    expect(() => {
+      strapi.auditLogs.addEvent('', { meta: 'payload1' });
+    }).toThrow('Name and payload are required');
+    expect(() => {
+      strapi.auditLogs.addEvent('test', {});
+    }).toThrow('Name and payload are required');
   });
 });
