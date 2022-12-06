@@ -172,8 +172,7 @@ exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the sn
   color: #666687;
 }
 
-.c2[aria-disabled='true'] svg > g,
-.c2[aria-disabled='true'] svg path {
+.c2[aria-disabled='true'] svg > g,.c2[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -186,8 +185,7 @@ exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the sn
   color: #666687;
 }
 
-.c2[aria-disabled='true']:active svg > g,
-.c2[aria-disabled='true']:active svg path {
+.c2[aria-disabled='true']:active svg > g,.c2[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 

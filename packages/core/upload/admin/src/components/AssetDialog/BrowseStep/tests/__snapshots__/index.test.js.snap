@@ -429,8 +429,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   color: #666687;
 }
 
-.c6[aria-disabled='true'] svg > g,
-.c6[aria-disabled='true'] svg path {
+.c6[aria-disabled='true'] svg > g,.c6[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -443,8 +442,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   color: #666687;
 }
 
-.c6[aria-disabled='true']:active svg > g,
-.c6[aria-disabled='true']:active svg path {
+.c6[aria-disabled='true']:active svg > g,.c6[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -1258,7 +1256,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
       </div>
       <nav
         aria-label="pagination"
-        class="sc-epFoly"
+        class=""
       >
         <ul
           class="c0 c13 c66"
