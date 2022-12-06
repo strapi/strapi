@@ -23,6 +23,17 @@ import { composeRefs, getTrad, ItemTypes } from '../../../utils';
 
 import FieldComponent from '../../FieldComponent';
 
+const ActionsStack = styled(Stack)`
+  /* 
+    we need to remove the background from the button but we can't 
+    wrap the element in styled because it breaks the forwardedAs which
+    we need for drag handler to work on firefox
+  */
+  div[role='button'] {
+    background: transparent;
+  }
+`;
+
 const IconButtonCustom = styled(IconButton)`
   background-color: transparent;
 
@@ -139,7 +150,7 @@ const DynamicZoneComponent = ({
   const composedBoxRefs = composeRefs(boxRef, dropRef);
 
   const accordionActions = !isFieldAllowed ? null : (
-    <Stack horizontal spacing={0} expanded={isOpen}>
+    <ActionsStack horizontal spacing={0} expanded={isOpen}>
       <IconButtonCustom
         noBorder
         label={formatMessage(
@@ -169,7 +180,7 @@ const DynamicZoneComponent = ({
       >
         <Drag />
       </IconButton>
-    </Stack>
+    </ActionsStack>
   );
 
   return (
