@@ -138,6 +138,40 @@ const DynamicZoneComponent = ({
 
   const composedBoxRefs = composeRefs(boxRef, dropRef);
 
+  const accordionActions = !isFieldAllowed ? null : (
+    <Stack horizontal spacing={0} expanded={isOpen}>
+      <IconButtonCustom
+        noBorder
+        label={formatMessage(
+          {
+            id: getTrad('components.DynamicZone.delete-label'),
+            defaultMessage: 'Delete {name}',
+          },
+          { name: friendlyName }
+        )}
+        onClick={onRemoveComponentClick}
+      >
+        <Trash />
+      </IconButtonCustom>
+      <IconButton
+        forwardedAs="div"
+        role="button"
+        noBorder
+        tabIndex={0}
+        onClick={(e) => e.stopPropagation()}
+        data-handler-id={handlerId}
+        ref={dragRef}
+        label={formatMessage({
+          id: getTrad('components.DragHandle-label'),
+          defaultMessage: 'Drag',
+        })}
+        onKeyDown={handleKeyDown}
+      >
+        <Drag />
+      </IconButton>
+    </Stack>
+  );
+
   return (
     <ComponentContainer as="li">
       <Flex justifyContent="center">
@@ -150,41 +184,7 @@ const DynamicZoneComponent = ({
           <Accordion expanded={isOpen} onToggle={handleToggle} size="S" error={errorMessage}>
             <AccordionToggle
               startIcon={<FontAwesomeIcon icon={icon} />}
-              action={
-                isFieldAllowed ? (
-                  <Stack horizontal spacing={0} expanded={isOpen}>
-                    <IconButtonCustom
-                      noBorder
-                      label={formatMessage(
-                        {
-                          id: getTrad('components.DynamicZone.delete-label'),
-                          defaultMessage: 'Delete {name}',
-                        },
-                        { name: friendlyName }
-                      )}
-                      onClick={onRemoveComponentClick}
-                    >
-                      <Trash />
-                    </IconButtonCustom>
-                    <IconButton
-                      forwardedAs="div"
-                      role="button"
-                      noBorder
-                      tabIndex={0}
-                      onClick={(e) => e.stopPropagation()}
-                      data-handler-id={handlerId}
-                      ref={dragRef}
-                      label={formatMessage({
-                        id: getTrad('components.DragHandle-label'),
-                        defaultMessage: 'Drag',
-                      })}
-                      onKeyDown={handleKeyDown}
-                    >
-                      <Drag />
-                    </IconButton>
-                  </Stack>
-                ) : null
-              }
+              action={accordionActions}
               title={`${friendlyName}${mainValue}`}
               togglePosition="left"
             />
