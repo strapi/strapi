@@ -71,6 +71,8 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const currentToken = auth.getToken();
+
     const getData = async () => {
       try {
         const {
@@ -81,10 +83,16 @@ function App() {
 
         updateProjectSettings({ menuLogo: prefixFileUrlWithBackendUrl(menuLogo) });
 
-        if (uuid) {
+        if (uuid && currentToken) {
           const {
             data: { data: properties },
-          } = await axios.get(`${strapi.backendURL}/admin/telemetry-properties`);
+          } = await axios.get(`${strapi.backendURL}/admin/telemetry-properties`, {
+            headers: {
+              Authorization: `Bearer ${currentToken}`,
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+            },
+          });
 
           setTelemetryProperties(properties);
 
