@@ -15,10 +15,6 @@ interface ILocalStrapiDestinationProviderOptions {
   strategy: 'restore' | 'merge';
 }
 
-// TODO: getting some type errors with @strapi/logger that need to be resolved first
-// const log = createLogger();
-const log = console;
-
 export const createLocalStrapiDestinationProvider = (
   options: ILocalStrapiDestinationProviderOptions
 ) => {
