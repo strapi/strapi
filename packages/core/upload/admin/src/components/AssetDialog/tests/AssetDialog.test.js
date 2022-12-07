@@ -23,8 +23,6 @@ jest.mock('../../../hooks/useFolders');
 jest.mock('../../../hooks/useAssets');
 jest.mock('../../../hooks/useModalQueryParams');
 
-console.error = jest.fn();
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

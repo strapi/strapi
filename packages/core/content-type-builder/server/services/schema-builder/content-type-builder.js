@@ -259,6 +259,7 @@ const generateRelation = ({ key, attribute, uid, targetAttribute = {} }) => {
     target: uid,
     autoPopulate: targetAttribute.autoPopulate,
     private: targetAttribute.private || undefined,
+    pluginOptions: targetAttribute.pluginOptions || undefined,
   };
 
   switch (attribute.relation) {

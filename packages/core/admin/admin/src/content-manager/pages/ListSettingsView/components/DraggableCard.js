@@ -201,7 +201,7 @@ const DraggableCard = ({
                   id: getTrad('components.DraggableCard.move.field'),
                   defaultMessage: 'Move {item}',
                 },
-                { item: name }
+                { item: labelField }
               )}
               onClick={(e) => e.stopPropagation()}
               ref={refs.dragRef}
@@ -223,7 +223,7 @@ const DraggableCard = ({
                   id: getTrad('components.DraggableCard.edit.field'),
                   defaultMessage: 'Edit {item}',
                 },
-                { item: name }
+                { item: labelField }
               )}
               type="button"
             >
@@ -237,7 +237,7 @@ const DraggableCard = ({
                   id: getTrad('components.DraggableCard.delete.field'),
                   defaultMessage: 'Delete {item}',
                 },
-                { item: name }
+                { item: labelField }
               )}
               type="button"
             >

@@ -18,8 +18,8 @@ const uploadAsset = (asset, folderId, cancelToken, onProgress) => {
     'fileInfo',
     JSON.stringify({
       name,
-      caption: caption || name,
-      alternativeText: alternativeText || name,
+      caption,
+      alternativeText,
       folder: folderId,
     })
   );

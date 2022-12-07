@@ -232,7 +232,7 @@ const Collapse = ({
         </Flex>
         {isModalOpen && (
           <ConditionsModal
-            headerBreadCrumbs={[label, 'app.components.LeftMenuLinkContainer.settings']}
+            headerBreadCrumbs={[label, 'Settings.permissions.conditions.conditions']}
             actions={checkboxesActions}
             isFormDisabled={isFormDisabled}
             onClosed={handleModalClose}

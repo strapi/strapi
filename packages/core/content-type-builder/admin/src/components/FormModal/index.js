@@ -58,6 +58,7 @@ import {
   SET_DATA_TO_EDIT,
   SET_DYNAMIC_ZONE_DATA_SCHEMA,
   SET_ATTRIBUTE_DATA_SCHEMA,
+  SET_CUSTOM_FIELD_DATA_SCHEMA,
   SET_ERRORS,
   ON_CHANGE,
   RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
@@ -268,16 +269,27 @@ const FormModal = () => {
           }
         }
 
-        dispatch({
-          type: SET_ATTRIBUTE_DATA_SCHEMA,
-          attributeType,
-          nameToSetForRelation: get(collectionTypesForRelation, ['0', 'title'], 'error'),
-          targetUid: get(collectionTypesForRelation, ['0', 'uid'], 'error'),
-          isEditing: actionType === 'edit',
-          modifiedDataToSetForEditing: attributeToEdit,
-          step,
-          forTarget,
-        });
+        if (modalType === 'customField') {
+          dispatch({
+            type: SET_CUSTOM_FIELD_DATA_SCHEMA,
+            customField,
+            isEditing: actionType === 'edit',
+            modifiedDataToSetForEditing: attributeToEdit,
+            // NOTE: forTarget is used in the i18n middleware
+            forTarget,
+          });
+        } else {
+          dispatch({
+            type: SET_ATTRIBUTE_DATA_SCHEMA,
+            attributeType,
+            nameToSetForRelation: get(collectionTypesForRelation, ['0', 'title'], 'error'),
+            targetUid: get(collectionTypesForRelation, ['0', 'uid'], 'error'),
+            isEditing: actionType === 'edit',
+            modifiedDataToSetForEditing: attributeToEdit,
+            step,
+            forTarget,
+          });
+        }
       }
     } else {
       dispatch({ type: RESET_PROPS });
@@ -348,6 +360,7 @@ const FormModal = () => {
         ctbFormsAPI,
         customFieldValidator: customField.options?.validator,
       });
+
       // Check for validity for creating a component
       // This is happening when the user creates a component "on the fly"
       // Since we temporarily store the component info in another object
@@ -551,7 +564,7 @@ const FormModal = () => {
         // Add/edit a field to a created component (the end modal is not step 2)
       } else if (isCreatingCustomFieldAttribute) {
         const customFieldAttributeUpdate = {
-          attributeToSet: { ...modifiedData, customField: customFieldUid, type: customField.type },
+          attributeToSet: { ...modifiedData, customField: customFieldUid },
           forTarget,
           targetUid,
           initialAttribute: initialData,
@@ -929,6 +942,15 @@ const FormModal = () => {
 
   const schemaKind = get(contentTypes, [targetUid, 'schema', 'kind']);
 
+  const checkIsEditingFieldName = () =>
+    actionType === 'edit' && attributes.every(({ name }) => name !== modifiedData?.name);
+
+  const handleClickFinish = () => {
+    if (checkIsEditingFieldName()) {
+      trackUsage('didEditFieldNameOnContentType');
+    }
+  };
+
   return (
     <ModalLayout onClose={handleClosed} labelledBy="title">
       <FormModalHeader
@@ -1059,6 +1081,7 @@ const FormModal = () => {
                 onSubmitEditContentType={handleSubmit}
                 onSubmitEditCustomFieldAttribute={handleSubmit}
                 onSubmitEditDz={handleSubmit}
+                onClickFinish={handleClickFinish}
               />
             }
             startActions={

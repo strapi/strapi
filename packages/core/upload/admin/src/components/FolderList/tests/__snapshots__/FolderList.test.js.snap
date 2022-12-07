@@ -26,10 +26,10 @@ exports[`FolderList renders and match snapshots 1`] = `
 
 .c1 {
   font-weight: 500;
-  color: #32324d;
-  font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
+  font-weight: 500;
+  color: #32324d;
 }
 
 <div>
