@@ -8,9 +8,14 @@ const {
   // eslint-disable-next-line import/no-unresolved, node/no-missing-require
 } = require('@strapi/data-transfer');
 const { isObject } = require('lodash/fp');
+const path = require('path');
 
 const strapi = require('../../index');
 const { buildTransferTable } = require('./utils');
+
+/**
+ * @typedef {import('@strapi/data-transfer').ILocalFileSourceProviderOptions} ILocalFileSourceProviderOptions
+ */
 
 const logger = console;
 
@@ -20,14 +25,12 @@ module.exports = async (opts) => {
     logger.error('Could not parse arguments');
     process.exit(1);
   }
-  const filename = opts.file;
 
   /**
    * From strapi backup file
    */
-  const sourceOptions = {
-    backupFilePath: filename,
-  };
+  const sourceOptions = getLocalFileSourceOptions(opts);
+
   const source = createLocalFileSourceProvider(sourceOptions);
 
   /**
@@ -69,16 +72,50 @@ module.exports = async (opts) => {
   const engine = createTransferEngine(source, destination, engineOptions);
 
   try {
-    logger.log('Starting import...');
+    logger.info('Starting import...');
 
     const results = await engine.transfer();
     const table = buildTransferTable(results.engine);
-    logger.log(table.toString());
+    logger.info(table.toString());
 
-    logger.log('Import process has been completed successfully!');
+    logger.info('Import process has been completed successfully!');
     process.exit(0);
   } catch (e) {
-    logger.log(`Import process failed unexpectedly: ${e.message}`);
+    logger.error(`Import process failed unexpectedly: ${e.message}`);
     process.exit(1);
   }
+};
+
+/**
+ * Infer local file source provider options based on a given filename
+ *
+ * @param {{ file: string; key?: string }} opts
+ *
+ * @return {ILocalFileSourceProviderOptions}
+ */
+const getLocalFileSourceOptions = (opts) => {
+  /**
+   * @type {ILocalFileSourceProviderOptions}
+   */
+  const options = {
+    file: { path: opts.file },
+    compression: { enabled: false },
+    encryption: { enabled: false },
+  };
+
+  const { extname, parse } = path;
+
+  let file = options.file.path;
+
+  if (extname(file) === '.enc') {
+    file = parse(file).name;
+    options.encryption = { enabled: true, key: opts.key };
+  }
+
+  if (extname(file) === '.gz') {
+    file = parse(file).name;
+    options.compression = { enabled: true };
+  }
+
+  return options;
 };

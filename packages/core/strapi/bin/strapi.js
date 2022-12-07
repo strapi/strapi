@@ -5,6 +5,7 @@
 // FIXME
 /* eslint-disable import/extensions */
 const _ = require('lodash');
+const path = require('path');
 const resolveCwd = require('resolve-cwd');
 const { yellow } = require('chalk');
 const { Command, Option } = require('commander');
@@ -316,14 +317,15 @@ program
     'path and filename to the Strapi export file you want to import'
   )
   .addOption(
-    new Option('--key <string>', 'Provide encryption key in command instead of using a prompt')
+    new Option('-k, --key <string>', 'Provide encryption key in command instead of using a prompt')
   )
   .allowExcessArguments(false)
   .hook('preAction', async (thisCommand) => {
     const opts = thisCommand.opts();
+    const ext = path.extname(String(opts.file));
 
     // check extension to guess if we should prompt for key
-    if (String(opts.file).endsWith('.enc')) {
+    if (ext === '.enc') {
       if (!opts.key) {
         const answers = await inquirer.prompt([
           {
