@@ -18,7 +18,7 @@ const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
  * @param {Boolean} options.countOne
  * @returns {true|{count: true}}
  */
-function getRelationPopulate(attribute, model, attributeName, { countMany, countOne }) {
+function getPopulateForRelation(attribute, model, attributeName, { countMany, countOne }) {
   const isManyRelation = isAnyToMany(attribute);
 
   // always populate createdBy, updatedBy, localizations etc.
@@ -33,7 +33,7 @@ function getRelationPopulate(attribute, model, attributeName, { countMany, count
 }
 
 /**
- * Populate the model for components
+ * Populate the model for Dynamic Zone components
  * @param {Object} attribute - Attribute containing the components
  * @param {String[]} attribute.components - IDs of components
  * @param {Object} options - Options to apply while populating
@@ -43,7 +43,7 @@ function getRelationPopulate(attribute, model, attributeName, { countMany, count
  * @param {Number} level
  * @returns {{populate: Object}}
  */
-function getPopulateForComponents(attribute, options, level) {
+function getPopulateForDZ(attribute, options, level) {
   const populatedComponents = (attribute.components || []).map((componentUID) =>
     getDeepPopulate(componentUID, options, level + 1)
   );
@@ -63,13 +63,13 @@ function getPopulateForComponents(attribute, options, level) {
  * @param {Number} level
  * @returns {Object}
  */
-function getPopulateByType(attributeName, model, options, level) {
+function getPopulateFor(attributeName, model, options, level) {
   const attribute = model.attributes[attributeName];
 
   switch (attribute.type) {
     case 'relation':
       return {
-        [attributeName]: getRelationPopulate(attribute, model, attributeName, options),
+        [attributeName]: getPopulateForRelation(attribute, model, attributeName, options),
       };
     case 'component':
       return {
@@ -83,7 +83,7 @@ function getPopulateByType(attributeName, model, options, level) {
       };
     case 'dynamiczone':
       return {
-        [attributeName]: getPopulateForComponents(attribute, options, level),
+        [attributeName]: getPopulateForDZ(attribute, options, level),
       };
     default:
       return {};
@@ -115,7 +115,7 @@ const getDeepPopulate = (
     (populateAcc, attributeName) =>
       merge(
         populateAcc,
-        getPopulateByType(attributeName, model, { countMany, countOne, maxLevel }, level)
+        getPopulateFor(attributeName, model, { countMany, countOne, maxLevel }, level)
       ),
     {}
   );
