@@ -33,6 +33,17 @@ const sidebars = {
           },
           items: [
             {
+              type: 'category',
+              label: 'Hooks',
+              items: [
+                {
+                  type: 'doc',
+                  label: 'useDragAndDrop',
+                  id: 'core/content-manager/hooks/use-drag-and-drop',
+                },
+              ],
+            },
+            {
               type: 'doc',
               label: 'Relations',
               id: 'core/content-manager/relations',
