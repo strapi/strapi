@@ -5,6 +5,7 @@
 // FIXME
 /* eslint-disable import/extensions */
 const _ = require('lodash');
+const path = require('path');
 const resolveCwd = require('resolve-cwd');
 const { yellow } = require('chalk');
 const { Command, Option } = require('commander');
@@ -311,8 +312,6 @@ program
       .choices(['exact', 'strict', 'subset', 'bypass'])
       .default('exact')
   )
-  .option('-d, --decompress', 'Decompress', false)
-  .option('-x, --decrypt', 'Decrypt. Use --key to provide the decryption key', false)
   .requiredOption(
     '-f, --file <file>',
     'path and filename to the Strapi export file you want to import'
@@ -323,9 +322,10 @@ program
   .allowExcessArguments(false)
   .hook('preAction', async (thisCommand) => {
     const opts = thisCommand.opts();
+    const ext = path.extname(String(opts.file));
 
     // check extension to guess if we should prompt for key
-    if (opts.decrypt) {
+    if (ext === '.enc') {
       if (!opts.key) {
         const answers = await inquirer.prompt([
           {
