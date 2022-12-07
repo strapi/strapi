@@ -8,7 +8,7 @@ import tar from 'tar-stream';
  */
 export const createFilePathFactory =
   (type: string) =>
-  (fileIndex: number = 0): string => {
+  (fileIndex = 0): string => {
     return path.join(
       // "{type}" directory
       type,
@@ -20,7 +20,7 @@ export const createFilePathFactory =
 export const createTarEntryStream = (
   archive: tar.Pack,
   pathFactory: (index?: number) => string,
-  maxSize: number = 2.56e8
+  maxSize = 2.56e8
 ) => {
   let fileIndex = 0;
   let buffer = '';
@@ -30,7 +30,8 @@ export const createTarEntryStream = (
       return;
     }
 
-    const name = pathFactory(fileIndex++);
+    fileIndex += 1;
+    const name = pathFactory(fileIndex);
     const size = buffer.length;
 
     await new Promise<void>((resolve, reject) => {

@@ -1,12 +1,3 @@
-import type {
-  IAsset,
-  IDestinationProvider,
-  IDestinationProviderTransferResults,
-  IMetadata,
-  ProviderType,
-  Stream,
-} from '../../../types';
-
 import fs from 'fs-extra';
 import tar from 'tar-stream';
 import path from 'path';
@@ -16,7 +7,16 @@ import { stringer } from 'stream-json/jsonl/Stringer';
 import { chain, Writable } from 'stream-chain';
 
 import { createEncryptionCipher } from '../../encryption/encrypt';
+import type {
+  IAsset,
+  IDestinationProvider,
+  IDestinationProviderTransferResults,
+  IMetadata,
+  ProviderType,
+  Stream,
+} from '../../../types';
 import { createFilePathFactory, createTarEntryStream } from './utils';
+
 export interface ILocalFileDestinationProviderOptions {
   encryption: {
     enabled: boolean;
@@ -48,12 +48,16 @@ export const createLocalFileDestinationProvider = (
 };
 
 class LocalFileDestinationProvider implements IDestinationProvider {
-  name: string = 'destination::local-file';
+  name = 'destination::local-file';
+
   type: ProviderType = 'destination';
+
   options: ILocalFileDestinationProviderOptions;
+
   results: ILocalFileDestinationProviderTransferResults = {};
 
   #providersMetadata: { source?: IMetadata; destination?: IMetadata } = {};
+
   #archive: { stream?: tar.Pack; pipeline?: Stream } = {};
 
   constructor(options: ILocalFileDestinationProviderOptions) {
@@ -63,17 +67,17 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   get #archivePath() {
     const { encryption, compression, file } = this.options;
 
-    let path = `${file.path}.tar`;
+    let filePath = `${file.path}.tar`;
 
     if (compression.enabled) {
-      path += '.gz';
+      filePath += '.gz';
     }
 
     if (encryption.enabled) {
-      path += '.enc';
+      filePath += '.enc';
     }
 
-    return path;
+    return filePath;
   }
 
   setMetadata(target: ProviderType, metadata: IMetadata): IDestinationProvider {

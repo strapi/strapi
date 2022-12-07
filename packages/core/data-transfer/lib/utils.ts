@@ -1,7 +1,7 @@
 import type { Readable } from 'stream';
-import type { Context, Diff } from '../types';
 
 import { isArray, isObject, zip, isEqual, uniq, mapValues, pick } from 'lodash/fp';
+import type { Context, Diff } from '../types';
 
 /**
  * Collect every entity in a Readable stream
@@ -23,6 +23,9 @@ const createContext = (): Context => ({ path: [] });
 export const jsonDiffs = (a: unknown, b: unknown, ctx: Context = createContext()): Diff[] => {
   const diffs: Diff[] = [];
   const { path } = ctx;
+
+  const aType = typeof a;
+  const bType = typeof b;
 
   // Define helpers
 
@@ -46,9 +49,6 @@ export const jsonDiffs = (a: unknown, b: unknown, ctx: Context = createContext()
     return diffs;
   };
 
-  const aType = typeof a;
-  const bType = typeof b;
-
   if (aType === 'undefined') {
     return added();
   }
@@ -66,7 +66,7 @@ export const jsonDiffs = (a: unknown, b: unknown, ctx: Context = createContext()
 
       diffs.push(...kDiffs);
 
-      k++;
+      k += 1;
     }
 
     return diffs;

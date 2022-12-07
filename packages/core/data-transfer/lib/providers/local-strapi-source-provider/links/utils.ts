@@ -1,7 +1,6 @@
 import type { RelationsType } from '@strapi/strapi';
-import type { ILink } from '../../../../types';
-
 import { concat, set, isEmpty } from 'lodash/fp';
+import type { ILink } from '../../../../types';
 
 // TODO: Fix any typings when we'll have better Strapi types
 
@@ -49,7 +48,7 @@ export const parseEntityLinks = (entity: any, populate: any, schema: any, strapi
         .map(({ __component, ...item }: any) =>
           parseEntityLinks(item, subPopulate.populate, strapi.components[__component], strapi)
         )
-        .reduce((acc: any, links: any) => acc.concat(...links), []);
+        .reduce((acc: any, rlinks: any) => acc.concat(...rlinks), []);
 
       links.push(...dzLinks);
     }
@@ -90,6 +89,7 @@ export const parseRelationLinks = ({ entity, schema, fieldName, value }: any): I
   const isMorphRelation = relation.startsWith('morph');
   const isCircularRelation = !isMorphRelation && target === schema.uid;
 
+  // eslint-disable-next-line no-nested-ternary
   const kind: ILink['kind'] = isMorphRelation
     ? // Polymorphic relations
       'relation.morph'

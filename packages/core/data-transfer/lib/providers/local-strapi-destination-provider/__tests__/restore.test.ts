@@ -77,7 +77,7 @@ describe('Restore ', () => {
 
     const { count } = await deleteAllRecords(strapi, {
       /* @ts-ignore: disable-next-line */
-      contentTypes: [getContentTypes()['foo']],
+      contentTypes: [getContentTypes().foo],
     });
     expect(count).toBe(3);
   });

@@ -1,10 +1,8 @@
-// import { createLogger } from '@strapi/logger';
-import type { IDestinationProvider, IMetadata, ProviderType, IConfiguration } from '../../../types';
-import { deleteAllRecords, DeleteOptions, restoreConfigs } from './restore';
-
 import chalk from 'chalk';
 import { Writable } from 'stream';
 
+import type { IConfiguration, IDestinationProvider, IMetadata, ProviderType } from '../../../types';
+import { deleteAllRecords, DeleteOptions, restoreConfigs } from './restore';
 import { mapSchemasValues } from '../../utils';
 
 export const VALID_STRATEGIES = ['restore', 'merge'];
@@ -22,10 +20,12 @@ export const createLocalStrapiDestinationProvider = (
 };
 
 class LocalStrapiDestinationProvider implements IDestinationProvider {
-  name: string = 'destination::local-strapi';
+  name = 'destination::local-strapi';
+
   type: ProviderType = 'destination';
 
   options: ILocalStrapiDestinationProviderOptions;
+
   strapi?: Strapi.Strapi;
 
   constructor(options: ILocalStrapiDestinationProviderOptions) {
@@ -43,7 +43,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   #validateOptions() {
     if (!VALID_STRATEGIES.includes(this.options.strategy)) {
-      throw new Error('Invalid stategy ' + this.options.strategy);
+      throw new Error(`Invalid stategy ${this.options.strategy}`);
     }
   }
 
@@ -51,7 +51,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     if (!this.strapi) {
       throw new Error('Strapi instance not found');
     }
-    return await deleteAllRecords(this.strapi, this.options.restore);
+    return deleteAllRecords(this.strapi, this.options.restore);
   }
 
   async beforeTransfer() {
