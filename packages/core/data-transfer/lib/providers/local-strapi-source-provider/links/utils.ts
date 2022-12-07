@@ -5,74 +5,6 @@ import type { ILink } from '../../../../types';
 // TODO: Fix any typings when we'll have better Strapi types
 
 /**
- * Domain util to create a link
- * TODO: Move that to the domain layer when we'll update it
- */
-export const linkBuilder = <T extends ILink = ILink>(kind: T['kind'], relation: RelationsType) => {
-  const link: Partial<T> = {};
-
-  link.kind = kind;
-  link.relation = relation;
-
-  return {
-    left(type: string, ref: string | number, field: string, pos?: number) {
-      link.left = { type, ref, field, pos };
-      return this;
-    },
-
-    right(type: string, ref: string | number, field?: string) {
-      link.right = { type, ref, field };
-      return this;
-    },
-
-    get value() {
-      return link.left && link.right ? (link as ILink) : null;
-    },
-  };
-};
-
-/**
- * Parse links contained in a relational attribute
- */
-export const parseRelationLinks = ({ entity, schema, fieldName, value }: any): ILink[] => {
-  const attribute = schema.attributes[fieldName];
-
-  const { relation, target }: { relation: RelationsType; target: string } = attribute;
-
-  // Handle ToMany relations
-  if (Array.isArray(value)) {
-    return (
-      value
-        // Get links from value
-        .map((item) => parseRelationLinks({ entity, schema, fieldName, value: item }))
-        // Flatten the results, to make sure we're dealing with the right data structure
-        .flat()
-        // Update the pos with the relation index in the collection
-        .map((link, i) => set<ILink>('left.pos', i, link))
-    );
-  }
-
-  const isMorphRelation = relation.startsWith('morph');
-  const isCircularRelation = !isMorphRelation && target === schema.uid;
-
-  // eslint-disable-next-line no-nested-ternary
-  const kind: ILink['kind'] = isMorphRelation
-    ? // Polymorphic relations
-      'relation.morph'
-    : isCircularRelation
-    ? // Self referencing relations
-      'relation.circular'
-    : // Regular relations
-      'relation.basic';
-
-  const link = linkBuilder(kind, relation)
-    .left(schema.uid, entity.id, fieldName)
-    .right(target, value.id, attribute.inversedBy).value;
-
-  return link ? [link] : [];
-};
-
-/**
  * Parse every links from an entity result (including nested components and dynamic zone levels)
  */
 export const parseEntityLinks = (entity: any, populate: any, schema: any, strapi: any): any[] => {
@@ -134,6 +66,47 @@ export const parseEntityLinks = (entity: any, populate: any, schema: any, strapi
 };
 
 /**
+ * Parse links contained in a relational attribute
+ */
+export const parseRelationLinks = ({ entity, schema, fieldName, value }: any): ILink[] => {
+  const attribute = schema.attributes[fieldName];
+
+  const { relation, target }: { relation: RelationsType; target: string } = attribute;
+
+  // Handle ToMany relations
+  if (Array.isArray(value)) {
+    return (
+      value
+        // Get links from value
+        .map((item) => parseRelationLinks({ entity, schema, fieldName, value: item }))
+        // Flatten the results, to make sure we're dealing with the right data structure
+        .flat()
+        // Update the pos with the relation index in the collection
+        .map((link, i) => set<ILink>('left.pos', i, link))
+    );
+  }
+
+  const isMorphRelation = relation.startsWith('morph');
+  const isCircularRelation = !isMorphRelation && target === schema.uid;
+
+  // eslint-disable-next-line no-nested-ternary
+  const kind: ILink['kind'] = isMorphRelation
+    ? // Polymorphic relations
+      'relation.morph'
+    : isCircularRelation
+    ? // Self referencing relations
+      'relation.circular'
+    : // Regular relations
+      'relation.basic';
+
+  const link = linkBuilder(kind, relation)
+    .left(schema.uid, entity.id, fieldName)
+    .right(target, value.id, attribute.inversedBy).value;
+
+  return link ? [link] : [];
+};
+
+/**
  * Get a deep populate query for a given schema
  * It will populate first level for relations and media as well as
  * first-level relations for nested components and dynamic zones' components
@@ -187,4 +160,31 @@ export const getDeepPopulateQuery = (schema: any, strapi: any) => {
   }
 
   return populate;
+};
+
+/**
+ * Domain util to create a link
+ * TODO: Move that to the domain layer when we'll update it
+ */
+export const linkBuilder = <T extends ILink = ILink>(kind: T['kind'], relation: RelationsType) => {
+  const link: Partial<T> = {};
+
+  link.kind = kind;
+  link.relation = relation;
+
+  return {
+    left(type: string, ref: string | number, field: string, pos?: number) {
+      link.left = { type, ref, field, pos };
+      return this;
+    },
+
+    right(type: string, ref: string | number, field?: string) {
+      link.right = { type, ref, field };
+      return this;
+    },
+
+    get value() {
+      return link.left && link.right ? (link as ILink) : null;
+    },
+  };
 };
