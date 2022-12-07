@@ -1,9 +1,7 @@
 /**
- * @typedef isSelectable
- *
- * @type {allowedTypes: Array<string>}
- * @type {mime: string}
- * @returns {Boolean}
+ * @param {string[]} allowedTypes
+ * @param {string} mime
+ * @returns {boolean}
  */
 
 export const isSelectable = (allowedTypes, mime = '') => {

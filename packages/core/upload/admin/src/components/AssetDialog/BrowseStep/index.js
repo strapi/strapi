@@ -253,12 +253,7 @@ export const BrowseStep = ({
           onEditFolder={onEditFolder}
           onSelectOne={onSelectAsset}
           onSelectAll={onSelectAllAsset}
-          rows={
-            // TODO: remove when fixed on DS side
-            // when number of rows in Table changes, the keyboard tab from a row to another
-            // is not working for 1st and last column
-            [...folders.map((folder) => ({ ...folder, type: 'folder' })), ...assets]
-          }
+          rows={[...folders.map((folder) => ({ ...folder, type: 'folder' })), ...assets]}
           selected={selectedAssets}
           shouldDisableBulkSelect={!multiple}
           sortQuery={queryObject?.sort ?? ''}
