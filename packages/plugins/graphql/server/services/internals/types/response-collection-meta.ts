@@ -1,8 +1,7 @@
-'use strict';
+import { StrapiCTX } from '../../../types/strapi-ctx';
+import { builder } from '../../builders/pothosBuilder';
 
-const { builder } = require('../../builders/pothosBuilder');
-
-module.exports = ({ strapi }) => {
+export default ({ strapi }: StrapiCTX) => {
   const { RESPONSE_COLLECTION_META_TYPE_NAME, PAGINATION_TYPE_NAME } = strapi
     .plugin('graphql')
     .service('constants');
@@ -11,7 +10,6 @@ module.exports = ({ strapi }) => {
     /**
      * A shared type definition used in EntitiesResponseCollection
      * to have information about the collection as a whole
-     * @type {NexusObjectTypeDef}
      */
     ResponseCollectionMeta: builder.objectType(RESPONSE_COLLECTION_META_TYPE_NAME, {
       fields(t) {

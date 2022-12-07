@@ -135,7 +135,7 @@ const ERROR_CODES = {
   emptyDynamicZone: 'dynamiczone.empty',
 };
 
-module.exports = () => ({
+export default () => ({
   PAGINATION_TYPE_NAME,
   RESPONSE_COLLECTION_META_TYPE_NAME,
   PUBLICATION_STATE_TYPE_NAME,

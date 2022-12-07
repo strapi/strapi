@@ -1,12 +1,12 @@
-'use strict';
+import { StrapiCTX } from '../../../types/strapi-ctx';
 
-const pagination = require('./pagination');
-const buildResponseCollectionMeta = require('./response-collection-meta');
-const publicationState = require('./publication-state');
-const filters = require('./filters');
-const error = require('./error');
+import pagination from './pagination';
+import buildResponseCollectionMeta from './response-collection-meta';
+import publicationState from './publication-state';
+import filters from './filters';
+import error from './error';
 
-module.exports = (context) => () => {
+export default (context: StrapiCTX) => () => {
   const { strapi } = context;
 
   const { KINDS } = strapi.plugin('graphql').service('constants');

@@ -1,9 +1,11 @@
-'use strict';
+import { StrapiCTX } from '../../../types/strapi-ctx';
 
-const { get, difference } = require('lodash/fp');
-const { ApplicationError } = require('@strapi/utils').errors;
+import { get, difference } from 'lodash/fp';
+import Utils from '@strapi/utils';
 
-module.exports = ({ strapi }) => {
+const { ApplicationError } = Utils.errors;
+
+export default ({ strapi }: StrapiCTX) => {
   const { STRAPI_SCALARS, SCALARS_ASSOCIATIONS } = strapi.plugin('graphql').service('constants');
 
   const missingStrapiScalars = difference(STRAPI_SCALARS, Object.keys(SCALARS_ASSOCIATIONS));
@@ -15,10 +17,8 @@ module.exports = ({ strapi }) => {
   return {
     /**
      * Used to transform a Strapi scalar type into its GraphQL equivalent
-     * @param {string} strapiScalar
-     * @return {NexusGenScalars}
      */
-    strapiScalarToGraphQLScalar(strapiScalar) {
+    strapiScalarToGraphQLScalar(strapiScalar: string) {
       return get(strapiScalar, SCALARS_ASSOCIATIONS);
     },
   };

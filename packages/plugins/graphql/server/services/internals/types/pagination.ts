@@ -1,8 +1,7 @@
-'use strict';
+import { StrapiCTX } from '../../../types/strapi-ctx';
+import { builder } from '../../builders/pothosBuilder';
 
-const { builder } = require('../../builders/pothosBuilder');
-
-module.exports = ({ strapi }) => {
+export default ({ strapi }: StrapiCTX) => {
   const { PAGINATION_TYPE_NAME } = strapi.plugin('graphql').service('constants');
 
   return {

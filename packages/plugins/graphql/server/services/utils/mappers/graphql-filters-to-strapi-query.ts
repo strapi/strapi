@@ -1,14 +1,14 @@
-'use strict';
-
-const { has, propEq, isNil, isDate, isObject } = require('lodash/fp');
+import { has, propEq, isNil, isDate, isObject } from 'lodash/fp';
+import { ContentType } from '../../../types/schema';
+import { StrapiCTX } from '../../../types/strapi-ctx';
 
 // todo[v4]: Find a way to get that dynamically
 const virtualScalarAttributes = ['id'];
 
-module.exports = ({ strapi }) => {
+export default ({ strapi }: StrapiCTX) => {
   const { service: getService } = strapi.plugin('graphql');
 
-  const recursivelyReplaceScalarOperators = (data) => {
+  const recursivelyReplaceScalarOperators = (data: any): any => {
     const { operators } = getService('builders').filters;
 
     if (Array.isArray(data)) {
@@ -21,7 +21,7 @@ module.exports = ({ strapi }) => {
       return data;
     }
 
-    const result = {};
+    const result: Record<string, string> = {};
 
     for (const [key, value] of Object.entries(data)) {
       const isOperator = !!operators[key];
@@ -37,11 +37,8 @@ module.exports = ({ strapi }) => {
   return {
     /**
      * Transform one or many GraphQL filters object into a valid Strapi query
-     * @param {object | object[]} filters
-     * @param {object} contentType
-     * @return {object | object[]}
      */
-    graphQLFiltersToStrapiQuery(filters, contentType = {}) {
+    graphQLFiltersToStrapiQuery(filters: any[], contentType: ContentType): any {
       const { isStrapiScalar, isMedia, isRelation, isComponent } = getService('utils').attributes;
       const { operators } = getService('builders').filters;
 
@@ -59,17 +56,17 @@ module.exports = ({ strapi }) => {
         );
       }
 
-      const resultMap = {};
+      const resultMap: Record<string, string> = {};
       const { attributes } = contentType;
 
-      const isAttribute = (attributeName) => {
+      const isAttribute = (attributeName: string) => {
         return virtualScalarAttributes.includes(attributeName) || has(attributeName, attributes);
       };
 
-      for (const [key, value] of Object.entries(filters)) {
+      for (const [key, value] of Object.entries<any>(filters)) {
         // If the key is an attribute, update the value
         if (isAttribute(key)) {
-          const attribute = attributes[key];
+          const attribute = attributes[key] as any;
 
           // If it's a scalar attribute
           if (virtualScalarAttributes.includes(key) || isStrapiScalar(attribute)) {

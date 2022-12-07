@@ -1,16 +1,14 @@
-'use strict';
-
-const { builder } = require('../../builders/pothosBuilder');
+import { StrapiCTX } from '../../../types/strapi-ctx';
+import { builder } from '../../builders/pothosBuilder';
 
 /**
  * Build a map of filters type for every GraphQL scalars
- * @return {Object<string, NexusInputTypeDef>}
  */
-const buildScalarFilters = ({ strapi }) => {
+const buildScalarFilters = ({ strapi }: StrapiCTX) => {
   const { naming, mappers } = strapi.plugin('graphql').service('utils');
   const { helpers } = strapi.plugin('graphql').service('internals');
 
-  return helpers.getEnabledScalars().reduce((acc, type) => {
+  return helpers.getEnabledScalars().reduce((acc: any, type: any) => {
     const operators = mappers.graphqlScalarToOperators(type);
     const typeName = naming.getScalarFilterInputTypeName(type);
 
@@ -23,7 +21,7 @@ const buildScalarFilters = ({ strapi }) => {
 
       [typeName]: builder.inputType(typeName, {
         fields(t) {
-          const fieldsObj = {};
+          const fieldsObj: any = {};
           for (const operator of operators) {
             fieldsObj[operator.fieldName] = operator.add(t, type);
           }
@@ -35,6 +33,6 @@ const buildScalarFilters = ({ strapi }) => {
   }, {});
 };
 
-module.exports = (context) => ({
+export default (context: StrapiCTX) => ({
   scalars: buildScalarFilters(context),
 });

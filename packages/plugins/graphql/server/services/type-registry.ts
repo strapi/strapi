@@ -1,30 +1,21 @@
-'use strict';
+import { isFunction } from 'lodash/fp';
+import Utils from '@strapi/utils';
 
-const { isFunction } = require('lodash/fp');
-const { ApplicationError } = require('@strapi/utils').errors;
+const { ApplicationError } = Utils.errors;
 
-/**
- * @typedef RegisteredTypeDef
- *
- * @property {string} name
- * @property {NexusAcceptedTypeDef} definition
- * @property {object} config
- */
-
+interface RegisteredTypeDef {
+  name: string;
+  definition: any;
+  config: any;
+}
 /**
  * Create a new type registry
  */
 const createTypeRegistry = () => {
-  const registry = new Map();
+  const registry = new Map<string, RegisteredTypeDef>();
 
   return {
-    /**
-     * Register a new type definition
-     * @param {string} name The name of the type
-     * @param {NexusAcceptedTypeDef} definition The Nexus definition for the type
-     * @param {object} [config] An optional config object with any metadata inside
-     */
-    register(name, definition, config = {}) {
+    register(name: string, definition: any, config = {}) {
       if (registry.has(name)) {
         throw new ApplicationError(`"${name}" has already been registered`);
       }
@@ -36,10 +27,8 @@ const createTypeRegistry = () => {
 
     /**
      * Register many types definitions at once
-     * @param {[string, NexusAcceptedTypeDef][]} definitionsEntries
-     * @param {object | function} [config]
      */
-    registerMany(definitionsEntries, config = {}) {
+    registerMany(definitionsEntries: string[], config: any = {}) {
       for (const [name, definition] of definitionsEntries) {
         this.register(name, definition, isFunction(config) ? config(name, definition) : config);
       }
@@ -49,24 +38,20 @@ const createTypeRegistry = () => {
 
     /**
      * Check if the given type name has already been added to the registry
-     * @param {string} name
-     * @return {boolean}
      */
-    has(name) {
+    has(name: string) {
       return registry.has(name);
     },
 
     /**
      * Get the type definition for `name`
-     * @param {string} name - The name of the type
      */
-    get(name) {
+    get(name: string) {
       return registry.get(name);
     },
 
     /**
      * Transform and return the registry as an object
-     * @return {Object<string, RegisteredTypeDef>}
      */
     toObject() {
       return Object.fromEntries(registry.entries());
@@ -74,15 +59,13 @@ const createTypeRegistry = () => {
 
     /**
      * Return the name of every registered type
-     * @return {string[]}
      */
-    get types() {
+    get types(): string[] {
       return Array.from(registry.keys());
     },
 
     /**
      * Return all the registered definitions as an array
-     * @return {RegisteredTypeDef[]}
      */
     get definitions() {
       return Array.from(registry.values());
@@ -90,15 +73,13 @@ const createTypeRegistry = () => {
 
     /**
      * Filter and return the types definitions that matches the given predicate
-     * @param {function(RegisteredTypeDef): boolean} predicate
-     * @return {RegisteredTypeDef[]}
      */
-    where(predicate) {
+    where(predicate: (typeDef: RegisteredTypeDef) => boolean) {
       return this.definitions.filter(predicate);
     },
   };
 };
 
-module.exports = () => ({
+export default () => ({
   new: createTypeRegistry,
 });

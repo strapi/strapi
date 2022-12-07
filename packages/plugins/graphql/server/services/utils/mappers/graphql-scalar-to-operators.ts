@@ -1,14 +1,13 @@
-'use strict';
+import { StrapiCTX } from '../../../types/strapi-ctx';
+import { get, map, mapValues } from 'lodash/fp';
 
-const { get, map, mapValues } = require('lodash/fp');
-
-module.exports = ({ strapi }) => ({
-  graphqlScalarToOperators(graphqlScalar) {
+export default ({ strapi }: StrapiCTX) => ({
+  graphqlScalarToOperators(graphqlScalar: string) {
     const { GRAPHQL_SCALAR_OPERATORS } = strapi.plugin('graphql').service('constants');
     const { operators } = strapi.plugin('graphql').service('builders').filters;
 
     const associations = mapValues(
-      map((operatorName) => operators[operatorName]),
+      map((operatorName) => operators[operatorName as keyof typeof operators]),
       GRAPHQL_SCALAR_OPERATORS
     );
 

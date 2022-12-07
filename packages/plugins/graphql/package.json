@@ -21,6 +21,9 @@
     }
   ],
   "scripts": {
+    "prepack": "tsc",
+    "build": "tsc",
+    "dev": "tsc -w",
     "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:watch": "cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js",

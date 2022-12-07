@@ -1,120 +1,99 @@
-'use strict';
+import { ContentType } from '../../types/schema';
 
-const { camelCase, upperFirst, lowerFirst, pipe, get } = require('lodash/fp');
-const { singular } = require('pluralize');
-const { ApplicationError } = require('@strapi/utils').errors;
+import { camelCase, upperFirst, lowerFirst, pipe, get } from 'lodash/fp';
+import { singular } from 'pluralize';
+import Utils from '@strapi/utils';
+import { StrapiCTX } from '../../types/strapi-ctx';
+import { ComponentAttribute } from '@strapi/strapi';
 
-module.exports = ({ strapi }) => {
+const { ApplicationError } = Utils.errors;
+
+export default ({ strapi }: StrapiCTX) => {
   /**
    * Build a type name for a enum based on a content type & an attribute name
-   * @param {object} contentType
-   * @param {string} attributeName
-   * @return {string}
    */
-  const getEnumName = (contentType, attributeName) => {
-    const { attributes } = contentType;
-    const { enumName } = attributes[attributeName];
-    const { modelType } = contentType;
+  const getEnumName = (contentType: ContentType, attributeName: string): string => {
+    const { attributes, modelType } = contentType;
+    const enumField = attributes[attributeName];
 
     const typeName =
       modelType === 'component' ? getComponentName(contentType) : getTypeName(contentType);
 
     const defaultEnumName = `ENUM_${typeName.toUpperCase()}_${attributeName.toUpperCase()}`;
 
-    return enumName || defaultEnumName;
+    return (enumField as any).enumName || defaultEnumName;
   };
 
   /**
    * Build the base type name for a given content type
-   * @param {object} contentType
-   * @param {object} options
-   * @param {'singular' | 'plural'} options.plurality
-   * @return {string}
    */
-  const getTypeName = (contentType, { plurality = 'singular' } = {}) => {
+  const getTypeName = (
+    contentType: ContentType,
+    options?: { plurality: 'singular' | 'plural' }
+  ) => {
     const plugin = get('plugin', contentType);
     const modelName = get('modelName', contentType);
     const name =
-      plurality === 'singular'
+      options?.plurality === 'singular'
         ? get('info.singularName', contentType)
         : get('info.pluralName', contentType);
 
     const transformedPlugin = upperFirst(camelCase(plugin));
     const transformedModelName = upperFirst(camelCase(name || singular(modelName)));
-
     return `${transformedPlugin}${transformedModelName}`;
   };
 
   /**
    * Build the entity's type name for a given content type
-   * @param {object} contentType
-   * @return {string}
    */
-  const getEntityName = (contentType) => {
+  const getEntityName = (contentType: ContentType) => {
     return `${getTypeName(contentType)}Entity`;
   };
 
   /**
    * Build the entity meta type name for a given content type
-   * @param {object} contentType
-   * @return {string}
    */
-  const getEntityMetaName = (contentType) => {
+  const getEntityMetaName = (contentType: ContentType) => {
     return `${getEntityName(contentType)}Meta`;
   };
 
   /**
    * Build the entity response's type name for a given content type
-   * @param {object} contentType
-   * @return {string}
    */
-  const getEntityResponseName = (contentType) => {
+  const getEntityResponseName = (contentType: ContentType) => {
     return `${getEntityName(contentType)}Response`;
   };
 
   /**
    * Build the entity response collection's type name for a given content type
-   * @param {object} contentType
-   * @return {string}
    */
-  const getEntityResponseCollectionName = (contentType) => {
+  const getEntityResponseCollectionName = (contentType: ContentType) => {
     return `${getEntityName(contentType)}ResponseCollection`;
   };
-
   /**
    * Build the relation response collection's type name for a given content type
-   * @param {object} contentType
-   * @return {string}
    */
-  const getRelationResponseCollectionName = (contentType) => {
+  const getRelationResponseCollectionName = (contentType: ContentType) => {
     return `${getTypeName(contentType)}RelationResponseCollection`;
   };
 
   /**
    * Build a component type name based on its definition
-   * @param {object} contentType
-   * @return {string}
    */
-  const getComponentName = (contentType) => {
+  const getComponentName = (contentType: ContentType) => {
     return contentType.globalId;
   };
-
   /**
    * Build a component type name based on a content type's attribute
-   * @param {object} attribute
-   * @return {string}
    */
-  const getComponentNameFromAttribute = (attribute) => {
-    return strapi.components[attribute.component].globalId;
+  const getComponentNameFromAttribute = (attribute: ComponentAttribute<never>) => {
+    return (strapi as any).components[attribute.component].globalId;
   };
 
   /**
    * Build a dynamic zone type name based on a content type and an attribute name
-   * @param {object} contentType
-   * @param {string} attributeName
-   * @return {string}
    */
-  const getDynamicZoneName = (contentType, attributeName) => {
+  const getDynamicZoneName = (contentType: ContentType, attributeName: string) => {
     const typeName = getTypeName(contentType);
     const dzName = upperFirst(camelCase(attributeName));
     const suffix = 'DynamicZone';
@@ -124,11 +103,8 @@ module.exports = ({ strapi }) => {
 
   /**
    * Build a dynamic zone input type name based on a content type and an attribute name
-   * @param {object} contentType
-   * @param {string} attributeName
-   * @return {string}
    */
-  const getDynamicZoneInputName = (contentType, attributeName) => {
+  const getDynamicZoneInputName = (contentType: ContentType, attributeName: string) => {
     const dzName = getDynamicZoneName(contentType, attributeName);
 
     return `${dzName}Input`;
@@ -136,10 +112,8 @@ module.exports = ({ strapi }) => {
 
   /**
    * Build a component input type name based on a content type and an attribute name
-   * @param {object} contentType
-   * @return {string}
    */
-  const getComponentInputName = (contentType) => {
+  const getComponentInputName = (contentType: ContentType) => {
     const componentName = getComponentName(contentType);
 
     return `${componentName}Input`;
@@ -147,10 +121,8 @@ module.exports = ({ strapi }) => {
 
   /**
    * Build a content type input name based on a content type and an attribute name
-   * @param {object} contentType
-   * @return {string}
    */
-  const getContentTypeInputName = (contentType) => {
+  const getContentTypeInputName = (contentType: ContentType) => {
     const typeName = getTypeName(contentType);
 
     return `${typeName}Input`;
@@ -158,28 +130,21 @@ module.exports = ({ strapi }) => {
 
   /**
    * Build the queries type name for a given content type
-   * @param {object} contentType
-   * @return {string}
    */
-  const getEntityQueriesTypeName = (contentType) => {
+  const getEntityQueriesTypeName = (contentType: ContentType) => {
     return `${getEntityName(contentType)}Queries`;
   };
-
   /**
    * Build the mutations type name for a given content type
-   * @param {object} contentType
-   * @return {string}
    */
-  const getEntityMutationsTypeName = (contentType) => {
+  const getEntityMutationsTypeName = (contentType: ContentType) => {
     return `${getEntityName(contentType)}Mutations`;
   };
 
   /**
    * Build the filters type name for a given content type
-   * @param {object} contentType
-   * @return {string}
    */
-  const getFiltersInputTypeName = (contentType) => {
+  const getFiltersInputTypeName = (contentType: ContentType) => {
     const isComponent = contentType.modelType === 'component';
 
     const baseName = isComponent ? getComponentName(contentType) : getTypeName(contentType);
@@ -189,20 +154,15 @@ module.exports = ({ strapi }) => {
 
   /**
    * Build a filters type name for a given GraphQL scalar type
-   * @param {NexusGenScalars} scalarType
-   * @return {string}
    */
-  const getScalarFilterInputTypeName = (scalarType) => {
+  const getScalarFilterInputTypeName = (scalarType: string) => {
     return `${scalarType}FilterInput`;
   };
 
   /**
    * Build a type name for a given content type & polymorphic attribute
-   * @param {object} contentType
-   * @param {string} attributeName
-   * @return {string}
    */
-  const getMorphRelationTypeName = (contentType, attributeName) => {
+  const getMorphRelationTypeName = (contentType: ContentType, attributeName: string) => {
     const typeName = getTypeName(contentType);
     const formattedAttr = upperFirst(camelCase(attributeName));
 
@@ -211,14 +171,15 @@ module.exports = ({ strapi }) => {
 
   /**
    * Build a custom type name generator with different customization options
-   * @param {object} options
-   * @param {string} [options.prefix]
-   * @param {string} [options.suffix]
-   * @param {'upper' | 'lower'} [options.firstLetterCase]
-   * @param {'plural' | 'singular'} [options.plurality]
-   * @return {function(*=): string}
    */
-  const buildCustomTypeNameGenerator = (options = {}) => {
+  const buildCustomTypeNameGenerator = (
+    options: {
+      prefix?: string;
+      suffix?: string;
+      firstLetterCase?: 'upper' | 'lower';
+      plurality?: 'plural' | 'singular';
+    } = {}
+  ) => {
     // todo[v4]: use singularName & pluralName is available
     const { prefix = '', suffix = '', plurality = 'singular', firstLetterCase = 'upper' } = options;
 
@@ -233,7 +194,7 @@ module.exports = ({ strapi }) => {
       firstLetterCase === 'upper' ? upperFirst : lowerFirst
     );
 
-    return (contentType) => `${prefix}${getCustomTypeName(contentType)}${suffix}`;
+    return (contentType: ContentType) => `${prefix}${getCustomTypeName(contentType)}${suffix}`;
   };
 
   const getFindQueryName = buildCustomTypeNameGenerator({

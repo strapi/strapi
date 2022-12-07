@@ -1,14 +1,14 @@
-'use strict';
+import { get } from 'lodash/fp';
+import Utils from '@strapi/utils';
+import { builder } from '../../builders/pothosBuilder';
+import { StrapiCTX } from '../../../types/strapi-ctx';
 
-const { get } = require('lodash/fp');
-const { ValidationError } = require('@strapi/utils').errors;
-const { builder } = require('../../builders/pothosBuilder');
+const { ValidationError } = Utils.errors;
 
 /**
  * Build an Error object type
- * @return {Object<string, NexusObjectTypeDef>}
  */
-module.exports = ({ strapi }) => {
+export default ({ strapi }: StrapiCTX) => {
   const { ERROR_CODES, ERROR_TYPE_NAME } = strapi.plugin('graphql').service('constants');
 
   return builder.objectType(ERROR_TYPE_NAME, {

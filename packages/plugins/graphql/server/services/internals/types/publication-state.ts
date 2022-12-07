@@ -1,14 +1,12 @@
-'use strict';
+import { StrapiCTX } from '../../../types/strapi-ctx';
+import { builder } from '../../builders/pothosBuilder';
 
-const { builder } = require('../../builders/pothosBuilder');
-
-module.exports = ({ strapi }) => {
+export default ({ strapi }: StrapiCTX) => {
   const { PUBLICATION_STATE_TYPE_NAME } = strapi.plugin('graphql').service('constants');
 
   return {
     /**
      * An enum type definition representing a publication state
-     * @type {NexusEnumTypeDef}
      */
     PublicationState: builder.enumType(PUBLICATION_STATE_TYPE_NAME, {
       values: {

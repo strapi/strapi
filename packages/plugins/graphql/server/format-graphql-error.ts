@@ -1,4 +1,5 @@
 import { toUpper, snakeCase, pick, isEmpty } from 'lodash/fp';
+// @ts-ignore
 import strapiUtils from '@strapi/utils';
 import {
   ApolloError,
