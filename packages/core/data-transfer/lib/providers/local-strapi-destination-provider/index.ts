@@ -99,7 +99,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
     return new Writable({
       objectMode: true,
-      write: async (config: IConfiguration, _encoding, callback) => {
+      write: async (config: IConfiguration<any>, _encoding, callback) => {
         try {
           if (this.options.strategy === 'restore' && this.strapi) {
             await restoreConfigs(this.strapi, config);
