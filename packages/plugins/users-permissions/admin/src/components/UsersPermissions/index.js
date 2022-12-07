@@ -4,21 +4,12 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
 import getTrad from '../../utils/getTrad';
 import Policies from '../Policies';
 import Permissions from '../Permissions';
 import reducer, { initialState } from './reducer';
 import { UsersPermissionsProvider } from '../../contexts/UsersPermissionsContext';
 import init from './init';
-
-const PermissionSection = styled(Stack)`
-  overflow-y: scroll;
-  height: 70vh;
-  &::-webkit-scrollbar {
-    display: none;
-  }
-`;
 
 const UsersPermissions = forwardRef(({ permissions, routes }, ref) => {
   const { formatMessage } = useIntl();
@@ -71,7 +62,7 @@ const UsersPermissions = forwardRef(({ permissions, routes }, ref) => {
     <UsersPermissionsProvider value={providerValue}>
       <Grid gap={0} shadow="filterShadow" hasRadius background="neutral0">
         <GridItem col={7} paddingTop={6} paddingBottom={6} paddingLeft={7} paddingRight={7}>
-          <PermissionSection spacing={6}>
+          <Stack spacing={6}>
             <Stack spacing={2}>
               <Typography variant="delta" as="h2">
                 {formatMessage({
@@ -87,7 +78,7 @@ const UsersPermissions = forwardRef(({ permissions, routes }, ref) => {
               </Typography>
             </Stack>
             <Permissions />
-          </PermissionSection>
+          </Stack>
         </GridItem>
         <Policies />
       </Grid>

@@ -2,9 +2,9 @@ import React from 'react';
 import { useIntl } from 'react-intl';
 import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
-import { GridItem } from '@strapi/design-system/Grid';
 import BoundRoute from '../BoundRoute';
 import { useApiTokenPermissionsContext } from '../../../../../../../contexts/ApiTokenPermissions';
+import { StickyGridItem } from '../StickyAdvancedSettings';
 
 const ActionBoundRoutes = () => {
   const {
@@ -14,14 +14,13 @@ const ActionBoundRoutes = () => {
   const actionSection = selectedAction?.split('.')[0];
 
   return (
-    <GridItem
+    <StickyGridItem
       col={5}
       background="neutral150"
       paddingTop={6}
       paddingBottom={6}
       paddingLeft={7}
       paddingRight={7}
-      style={{ minHeight: '100%' }}
     >
       {selectedAction ? (
         <Stack spacing={2}>
@@ -49,7 +48,7 @@ const ActionBoundRoutes = () => {
           </Typography>
         </Stack>
       )}
-    </GridItem>
+    </StickyGridItem>
   );
 };
 
