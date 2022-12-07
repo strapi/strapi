@@ -18,18 +18,15 @@ import type {
 import { createFilePathFactory, createTarEntryStream } from './utils';
 
 export interface ILocalFileDestinationProviderOptions {
-  // Encryption
   encryption: {
     enabled: boolean;
     key?: string;
   };
 
-  // Compression
   compression: {
     enabled: boolean;
   };
 
-  // File
   file: {
     path: string;
     maxSize?: number;

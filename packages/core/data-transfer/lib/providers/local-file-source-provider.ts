@@ -23,25 +23,18 @@ const METADATA_FILE_PATH = 'metadata.json';
  * Provider options
  */
 export interface ILocalFileSourceProviderOptions {
-  /**
-   * Path to the backup archive
-   */
-  backupFilePath: string;
+  file: {
+    path: string;
+  };
 
-  /**
-   * Whether the backup data is encrypted or not
-   */
-  encrypted?: boolean;
+  encryption: {
+    enabled: boolean;
+    key?: string;
+  };
 
-  /**
-   * Encryption key used to decrypt the encrypted data (if necessary)
-   */
-  encryptionKey?: string;
-
-  /**
-   * Whether the backup data is compressed or not
-   */
-  compressed?: boolean;
+  compression: {
+    enabled: boolean;
+  };
 }
 
 export const createLocalFileSourceProvider = (options: ILocalFileSourceProviderOptions) => {
@@ -58,7 +51,9 @@ class LocalFileSourceProvider implements ISourceProvider {
   constructor(options: ILocalFileSourceProviderOptions) {
     this.options = options;
 
-    if (this.options.encrypted && this.options.encryptionKey === undefined) {
+    const { encryption } = this.options;
+
+    if (encryption.enabled && encryption.key === undefined) {
       throw new Error('Missing encryption key');
     }
   }
@@ -67,7 +62,7 @@ class LocalFileSourceProvider implements ISourceProvider {
    * Pre flight checks regarding the provided options (making sure that the provided path is correct, etc...)
    */
   bootstrap() {
-    const path = this.options.backupFilePath;
+    const { path } = this.options.file;
     const isValidBackupPath = fs.existsSync(path);
 
     // Check if the provided path exists
@@ -113,8 +108,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     const readStream = fs.createReadStream(path);
     const streams: StreamItemArray = [readStream];
 
-    // Handle decompression
-    if (decompress) {
+    if (compression.enabled) {
       streams.push(zip.createGunzip());
     }
 
@@ -146,22 +140,12 @@ class LocalFileSourceProvider implements ISourceProvider {
           },
 
           onentry(entry) {
-            const transforms = [];
-
-            if (options.encrypted) {
-              transforms.push(createDecryptionCipher(options.encryptionKey!));
-            }
-
-            if (options.compressed) {
-              transforms.push(zip.createGunzip());
-            }
-
-            transforms.push(
+            const transforms = [
               // JSONL parser to read the data chunks one by one (line by line)
               parser(),
               // The JSONL parser returns each line as key/value
-              (line: { key: string; value: any }) => line.value
-            );
+              (line: { key: string; value: any }) => line.value,
+            ];
 
             entry
               // Pipe transforms
@@ -220,7 +204,7 @@ class LocalFileSourceProvider implements ISourceProvider {
         () => {
           // If the promise hasn't been resolved and we've parsed all
           // the archive entries, then the file doesn't exist
-          reject(new Error(`${filePath} not found in the archive stream`));
+          reject(new Error(`File "${filePath}" not found`));
         }
       );
     });
