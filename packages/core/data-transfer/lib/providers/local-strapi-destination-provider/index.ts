@@ -1,8 +1,8 @@
 import chalk from 'chalk';
 import { Writable } from 'stream';
 
-import type { IDestinationProvider, IMetadata, ProviderType } from '../../../types';
-import { deleteAllRecords, DeleteOptions } from './restore';
+import type { IConfiguration, IDestinationProvider, IMetadata, ProviderType } from '../../../types';
+import { deleteAllRecords, DeleteOptions, restoreConfigs } from './restore';
 import { mapSchemasValues } from '../../utils';
 
 export const VALID_STRATEGIES = ['restore', 'merge'];

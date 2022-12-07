@@ -9,7 +9,6 @@ import { pipeline, PassThrough } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
 import type { IMetadata, ISourceProvider, ProviderType } from '../../types';
 
-import { createDecryptionCipher } from '../encryption';
 import { collect } from '../utils';
 
 type StreamItemArray = Parameters<typeof chain>[0];
@@ -104,11 +103,11 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   #getBackupStream(decompress = true) {
-    const path = this.options.backupFilePath;
+    const path = this.options.file.path;
     const readStream = fs.createReadStream(path);
     const streams: StreamItemArray = [readStream];
 
-    if (compression.enabled) {
+    if (this.options.compression.enabled) {
       streams.push(zip.createGunzip());
     }
 
@@ -116,7 +115,6 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   #streamJsonlDirectory(directory: string) {
-    const options = this.options;
     const inStream = this.#getBackupStream();
 
     const outStream = new PassThrough({ objectMode: true });
