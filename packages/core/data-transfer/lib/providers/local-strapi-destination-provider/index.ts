@@ -2,8 +2,7 @@
 import type { IDestinationProvider, IMetadata, ProviderType } from '../../../types';
 import { deleteAllRecords, DeleteOptions } from './restore';
 
-import chalk from 'chalk';
-import { Duplex, Writable } from 'stream';
+import { Writable } from 'stream';
 import path from 'path';
 import * as fse from 'fs-extra';
 
@@ -102,55 +101,19 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     if (!this.strapi) {
       throw new Error('Not able to stream Assets. Strapi instance not found');
     }
+
     const assetsDirectory = path.join(this.strapi.dirs.static.public, 'uploads');
+
     return new Writable({
       objectMode: true,
-      write(chunk, _encoding, callback) {
+      async write(chunk, _encoding, callback) {
         const entryPath = path.join(assetsDirectory, chunk.file);
         const writableStream = fse.createWriteStream(entryPath);
+
         chunk.stream
           .pipe(writableStream)
           .on('close', () => callback())
           .on('error', callback);
-      },
-    });
-  }
-
-  getEntitiesStream(): Duplex {
-    const self = this;
-
-    return new Duplex({
-      objectMode: true,
-      async write(entity, _encoding, callback) {
-        if (!self.strapi) {
-          callback(new Error('Strapi instance not found'));
-        }
-
-        const { type: uid, id, data } = entity;
-
-        try {
-          await strapi.entityService.create(uid, { data });
-        } catch (e: any) {
-          // TODO: remove "any" cast
-          log.warn(
-            chalk.bold(`Failed to import ${chalk.yellowBright(uid)} (${chalk.greenBright(id)})`)
-          );
-          e.details.errors
-            .map((err: any, i: number) => {
-              // TODO: add correct error type
-              const info = {
-                uid: chalk.yellowBright(`[${uid}]`),
-                path: chalk.blueBright(`[${err.path.join('.')}]`),
-                id: chalk.greenBright(`[${id}]`),
-                message: err.message,
-              };
-
-              return `(${i}) ${info.uid}${info.id}${info.path}: ${info.message}`;
-            })
-            .forEach((message: string) => log.warn(message));
-        } finally {
-          callback();
-        }
       },
     });
   }
