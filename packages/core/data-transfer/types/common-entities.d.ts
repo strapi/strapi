@@ -125,9 +125,26 @@ interface ICircularLink extends IDefaultLink {
 /**
  * Strapi configurations
  */
-interface IConfiguration<T = unknown> {
+interface IConfiguration {
   type: 'core-store' | 'webhook';
-  value: T;
+  value: IWebhook | ICorestore;
+}
+
+interface IWebhook {
+  id: string | number;
+  name: string;
+  events: string[];
+  enabled: boolean;
+  headers: any;
+}
+
+interface ICorestore {
+  id: string | number;
+  key: string;
+  type: string;
+  value: any;
+  environment: any;
+  tag: any;
 }
 export interface IAsset {
   filename: string;

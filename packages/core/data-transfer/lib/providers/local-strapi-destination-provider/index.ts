@@ -97,15 +97,16 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async getConfigurationStream(): Promise<Writable> {
+    if (!this.strapi) {
+      throw new Error('Not able to stream Configurations. Strapi instance not found');
+    }
+    const strapi = this.strapi;
     return new Writable({
       objectMode: true,
-      write: async (config: IConfiguration<any>, _encoding, callback) => {
-        if (!this.strapi) {
-          throw new Error('Not able to stream Configurations. Strapi instance not found');
-        }
+      write: async (config: IConfiguration, _encoding, callback) => {
         try {
           if (this.options.strategy === 'restore') {
-            await restoreConfigs(this.strapi, config);
+            await restoreConfigs(strapi, config);
           }
           callback();
         } catch (error) {
