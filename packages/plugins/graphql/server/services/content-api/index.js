@@ -51,13 +51,7 @@ module.exports = ({ strapi }) => {
     }
 
     // Build a merged schema from both Nexus types & SDL type definitions
-    const schema = buildMergedSchema({ registry });
-
-    // Generate the extension configuration for the content API.
-    // This extension instance needs to be generated after the Nexus schema's
-    // generation, so that configurations created during types definitions
-    // can be registered before being used in the wrap resolvers operation
-    const extension = extensionService.generate({ typeRegistry: registry });
+    const [schema, extension] = buildMergedSchema({ registry });
 
     // Add the extension's resolvers to the final schema
     const schemaWithResolvers = addResolversToSchema(schema, extension.resolvers);
@@ -83,18 +77,21 @@ module.exports = ({ strapi }) => {
   const buildMergedSchema = ({ registry }) => {
     // Here we extract types, plugins & typeDefs from a temporary generated
     // extension since there won't be any addition allowed after schemas generation
-    const { typeDefs = [] } = extensionService.generate({ typeRegistry: registry });
+    const extension = extensionService.generate({ typeRegistry: registry });
 
     // Nexus schema built with user-defined & shadow CRUD auto generated Nexus types
-    const nexusSchema = builder.toSchema();
+    const schema = builder.toSchema();
 
     // Merge type definitions with the Nexus schema
-    return mergeSchemas({
-      typeDefs,
-      // Give access to the shadowCRUD & nexus based types
-      // Note: This is necessary so that types defined in SDL can reference types defined with Nexus
-      schemas: [nexusSchema],
-    });
+    return [
+      mergeSchemas({
+        typeDefs: extension.typeDefs || [],
+        // Give access to the shadowCRUD & nexus based types
+        // Note: This is necessary so that types defined in SDL can reference types defined with Nexus
+        schemas: [schema],
+      }),
+      extension,
+    ];
   };
 
   const shadowCRUD = () => {
