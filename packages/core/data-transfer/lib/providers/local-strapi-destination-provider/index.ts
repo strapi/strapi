@@ -1,6 +1,10 @@
 // import { createLogger } from '@strapi/logger';
-import type { IDestinationProvider, IMetadata, ProviderType } from '../../../types';
-import { deleteAllRecords, DeleteOptions } from './restore';
+import type { IDestinationProvider, IMetadata, ProviderType, IConfiguration } from '../../../types';
+import { deleteAllRecords, DeleteOptions, restoreConfigs } from './restore';
+
+import chalk from 'chalk';
+import { Writable } from 'stream';
+
 import { mapSchemasValues } from '../../utils';
 
 export const VALID_STRATEGIES = ['restore', 'merge'];
@@ -86,5 +90,31 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     };
 
     return mapSchemasValues(schemas);
+  }
+
+  async getConfigurationStream(): Promise<Writable> {
+    if (!this.strapi) {
+      throw new Error('Not able to stream Configurations. Strapi instance not found');
+    }
+
+    return new Writable({
+      objectMode: true,
+      write: async (config: IConfiguration<any>, _encoding, callback) => {
+        try {
+          if (this.options.strategy === 'restore' && this.strapi) {
+            await restoreConfigs(this.strapi, config);
+          }
+          callback();
+        } catch (error) {
+          callback(
+            new Error(
+              `Failed to import ${chalk.yellowBright(config.type)} (${chalk.greenBright(
+                config.value.id
+              )}`
+            )
+          );
+        }
+      },
+    });
   }
 }
