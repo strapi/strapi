@@ -29,6 +29,7 @@ const reducers = {
     contentTypeDataStructure: {},
     isLoading: true,
     data: null,
+    setModifiedDataOnly: false,
     status: 'resolved',
   })),
   rbacProvider: jest.fn(() => ({ allPermissions: null, collectionTypesRelatedPermissions: {} })),

@@ -18,6 +18,7 @@ describe('CONTENT MANAGER | sharedReducers | crudReducer', () => {
       contentTypeDataStructure: {},
       isLoading: true,
       data: {},
+      setModifiedDataOnly: false,
       status: 'resolved',
     };
   });
