@@ -564,6 +564,26 @@ describe('RelationInputDataManager', () => {
       expect(queryByText(/\(8\)/)).toBeInTheDocument();
     });
 
+    it.only('should not crash, if the field is not set in modifiedData (e.g. in components)', () => {
+      useCMEditViewDataManager.mockImplementation(() => ({
+        isCreatingEntry: false,
+        createActionAllowedFields: ['relation'],
+        readActionAllowedFields: ['relation'],
+        updateActionAllowedFields: ['relation'],
+        slug: 'test',
+        initialData: {
+          relation: [
+            {
+              id: 1,
+            },
+          ],
+        },
+        modifiedData: {},
+      }));
+
+      expect(setup).not.toThrow();
+    });
+
     it('should correct calculate browser mutations when there are relations from useRelation', async () => {
       useRelation.mockImplementation(() => ({
         relations: {
