@@ -4,7 +4,7 @@ const userUID = 'plugin::users-permissions.user';
 const roleUID = 'plugin::users-permissions.role';
 
 module.exports = (context) => {
-  const { nexus, strapi } = context;
+  const { builder, strapi } = context;
 
   const { naming } = strapi.plugin('graphql').service('utils');
 
@@ -29,15 +29,15 @@ module.exports = (context) => {
     emailConfirmation: require('./auth/email-confirmation'),
   };
 
-  return nexus.extendType({
-    type: 'Mutation',
+  return builder.mutationFields((t) => {
+    const fieldsObj = {};
 
-    definition(t) {
-      for (const [name, getConfig] of Object.entries(mutations)) {
-        const config = getConfig(context);
+    for (const [name, getConfig] of Object.entries(mutations)) {
+      const config = getConfig({ ...context, t });
 
-        t.field(name, config);
-      }
-    },
+      fieldsObj[name] = t.field(config);
+    }
+
+    return fieldsObj;
   });
 };

@@ -1,6 +1,6 @@
 'use strict';
 
-const { extendType } = require('nexus');
+const { builder } = require('../pothosBuilder');
 
 module.exports = ({ strapi }) => {
   const { service: getService } = strapi.plugin('graphql');
@@ -41,18 +41,18 @@ module.exports = ({ strapi }) => {
       registerAuthConfig(findQueryName, { scope: [`${contentType.uid}.find`] });
     }
 
-    return extendType({
-      type: 'Query',
+    return builder.queryFields((t) => {
+      const fieldsObj = {};
 
-      definition(t) {
-        if (isFindOneEnabled) {
-          addFindOneQuery(t, contentType);
-        }
+      if (isFindOneEnabled) {
+        fieldsObj[getFindOneQueryName(contentType)] = addFindOneQuery(t, contentType);
+      }
 
-        if (isFindEnabled) {
-          addFindQuery(t, contentType);
-        }
-      },
+      if (isFindEnabled) {
+        fieldsObj[getFindQueryName(contentType)] = addFindQuery(t, contentType);
+      }
+
+      return fieldsObj;
     });
   };
 
@@ -64,13 +64,12 @@ module.exports = ({ strapi }) => {
   const addFindOneQuery = (t, contentType) => {
     const { uid } = contentType;
 
-    const findOneQueryName = getFindOneQueryName(contentType);
     const responseTypeName = getEntityResponseName(contentType);
 
-    t.field(findOneQueryName, {
+    return t.field({
       type: responseTypeName,
 
-      args: getContentTypeArgs(contentType, { multiple: false }),
+      args: getContentTypeArgs(contentType, t, { multiple: false }),
 
       async resolve(parent, args) {
         const transformedArgs = transformArgs(args, { contentType });
@@ -94,13 +93,12 @@ module.exports = ({ strapi }) => {
   const addFindQuery = (t, contentType) => {
     const { uid } = contentType;
 
-    const findQueryName = getFindQueryName(contentType);
     const responseCollectionTypeName = getEntityResponseCollectionName(contentType);
 
-    t.field(findQueryName, {
+    return t.field({
       type: responseCollectionTypeName,
 
-      args: getContentTypeArgs(contentType),
+      args: getContentTypeArgs(contentType, t),
 
       async resolve(parent, args) {
         const transformedArgs = transformArgs(args, { contentType, usePagination: true });

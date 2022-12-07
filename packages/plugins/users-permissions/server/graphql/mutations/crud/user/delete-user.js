@@ -4,8 +4,7 @@ const { checkBadRequest } = require('../../../utils');
 
 const usersPermissionsUserUID = 'plugin::users-permissions.user';
 
-module.exports = ({ nexus, strapi }) => {
-  const { nonNull } = nexus;
+module.exports = ({ t, strapi }) => {
   const { getEntityResponseName } = strapi.plugin('graphql').service('utils').naming;
 
   const userContentType = strapi.getModel(usersPermissionsUserUID);
@@ -13,10 +12,11 @@ module.exports = ({ nexus, strapi }) => {
   const responseName = getEntityResponseName(userContentType);
 
   return {
-    type: nonNull(responseName),
+    type: responseName,
+    nullable: false,
 
     args: {
-      id: nonNull('ID'),
+      id: t.arg({ type: 'ID', nullable: false }),
     },
 
     description: 'Delete an existing user',

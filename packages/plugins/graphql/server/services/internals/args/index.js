@@ -5,7 +5,7 @@ const publicationState = require('./publication-state');
 const PaginationArg = require('./pagination');
 
 module.exports = (context) => ({
-  SortArg,
-  PaginationArg,
-  PublicationStateArg: publicationState(context),
+  SortArg: (t) => SortArg(t),
+  PaginationArg: (t) => PaginationArg(t),
+  PublicationStateArg: (t) => publicationState(context, t),
 });

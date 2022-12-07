@@ -4,14 +4,12 @@ const { toPlainObject } = require('lodash/fp');
 
 const { checkBadRequest } = require('../../utils');
 
-module.exports = ({ nexus, strapi }) => {
-  const { nonNull } = nexus;
-
+module.exports = ({ t, strapi }) => {
   return {
     type: 'UsersPermissionsLoginPayload',
 
     args: {
-      confirmation: nonNull('String'),
+      confirmation: t.arg({ type: 'String', nullable: false }),
     },
 
     description: 'Confirm an email users email address',

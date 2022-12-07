@@ -1,11 +1,11 @@
 'use strict';
 
-module.exports = ({ nexus }) => {
-  return nexus.objectType({
-    name: 'UsersPermissionsDeleteRolePayload',
-
-    definition(t) {
-      t.nonNull.boolean('ok');
+module.exports = ({ builder }) => {
+  return builder.objectType('UsersPermissionsDeleteRolePayload', {
+    fields(t) {
+      return {
+        ok: t.boolean({ nullable: false }),
+      };
     },
   });
 };

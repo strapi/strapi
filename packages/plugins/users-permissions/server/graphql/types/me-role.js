@@ -1,14 +1,14 @@
 'use strict';
 
-module.exports = ({ nexus }) => {
-  return nexus.objectType({
-    name: 'UsersPermissionsMeRole',
-
-    definition(t) {
-      t.nonNull.id('id');
-      t.nonNull.string('name');
-      t.string('description');
-      t.string('type');
+module.exports = ({ builder }) => {
+  return builder.objectType('UsersPermissionsMeRole', {
+    fields(t) {
+      return {
+        id: t.id({ nullable: false }),
+        name: t.string({ nullable: false }),
+        description: t.string(),
+        type: t.string(),
+      };
     },
   });
 };

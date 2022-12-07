@@ -1,6 +1,6 @@
 'use strict';
 
-const { unionType } = require('nexus');
+const { builder } = require('../../builders/pothosBuilder');
 
 const registerPolymorphicContentType = (contentType, { registry, strapi }) => {
   const { service: getService } = strapi.plugin('graphql');
@@ -9,7 +9,7 @@ const registerPolymorphicContentType = (contentType, { registry, strapi }) => {
     naming,
     attributes: { isMorphRelation },
   } = getService('utils');
-  const { KINDS } = getService('constants');
+  const { KINDS, ERROR_TYPE_NAME } = getService('constants');
 
   const { attributes = {} } = contentType;
 
@@ -38,10 +38,8 @@ const registerPolymorphicContentType = (contentType, { registry, strapi }) => {
     // Register the new polymorphic union type
     registry.register(
       name,
-
-      unionType({
-        name,
-
+      builder.unionType(name, {
+        types: [...members, ERROR_TYPE_NAME],
         resolveType(obj) {
           const contentType = strapi.getModel(obj.__type);
 
@@ -54,10 +52,6 @@ const registerPolymorphicContentType = (contentType, { registry, strapi }) => {
           }
 
           return naming.getTypeName(contentType);
-        },
-
-        definition(t) {
-          t.members(...members);
         },
       }),
 

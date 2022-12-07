@@ -2,12 +2,6 @@
 
 const me = require('./me');
 
-module.exports = ({ nexus }) => {
-  return nexus.extendType({
-    type: 'Query',
-
-    definition(t) {
-      t.field('me', me({ nexus }));
-    },
-  });
+module.exports = ({ builder }) => {
+  return builder.queryField('me', (t) => t.field(me({ builder })));
 };

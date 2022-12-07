@@ -1,8 +1,8 @@
 'use strict';
 
-const { objectType } = require('nexus');
 const { get } = require('lodash/fp');
 const { ValidationError } = require('@strapi/utils').errors;
+const { builder } = require('../../builders/pothosBuilder');
 
 /**
  * Build an Error object type
@@ -11,24 +11,24 @@ const { ValidationError } = require('@strapi/utils').errors;
 module.exports = ({ strapi }) => {
   const { ERROR_CODES, ERROR_TYPE_NAME } = strapi.plugin('graphql').service('constants');
 
-  return objectType({
-    name: ERROR_TYPE_NAME,
+  return builder.objectType(ERROR_TYPE_NAME, {
+    fields(t) {
+      return {
+        code: t.string({
+          resolve(parent) {
+            const code = get('code', parent);
 
-    definition(t) {
-      t.nonNull.string('code', {
-        resolve(parent) {
-          const code = get('code', parent);
+            const isValidPlaceholderCode = Object.values(ERROR_CODES).includes(code);
+            if (!isValidPlaceholderCode) {
+              throw new ValidationError(`"${code}" is not a valid code value`);
+            }
 
-          const isValidPlaceholderCode = Object.values(ERROR_CODES).includes(code);
-          if (!isValidPlaceholderCode) {
-            throw new ValidationError(`"${code}" is not a valid code value`);
-          }
-
-          return code;
-        },
-      });
-
-      t.string('message');
+            return code;
+          },
+          nullable: false,
+        }),
+        message: t.string(),
+      };
     },
   });
 };

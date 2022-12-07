@@ -1,8 +1,8 @@
 'use strict';
 
-const { enumType } = require('nexus');
 const { set } = require('lodash/fp');
 const { toRegressedEnumValue } = require('@strapi/utils');
+const { builder } = require('./pothosBuilder');
 
 /**
  * Build a Nexus enum type from a Strapi enum attribute
@@ -12,9 +12,8 @@ const { toRegressedEnumValue } = require('@strapi/utils');
  * @return {NexusEnumTypeDef}
  */
 const buildEnumTypeDefinition = (definition, name) => {
-  return enumType({
-    name,
-    members: definition.enum.reduce(
+  return builder.enumType(name, {
+    values: definition.enum.reduce(
       (acc, value) => set(toRegressedEnumValue(value), value, acc),
       {}
     ),

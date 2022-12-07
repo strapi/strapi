@@ -1,7 +1,5 @@
 'use strict';
 
-const { list } = require('nexus');
-
 const OR_FIELD_NAME = 'or';
 
 module.exports = () => ({
@@ -10,6 +8,6 @@ module.exports = () => ({
   strapiOperator: '$or',
 
   add(t, type) {
-    t.field(OR_FIELD_NAME, { type: list(type) });
+    return t.field({ type: [type] });
   },
 });

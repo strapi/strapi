@@ -1,13 +1,13 @@
 'use strict';
 
-module.exports = ({ nexus }) => {
-  return nexus.inputObjectType({
-    name: 'UsersPermissionsRegisterInput',
-
-    definition(t) {
-      t.nonNull.string('username');
-      t.nonNull.string('email');
-      t.nonNull.string('password');
+module.exports = ({ builder }) => {
+  return builder.inputType('UsersPermissionsRegisterInput', {
+    fields(t) {
+      return {
+        username: t.string(),
+        email: t.string(),
+        password: t.string(),
+      };
     },
   });
 };

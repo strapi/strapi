@@ -1,7 +1,7 @@
 'use strict';
 
-const { extendType, nonNull } = require('nexus');
 const { sanitize } = require('@strapi/utils');
+const { builder } = require('../pothosBuilder');
 
 module.exports = ({ strapi }) => {
   const { service: getService } = strapi.plugin('graphql');
@@ -21,15 +21,14 @@ module.exports = ({ strapi }) => {
   const addCreateMutation = (t, contentType) => {
     const { uid } = contentType;
 
-    const createMutationName = getCreateMutationTypeName(contentType);
     const responseTypeName = getEntityResponseName(contentType);
 
-    t.field(createMutationName, {
+    return t.field({
       type: responseTypeName,
 
       args: {
         // Create payload
-        data: nonNull(getContentTypeInputName(contentType)),
+        data: t.arg({ type: getContentTypeInputName(contentType), nullable: false }),
       },
 
       async resolve(parent, args, context) {
@@ -59,24 +58,23 @@ module.exports = ({ strapi }) => {
   const addUpdateMutation = (t, contentType) => {
     const { uid } = contentType;
 
-    const updateMutationName = getUpdateMutationTypeName(contentType);
     const responseTypeName = getEntityResponseName(contentType);
 
     // todo[v4]: Don't allow to filter using every unique attributes for now
     // Only authorize filtering using unique scalar fields for updateOne queries
     // const uniqueAttributes = getUniqueAttributesFiltersMap(attributes);
 
-    t.field(updateMutationName, {
+    return t.field({
       type: responseTypeName,
 
       args: {
         // Query args
-        id: nonNull('ID'),
+        id: t.arg({ type: 'ID', requires: true }),
         // todo[v4]: Don't allow to filter using every unique attributes for now
         // ...uniqueAttributes,
 
         // Update payload
-        data: nonNull(getContentTypeInputName(contentType)),
+        data: t.arg({ type: getContentTypeInputName(contentType), nullable: false }),
       },
 
       async resolve(parent, args, context) {
@@ -106,19 +104,18 @@ module.exports = ({ strapi }) => {
   const addDeleteMutation = (t, contentType) => {
     const { uid } = contentType;
 
-    const deleteMutationName = getDeleteMutationTypeName(contentType);
     const responseTypeName = getEntityResponseName(contentType);
 
     // todo[v4]: Don't allow to filter using every unique attributes for now
     // Only authorize filtering using unique scalar fields for updateOne queries
     // const uniqueAttributes = getUniqueAttributesFiltersMap(attributes);
 
-    t.field(deleteMutationName, {
+    return t.field({
       type: responseTypeName,
 
       args: {
         // Query args
-        id: nonNull('ID'),
+        id: t.arg({ type: 'ID', required: false }),
         // todo[v4]: Don't allow to filter using every unique attributes for now
         // ...uniqueAttributes,
       },
@@ -169,22 +166,22 @@ module.exports = ({ strapi }) => {
         registerAuthConfig(deleteMutationName, { scope: [`${contentType.uid}.delete`] });
       }
 
-      return extendType({
-        type: 'Mutation',
+      return builder.mutationFields((t) => {
+        const fieldsObj = {};
 
-        definition(t) {
-          if (isCreateEnabled) {
-            addCreateMutation(t, contentType);
-          }
+        if (isCreateEnabled) {
+          fieldsObj[getCreateMutationTypeName(contentType)] = addCreateMutation(t, contentType);
+        }
 
-          if (isUpdateEnabled) {
-            addUpdateMutation(t, contentType);
-          }
+        if (isUpdateEnabled) {
+          fieldsObj[getUpdateMutationTypeName(contentType)] = addUpdateMutation(t, contentType);
+        }
 
-          if (isDeleteEnabled) {
-            addDeleteMutation(t, contentType);
-          }
-        },
+        if (isDeleteEnabled) {
+          fieldsObj[getDeleteMutationTypeName(contentType)] = addDeleteMutation(t, contentType);
+        }
+
+        return fieldsObj;
       });
     },
   };

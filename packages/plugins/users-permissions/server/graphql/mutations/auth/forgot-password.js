@@ -4,14 +4,12 @@ const { toPlainObject } = require('lodash/fp');
 
 const { checkBadRequest } = require('../../utils');
 
-module.exports = ({ nexus, strapi }) => {
-  const { nonNull } = nexus;
-
+module.exports = ({ t, strapi }) => {
   return {
     type: 'UsersPermissionsPasswordPayload',
 
     args: {
-      email: nonNull('String'),
+      email: t.arg({ type: 'String' }),
     },
 
     description: 'Request a reset password token',

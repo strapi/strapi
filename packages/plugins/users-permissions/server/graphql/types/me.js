@@ -1,16 +1,16 @@
 'use strict';
 
-module.exports = ({ nexus }) => {
-  return nexus.objectType({
-    name: 'UsersPermissionsMe',
-
-    definition(t) {
-      t.nonNull.id('id');
-      t.nonNull.string('username');
-      t.string('email');
-      t.boolean('confirmed');
-      t.boolean('blocked');
-      t.field('role', { type: 'UsersPermissionsMeRole' });
+module.exports = ({ builder }) => {
+  return builder.objectType('UsersPermissionsMe', {
+    fields(t) {
+      return {
+        id: t.id({ nullable: false }),
+        username: t.string({ nullable: false }),
+        email: t.string(),
+        confirmed: t.boolean(),
+        blocked: t.boolean(),
+        role: t.field({ type: 'UsersPermissionsMeRole' }),
+      };
     },
   });
 };

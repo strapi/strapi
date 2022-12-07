@@ -72,165 +72,162 @@ module.exports = ({ strapi }) => {
   /**
    * Register Upload's types, queries & mutations to the content API using the GraphQL extension API
    */
-  getGraphQLService('extension').use(({ nexus }) => {
-    const { inputObjectType, extendType, nonNull, list } = nexus;
-
+  getGraphQLService('extension').use(({ builder }) => {
     // Represents the input data payload for the file's information
-    const fileInfoInputType = inputObjectType({
-      name: FILE_INFO_INPUT_TYPE_NAME,
-
-      definition(t) {
-        t.string('name');
-        t.string('alternativeText');
-        t.string('caption');
+    const fileInfoInputType = builder.inputType(FILE_INFO_INPUT_TYPE_NAME, {
+      fields(t) {
+        return {
+          name: t.string(),
+          alternativeText: t.string(),
+          caption: t.string(),
+        };
       },
     });
 
-    const mutations = extendType({
-      type: 'Mutation',
+    const mutations = builder.mutationFields((t) => ({
+      /**
+       * Upload a single file
+       */
+      [UPLOAD_MUTATION_NAME]: t.field({
+        type: fileEntityResponseType,
+        nullable: false,
 
-      definition(t) {
-        /**
-         * Upload a single file
-         */
-        t.field(UPLOAD_MUTATION_NAME, {
-          type: nonNull(fileEntityResponseType),
+        args: {
+          refId: t.arg({ type: 'ID' }),
+          ref: t.arg({ type: 'String' }),
+          field: t.arg({ type: 'String' }),
+          info: t.arg({ type: FILE_INFO_INPUT_TYPE_NAME }),
+          file: t.arg({ type: 'Upload', required: false }),
+        },
 
-          args: {
-            refId: 'ID',
-            ref: 'String',
-            field: 'String',
-            info: FILE_INFO_INPUT_TYPE_NAME,
-            file: nonNull('Upload'),
-          },
+        async resolve(parent, args) {
+          // create temporary folder to store files for stream manipulation
+          const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
+          let sanitizedEntity;
 
-          async resolve(parent, args) {
-            // create temporary folder to store files for stream manipulation
-            const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
-            let sanitizedEntity;
+          try {
+            const { file: upload, info = {}, ...metas } = args;
 
-            try {
-              const { file: upload, info = {}, ...metas } = args;
+            const apiUploadFolderService = getUploadService('api-upload-folder');
 
-              const apiUploadFolderService = getUploadService('api-upload-folder');
+            const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
+            info.folder = apiUploadFolder.id;
 
-              const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
-              info.folder = apiUploadFolder.id;
+            const file = await formatFile(upload, info, { ...metas, tmpWorkingDirectory });
+            const uploadedFile = await getUploadService('upload').uploadFileAndPersist(file, {});
+            sanitizedEntity = await toEntityResponse(uploadedFile, {
+              args,
+              resourceUID: fileTypeName,
+            });
+          } finally {
+            // delete temporary folder
+            await fse.remove(tmpWorkingDirectory);
+          }
 
-              const file = await formatFile(upload, info, { ...metas, tmpWorkingDirectory });
-              const uploadedFile = await getUploadService('upload').uploadFileAndPersist(file, {});
-              sanitizedEntity = await toEntityResponse(uploadedFile, {
-                args,
-                resourceUID: fileTypeName,
-              });
-            } finally {
-              // delete temporary folder
-              await fse.remove(tmpWorkingDirectory);
-            }
+          return sanitizedEntity;
+        },
+      }),
 
-            return sanitizedEntity;
-          },
-        });
+      /**
+       * Upload multiple files
+       */
+      [MULTIPLE_UPLOAD_MUTATION_NAME]: t.field({
+        type: [fileEntityResponseType],
+        nullable: false,
 
-        /**
-         * Upload multiple files
-         */
-        t.field(MULTIPLE_UPLOAD_MUTATION_NAME, {
-          type: nonNull(list(fileEntityResponseType)),
+        args: {
+          refId: t.arg({ type: 'ID' }),
+          ref: t.arg({ type: 'String' }),
+          field: t.arg({ type: 'String' }),
+          files: t.arg({ type: 'Upload', required: false }),
+        },
 
-          args: {
-            refId: 'ID',
-            ref: 'String',
-            field: 'String',
-            files: nonNull(list('Upload')),
-          },
+        async resolve(parent, args) {
+          // create temporary folder to store files for stream manipulation
+          const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
+          let sanitizedEntities = [];
 
-          async resolve(parent, args) {
-            // create temporary folder to store files for stream manipulation
-            const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
-            let sanitizedEntities = [];
+          try {
+            const { files: uploads, ...metas } = args;
 
-            try {
-              const { files: uploads, ...metas } = args;
+            const apiUploadFolderService = getUploadService('api-upload-folder');
 
-              const apiUploadFolderService = getUploadService('api-upload-folder');
+            const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
 
-              const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
-
-              const files = await Promise.all(
-                uploads.map((upload) =>
-                  formatFile(
-                    upload,
-                    { folder: apiUploadFolder.id },
-                    { ...metas, tmpWorkingDirectory }
-                  )
+            const files = await Promise.all(
+              uploads.map((upload) =>
+                formatFile(
+                  upload,
+                  { folder: apiUploadFolder.id },
+                  { ...metas, tmpWorkingDirectory }
                 )
-              );
+              )
+            );
 
-              const uploadService = getUploadService('upload');
+            const uploadService = getUploadService('upload');
 
-              const uploadedFiles = await Promise.all(
-                files.map((file) => uploadService.uploadFileAndPersist(file, {}))
-              );
+            const uploadedFiles = await Promise.all(
+              files.map((file) => uploadService.uploadFileAndPersist(file, {}))
+            );
 
-              sanitizedEntities = uploadedFiles.map((file) =>
-                toEntityResponse(file, { args, resourceUID: fileTypeName })
-              );
-            } finally {
-              // delete temporary folder
-              await fse.remove(tmpWorkingDirectory);
-            }
+            sanitizedEntities = uploadedFiles.map((file) =>
+              toEntityResponse(file, { args, resourceUID: fileTypeName })
+            );
+          } finally {
+            // delete temporary folder
+            await fse.remove(tmpWorkingDirectory);
+          }
 
-            return sanitizedEntities;
-          },
-        });
+          return sanitizedEntities;
+        },
+      }),
 
-        /**
-         * Update some information for a given file
-         */
-        t.field(UPDATE_FILE_INFO_MUTATION_NAME, {
-          type: nonNull(fileEntityResponseType),
+      /**
+       * Update some information for a given file
+       */
+      [UPDATE_FILE_INFO_MUTATION_NAME]: t.field({
+        type: fileEntityResponseType,
+        nullable: false,
 
-          args: {
-            id: nonNull('ID'),
-            info: FILE_INFO_INPUT_TYPE_NAME,
-          },
+        args: {
+          id: t.arg({ type: 'ID', required: false }),
+          info: t.arg({ type: FILE_INFO_INPUT_TYPE_NAME }),
+        },
 
-          async resolve(parent, args) {
-            const { id, info } = args;
+        async resolve(parent, args) {
+          const { id, info } = args;
 
-            const updatedFile = await getUploadService('upload').updateFileInfo(id, info);
+          const updatedFile = await getUploadService('upload').updateFileInfo(id, info);
 
-            return toEntityResponse(updatedFile, { args, resourceUID: fileTypeName });
-          },
-        });
+          return toEntityResponse(updatedFile, { args, resourceUID: fileTypeName });
+        },
+      }),
 
-        /**
-         * Delete & remove a given file
-         */
-        t.field(DELETE_FILE_MUTATION_NAME, {
-          type: fileEntityResponseType,
+      /**
+       * Delete & remove a given file
+       */
+      [DELETE_FILE_MUTATION_NAME]: t.field({
+        type: fileEntityResponseType,
 
-          args: {
-            id: nonNull('ID'),
-          },
+        args: {
+          id: t.arg({ type: 'ID', required: false }),
+        },
 
-          async resolve(parent, args) {
-            const { id } = args;
+        async resolve(parent, args) {
+          const { id } = args;
 
-            const file = await getUploadService('upload').findOne(id);
+          const file = await getUploadService('upload').findOne(id);
 
-            if (!file) {
-              return null;
-            }
+          if (!file) {
+            return null;
+          }
 
-            const deletedFile = await getUploadService('upload').remove(file);
+          const deletedFile = await getUploadService('upload').remove(file);
 
-            return toEntityResponse(deletedFile, { args, resourceUID: fileTypeName });
-          },
-        });
-      },
-    });
+          return toEntityResponse(deletedFile, { args, resourceUID: fileTypeName });
+        },
+      }),
+    }));
 
     return {
       types: [fileInfoInputType, mutations],

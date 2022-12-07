@@ -1,7 +1,5 @@
 'use strict';
 
-const { list } = require('nexus');
-
 const NOT_IN_FIELD_NAME = 'notIn';
 
 module.exports = () => ({
@@ -10,6 +8,6 @@ module.exports = () => ({
   strapiOperator: '$notIn',
 
   add(t, type) {
-    t.field(NOT_IN_FIELD_NAME, { type: list(type) });
+    return t.field({ type: [type] });
   },
 });

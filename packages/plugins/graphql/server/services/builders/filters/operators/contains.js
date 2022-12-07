@@ -8,6 +8,6 @@ module.exports = () => ({
   strapiOperator: '$contains',
 
   add(t, type) {
-    t.field(CONTAINS_FIELD_NAME, { type });
+    return t.field({ type });
   },
 });

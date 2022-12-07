@@ -8,6 +8,6 @@ module.exports = () => ({
   strapiOperator: '$startsWith',
 
   add(t, type) {
-    t.field(STARTS_WITH_FIELD_NAME, { type });
+    return t.field({ type });
   },
 });

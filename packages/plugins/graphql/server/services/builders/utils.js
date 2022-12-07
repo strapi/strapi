@@ -17,7 +17,7 @@ module.exports = ({ strapi }) => {
      * @param {boolean} options.multiple
      * @return {object}
      */
-    getContentTypeArgs(contentType, { multiple = true } = {}) {
+    getContentTypeArgs(contentType, builder, { multiple = true } = {}) {
       const { naming } = getService('utils');
       const { args } = getService('internals');
 
@@ -28,26 +28,26 @@ module.exports = ({ strapi }) => {
         if (!multiple) return {};
 
         return {
-          filters: naming.getFiltersInputTypeName(contentType),
-          pagination: args.PaginationArg,
-          sort: args.SortArg,
+          filters: builder.arg({ type: naming.getFiltersInputTypeName(contentType) }),
+          pagination: args.PaginationArg(builder),
+          sort: args.SortArg(builder),
         };
       }
 
       // Collection Types
       if (kind === 'collectionType') {
         if (!multiple) {
-          return { id: 'ID' };
+          return { id: builder.arg({ type: 'ID' }) };
         }
 
         const params = {
-          filters: naming.getFiltersInputTypeName(contentType),
-          pagination: args.PaginationArg,
-          sort: args.SortArg,
+          filters: builder.arg({ type: naming.getFiltersInputTypeName(contentType) }),
+          pagination: args.PaginationArg(builder),
+          sort: args.SortArg(builder),
         };
 
         if (hasDraftAndPublish(contentType)) {
-          Object.assign(params, { publicationState: args.PublicationStateArg });
+          Object.assign(params, { publicationState: args.PublicationStateArg(builder) });
         }
 
         return params;
@@ -58,7 +58,7 @@ module.exports = ({ strapi }) => {
         const params = {};
 
         if (hasDraftAndPublish(contentType)) {
-          Object.assign(params, { publicationState: args.PublicationStateArg });
+          Object.assign(params, { publicationState: args.PublicationStateArg(builder) });
         }
 
         return params;

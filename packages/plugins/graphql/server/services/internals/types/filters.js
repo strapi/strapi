@@ -1,6 +1,6 @@
 'use strict';
 
-const { inputObjectType } = require('nexus');
+const { builder } = require('../../builders/pothosBuilder');
 
 /**
  * Build a map of filters type for every GraphQL scalars
@@ -21,13 +21,14 @@ const buildScalarFilters = ({ strapi }) => {
     return {
       ...acc,
 
-      [typeName]: inputObjectType({
-        name: typeName,
-
-        definition(t) {
+      [typeName]: builder.inputType(typeName, {
+        fields(t) {
+          const fieldsObj = {};
           for (const operator of operators) {
-            operator.add(t, type);
+            fieldsObj[operator.fieldName] = operator.add(t, type);
           }
+
+          return fieldsObj;
         },
       }),
     };

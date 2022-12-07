@@ -2,9 +2,8 @@
 
 const usersPermissionsRoleUID = 'plugin::users-permissions.role';
 
-module.exports = ({ nexus, strapi }) => {
+module.exports = ({ t, strapi }) => {
   const { getContentTypeInputName } = strapi.plugin('graphql').service('utils').naming;
-  const { nonNull } = nexus;
 
   const roleContentType = strapi.getModel(usersPermissionsRoleUID);
 
@@ -14,8 +13,8 @@ module.exports = ({ nexus, strapi }) => {
     type: 'UsersPermissionsUpdateRolePayload',
 
     args: {
-      id: nonNull('ID'),
-      data: nonNull(roleInputName),
+      id: t.arg({ type: 'ID', nullable: false }),
+      data: t.arg({ type: roleInputName, nullable: false }),
     },
 
     description: 'Update an existing role',

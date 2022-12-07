@@ -1,17 +1,19 @@
 'use strict';
 
-const { GraphQLDateTime, GraphQLLong, GraphQLJSON } = require('graphql-scalars');
+const {
+  resolvers: { JSON, DateTime, BigInt },
+} = require('graphql-scalars');
 const { GraphQLUpload } = require('graphql-upload');
-const { asNexusMethod } = require('nexus');
 
 const TimeScalar = require('./time');
 const GraphQLDate = require('./date');
+const { builder } = require('../../builders/pothosBuilder');
 
 module.exports = () => ({
-  JSON: asNexusMethod(GraphQLJSON, 'json'),
-  DateTime: asNexusMethod(GraphQLDateTime, 'dateTime'),
-  Time: asNexusMethod(TimeScalar, 'time'),
-  Date: asNexusMethod(GraphQLDate, 'date'),
-  Long: asNexusMethod(GraphQLLong, 'long'),
-  Upload: asNexusMethod(GraphQLUpload, 'upload'),
+  JSON: builder.addScalarType('JSON', JSON, {}),
+  DateTime: builder.addScalarType('DateTime', DateTime, {}),
+  Time: builder.addScalarType('Time', TimeScalar, {}),
+  Date: builder.addScalarType('Date', GraphQLDate, {}),
+  Long: builder.addScalarType('Long', BigInt, {}),
+  Upload: builder.addScalarType('Upload', GraphQLUpload, {}),
 });

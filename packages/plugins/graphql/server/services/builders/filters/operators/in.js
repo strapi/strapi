@@ -1,7 +1,5 @@
 'use strict';
 
-const { list } = require('nexus');
-
 const IN_FIELD_NAME = 'in';
 
 module.exports = () => ({
@@ -10,6 +8,6 @@ module.exports = () => ({
   strapiOperator: '$in',
 
   add(t, type) {
-    t.field(IN_FIELD_NAME, { type: list(type) });
+    return t.field({ type: [type] });
   },
 });

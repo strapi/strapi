@@ -1,6 +1,6 @@
 'use strict';
 
-const { objectType } = require('nexus');
+const { builder } = require('../../builders/pothosBuilder');
 
 module.exports = ({ strapi }) => {
   const { PAGINATION_TYPE_NAME } = strapi.plugin('graphql').service('constants');
@@ -10,14 +10,14 @@ module.exports = ({ strapi }) => {
      * Type definition for a Pagination object
      * @type {NexusObjectTypeDef}
      */
-    Pagination: objectType({
-      name: PAGINATION_TYPE_NAME,
-
-      definition(t) {
-        t.nonNull.int('total');
-        t.nonNull.int('page');
-        t.nonNull.int('pageSize');
-        t.nonNull.int('pageCount');
+    Pagination: builder.objectType(PAGINATION_TYPE_NAME, {
+      fields(t) {
+        return {
+          total: t.int({ nullable: false }),
+          page: t.int({ nullable: false }),
+          pageSize: t.int({ nullable: false }),
+          pageCount: t.int({ nullable: false }),
+        };
       },
     }),
   };

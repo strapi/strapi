@@ -1,19 +1,20 @@
 'use strict';
 
-const { arg, inputObjectType } = require('nexus');
+const { builder } = require('../../builders/pothosBuilder');
 
-const PaginationInputType = inputObjectType({
-  name: 'PaginationArg',
-
-  definition(t) {
-    t.int('page');
-    t.int('pageSize');
-    t.int('start');
-    t.int('limit');
+const PaginationInputType = builder.inputType('PaginationArg', {
+  fields(t) {
+    return {
+      page: t.int(),
+      pageSize: t.int(),
+      start: t.int(),
+      limit: t.int(),
+    };
   },
 });
 
-module.exports = arg({
-  type: PaginationInputType,
-  default: {},
-});
+module.exports = (t) =>
+  t.arg({
+    type: PaginationInputType,
+    default: {},
+  });

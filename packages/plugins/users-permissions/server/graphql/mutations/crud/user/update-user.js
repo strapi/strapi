@@ -6,8 +6,7 @@ const { checkBadRequest } = require('../../../utils');
 
 const usersPermissionsUserUID = 'plugin::users-permissions.user';
 
-module.exports = ({ nexus, strapi }) => {
-  const { nonNull } = nexus;
+module.exports = ({ t, strapi }) => {
   const { getContentTypeInputName, getEntityResponseName } = strapi
     .plugin('graphql')
     .service('utils').naming;
@@ -18,11 +17,12 @@ module.exports = ({ nexus, strapi }) => {
   const responseName = getEntityResponseName(userContentType);
 
   return {
-    type: nonNull(responseName),
+    type: responseName,
+    nullable: false,
 
     args: {
-      id: nonNull('ID'),
-      data: nonNull(userInputName),
+      id: t.arg({ type: 'ID', nullable: false }),
+      data: t.arg({ type: userInputName, nullable: false }),
     },
 
     description: 'Update an existing user',

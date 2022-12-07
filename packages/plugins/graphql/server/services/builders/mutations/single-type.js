@@ -1,9 +1,9 @@
 'use strict';
 
-const { extendType, nonNull } = require('nexus');
 const { omit, isNil } = require('lodash/fp');
 
 const utils = require('@strapi/utils');
+const { builder } = require('../pothosBuilder');
 
 const { sanitize } = utils;
 const { NotFoundError } = utils.errors;
@@ -25,15 +25,14 @@ module.exports = ({ strapi }) => {
   const addUpdateMutation = (t, contentType) => {
     const { uid } = contentType;
 
-    const updateMutationName = getUpdateMutationTypeName(contentType);
     const responseTypeName = getEntityResponseName(contentType);
 
-    t.field(updateMutationName, {
+    return t.field({
       type: responseTypeName,
 
       args: {
         // Update payload
-        data: nonNull(getContentTypeInputName(contentType)),
+        data: t.arg({ type: getContentTypeInputName(contentType), nullable: false }),
       },
 
       async resolve(parent, args, context) {
@@ -69,10 +68,9 @@ module.exports = ({ strapi }) => {
   const addDeleteMutation = (t, contentType) => {
     const { uid } = contentType;
 
-    const deleteMutationName = getDeleteMutationTypeName(contentType);
     const responseTypeName = getEntityResponseName(contentType);
 
-    t.field(deleteMutationName, {
+    return t.field({
       type: responseTypeName,
 
       args: {},
@@ -123,18 +121,18 @@ module.exports = ({ strapi }) => {
         registerAuthConfig(deleteMutationName, { scope: [`${contentType.uid}.delete`] });
       }
 
-      return extendType({
-        type: 'Mutation',
+      return builder.mutationFields((t) => {
+        const fieldsObj = {};
 
-        definition(t) {
-          if (isUpdateEnabled) {
-            addUpdateMutation(t, contentType);
-          }
+        if (isUpdateEnabled) {
+          fieldsObj[getUpdateMutationTypeName(contentType)] = addUpdateMutation(t, contentType);
+        }
 
-          if (isDeleteEnabled) {
-            addDeleteMutation(t, contentType);
-          }
-        },
+        if (isDeleteEnabled) {
+          fieldsObj[getDeleteMutationTypeName(contentType)] = addDeleteMutation(t, contentType);
+        }
+
+        return fieldsObj;
       });
     },
   };

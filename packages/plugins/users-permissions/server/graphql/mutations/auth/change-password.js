@@ -4,16 +4,14 @@ const { toPlainObject } = require('lodash/fp');
 
 const { checkBadRequest } = require('../../utils');
 
-module.exports = ({ nexus, strapi }) => {
-  const { nonNull } = nexus;
-
+module.exports = ({ t, strapi }) => {
   return {
     type: 'UsersPermissionsLoginPayload',
 
     args: {
-      currentPassword: nonNull('String'),
-      password: nonNull('String'),
-      passwordConfirmation: nonNull('String'),
+      currentPassword: t.arg({ type: 'String', nullable: false }),
+      password: t.arg({ type: 'String', nullable: false }),
+      passwordConfirmation: t.arg({ type: 'String', nullable: false }),
     },
 
     description: 'Change user password. Confirm with the current password.',

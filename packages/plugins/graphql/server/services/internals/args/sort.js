@@ -1,10 +1,9 @@
 'use strict';
 
-const { arg, list } = require('nexus');
-
-const SortArg = arg({
-  type: list('String'),
-  default: [],
-});
+const SortArg = (t) =>
+  t.arg({
+    type: ['String'],
+    default: [],
+  });
 
 module.exports = SortArg;

@@ -1,7 +1,7 @@
 'use strict';
 
-const { objectType } = require('nexus');
 const { prop } = require('lodash/fp');
+const { builder } = require('./pothosBuilder');
 
 module.exports = ({ strapi }) => {
   const { naming } = strapi.plugin('graphql').service('utils');
@@ -16,15 +16,15 @@ module.exports = ({ strapi }) => {
       const name = naming.getEntityResponseName(contentType);
       const entityName = naming.getEntityName(contentType);
 
-      return objectType({
-        name,
+      return builder.objectType(name, {
+        fields(t) {
+          return {
+            data: t.field({
+              type: entityName,
 
-        definition(t) {
-          t.field('data', {
-            type: entityName,
-
-            resolve: prop('value'),
-          });
+              resolve: prop('value'),
+            }),
+          };
         },
       });
     },

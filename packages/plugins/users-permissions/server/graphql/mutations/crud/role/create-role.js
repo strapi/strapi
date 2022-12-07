@@ -4,10 +4,8 @@ const { toPlainObject } = require('lodash/fp');
 
 const usersPermissionsRoleUID = 'plugin::users-permissions.role';
 
-module.exports = ({ nexus, strapi }) => {
+module.exports = ({ t, strapi }) => {
   const { getContentTypeInputName } = strapi.plugin('graphql').service('utils').naming;
-  const { nonNull } = nexus;
-
   const roleContentType = strapi.getModel(usersPermissionsRoleUID);
 
   const roleInputName = getContentTypeInputName(roleContentType);
@@ -16,7 +14,7 @@ module.exports = ({ nexus, strapi }) => {
     type: 'UsersPermissionsCreateRolePayload',
 
     args: {
-      data: nonNull(roleInputName),
+      data: t.arg({ type: roleInputName, nullable: false }),
     },
 
     description: 'Create a new role',

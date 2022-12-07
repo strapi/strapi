@@ -11,9 +11,9 @@ module.exports = ({ strapi }) => ({
     const { naming, attributes } = strapi.plugin('graphql').service('utils');
 
     if (attributes.isGraphQLScalar({ type })) {
-      t.field(NOT_FIELD_NAME, { type: naming.getScalarFilterInputTypeName(type) });
-    } else {
-      t.field(NOT_FIELD_NAME, { type });
+      return t.field({ type: naming.getScalarFilterInputTypeName(type) });
     }
+
+    return t.field({ type });
   },
 });

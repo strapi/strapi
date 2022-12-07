@@ -1,7 +1,7 @@
 'use strict';
 
-const { objectType, nonNull } = require('nexus');
 const { defaultTo, prop, pipe } = require('lodash/fp');
+const { builder } = require('./pothosBuilder');
 
 module.exports = ({ strapi }) => {
   const { naming } = strapi.plugin('graphql').service('utils');
@@ -16,15 +16,15 @@ module.exports = ({ strapi }) => {
       const name = naming.getRelationResponseCollectionName(contentType);
       const entityName = naming.getEntityName(contentType);
 
-      return objectType({
-        name,
-
-        definition(t) {
-          t.nonNull.list.field('data', {
-            type: nonNull(entityName),
-
-            resolve: pipe(prop('nodes'), defaultTo([])),
-          });
+      return builder.objectType(name, {
+        fields(t) {
+          return {
+            data: t.field({
+              type: [entityName],
+              nullable: false,
+              resolve: pipe(prop('nodes'), defaultTo([])),
+            }),
+          };
         },
       });
     },

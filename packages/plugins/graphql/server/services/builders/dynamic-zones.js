@@ -2,8 +2,8 @@
 
 const { Kind, valueFromASTUntyped } = require('graphql');
 const { omit } = require('lodash/fp');
-const { unionType, scalarType } = require('nexus');
 const { ApplicationError } = require('@strapi/utils').errors;
+const { builder } = require('./pothosBuilder');
 
 module.exports = ({ strapi }) => {
   const buildTypeDefinition = (name, components) => {
@@ -22,19 +22,14 @@ module.exports = ({ strapi }) => {
       return component.globalId;
     });
 
-    return unionType({
-      name,
-
+    return builder.unionType(name, {
+      types: [...componentsTypeNames, ERROR_TYPE_NAME],
       resolveType(obj) {
         if (isEmpty) {
           return ERROR_TYPE_NAME;
         }
 
         return strapi.components[obj.__component].globalId;
-      },
-
-      definition(t) {
-        t.members(...componentsTypeNames, ERROR_TYPE_NAME);
       },
     });
   };
@@ -59,9 +54,7 @@ module.exports = ({ strapi }) => {
       };
     };
 
-    return scalarType({
-      name,
-
+    return builder.scalarType(name, {
       serialize: (value) => value,
 
       parseValue: (value) => parseData(value),

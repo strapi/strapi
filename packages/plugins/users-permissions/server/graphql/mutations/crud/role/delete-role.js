@@ -1,13 +1,11 @@
 'use strict';
 
-module.exports = ({ nexus, strapi }) => {
-  const { nonNull } = nexus;
-
+module.exports = ({ t, strapi }) => {
   return {
     type: 'UsersPermissionsDeleteRolePayload',
 
     args: {
-      id: nonNull('ID'),
+      id: t.arg({ type: 'ID', nullable: false }),
     },
 
     description: 'Delete an existing role',

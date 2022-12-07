@@ -8,6 +8,6 @@ module.exports = () => ({
   strapiOperator: '$null',
 
   add(t) {
-    t.boolean(NULL_FIELD_NAME);
+    return t.boolean();
   },
 });

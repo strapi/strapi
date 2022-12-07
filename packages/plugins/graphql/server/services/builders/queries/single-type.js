@@ -1,6 +1,6 @@
 'use strict';
 
-const { extendType } = require('nexus');
+const { builder } = require('../pothosBuilder');
 
 module.exports = ({ strapi }) => {
   const { service: getService } = strapi.plugin('graphql');
@@ -30,27 +30,22 @@ module.exports = ({ strapi }) => {
       registerAuthConfig(findQueryName, { scope: [`${contentType.uid}.find`] });
     }
 
-    return extendType({
-      type: 'Query',
-
-      definition(t) {
-        if (isFindEnabled) {
-          addFindQuery(t, contentType);
-        }
-      },
-    });
+    if (isFindEnabled) {
+      return builder.queryField(getFindOneQueryName(contentType), (t) =>
+        addFindQuery(t, contentType)
+      );
+    }
   };
 
   const addFindQuery = (t, contentType) => {
     const { uid } = contentType;
 
-    const findQueryName = getFindOneQueryName(contentType);
     const responseTypeName = getEntityResponseName(contentType);
 
-    t.field(findQueryName, {
+    return t.field({
       type: responseTypeName,
 
-      args: getContentTypeArgs(contentType),
+      args: getContentTypeArgs(contentType, t),
 
       async resolve(parent, args) {
         const transformedArgs = transformArgs(args, { contentType });

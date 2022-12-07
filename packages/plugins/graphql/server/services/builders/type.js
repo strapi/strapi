@@ -1,9 +1,9 @@
 'use strict';
 
 const { isArray, isString, isUndefined, constant } = require('lodash/fp');
-const { objectType } = require('nexus');
 
 const { contentTypes } = require('@strapi/utils');
+const { builder } = require('./pothosBuilder');
 
 /**
  * @typedef TypeBuildersOptions
@@ -31,12 +31,12 @@ module.exports = (context) => {
    *
    * @param {TypeBuildersOptions} options
    */
-  const addScalarAttribute = ({ builder, attributeName, attribute }) => {
+  const addScalarAttribute = ({ builder, attribute }) => {
     const { mappers } = getGraphQLService('utils');
 
     const gqlType = mappers.strapiScalarToGraphQLScalar(attribute.type);
 
-    builder.field(attributeName, { type: gqlType });
+    return builder.field({ type: gqlType });
   };
 
   /**
@@ -48,17 +48,11 @@ module.exports = (context) => {
    * @param {TypeBuildersOptions} options
    */
   const addComponentAttribute = ({ builder, attributeName, contentType, attribute }) => {
-    let localBuilder = builder;
-
     const { naming } = getGraphQLService('utils');
     const { getContentTypeArgs } = getGraphQLService('builders').utils;
     const { buildComponentResolver } = getGraphQLService('builders').get('content-api');
 
     const type = naming.getComponentNameFromAttribute(attribute);
-
-    if (attribute.repeatable) {
-      localBuilder = localBuilder.list;
-    }
 
     const targetComponent = strapi.getModel(attribute.component);
 
@@ -68,9 +62,14 @@ module.exports = (context) => {
       strapi,
     });
 
-    const args = getContentTypeArgs(targetComponent, { multiple: !!attribute.repeatable });
+    // TODO: revist this:
+    const args = getContentTypeArgs(targetComponent, builder, { multiple: !!attribute.repeatable });
 
-    localBuilder.field(attributeName, { type, resolve, args });
+    return builder.field({
+      type: attribute.repeatable ? [type] : type,
+      resolve,
+      args,
+    });
   };
 
   /**
@@ -103,7 +102,7 @@ module.exports = (context) => {
           attributeName,
         });
 
-    builder.list.field(attributeName, { type, resolve });
+    return builder.field({ type: [type], resolve });
   };
 
   /**
@@ -119,7 +118,7 @@ module.exports = (context) => {
 
     const type = naming.getEnumName(contentType, attributeName);
 
-    builder.field(attributeName, { type });
+    return builder.field({ type });
   };
 
   /**
@@ -148,32 +147,31 @@ module.exports = (context) => {
       strapi,
     });
 
-    const args = attribute.multiple ? getContentTypeArgs(fileContentType) : undefined;
+    const args = attribute.multiple ? getContentTypeArgs(fileContentType, builder) : undefined;
     const type = attribute.multiple
       ? naming.getRelationResponseCollectionName(fileContentType)
       : naming.getEntityResponseName(fileContentType);
 
-    builder.field(attributeName, { type, resolve, args });
+    return builder.field({ type, resolve, args });
   };
 
   /**
    * Add a polymorphic relational attribute to the type definition
    * @param {TypeBuildersOptions} options
    */
-  const addPolymorphicRelationalAttribute = (options) => {
+  const addPolymorphicRelationalAttribute = ({
+    builder,
+    attributeName,
+    attribute,
+    contentType,
+  }) => {
     const { GENERIC_MORPH_TYPENAME } = getGraphQLService('constants');
     const { naming } = getGraphQLService('utils');
     const { buildAssociationResolver } = getGraphQLService('builders').get('content-api');
 
-    let { builder } = options;
-    const { attributeName, attribute, contentType } = options;
-
     const { target } = attribute;
     const isToManyRelation = attribute.relation.endsWith('Many');
 
-    if (isToManyRelation) {
-      builder = builder.list;
-    }
     // todo[v4]: How to handle polymorphic relation w/ entity response collection types?
     //  -> Currently return raw polymorphic entities
 
@@ -185,17 +183,17 @@ module.exports = (context) => {
 
     // If there is no specific target specified, then use the GenericMorph type
     if (isUndefined(target)) {
-      builder.field(attributeName, {
-        type: GENERIC_MORPH_TYPENAME,
+      return builder.field({
+        type: isToManyRelation ? [GENERIC_MORPH_TYPENAME] : GENERIC_MORPH_TYPENAME,
         resolve,
       });
     }
 
     // If the target is an array of string, resolve the associated morph type and use it
-    else if (isArray(target) && target.every(isString)) {
+    if (isArray(target) && target.every(isString)) {
       const type = naming.getMorphRelationTypeName(contentType, attributeName);
 
-      builder.field(attributeName, { type, resolve });
+      return builder.field({ type: isToManyRelation ? [type] : type, resolve });
     }
   };
 
@@ -203,14 +201,11 @@ module.exports = (context) => {
    * Add a regular relational attribute to the type definition
    * @param {TypeBuildersOptions} options
    */
-  const addRegularRelationalAttribute = (options) => {
+  const addRegularRelationalAttribute = ({ builder, attributeName, attribute, contentType }) => {
     const { naming } = getGraphQLService('utils');
     const { getContentTypeArgs } = getGraphQLService('builders').utils;
     const { buildAssociationResolver } = getGraphQLService('builders').get('content-api');
     const extension = getGraphQLService('extension');
-
-    const { builder } = options;
-    const { attributeName, attribute, contentType } = options;
 
     if (extension.shadowCRUD(attribute.target).isDisabled()) {
       return;
@@ -230,14 +225,14 @@ module.exports = (context) => {
       ? naming.getRelationResponseCollectionName(targetContentType)
       : naming.getEntityResponseName(targetContentType);
 
-    const args = isToManyRelation ? getContentTypeArgs(targetContentType) : undefined;
+    const args = isToManyRelation ? getContentTypeArgs(targetContentType, builder) : undefined;
 
     const resolverPath = `${naming.getTypeName(contentType)}.${attributeName}`;
     const resolverScope = `${targetContentType.uid}.find`;
 
     extension.use({ resolversConfig: { [resolverPath]: { auth: { scope: [resolverScope] } } } });
 
-    builder.field(attributeName, { type, resolve, args });
+    return builder.field({ type, resolve, args });
   };
 
   const isNotPrivate = (contentType) => (attributeName) => {
@@ -277,12 +272,12 @@ module.exports = (context) => {
         contentType
       );
 
-      return objectType({
-        name,
+      return builder.objectType(name, {
+        fields(t) {
+          const fieldsObj = {};
 
-        definition(t) {
           if (modelType === 'component' && isNotDisabled(contentType)('id')) {
-            t.nonNull.id('id');
+            fieldsObj.id = t.id({ nullable: false });
           }
 
           /** Attributes
@@ -310,52 +305,59 @@ module.exports = (context) => {
 
               // We create a copy of the builder (t) to apply custom
               // rules only on the current attribute (eg: nonNull, list, ...)
-              let builder = t;
-
-              if (attribute.required) {
-                builder = builder.nonNull;
-              }
+              const builder = t;
 
               /**
                * @type {TypeBuildersOptions}
                */
-              const options = { builder, attributeName, attribute, contentType, context };
+              const options = {
+                builder,
+                attributeName,
+                attribute,
+                contentType,
+                context,
+                required: attribute.required,
+              };
 
               // Enums
               if (isEnumeration(attribute)) {
-                addEnumAttribute(options);
+                fieldsObj[attributeName] = addEnumAttribute(options);
               }
 
               // Scalars
               else if (isStrapiScalar(attribute)) {
-                addScalarAttribute(options);
+                fieldsObj[attributeName] = addScalarAttribute(options);
               }
 
               // Components
               else if (isComponent(attribute)) {
-                addComponentAttribute(options);
+                fieldsObj[attributeName] = addComponentAttribute(options);
               }
 
               // Dynamic Zones
               else if (isDynamicZone(attribute)) {
-                addDynamicZoneAttribute(options);
+                fieldsObj[attributeName] = addDynamicZoneAttribute(options);
               }
 
               // Media
               else if (isMedia(attribute)) {
-                addMediaAttribute(options);
+                const ref = addMediaAttribute(options);
+                if (ref) fieldsObj[attributeName] = ref;
               }
 
               // Polymorphic Relations
               else if (isMorphRelation(attribute)) {
-                addPolymorphicRelationalAttribute(options);
+                fieldsObj[attributeName] = addPolymorphicRelationalAttribute(options);
               }
 
               // Regular Relations
               else if (isRelation(attribute)) {
-                addRegularRelationalAttribute(options);
+                const ref = addRegularRelationalAttribute(options);
+                if (ref) fieldsObj[attributeName] = ref;
               }
             });
+
+          return fieldsObj;
         },
       });
     },

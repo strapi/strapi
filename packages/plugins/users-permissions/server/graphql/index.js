@@ -29,10 +29,10 @@ module.exports = ({ strapi }) => {
   extensionService.shadowCRUD('plugin::users-permissions.role').disableActions(actionsToDisable);
 
   // Register new types & resolvers config
-  extensionService.use(({ nexus }) => {
-    const types = getTypes({ strapi, nexus });
-    const queries = getQueries({ strapi, nexus });
-    const mutations = getMutations({ strapi, nexus });
+  extensionService.use(({ builder }) => {
+    const types = getTypes({ strapi, builder });
+    const queries = getQueries({ strapi, builder });
+    const mutations = getMutations({ strapi, builder });
     const resolversConfig = getResolversConfig({ strapi });
 
     return {

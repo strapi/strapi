@@ -1,6 +1,6 @@
 'use strict';
 
-const { inputObjectType } = require('nexus');
+const { builder } = require('../pothosBuilder');
 
 module.exports = ({ strapi }) => {
   const rootLevelOperators = () => {
@@ -9,15 +9,15 @@ module.exports = ({ strapi }) => {
     return [operators.and, operators.or, operators.not];
   };
 
-  const addScalarAttribute = (builder, attributeName, attribute) => {
+  const addScalarAttribute = (builder, attribute) => {
     const { naming, mappers } = strapi.plugin('graphql').service('utils');
 
     const gqlType = mappers.strapiScalarToGraphQLScalar(attribute.type);
 
-    builder.field(attributeName, { type: naming.getScalarFilterInputTypeName(gqlType) });
+    return builder.field({ type: naming.getScalarFilterInputTypeName(gqlType) });
   };
 
-  const addRelationalAttribute = (builder, attributeName, attribute) => {
+  const addRelationalAttribute = (builder, attribute) => {
     const utils = strapi.plugin('graphql').service('utils');
     const extension = strapi.plugin('graphql').service('extension');
     const { getFiltersInputTypeName } = utils.naming;
@@ -32,10 +32,10 @@ module.exports = ({ strapi }) => {
     // If the target model is disabled, then ignore it too
     if (extension.shadowCRUD(model.uid).isDisabled()) return;
 
-    builder.field(attributeName, { type: getFiltersInputTypeName(model) });
+    return builder.field({ type: getFiltersInputTypeName(model) });
   };
 
-  const addComponentAttribute = (builder, attributeName, attribute) => {
+  const addComponentAttribute = (builder, attribute) => {
     const utils = strapi.plugin('graphql').service('utils');
     const extension = strapi.plugin('graphql').service('extension');
     const { getFiltersInputTypeName } = utils.naming;
@@ -48,7 +48,7 @@ module.exports = ({ strapi }) => {
     // If the component is disabled, then ignore it too
     if (extension.shadowCRUD(component.uid).isDisabled()) return;
 
-    builder.field(attributeName, { type: getFiltersInputTypeName(component) });
+    return builder.field({ type: getFiltersInputTypeName(component) });
   };
 
   const buildContentTypeFilters = (contentType) => {
@@ -62,10 +62,10 @@ module.exports = ({ strapi }) => {
 
     const filtersTypeName = getFiltersInputTypeName(contentType);
 
-    return inputObjectType({
-      name: filtersTypeName,
+    return builder.inputType(filtersTypeName, {
+      fields(t) {
+        const fieldsObj = {};
 
-      definition(t) {
         const validAttributes = Object.entries(attributes).filter(([attributeName]) =>
           extension.shadowCRUD(contentType.uid).field(attributeName).hasFiltersEnabeld()
         );
@@ -76,31 +76,35 @@ module.exports = ({ strapi }) => {
           .hasFiltersEnabeld();
         // Add an ID filter to the collection types
         if (contentType.kind === 'collectionType' && isIDFilterEnabled) {
-          t.field('id', { type: getScalarFilterInputTypeName('ID') });
+          fieldsObj.id = t.field({ type: getScalarFilterInputTypeName('ID') });
         }
 
         // Add every defined attribute
         for (const [attributeName, attribute] of validAttributes) {
           // Handle scalars
           if (isStrapiScalar(attribute)) {
-            addScalarAttribute(t, attributeName, attribute);
+            fieldsObj[attributeName] = addScalarAttribute(t, attribute);
           }
 
           // Handle relations
           else if (isRelation(attribute)) {
-            addRelationalAttribute(t, attributeName, attribute);
+            const ref = addRelationalAttribute(t, attribute);
+
+            if (ref) fieldsObj[attributeName] = ref;
           }
 
           // Handle components
           else if (isComponent(attribute)) {
-            addComponentAttribute(t, attributeName, attribute);
+            fieldsObj[attributeName] = addComponentAttribute(t, attribute);
           }
         }
 
         // Conditional clauses
         for (const operator of rootLevelOperators()) {
-          operator.add(t, filtersTypeName);
+          fieldsObj[operator.fieldName] = operator.add(t, filtersTypeName);
         }
+
+        return fieldsObj;
       },
     });
   };

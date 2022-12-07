@@ -2,7 +2,6 @@
 
 const { mergeSchemas, addResolversToSchema } = require('@graphql-tools/schema');
 const { pruneSchema } = require('@graphql-tools/utils');
-const { makeSchema } = require('nexus');
 const { prop, startsWith } = require('lodash/fp');
 
 const { wrapResolvers } = require('./wrap-resolvers');
@@ -20,6 +19,7 @@ const {
     registerDynamicZonesDefinition,
   },
 } = require('./register-functions');
+const { builder } = require('../builders/pothosBuilder');
 
 module.exports = ({ strapi }) => {
   const { service: getGraphQLService } = strapi.plugin('graphql');
@@ -62,33 +62,16 @@ module.exports = ({ strapi }) => {
     // Add the extension's resolvers to the final schema
     const schemaWithResolvers = addResolversToSchema(schema, extension.resolvers);
 
-    // Create a configuration object for the artifacts generation
-    const outputs = {
-      schema: config('artifacts.schema', false),
-      typegen: config('artifacts.typegen', false),
-    };
+    // // Create a configuration object for the artifacts generation
+    // const outputs = {
+    //   schema: config('artifacts.schema', false),
+    //   typegen: config('artifacts.typegen', false),
+    // };
 
-    const currentEnv = strapi.config.get('environment');
-
-    const nexusSchema = makeSchema({
-      // Build the schema from the merged GraphQL schema.
-      // Since we're passing the schema to the mergeSchema property, it'll transform our SDL type definitions
-      // into Nexus type definition, thus allowing them to be handled by  Nexus plugins & other processing
-      mergeSchema: { schema: schemaWithResolvers },
-
-      // Apply user-defined plugins
-      plugins: extension.plugins,
-
-      // Whether to generate artifacts (GraphQL schema, TS types definitions) or not.
-      // By default, we generate artifacts only on development environment
-      shouldGenerateArtifacts: config('generateArtifacts', currentEnv === 'development'),
-
-      // Artifacts generation configuration
-      outputs,
-    });
+    // const currentEnv = strapi.config.get('environment');
 
     // Wrap resolvers if needed (auth, middlewares, policies...) as configured in the extension
-    const wrappedNexusSchema = wrapResolvers({ schema: nexusSchema, strapi, extension });
+    const wrappedNexusSchema = wrapResolvers({ schema: schemaWithResolvers, strapi, extension });
 
     // Prune schema, remove unused types
     // eg: removes registered subscriptions if they're disabled in the config)
@@ -100,10 +83,10 @@ module.exports = ({ strapi }) => {
   const buildMergedSchema = ({ registry }) => {
     // Here we extract types, plugins & typeDefs from a temporary generated
     // extension since there won't be any addition allowed after schemas generation
-    const { types, typeDefs = [] } = extensionService.generate({ typeRegistry: registry });
+    const { typeDefs = [] } = extensionService.generate({ typeRegistry: registry });
 
     // Nexus schema built with user-defined & shadow CRUD auto generated Nexus types
-    const nexusSchema = makeSchema({ types: [registry.definitions, types] });
+    const nexusSchema = builder.toSchema();
 
     // Merge type definitions with the Nexus schema
     return mergeSchemas({
@@ -177,6 +160,7 @@ module.exports = ({ strapi }) => {
   const registerMorphTypes = (contentTypes) => {
     // Create & register a union type that includes every type or component registered
     const genericMorphType = builders.buildGenericMorphDefinition();
+
     registry.register(GENERIC_MORPH_TYPENAME, genericMorphType, { kind: KINDS.morph });
 
     for (const contentType of contentTypes) {

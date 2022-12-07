@@ -18,6 +18,6 @@ module.exports = ({ strapi }) => ({
       );
     }
 
-    t.field(EQ_FIELD_NAME, { type });
+    return t.field({ type });
   },
 });

@@ -4,14 +4,13 @@ const { toPlainObject } = require('lodash/fp');
 
 const { checkBadRequest } = require('../../utils');
 
-module.exports = ({ nexus, strapi }) => {
-  const { nonNull } = nexus;
-
+module.exports = ({ t, strapi }) => {
   return {
-    type: nonNull('UsersPermissionsLoginPayload'),
+    type: 'UsersPermissionsLoginPayload',
+    nullable: false,
 
     args: {
-      input: nonNull('UsersPermissionsLoginInput'),
+      input: t.arg({ type: 'UsersPermissionsLoginInput', nullable: false }),
     },
 
     async resolve(parent, args, context) {

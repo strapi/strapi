@@ -1,22 +1,9 @@
 'use strict';
 
-const nexus = require('nexus');
 const { merge } = require('lodash/fp');
 
+const { builder } = require('../builders/pothosBuilder');
 const createShadowCRUDManager = require('./shadow-crud-manager');
-
-/**
- * @typedef StrapiGraphQLExtensionConfiguration
- * @property {NexusGen[]} types - A collection of Nexus types
- * @property {string} typeDefs - Type definitions (SDL format)
- * @property {object} resolvers - A resolver map
- * @property {object} resolversConfig - An object that bind a configuration to a resolver based on an absolute path (the key)
- * @property {NexusPlugin[]} plugins - A collection of Nexus plugins
- */
-
-/**
- * @typedef {function({ strapi: object, nexus: object, typeRegistry: object }): StrapiGraphQLExtensionConfiguration} StrapiGraphQLExtensionConfigurationFactory
- */
 
 const getDefaultState = () => ({
   types: [],
@@ -32,11 +19,6 @@ const createExtension = ({ strapi } = {}) => {
   return {
     shadowCRUD: createShadowCRUDManager({ strapi }),
 
-    /**
-     * Register a new extension configuration
-     * @param {StrapiGraphQLExtensionConfiguration | StrapiGraphQLExtensionConfigurationFactory} configuration
-     * @return {this}
-     */
     use(configuration) {
       configs.push(configuration);
 
@@ -51,8 +33,11 @@ const createExtension = ({ strapi } = {}) => {
      */
     generate({ typeRegistry }) {
       const resolveConfig = (config) => {
-        return typeof config === 'function' ? config({ strapi, nexus, typeRegistry }) : config;
+        return typeof config === 'function' ? config({ strapi, builder, typeRegistry }) : config;
       };
+
+      // TODO: ask why the core/upload/server/graphql.js file registers twice?
+      configs.shift();
 
       // Evaluate & merge every registered configuration object, then return the result
       return configs.reduce((acc, configuration) => {

@@ -1,9 +1,9 @@
 'use strict';
 
-const { inputObjectType, nonNull } = require('nexus');
 const {
   contentTypes: { isWritableAttribute },
 } = require('@strapi/utils');
+const { builder } = require('./pothosBuilder');
 
 module.exports = (context) => {
   const { strapi } = context;
@@ -32,10 +32,10 @@ module.exports = (context) => {
         modelType === 'component' ? getComponentInputName : getContentTypeInputName
       ).call(null, contentType);
 
-      return inputObjectType({
-        name,
+      return builder.inputType(name, {
+        fields(t) {
+          const fieldsObj = {};
 
-        definition(t) {
           const isFieldEnabled = (fieldName) => {
             return extension.shadowCRUD(contentType.uid).field(fieldName).hasInputEnabled();
           };
@@ -46,7 +46,7 @@ module.exports = (context) => {
 
           // Add the ID for the component to enable inplace updates
           if (modelType === 'component' && isFieldEnabled('id')) {
-            t.id('id');
+            fieldsObj.id = t.id();
           }
 
           validAttributes.forEach(([attributeName, attribute]) => {
@@ -54,14 +54,14 @@ module.exports = (context) => {
             if (isEnumeration(attribute)) {
               const enumTypeName = getEnumName(contentType, attributeName);
 
-              t.field(attributeName, { type: enumTypeName });
+              fieldsObj[attributeName] = t.field({ type: enumTypeName });
             }
 
             // Scalars
             else if (isStrapiScalar(attribute)) {
               const gqlScalar = mappers.strapiScalarToGraphQLScalar(attribute.type);
 
-              t.field(attributeName, { type: gqlScalar });
+              fieldsObj[attributeName] = t.field({ type: gqlScalar });
             }
 
             // Media
@@ -73,9 +73,9 @@ module.exports = (context) => {
               }
 
               if (isMultiple) {
-                t.list.id(attributeName);
+                fieldsObj[attributeName] = t.idList();
               } else {
-                t.id(attributeName);
+                fieldsObj[attributeName] = t.id();
               }
             }
 
@@ -88,9 +88,9 @@ module.exports = (context) => {
               const isToManyRelation = attribute.relation.endsWith('Many');
 
               if (isToManyRelation) {
-                t.list.id(attributeName);
+                fieldsObj[attributeName] = t.idList();
               } else {
-                t.id(attributeName);
+                fieldsObj[attributeName] = t.id();
               }
             }
 
@@ -100,20 +100,20 @@ module.exports = (context) => {
               const component = strapi.components[attribute.component];
               const componentInputType = getComponentInputName(component);
 
-              if (isRepeatable) {
-                t.list.field(attributeName, { type: componentInputType });
-              } else {
-                t.field(attributeName, { type: componentInputType });
-              }
+              fieldsObj[attributeName] = t.field({
+                type: isRepeatable ? [componentInputType] : componentInputType,
+              });
             }
 
             // Dynamic Zones
             else if (isDynamicZone(attribute)) {
               const dzInputName = getDynamicZoneInputName(contentType, attributeName);
 
-              t.list.field(attributeName, { type: nonNull(dzInputName) });
+              fieldsObj[attributeName] = t.field({ type: [dzInputName], required: true });
             }
           });
+
+          return fieldsObj;
         },
       });
     },

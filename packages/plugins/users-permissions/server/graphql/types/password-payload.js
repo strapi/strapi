@@ -1,11 +1,9 @@
 'use strict';
 
-module.exports = ({ nexus }) => {
-  return nexus.objectType({
-    name: 'UsersPermissionsPasswordPayload',
-
-    definition(t) {
-      t.nonNull.boolean('ok');
+module.exports = ({ builder }) => {
+  return builder.objectType('UsersPermissionsPasswordPayload', {
+    fields(t) {
+      return { ok: t.boolean({ nullable: false }) };
     },
   });
 };
