@@ -10,6 +10,7 @@ import { parser } from 'stream-json/jsonl/Parser';
 import type { IMetadata, ISourceProvider, ProviderType } from '../../types';
 
 import { collect } from '../utils';
+import { createDecryptionCipher } from '../encryption';
 
 type StreamItemArray = Parameters<typeof chain>[0];
 
@@ -102,12 +103,17 @@ class LocalFileSourceProvider implements ISourceProvider {
     return this.#streamJsonlDirectory('configuration');
   }
 
-  #getBackupStream(decompress = true) {
-    const path = this.options.file.path;
-    const readStream = fs.createReadStream(path);
-    const streams: StreamItemArray = [readStream];
+  #getBackupStream() {
+    const { file, encryption, compression } = this.options;
 
-    if (this.options.compression.enabled) {
+    const fileStream = fs.createReadStream(file.path);
+    const streams: StreamItemArray = [fileStream];
+
+    if (encryption.enabled && encryption.key) {
+      streams.push(createDecryptionCipher(encryption.key));
+    }
+
+    if (compression.enabled) {
       streams.push(zip.createGunzip());
     }
 
