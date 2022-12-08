@@ -1,6 +1,8 @@
 /* eslint-disable react/prop-types */
 
 import React from 'react';
+// import { createStore, combineReducers } from 'redux';
+// import { Provider } from 'react-redux';
 import { request, useRBAC } from '@strapi/helper-plugin';
 // import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 // import { ThemeProvider } from 'styled-components';
