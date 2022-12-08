@@ -34,10 +34,8 @@ class WebhookRunner {
     this.queue.subscribe(this.executeListener.bind(this));
 
     strapi.eventHub.addSubscriber((eventName, ...args) => {
-      console.log('Listening on behalf of webhooks', eventName, ...args);
       if (this.listeners.has(eventName)) {
         const listener = this.listeners.get(eventName);
-        console.log('Found listener for event', eventName, 'executing...');
         listener(...args);
       }
     });
