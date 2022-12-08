@@ -22,11 +22,6 @@ describe('ComponentCard', () => {
     expect(getByTestId('component-card-icon')).toMatchSnapshot();
   });
 
-  it('should render a valid icon when passed its name', () => {
-    const { getByTestId } = setup({ icon: 'fa-camera' });
-    expect(getByTestId('component-card-icon')).toMatchSnapshot();
-  });
-
   it('should call the onClick handler when passed', () => {
     const onClick = jest.fn();
     const { getByText } = setup({ onClick });

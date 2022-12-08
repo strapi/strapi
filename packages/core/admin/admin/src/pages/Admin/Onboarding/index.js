@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faQuestion, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { Box } from '@strapi/design-system/Box';
-import { Typography } from '@strapi/design-system/Typography';
-import { FocusTrap } from '@strapi/design-system/FocusTrap';
+import { Box, FocusTrap, Typography } from '@strapi/design-system';
+import { Book, Cross, Information } from '@strapi/icons';
+
 import { useConfigurations } from '../../../hooks';
 
 const OnboardingWrapper = styled(Box)`
@@ -20,8 +18,9 @@ const Button = styled.button`
   background: ${({ theme }) => theme.colors.primary600};
   box-shadow: ${({ theme }) => theme.shadows.tableShadow};
   border-radius: 50%;
-  svg {
-    color: ${({ theme }) => theme.colors.buttonNeutral0};
+
+  svg path {
+    fill: ${({ theme }) => theme.colors.buttonNeutral0};
   }
 `;
 
@@ -71,9 +70,9 @@ const Onboarding = () => {
     return null;
   }
 
-  const staticLinks = [
+  const STATIC_LINKS = [
     {
-      icon: 'book',
+      Icon: <Book />,
       label: formatMessage({
         id: 'global.documentation',
         defaultMessage: 'Documentation',
@@ -81,7 +80,7 @@ const Onboarding = () => {
       destination: 'https://docs.strapi.io',
     },
     {
-      icon: 'file',
+      Icon: <Information />,
       label: formatMessage({ id: 'app.static.links.cheatsheet', defaultMessage: 'CheatSheet' }),
       destination: 'https://strapi-showcase.s3-us-west-2.amazonaws.com/CheatSheet.pdf',
     },
@@ -101,8 +100,8 @@ const Onboarding = () => {
         })}
         onClick={handleClick}
       >
-        {!isOpen && <FontAwesomeIcon icon={faQuestion} />}
-        {isOpen && <FontAwesomeIcon icon={faTimes} />}
+        {/* TODO: Information -> Question */}
+        {isOpen ? <Cross /> : <Information />}
       </Button>
 
       {/* FIX ME - replace with popover when overflow popover is fixed 
@@ -116,14 +115,14 @@ const Onboarding = () => {
             paddingBottom={2}
             paddingTop={2}
           >
-            {staticLinks.map((link) => (
+            {STATIC_LINKS.map((link) => (
               <StyledLink
                 key={link.label}
                 rel="nofollow noreferrer noopener"
                 target="_blank"
                 href={link.destination}
               >
-                <FontAwesomeIcon icon={link.icon} />
+                {link.Icon}
                 <Typography>{link.label}</Typography>
               </StyledLink>
             ))}

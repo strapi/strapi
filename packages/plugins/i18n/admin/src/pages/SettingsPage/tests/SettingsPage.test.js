@@ -1,15 +1,11 @@
 /* eslint-disable react/prop-types */
 
 import React from 'react';
-// import { createStore, combineReducers } from 'redux';
-// import { Provider } from 'react-redux';
 import { request, useRBAC } from '@strapi/helper-plugin';
 // import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 // import { ThemeProvider } from 'styled-components';
 // import { QueryClient, QueryClientProvider } from 'react-query';
 // import LocaleSettingsPage from '..';
-// eslint-disable-next-line import/extensions
-import '@fortawesome/fontawesome-free/js/all.min.js';
 // TODO: move to @strapi/helper-plugin
 // import themes from '../../../../../../../core/admin/admin/src/themes';
 // import i18nReducers, { initialState } from '../../../hooks/reducers';
