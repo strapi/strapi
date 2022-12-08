@@ -5,6 +5,10 @@ const mockIsEnabled = jest.fn();
 
 const EventEmitter = require('events');
 const createAuditLogsService = require('../audit-logs');
+const createEventHub = require('../../../../../strapi/lib/services/event-hub');
+const { createContainer } = require('../../../../../strapi/lib/container');
+const eeAdminBootstrap = require('../../bootstrap');
+const eeAdminDestroy = require('../../destroy');
 
 jest.mock('@strapi/strapi/lib/utils/ee', () => {
   return {
@@ -22,32 +26,38 @@ describe('Audit logs service', () => {
   it('emits an event when the proper license is provided', () => {
     const logSpy = jest.spyOn(console, 'log');
     mockIsEnabled.mockReturnValueOnce(true);
+
     const strapi = {
       EE: true,
-      eventHub: new EventEmitter(),
+      eventHub: createEventHub(),
+      container: createContainer({}),
+      service: () => ({
+        actionProvider: {
+          registerMany: jest.fn(),
+        },
+      }),
     };
+    global.strapi = strapi;
 
-    strapi.auditLogs = createAuditLogsService(strapi);
-    strapi.auditLogs.addEvent('test', { meta: 'payload1' });
-    strapi.auditLogs.addEvent('test', { meta: 'payload2' });
+    eeAdminBootstrap({ strapi });
 
-    expect(strapi.eventHub.eventNames().includes('test')).toBe(true);
-    expect(strapi.eventHub.eventNames().length).toBe(1);
+    strapi.eventHub.emit('test', { meta: 'payload1' });
+    strapi.eventHub.emit('test', { meta: 'payload2' });
+
     // TODO: Replace with a test to save to db
-    expect(logSpy.mock.calls[0][0]).toStrictEqual(
-      `Listened to event test with payload: ${JSON.stringify({ meta: 'payload1' })}`
-    );
-    expect(logSpy.mock.calls[1][0]).toStrictEqual(
-      `Listened to event test with payload: ${JSON.stringify({ meta: 'payload2' })}`
-    );
+    expect(logSpy).toHaveBeenCalledTimes(2);
+
+    // Cleanup
+    eeAdminDestroy({ strapi });
   });
 
   it('does not emit event when the proper license is not provided', () => {
     mockIsEnabled.mockReturnValueOnce(false);
     const strapi = {
       EE: false,
-      eventHub: new EventEmitter(),
+      eventHub: createEventHub(),
     };
+    global.strapi = strapi;
 
     strapi.auditLogs = createAuditLogsService(strapi);
     strapi.auditLogs.addEvent('test', { meta: 'sphere' });

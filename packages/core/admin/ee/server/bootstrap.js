@@ -25,7 +25,7 @@ const SSO_ACTIONS = [
   },
 ];
 
-module.exports = async () => {
+module.exports = async ({ strapi }) => {
   const { actionProvider } = getService('permission');
 
   if (features.isEnabled('sso')) {

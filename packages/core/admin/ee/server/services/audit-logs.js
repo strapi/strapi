@@ -12,13 +12,11 @@ const createAuditLogsService = (strapi) => {
 
   return {
     bootstrap() {
-      console.log('Registering audit logs service...');
       this.unsubscribe = strapi.eventHub.addSubscriber(saveEvent);
     },
 
     destroy() {
       if (this.unsubscribe) {
-        console.log('Unsubscribing from audit logs service...');
         this.unsubscribe();
       }
     },
