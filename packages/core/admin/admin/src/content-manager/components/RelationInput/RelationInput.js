@@ -355,7 +355,7 @@ const RelationInput = ({
               {ListItem}
             </List>
           </RelationList>
-        ) : null}
+        )}
         {(description || error) && (
           <Box paddingTop={2}>
             <FieldHint />
