@@ -325,7 +325,7 @@ const RelationInput = ({
           )
         }
       >
-        {relations.length > 0 ? (
+        {relations.length > 0 && (
           <RelationList overflow={overflow}>
             <VisuallyHidden id={ariaDescriptionId}>{listAriaDescription}</VisuallyHidden>
             <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
