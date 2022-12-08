@@ -206,7 +206,7 @@ You might notice in the [basic usage](#basic-usage) section this piece of code:
 </IconButton>
 ```
 
-In `firefox` the drag handler will not work if you click and drag when the element is a `button`.
+In `firefox` the drag handler will not work if you click and drag when the element is a `button`, this is known [bug in the browser](bugzilla.mozilla.org/show_bug.cgi?id=568313).
 Therefore the workaround is to use the `forwardedAs` prop to render a `div` instead of a `button`
 and add the `role` and `tabIndex` props to make this accessible. The actual `IconButton` component
 adds an accessible lable from the `aria-label` prop. So we don't have to concern ourselves with that.
