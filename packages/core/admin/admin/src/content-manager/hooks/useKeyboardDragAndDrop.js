@@ -15,6 +15,8 @@ import { useState } from 'react';
  * Utility hook designed to implement keyboard accessibile drag and drop by
  * returning an onKeyDown handler to be passed to the drag icon button.
  *
+ * @internal - You should use `useDragAndDrop` instead.
+ *
  * @type {(index: number, callbacks: UseKeyboardDragAndDropCallbacks) => (event: React.KeyboardEvent<HTMLButtonElement>) => void}
  */
 export const useKeyboardDragAndDrop = (index, { onCancel, onDropItem, onGrabItem, onMoveItem }) => {
