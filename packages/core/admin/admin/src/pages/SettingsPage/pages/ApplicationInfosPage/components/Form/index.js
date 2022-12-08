@@ -29,7 +29,9 @@ const Form = forwardRef(({ canUpdate, projectSettingsStored }, ref) => {
   };
 
   const handleResetMenuLogo = () => {
-    trackUsage('didClickResetLogo');
+    trackUsage('didClickResetLogo', {
+      logo: 'menu',
+    });
 
     dispatch({
       type: 'RESET_CUSTOM_MENU_LOGO',
@@ -44,6 +46,10 @@ const Form = forwardRef(({ canUpdate, projectSettingsStored }, ref) => {
   };
 
   const handleResetAuthLogo = () => {
+    trackUsage('didClickResetLogo', {
+      logo: 'auth',
+    });
+
     dispatch({
       type: 'RESET_CUSTOM_AUTH_LOGO',
     });

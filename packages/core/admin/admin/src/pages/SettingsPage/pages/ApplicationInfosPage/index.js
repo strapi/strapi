@@ -60,10 +60,18 @@ const ApplicationInfosPage = () => {
 
     submitMutation.mutate(formData, {
       onSuccess() {
-        const { menuLogo } = inputValues;
+        const { menuLogo, authLogo } = inputValues;
 
         if (menuLogo.rawFile) {
-          trackUsage('didChangeLogo');
+          trackUsage('didChangeLogo', {
+            logo: 'menu',
+          });
+        }
+
+        if (authLogo.rawFile) {
+          trackUsage('didChangeLogo', {
+            logo: 'auth',
+          });
         }
 
         toggleNotification({
