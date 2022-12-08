@@ -32,14 +32,18 @@ class WebhookRunner {
 
     this.queue = new WorkerQueue({ logger, concurrency: 5 });
     this.queue.subscribe(this.executeListener.bind(this));
+
+    strapi.eventHub.addSubscriber((eventName, ...args) => {
+      if (this.listeners.has(eventName)) {
+        const listener = this.listeners.get(eventName);
+        listener(...args);
+      }
+    });
   }
 
   deleteListener(event) {
     debug(`Deleting listener for event '${event}'`);
     if (this.listeners.has(event)) {
-      const fn = this.listeners.get(event);
-
-      this.eventHub.off(event, fn);
       this.listeners.delete(event);
     }
   }
@@ -57,7 +61,6 @@ class WebhookRunner {
     };
 
     this.listeners.set(event, listen);
-    this.eventHub.on(event, listen);
   }
 
   async executeListener({ event, info }) {
