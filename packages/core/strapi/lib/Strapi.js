@@ -225,7 +225,7 @@ class Strapi {
 
     await this.runLifecyclesFunctions(LIFECYCLES.DESTROY);
 
-    this.eventHub.removeAllListeners();
+    this.eventHub.removeAllSubscribers();
 
     if (_.has(this, 'db')) {
       await this.db.destroy();

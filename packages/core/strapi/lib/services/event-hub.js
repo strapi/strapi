@@ -1,16 +1,30 @@
+'use strict';
+
 /**
  * The event hub is Strapi's event control center.
  */
+module.exports = function createEventHub() {
+  // Store of subscribers that will be called when an event is emitted
+  const subscribers = [];
 
-'use strict';
+  return {
+    emit(eventName, ...args) {
+      subscribers.forEach((subscriber) => {
+        subscriber(eventName, ...args);
+      });
+    },
 
-const EventEmitter = require('events');
+    addSubscriber(subscriber) {
+      subscribers.push(subscriber);
 
-class EventHub extends EventEmitter {}
+      // Return a function to remove the subscriber
+      return () => {
+        subscribers.splice(subscribers.indexOf(subscriber), 1);
+      };
+    },
 
-/**
- * Expose a factory function instead of the class
- */
-module.exports = function createEventHub(opts) {
-  return new EventHub(opts);
+    removeAllSubscribers() {
+      subscribers.length = 0;
+    },
+  };
 };

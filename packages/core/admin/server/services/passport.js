@@ -24,7 +24,11 @@ const registerAuthEvents = () => {
   const eventList = Object.entries(events).filter(keyIsValidEventName).filter(valueIsFunctionType);
 
   for (const [eventName, handler] of eventList) {
-    strapi.eventHub.on(authEventsMapper[eventName], handler);
+    strapi.eventHub.addSubscriber((name, ...args) => {
+      if (name === authEventsMapper[eventName]) {
+        handler(...args);
+      }
+    });
   }
 };
 
