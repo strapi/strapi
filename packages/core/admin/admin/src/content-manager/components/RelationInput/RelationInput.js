@@ -499,7 +499,7 @@ const ListItem = ({ data, index, style }) => {
       onCancel={handleCancel}
       onDropItem={handleDropItem}
       onGrabItem={handleGrabItem}
-      status={publicationState}
+      status={publicationState || undefined}
       style={{
         ...style,
         bottom: style.bottom ?? 0 + RELATION_GUTTER,

@@ -17,6 +17,7 @@ const setup = ({ endAction }) =>
             iconButtonAriaLabel="Drag"
             index={0}
             id={0}
+            name="test_field"
             endAction={endAction}
           >
             First relation
@@ -26,6 +27,7 @@ const setup = ({ endAction }) =>
             iconButtonAriaLabel="Drag"
             index={1}
             id={1}
+            name="test_field"
             endAction={endAction}
           >
             Second relation

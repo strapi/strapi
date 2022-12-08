@@ -129,6 +129,7 @@ const RelationItemPlaceholder = forwardRef((_, ref) => (
 RelationItem.defaultProps = {
   ariaDescribedBy: '',
   canDrag: false,
+  displayValue: '',
   disabled: false,
   endAction: undefined,
   onCancel: undefined,
@@ -143,7 +144,7 @@ RelationItem.propTypes = {
   ariaDescribedBy: PropTypes.string,
   canDrag: PropTypes.bool,
   children: PropTypes.node.isRequired,
-  displayValue: PropTypes.string.isRequired,
+  displayValue: PropTypes.string,
   disabled: PropTypes.bool,
   endAction: PropTypes.node,
   iconButtonAriaLabel: PropTypes.string.isRequired,
