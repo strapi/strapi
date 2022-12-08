@@ -1,32 +1,33 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { getEmptyImage } from 'react-dnd-html5-backend';
 
 import { Box, Flex, Stack, IconButton } from '@strapi/design-system';
 import { Drag } from '@strapi/icons';
 
 import { useDragAndDrop } from '../../../hooks/useDragAndDrop';
 
-import { composeRefs } from '../../../utils';
+import { composeRefs, ItemTypes } from '../../../utils';
+
 import { RELATION_GUTTER } from '../constants';
 
-const StackWrapper = styled(Stack)`
+export const StackWrapper = styled(Stack)`
   width: 100%;
   /* Used to prevent endAction to be pushed out of container */
   min-width: 0;
 `;
 
-const ChildrenWrapper = styled(Flex)`
+export const ChildrenWrapper = styled(Flex)`
   width: 100%;
   /* Used to prevent endAction to be pushed out of container */
   min-width: 0;
 `;
-
-const RELATION_ITEM_DRAG_TYPE = 'RelationItem';
 
 export const RelationItem = ({
   ariaDescribedBy,
   children,
+  displayValue,
   canDrag,
   disabled,
   endAction,
@@ -34,16 +35,22 @@ export const RelationItem = ({
   style,
   id,
   index,
+  name,
   onCancel,
   onDropItem,
   onGrabItem,
+  status,
   updatePositionOfRelation,
   ...props
 }) => {
   const [{ handlerId, isDragging, handleKeyDown }, relationRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop(canDrag && !disabled, {
-      type: RELATION_ITEM_DRAG_TYPE,
+      type: `${ItemTypes.RELATION}_${name}`,
       index,
+      item: {
+        displayedValue: displayValue,
+        status,
+      },
       onGrabItem,
       onDropItem,
       onCancel,
@@ -51,6 +58,10 @@ export const RelationItem = ({
     });
 
   const composedRefs = composeRefs(relationRef, dragRef);
+
+  useEffect(() => {
+    dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
+  }, [dragPreviewRef]);
 
   return (
     <Box
@@ -124,6 +135,7 @@ RelationItem.defaultProps = {
   onDropItem: undefined,
   onGrabItem: undefined,
   style: undefined,
+  status: undefined,
   updatePositionOfRelation: undefined,
 };
 
@@ -131,14 +143,17 @@ RelationItem.propTypes = {
   ariaDescribedBy: PropTypes.string,
   canDrag: PropTypes.bool,
   children: PropTypes.node.isRequired,
+  displayValue: PropTypes.string.isRequired,
   disabled: PropTypes.bool,
   endAction: PropTypes.node,
   iconButtonAriaLabel: PropTypes.string.isRequired,
   id: PropTypes.number.isRequired,
   index: PropTypes.number.isRequired,
+  name: PropTypes.string.isRequired,
   onCancel: PropTypes.func,
   onDropItem: PropTypes.func,
   onGrabItem: PropTypes.func,
+  status: PropTypes.string,
   style: PropTypes.shape({
     height: PropTypes.number,
     left: PropTypes.number,
