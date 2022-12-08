@@ -1,36 +1,26 @@
 'use strict';
 
-const { features } = require('@strapi/strapi/lib/utils/ee');
-
 const createAuditLogsService = (strapi) => {
-  const saveEvent = (name, payload = {}) => {
-    if (!name || !Object.keys(payload).length) {
-      throw Error('Name and payload are required');
+  const saveEvent = (name, ...args) => {
+    if (!name) {
+      throw Error('Name is required');
     }
     // TODO: filter events here
     // TODO: save events here via provider
-    console.log(`Listened to event ${name} with payload: ${JSON.stringify(payload)}`);
+    console.log(`Listened to event ${name} with args: ${args}`);
   };
 
-  const isEnabled = strapi.EE && features.isEnabled('audit-logs');
-
   return {
-    addEvent(name, payload) {
-      // Don't emit events if audit logs are not enabled
-      if (!isEnabled) {
-        return;
-      }
+    bootstrap() {
+      console.log('Registering audit logs service...');
+      this.unsubscribe = strapi.eventHub.addSubscriber(saveEvent);
+    },
 
-      // Create a listener if it doesn't already exist
-      const existingsEvents = strapi.eventHub.eventNames();
-      if (!existingsEvents.includes(name)) {
-        strapi.eventHub.addListener(name, (payload) => {
-          saveEvent(name, payload);
-        });
+    destroy() {
+      if (this.unsubscribe) {
+        console.log('Unsubscribing from audit logs service...');
+        this.unsubscribe();
       }
-
-      // Emit the event
-      strapi.eventHub.emit(name, payload);
     },
   };
 };

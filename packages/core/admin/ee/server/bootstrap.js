@@ -4,6 +4,7 @@
 const { features } = require('@strapi/strapi/lib/utils/ee');
 const executeCEBootstrap = require('../../server/bootstrap');
 const { getService } = require('../../server/utils');
+const createAuditLogsService = require('./services/audit-logs');
 
 const SSO_ACTIONS = [
   {
@@ -29,6 +30,12 @@ module.exports = async () => {
 
   if (features.isEnabled('sso')) {
     await actionProvider.registerMany(SSO_ACTIONS);
+  }
+
+  if (features.isEnabled('audit-logs')) {
+    const auditLogsService = createAuditLogsService(strapi);
+    strapi.container.register('audit-logs', auditLogsService);
+    auditLogsService.bootstrap();
   }
 
   await executeCEBootstrap();
