@@ -211,7 +211,7 @@ export const MediaLibrary = () => {
                       }
                       selectAll([
                         ...assets.map((asset) => ({ ...asset, type: 'asset' })),
-                        ...folders.map((folder) => ({ ...folder, type: 'folder' })),
+                        ...(folders ?? []).map((folder) => ({ ...folder, type: 'folder' })),
                       ]);
                     }}
                   />
