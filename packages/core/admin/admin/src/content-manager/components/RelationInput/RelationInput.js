@@ -260,6 +260,8 @@ const RelationInput = ({
     ) {
       listRef.current.scrollToItem(0, 'start');
     }
+
+    updatedRelationsWith.current = undefined;
   }, [previewRelationsLength, relations]);
 
   const ariaDescriptionId = `${name}-item-instructions`;
