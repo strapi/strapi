@@ -325,35 +325,37 @@ const RelationInput = ({
           )
         }
       >
-        <RelationList overflow={overflow}>
-          <VisuallyHidden id={ariaDescriptionId}>{listAriaDescription}</VisuallyHidden>
-          <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
-          <List
-            height={dynamicListHeight}
-            ref={listRef}
-            outerRef={outerListRef}
-            itemCount={totalNumberOfRelations}
-            itemSize={RELATION_ITEM_HEIGHT + RELATION_GUTTER}
-            itemData={{
-              ariaDescribedBy: ariaDescriptionId,
-              canDrag: canReorder,
-              disabled,
-              handleCancel: onCancel,
-              handleDropItem: onDropItem,
-              handleGrabItem: onGrabItem,
-              iconButtonAriaLabel,
-              labelDisconnectRelation,
-              onRelationDisconnect,
-              publicationStateTranslations,
-              relations,
-              updatePositionOfRelation: handleUpdatePositionOfRelation,
-            }}
-            itemKey={(index, { relations: relationsItems }) => relationsItems[index].id}
-            innerElementType="ol"
-          >
-            {ListItem}
-          </List>
-        </RelationList>
+        {relations.length > 0 ? (
+          <RelationList overflow={overflow}>
+            <VisuallyHidden id={ariaDescriptionId}>{listAriaDescription}</VisuallyHidden>
+            <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
+            <List
+              height={dynamicListHeight}
+              ref={listRef}
+              outerRef={outerListRef}
+              itemCount={totalNumberOfRelations}
+              itemSize={RELATION_ITEM_HEIGHT + RELATION_GUTTER}
+              itemData={{
+                ariaDescribedBy: ariaDescriptionId,
+                canDrag: canReorder,
+                disabled,
+                handleCancel: onCancel,
+                handleDropItem: onDropItem,
+                handleGrabItem: onGrabItem,
+                iconButtonAriaLabel,
+                labelDisconnectRelation,
+                onRelationDisconnect,
+                publicationStateTranslations,
+                relations,
+                updatePositionOfRelation: handleUpdatePositionOfRelation,
+              }}
+              itemKey={(index, { relations: relationsItems }) => relationsItems[index].id}
+              innerElementType="ol"
+            >
+              {ListItem}
+            </List>
+          </RelationList>
+        ) : null}
         {(description || error) && (
           <Box paddingTop={2}>
             <FieldHint />
