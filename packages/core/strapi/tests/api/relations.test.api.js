@@ -833,7 +833,7 @@ describe('Relations', () => {
     });
   });
 
-  test.only('Update relations using the same id multiple times', async () => {
+  test('Update relations using the same id multiple times', async () => {
     const shop = await createShop({
       anyToManyRel: [
         { id: id1, position: { end: true } },
@@ -851,6 +851,22 @@ describe('Relations', () => {
 
     const expectedShop = shopFactory({
       anyToManyRel: [{ id: id2 }, { id: id1 }],
+    });
+    expect(updatedShop).toMatchObject(expectedShop);
+  });
+
+  test.only('Update relations with invalid connect array', async () => {
+    const shop = await createShop({
+      anyToManyRel: [{ id: id1, position: { end: true } }],
+    });
+
+    // Connect relation before id2, but id2 is not in the DB or in the connect array
+    const updatedShop = await updateShop(shop, {
+      anyToManyRel: [{ id: id1, position: { after: id2 } }],
+    });
+
+    const expectedShop = shopFactory({
+      anyToManyRel: [{ id: id1 }],
     });
     expect(updatedShop).toMatchObject(expectedShop);
   });
