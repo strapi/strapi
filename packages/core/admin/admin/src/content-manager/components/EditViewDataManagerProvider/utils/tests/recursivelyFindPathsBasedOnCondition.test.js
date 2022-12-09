@@ -611,4 +611,79 @@ describe('recursivelyFindPathsBasedOnCondition', () => {
       expect(actual).toEqual(['dynamic_relations', 'dynamic_relations.simple']);
     });
   });
+
+  describe('components', () => {
+    test('given that a component exits, it should be returned', () => {
+      const components = {
+        'basic.simple': {
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            categories: {
+              type: 'relation',
+              relation: 'oneToMany',
+              target: 'api::category.category',
+              targetModel: 'api::category.category',
+              relationType: 'oneToMany',
+            },
+            my_name: {
+              type: 'string',
+            },
+          },
+        },
+      };
+
+      const attributes = {
+        relation: {
+          type: 'component',
+          component: 'basic.simple',
+          repeatable: false,
+        },
+      };
+
+      const actual = recursivelyFindPathsBasedOnCondition(
+        components,
+        (value) => value.type === 'component' && !value.repeatable
+      )(attributes);
+
+      expect(actual).toEqual(['relation']);
+    });
+
+    test('given that a component is in a dynamic zone it should not return the name of the dynamic zone', () => {
+      const components = {
+        'basic.simple': {
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            categories: {
+              type: 'relation',
+              relation: 'oneToMany',
+              target: 'api::category.category',
+              targetModel: 'api::category.category',
+              relationType: 'oneToMany',
+            },
+            my_name: {
+              type: 'string',
+            },
+          },
+        },
+      };
+
+      const attributes = {
+        dynamic_relations: {
+          type: 'dynamiczone',
+          components: ['basic.simple'],
+        },
+      };
+
+      const actual = recursivelyFindPathsBasedOnCondition(
+        components,
+        (value) => value.type === 'component' && value.repeatable === false
+      )(attributes);
+
+      expect(actual).toEqual([]);
+    });
+  });
 });

@@ -194,7 +194,7 @@ const DynamicZoneComponent = ({
         ) : (
           <Accordion expanded={isOpen} onToggle={handleToggle} size="S" error={errorMessage}>
             <AccordionToggle
-              startIcon={<FontAwesomeIcon icon={icon} />}
+              startIcon={icon && <FontAwesomeIcon icon={icon} />}
               action={accordionActions}
               title={`${friendlyName}${mainValue}`}
               togglePosition="left"

@@ -149,6 +149,25 @@ export const MediaLibrary = () => {
     }
   };
 
+  const handleAssetDeleted = (numberOfAssets) => {
+    if (
+      numberOfAssets === assetCount &&
+      assetsData.pagination.page === assetsData.pagination.pageCount &&
+      assetsData.pagination.page > 1
+    ) {
+      setQuery({
+        ...query,
+        page: assetsData.pagination.page - 1,
+      });
+    }
+  };
+
+  const handleBulkActionSuccess = () => {
+    selectAll();
+
+    handleAssetDeleted(selected.length);
+  };
+
   useFocusWhenNavigate();
 
   return (
@@ -216,7 +235,11 @@ export const MediaLibrary = () => {
 
         <ContentLayout>
           {selected.length > 0 && (
-            <BulkActions currentFolder={currentFolder} selected={selected} onSuccess={selectAll} />
+            <BulkActions
+              currentFolder={currentFolder}
+              selected={selected}
+              onSuccess={handleBulkActionSuccess}
+            />
           )}
 
           {isLoading && <LoadingIndicatorPage />}
@@ -379,7 +402,14 @@ export const MediaLibrary = () => {
 
       {assetToEdit && (
         <EditAssetDialog
-          onClose={() => setAssetToEdit(undefined)}
+          onClose={(editedAsset) => {
+            // The asset has been deleted
+            if (editedAsset === null) {
+              handleAssetDeleted(1);
+            }
+
+            setAssetToEdit(undefined);
+          }}
           asset={assetToEdit}
           canUpdate={canUpdate}
           canCopyLink={canCopyLink}

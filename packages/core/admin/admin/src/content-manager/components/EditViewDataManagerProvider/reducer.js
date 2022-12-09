@@ -207,6 +207,7 @@ const reducer = (state, action) =>
           componentPaths = [],
           repeatableComponentPaths = [],
           dynamicZonePaths = [],
+          setModifiedDataOnly,
         } = action;
 
         /**
@@ -258,7 +259,10 @@ const reducer = (state, action) =>
             return acc;
           }, data);
 
-        draftState.initialData = mergeDataWithPreparedRelations;
+        if (!setModifiedDataOnly) {
+          draftState.initialData = mergeDataWithPreparedRelations;
+        }
+
         draftState.modifiedData = mergeDataWithPreparedRelations;
 
         draftState.formErrors = {};

@@ -231,8 +231,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         color: #666687;
       }
 
-      .c13[aria-disabled='true'] svg > g,
-      .c13[aria-disabled='true'] svg path {
+      .c13[aria-disabled='true'] svg > g,.c13[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -245,8 +244,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         color: #666687;
       }
 
-      .c13[aria-disabled='true']:active svg > g,
-      .c13[aria-disabled='true']:active svg path {
+      .c13[aria-disabled='true']:active svg > g,.c13[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
