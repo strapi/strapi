@@ -16,8 +16,14 @@ const getPluginsPath = () => {
    *
    * and see https://github.com/isaacs/node-glob/issues/467#issuecomment-1114240501 for the recommended fix.
    */
-  const corePath = join(rootPath, 'core', '*').split(sep).join(posix.sep);
-  const pluginsPath = join(rootPath, 'plugins', '*').split(sep).join(posix.sep);
+  let corePath = join(rootPath, 'core', '*');
+  let pluginsPath = join(rootPath, 'plugins', '*');
+
+  if (process.platform === 'win32') {
+    corePath = corePath.split(sep).join(posix.sep);
+    pluginsPath = pluginsPath.split(sep).join(posix.sep);
+  }
+
   const corePackageDirs = glob.sync(corePath);
   const pluginsPackageDirs = glob.sync(pluginsPath);
 
