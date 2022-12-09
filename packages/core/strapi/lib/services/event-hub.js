@@ -4,17 +4,24 @@
  * The event hub is Strapi's event control center.
  */
 module.exports = function createEventHub() {
+  const listeners = new Map();
+
+  // Default subscriber to easily add listeners with the on() method
+  const defaultSubscriber = async (eventName, ...args) => {
+    if (listeners.has(eventName)) {
+      return Promise.all(listeners.get(eventName).map((listener) => listener(...args)));
+    }
+  };
+
   // Store of subscribers that will be called when an event is emitted
-  const subscribers = [];
+  const subscribers = [defaultSubscriber];
 
   return {
-    emit(eventName, ...args) {
-      subscribers.forEach((subscriber) => {
-        subscriber(eventName, ...args);
-      });
+    async emit(eventName, ...args) {
+      await Promise.all(subscribers.map((subscriber) => subscriber(eventName, ...args)));
     },
 
-    addSubscriber(subscriber) {
+    subscribe(subscriber) {
       subscribers.push(subscriber);
 
       // Return a function to remove the subscriber
@@ -23,7 +30,20 @@ module.exports = function createEventHub() {
       };
     },
 
-    removeAllSubscribers() {
+    on(eventName, listener) {
+      if (!listeners.has(eventName)) {
+        listeners.set(eventName, []);
+      }
+
+      listeners.get(eventName).push(listener);
+
+      // Return a function to remove the listener
+      return () => {
+        listeners.get(eventName).splice(listeners.get(eventName).indexOf(listener), 1);
+      };
+    },
+
+    destroy() {
       subscribers.length = 0;
     },
   };

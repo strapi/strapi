@@ -33,7 +33,7 @@ class WebhookRunner {
     this.queue = new WorkerQueue({ logger, concurrency: 5 });
     this.queue.subscribe(this.executeListener.bind(this));
 
-    strapi.eventHub.addSubscriber((eventName, ...args) => {
+    strapi.eventHub.subscribe((eventName, ...args) => {
       if (this.listeners.has(eventName)) {
         const listener = this.listeners.get(eventName);
         listener(...args);
