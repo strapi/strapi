@@ -122,7 +122,7 @@ const DraggedItem = ({
 
   useEffect(() => {
     dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
-  }, [dragPreviewRef]);
+  }, [dragPreviewRef, index]);
 
   const composedAccordionRefs = composeRefs(accordionRef, dragRef);
   const composedBoxRefs = composeRefs(boxRef, dropRef);

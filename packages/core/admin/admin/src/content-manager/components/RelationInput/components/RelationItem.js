@@ -61,7 +61,7 @@ export const RelationItem = ({
 
   useEffect(() => {
     dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
-  }, [dragPreviewRef]);
+  }, [dragPreviewRef, index]);
 
   return (
     <Box

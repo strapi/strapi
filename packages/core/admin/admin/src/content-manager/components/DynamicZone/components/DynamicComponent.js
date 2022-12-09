@@ -145,7 +145,7 @@ const DynamicZoneComponent = ({
 
   useEffect(() => {
     dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
-  }, [dragPreviewRef]);
+  }, [dragPreviewRef, index]);
 
   const composedBoxRefs = composeRefs(boxRef, dropRef);
 
