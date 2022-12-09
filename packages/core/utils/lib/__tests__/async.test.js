@@ -31,6 +31,15 @@ describe('Async utils', () => {
         });
       }).rejects.toThrow('test');
     });
+    test('Should throw an error 2', async () => {
+      const numberPromiseArray = [Promise.reject(new Error('input')), Promise.resolve(2)];
+
+      const mapFunc = mapAsync(numberPromiseArray);
+
+      await expect(async () => {
+        await mapFunc(() => true);
+      }).rejects.toThrow('input');
+    });
   });
   describe('reduceAsync', () => {
     test('Should return a incremented number', async () => {
@@ -65,6 +74,15 @@ describe('Async utils', () => {
           throw new Error('test');
         });
       }).rejects.toThrow('test');
+    });
+    test('Should throw an error 2', async () => {
+      const numberPromiseArray = [Promise.reject(new Error('input')), Promise.resolve(2)];
+
+      const reduceFunc = reduceAsync(numberPromiseArray);
+
+      await expect(async () => {
+        await reduceFunc(() => true);
+      }).rejects.toThrow('input');
     });
   });
 });
