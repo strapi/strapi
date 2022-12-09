@@ -131,7 +131,7 @@ const DynamicZoneComponent = ({
 
   const [{ handlerId, isDragging, handleKeyDown }, boxRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop(isFieldAllowed, {
-      type: ItemTypes.DYNAMIC_ZONE,
+      type: `${ItemTypes.DYNAMIC_ZONE}_${name}`,
       index,
       item: {
         displayedValue: `${friendlyName}${mainValue}`,
@@ -145,7 +145,7 @@ const DynamicZoneComponent = ({
 
   useEffect(() => {
     dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
-  }, [dragPreviewRef]);
+  }, [dragPreviewRef, index]);
 
   const composedBoxRefs = composeRefs(boxRef, dropRef);
 

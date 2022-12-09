@@ -32,7 +32,7 @@ const LinkEllipsis = styled(Link)`
   display: inherit;
 `;
 
-const BoxEllipsis = styled(Box)`
+export const BoxEllipsis = styled(Box)`
   > span {
     white-space: nowrap;
     overflow: hidden;
@@ -41,7 +41,7 @@ const BoxEllipsis = styled(Box)`
   }
 `;
 
-const DisconnectButton = styled.button`
+export const DisconnectButton = styled.button`
   svg path {
     fill: ${({ theme }) => theme.colors.neutral500};
   }
@@ -260,6 +260,8 @@ const RelationInput = ({
     ) {
       listRef.current.scrollToItem(0, 'start');
     }
+
+    updatedRelationsWith.current = undefined;
   }, [previewRelationsLength, relations]);
 
   const ariaDescriptionId = `${name}-item-instructions`;
@@ -336,6 +338,7 @@ const RelationInput = ({
               itemCount={totalNumberOfRelations}
               itemSize={RELATION_ITEM_HEIGHT + RELATION_GUTTER}
               itemData={{
+                name,
                 ariaDescribedBy: ariaDescriptionId,
                 canDrag: canReorder,
                 disabled,
@@ -349,7 +352,9 @@ const RelationInput = ({
                 relations,
                 updatePositionOfRelation: handleUpdatePositionOfRelation,
               }}
-              itemKey={(index, { relations: relationsItems }) => relationsItems[index].id}
+              itemKey={(index, { relations: relationsItems }) =>
+                `${relationsItems[index].mainField}_${relationsItems[index].id}`
+              }
               innerElementType="ol"
             >
               {ListItem}
@@ -462,6 +467,7 @@ const ListItem = ({ data, index, style }) => {
     handleDropItem,
     handleGrabItem,
     iconButtonAriaLabel,
+    name,
     labelDisconnectRelation,
     onRelationDisconnect,
     publicationStateTranslations,
@@ -476,9 +482,11 @@ const ListItem = ({ data, index, style }) => {
       ariaDescribedBy={ariaDescribedBy}
       canDrag={canDrag}
       disabled={disabled}
+      displayValue={mainField ?? id}
       iconButtonAriaLabel={iconButtonAriaLabel}
       id={id}
       index={index}
+      name={name}
       endAction={
         <DisconnectButton
           data-testid={`remove-relation-${id}`}
@@ -493,6 +501,7 @@ const ListItem = ({ data, index, style }) => {
       onCancel={handleCancel}
       onDropItem={handleDropItem}
       onGrabItem={handleGrabItem}
+      status={publicationState || undefined}
       style={{
         ...style,
         bottom: style.bottom ?? 0 + RELATION_GUTTER,
@@ -539,6 +548,7 @@ ListItem.propTypes = {
     handleGrabItem: PropTypes.func,
     iconButtonAriaLabel: PropTypes.string.isRequired,
     labelDisconnectRelation: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
     onRelationDisconnect: PropTypes.func.isRequired,
     publicationStateTranslations: PropTypes.shape({
       draft: PropTypes.string.isRequired,

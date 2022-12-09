@@ -16,6 +16,7 @@ const setup = ({ endAction, testingDnd = false, ...props }) =>
           canDrag={testingDnd}
           id={0}
           index={0}
+          name="test_field"
           endAction={endAction}
           {...props}
         >
@@ -23,6 +24,7 @@ const setup = ({ endAction, testingDnd = false, ...props }) =>
         </RelationItem>
         {testingDnd ? (
           <RelationItem
+            name="test_field"
             ariaDescribedBy="test"
             iconButtonAriaLabel="Drag"
             canDrag={testingDnd}

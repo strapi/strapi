@@ -6,6 +6,7 @@ import ItemTypes from '../../utils/ItemTypes';
 import CardPreview from '../../pages/ListSettingsView/components/CardPreview';
 
 import ComponentPreview from './ComponentDragPreview';
+import { RelationDragPreview } from './RelationDragPreview';
 
 const layerStyles = {
   position: 'fixed',
@@ -48,6 +49,13 @@ const CustomDragLayer = () => {
     return null;
   }
 
+  /**
+   * Because a user may have multiple relations / dynamic zones / repeable fields in the same content type,
+   * we append the fieldName for the item type to make them unique, however, we then want to extract that
+   * first type to apply the correct preview.
+   */
+  const [actualType] = itemType.split('_');
+
   return (
     <LayoutDndProvider>
       <div style={layerStyles}>
@@ -55,11 +63,18 @@ const CustomDragLayer = () => {
           {[ItemTypes.EDIT_FIELD, ItemTypes.FIELD].includes(itemType) && (
             <CardPreview labelField={item.labelField} />
           )}
-          {itemType === ItemTypes.COMPONENT && (
+          {actualType === ItemTypes.COMPONENT && (
             <ComponentPreview displayedValue={item.displayedValue} />
           )}
-          {itemType === ItemTypes.DYNAMIC_ZONE && (
+          {actualType === ItemTypes.DYNAMIC_ZONE && (
             <ComponentPreview icon={item.icon} displayedValue={item.displayedValue} />
+          )}
+          {actualType === ItemTypes.RELATION && (
+            <RelationDragPreview
+              displayedValue={item.displayedValue}
+              status={item.status}
+              width={item.width}
+            />
           )}
         </div>
       </div>

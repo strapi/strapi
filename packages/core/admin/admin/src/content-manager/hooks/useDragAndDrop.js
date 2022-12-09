@@ -90,7 +90,13 @@ export const useDragAndDrop = (
         onStart();
       }
 
-      return { index, ...item };
+      /**
+       * This will be attached and it helps define the preview sizes
+       * when a component is flexy e.g. Relations
+       */
+      const { width } = objectRef.current?.getBoundingClientRect() ?? {};
+
+      return { index, width, ...item };
     },
     end() {
       if (onEnd) {

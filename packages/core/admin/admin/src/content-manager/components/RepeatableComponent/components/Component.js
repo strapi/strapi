@@ -97,9 +97,11 @@ const DraggedItem = ({
   const accordionRef = useRef(null);
   const { formatMessage } = useIntl();
 
+  const [parentFieldName] = componentFieldName.split('.');
+
   const [{ handlerId, isDragging, handleKeyDown }, boxRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop(!isReadOnly, {
-      type: ItemTypes.COMPONENT,
+      type: `${ItemTypes.COMPONENT}_${parentFieldName}`,
       index,
       item: {
         displayedValue,
@@ -120,7 +122,7 @@ const DraggedItem = ({
 
   useEffect(() => {
     dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
-  }, [dragPreviewRef]);
+  }, [dragPreviewRef, index]);
 
   const composedAccordionRefs = composeRefs(accordionRef, dragRef);
   const composedBoxRefs = composeRefs(boxRef, dropRef);
