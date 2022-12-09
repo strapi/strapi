@@ -9,6 +9,7 @@ import { Stack } from '@strapi/design-system/Stack';
 import { useContentTypeLayout } from '../../hooks';
 import FieldComponent from '../FieldComponent';
 import Inputs from '../Inputs';
+import useLazyComponents from '../../hooks/useLazyComponents';
 
 const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, name }) => {
   const { getComponentLayout } = useContentTypeLayout();
@@ -17,6 +18,8 @@ const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, nam
     [componentUid, getComponentLayout]
   );
   const fields = componentLayoutData.layouts.edit;
+
+  const { lazyComponentStore } = useLazyComponents();
 
   return (
     <Box
@@ -67,6 +70,7 @@ const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, nam
                       metadatas={metadatas}
                       queryInfos={queryInfos}
                       size={size}
+                      customFieldInputs={lazyComponentStore}
                     />
                   </GridItem>
                 );

@@ -435,8 +435,7 @@ describe('Admin | containers | RoleEditPage', () => {
         color: #666687;
       }
 
-      .c14[aria-disabled='true'] svg > g,
-      .c14[aria-disabled='true'] svg path {
+      .c14[aria-disabled='true'] svg > g,.c14[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -449,8 +448,7 @@ describe('Admin | containers | RoleEditPage', () => {
         color: #666687;
       }
 
-      .c14[aria-disabled='true']:active svg > g,
-      .c14[aria-disabled='true']:active svg path {
+      .c14[aria-disabled='true']:active svg > g,.c14[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -781,10 +779,6 @@ describe('Admin | containers | RoleEditPage', () => {
 
       .c41:hover:not([aria-disabled='true']) {
         border: 1px solid #4945ff;
-      }
-
-      .c41:hover:not([aria-disabled='true']) .sc-cOLXoO {
-        color: #271fe0;
       }
 
       .c41:hover:not([aria-disabled='true']) .c7 {
@@ -1125,7 +1119,7 @@ describe('Admin | containers | RoleEditPage', () => {
                                   class="c7 c49"
                                 >
                                   <span
-                                    class="c7 sc-cOLXoO c50"
+                                    class="c7 c50"
                                     id="accordion-label-accordion-3"
                                   >
                                     Address
