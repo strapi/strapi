@@ -1,21 +1,44 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DateTimePicker snapshots the component 1`] = `
-.c8 {
+.c2 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c17 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c20 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c7 {
   padding-right: 8px;
   padding-left: 12px;
 }
 
-.c15 {
+.c14 {
   padding-left: 12px;
 }
 
-.c17 {
+.c16 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c1 {
+.c0 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -43,7 +66,7 @@ exports[`DateTimePicker snapshots the component 1`] = `
   flex-direction: row;
 }
 
-.c6 {
+.c5 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -61,53 +84,30 @@ exports[`DateTimePicker snapshots the component 1`] = `
   justify-content: space-between;
 }
 
-.c2 > * {
+.c1 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c2 > * + * {
+.c1 > * + * {
   margin-top: 4px;
 }
 
-.c11 > * {
+.c10 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c5 > * {
+.c4 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c5 > * + * {
+.c4 > * + * {
   margin-left: 8px;
 }
 
-.c4 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c18 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c21 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c10 {
+.c9 {
   border: none;
   border-radius: 4px;
   padding-bottom: 0.65625rem;
@@ -122,36 +122,36 @@ exports[`DateTimePicker snapshots the component 1`] = `
   background: inherit;
 }
 
-.c10::-webkit-input-placeholder {
+.c9::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c10::-moz-placeholder {
+.c9::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c10:-ms-input-placeholder {
+.c9:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c10::placeholder {
+.c9::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c10[aria-disabled='true'] {
+.c9[aria-disabled='true'] {
   color: inherit;
 }
 
-.c10:focus {
+.c9:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c7 {
+.c6 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
@@ -163,41 +163,12 @@ exports[`DateTimePicker snapshots the component 1`] = `
   transition-duration: 0.2s;
 }
 
-.c7:focus-within {
+.c6:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c9 {
-  border: none;
-  background: transparent;
-  border-radius: 4px;
-}
-
-.c9 svg path {
-  fill: #8e8ea9;
-}
-
-.c13 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c13:focus {
-  outline: none;
-}
-
-.c13[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c12 {
+.c11 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -213,28 +184,28 @@ exports[`DateTimePicker snapshots the component 1`] = `
   transition-duration: 0.2s;
 }
 
-.c12:focus-within {
+.c11:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c19 {
+.c18 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c19 svg {
+.c18 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c19 svg path {
+.c18 svg path {
   fill: #666687;
 }
 
-.c20 {
+.c19 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -243,15 +214,44 @@ exports[`DateTimePicker snapshots the component 1`] = `
   border: none;
 }
 
-.c20 svg {
+.c19 svg {
   width: 0.375rem;
 }
 
-.c14 {
+.c8 {
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+}
+
+.c8 svg path {
+  fill: #8e8ea9;
+}
+
+.c12 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c12:focus {
+  outline: none;
+}
+
+.c12[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c13 {
   width: 100%;
 }
 
-.c16 {
+.c15 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -262,45 +262,36 @@ exports[`DateTimePicker snapshots the component 1`] = `
   align-items: center;
 }
 
-.c16 svg {
+.c15 svg {
   height: 1rem;
   width: 1rem;
 }
 
-.c16 svg path {
+.c15 svg path {
   fill: #8e8ea9;
 }
 
-.c0 > div > div p[data-strapi-field-error='true'] {
-  display: none;
-}
-
 <div
-  aria-labelledby="datetime-label"
-  class="c0"
+  aria-labelledby="datetime-label-1"
   role="group"
 >
   <div
-    class="c1 c2"
+    class="c0 c1"
     spacing="1"
   >
-    <div
-      class="c3"
+    <label
+      class="c2"
+      for="field-3"
+      id="datetime-label-1"
     >
-      <label
-        class="c4"
-        for="field-1"
-        id="datetime-label"
+      <div
+        class="c3"
       >
-        <div
-          class="c3"
-        >
-          Date time picker
-        </div>
-      </label>
-    </div>
+        Date time picker
+      </div>
+    </label>
     <div
-      class="c3 c5"
+      class="c3 c4"
       spacing="2"
     >
       <div
@@ -309,19 +300,19 @@ exports[`DateTimePicker snapshots the component 1`] = `
         <div>
           <div>
             <div
-              class="c1 c2"
+              class="c0 c1"
               spacing="1"
             >
               <div
-                class="c6 c7"
+                class="c5 c6"
               >
                 <div
-                  class="c8"
+                  class="c7"
                 >
                   <button
                     aria-disabled="false"
                     aria-label="Date picker, current is 10/13/2021"
-                    class="c9"
+                    class="c8"
                     type="button"
                   >
                     <svg
@@ -346,9 +337,9 @@ exports[`DateTimePicker snapshots the component 1`] = `
                   aria-disabled="false"
                   aria-invalid="false"
                   aria-label="Date time picker"
-                  class="c10"
+                  class="c9"
                   data-testid="datetimepicker-date"
-                  id="datepicker-2"
+                  id="datepicker-4"
                   name="datetimepicker"
                   value="10/13/2021"
                 />
@@ -359,34 +350,34 @@ exports[`DateTimePicker snapshots the component 1`] = `
       </div>
       <div>
         <div
-          class="c1 c11"
+          class="c0 c10"
         >
           <div
-            class="c3 c12"
+            class="c3 c11"
           >
             <button
               aria-disabled="false"
               aria-expanded="false"
               aria-haspopup="listbox"
               aria-label="Date time picker"
-              aria-labelledby="timepicker-3-label timepicker-3-content"
-              class="c13"
+              aria-labelledby="timepicker-5-label timepicker-5-content"
+              class="c12"
               data-testid="datetimepicker-time"
-              id="timepicker-3"
+              id="timepicker-5"
               type="button"
             />
             <div
-              class="c6 c14"
+              class="c5 c13"
             >
               <div
                 class="c3"
               >
                 <div
                   aria-hidden="true"
-                  class="c15"
+                  class="c14"
                 >
                   <div
-                    class="c16"
+                    class="c15"
                   >
                     <svg
                       fill="none"
@@ -405,11 +396,11 @@ exports[`DateTimePicker snapshots the component 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c17"
+                  class="c16"
                 >
                   <span
-                    class="c18"
-                    id="timepicker-3-content"
+                    class="c17"
+                    id="timepicker-5-content"
                   >
                     10:00
                   </span>
@@ -420,9 +411,9 @@ exports[`DateTimePicker snapshots the component 1`] = `
               >
                 <button
                   aria-hidden="true"
-                  class="c15 c19 c20"
+                  class="c14 c18 c19"
                   tabindex="-1"
-                  title="Carret Down Button"
+                  title="select"
                   type="button"
                 >
                   <svg
@@ -447,8 +438,8 @@ exports[`DateTimePicker snapshots the component 1`] = `
       </div>
     </div>
     <p
-      class="c21"
-      id="field-1-hint"
+      class="c20"
+      id="field-3-hint"
     >
       This is a super description
     </p>

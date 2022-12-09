@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { DateTimePicker } from '@strapi/design-system/DateTimePicker';
-import { Select, Option } from '@strapi/design-system/Select';
+import { DateTimePicker, Select } from '@strapi/design-system';
+import { Option } from '@strapi/design-system/Select';
 import { useIntl } from 'react-intl';
 
 const FilterValueInput = ({ label, onChange, options, type, value }) => {
