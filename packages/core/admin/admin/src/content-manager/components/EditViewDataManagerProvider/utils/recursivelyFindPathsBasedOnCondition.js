@@ -55,8 +55,15 @@ const recursivelyFindPathsBasedOnConditionSetup = (components, predicate = () =>
                *
                * NOTE: we don't need to know the path to the `array` because it's about data shape not about the actual data
                */
-            }).map((path) => path.split(`${componentName}.`)[1]);
+            }).map((path) => {
+              return path.split(`${componentName}.`)[1];
+            });
           })
+          /**
+           * We filter because this will give you `dynamiczone.undefined` because the dynamic_zone component
+           * is not required to be returned in this circumstance.
+           */
+          .filter((path) => Boolean(path))
           .map((path) => `${key}.${path}`);
 
         acc = [...acc, attributesInDynamicComponents];
