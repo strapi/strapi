@@ -327,8 +327,7 @@ describe('Homepage', () => {
         color: #666687;
       }
 
-      .c18[aria-disabled='true'] svg > g,
-      .c18[aria-disabled='true'] svg path {
+      .c18[aria-disabled='true'] svg > g,.c18[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -341,8 +340,7 @@ describe('Homepage', () => {
         color: #666687;
       }
 
-      .c18[aria-disabled='true']:active svg > g,
-      .c18[aria-disabled='true']:active svg path {
+      .c18[aria-disabled='true']:active svg > g,.c18[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -464,8 +462,7 @@ describe('Homepage', () => {
         color: #666687;
       }
 
-      .c45[aria-disabled='true'] svg > g,
-      .c45[aria-disabled='true'] svg path {
+      .c45[aria-disabled='true'] svg > g,.c45[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -478,8 +475,7 @@ describe('Homepage', () => {
         color: #666687;
       }
 
-      .c45[aria-disabled='true']:active svg > g,
-      .c45[aria-disabled='true']:active svg path {
+      .c45[aria-disabled='true']:active svg > g,.c45[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -562,15 +558,15 @@ describe('Homepage', () => {
       }
 
       .c53 > path:first-child {
-        fill: #8e75ff;
+        fill: #4945ff;
       }
 
       .c53 > path:nth-child(2) {
-        fill: #8e75ff;
+        fill: #fff;
       }
 
-      .c53 > path:nth-child(3) {
-        fill: #8e75ff;
+      .c53 > path:nth-child(4) {
+        fill: #9593ff;
       }
 
       .c51 path {

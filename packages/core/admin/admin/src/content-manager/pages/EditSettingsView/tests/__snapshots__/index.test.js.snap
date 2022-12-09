@@ -349,8 +349,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c13[aria-disabled='true'] svg > g,
-.c13[aria-disabled='true'] svg path {
+.c13[aria-disabled='true'] svg > g,.c13[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -363,8 +362,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c13[aria-disabled='true']:active svg > g,
-.c13[aria-disabled='true']:active svg path {
+.c13[aria-disabled='true']:active svg > g,.c13[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -430,8 +428,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c56[aria-disabled='true'] svg > g,
-.c56[aria-disabled='true'] svg path {
+.c56[aria-disabled='true'] svg > g,.c56[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -444,8 +441,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c56[aria-disabled='true']:active svg > g,
-.c56[aria-disabled='true']:active svg path {
+.c56[aria-disabled='true']:active svg > g,.c56[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -695,8 +691,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c39[aria-disabled='true'] svg > g,
-.c39[aria-disabled='true'] svg path {
+.c39[aria-disabled='true'] svg > g,.c39[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -709,8 +704,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c39[aria-disabled='true']:active svg > g,
-.c39[aria-disabled='true']:active svg path {
+.c39[aria-disabled='true']:active svg > g,.c39[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -1814,8 +1808,7 @@ exports[`EditSettingsView should add field 1`] = `
   color: #666687;
 }
 
-.c13[aria-disabled='true'] svg > g,
-.c13[aria-disabled='true'] svg path {
+.c13[aria-disabled='true'] svg > g,.c13[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -1828,8 +1821,7 @@ exports[`EditSettingsView should add field 1`] = `
   color: #666687;
 }
 
-.c13[aria-disabled='true']:active svg > g,
-.c13[aria-disabled='true']:active svg path {
+.c13[aria-disabled='true']:active svg > g,.c13[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -1895,8 +1887,7 @@ exports[`EditSettingsView should add field 1`] = `
   color: #666687;
 }
 
-.c56[aria-disabled='true'] svg > g,
-.c56[aria-disabled='true'] svg path {
+.c56[aria-disabled='true'] svg > g,.c56[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -1909,8 +1900,7 @@ exports[`EditSettingsView should add field 1`] = `
   color: #666687;
 }
 
-.c56[aria-disabled='true']:active svg > g,
-.c56[aria-disabled='true']:active svg path {
+.c56[aria-disabled='true']:active svg > g,.c56[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -2160,8 +2150,7 @@ exports[`EditSettingsView should add field 1`] = `
   color: #666687;
 }
 
-.c39[aria-disabled='true'] svg > g,
-.c39[aria-disabled='true'] svg path {
+.c39[aria-disabled='true'] svg > g,.c39[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -2174,8 +2163,7 @@ exports[`EditSettingsView should add field 1`] = `
   color: #666687;
 }
 
-.c39[aria-disabled='true']:active svg > g,
-.c39[aria-disabled='true']:active svg path {
+.c39[aria-disabled='true']:active svg > g,.c39[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
