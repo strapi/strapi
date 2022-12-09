@@ -30,13 +30,9 @@ const DragButton = styled.span`
   background-color: transparent;
   padding: 0 ${({ theme }) => theme.spaces[3]};
   cursor: all-scroll;
-
   svg {
     width: ${12 / 16}rem;
     height: ${12 / 16}rem;
-  }
-
-  svg {
     path {
       fill: ${({ theme, expanded }) =>
         expanded ? theme.colors.primary600 : theme.colors.neutral600};
