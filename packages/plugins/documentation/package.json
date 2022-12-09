@@ -39,7 +39,7 @@
     "react-intl": "5.25.1",
     "react-redux": "7.2.8",
     "react-router": "^5.2.0",
-    "react-router-dom": "5.2.0",
+    "react-router-dom": "5.3.4",
     "redux": "^4.0.1",
     "reselect": "^4.0.0",
     "swagger-ui-dist": "4.15.5",
@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "@testing-library/react": "12.1.4",
-    "msw": "0.42.3"
+    "msw": "0.49.1"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",
