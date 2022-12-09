@@ -1,8 +1,18 @@
 'use strict';
 
-const { mapAsync, reduceAsync } = require('../async');
+const { pipeAsync, mapAsync, reduceAsync } = require('../async');
 
 describe('Async utils', () => {
+  describe('pipeAsync', () => {
+    test('Should pipe several functions', async () => {
+      const circleAreaPipe = [(n) => n * n, (n) => Promise.resolve(n * Math.PI), Math.round];
+
+      const circleAreaFunc = pipeAsync(...circleAreaPipe);
+      const result = await circleAreaFunc(50);
+
+      expect(result).toEqual(7854);
+    });
+  });
   describe('mapAsync', () => {
     test('Should return a simple array of numbers', async () => {
       const numberPromiseArray = [Promise.resolve(1), Promise.resolve(2)];
