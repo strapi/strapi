@@ -44,6 +44,7 @@ module.exports = function createEventHub() {
     },
 
     destroy() {
+      listeners.clear();
       subscribers.length = 0;
     },
   };
