@@ -27,13 +27,28 @@ const DragButton = styled.span`
   display: flex;
   align-items: center;
   height: ${({ theme }) => theme.spaces[7]};
-
+  background-color: transparent;
   padding: 0 ${({ theme }) => theme.spaces[3]};
   cursor: all-scroll;
 
   svg {
     width: ${12 / 16}rem;
     height: ${12 / 16}rem;
+  }
+
+  svg {
+    path {
+      fill: ${({ theme, expanded }) =>
+        expanded ? theme.colors.primary600 : theme.colors.neutral600};
+    }
+  }
+
+  &:hover {
+    svg {
+      path {
+        fill: ${({ theme }) => theme.colors.primary600};
+      }
+    }
   }
 `;
 
