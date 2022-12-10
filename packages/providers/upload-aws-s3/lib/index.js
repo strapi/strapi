@@ -41,6 +41,8 @@ module.exports = {
             // set the bucket file url
             if (assertUrlProtocol(data.Location)) {
               file.url = data.Location;
+            } else if (data.Location[0] === '/') {
+              file.url = `https://${config.params.Bucket}.${config.endpoint}${data.Location}`;
             } else {
               // Default protocol to https protocol
               file.url = `https://${data.Location}`;
