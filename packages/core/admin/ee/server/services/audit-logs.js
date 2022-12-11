@@ -7,12 +7,12 @@ const createAuditLogsService = (strapi) => {
     }
     // TODO: filter events here
     // TODO: save events here via provider
-    console.log(`Listened to event ${name} with args: ${args}`);
+    console.log(`Listened to event ${name} with args: ${JSON.stringify(args)}`);
   };
 
   return {
     bootstrap() {
-      this.unsubscribe = strapi.eventHub.addSubscriber(saveEvent);
+      this.unsubscribe = strapi.eventHub.subscribe(saveEvent);
     },
 
     destroy() {

@@ -1,84 +1,101 @@
 'use strict';
 
-// Mock before modules require it
-const mockIsEnabled = jest.fn();
-
-const EventEmitter = require('events');
-const createAuditLogsService = require('../audit-logs');
 const createEventHub = require('../../../../../strapi/lib/services/event-hub');
-const { createContainer } = require('../../../../../strapi/lib/container');
-const eeAdminBootstrap = require('../../bootstrap');
-const eeAdminDestroy = require('../../destroy');
+const createAuditLogsService = require('../audit-logs');
 
-jest.mock('@strapi/strapi/lib/utils/ee', () => {
-  return {
-    features: {
-      isEnabled: mockIsEnabled,
-    },
-  };
-});
+jest.mock('../../../../server/bootstrap');
 
-describe('Audit logs service', () => {
+describe('Audit logs auth', () => {
   afterEach(() => {
     jest.resetAllMocks();
+    jest.resetModules();
   });
 
-  it('emits an event when the proper license is provided', () => {
-    const logSpy = jest.spyOn(console, 'log');
-    mockIsEnabled.mockReturnValueOnce(true);
-
-    const strapi = {
-      EE: true,
-      eventHub: createEventHub(),
-      container: createContainer({}),
-      service: () => ({
-        actionProvider: {
-          registerMany: jest.fn(),
+  describe('Init with audit logs disabled', () => {
+    beforeAll(() => {
+      jest.mock('@strapi/strapi/lib/utils/ee', () => ({
+        features: {
+          isEnabled: () => false,
         },
-      }),
-    };
-    global.strapi = strapi;
+      }));
+    });
 
-    eeAdminBootstrap({ strapi });
+    it('should not register the audit logs service when bootstraped', async () => {
+      const eeAdminBootstrap = require('../../bootstrap');
+      const mockRegister = jest.fn();
 
-    strapi.eventHub.emit('test', { meta: 'payload1' });
-    strapi.eventHub.emit('test', { meta: 'payload2' });
+      global.strapi = {
+        admin: {
+          services: {
+            permission: {
+              actionProvider: { registerMany: jest.fn() },
+            },
+          },
+        },
+        container: {
+          register: mockRegister,
+        },
+      };
 
-    // TODO: Replace with a test to save to db
-    expect(logSpy).toHaveBeenCalledTimes(2);
+      await eeAdminBootstrap({ strapi });
 
-    // Cleanup
-    eeAdminDestroy({ strapi });
+      expect(mockRegister).not.toHaveBeenCalledWith('audit-logs', expect.anything());
+    });
   });
 
-  it('does not emit event when the proper license is not provided', () => {
-    mockIsEnabled.mockReturnValueOnce(false);
-    const strapi = {
-      EE: false,
-      eventHub: createEventHub(),
-    };
-    global.strapi = strapi;
+  describe('Init with audit logs enabled', () => {
+    const mockRegister = jest.fn();
 
-    strapi.auditLogs = createAuditLogsService(strapi);
-    strapi.auditLogs.addEvent('test', { meta: 'sphere' });
+    beforeEach(() => {
+      jest.mock('@strapi/strapi/lib/utils/ee', () => ({
+        features: {
+          // We only enabled audit logs
+          isEnabled: (feature) => feature === 'audit-logs',
+        },
+      }));
+      global.strapi = {
+        admin: {
+          services: {
+            permission: {
+              actionProvider: { registerMany: jest.fn() },
+            },
+          },
+        },
+        container: {
+          register: mockRegister,
+        },
+        eventHub: createEventHub(),
+      };
+    });
 
-    expect(strapi.eventHub.eventNames()).toEqual([]);
-  });
+    it('should register and init the audit logs service when bootstraped', async () => {
+      const eeAdminBootstrap = require('../../bootstrap');
 
-  it('throws when event is missing name or payload', () => {
-    mockIsEnabled.mockReturnValueOnce(true);
-    const strapi = {
-      EE: true,
-      eventHub: new EventEmitter(),
-    };
+      await eeAdminBootstrap({ strapi });
 
-    strapi.auditLogs = createAuditLogsService(strapi);
+      expect(mockRegister).toHaveBeenCalledWith('audit-logs', expect.anything());
+    });
 
-    expect(() => {
-      strapi.auditLogs.addEvent('', { meta: 'payload1' });
-    }).toThrow('Name and payload are required');
-    expect(() => {
-      strapi.auditLogs.addEvent('test', {});
-    }).toThrow('Name and payload are required');
+    it('should emit an event and capture it in the audit logs', async () => {
+      const logSpy = jest.spyOn(console, 'log');
+
+      const auditLogsService = createAuditLogsService(strapi);
+      auditLogsService.bootstrap();
+
+      const eventName = 'test';
+      const eventPayload = { meta: 'test' };
+      strapi.eventHub.emit(eventName, eventPayload);
+      // TODO: Replace with a test to save to db
+      expect(logSpy).toHaveBeenCalledWith(
+        `Listened to event ${eventName} with args: ${JSON.stringify(eventPayload)}`
+      );
+    });
+
+    it('should throw and error when name is empty', () => {
+      const auditLogsService = createAuditLogsService(strapi);
+      auditLogsService.bootstrap();
+
+      expect(() => strapi.eventHub.emit('', { meta: 'test' })).toThrowError('Name is required');
+    });
   });
 });
