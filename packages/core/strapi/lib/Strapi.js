@@ -126,6 +126,10 @@ class Strapi {
     return this.container.get('config');
   }
 
+  get EE() {
+    return ee.isEE;
+  }
+
   get services() {
     return this.container.get('services').getAll();
   }
@@ -365,7 +369,7 @@ class Strapi {
   }
 
   async register() {
-    await this.loadEE();
+    ee.init(this.dirs.app.root, this.log);
 
     await Promise.all([
       this.loadApp(),
@@ -445,6 +449,10 @@ class Strapi {
 
     await this.db.schema.sync();
 
+    if (this.EE) {
+      await ee.checkLicense(this.db);
+    }
+
     await this.hook('strapi::content-types.afterSync').call({
       oldContentTypes,
       contentTypes: strapi.contentTypes,
@@ -456,8 +464,6 @@ class Strapi {
       key: 'schema',
       value: strapi.contentTypes,
     });
-
-    await ee.checkLicense();
 
     await this.startWebhooks();
 
@@ -471,16 +477,6 @@ class Strapi {
     this.cron.start();
 
     return this;
-  }
-
-  loadEE() {
-    Object.defineProperty(this, 'EE', {
-      get() {
-        return ee({ dir: this.dirs.app.root, logger: this.log });
-      },
-      configurable: false,
-      enumerable: false,
-    });
   }
 
   async load() {

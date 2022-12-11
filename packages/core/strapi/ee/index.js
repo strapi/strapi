@@ -1,132 +1,211 @@
 'use strict';
 
-const path = require('path');
 const fs = require('fs');
+const { join } = require('path');
 const crypto = require('crypto');
-const _ = require('lodash');
+const fetch = require('node-fetch');
+const { pick } = require('lodash/fp');
 
-const publicKey = fs.readFileSync(path.join(__dirname, 'resources/key.pub'));
+const { coreStoreModel } = require('../lib/services/core-store');
 
-const noop = () => {};
+const publicKey = fs.readFileSync(join(__dirname, 'resources/key.pub'));
 
-const noLog = {
-  warn: noop,
-  info: noop,
+const ee = {
+  enabled: false,
+  licenseInfo: {},
 };
 
-const internals = {};
+const disable = (message = 'Invalid license. Starting in CE.') => {
+  ee.logger?.warn(message);
+  // Only keep the license key for potential re-enabling during a later check
+  ee.licenseInfo = pick('licenseKey', ee.licenseInfo);
+  ee.enabled = false;
+};
+
+const readLicense = (directory) => {
+  try {
+    const path = join(directory, 'license.txt');
+    return fs.readFileSync(path).toString();
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      // Permission denied, directory found instead of file, etc.
+    }
+  }
+};
+
+const fetchLicense = async (key, fallback) => {
+  try {
+    const response = await fetch(`https://license.strapi.io/api/licenses/${key}`);
+
+    if (response.status !== 200) {
+      disable();
+      return null;
+    }
+
+    return response.text();
+  } catch (error) {
+    if (error instanceof fetch.FetchError) {
+      if (fallback) {
+        ee.logger(
+          'Could not proceed to the online verification of your license. We will try to use your locally stored one as a potential fallback.'
+        );
+        return fallback;
+      }
+
+      disable(
+        'Could not proceed to the online verification of your license, sorry for the inconvenience. Starting in CE.'
+      );
+    }
+
+    return null;
+  }
+};
+
+const verifyLicense = (license) => {
+  const [signature, base64Content] = Buffer.from(license, 'base64').toString().split('\n');
+  const stringifiedContent = Buffer.from(base64Content, 'base64').toString();
+
+  const verifier = crypto.createVerify('RSA-SHA256');
+  verifier.update(stringifiedContent);
+  verifier.end();
+
+  const verified = verifier.verify(publicKey, signature, 'base64');
+
+  return { verified, licenseInfo: verified ? JSON.parse(stringifiedContent) : null };
+};
+
+let initialized = false;
+
+const init = (licenseDir, logger) => {
+  // Can only be executed once, to prevent any abuse of the optimistic behavior
+  if (initialized) {
+    return;
+  }
+
+  initialized = true;
+  ee.logger = logger;
+
+  if (process.env.STRAPI_DISABLE_EE?.toLowerCase() === 'true') {
+    return;
+  }
+
+  const license = process.env.STRAPI_LICENSE || readLicense(licenseDir);
+
+  if (license) {
+    const { verified, licenseInfo } = verifyLicense(license);
+
+    if (verified) {
+      ee.enabled = true; // Optimistically enable EE during initialization
+      ee.licenseInfo = licenseInfo;
+    } else {
+      return disable();
+    }
+  }
+};
+
+const oneMinute = 1000 * 60;
+
+const onlineUpdate = async (db) => {
+  const transaction = await db.transaction();
+
+  try {
+    // TODO: Use the core store interface instead, it does not support transactions and "FOR UPDATE" at the moment
+    const eeInfo = await db
+      .queryBuilder(coreStoreModel.uid)
+      .where({ key: 'ee_information' })
+      .select('value')
+      .first()
+      .transacting(transaction)
+      .forUpdate()
+      .execute()
+      .then((result) => (result ? JSON.parse(result.value) : result));
+
+    const useStoredLicense = eeInfo?.lastOnlineCheck > Date.now() - oneMinute;
+    const license = useStoredLicense
+      ? eeInfo.license
+      : await fetchLicense(ee.licenseInfo.licenseKey, eeInfo?.license);
+
+    if (license) {
+      const { verified, licenseInfo } = verifyLicense(license);
+
+      if (verified) {
+        ee.licenseInfo = licenseInfo;
+      } else {
+        disable();
+      }
+    }
+
+    if (!useStoredLicense) {
+      const value = { license, lastOnlineCheck: Date.now() };
+      const query = db.queryBuilder(coreStoreModel.uid).transacting(transaction);
+
+      if (!eeInfo) {
+        query.insert({ key: 'ee_information', value: JSON.stringify(value), type: typeof value });
+      } else {
+        query.update({ value: JSON.stringify(value) }).where({ key: 'ee_information' });
+      }
+
+      await query.execute();
+    } else if (!license) {
+      disable();
+    }
+
+    await transaction.commit();
+  } catch (error) {
+    // TODO: The database can be locked at the time of writing, could just a SQLite issue only
+    await transaction.rollback();
+    return disable(error.message);
+  }
+};
+
 const defaultFeatures = {
   bronze: [],
   silver: [],
   gold: ['sso'],
 };
 
-const EEService = ({ dir, logger = noLog }) => {
-  if (_.has(internals, 'isEE')) return internals.isEE;
-
-  const warnAndReturn = (msg = 'Invalid license. Starting in CE.') => {
-    logger.warn(msg);
-    internals.isEE = false;
-    return false;
-  };
-
-  if (process.env.STRAPI_DISABLE_EE === 'true') {
-    internals.isEE = false;
-    return false;
+const validateInfo = () => {
+  if (ee.licenseInfo.expireAt) {
+    return;
   }
 
-  const licensePath = path.join(dir, 'license.txt');
+  const expirationTime = new Date(ee.licenseInfo.expireAt).getTime();
 
-  let license;
-  if (_.has(process.env, 'STRAPI_LICENSE')) {
-    license = process.env.STRAPI_LICENSE;
-  } else if (fs.existsSync(licensePath)) {
-    license = fs.readFileSync(licensePath).toString();
+  if (expirationTime < new Date().getTime()) {
+    return disable('License expired. Starting in CE.');
   }
 
-  if (_.isNil(license)) {
-    internals.isEE = false;
-    return false;
-  }
+  ee.enabled = true;
 
-  // TODO: optimistically return true if license key is valid
-
-  try {
-    const plainLicense = Buffer.from(license, 'base64').toString();
-    const [signatureb64, contentb64] = plainLicense.split('\n');
-
-    const signature = Buffer.from(signatureb64, 'base64');
-    const content = Buffer.from(contentb64, 'base64').toString();
-
-    const verifier = crypto.createVerify('RSA-SHA256');
-    verifier.update(content);
-    verifier.end();
-
-    const isValid = verifier.verify(publicKey, signature);
-    if (!isValid) return warnAndReturn();
-
-    internals.licenseInfo = JSON.parse(content);
-    internals.licenseInfo.features =
-      internals.licenseInfo.features || defaultFeatures[internals.licenseInfo.type];
-
-    const expirationTime = new Date(internals.licenseInfo.expireAt).getTime();
-    if (expirationTime < new Date().getTime()) {
-      return warnAndReturn('License expired. Starting in CE');
-    }
-  } catch (err) {
-    return warnAndReturn();
-  }
-
-  internals.isEE = true;
-  return true;
-};
-
-EEService.checkLicense = async () => {
-  // TODO: online / DB check of the license info
-  // TODO: refresh info if the DB info is outdated
-  // TODO: register cron
-  // internals.licenseInfo = await db.getLicense();
-};
-
-Object.defineProperty(EEService, 'licenseInfo', {
-  get() {
-    mustHaveKey('licenseInfo');
-    return internals.licenseInfo;
-  },
-  configurable: false,
-  enumerable: false,
-});
-
-Object.defineProperty(EEService, 'isEE', {
-  get() {
-    mustHaveKey('isEE');
-    return internals.isEE;
-  },
-  configurable: false,
-  enumerable: false,
-});
-
-Object.defineProperty(EEService, 'features', {
-  get() {
-    return {
-      isEnabled(feature) {
-        return internals.licenseInfo.features.includes(feature);
-      },
-      getEnabled() {
-        return internals.licenseInfo.features;
-      },
-    };
-  },
-  configurable: false,
-  enumerable: false,
-});
-
-const mustHaveKey = (key) => {
-  if (!_.has(internals, key)) {
-    const err = new Error('Tampering with license');
-    // err.stack = null;
-    throw err;
+  if (!ee.licenseInfo.features) {
+    ee.licenseInfo.features = defaultFeatures[ee.licenseInfo.type];
   }
 };
 
-module.exports = EEService;
+const shouldStayOffline = process.env.STRAPI_DISABLE_LICENSE_PING?.toLowerCase() === 'true';
+
+const checkLicense = async (db) => {
+  if (!shouldStayOffline) {
+    await onlineUpdate(db);
+    // TODO: Register cron, try to spread it out across projects to avoid regular request spikes
+  } else if (!ee.licenseInfo.expireAt) {
+    return disable('Your license does not have offline support. Starting in CE.');
+  }
+
+  if (ee.enabled) {
+    validateInfo();
+  }
+};
+
+module.exports = {
+  init,
+  disable,
+  features: {
+    isEnabled: (feature) => (ee.enabled && ee.licenseInfo.features?.includes(feature)) || false,
+    getEnabled: () => (ee.enabled && Object.freeze(ee.licenseInfo.features)) || [],
+  },
+  checkLicense,
+  get isEE() {
+    return ee.enabled;
+  },
+};
