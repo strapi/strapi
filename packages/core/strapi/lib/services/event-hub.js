@@ -9,16 +9,20 @@ module.exports = function createEventHub() {
   // Default subscriber to easily add listeners with the on() method
   const defaultSubscriber = async (eventName, ...args) => {
     if (listeners.has(eventName)) {
-      return Promise.all(listeners.get(eventName).map((listener) => listener(...args)));
+      for (const listener of listeners.get(eventName)) {
+        await listener(...args);
+      }
     }
   };
 
   // Store of subscribers that will be called when an event is emitted
   const subscribers = [defaultSubscriber];
 
-  return {
+  const eventHub = {
     async emit(eventName, ...args) {
-      await Promise.all(subscribers.map((subscriber) => subscriber(eventName, ...args)));
+      for (const subscriber of subscribers) {
+        await subscriber(eventName, ...args);
+      }
     },
 
     subscribe(subscriber) {
@@ -26,8 +30,12 @@ module.exports = function createEventHub() {
 
       // Return a function to remove the subscriber
       return () => {
-        subscribers.splice(subscribers.indexOf(subscriber), 1);
+        eventHub.unsubscribe(subscriber);
       };
+    },
+
+    unsubscribe(subscriber) {
+      subscribers.splice(subscribers.indexOf(subscriber), 1);
     },
 
     on(eventName, listener) {
@@ -39,12 +47,31 @@ module.exports = function createEventHub() {
 
       // Return a function to remove the listener
       return () => {
-        listeners.get(eventName).splice(listeners.get(eventName).indexOf(listener), 1);
+        eventHub.off(eventName, listener);
       };
     },
 
-    destroy() {
-      subscribers.length = 0;
+    off(eventName, listener) {
+      listeners.get(eventName).splice(listeners.get(eventName).indexOf(listener), 1);
     },
+
+    once(eventName, listener) {
+      return eventHub.on(eventName, async (...args) => {
+        eventHub.off(eventName, listener);
+        return listener(...args);
+      });
+    },
+
+    destroy() {
+      listeners.clear();
+      subscribers.length = 0;
+      return this;
+    },
+  };
+
+  return {
+    ...eventHub,
+    removeListener: eventHub.off,
+    addListener: eventHub.on,
   };
 };
