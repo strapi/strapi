@@ -1,6 +1,5 @@
-import type { Diff } from '../../types';
-
-import { jsonDiffs } from '../utils';
+import type { Diff } from '../utils/json';
+import * as utils from '../utils';
 
 const strategies = {
   // No diffs
@@ -29,7 +28,7 @@ const strategies = {
 };
 
 const compareSchemas = <T, P>(a: T, b: P, strategy: keyof typeof strategies) => {
-  const diffs = jsonDiffs(a, b);
+  const diffs = utils.json.diff(a, b);
   return strategies[strategy](diffs);
 };
 
