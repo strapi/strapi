@@ -24,7 +24,7 @@ that you are somewhat familiar with `@strapi/design-system` components.
 ### Basic usage
 
 Below is a basic example usage where we're not interested in rendering custom previews in the DragLayer. However, we do replace
-the current item with a placeholder in the meantime hence why we use the `dragPreviewRef`.
+the current item with a placeholder.
 
 ```jsx
 import { Box, Flex, IconButton } from '@strapi/design-system';
@@ -36,19 +36,18 @@ import { composeRefs } from 'path/to/utils';
 import { Placeholder } from './Placeholder';
 
 const MyComponent = ({ onMoveItem }) => {
-  const [{ handlerId, isDragging, handleKeyDown }, myRef, dropRef, dragRef, dragPreviewRef] =
-    useDragAndDrop(true, {
-      type: 'my-type',
-      index,
-      onMoveItem,
-    });
+  const [{ handlerId, isDragging, handleKeyDown }, myRef, dropRef, dragRef] = useDragAndDrop(true, {
+    type: 'my-type',
+    index,
+    onMoveItem,
+  });
 
   const composedRefs = composeRefs(myRef, dragRef);
 
   return (
     <Box ref={dropRef} cursor={'all-scroll'}>
       {isDragging ? (
-        <Placeholder ref={dragPreviewRef} />
+        <Placeholder />
       ) : (
         <Flex ref={composedRefs} data-handler-id={handlerId}>
           <IconButton
@@ -94,7 +93,7 @@ const MyComponent = ({ onMoveItem }) => {
 
   // highlight-start
   useEffect(() => {
-    dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
+    dragPreviewRef(getEmptyImage());
   }, [dragPreviewRef]);
   // highlight-end
 
@@ -103,7 +102,7 @@ const MyComponent = ({ onMoveItem }) => {
   return (
     <Box ref={dropRef} cursor={'all-scroll'}>
       {isDragging ? (
-        <Placeholder ref={dragPreviewRef} />
+        <Placeholder />
       ) : (
         <Flex ref={composedRefs} data-handler-id={handlerId}>
           <IconButton
