@@ -1,13 +1,13 @@
-// import { createLogger } from '@strapi/logger';
+import type { Writable } from 'stream';
 import type { IDestinationProvider, IMetadata, ProviderType } from '../../../types';
-import { deleteAllRecords, DeleteOptions } from './restore';
-import { mapSchemasValues } from '../../utils';
+import { restore } from './strategies';
+import * as utils from '../../utils';
 
 export const VALID_STRATEGIES = ['restore', 'merge'];
 
 interface ILocalStrapiDestinationProviderOptions {
   getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>;
-  restore?: DeleteOptions;
+  restore?: restore.IRestoreOptions;
   strategy: 'restore' | 'merge';
 }
 
@@ -24,8 +24,11 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   options: ILocalStrapiDestinationProviderOptions;
   strapi?: Strapi.Strapi;
 
+  #entitiesMapper: { [type: string]: { [id: number]: number } };
+
   constructor(options: ILocalStrapiDestinationProviderOptions) {
     this.options = options;
+    this.#entitiesMapper = {};
   }
 
   async bootstrap(): Promise<void> {
@@ -47,12 +50,13 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     if (!this.strapi) {
       throw new Error('Strapi instance not found');
     }
-    return await deleteAllRecords(this.strapi, this.options.restore);
+
+    return restore.deleteRecords(this.strapi, this.options.restore);
   }
 
   async beforeTransfer() {
     if (this.options.strategy === 'restore') {
-      await this.#deleteAll();
+      const res = await this.#deleteAll();
     }
   }
 
@@ -85,6 +89,31 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       ...this.strapi.components,
     };
 
-    return mapSchemasValues(schemas);
+    return utils.schema.mapSchemasValues(schemas);
+  }
+
+  getEntitiesStream(): Writable {
+    if (!this.strapi) {
+      throw new Error('Not able to import entities. Strapi instance not found');
+    }
+
+    const { strategy } = this.options;
+
+    const updateMappingTable = (type: string, oldID: number, newID: number) => {
+      if (!this.#entitiesMapper[type]) {
+        this.#entitiesMapper[type] = {};
+      }
+
+      Object.assign(this.#entitiesMapper[type], { [oldID]: newID });
+    };
+
+    if (strategy === 'restore') {
+      return restore.createWritableEntitiesStream({
+        strapi: this.strapi,
+        updateMappingTable,
+      });
+    }
+
+    throw new Error(`Invalid strategy supplied: "${strategy}"`);
   }
 }

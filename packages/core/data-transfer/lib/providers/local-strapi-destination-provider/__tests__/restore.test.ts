@@ -1,5 +1,5 @@
-import { deleteAllRecords } from '../restore';
-import { getStrapiFactory, getContentTypes } from '../../test-utils';
+import { deleteRecords } from '../strategies/restore';
+import { getStrapiFactory, getContentTypes, setGlobalStrapi } from '../../test-utils';
 
 const entities = [
   {
@@ -32,15 +32,21 @@ const entities = [
   },
 ];
 
-const deleteMany = jest.fn(async (uid: string) => ({
-  count: entities.filter((entity) => entity.contentType.uid === uid).length,
-}));
+const deleteMany = (uid: string) =>
+  jest.fn(async () => ({
+    count: entities.filter((entity) => entity.contentType.uid === uid).length,
+  }));
 
-const query = jest.fn(() => {
+const findMany = (uid: string) => {
+  return jest.fn(async () => entities.filter((entity) => entity.contentType.uid === uid));
+};
+
+const getModel = jest.fn((uid: string) => getContentTypes()[uid]);
+
+const query = jest.fn((uid) => {
   return {
-    deleteMany: jest.fn(() => ({
-      count: 0,
-    })),
+    deleteMany: deleteMany(uid),
+    findMany: findMany(uid),
   };
 });
 
@@ -48,13 +54,14 @@ describe('Restore ', () => {
   test('Should delete all contentTypes', async () => {
     const strapi = getStrapiFactory({
       contentTypes: getContentTypes(),
-      entityService: {
-        deleteMany,
-      },
       query,
+      getModel,
+      db: { query },
     })();
 
-    const { count } = await deleteAllRecords(strapi, {
+    setGlobalStrapi(strapi);
+
+    const { count } = await deleteRecords(strapi, {
       /* @ts-ignore: disable-next-line */
       contentTypes: Object.values(getContentTypes()),
     });
@@ -64,15 +71,17 @@ describe('Restore ', () => {
   test('Should only delete chosen contentType', async () => {
     const strapi = getStrapiFactory({
       contentTypes: getContentTypes(),
-      entityService: {
-        deleteMany,
-      },
       query,
+      getModel,
+      db: { query },
     })();
 
-    const { count } = await deleteAllRecords(strapi, {
-      /* @ts-ignore: disable-next-line */
-      contentTypes: [getContentTypes()['foo']],
+    setGlobalStrapi(strapi);
+
+    const { count } = await deleteRecords(strapi, {
+      entities: {
+        include: ['foo'],
+      },
     });
     expect(count).toBe(3);
   });
