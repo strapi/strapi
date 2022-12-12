@@ -2,10 +2,9 @@ import fs from 'fs-extra';
 import tar from 'tar-stream';
 import path from 'path';
 import zlib from 'zlib';
-import { Readable } from 'stream';
 import { stringer } from 'stream-json/jsonl/Stringer';
 import { chain } from 'stream-chain';
-import { Writable } from 'stream';
+import { Readable, Writable } from 'stream';
 
 import { createEncryptionCipher } from '../../encryption/encrypt';
 import type {

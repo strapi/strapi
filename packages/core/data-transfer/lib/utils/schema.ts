@@ -1,3 +1,4 @@
+import type { Schema } from '@strapi/strapi';
 import { mapValues, pick } from 'lodash/fp';
 
 const schemaSelectedKeys = [
@@ -14,4 +15,6 @@ const schemaSelectedKeys = [
   'globalId',
 ];
 
-export const mapSchemasValues = (schemas: any) => mapValues(pick(schemaSelectedKeys), schemas);
+export const mapSchemasValues = (schemas: Record<string, Schema>) => {
+  return mapValues(pick(schemaSelectedKeys), schemas);
+};

@@ -1,5 +1,6 @@
 import type { ContentTypeSchema } from '@strapi/strapi';
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import * as componentsService from '@strapi/strapi/lib/services/entity-service/components';
 import { assign, map, omit } from 'lodash/fp';
@@ -18,7 +19,7 @@ const omitInvalidCreationAttributes = omit(['id']);
 
 const createEntityQuery = (strapi: Strapi.Strapi) => {
   const components = {
-    assignToEntity: async <T extends object>(uid: string, data: T) => {
+    async assignToEntity<T extends object>(uid: string, data: T) {
       const model = strapi.getModel(uid);
 
       const entityComponents = await componentsService.createComponents(uid, data);
@@ -26,9 +27,11 @@ const createEntityQuery = (strapi: Strapi.Strapi) => {
 
       return assign(entityComponents, dataWithoutComponents);
     },
-    get: async <T extends object>(uid: string, entity: T) => {
+
+    async get<T extends object>(uid: string, entity: T) {
       return componentsService.getComponents(uid, entity);
     },
+
     delete<T extends object>(uid: string, componentsToDelete: T) {
       return componentsService.deleteComponents(uid, componentsToDelete, { loadComponents: false });
     },

@@ -148,7 +148,7 @@ class LocalFileSourceProvider implements ISourceProvider {
               // JSONL parser to read the data chunks one by one (line by line)
               parser(),
               // The JSONL parser returns each line as key/value
-              (line: { key: string; value: any }) => line.value,
+              (line: { key: string; value: object }) => line.value,
             ];
 
             entry

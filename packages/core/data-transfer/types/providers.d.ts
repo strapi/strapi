@@ -30,7 +30,7 @@ export interface ISourceProvider extends IProvider {
   streamLinks?(): Readable | Promise<Readable>;
   streamAssets?(): Readable | Promise<Readable>;
   streamConfiguration?(): Readable | Promise<Readable>;
-  getSchemas?(): Strapi.Schemas;
+  getSchemas?(): Strapi.Schemas | Promise<Strapi.Schemas>;
   streamSchemas?(): Readable | Promise<Readable>;
 }
 
@@ -49,6 +49,6 @@ export interface IDestinationProvider extends IProvider {
   getLinksStream?(): Writable | Promise<Writable>;
   getAssetsStream?(): Writable | Promise<Writable>;
   getConfigurationStream?(): Writable | Promise<Writable>;
-  getSchemas?(): Strapi.Schemas;
+  getSchemas?(): Strapi.Schemas | Promise<Strapi.Schemas>;
   getSchemasStream?(): Writable | Promise<Writable>;
 }

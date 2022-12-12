@@ -1,10 +1,7 @@
-import { PassThrough, Transform } from 'stream';
+import { PassThrough, Transform, Readable, Writable } from 'stream';
 import * as path from 'path';
-import { isEmpty, isFunction, uniq } from 'lodash/fp';
+import { isEmpty, uniq } from 'lodash/fp';
 import type { Schema } from '@strapi/strapi';
-import { Readable, Writable } from 'stream';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const semverDiff = require('semver/functions/diff');
 
 import type {
   IAsset,
@@ -23,6 +20,10 @@ import type { Diff } from '../utils/json';
 
 import compareSchemas from '../strategies';
 import { filter, map } from '../utils/stream';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const semverDiff = require('semver/functions/diff');
+
+type SchemaMap = Record<string, Schema>;
 
 type TransferProgress = {
   [key in TransferStage]?: {
@@ -78,7 +79,7 @@ class TransferEngine<
     options: { includeGlobal?: boolean } = {}
   ): PassThrough | Transform {
     const { includeGlobal = true } = options;
-    const transforms = this.options?.transforms;
+    const { global: globalTransforms, [key]: stageTransforms } = this.options?.transforms ?? {};
 
     let stream = new PassThrough({ objectMode: true });
 
@@ -95,10 +96,10 @@ class TransferEngine<
     };
 
     if (includeGlobal) {
-      applyTransforms(transforms?.global);
+      applyTransforms(globalTransforms);
     }
 
-    applyTransforms(transforms?.[key] as TransferTransform<unknown>[]);
+    applyTransforms(stageTransforms as TransferTransform<unknown>[]);
 
     return stream;
   }
@@ -115,7 +116,11 @@ class TransferEngine<
       this.progress.data[stage] = { count: 0, bytes: 0 };
     }
 
-    const stageProgress = this.progress.data[stage]!;
+    const stageProgress = this.progress.data[stage];
+
+    if (!stageProgress) {
+      return;
+    }
 
     const size = aggregate?.size?.(data) ?? JSON.stringify(data).length;
     const key = aggregate?.key?.(data);
@@ -206,7 +211,7 @@ class TransferEngine<
     );
   }
 
-  #assertSchemasMatching(sourceSchemas: any, destinationSchemas: any) {
+  #assertSchemasMatching(sourceSchemas: SchemaMap, destinationSchemas: SchemaMap) {
     const strategy = this.options.schemasMatching || 'strict';
     const keys = uniq(Object.keys(sourceSchemas).concat(Object.keys(destinationSchemas)));
     const diffs: { [key: string]: Diff[] } = {};
@@ -308,8 +313,8 @@ class TransferEngine<
         );
       }
 
-      const sourceSchemas = await this.sourceProvider.getSchemas?.();
-      const destinationSchemas = await this.destinationProvider.getSchemas?.();
+      const sourceSchemas = (await this.sourceProvider.getSchemas?.()) as SchemaMap;
+      const destinationSchemas = (await this.destinationProvider.getSchemas?.()) as SchemaMap;
 
       if (sourceSchemas && destinationSchemas) {
         this.#assertSchemasMatching(sourceSchemas, destinationSchemas);

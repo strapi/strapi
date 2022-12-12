@@ -29,7 +29,9 @@ describe('Local File Destination Provider - Utils', () => {
 
       test.each(cases)(
         'Given type: %s and fileIndex: %d, returns the right file path: %s',
-        (type: any, fileIndex: any, filePath: any) => {
+        (...args) => {
+          const [type, fileIndex, filePath] = args as [string, number, string];
+
           const filePathFactory = createFilePathFactory(type);
 
           const path = filePathFactory(fileIndex);
