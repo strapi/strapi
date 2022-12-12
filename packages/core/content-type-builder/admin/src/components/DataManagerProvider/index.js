@@ -351,7 +351,7 @@ const DataManagerProvider = ({
 
       // Update the category
       // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from getFetchClient
-      await axiosInstance({ url: requestURL, method: 'PUT', data: body });
+      await axiosInstance.put(requestURL, body);
 
       // Make sure the server has restarted
       await serverRestartWatcher(true);
@@ -501,19 +501,18 @@ const DataManagerProvider = ({
         trackUsage('willSaveComponent');
       }
 
-      const method = isCreating ? 'POST' : 'PUT';
+      // Lock the app
+      lockAppWithAutoreload();
 
       const baseURL = `/${endPoint}`;
       const requestURL = isCreating ? baseURL : `${baseURL}/${currentUid}`;
 
-      // Lock the app
-      lockAppWithAutoreload();
       // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from getFetchClient
-      await axiosInstance({
-        url: requestURL,
-        method,
-        data: body,
-      });
+      if (isCreating) {
+        await axiosInstance.post(requestURL, body);
+      } else {
+        await axiosInstance.put(requestURL, body);
+      }
 
       // Make sure the server has restarted
       await serverRestartWatcher(true);
