@@ -1,15 +1,20 @@
-import type { ILocalFileSourceProviderOptions } from '..';
-
 import { Readable } from 'stream';
+import type { ILocalFileSourceProviderOptions } from '..';
 
 import { createLocalFileSourceProvider } from '..';
 
 describe('Stream assets', () => {
   test('returns a stream', () => {
     const options: ILocalFileSourceProviderOptions = {
-      backupFilePath: './test-file',
-      compressed: false,
-      encrypted: false,
+      file: {
+        path: './test-file',
+      },
+      compression: {
+        enabled: false,
+      },
+      encryption: {
+        enabled: false,
+      },
     };
     const provider = createLocalFileSourceProvider(options);
     const stream = provider.streamAssets();

@@ -102,17 +102,39 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     }
 
     const assetsDirectory = path.join(this.strapi.dirs.static.public, 'uploads');
+    const backupDirectory = path.join(
+      this.strapi.dirs.static.public,
+      `uploads_backup_${Date.now()}`
+    );
+
+    fse.renameSync(assetsDirectory, backupDirectory);
+    fse.mkdirSync(assetsDirectory);
 
     return new Writable({
       objectMode: true,
+      async final(next) {
+        fse.rmSync(backupDirectory, { recursive: true, force: true });
+        next();
+      },
       async write(chunk, _encoding, callback) {
         const entryPath = path.join(assetsDirectory, chunk.file);
         const writableStream = fse.createWriteStream(entryPath);
 
         chunk.stream
           .pipe(writableStream)
-          .on('close', () => callback())
-          .on('error', callback);
+          .on('close', callback)
+          .on('error', (error: Error) => {
+            try {
+              fse.rmSync(assetsDirectory, { recursive: true, force: true });
+              fse.renameSync(backupDirectory, assetsDirectory);
+            } catch (err) {
+              console.log(
+                `There was an error doing the rollback process. The original files are in ${backupDirectory}, but we failed to restore them to ${assetsDirectory}`
+              );
+            } finally {
+              callback(error);
+            }
+          });
       },
     });
   }
