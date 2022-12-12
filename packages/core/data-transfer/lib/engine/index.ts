@@ -258,7 +258,11 @@ class TransferEngine<
   }
 
   async transfer(): Promise<ITransferResults<S, D>> {
+    // reset data between transfers
+    this.progress.data = {};
+
     const transferId = randomUUID();
+
     this.#emitTransferUpdate('start', { transferId });
 
     try {
