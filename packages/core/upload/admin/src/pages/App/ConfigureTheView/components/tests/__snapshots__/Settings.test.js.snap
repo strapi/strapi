@@ -274,6 +274,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
                       aria-hidden="true"
                       class="c13 c14 c15"
                       tabindex="-1"
+                      title="Carret Down Button"
                       type="button"
                     >
                       <svg
@@ -365,6 +366,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
                       aria-hidden="true"
                       class="c13 c14 c15"
                       tabindex="-1"
+                      title="Carret Down Button"
                       type="button"
                     >
                       <svg
