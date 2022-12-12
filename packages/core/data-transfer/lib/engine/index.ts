@@ -1,4 +1,4 @@
-import { PassThrough, Stream } from 'stream-chain';
+import { PassThrough } from 'stream-chain';
 import * as path from 'path';
 import { isEmpty, uniq } from 'lodash/fp';
 import type { Schema } from '@strapi/strapi';
