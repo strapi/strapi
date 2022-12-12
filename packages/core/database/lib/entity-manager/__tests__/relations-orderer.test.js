@@ -98,6 +98,30 @@ describe('Given I have some relations in the database', () => {
       ]);
     });
   });
+
+  describe('When you connect a relation before a non-existing relation in non-strict mode', () => {
+    test('Then it is placed at the end', () => {
+      const orderer = relationsOrderer(
+        [
+          { id: 1, order: 1 },
+          { id: 2, order: 2 },
+          { id: 3, order: 3 },
+        ],
+        'id',
+        'order',
+        false
+      );
+
+      orderer.connect([{ id: 4, position: { before: 5 } }]);
+
+      expect(orderer.get()).toMatchObject([
+        { id: 1, order: 1 },
+        { id: 2, order: 2 },
+        { id: 3, order: 3 },
+        { id: 4, order: 3.5 },
+      ]);
+    });
+  });
 });
 
 describe('Given there are no relations in the database', () => {

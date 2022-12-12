@@ -138,6 +138,7 @@ const createShop = async ({
   anyToManyRel = [{ id: id1 }, { id: id2 }, { id: id3 }],
   data = {},
   populate,
+  strictConnect = true,
 }) => {
   return createEntry(
     'shops',
@@ -146,12 +147,12 @@ const createShop = async ({
       products_ow: { connect: anyToOneRel },
       products_oo: { connect: anyToOneRel },
       products_mo: { connect: anyToOneRel },
-      products_om: { connect: anyToManyRel },
-      products_mm: { connect: anyToManyRel },
-      products_mw: { connect: anyToManyRel },
+      products_om: { options: { strictConnect }, connect: anyToManyRel },
+      products_mm: { options: { strictConnect }, connect: anyToManyRel },
+      products_mw: { options: { strictConnect }, connect: anyToManyRel },
       myCompo: {
         compo_products_ow: { connect: anyToOneRel },
-        compo_products_mw: { connect: anyToManyRel },
+        compo_products_mw: { options: { strictConnect }, connect: anyToManyRel },
       },
       ...data,
     },
@@ -167,6 +168,7 @@ const updateShop = async (
     relAction = 'connect',
     data = {},
     populate,
+    strictConnect = true,
   }
 ) => {
   return updateEntry(
@@ -177,13 +179,13 @@ const updateShop = async (
       products_ow: { [relAction]: anyToOneRel },
       products_oo: { [relAction]: anyToOneRel },
       products_mo: { [relAction]: anyToOneRel },
-      products_om: { [relAction]: anyToManyRel },
-      products_mm: { [relAction]: anyToManyRel },
-      products_mw: { [relAction]: anyToManyRel },
+      products_om: { options: { strictConnect }, [relAction]: anyToManyRel },
+      products_mm: { options: { strictConnect }, [relAction]: anyToManyRel },
+      products_mw: { options: { strictConnect }, [relAction]: anyToManyRel },
       myCompo: {
         id: shop.attributes?.myCompo?.id,
         compo_products_ow: { [relAction]: anyToOneRel },
-        compo_products_mw: { [relAction]: anyToManyRel },
+        compo_products_mw: { options: { strictConnect }, [relAction]: anyToManyRel },
       },
       ...data,
     },
@@ -831,40 +833,58 @@ describe('Relations', () => {
       });
       expect(updatedShop.data).toMatchObject(expectedShop);
     });
-  });
 
-  test('Update relations using the same id multiple times', async () => {
-    const shop = await createShop({
-      anyToManyRel: [
-        { id: id1, position: { end: true } },
-        { id: id2, position: { end: true } },
-      ],
+    test('Update relations using the same id multiple times', async () => {
+      const shop = await createShop({
+        anyToManyRel: [
+          { id: id1, position: { end: true } },
+          { id: id2, position: { end: true } },
+        ],
+      });
+
+      const updatedShop = await updateShop(shop.data, {
+        anyToManyRel: [
+          { id: id1, position: { end: true } },
+          { id: id1, position: { start: true } },
+          { id: id1, position: { after: id2 } },
+        ],
+      });
+
+      const expectedShop = shopFactory({
+        anyToManyRel: [{ id: id2 }, { id: id1 }],
+      });
+      expect(updatedShop.data).toMatchObject(expectedShop);
     });
 
-    const updatedShop = await updateShop(shop.data, {
-      anyToManyRel: [
-        { id: id1, position: { end: true } },
-        { id: id1, position: { start: true } },
-        { id: id1, position: { after: id2 } },
-      ],
+    test('Update relations with invalid connect array in strict mode', async () => {
+      const shop = await createShop({
+        anyToManyRel: [],
+      });
+
+      // Connect before an id that does not exist.
+      const updatedShop = await updateShop(shop.data, {
+        anyToManyRel: [{ id: id1, position: { after: id2 } }],
+      });
+
+      expect(updatedShop.error).toMatchObject({ status: 400, name: 'ValidationError' });
     });
 
-    const expectedShop = shopFactory({
-      anyToManyRel: [{ id: id2 }, { id: id1 }],
-    });
-    expect(updatedShop.data).toMatchObject(expectedShop);
-  });
+    test('Update relations with invalid connect array in non-strict mode', async () => {
+      const shop = await createShop({
+        anyToManyRel: [{ id: id1 }],
+      });
 
-  test('Update relations with invalid connect array in strict mode', async () => {
-    const shop = await createShop({
-      anyToManyRel: [{ id: id1, position: { end: true } }],
-    });
+      // Connect before an id that does not exist.
+      const updatedShop = await updateShop(shop.data, {
+        anyToManyRel: [{ id: id2, position: { after: id3 } }],
+        strictConnect: false,
+      });
 
-    // Connect relation before id2, but id2 is not in the DB or in the connect array
-    const updatedShop = await updateShop(shop.data, {
-      anyToManyRel: [{ id: id1, position: { after: id2 } }],
-    });
+      const expectedShop = shopFactory({
+        anyToManyRel: [{ id: id1 }, { id: id2 }],
+      });
 
-    expect(updatedShop.error).toMatchObject({ status: 400, name: 'ValidationError' });
+      expect(updatedShop.data).toMatchObject(expectedShop);
+    });
   });
 });

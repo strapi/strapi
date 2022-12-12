@@ -20,7 +20,7 @@ const { InvalidRelationError } = require('../errors');
  *   { id: 5, position: { before: 1 } }
  *
  */
-const sortConnectArray = (connectArr, initialArr = []) => {
+const sortConnectArray = (connectArr, initialArr = [], strictSort = true) => {
   const sortedConnect = [];
   // Boolean to know if we have to recalculate the order of the relations
   let needsSorting = false;
@@ -69,7 +69,7 @@ const sortConnectArray = (connectArr, initialArr = []) => {
         computedIdx[adjacentRelIdx] = true;
         computeRelation(adjacentRel);
         pushRelation(rel);
-      } else {
+      } else if (strictSort) {
         // If we reach this point, it means that the adjacent relation is not in the connect array
         // and it is not in the database. This should not happen.
         throw new InvalidRelationError(
@@ -77,6 +77,9 @@ const sortConnectArray = (connectArr, initialArr = []) => {
             rel.position
           )}. The relation with id ${adjacentRelId} needs to be connected first.`
         );
+      } else {
+        // We are in non-strict mode so we can push the relation.
+        pushRelation({ id: rel.id, position: { end: true } });
       }
     };
 
@@ -114,9 +117,11 @@ const sortConnectArray = (connectArr, initialArr = []) => {
  * @param {Array<*>} initArr - array of relations to initialize the class with
  * @param {string} idColumn - the column name of the id
  * @param {string} orderColumn - the column name of the order
+ * @param {boolean} strictConnect - if true, will throw an error if a relation is connected adjacent to
+ *                               another one that does not exist
  * @return {*}
  */
-const relationsOrderer = (initArr, idColumn, orderColumn) => {
+const relationsOrderer = (initArr, idColumn, orderColumn, strictConnect) => {
   const arr = _.castArray(initArr || []).map((r) => ({
     init: true,
     id: r[idColumn],
@@ -170,7 +175,7 @@ const relationsOrderer = (initArr, idColumn, orderColumn) => {
       return this;
     },
     connect(relations) {
-      const sortedRelations = sortConnectArray(relations, arr);
+      const sortedRelations = sortConnectArray(relations, arr, strictConnect);
       sortedRelations.forEach((relation) => {
         this.disconnect(relation);
 
