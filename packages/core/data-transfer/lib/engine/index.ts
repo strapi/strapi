@@ -125,7 +125,7 @@ class TransferEngine<
     this.progress.stream.emit(type, payload);
   }
 
-  #emitStageUpdate(type: 'start' | 'finish' | 'progress', transferStage: TransferStage) {
+  #emitStageUpdate(type: 'start' | 'finish' | 'progress' | 'skip', transferStage: TransferStage) {
     this.progress.stream.emit(`stage::${type}`, {
       data: this.progress.data,
       stage: transferStage,
@@ -312,11 +312,13 @@ class TransferEngine<
 
     const inStream = await this.sourceProvider.streamSchemas?.();
     if (!inStream) {
+      this.#emitStageUpdate('skip', stageName);
       return;
     }
 
     const outStream = await this.destinationProvider.getSchemasStream?.();
     if (!outStream) {
+      this.#emitStageUpdate('skip', stageName);
       return;
     }
 
@@ -346,11 +348,13 @@ class TransferEngine<
 
     const inStream = await this.sourceProvider.streamEntities?.();
     if (!inStream) {
+      this.#emitStageUpdate('skip', stageName);
       return;
     }
 
     const outStream = await this.destinationProvider.getEntitiesStream?.();
     if (!outStream) {
+      this.#emitStageUpdate('skip', stageName);
       return;
     }
 
@@ -385,11 +389,13 @@ class TransferEngine<
 
     const inStream = await this.sourceProvider.streamLinks?.();
     if (!inStream) {
+      this.#emitStageUpdate('skip', stageName);
       return;
     }
 
     const outStream = await this.destinationProvider.getLinksStream?.();
     if (!outStream) {
+      this.#emitStageUpdate('skip', stageName);
       return;
     }
 
@@ -417,11 +423,13 @@ class TransferEngine<
     const stageName: TransferStage = 'assets';
     const inStream = await this.sourceProvider.streamAssets?.();
     if (!inStream) {
+      this.#emitStageUpdate('skip', stageName);
       return;
     }
 
     const outStream = await this.destinationProvider.getAssetsStream?.();
     if (!outStream) {
+      this.#emitStageUpdate('skip', stageName);
       return;
     }
 
@@ -457,11 +465,13 @@ class TransferEngine<
 
     const inStream = await this.sourceProvider.streamConfiguration?.();
     if (!inStream) {
+      this.#emitStageUpdate('skip', stageName);
       return;
     }
 
     const outStream = await this.destinationProvider.getConfigurationStream?.();
     if (!outStream) {
+      this.#emitStageUpdate('skip', stageName);
       return;
     }
 
