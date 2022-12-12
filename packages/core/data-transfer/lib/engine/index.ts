@@ -23,13 +23,13 @@ import compareSchemas from '../strategies';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const semverDiff = require('semver/functions/diff');
 
-export const transferStages: TransferStage[] = [
+export const transferStages: ReadonlyArray<TransferStage> = Object.freeze([
   'entities',
   'links',
   'assets',
   'schemas',
   'configuration',
-];
+]);
 
 class TransferEngine<
   S extends ISourceProvider = ISourceProvider,
