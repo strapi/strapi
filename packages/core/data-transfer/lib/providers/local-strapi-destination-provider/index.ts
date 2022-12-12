@@ -1,4 +1,5 @@
-import type { Writable } from 'stream';
+import { Writable } from 'stream';
+
 import type { IDestinationProvider, IMetadata, ProviderType } from '../../../types';
 import { restore } from './strategies';
 import * as utils from '../../utils';
@@ -11,17 +12,13 @@ interface ILocalStrapiDestinationProviderOptions {
   strategy: 'restore' | 'merge';
 }
 
-export const createLocalStrapiDestinationProvider = (
-  options: ILocalStrapiDestinationProviderOptions
-) => {
-  return new LocalStrapiDestinationProvider(options);
-};
-
 class LocalStrapiDestinationProvider implements IDestinationProvider {
-  name: string = 'destination::local-strapi';
+  name = 'destination::local-strapi';
+
   type: ProviderType = 'destination';
 
   options: ILocalStrapiDestinationProviderOptions;
+
   strapi?: Strapi.Strapi;
 
   #entitiesMapper: { [type: string]: { [id: number]: number } };
@@ -42,7 +39,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   #validateOptions() {
     if (!VALID_STRATEGIES.includes(this.options.strategy)) {
-      throw new Error('Invalid stategy ' + this.options.strategy);
+      throw new Error(`Invalid stategy ${this.options.strategy}`);
     }
   }
 
@@ -56,7 +53,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   async beforeTransfer() {
     if (this.options.strategy === 'restore') {
-      const res = await this.#deleteAll();
+      await this.#deleteAll();
     }
   }
 
@@ -108,7 +105,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     };
 
     if (strategy === 'restore') {
-      return restore.createWritableEntitiesStream({
+      return restore.createEntitiesWriteStream({
         strapi: this.strapi,
         updateMappingTable,
       });
@@ -116,4 +113,24 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
     throw new Error(`Invalid strategy supplied: "${strategy}"`);
   }
+
+  async getConfigurationStream(): Promise<Writable> {
+    if (!this.strapi) {
+      throw new Error('Not able to stream Configurations. Strapi instance not found');
+    }
+
+    const { strategy } = this.options;
+
+    if (strategy === 'restore') {
+      return restore.createConfigurationWriteStream(this.strapi);
+    }
+
+    throw new Error(`Invalid strategy supplied: "${strategy}"`);
+  }
 }
+
+export const createLocalStrapiDestinationProvider = (
+  options: ILocalStrapiDestinationProviderOptions
+) => {
+  return new LocalStrapiDestinationProvider(options);
+};

@@ -123,6 +123,14 @@ interface ICircularLink extends IDefaultLink {
   kind: 'relation.circular';
 }
 
+/**
+ * Strapi configurations
+ */
+export interface IConfiguration<T = unknown> {
+  type: 'core-store' | 'webhook';
+  value: T;
+}
+
 export interface IAsset {
   filename: string;
   filepath: string;

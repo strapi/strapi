@@ -1,4 +1,4 @@
-import type { ContentTypeSchema, GetAttributesValues, RelationsType } from '@strapi/strapi';
+import type { ContentTypeSchema } from '@strapi/strapi';
 
 import { Readable } from 'stream';
 import { castArray } from 'lodash/fp';

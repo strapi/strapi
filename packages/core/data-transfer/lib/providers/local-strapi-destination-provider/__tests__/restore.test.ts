@@ -1,5 +1,6 @@
-import { deleteRecords } from '../strategies/restore';
+import { deleteRecords, restoreConfigs } from '../strategies/restore';
 import { getStrapiFactory, getContentTypes, setGlobalStrapi } from '../../test-utils';
+import { IConfiguration } from '../../../../types';
 
 const entities = [
   {
@@ -32,6 +33,10 @@ const entities = [
   },
 ];
 
+afterEach(() => {
+  jest.clearAllMocks();
+});
+
 const deleteMany = (uid: string) =>
   jest.fn(async () => ({
     count: entities.filter((entity) => entity.contentType.uid === uid).length,
@@ -41,12 +46,15 @@ const findMany = (uid: string) => {
   return jest.fn(async () => entities.filter((entity) => entity.contentType.uid === uid));
 };
 
+const create = jest.fn((data) => data);
+
 const getModel = jest.fn((uid: string) => getContentTypes()[uid]);
 
 const query = jest.fn((uid) => {
   return {
     deleteMany: deleteMany(uid),
     findMany: findMany(uid),
+    create,
   };
 });
 
@@ -61,10 +69,7 @@ describe('Restore ', () => {
 
     setGlobalStrapi(strapi);
 
-    const { count } = await deleteRecords(strapi, {
-      /* @ts-ignore: disable-next-line */
-      contentTypes: Object.values(getContentTypes()),
-    });
+    const { count } = await deleteRecords(strapi);
     expect(count).toBe(entities.length);
   });
 
@@ -84,5 +89,77 @@ describe('Restore ', () => {
       },
     });
     expect(count).toBe(3);
+  });
+
+  test('Should add core store data', async () => {
+    const strapi = getStrapiFactory({
+      contentTypes: getContentTypes(),
+      db: {
+        query,
+      },
+    })();
+    const config: IConfiguration<{
+      key: string;
+      type: string;
+      environment: null;
+      tag: string;
+      value: object;
+    }> = {
+      type: 'core-store',
+      value: {
+        key: 'test-key',
+        type: 'test-type',
+        environment: null,
+        tag: 'tag',
+        value: {},
+      },
+    };
+    const result = await restoreConfigs(strapi, config);
+
+    expect(strapi.db.query).toBeCalledTimes(1);
+    expect(strapi.db.query).toBeCalledWith('strapi::core-store');
+    expect(result.data).toMatchObject(config.value);
+  });
+
+  test('Should add webhook data', async () => {
+    const strapi = getStrapiFactory({
+      contentTypes: getContentTypes(),
+      db: {
+        query,
+      },
+    })();
+
+    const config: IConfiguration<{
+      id: number;
+      name: string;
+      url: string;
+      headers: Record<string, unknown>;
+      events: string[];
+      enabled: boolean;
+    }> = {
+      type: 'webhook',
+      value: {
+        id: 4,
+        name: 'christian',
+        url: 'https://facebook.com',
+        headers: { null: '' },
+        events: [
+          'entry.create',
+          'entry.update',
+          'entry.delete',
+          'entry.publish',
+          'entry.unpublish',
+          'media.create',
+          'media.update',
+          'media.delete',
+        ],
+        enabled: true,
+      },
+    };
+    const result = await restoreConfigs(strapi, config);
+
+    expect(strapi.db.query).toBeCalledTimes(1);
+    expect(strapi.db.query).toBeCalledWith('webhook');
+    expect(result.data).toMatchObject(config.value);
   });
 });

@@ -19,10 +19,12 @@ export const createLocalStrapiSourceProvider = (options: ILocalStrapiSourceProvi
 };
 
 class LocalStrapiSourceProvider implements ISourceProvider {
-  name: string = 'source::local-strapi';
+  name = 'source::local-strapi';
+
   type: ProviderType = 'source';
 
   options: ILocalStrapiSourceProviderOptions;
+
   strapi?: Strapi.Strapi;
 
   constructor(options: ILocalStrapiSourceProviderOptions) {

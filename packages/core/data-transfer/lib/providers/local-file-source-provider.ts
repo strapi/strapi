@@ -1,7 +1,5 @@
 import type { Readable } from 'stream';
 
-import type { IMetadata, ISourceProvider, ProviderType } from '../../types';
-
 import fs from 'fs';
 import zip from 'zlib';
 import tar from 'tar';
@@ -9,6 +7,7 @@ import { keyBy } from 'lodash/fp';
 import { chain } from 'stream-chain';
 import { pipeline, PassThrough } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
+import type { IMetadata, ISourceProvider, ProviderType } from '../../types';
 
 import { createDecryptionCipher } from '../encryption';
 import * as utils from '../utils';
@@ -44,7 +43,8 @@ export const createLocalFileSourceProvider = (options: ILocalFileSourceProviderO
 
 class LocalFileSourceProvider implements ISourceProvider {
   type: ProviderType = 'source';
-  name: string = 'source::local-file';
+
+  name = 'source::local-file';
 
   options: ILocalFileSourceProviderOptions;
 
@@ -121,7 +121,6 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   #streamJsonlDirectory(directory: string) {
-    const options = this.options;
     const inStream = this.#getBackupStream();
 
     const outStream = new PassThrough({ objectMode: true });
@@ -172,7 +171,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     return outStream;
   }
 
-  async #parseJSONFile<T extends {} = any>(fileStream: Readable, filePath: string): Promise<T> {
+  async #parseJSONFile<T extends object>(fileStream: Readable, filePath: string): Promise<T> {
     return new Promise<T>((resolve, reject) => {
       pipeline(
         [

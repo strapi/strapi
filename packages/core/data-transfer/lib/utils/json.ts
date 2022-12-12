@@ -1,10 +1,13 @@
-import { isArray, isObject, zip, isEqual, uniq, mapValues, pick } from 'lodash/fp';
+import { isArray, isObject, zip, isEqual, uniq } from 'lodash/fp';
 
 const createContext = (): Context => ({ path: [] });
 
 export const diff = (a: unknown, b: unknown, ctx: Context = createContext()): Diff[] => {
   const diffs: Diff[] = [];
   const { path } = ctx;
+
+  const aType = typeof a;
+  const bType = typeof b;
 
   // Define helpers
 
@@ -28,9 +31,6 @@ export const diff = (a: unknown, b: unknown, ctx: Context = createContext()): Di
     return diffs;
   };
 
-  const aType = typeof a;
-  const bType = typeof b;
-
   if (aType === 'undefined') {
     return added();
   }
@@ -48,7 +48,7 @@ export const diff = (a: unknown, b: unknown, ctx: Context = createContext()): Di
 
       diffs.push(...kDiffs);
 
-      k++;
+      k += 1;
     }
 
     return diffs;
@@ -58,8 +58,8 @@ export const diff = (a: unknown, b: unknown, ctx: Context = createContext()): Di
     const keys = uniq(Object.keys(a).concat(Object.keys(b)));
 
     for (const key of keys) {
-      const aValue = (a as any)[key];
-      const bValue = (b as any)[key];
+      const aValue = (a as Record<string, unknown>)[key];
+      const bValue = (b as Record<string, unknown>)[key];
 
       const nestedDiffs = diff(aValue, bValue, { path: [...path, key] });
 

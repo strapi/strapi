@@ -8,9 +8,14 @@ const {
   // eslint-disable-next-line import/no-unresolved, node/no-missing-require
 } = require('@strapi/data-transfer');
 const { isObject } = require('lodash/fp');
+const path = require('path');
 
 const strapi = require('../../index');
 const { buildTransferTable, DEFAULT_IGNORED_CONTENT_TYPES } = require('./utils');
+
+/**
+ * @typedef {import('@strapi/data-transfer').ILocalFileSourceProviderOptions} ILocalFileSourceProviderOptions
+ */
 
 const logger = console;
 
@@ -20,16 +25,11 @@ module.exports = async (opts) => {
     logger.error('Could not parse arguments');
     process.exit(1);
   }
-  const filename = opts.file;
 
   /**
    * From strapi backup file
    */
-  const sourceOptions = {
-    file: { path: filename },
-    compression: { enabled: opts.decompress },
-    encryption: { enabled: opts.decrypt, key: opts.key },
-  };
+  const sourceOptions = getLocalFileSourceOptions(opts);
 
   const source = createLocalFileSourceProvider(sourceOptions);
 
@@ -80,4 +80,38 @@ module.exports = async (opts) => {
     logger.error(e);
     process.exit(1);
   }
+};
+
+/**
+ * Infer local file source provider options based on a given filename
+ *
+ * @param {{ file: string; key?: string }} opts
+ *
+ * @return {ILocalFileSourceProviderOptions}
+ */
+const getLocalFileSourceOptions = (opts) => {
+  /**
+   * @type {ILocalFileSourceProviderOptions}
+   */
+  const options = {
+    file: { path: opts.file },
+    compression: { enabled: false },
+    encryption: { enabled: false },
+  };
+
+  const { extname, parse } = path;
+
+  let file = options.file.path;
+
+  if (extname(file) === '.enc') {
+    file = parse(file).name;
+    options.encryption = { enabled: true, key: opts.key };
+  }
+
+  if (extname(file) === '.gz') {
+    file = parse(file).name;
+    options.compression = { enabled: true };
+  }
+
+  return options;
 };

@@ -134,7 +134,7 @@ export const extendExpectForDataTransferTests = () => {
       }
       return {
         pass: true,
-        message: () => `Expected engine not to be valid`,
+        message: () => 'Expected engine not to be valid',
       };
     },
     toHaveSourceStagesCalledTimes(provider: ISourceProvider, times: number) {
@@ -149,6 +149,7 @@ export const extendExpectForDataTransferTests = () => {
             return true;
           }
         }
+        return false;
       });
 
       if (missing.length) {
@@ -160,7 +161,7 @@ export const extendExpectForDataTransferTests = () => {
       }
       return {
         pass: true,
-        message: () => `Expected source provider not to have all stages called`,
+        message: () => 'Expected source provider not to have all stages called',
       };
     },
     toHaveDestinationStagesCalledTimes(provider: IDestinationProvider, times: number) {
@@ -174,6 +175,8 @@ export const extendExpectForDataTransferTests = () => {
             return true;
           }
         }
+
+        return false;
       });
 
       if (missing.length) {
@@ -187,7 +190,7 @@ export const extendExpectForDataTransferTests = () => {
       }
       return {
         pass: true,
-        message: () => `Expected destination provider not to have all stages called`,
+        message: () => 'Expected destination provider not to have all stages called',
       };
     },
     toBeValidSourceProvider(provider: ISourceProvider) {
@@ -203,7 +206,7 @@ export const extendExpectForDataTransferTests = () => {
       }
       return {
         pass: true,
-        message: () => `Expected source provider not to be valid`,
+        message: () => 'Expected source provider not to be valid',
       };
     },
     toBeValidDestinationProvider(provider: IDestinationProvider) {
@@ -219,7 +222,7 @@ export const extendExpectForDataTransferTests = () => {
       }
       return {
         pass: true,
-        message: () => `Expected destination provider not to be valid`,
+        message: () => 'Expected destination provider not to be valid',
       };
     },
   });

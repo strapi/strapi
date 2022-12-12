@@ -9,7 +9,7 @@ interface IEntitiesRestoreStreamOptions {
   updateMappingTable<T extends SchemaUID | string>(type: T, oldID: number, newID: number): void;
 }
 
-const createWritableEntitiesStream = (options: IEntitiesRestoreStreamOptions) => {
+const createEntitiesWriteStream = (options: IEntitiesRestoreStreamOptions) => {
   const { strapi, updateMappingTable } = options;
   const query = shared.strapi.entity.createEntityQuery(strapi);
 
@@ -25,13 +25,16 @@ const createWritableEntitiesStream = (options: IEntitiesRestoreStreamOptions) =>
         updateMappingTable(type, id, created.id);
 
         callback(null);
-      } catch (e: any) {
-        console.error('Failed to create', entity);
-        console.error(e);
+      } catch (e) {
+        if (e instanceof Error) {
+          console.error('Failed to create', type, id);
+          console.error(e);
+        }
+
         callback(null);
       }
     },
   });
 };
 
-export { createWritableEntitiesStream };
+export { createEntitiesWriteStream };
