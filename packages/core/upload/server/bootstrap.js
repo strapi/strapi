@@ -13,7 +13,6 @@ module.exports = async ({ strapi }) => {
     view_configuration: {
       pageSize: 10,
       sort: ALLOWED_SORT_STRINGS[0],
-      test: 123,
     },
   };
 
