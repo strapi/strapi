@@ -1,17 +1,16 @@
+import crypto from 'crypto';
 import { TextEncoder } from 'util';
 import hashAdminUserEmail, { utils } from '../uniqueAdminHash';
 
 const testHashValue = '8544bf5b5389959462912699664f03ed664a4b6d24f03b13bdbc362efc147873';
 
 describe('Creating admin user email hash in admin', () => {
-  afterEach(() => {
+  afterAll(() => {
     Object.defineProperty(global.self, 'crypto', {
       value: undefined,
-      configurable: true,
     });
     Object.defineProperty(global.self, 'TextEncoder', {
       value: undefined,
-      configurable: true,
     });
   });
 
@@ -25,13 +24,15 @@ describe('Creating admin user email hash in admin', () => {
     Object.defineProperty(global.self, 'crypto', {
       value: {
         subtle: {
-          digest: jest.fn(() => testHashValue),
+          digest: jest.fn((type, message) => crypto.createHash('sha256').update(message).digest()),
         },
       },
+      configurable: true,
     });
 
     Object.defineProperty(global.self, 'TextEncoder', {
       value: TextEncoder,
+      configurable: true,
     });
 
     const payload = {
@@ -43,16 +44,6 @@ describe('Creating admin user email hash in admin', () => {
     const testHash = await hashAdminUserEmail(payload);
 
     expect(spy).toHaveBeenCalled();
-    expect(testHash).toBe(testHashValue);
-  });
-
-  it('should return same hash even if subtle crypto or text encoder are not available', async () => {
-    const payload = {
-      email: 'testemail@strapi.io',
-    };
-
-    const testHash = await hashAdminUserEmail(payload);
-
     expect(testHash).toBe(testHashValue);
   });
 });

@@ -17,8 +17,6 @@ export default async function hashAdminUserEmail(payload) {
   try {
     return await utils.digestMessage(payload.email);
   } catch (error) {
-    const hash = await import('hash.js');
-
-    return hash.sha256().update(payload.email).digest('hex');
+    return '';
   }
 }
