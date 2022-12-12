@@ -1,5 +1,4 @@
 import { chain } from 'stream-chain';
-import { mapValues, pick } from 'lodash/fp';
 import { Readable } from 'stream';
 
 import type { IMetadata, ISourceProvider, ProviderType } from '../../../types';
@@ -7,7 +6,7 @@ import { createEntitiesStream, createEntitiesTransformStream } from './entities'
 import { createLinksStream } from './links';
 import { createConfigurationStream } from './configuration';
 import { createAssetsStream } from './assets';
-import { mapSchemasValues } from '../../utils';
+import * as utils from '../../utils';
 
 export interface ILocalStrapiSourceProviderOptions {
   getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>;
@@ -62,7 +61,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     };
   }
 
-  async streamEntities(): Promise<NodeJS.ReadableStream> {
+  async streamEntities(): Promise<Readable> {
     if (!this.strapi) {
       throw new Error('Not able to stream entities. Strapi instance not found');
     }
@@ -76,7 +75,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     ]);
   }
 
-  streamLinks(): NodeJS.ReadableStream {
+  streamLinks(): Readable {
     if (!this.strapi) {
       throw new Error('Not able to stream links. Strapi instance not found');
     }
@@ -84,7 +83,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     return createLinksStream(this.strapi);
   }
 
-  streamConfiguration(): NodeJS.ReadableStream {
+  streamConfiguration(): Readable {
     if (!this.strapi) {
       throw new Error('Not able to stream configuration. Strapi instance not found');
     }
@@ -102,14 +101,14 @@ class LocalStrapiSourceProvider implements ISourceProvider {
       ...this.strapi.components,
     };
 
-    return mapSchemasValues(schemas);
+    return utils.schema.mapSchemasValues(schemas);
   }
 
-  streamSchemas(): NodeJS.ReadableStream {
+  streamSchemas(): Readable {
     return Readable.from(Object.values(this.getSchemas()));
   }
 
-  streamAssets(): NodeJS.ReadableStream {
+  streamAssets(): Readable {
     if (!this.strapi) {
       throw new Error('Not able to stream assets. Strapi instance not found');
     }
