@@ -3,7 +3,7 @@
 const createEventHub = require('../../../../../strapi/lib/services/event-hub');
 const createAuditLogsService = require('../audit-logs');
 
-jest.mock('../../../../server/bootstrap');
+jest.mock('../../../../server/register');
 
 describe('Audit logs auth', () => {
   afterEach(() => {
@@ -20,8 +20,8 @@ describe('Audit logs auth', () => {
       }));
     });
 
-    it('should not register the audit logs service when bootstraped', async () => {
-      const eeAdminBootstrap = require('../../bootstrap');
+    it('should not register the audit logs service when registered', async () => {
+      const eeAdminRegister = require('../../register');
       const mockRegister = jest.fn();
 
       global.strapi = {
@@ -37,7 +37,7 @@ describe('Audit logs auth', () => {
         },
       };
 
-      await eeAdminBootstrap({ strapi });
+      await eeAdminRegister({ strapi });
 
       expect(mockRegister).not.toHaveBeenCalledWith('audit-logs', expect.anything());
     });
@@ -68,10 +68,10 @@ describe('Audit logs auth', () => {
       };
     });
 
-    it('should register and init the audit logs service when bootstraped', async () => {
-      const eeAdminBootstrap = require('../../bootstrap');
+    it('should register and init the audit logs service when registered', async () => {
+      const eeAdminRegister = require('../../register');
 
-      await eeAdminBootstrap({ strapi });
+      await eeAdminRegister({ strapi });
 
       expect(mockRegister).toHaveBeenCalledWith('audit-logs', expect.anything());
     });
@@ -95,7 +95,9 @@ describe('Audit logs auth', () => {
       const auditLogsService = createAuditLogsService(strapi);
       auditLogsService.bootstrap();
 
-      expect(() => strapi.eventHub.emit('', { meta: 'test' })).toThrowError('Name is required');
+      expect(() => {
+        strapi.eventHub.emit('', { meta: 'test' });
+      }).toThrowError('Name is required');
     });
   });
 });
