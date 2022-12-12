@@ -120,7 +120,7 @@ const createEntry = async (pluralName, data, populate) => {
     body: { data },
     qs: { populate },
   });
-  return body.data;
+  return body;
 };
 
 const updateEntry = async (pluralName, id, data, populate) => {
@@ -130,7 +130,7 @@ const updateEntry = async (pluralName, id, data, populate) => {
     body: { data },
     qs: { populate },
   });
-  return body.data;
+  return body;
 };
 
 const createShop = async ({
@@ -228,9 +228,9 @@ describe('Relations', () => {
     const createdProduct2 = await createEntry('products', { name: 'Candle' });
     const createdProduct3 = await createEntry('products', { name: 'Mug' });
 
-    data.products.push(createdProduct1);
-    data.products.push(createdProduct2);
-    data.products.push(createdProduct3);
+    data.products.push(createdProduct1.data);
+    data.products.push(createdProduct2.data);
+    data.products.push(createdProduct3.data);
 
     id1 = data.products[0].id;
     id2 = data.products[1].id;
@@ -271,7 +271,7 @@ describe('Relations', () => {
             populateShop
           );
 
-          expect(shop).toMatchObject({
+          expect(shop.data).toMatchObject({
             attributes: {
               myCompo: {
                 compo_products_mw: { data: [{ id: id1 }, { id: id2 }] },
@@ -310,7 +310,7 @@ describe('Relations', () => {
             populateShop
           );
 
-          expect(shop).toMatchObject({
+          expect(shop.data).toMatchObject({
             attributes: {
               myCompo: {
                 compo_products_mw: { data: [{ id: id2 }, { id: id1 }] },
@@ -357,7 +357,7 @@ describe('Relations', () => {
 
         const updatedShop = await updateEntry(
           'shops',
-          createdShop.id,
+          createdShop.data.id,
           {
             name: 'Cazotte Shop',
             products_ow: { connect: relationToAdd },
@@ -367,7 +367,7 @@ describe('Relations', () => {
             products_mm: { connect: relationToAdd },
             products_mw: { connect: relationToAdd },
             myCompo: {
-              id: createdShop.attributes.myCompo.id,
+              id: createdShop.data.attributes.myCompo.id,
               compo_products_ow: { connect: relationToAdd },
               compo_products_mw: { connect: relationToAdd },
             },
@@ -375,7 +375,7 @@ describe('Relations', () => {
           populateShop
         );
 
-        expect(updatedShop).toMatchObject({
+        expect(updatedShop.data).toMatchObject({
           attributes: {
             myCompo: {
               compo_products_mw: { data: [{ id: id1 }, { id: id2 }, { id: id3 }] },
@@ -415,7 +415,7 @@ describe('Relations', () => {
 
         const updatedShop = await updateEntry(
           'shops',
-          createdShop.id,
+          createdShop.data.id,
           {
             name: 'Cazotte Shop',
             products_ow: { connect: relationToAdd, disconnect: relationToRemove },
@@ -425,7 +425,7 @@ describe('Relations', () => {
             products_mm: { connect: relationToAdd, disconnect: relationToRemove },
             products_mw: { connect: relationToAdd, disconnect: relationToRemove },
             myCompo: {
-              id: createdShop.attributes.myCompo.id,
+              id: createdShop.data.attributes.myCompo.id,
               compo_products_ow: { connect: relationToAdd, disconnect: relationToRemove },
               compo_products_mw: { connect: relationToAdd, disconnect: relationToRemove },
             },
@@ -433,7 +433,7 @@ describe('Relations', () => {
           populateShop
         );
 
-        expect(updatedShop).toMatchObject({
+        expect(updatedShop.data).toMatchObject({
           attributes: {
             myCompo: {
               compo_products_mw: { data: [{ id: id2 }, { id: id3 }] },
@@ -473,7 +473,7 @@ describe('Relations', () => {
 
         const updatedShop = await updateEntry(
           'shops',
-          createdShop.id,
+          createdShop.data.id,
           {
             name: 'Cazotte Shop',
             products_ow: { connect: relationToAdd, disconnect: relationToRemove },
@@ -483,7 +483,7 @@ describe('Relations', () => {
             products_mm: { connect: relationToAdd, disconnect: relationToRemove },
             products_mw: { connect: relationToAdd, disconnect: relationToRemove },
             myCompo: {
-              id: createdShop.attributes.myCompo.id,
+              id: createdShop.data.attributes.myCompo.id,
               compo_products_ow: { connect: relationToAdd, disconnect: relationToRemove },
               compo_products_mw: { connect: relationToAdd, disconnect: relationToRemove },
             },
@@ -491,7 +491,7 @@ describe('Relations', () => {
           populateShop
         );
 
-        expect(updatedShop).toMatchObject({
+        expect(updatedShop.data).toMatchObject({
           attributes: {
             myCompo: {
               compo_products_mw: { data: [{ id: id2 }, { id: id3 }] },
@@ -527,21 +527,21 @@ describe('Relations', () => {
 
         const updatedShop = await updateEntry(
           'shops',
-          createdShop.id,
+          createdShop.data.id,
           {
             name: 'Cazotte Shop',
             products_om: { connect: relationToChange },
             products_mm: { connect: relationToChange },
             products_mw: { connect: relationToChange },
             myCompo: {
-              id: createdShop.attributes.myCompo.id,
+              id: createdShop.data.attributes.myCompo.id,
               compo_products_mw: { connect: relationToChange },
             },
           },
           populateShop
         );
 
-        expect(updatedShop).toMatchObject({
+        expect(updatedShop.data).toMatchObject({
           attributes: {
             myCompo: {
               compo_products_mw: { data: [{ id: id3 }, { id: id2 }, { id: id1 }] },
@@ -572,21 +572,21 @@ describe('Relations', () => {
 
         const updatedShop = await updateEntry(
           'shops',
-          createdShop.id,
+          createdShop.data.id,
           {
             name: 'Cazotte Shop',
             products_om: { connect: relationToChange },
             products_mm: { connect: relationToChange },
             products_mw: { connect: relationToChange },
             myCompo: {
-              id: createdShop.attributes.myCompo.id,
+              id: createdShop.data.attributes.myCompo.id,
               compo_products_mw: { connect: relationToChange },
             },
           },
           populateShop
         );
 
-        expect(updatedShop).toMatchObject({
+        expect(updatedShop.data).toMatchObject({
           attributes: {
             myCompo: {
               compo_products_mw: { data: [{ id: id1 }, { id: id3 }, { id: id2 }] },
@@ -617,21 +617,21 @@ describe('Relations', () => {
 
         const updatedShop = await updateEntry(
           'shops',
-          createdShop.id,
+          createdShop.data.id,
           {
             name: 'Cazotte Shop',
             products_om: { connect: relationToChange },
             products_mm: { connect: relationToChange },
             products_mw: { connect: relationToChange },
             myCompo: {
-              id: createdShop.attributes.myCompo.id,
+              id: createdShop.data.attributes.myCompo.id,
               compo_products_mw: { connect: relationToChange },
             },
           },
           populateShop
         );
 
-        expect(updatedShop).toMatchObject({
+        expect(updatedShop.data).toMatchObject({
           attributes: {
             myCompo: {
               compo_products_mw: { data: [{ id: id3 }, { id: id2 }, { id: id1 }] },
@@ -675,7 +675,7 @@ describe('Relations', () => {
 
         const updatedShop = await updateEntry(
           'shops',
-          createdShop.id,
+          createdShop.data.id,
           {
             name: 'Cazotte Shop',
             products_ow: { disconnect: relationsToDisconnectOne },
@@ -685,7 +685,7 @@ describe('Relations', () => {
             products_mm: { disconnect: relationsToDisconnectMany },
             products_mw: { disconnect: relationsToDisconnectMany },
             myCompo: {
-              id: createdShop.attributes.myCompo.id,
+              id: createdShop.data.attributes.myCompo.id,
               compo_products_ow: { disconnect: relationsToDisconnectOne },
               compo_products_mw: { disconnect: relationsToDisconnectMany },
             },
@@ -693,7 +693,7 @@ describe('Relations', () => {
           populateShop
         );
 
-        expect(updatedShop).toMatchObject({
+        expect(updatedShop.data).toMatchObject({
           attributes: {
             myCompo: {
               compo_products_ow: { data: null },
@@ -733,7 +733,7 @@ describe('Relations', () => {
 
         const updatedShop = await updateEntry(
           'shops',
-          createdShop.id,
+          createdShop.data.id,
           {
             name: 'Cazotte Shop',
             products_ow: { disconnect: relationsToDisconnectMany },
@@ -743,7 +743,7 @@ describe('Relations', () => {
             products_mm: { disconnect: relationsToDisconnectMany },
             products_mw: { disconnect: relationsToDisconnectMany },
             myCompo: {
-              id: createdShop.attributes.myCompo.id,
+              id: createdShop.data.attributes.myCompo.id,
               compo_products_ow: { disconnect: relationsToDisconnectMany },
               compo_products_mw: { disconnect: relationsToDisconnectMany },
             },
@@ -751,7 +751,7 @@ describe('Relations', () => {
           populateShop
         );
 
-        expect(updatedShop).toMatchObject({
+        expect(updatedShop.data).toMatchObject({
           attributes: {
             myCompo: {
               compo_products_ow: { data: { id: id1 } },
@@ -779,7 +779,7 @@ describe('Relations', () => {
       });
 
       const expectedCreatedShop = shopFactory({ anyToManyRel: [{ id: id2 }, { id: id1 }] });
-      expect(createdShop).toMatchObject(expectedCreatedShop);
+      expect(createdShop.data).toMatchObject(expectedCreatedShop);
     });
 
     test('Connect new relation at the end', async () => {
@@ -791,7 +791,7 @@ describe('Relations', () => {
       });
 
       const expectedCreatedShop = shopFactory({ anyToManyRel: [{ id: id1 }, { id: id2 }] });
-      expect(createdShop).toMatchObject(expectedCreatedShop);
+      expect(createdShop.data).toMatchObject(expectedCreatedShop);
     });
 
     test('Create relations using before and after', async () => {
@@ -807,7 +807,7 @@ describe('Relations', () => {
       const expectedShop = shopFactory({
         anyToManyRel: [{ id: id2 }, { id: id1 }, { id: id3 }],
       });
-      expect(createdShop).toMatchObject(expectedShop);
+      expect(createdShop.data).toMatchObject(expectedShop);
     });
 
     test('Update relations using before and after', async () => {
@@ -818,7 +818,7 @@ describe('Relations', () => {
         ],
       });
 
-      const updatedShop = await updateShop(shop, {
+      const updatedShop = await updateShop(shop.data, {
         anyToManyRel: [
           { id: id1, position: { before: id2 } },
           { id: id2, position: { start: true } },
@@ -829,7 +829,7 @@ describe('Relations', () => {
       const expectedShop = shopFactory({
         anyToManyRel: [{ id: id2 }, { id: id1 }, { id: id3 }],
       });
-      expect(updatedShop).toMatchObject(expectedShop);
+      expect(updatedShop.data).toMatchObject(expectedShop);
     });
   });
 
@@ -841,7 +841,7 @@ describe('Relations', () => {
       ],
     });
 
-    const updatedShop = await updateShop(shop, {
+    const updatedShop = await updateShop(shop.data, {
       anyToManyRel: [
         { id: id1, position: { end: true } },
         { id: id1, position: { start: true } },
@@ -852,22 +852,19 @@ describe('Relations', () => {
     const expectedShop = shopFactory({
       anyToManyRel: [{ id: id2 }, { id: id1 }],
     });
-    expect(updatedShop).toMatchObject(expectedShop);
+    expect(updatedShop.data).toMatchObject(expectedShop);
   });
 
-  test.only('Update relations with invalid connect array', async () => {
+  test('Update relations with invalid connect array in strict mode', async () => {
     const shop = await createShop({
       anyToManyRel: [{ id: id1, position: { end: true } }],
     });
 
     // Connect relation before id2, but id2 is not in the DB or in the connect array
-    const updatedShop = await updateShop(shop, {
+    const updatedShop = await updateShop(shop.data, {
       anyToManyRel: [{ id: id1, position: { after: id2 } }],
     });
 
-    const expectedShop = shopFactory({
-      anyToManyRel: [{ id: id1 }],
-    });
-    expect(updatedShop).toMatchObject(expectedShop);
+    expect(updatedShop.error).toMatchObject({ status: 400, name: 'ValidationError' });
   });
 });

@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash/fp');
-
+const { InvalidRelationError } = require('../errors');
 /**
  * When connecting relations, the order you connect them matters.
  *
@@ -72,7 +72,7 @@ const sortConnectArray = (connectArr, initialArr = []) => {
       } else {
         // If we reach this point, it means that the adjacent relation is not in the connect array
         // and it is not in the database. This should not happen.
-        throw new Error(
+        throw new InvalidRelationError(
           `There was a problem connecting relation with id ${rel.id} at position ${JSON.stringify(
             rel.position
           )}. The relation with id ${adjacentRelId} needs to be connected first.`
