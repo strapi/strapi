@@ -1,6 +1,6 @@
 import { deleteAllRecords, restoreConfigs } from '../restore';
 import { getStrapiFactory, getContentTypes } from '../../test-utils';
-import { IConfiguration } from '../../../../types';
+import type { IConfiguration } from '../../../../types';
 
 const entities = [
   {
