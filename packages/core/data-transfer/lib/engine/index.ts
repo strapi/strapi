@@ -1,8 +1,8 @@
 import { PassThrough } from 'stream-chain';
-import * as path from 'path';
+import { extname } from 'path';
 import { isEmpty, uniq } from 'lodash/fp';
-import type { Schema } from '@strapi/strapi';
 import { diff as semverDiff } from 'semver';
+import type { Schema } from '@strapi/strapi';
 
 import type {
   Diff,
@@ -435,7 +435,7 @@ class TransferEngine<
         .pipe(
           this.#progressTracker(stageName, {
             size: (value: IAsset) => value.stats.size,
-            key: (value: IAsset) => path.extname(value.filename),
+            key: (value: IAsset) => extname(value.filename),
           })
         )
         .pipe(outStream);
