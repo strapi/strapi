@@ -3,6 +3,19 @@ import { IEntity, ILink } from './common-entities';
 import { ITransferRule } from './utils';
 import { ISourceProvider, IDestinationProvider } from './provider';
 
+export type TransferProgress = {
+  [key in TransferStage]?: {
+    count: number;
+    bytes: number;
+    aggregates?: {
+      [key: string]: {
+        count: number;
+        bytes: number;
+      };
+    };
+  };
+};
+
 /**
  * Defines the capabilities and properties of the transfer engine
  */

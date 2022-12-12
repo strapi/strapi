@@ -2,6 +2,7 @@ import { PassThrough } from 'stream-chain';
 import * as path from 'path';
 import { isEmpty, uniq } from 'lodash/fp';
 import type { Schema } from '@strapi/strapi';
+import { randomUUID } from 'crypto';
 
 import type {
   Diff,
@@ -13,25 +14,22 @@ import type {
   ITransferEngine,
   ITransferEngineOptions,
   ITransferResults,
+  TransferProgress,
   TransferStage,
 } from '../../types';
 
 import compareSchemas from '../strategies';
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const semverDiff = require('semver/functions/diff');
 
-type TransferProgress = {
-  [key in TransferStage]?: {
-    count: number;
-    bytes: number;
-    aggregates?: {
-      [key: string]: {
-        count: number;
-        bytes: number;
-      };
-    };
-  };
-};
+export const transferStages: TransferStage[] = [
+  'entities',
+  'links',
+  'assets',
+  'schemas',
+  'configuration',
+];
 
 class TransferEngine<
   S extends ISourceProvider = ISourceProvider,
@@ -123,8 +121,12 @@ class TransferEngine<
     });
   }
 
-  #emitStageUpdate(type: 'start' | 'complete' | 'progress', transferStage: TransferStage) {
-    this.progress.stream.emit(type, {
+  #emitTransferUpdate(type: 'start' | 'finish' | 'error', payload?: object) {
+    this.progress.stream.emit(type, payload);
+  }
+
+  #emitStageUpdate(type: 'start' | 'finish' | 'progress', transferStage: TransferStage) {
+    this.progress.stream.emit(`stage::${type}`, {
       data: this.progress.data,
       stage: transferStage,
     });
@@ -256,6 +258,9 @@ class TransferEngine<
   }
 
   async transfer(): Promise<ITransferResults<S, D>> {
+    const transferId = randomUUID();
+    this.#emitTransferUpdate('start', { transferId });
+
     try {
       await this.bootstrap();
       await this.init();
@@ -277,9 +282,13 @@ class TransferEngine<
       await this.transferLinks();
       await this.transferConfiguration();
 
+      this.#emitTransferUpdate('finish', { transferId });
+
       // Gracefully close the providers
       await this.close();
     } catch (e: unknown) {
+      this.#emitTransferUpdate('error', { error: e, transferId });
+
       // Rollback the destination provider if an exception is thrown during the transfer
       // Note: This will be configurable in the future
       await this.destinationProvider.rollback?.(e as Error);
@@ -322,7 +331,7 @@ class TransferEngine<
         .on('error', reject)
         // Resolve the promise when the destination has finished reading all the data from the source
         .on('close', () => {
-          this.#emitStageUpdate('complete', stageName);
+          this.#emitStageUpdate('finish', stageName);
           resolve();
         });
 
@@ -361,7 +370,7 @@ class TransferEngine<
         })
         // Resolve the promise when the destination has finished reading all the data from the source
         .on('close', () => {
-          this.#emitStageUpdate('complete', stageName);
+          this.#emitStageUpdate('finish', stageName);
           resolve();
         });
 
@@ -396,7 +405,7 @@ class TransferEngine<
         .on('error', reject)
         // Resolve the promise when the destination has finished reading all the data from the source
         .on('close', () => {
-          this.#emitStageUpdate('complete', stageName);
+          this.#emitStageUpdate('finish', stageName);
           resolve();
         });
 
@@ -428,7 +437,7 @@ class TransferEngine<
         .on('error', reject)
         // Resolve the promise when the destination has finished reading all the data from the source
         .on('close', () => {
-          this.#emitStageUpdate('complete', stageName);
+          this.#emitStageUpdate('finish', stageName);
           resolve();
         });
 
@@ -468,7 +477,7 @@ class TransferEngine<
         .on('error', reject)
         // Resolve the promise when the destination has finished reading all the data from the source
         .on('close', () => {
-          this.#emitStageUpdate('complete', stageName);
+          this.#emitStageUpdate('finish', stageName);
           resolve();
         });
 

@@ -2,7 +2,7 @@ import * as path from 'path';
 import { cloneDeep } from 'lodash/fp';
 import { Readable, Writable } from 'stream-chain';
 import type { Schema } from '@strapi/strapi';
-import { createTransferEngine } from '..';
+import { createTransferEngine, transferStages } from '..';
 import type {
   IAsset,
   IDestinationProvider,
@@ -392,12 +392,13 @@ describe('Transfer engine', () => {
   });
 
   describe('progressStream', () => {
-    test("emits 'progress' events", async () => {
+    test("emits 'stage::progress' events", async () => {
       const source = createSource();
       const engine = createTransferEngine(source, completeDestination, defaultOptions);
 
       let calls = 0;
-      engine.progress.stream.on('progress', ({ stage, data }) => {
+      engine.progress.stream.on('stage::progress', ({ stage, data }) => {
+        expect(transferStages.includes(stage)).toBe(true);
         expect(data).toMatchObject(engine.progress.data);
         calls += 1;
       });
@@ -411,8 +412,8 @@ describe('Transfer engine', () => {
     });
 
     // TODO: to implement these, the mocked streams need to be improved
-    test.todo("emits 'start' events");
-    test.todo("emits 'complete' events");
+    test.todo("emits 'stage::start' events");
+    test.todo("emits 'stage::finish' events");
   });
 
   describe('integrity checks', () => {

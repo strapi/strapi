@@ -24,17 +24,15 @@ module.exports = async (opts) => {
   }
   const filename = opts.file;
 
+  // Load a local instance of Strapi for source and for engine to send telemetry
+  const strapiInstance = await strapi(await strapi.compile()).load();
+
   /**
    * From local Strapi instance
    */
   const sourceOptions = {
     async getStrapi() {
-      const appContext = await strapi.compile();
-      const app = strapi(appContext);
-
-      app.log.level = 'error';
-
-      return app.load();
+      return strapiInstance;
     },
   };
   const source = createLocalStrapiSourceProvider(sourceOptions);
@@ -80,6 +78,28 @@ module.exports = async (opts) => {
 
   try {
     logger.log(`Starting export...`);
+
+    const progress = engine.progress.stream;
+
+    const telemetryPayload = (payload) => {
+      return {
+        transferId: payload.transferId,
+        source: engine.sourceProvider.name,
+        destination: engine.destinationProvider.name,
+      };
+    };
+
+    progress.on('start', (payload = undefined) => {
+      strapiInstance.telemetry.send('deitsStarted', telemetryPayload(payload));
+    });
+
+    progress.on('finish', (payload = undefined) => {
+      strapiInstance.telemetry.send('deitsFinished', telemetryPayload(payload));
+    });
+
+    progress.on('error', (payload = undefined) => {
+      strapiInstance.telemetry.send('deitsFailed', telemetryPayload(payload));
+    });
 
     const results = await engine.transfer();
     const table = buildTransferTable(results.engine);
