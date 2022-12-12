@@ -80,9 +80,8 @@ module.exports = async (opts) => {
 
     const progress = engine.progress.stream;
 
-    const telemetryPayload = (payload) => {
+    const telemetryPayload = (/* payload */) => {
       return {
-        transferId: payload.transferId,
         source: engine.sourceProvider.name,
         destination: engine.destinationProvider.name,
       };

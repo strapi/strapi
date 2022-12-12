@@ -397,14 +397,12 @@ describe('Transfer engine', () => {
       const engine = createTransferEngine(source, completeDestination, defaultOptions);
 
       let calledStart = 0;
-      engine.progress.stream.on('transfer::start', (payload) => {
-        expect(typeof payload.transferId).toBe('string');
+      engine.progress.stream.on('transfer::start', (/* payload */) => {
         calledStart += 1;
       });
 
       let calledFinish = 0;
-      engine.progress.stream.on('transfer::finish', (payload) => {
-        expect(typeof payload.transferId).toBe('string');
+      engine.progress.stream.on('transfer::finish', (/* payload */) => {
         calledFinish += 1;
       });
 

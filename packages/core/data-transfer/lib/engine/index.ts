@@ -2,7 +2,6 @@ import { PassThrough } from 'stream-chain';
 import * as path from 'path';
 import { isEmpty, uniq } from 'lodash/fp';
 import type { Schema } from '@strapi/strapi';
-import { randomUUID } from 'crypto';
 
 import type {
   Diff,
@@ -261,9 +260,7 @@ class TransferEngine<
     // reset data between transfers
     this.progress.data = {};
 
-    const transferId = randomUUID();
-
-    this.#emitTransferUpdate('start', { transferId });
+    this.#emitTransferUpdate('start');
 
     try {
       await this.bootstrap();
@@ -286,12 +283,12 @@ class TransferEngine<
       await this.transferLinks();
       await this.transferConfiguration();
 
-      this.#emitTransferUpdate('finish', { transferId });
+      this.#emitTransferUpdate('finish');
 
       // Gracefully close the providers
       await this.close();
     } catch (e: unknown) {
-      this.#emitTransferUpdate('error', { error: e, transferId });
+      this.#emitTransferUpdate('error', { error: e });
 
       // Rollback the destination provider if an exception is thrown during the transfer
       // Note: This will be configurable in the future
