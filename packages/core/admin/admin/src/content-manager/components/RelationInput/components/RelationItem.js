@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -60,8 +60,8 @@ export const RelationItem = ({
   const composedRefs = composeRefs(relationRef, dragRef);
 
   useEffect(() => {
-    dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
-  }, [dragPreviewRef, index]);
+    dragPreviewRef(getEmptyImage());
+  }, [dragPreviewRef]);
 
   return (
     <Box
@@ -72,7 +72,7 @@ export const RelationItem = ({
       cursor={canDrag ? 'all-scroll' : 'default'}
     >
       {isDragging ? (
-        <RelationItemPlaceholder ref={dragPreviewRef} />
+        <RelationItemPlaceholder />
       ) : (
         <Flex
           paddingTop={2}
@@ -110,9 +110,8 @@ export const RelationItem = ({
   );
 };
 
-const RelationItemPlaceholder = forwardRef((_, ref) => (
+const RelationItemPlaceholder = () => (
   <Box
-    ref={ref}
     paddingTop={2}
     paddingBottom={2}
     paddingLeft={4}
@@ -124,7 +123,7 @@ const RelationItemPlaceholder = forwardRef((_, ref) => (
     background="primary100"
     height={`calc(100% - ${RELATION_GUTTER}px)`}
   />
-));
+);
 
 RelationItem.defaultProps = {
   ariaDescribedBy: '',

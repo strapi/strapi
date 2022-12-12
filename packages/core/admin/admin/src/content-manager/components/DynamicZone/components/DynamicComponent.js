@@ -190,7 +190,7 @@ const DynamicZoneComponent = ({
       </Flex>
       <StyledBox ref={composedBoxRefs} hasRadius>
         {isDragging ? (
-          <Preview ref={dragPreviewRef} padding={6} background="primary100" />
+          <Preview padding={6} background="primary100" />
         ) : (
           <Accordion expanded={isOpen} onToggle={handleToggle} size="S" error={errorMessage}>
             <AccordionToggle
