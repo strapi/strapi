@@ -11,7 +11,7 @@ import { pipeline, PassThrough } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
 
 import { createDecryptionCipher } from '../encryption';
-import { collect } from '../utils';
+import * as utils from '../utils';
 
 type StreamItemArray = Parameters<typeof chain>[0];
 
@@ -81,24 +81,24 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   async getSchemas() {
-    const schemas = await collect(this.streamSchemas() as Readable);
+    const schemas = await utils.stream.collect(this.streamSchemas());
 
     return keyBy('uid', schemas);
   }
 
-  streamEntities(): NodeJS.ReadableStream {
+  streamEntities(): Readable {
     return this.#streamJsonlDirectory('entities');
   }
 
-  streamSchemas(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream> {
+  streamSchemas(): Readable {
     return this.#streamJsonlDirectory('schemas');
   }
 
-  streamLinks(): NodeJS.ReadableStream {
+  streamLinks(): Readable {
     return this.#streamJsonlDirectory('links');
   }
 
-  streamConfiguration(): NodeJS.ReadableStream {
+  streamConfiguration(): Readable {
     // NOTE: TBD
     return this.#streamJsonlDirectory('configuration');
   }
@@ -172,10 +172,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     return outStream;
   }
 
-  async #parseJSONFile<T extends {} = any>(
-    fileStream: NodeJS.ReadableStream,
-    filePath: string
-  ): Promise<T> {
+  async #parseJSONFile<T extends {} = any>(fileStream: Readable, filePath: string): Promise<T> {
     return new Promise<T>((resolve, reject) => {
       pipeline(
         [
