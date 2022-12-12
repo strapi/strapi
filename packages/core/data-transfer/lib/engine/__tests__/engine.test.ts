@@ -392,6 +392,33 @@ describe('Transfer engine', () => {
   });
 
   describe('progressStream', () => {
+    test("emits 'transfer::start' and 'transfer::finish' events", async () => {
+      const source = createSource();
+      const engine = createTransferEngine(source, completeDestination, defaultOptions);
+
+      let calledStart = 0;
+      engine.progress.stream.on('transfer::start', (payload) => {
+        expect(typeof payload.transferId).toBe('string');
+        calledStart += 1;
+      });
+
+      let calledFinish = 0;
+      engine.progress.stream.on('transfer::finish', (payload) => {
+        expect(typeof payload.transferId).toBe('string');
+        calledFinish += 1;
+      });
+
+      // first call
+      await engine.transfer();
+      expect(calledStart).toEqual(1);
+      expect(calledFinish).toEqual(1);
+
+      // second call -- currently not supported
+      // await engine.transfer();
+      // expect(calledStart).toEqual(2);
+      // expect(calledFinish).toEqual(2);
+    });
+
     test("emits 'stage::progress' events", async () => {
       const source = createSource();
       const engine = createTransferEngine(source, completeDestination, defaultOptions);
@@ -406,14 +433,64 @@ describe('Transfer engine', () => {
       await engine.transfer();
 
       // Two values are emitted by default for each stage
+      // TODO: this is no longer true, we should be checking the sum of the various mocked streams
       const itemPerStage = 2;
 
       expect(calls).toEqual((sourceStages.length - providerStages.length) * itemPerStage);
     });
 
-    // TODO: to implement these, the mocked streams need to be improved
-    test.todo("emits 'stage::start' events");
-    test.todo("emits 'stage::finish' events");
+    test("emits 'stage::start' events", async () => {
+      const source = createSource();
+      const engine = createTransferEngine(source, completeDestination, defaultOptions);
+
+      let calls = 0;
+      engine.progress.stream.on('stage::start', ({ stage, data }) => {
+        expect(transferStages.includes(stage)).toBe(true);
+        expect(data).toMatchObject(engine.progress.data);
+        calls += 1;
+      });
+
+      await engine.transfer();
+
+      expect(calls).toEqual(transferStages.length);
+    });
+
+    test("emits 'stage::finish' events", async () => {
+      const source = createSource();
+      const engine = createTransferEngine(source, completeDestination, defaultOptions);
+
+      let calls = 0;
+      engine.progress.stream.on('stage::finish', ({ stage, data }) => {
+        expect(transferStages.includes(stage)).toBe(true);
+        expect(data).toMatchObject(engine.progress.data);
+        calls += 1;
+      });
+
+      await engine.transfer();
+
+      expect(calls).toEqual(transferStages.length);
+    });
+
+    test("emits 'stage::skip' events", async () => {
+      const source = createSource();
+      const engine = createTransferEngine(source, completeDestination, defaultOptions);
+
+      // delete 3 stages from source
+      delete source.streamSchemas;
+      delete source.streamLinks;
+      delete source.streamEntities;
+
+      let calls = 0;
+      engine.progress.stream.on('stage::skip', ({ stage, data }) => {
+        expect(transferStages.includes(stage)).toBe(true);
+        expect(data).toMatchObject(engine.progress.data);
+        calls += 1;
+      });
+
+      await engine.transfer();
+
+      expect(calls).toEqual(3); // 3 deleted stages above
+    });
   });
 
   describe('integrity checks', () => {

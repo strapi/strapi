@@ -122,7 +122,7 @@ class TransferEngine<
   }
 
   #emitTransferUpdate(type: 'start' | 'finish' | 'error', payload?: object) {
-    this.progress.stream.emit(type, payload);
+    this.progress.stream.emit(`transfer::${type}`, payload);
   }
 
   #emitStageUpdate(type: 'start' | 'finish' | 'progress' | 'skip', transferStage: TransferStage) {
