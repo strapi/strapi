@@ -316,8 +316,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   color: #666687;
 }
 
-.c11[aria-disabled='true'] svg > g,
-.c11[aria-disabled='true'] svg path {
+.c11[aria-disabled='true'] svg > g,.c11[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -330,8 +329,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   color: #666687;
 }
 
-.c11[aria-disabled='true']:active svg > g,
-.c11[aria-disabled='true']:active svg path {
+.c11[aria-disabled='true']:active svg > g,.c11[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -722,7 +720,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                         class="c0 c7 c38"
                       >
                         <button
-                          aria-describedby="select-2-hint"
+                          aria-describedby="select-2-error"
                           aria-disabled="false"
                           aria-expanded="false"
                           aria-haspopup="listbox"
@@ -756,6 +754,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                               aria-hidden="true"
                               class="c0 c43 c44 c45"
                               tabindex="-1"
+                              title="Carret Down Button"
                               type="button"
                             >
                               <svg

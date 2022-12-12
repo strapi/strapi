@@ -459,8 +459,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   color: #666687;
 }
 
-.c46[aria-disabled='true'] svg > g,
-.c46[aria-disabled='true'] svg path {
+.c46[aria-disabled='true'] svg > g,.c46[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -473,8 +472,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   color: #666687;
 }
 
-.c46[aria-disabled='true']:active svg > g,
-.c46[aria-disabled='true']:active svg path {
+.c46[aria-disabled='true']:active svg > g,.c46[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -533,8 +531,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   color: #666687;
 }
 
-.c69[aria-disabled='true'] svg > g,
-.c69[aria-disabled='true'] svg path {
+.c69[aria-disabled='true'] svg > g,.c69[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -547,8 +544,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   color: #666687;
 }
 
-.c69[aria-disabled='true']:active svg > g,
-.c69[aria-disabled='true']:active svg path {
+.c69[aria-disabled='true']:active svg > g,.c69[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -805,8 +801,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   color: #666687;
 }
 
-.c12[aria-disabled='true'] svg > g,
-.c12[aria-disabled='true'] svg path {
+.c12[aria-disabled='true'] svg > g,.c12[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -819,8 +814,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   color: #666687;
 }
 
-.c12[aria-disabled='true']:active svg > g,
-.c12[aria-disabled='true']:active svg path {
+.c12[aria-disabled='true']:active svg > g,.c12[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -1165,6 +1159,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           aria-hidden="true"
                           class="c0 c42 c43 c44"
                           tabindex="-1"
+                          title="Carret Down Button"
                           type="button"
                         >
                           <svg

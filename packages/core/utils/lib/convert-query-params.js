@@ -6,7 +6,11 @@
  * Converts the standard Strapi REST query params to a more usable format for querying
  * You can read more here: https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest-api.html#filters
  */
+
 const {
+  isNil,
+  toNumber,
+  isInteger,
   has,
   isEmpty,
   isObject,
@@ -14,14 +18,16 @@ const {
   cloneDeep,
   get,
   mergeAll,
-  isNil,
-  toNumber,
-  isInteger,
 } = require('lodash/fp');
 const _ = require('lodash');
 const parseType = require('./parse-type');
 const contentTypesUtils = require('./content-types');
 const { PaginationError } = require('./errors');
+const {
+  isMediaAttribute,
+  isDynamicZoneAttribute,
+  isMorphToRelationalAttribute,
+} = require('./content-types');
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
@@ -185,8 +191,31 @@ const convertPopulateObject = (populate, schema) => {
       return acc;
     }
 
-    // FIXME: This is a temporary solution for dynamic zones that should be
-    // fixed when we'll implement a more accurate way to query them
+    // Allow adding an 'on' strategy to populate queries for polymorphic relations, media and dynamic zones
+    const isAllowedAttributeForFragmentPopulate =
+      isDynamicZoneAttribute(attribute) ||
+      isMediaAttribute(attribute) ||
+      isMorphToRelationalAttribute(attribute);
+
+    const hasFragmentPopulateDefined = typeof subPopulate === 'object' && 'on' in subPopulate;
+
+    if (isAllowedAttributeForFragmentPopulate && hasFragmentPopulateDefined) {
+      return {
+        ...acc,
+        [key]: {
+          on: Object.entries(subPopulate.on).reduce(
+            (acc, [type, typeSubPopulate]) => ({
+              ...acc,
+              [type]: convertNestedPopulate(typeSubPopulate, strapi.getModel(type)),
+            }),
+            {}
+          ),
+        },
+      };
+    }
+
+    // TODO: This is a query's populate fallback for DynamicZone and is kept for legacy purpose.
+    //       Removing it could break existing user queries but it should be removed in V5.
     if (attribute.type === 'dynamiczone') {
       const populates = attribute.components
         .map((uid) => strapi.getModel(uid))

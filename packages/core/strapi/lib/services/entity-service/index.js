@@ -134,17 +134,20 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     // TODO: wrap into transaction
     const componentData = await createComponents(uid, validData);
 
+    const entityData = creationPipeline(
+      Object.assign(omitComponentData(model, validData), componentData),
+      {
+        contentType: model,
+      }
+    );
     let entity = await db.query(uid).create({
       ...query,
-      data: creationPipeline(Object.assign(omitComponentData(model, validData), componentData), {
-        contentType: model,
-      }),
+      data: entityData,
     });
 
     // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
-    // FIXME: upload in components
     if (files && Object.keys(files).length > 0) {
-      await this.uploadFiles(uid, entity, files);
+      await this.uploadFiles(uid, Object.assign(entityData, entity), files);
       entity = await this.findOne(uid, entity.id, wrappedParams);
     }
 
@@ -180,19 +183,22 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     // TODO: wrap in transaction
     const componentData = await updateComponents(uid, entityToUpdate, validData);
+    const entityData = updatePipeline(
+      Object.assign(omitComponentData(model, validData), componentData),
+      {
+        contentType: model,
+      }
+    );
 
     let entity = await db.query(uid).update({
       ...query,
       where: { id: entityId },
-      data: updatePipeline(Object.assign(omitComponentData(model, validData), componentData), {
-        contentType: model,
-      }),
+      data: entityData,
     });
 
     // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
-    // FIXME: upload in components
     if (files && Object.keys(files).length > 0) {
-      await this.uploadFiles(uid, entity, files);
+      await this.uploadFiles(uid, Object.assign(entityData, entity), files);
       entity = await this.findOne(uid, entity.id, wrappedParams);
     }
 

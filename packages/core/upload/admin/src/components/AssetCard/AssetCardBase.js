@@ -13,6 +13,7 @@ import {
   CardTitle,
   CardSubtitle,
 } from '@strapi/design-system/Card';
+import { Flex } from '@strapi/design-system/Flex';
 import { IconButton } from '@strapi/design-system/IconButton';
 import Pencil from '@strapi/icons/Pencil';
 import Trash from '@strapi/icons/Trash';
@@ -116,12 +117,14 @@ export const AssetCardBase = ({
             {subtitle}
           </CardSubtitle>
         </CardContent>
-        <CardBadge>
-          {formatMessage({
-            id: getTrad(`settings.section.${variant.toLowerCase()}.label`),
-            defaultMessage: variant,
-          })}
-        </CardBadge>
+        <Flex paddingTop={1} grow={1}>
+          <CardBadge>
+            {formatMessage({
+              id: getTrad(`settings.section.${variant.toLowerCase()}.label`),
+              defaultMessage: variant,
+            })}
+          </CardBadge>
+        </Flex>
       </CardBody>
     </CardContainer>
   );

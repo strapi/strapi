@@ -446,6 +446,11 @@ const morphToMany = async (input, ctx) => {
     .where({
       [joinColumn.name]: referencedValues,
       ...(joinTable.on || {}),
+      // If the populateValue contains an "on" property,
+      // only populate the types defined in it
+      ...('on' in populateValue
+        ? { [morphColumn.typeColumn.name]: Object.keys(populateValue.on) }
+        : {}),
     })
     .orderBy([joinColumn.name, 'order'])
     .execute({ mapResults: false });
@@ -470,6 +475,8 @@ const morphToMany = async (input, ctx) => {
   }, {});
 
   const map = {};
+  const { on, ...typePopulate } = populateValue;
+
   for (const type of Object.keys(idsByType)) {
     const ids = idsByType[type];
 
@@ -483,7 +490,7 @@ const morphToMany = async (input, ctx) => {
     const qb = db.entityManager.createQueryBuilder(type);
 
     const rows = await qb
-      .init(populateValue)
+      .init(on?.[type] ?? typePopulate)
       .addSelect(`${qb.alias}.${idColumn.referencedColumn}`)
       .where({ [idColumn.referencedColumn]: ids })
       .execute({ mapResults: false });
@@ -540,6 +547,8 @@ const morphToOne = async (input, ctx) => {
   }, {});
 
   const map = {};
+  const { on, ...typePopulate } = populateValue;
+
   for (const type of Object.keys(idsByType)) {
     const ids = idsByType[type];
 
@@ -552,7 +561,7 @@ const morphToOne = async (input, ctx) => {
     const qb = db.entityManager.createQueryBuilder(type);
 
     const rows = await qb
-      .init(populateValue)
+      .init(on?.[type] ?? typePopulate)
       .addSelect(`${qb.alias}.${idColumn.referencedColumn}`)
       .where({ [idColumn.referencedColumn]: ids })
       .execute({ mapResults: false });
@@ -579,7 +588,16 @@ const morphToOne = async (input, ctx) => {
 
 //  TODO: Omit limit & offset to avoid needing a query per result to avoid making too many queries
 const pickPopulateParams = (populate) => {
-  const fieldsToPick = ['select', 'count', 'where', 'populate', 'orderBy', 'filters', 'ordering'];
+  const fieldsToPick = [
+    'select',
+    'count',
+    'where',
+    'populate',
+    'orderBy',
+    'filters',
+    'ordering',
+    'on',
+  ];
 
   if (populate.count !== true) {
     fieldsToPick.push('limit', 'offset');
