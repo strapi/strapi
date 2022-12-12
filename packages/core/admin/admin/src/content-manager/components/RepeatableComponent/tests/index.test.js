@@ -229,9 +229,9 @@ describe('RepeatableComponents', () => {
       fireEvent.drop(dropZone);
 
       expect(moveComponentField).toHaveBeenCalledWith({
-        currentIndex: 1,
+        currentIndex: 0,
         name: 'repeatable-component',
-        newIndex: 0,
+        newIndex: 1,
       });
     });
 

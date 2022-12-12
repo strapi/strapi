@@ -55,10 +55,10 @@ export const useDragAndDrop = (
         return;
       }
       const dragIndex = item.index;
-      const currentIndex = index;
+      const newInd = index;
 
       // Don't replace items with themselves
-      if (dragIndex === currentIndex) {
+      if (dragIndex === newInd) {
         return;
       }
 
@@ -68,18 +68,18 @@ export const useDragAndDrop = (
       const hoverClientY = clientOffset.y - hoverBoundingRect.top;
 
       // Dragging downwards
-      if (dragIndex < currentIndex && hoverClientY < hoverMiddleY) {
+      if (dragIndex < newInd && hoverClientY < hoverMiddleY) {
         return;
       }
 
       // Dragging upwards
-      if (dragIndex > currentIndex && hoverClientY > hoverMiddleY) {
+      if (dragIndex > newInd && hoverClientY > hoverMiddleY) {
         return;
       }
 
       // Time to actually perform the action
-      onMoveItem(dragIndex, currentIndex);
-      item.index = currentIndex;
+      onMoveItem(newInd, dragIndex);
+      item.index = newInd;
     },
   });
 
