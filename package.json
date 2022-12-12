@@ -29,10 +29,11 @@
   ],
   "scripts": {
     "prepare": "husky install",
-    "setup": "yarn clean && yarn && yarn build",
+    "setup": "yarn clean && yarn && yarn compile && yarn build",
     "clean": "lerna run --stream clean --no-private",
     "watch": "lerna run --stream watch --no-private",
     "build": "lerna run --stream build --no-private",
+    "compile": "lerna run --stream compile --no-private",
     "generate": "plop --plopfile ./packages/generators/admin/plopfile.js",
     "lint": "npm-run-all -p lint:code lint:css",
     "lint:code": "eslint .",

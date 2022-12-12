@@ -27,9 +27,9 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "compile": "tsc -p tsconfig.json",
     "clean": "rimraf ./dist",
-    "build:clean": "yarn clean && yarn build",
+    "compile:clean": "yarn clean && yarn compile",
     "watch": "yarn build -w",
     "test:unit": "jest --verbose"
   },
