@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
-import { DateTimePicker as MyDateTimePicker } from '@strapi/design-system';
+import { DateTimePicker } from '@strapi/design-system';
 
 // TODO: remove DateTimePicker component from the helper-plugin in V5
-export default function DateTimePicker(props) {
+export default function DateTimePickerLegacy(props) {
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
       console.log(
@@ -13,5 +13,5 @@ export default function DateTimePicker(props) {
     }
   }, []);
 
-  return <MyDateTimePicker {...props} />;
+  return <DateTimePicker {...props} />;
 }
