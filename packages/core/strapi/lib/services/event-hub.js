@@ -72,6 +72,7 @@ module.exports = function createEventHub() {
   return {
     ...eventHub,
     removeListener: eventHub.off,
+    removeAllListeners: eventHub.destroy,
     addListener: eventHub.on,
   };
 };

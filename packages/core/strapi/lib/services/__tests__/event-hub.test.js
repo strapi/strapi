@@ -95,4 +95,24 @@ describe('Event Hub', () => {
     expect(fn).toHaveBeenCalledTimes(1);
     expect(fn2).toHaveBeenCalledTimes(1);
   });
+
+  it('removes all subscribers on removeAllListeners()', async () => {
+    const { subscribe, on, emit, removeAllListeners } = createEventHub();
+
+    const fn = jest.fn();
+    const fn2 = jest.fn();
+    subscribe(fn);
+    on('my-event', fn2);
+
+    await emit('my-event');
+    expect(fn).toHaveBeenCalled();
+    expect(fn2).toHaveBeenCalled();
+
+    removeAllListeners();
+
+    // Subscribers are removed
+    await emit('my-event');
+    expect(fn).toHaveBeenCalledTimes(1);
+    expect(fn2).toHaveBeenCalledTimes(1);
+  });
 });
