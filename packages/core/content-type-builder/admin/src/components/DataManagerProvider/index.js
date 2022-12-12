@@ -108,6 +108,7 @@ const DataManagerProvider = ({
         { data: reservedNames },
       ] = await Promise.all(
         ['components', 'content-types', 'reserved-names'].map((endPoint) => {
+          // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from getFetchClient
           return axiosInstance.get(endPoint);
         })
       );
@@ -265,7 +266,7 @@ const DataManagerProvider = ({
 
       if (userConfirm) {
         lockAppWithAutoreload();
-
+        // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from getFetchClient
         await axiosInstance.delete(requestURL);
 
         // Make sure the server has restarted
@@ -315,7 +316,7 @@ const DataManagerProvider = ({
         }
 
         lockAppWithAutoreload();
-
+        // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from getFetchClient
         await axiosInstance.delete(requestURL);
 
         // Make sure the server has restarted
@@ -349,7 +350,8 @@ const DataManagerProvider = ({
       lockAppWithAutoreload();
 
       // Update the category
-      await axiosInstance({ url: requestURL, method: 'PUT', data: body });
+      // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from getFetchClient
+      await axiosInstance.put(requestURL, body);
 
       // Make sure the server has restarted
       await serverRestartWatcher(true);
@@ -499,19 +501,18 @@ const DataManagerProvider = ({
         trackUsage('willSaveComponent');
       }
 
-      const method = isCreating ? 'POST' : 'PUT';
+      // Lock the app
+      lockAppWithAutoreload();
 
       const baseURL = `/${endPoint}`;
       const requestURL = isCreating ? baseURL : `${baseURL}/${currentUid}`;
 
-      // Lock the app
-      lockAppWithAutoreload();
-
-      await axiosInstance({
-        url: requestURL,
-        method,
-        data: body,
-      });
+      // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from getFetchClient
+      if (isCreating) {
+        await axiosInstance.post(requestURL, body);
+      } else {
+        await axiosInstance.put(requestURL, body);
+      }
 
       // Make sure the server has restarted
       await serverRestartWatcher(true);
