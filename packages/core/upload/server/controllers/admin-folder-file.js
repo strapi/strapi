@@ -154,7 +154,7 @@ module.exports = {
 
           // update path for folders themselves & folders below
           totalFolderNumber = await strapi.db
-            .connection(folderTable)
+            .getConnection(folderTable)
             .transacting(trx)
             .where(pathColName, existingFolder.path)
             .orWhere(pathColName, 'like', `${existingFolder.path}/%`)
@@ -169,7 +169,7 @@ module.exports = {
 
           // update path of files below
           totalFileNumber = await strapi.db
-            .connection(fileTable)
+            .getConnection(fileTable)
             .transacting(trx)
             .where(folderPathColName, existingFolder.path)
             .orWhere(folderPathColName, 'like', `${existingFolder.path}/%`)
@@ -209,7 +209,7 @@ module.exports = {
 
         // update files main fields (path + updatedBy)
         await strapi.db
-          .connection(fileTable)
+          .getConnection(fileTable)
           .transacting(trx)
           .whereIn('id', fileIds)
           .update(folderPathColName, destinationFolderPath);

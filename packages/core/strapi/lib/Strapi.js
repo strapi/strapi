@@ -127,7 +127,7 @@ class Strapi {
   }
 
   get EE() {
-    return ee({ dir: this.dirs.dist.root, logger: this.log });
+    return ee({ dir: this.dirs.app.root, logger: this.log });
   }
 
   get services() {

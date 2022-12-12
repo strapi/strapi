@@ -14,10 +14,11 @@ exports[`BulkMoveButton renders 1`] = `
 }
 
 .c6 {
-  font-weight: 600;
-  color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
+  font-weight: 600;
+  line-height: 1.14;
+  color: #32324d;
 }
 
 .c3 {
@@ -91,9 +92,11 @@ exports[`BulkMoveButton renders 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
+  background-color: #4945ff;
   border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
 }
@@ -122,8 +125,7 @@ exports[`BulkMoveButton renders 1`] = `
   color: #666687;
 }
 
-.c1[aria-disabled='true'] svg > g,
-.c1[aria-disabled='true'] svg path {
+.c1[aria-disabled='true'] svg > g,.c1[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -136,8 +138,7 @@ exports[`BulkMoveButton renders 1`] = `
   color: #666687;
 }
 
-.c1[aria-disabled='true']:active svg > g,
-.c1[aria-disabled='true']:active svg path {
+.c1[aria-disabled='true']:active svg > g,.c1[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 

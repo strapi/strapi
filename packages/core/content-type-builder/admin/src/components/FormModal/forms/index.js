@@ -163,7 +163,7 @@ const forms = {
       });
 
       const pluralNames = Object.values(contentTypes).map((contentType) => {
-        return contentType.schema.pluralNames;
+        return get(contentType, ['schema', 'pluralName'], '');
       });
 
       const takenNames = isEditing
@@ -186,12 +186,12 @@ const forms = {
           })
         : pluralNames;
 
-      const contentTypeShape = createContentTypeSchema(
-        takenNames,
-        reservedNames.models,
-        takenSingularNames,
-        takenPluralNames
-      );
+      const contentTypeShape = createContentTypeSchema({
+        usedContentTypeNames: takenNames,
+        reservedModels: reservedNames.models,
+        singularNames: takenSingularNames,
+        pluralNames: takenPluralNames,
+      });
 
       // FIXME
       return extensions.makeValidator(

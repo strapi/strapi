@@ -1,26 +1,24 @@
 import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { render as renderRTL, fireEvent, waitFor } from '@testing-library/react';
+import { render as renderRTL } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import en from '../../../translations/en.json';
-
+import { IntlProvider } from 'react-intl';
 import { AssetCardBase } from '../AssetCardBase';
 
-jest.mock('react-intl', () => ({
-  useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id]) }),
-}));
-
-describe('AssetCardBase', () => {
-  const render = (props) =>
-    renderRTL(
+const render = (props) =>
+  renderRTL(
+    <IntlProvider locale="en" messages={{}} defaultLocale="en">
       <ThemeProvider theme={lightTheme}>
         <AssetCardBase name="Card" extension="png" {...props} />
       </ThemeProvider>
-    );
+    </IntlProvider>
+  );
 
+describe('AssetCardBase', () => {
   describe('Interaction', () => {
-    it('should call onSelect when the checkbox is clicked', () => {
+    it('should call onSelect when the checkbox is clicked', async () => {
+      const user = userEvent.setup();
       const onSelect = jest.fn();
       const { getByRole } = render({
         onSelect,
@@ -28,87 +26,113 @@ describe('AssetCardBase', () => {
 
       const checkbox = getByRole('checkbox');
 
-      fireEvent.click(checkbox);
+      await user.click(checkbox);
 
       expect(onSelect).toHaveBeenCalledTimes(1);
     });
 
-    it('should call onEdit when the edit button is clicked after the card has been hovered', () => {
+    it('should call onEdit when the edit button is clicked', async () => {
       const onEdit = jest.fn();
-      const { getAllByRole } = render({
+      const user = userEvent.setup();
+
+      const { getByRole } = render({
         onEdit,
       });
 
-      const [card, button] = getAllByRole('button');
+      const editButton = getByRole('button', {
+        name: /edit/i,
+      });
 
-      userEvent.hover(card);
-
-      waitFor(() => expect(button.parentElement).toHaveStyle('opacity: 1'));
-
-      fireEvent.click(button);
+      await user.click(editButton);
 
       expect(onEdit).toHaveBeenCalledTimes(1);
     });
 
-    it('should call onRemove when the remove button is clicked after the card has been hovered', () => {
+    it('should call onRemove when the remove button is clicked', async () => {
       const onRemove = jest.fn();
-      const { getAllByRole } = render({
+      const user = userEvent.setup();
+      const { getByRole } = render({
         onRemove,
       });
 
-      const [card, button] = getAllByRole('button');
+      const removeButton = getByRole('button', {
+        name: /remove from selection/i,
+      });
 
-      userEvent.hover(card);
-
-      waitFor(() => expect(button.parentElement).toHaveStyle('opacity: 1'));
-
-      fireEvent.click(button);
+      await user.click(removeButton);
 
       expect(onRemove).toHaveBeenCalledTimes(1);
     });
 
-    it('should call onEdit when the card is clicked', () => {
+    it('should call onEdit when the card is clicked', async () => {
       const onEdit = jest.fn();
+      const user = userEvent.setup();
       const { getAllByRole } = render({
         onEdit,
       });
 
       const card = getAllByRole('button')[0];
 
-      fireEvent.click(card);
+      await user.click(card);
 
       expect(onEdit).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('Keyboard Navigation', () => {
-    it('should focus checkbox when the card is first tabbed too', () => {
+    it('should focus the checkbox when the card is first tabbed once', async () => {
+      const user = userEvent.setup();
       const { getByRole } = render({
         onSelect: jest.fn(),
         onEdit: jest.fn(),
         onRemove: jest.fn(),
       });
 
-      userEvent.tab();
+      await user.tab();
 
       expect(getByRole('checkbox')).toHaveFocus();
     });
 
-    it('should focus the edit button and change their opacity when the card is tabbed too', () => {
-      const { getAllByRole } = render({
+    it('should focus remove from selection when the card is first tabbed twice', async () => {
+      const user = userEvent.setup();
+      const { getByRole } = render({
         onSelect: jest.fn(),
         onEdit: jest.fn(),
         onRemove: jest.fn(),
       });
 
-      userEvent.tab();
-      userEvent.tab();
+      // checkbox
+      await user.tab();
+      // Remove from selection
+      await user.tab();
 
-      const button = getAllByRole('button')[1];
+      const removeSelectionButton = getByRole('button', {
+        name: /remove from selection/i,
+      });
 
-      waitFor(() => expect(button.parentElement).toHaveStyle('opacity: 1'));
+      expect(removeSelectionButton).toHaveFocus();
+    });
 
-      expect(button).toHaveFocus();
+    it('should focus the edit button when the card is three times', async () => {
+      const user = userEvent.setup();
+      const { getByRole } = render({
+        onSelect: jest.fn(),
+        onEdit: jest.fn(),
+        onRemove: jest.fn(),
+      });
+
+      // checkbox
+      await user.tab();
+      // Remove from selection
+      await user.tab();
+      // Edit
+      await user.tab();
+
+      const editButton = getByRole('button', {
+        name: /edit/i,
+      });
+
+      expect(editButton).toHaveFocus();
     });
   });
 });

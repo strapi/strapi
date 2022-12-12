@@ -62,7 +62,7 @@ const Configuration = ({ config }) => {
             })}
             placeholder={formatMessage({
               id: getTrad('Settings.email.plugin.placeholder.defaultFrom'),
-              defaultMessage: `ex: Strapi No-Reply \<no-reply@strapi.io\>`,
+              defaultMessage: "ex: Strapi No-Reply '<'no-reply@strapi.io'>'",
             })}
             disabled
             onChange={() => {}}
@@ -78,7 +78,7 @@ const Configuration = ({ config }) => {
             })}
             placeholder={formatMessage({
               id: getTrad('Settings.email.plugin.placeholder.defaultReplyTo'),
-              defaultMessage: `ex: Strapi \<example@strapi.io\>`,
+              defaultMessage: `ex: Strapi '<'example@strapi.io'>'`,
             })}
             disabled
             onChange={() => {}}

@@ -80,10 +80,10 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
 }
 
 .c3 {
-  font-weight: 600;
-  color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
 }
 
 .c0 {

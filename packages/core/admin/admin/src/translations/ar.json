@@ -154,7 +154,6 @@
   "content-manager.containers.SettingPage.editSettings.description": "اسحب الحقول وأفلتها لإنشاء التخطيط",
   "content-manager.containers.SettingPage.editSettings.title": "التعديل - الإعدادات",
   "content-manager.containers.SettingPage.listSettings.title": "قائمة( إعدادات)",
-  "content-manager.containers.SettingPage.relations": "المجالات العلائقية",
   "content-manager.containers.SettingsPage.Block.contentType.description": "تكوين الإعدادات المحددة",
   "content-manager.containers.SettingsPage.Block.generalSettings.title": "عام",
   "content-manager.emptyAttributes.title": "لا توجد حقول بعد",

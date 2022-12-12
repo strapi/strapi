@@ -210,7 +210,6 @@
   "content-manager.containers.SettingPage.editSettings.description": "Yerleşimi oluşturmak için alanları sürükleyip bırakın",
   "content-manager.containers.SettingPage.editSettings.title": "Düzenle (ayarlar)",
   "content-manager.containers.SettingPage.listSettings.title": "Liste (ayarlar)",
-  "content-manager.containers.SettingPage.relations": "İlişkisel alanlar",
   "content-manager.containers.SettingsPage.Block.contentType.description": "Belirli ayarları yapılandırın",
   "content-manager.containers.SettingsPage.Block.generalSettings.title": "Genel",
   "content-manager.emptyAttributes.title": "Henüz bir alan yok",

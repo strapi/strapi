@@ -42,9 +42,8 @@ const getDefaultFieldSize = (type) => {
 async function createDefaultLayouts(schema) {
   return {
     list: createDefaultListLayout(schema),
-    editRelations: createDefaultEditRelationsLayout(schema),
     edit: createDefaultEditLayout(schema),
-    ..._.pick(_.get(schema, ['config', 'layouts'], {}), ['list', 'edit', 'editRelations']),
+    ..._.pick(_.get(schema, ['config', 'layouts'], {}), ['list', 'edit']),
   };
 }
 
@@ -52,12 +51,6 @@ function createDefaultListLayout(schema) {
   return Object.keys(schema.attributes)
     .filter((name) => isListable(schema, name))
     .slice(0, DEFAULT_LIST_LENGTH);
-}
-
-function createDefaultEditRelationsLayout(schema) {
-  if (schema.modelType === 'component') return [];
-
-  return Object.keys(schema.attributes).filter((name) => hasRelationAttribute(schema, name));
 }
 
 const rowSize = (els) => els.reduce((sum, el) => sum + el.size, 0);
@@ -77,9 +70,12 @@ function syncLayouts(configuration, schema) {
 
   let cleanList = list.filter((attr) => isListable(schema, attr));
 
-  let cleanEditRelations = editRelations.filter((attr) => hasRelationAttribute(schema, attr));
+  // TODO V5: remove editRelations
+  const cleanEditRelations = editRelations.filter((attr) => hasRelationAttribute(schema, attr));
 
-  const elementsToReAppend = [];
+  // backward compatibility with when relations were on the side of the layout
+  // it migrates the displayed relations to the main edit layout
+  const elementsToReAppend = [...cleanEditRelations];
   let cleanEdit = [];
   for (const row of edit) {
     const newRow = [];
@@ -122,13 +118,6 @@ function syncLayouts(configuration, schema) {
     );
   }
 
-  // add new relations to layout
-  if (schema.modelType !== 'component') {
-    const newRelations = newAttributes.filter((key) => hasRelationAttribute(schema, key));
-
-    cleanEditRelations = _.uniq(cleanEditRelations.concat(newRelations));
-  }
-
   // add new attributes to edit view
   const newEditAttributes = newAttributes.filter((key) => hasEditableAttribute(schema, key));
 
@@ -137,10 +126,6 @@ function syncLayouts(configuration, schema) {
   return {
     list: cleanList.length > 0 ? cleanList : createDefaultListLayout(schema),
     edit: cleanEdit.length > 0 ? cleanEdit : createDefaultEditLayout(schema),
-    editRelations:
-      editRelations.length === 0 || cleanEditRelations.length > 0
-        ? cleanEditRelations
-        : createDefaultEditRelationsLayout(schema),
   };
 }
 

@@ -9,8 +9,6 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import { EditFolderDialog } from '../EditFolderDialog';
 import { useEditFolder } from '../../../hooks/useEditFolder';
 
-console.error = jest.fn();
-
 jest.mock('../../../utils/axiosInstance', () => ({
   ...jest.requireActual('../../../utils/axiosInstance'),
   put: jest.fn().mockImplementation({}),
@@ -45,7 +43,7 @@ function ComponentFixture(props) {
       <IntlProvider locale="en" messages={{}}>
         <ThemeProvider theme={lightTheme}>
           <NotificationsProvider toggleNotification={() => {}}>
-            <EditFolderDialog {...nextProps} />
+            <EditFolderDialog onClose={() => {}} {...nextProps} />
           </NotificationsProvider>
         </ThemeProvider>
       </IntlProvider>
@@ -54,7 +52,7 @@ function ComponentFixture(props) {
 }
 
 function setup(props = { onClose: jest.fn() }) {
-  return render(<ComponentFixture {...props} />, { container: document.body });
+  return render(<ComponentFixture {...props} />);
 }
 
 function getInput(container, name) {
@@ -71,16 +69,16 @@ describe('EditFolderDialog', () => {
   });
 
   test('renders and matches the snapshot', () => {
-    const { container } = setup();
-    expect(container).toMatchSnapshot();
+    const { baseElement } = setup();
+    expect(baseElement).toMatchSnapshot();
   });
 
   test('closes the modal', () => {
     const spy = jest.fn();
-    const { container } = setup({ onClose: spy });
+    const { baseElement } = setup({ onClose: spy });
 
     act(() => {
-      fireEvent.click(getButton(container, 'cancel'));
+      fireEvent.click(getButton(baseElement, 'cancel'));
     });
 
     expect(spy).toBeCalledTimes(1);
@@ -88,11 +86,11 @@ describe('EditFolderDialog', () => {
 
   test('name is a required field', async () => {
     const spy = jest.fn();
-    const { container } = setup({ onClose: spy });
-    const name = getInput(container, 'name');
+    const { baseElement } = setup({ onClose: spy });
+    const name = getInput(baseElement, 'name');
 
     act(() => {
-      fireEvent.click(getButton(container, 'submit'));
+      fireEvent.click(getButton(baseElement, 'submit'));
     });
 
     expect(spy).toBeCalledTimes(0);
@@ -102,7 +100,7 @@ describe('EditFolderDialog', () => {
     });
 
     act(() => {
-      fireEvent.click(getButton(container, 'submit'));
+      fireEvent.click(getButton(baseElement, 'submit'));
     });
 
     await waitFor(() => expect(spy).toBeCalledTimes(1));
@@ -115,10 +113,15 @@ describe('EditFolderDialog', () => {
     const folder = {
       id: 2,
       name: 'default folder name',
+      createdAt: 'Mon Oct 24 2022 16:02:14 GMT+0200',
+      updatedAt: 'Mon Oct 24 2022 16:02:14 GMT+0200',
+      pathId: 2,
+      path: '2',
+      parent: null,
     };
-    const { container, queryByText } = setup({ folder, onClose: spy });
+    const { baseElement, queryByText } = setup({ folder, onClose: spy });
 
-    expect(getInput(container, 'name').value).toBe(folder.name);
+    expect(getInput(baseElement, 'name').value).toBe(folder.name);
     expect(queryByText('Media Library')).toBeInTheDocument();
   });
 
@@ -133,14 +136,25 @@ describe('EditFolderDialog', () => {
     const folder = {
       id: 1,
       name: 'default folder name',
-      children: [],
-      parent: { id: 1, label: 'Some parent' },
+      createdAt: 'Mon Oct 24 2022 16:02:14 GMT+0200',
+      updatedAt: 'Mon Oct 24 2022 16:02:14 GMT+0200',
+      children: { count: 0 },
+      parent: {
+        id: 2,
+        name: 'Some parent',
+        createdAt: 'Mon Oct 24 2022 16:02:14 GMT+0200',
+        updatedAt: 'Mon Oct 24 2022 16:02:14 GMT+0200',
+        pathId: 2,
+        path: '1/2',
+      },
+      pathId: 2,
+      path: '2',
     };
     const folderStructure = [{ value: 1, label: 'Some parent' }];
-    const { container, queryByText } = setup({ folder, folderStructure });
+    const { baseElement, queryByText } = setup({ folder, folderStructure });
 
     act(() => {
-      fireEvent.click(getButton(container, 'delete'));
+      fireEvent.click(getButton(baseElement, 'delete'));
     });
 
     expect(queryByText('Are you sure you want to delete this?')).toBeInTheDocument();
@@ -172,10 +186,21 @@ describe('EditFolderDialog', () => {
     const folder = {
       id: 1,
       name: 'default folder name',
-      children: [],
-      parent: { id: 1, label: 'Some parent' },
+      children: { count: 0 },
+      createdAt: 'Mon Oct 24 2022 16:02:14 GMT+0200',
+      updatedAt: 'Mon Oct 24 2022 16:02:14 GMT+0200',
+      parent: {
+        id: 2,
+        name: 'Some parent',
+        createdAt: 'Mon Oct 24 2022 16:02:14 GMT+0200',
+        updatedAt: 'Mon Oct 24 2022 16:02:14 GMT+0200',
+        pathId: 2,
+        path: '1/2',
+      },
+      pathId: 2,
+      path: '2',
     };
-    const folderStructure = [{ value: 1, label: 'Some parent' }];
+    const folderStructure = [{ value: 1, name: 'Some parent' }];
 
     const { getByText } = setup({ folder, folderStructure });
 
