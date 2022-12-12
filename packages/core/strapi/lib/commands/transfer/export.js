@@ -24,12 +24,11 @@ module.exports = async (opts) => {
   }
   const filename = opts.file;
 
-  // Load a local instance of Strapi for source and for engine to send telemetry
-  const strapiInstance = await strapi(await strapi.compile()).load();
-
   /**
    * From local Strapi instance
    */
+  const strapiInstance = await strapi(await strapi.compile()).load();
+
   const sourceOptions = {
     async getStrapi() {
       return strapiInstance;
