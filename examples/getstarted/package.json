@@ -27,7 +27,7 @@
     "lodash": "4.17.21",
     "mysql": "2.18.1",
     "passport-google-oauth2": "0.2.0",
-    "pg": "8.6.0",
+    "pg": "8.8.0",
     "sqlite3": "5.1.2"
   },
   "strapi": {
