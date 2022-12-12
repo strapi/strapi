@@ -1,6 +1,6 @@
 import type { Readable } from 'stream';
 
-import fs from 'fs';
+import { createReadStream } from 'fs-extra';
 import zip from 'zlib';
 import tar from 'tar';
 import { keyBy } from 'lodash/fp';
@@ -48,6 +48,8 @@ class LocalFileSourceProvider implements ISourceProvider {
 
   options: ILocalFileSourceProviderOptions;
 
+  #filestream?: Readable;
+
   constructor(options: ILocalFileSourceProviderOptions) {
     this.options = options;
 
@@ -59,17 +61,13 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   /**
-   * Pre flight checks regarding the provided options (making sure that the provided path is correct, etc...)
+   * Pre flight checks regarding the provided options, opening the file
    */
-  bootstrap() {
-    const { path } = this.options.file;
-    const isValidBackupPath = fs.existsSync(path);
-
-    // Check if the provided path exists
-    if (!isValidBackupPath) {
-      throw new Error(
-        `Invalid backup file path provided. "${path}" does not exist on the filesystem.`
-      );
+  async bootstrap() {
+    try {
+      this.#filestream = createReadStream(this.options.file.path);
+    } catch (e) {
+      throw new Error(`Could not read backup file path provided at "${this.options.file.path}"`);
     }
   }
 
@@ -104,10 +102,14 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   #getBackupStream() {
-    const { file, encryption, compression } = this.options;
+    const { encryption, compression } = this.options;
 
-    const fileStream = fs.createReadStream(file.path);
-    const streams: StreamItemArray = [fileStream];
+    // This should be impossible as long as bootstrap was called first
+    if (!this.#filestream) {
+      throw new Error('Could not read file stream');
+    }
+
+    const streams: StreamItemArray = [this.#filestream];
 
     if (encryption.enabled && encryption.key) {
       streams.push(createDecryptionCipher(encryption.key));
