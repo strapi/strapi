@@ -34,27 +34,32 @@ const ModalForm = ({ queryName, onToggle }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
-  const postMutation = useMutation((body) => axiosInstance.post('/admin/users', body), {
-    async onSuccess({ data }) {
-      setRegistrationToken(data.data.registrationToken);
-      await queryClient.invalidateQueries(queryName);
-      goNext();
-      setIsSubmitting(false);
+  const postMutation = useMutation(
+    (body) => {
+      return axiosInstance.post('/admin/users', body);
     },
-    onError(err) {
-      setIsSubmitting(false);
+    {
+      async onSuccess({ data }) {
+        setRegistrationToken(data.data.registrationToken);
+        await queryClient.invalidateQueries(queryName);
+        goNext();
+        setIsSubmitting(false);
+      },
+      onError(err) {
+        setIsSubmitting(false);
 
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
-      });
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        });
 
-      throw err;
-    },
-    onSettled() {
-      unlockApp();
-    },
-  });
+        throw err;
+      },
+      onSettled() {
+        unlockApp();
+      },
+    }
+  );
 
   const headerTitle = formatMessage({
     id: 'Settings.permissions.users.create',
