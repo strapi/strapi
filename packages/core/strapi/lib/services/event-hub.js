@@ -67,15 +67,12 @@ module.exports = function createEventHub() {
       subscribers.length = 0;
       return this;
     },
-
-    removeAllListeners() {
-      eventHub.destroy();
-    },
   };
 
   return {
     ...eventHub,
     removeListener: eventHub.off,
+    removeAllListeners: eventHub.destroy,
     addListener: eventHub.on,
   };
 };
