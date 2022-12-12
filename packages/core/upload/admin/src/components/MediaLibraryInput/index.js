@@ -21,6 +21,7 @@ export const MediaLibraryInput = ({
   description,
   disabled,
   error,
+  labelAction,
   multiple,
   name,
   onChange,
@@ -144,6 +145,7 @@ export const MediaLibraryInput = ({
         assets={selectedAssets}
         disabled={disabled}
         label={label}
+        labelAction={labelAction}
         onDeleteAsset={handleDeleteAsset}
         onDeleteAssetFromMediaLibrary={handleDeleteAssetFromMediaLibrary}
         onAddAsset={() => setStep(STEPS.AssetSelect)}
@@ -199,6 +201,7 @@ MediaLibraryInput.defaultProps = {
   description: undefined,
   error: undefined,
   intlLabel: undefined,
+  labelAction: undefined,
   multiple: false,
   required: false,
   value: [],
@@ -214,6 +217,7 @@ MediaLibraryInput.propTypes = {
   }),
   error: PropTypes.string,
   intlLabel: PropTypes.shape({ id: PropTypes.string, defaultMessage: PropTypes.string }),
+  labelAction: PropTypes.node,
   multiple: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
