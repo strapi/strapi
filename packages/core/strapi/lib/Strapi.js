@@ -450,7 +450,7 @@ class Strapi {
     await this.db.schema.sync();
 
     if (this.EE) {
-      await ee.checkLicense(this.db);
+      await ee.checkLicense({ strapi: this });
     }
 
     await this.hook('strapi::content-types.afterSync').call({
