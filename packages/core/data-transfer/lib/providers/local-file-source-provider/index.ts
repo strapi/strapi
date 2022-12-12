@@ -1,18 +1,17 @@
 import type { Readable } from 'stream';
 
-import type { IMetadata, ISourceProvider, ProviderType } from '../../../types';
-
 import fs from 'fs';
 import zip from 'zlib';
 import tar from 'tar';
 import path from 'path';
 import { keyBy } from 'lodash/fp';
 import { chain } from 'stream-chain';
-import { pipeline, PassThrough, Readable as ReadStream } from 'stream';
+import { pipeline, PassThrough } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
+import type { IMetadata, ISourceProvider, ProviderType } from '../../../types';
 
-import { createDecryptionCipher } from '../../encryption';
 import { collect } from '../../utils';
+import { createDecryptionCipher } from '../../encryption';
 
 type StreamItemArray = Parameters<typeof chain>[0];
 
@@ -25,25 +24,18 @@ const METADATA_FILE_PATH = 'metadata.json';
  * Provider options
  */
 export interface ILocalFileSourceProviderOptions {
-  /**
-   * Path to the backup archive
-   */
-  backupFilePath: string;
+  file: {
+    path: string;
+  };
 
-  /**
-   * Whether the backup data is encrypted or not
-   */
-  encrypted?: boolean;
+  encryption: {
+    enabled: boolean;
+    key?: string;
+  };
 
-  /**
-   * Encryption key used to decrypt the encrypted data (if necessary)
-   */
-  encryptionKey?: string;
-
-  /**
-   * Whether the backup data is compressed or not
-   */
-  compressed?: boolean;
+  compression: {
+    enabled: boolean;
+  };
 }
 
 export const createLocalFileSourceProvider = (options: ILocalFileSourceProviderOptions) => {
@@ -52,14 +44,17 @@ export const createLocalFileSourceProvider = (options: ILocalFileSourceProviderO
 
 class LocalFileSourceProvider implements ISourceProvider {
   type: ProviderType = 'source';
-  name: string = 'source::local-file';
+
+  name = 'source::local-file';
 
   options: ILocalFileSourceProviderOptions;
 
   constructor(options: ILocalFileSourceProviderOptions) {
     this.options = options;
 
-    if (this.options.encrypted && this.options.encryptionKey === undefined) {
+    const { encryption } = this.options;
+
+    if (encryption.enabled && encryption.key === undefined) {
       throw new Error('Missing encryption key');
     }
   }
@@ -68,13 +63,13 @@ class LocalFileSourceProvider implements ISourceProvider {
    * Pre flight checks regarding the provided options (making sure that the provided path is correct, etc...)
    */
   bootstrap() {
-    const path = this.options.backupFilePath;
-    const isValidBackupPath = fs.existsSync(path);
+    const { path: filePath } = this.options.file;
+    const isValidBackupPath = fs.existsSync(filePath);
 
     // Check if the provided path exists
     if (!isValidBackupPath) {
       throw new Error(
-        `Invalid backup file path provided. "${path}" does not exist on the filesystem.`
+        `Invalid backup file path provided. "${filePath}" does not exist on the filesystem.`
       );
     }
   }
@@ -117,13 +112,13 @@ class LocalFileSourceProvider implements ISourceProvider {
       [
         inStream,
         new tar.Parse({
-          filter(path, entry) {
+          filter(filePath, entry) {
             if (entry.type !== 'File') {
               return false;
             }
 
-            const parts = path.split('/');
-            return parts[0] === 'assets' && parts[1] == 'uploads';
+            const parts = filePath.split('/');
+            return parts[0] === 'assets' && parts[1] === 'uploads';
           },
           onentry(entry) {
             const { path: filePath, size } = entry;
@@ -138,13 +133,17 @@ class LocalFileSourceProvider implements ISourceProvider {
     return outStream;
   }
 
-  #getBackupStream(decompress: boolean = true) {
-    const path = this.options.backupFilePath;
-    const readStream = fs.createReadStream(path);
-    const streams: StreamItemArray = [readStream];
+  #getBackupStream() {
+    const { file, encryption, compression } = this.options;
 
-    // Handle decompression
-    if (decompress) {
+    const fileStream = fs.createReadStream(file.path);
+    const streams: StreamItemArray = [fileStream];
+
+    if (encryption.enabled && encryption.key) {
+      streams.push(createDecryptionCipher(encryption.key));
+    }
+
+    if (compression.enabled) {
       streams.push(zip.createGunzip());
     }
 
@@ -152,7 +151,6 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   #streamJsonlDirectory(directory: string) {
-    const options = this.options;
     const inStream = this.#getBackupStream();
 
     const outStream = new PassThrough({ objectMode: true });
@@ -161,12 +159,12 @@ class LocalFileSourceProvider implements ISourceProvider {
       [
         inStream,
         new tar.Parse({
-          filter(path, entry) {
+          filter(filePath, entry) {
             if (entry.type !== 'File') {
               return false;
             }
 
-            const parts = path.split('/');
+            const parts = filePath.split('/');
 
             if (parts.length !== 2) {
               return false;
@@ -176,22 +174,12 @@ class LocalFileSourceProvider implements ISourceProvider {
           },
 
           onentry(entry) {
-            const transforms = [];
-
-            if (options.encrypted) {
-              transforms.push(createDecryptionCipher(options.encryptionKey!));
-            }
-
-            if (options.compressed) {
-              transforms.push(zip.createGunzip());
-            }
-
-            transforms.push(
+            const transforms = [
               // JSONL parser to read the data chunks one by one (line by line)
               parser(),
               // The JSONL parser returns each line as key/value
-              (line: { key: string; value: any }) => line.value
-            );
+              (line: { key: string; value: any }) => line.value,
+            ];
 
             entry
               // Pipe transforms
@@ -213,7 +201,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     return outStream;
   }
 
-  async #parseJSONFile<T extends {} = any>(
+  async #parseJSONFile<T extends Record<string, any> = any>(
     fileStream: NodeJS.ReadableStream,
     filePath: string
   ): Promise<T> {
@@ -226,8 +214,8 @@ class LocalFileSourceProvider implements ISourceProvider {
             /**
              * Filter the parsed entries to only keep the one that matches the given filepath
              */
-            filter(path, entry) {
-              return path === filePath && entry.type === 'File';
+            filter(entryPath, entry) {
+              return entryPath === filePath && entry.type === 'File';
             },
 
             /**
@@ -250,7 +238,7 @@ class LocalFileSourceProvider implements ISourceProvider {
         () => {
           // If the promise hasn't been resolved and we've parsed all
           // the archive entries, then the file doesn't exist
-          reject(`${filePath} not found in the archive stream`);
+          reject(new Error(`File "${filePath}" not found`));
         }
       );
     });

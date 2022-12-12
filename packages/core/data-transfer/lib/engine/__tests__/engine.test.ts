@@ -9,7 +9,6 @@ import type {
   IEntity,
   ILink,
   ISourceProvider,
-  ITransferEngine,
   ITransferEngineOptions,
 } from '../../../types';
 import {
@@ -393,7 +392,7 @@ describe('Transfer engine', () => {
   });
 
   describe('progressStream', () => {
-    test(`emits 'progress' events`, async () => {
+    test("emits 'progress' events", async () => {
       const source = createSource();
       const engine = createTransferEngine(source, completeDestination, defaultOptions);
 
@@ -412,8 +411,8 @@ describe('Transfer engine', () => {
     });
 
     // TODO: to implement these, the mocked streams need to be improved
-    test.todo(`emits 'start' events`);
-    test.todo(`emits 'complete' events`);
+    test.todo("emits 'start' events");
+    test.todo("emits 'complete' events");
   });
 
   describe('integrity checks', () => {

@@ -48,7 +48,7 @@ describe('Local File Destination Provider - Utils', () => {
       const tarEntryStream = createTarEntryStream(archive, pathFactory, maxSize);
 
       const write = async () =>
-        await new Promise((resolve, reject) => {
+        new Promise((resolve, reject) => {
           tarEntryStream.on('finish', resolve);
           tarEntryStream.on('error', reject);
           tarEntryStream.write(chunk);
@@ -64,13 +64,13 @@ describe('Local File Destination Provider - Utils', () => {
       const tarEntryStream = createTarEntryStream(archive, pathFactory, maxSize);
 
       const write = async () =>
-        await new Promise((resolve, reject) => {
+        new Promise((resolve, reject) => {
           tarEntryStream.on('finish', resolve);
           tarEntryStream.on('error', reject);
           tarEntryStream.write(chunk);
         });
 
-      expect(write).resolves;
+      expect(write()).resolves.not.toBe(null);
     });
   });
 });

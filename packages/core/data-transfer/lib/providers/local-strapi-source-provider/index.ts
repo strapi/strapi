@@ -1,5 +1,4 @@
 import { chain } from 'stream-chain';
-import { mapValues, pick } from 'lodash/fp';
 import { Readable } from 'stream';
 
 import type { IMetadata, ISourceProvider, ProviderType } from '../../../types';
@@ -20,10 +19,12 @@ export const createLocalStrapiSourceProvider = (options: ILocalStrapiSourceProvi
 };
 
 class LocalStrapiSourceProvider implements ISourceProvider {
-  name: string = 'source::local-strapi';
+  name = 'source::local-strapi';
+
   type: ProviderType = 'source';
 
   options: ILocalStrapiSourceProviderOptions;
+
   strapi?: Strapi.Strapi;
 
   constructor(options: ILocalStrapiSourceProviderOptions) {
