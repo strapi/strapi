@@ -1,7 +1,7 @@
 'use strict';
 
 const { getService } = require('../utils');
-const { ACTIONS, FILE_MODEL_UID } = require('../constants');
+const { ACTIONS } = require('../constants');
 const validateConfig = require('./validation/admin/configureView');
 
 module.exports = {
@@ -11,7 +11,7 @@ module.exports = {
       state: { userAbility },
     } = ctx;
 
-    if (userAbility.cannot(ACTIONS.configureView, FILE_MODEL_UID)) {
+    if (userAbility.cannot(ACTIONS.configureView)) {
       return ctx.forbidden();
     }
 

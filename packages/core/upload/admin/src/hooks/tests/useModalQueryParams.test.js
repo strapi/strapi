@@ -47,11 +47,7 @@ function ComponentFixture({ children }) {
 }
 
 function setup(...args) {
-  return new Promise((resolve) => {
-    act(() => {
-      resolve(renderHook(() => useModalQueryParams(...args), { wrapper: ComponentFixture }));
-    });
-  });
+  return renderHook(() => useModalQueryParams(...args), { wrapper: ComponentFixture });
 }
 
 const FIXTURE_QUERY = {

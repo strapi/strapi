@@ -489,7 +489,6 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
               >
                 <a
                   class="c7"
-                  data-testid="go-back"
                   href="/plugins/upload"
                   id="go-back"
                 >
@@ -532,7 +531,6 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                 <button
                   aria-disabled="true"
                   class="c15 c16"
-                  data-testid="save"
                   disabled=""
                   type="submit"
                 >

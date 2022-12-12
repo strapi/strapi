@@ -69,12 +69,7 @@ const ConfigureTheView = ({ config }) => {
         <form onSubmit={handleSubmit}>
           <HeaderLayout
             navigationAction={
-              <Link
-                startIcon={<ArrowLeft />}
-                to={`/plugins/${pluginID}`}
-                id="go-back"
-                data-testid="go-back"
-              >
+              <Link startIcon={<ArrowLeft />} to={`/plugins/${pluginID}`} id="go-back">
                 {formatMessage({ id: getTrad('config.back'), defaultMessage: 'Back' })}
               </Link>
             }
@@ -84,7 +79,6 @@ const ConfigureTheView = ({ config }) => {
                 startIcon={<Check />}
                 disabled={isEqual(modifiedData, initialData)}
                 type="submit"
-                data-testid="save"
               >
                 {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
               </Button>

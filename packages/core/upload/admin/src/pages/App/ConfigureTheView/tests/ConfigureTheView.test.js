@@ -62,7 +62,11 @@ describe('Upload - Configure', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Configure the view - Media Library')).toBeInTheDocument();
-        expect(screen.getByTestId('save')).toHaveAttribute('disabled');
+        expect(
+          screen.getByRole('button', {
+            name: 'Save',
+          })
+        ).toHaveAttribute('disabled');
       });
     });
   });
@@ -75,11 +79,15 @@ describe('Upload - Configure', () => {
 
       fireEvent.mouseDown(screen.getByTestId('pageSize-select'));
       fireEvent.click(screen.getByTestId(`pageSize-option-${testPageSize}`));
+
+      const saveButton = screen.getByRole('button', {
+        name: 'Save',
+      });
       await waitFor(() => {
-        expect(screen.getByTestId('save')).toBeEnabled();
+        expect(saveButton).toBeEnabled();
       });
 
-      fireEvent.click(screen.getByTestId('save'));
+      fireEvent.click(saveButton);
       await waitFor(() => {
         expect(screen.getByText('This will modify all your settings')).toBeInTheDocument();
       });

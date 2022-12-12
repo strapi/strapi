@@ -4,25 +4,20 @@ const { getService } = require('./utils');
 const { ALLOWED_SORT_STRINGS } = require('./constants');
 
 module.exports = async ({ strapi }) => {
-  const Stores = new Map([
-    [
-      'settings',
-      {
-        sizeOptimization: true,
-        responsiveDimensions: true,
-        autoOrientation: false,
-      },
-    ],
-    [
-      'view_configuration',
-      {
-        pageSize: 10,
-        sort: ALLOWED_SORT_STRINGS[0],
-      },
-    ],
-  ]);
+  const defaultConfig = {
+    settings: {
+      sizeOptimization: true,
+      responsiveDimensions: true,
+      autoOrientation: false,
+    },
+    view_configuration: {
+      pageSize: 10,
+      sort: ALLOWED_SORT_STRINGS[0],
+      test: 123,
+    },
+  };
 
-  for (const [key, defaultValue] of Stores) {
+  for (const [key, defaultValue] of Object.entries(defaultConfig)) {
     // set plugin store
     const configurator = strapi.store({ type: 'plugin', name: 'upload', key });
 
@@ -34,10 +29,10 @@ module.exports = async ({ strapi }) => {
       continue;
     }
 
-    // if provider config does not exist or does not have all the required keys
-    // set to the default value
+    // if the config does not exist or does not have all the required keys
+    // set from the defaultValue ensuring all required settings are present
     await configurator.set({
-      value: defaultValue,
+      value: Object.assign(defaultValue, config || {}),
     });
   }
 
