@@ -1,7 +1,8 @@
-import { PassThrough, Stream } from 'stream-chain';
+import { PassThrough } from 'stream-chain';
 import * as path from 'path';
 import { isEmpty, uniq } from 'lodash/fp';
 import type { Schema } from '@strapi/strapi';
+import { diff as semverDiff } from 'semver';
 
 import type {
   Diff,
@@ -17,8 +18,6 @@ import type {
 } from '../../types';
 
 import compareSchemas from '../strategies';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const semverDiff = require('semver/functions/diff');
 
 type TransferProgress = {
   [key in TransferStage]?: {
