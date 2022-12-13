@@ -1,11 +1,11 @@
 import axios from 'axios';
 import checkLatestStrapiVersion from './checkLatestStrapiVersion';
-import { axiosInstance } from '../../../core/utils';
 import { getFetchClient } from '../../../utils/getFetchClient';
 import packageJSON from '../../../../../package.json';
 
 const strapiVersion = packageJSON.version;
 const showUpdateNotif = !JSON.parse(localStorage.getItem('STRAPI_UPDATE_NOTIF'));
+const { get } = getFetchClient();
 
 const fetchStrapiLatestRelease = async (toggleNotification) => {
   try {
@@ -38,7 +38,6 @@ const fetchStrapiLatestRelease = async (toggleNotification) => {
 };
 
 const fetchAppInfo = async () => {
-  const { get } = getFetchClient();
   try {
     const { data, headers } = await get('/admin/information');
 
@@ -53,7 +52,6 @@ const fetchAppInfo = async () => {
 };
 
 const fetchCurrentUserPermissions = async () => {
-  const { get } = getFetchClient();
   try {
     const { data, headers } = await get('/admin/users/me/permissions');
 
@@ -73,7 +71,7 @@ const fetchUserRoles = async () => {
       data: {
         data: { roles },
       },
-    } = await axiosInstance.get('/admin/users/me');
+    } = await get('/admin/users/me');
 
     return roles;
   } catch (err) {
