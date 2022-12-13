@@ -35,7 +35,6 @@ const run = async () => {
         data: { isEE, features },
       },
     } = await get('/admin/project-type');
-    console.log('new impl');
 
     window.strapi.isEE = isEE;
     window.strapi.features = {

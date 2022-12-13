@@ -1,6 +1,7 @@
 import axios from 'axios';
 import checkLatestStrapiVersion from './checkLatestStrapiVersion';
 import { axiosInstance } from '../../../core/utils';
+import { getFetchClient } from '../../../utils/getFetchClient';
 import packageJSON from '../../../../../package.json';
 
 const strapiVersion = packageJSON.version;
@@ -37,8 +38,9 @@ const fetchStrapiLatestRelease = async (toggleNotification) => {
 };
 
 const fetchAppInfo = async () => {
+  const { get } = getFetchClient();
   try {
-    const { data, headers } = await axiosInstance.get('/admin/information');
+    const { data, headers } = await get('/admin/information');
 
     if (!headers['content-type'].includes('application/json')) {
       throw new Error('Not found');
