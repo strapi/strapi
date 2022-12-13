@@ -1,4 +1,4 @@
-import * as path from 'path';
+import { join } from 'path';
 import { cloneDeep } from 'lodash/fp';
 import { Readable, Writable } from 'stream-chain';
 import type { Schema } from '@strapi/strapi';
@@ -47,13 +47,13 @@ const getAssetsMockSourceStream = (
   data: Iterable<IAsset> = [
     {
       filename: 'foo.jpg',
-      filepath: path.join(__dirname, 'foo.jpg'),
+      filepath: join(__dirname, 'foo.jpg'),
       stats: { size: 24 },
       stream: Readable.from([1, 2, 3]),
     },
     {
       filename: 'bar.jpg',
-      filepath: path.join(__dirname, 'bar.jpg'),
+      filepath: join(__dirname, 'bar.jpg'),
       stats: { size: 48 },
       stream: Readable.from([4, 5, 6, 7, 8, 9]),
     },

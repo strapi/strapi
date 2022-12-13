@@ -1,5 +1,6 @@
 import { deleteAllRecords, restoreConfigs } from '../restore';
 import { getStrapiFactory, getContentTypes } from '../../test-utils';
+import type { IConfiguration } from '../../../../types';
 
 const entities = [
   {
@@ -89,7 +90,7 @@ describe('Restore ', () => {
         query,
       },
     })();
-    const config = {
+    const config: IConfiguration = {
       type: 'core-store',
       value: {
         key: 'test-key',
@@ -113,7 +114,7 @@ describe('Restore ', () => {
         query,
       },
     })();
-    const config = {
+    const config: IConfiguration = {
       type: 'webhook',
       value: {
         id: 4,
