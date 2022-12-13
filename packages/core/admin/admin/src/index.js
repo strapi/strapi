@@ -1,6 +1,6 @@
 import ReactDOM from 'react-dom';
 import { Components, Fields, Middlewares, Reducers } from './core/apis';
-import { axiosInstance } from './core/utils';
+import { getFetchClient } from './utils/getFetchClient';
 import appCustomisations from './app';
 // eslint-disable-next-line import/extensions
 import plugins from './plugins';
@@ -28,12 +28,14 @@ const reducers = Reducers({ appReducers });
 const MOUNT_NODE = document.getElementById('app');
 
 const run = async () => {
+  const { get } = getFetchClient();
   try {
     const {
       data: {
         data: { isEE, features },
       },
-    } = await axiosInstance.get('/admin/project-type');
+    } = await get('/admin/project-type');
+    console.log('new impl');
 
     window.strapi.isEE = isEE;
     window.strapi.features = {
