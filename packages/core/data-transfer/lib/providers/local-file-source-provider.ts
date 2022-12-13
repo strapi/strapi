@@ -1,6 +1,6 @@
 import type { Readable } from 'stream';
 
-import { createReadStream } from 'fs-extra';
+import * as fs from 'fs-extra';
 import zip from 'zlib';
 import tar from 'tar';
 import { keyBy } from 'lodash/fp';
@@ -48,8 +48,6 @@ class LocalFileSourceProvider implements ISourceProvider {
 
   options: ILocalFileSourceProviderOptions;
 
-  #filestream?: Readable;
-
   constructor(options: ILocalFileSourceProviderOptions) {
     this.options = options;
 
@@ -61,13 +59,17 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   /**
-   * Pre flight checks regarding the provided options, opening the file
+   *  Pre flight checks regarding the provided options (making sure that the provided path is correct, etc...)
    */
   async bootstrap() {
-    try {
-      this.#filestream = createReadStream(this.options.file.path);
-    } catch (e) {
-      throw new Error(`Could not read backup file path provided at "${this.options.file.path}"`);
+    const { path } = this.options.file;
+    const isValidBackupPath = await fs.existsSync(path);
+
+    // Check if the provided path exists
+    if (!isValidBackupPath) {
+      throw new Error(
+        `Invalid backup file path provided. "${path}" does not exist on the filesystem.`
+      );
     }
   }
 
@@ -102,14 +104,16 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   #getBackupStream() {
-    const { encryption, compression } = this.options;
+    const { file, encryption, compression } = this.options;
 
     // This should be impossible as long as bootstrap was called first
-    if (!this.#filestream) {
-      throw new Error('Could not read file stream');
-    }
+    const streams: StreamItemArray = [];
 
-    const streams: StreamItemArray = [this.#filestream];
+    try {
+      streams.push(fs.createReadStream(file.path));
+    } catch (e) {
+      throw new Error(`Could not read backup file path provided at "${this.options.file.path}"`);
+    }
 
     if (encryption.enabled && encryption.key) {
       streams.push(createDecryptionCipher(encryption.key));
