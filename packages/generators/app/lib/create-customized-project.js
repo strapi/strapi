@@ -8,12 +8,12 @@ const inquirer = require('inquirer');
 const execa = require('execa');
 const { merge } = require('lodash');
 
-const stopProcess = require('./utils/stop-process');
-const { trackUsage } = require('./utils/usage');
-const defaultConfigs = require('./utils/db-configs');
-const clientDependencies = require('./utils/db-client-dependencies');
-const dbQuestions = require('./utils/db-questions');
-const createProject = require('./create-project');
+const stopProcess = require('./utils/stop-process.js');
+const { trackUsage } = require('./utils/usage.js');
+const defaultConfigs = require('./utils/db-configs.js');
+const clientDependencies = require('./utils/db-client-dependencies.js');
+const dbQuestions = require('./utils/db-questions.js');
+const createProject = require('./create-project.js');
 
 const LANGUAGES = {
   javascript: 'JavaScript',

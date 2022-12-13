@@ -10,11 +10,11 @@ const execa = require('execa');
 const ora = require('ora');
 const _ = require('lodash');
 
-const stopProcess = require('./utils/stop-process');
-const { trackUsage, captureStderr } = require('./utils/usage');
+const stopProcess = require('./utils/stop-process.js');
+const { trackUsage, captureStderr } = require('./utils/usage.js');
 const mergeTemplate = require('./utils/merge-template.js');
 
-const packageJSON = require('./resources/json/common/package.json');
+const packageJSON = require('./resources/json/common/package.json.js');
 const createDatabaseConfig = require('./resources/templates/database.js');
 const createEnvFile = require('./resources/templates/env.js');
 

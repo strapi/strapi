@@ -2,7 +2,7 @@
 
 const chalk = require('chalk');
 const fse = require('fs-extra');
-const stopProcess = require('./stop-process');
+const stopProcess = require('./stop-process.js');
 
 /**
  * Checks if the an empty directory exists at rootPath

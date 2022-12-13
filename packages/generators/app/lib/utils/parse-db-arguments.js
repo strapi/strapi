@@ -1,7 +1,7 @@
 'use strict';
 
 const chalk = require('chalk');
-const stopProcess = require('./stop-process');
+const stopProcess = require('./stop-process.js');
 
 const DB_ARGS = ['dbclient', 'dbhost', 'dbport', 'dbname', 'dbusername', 'dbpassword'];
 

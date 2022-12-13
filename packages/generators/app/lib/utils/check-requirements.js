@@ -2,7 +2,7 @@
 
 const { red, green, bold, yellow } = require('chalk');
 const semver = require('semver');
-const packageJSON = require('../resources/json/common/package.json');
+const packageJSON = require('../resources/json/common/package.json.js');
 
 module.exports = function checkBeforeInstall() {
   const currentNodeVersion = process.versions.node;

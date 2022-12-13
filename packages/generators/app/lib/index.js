@@ -5,13 +5,13 @@ const os = require('os');
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 const sentry = require('@sentry/node');
-const hasYarn = require('./utils/has-yarn');
-const checkRequirements = require('./utils/check-requirements');
-const { trackError, captureException } = require('./utils/usage');
-const parseDatabaseArguments = require('./utils/parse-db-arguments');
-const generateNew = require('./generate-new');
-const checkInstallPath = require('./utils/check-install-path');
-const machineID = require('./utils/machine-id');
+const hasYarn = require('./utils/has-yarn.js');
+const checkRequirements = require('./utils/check-requirements.js');
+const { trackError, captureException } = require('./utils/usage.js');
+const parseDatabaseArguments = require('./utils/parse-db-arguments.js');
+const generateNew = require('./generate-new.js');
+const checkInstallPath = require('./utils/check-install-path.js');
+const machineID = require('./utils/machine-id.js');
 
 sentry.init({
   dsn: 'https://841d2b2c9b4d4b43a4cde92794cb705a@sentry.io/1762059',

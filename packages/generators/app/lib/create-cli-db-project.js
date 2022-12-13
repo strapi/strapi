@@ -2,11 +2,11 @@
 
 const { merge } = require('lodash');
 
-const { trackUsage } = require('./utils/usage');
-const defaultConfigs = require('./utils/db-configs');
-const clientDependencies = require('./utils/db-client-dependencies');
-const getClientName = require('./utils/db-client-name');
-const createProject = require('./create-project');
+const { trackUsage } = require('./utils/usage.js');
+const defaultConfigs = require('./utils/db-configs.js');
+const clientDependencies = require('./utils/db-client-dependencies.js');
+const getClientName = require('./utils/db-client-name.js');
+const createProject = require('./create-project.js');
 
 module.exports = async (scope) => {
   console.log('Creating a project from the database CLI arguments.');

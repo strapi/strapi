@@ -5,7 +5,7 @@ const path = require('path');
 const fse = require('fs-extra');
 const _ = require('lodash/fp');
 const chalk = require('chalk');
-const { getTemplatePackageInfo, downloadNpmTemplate } = require('./fetch-npm-template');
+const { getTemplatePackageInfo, downloadNpmTemplate } = require('./fetch-npm-template.js');
 
 // Specify all the files and directories a template can have
 const allowFile = Symbol('alloFile');

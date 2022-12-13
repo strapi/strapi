@@ -4,11 +4,11 @@
  * Module dependencies
  */
 
-const { trackUsage } = require('./utils/usage');
-const checkInstallPath = require('./utils/check-install-path');
-const createCLIDatabaseProject = require('./create-cli-db-project');
-const createCustomizedProject = require('./create-customized-project');
-const createQuickStartProject = require('./create-quickstart-project');
+const { trackUsage } = require('./utils/usage.js');
+const checkInstallPath = require('./utils/check-install-path.js');
+const createCLIDatabaseProject = require('./create-cli-db-project.js');
+const createCustomizedProject = require('./create-customized-project.js');
+const createQuickStartProject = require('./create-quickstart-project.js');
 
 module.exports = async (scope) => {
   const hasDatabaseConfig = Boolean(scope.database);

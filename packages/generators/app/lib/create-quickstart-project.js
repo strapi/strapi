@@ -3,10 +3,10 @@
 const execa = require('execa');
 // FIXME
 /* eslint-disable import/extensions */
-const { trackUsage, captureStderr } = require('./utils/usage');
+const { trackUsage, captureStderr } = require('./utils/usage.js');
 const defaultConfigs = require('./utils/db-configs.js');
 const clientDependencies = require('./utils/db-client-dependencies.js');
-const createProject = require('./create-project');
+const createProject = require('./create-project.js');
 
 module.exports = async function createQuickStartProject(scope) {
   console.log('Creating a quickstart project.');
