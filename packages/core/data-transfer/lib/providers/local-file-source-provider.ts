@@ -59,7 +59,7 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   /**
-   *  Pre flight checks regarding the provided options (making sure that the provided path is correct, etc...)
+   * Pre flight checks regarding the provided options (making sure that the provided path is correct, etc...)
    */
   async bootstrap() {
     const { path } = this.options.file;
@@ -106,7 +106,6 @@ class LocalFileSourceProvider implements ISourceProvider {
   #getBackupStream() {
     const { file, encryption, compression } = this.options;
 
-    // This should be impossible as long as bootstrap was called first
     const streams: StreamItemArray = [];
 
     try {
