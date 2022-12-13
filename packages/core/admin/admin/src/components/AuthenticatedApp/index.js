@@ -31,7 +31,7 @@ const AuthenticatedApp = () => {
   const userInfo = auth.getUserInfo();
   const userName = get(userInfo, 'username') || getFullName(userInfo.firstname, userInfo.lastname);
   const [userDisplayName, setUserDisplayName] = useState(userName);
-  const [userId, setUserId] = useState('');
+  const [userId, setUserId] = useState(null);
   const { showReleaseNotification } = useConfigurations();
   const [
     { data: appInfos, status },
