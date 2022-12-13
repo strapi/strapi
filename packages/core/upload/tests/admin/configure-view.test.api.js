@@ -1,7 +1,5 @@
 'use strict';
 
-const { sample } = require('lodash');
-
 // Helpers.
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
@@ -130,7 +128,7 @@ describe('Configure Media Library View', () => {
     test('Successfully update the ML view configuration', async () => {
       const config = {
         pageSize: 100,
-        sort: sample(ALLOWED_SORT_STRINGS),
+        sort: ALLOWED_SORT_STRINGS[1],
       };
       const updateRes = await requests.admin({
         method: 'PUT',
