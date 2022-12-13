@@ -80,7 +80,7 @@ describe('Audit logs auth', () => {
       const logSpy = jest.spyOn(console, 'log');
 
       const auditLogsService = createAuditLogsService(strapi);
-      auditLogsService.bootstrap();
+      auditLogsService.register();
 
       const eventName = 'test';
       const eventPayload = { meta: 'test' };
@@ -93,7 +93,7 @@ describe('Audit logs auth', () => {
 
     it('should throw and error when name is empty', () => {
       const auditLogsService = createAuditLogsService(strapi);
-      auditLogsService.bootstrap();
+      auditLogsService.register();
 
       expect(() => {
         strapi.eventHub.emit('', { meta: 'test' });

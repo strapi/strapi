@@ -11,7 +11,7 @@ const createAuditLogsService = (strapi) => {
   };
 
   return {
-    bootstrap() {
+    register() {
       this.unsubscribe = strapi.eventHub.subscribe(saveEvent);
     },
 
