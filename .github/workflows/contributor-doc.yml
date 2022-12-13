@@ -21,7 +21,7 @@ permissions: {}
 jobs:
   deploy:
     permissions:
-      contents: write  #  to push pages branch (peaceiris/actions-gh-pages)
+      contents: write # to push pages branch (peaceiris/actions-gh-pages)
 
     environment:
       name: github-pages

@@ -1,11 +1,11 @@
-import React, { Suspense, memo } from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import {
   CheckPermissions,
-  LoadingIndicatorPage,
   useTracking,
   LinkButton,
+  LoadingIndicatorPage,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { ContentLayout } from '@strapi/design-system/Layout';
@@ -23,13 +23,14 @@ import CollectionTypeFormWrapper from '../../components/CollectionTypeFormWrappe
 import EditViewDataManagerProvider from '../../components/EditViewDataManagerProvider';
 import SingleTypeFormWrapper from '../../components/SingleTypeFormWrapper';
 import { getTrad } from '../../utils';
+import useLazyComponents from '../../hooks/useLazyComponents';
 import DraftAndPublishBadge from './DraftAndPublishBadge';
 import Informations from './Informations';
 import Header from './Header';
 import { getFieldsActionMatchingPermissions } from './utils';
 import DeleteLink from './DeleteLink';
 import GridRow from './GridRow';
-import { selectCurrentLayout, selectAttributesLayout } from './selectors';
+import { selectCurrentLayout, selectAttributesLayout, selectCustomFieldUids } from './selectors';
 
 const cmPermissions = permissions.contentManager;
 const ctbPermissions = [{ action: 'plugin::content-type-builder.read', subject: null }];
@@ -38,13 +39,17 @@ const ctbPermissions = [{ action: 'plugin::content-type-builder.read', subject: 
 const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, userPermissions }) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const { createActionAllowedFields, readActionAllowedFields, updateActionAllowedFields } =
-    getFieldsActionMatchingPermissions(userPermissions, slug);
 
-  const { layout, formattedContentTypeLayout } = useSelector((state) => ({
+  const { layout, formattedContentTypeLayout, customFieldUids } = useSelector((state) => ({
     layout: selectCurrentLayout(state),
     formattedContentTypeLayout: selectAttributesLayout(state),
+    customFieldUids: selectCustomFieldUids(state),
   }));
+
+  const { isLazyLoading, lazyComponentStore } = useLazyComponents(customFieldUids);
+
+  const { createActionAllowedFields, readActionAllowedFields, updateActionAllowedFields } =
+    getFieldsActionMatchingPermissions(userPermissions, slug);
 
   const configurationPermissions = isSingleType
     ? cmPermissions.singleTypesConfigurations
@@ -63,6 +68,10 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
       return subBlock.every((obj) => obj.fieldSchema.type === 'dynamiczone');
     });
   };
+
+  if (isLazyLoading) {
+    return <LoadingIndicatorPage />;
+  }
 
   return (
     <DataManagementWrapper allLayoutData={layout} slug={slug} id={id} origin={origin}>
@@ -110,54 +119,56 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
               <ContentLayout>
                 <Grid gap={4}>
                   <GridItem col={9} s={12}>
-                    <Suspense fallback={<LoadingIndicatorPage />}>
-                      <Stack spacing={6}>
-                        {formattedContentTypeLayout.map((row, index) => {
-                          if (isDynamicZone(row)) {
-                            const {
-                              0: {
-                                0: { name, fieldSchema, metadatas, labelAction },
-                              },
-                            } = row;
-
-                            return (
-                              <Box key={index}>
-                                <Grid gap={4}>
-                                  <GridItem col={12} s={12} xs={12}>
-                                    <DynamicZone
-                                      name={name}
-                                      fieldSchema={fieldSchema}
-                                      labelAction={labelAction}
-                                      metadatas={metadatas}
-                                    />
-                                  </GridItem>
-                                </Grid>
-                              </Box>
-                            );
-                          }
+                    <Stack spacing={6}>
+                      {formattedContentTypeLayout.map((row, index) => {
+                        if (isDynamicZone(row)) {
+                          const {
+                            0: {
+                              0: { name, fieldSchema, metadatas, labelAction },
+                            },
+                          } = row;
 
                           return (
-                            <Box
-                              key={index}
-                              hasRadius
-                              background="neutral0"
-                              shadow="tableShadow"
-                              paddingLeft={6}
-                              paddingRight={6}
-                              paddingTop={6}
-                              paddingBottom={6}
-                              borderColor="neutral150"
-                            >
-                              <Stack spacing={6}>
-                                {row.map((grid, gridRowIndex) => (
-                                  <GridRow columns={grid} key={gridRowIndex} />
-                                ))}
-                              </Stack>
+                            <Box key={index}>
+                              <Grid gap={4}>
+                                <GridItem col={12} s={12} xs={12}>
+                                  <DynamicZone
+                                    name={name}
+                                    fieldSchema={fieldSchema}
+                                    labelAction={labelAction}
+                                    metadatas={metadatas}
+                                  />
+                                </GridItem>
+                              </Grid>
                             </Box>
                           );
-                        })}
-                      </Stack>
-                    </Suspense>
+                        }
+
+                        return (
+                          <Box
+                            key={index}
+                            hasRadius
+                            background="neutral0"
+                            shadow="tableShadow"
+                            paddingLeft={6}
+                            paddingRight={6}
+                            paddingTop={6}
+                            paddingBottom={6}
+                            borderColor="neutral150"
+                          >
+                            <Stack spacing={6}>
+                              {row.map((grid, gridRowIndex) => (
+                                <GridRow
+                                  columns={grid}
+                                  customFieldInputs={lazyComponentStore}
+                                  key={gridRowIndex}
+                                />
+                              ))}
+                            </Stack>
+                          </Box>
+                        );
+                      })}
+                    </Stack>
                   </GridItem>
                   <GridItem col={3} s={12}>
                     <Stack spacing={2}>

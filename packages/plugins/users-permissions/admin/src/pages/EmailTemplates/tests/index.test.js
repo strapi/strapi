@@ -396,6 +396,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                   aria-colcount="3"
                   aria-rowcount="3"
                   class="c11"
+                  role="grid"
                 >
                   <thead
                     class="c12"
@@ -407,6 +408,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                       <th
                         aria-colindex="1"
                         class="c14 c15"
+                        role="gridcell"
                         tabindex="0"
                         width="1%"
                       >
@@ -426,6 +428,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                       <th
                         aria-colindex="2"
                         class="c15"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <div
@@ -444,6 +447,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                       <th
                         aria-colindex="3"
                         class="c14 c15"
+                        role="gridcell"
                         tabindex="-1"
                         width="1%"
                       >
@@ -473,6 +477,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                       <td
                         aria-colindex="1"
                         class="c15"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <div
@@ -498,6 +503,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                       <td
                         aria-colindex="2"
                         class="c15"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <span
@@ -553,6 +559,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                       <td
                         aria-colindex="1"
                         class="c15"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <div
@@ -576,6 +583,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                       <td
                         aria-colindex="2"
                         class="c15"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <span

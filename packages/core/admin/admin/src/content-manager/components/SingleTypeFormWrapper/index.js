@@ -103,7 +103,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       setIsCreatingEntry(true);
 
       try {
-        const { data } = await axiosInstance(getRequestUrl(`${slug}${searchToSend}`), {
+        const { data } = await axiosInstance.get(getRequestUrl(`${slug}${searchToSend}`), {
           cancelToken: source.token,
         });
 
