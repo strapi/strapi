@@ -1,6 +1,6 @@
 import type { Readable } from 'stream';
 
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import zip from 'zlib';
 import tar from 'tar';
 import { keyBy } from 'lodash/fp';
@@ -63,13 +63,11 @@ class LocalFileSourceProvider implements ISourceProvider {
    */
   async bootstrap() {
     const { path } = this.options.file;
-    const isValidBackupPath = await fs.existsSync(path);
-
-    // Check if the provided path exists
-    if (!isValidBackupPath) {
-      throw new Error(
-        `Invalid backup file path provided. "${path}" does not exist on the filesystem.`
-      );
+    try {
+      // This is only to show a nicer error, it doesn't ensure the file will still exist when we try to open it later
+      await fs.access(path, fs.constants.R_OK);
+    } catch (e) {
+      throw new Error(`Can't access file "${path}".`);
     }
   }
 
