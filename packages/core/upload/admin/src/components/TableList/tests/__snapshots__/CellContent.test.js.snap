@@ -21,6 +21,7 @@ exports[`TableList | CellContent should render "-" by default when no recognized
 
 <div>
   <span
+    aria-label="This field is empty"
     class="c0"
   >
     -
@@ -73,7 +74,7 @@ exports[`TableList | CellContent should render date cell type 1`] = `
   <span
     class="c0"
   >
-    11/18/2022
+    Friday, November 18, 2022
   </span>
   <div
     class="c1"
@@ -171,6 +172,7 @@ exports[`TableList | CellContent should render extension cell type with "-" when
 
 <div>
   <span
+    aria-label="This field is empty"
     class="c0"
   >
     -
@@ -514,6 +516,7 @@ exports[`TableList | CellContent should render size cell type with "-" when elem
 
 <div>
   <span
+    aria-label="This field is empty"
     class="c0"
   >
     -

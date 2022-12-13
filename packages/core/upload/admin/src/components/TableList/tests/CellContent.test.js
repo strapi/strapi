@@ -96,7 +96,7 @@ describe('TableList | CellContent', () => {
       content: '2022-11-18T12:08:02.202Z',
     });
 
-    expect(getByText('11/18/2022')).toBeInTheDocument();
+    expect(getByText('Friday, November 18, 2022')).toBeInTheDocument();
     expect(container).toMatchSnapshot();
   });
 

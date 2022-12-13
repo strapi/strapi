@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import parseISO from 'date-fns/parseISO';
 import { getFileExtension } from '@strapi/helper-plugin';
 import { Typography } from '@strapi/design-system/Typography';
 
@@ -17,7 +18,8 @@ export const CellContent = ({
   thumbnailURL,
   url,
 }) => {
-  const { formatDate } = useIntl();
+  const { formatDate, formatMessage } = useIntl();
+
   switch (cellType) {
     case 'image':
       return (
@@ -31,15 +33,35 @@ export const CellContent = ({
         />
       );
     case 'date':
-      return <Typography>{formatDate(content)}</Typography>;
+      return <Typography>{formatDate(parseISO(content), { dateStyle: 'full' })}</Typography>;
 
     case 'size':
-      if (elementType === 'folder') return <Typography>-</Typography>;
+      if (elementType === 'folder')
+        return (
+          <Typography
+            aria-label={formatMessage({
+              id: 'list.table.content.empty-label',
+              defaultMessage: 'This field is empty',
+            })}
+          >
+            -
+          </Typography>
+        );
 
       return <Typography>{formatBytes(content)}</Typography>;
 
     case 'ext':
-      if (elementType === 'folder') return <Typography>-</Typography>;
+      if (elementType === 'folder')
+        return (
+          <Typography
+            aria-label={formatMessage({
+              id: 'list.table.content.empty-label',
+              defaultMessage: 'This field is empty',
+            })}
+          >
+            -
+          </Typography>
+        );
 
       return <Typography>{getFileExtension(content).toUpperCase()}</Typography>;
 
@@ -47,7 +69,16 @@ export const CellContent = ({
       return <Typography>{content}</Typography>;
 
     default:
-      return <Typography>-</Typography>;
+      return (
+        <Typography
+          aria-label={formatMessage({
+            id: 'list.table.content.empty-label',
+            defaultMessage: 'This field is empty',
+          })}
+        >
+          -
+        </Typography>
+      );
   }
 };
 

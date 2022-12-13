@@ -312,12 +312,7 @@ export const MediaLibrary = () => {
               onEditFolder={handleEditFolder}
               onSelectOne={selectOne}
               onSelectAll={handleBulkSelect}
-              rows={
-                // TODO: remove when fixed on DS side
-                // when number of rows in Table changes, the keyboard tab from a row to another
-                // is not working for 1st and last column
-                !assetsLoading && !foldersLoading ? [...folders, ...assets] : []
-              }
+              rows={[...folders, ...assets]}
               selected={selected}
               shouldDisableBulkSelect={!canUpdate}
               sortQuery={query?.sort ?? ''}

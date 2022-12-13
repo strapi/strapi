@@ -76,9 +76,8 @@ describe('TableList | TableRows', () => {
       expect(getByText('michka')).toBeInTheDocument();
       expect(getByText('JPEG')).toBeInTheDocument();
       expect(getByText('12KB')).toBeInTheDocument();
-      expect(getByText('10/1/2021')).toBeInTheDocument();
-      expect(getByText('10/18/2021')).toBeInTheDocument();
-      expect(getByText('10/18/2021')).toBeInTheDocument();
+      expect(getByText('Friday, October 1, 2021')).toBeInTheDocument();
+      expect(getByText('Monday, October 18, 2021')).toBeInTheDocument();
     });
 
     it('should call onSelectAsset callback', () => {
