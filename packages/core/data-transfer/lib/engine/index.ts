@@ -20,7 +20,7 @@ import type {
 
 import compareSchemas from '../strategies';
 
-export const transferStages: ReadonlyArray<TransferStage> = Object.freeze([
+export const TRANSFER_STAGES: ReadonlyArray<TransferStage> = Object.freeze([
   'entities',
   'links',
   'assets',

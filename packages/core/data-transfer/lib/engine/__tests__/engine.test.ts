@@ -2,7 +2,7 @@ import { join } from 'path';
 import { cloneDeep } from 'lodash/fp';
 import { Readable, Writable } from 'stream-chain';
 import type { Schema } from '@strapi/strapi';
-import { createTransferEngine, transferStages } from '..';
+import { createTransferEngine, TRANSFER_STAGES } from '..';
 import type {
   IAsset,
   IDestinationProvider,
@@ -423,7 +423,7 @@ describe('Transfer engine', () => {
 
       let calls = 0;
       engine.progress.stream.on('stage::progress', ({ stage, data }) => {
-        expect(transferStages.includes(stage)).toBe(true);
+        expect(TRANSFER_STAGES.includes(stage)).toBe(true);
         expect(data).toMatchObject(engine.progress.data);
         calls += 1;
       });
@@ -443,14 +443,14 @@ describe('Transfer engine', () => {
 
       let calls = 0;
       engine.progress.stream.on('stage::start', ({ stage, data }) => {
-        expect(transferStages.includes(stage)).toBe(true);
+        expect(TRANSFER_STAGES.includes(stage)).toBe(true);
         expect(data).toMatchObject(engine.progress.data);
         calls += 1;
       });
 
       await engine.transfer();
 
-      expect(calls).toEqual(transferStages.length);
+      expect(calls).toEqual(TRANSFER_STAGES.length);
     });
 
     test("emits 'stage::finish' events", async () => {
@@ -459,14 +459,14 @@ describe('Transfer engine', () => {
 
       let calls = 0;
       engine.progress.stream.on('stage::finish', ({ stage, data }) => {
-        expect(transferStages.includes(stage)).toBe(true);
+        expect(TRANSFER_STAGES.includes(stage)).toBe(true);
         expect(data).toMatchObject(engine.progress.data);
         calls += 1;
       });
 
       await engine.transfer();
 
-      expect(calls).toEqual(transferStages.length);
+      expect(calls).toEqual(TRANSFER_STAGES.length);
     });
 
     test("emits 'stage::skip' events", async () => {
@@ -480,7 +480,7 @@ describe('Transfer engine', () => {
 
       let calls = 0;
       engine.progress.stream.on('stage::skip', ({ stage, data }) => {
-        expect(transferStages.includes(stage)).toBe(true);
+        expect(TRANSFER_STAGES.includes(stage)).toBe(true);
         expect(data).toMatchObject(engine.progress.data);
         calls += 1;
       });
