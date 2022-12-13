@@ -84,10 +84,10 @@ describe('Audit logs auth', () => {
 
       const eventName = 'test';
       const eventPayload = { meta: 'test' };
-      strapi.eventHub.emit(eventName, eventPayload);
+      await strapi.eventHub.emit(eventName, eventPayload);
       // TODO: Replace with a test to save to db
       expect(logSpy).toHaveBeenCalledWith(
-        `Listened to event ${eventName} with args: ${JSON.stringify(eventPayload)}`
+        `Listened to event ${eventName} with args: [${JSON.stringify(eventPayload)}]`
       );
     });
 
@@ -96,8 +96,8 @@ describe('Audit logs auth', () => {
       auditLogsService.register();
 
       expect(() => {
-        strapi.eventHub.emit('', { meta: 'test' });
-      }).toThrowError('Name is required');
+        return strapi.eventHub.emit('', { meta: 'test' });
+      }).rejects.toThrowError('Name is required');
     });
   });
 });
