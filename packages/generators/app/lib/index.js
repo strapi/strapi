@@ -2,8 +2,7 @@
 
 const { join, resolve, basename } = require('path');
 const os = require('os');
-const crypto = require('crypto');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto');
 const sentry = require('@sentry/node');
 const hasYarn = require('./utils/has-yarn');
 const checkRequirements = require('./utils/check-requirements');
@@ -22,7 +21,7 @@ const generateNewApp = (projectDirectory, cliArguments) => {
 
   const rootPath = resolve(projectDirectory);
 
-  const tmpPath = join(os.tmpdir(), `strapi${crypto.randomBytes(6).toString('hex')}`);
+  const tmpPath = join(os.tmpdir(), `strapi${randomUUID()}`);
 
   const useNpm = cliArguments.useNpm !== undefined;
 
@@ -40,7 +39,7 @@ const generateNewApp = (projectDirectory, cliArguments) => {
       template: cliArguments.template,
       starter: cliArguments.starter,
     },
-    uuid: (process.env.STRAPI_UUID_PREFIX || '') + uuidv4(),
+    uuid: (process.env.STRAPI_UUID_PREFIX || '') + randomUUID(),
     docker: process.env.DOCKER === 'true',
     deviceId: machineID(),
     tmpPath,
