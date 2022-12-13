@@ -130,7 +130,7 @@ class TransferEngine<
   }
 
   #assertStrapiVersionIntegrity(sourceVersion?: string, destinationVersion?: string) {
-    const strategy = this.options.versionMatching;
+    const strategy = this.options.versionStrategy;
 
     if (
       !sourceVersion ||
@@ -172,7 +172,11 @@ class TransferEngine<
   }
 
   #assertSchemasMatching(sourceSchemas: any, destinationSchemas: any) {
-    const strategy = this.options.schemasMatching || 'strict';
+    const strategy = this.options.schemaStrategy || 'strict';
+    if (strategy === 'ignore') {
+      return;
+    }
+
     const keys = uniq(Object.keys(sourceSchemas).concat(Object.keys(destinationSchemas)));
     const diffs: { [key: string]: Diff[] } = {};
 

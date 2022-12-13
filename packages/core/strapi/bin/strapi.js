@@ -299,17 +299,29 @@ program
   .command('import')
   .description('Import data from file to Strapi')
   .addOption(
-    new Option('--conflictStrategy <conflictStrategy>', 'Which strategy to use for ID conflicts')
-      .choices(['restore', 'abort', 'keep', 'replace'])
+    new Option(
+      '--conflictStrategy <conflictStrategy>',
+      'Which strategy to use for ID conflicts. "restore" deletes all existing data and replaces it with data being restored.'
+    )
+      .choices(['restore'])
       .default('restore')
   )
   .addOption(
     new Option(
-      '--schemaComparison <schemaComparison>',
-      'exact requires every field to match, strict requires Strapi version and content type schema fields do not break, subset requires source schema to exist in destination, bypass skips checks',
+      '--schemaStrategy <schemaStrategy>',
+      'exact requires schemas to be identical, strict requires all content types to exist in both but allows some non-structural fields to differ',
       parseInputList
     )
-      .choices(['exact', 'strict', 'subset', 'bypass'])
+      .choices(['exact', 'strict']) // 'ignore' is also a possible option in the transfer engine, but we don't provide it in the CLI at this time
+      .default('exact')
+  )
+  .addOption(
+    new Option(
+      '--versionStrategy <versionStrategy>',
+      'exact requires schemas to be identical, strict requires all content types to exist in both but allows some non-structural fields to differ',
+      parseInputList
+    )
+      .choices(['exact', 'major', 'minor', 'patch', 'ignore'])
       .default('exact')
   )
   .requiredOption(

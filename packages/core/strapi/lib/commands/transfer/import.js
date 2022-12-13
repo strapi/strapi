@@ -66,7 +66,8 @@ module.exports = async (opts) => {
    */
   const engineOptions = {
     strategy: opts.conflictStrategy,
-    versionMatching: opts.schemaComparison,
+    versionStrategy: opts.versionStrategy,
+    schemaStrategy: opts.schemaStrategy,
     exclude: opts.exclude,
   };
   const engine = createTransferEngine(source, destination, engineOptions);

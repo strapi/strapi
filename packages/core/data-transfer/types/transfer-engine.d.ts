@@ -112,12 +112,12 @@ export interface ITransferEngineOptions {
    * "minor" // both the major and minor version should match. 4.3.9 and 4.3.11 will work, while 4.3.9 and 4.4.1 won't
    * "patch" // every part of the version should match. Similar to "exact" but only work on semver.
    */
-  versionMatching: 'exact' | 'ignore' | 'major' | 'minor' | 'patch';
+  versionStrategy: 'exact' | 'ignore' | 'major' | 'minor' | 'patch';
 
   /**
    * Strategy used to do the schema matching in the integrity checks
    */
-  schemasMatching: 'exact' | 'strict';
+  schemaStrategy: 'exact' | 'strict' | 'ignore';
 
   // List of global transform streams to integrate into the final pipelines
   common?: {
