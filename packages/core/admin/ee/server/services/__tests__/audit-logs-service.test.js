@@ -91,11 +91,11 @@ describe('Audit logs auth', () => {
       );
     });
 
-    it('should throw and error when name is empty', () => {
+    it('should throw and error when name is empty', async () => {
       const auditLogsService = createAuditLogsService(strapi);
       auditLogsService.register();
 
-      expect(() => {
+      await expect(() => {
         return strapi.eventHub.emit('', { meta: 'test' });
       }).rejects.toThrowError('Name is required');
     });
