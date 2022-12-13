@@ -23,16 +23,15 @@ const createEntitiesWriteStream = (options: IEntitiesRestoreStreamOptions) => {
         const created = await query(type).create({ data });
 
         updateMappingTable(type, id, created.id);
-
-        callback(null);
       } catch (e) {
         if (e instanceof Error) {
-          console.error('Failed to create', type, id);
-          console.error(e);
+          return callback(e);
         }
 
-        callback(null);
+        return callback(new Error(`Failed to create "${type}" (${id})`));
       }
+
+      return callback(null);
     },
   });
 };
