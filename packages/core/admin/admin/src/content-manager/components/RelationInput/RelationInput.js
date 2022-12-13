@@ -34,15 +34,6 @@ const LinkEllipsis = styled(Link)`
   }
 `;
 
-const BoxEllipsis = styled(Box)`
-  > span {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: inherit;
-  }
-`;
-
 const DisconnectButton = styled.button`
   svg path {
     fill: ${({ theme }) => theme.colors.neutral500};
@@ -308,8 +299,6 @@ const RelationInput = ({
             {({ data, index, style }) => {
               const { publicationState, href, mainField, id } = data[index];
               const statusColor = publicationState === 'draft' ? 'secondary' : 'success';
-              // Use Box to fix the issue of BoxEllipsis causing LinkEllipsis :focus-visible:after "outline" hidden
-              const BoxWrapper = href ? Box : BoxEllipsis;
 
               return (
                 <RelationItem
@@ -328,7 +317,7 @@ const RelationInput = ({
                   }
                   style={style}
                 >
-                  <BoxWrapper minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
+                  <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
                     <Tooltip description={mainField ?? `${id}`}>
                       {href ? (
                         <LinkEllipsis to={href} disabled={disabled}>
@@ -340,7 +329,7 @@ const RelationInput = ({
                         </Typography>
                       )}
                     </Tooltip>
-                  </BoxWrapper>
+                  </Box>
 
                   {publicationState && (
                     <Status variant={statusColor} showBullet={false} size="S">
