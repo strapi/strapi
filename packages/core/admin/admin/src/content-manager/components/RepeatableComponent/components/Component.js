@@ -132,7 +132,7 @@ const DraggedItem = ({
   return (
     <Box ref={composedBoxRefs}>
       {isDragging ? (
-        <Preview ref={dragPreviewRef} />
+        <Preview />
       ) : (
         <Accordion expanded={isOpen} onToggle={onClickToggle} id={componentFieldName} size="S">
           <AccordionToggle
