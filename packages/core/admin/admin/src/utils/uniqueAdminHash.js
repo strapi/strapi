@@ -12,11 +12,11 @@ export const utils = {
 
 export default async function hashAdminUserEmail(payload) {
   if (!payload) {
-    return '';
+    return null;
   }
   try {
     return await utils.digestMessage(payload.email);
   } catch (error) {
-    return '';
+    return null;
   }
 }

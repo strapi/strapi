@@ -17,7 +17,7 @@ describe('Creating admin user email hash in admin', () => {
   it('should return empty string if no payload provided', async () => {
     const testHash = await hashAdminUserEmail();
 
-    expect(testHash).toBe('');
+    expect(testHash).toBe(null);
   });
 
   it('should return hash using crypto subtle', async () => {
