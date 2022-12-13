@@ -35,9 +35,8 @@ export const createConfigurationWriteStream = async (strapi: Strapi.Strapi) => {
     ) {
       try {
         await restoreConfigs(strapi, config);
-        callback();
       } catch (error) {
-        callback(
+        return callback(
           new Error(
             `Failed to import ${chalk.yellowBright(config.type)} (${chalk.greenBright(
               config.value.id
@@ -45,6 +44,7 @@ export const createConfigurationWriteStream = async (strapi: Strapi.Strapi) => {
           )
         );
       }
+      callback();
     },
   });
 };
