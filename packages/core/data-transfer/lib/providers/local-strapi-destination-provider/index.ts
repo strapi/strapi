@@ -1,5 +1,3 @@
-// import { createLogger } from '@strapi/logger';
-
 import chalk from 'chalk';
 import { Writable } from 'stream';
 import path from 'path';
@@ -128,7 +126,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
               fse.rmSync(assetsDirectory, { recursive: true, force: true });
               fse.renameSync(backupDirectory, assetsDirectory);
             } catch (err) {
-              console.log(
+              throw new Error(
                 `There was an error doing the rollback process. The original files are in ${backupDirectory}, but we failed to restore them to ${assetsDirectory}`
               );
             } finally {
