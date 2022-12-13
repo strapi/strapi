@@ -24,10 +24,14 @@ import { RELATION_ITEM_HEIGHT } from './constants';
 import { usePrev } from '../../hooks';
 
 const LinkEllipsis = styled(Link)`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: inherit;
+  display: block;
+
+  > span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+  }
 `;
 
 const BoxEllipsis = styled(Box)`
@@ -304,6 +308,8 @@ const RelationInput = ({
             {({ data, index, style }) => {
               const { publicationState, href, mainField, id } = data[index];
               const statusColor = publicationState === 'draft' ? 'secondary' : 'success';
+              // Use Box to fix the issue of BoxEllipsis causing LinkEllipsis :focus-visible:after "outline" hidden
+              const BoxWrapper = href ? Box : BoxEllipsis;
 
               return (
                 <RelationItem
@@ -322,7 +328,7 @@ const RelationInput = ({
                   }
                   style={style}
                 >
-                  <BoxEllipsis minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
+                  <BoxWrapper minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
                     <Tooltip description={mainField ?? `${id}`}>
                       {href ? (
                         <LinkEllipsis to={href} disabled={disabled}>
@@ -334,7 +340,7 @@ const RelationInput = ({
                         </Typography>
                       )}
                     </Tooltip>
-                  </BoxEllipsis>
+                  </BoxWrapper>
 
                   {publicationState && (
                     <Status variant={statusColor} showBullet={false} size="S">

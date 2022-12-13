@@ -49,7 +49,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   min-width: 0px;
 }
 
-.c23 {
+.c22 {
   background: #eaf5ff;
   padding-top: 4px;
   padding-right: 8px;
@@ -60,11 +60,11 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   border: 1px solid #b8e1ff;
 }
 
-.c26 {
+.c25 {
   padding-left: 16px;
 }
 
-.c28 {
+.c27 {
   color: #666687;
   width: 12px;
 }
@@ -165,13 +165,13 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   color: #4945ff;
 }
 
-.c22 {
+.c21 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #32324d;
 }
 
-.c25 {
+.c24 {
   font-size: 0.875rem;
   line-height: 1.43;
   font-weight: 600;
@@ -210,7 +210,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   margin-top: 4px;
 }
 
-.c29 path {
+.c28 path {
   fill: #666687;
 }
 
@@ -300,7 +300,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   width: 0.5625rem;
 }
 
-.c24 .c5 {
+.c23 .c5 {
   color: #0c75af;
 }
 
@@ -308,7 +308,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   color: #328048;
 }
 
-.c20 {
+.c19 {
   display: -webkit-inline-box;
   display: -webkit-inline-flex;
   display: -ms-inline-flexbox;
@@ -324,31 +324,31 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   outline: none;
 }
 
-.c20 svg path {
+.c19 svg path {
   -webkit-transition: fill 150ms ease-out;
   transition: fill 150ms ease-out;
   fill: currentColor;
 }
 
-.c20 svg {
+.c19 svg {
   font-size: 0.625rem;
 }
 
-.c20 .c5 {
+.c19 .c5 {
   -webkit-transition: color 150ms ease-out;
   transition: color 150ms ease-out;
   color: currentColor;
 }
 
-.c20:hover {
+.c19:hover {
   color: #7b79ff;
 }
 
-.c20:active {
+.c19:active {
   color: #271fe0;
 }
 
-.c20:after {
+.c19:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -363,11 +363,11 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   border: 2px solid transparent;
 }
 
-.c20:focus-visible {
+.c19:focus-visible {
   outline: none;
 }
 
-.c20:focus-visible:after {
+.c19:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -407,26 +407,30 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   bottom: 0;
 }
 
-.c21 {
+.c20 {
+  display: block;
+}
+
+.c20 > span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.c29 > span {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   display: inherit;
 }
 
-.c19 > span {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: inherit;
-}
-
-.c27 svg path {
+.c26 svg path {
   fill: #8e8ea9;
 }
 
-.c27:hover svg path,
-.c27:focus svg path {
+.c26:hover svg path,
+.c26:focus svg path {
   fill: #666687;
 }
 
@@ -585,18 +589,18 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                   class="c16 c17"
                 >
                   <div
-                    class="c18 c19"
+                    class="c18"
                   >
                     <span>
                       <a
                         aria-current="page"
                         aria-describedby="tooltip-1"
-                        class="c20 c21 active"
+                        class="c19 c20 active"
                         href="/"
                         tabindex="0"
                       >
                         <span
-                          class="c5 c22"
+                          class="c5 c21"
                         >
                           Relation 1
                         </span>
@@ -604,26 +608,26 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                     </span>
                   </div>
                   <div
-                    class="c23 c24"
+                    class="c22 c23"
                   >
                     <span
-                      class="c5 c25"
+                      class="c5 c24"
                     >
                       Draft
                     </span>
                   </div>
                 </div>
                 <div
-                  class="c26"
+                  class="c25"
                 >
                   <button
                     aria-label="Remove"
-                    class="c27"
+                    class="c26"
                     data-testid="remove-relation-1"
                     type="button"
                   >
                     <svg
-                      class="c28 c29"
+                      class="c27 c28"
                       fill="none"
                       height="1em"
                       viewBox="0 0 24 24"
@@ -650,7 +654,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                   class="c16 c17"
                 >
                   <div
-                    class="c18 c19"
+                    class="c18 c29"
                   >
                     <span>
                       <span
@@ -673,16 +677,16 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                   </div>
                 </div>
                 <div
-                  class="c26"
+                  class="c25"
                 >
                   <button
                     aria-label="Remove"
-                    class="c27"
+                    class="c26"
                     data-testid="remove-relation-2"
                     type="button"
                   >
                     <svg
-                      class="c28 c29"
+                      class="c27 c28"
                       fill="none"
                       height="1em"
                       viewBox="0 0 24 24"
@@ -709,7 +713,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                   class="c16 c17"
                 >
                   <div
-                    class="c18 c19"
+                    class="c18 c29"
                   >
                     <span>
                       <span
@@ -723,16 +727,16 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                   </div>
                 </div>
                 <div
-                  class="c26"
+                  class="c25"
                 >
                   <button
                     aria-label="Remove"
-                    class="c27"
+                    class="c26"
                     data-testid="remove-relation-3"
                     type="button"
                   >
                     <svg
-                      class="c28 c29"
+                      class="c27 c28"
                       fill="none"
                       height="1em"
                       viewBox="0 0 24 24"
