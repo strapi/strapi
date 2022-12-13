@@ -53,8 +53,9 @@ const fetchAppInfo = async () => {
 };
 
 const fetchCurrentUserPermissions = async () => {
+  const { get } = getFetchClient();
   try {
-    const { data, headers } = await axiosInstance.get('/admin/users/me/permissions');
+    const { data, headers } = await get('/admin/users/me/permissions');
 
     if (!headers['content-type'].includes('application/json')) {
       throw new Error('Not found');
