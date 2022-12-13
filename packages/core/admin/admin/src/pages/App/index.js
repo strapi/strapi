@@ -86,6 +86,7 @@ function App() {
           const {
             data: { data: properties },
           } = await get(`/admin/telemetry-properties`, {
+            // NOTE: needed because the interceptors of the fetchClient redirect to /login when receive a 401 and it would end up in an infinite loop when the user doesn't have a session.
             validateStatus: (status) => status < 500,
           });
 
