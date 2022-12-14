@@ -132,7 +132,7 @@ interface IConfiguration<T = unknown> {
 export interface IAsset {
   filename: string;
   filepath: string;
-  stream: NodeJS.ReadableStream;
+  stream: Readable;
   stats: IAssetStats;
 }
 

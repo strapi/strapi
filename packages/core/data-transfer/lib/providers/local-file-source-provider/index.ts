@@ -8,7 +8,7 @@ import { keyBy } from 'lodash/fp';
 import { chain } from 'stream-chain';
 import { pipeline, PassThrough } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
-import type { IMetadata, ISourceProvider, ProviderType } from '../../../types';
+import type { IAsset, IMetadata, ISourceProvider, ProviderType } from '../../../types';
 
 import { collect } from '../../utils';
 import { createDecryptionCipher } from '../../encryption';
@@ -121,9 +121,15 @@ class LocalFileSourceProvider implements ISourceProvider {
             return parts[0] === 'assets' && parts[1] === 'uploads';
           },
           onentry(entry) {
-            const { path: filePath, size } = entry;
+            const { path: filePath, size = 0 } = entry;
             const file = path.basename(filePath);
-            outStream.write({ file, path: filePath, stats: { size }, stream: entry });
+            const asset: IAsset = {
+              filename: file,
+              filepath: filePath,
+              stats: { size },
+              stream: entry,
+            };
+            outStream.write(asset);
           },
         }),
       ],

@@ -2,7 +2,13 @@ import chalk from 'chalk';
 import { Writable } from 'stream';
 import path from 'path';
 import * as fse from 'fs-extra';
-import type { IConfiguration, IDestinationProvider, IMetadata, ProviderType } from '../../../types';
+import type {
+  IAsset,
+  IConfiguration,
+  IDestinationProvider,
+  IMetadata,
+  ProviderType,
+} from '../../../types';
 
 import { deleteAllRecords, DeleteOptions, restoreConfigs } from './restore';
 import { mapSchemasValues } from '../../utils';
@@ -94,7 +100,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     return mapSchemasValues(schemas);
   }
 
-  getAssetsStream(): NodeJS.WritableStream {
+  async getAssetsStream(): Promise<NodeJS.WritableStream> {
     if (!this.strapi) {
       throw new Error('Not able to stream Assets. Strapi instance not found');
     }
@@ -105,26 +111,31 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       `uploads_backup_${Date.now()}`
     );
 
-    fse.renameSync(assetsDirectory, backupDirectory);
-    fse.mkdirSync(assetsDirectory);
+    await fse.rename(assetsDirectory, backupDirectory);
+    await fse.mkdir(assetsDirectory);
 
     return new Writable({
       objectMode: true,
       async final(next) {
-        fse.rmSync(backupDirectory, { recursive: true, force: true });
+        await fse.rm(backupDirectory, { recursive: true, force: true });
         next();
       },
-      async write(chunk, _encoding, callback) {
-        const entryPath = path.join(assetsDirectory, chunk.file);
+      async write(chunk: IAsset, _encoding, callback) {
+        const entryPath = path.join(assetsDirectory, chunk.filename);
         const writableStream = fse.createWriteStream(entryPath);
 
         chunk.stream
           .pipe(writableStream)
           .on('close', callback)
-          .on('error', (error: Error) => {
+          .on('error', async (error: Error) => {
             try {
-              fse.rmSync(assetsDirectory, { recursive: true, force: true });
-              fse.renameSync(backupDirectory, assetsDirectory);
+              await fse.rm(assetsDirectory, { recursive: true, force: true });
+              await fse.rename(backupDirectory, assetsDirectory);
+              this.destroy(
+                new Error(
+                  `There was an error during the transfer process. The original files have been restored to ${assetsDirectory}`
+                )
+              );
             } catch (err) {
               throw new Error(
                 `There was an error doing the rollback process. The original files are in ${backupDirectory}, but we failed to restore them to ${assetsDirectory}`
