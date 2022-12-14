@@ -134,8 +134,8 @@ const reducer = (state, action) =>
         const modifiedDataPath = ['modifiedData', ...action.keys];
         const { value } = action;
 
-        const initialDataRelations = get(state, initialDataPath);
-        const modifiedDataRelations = get(state, modifiedDataPath);
+        const initialDataRelations = get(state, initialDataPath, []);
+        const modifiedDataRelations = get(state, modifiedDataPath, []);
 
         set(draftState, initialDataPath, uniqBy([...value, ...initialDataRelations], 'id'));
 
