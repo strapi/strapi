@@ -23,6 +23,7 @@ const fetchRelation = async (endPoint, notifyStatus) => {
   const {
     data: { results, pagination },
   } = await axiosInstance.get(endPoint);
+  console.log('fetchRelation', endPoint, results, pagination);
 
   notifyStatus();
 
