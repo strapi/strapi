@@ -13,6 +13,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import { axiosInstance } from '../../../core/utils';
+import { getFetchClient } from '../../../utils/getFetchClient';
 import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
 import {
   getData,
@@ -107,6 +108,13 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
           cancelToken: source.token,
         });
 
+        console.log(
+          'onFetchData',
+          getRequestUrl(`${slug}${searchToSend}`),
+          { cancelToken: source.token },
+          data
+        );
+
         dispatch(getDataSucceeded(cleanReceivedData(data)));
 
         setIsCreatingEntry(false);
@@ -161,6 +169,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         trackUsageRef.current('willDeleteEntry', trackerProperty);
 
         const { data } = await axiosInstance.delete(getRequestUrl(`${slug}${searchToSend}`));
+        console.log('onDelete', getRequestUrl(`${slug}${searchToSend}`), data);
 
         toggleNotification({
           type: 'success',
@@ -189,12 +198,13 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
   const onPost = useCallback(
     async (body, trackerProperty) => {
+      const { put } = getFetchClient();
       const endPoint = getRequestUrl(`${slug}${rawQuery}`);
 
       try {
         dispatch(setStatus('submit-pending'));
 
-        const { data } = await axiosInstance.put(endPoint, body);
+        const { data } = await put(endPoint, body);
 
         trackUsageRef.current('didCreateEntry', trackerProperty);
         toggleNotification({
@@ -243,6 +253,8 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       dispatch(setStatus('draft-relation-check-pending'));
 
       const numberOfDraftRelations = await axiosInstance.get(endPoint);
+      console.log('onPost', endPoint, numberOfDraftRelations);
+
       trackUsageRef.current('didCheckDraftRelations');
 
       dispatch(setStatus('resolved'));
@@ -264,6 +276,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       dispatch(setStatus('publish-pending'));
 
       const { data } = await axiosInstance.post(endPoint);
+      console.log('onPublish', endPoint, data);
 
       trackUsageRef.current('didPublishEntry');
       toggleNotification({
@@ -295,6 +308,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         dispatch(setStatus('submit-pending'));
 
         const { data } = await axiosInstance.put(endPoint, body);
+        console.log('onPut', endPoint, body, data);
 
         toggleNotification({
           type: 'success',
@@ -334,6 +348,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       trackUsageRef.current('willUnpublishEntry');
 
       const { data } = await axiosInstance.post(endPoint);
+      console.log('onUnpublish', endPoint, data);
 
       trackUsageRef.current('didUnpublishEntry');
       toggleNotification({
