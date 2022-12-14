@@ -14,7 +14,7 @@ const inquirer = require('inquirer');
 const program = new Command();
 
 const packageJSON = require('../package.json');
-const { promptEncryptionKey, confirmKeyValue } = require('../lib/commands/utils/commander');
+const { promptEncryptionKey, confirmMessage } = require('../lib/commands/utils/commander');
 
 const checkCwdIsStrapiApp = (name) => {
   const logErrorAndExit = () => {
@@ -326,9 +326,7 @@ program
   })
   .hook(
     'preAction',
-    confirmKeyValue(
-      'conflictStrategy',
-      'restore',
+    confirmMessage(
       "Using strategy 'restore' will delete all data in your database. Are you sure you want to proceed?"
     )
   )
