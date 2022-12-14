@@ -24,12 +24,10 @@ module.exports = function processEvent(strapi, name, ...args) {
     return null;
   }
 
-  const event = {
+  return {
     action: name,
     date: new Date().toISOString(),
     payload: getPayload(...args) || {},
     userId: strapi.requestContext.get().state?.user?.id,
   };
-
-  return event;
 };
