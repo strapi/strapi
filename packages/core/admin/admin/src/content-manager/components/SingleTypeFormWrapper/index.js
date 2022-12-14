@@ -103,17 +103,12 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
       setIsCreatingEntry(true);
 
+      const { get: getClient } = getFetchClient();
+
       try {
-        const { data } = await axiosInstance.get(getRequestUrl(`${slug}${searchToSend}`), {
+        const { data } = await getClient(getRequestUrl(`${slug}${searchToSend}`), {
           cancelToken: source.token,
         });
-
-        console.log(
-          'onFetchData',
-          getRequestUrl(`${slug}${searchToSend}`),
-          { cancelToken: source.token },
-          data
-        );
 
         dispatch(getDataSucceeded(cleanReceivedData(data)));
 
