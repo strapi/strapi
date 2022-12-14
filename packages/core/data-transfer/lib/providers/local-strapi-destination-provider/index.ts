@@ -5,7 +5,8 @@ import type { IConfiguration, IDestinationProvider, IMetadata, ProviderType } fr
 import { deleteAllRecords, DeleteOptions, restoreConfigs } from './restore';
 import { mapSchemasValues } from '../../utils';
 
-export const VALID_STRATEGIES = ['restore', 'merge'];
+export const VALID_CONFLICT_STRATEGIES = ['restore', 'merge'];
+export const DEFAULT_CONFLICT_STRATEGY = 'restore';
 
 interface ILocalStrapiDestinationProviderOptions {
   getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>;
@@ -42,7 +43,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   #validateOptions() {
-    if (!VALID_STRATEGIES.includes(this.options.strategy)) {
+    if (!VALID_CONFLICT_STRATEGIES.includes(this.options.strategy)) {
       throw new Error(`Invalid stategy ${this.options.strategy}`);
     }
   }

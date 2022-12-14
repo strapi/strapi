@@ -302,7 +302,6 @@ describe('Transfer engine', () => {
   } as IDestinationProvider;
 
   const defaultOptions = {
-    strategy: 'restore',
     versionStrategy: 'exact',
     schemaStrategy: 'exact',
     exclude: [],
@@ -419,7 +418,6 @@ describe('Transfer engine', () => {
     describe('schema matching', () => {
       describe('exact', () => {
         const engineOptions = {
-          strategy: 'restore',
           versionStrategy: 'exact',
           schemaStrategy: 'exact',
           exclude: [],

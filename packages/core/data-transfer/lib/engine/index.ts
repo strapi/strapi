@@ -19,6 +19,9 @@ import type {
 
 import compareSchemas from '../strategies';
 
+export const DEFAULT_VERSION_STRATEGY = 'ignore';
+export const DEFAULT_SCHEMA_STRATEGY = 'strict';
+
 type TransferProgress = {
   [key in TransferStage]?: {
     count: number;
@@ -130,7 +133,7 @@ class TransferEngine<
   }
 
   #assertStrapiVersionIntegrity(sourceVersion?: string, destinationVersion?: string) {
-    const strategy = this.options.versionStrategy;
+    const strategy = this.options.versionStrategy || DEFAULT_VERSION_STRATEGY;
 
     if (
       !sourceVersion ||
@@ -172,7 +175,7 @@ class TransferEngine<
   }
 
   #assertSchemasMatching(sourceSchemas: any, destinationSchemas: any) {
-    const strategy = this.options.schemaStrategy || 'strict';
+    const strategy = this.options.schemaStrategy || DEFAULT_SCHEMA_STRATEGY;
     if (strategy === 'ignore') {
       return;
     }
