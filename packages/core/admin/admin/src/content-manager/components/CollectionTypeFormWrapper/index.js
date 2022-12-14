@@ -32,7 +32,7 @@ import {
   submitSucceeded,
 } from '../../sharedReducers/crudReducer/actions';
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
-import { useFetchClient } from '../../../hooks';
+import { getFetchClient } from '../../../utils/getFetchClient';
 
 // This container is used to handle the CRUD
 const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }) => {
@@ -93,8 +93,6 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     );
   }, []);
 
-  const { get: getClient } = useFetchClient();
-
   // SET THE DEFAULT LAYOUT the effect is applied when the slug changes
   useEffect(() => {
     const componentsDataStructure = Object.keys(allLayoutData.components).reduce((acc, current) => {
@@ -138,6 +136,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
     const fetchData = async (source) => {
       dispatch(getData());
+      const { get: getClient } = getFetchClient();
 
       try {
         const { data } = await getClient(requestURL, { cancelToken: source.token });
@@ -197,7 +196,6 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     rawQuery,
     redirectionLink,
     toggleNotification,
-    getClient,
   ]);
 
   const displayErrors = useCallback(
