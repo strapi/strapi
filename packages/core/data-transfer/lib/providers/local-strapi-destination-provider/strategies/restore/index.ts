@@ -116,7 +116,7 @@ const useResults = (
   const update = (count: number, key?: string) => {
     if (key) {
       if (!(key in results.aggregate)) {
-        throw new Error(`Results's update has been provided with an unknown key "${key}"`);
+        throw new Error(`Unknown key "${key}" provided in results update`);
       }
 
       results.aggregate[key].count += count;

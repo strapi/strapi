@@ -46,7 +46,9 @@ module.exports = async (opts) => {
     process.exit(1);
   }
 
-  const source = createSourceProvider();
+  const strapi = await createStrapiInstance();
+
+  const source = createSourceProvider(strapi);
   const destination = createDestinationProvider(opts);
 
   const engine = createTransferEngine(source, destination, {
@@ -99,15 +101,9 @@ module.exports = async (opts) => {
 /**
  * It creates a local strapi destination provider
  */
-const createSourceProvider = () => {
-  let strapi = null;
-
+const createSourceProvider = (strapi) => {
   return createLocalStrapiSourceProvider({
     async getStrapi() {
-      if (!strapi) {
-        strapi = await createStrapiInstance();
-      }
-
       return strapi;
     },
   });

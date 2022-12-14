@@ -1,6 +1,8 @@
 import { PassThrough, Transform, Readable, Writable } from 'stream';
 import * as path from 'path';
+import { extname } from 'path';
 import { isEmpty, uniq } from 'lodash/fp';
+import { diff as semverDiff } from 'semver';
 import type { Schema } from '@strapi/strapi';
 
 import type {
@@ -11,6 +13,7 @@ import type {
   ISourceProvider,
   ITransferEngine,
   ITransferEngineOptions,
+  TransferProgress,
   ITransferResults,
   Stream,
   TransferStage,
@@ -20,23 +23,8 @@ import type { Diff } from '../utils/json';
 
 import compareSchemas from '../strategies';
 import { filter, map } from '../utils/stream';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const semverDiff = require('semver/functions/diff');
 
 type SchemaMap = Record<string, Schema>;
-
-type TransferProgress = {
-  [key in TransferStage]?: {
-    count: number;
-    bytes: number;
-    aggregates?: {
-      [key: string]: {
-        count: number;
-        bytes: number;
-      };
-    };
-  };
-};
 
 class TransferEngine<
   S extends ISourceProvider = ISourceProvider,
@@ -415,7 +403,7 @@ class TransferEngine<
     const transform = this.#createStageTransformStream(stage);
     const tracker = this.#progressTracker(stage, {
       size: (value: IAsset) => value.stats.size,
-      key: (value: IAsset) => path.extname(value.filename),
+      key: (value: IAsset) => extname(value.filename),
     });
 
     await this.#transferStage({ stage, source, destination, transform, tracker });
