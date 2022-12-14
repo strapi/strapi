@@ -4,7 +4,7 @@ import type { ILink } from '../../../types';
 import { createLinkQuery } from '../shared/strapi/link';
 
 /**
- * Create a Duplex instance which will stream all the links from a Strapi instance
+ * Create a Readable which will stream all the links from a Strapi instance
  */
 export const createLinksStream = (strapi: Strapi.Strapi): Readable => {
   const uids = [...Object.keys(strapi.contentTypes), ...Object.keys(strapi.components)] as string[];
