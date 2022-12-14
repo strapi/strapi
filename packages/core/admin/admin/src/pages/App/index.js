@@ -25,7 +25,7 @@ import NotFoundPage from '../NotFoundPage';
 import UseCasePage from '../UseCasePage';
 import { getUID } from './utils';
 import routes from './utils/routes';
-import { useConfigurations } from '../../hooks';
+import { useConfigurations, useFetchClient } from '../../hooks';
 
 const AuthenticatedApp = lazy(() =>
   import(/* webpackChunkName: "Admin-authenticatedApp" */ '../../components/AuthenticatedApp')
@@ -40,6 +40,7 @@ function App() {
     hasAdmin: false,
   });
   const appInfo = useAppInfos();
+  const { get } = useFetchClient();
 
   const authRoutes = useMemo(() => {
     return makeUniqueRoutes(
@@ -88,7 +89,10 @@ function App() {
         if (uuid) {
           const {
             data: { data: properties },
-          } = await axios.get(`${strapi.backendURL}/admin/telemetry-properties`);
+          } = await get(`/admin/telemetry-properties`, {
+            // NOTE: needed because the interceptors of the fetchClient redirect to /login when receive a 401 and it would end up in an infinite loop when the user doesn't have a session.
+            validateStatus: (status) => status < 500,
+          });
 
           setTelemetryProperties(properties);
 
