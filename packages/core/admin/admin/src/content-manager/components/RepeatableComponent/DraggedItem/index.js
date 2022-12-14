@@ -159,7 +159,7 @@ const DraggedItem = ({
     }
   }, [isDragging, setIsDraggingSibling]);
 
-  // Moves focus to the 1st focusable element in AccordionContent once opend/new item added
+  // Moves focus to the 1st focusable element in AccordionContent once new item added (mounted with isOpen=true)
   useEffect(() => {
     if (isOpen) {
       const focusable = contentRef.current?.querySelector(
@@ -167,7 +167,8 @@ const DraggedItem = ({
       );
       focusable?.focus();
     }
-  }, [isOpen]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Effect in order to force a rerender after reordering the components
   // Since we are removing the Accordion when doing the DnD  we are losing the dragRef, therefore the replaced element cannot be dragged
