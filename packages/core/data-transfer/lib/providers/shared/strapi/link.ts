@@ -173,11 +173,19 @@ export const createLinkQuery = (strapi: Strapi.Strapi) => {
       const { kind, left, right } = link;
 
       const metadata = strapi.db.metadata.get(left.type);
-      const leftAttribute = metadata.attributes[left.field];
+      const attribute = metadata.attributes[left.field];
 
       const payload = {};
 
-      if (leftAttribute.joinTable) {
+      if (attribute.joinColumn) {
+        const joinColumnName = attribute.joinColumn.name;
+
+        await connection(metadata.tableName)
+          .where('id', left.ref)
+          .update({ [joinColumnName]: right.ref });
+      }
+
+      if (attribute.joinTable) {
         const {
           name,
           joinColumn,
@@ -185,7 +193,7 @@ export const createLinkQuery = (strapi: Strapi.Strapi) => {
           orderColumnName,
           inverseOrderColumnName,
           morphColumn,
-        } = leftAttribute.joinTable;
+        } = attribute.joinTable;
 
         if (joinColumn) {
           Object.assign(payload, { [joinColumn.name]: left.ref });
