@@ -159,6 +159,7 @@ const DraggedItem = ({
     }
   }, [isDragging, setIsDraggingSibling]);
 
+  // Moves focus to the 1st focusable element in AccordionContent once opend/new item added
   useEffect(() => {
     if (isOpen) {
       const focusable = contentRef.current?.querySelector(
@@ -166,7 +167,6 @@ const DraggedItem = ({
       );
       focusable?.focus();
     }
-    // We only focus on 1st focusable element in AccordionContent on mount with isOpen=true .i.e. new item
   }, [isOpen]);
 
   // Effect in order to force a rerender after reordering the components
