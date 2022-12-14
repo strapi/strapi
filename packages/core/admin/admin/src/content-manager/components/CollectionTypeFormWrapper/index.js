@@ -320,14 +320,14 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   }, [displayErrors, id, slug, dispatch]);
 
   const onPublish = useCallback(async () => {
+    const { post } = getFetchClient();
     try {
       trackUsageRef.current('willPublishEntry');
       const endPoint = getRequestUrl(`collection-types/${slug}/${id}/actions/publish`);
 
       dispatch(setStatus('publish-pending'));
 
-      const { data } = await axiosInstance.post(endPoint);
-      console.log('onPublish', endPoint);
+      const { data } = await post(endPoint);
 
       trackUsageRef.current('didPublishEntry');
 
