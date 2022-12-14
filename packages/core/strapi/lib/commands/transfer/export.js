@@ -75,8 +75,8 @@ module.exports = async (opts) => {
    */
   const engineOptions = {
     strategy: 'restore', // for an export to file, strategy will always be 'restore'
-    versionMatching: 'ignore', // for an export to file, versionMatching will always be skipped
-    schemasMatching: 'ignore', // for an export to file, schemaMatching will always be skipped
+    versionStrategy: 'ignore', // for an export to file, versionStrategy will always be skipped
+    schemaStrategy: 'ignore', // for an export to file, schemaStrategy will always be skipped
     exclude: opts.exclude,
   };
   const engine = createTransferEngine(source, destination, engineOptions);
