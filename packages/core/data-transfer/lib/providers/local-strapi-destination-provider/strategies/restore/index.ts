@@ -130,3 +130,4 @@ const useResults = (
 
 export * from './entities';
 export * from './configuration';
+export * from './links';

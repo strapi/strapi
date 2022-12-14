@@ -127,6 +127,21 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
     throw new Error(`Invalid strategy supplied: "${strategy}"`);
   }
+
+  async getLinksStream(): Promise<Writable> {
+    if (!this.strapi) {
+      throw new Error('Not able to stream links. Strapi instance not found');
+    }
+
+    const { strategy } = this.options;
+    const mapID = (uid: string, id: number): number | undefined => this.#entitiesMapper[uid]?.[id];
+
+    if (strategy === 'restore') {
+      return restore.createLinksWriteStream(mapID, this.strapi);
+    }
+
+    throw new Error(`Invalid strategy supplied: "${strategy}"`);
+  }
 }
 
 export const createLocalStrapiDestinationProvider = (

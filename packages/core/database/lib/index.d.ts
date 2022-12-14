@@ -1,3 +1,4 @@
+import { Knex } from 'knex';
 import { LifecycleProvider } from './lifecycles';
 import { MigrationProvider } from './migrations';
 import { SchemaProvider } from './schema';
@@ -158,6 +159,8 @@ export interface Database {
   migrations: MigrationProvider;
   entityManager: EntityManager;
   queryBuilder: any;
+  metadata: any;
+  connection: Knex;
 
   query<T extends keyof AllTypes>(uid: T): QueryFromContentType<T>;
 }

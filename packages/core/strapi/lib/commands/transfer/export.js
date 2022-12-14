@@ -53,6 +53,16 @@ module.exports = async (opts) => {
     strategy: 'restore', // for an export to file, strategy will always be 'restore'
     versionMatching: 'ignore', // for an export to file, versionMatching will always be skipped
     transforms: {
+      links: [
+        {
+          filter(link) {
+            return (
+              !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.left.type) &&
+              !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.right.type)
+            );
+          },
+        },
+      ],
       entities: [
         {
           filter(entity) {
