@@ -62,7 +62,7 @@ const TypographyMaxWidth = styled(Typography)`
 const ConfigureTheViewButton = styled(Box)`
   svg {
     path {
-      fill: ${({ theme }) => theme.colors.neutral900};
+      fill: ${({ theme }) => theme.colors.neutral500};
     }
   }
 `;
