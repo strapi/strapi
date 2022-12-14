@@ -21,7 +21,7 @@ const filePath = './test-file';
 jest.mock('../../../encryption/encrypt', () => {
   return {
     __esModule: true,
-    createEncryptionCipher(key: string) {},
+    createEncryptionCipher() {},
   };
 });
 
@@ -56,7 +56,7 @@ describe('Local File Destination Provider', () => {
 
       await provider.bootstrap();
 
-      expect(provider.results.file!.path).toEqual(`${filePath}.tar.gz`);
+      expect(provider.results.file?.path).toEqual(`${filePath}.tar.gz`);
     });
 
     it('Adds .enc extension to the archive path when encryption is enabled', async () => {
@@ -69,7 +69,7 @@ describe('Local File Destination Provider', () => {
 
       await provider.bootstrap();
 
-      expect(provider.results.file!.path).toEqual(`${filePath}.tar.enc`);
+      expect(provider.results.file?.path).toEqual(`${filePath}.tar.enc`);
     });
 
     it('Adds .gz.enc extension to the archive path when encryption and compression are enabled', async () => {
@@ -82,7 +82,7 @@ describe('Local File Destination Provider', () => {
 
       await provider.bootstrap();
 
-      expect(provider.results.file!.path).toEqual(`${filePath}.tar.gz.enc`);
+      expect(provider.results.file?.path).toEqual(`${filePath}.tar.gz.enc`);
     });
 
     it('Adds the compression step to the stream chain when compression is enabled', async () => {

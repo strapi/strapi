@@ -1,5 +1,6 @@
 import type { GetAttributesValues, RelationsType } from '@strapi/strapi';
 import type { SchemaUID } from '@strapi/strapi/lib/types/utils';
+import type { Readable } from 'stream';
 
 export interface IMetadata {
   strapi?: {
@@ -18,7 +19,7 @@ export interface IMetadata {
  * Common TransferEngine format to represent a Strapi entity
  * @template T The schema UID this entity represents
  */
-export interface IEntity<T extends SchemaUID | string = string> {
+export interface IEntity<T extends SchemaUID | string = SchemaUID> {
   /**
    * UID of the parent type (content-type, component, etc...)
    */
@@ -28,7 +29,7 @@ export interface IEntity<T extends SchemaUID | string = string> {
    * Reference of the entity.
    * Might be deprecated and replaced by a "ref" or "reference" property in the future
    */
-  id: number | string;
+  id: number;
 
   /**
    * The entity data (attributes value)
@@ -125,10 +126,11 @@ interface ICircularLink extends IDefaultLink {
 /**
  * Strapi configurations
  */
-interface IConfiguration<T = unknown> {
+export interface IConfiguration<T = unknown> {
   type: 'core-store' | 'webhook';
   value: T;
 }
+
 export interface IAsset {
   filename: string;
   filepath: string;

@@ -29,7 +29,7 @@
   ],
   "scripts": {
     "prepare": "husky install",
-    "setup": "yarn clean && yarn && yarn build",
+    "setup": "yarn && yarn clean && yarn build",
     "clean": "lerna run --stream clean --no-private",
     "watch": "lerna run --stream watch --no-private",
     "build": "lerna run --stream build --no-private",
@@ -82,7 +82,7 @@
     "fs-extra": "10.1.0",
     "get-port": "5.1.1",
     "glob": "7.2.3",
-    "husky": "8.0.1",
+    "husky": "8.0.2",
     "inquirer": "8.2.4",
     "jest": "29.0.3",
     "jest-circus": "29.0.3",

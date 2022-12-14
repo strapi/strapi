@@ -1,5 +1,5 @@
 import { Writable } from 'stream';
-import path from 'path';
+import { join } from 'path';
 import tar from 'tar-stream';
 
 /**
@@ -9,7 +9,7 @@ import tar from 'tar-stream';
 export const createFilePathFactory =
   (type: string) =>
   (fileIndex = 0): string => {
-    return path.join(
+    return join(
       // "{type}" directory
       type,
       // "${type}_XXXXX.jsonl" file

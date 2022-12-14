@@ -1,6 +1,6 @@
 import type { Readable } from 'stream';
 
-import fs from 'fs';
+import fs from 'fs-extra';
 import zip from 'zlib';
 import tar from 'tar';
 import path from 'path';
@@ -10,8 +10,8 @@ import { pipeline, PassThrough } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
 import type { IAsset, IMetadata, ISourceProvider, ProviderType } from '../../../types';
 
-import { collect } from '../../utils';
 import { createDecryptionCipher } from '../../encryption';
+import * as utils from '../../utils';
 
 type StreamItemArray = Parameters<typeof chain>[0];
 
@@ -62,15 +62,13 @@ class LocalFileSourceProvider implements ISourceProvider {
   /**
    * Pre flight checks regarding the provided options (making sure that the provided path is correct, etc...)
    */
-  bootstrap() {
+  async bootstrap() {
     const { path: filePath } = this.options.file;
-    const isValidBackupPath = fs.existsSync(filePath);
-
-    // Check if the provided path exists
-    if (!isValidBackupPath) {
-      throw new Error(
-        `Invalid backup file path provided. "${filePath}" does not exist on the filesystem.`
-      );
+    try {
+      // This is only to show a nicer error, it doesn't ensure the file will still exist when we try to open it later
+      await fs.access(filePath, fs.constants.R_OK);
+    } catch (e) {
+      throw new Error(`Can't access file "${filePath}".`);
     }
   }
 
@@ -82,29 +80,29 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   async getSchemas() {
-    const schemas = await collect(this.streamSchemas() as Readable);
+    const schemas = await utils.stream.collect(this.streamSchemas());
 
     return keyBy('uid', schemas);
   }
 
-  streamEntities(): NodeJS.ReadableStream {
+  streamEntities(): Readable {
     return this.#streamJsonlDirectory('entities');
   }
 
-  streamSchemas(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream> {
+  streamSchemas(): Readable {
     return this.#streamJsonlDirectory('schemas');
   }
 
-  streamLinks(): NodeJS.ReadableStream {
+  streamLinks(): Readable {
     return this.#streamJsonlDirectory('links');
   }
 
-  streamConfiguration(): NodeJS.ReadableStream {
+  streamConfiguration(): Readable {
     // NOTE: TBD
     return this.#streamJsonlDirectory('configuration');
   }
 
-  streamAssets(): NodeJS.ReadableStream {
+  streamAssets(): Readable | Promise<Readable> {
     const inStream = this.#getBackupStream();
     const outStream = new PassThrough({ objectMode: true });
 
@@ -127,7 +125,7 @@ class LocalFileSourceProvider implements ISourceProvider {
               filename: file,
               filepath: filePath,
               stats: { size },
-              stream: entry,
+              stream: entry as unknown as Readable,
             };
             outStream.write(asset);
           },
@@ -142,8 +140,13 @@ class LocalFileSourceProvider implements ISourceProvider {
   #getBackupStream() {
     const { file, encryption, compression } = this.options;
 
-    const fileStream = fs.createReadStream(file.path);
-    const streams: StreamItemArray = [fileStream];
+    const streams: StreamItemArray = [];
+
+    try {
+      streams.push(fs.createReadStream(file.path));
+    } catch (e) {
+      throw new Error(`Could not read backup file path provided at "${this.options.file.path}"`);
+    }
 
     if (encryption.enabled && encryption.key) {
       streams.push(createDecryptionCipher(encryption.key));
@@ -184,7 +187,7 @@ class LocalFileSourceProvider implements ISourceProvider {
               // JSONL parser to read the data chunks one by one (line by line)
               parser(),
               // The JSONL parser returns each line as key/value
-              (line: { key: string; value: any }) => line.value,
+              (line: { key: string; value: object }) => line.value,
             ];
 
             entry
@@ -207,10 +210,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     return outStream;
   }
 
-  async #parseJSONFile<T extends Record<string, any> = any>(
-    fileStream: NodeJS.ReadableStream,
-    filePath: string
-  ): Promise<T> {
+  async #parseJSONFile<T extends object>(fileStream: Readable, filePath: string): Promise<T> {
     return new Promise<T>((resolve, reject) => {
       pipeline(
         [

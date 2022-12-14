@@ -1,10 +1,11 @@
-import * as path from 'path';
+import { join } from 'path';
 import { cloneDeep } from 'lodash/fp';
 import { Readable, Writable } from 'stream-chain';
 import type { Schema } from '@strapi/strapi';
 import { createTransferEngine } from '..';
 import type {
   IAsset,
+  IConfiguration,
   IDestinationProvider,
   IEntity,
   ILink,
@@ -20,7 +21,7 @@ import {
 const getMockSourceStream = (data: Iterable<unknown>) => Readable.from(data);
 
 const getEntitiesMockSourceStream = (
-  data: Iterable<IEntity> = [
+  data: Iterable<IEntity<'foo' | 'bar'>> = [
     { id: 1, type: 'foo', data: { foo: 'bar' } },
     { id: 2, type: 'bar', data: { bar: 'foo' } },
   ]
@@ -47,13 +48,13 @@ const getAssetsMockSourceStream = (
   data: Iterable<IAsset> = [
     {
       filename: 'foo.jpg',
-      filepath: path.join(__dirname, 'foo.jpg'),
+      filepath: join(__dirname, 'foo.jpg'),
       stats: { size: 24 },
       stream: Readable.from([1, 2, 3]),
     },
     {
       filename: 'bar.jpg',
-      filepath: path.join(__dirname, 'bar.jpg'),
+      filepath: join(__dirname, 'bar.jpg'),
       stats: { size: 48 },
       stream: Readable.from([4, 5, 6, 7, 8, 9]),
     },
@@ -240,29 +241,25 @@ const createSource = (streamData?: {
   assets?: IAsset[];
   entities?: IEntity[];
   links?: ILink[];
-  configuration?: any[];
+  configuration?: IConfiguration[];
   schemas?: Schema[];
 }): ISourceProvider => {
   return {
     type: 'source',
     name: 'completeSource',
-    getMetadata: jest.fn().mockResolvedValue(metadata) as any,
-    getSchemas: jest.fn().mockResolvedValue(schemas) as any,
+    getMetadata: jest.fn().mockResolvedValue(metadata),
+    getSchemas: jest.fn().mockResolvedValue(schemas),
 
-    bootstrap: jest.fn() as any,
-    close: jest.fn() as any,
+    bootstrap: jest.fn(),
+    close: jest.fn(),
 
-    streamEntities: jest
-      .fn()
-      .mockResolvedValue(getEntitiesMockSourceStream(streamData?.entities)) as any,
-    streamLinks: jest.fn().mockResolvedValue(getLinksMockSourceStream(streamData?.links)) as any,
-    streamAssets: jest.fn().mockResolvedValue(getAssetsMockSourceStream(streamData?.assets)) as any,
+    streamEntities: jest.fn().mockResolvedValue(getEntitiesMockSourceStream(streamData?.entities)),
+    streamLinks: jest.fn().mockResolvedValue(getLinksMockSourceStream(streamData?.links)),
+    streamAssets: jest.fn().mockResolvedValue(getAssetsMockSourceStream(streamData?.assets)),
     streamConfiguration: jest
       .fn()
-      .mockResolvedValue(getConfigurationMockSourceStream(streamData?.configuration)) as any,
-    streamSchemas: jest
-      .fn()
-      .mockReturnValue(getSchemasMockSourceStream(streamData?.schemas)) as any,
+      .mockResolvedValue(getConfigurationMockSourceStream(streamData?.configuration)),
+    streamSchemas: jest.fn().mockReturnValue(getSchemasMockSourceStream(streamData?.schemas)),
   };
 };
 
@@ -270,17 +267,17 @@ const createDestination = () => {
   return {
     type: 'destination',
     name: 'completeDestination',
-    getMetadata: jest.fn().mockResolvedValue(metadata) as any,
-    getSchemas: jest.fn().mockResolvedValue(schemas) as any,
+    getMetadata: jest.fn().mockResolvedValue(metadata),
+    getSchemas: jest.fn().mockResolvedValue(schemas),
 
-    bootstrap: jest.fn() as any,
-    close: jest.fn() as any,
+    bootstrap: jest.fn(),
+    close: jest.fn(),
 
-    getEntitiesStream: jest.fn().mockResolvedValue(getMockDestinationStream()) as any,
-    getLinksStream: jest.fn().mockResolvedValue(getMockDestinationStream()) as any,
-    getAssetsStream: jest.fn().mockResolvedValue(getMockDestinationStream()) as any,
-    getConfigurationStream: jest.fn().mockResolvedValue(getMockDestinationStream()) as any,
-    getSchemasStream: jest.fn().mockResolvedValue(getMockDestinationStream()) as any,
+    getEntitiesStream: jest.fn().mockResolvedValue(getMockDestinationStream()),
+    getLinksStream: jest.fn().mockResolvedValue(getMockDestinationStream()),
+    getAssetsStream: jest.fn().mockResolvedValue(getMockDestinationStream()),
+    getConfigurationStream: jest.fn().mockResolvedValue(getMockDestinationStream()),
+    getSchemasStream: jest.fn().mockResolvedValue(getMockDestinationStream()),
   } as IDestinationProvider;
 };
 
@@ -290,15 +287,15 @@ describe('Transfer engine', () => {
   const minimalSource = {
     type: 'source',
     name: 'minimalSource',
-    getMetadata: jest.fn() as any,
-    getSchemas: jest.fn() as any,
+    getMetadata: jest.fn(),
+    getSchemas: jest.fn(),
   } as ISourceProvider;
 
   const minimalDestination = {
     type: 'destination',
     name: 'minimalDestination',
-    getMetadata: jest.fn() as any,
-    getSchemas: jest.fn() as any,
+    getMetadata: jest.fn(),
+    getSchemas: jest.fn(),
   } as IDestinationProvider;
 
   const defaultOptions = {
@@ -397,7 +394,7 @@ describe('Transfer engine', () => {
       const engine = createTransferEngine(source, completeDestination, defaultOptions);
 
       let calls = 0;
-      engine.progress.stream.on('progress', ({ stage, data }) => {
+      engine.progress.stream.on('progress', ({ data }) => {
         expect(data).toMatchObject(engine.progress.data);
         calls += 1;
       });
@@ -447,7 +444,11 @@ describe('Transfer engine', () => {
         test('differing nested field fails', async () => {
           const destination = createDestination();
           const fakeSchema = cloneDeep(schemas);
-          fakeSchema[0].attributes.action!.minLength = 2;
+
+          if (fakeSchema[0].attributes.action) {
+            fakeSchema[0].attributes.action.minLength = 2;
+          }
+
           destination.getSchemas = jest.fn().mockResolvedValue(fakeSchema);
           const engine = createTransferEngine(completeSource, destination, engineOptions);
           expect(

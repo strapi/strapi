@@ -1,10 +1,10 @@
-import fs from 'fs-extra';
+import { rm, createWriteStream } from 'fs-extra';
 import tar from 'tar-stream';
 import path from 'path';
 import zlib from 'zlib';
-import { Readable } from 'stream';
 import { stringer } from 'stream-json/jsonl/Stringer';
-import { chain, Writable } from 'stream-chain';
+import { chain } from 'stream-chain';
+import { Readable, Writable } from 'stream';
 
 import { createEncryptionCipher } from '../../encryption/encrypt';
 import type {
@@ -86,18 +86,6 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return this;
   }
 
-  #getDataTransformers(options: { jsonl?: boolean } = {}) {
-    const { jsonl = true } = options;
-    const transforms: Stream[] = [];
-
-    if (jsonl) {
-      // Convert to stringified JSON lines
-      transforms.push(stringer());
-    }
-
-    return transforms;
-  }
-
   createGzip(): zlib.Gzip {
     return zlib.createGzip();
   }
@@ -111,7 +99,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
     this.#archive.stream = tar.pack();
 
-    const outStream = fs.createWriteStream(this.#archivePath);
+    const outStream = createWriteStream(this.#archivePath);
 
     const archiveTransforms: Stream[] = [];
 
@@ -147,7 +135,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
   async rollback(): Promise<void> {
     await this.close();
-    fs.rmSync(this.#archivePath, { force: true });
+    await rm(this.#archivePath, { force: true });
   }
 
   getMetadata() {
@@ -193,7 +181,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return chain([stringer(), entryStream]);
   }
 
-  getEntitiesStream(): NodeJS.WritableStream {
+  getEntitiesStream(): Writable {
     if (!this.#archive.stream) {
       throw new Error('Archive stream is unavailable');
     }
@@ -209,7 +197,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return chain([stringer(), entryStream]);
   }
 
-  getLinksStream(): NodeJS.WritableStream {
+  getLinksStream(): Writable {
     if (!this.#archive.stream) {
       throw new Error('Archive stream is unavailable');
     }
@@ -225,7 +213,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return chain([stringer(), entryStream]);
   }
 
-  getConfigurationStream(): NodeJS.WritableStream {
+  getConfigurationStream(): Writable {
     if (!this.#archive.stream) {
       throw new Error('Archive stream is unavailable');
     }
@@ -241,7 +229,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return chain([stringer(), entryStream]);
   }
 
-  getAssetsStream(): NodeJS.WritableStream {
+  getAssetsStream(): Writable {
     const { stream: archiveStream } = this.#archive;
 
     if (!archiveStream) {

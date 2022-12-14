@@ -3,6 +3,7 @@
 const chalk = require('chalk');
 const Table = require('cli-table3');
 const { readableBytes } = require('../utils');
+const strapi = require('../../index');
 
 const pad = (n) => {
   return (n < 10 ? '0' : '') + String(n);
@@ -67,8 +68,27 @@ const buildTransferTable = (resultData) => {
   return table;
 };
 
+const DEFAULT_IGNORED_CONTENT_TYPES = [
+  'admin::permission',
+  'admin::user',
+  'admin::role',
+  'admin::api-token',
+  'admin::api-token-permission',
+];
+
+const createStrapiInstance = async (logLevel = 'error') => {
+  const appContext = await strapi.compile();
+  const app = strapi(appContext);
+
+  app.log.level = logLevel;
+
+  return app.load();
+};
+
 module.exports = {
   buildTransferTable,
   getDefaultExportName,
   yyyymmddHHMMSS,
+  DEFAULT_IGNORED_CONTENT_TYPES,
+  createStrapiInstance,
 };

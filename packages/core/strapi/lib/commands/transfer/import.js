@@ -11,7 +11,7 @@ const { isObject } = require('lodash/fp');
 const path = require('path');
 
 const strapi = require('../../index');
-const { buildTransferTable } = require('./utils');
+const { buildTransferTable, DEFAULT_IGNORED_CONTENT_TYPES } = require('./utils');
 
 /**
  * @typedef {import('@strapi/data-transfer').ILocalFileSourceProviderOptions} ILocalFileSourceProviderOptions
@@ -38,25 +38,13 @@ module.exports = async (opts) => {
    */
   const strapiInstance = await strapi(await strapi.compile()).load();
 
-  const exceptions = [
-    'admin::permission',
-    'admin::user',
-    'admin::role',
-    'admin::api-token',
-    'admin::api-token-permission',
-  ];
-  const contentTypes = Object.values(strapiInstance.contentTypes);
-  const contentTypesToDelete = contentTypes.filter(
-    (contentType) => !exceptions.includes(contentType.uid)
-  );
   const destinationOptions = {
     async getStrapi() {
       return strapiInstance;
     },
     strategy: opts.conflictStrategy,
     restore: {
-      contentTypes: contentTypesToDelete,
-      uidsOfModelsToDelete: ['webhook', 'strapi::core-store'],
+      entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },
     },
   };
   const destination = createLocalStrapiDestinationProvider(destinationOptions);
@@ -68,6 +56,13 @@ module.exports = async (opts) => {
     strategy: opts.conflictStrategy,
     versionMatching: opts.schemaComparison,
     exclude: opts.exclude,
+    rules: {
+      entities: [
+        {
+          filter: (entity) => !DEFAULT_IGNORED_CONTENT_TYPES.includes(entity.type),
+        },
+      ],
+    },
   };
   const engine = createTransferEngine(source, destination, engineOptions);
 
@@ -81,7 +76,8 @@ module.exports = async (opts) => {
     logger.info('Import process has been completed successfully!');
     process.exit(0);
   } catch (e) {
-    logger.error(`Import process failed unexpectedly: ${e.message}`);
+    logger.error('Import process failed unexpectedly:');
+    logger.error(e);
     process.exit(1);
   }
 };

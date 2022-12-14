@@ -40,7 +40,7 @@ export const RelationInputDataManager = ({
   const { connectRelation, disconnectRelation, loadRelation, modifiedData, slug, initialData } =
     useCMEditViewDataManager();
 
-  const relationsFromModifiedData = get(modifiedData, name) ?? [];
+  const relationsFromModifiedData = get(modifiedData, name, []);
 
   const currentLastPage = Math.ceil(get(initialData, name, []).length / RELATIONS_TO_DISPLAY);
 
