@@ -254,7 +254,6 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         dispatch(setStatus('submit-pending'));
 
         const { data } = await post(endPoint, body);
-        console.log('onPost new', endPoint, data);
 
         trackUsageRef.current('didCreateEntry', trackerProperty);
         toggleNotification({
@@ -297,6 +296,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   );
 
   const onDraftRelationCheck = useCallback(async () => {
+    const { get: getClient } = getFetchClient();
     try {
       trackUsageRef.current('willCheckDraftRelations');
 
@@ -305,8 +305,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       );
       dispatch(setStatus('draft-relation-check-pending'));
 
-      const numberOfDraftRelations = await axiosInstance.get(endPoint);
-      console.log('onDraftRelationCheck', endPoint);
+      const numberOfDraftRelations = await getClient(endPoint);
       trackUsageRef.current('didCheckDraftRelations');
 
       dispatch(setStatus('resolved'));
