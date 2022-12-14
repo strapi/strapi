@@ -1,11 +1,11 @@
-import {
+import type {
   IDestinationProviderTransferResults,
   IProviderTransferResults,
   ISourceProviderTransferResults,
   Stream,
 } from './utils';
-import { IMetadata } from './common-entities';
-import { PipelineSource, PipelineDestination } from 'stream';
+import type { IMetadata } from './common-entities';
+import type { PipelineSource, PipelineDestination } from 'stream';
 
 type ProviderType = 'source' | 'destination';
 

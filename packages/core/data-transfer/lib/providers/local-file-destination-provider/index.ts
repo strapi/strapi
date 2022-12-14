@@ -1,4 +1,4 @@
-import fs from 'fs-extra';
+import { rm, createWriteStream } from 'fs-extra';
 import tar from 'tar-stream';
 import path from 'path';
 import zlib from 'zlib';
@@ -111,7 +111,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
     this.#archive.stream = tar.pack();
 
-    const outStream = fs.createWriteStream(this.#archivePath);
+    const outStream = createWriteStream(this.#archivePath);
 
     const archiveTransforms: Stream[] = [];
 
@@ -147,7 +147,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
   async rollback(): Promise<void> {
     await this.close();
-    fs.rmSync(this.#archivePath, { force: true });
+    await rm(this.#archivePath, { force: true });
   }
 
   getMetadata() {

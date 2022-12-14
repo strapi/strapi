@@ -1,6 +1,7 @@
-import { PassThrough, Stream } from 'stream-chain';
-import * as path from 'path';
+import { PassThrough } from 'stream-chain';
+import { extname } from 'path';
 import { isEmpty, uniq } from 'lodash/fp';
+import { diff as semverDiff } from 'semver';
 import type { Schema } from '@strapi/strapi';
 
 import type {
@@ -17,8 +18,6 @@ import type {
 } from '../../types';
 
 import compareSchemas from '../strategies';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const semverDiff = require('semver/functions/diff');
 
 type TransferProgress = {
   [key in TransferStage]?: {
@@ -436,7 +435,7 @@ class TransferEngine<
         .pipe(
           this.#progressTracker(stageName, {
             size: (value: IAsset) => value.stats.size,
-            key: (value: IAsset) => path.extname(value.filename),
+            key: (value: IAsset) => extname(value.filename),
           })
         )
         .pipe(outStream);

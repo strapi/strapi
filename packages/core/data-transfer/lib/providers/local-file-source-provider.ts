@@ -1,6 +1,6 @@
 import type { Readable } from 'stream';
 
-import fs from 'fs';
+import fs from 'fs-extra';
 import zip from 'zlib';
 import tar from 'tar';
 import { keyBy } from 'lodash/fp';
@@ -61,15 +61,13 @@ class LocalFileSourceProvider implements ISourceProvider {
   /**
    * Pre flight checks regarding the provided options (making sure that the provided path is correct, etc...)
    */
-  bootstrap() {
+  async bootstrap() {
     const { path } = this.options.file;
-    const isValidBackupPath = fs.existsSync(path);
-
-    // Check if the provided path exists
-    if (!isValidBackupPath) {
-      throw new Error(
-        `Invalid backup file path provided. "${path}" does not exist on the filesystem.`
-      );
+    try {
+      // This is only to show a nicer error, it doesn't ensure the file will still exist when we try to open it later
+      await fs.access(path, fs.constants.R_OK);
+    } catch (e) {
+      throw new Error(`Can't access file "${path}".`);
     }
   }
 
@@ -106,8 +104,13 @@ class LocalFileSourceProvider implements ISourceProvider {
   #getBackupStream() {
     const { file, encryption, compression } = this.options;
 
-    const fileStream = fs.createReadStream(file.path);
-    const streams: StreamItemArray = [fileStream];
+    const streams: StreamItemArray = [];
+
+    try {
+      streams.push(fs.createReadStream(file.path));
+    } catch (e) {
+      throw new Error(`Could not read backup file path provided at "${this.options.file.path}"`);
+    }
 
     if (encryption.enabled && encryption.key) {
       streams.push(createDecryptionCipher(encryption.key));

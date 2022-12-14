@@ -1,7 +1,7 @@
-import { SchemaUID } from '@strapi/strapi/lib/types/utils';
-import { IEntity, ILink } from './common-entities';
-import { ITransferRule } from './utils';
-import { ISourceProvider, IDestinationProvider } from './provider';
+import type { SchemaUID } from '@strapi/strapi/lib/types/utils';
+import type { IEntity, ILink } from './common-entities';
+import type { ITransferRule } from './utils';
+import type { ISourceProvider, IDestinationProvider } from './provider';
 
 /**
  * Defines the capabilities and properties of the transfer engine
