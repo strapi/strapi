@@ -629,6 +629,143 @@ describe('Relations', () => {
     });
   });
 
+  describe('Reorder an entity relations', () => {
+    test('Reorder single relation', async () => {
+      const createdShop = await createEntry(
+        'shop',
+        {
+          name: 'Cazotte Shop',
+          products_om: { connect: [id1, id2, id3] },
+          products_mm: { connect: [id1, id2, id3] },
+          products_mw: { connect: [id1, id2, id3] },
+          myCompo: {
+            compo_products_mw: { connect: [id1, id2, id3] },
+          },
+        },
+        ['myCompo']
+      );
+
+      const relationToChange = [{ id: id1, position: { before: id3 } }];
+      const updatedShop = await updateEntry('shop', createdShop.id, {
+        name: 'Cazotte Shop',
+        products_om: { connect: relationToChange },
+        products_mm: { connect: relationToChange },
+        products_mw: { connect: relationToChange },
+        myCompo: {
+          id: createdShop.myCompo.id,
+          compo_products_mw: { connect: relationToChange },
+        },
+      });
+
+      let res;
+      const expectedRelations = [{ id: id3 }, { id: id1 }, { id: id2 }];
+
+      res = await getRelations('default.compo', 'compo_products_mw', updatedShop.myCompo.id);
+      expect(res.results).toMatchObject(expectedRelations);
+
+      res = await getRelations('api::shop.shop', 'products_mm', updatedShop.id);
+      expect(res.results).toMatchObject(expectedRelations);
+
+      res = await getRelations('api::shop.shop', 'products_mw', updatedShop.id);
+      expect(res.results).toMatchObject(expectedRelations);
+
+      res = await getRelations('api::shop.shop', 'products_om', updatedShop.id);
+      expect(res.results).toMatchObject(expectedRelations);
+    });
+
+    test('Reorder multiple relations', async () => {
+      const createdShop = await createEntry(
+        'shop',
+        {
+          name: 'Cazotte Shop',
+          products_om: { connect: [id1, id2, id3] },
+          products_mm: { connect: [id1, id2, id3] },
+          products_mw: { connect: [id1, id2, id3] },
+          myCompo: {
+            compo_products_mw: { connect: [id1, id2, id3] },
+          },
+        },
+        ['myCompo']
+      );
+
+      const relationToChange = [
+        { id: id1, position: { end: true } },
+        { id: id3, position: { start: true } },
+        { id: id2, position: { after: id1 } },
+      ];
+      const updatedShop = await updateEntry('shop', createdShop.id, {
+        name: 'Cazotte Shop',
+        products_om: { connect: relationToChange },
+        products_mm: { connect: relationToChange },
+        products_mw: { connect: relationToChange },
+        myCompo: {
+          id: createdShop.myCompo.id,
+          compo_products_mw: { connect: relationToChange },
+        },
+      });
+
+      let res;
+      const expectedRelations = [{ id: id2 }, { id: id1 }, { id: id3 }];
+
+      res = await getRelations('default.compo', 'compo_products_mw', updatedShop.myCompo.id);
+      expect(res.results).toMatchObject(expectedRelations);
+
+      res = await getRelations('api::shop.shop', 'products_mm', updatedShop.id);
+      expect(res.results).toMatchObject(expectedRelations);
+
+      res = await getRelations('api::shop.shop', 'products_mw', updatedShop.id);
+      expect(res.results).toMatchObject(expectedRelations);
+
+      res = await getRelations('api::shop.shop', 'products_om', updatedShop.id);
+      expect(res.results).toMatchObject(expectedRelations);
+    });
+
+    test('Invalid reorder with non-strict mode should not give an error', async () => {
+      const createdShop = await createEntry(
+        'shop',
+        {
+          name: 'Cazotte Shop',
+          products_om: { connect: [id1, id2] },
+          products_mm: { connect: [id1, id2] },
+          products_mw: { connect: [id1, id2] },
+          myCompo: {
+            compo_products_mw: { connect: [id1, id2] },
+          },
+        },
+        ['myCompo']
+      );
+
+      const relationToChange = [
+        { id: id1, position: { before: id3 } }, // id3 does not exist, should place it at the end
+      ];
+      const updatedShop = await updateEntry('shop', createdShop.id, {
+        name: 'Cazotte Shop',
+        products_om: { options: { strictConnect: false }, connect: relationToChange },
+        products_mm: { options: { strictConnect: false }, connect: relationToChange },
+        products_mw: { options: { strictConnect: false }, connect: relationToChange },
+        myCompo: {
+          id: createdShop.myCompo.id,
+          compo_products_mw: { options: { strictConnect: false }, connect: relationToChange },
+        },
+      });
+
+      let res;
+      const expectedRelations = [{ id: id1 }, { id: id2 }];
+
+      res = await getRelations('default.compo', 'compo_products_mw', updatedShop.myCompo.id);
+      expect(res.results).toMatchObject(expectedRelations);
+
+      res = await getRelations('api::shop.shop', 'products_mm', updatedShop.id);
+      expect(res.results).toMatchObject(expectedRelations);
+
+      res = await getRelations('api::shop.shop', 'products_mw', updatedShop.id);
+      expect(res.results).toMatchObject(expectedRelations);
+
+      res = await getRelations('api::shop.shop', 'products_om', updatedShop.id);
+      expect(res.results).toMatchObject(expectedRelations);
+    });
+  });
+
   describe('Disconnect entity relations', () => {
     describe.each([
       ['directly in the array ([1, 2, 3])', 'object'],
