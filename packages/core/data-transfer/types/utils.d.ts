@@ -19,10 +19,23 @@ type Stream = Readable | Writable | Duplex | Transform;
 
 export type TransferStage = 'entities' | 'links' | 'assets' | 'schemas' | 'configuration';
 
+export type TransferProgress = {
+  [key in TransferStage]?: {
+    count: number;
+    bytes: number;
+    aggregates?: {
+      [key: string]: {
+        count: number;
+        bytes: number;
+      };
+    };
+  };
+};
+
 export interface ITransferResults<S extends ISourceProvider, D extends IDestinationProvider> {
   source?: S['results'];
   destination?: D['results'];
-  engine?: unknown;
+  engine?: TransferProgress;
 }
 
 // There aren't currently any universal results provided but there likely will be in the future, so providers that have their own results should extend from these to be safe

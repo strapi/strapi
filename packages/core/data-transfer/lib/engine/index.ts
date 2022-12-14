@@ -11,6 +11,7 @@ import type {
   ISourceProvider,
   ITransferEngine,
   ITransferEngineOptions,
+  TransferProgress,
   ITransferResults,
   Stream,
   TransferStage,
@@ -24,19 +25,6 @@ import { filter, map } from '../utils/stream';
 const semverDiff = require('semver/functions/diff');
 
 type SchemaMap = Record<string, Schema>;
-
-type TransferProgress = {
-  [key in TransferStage]?: {
-    count: number;
-    bytes: number;
-    aggregates?: {
-      [key: string]: {
-        count: number;
-        bytes: number;
-      };
-    };
-  };
-};
 
 class TransferEngine<
   S extends ISourceProvider = ISourceProvider,
