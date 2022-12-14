@@ -55,6 +55,7 @@ const Inputs = ({ label, onChange, options, type, value }) => {
         onClear={() => onChange(null)}
         value={value ? new Date(value) : null}
         selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}
+        selectButtonTitle={formatMessage({ id: 'selectButtonTitle', defaultMessage: 'Select' })}
       />
     );
   }

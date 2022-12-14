@@ -21,6 +21,7 @@ const FilterValueInput = ({ label, onChange, options, type, value }) => {
         onClear={() => onChange('')}
         value={value ? new Date(value) : null}
         selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}
+        selectButtonTitle={formatMessage({ id: 'selectButtonTitle', defaultMessage: 'Select' })}
       />
     );
   }
