@@ -14,11 +14,7 @@ const inquirer = require('inquirer');
 const program = new Command();
 
 const packageJSON = require('../package.json');
-const {
-  parseInputList,
-  promptEncryptionKey,
-  confirmKeyValue,
-} = require('../lib/commands/utils/commander');
+const { promptEncryptionKey, confirmKeyValue } = require('../lib/commands/utils/commander');
 
 const checkCwdIsStrapiApp = (name) => {
   const logErrorAndExit = () => {
@@ -298,32 +294,6 @@ program
 program
   .command('import')
   .description('Import data from file to Strapi')
-  .addOption(
-    new Option(
-      '--conflictStrategy <conflictStrategy>',
-      'Which strategy to use for ID conflicts. "restore" deletes all existing data and replaces it with data being restored.'
-    )
-      .choices(['restore'])
-      .default('restore')
-  )
-  .addOption(
-    new Option(
-      '--schemaStrategy <schemaStrategy>',
-      'exact requires schemas to be identical, strict requires all content types to exist in both but allows some non-structural fields to differ',
-      parseInputList
-    )
-      .choices(['exact', 'strict']) // 'ignore' is also a possible option in the transfer engine, but we don't provide it in the CLI at this time
-      .default('exact')
-  )
-  .addOption(
-    new Option(
-      '--versionStrategy <versionStrategy>',
-      'exact requires schemas to be identical, strict requires all content types to exist in both but allows some non-structural fields to differ',
-      parseInputList
-    )
-      .choices(['exact', 'major', 'minor', 'patch', 'ignore'])
-      .default('exact')
-  )
   .requiredOption(
     '-f, --file <file>',
     'path and filename to the Strapi export file you want to import'

@@ -65,9 +65,9 @@ module.exports = async (opts) => {
    * Configure and run the transfer engine
    */
   const engineOptions = {
-    strategy: opts.conflictStrategy,
-    versionStrategy: opts.versionStrategy,
-    schemaStrategy: opts.schemaStrategy,
+    strategy: opts.conflictStrategy || 'restore',
+    versionStrategy: opts.versionStrategy || 'ignore',
+    schemaStrategy: opts.schemaStrategy || 'exact',
     exclude: opts.exclude,
   };
   const engine = createTransferEngine(source, destination, engineOptions);
