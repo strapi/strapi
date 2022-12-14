@@ -327,7 +327,7 @@ program
   .hook(
     'preAction',
     confirmMessage(
-      "Using strategy 'restore' will delete all data in your database. Are you sure you want to proceed?"
+      'The import will delete all data in your database. Are you sure you want to proceed?'
     )
   )
   .action(getLocalScript('transfer/import'));
