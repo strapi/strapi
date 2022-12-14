@@ -45,53 +45,35 @@ describe('Entity service', () => {
   });
 
   describe('Find', () => {
-    const data = {
-      id: 1,
-      title: 'Test',
-    };
+    test('Returns first element for single types', async () => {
+      const data = {
+        id: 1,
+        title: 'Test',
+      };
 
-    const fakeQuery = {
-      findOne: jest.fn(() => Promise.resolve(data)),
-      findMany: jest.fn(() => Promise.resolve(data)),
-    };
+      const fakeQuery = {
+        findOne: jest.fn(() => Promise.resolve(data)),
+      };
 
-    const fakeDB = {
-      query: jest.fn(() => fakeQuery),
-    };
+      const fakeDB = {
+        query: jest.fn(() => fakeQuery),
+      };
 
-    const fakeStrapi = {
-      getModel: jest.fn(() => {
-        return { kind: 'singleType', privateAttributes: [] };
-      }),
-    };
+      const fakeStrapi = {
+        getModel: jest.fn(() => {
+          return { kind: 'singleType', privateAttributes: [] };
+        }),
+      };
 
-    const instance = createEntityService({
-      strapi: fakeStrapi,
-      db: fakeDB,
-      eventHub: new EventEmitter(),
-    });
-
-    test('Returns all locales for single types when `locale=all` is specified', async () => {
       const instance = createEntityService({
         strapi: fakeStrapi,
         db: fakeDB,
         eventHub: new EventEmitter(),
       });
 
-      const result = await instance.findMany('test-model', { locale: 'all' });
-
-      expect(fakeStrapi.getModel).toHaveBeenCalledTimes(1);
-      expect(fakeStrapi.getModel).toHaveBeenCalledWith('test-model');
-
-      expect(fakeDB.query).toHaveBeenCalledWith('test-model');
-      expect(fakeQuery.findMany).toHaveBeenCalledWith({});
-      expect(result).toEqual(data);
-    });
-
-    test('Returns first element for single types', async () => {
       const result = await instance.findMany('test-model');
 
-      expect(fakeStrapi.getModel).toHaveBeenCalledTimes(2);
+      expect(fakeStrapi.getModel).toHaveBeenCalledTimes(1);
       expect(fakeStrapi.getModel).toHaveBeenCalledWith('test-model');
 
       expect(fakeDB.query).toHaveBeenCalledWith('test-model');
