@@ -9,7 +9,6 @@ import Refresh from '@strapi/icons/Refresh';
 import CheckCircle from '@strapi/icons/CheckCircle';
 import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import Loader from '@strapi/icons/Loader';
-import { axiosInstance } from '../../../core/utils';
 import { useFetchClient } from '../../../hooks';
 import { getRequestUrl } from '../../utils';
 import useDebounce from './useDebounce';
@@ -98,7 +97,7 @@ const InputUID = ({
     }
 
     try {
-      const { data } = await axiosInstance.post(requestURL, {
+      const { data } = await post(requestURL, {
         contentTypeUID,
         field: name,
         value: value ? value.trim() : '',
