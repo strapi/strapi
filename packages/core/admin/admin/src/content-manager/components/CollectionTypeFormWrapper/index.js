@@ -32,6 +32,7 @@ import {
   submitSucceeded,
 } from '../../sharedReducers/crudReducer/actions';
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
+import { useFetchClient } from '../../../hooks';
 
 // This container is used to handle the CRUD
 const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }) => {
@@ -92,6 +93,8 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     );
   }, []);
 
+  const { get: getClient } = useFetchClient();
+
   // SET THE DEFAULT LAYOUT the effect is applied when the slug changes
   useEffect(() => {
     const componentsDataStructure = Object.keys(allLayoutData.components).reduce((acc, current) => {
@@ -137,8 +140,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       dispatch(getData());
 
       try {
-        const { data } = await axiosInstance.get(requestURL, { cancelToken: source.token });
-
+        const { data } = await getClient(requestURL, { cancelToken: source.token });
         dispatch(getDataSucceeded(cleanReceivedData(cleanClonedData(data))));
       } catch (err) {
         if (axios.isCancel(err)) {
@@ -195,6 +197,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     rawQuery,
     redirectionLink,
     toggleNotification,
+    getClient,
   ]);
 
   const displayErrors = useCallback(
@@ -222,6 +225,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         const { data } = await axiosInstance.delete(
           getRequestUrl(`collection-types/${slug}/${id}`)
         );
+        console.log('onDelete', getRequestUrl(`collection-types/${slug}/${id}`));
 
         toggleNotification({
           type: 'success',
@@ -253,6 +257,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         dispatch(setStatus('submit-pending'));
 
         const { data } = await axiosInstance.post(endPoint, body);
+        console.log('onPost', endPoint);
 
         trackUsageRef.current('didCreateEntry', trackerProperty);
         toggleNotification({
@@ -304,6 +309,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       dispatch(setStatus('draft-relation-check-pending'));
 
       const numberOfDraftRelations = await axiosInstance.get(endPoint);
+      console.log('onDraftRelationCheck', endPoint);
       trackUsageRef.current('didCheckDraftRelations');
 
       dispatch(setStatus('resolved'));
@@ -325,6 +331,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       dispatch(setStatus('publish-pending'));
 
       const { data } = await axiosInstance.post(endPoint);
+      console.log('onPublish', endPoint);
 
       trackUsageRef.current('didPublishEntry');
 
@@ -355,6 +362,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         dispatch(setStatus('submit-pending'));
 
         const { data } = await axiosInstance.put(endPoint, body);
+        console.log('onPut', endPoint);
 
         trackUsageRef.current('didEditEntry', { trackerProperty });
         toggleNotification({
@@ -391,6 +399,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       trackUsageRef.current('willUnpublishEntry');
 
       const { data } = await axiosInstance.post(endPoint);
+      console.log('onUnpublish', endPoint);
 
       trackUsageRef.current('didUnpublishEntry');
       toggleNotification({
