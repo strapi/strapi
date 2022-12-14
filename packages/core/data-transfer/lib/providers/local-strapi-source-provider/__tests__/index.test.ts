@@ -101,7 +101,7 @@ describe('Local Strapi Source Provider', () => {
       await provider.bootstrap();
 
       const entitiesStream = (await provider.streamEntities()) as Readable;
-      const entities = await collect<IEntity<'foo' | 'bar'>>(entitiesStream);
+      const entities = await collect<IEntity>(entitiesStream);
 
       // Should have been called with 'foo', then 'bar'
       expect(queryBuilder).toHaveBeenCalledTimes(2);

@@ -2,63 +2,40 @@ import type { Readable, Writable, Duplex, Transform } from 'stream';
 import type { IDestinationProvider, ISourceProvider } from './providers';
 
 /**
- * Default signature for transfer rules' filter methods
+ * Define a transfer transform which will be used to intercept
+ * and potentially discard or modify the transferred data
  */
-type TransferRuleFilterSignature = (...params: unknown[]) => boolean;
-
-/**
- * Define a transfer rule which will be used to intercept
- * and potentially modify the transferred data
- */
-export interface ITransferRule<
-  T extends TransferRuleFilterSignature = TransferRuleFilterSignature
-> {
-  /**
-   * Filter method used to select which data should be transformed
-   */
-  filter?: T;
-  /**
-   * Transform middlewares which will be applied to the filtered data
-   */
-  transforms: StreamItem[];
-}
+export type TransferTransform<T> =
+  | {
+      filter: (data: T) => boolean;
+    }
+  | {
+      map: (data: T) => T;
+    };
 
 export type TransformFunction = (chunk: any, encoding?: string) => any;
 export type StreamItem = Stream | TransformFunction;
 type Stream = Readable | Writable | Duplex | Transform;
 
-export interface AddedDiff<T = unknown> {
-  kind: 'added';
-  path: string[];
-  type: string;
-  value: T;
-}
-
-export interface ModifiedDiff<T = unknown, P = unknown> {
-  kind: 'modified';
-  path: string[];
-  types: [string, string];
-  values: [T, P];
-}
-
-export interface DeletedDiff<T = unknown> {
-  kind: 'deleted';
-  path: string[];
-  type: string;
-  value: T;
-}
-
-export type Diff = AddedDiff | ModifiedDiff | DeletedDiff;
-
-export interface Context {
-  path: string[];
-}
 export type TransferStage = 'entities' | 'links' | 'assets' | 'schemas' | 'configuration';
+
+export type TransferProgress = {
+  [key in TransferStage]?: {
+    count: number;
+    bytes: number;
+    aggregates?: {
+      [key: string]: {
+        count: number;
+        bytes: number;
+      };
+    };
+  };
+};
 
 export interface ITransferResults<S extends ISourceProvider, D extends IDestinationProvider> {
   source?: S['results'];
   destination?: D['results'];
-  engine?: ITransferResults;
+  engine?: TransferProgress;
 }
 
 // There aren't currently any universal results provided but there likely will be in the future, so providers that have their own results should extend from these to be safe

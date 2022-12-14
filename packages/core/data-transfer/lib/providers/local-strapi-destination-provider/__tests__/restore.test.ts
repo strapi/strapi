@@ -1,6 +1,6 @@
-import { deleteAllRecords, restoreConfigs } from '../restore';
-import { getStrapiFactory, getContentTypes } from '../../test-utils';
-import type { IConfiguration } from '../../../../types';
+import { deleteRecords, restoreConfigs } from '../strategies/restore';
+import { getStrapiFactory, getContentTypes, setGlobalStrapi } from '../../test-utils';
+import { IConfiguration } from '../../../../types';
 
 const entities = [
   {
@@ -37,16 +37,24 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-const deleteMany = jest.fn(async (uid: string) => ({
-  count: entities.filter((entity) => entity.contentType.uid === uid).length,
-}));
+const deleteMany = (uid: string) =>
+  jest.fn(async () => ({
+    count: entities.filter((entity) => entity.contentType.uid === uid).length,
+  }));
 
-const query = jest.fn(() => {
+const findMany = (uid: string) => {
+  return jest.fn(async () => entities.filter((entity) => entity.contentType.uid === uid));
+};
+
+const create = jest.fn((data) => data);
+
+const getModel = jest.fn((uid: string) => getContentTypes()[uid]);
+
+const query = jest.fn((uid) => {
   return {
-    deleteMany: jest.fn(() => ({
-      count: 0,
-    })),
-    create: jest.fn((data) => data),
+    deleteMany: deleteMany(uid),
+    findMany: findMany(uid),
+    create,
   };
 });
 
@@ -54,31 +62,31 @@ describe('Restore ', () => {
   test('Should delete all contentTypes', async () => {
     const strapi = getStrapiFactory({
       contentTypes: getContentTypes(),
-      entityService: {
-        deleteMany,
-      },
       query,
+      getModel,
+      db: { query },
     })();
 
-    const { count } = await deleteAllRecords(strapi, {
-      /* @ts-ignore: disable-next-line */
-      contentTypes: Object.values(getContentTypes()),
-    });
+    setGlobalStrapi(strapi);
+
+    const { count } = await deleteRecords(strapi);
     expect(count).toBe(entities.length);
   });
 
   test('Should only delete chosen contentType', async () => {
     const strapi = getStrapiFactory({
       contentTypes: getContentTypes(),
-      entityService: {
-        deleteMany,
-      },
       query,
+      getModel,
+      db: { query },
     })();
 
-    const { count } = await deleteAllRecords(strapi, {
-      /* @ts-ignore: disable-next-line */
-      contentTypes: [getContentTypes().foo],
+    setGlobalStrapi(strapi);
+
+    const { count } = await deleteRecords(strapi, {
+      entities: {
+        include: ['foo'],
+      },
     });
     expect(count).toBe(3);
   });
@@ -90,7 +98,13 @@ describe('Restore ', () => {
         query,
       },
     })();
-    const config: IConfiguration = {
+    const config: IConfiguration<{
+      key: string;
+      type: string;
+      environment: null;
+      tag: string;
+      value: object;
+    }> = {
       type: 'core-store',
       value: {
         key: 'test-key',
@@ -114,7 +128,15 @@ describe('Restore ', () => {
         query,
       },
     })();
-    const config: IConfiguration = {
+
+    const config: IConfiguration<{
+      id: number;
+      name: string;
+      url: string;
+      headers: Record<string, unknown>;
+      events: string[];
+      enabled: boolean;
+    }> = {
       type: 'webhook',
       value: {
         id: 4,

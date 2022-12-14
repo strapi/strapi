@@ -65,9 +65,13 @@ export const createMockedQueryBuilder = <T extends string = ContentType>(data: {
   [key in T]: unknown[];
 }) =>
   jest.fn((uid: T) => {
-    const state: { [key: string]: unknown } = { populate: undefined };
+    const state: { [key: string]: unknown } = { populate: undefined, select: undefined };
 
     return {
+      select(fields: string | string[]) {
+        state.fields = fields;
+        return this;
+      },
       populate(populate: unknown) {
         state.populate = populate;
         return this;
