@@ -25,7 +25,7 @@ import NotFoundPage from '../NotFoundPage';
 import UseCasePage from '../UseCasePage';
 import { getUID } from './utils';
 import routes from './utils/routes';
-import { useConfigurations } from '../../hooks';
+import { useConfigurations, useFetchClient } from '../../hooks';
 
 const AuthenticatedApp = lazy(() =>
   import(/* webpackChunkName: "Admin-authenticatedApp" */ '../../components/AuthenticatedApp')
@@ -35,8 +35,12 @@ function App() {
   const toggleNotification = useNotification();
   const { updateProjectSettings } = useConfigurations();
   const { formatMessage } = useIntl();
-  const [{ isLoading, hasAdmin, uuid }, setState] = useState({ isLoading: true, hasAdmin: false });
+  const [{ isLoading, hasAdmin, uuid, deviceId }, setState] = useState({
+    isLoading: true,
+    hasAdmin: false,
+  });
   const appInfo = useAppInfos();
+  const { get } = useFetchClient();
 
   const authRoutes = useMemo(() => {
     return makeUniqueRoutes(
@@ -84,26 +88,29 @@ function App() {
           authLogo: prefixFileUrlWithBackendUrl(authLogo),
         });
 
+        const deviceId = await getUID();
+
         if (uuid) {
           const {
             data: { data: properties },
-          } = await axios.get(`${strapi.backendURL}/admin/telemetry-properties`);
+          } = await get(`/admin/telemetry-properties`, {
+            // NOTE: needed because the interceptors of the fetchClient redirect to /login when receive a 401 and it would end up in an infinite loop when the user doesn't have a session.
+            validateStatus: (status) => status < 500,
+          });
 
           setTelemetryProperties(properties);
 
           try {
-            const deviceId = await getUID();
-
-            await fetch('https://analytics.strapi.io/track', {
+            await fetch('https://analytics.strapi.io/api/v2/track', {
               method: 'POST',
               body: JSON.stringify({
+                // This event is anonymous
                 event: 'didInitializeAdministration',
-                uuid,
+                userId: '',
                 deviceId,
-                properties: {
-                  ...properties,
-                  environment: appInfo.currentEnvironment,
-                },
+                eventPropeties: {},
+                userProperties: { environment: appInfo.currentEnvironment },
+                groupProperties: { ...properties, projectId: uuid },
               }),
               headers: {
                 'Content-Type': 'application/json',
@@ -114,7 +121,7 @@ function App() {
           }
         }
 
-        setState({ isLoading: false, hasAdmin, uuid });
+        setState({ isLoading: false, hasAdmin, uuid, deviceId });
       } catch (err) {
         toggleNotification({
           type: 'warning',
@@ -133,8 +140,9 @@ function App() {
     () => ({
       uuid,
       telemetryProperties,
+      deviceId,
     }),
-    [uuid, telemetryProperties]
+    [uuid, telemetryProperties, deviceId]
   );
 
   if (isLoading) {
