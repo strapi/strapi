@@ -50,6 +50,7 @@ export const RelationItem = ({
       item: {
         displayedValue: displayValue,
         status,
+        id,
       },
       onGrabItem,
       onDropItem,

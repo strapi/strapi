@@ -104,6 +104,16 @@ export const useDragAndDrop = (
       }
     },
     canDrag: active,
+    /**
+     * This is for useful when the item is in a virtualized list.
+     * However, if we don't have an ID then we want the libraries
+     * defaults to take care of this.
+     */
+    isDragging: item.id
+      ? (monitor) => {
+          return item.id === monitor.getItem().id;
+        }
+      : undefined,
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),

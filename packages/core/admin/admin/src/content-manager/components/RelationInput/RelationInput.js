@@ -352,9 +352,7 @@ const RelationInput = ({
                 relations,
                 updatePositionOfRelation: handleUpdatePositionOfRelation,
               }}
-              itemKey={(index, { relations: relationsItems }) =>
-                `${relationsItems[index].mainField}_${relationsItems[index].id}`
-              }
+              itemKey={(index) => `${relations[index].mainField}_${relations[index].id}`}
               innerElementType="ol"
             >
               {ListItem}
