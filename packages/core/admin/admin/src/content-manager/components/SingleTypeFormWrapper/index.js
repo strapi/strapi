@@ -12,7 +12,6 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import axios from 'axios';
-import { axiosInstance } from '../../../core/utils';
 import { getFetchClient } from '../../../utils/getFetchClient';
 import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
 import {
@@ -160,11 +159,11 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
   const onDelete = useCallback(
     async (trackerProperty) => {
+      const { del } = getFetchClient();
       try {
         trackUsageRef.current('willDeleteEntry', trackerProperty);
 
-        const { data } = await axiosInstance.delete(getRequestUrl(`${slug}${searchToSend}`));
-        console.log('onDelete', getRequestUrl(`${slug}${searchToSend}`), data);
+        const { data } = await del(getRequestUrl(`${slug}${searchToSend}`));
 
         toggleNotification({
           type: 'success',
