@@ -55,7 +55,7 @@ const FIXTURE_ASSETS = [
 const FIXTURE_FOLDERS = [
   {
     id: 1,
-    createdAt: '',
+    createdAt: '2021-10-18T08:04:56.326Z',
     pathId: 1,
     name: 'Folder 1',
     children: {
@@ -64,7 +64,7 @@ const FIXTURE_FOLDERS = [
     files: {
       count: 1,
     },
-    updatedAt: '',
+    updatedAt: '2021-10-18T08:04:56.326Z',
     path: '/1',
   },
 ];
@@ -272,6 +272,14 @@ describe('BrowseStep', () => {
 
       expect(queryByText('Folders (1)')).not.toBeInTheDocument();
       expect(queryByText('Assets (1)')).not.toBeInTheDocument();
+    });
+
+    it('should not render table if no assets and folders', () => {
+      usePersistentState.mockReturnValueOnce([viewOptions.LIST]);
+      const { queryByRole, getByText } = setup({ folders: [] });
+
+      expect(queryByRole('gridcell', { name: /preview/i })).not.toBeInTheDocument();
+      expect(getByText('Upload your first assets...')).toBeInTheDocument();
     });
   });
 });

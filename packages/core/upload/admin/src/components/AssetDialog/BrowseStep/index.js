@@ -240,7 +240,7 @@ export const BrowseStep = ({
         </Box>
       )}
 
-      {!isGridView && (
+      {!isGridView && (folderCount > 0 || assetCount > 0) && (
         <TableList
           allowedTypes={allowedTypes}
           assetCount={assetCount}
