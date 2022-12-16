@@ -56,6 +56,7 @@ export const RelationItem = ({
       onDropItem,
       onCancel,
       onMoveItem: updatePositionOfRelation,
+      dropSensitivity: 'immediate',
     });
 
   const composedRefs = composeRefs(relationRef, dragRef);
