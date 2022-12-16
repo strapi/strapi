@@ -154,7 +154,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                     required
                     label={formatMessage({
                       id: 'Auth.form.confirmPassword.label',
-                      defaultMessage: 'Confirmation Password',
+                      defaultMessage: 'Confirm Password',
                     })}
                     type={confirmPasswordShown ? 'text' : 'password'}
                   />

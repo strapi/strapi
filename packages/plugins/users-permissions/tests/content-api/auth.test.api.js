@@ -50,7 +50,7 @@ describe('Auth API', () => {
       expect(res.body.error.message).toBe('Forbidden');
     });
 
-    test('Fails on invalid confirmation password', async () => {
+    test('Fails on invalid confirm password', async () => {
       const res = await rq({
         method: 'POST',
         url: '/change-password',
