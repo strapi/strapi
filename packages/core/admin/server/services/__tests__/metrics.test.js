@@ -19,7 +19,12 @@ describe('Metrics', () => {
 
     await metricsService.sendDidInviteUser();
 
-    expect(send).toHaveBeenCalledWith('didInviteUser', { numberOfRoles: 3, numberOfUsers: 2 });
+    expect(send).toHaveBeenCalledWith('didInviteUser', {
+      groupProperties: {
+        numberOfRoles: 3,
+        numberOfUsers: 2,
+      },
+    });
     expect(countUsers).toHaveBeenCalledWith();
     expect(countRoles).toHaveBeenCalledWith();
   });
@@ -52,7 +57,9 @@ describe('Metrics', () => {
 
     expect(getLanguagesInUse).toHaveBeenCalledWith();
     expect(send).toHaveBeenCalledWith('didChangeInterfaceLanguage', {
-      languagesInUse: ['en', 'fr', 'en'],
+      userProperties: {
+        languagesInUse: ['en', 'fr', 'en'],
+      },
     });
   });
 });
