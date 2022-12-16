@@ -51,6 +51,7 @@
     "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
     "test:front:update:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --u",
     "test:playwright": "playwright test",
+    "test:playwright:debug": "PWDEBUG=1 playwright test",
     "test:playwright:codegen": "playwright codegen",
     "test:unit": "jest --verbose",
     "test:api": "node test/scripts/run-api-tests.js",
