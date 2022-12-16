@@ -4,6 +4,9 @@ const {
   createLocalFileSourceProvider,
   createLocalStrapiDestinationProvider,
   createTransferEngine,
+  DEFAULT_VERSION_STRATEGY,
+  DEFAULT_SCHEMA_STRATEGY,
+  DEFAULT_CONFLICT_STRATEGY,
   // TODO: we need to solve this issue with typescript modules
   // eslint-disable-next-line import/no-unresolved, node/no-missing-require
 } = require('@strapi/data-transfer');
@@ -42,7 +45,7 @@ module.exports = async (opts) => {
     async getStrapi() {
       return strapiInstance;
     },
-    strategy: opts.conflictStrategy,
+    strategy: opts.conflictStrategy || DEFAULT_CONFLICT_STRATEGY,
     restore: {
       entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },
     },
@@ -53,8 +56,8 @@ module.exports = async (opts) => {
    * Configure and run the transfer engine
    */
   const engineOptions = {
-    strategy: opts.conflictStrategy,
-    versionMatching: opts.schemaComparison,
+    versionStrategy: opts.versionStrategy || DEFAULT_VERSION_STRATEGY,
+    schemaStrategy: opts.schemaStrategy || DEFAULT_SCHEMA_STRATEGY,
     exclude: opts.exclude,
     rules: {
       links: [

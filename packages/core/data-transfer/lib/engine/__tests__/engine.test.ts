@@ -299,9 +299,8 @@ describe('Transfer engine', () => {
   } as IDestinationProvider;
 
   const defaultOptions = {
-    strategy: 'restore',
-    versionMatching: 'exact',
-    schemasMatching: 'exact',
+    versionStrategy: 'exact',
+    schemaStrategy: 'exact',
     exclude: [],
   } as ITransferEngineOptions;
 
@@ -416,9 +415,8 @@ describe('Transfer engine', () => {
     describe('schema matching', () => {
       describe('exact', () => {
         const engineOptions = {
-          strategy: 'restore',
-          versionMatching: 'exact',
-          schemasMatching: 'exact',
+          versionStrategy: 'exact',
+          schemaStrategy: 'exact',
           exclude: [],
         } as ITransferEngineOptions;
         test('source with source schema missing in destination fails', async () => {
@@ -465,7 +463,7 @@ describe('Transfer engine', () => {
         const versionsThatFail = ['foo', 'z1.2.3', '1.2.3z'];
         const options: ITransferEngineOptions = {
           ...defaultOptions,
-          versionMatching: 'exact',
+          versionStrategy: 'exact',
         };
 
         versionsThatFail.forEach((version) => {
@@ -487,7 +485,7 @@ describe('Transfer engine', () => {
         const versionsThatSucceed = ['1.2.3'];
         const options: ITransferEngineOptions = {
           ...defaultOptions,
-          versionMatching: 'exact',
+          versionStrategy: 'exact',
         };
 
         versionsThatFail.forEach((version) => {
@@ -522,7 +520,7 @@ describe('Transfer engine', () => {
         const versionsThatSucceed = ['1.2.3', '1.3.4', '1.4.4-alpha'];
         const options: ITransferEngineOptions = {
           ...defaultOptions,
-          versionMatching: 'major',
+          versionStrategy: 'major',
         };
 
         await Promise.all(
@@ -561,7 +559,7 @@ describe('Transfer engine', () => {
         const versionsThatSucceed = ['1.2.3', '1.2.40', '1.2.4-alpha'];
         const options: ITransferEngineOptions = {
           ...defaultOptions,
-          versionMatching: 'minor',
+          versionStrategy: 'minor',
         };
 
         await Promise.all(
@@ -600,7 +598,7 @@ describe('Transfer engine', () => {
         const versionsThatSucceed = ['1.2.3'];
         const options: ITransferEngineOptions = {
           ...defaultOptions,
-          versionMatching: 'patch',
+          versionStrategy: 'patch',
         };
 
         await Promise.all(
@@ -638,7 +636,7 @@ describe('Transfer engine', () => {
         const versionsThatSucceed = ['1.2.3', '1.3.4', '5.24.44-alpha'];
         const options: ITransferEngineOptions = {
           ...defaultOptions,
-          versionMatching: 'ignore',
+          versionStrategy: 'ignore',
         };
 
         await Promise.all(

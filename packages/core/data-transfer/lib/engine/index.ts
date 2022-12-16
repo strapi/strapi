@@ -1,5 +1,4 @@
 import { PassThrough, Transform, Readable, Writable } from 'stream';
-import * as path from 'path';
 import { extname } from 'path';
 import { isEmpty, uniq } from 'lodash/fp';
 import { diff as semverDiff } from 'semver';
@@ -23,6 +22,9 @@ import type { Diff } from '../utils/json';
 
 import compareSchemas from '../strategies';
 import { filter, map } from '../utils/stream';
+
+export const DEFAULT_VERSION_STRATEGY = 'ignore';
+export const DEFAULT_SCHEMA_STRATEGY = 'strict';
 
 type SchemaMap = Record<string, Schema>;
 
@@ -158,7 +160,7 @@ class TransferEngine<
   }
 
   #assertStrapiVersionIntegrity(sourceVersion?: string, destinationVersion?: string) {
-    const strategy = this.options.versionMatching;
+    const strategy = this.options.versionStrategy || DEFAULT_VERSION_STRATEGY;
 
     if (
       !sourceVersion ||
@@ -200,7 +202,11 @@ class TransferEngine<
   }
 
   #assertSchemasMatching(sourceSchemas: SchemaMap, destinationSchemas: SchemaMap) {
-    const strategy = this.options.schemasMatching || 'strict';
+    const strategy = this.options.schemaStrategy || DEFAULT_SCHEMA_STRATEGY;
+    if (strategy === 'ignore') {
+      return;
+    }
+
     const keys = uniq(Object.keys(sourceSchemas).concat(Object.keys(destinationSchemas)));
     const diffs: { [key: string]: Diff[] } = {};
 

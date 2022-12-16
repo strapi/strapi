@@ -22,7 +22,6 @@ const {
  * @typedef ImportCommandOptions Options given to the CLI import command
  *
  * @property {string} [file] The file path to import
- * @property {number} [maxSizeJsonl] Maximum size for each .jsonl file
  * @property {boolean} [encrypt] Used to encrypt the final archive
  * @property {string} [key] Encryption key, only useful when encryption is enabled
  * @property {boolean} [compress] Used to compress the final archive
@@ -52,8 +51,8 @@ module.exports = async (opts) => {
   const destination = createDestinationProvider(opts);
 
   const engine = createTransferEngine(source, destination, {
-    strategy: 'restore', // for an export to file, strategy will always be 'restore'
-    versionMatching: 'ignore', // for an export to file, versionMatching will always be skipped
+    versionStrategy: 'ignore', // for an export to file, versionStrategy will always be skipped
+    schemaStrategy: 'ignore', // for an export to file, schemaStrategy will always be skipped
     transforms: {
       links: [
         {
