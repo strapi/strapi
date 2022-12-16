@@ -111,7 +111,7 @@ const DynamicZoneComponent = ({
       <StyledBox hasRadius>
         <Accordion expanded={isOpen} onToggle={handleToggle} size="S" error={errorMessage}>
           <AccordionToggle
-            startIcon={<FontAwesomeIcon icon={icon} />}
+            startIcon={icon && <FontAwesomeIcon icon={icon} />}
             action={
               <Stack horizontal spacing={0} expanded={isOpen}>
                 {showDownIcon && (

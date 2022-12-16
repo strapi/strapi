@@ -69,6 +69,7 @@ const ActionContainer = styled(Box)`
     }
   }
 `;
+
 export const MediaLibrary = () => {
   const { push } = useHistory();
   const {
