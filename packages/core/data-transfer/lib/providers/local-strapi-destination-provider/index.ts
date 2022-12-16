@@ -1,24 +1,17 @@
-import chalk from 'chalk';
 import { Writable } from 'stream';
 
-import type { IConfiguration, IDestinationProvider, IMetadata, ProviderType } from '../../../types';
-import { deleteAllRecords, DeleteOptions, restoreConfigs } from './restore';
-import { mapSchemasValues } from '../../utils';
+import type { IDestinationProvider, IMetadata, ProviderType } from '../../../types';
+import { restore } from './strategies';
+import * as utils from '../../utils';
 
 export const VALID_CONFLICT_STRATEGIES = ['restore', 'merge'];
 export const DEFAULT_CONFLICT_STRATEGY = 'restore';
 
 interface ILocalStrapiDestinationProviderOptions {
   getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>;
-  restore?: DeleteOptions;
+  restore?: restore.IRestoreOptions;
   strategy: 'restore' | 'merge';
 }
-
-export const createLocalStrapiDestinationProvider = (
-  options: ILocalStrapiDestinationProviderOptions
-) => {
-  return new LocalStrapiDestinationProvider(options);
-};
 
 class LocalStrapiDestinationProvider implements IDestinationProvider {
   name = 'destination::local-strapi';
@@ -29,8 +22,11 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   strapi?: Strapi.Strapi;
 
+  #entitiesMapper: { [type: string]: { [id: number]: number } };
+
   constructor(options: ILocalStrapiDestinationProviderOptions) {
     this.options = options;
+    this.#entitiesMapper = {};
   }
 
   async bootstrap(): Promise<void> {
@@ -52,7 +48,8 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     if (!this.strapi) {
       throw new Error('Strapi instance not found');
     }
-    return deleteAllRecords(this.strapi, this.options.restore);
+
+    return restore.deleteRecords(this.strapi, this.options.restore);
   }
 
   async beforeTransfer() {
@@ -90,7 +87,32 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       ...this.strapi.components,
     };
 
-    return mapSchemasValues(schemas);
+    return utils.schema.mapSchemasValues(schemas);
+  }
+
+  getEntitiesStream(): Writable {
+    if (!this.strapi) {
+      throw new Error('Not able to import entities. Strapi instance not found');
+    }
+
+    const { strategy } = this.options;
+
+    const updateMappingTable = (type: string, oldID: number, newID: number) => {
+      if (!this.#entitiesMapper[type]) {
+        this.#entitiesMapper[type] = {};
+      }
+
+      Object.assign(this.#entitiesMapper[type], { [oldID]: newID });
+    };
+
+    if (strategy === 'restore') {
+      return restore.createEntitiesWriteStream({
+        strapi: this.strapi,
+        updateMappingTable,
+      });
+    }
+
+    throw new Error(`Invalid strategy supplied: "${strategy}"`);
   }
 
   async getConfigurationStream(): Promise<Writable> {
@@ -98,24 +120,18 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       throw new Error('Not able to stream Configurations. Strapi instance not found');
     }
 
-    return new Writable({
-      objectMode: true,
-      write: async (config: IConfiguration<any>, _encoding, callback) => {
-        try {
-          if (this.options.strategy === 'restore' && this.strapi) {
-            await restoreConfigs(this.strapi, config);
-          }
-          callback();
-        } catch (error) {
-          callback(
-            new Error(
-              `Failed to import ${chalk.yellowBright(config.type)} (${chalk.greenBright(
-                config.value.id
-              )}`
-            )
-          );
-        }
-      },
-    });
+    const { strategy } = this.options;
+
+    if (strategy === 'restore') {
+      return restore.createConfigurationWriteStream(this.strapi);
+    }
+
+    throw new Error(`Invalid strategy supplied: "${strategy}"`);
   }
 }
+
+export const createLocalStrapiDestinationProvider = (
+  options: ILocalStrapiDestinationProviderOptions
+) => {
+  return new LocalStrapiDestinationProvider(options);
+};

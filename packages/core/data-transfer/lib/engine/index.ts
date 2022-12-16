@@ -1,11 +1,10 @@
-import { PassThrough } from 'stream-chain';
+import { PassThrough, Transform, Readable, Writable } from 'stream';
 import { extname } from 'path';
 import { isEmpty, uniq } from 'lodash/fp';
 import { diff as semverDiff } from 'semver';
 import type { Schema } from '@strapi/strapi';
 
 import type {
-  Diff,
   IAsset,
   IDestinationProvider,
   IEntity,
@@ -13,27 +12,21 @@ import type {
   ISourceProvider,
   ITransferEngine,
   ITransferEngineOptions,
+  TransferProgress,
   ITransferResults,
+  Stream,
   TransferStage,
+  TransferTransform,
 } from '../../types';
+import type { Diff } from '../utils/json';
 
 import compareSchemas from '../strategies';
+import { filter, map } from '../utils/stream';
 
 export const DEFAULT_VERSION_STRATEGY = 'ignore';
 export const DEFAULT_SCHEMA_STRATEGY = 'strict';
 
-type TransferProgress = {
-  [key in TransferStage]?: {
-    count: number;
-    bytes: number;
-    aggregates?: {
-      [key: string]: {
-        count: number;
-        bytes: number;
-      };
-    };
-  };
-};
+type SchemaMap = Record<string, Schema>;
 
 class TransferEngine<
   S extends ISourceProvider = ISourceProvider,
@@ -68,7 +61,37 @@ class TransferEngine<
     this.destinationProvider = destinationProvider;
     this.options = options;
 
-    this.progress = { data: {}, stream: new PassThrough() };
+    this.progress = { data: {}, stream: new PassThrough({ objectMode: true }) };
+  }
+
+  #createStageTransformStream<T extends TransferStage>(
+    key: T,
+    options: { includeGlobal?: boolean } = {}
+  ): PassThrough | Transform {
+    const { includeGlobal = true } = options;
+    const { global: globalTransforms, [key]: stageTransforms } = this.options?.transforms ?? {};
+
+    let stream = new PassThrough({ objectMode: true });
+
+    const applyTransforms = <U>(transforms: TransferTransform<U>[] = []) => {
+      for (const transform of transforms) {
+        if ('filter' in transform) {
+          stream = stream.pipe(filter(transform.filter));
+        }
+
+        if ('map' in transform) {
+          stream = stream.pipe(map(transform.map));
+        }
+      }
+    };
+
+    if (includeGlobal) {
+      applyTransforms(globalTransforms);
+    }
+
+    applyTransforms(stageTransforms as TransferTransform<unknown>[]);
+
+    return stream;
   }
 
   #updateTransferProgress<T = unknown>(
@@ -83,7 +106,11 @@ class TransferEngine<
       this.progress.data[stage] = { count: 0, bytes: 0 };
     }
 
-    const stageProgress = this.progress.data[stage]!;
+    const stageProgress = this.progress.data[stage];
+
+    if (!stageProgress) {
+      return;
+    }
 
     const size = aggregate?.size?.(data) ?? JSON.stringify(data).length;
     const key = aggregate?.key?.(data);
@@ -174,7 +201,7 @@ class TransferEngine<
     );
   }
 
-  #assertSchemasMatching(sourceSchemas: any, destinationSchemas: any) {
+  #assertSchemasMatching(sourceSchemas: SchemaMap, destinationSchemas: SchemaMap) {
     const strategy = this.options.schemaStrategy || DEFAULT_SCHEMA_STRATEGY;
     if (strategy === 'ignore') {
       return;
@@ -200,6 +227,38 @@ class TransferEngine<
         `
       );
     }
+  }
+
+  async #transferStage(options: {
+    stage: TransferStage;
+    source?: Readable;
+    destination?: Writable;
+    transform?: PassThrough;
+    tracker?: PassThrough;
+  }) {
+    const { stage, source, destination, transform, tracker } = options;
+
+    if (!source || !destination) {
+      return;
+    }
+
+    this.#emitStageUpdate('start', stage);
+
+    await new Promise<void>((resolve, reject) => {
+      let stream: Stream = source;
+
+      if (transform) {
+        stream = stream.pipe(transform);
+      }
+
+      if (tracker) {
+        stream = stream.pipe(tracker);
+      }
+
+      stream.pipe(destination).on('error', reject).on('close', resolve);
+    });
+
+    this.#emitStageUpdate('complete', stage);
   }
 
   async init(): Promise<void> {
@@ -248,8 +307,8 @@ class TransferEngine<
         );
       }
 
-      const sourceSchemas = await this.sourceProvider.getSchemas?.();
-      const destinationSchemas = await this.destinationProvider.getSchemas?.();
+      const sourceSchemas = (await this.sourceProvider.getSchemas?.()) as SchemaMap;
+      const destinationSchemas = (await this.destinationProvider.getSchemas?.()) as SchemaMap;
 
       if (sourceSchemas && destinationSchemas) {
         this.#assertSchemasMatching(sourceSchemas, destinationSchemas);
@@ -276,6 +335,7 @@ class TransferEngine<
       }
 
       await this.beforeTransfer();
+
       // Run the transfer stages
       await this.transferSchemas();
       await this.transferEntities();
@@ -305,181 +365,66 @@ class TransferEngine<
   }
 
   async transferSchemas(): Promise<void> {
-    const stageName: TransferStage = 'schemas';
+    const stage: TransferStage = 'schemas';
 
-    const inStream = await this.sourceProvider.streamSchemas?.();
-    if (!inStream) {
-      return;
-    }
+    const source = await this.sourceProvider.streamSchemas?.();
+    const destination = await this.destinationProvider.getSchemasStream?.();
 
-    const outStream = await this.destinationProvider.getSchemasStream?.();
-    if (!outStream) {
-      return;
-    }
+    const transform = this.#createStageTransformStream(stage);
+    const tracker = this.#progressTracker(stage, { key: (value: Schema) => value.modelType });
 
-    this.#emitStageUpdate('start', stageName);
-    return new Promise((resolve, reject) => {
-      inStream
-        // Throw on error in the source
-        .on('error', reject);
-
-      outStream
-        // Throw on error in the destination
-        .on('error', reject)
-        // Resolve the promise when the destination has finished reading all the data from the source
-        .on('close', () => {
-          this.#emitStageUpdate('complete', stageName);
-          resolve();
-        });
-
-      inStream
-        .pipe(this.#progressTracker(stageName, { key: (value: Schema) => value.modelType }))
-        .pipe(outStream);
-    });
+    await this.#transferStage({ stage, source, destination, transform, tracker });
   }
 
   async transferEntities(): Promise<void> {
-    const stageName: TransferStage = 'entities';
+    const stage: TransferStage = 'entities';
 
-    const inStream = await this.sourceProvider.streamEntities?.();
-    if (!inStream) {
-      return;
-    }
+    const source = await this.sourceProvider.streamEntities?.();
+    const destination = await this.destinationProvider.getEntitiesStream?.();
 
-    const outStream = await this.destinationProvider.getEntitiesStream?.();
-    if (!outStream) {
-      return;
-    }
+    const transform = this.#createStageTransformStream(stage);
+    const tracker = this.#progressTracker(stage, { key: (value: IEntity) => value.type });
 
-    this.#emitStageUpdate('start', stageName);
-
-    return new Promise((resolve, reject) => {
-      inStream
-        // Throw on error in the source
-        .on('error', (e) => {
-          reject(e);
-        });
-
-      outStream
-        // Throw on error in the destination
-        .on('error', (e) => {
-          reject(e);
-        })
-        // Resolve the promise when the destination has finished reading all the data from the source
-        .on('close', () => {
-          this.#emitStageUpdate('complete', stageName);
-          resolve();
-        });
-
-      inStream
-        .pipe(this.#progressTracker(stageName, { key: (value: IEntity) => value.type }))
-        .pipe(outStream);
-    });
+    await this.#transferStage({ stage, source, destination, transform, tracker });
   }
 
   async transferLinks(): Promise<void> {
-    const stageName: TransferStage = 'links';
+    const stage: TransferStage = 'links';
 
-    const inStream = await this.sourceProvider.streamLinks?.();
-    if (!inStream) {
-      return;
-    }
+    const source = await this.sourceProvider.streamLinks?.();
+    const destination = await this.destinationProvider.getLinksStream?.();
 
-    const outStream = await this.destinationProvider.getLinksStream?.();
-    if (!outStream) {
-      return;
-    }
+    const transform = this.#createStageTransformStream(stage);
+    const tracker = this.#progressTracker(stage);
 
-    this.#emitStageUpdate('start', 'links');
-
-    return new Promise((resolve, reject) => {
-      inStream
-        // Throw on error in the source
-        .on('error', reject);
-
-      outStream
-        // Throw on error in the destination
-        .on('error', reject)
-        // Resolve the promise when the destination has finished reading all the data from the source
-        .on('close', () => {
-          this.#emitStageUpdate('complete', stageName);
-          resolve();
-        });
-
-      inStream.pipe(this.#progressTracker(stageName)).pipe(outStream);
-    });
+    await this.#transferStage({ stage, source, destination, transform, tracker });
   }
 
   async transferAssets(): Promise<void> {
-    const stageName: TransferStage = 'assets';
-    const inStream = await this.sourceProvider.streamAssets?.();
-    if (!inStream) {
-      return;
-    }
+    const stage: TransferStage = 'assets';
 
-    const outStream = await this.destinationProvider.getAssetsStream?.();
-    if (!outStream) {
-      return;
-    }
+    const source = await this.sourceProvider.streamAssets?.();
+    const destination = await this.destinationProvider.getAssetsStream?.();
 
-    this.#emitStageUpdate('start', stageName);
-
-    return new Promise((resolve, reject) => {
-      inStream
-        // Throw on error in the source
-        .on('error', reject);
-
-      outStream
-        // Throw on error in the destination
-        .on('error', reject)
-        // Resolve the promise when the destination has finished reading all the data from the source
-        .on('close', () => {
-          this.#emitStageUpdate('complete', stageName);
-          resolve();
-        });
-
-      inStream
-        .pipe(
-          this.#progressTracker(stageName, {
-            size: (value: IAsset) => value.stats.size,
-            key: (value: IAsset) => extname(value.filename),
-          })
-        )
-        .pipe(outStream);
+    const transform = this.#createStageTransformStream(stage);
+    const tracker = this.#progressTracker(stage, {
+      size: (value: IAsset) => value.stats.size,
+      key: (value: IAsset) => extname(value.filename),
     });
+
+    await this.#transferStage({ stage, source, destination, transform, tracker });
   }
 
   async transferConfiguration(): Promise<void> {
-    const stageName: TransferStage = 'configuration';
+    const stage: TransferStage = 'configuration';
 
-    const inStream = await this.sourceProvider.streamConfiguration?.();
-    if (!inStream) {
-      return;
-    }
+    const source = await this.sourceProvider.streamConfiguration?.();
+    const destination = await this.destinationProvider.getConfigurationStream?.();
 
-    const outStream = await this.destinationProvider.getConfigurationStream?.();
-    if (!outStream) {
-      return;
-    }
+    const transform = this.#createStageTransformStream(stage);
+    const tracker = this.#progressTracker(stage);
 
-    this.#emitStageUpdate('start', stageName);
-
-    return new Promise((resolve, reject) => {
-      inStream
-        // Throw on error in the source
-        .on('error', reject);
-
-      outStream
-        // Throw on error in the destination
-        .on('error', reject)
-        // Resolve the promise when the destination has finished reading all the data from the source
-        .on('close', () => {
-          this.#emitStageUpdate('complete', stageName);
-          resolve();
-        });
-
-      inStream.pipe(this.#progressTracker(stageName)).pipe(outStream);
-    });
+    await this.#transferStage({ stage, source, destination, transform, tracker });
   }
 }
 

@@ -74,10 +74,12 @@ describe('export', () => {
 
   it('encrypts the output file with the given key', async () => {
     const key = 'secret-key';
-    await exportCommand({ key });
+    const encrypt = true;
+
+    await exportCommand({ encrypt, key });
     expect(mockDataTransfer.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
-        encryption: { key },
+        encryption: { enabled: encrypt, key },
       })
     );
     expect(exit).toHaveBeenCalled();

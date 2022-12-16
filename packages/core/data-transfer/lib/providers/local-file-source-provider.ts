@@ -9,8 +9,8 @@ import { pipeline, PassThrough } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
 import type { IMetadata, ISourceProvider, ProviderType } from '../../types';
 
-import { collect } from '../utils';
 import { createDecryptionCipher } from '../encryption';
+import * as utils from '../utils';
 
 type StreamItemArray = Parameters<typeof chain>[0];
 
@@ -79,24 +79,24 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   async getSchemas() {
-    const schemas = await collect(this.streamSchemas() as Readable);
+    const schemas = await utils.stream.collect(this.streamSchemas());
 
     return keyBy('uid', schemas);
   }
 
-  streamEntities(): NodeJS.ReadableStream {
+  streamEntities(): Readable {
     return this.#streamJsonlDirectory('entities');
   }
 
-  streamSchemas(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream> {
+  streamSchemas(): Readable {
     return this.#streamJsonlDirectory('schemas');
   }
 
-  streamLinks(): NodeJS.ReadableStream {
+  streamLinks(): Readable {
     return this.#streamJsonlDirectory('links');
   }
 
-  streamConfiguration(): NodeJS.ReadableStream {
+  streamConfiguration(): Readable {
     // NOTE: TBD
     return this.#streamJsonlDirectory('configuration');
   }
@@ -151,7 +151,7 @@ class LocalFileSourceProvider implements ISourceProvider {
               // JSONL parser to read the data chunks one by one (line by line)
               parser(),
               // The JSONL parser returns each line as key/value
-              (line: { key: string; value: any }) => line.value,
+              (line: { key: string; value: object }) => line.value,
             ];
 
             entry
@@ -174,10 +174,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     return outStream;
   }
 
-  async #parseJSONFile<T extends Record<string, any> = any>(
-    fileStream: NodeJS.ReadableStream,
-    filePath: string
-  ): Promise<T> {
+  async #parseJSONFile<T extends object>(fileStream: Readable, filePath: string): Promise<T> {
     return new Promise<T>((resolve, reject) => {
       pipeline(
         [
