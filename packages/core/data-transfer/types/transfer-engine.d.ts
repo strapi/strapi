@@ -3,19 +3,6 @@ import type { ITransferResults, TransferTransform } from './utils';
 import type { ISourceProvider, IDestinationProvider } from './providers';
 import type { Schema } from '@strapi/strapi';
 
-export type TransferProgress = {
-  [key in TransferStage]?: {
-    count: number;
-    bytes: number;
-    aggregates?: {
-      [key: string]: {
-        count: number;
-        bytes: number;
-      };
-    };
-  };
-};
-
 /**
  * Defines the capabilities and properties of the transfer engine
  */
