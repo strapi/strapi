@@ -17,7 +17,7 @@ jobs:
         with:
           actions: 'close-issues'
           token: ${{ secrets.GITHUB_TOKEN }}
-          labels: 'status: pending reproduction'
+          labels: 'status: can not reproduce'
           inactive-day: 14
           close-reason: 'completed'
           body: |
