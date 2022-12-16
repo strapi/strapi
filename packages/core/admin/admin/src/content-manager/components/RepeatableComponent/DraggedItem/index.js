@@ -65,7 +65,6 @@ const DraggedItem = ({
 }) => {
   const dragRef = useRef(null);
   const dropRef = useRef(null);
-  const contentRef = useRef(null);
   const [, forceRerenderAfterDnd] = useState(false);
   const { formatMessage } = useIntl();
 
@@ -159,17 +158,6 @@ const DraggedItem = ({
     }
   }, [isDragging, setIsDraggingSibling]);
 
-  // Moves focus to the 1st focusable element in AccordionContent once new item added (mounted with isOpen=true)
-  useEffect(() => {
-    if (isOpen) {
-      const focusable = contentRef.current?.querySelector(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      focusable?.focus();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   // Effect in order to force a rerender after reordering the components
   // Since we are removing the Accordion when doing the DnD  we are losing the dragRef, therefore the replaced element cannot be dragged
   // anymore, this hack forces a rerender in order to apply the dragRef
@@ -248,7 +236,7 @@ const DraggedItem = ({
             togglePosition="left"
           />
           <AccordionContent>
-            <Stack background="neutral100" padding={6} spacing={6} ref={contentRef}>
+            <Stack background="neutral100" padding={6} spacing={6}>
               {fields.map((fieldRow, key) => {
                 return (
                   <Grid gap={4} key={key}>
