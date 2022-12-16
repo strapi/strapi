@@ -1,21 +1,18 @@
 'use strict';
 
 module.exports = function processEvent(strapi, name, ...args) {
-  const defaultGetPayload = (...args) => args[0];
-  const getAuthPayload = (...args) => ({
-    user: strapi.service('admin::user').sanitizeUser(args[0].user),
-  });
+  const getDefaultPayload = (...args) => args[0];
 
   const eventMap = {
-    'entry.create': defaultGetPayload,
-    'entry.update': defaultGetPayload,
-    'entry.delete': defaultGetPayload,
-    'entry.publish': defaultGetPayload,
-    'entry.unpublish': defaultGetPayload,
-    'media.create': defaultGetPayload,
-    'media.update': defaultGetPayload,
-    'media.delete': defaultGetPayload,
-    'admin.auth.success': getAuthPayload,
+    'entry.create': getDefaultPayload,
+    'entry.update': getDefaultPayload,
+    'entry.delete': getDefaultPayload,
+    'entry.publish': getDefaultPayload,
+    'entry.unpublish': getDefaultPayload,
+    'media.create': getDefaultPayload,
+    'media.update': getDefaultPayload,
+    'media.delete': getDefaultPayload,
+    'admin.auth.success': getDefaultPayload,
   };
   const getPayload = eventMap[name];
 
