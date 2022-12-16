@@ -335,6 +335,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
   // The publish and unpublish method could be refactored but let's leave the duplication for now
   const onUnpublish = useCallback(async () => {
+    const { post } = getFetchClient();
     const endPoint = getRequestUrl(`${slug}/actions/unpublish${searchToSend}`);
 
     dispatch(setStatus('unpublish-pending'));
@@ -342,8 +343,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
     try {
       trackUsageRef.current('willUnpublishEntry');
 
-      const { data } = await axiosInstance.post(endPoint);
-      console.log('onUnpublish', endPoint, data);
+      const { data } = await post(endPoint);
 
       trackUsageRef.current('didUnpublishEntry');
       toggleNotification({
