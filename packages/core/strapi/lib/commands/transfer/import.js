@@ -60,6 +60,16 @@ module.exports = async (opts) => {
     schemaStrategy: opts.schemaStrategy || DEFAULT_SCHEMA_STRATEGY,
     exclude: opts.exclude,
     rules: {
+      links: [
+        {
+          filter(link) {
+            return (
+              !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.left.type) &&
+              !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.right.type)
+            );
+          },
+        },
+      ],
       entities: [
         {
           filter: (entity) => !DEFAULT_IGNORED_CONTENT_TYPES.includes(entity.type),

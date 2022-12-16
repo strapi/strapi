@@ -54,6 +54,16 @@ module.exports = async (opts) => {
     versionStrategy: 'ignore', // for an export to file, versionStrategy will always be skipped
     schemaStrategy: 'ignore', // for an export to file, schemaStrategy will always be skipped
     transforms: {
+      links: [
+        {
+          filter(link) {
+            return (
+              !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.left.type) &&
+              !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.right.type)
+            );
+          },
+        },
+      ],
       entities: [
         {
           filter(entity) {

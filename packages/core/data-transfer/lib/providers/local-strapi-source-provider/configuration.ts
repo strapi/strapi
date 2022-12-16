@@ -2,6 +2,8 @@ import { chain } from 'stream-chain';
 import { Readable } from 'stream';
 import { set } from 'lodash/fp';
 
+import type { IConfiguration } from '../../../types';
+
 /**
  * Create a readable stream that export the Strapi app configuration
  */
@@ -23,7 +25,7 @@ export const createConfigurationStream = (strapi: Strapi.Strapi): Readable => {
 
   // Readable configuration stream
   return Readable.from(
-    (async function* () {
+    (async function* configurationGenerator(): AsyncGenerator<IConfiguration> {
       for (const stream of streams) {
         for await (const item of stream) {
           yield item;
