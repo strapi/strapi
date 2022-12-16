@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { useSelector, shallowEqual } from 'react-redux';
 import axios from 'axios';
-import { axiosInstance } from '../../../core/utils';
+import { getFetchClient } from '../../../utils/getFetchClient';
 import formatLayouts from './utils/formatLayouts';
 import reducer, { initialState } from './reducer';
 import { makeSelectModelAndComponentSchemas } from '../../pages/App/selectors';
@@ -22,12 +22,14 @@ const useFetchContentTypeLayout = (contentTypeUID) => {
       }
       dispatch({ type: 'GET_DATA' });
 
+      const { get } = getFetchClient();
+
       try {
         const endPoint = getRequestUrl(`content-types/${uid}/configuration`);
 
         const {
           data: { data },
-        } = await axiosInstance.get(endPoint, { cancelToken: source.token });
+        } = await get(endPoint, { cancelToken: source.token });
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
