@@ -241,14 +241,14 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   );
 
   const onDraftRelationCheck = useCallback(async () => {
+    const { get: getClient } = getFetchClient();
     try {
       trackUsageRef.current('willCheckDraftRelations');
 
       const endPoint = getRequestUrl(`${slug}/actions/numberOfDraftRelations`);
       dispatch(setStatus('draft-relation-check-pending'));
 
-      const numberOfDraftRelations = await axiosInstance.get(endPoint);
-      console.log('onPost', endPoint, numberOfDraftRelations);
+      const numberOfDraftRelations = await getClient(endPoint);
 
       trackUsageRef.current('didCheckDraftRelations');
 
