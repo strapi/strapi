@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import axios from 'axios';
 import { useIntl } from 'react-intl';
-import { axiosInstance } from '../../../core/utils';
+import { getFetchClient } from '../../../utils/getFetchClient';
 import { MUTATE_COLLECTION_TYPES_LINKS, MUTATE_SINGLE_TYPES_LINKS } from '../../../exposedHooks';
 import { getRequestUrl, getTrad } from '../../utils';
 import { getData, resetProps, setContentTypeLinks } from './actions';
@@ -22,6 +22,7 @@ const useModels = () => {
   const source = CancelToken.source();
   const { notifyStatus } = useNotifyAT();
   const { formatMessage } = useIntl();
+  const { get } = getFetchClient();
 
   const fetchData = async () => {
     dispatch(getData());
@@ -36,7 +37,7 @@ const useModels = () => {
         },
       ] = await Promise.all(
         ['components', 'content-types'].map((endPoint) =>
-          axiosInstance.get(getRequestUrl(endPoint), { cancelToken: source.token })
+          get(getRequestUrl(endPoint), { cancelToken: source.token })
         )
       );
 
