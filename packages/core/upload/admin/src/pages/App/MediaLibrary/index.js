@@ -94,7 +94,7 @@ export const MediaLibrary = () => {
   });
 
   const {
-    data: folders,
+    data: folders = [],
     isLoading: foldersLoading,
     errors: foldersError,
   } = useFolders({
@@ -115,7 +115,7 @@ export const MediaLibrary = () => {
     push(pathname);
   }
 
-  const folderCount = folders?.length || 0;
+  const folderCount = folders.length;
   const assets = assetsData?.results;
   const assetCount = assets?.length ?? 0;
   const isLoading = isCurrentFolderLoading || foldersLoading || permissionsLoading || assetsLoading;
