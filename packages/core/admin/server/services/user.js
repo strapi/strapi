@@ -184,7 +184,11 @@ const register = async ({ registrationToken, userInfo }) => {
  * Find one user
  */
 const findOne = async (id, populate = ['roles']) => {
-  return strapi.entityService.findOne('admin::user', id, { populate });
+  const user = await strapi.entityService.findOne('admin::user', id, { populate });
+
+  strapi.eventHub.emit('user.read', sanitizeUser(user));
+
+  return user;
 };
 
 /**
