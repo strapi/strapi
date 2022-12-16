@@ -10,8 +10,7 @@ import { basename, createHook } from './core/utils';
 import configureStore from './core/store/configureStore';
 import { customFields, Plugin } from './core/apis';
 import App from './pages/App';
-import AuthLogo from './assets/images/logo_strapi_auth_v4.png';
-import MenuLogo from './assets/images/logo_strapi_menu.png';
+import Logo from './assets/images/logo-strapi-2022.svg';
 import Providers from './components/Providers';
 import languageNativeNames from './translations/languageNativeNames';
 import {
@@ -29,10 +28,10 @@ class StrapiApp {
     this.customConfigurations = adminConfig.config;
     this.customBootstrapConfiguration = adminConfig.bootstrap;
     this.configurations = {
-      authLogo: AuthLogo,
+      authLogo: Logo,
       head: { favicon },
       locales: ['en'],
-      menuLogo: MenuLogo,
+      menuLogo: Logo,
       notifications: { releases: true },
       themes: { light: lightTheme, dark: darkTheme },
       translations: {},

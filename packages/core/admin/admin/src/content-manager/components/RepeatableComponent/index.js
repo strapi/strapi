@@ -48,15 +48,13 @@ const RepeatableComponent = ({
   const [collapseToOpen, setCollapseToOpen] = useState('');
   const [isDraggingSibling, setIsDraggingSibling] = useState(false);
   const [, drop] = useDrop({ accept: ItemTypes.COMPONENT });
-  const { getComponentLayout } = useContentTypeLayout();
+  const { getComponentLayout, components } = useContentTypeLayout();
   const componentLayoutData = useMemo(
     () => getComponentLayout(componentUid),
     [componentUid, getComponentLayout]
   );
 
-  const nextTempKey = useMemo(() => {
-    return getMaxTempKey(componentValue || []) + 1;
-  }, [componentValue]);
+  const nextTempKey = useMemo(() => getMaxTempKey(componentValue || []) + 1, [componentValue]);
 
   const componentErrorKeys = getComponentErrorKeys(name, formErrors);
 
@@ -73,7 +71,7 @@ const RepeatableComponent = ({
       if (componentValueLength < max) {
         const shouldCheckErrors = hasMinError;
 
-        addRepeatableComponentToField(name, componentUid, shouldCheckErrors);
+        addRepeatableComponentToField(name, componentLayoutData, components, shouldCheckErrors);
 
         setCollapseToOpen(nextTempKey);
       } else if (componentValueLength >= max) {
@@ -84,8 +82,9 @@ const RepeatableComponent = ({
       }
     }
   }, [
+    components,
     addRepeatableComponentToField,
-    componentUid,
+    componentLayoutData,
     componentValueLength,
     hasMinError,
     isReadOnly,

@@ -82,7 +82,7 @@ export const MediaLibrary = () => {
   });
 
   const {
-    data: folders,
+    data: folders = [],
     isLoading: foldersLoading,
     errors: foldersError,
   } = useFolders({
@@ -103,7 +103,7 @@ export const MediaLibrary = () => {
     push(pathname);
   }
 
-  const folderCount = folders?.length || 0;
+  const folderCount = folders.length;
   const assets = assetsData?.results;
   const assetCount = assets?.length ?? 0;
   const isLoading = isCurrentFolderLoading || foldersLoading || permissionsLoading || assetsLoading;
@@ -147,6 +147,25 @@ export const MediaLibrary = () => {
     if (currentFolderToEditRef.current) {
       currentFolderToEditRef.current.focus();
     }
+  };
+
+  const handleAssetDeleted = (numberOfAssets) => {
+    if (
+      numberOfAssets === assetCount &&
+      assetsData.pagination.page === assetsData.pagination.pageCount &&
+      assetsData.pagination.page > 1
+    ) {
+      setQuery({
+        ...query,
+        page: assetsData.pagination.page - 1,
+      });
+    }
+  };
+
+  const handleBulkActionSuccess = () => {
+    selectAll();
+
+    handleAssetDeleted(selected.length);
   };
 
   useFocusWhenNavigate();
@@ -216,7 +235,11 @@ export const MediaLibrary = () => {
 
         <ContentLayout>
           {selected.length > 0 && (
-            <BulkActions currentFolder={currentFolder} selected={selected} onSuccess={selectAll} />
+            <BulkActions
+              currentFolder={currentFolder}
+              selected={selected}
+              onSuccess={handleBulkActionSuccess}
+            />
           )}
 
           {isLoading && <LoadingIndicatorPage />}
@@ -379,7 +402,14 @@ export const MediaLibrary = () => {
 
       {assetToEdit && (
         <EditAssetDialog
-          onClose={() => setAssetToEdit(undefined)}
+          onClose={(editedAsset) => {
+            // The asset has been deleted
+            if (editedAsset === null) {
+              handleAssetDeleted(1);
+            }
+
+            setAssetToEdit(undefined);
+          }}
           asset={assetToEdit}
           canUpdate={canUpdate}
           canCopyLink={canCopyLink}

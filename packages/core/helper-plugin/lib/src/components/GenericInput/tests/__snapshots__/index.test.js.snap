@@ -68,17 +68,26 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
   justify-content: space-between;
 }
 
+.c1 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c1 > * + * {
+  margin-top: 4px;
+}
+
 .c2 {
-  font-weight: 600;
-  color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
 }
 
 .c4 {
-  color: #d02b20;
   font-size: 0.875rem;
   line-height: 1.43;
+  color: #d02b20;
 }
 
 .c5 {
@@ -144,15 +153,6 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
 .c7:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c1 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c1 > * + * {
-  margin-top: 4px;
 }
 
 .c12 path {

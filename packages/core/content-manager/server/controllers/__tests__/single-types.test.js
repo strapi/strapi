@@ -85,6 +85,7 @@ describe('Single Types', () => {
       },
       user: {
         id: 1,
+        email: 'someTestEmailString',
       },
     };
 
@@ -180,7 +181,9 @@ describe('Single Types', () => {
     );
 
     expect(sendTelemetry).toHaveBeenCalledWith('didCreateFirstContentTypeEntry', {
-      model: modelUid,
+      eventProperties: {
+        model: modelUid,
+      },
     });
   });
 
