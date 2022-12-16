@@ -4,7 +4,7 @@
 
 As of January 2023 (and until this document is updated), only the v4.x.x _GA_ releases of Strapi are supported for updates and bug fixes. Any previous versions are currently not supported and users are advised to use them "at their own risk".
 
-- v4.x.x **GA** is considered LTS until further notice
+- v4.x.x **Stable** is considered LTS until further notice
 - v4.x.x **Beta** is considered unstable and not supported
 - v4.x.x **Alpha** is considered unstable and not supported
 - v3.x.x is considered deprecated and not supported
