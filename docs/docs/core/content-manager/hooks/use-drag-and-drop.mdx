@@ -132,7 +132,16 @@ import { ConnectDropTarget, ConnectDragSource, ConnectDragPreview } from 'react-
 interface UseDragAndDropOptions {
   index: number;
   onMoveItem: (newIndex: number, currentIndex: number) => void;
+  /**
+   * @default "regular"
+   * Defines whether the change in index should be immediately over another
+   * dropzone or half way over it (regular).
+   */
+  dropSensitivity?: 'immediate' | 'regular';
   item?: object;
+  /**
+   * @default 'STRAPI_DND'
+   */
   type?: string;
   onCancel?: (index: number) => void;
   onDropItem?: (index: number) => void;

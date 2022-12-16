@@ -50,11 +50,13 @@ export const RelationItem = ({
       item: {
         displayedValue: displayValue,
         status,
+        id,
       },
       onGrabItem,
       onDropItem,
       onCancel,
       onMoveItem: updatePositionOfRelation,
+      dropSensitivity: 'immediate',
     });
 
   const composedRefs = composeRefs(relationRef, dragRef);
