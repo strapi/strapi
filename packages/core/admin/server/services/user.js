@@ -273,10 +273,9 @@ const deleteByIds = async (ids) => {
     deletedUsers.push(deletedUser);
   }
 
-  strapi.eventHub.emit(
-    'user.delete',
-    deletedUsers.map((deletedUser) => sanitizeUser(deletedUser))
-  );
+  strapi.eventHub.emit('user.delete', {
+    users: deletedUsers.map((deletedUser) => sanitizeUser(deletedUser)),
+  });
 
   return deletedUsers;
 };
