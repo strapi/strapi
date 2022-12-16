@@ -22,7 +22,6 @@ const {
  * @typedef ImportCommandOptions Options given to the CLI import command
  *
  * @property {string} [file] The file path to import
- * @property {number} [maxSizeJsonl] Maximum size for each .jsonl file
  * @property {boolean} [encrypt] Used to encrypt the final archive
  * @property {string} [key] Encryption key, only useful when encryption is enabled
  * @property {boolean} [compress] Used to compress the final archive

@@ -269,25 +269,9 @@ program
   .addOption(
     new Option('--key <string>', 'Provide encryption key in command instead of using a prompt')
   )
-  .addOption(
-    new Option(
-      '--max-size-jsonl <max MB per internal backup file>',
-      'split internal jsonl files when exceeding max size in MB'
-    )
-      .argParser(parseFloat)
-      .default(256)
-  )
   .addOption(new Option('-f, --file <file>', 'name to use for exported file (without extensions)'))
   .allowExcessArguments(false)
   .hook('preAction', promptEncryptionKey)
-  // validate inputs
-  .hook('preAction', (thisCommand) => {
-    const opts = thisCommand.opts();
-    if (!opts.maxSizeJsonl) {
-      console.error('Invalid max-size-jsonl provided. Must be a number value.');
-      process.exit(1);
-    }
-  })
   .action(getLocalScript('transfer/export'));
 
 // `$ strapi import`
