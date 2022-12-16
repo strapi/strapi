@@ -22,6 +22,11 @@ const sanitizeUser = (user) => {
   };
 };
 
+const sanitizeAuditLogPayload = (user) => ({
+  ...sanitizeUser(user),
+  roles: user.roles.map((role) => sanitizeUserRoles(role)),
+});
+
 /**
  * Create and save a user in database
  * @param attributes A partial user object
@@ -42,6 +47,8 @@ const create = async (attributes) => {
   const createdUser = await strapi.query('admin::user').create({ data: user, populate: ['roles'] });
 
   getService('metrics').sendDidInviteUser();
+
+  strapi.eventHub.emit('user.create', sanitizeAuditLogPayload(createdUser));
 
   return createdUser;
 };
