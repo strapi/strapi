@@ -29,6 +29,34 @@ const pickComparableFields = pick(COMPARABLE_FIELDS);
 
 const jsonClean = (data) => JSON.parse(JSON.stringify(data));
 
+const ROLE_EVENTS = {
+  CREATE: 'role.create',
+  UPDATE: 'role.update',
+  DELETE: 'role.delete',
+  PERMISSIONS: 'role.permissions',
+};
+
+/**
+ * Emit an event on role actions
+ * @param {string} action
+ * @param {Function} fn controller
+ * @returns {Function}
+ */
+const wrapWithEmitEvent =
+  (event, fn) =>
+  async (...args) => {
+    const result = await fn(...args);
+
+    const sanitizedResults =
+      event === ROLE_EVENTS.PERMISSIONS
+        ? result.map(permissionDomain.sanitizePermissionFields)
+        : sanitizeRole(result);
+
+    strapi.eventHub.emit(event, sanitizedResults);
+
+    return result;
+  };
+
 /**
  * Compare two permissions
  * @param {Permission} p1
@@ -48,7 +76,7 @@ const arePermissionsEqual = (p1, p2) => {
  * @param attributes A partial role object
  * @returns {Promise<role>}
  */
-const create = async (attributes) => {
+const create = wrapWithEmitEvent(ROLE_EVENTS.CREATE, async (attributes) => {
   const alreadyExists = await exists({ name: attributes.name });
 
   if (alreadyExists) {
@@ -65,7 +93,7 @@ const create = async (attributes) => {
   };
 
   return strapi.query('admin::role').create({ data: rolesWithCode });
-};
+});
 
 /**
  * Find a role in database
@@ -122,7 +150,7 @@ const findAllWithUsersCount = async (populate) => {
  * @param attributes A partial role object
  * @returns {Promise<role>}
  */
-const update = async (params, attributes) => {
+const update = wrapWithEmitEvent(ROLE_EVENTS.UPDATE, async (params, attributes) => {
   const sanitizedAttributes = _.omit(attributes, ['code']);
 
   if (_.has(params, 'id') && _.has(sanitizedAttributes, 'name')) {
@@ -138,7 +166,7 @@ const update = async (params, attributes) => {
   }
 
   return strapi.query('admin::role').update({ where: params, data: sanitizedAttributes });
-};
+});
 
 /**
  * Check if a role exists in database
@@ -184,7 +212,7 @@ const checkRolesIdForDeletion = async (ids = []) => {
  * @param ids query params to find the roles
  * @returns {Promise<array>}
  */
-const deleteByIds = async (ids = []) => {
+const deleteByIds = wrapWithEmitEvent(ROLE_EVENTS.DELETE, async (ids = []) => {
   await checkRolesIdForDeletion(ids);
 
   await getService('permission').deleteByRolesIds(ids);
@@ -194,12 +222,13 @@ const deleteByIds = async (ids = []) => {
     const deletedRole = await strapi.query('admin::role').delete({ where: { id } });
 
     if (deletedRole) {
+      strapi.eventHub.emit('role.delete', deletedRole);
       deletedRoles.push(deletedRole);
     }
   }
 
   return deletedRoles;
-};
+});
 
 /** Count the number of users for some roles
  * @returns {Promise<number>}
@@ -309,53 +338,56 @@ const displayWarningIfNoSuperAdmin = async () => {
  * @param {string|int} roleId - role ID
  * @param {Array<Permission{action,subject,fields,conditions}>} permissions - permissions to assign to the role
  */
-const assignPermissions = async (roleId, permissions = []) => {
-  await validatePermissionsExist(permissions);
+const assignPermissions = wrapWithEmitEvent(
+  ROLE_EVENTS.PERMISSIONS,
+  async (roleId, permissions = []) => {
+    await validatePermissionsExist(permissions);
 
-  const superAdmin = await getService('role').getSuperAdmin();
-  const isSuperAdmin = superAdmin && superAdmin.id === roleId;
-  const assignRole = set('role', roleId);
+    const superAdmin = await getService('role').getSuperAdmin();
+    const isSuperAdmin = superAdmin && superAdmin.id === roleId;
+    const assignRole = set('role', roleId);
 
-  const permissionsWithRole = permissions
-    // Add the role attribute to every permission
-    .map(assignRole)
-    // Transform each permission into a Permission instance
-    .map(permissionDomain.create);
+    const permissionsWithRole = permissions
+      // Add the role attribute to every permission
+      .map(assignRole)
+      // Transform each permission into a Permission instance
+      .map(permissionDomain.create);
 
-  const existingPermissions = await getService('permission').findMany({
-    where: { role: { id: roleId } },
-    populate: ['role'],
-  });
+    const existingPermissions = await getService('permission').findMany({
+      where: { role: { id: roleId } },
+      populate: ['role'],
+    });
 
-  const permissionsToAdd = differenceWith(
-    arePermissionsEqual,
-    permissionsWithRole,
-    existingPermissions
-  );
+    const permissionsToAdd = differenceWith(
+      arePermissionsEqual,
+      permissionsWithRole,
+      existingPermissions
+    );
 
-  const permissionsToDelete = differenceWith(
-    arePermissionsEqual,
-    existingPermissions,
-    permissionsWithRole
-  );
+    const permissionsToDelete = differenceWith(
+      arePermissionsEqual,
+      existingPermissions,
+      permissionsWithRole
+    );
 
-  const permissionsToReturn = differenceBy('id', permissionsToDelete, existingPermissions);
+    const permissionsToReturn = differenceBy('id', permissionsToDelete, existingPermissions);
 
-  if (permissionsToDelete.length > 0) {
-    await getService('permission').deleteByIds(permissionsToDelete.map(prop('id')));
+    if (permissionsToDelete.length > 0) {
+      await getService('permission').deleteByIds(permissionsToDelete.map(prop('id')));
+    }
+
+    if (permissionsToAdd.length > 0) {
+      const newPermissions = await addPermissions(roleId, permissionsToAdd);
+      permissionsToReturn.push(...newPermissions);
+    }
+
+    if (!isSuperAdmin && (permissionsToAdd.length || permissionsToDelete.length)) {
+      await getService('metrics').sendDidUpdateRolePermissions();
+    }
+
+    return permissionsToReturn;
   }
-
-  if (permissionsToAdd.length > 0) {
-    const newPermissions = await addPermissions(roleId, permissionsToAdd);
-    permissionsToReturn.push(...newPermissions);
-  }
-
-  if (!isSuperAdmin && (permissionsToAdd.length || permissionsToDelete.length)) {
-    await getService('metrics').sendDidUpdateRolePermissions();
-  }
-
-  return permissionsToReturn;
-};
+);
 
 const addPermissions = async (roleId, permissions) => {
   const { conditionProvider, createMany } = getService('permission');

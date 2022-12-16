@@ -13,6 +13,10 @@ module.exports = function processEvent(strapi, name, ...args) {
     'media.update': getDefaultPayload,
     'media.delete': getDefaultPayload,
     'admin.auth.success': getDefaultPayload,
+    'role.create': getDefaultPayload,
+    'role.update': getDefaultPayload,
+    'role.delete': getDefaultPayload,
+    'role.permissions': getDefaultPayload,
   };
   const getPayload = eventMap[name];
 
