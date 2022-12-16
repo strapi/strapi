@@ -1,7 +1,6 @@
 import { Readable } from 'stream';
 
 import { createLinksStream } from '../links';
-import { getDeepPopulateQuery } from '../links/utils';
 import { collect, getStrapiFactory } from '../../../__tests__/test-utils';
 
 describe('Local Strapi Source Provider - Entities Streaming', () => {
@@ -323,101 +322,6 @@ describe('Local Strapi Source Provider - Entities Streaming', () => {
             },
           },
         ])
-      );
-    });
-  });
-
-  describe('Get Deep Populate Query', () => {
-    test('Should return an empty object if there is nothing to populate', () => {
-      const strapi = getStrapiFactory({
-        contentTypes: {
-          blog: {
-            uid: 'blog',
-            attributes: {
-              title: { type: 'string' },
-              age: { type: 'number' },
-            },
-          },
-        },
-      })();
-
-      const schema = strapi.contentTypes.blog;
-      const populate = getDeepPopulateQuery(schema, strapi);
-
-      expect(populate).toEqual({});
-    });
-
-    test("Should return an empty object if there are components or dynamic zones but they doesn't contain relations", () => {
-      const strapi = getStrapiFactory({
-        contentTypes: {
-          blog: {
-            uid: 'blog',
-            attributes: {
-              title: { type: 'string' },
-              age: { type: 'number' },
-              compo: { type: 'component', component: 'somecomponent' },
-              dz: { type: 'dynamiczone', components: ['somecomponent'] },
-            },
-          },
-        },
-        components: {
-          somecomponent: {
-            uid: 'somecomponent',
-            attributes: {
-              field: { type: 'string' },
-            },
-          },
-        },
-      })();
-
-      const schema = strapi.contentTypes.blog;
-      const populate = getDeepPopulateQuery(schema, strapi);
-
-      expect(populate).toEqual({});
-    });
-
-    test('Should return a nested populate object for first level of relations', () => {
-      const strapi = getStrapiFactory({
-        contentTypes: {
-          blog: {
-            uid: 'blog',
-            attributes: {
-              title: { type: 'string' },
-              age: { type: 'number' },
-              compo: { type: 'component', component: 'somecomponent' },
-              dz: { type: 'dynamiczone', components: ['somecomponent'] },
-              blog: { type: 'relation', target: 'blog', relation: 'oneToOne' },
-            },
-          },
-        },
-        components: {
-          somecomponent: {
-            uid: 'somecomponent',
-            attributes: {
-              field: { type: 'string' },
-              blog: { type: 'relation', target: 'blog', relation: 'oneToOne' },
-            },
-          },
-        },
-      })();
-
-      const schema = strapi.contentTypes.blog;
-      const populate = getDeepPopulateQuery(schema, strapi);
-
-      expect(populate).toMatchObject(
-        expect.objectContaining({
-          blog: {
-            fields: ['id'],
-          },
-          compo: {
-            fields: ['id'],
-            populate: { blog: { fields: ['id'] } },
-          },
-          dz: {
-            fields: ['id'],
-            populate: { blog: { fields: ['id'] } },
-          },
-        })
       );
     });
   });
