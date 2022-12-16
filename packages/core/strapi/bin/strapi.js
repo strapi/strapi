@@ -267,11 +267,14 @@ program
   .command('export')
   .description('Export data from Strapi to file')
   .addOption(
-    new Option('--no-encrypt', `Disable 'aes-128-ecb' encryption of the output file`).default(true)
+    new Option('--no-encrypt', `Disables 'aes-128-ecb' encryption of the output file`).default(true)
   )
-  .addOption(new Option('--no-compress', 'Disable gzip compression of output file').default(true))
+  .addOption(new Option('--no-compress', 'Disables gzip compression of output file').default(true))
   .addOption(
-    new Option('--key <string>', 'Provide encryption key in command instead of using a prompt')
+    new Option(
+      '-k, --key <string>',
+      'Provide encryption key in command instead of using the prompt'
+    )
   )
   .addOption(
     new Option(
@@ -314,10 +317,13 @@ program
   )
   .requiredOption(
     '-f, --file <file>',
-    'path and filename to the Strapi export file you want to import'
+    'path and filename for the Strapi export file you want to import'
   )
   .addOption(
-    new Option('-k, --key <string>', 'Provide encryption key in command instead of using a prompt')
+    new Option(
+      '-k, --key <string>',
+      'Provide encryption key in command instead of using the prompt'
+    )
   )
   .allowExcessArguments(false)
   .hook('preAction', async (thisCommand) => {
