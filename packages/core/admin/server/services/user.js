@@ -74,12 +74,11 @@ const updateById = async (id, attributes) => {
     }
   }
 
-  let updatedUser;
   // hash password if a new one is sent
   if (_.has(attributes, 'password')) {
     const hashedPassword = await getService('auth').hashPassword(attributes.password);
 
-    updatedUser = await strapi.query('admin::user').update({
+    const updatedUser = await strapi.query('admin::user').update({
       where: { id },
       data: {
         ...attributes,
@@ -87,9 +86,13 @@ const updateById = async (id, attributes) => {
       },
       populate: ['roles'],
     });
+
+    strapi.eventHub.emit('user.update', sanitizeUser(updatedUser));
+
+    return updatedUser;
   }
 
-  updatedUser = await strapi.query('admin::user').update({
+  const updatedUser = await strapi.query('admin::user').update({
     where: { id },
     data: attributes,
     populate: ['roles'],
