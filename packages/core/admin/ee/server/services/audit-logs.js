@@ -12,13 +12,19 @@ const createAuditLogsService = (strapi) => {
 
   return {
     register() {
-      this.unsubscribe = strapi.eventHub.subscribe(saveEvent);
+      this._eventHubUnsubscribe = strapi.eventHub.subscribe(saveEvent);
+      return this;
+    },
+
+    unsubscribe() {
+      if (this._eventHubUnsubscribe) {
+        this._eventHubUnsubscribe();
+      }
+      return this;
     },
 
     destroy() {
-      if (this.unsubscribe) {
-        this.unsubscribe();
-      }
+      return this.unsubscribe();
     },
   };
 };
