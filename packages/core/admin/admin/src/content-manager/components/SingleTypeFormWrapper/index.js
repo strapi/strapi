@@ -264,14 +264,14 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   }, [displayErrors, slug, dispatch]);
 
   const onPublish = useCallback(async () => {
+    const { post } = getFetchClient();
     try {
       trackUsageRef.current('willPublishEntry');
       const endPoint = getRequestUrl(`${slug}/actions/publish${searchToSend}`);
 
       dispatch(setStatus('publish-pending'));
 
-      const { data } = await axiosInstance.post(endPoint);
-      console.log('onPublish', endPoint, data);
+      const { data } = await post(endPoint);
 
       trackUsageRef.current('didPublishEntry');
       toggleNotification({
