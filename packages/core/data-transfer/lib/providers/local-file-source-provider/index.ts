@@ -3,14 +3,15 @@ import type { Readable } from 'stream';
 import fs from 'fs-extra';
 import zip from 'zlib';
 import tar from 'tar';
+import path from 'path';
 import { keyBy } from 'lodash/fp';
 import { chain } from 'stream-chain';
 import { pipeline, PassThrough } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
-import type { IMetadata, ISourceProvider, ProviderType } from '../../types';
+import type { IAsset, IMetadata, ISourceProvider, ProviderType } from '../../../types';
 
-import { createDecryptionCipher } from '../encryption';
-import * as utils from '../utils';
+import { createDecryptionCipher } from '../../encryption';
+import * as utils from '../../utils';
 
 type StreamItemArray = Parameters<typeof chain>[0];
 
@@ -62,12 +63,12 @@ class LocalFileSourceProvider implements ISourceProvider {
    * Pre flight checks regarding the provided options (making sure that the provided path is correct, etc...)
    */
   async bootstrap() {
-    const { path } = this.options.file;
+    const { path: filePath } = this.options.file;
     try {
       // This is only to show a nicer error, it doesn't ensure the file will still exist when we try to open it later
-      await fs.access(path, fs.constants.R_OK);
+      await fs.access(filePath, fs.constants.R_OK);
     } catch (e) {
-      throw new Error(`Can't access file "${path}".`);
+      throw new Error(`Can't access file "${filePath}".`);
     }
   }
 
@@ -101,6 +102,41 @@ class LocalFileSourceProvider implements ISourceProvider {
     return this.#streamJsonlDirectory('configuration');
   }
 
+  streamAssets(): Readable | Promise<Readable> {
+    const inStream = this.#getBackupStream();
+    const outStream = new PassThrough({ objectMode: true });
+
+    pipeline(
+      [
+        inStream,
+        new tar.Parse({
+          filter(filePath, entry) {
+            if (entry.type !== 'File') {
+              return false;
+            }
+
+            const parts = filePath.split('/');
+            return parts[0] === 'assets' && parts[1] === 'uploads';
+          },
+          onentry(entry) {
+            const { path: filePath, size = 0 } = entry;
+            const file = path.basename(filePath);
+            const asset: IAsset = {
+              filename: file,
+              filepath: filePath,
+              stats: { size },
+              stream: entry as unknown as Readable,
+            };
+            outStream.write(asset);
+          },
+        }),
+      ],
+      () => outStream.end()
+    );
+
+    return outStream;
+  }
+
   #getBackupStream() {
     const { file, encryption, compression } = this.options;
 
@@ -132,12 +168,12 @@ class LocalFileSourceProvider implements ISourceProvider {
       [
         inStream,
         new tar.Parse({
-          filter(path, entry) {
+          filter(filePath, entry) {
             if (entry.type !== 'File') {
               return false;
             }
 
-            const parts = path.split('/');
+            const parts = filePath.split('/');
 
             if (parts.length !== 2) {
               return false;
@@ -184,8 +220,8 @@ class LocalFileSourceProvider implements ISourceProvider {
             /**
              * Filter the parsed entries to only keep the one that matches the given filepath
              */
-            filter(path, entry) {
-              return path === filePath && entry.type === 'File';
+            filter(entryPath, entry) {
+              return entryPath === filePath && entry.type === 'File';
             },
 
             /**

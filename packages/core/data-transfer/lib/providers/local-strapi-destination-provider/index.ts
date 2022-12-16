@@ -1,6 +1,8 @@
 import { Writable } from 'stream';
+import path from 'path';
+import * as fse from 'fs-extra';
+import type { IAsset, IDestinationProvider, IMetadata, ProviderType } from '../../../types';
 
-import type { IDestinationProvider, IMetadata, ProviderType } from '../../../types';
 import { restore } from './strategies';
 import * as utils from '../../utils';
 
@@ -112,6 +114,54 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     }
 
     throw new Error(`Invalid strategy supplied: "${strategy}"`);
+  }
+
+  async getAssetsStream(): Promise<Writable> {
+    if (!this.strapi) {
+      throw new Error('Not able to stream Assets. Strapi instance not found');
+    }
+
+    const assetsDirectory = path.join(this.strapi.dirs.static.public, 'uploads');
+    const backupDirectory = path.join(
+      this.strapi.dirs.static.public,
+      `uploads_backup_${Date.now()}`
+    );
+
+    await fse.rename(assetsDirectory, backupDirectory);
+    await fse.mkdir(assetsDirectory);
+
+    return new Writable({
+      objectMode: true,
+      async final(next) {
+        await fse.rm(backupDirectory, { recursive: true, force: true });
+        next();
+      },
+      async write(chunk: IAsset, _encoding, callback) {
+        const entryPath = path.join(assetsDirectory, chunk.filename);
+        const writableStream = fse.createWriteStream(entryPath);
+
+        chunk.stream
+          .pipe(writableStream)
+          .on('close', callback)
+          .on('error', async (error: Error) => {
+            try {
+              await fse.rm(assetsDirectory, { recursive: true, force: true });
+              await fse.rename(backupDirectory, assetsDirectory);
+              this.destroy(
+                new Error(
+                  `There was an error during the transfer process. The original files have been restored to ${assetsDirectory}`
+                )
+              );
+            } catch (err) {
+              throw new Error(
+                `There was an error doing the rollback process. The original files are in ${backupDirectory}, but we failed to restore them to ${assetsDirectory}`
+              );
+            } finally {
+              callback(error);
+            }
+          });
+      },
+    });
   }
 
   async getConfigurationStream(): Promise<Writable> {
