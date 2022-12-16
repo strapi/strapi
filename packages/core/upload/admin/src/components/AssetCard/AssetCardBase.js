@@ -45,12 +45,13 @@ const CardContainer = styled(Card)`
 
 export const AssetCardBase = ({
   children,
-  name,
   extension,
-  selected,
+  isSelectable,
+  name,
   onSelect,
   onRemove,
   onEdit,
+  selected,
   subtitle,
   variant,
 }) => {
@@ -77,7 +78,7 @@ export const AssetCardBase = ({
   return (
     <CardContainer role="button" height="100%" tabIndex={-1} onClick={handleClick}>
       <CardHeader>
-        {onSelect && (
+        {isSelectable && (
           // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
           <div onClick={handlePropagationClick}>
             <CardCheckbox value={selected} onValueChange={onSelect} />
@@ -132,10 +133,11 @@ export const AssetCardBase = ({
 
 AssetCardBase.defaultProps = {
   children: undefined,
-  selected: false,
+  isSelectable: true,
   onEdit: undefined,
   onSelect: undefined,
   onRemove: undefined,
+  selected: false,
   subtitle: '',
   variant: 'Image',
 };
@@ -143,6 +145,7 @@ AssetCardBase.defaultProps = {
 AssetCardBase.propTypes = {
   children: PropTypes.node,
   extension: PropTypes.string.isRequired,
+  isSelectable: PropTypes.bool,
   name: PropTypes.string.isRequired,
   onEdit: PropTypes.func,
   onSelect: PropTypes.func,
