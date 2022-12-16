@@ -1,15 +1,15 @@
 import { createLocalStrapiDestinationProvider } from '../index';
-import * as restoreApi from '../restore';
-import { getStrapiFactory, getContentTypes } from '../../test-utils';
+import * as restoreApi from '../strategies/restore';
+import { getStrapiFactory, getContentTypes, setGlobalStrapi } from '../../test-utils';
 
 afterEach(() => {
   jest.clearAllMocks();
 });
 
-jest.mock('../restore', () => {
+jest.mock('../strategies/restore', () => {
   return {
     __esModule: true,
-    ...jest.requireActual('../restore'),
+    ...jest.requireActual('../strategies/restore'),
   };
 });
 
@@ -94,29 +94,39 @@ describe('Local Strapi Source Destination', () => {
           contentType: { uid: 'bar' },
         },
       ];
-      const deleteMany = jest.fn(async (uid: string) => ({
-        count: entities.filter((entity) => entity.contentType.uid === uid).length,
-      }));
 
-      const query = jest.fn(() => {
+      const deleteMany = (uid: string) =>
+        jest.fn(async () => ({
+          count: entities.filter((entity) => entity.contentType.uid === uid).length,
+        }));
+
+      const findMany = (uid: string) => {
+        return jest.fn(async () => entities.filter((entity) => entity.contentType.uid === uid));
+      };
+
+      const query = jest.fn((uid) => {
         return {
-          deleteMany: jest.fn(() => ({
-            count: 0,
-          })),
+          deleteMany: deleteMany(uid),
+          findMany: findMany(uid),
         };
       });
 
+      const getModel = jest.fn((uid: string) => getContentTypes()[uid]);
+
+      const strapi = getStrapiFactory({
+        contentTypes: getContentTypes(),
+        query,
+        getModel,
+        db: { query },
+      })();
+
+      setGlobalStrapi(strapi);
+
       const provider = createLocalStrapiDestinationProvider({
-        getStrapi: getStrapiFactory({
-          contentTypes: getContentTypes(),
-          entityService: {
-            deleteMany,
-          },
-          query,
-        }),
+        getStrapi: () => strapi,
         strategy: 'restore',
       });
-      const deleteAllSpy = jest.spyOn(restoreApi, 'deleteAllRecords');
+      const deleteAllSpy = jest.spyOn(restoreApi, 'deleteRecords');
       await provider.bootstrap();
       await provider.beforeTransfer();
 
@@ -128,7 +138,7 @@ describe('Local Strapi Source Destination', () => {
         getStrapi: getStrapiFactory({}),
         strategy: 'merge',
       });
-      const deleteAllSpy = jest.spyOn(restoreApi, 'deleteAllRecords');
+      const deleteAllSpy = jest.spyOn(restoreApi, 'deleteRecords');
       await provider.bootstrap();
       await provider.beforeTransfer();
 

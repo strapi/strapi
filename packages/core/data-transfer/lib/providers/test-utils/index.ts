@@ -74,3 +74,10 @@ export const createMockedQueryBuilder = <T extends string = ContentType>(data: {
       },
     };
   });
+
+/**
+ * Update the global store with the given strapi value
+ */
+export const setGlobalStrapi = (strapi: Strapi.Strapi): void => {
+  (global as unknown as Global).strapi = strapi;
+};

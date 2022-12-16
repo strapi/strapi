@@ -4,6 +4,9 @@ const {
   createLocalFileSourceProvider,
   createLocalStrapiDestinationProvider,
   createTransferEngine,
+  DEFAULT_VERSION_STRATEGY,
+  DEFAULT_SCHEMA_STRATEGY,
+  DEFAULT_CONFLICT_STRATEGY,
   // TODO: we need to solve this issue with typescript modules
   // eslint-disable-next-line import/no-unresolved, node/no-missing-require
 } = require('@strapi/data-transfer');
@@ -11,7 +14,7 @@ const { isObject } = require('lodash/fp');
 const path = require('path');
 
 const strapi = require('../../index');
-const { buildTransferTable } = require('./utils');
+const { buildTransferTable, DEFAULT_IGNORED_CONTENT_TYPES } = require('./utils');
 
 /**
  * @typedef {import('@strapi/data-transfer').ILocalFileSourceProviderOptions} ILocalFileSourceProviderOptions
@@ -38,25 +41,13 @@ module.exports = async (opts) => {
    */
   const strapiInstance = await strapi(await strapi.compile()).load();
 
-  const exceptions = [
-    'admin::permission',
-    'admin::user',
-    'admin::role',
-    'admin::api-token',
-    'admin::api-token-permission',
-  ];
-  const contentTypes = Object.values(strapiInstance.contentTypes);
-  const contentTypesToDelete = contentTypes.filter(
-    (contentType) => !exceptions.includes(contentType.uid)
-  );
   const destinationOptions = {
     async getStrapi() {
       return strapiInstance;
     },
-    strategy: opts.conflictStrategy,
+    strategy: opts.conflictStrategy || DEFAULT_CONFLICT_STRATEGY,
     restore: {
-      contentTypes: contentTypesToDelete,
-      uidsOfModelsToDelete: ['webhook', 'strapi::core-store'],
+      entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },
     },
   };
   const destination = createLocalStrapiDestinationProvider(destinationOptions);
@@ -65,9 +56,26 @@ module.exports = async (opts) => {
    * Configure and run the transfer engine
    */
   const engineOptions = {
-    strategy: opts.conflictStrategy,
-    versionMatching: opts.schemaComparison,
+    versionStrategy: opts.versionStrategy || DEFAULT_VERSION_STRATEGY,
+    schemaStrategy: opts.schemaStrategy || DEFAULT_SCHEMA_STRATEGY,
     exclude: opts.exclude,
+    rules: {
+      links: [
+        {
+          filter(link) {
+            return (
+              !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.left.type) &&
+              !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.right.type)
+            );
+          },
+        },
+      ],
+      entities: [
+        {
+          filter: (entity) => !DEFAULT_IGNORED_CONTENT_TYPES.includes(entity.type),
+        },
+      ],
+    },
   };
   const engine = createTransferEngine(source, destination, engineOptions);
 
@@ -101,7 +109,8 @@ module.exports = async (opts) => {
     logger.info('Import process has been completed successfully!');
     process.exit(0);
   } catch (e) {
-    logger.error(`Import process failed unexpectedly: ${e.message}`);
+    logger.error('Import process failed unexpectedly:');
+    logger.error(e);
     process.exit(1);
   }
 };

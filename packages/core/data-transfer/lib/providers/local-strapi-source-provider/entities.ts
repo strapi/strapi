@@ -1,7 +1,8 @@
 import type { ContentTypeSchema } from '@strapi/strapi';
 
-import { isObject, isArray, size } from 'lodash/fp';
+import { isObject, isArray, isEmpty, size } from 'lodash/fp';
 import { Readable, PassThrough } from 'stream';
+import { IEntity } from '../../../types';
 
 /**
  * Generate and consume content-types streams in order to stream each entity individually
@@ -14,6 +15,8 @@ export const createEntitiesStream = (strapi: Strapi.Strapi): Readable => {
       const stream: Readable = strapi.db
         // Create a query builder instance (default type is 'select')
         .queryBuilder(contentType.uid)
+        // Fetch all columns
+        .select('*')
         // Apply the populate
         .populate(getPopulateAttributes(strapi, contentType))
         // Get a readable stream
@@ -24,7 +27,10 @@ export const createEntitiesStream = (strapi: Strapi.Strapi): Readable => {
   }
 
   return Readable.from(
-    (async function* () {
+    (async function* entitiesGenerator(): AsyncGenerator<{
+      entity: IEntity;
+      contentType: ContentTypeSchema;
+    }> {
       for await (const { stream, contentType } of contentTypeStreamGenerator()) {
         for await (const entity of stream) {
           yield { entity, contentType };
@@ -75,8 +81,8 @@ const getPopulateAttributes = (strapi: Strapi.Strapi, contentType: ContentTypeSc
         populate[key] = { populate: subPopulate };
       }
 
-      if (subPopulate === true) {
-        populate[key] = true;
+      if (isArray(subPopulate) && isEmpty(subPopulate)) {
+        populate[key] = [];
       }
     }
 
@@ -87,9 +93,15 @@ const getPopulateAttributes = (strapi: Strapi.Strapi, contentType: ContentTypeSc
 
       for (const componentUID of componentsUID) {
         const component = strapi.getModel(componentUID);
-        const componentPopulate = getPopulateAttributes(strapi, component);
+        const subPopulate = getPopulateAttributes(strapi, component);
 
-        on[componentUID] = { populate: componentPopulate };
+        if ((isArray(subPopulate) || isObject(subPopulate)) && size(subPopulate) > 0) {
+          on[componentUID] = { populate: subPopulate };
+        }
+
+        if (isArray(subPopulate) && isEmpty(subPopulate)) {
+          on[componentUID] = [];
+        }
       }
 
       populate[key] = size(on) > 0 ? { on } : true;
@@ -97,10 +109,6 @@ const getPopulateAttributes = (strapi: Strapi.Strapi, contentType: ContentTypeSc
   }
 
   const values = Object.values(populate);
-
-  if (values.length === 0) {
-    return true;
-  }
 
   if (values.every((value) => value === true)) {
     return Object.keys(populate);
