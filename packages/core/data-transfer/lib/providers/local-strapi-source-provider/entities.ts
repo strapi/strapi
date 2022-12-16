@@ -2,6 +2,7 @@ import type { ContentTypeSchema } from '@strapi/strapi';
 
 import { isObject, isArray, isEmpty, size } from 'lodash/fp';
 import { Readable, PassThrough } from 'stream';
+import { IEntity } from '../../../types';
 
 /**
  * Generate and consume content-types streams in order to stream each entity individually
@@ -26,7 +27,10 @@ export const createEntitiesStream = (strapi: Strapi.Strapi): Readable => {
   }
 
   return Readable.from(
-    (async function* () {
+    (async function* entitiesGenerator(): AsyncGenerator<{
+      entity: IEntity;
+      contentType: ContentTypeSchema;
+    }> {
       for await (const { stream, contentType } of contentTypeStreamGenerator()) {
         for await (const entity of stream) {
           yield { entity, contentType };

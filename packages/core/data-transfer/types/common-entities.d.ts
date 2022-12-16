@@ -70,7 +70,7 @@ interface IDefaultLink {
     /**
      * Reference ID of the entity
      */
-    ref: number | string;
+    ref: number;
     /**
      * Field used to hold the link in the entity
      */
@@ -94,11 +94,15 @@ interface IDefaultLink {
     /**
      * Reference ID of the entity
      */
-    ref: number | string;
+    ref: number;
     /**
      * Field used to hold the link in the entity
      */
     field?: string;
+    /**
+     * If the link is part of a collection, keep its position here
+     */
+    pos?: number;
   };
 }
 
