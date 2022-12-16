@@ -1,19 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useInfiniteQuery } from 'react-query';
 
-import { axiosInstance } from '../../../core/utils';
+import { getFetchClient } from '../../../utils/getFetchClient';
 
 import { normalizeRelations } from '../../components/RelationInputDataManager/utils';
 
 export const useRelation = (cacheKey, { name, relation, search }) => {
   const [searchParams, setSearchParams] = useState({});
   const [currentPage, setCurrentPage] = useState(0);
+  const { get } = getFetchClient();
   /**
    * This runs in `useInfiniteQuery` to actually fetch the data
    */
   const fetchRelations = async ({ pageParam = 1 }) => {
     try {
-      const { data } = await axiosInstance.get(relation?.endpoint, {
+      const { data } = await get(relation?.endpoint, {
         params: {
           ...(relation.pageParams ?? {}),
           page: pageParam,
@@ -30,7 +31,7 @@ export const useRelation = (cacheKey, { name, relation, search }) => {
 
   const fetchSearch = async ({ pageParam = 1 }) => {
     try {
-      const { data } = await axiosInstance.get(search.endpoint, {
+      const { data } = await get(search.endpoint, {
         params: {
           ...(search.pageParams ?? {}),
           ...searchParams,
