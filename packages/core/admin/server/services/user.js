@@ -22,11 +22,6 @@ const sanitizeUser = (user) => {
   };
 };
 
-const sanitizeAuditLogPayload = (user) => ({
-  ...sanitizeUser(user),
-  roles: user.roles.map((role) => sanitizeUserRoles(role)),
-});
-
 /**
  * Create and save a user in database
  * @param attributes A partial user object
@@ -48,7 +43,7 @@ const create = async (attributes) => {
 
   getService('metrics').sendDidInviteUser();
 
-  strapi.eventHub.emit('user.create', sanitizeAuditLogPayload(createdUser));
+  strapi.eventHub.emit('user.create', sanitizeUser(createdUser));
 
   return createdUser;
 };
@@ -79,11 +74,12 @@ const updateById = async (id, attributes) => {
     }
   }
 
+  let updatedUser;
   // hash password if a new one is sent
   if (_.has(attributes, 'password')) {
     const hashedPassword = await getService('auth').hashPassword(attributes.password);
 
-    return strapi.query('admin::user').update({
+    updatedUser = await strapi.query('admin::user').update({
       where: { id },
       data: {
         ...attributes,
@@ -93,11 +89,15 @@ const updateById = async (id, attributes) => {
     });
   }
 
-  return strapi.query('admin::user').update({
+  updatedUser = await strapi.query('admin::user').update({
     where: { id },
     data: attributes,
     populate: ['roles'],
   });
+
+  strapi.eventHub.emit('user.update', sanitizeUser(updatedUser));
+
+  return updatedUser;
 };
 
 /**
@@ -237,7 +237,7 @@ const deleteById = async (id) => {
     .query('admin::user')
     .delete({ where: { id }, populate: ['roles'] });
 
-  strapi.eventHub.emit('user.delete', sanitizeAuditLogPayload(deletedUser));
+  strapi.eventHub.emit('user.delete', sanitizeUser(deletedUser));
 
   return deletedUser;
 };
@@ -272,7 +272,7 @@ const deleteByIds = async (ids) => {
 
   strapi.eventHub.emit(
     'user.delete',
-    deletedUsers.map((deletedUser) => sanitizeAuditLogPayload(deletedUser))
+    deletedUsers.map((deletedUser) => sanitizeUser(deletedUser))
   );
 
   return deletedUsers;
