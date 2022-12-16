@@ -14,7 +14,6 @@ module.exports = function processEvent(strapi, name, ...args) {
     'media.delete': getDefaultPayload,
     'admin.auth.success': getDefaultPayload,
     'user.create': getDefaultPayload,
-    'user.read': getDefaultPayload,
     'user.update': getDefaultPayload,
     'user.delete': getDefaultPayload,
   };
