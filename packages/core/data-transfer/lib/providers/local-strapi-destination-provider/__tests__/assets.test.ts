@@ -1,5 +1,6 @@
 import fse from 'fs-extra';
 import { Writable, Readable } from 'stream';
+import type { IAsset } from '../../../../types';
 
 import { getStrapiFactory } from '../../../__tests__/test-utils';
 import { createLocalStrapiDestinationProvider } from '../index';
@@ -18,13 +19,13 @@ const createWriteStreamMock = jest.fn(() => {
 jest.mock('fs-extra');
 
 describe('Local Strapi Destination Provider - Get Assets Stream', () => {
-  test('Throws an error if the Strapi instance is not provided', () => {
+  test('Throws an error if the Strapi instance is not provided', async () => {
     /* @ts-ignore: disable-next-line */
     const provider = createLocalStrapiDestinationProvider({
       strategy: 'restore',
     });
 
-    expect(() => provider.getAssetsStream()).toThrowError(
+    await expect(() => provider.getAssetsStream()).rejects.toThrowError(
       'Not able to stream Assets. Strapi instance not found'
     );
   });
@@ -41,7 +42,7 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
     });
     await provider.bootstrap();
 
-    const stream = provider.getAssetsStream();
+    const stream = await provider.getAssetsStream();
 
     expect(stream instanceof Writable).toBeTruthy();
   });
@@ -49,9 +50,9 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
   test('Writes on the strapi assets path', async () => {
     (fse.createWriteStream as jest.Mock).mockImplementationOnce(createWriteStreamMock);
     const assetsDirectory = 'static/public/assets';
-    const file = {
-      file: 'test-photo.jpg',
-      path: 'strapi-import-folder/assets',
+    const file: IAsset = {
+      filename: 'test-photo.jpg',
+      filepath: 'strapi-import-folder/assets',
       stats: { size: 200 },
       stream: Readable.from(['test', 'test-2']),
     };
@@ -67,7 +68,7 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
     });
 
     await provider.bootstrap();
-    const stream = provider.getAssetsStream() as Writable;
+    const stream = await provider.getAssetsStream();
 
     const error = await new Promise<Error | null | undefined>((resolve) => {
       stream.write(file, resolve);
@@ -76,6 +77,8 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
     expect(error).not.toBeInstanceOf(Error);
 
     expect(write).toHaveBeenCalled();
-    expect(createWriteStreamMock).toHaveBeenCalledWith(`${assetsDirectory}/uploads/${file.file}`);
+    expect(createWriteStreamMock).toHaveBeenCalledWith(
+      `${assetsDirectory}/uploads/${file.filename}`
+    );
   });
 });
