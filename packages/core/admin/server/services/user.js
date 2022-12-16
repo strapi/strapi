@@ -233,7 +233,13 @@ const deleteById = async (id) => {
     }
   }
 
-  return strapi.query('admin::user').delete({ where: { id }, populate: ['roles'] });
+  const deletedUser = await strapi
+    .query('admin::user')
+    .delete({ where: { id }, populate: ['roles'] });
+
+  strapi.eventHub.emit('user.delete', sanitizeAuditLogPayload(deletedUser));
+
+  return deletedUser;
 };
 
 /** Delete a user
@@ -263,6 +269,11 @@ const deleteByIds = async (ids) => {
 
     deletedUsers.push(deletedUser);
   }
+
+  strapi.eventHub.emit(
+    'user.delete',
+    deletedUsers.map((deletedUser) => sanitizeAuditLogPayload(deletedUser))
+  );
 
   return deletedUsers;
 };
