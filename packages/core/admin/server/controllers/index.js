@@ -10,4 +10,5 @@ module.exports = {
   user: require('./user'),
   webhooks: require('./webhooks'),
   'content-api': require('./content-api'),
+  'websocket-api': require('./websocket-api'),
 };

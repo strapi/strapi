@@ -137,6 +137,7 @@
     "webpack-cli": "^4.10.0",
     "webpack-dev-server": "^4.9.3",
     "webpackbar": "^5.0.2",
+    "ws": "8.11.0",
     "yup": "^0.32.9"
   },
   "devDependencies": {
