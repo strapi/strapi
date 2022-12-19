@@ -11,12 +11,12 @@ import {
 import { MemoryRouter } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
 
-import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
-import { useFolders } from '../../../hooks/useFolders';
-import { useAssets } from '../../../hooks/useAssets';
-import { useFolder } from '../../../hooks/useFolder';
-import { MediaLibrary } from '../MediaLibrary';
-import { viewOptions } from '../../../constants';
+import { useMediaLibraryPermissions } from '../../../../hooks/useMediaLibraryPermissions';
+import { useFolders } from '../../../../hooks/useFolders';
+import { useAssets } from '../../../../hooks/useAssets';
+import { useFolder } from '../../../../hooks/useFolder';
+import { MediaLibrary } from '..';
+import { viewOptions } from '../../../../constants';
 
 const FIXTURE_ASSET_PAGINATION = {
   pageCount: 1,
@@ -59,13 +59,15 @@ const FIXTURE_ASSETS = [
   },
 ];
 
-jest.mock('../../../hooks/useMediaLibraryPermissions');
-jest.mock('../../../hooks/useFolders');
-jest.mock('../../../hooks/useFolder');
-jest.mock('../../../hooks/useAssets');
+jest.mock('../../../../hooks/useMediaLibraryPermissions');
+jest.mock('../../../../hooks/useFolders');
+jest.mock('../../../../hooks/useFolder');
+jest.mock('../../../../hooks/useAssets');
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
+  CheckPermissions: jest.fn().mockReturnValue(null),
   useRBAC: jest.fn(),
+  useRBACProvider: jest.fn().mockReturnValue({ allPermissions: [] }),
   useNotification: jest.fn(() => jest.fn()),
   useQueryParams: jest.fn().mockReturnValue([{ query: {}, rawQuery: '' }, jest.fn()]),
   useSelectionState: jest
@@ -73,8 +75,8 @@ jest.mock('@strapi/helper-plugin', () => ({
     .mockReturnValue([[], { selectOne: jest.fn(), selectAll: jest.fn() }]),
   usePersistentState: jest.fn().mockReturnValue([0, jest.fn()]),
 }));
-jest.mock('../../../utils', () => ({
-  ...jest.requireActual('../../../utils'),
+jest.mock('../../../../utils', () => ({
+  ...jest.requireActual('../../../../utils'),
   getTrad: (x) => x,
 }));
 
@@ -103,8 +105,8 @@ const renderML = () =>
   );
 
 describe('Media library homepage', () => {
-  afterEach(() => {
-    jest.clearAllMocks();
+  beforeEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe('navigation', () => {
