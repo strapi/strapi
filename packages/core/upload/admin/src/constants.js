@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { getTrad } from './utils';
 
 export const AssetType = {
   Video: 'video',
@@ -96,6 +97,67 @@ export const BreadcrumbsDefinition = PropTypes.arrayOf(
   PropTypes.oneOfType([CrumbDefinition, CrumbMenuDefinition])
 );
 
+export const viewOptions = {
+  GRID: 0,
+  LIST: 1,
+};
+export const tableHeaders = [
+  {
+    name: 'preview',
+    key: 'preview',
+    metadatas: {
+      label: { id: getTrad('list.table.header.preview'), defaultMessage: 'preview' },
+      isSortable: false,
+    },
+    type: 'image',
+  },
+  {
+    name: 'name',
+    key: 'name',
+    metadatas: {
+      label: { id: getTrad('list.table.header.name'), defaultMessage: 'name' },
+      isSortable: true,
+    },
+    type: 'text',
+  },
+  {
+    name: 'ext',
+    key: 'extension',
+    metadatas: {
+      label: { id: getTrad('list.table.header.ext'), defaultMessage: 'extension' },
+      isSortable: false,
+    },
+    type: 'ext',
+  },
+  {
+    name: 'size',
+    key: 'size',
+    metadatas: {
+      label: { id: getTrad('list.table.header.size'), defaultMessage: 'size' },
+      isSortable: false,
+    },
+    type: 'size',
+  },
+  {
+    name: 'createdAt',
+    key: 'createdAt',
+    metadatas: {
+      label: { id: getTrad('list.table.header.createdAt'), defaultMessage: 'created' },
+      isSortable: true,
+    },
+    type: 'date',
+  },
+  {
+    name: 'updatedAt',
+    key: 'updatedAt',
+    metadatas: {
+      label: { id: getTrad('list.table.header.updatedAt'), defaultMessage: 'last update' },
+      isSortable: true,
+    },
+    type: 'date',
+  },
+];
+
 export const pageSizes = [10, 20, 50, 100];
 
 export const sortOptions = [
@@ -106,3 +168,8 @@ export const sortOptions = [
   { key: 'sort.updated_at_desc', value: 'updatedAt:DESC' },
   { key: 'sort.updated_at_asc', value: 'updatedAt:ASC' },
 ];
+
+export const localStorageKeys = {
+  modalView: `STRAPI_UPLOAD_MODAL_VIEW`,
+  view: `STRAPI_UPLOAD_LIBRARY_VIEW`,
+};

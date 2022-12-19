@@ -2,7 +2,12 @@ import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { render as renderTL, screen, waitFor, fireEvent } from '@testing-library/react';
-import { useSelectionState, useQueryParams, TrackingProvider } from '@strapi/helper-plugin';
+import {
+  useSelectionState,
+  useQueryParams,
+  TrackingProvider,
+  usePersistentState,
+} from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
 
@@ -11,6 +16,7 @@ import { useFolders } from '../../../../hooks/useFolders';
 import { useAssets } from '../../../../hooks/useAssets';
 import { useFolder } from '../../../../hooks/useFolder';
 import { MediaLibrary } from '..';
+import { viewOptions } from '../../../../constants';
 
 const FIXTURE_ASSET_PAGINATION = {
   pageCount: 1,
@@ -67,6 +73,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   useSelectionState: jest
     .fn()
     .mockReturnValue([[], { selectOne: jest.fn(), selectAll: jest.fn() }]),
+  usePersistentState: jest.fn().mockReturnValue([0, jest.fn()]),
 }));
 jest.mock('../../../../utils', () => ({
   ...jest.requireActual('../../../../utils'),
@@ -220,6 +227,11 @@ describe('Media library homepage', () => {
       });
 
       it('hides the select all button when the user is not allowed to update', () => {
+        useMediaLibraryPermissions.mockReturnValueOnce({
+          canUpdate: true,
+          canRead: true,
+          canCreate: true,
+        });
         useMediaLibraryPermissions.mockReturnValue({
           isLoading: false,
           canRead: true,
@@ -255,6 +267,11 @@ describe('Media library homepage', () => {
 
     describe('create folder', () => {
       it('shows the create button if the user has create permissions', () => {
+        useMediaLibraryPermissions.mockReturnValueOnce({
+          canUpdate: true,
+          canRead: true,
+          canCreate: true,
+        });
         renderML();
         expect(screen.getByText('Add new folder')).toBeInTheDocument();
       });
@@ -348,6 +365,11 @@ describe('Media library homepage', () => {
     });
 
     it('displays folder with checked checkbox when is selected', () => {
+      useMediaLibraryPermissions.mockReturnValueOnce({
+        canUpdate: true,
+        canRead: true,
+        canCreate: true,
+      });
       useSelectionState.mockReturnValueOnce([
         [
           {
@@ -369,7 +391,13 @@ describe('Media library homepage', () => {
     });
 
     it('doest not displays folder with checked checkbox when is not selected', () => {
+      useMediaLibraryPermissions.mockReturnValueOnce({
+        canUpdate: true,
+        canRead: true,
+        canCreate: true,
+      });
       renderML();
+
       expect(screen.getByTestId('folder-checkbox-1')).not.toBeChecked();
     });
 
@@ -494,6 +522,66 @@ describe('Media library homepage', () => {
         screen.queryByText('There are no elements with the applied filters')
       ).toBeInTheDocument();
       expect(screen.queryByText('header.actions.add-assets')).not.toBeInTheDocument();
+    });
+
+    describe('displays the appropriate switch to change the view', () => {
+      const setView = jest.fn();
+      it('starts with Grid View', () => {
+        usePersistentState.mockReturnValueOnce([viewOptions.GRID, setView]);
+        const { queryByRole } = renderML();
+
+        const listSwitch = queryByRole('button', { name: 'List View' });
+        const gridSwitch = queryByRole('button', { name: 'Grid View' });
+
+        expect(listSwitch).toBeInTheDocument();
+        expect(gridSwitch).not.toBeInTheDocument();
+
+        fireEvent.click(listSwitch);
+        expect(setView).toHaveBeenCalledWith(viewOptions.LIST);
+      });
+
+      it('starts with List View', () => {
+        usePersistentState.mockReturnValueOnce([viewOptions.LIST, setView]);
+        const { queryByRole } = renderML();
+
+        const listSwitch = queryByRole('button', { name: 'List View' });
+        const gridSwitch = queryByRole('button', { name: 'Grid View' });
+
+        expect(gridSwitch).toBeInTheDocument();
+        expect(listSwitch).not.toBeInTheDocument();
+
+        fireEvent.click(gridSwitch);
+        expect(setView).toHaveBeenCalledWith(viewOptions.GRID);
+      });
+    });
+
+    describe('displays the list view', () => {
+      it('should render the table headers', () => {
+        usePersistentState.mockReturnValueOnce([viewOptions.LIST]);
+
+        const { getByText } = renderML();
+        expect(getByText('preview')).toBeInTheDocument();
+        expect(getByText('name')).toBeInTheDocument();
+        expect(getByText('extension')).toBeInTheDocument();
+        expect(getByText('size')).toBeInTheDocument();
+        expect(getByText('created')).toBeInTheDocument();
+        expect(getByText('last update')).toBeInTheDocument();
+      });
+
+      it('should not render the sort button', () => {
+        usePersistentState.mockReturnValueOnce([viewOptions.LIST]);
+        const { queryByRole } = renderML();
+
+        expect(queryByRole('button', { name: 'Sort by' })).not.toBeInTheDocument();
+      });
+
+      it('should not render the folders and assets titles', () => {
+        usePersistentState.mockReturnValueOnce([viewOptions.LIST]);
+        const { queryByText } = renderML();
+
+        expect(queryByText('Folders (1)')).not.toBeInTheDocument();
+        expect(queryByText('Assets (1)')).not.toBeInTheDocument();
+      });
     });
   });
 });
