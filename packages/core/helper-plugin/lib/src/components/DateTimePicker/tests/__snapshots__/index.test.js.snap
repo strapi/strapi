@@ -290,7 +290,6 @@ exports[`DateTimePicker snapshots the component 1`] = `
       <label
         class="c4"
         for="field-1"
-        id="datetime-label"
       >
         <div
           class="c3"
@@ -346,6 +345,7 @@ exports[`DateTimePicker snapshots the component 1`] = `
                   aria-disabled="false"
                   aria-invalid="false"
                   aria-label="Date time picker"
+                  aria-required="false"
                   class="c10"
                   data-testid="datetimepicker-date"
                   id="datepicker-2"

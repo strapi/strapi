@@ -1002,6 +1002,7 @@ describe('Admin | containers | RoleEditPage', () => {
                                 <input
                                   aria-disabled="false"
                                   aria-invalid="false"
+                                  aria-required="false"
                                   class="c29"
                                   id="textinput-1"
                                   name="name"
@@ -1046,6 +1047,7 @@ describe('Admin | containers | RoleEditPage', () => {
                               >
                                 <textarea
                                   aria-invalid="false"
+                                  aria-required="false"
                                   class="c32"
                                   id="textarea-2"
                                   name="description"

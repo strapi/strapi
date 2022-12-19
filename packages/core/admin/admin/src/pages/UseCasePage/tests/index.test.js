@@ -732,7 +732,6 @@ describe('Admin | UseCasePage', () => {
                         <span
                           class="c5 c22"
                           for="usecase"
-                          id="usecase-label"
                         >
                           <div
                             class="c0 c23"

@@ -694,7 +694,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                         <label
                           class="c5 c21"
                           for="textinput-2"
-                          required=""
                         >
                           <div
                             class="c0 c13"
@@ -714,6 +713,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                             aria-describedby="textinput-2-hint"
                             aria-disabled="false"
                             aria-invalid="false"
+                            aria-required="true"
                             class="c26 c27"
                             id="textinput-2"
                             name="password"
@@ -761,7 +761,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                         <label
                           class="c5 c21"
                           for="textinput-3"
-                          required=""
                         >
                           <div
                             class="c0 c13"
@@ -780,6 +779,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                           <input
                             aria-disabled="false"
                             aria-invalid="false"
+                            aria-required="true"
                             class="c26 c27"
                             id="textinput-3"
                             name="confirmPassword"

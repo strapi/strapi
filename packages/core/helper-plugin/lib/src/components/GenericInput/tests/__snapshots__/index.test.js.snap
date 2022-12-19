@@ -211,7 +211,6 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
       <label
         class="c2"
         for="number"
-        required=""
       >
         <div
           class="c3"
@@ -230,6 +229,7 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
         <input
           aria-disabled="false"
           aria-invalid="false"
+          aria-required="true"
           class="c8"
           id="number"
           name="number"

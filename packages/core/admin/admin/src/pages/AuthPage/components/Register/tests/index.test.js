@@ -831,7 +831,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                               <label
                                 class="c5 c26"
                                 for="textinput-2"
-                                required=""
                               >
                                 <div
                                   class="c0 c13"
@@ -850,6 +849,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                                 <input
                                   aria-disabled="false"
                                   aria-invalid="false"
+                                  aria-required="true"
                                   class="c31"
                                   id="textinput-2"
                                   name="firstname"
@@ -889,6 +889,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                                 <input
                                   aria-disabled="false"
                                   aria-invalid="false"
+                                  aria-required="false"
                                   class="c31"
                                   id="textinput-3"
                                   name="lastname"
@@ -910,7 +911,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                         <label
                           class="c5 c26"
                           for="textinput-4"
-                          required=""
                         >
                           <div
                             class="c0 c13"
@@ -929,6 +929,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                           <input
                             aria-disabled="false"
                             aria-invalid="false"
+                            aria-required="true"
                             class="c31"
                             id="textinput-4"
                             name="email"
@@ -948,7 +949,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                         <label
                           class="c5 c26"
                           for="textinput-5"
-                          required=""
                         >
                           <div
                             class="c0 c13"
@@ -968,6 +968,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                             aria-describedby="textinput-5-hint"
                             aria-disabled="false"
                             aria-invalid="false"
+                            aria-required="true"
                             class="c32 c33"
                             id="textinput-5"
                             name="password"
@@ -1015,7 +1016,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                         <label
                           class="c5 c26"
                           for="textinput-6"
-                          required=""
                         >
                           <div
                             class="c0 c13"
@@ -1034,6 +1034,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                           <input
                             aria-disabled="false"
                             aria-invalid="false"
+                            aria-required="true"
                             class="c32 c33"
                             id="textinput-6"
                             name="confirmPassword"
