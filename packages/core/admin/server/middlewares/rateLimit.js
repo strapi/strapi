@@ -10,7 +10,7 @@ module.exports =
   async (ctx, next) => {
     let ratelimitConfig = strapi.config.get('admin.ratelimit');
 
-    if (!ratelimitConfig || !ratelimitConfig.enabled) {
+    if (!ratelimitConfig || !has('enabled', ratelimitConfig)) {
       ratelimitConfig = {
         enabled: true,
       };
