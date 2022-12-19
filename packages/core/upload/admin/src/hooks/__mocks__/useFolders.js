@@ -6,14 +6,14 @@ export const useFolders = jest.fn().mockReturnValue({
       children: {
         count: 1,
       },
-      createdAt: '',
+      createdAt: '2021-10-18T08:04:56.326Z',
       files: {
         count: 1,
       },
       parent: null,
       path: '/1',
       pathId: 1,
-      updatedAt: '',
+      updatedAt: '2021-10-18T08:04:56.326Z',
     },
   ],
   isLoading: false,
