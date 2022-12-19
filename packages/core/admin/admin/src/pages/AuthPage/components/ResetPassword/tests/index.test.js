@@ -766,7 +766,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                           <div
                             class="c0 c13"
                           >
-                            Confirmation Password
+                            Confirm Password
                             <span
                               class="c5 c22 c23"
                             >
