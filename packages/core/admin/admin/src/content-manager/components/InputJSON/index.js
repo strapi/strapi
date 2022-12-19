@@ -164,7 +164,11 @@ class InputJSON extends React.Component {
         required={this.props.required}
       >
         <Stack spacing={1}>
-          <Label intlLabel={this.props.intlLabel} name={this.props.name} />
+          <Label
+            intlLabel={this.props.intlLabel}
+            name={this.props.name}
+            labelAction={this.props.labelAction}
+          />
           <StyledBox error={this.props.error}>
             <EditorWrapper disabled={this.props.disabled}>
               <textarea
@@ -189,6 +193,7 @@ InputJSON.defaultProps = {
   id: undefined,
   error: undefined,
   intlLabel: undefined,
+  labelAction: undefined,
   onChange() {},
   value: null,
   required: false,
@@ -208,6 +213,7 @@ InputJSON.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }),
+  labelAction: PropTypes.element,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func,
   value: PropTypes.any,

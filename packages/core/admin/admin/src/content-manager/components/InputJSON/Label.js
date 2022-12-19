@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { FieldLabel } from '@strapi/design-system/Field';
 
-const Label = ({ intlLabel, name }) => {
+const Label = ({ intlLabel, labelAction, name }) => {
   const { formatMessage } = useIntl();
   const label = intlLabel?.id
     ? formatMessage(
@@ -12,12 +12,13 @@ const Label = ({ intlLabel, name }) => {
       )
     : name;
 
-  return <FieldLabel>{label}</FieldLabel>;
+  return <FieldLabel action={labelAction}>{label}</FieldLabel>;
 };
 
 Label.defaultProps = {
   id: undefined,
   intlLabel: undefined,
+  labelAction: undefined,
 };
 
 Label.propTypes = {
@@ -27,6 +28,7 @@ Label.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }),
+  labelAction: PropTypes.element,
   name: PropTypes.string.isRequired,
 };
 

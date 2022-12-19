@@ -136,7 +136,7 @@ const DateTimePicker = ({
       <Stack spacing={1}>
         {label && (
           <Flex>
-            <FieldLabel id="datetime-label">{label}</FieldLabel>
+            <FieldLabel>{label}</FieldLabel>
             {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
           </Flex>
         )}
