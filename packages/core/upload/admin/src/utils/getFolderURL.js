@@ -1,11 +1,19 @@
+/**
+ * @param {string} pathname
+ * @param {object} query
+ * @param {string} query._q Search value of the query
+ * @param {number|undefined} folderID
+ * @returns {string}
+ */
+
 import { stringify } from 'qs';
 
-const getFolderURL = (pathname, query, folder) => {
+const getFolderURL = (pathname, query, folderID) => {
   const { _q, ...queryParamsWithoutQ } = query;
   const queryParamsString = stringify(
     {
       ...queryParamsWithoutQ,
-      folder: folder?.id,
+      folder: folderID,
     },
     { encode: false }
   );

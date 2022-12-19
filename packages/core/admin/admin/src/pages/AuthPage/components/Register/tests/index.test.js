@@ -1020,7 +1020,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                           <div
                             class="c0 c13"
                           >
-                            Confirmation Password
+                            Confirm Password
                             <span
                               class="c5 c27 c28"
                             >
