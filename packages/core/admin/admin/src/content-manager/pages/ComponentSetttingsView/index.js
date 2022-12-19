@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { CheckPagePermissions, LoadingIndicatorPage } from '@strapi/helper-plugin';
 import { useSelector, shallowEqual } from 'react-redux';
 import axios from 'axios';
-import { axiosInstance } from '../../../core/utils';
+import { getFetchClient } from '../../../utils/getFetchClient';
 import { getRequestUrl, mergeMetasWithSchema } from '../../utils';
 import { makeSelectModelAndComponentSchemas } from '../App/selectors';
 import permissions from '../../../permissions';
@@ -22,6 +22,7 @@ const ComponentSettingsView = () => {
   useEffect(() => {
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source();
+    const { get } = getFetchClient();
 
     const fetchData = async (source) => {
       try {
@@ -29,9 +30,16 @@ const ComponentSettingsView = () => {
 
         const {
           data: { data },
-        } = await axiosInstance.get(getRequestUrl(`components/${uid}/configuration`), {
+        } = await get(getRequestUrl(`components/${uid}/configuration`), {
           cancelToken: source.token,
         });
+
+        console.log(
+          'ComponentSettingsView fetchData new',
+          getRequestUrl(`components/${uid}/configuration`),
+          source.token,
+          data
+        );
 
         dispatch(getDataSucceeded(mergeMetasWithSchema(data, schemas, 'component')));
       } catch (err) {
