@@ -34,13 +34,6 @@ const ComponentSettingsView = () => {
           cancelToken: source.token,
         });
 
-        console.log(
-          'ComponentSettingsView fetchData new',
-          getRequestUrl(`components/${uid}/configuration`),
-          source.token,
-          data
-        );
-
         dispatch(getDataSucceeded(mergeMetasWithSchema(data, schemas, 'component')));
       } catch (err) {
         if (axios.isCancel(err)) {

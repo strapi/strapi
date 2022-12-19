@@ -1,8 +1,10 @@
-import { axiosInstance } from '../../../../core/utils';
+import { getFetchClient } from '../../../../utils/getFetchClient';
 import { getRequestUrl } from '../../../utils';
 
 const putCMSettingsEV = (body, slug, isContentTypeView) => {
-  return axiosInstance.put(
+  const { put } = getFetchClient();
+
+  return put(
     getRequestUrl(
       isContentTypeView ? `content-types/${slug}/configuration` : `components/${slug}/configuration`
     ),
