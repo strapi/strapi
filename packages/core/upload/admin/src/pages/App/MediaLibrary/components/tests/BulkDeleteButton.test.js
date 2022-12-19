@@ -5,10 +5,10 @@ import { render, fireEvent, waitFor, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
 
-import { BulkDeleteButton } from '../components/BulkDeleteButton';
-import { useBulkRemove } from '../../../hooks/useBulkRemove';
+import { BulkDeleteButton } from '../BulkDeleteButton';
+import { useBulkRemove } from '../../../../../hooks/useBulkRemove';
 
-jest.mock('../../../hooks/useBulkRemove');
+jest.mock('../../../../../hooks/useBulkRemove');
 
 const setup = (
   props = {
