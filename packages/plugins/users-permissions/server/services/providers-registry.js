@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const getInitialProviders = ({ purest }) => ({
   async discord({ accessToken }) {
     const discord = purest({ provider: 'discord' });
+
     return discord
       .get('users/@me')
       .auth(accessToken)
@@ -261,6 +262,35 @@ const getInitialProviders = ({ purest }) => ({
         return {
           username,
           email,
+        };
+      });
+  },
+  async patreon({ accessToken }) {
+    const patreon = purest({
+      provider: 'patreon',
+      config: {
+        patreon: {
+          default: {
+            origin: 'https://www.patreon.com',
+            path: 'api/oauth2/{path}',
+            headers: {
+              authorization: 'Bearer {auth}',
+            },
+          },
+        },
+      },
+    });
+
+    return patreon
+      .get('v2/identity')
+      .auth(accessToken)
+      .qs(new URLSearchParams({ 'fields[user]': 'full_name,email' }).toString())
+      .request()
+      .then(({ body }) => {
+        const patreonData = body.data.attributes;
+        return {
+          username: `${patreonData.first_name} ${patreonData.last_name}`,
+          email: patreonData.email,
         };
       });
   },
