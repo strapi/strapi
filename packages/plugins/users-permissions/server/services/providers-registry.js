@@ -289,7 +289,7 @@ const getInitialProviders = ({ purest }) => ({
       .then(({ body }) => {
         const patreonData = body.data.attributes;
         return {
-          username: `${patreonData.first_name} ${patreonData.last_name}`,
+          username: patreonData.full_name,
           email: patreonData.email,
         };
       });
