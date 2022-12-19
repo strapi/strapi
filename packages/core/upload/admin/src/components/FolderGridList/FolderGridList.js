@@ -5,11 +5,11 @@ import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
 import { Grid } from '@strapi/design-system/Grid';
 import { Typography } from '@strapi/design-system/Typography';
 
-export const FolderList = ({ title, children }) => {
+export const FolderGridList = ({ title, children }) => {
   return (
     <KeyboardNavigable tagName="article">
       {title && (
-        <Box paddingTop={2} paddingBottom={2}>
+        <Box paddingBottom={2}>
           <Typography as="h2" variant="delta" fontWeight="semiBold">
             {title}
           </Typography>
@@ -21,11 +21,11 @@ export const FolderList = ({ title, children }) => {
   );
 };
 
-FolderList.defaultProps = {
+FolderGridList.defaultProps = {
   title: null,
 };
 
-FolderList.propTypes = {
+FolderGridList.propTypes = {
   children: PropTypes.node.isRequired,
   title: PropTypes.string,
 };

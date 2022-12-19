@@ -2,6 +2,8 @@
 
 const { has, get, omit, isArray } = require('lodash/fp');
 const { ApplicationError } = require('@strapi/utils').errors;
+const { transformParamsToQuery } = require('@strapi/utils').convertQueryParams;
+
 const { getService } = require('../utils');
 
 const LOCALE_QUERY_FILTER = 'locale';
@@ -147,6 +149,36 @@ const decorator = (service) => ({
 
     await syncNonLocalizedAttributes(entry, { model });
     return entry;
+  },
+
+  /**
+   * Find an entry or several if fetching all locales
+   * @param {string} uid - Model uid
+   * @param {object} opts - Query options object (params, data, files, populate)
+   */
+  async findMany(uid, opts = {}) {
+    const model = strapi.getModel(uid);
+
+    const { isLocalizedContentType } = getService('content-types');
+
+    if (!isLocalizedContentType(model)) {
+      return service.findMany.call(this, uid, opts);
+    }
+
+    const { kind } = strapi.getModel(uid);
+
+    const wrappedParams = await this.wrapParams(opts, { uid, action: 'findMany' });
+
+    const query = transformParamsToQuery(uid, wrappedParams);
+
+    if (kind === 'singleType') {
+      if (opts[LOCALE_QUERY_FILTER] === 'all') {
+        return strapi.db.query(uid).findMany(query);
+      }
+      return strapi.db.query(uid).findOne(query);
+    }
+
+    return strapi.db.query(uid).findMany(query);
   },
 });
 
