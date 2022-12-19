@@ -1,8 +1,10 @@
-import { axiosInstance } from '../../../../core/utils';
+import { getFetchClient } from '../../../../utils/getFetchClient';
 import { getRequestUrl } from '../../../utils';
 
 const putCMSettingsLV = (body, slug) => {
-  return axiosInstance.put(getRequestUrl(`content-types/${slug}/configuration`), body);
+  const { put } = getFetchClient();
+
+  return put(getRequestUrl(`content-types/${slug}/configuration`), body);
 };
 
 export default putCMSettingsLV;
