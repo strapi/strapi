@@ -1,18 +1,63 @@
 'use strict';
 
+const defaultEvents = [
+  'entry.create',
+  'entry.update',
+  'entry.delete',
+  'entry.publish',
+  'entry.unpublish',
+  'media.create',
+  'media.update',
+  'media.delete',
+  'admin.auth.success',
+];
+
+const getEventMap = (defaultEvents) => {
+  const getDefaultPayload = (...args) => args[0];
+
+  // Use the default payload for all default events
+  return defaultEvents.reduce((acc, event) => {
+    acc[event] = getDefaultPayload;
+    return acc;
+  }, {});
+};
+
 const createAuditLogsService = (strapi) => {
-  const saveEvent = (name, ...args) => {
+  // NOTE: providers should be able to replace getEventMap to add or remove events
+  const eventMap = getEventMap(defaultEvents);
+
+  const processEvent = (name, ...args) => {
+    const getPayload = eventMap[name];
+
+    // Ignore the event if it's not in the map
+    if (!getPayload) {
+      return null;
+    }
+
+    return {
+      action: name,
+      date: new Date().toISOString(),
+      payload: getPayload(...args) || {},
+      userId: strapi.requestContext.get().state?.user?.id,
+    };
+  };
+
+  const handleEvent = (name, ...args) => {
     if (!name) {
       throw Error('Name is required');
     }
-    // TODO: filter events here
-    // TODO: save events here via provider
-    console.log(`Listened to event ${name} with args: ${JSON.stringify(args)}`);
+
+    const processedEvent = processEvent(name, ...args);
+
+    if (processedEvent) {
+      // TODO: save events here via provider
+      console.log('Saving event', processedEvent);
+    }
   };
 
   return {
     register() {
-      this._eventHubUnsubscribe = strapi.eventHub.subscribe(saveEvent);
+      this._eventHubUnsubscribe = strapi.eventHub.subscribe(handleEvent);
       return this;
     },
 

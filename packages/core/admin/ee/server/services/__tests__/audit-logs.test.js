@@ -5,10 +5,11 @@ const createAuditLogsService = require('../audit-logs');
 
 jest.mock('../../../../server/register');
 
-describe('Audit logs auth', () => {
+describe('Audit logs service', () => {
   afterEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
+    jest.useRealTimers();
   });
 
   describe('Init with audit logs disabled', () => {
@@ -65,6 +66,17 @@ describe('Audit logs auth', () => {
           register: mockRegister,
         },
         eventHub: createEventHub(),
+        requestContext: {
+          get() {
+            return {
+              state: {
+                user: {
+                  id: 1,
+                },
+              },
+            };
+          },
+        },
       };
     });
 
@@ -82,13 +94,31 @@ describe('Audit logs auth', () => {
       const auditLogsService = createAuditLogsService(strapi);
       auditLogsService.register();
 
-      const eventName = 'test';
+      jest.useFakeTimers().setSystemTime(new Date('1970-01-01T00:00:00.000Z'));
+      await strapi.eventHub.emit('entry.create', { meta: 'test' });
+
+      // TODO: Replace with a test to save to db
+      const [message, payload] = logSpy.mock.lastCall;
+      expect(message).toBe('Saving event');
+      expect(payload).toMatchObject({
+        action: 'entry.create',
+        date: '1970-01-01T00:00:00.000Z',
+        payload: { meta: 'test' },
+        userId: 1,
+      });
+    });
+
+    it('ignores events that are not in the event map', async () => {
+      const logSpy = jest.spyOn(console, 'log');
+
+      const auditLogsService = createAuditLogsService(strapi);
+      auditLogsService.register();
+
+      const eventName = 'unknown';
       const eventPayload = { meta: 'test' };
       await strapi.eventHub.emit(eventName, eventPayload);
-      // TODO: Replace with a test to save to db
-      expect(logSpy).toHaveBeenCalledWith(
-        `Listened to event ${eventName} with args: [${JSON.stringify(eventPayload)}]`
-      );
+
+      expect(logSpy).not.toHaveBeenCalled();
     });
 
     it('should throw and error when name is empty', async () => {
