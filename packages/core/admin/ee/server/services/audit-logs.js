@@ -9,6 +9,9 @@ const defaultEvents = [
   'media.create',
   'media.update',
   'media.delete',
+  'user.create',
+  'user.update',
+  'user.delete',
   'admin.auth.success',
 ];
 
