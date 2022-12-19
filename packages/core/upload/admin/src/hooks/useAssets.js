@@ -4,8 +4,9 @@ import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { useNotification } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
+import { getFetchClient } from '@strapi/admin/admin/src/utils/getFetchClient';
 import pluginId from '../pluginId';
-import { axiosInstance, getRequestUrl } from '../utils';
+import { getRequestUrl } from '../utils';
 
 export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
   const { formatMessage } = useIntl();
@@ -40,8 +41,9 @@ export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
   }
 
   const getAssets = async () => {
+    const { get } = getFetchClient();
     try {
-      const { data } = await axiosInstance.get(
+      const { data } = await get(
         `${dataRequestURL}${stringify(params, {
           encode: false,
           addQueryPrefix: true,
