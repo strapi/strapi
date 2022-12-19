@@ -1,19 +1,31 @@
 'use strict';
 
-module.exports = function processEvent(strapi, name, ...args) {
+function getEventMap(defaultEvents) {
   const getDefaultPayload = (...args) => args[0];
 
-  const eventMap = {
-    'entry.create': getDefaultPayload,
-    'entry.update': getDefaultPayload,
-    'entry.delete': getDefaultPayload,
-    'entry.publish': getDefaultPayload,
-    'entry.unpublish': getDefaultPayload,
-    'media.create': getDefaultPayload,
-    'media.update': getDefaultPayload,
-    'media.delete': getDefaultPayload,
-    'admin.auth.success': getDefaultPayload,
-  };
+  // Use the default payload for all default events
+  return defaultEvents.reduce((acc, event) => {
+    acc[event] = getDefaultPayload;
+    return acc;
+  }, {});
+}
+
+module.exports = function processEvent(strapi, name, ...args) {
+  const defaultEvents = [
+    'entry.create',
+    'entry.update',
+    'entry.delete',
+    'entry.publish',
+    'entry.unpublish',
+    'media.create',
+    'media.update',
+    'media.delete',
+    'admin.auth.success',
+  ];
+
+  // NOTE: providers should be able to replace getEventMap to add or remove events
+  const eventMap = getEventMap(defaultEvents);
+
   const getPayload = eventMap[name];
 
   // Ignore the event if it's not in the map
