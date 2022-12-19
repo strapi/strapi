@@ -1,6 +1,6 @@
 'use strict';
 
-const { isNil, pick } = require('lodash/fp');
+const { pick } = require('lodash/fp');
 const { ApplicationError } = require('@strapi/utils').errors;
 
 /**
@@ -29,7 +29,7 @@ module.exports = {
   async test(ctx) {
     const { to } = ctx.request.body;
 
-    if (isNil(to)) {
+    if (!to) {
       throw new ApplicationError('No recipient(s) are given');
     }
 

@@ -25,7 +25,7 @@ import { CopyLinkButton } from '../../CopyLinkButton';
 import { UploadProgress } from '../../UploadProgress';
 import { AssetType, AssetDefinition } from '../../../constants';
 import { AssetPreview } from './AssetPreview';
-import { createAssetUrl } from '../../../utils/createAssetUrl';
+import { createAssetUrl } from '../../../utils';
 
 export const PreviewBox = ({
   asset,
@@ -123,7 +123,7 @@ export const PreviewBox = ({
     const nextAsset = { ...asset, width, height };
     const file = await produceFile(nextAsset.name, nextAsset.mime, nextAsset.updatedAt);
 
-    await upload({ name: file.name, rawFile: file });
+    await upload({ name: file.name, rawFile: file }, asset.folder?.id);
 
     trackUsage('didCropFile', { duplicatedFile: true, location: trackedLocation });
 

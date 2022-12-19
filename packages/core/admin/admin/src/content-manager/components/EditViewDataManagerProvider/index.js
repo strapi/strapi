@@ -8,7 +8,9 @@ import set from 'lodash/set';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Prompt, Redirect } from 'react-router-dom';
-import { Main } from '@strapi/design-system/Main';
+import { useDispatch, useSelector } from 'react-redux';
+
+import { Main } from '@strapi/design-system';
 import {
   LoadingIndicatorPage,
   ContentManagerEditViewDataManagerContext,
@@ -20,8 +22,13 @@ import {
 } from '@strapi/helper-plugin';
 
 import { getTrad, removeKeyInObject } from '../../utils';
+
+import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
+
 import reducer, { initialState } from './reducer';
 import { cleanData, createYupSchema, recursivelyFindPathsBasedOnCondition } from './utils';
+import { clearSetModifiedDataOnly } from '../../sharedReducers/crudReducer/actions';
+import { usePrev } from '../../hooks';
 
 const EditViewDataManagerProvider = ({
   allLayoutData,
@@ -60,6 +67,9 @@ const EditViewDataManagerProvider = ({
     shouldCheckErrors,
     publishConfirmation,
   } = reducerState;
+
+  const { setModifiedDataOnly } = useSelector(selectCrudReducer);
+  const reduxDispatch = useDispatch();
 
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
@@ -144,8 +154,18 @@ const EditViewDataManagerProvider = ({
 
   const { components } = allLayoutData;
 
+  const previousInitialValues = usePrev(initialValues);
+
   useEffect(() => {
-    if (initialValues && currentContentTypeLayout?.attributes) {
+    /**
+     * Only fire this effect if the initialValues are different
+     * otherwise it's a fruitless effort no matter what happens.
+     */
+    if (
+      initialValues &&
+      currentContentTypeLayout?.attributes &&
+      !isEqual(previousInitialValues, initialValues)
+    ) {
       /**
        * This will return an array of paths:
        * ['many_to_one', 'one_to_many', 'one_to_one']
@@ -179,9 +199,25 @@ const EditViewDataManagerProvider = ({
         componentPaths,
         repeatableComponentPaths,
         dynamicZonePaths,
+        setModifiedDataOnly,
       });
+
+      /**
+       * TODO: This should be moved to a side-effect e.g. thunks
+       * something to consider for V5
+       */
+      if (setModifiedDataOnly) {
+        reduxDispatch(clearSetModifiedDataOnly());
+      }
     }
-  }, [initialValues, currentContentTypeLayout, components]);
+  }, [
+    initialValues,
+    currentContentTypeLayout,
+    components,
+    setModifiedDataOnly,
+    reduxDispatch,
+    previousInitialValues,
+  ]);
 
   const dispatchAddComponent = useCallback(
     (type) =>
