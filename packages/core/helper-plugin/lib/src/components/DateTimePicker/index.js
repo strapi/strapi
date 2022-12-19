@@ -131,13 +131,12 @@ const DateTimePicker = ({
       aria-labelledby="datetime-label"
       hint={hint}
       error={error}
+      required={required}
     >
       <Stack spacing={1}>
         {label && (
           <Flex>
-            <FieldLabel required={required} id="datetime-label">
-              {label}
-            </FieldLabel>
+            <FieldLabel id="datetime-label">{label}</FieldLabel>
             {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
           </Flex>
         )}
