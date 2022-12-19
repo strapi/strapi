@@ -47,14 +47,11 @@ const createAuditLogsService = (strapi) => {
       throw Error('Name is required');
     }
 
-    const processedEvent = processEvent(strapi, name, ...args);
+    const processedEvent = processEvent(name, ...args);
 
     if (processedEvent) {
       // TODO: save events here via provider
-      console.log(`Saving event: ${JSON.stringify(processedEvent, null, 2)}`);
-    } else {
-      // TODO remove
-      console.log(`Ignored event ${name} with args: ${JSON.stringify(args)}`);
+      console.log('Saving event', processedEvent);
     }
   };
 
