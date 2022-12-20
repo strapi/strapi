@@ -81,8 +81,10 @@ module.exports = async (opts) => {
 
     const telemetryPayload = (/* payload */) => {
       return {
-        source: engine.sourceProvider.name,
-        destination: engine.destinationProvider.name,
+        eventProperties: {
+          source: engine.sourceProvider.name,
+          destination: engine.destinationProvider.name,
+        },
       };
     };
 
