@@ -5,9 +5,9 @@ import { render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
 
-import { BulkActions } from '../components/BulkActions';
+import { BulkActions } from '../BulkActions';
 
-jest.mock('../../../hooks/useBulkRemove');
+jest.mock('../../../../../hooks/useBulkRemove');
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
