@@ -1051,6 +1051,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                 <input
                   aria-disabled="false"
                   aria-invalid="false"
+                  aria-required="false"
                   class="c25"
                   id="field-1"
                   name="searchbar"

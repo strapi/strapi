@@ -649,7 +649,6 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           <label
                             class="c5 c22"
                             for="firstname"
-                            required=""
                           >
                             <div
                               class="c1 c4"
@@ -668,6 +667,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
+                              aria-required="true"
                               class="c26"
                               id="firstname"
                               name="firstname"
@@ -709,6 +709,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
+                              aria-required="false"
                               class="c26"
                               id="lastname"
                               name="lastname"
@@ -737,7 +738,6 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           <label
                             class="c5 c22"
                             for="email"
-                            required=""
                           >
                             <div
                               class="c1 c4"
@@ -756,6 +756,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
+                              aria-required="true"
                               class="c26"
                               id="email"
                               name="email"
@@ -797,6 +798,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
+                              aria-required="false"
                               class="c26"
                               id="username"
                               name="username"
@@ -856,6 +858,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
+                              aria-required="false"
                               class="c27 c28"
                               id="textinput-1"
                               name="currentPassword"
@@ -922,6 +925,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
+                              aria-required="false"
                               autocomplete="new-password"
                               class="c27 c28"
                               id="textinput-2"
@@ -985,6 +989,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
+                              aria-required="false"
                               autocomplete="new-password"
                               class="c27 c28"
                               id="textinput-3"
@@ -1071,7 +1076,6 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                         <span
                           class="c5 c22"
                           for="select-4"
-                          id="select-4-label"
                         >
                           <div
                             class="c1 c4"
@@ -1181,7 +1185,6 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                         <span
                           class="c5 c22"
                           for="select-5"
-                          id="select-5-label"
                         >
                           <div
                             class="c1 c4"
