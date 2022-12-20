@@ -207,6 +207,11 @@ exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the sn
   fill: #8e8ea9;
 }
 
+.c9 {
+  border-radius: 4px;
+  height: 1.5rem;
+}
+
 .c12 {
   display: -webkit-box;
   display: -webkit-flex;
@@ -225,11 +230,6 @@ exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the sn
 
 .c3 {
   padding: 4px 12px;
-}
-
-.c9 {
-  border-radius: 4px;
-  height: 1.5rem;
 }
 
 <div>

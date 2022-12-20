@@ -516,21 +516,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         align-items: center;
       }
 
-      .c27 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: flex-start;
-        -webkit-box-align: flex-start;
-        -ms-flex-align: flex-start;
-        align-items: flex-start;
-      }
-
-      .c27 * {
-        cursor: pointer;
-      }
-
       .c35 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
@@ -586,6 +571,21 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
 
       .c0:focus-visible {
         outline: none;
+      }
+
+      .c27 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: flex-start;
+        -webkit-box-align: flex-start;
+        -ms-flex-align: flex-start;
+        align-items: flex-start;
+      }
+
+      .c27 * {
+        cursor: pointer;
       }
 
       .c3 {

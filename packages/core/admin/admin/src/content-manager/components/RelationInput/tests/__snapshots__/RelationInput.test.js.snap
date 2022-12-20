@@ -210,6 +210,47 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   margin-top: 4px;
 }
 
+.c28 path {
+  fill: #666687;
+}
+
+.c9 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c9 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c9 svg path {
+  fill: #666687;
+}
+
+.c10 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+}
+
+.c10 svg {
+  width: 0.5625rem;
+}
+
+.c23 .c5 {
+  color: #0c75af;
+}
+
+.c31 .c5 {
+  color: #328048;
+}
+
 .c19 {
   display: -webkit-inline-box;
   display: -webkit-inline-flex;
@@ -280,10 +321,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   border: 2px solid #4945ff;
 }
 
-.c28 path {
-  fill: #666687;
-}
-
 .c11 {
   background: transparent;
   border: none;
@@ -339,43 +376,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   left: -5px;
   right: -5px;
   border: 2px solid #4945ff;
-}
-
-.c9 {
-  background: transparent;
-  border: none;
-  position: relative;
-  z-index: 1;
-}
-
-.c9 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
-}
-
-.c9 svg path {
-  fill: #666687;
-}
-
-.c10 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  background: none;
-  border: none;
-}
-
-.c10 svg {
-  width: 0.5625rem;
-}
-
-.c23 .c5 {
-  color: #0c75af;
-}
-
-.c31 .c5 {
-  color: #328048;
 }
 
 .c17 {

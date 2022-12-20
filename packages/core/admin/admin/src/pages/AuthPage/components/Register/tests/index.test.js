@@ -621,6 +621,10 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         align-items: center;
       }
 
+      .c12:focus-visible {
+        outline: none;
+      }
+
       .c39 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -634,6 +638,17 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
 
       .c39 * {
         cursor: pointer;
+      }
+
+      .c23 {
+        display: grid;
+        grid-template-columns: repeat(12,1fr);
+        gap: 16px;
+      }
+
+      .c24 {
+        grid-column: span 6;
+        max-width: 100%;
       }
 
       .c8 {
@@ -650,21 +665,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
       .c8 svg {
         height: 4px;
         width: 6px;
-      }
-
-      .c12:focus-visible {
-        outline: none;
-      }
-
-      .c23 {
-        display: grid;
-        grid-template-columns: repeat(12,1fr);
-        gap: 16px;
-      }
-
-      .c24 {
-        grid-column: span 6;
-        max-width: 100%;
       }
 
       .c11 {

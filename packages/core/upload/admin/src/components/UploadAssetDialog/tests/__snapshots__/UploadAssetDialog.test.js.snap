@@ -1146,6 +1146,56 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   fill: #666687;
 }
 
+.c1 {
+  position: fixed;
+  z-index: 4;
+  inset: 0;
+  background: #32324d1F;
+  padding: 0 40px;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c4 {
+  width: 51.875rem;
+}
+
+.c6 {
+  border-radius: 4px 4px 0 0;
+  border-bottom: 1px solid #eaeaef;
+}
+
+.c31 {
+  border-radius: 0 0 4px 4px;
+  border-top: 1px solid #eaeaef;
+}
+
+.c32 > * + * {
+  margin-left: 8px;
+}
+
+.c18 {
+  border-bottom: 2px solid #4945ff;
+}
+
+.c16 {
+  border-bottom: 2px solid transparent;
+}
+
+.c14[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
 .c28 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
@@ -1237,56 +1287,6 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   line-height: 1.43;
   color: #8e8ea9;
   opacity: 1;
-}
-
-.c1 {
-  position: fixed;
-  z-index: 4;
-  inset: 0;
-  background: #32324d1F;
-  padding: 0 40px;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c4 {
-  width: 51.875rem;
-}
-
-.c6 {
-  border-radius: 4px 4px 0 0;
-  border-bottom: 1px solid #eaeaef;
-}
-
-.c31 {
-  border-radius: 0 0 4px 4px;
-  border-top: 1px solid #eaeaef;
-}
-
-.c32 > * + * {
-  margin-left: 8px;
-}
-
-.c18 {
-  border-bottom: 2px solid #4945ff;
-}
-
-.c16 {
-  border-bottom: 2px solid transparent;
-}
-
-.c14[aria-disabled='true'] {
-  cursor: not-allowed;
 }
 
 <body
