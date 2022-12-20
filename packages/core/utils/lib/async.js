@@ -21,7 +21,7 @@ function mapAsync(promiseArray, { concurrency = Infinity } = {}) {
   const appliedConcurrency = concurrency > promiseArray.length ? promiseArray.length : concurrency;
   const promiseArrayChunks = chunk(appliedConcurrency)(promiseArray);
 
-  return async (callback) => {
+  return async (iteratee) => {
     return promiseArrayChunks.reduce(async (prevChunksPromise, chunk, chunkIndex) => {
       // Need to await previous promise in order to respect the concurrency option
       const prevChunks = await prevChunksPromise;
@@ -29,7 +29,7 @@ function mapAsync(promiseArray, { concurrency = Infinity } = {}) {
       const awaitedChunk = await Promise.all(chunk);
       const transformedPromiseChunk = await Promise.all(
         // Calculating the index based on the original array, we do not want to have the index of the element inside the chunk
-        awaitedChunk.map((value, index) => callback(value, chunkIndex * appliedConcurrency + index))
+        awaitedChunk.map((value, index) => iteratee(value, chunkIndex * appliedConcurrency + index))
       );
 
       return prevChunks.concat(transformedPromiseChunk);
@@ -41,10 +41,10 @@ function mapAsync(promiseArray, { concurrency = Infinity } = {}) {
  * @type { import('./async').reduceAsync }
  */
 function reduceAsync(promiseArray) {
-  return (callback, initialValue) =>
+  return (iteratee, initialValue) =>
     promiseArray.reduce(async (previousPromise, currentValue, index) => {
       const previousValue = await previousPromise;
-      return callback(previousValue, await currentValue, index);
+      return iteratee(previousValue, await currentValue, index);
     }, Promise.resolve(initialValue));
 }
 
