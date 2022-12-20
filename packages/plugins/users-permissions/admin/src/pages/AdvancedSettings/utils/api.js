@@ -1,13 +1,19 @@
-import { axiosInstance, getRequestURL } from '../../../utils';
+import { getFetchClient } from '@strapi/admin/admin/src/utils/getFetchClient';
+import { getRequestURL } from '../../../utils';
 
 const fetchData = async () => {
-  const { data } = await axiosInstance.get(getRequestURL('advanced'));
+  const { get } = getFetchClient();
+  const { data } = await get(getRequestURL('advanced'));
+  console.log('fetchData new', getRequestURL('advanced'), data);
 
   return data;
 };
 
 const putAdvancedSettings = (body) => {
-  return axiosInstance.put(getRequestURL('advanced'), body);
+  const { put } = getFetchClient();
+  console.log('putAdvancedSettings new', getRequestURL('advanced'), body);
+
+  return put(getRequestURL('advanced'), body);
 };
 
 export { fetchData, putAdvancedSettings };
