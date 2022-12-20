@@ -33,7 +33,6 @@ import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Plus from '@strapi/icons/Plus';
 import Cog from '@strapi/icons/Cog';
 
-import { axiosInstance } from '../../../core/utils';
 import { getFetchClient } from '../../../utils/getFetchClient';
 
 import DynamicTable from '../../components/DynamicTable';
@@ -162,7 +161,8 @@ function ListView({
   const handleConfirmDeleteAllData = useCallback(
     async (ids) => {
       try {
-        await axiosInstance.post(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
+        const { post } = getFetchClient();
+        await post(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
           ids,
         });
 
@@ -182,7 +182,8 @@ function ListView({
   const handleConfirmDeleteData = useCallback(
     async (idToDelete) => {
       try {
-        await axiosInstance.delete(getRequestUrl(`collection-types/${slug}/${idToDelete}`));
+        const { del } = getFetchClient();
+        await del(getRequestUrl(`collection-types/${slug}/${idToDelete}`));
 
         const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
         fetchData(requestUrl);
