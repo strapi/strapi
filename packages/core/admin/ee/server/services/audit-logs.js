@@ -54,7 +54,7 @@ const createAuditLogsService = (strapi) => {
     };
   };
 
-  const handleEvent = (name, ...args) => {
+  const handleEvent = async (name, ...args) => {
     if (!name) {
       throw Error('Name is required');
     }
@@ -62,8 +62,7 @@ const createAuditLogsService = (strapi) => {
     const processedEvent = processEvent(name, ...args);
 
     if (processedEvent) {
-      // TODO: save events here via provider
-      console.log('Saving event', processedEvent);
+      await provider.saveEvent(processedEvent);
     }
   };
 

@@ -10,6 +10,7 @@ module.exports = {
   },
   options: {
     draftAndPublish: false,
+    timestamps: false,
     'content-manager': {
       visible: false,
     },
