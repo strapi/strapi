@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { Box, FocusTrap, Typography } from '@strapi/design-system';
-import { Book, Cross, Information } from '@strapi/icons';
+import { Book, Cross, Information, Question } from '@strapi/icons';
 
 import { useConfigurations } from '../../../hooks';
 
@@ -100,8 +100,7 @@ const Onboarding = () => {
         })}
         onClick={handleClick}
       >
-        {/* TODO: Information -> Question */}
-        {isOpen ? <Cross /> : <Information />}
+        {isOpen ? <Cross /> : <Question />}
       </Button>
 
       {/* FIX ME - replace with popover when overflow popover is fixed 
