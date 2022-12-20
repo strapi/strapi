@@ -138,8 +138,10 @@ const createShop = async ({
   anyToManyRel = [{ id: id1 }, { id: id2 }, { id: id3 }],
   data = {},
   populate,
-  strictConnect = true,
+  strict,
 }) => {
+  const options = strict ? { strict } : {};
+
   return createEntry(
     'shops',
     {
@@ -147,12 +149,12 @@ const createShop = async ({
       products_ow: { connect: anyToOneRel },
       products_oo: { connect: anyToOneRel },
       products_mo: { connect: anyToOneRel },
-      products_om: { options: { strictConnect }, connect: anyToManyRel },
-      products_mm: { options: { strictConnect }, connect: anyToManyRel },
-      products_mw: { options: { strictConnect }, connect: anyToManyRel },
+      products_om: { options, connect: anyToManyRel },
+      products_mm: { options, connect: anyToManyRel },
+      products_mw: { options, connect: anyToManyRel },
       myCompo: {
         compo_products_ow: { connect: anyToOneRel },
-        compo_products_mw: { options: { strictConnect }, connect: anyToManyRel },
+        compo_products_mw: { options, connect: anyToManyRel },
       },
       ...data,
     },
@@ -168,7 +170,7 @@ const updateShop = async (
     relAction = 'connect',
     data = {},
     populate,
-    strictConnect = true,
+    strict = true,
   }
 ) => {
   return updateEntry(
@@ -179,13 +181,13 @@ const updateShop = async (
       products_ow: { [relAction]: anyToOneRel },
       products_oo: { [relAction]: anyToOneRel },
       products_mo: { [relAction]: anyToOneRel },
-      products_om: { options: { strictConnect }, [relAction]: anyToManyRel },
-      products_mm: { options: { strictConnect }, [relAction]: anyToManyRel },
-      products_mw: { options: { strictConnect }, [relAction]: anyToManyRel },
+      products_om: { options: { strict }, [relAction]: anyToManyRel },
+      products_mm: { options: { strict }, [relAction]: anyToManyRel },
+      products_mw: { options: { strict }, [relAction]: anyToManyRel },
       myCompo: {
         id: shop.attributes?.myCompo?.id,
         compo_products_ow: { [relAction]: anyToOneRel },
-        compo_products_mw: { options: { strictConnect }, [relAction]: anyToManyRel },
+        compo_products_mw: { options: { strict }, [relAction]: anyToManyRel },
       },
       ...data,
     },
@@ -877,7 +879,7 @@ describe('Relations', () => {
       // Connect before an id that does not exist.
       const updatedShop = await updateShop(shop.data, {
         anyToManyRel: [{ id: id2, position: { after: id3 } }],
-        strictConnect: false,
+        strict: false,
       });
 
       const expectedShop = shopFactory({

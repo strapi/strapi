@@ -740,12 +740,12 @@ describe('Relations', () => {
       ];
       const updatedShop = await updateEntry('shop', createdShop.id, {
         name: 'Cazotte Shop',
-        products_om: { options: { strictConnect: false }, connect: relationToChange },
-        products_mm: { options: { strictConnect: false }, connect: relationToChange },
-        products_mw: { options: { strictConnect: false }, connect: relationToChange },
+        products_om: { options: { strict: false }, connect: relationToChange },
+        products_mm: { options: { strict: false }, connect: relationToChange },
+        products_mw: { options: { strict: false }, connect: relationToChange },
         myCompo: {
           id: createdShop.myCompo.id,
-          compo_products_mw: { options: { strictConnect: false }, connect: relationToChange },
+          compo_products_mw: { options: { strict: false }, connect: relationToChange },
         },
       });
 

@@ -79,7 +79,7 @@ const toAssocs = (data) => {
 
   return {
     options: {
-      strictConnect: data?.options?.strictConnect,
+      strict: data?.options?.strict,
     },
     connect: toIdArray(data?.connect).map((elm) => ({
       id: elm.id,
@@ -880,7 +880,7 @@ const createEntityManager = (db) => {
                   adjacentRelations,
                   inverseJoinColumn.name,
                   joinTable.orderColumnName,
-                  cleanRelationData.options.strictConnect
+                  cleanRelationData.options.strict
                 )
                   .connect(cleanRelationData.connect)
                   .getOrderMap();

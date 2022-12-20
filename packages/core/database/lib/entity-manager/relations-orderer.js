@@ -117,11 +117,11 @@ const sortConnectArray = (connectArr, initialArr = [], strictSort = true) => {
  * @param {Array<*>} initArr - array of relations to initialize the class with
  * @param {string} idColumn - the column name of the id
  * @param {string} orderColumn - the column name of the order
- * @param {boolean} strictConnect - if true, will throw an error if a relation is connected adjacent to
+ * @param {boolean} strict - if true, will throw an error if a relation is connected adjacent to
  *                               another one that does not exist
  * @return {*}
  */
-const relationsOrderer = (initArr, idColumn, orderColumn, strictConnect) => {
+const relationsOrderer = (initArr, idColumn, orderColumn, strict) => {
   const arr = _.castArray(initArr || []).map((r) => ({
     init: true,
     id: r[idColumn],
@@ -175,7 +175,7 @@ const relationsOrderer = (initArr, idColumn, orderColumn, strictConnect) => {
       return this;
     },
     connect(relations) {
-      const sortedRelations = sortConnectArray(relations, arr, strictConnect);
+      const sortedRelations = sortConnectArray(relations, arr, strict);
       sortedRelations.forEach((relation) => {
         this.disconnect(relation);
 
