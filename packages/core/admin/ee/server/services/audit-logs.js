@@ -13,6 +13,7 @@ const defaultEvents = [
   'user.update',
   'user.delete',
   'admin.auth.success',
+  'admin.logout',
 ];
 
 const getEventMap = (defaultEvents) => {

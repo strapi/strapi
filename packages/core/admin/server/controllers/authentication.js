@@ -157,4 +157,10 @@ module.exports = {
       },
     };
   },
+
+  logout(ctx) {
+    const sanitizedUser = getService('user').sanitizeUser(ctx.state.user);
+    strapi.eventHub.emit('admin.logout', { user: sanitizedUser });
+    ctx.body = { data: {} };
+  },
 };
