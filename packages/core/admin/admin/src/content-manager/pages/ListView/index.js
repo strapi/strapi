@@ -34,6 +34,7 @@ import Plus from '@strapi/icons/Plus';
 import Cog from '@strapi/icons/Cog';
 
 import { axiosInstance } from '../../../core/utils';
+import { getFetchClient } from '../../../utils/getFetchClient';
 
 import DynamicTable from '../../components/DynamicTable';
 import AttributeFilter from '../../components/AttributeFilter';
@@ -106,13 +107,14 @@ function ListView({
   const fetchData = useCallback(
     async (endPoint, source) => {
       getData();
+      const { get: getClient } = getFetchClient();
 
       try {
         const opts = source ? { cancelToken: source.token } : null;
 
         const {
           data: { results, pagination: paginationResult },
-        } = await axiosInstance.get(endPoint, opts);
+        } = await getClient(endPoint, opts);
 
         notifyStatus(
           formatMessage(
