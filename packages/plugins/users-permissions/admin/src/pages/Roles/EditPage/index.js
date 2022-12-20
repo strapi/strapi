@@ -21,7 +21,7 @@ import { Typography } from '@strapi/design-system/Typography';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Check from '@strapi/icons/Check';
 import { GridItem, Grid } from '@strapi/design-system/Grid';
-import { getFetchClient } from '@strapi/admin/admin/src/utils/getFetchClient';
+import useFetchClient from '@strapi/admin/admin/src/hooks/useFetchClient';
 import UsersPermissions from '../../../components/UsersPermissions';
 import getTrad from '../../../utils/getTrad';
 import pluginId from '../../../pluginId';
@@ -40,7 +40,7 @@ const EditPage = () => {
   const { role, onSubmitSucceeded, isLoading: isLoadingRole } = useFetchRole(id);
   const permissionsRef = useRef();
 
-  const { put } = getFetchClient();
+  const { put } = useFetchClient();
 
   const handleEditRoleSubmit = async (data) => {
     // Set loading state
