@@ -893,7 +893,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                           <span
                             class="c5 c20"
                             for="select-1"
-                            id="select-1-label"
                           >
                             <div
                               class="c1 c4"
@@ -1030,6 +1029,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               </div>
                               <input
                                 aria-disabled="false"
+                                aria-required="false"
                                 class="c46"
                                 id="toggleinput-1"
                                 name="unique_email"
@@ -1108,6 +1108,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               </div>
                               <input
                                 aria-disabled="false"
+                                aria-required="false"
                                 class="c46"
                                 id="toggleinput-2"
                                 name="allow_register"
@@ -1154,6 +1155,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 aria-describedby="email_reset_password-hint"
                                 aria-disabled="false"
                                 aria-invalid="false"
+                                aria-required="false"
                                 class="c51"
                                 id="email_reset_password"
                                 name="email_reset_password"
@@ -1234,6 +1236,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               </div>
                               <input
                                 aria-disabled="false"
+                                aria-required="false"
                                 class="c46"
                                 id="toggleinput-3"
                                 name="email_confirmation"
@@ -1281,6 +1284,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 aria-describedby="email_confirmation_redirection-hint"
                                 aria-disabled="true"
                                 aria-invalid="false"
+                                aria-required="false"
                                 class="c53"
                                 id="email_confirmation_redirection"
                                 name="email_confirmation_redirection"

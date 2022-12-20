@@ -1463,6 +1463,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                               <textarea
                                 aria-describedby="textarea-35-hint"
                                 aria-invalid="false"
+                                aria-required="false"
                                 class="c29"
                                 id="textarea-35"
                                 name="urls"

@@ -1046,6 +1046,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                 <input
                   aria-disabled="false"
                   aria-invalid="false"
+                  aria-required="false"
                   class="c25"
                   id="field-1"
                   name="searchbar"

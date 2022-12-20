@@ -691,6 +691,7 @@ describe('Email | Pages | Settings', () => {
                                 <input
                                   aria-disabled="true"
                                   aria-invalid="false"
+                                  aria-required="false"
                                   class="c21"
                                   id="textinput-4"
                                   name="shipper-email"
@@ -732,6 +733,7 @@ describe('Email | Pages | Settings', () => {
                                 <input
                                   aria-disabled="true"
                                   aria-invalid="false"
+                                  aria-required="false"
                                   class="c21"
                                   id="textinput-5"
                                   name="response-email"
@@ -758,7 +760,6 @@ describe('Email | Pages | Settings', () => {
                             <span
                               class="c5 c19"
                               for="select-6"
-                              id="select-6-label"
                             >
                               <div
                                 class="c1 c4"
@@ -877,6 +878,7 @@ describe('Email | Pages | Settings', () => {
                                 <input
                                   aria-disabled="false"
                                   aria-invalid="false"
+                                  aria-required="false"
                                   class="c31"
                                   id="test-address-input"
                                   name="test-address"

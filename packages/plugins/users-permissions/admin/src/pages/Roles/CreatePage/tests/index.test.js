@@ -906,6 +906,7 @@ describe('Admin | containers | RoleCreatePage', () => {
                                 <input
                                   aria-disabled="false"
                                   aria-invalid="false"
+                                  aria-required="false"
                                   class="c25"
                                   id="textinput-1"
                                   name="name"
@@ -950,6 +951,7 @@ describe('Admin | containers | RoleCreatePage', () => {
                               >
                                 <textarea
                                   aria-invalid="false"
+                                  aria-required="false"
                                   class="c28"
                                   id="textarea-2"
                                   name="description"

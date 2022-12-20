@@ -1081,7 +1081,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           <label
                             class="c7 c27"
                             for="textinput-1"
-                            required=""
                           >
                             <div
                               class="c1 c9 c11"
@@ -1100,6 +1099,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
+                              aria-required="true"
                               class="c31"
                               id="textinput-1"
                               name="name"
@@ -1144,6 +1144,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           >
                             <textarea
                               aria-invalid="false"
+                              aria-required="false"
                               class="c34"
                               id="textarea-2"
                               name="description"
@@ -1168,8 +1169,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         <span
                           class="c7 c27"
                           for="select-3"
-                          id="select-3-label"
-                          required=""
                         >
                           <div
                             class="c1 c9 c11"
@@ -1261,8 +1260,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         <span
                           class="c7 c27"
                           for="select-4"
-                          id="select-4-label"
-                          required=""
                         >
                           <div
                             class="c1 c9 c11"
@@ -2880,7 +2877,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           <label
                             class="c7 c34"
                             for="textinput-28"
-                            required=""
                           >
                             <div
                               class="c1 c9 c11"
@@ -2899,6 +2895,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
+                              aria-required="true"
                               class="c38"
                               id="textinput-28"
                               name="name"
@@ -2943,6 +2940,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           >
                             <textarea
                               aria-invalid="false"
+                              aria-required="false"
                               class="c41"
                               id="textarea-29"
                               name="description"
@@ -2969,8 +2967,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         <span
                           class="c7 c34"
                           for="select-30"
-                          id="select-30-label"
-                          required=""
                         >
                           <div
                             class="c1 c9 c11"
@@ -3066,8 +3062,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         <span
                           class="c7 c34"
                           for="select-31"
-                          id="select-31-label"
-                          required=""
                         >
                           <div
                             class="c1 c9 c11"

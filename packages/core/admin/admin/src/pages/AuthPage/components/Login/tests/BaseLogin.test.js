@@ -670,7 +670,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                     <label
                       class="c8 c15"
                       for="textinput-1"
-                      required=""
                     >
                       <div
                         class="c1 c4"
@@ -689,6 +688,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                       <input
                         aria-disabled="false"
                         aria-invalid="false"
+                        aria-required="true"
                         class="c20"
                         id="textinput-1"
                         name="email"
@@ -708,7 +708,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                     <label
                       class="c8 c15"
                       for="textinput-2"
-                      required=""
                     >
                       <div
                         class="c1 c4"
@@ -727,6 +726,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                       <input
                         aria-disabled="false"
                         aria-invalid="false"
+                        aria-required="true"
                         class="c21 c22"
                         id="textinput-2"
                         name="password"

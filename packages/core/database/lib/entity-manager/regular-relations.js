@@ -328,7 +328,7 @@ const cleanOrderColumnsForInnoDB = async ({
       await db.connection
         .raw(
           `
-          CREATE TEMPORARY TABLE ??
+          CREATE TABLE ??
             SELECT
               id,
               (
@@ -361,9 +361,7 @@ const cleanOrderColumnsForInnoDB = async ({
         )
         .transacting(trx);
     } finally {
-      await db.connection
-        .raw(`DROP TEMPORARY TABLE IF EXISTS ??`, [tempInvOrderTableName])
-        .transacting(trx);
+      await db.connection.raw(`DROP TABLE IF EXISTS ??`, [tempInvOrderTableName]).transacting(trx);
     }
   }
 };
