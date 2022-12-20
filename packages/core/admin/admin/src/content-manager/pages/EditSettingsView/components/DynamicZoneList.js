@@ -20,6 +20,12 @@ const CustomLink = styled(Flex)`
           color: ${theme.colors.primary600};
       }
     `}
+
+    /* > ComponentIcon */
+    > div:first-child {
+      background: ${({ theme }) => theme.colors.primary200};
+      color: ${({ theme }) => theme.colors.primary600};
+    }
   }
 `;
 
