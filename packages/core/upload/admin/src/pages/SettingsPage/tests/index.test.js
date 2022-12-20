@@ -668,6 +668,7 @@ describe('Upload | SettingsPage', () => {
                                       <input
                                         aria-disabled="false"
                                         aria-label="responsiveDimensions"
+                                        aria-required="false"
                                         checked=""
                                         class="c37"
                                         data-testid="responsiveDimensions"
@@ -749,6 +750,7 @@ describe('Upload | SettingsPage', () => {
                                       <input
                                         aria-disabled="false"
                                         aria-label="sizeOptimization"
+                                        aria-required="false"
                                         class="c37"
                                         data-testid="sizeOptimization"
                                         id="toggleinput-2"
@@ -829,6 +831,7 @@ describe('Upload | SettingsPage', () => {
                                       <input
                                         aria-disabled="false"
                                         aria-label="autoOrientation"
+                                        aria-required="false"
                                         checked=""
                                         class="c37"
                                         data-testid="autoOrientation"

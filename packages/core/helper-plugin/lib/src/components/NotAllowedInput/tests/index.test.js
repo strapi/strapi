@@ -202,6 +202,7 @@ describe('<NotAllowedInput />', () => {
               <input
                 aria-disabled="true"
                 aria-invalid="false"
+                aria-required="false"
                 class="c8"
                 id="test"
                 name="test"
