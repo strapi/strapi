@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Box, FocusTrap, Typography } from '@strapi/design-system';
+import { Box, FocusTrap, Typography, Icon } from '@strapi/design-system';
 import { Book, Cross, Information, Question } from '@strapi/icons';
+import { pxToRem } from '@strapi/helper-plugin';
 
 import { useConfigurations } from '../../../hooks';
 
@@ -94,13 +95,20 @@ const Onboarding = () => {
     <OnboardingWrapper as="aside">
       <Button
         id="onboarding"
-        aria-label={formatMessage({
-          id: 'app.components.Onboarding.help.button',
-          defaultMessage: 'Help button',
-        })}
+        aria-label={formatMessage(
+          isOpen
+            ? {
+                id: 'app.components.Onboarding.help.button-close',
+                defaultMessage: 'Close help menu',
+              }
+            : {
+                id: 'app.components.Onboarding.help.button',
+                defaultMessage: 'Open help menu',
+              }
+        )}
         onClick={handleClick}
       >
-        {isOpen ? <Cross /> : <Question />}
+        <Icon as={isOpen ? Cross : Question} height={pxToRem(16)} width={pxToRem(16)} />
       </Button>
 
       {/* FIX ME - replace with popover when overflow popover is fixed 
