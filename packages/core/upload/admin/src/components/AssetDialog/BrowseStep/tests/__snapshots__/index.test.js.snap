@@ -503,22 +503,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   fill: #666687;
 }
 
-.c10 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c10 svg {
-  height: 4px;
-  width: 6px;
-}
-
 .c58 {
   position: absolute;
   left: 0;
@@ -626,6 +610,22 @@ exports[`BrowseStep renders and match snapshot 1`] = `
 .c27:focus {
   background-color: #dcdce4;
   color: #4a4a6a;
+}
+
+.c10 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c10 svg {
+  height: 4px;
+  width: 6px;
 }
 
 .c34 {

@@ -1,8 +1,8 @@
-import React, { useState, useRef } from 'react'; // useState
+import React, { useState, useRef } from 'react';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { useHistory, useLocation } from 'react-router-dom';
-
+import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
+import { stringify } from 'qs';
 import {
   LoadingIndicatorPage,
   useFocusWhenNavigate,
@@ -11,6 +11,7 @@ import {
   useSelectionState,
   useQueryParams,
   useTracking,
+  CheckPermissions,
   usePersistentState,
 } from '@strapi/helper-plugin';
 import { Layout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
@@ -24,33 +25,36 @@ import { Typography } from '@strapi/design-system/Typography';
 import { GridItem } from '@strapi/design-system/Grid';
 import { Flex } from '@strapi/design-system/Flex';
 import Pencil from '@strapi/icons/Pencil';
-import List from '@strapi/icons/List';
+import Cog from '@strapi/icons/Cog';
 import Grid from '@strapi/icons/Grid';
+import List from '@strapi/icons/List';
 
-import { UploadAssetDialog } from '../../components/UploadAssetDialog/UploadAssetDialog';
-import { EditFolderDialog } from '../../components/EditFolderDialog';
-import { EditAssetDialog } from '../../components/EditAssetDialog';
-import { TableList } from '../../components/TableList';
-import { AssetGridList } from '../../components/AssetGridList';
-import { FolderGridList } from '../../components/FolderGridList';
-import SortPicker from '../../components/SortPicker';
-import { useAssets } from '../../hooks/useAssets';
-import { useFolders } from '../../hooks/useFolders';
-import { useFolder } from '../../hooks/useFolder';
-import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
-import { getTrad, containsAssetFilter, getBreadcrumbDataML, getFolderURL } from '../../utils';
-import { PaginationFooter } from '../../components/PaginationFooter';
+import { UploadAssetDialog } from '../../../components/UploadAssetDialog/UploadAssetDialog';
+import { EditFolderDialog } from '../../../components/EditFolderDialog';
+import { EditAssetDialog } from '../../../components/EditAssetDialog';
+import { AssetGridList } from '../../../components/AssetGridList';
+import { FolderGridList } from '../../../components/FolderGridList';
+import { TableList } from '../../../components/TableList';
+import SortPicker from '../../../components/SortPicker';
+import { PaginationFooter } from '../../../components/PaginationFooter';
 import { BulkActions } from './components/BulkActions';
+import { EmptyOrNoPermissions } from './components/EmptyOrNoPermissions';
 import {
   FolderCard,
   FolderCardBody,
   FolderCardCheckbox,
   FolderCardBodyAction,
-} from '../../components/FolderCard';
+} from '../../../components/FolderCard';
 import { Filters } from './components/Filters';
 import { Header } from './components/Header';
-import { EmptyOrNoPermissions } from './components/EmptyOrNoPermissions';
-import { localStorageKeys, viewOptions } from '../../constants';
+
+import { useAssets } from '../../../hooks/useAssets';
+import { useFolders } from '../../../hooks/useFolders';
+import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
+import { useFolder } from '../../../hooks/useFolder';
+import { getTrad, containsAssetFilter, getBreadcrumbDataML, getFolderURL } from '../../../utils';
+import pluginPermissions from '../../../permissions';
+import { localStorageKeys, viewOptions } from '../../../constants';
 
 const BoxWithHeight = styled(Box)`
   height: ${32 / 16}rem;
@@ -250,6 +254,22 @@ export const MediaLibrary = () => {
           }
           endActions={
             <>
+              <CheckPermissions permissions={pluginPermissions.configureView}>
+                <ActionContainer paddingTop={1} paddingBottom={1}>
+                  <IconButton
+                    forwardedAs={ReactRouterLink}
+                    to={{
+                      pathname: `${pathname}/configuration`,
+                      search: stringify(query, { encode: false }),
+                    }}
+                    icon={<Cog />}
+                    label={formatMessage({
+                      id: 'app.links.configure-view',
+                      defaultMessage: 'Configure the view',
+                    })}
+                  />
+                </ActionContainer>
+              </CheckPermissions>
               <ActionContainer paddingTop={1} paddingBottom={1}>
                 <IconButton
                   icon={isGridView ? <List /> : <Grid />}
