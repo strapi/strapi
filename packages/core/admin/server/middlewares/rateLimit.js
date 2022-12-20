@@ -1,7 +1,7 @@
 'use strict';
 
 const utils = require('@strapi/utils');
-const { toLower } = require('lodash/fp');
+const { has, toLower } = require('lodash/fp');
 
 const { RateLimitError } = utils.errors;
 
