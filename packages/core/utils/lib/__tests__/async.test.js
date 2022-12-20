@@ -50,6 +50,26 @@ describe('Async utils', () => {
         await mapFunc(() => true);
       }).rejects.toThrow('input');
     });
+    test('Should resolve elements two at a time', async () => {
+      const numberPromiseArray = [1, 2, 3];
+      const getPromiseDelayed = (speed = 0) =>
+        new Promise((resolve) => {
+          setTimeout(resolve, speed);
+        });
+      const opOrder = [];
+
+      const mapFunc = mapAsync(numberPromiseArray, { concurrency: 2 });
+      const result = await mapFunc(async (value, index) => {
+        if (index === 0) {
+          await getPromiseDelayed(20);
+        }
+        opOrder.push(index);
+        return value;
+      });
+
+      expect(result).toEqual([1, 2, 3]);
+      expect(opOrder).toEqual([1, 0, 2]);
+    });
   });
   describe('reduceAsync', () => {
     test('Should return a incremented number', async () => {

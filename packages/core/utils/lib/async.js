@@ -1,5 +1,7 @@
 'use strict';
 
+const { chunk } = require('lodash/fp');
+
 function pipeAsync(...methods) {
   return async (data) => {
     let res = data;
@@ -15,13 +17,23 @@ function pipeAsync(...methods) {
 /**
  * @type { import('./async').mapAsync }
  */
-function mapAsync(promiseArray) {
-  return (callback) => {
-    const transformedPromiseArray = promiseArray.map(async (promiseValue, index) => {
-      const value = await promiseValue;
-      return callback(value, index);
-    });
-    return Promise.all(transformedPromiseArray);
+function mapAsync(promiseArray, { concurrency = Infinity } = {}) {
+  const appliedConcurrency = concurrency > promiseArray.length ? promiseArray.length : concurrency;
+  const promiseArrayChunks = chunk(appliedConcurrency)(promiseArray);
+
+  return async (callback) => {
+    return promiseArrayChunks.reduce(async (prevChunksPromise, chunk, chunkIndex) => {
+      // Need to await previous promise in order to respect the concurrency option
+      const prevChunks = await prevChunksPromise;
+      // As chunks can contain promises, we need to await the chunk
+      const awaitedChunk = await Promise.all(chunk);
+      const transformedPromiseChunk = await Promise.all(
+        // Calculating the index based on the original array, we do not want to have the index of the element inside the chunk
+        awaitedChunk.map((value, index) => callback(value, chunkIndex * appliedConcurrency + index))
+      );
+
+      return prevChunks.concat(transformedPromiseChunk);
+    }, Promise.resolve([]));
   };
 }
 
