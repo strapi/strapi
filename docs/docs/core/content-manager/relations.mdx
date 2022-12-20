@@ -116,7 +116,7 @@ filter out the relation from the array of relations. This is handled inside the 
 
 :::note
 Connecting relations adds the item to the end of the list, whilst loading more relations prepends to
-the beginning of the list. This is the expected behaviour.
+the beginning of the list. This is the expected behaviour, to keep the order of the list in the UI in sync with the API response.
 :::
 
 The `RelationInput` component takes the field in `modifiedData` as its source of truth. You could therefore consider this to
@@ -126,7 +126,7 @@ data for the api.
 
 ### Cleaning data to be posted to the API
 
-The API to update the enttiy expects relations to be categorised into two groups, a `connect` array and `disconnect` array.
+The API to update the entiy expects relations to be categorised into two groups, a `connect` array and `disconnect` array.
 You could do this as the user interacts with the input but we found this to be confusing and then involved us managing three
 different arrays which makes the code more complex. Instead, because the browser doesn't really care about whats new and removed
 and we have a copy of the slice of data we're mutating from the server we can run a small diff algorithm to determine which
@@ -142,3 +142,18 @@ relations have been connected and which have been disconnected. Returning an obj
 ```
 
 ## Frontend component architecture
+
+The input field for relation fields consist of two components:
+
+### `RelationInputDataManager`
+
+This container component handles data fetching and data normalization for the `RelationInput` component. This has been extracted from 
+the `RelationInput` so that Strapi is able to move the underlying component into the design-system if the community would need it
+(most other input components can be consumed from there).
+
+### `RelationInput`
+
+This component is the presentational counterpart to the `RelationInputDataManager` component. It renders an input field based on the data passed from the data manager.
+
+Under the hood it is using `react-window` to render a list of relations in a virtualized view. Some fields need to render thousands of relations, which
+would otherwise have a negative impact on the overall performance of the content-manager.
