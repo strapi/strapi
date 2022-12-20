@@ -1,5 +1,7 @@
 'use strict';
 
+const provider = require('@strapi/provider-audit-logs-local');
+
 const defaultEvents = [
   'entry.create',
   'entry.update',
@@ -68,6 +70,7 @@ const createAuditLogsService = (strapi) => {
   return {
     register() {
       this._eventHubUnsubscribe = strapi.eventHub.subscribe(handleEvent);
+      provider.register({ strapi });
       return this;
     },
 
