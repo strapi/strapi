@@ -27,7 +27,7 @@ module.exports = (baseURL) => ({
     key: '',
     secret: '',
     callback: `${baseURL}/google/callback`,
-    scope: ['email'],
+    scope: ['email', 'openid', 'profile'],
   },
   github: {
     enabled: false,
