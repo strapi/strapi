@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useReducer } from 'react';
 import { useNotification } from '@strapi/helper-plugin';
 import { get } from 'lodash';
+import { getFetchClient } from '@strapi/admin/admin/src/utils/getFetchClient';
 import init from './init';
 import pluginId from '../../pluginId';
 import { cleanPermissions } from '../../utils';
-import axiosInstance from '../../utils/axiosInstance';
 import reducer, { initialState } from './reducer';
 
 const usePlugins = (shouldFetchData = true) => {
@@ -14,6 +14,7 @@ const usePlugins = (shouldFetchData = true) => {
   );
 
   const fetchPlugins = useCallback(async () => {
+    const { get: getClient } = getFetchClient();
     try {
       dispatch({
         type: 'GET_DATA',
@@ -21,7 +22,7 @@ const usePlugins = (shouldFetchData = true) => {
 
       const [{ permissions }, { routes }] = await Promise.all(
         [`/${pluginId}/permissions`, `/${pluginId}/routes`].map(async (endpoint) => {
-          const res = await axiosInstance.get(endpoint);
+          const res = await getClient(endpoint);
 
           return res.data;
         })
