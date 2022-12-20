@@ -4,16 +4,18 @@ import styled from 'styled-components';
 
 import { Flex } from '@strapi/design-system';
 
-const Wrapper = styled(Flex)`
-  ${({ showBackground }) => (showBackground ? `border-radius: 50%;` : '')}
+const WIDTH_S = 5;
+const WIDTH_M = 8;
 
+const Wrapper = styled(Flex)`
+  border-radius: ${({ showBackground }) => (showBackground ? `50%` : 0)};
   color: ${({ theme }) => theme.colors.neutral600};
-  height: ${({ theme, size }) => theme.spaces[size === 'S' ? 5 : 8]};
-  width: ${({ theme, size }) => theme.spaces[size === 'S' ? 5 : 8]};
+  height: ${({ theme, size }) => theme.spaces[size === 'S' ? WIDTH_S : WIDTH_M]};
+  width: ${({ theme, size }) => theme.spaces[size === 'S' ? WIDTH_S : WIDTH_M]};
 
   svg {
-    height: ${({ theme, size }) => theme.spaces[size === 'S' ? 3 : 5]};
-    width: ${({ theme, size }) => theme.spaces[size === 'S' ? 3 : 5]};
+    height: ${({ theme, size }) => theme.spaces[size === 'S' ? WIDTH_S - 2 : WIDTH_M - 3]};
+    width: ${({ theme, size }) => theme.spaces[size === 'S' ? WIDTH_S - 2 : WIDTH_M - 3]};
   }
 `;
 
