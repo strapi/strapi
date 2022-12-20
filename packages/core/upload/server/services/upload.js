@@ -77,8 +77,8 @@ module.exports = ({ strapi }) => ({
     if (!ext) {
       ext = `.${extension(type)}`;
     }
-    const basename = path.basename(fileInfo.name || filename, ext);
-    const usedName = fileInfo.name || filename;
+    const usedName = (fileInfo.name || filename).normalize();
+    const basename = path.basename(usedName, ext);
 
     const entity = {
       name: usedName,
