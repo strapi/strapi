@@ -74,7 +74,6 @@ class Database {
   }
 }
 
-// TODO: Do the same for repeated mappedBy relations
 const getLinks = ({ db }) => {
   const relationsToUpdate = {};
 
@@ -102,11 +101,6 @@ const getLinks = ({ db }) => {
   return Object.values(relationsToUpdate);
 };
 
-// const isLinkTableEmpty = async (db, linkTableName) => {
-//   const result = await db.getConnection().count('* as count').from(linkTableName);
-//   return result.count === 0;
-// };
-
 // TODO: move into strapi
 Database.transformContentTypes = transformContentTypes;
 Database.init = async (config) => {
@@ -129,7 +123,6 @@ Database.init = async (config) => {
     const invContentType = db.metadata.get(relation.target);
 
     // If both sides use inversedBy
-    // TODO: Same for mappedBy
     if (relation.inversedBy && invRelation.inversedBy) {
       // If the generated join table name is the same as the one assigned in relation.joinTable,
       // relation is on the inversed side of the bidirectional relation.
