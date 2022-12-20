@@ -41,9 +41,8 @@ describe('sortConnectArray', () => {
   test("error if position doesn't exist", () => {
     const sortConnect = () => sortConnectArray([{ id: 1, position: { after: 2 } }]);
 
-    expect(sortConnect).toThrowErrorMatchingSnapshot(
-      '"There was a problem connecting relation with id 1 at position' +
-        '{"after":2}. The relation with id 2 needs to be connected first."'
+    expect(sortConnect).toThrowError(
+      'There was a problem connecting relation with id 1 at position {"after":2}. The relation with id 2 needs to be connected first.'
     );
   });
 });
