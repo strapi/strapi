@@ -65,7 +65,7 @@ const create = async (attributes) => {
   };
 
   const result = await strapi.query('admin::role').create({ data: rolesWithCode });
-  strapi.eventHub.emit('role.create', sanitizeRole(result));
+  strapi.eventHub.emit('role.create', { role: sanitizeRole(result) });
 
   return result;
 };
@@ -143,7 +143,7 @@ const update = async (params, attributes) => {
   const result = await strapi
     .query('admin::role')
     .update({ where: params, data: sanitizedAttributes });
-  strapi.eventHub.emit('role.update', sanitizeRole(result));
+  strapi.eventHub.emit('role.update', { role: sanitizeRole(result) });
 
   return result;
 };
@@ -202,7 +202,7 @@ const deleteByIds = async (ids = []) => {
     const deletedRole = await strapi.query('admin::role').delete({ where: { id } });
 
     if (deletedRole) {
-      strapi.eventHub.emit('role.delete', deletedRole);
+      strapi.eventHub.emit('role.delete', { role: deletedRole });
       deletedRoles.push(deletedRole);
     }
   }

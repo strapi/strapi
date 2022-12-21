@@ -49,7 +49,7 @@ const deleteByIds = async (ids) => {
     const queryResult = await strapi.query('admin::permission').delete({ where: { id } });
     result.push(queryResult);
   }
-  strapi.eventHub.emit('permissions.delete', { permissions: result });
+  strapi.eventHub.emit('permission.delete', { permissions: result });
 };
 
 /**
@@ -65,7 +65,7 @@ const createMany = async (permissions) => {
   }
 
   const permissionsToReturn = permissionDomain.toPermission(createdPermissions);
-  strapi.eventHub.emit('permissions.create', { permissions: permissionsToReturn });
+  strapi.eventHub.emit('permission.create', { permissions: permissionsToReturn });
 
   return permissionsToReturn;
 };
@@ -82,7 +82,7 @@ const update = async (params, attributes) => {
     .update({ where: params, data: attributes });
 
   const permissionToReturn = permissionDomain.toPermission(updatedPermission);
-  strapi.eventHub.emit('permissions.update', { permissions: permissionToReturn });
+  strapi.eventHub.emit('permission.update', { permissions: permissionToReturn });
 
   return permissionToReturn;
 };
