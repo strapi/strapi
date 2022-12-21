@@ -5,7 +5,7 @@ import type {
   Stream,
 } from './utils';
 import type { IMetadata } from './common-entities';
-import type { PipelineSource, PipelineDestination } from 'stream';
+import type { PipelineSource, PipelineDestination, Readable, Writable } from 'stream';
 
 type ProviderType = 'source' | 'destination';
 
@@ -26,17 +26,16 @@ export interface ISourceProvider extends IProvider {
   results?: ISourceProviderTransferResults;
 
   // Getters for the source's transfer streams
-  streamEntities?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
-  streamLinks?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
-  streamAssets?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
-  streamConfiguration?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
-  getSchemas?(): Strapi.Schemas;
-  streamSchemas?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
+  streamEntities?(): Readable | Promise<Readable>;
+  streamLinks?(): Readable | Promise<Readable>;
+  streamAssets?(): Readable | Promise<Readable>;
+  streamConfiguration?(): Readable | Promise<Readable>;
+  getSchemas?(): Strapi.Schemas | Promise<Strapi.Schemas>;
+  streamSchemas?(): Readable | Promise<Readable>;
 }
 
 export interface IDestinationProvider extends IProvider {
   results?: IDestinationProviderTransferResults;
-  #providersMetadata?: { source?: IMetadata; destination?: IMetadata };
 
   /**
    * Optional rollback implementation
@@ -46,10 +45,10 @@ export interface IDestinationProvider extends IProvider {
   setMetadata?(target: ProviderType, metadata: IMetadata): IDestinationProvider;
 
   // Getters for the destination's transfer streams
-  getEntitiesStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
-  getLinksStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
-  getAssetsStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
-  getConfigurationStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
-  getSchemas?(): Strapi.Schemas;
-  getSchemasStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
+  getEntitiesStream?(): Writable | Promise<Writable>;
+  getLinksStream?(): Writable | Promise<Writable>;
+  getAssetsStream?(): Writable | Promise<Writable>;
+  getConfigurationStream?(): Writable | Promise<Writable>;
+  getSchemas?(): Strapi.Schemas | Promise<Strapi.Schemas>;
+  getSchemasStream?(): Writable | Promise<Writable>;
 }

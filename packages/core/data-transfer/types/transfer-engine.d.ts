@@ -1,7 +1,7 @@
-import type { SchemaUID } from '@strapi/strapi/lib/types/utils';
-import type { IEntity, ILink } from './common-entities';
-import type { ITransferRule } from './utils';
-import type { ISourceProvider, IDestinationProvider } from './provider';
+import type { IAsset, IEntity, ILink } from './common-entities';
+import type { ITransferResults, TransferTransform } from './utils';
+import type { ISourceProvider, IDestinationProvider } from './providers';
+import type { Schema } from '@strapi/strapi';
 
 /**
  * Defines the capabilities and properties of the transfer engine
@@ -112,45 +112,20 @@ export interface ITransferEngineOptions {
    * "minor" // both the major and minor version should match. 4.3.9 and 4.3.11 will work, while 4.3.9 and 4.4.1 won't
    * "patch" // every part of the version should match. Similar to "exact" but only work on semver.
    */
-  versionMatching: 'exact' | 'ignore' | 'major' | 'minor' | 'patch';
+  versionStrategy: 'exact' | 'ignore' | 'major' | 'minor' | 'patch';
 
   /**
    * Strategy used to do the schema matching in the integrity checks
    */
-  schemasMatching: 'exact' | 'strict';
+  schemaStrategy: 'exact' | 'strict' | 'ignore';
 
-  // List of global transform streams to integrate into the final pipelines
-  common?: {
-    rules?: ITransferRule[];
-  };
-
-  /**
-   * Options related to the transfer of the entities
-   */
-  entities?: {
-    /**
-     * Transformation rules for entities
-     */
-    rules?: ITransferRule<<T extends SchemaUID>(entity: IEntity<T>) => boolean>[];
-  };
-
-  /**
-   * Options related to the transfer of the links
-   */
-  links?: {
-    /**
-     * Transformation rules for links
-     */
-    rules?: ITransferRule<<T extends ILink>(link: T) => boolean>[];
-  };
-
-  /**
-   * Options related to the transfer of the links
-   */
-  assets?: {
-    /**
-     * Transformation rules for assets
-     */
-    rules?: ITransferRule<(asset: unknown) => boolean>[];
+  // List of rules to integrate into the final pipelines
+  transforms?: {
+    global?: TransferTransform<unknown>[];
+    schemas?: TransferTransform<Schema>[];
+    entities?: TransferTransform<IEntity>[];
+    links?: TransferTransform<ILink>[];
+    assets?: TransferTransform<IAsset>[];
+    configuration?: TransferTransform<unknown>[];
   };
 }
