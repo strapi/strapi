@@ -13,6 +13,8 @@ const inquirer = require('inquirer');
 
 const program = new Command();
 
+// TODO: re-enable lint on the next line once we merge the github CI fix
+// eslint-disable-next-line import/no-unresolved, node/no-missing-require
 const { createLocalFileSourceProvider } = require('@strapi/data-transfer');
 const packageJSON = require('../package.json');
 const { promptEncryptionKey, confirmMessage } = require('../lib/commands/utils/commander');
