@@ -22,6 +22,12 @@ const defaultEvents = [
   'component.create',
   'component.update',
   'component.delete',
+  'role.create',
+  'role.update',
+  'role.delete',
+  'permission.create',
+  'permission.update',
+  'permission.delete',
 ];
 
 const getEventMap = (defaultEvents) => {
