@@ -52,6 +52,8 @@ const LinkUser = styled(RouterNavLink)`
 
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
 // Removing content type builder by Zach
+console.log('generalSectionLinks',generalSectionLinks)
+console.log('pluginsSectionLinks',pluginsSectionLinks)
 const [contentTypeBuilder, mediaGallery] = pluginsSectionLinks
 pluginsSectionLinks = [mediaGallery]
 
