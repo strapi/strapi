@@ -55,10 +55,6 @@ const createAuditLogsService = (strapi) => {
   };
 
   const handleEvent = async (name, ...args) => {
-    if (!name) {
-      throw Error('Name is required');
-    }
-
     const processedEvent = processEvent(name, ...args);
 
     if (processedEvent) {
