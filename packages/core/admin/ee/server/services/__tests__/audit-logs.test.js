@@ -43,6 +43,7 @@ describe('Audit logs service', () => {
   describe('Init with audit logs enabled', () => {
     const mockRegister = jest.fn();
     const mockAddContentType = jest.fn();
+    const mockEntityServiceCreate = jest.fn();
     const mockGet = jest.fn((name) => {
       if (name === 'content-types') {
         return {
@@ -64,7 +65,7 @@ describe('Audit logs service', () => {
         get: mockGet,
       },
       entityService: {
-        create: jest.fn(),
+        create: mockEntityServiceCreate,
       },
       eventHub: createEventHub(),
       requestContext: {
@@ -98,6 +99,7 @@ describe('Audit logs service', () => {
 
     afterEach(() => {
       mockSaveEvent.mockClear();
+      mockEntityServiceCreate.mockClear();
     });
 
     it('should register and init the audit logs service when registered', async () => {
@@ -125,11 +127,20 @@ describe('Audit logs service', () => {
           userId: 1,
         })
       );
+
+      // The provider saves the event in the database
+      expect(mockEntityServiceCreate).toHaveBeenCalledTimes(1);
+      expect(mockEntityServiceCreate).toHaveBeenCalledWith('admin::audit-log', {
+        data: expect.objectContaining({
+          action: 'entry.create',
+          date: '1970-01-01T00:00:00.000Z',
+          payload: { meta: 'test' },
+          user: 1,
+        }),
+      });
     });
 
     it('ignores events that are not in the event map', async () => {
-      const logSpy = jest.spyOn(console, 'log');
-
       const auditLogsService = createAuditLogsService(strapi);
       auditLogsService.register();
 
@@ -137,7 +148,7 @@ describe('Audit logs service', () => {
       const eventPayload = { meta: 'test' };
       await strapi.eventHub.emit(eventName, eventPayload);
 
-      expect(logSpy).not.toHaveBeenCalled();
+      expect(mockSaveEvent).not.toHaveBeenCalled();
     });
   });
 });
