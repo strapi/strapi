@@ -226,15 +226,13 @@ const RelationInput = ({
   }, [previewRelationsLength, relations]);
 
   return (
-    <Field error={error} name={name} hint={description} id={id}>
+    <Field error={error} name={name} hint={description} id={id} required={required}>
       <Relation
         totalNumberOfRelations={totalNumberOfRelations}
         size={size}
         search={
           <>
-            <FieldLabel action={labelAction} required={required}>
-              {label}
-            </FieldLabel>
+            <FieldLabel action={labelAction}>{label}</FieldLabel>
             <ReactSelect
               // position fixed doesn't update position on scroll
               // react select doesn't update menu position on options change

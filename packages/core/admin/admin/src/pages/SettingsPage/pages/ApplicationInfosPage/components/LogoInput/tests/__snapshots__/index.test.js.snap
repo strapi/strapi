@@ -1963,6 +1963,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                               <input
                                 aria-disabled="false"
                                 aria-invalid="false"
+                                aria-required="false"
                                 class="c45"
                                 id="textinput-117"
                                 name="logo-url"

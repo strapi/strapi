@@ -461,6 +461,25 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   fill: #ffffff;
 }
 
+.c36 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c36:focus {
+  outline: none;
+}
+
+.c36[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
 .c29 {
   line-height: 0;
 }
@@ -526,29 +545,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c65 path {
-  fill: #666687;
-}
-
-.c36 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c36:focus {
-  outline: none;
-}
-
-.c36[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
 .c35 {
   position: relative;
   border: 1px solid #dcdce4;
@@ -601,6 +597,101 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
 
 .c37 {
   width: 100%;
+}
+
+.c65 path {
+  fill: #666687;
+}
+
+.c4 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  position: relative;
+  outline: none;
+}
+
+.c4 svg path {
+  fill: #4945ff;
+}
+
+.c4 svg {
+  font-size: 0.625rem;
+}
+
+.c4:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c4:focus-visible {
+  outline: none;
+}
+
+.c4:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c6 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.c0:focus-visible {
+  outline: none;
+}
+
+.c24 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 20px;
+}
+
+.c45 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 0px;
+}
+
+.c25 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c46 {
+  grid-column: span 7;
+  max-width: 100%;
+}
+
+.c68 {
+  grid-column: span 5;
+  max-width: 100%;
 }
 
 .c33 {
@@ -696,6 +787,46 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   opacity: 1;
 }
 
+.c52 {
+  border: 1px solid #f6f6f9;
+}
+
+.c52:hover:not([aria-disabled='true']) {
+  border: 1px solid #4945ff;
+}
+
+.c52:hover:not([aria-disabled='true']) .c7 {
+  color: #4945ff;
+}
+
+.c52:hover:not([aria-disabled='true']) > .c9 {
+  background: #f0f0ff;
+}
+
+.c52:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+  background: #d9d8ff;
+}
+
+.c66 {
+  border: 1px solid #ffffff;
+}
+
+.c66:hover:not([aria-disabled='true']) {
+  border: 1px solid #4945ff;
+}
+
+.c66:hover:not([aria-disabled='true']) .c7 {
+  color: #4945ff;
+}
+
+.c66:hover:not([aria-disabled='true']) > .c9 {
+  background: #f0f0ff;
+}
+
+.c66:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+  background: #d9d8ff;
+}
+
 .c58 {
   background: transparent;
   border: none;
@@ -751,137 +882,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   left: -5px;
   right: -5px;
   border: 2px solid #4945ff;
-}
-
-.c4 {
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  position: relative;
-  outline: none;
-}
-
-.c4 svg path {
-  fill: #4945ff;
-}
-
-.c4 svg {
-  font-size: 0.625rem;
-}
-
-.c4:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c4:focus-visible {
-  outline: none;
-}
-
-.c4:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c6 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-}
-
-.c0:focus-visible {
-  outline: none;
-}
-
-.c24 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 20px;
-}
-
-.c45 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 0px;
-}
-
-.c25 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c46 {
-  grid-column: span 7;
-  max-width: 100%;
-}
-
-.c68 {
-  grid-column: span 5;
-  max-width: 100%;
-}
-
-.c52 {
-  border: 1px solid #f6f6f9;
-}
-
-.c52:hover:not([aria-disabled='true']) {
-  border: 1px solid #4945ff;
-}
-
-.c52:hover:not([aria-disabled='true']) .c7 {
-  color: #4945ff;
-}
-
-.c52:hover:not([aria-disabled='true']) > .c9 {
-  background: #f0f0ff;
-}
-
-.c52:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
-  background: #d9d8ff;
-}
-
-.c66 {
-  border: 1px solid #ffffff;
-}
-
-.c66:hover:not([aria-disabled='true']) {
-  border: 1px solid #4945ff;
-}
-
-.c66:hover:not([aria-disabled='true']) .c7 {
-  color: #4945ff;
-}
-
-.c66:hover:not([aria-disabled='true']) > .c9 {
-  background: #f0f0ff;
-}
-
-.c66:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
-  background: #d9d8ff;
 }
 
 .c59 {
@@ -1081,7 +1081,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           <label
                             class="c7 c27"
                             for="textinput-1"
-                            required=""
                           >
                             <div
                               class="c1 c9 c11"
@@ -1100,6 +1099,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
+                              aria-required="true"
                               class="c31"
                               id="textinput-1"
                               name="name"
@@ -1144,6 +1144,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           >
                             <textarea
                               aria-invalid="false"
+                              aria-required="false"
                               class="c34"
                               id="textarea-2"
                               name="description"
@@ -1168,8 +1169,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         <span
                           class="c7 c27"
                           for="select-3"
-                          id="select-3-label"
-                          required=""
                         >
                           <div
                             class="c1 c9 c11"
@@ -1261,8 +1260,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         <span
                           class="c7 c27"
                           for="select-4"
-                          id="select-4-label"
-                          required=""
                         >
                           <div
                             class="c1 c9 c11"
@@ -2140,6 +2137,25 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   fill: #ffffff;
 }
 
+.c43 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c43:focus {
+  outline: none;
+}
+
+.c43[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
 .c36 {
   line-height: 0;
 }
@@ -2203,29 +2219,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
 .c37:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c74 path {
-  fill: #666687;
-}
-
-.c43 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c43:focus {
-  outline: none;
-}
-
-.c43[aria-disabled='true'] {
-  cursor: not-allowed;
 }
 
 .c42 {
@@ -2319,154 +2312,8 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   width: 100%;
 }
 
-.c40 {
-  border: 1px solid #dcdce4;
-  border-radius: 4px;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 12px;
-  padding-bottom: 12px;
-  background: #ffffff;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c40:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c41 {
-  display: block;
-  width: 100%;
-  font-weight: 400;
-  font-size: 0.875rem;
-  border: none;
-  color: #32324d;
-  resize: none;
-  background: inherit;
-}
-
-.c41::-webkit-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c41::-moz-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c41:-ms-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c41::placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c41:focus-within {
-  outline: none;
-}
-
-.c39 textarea {
-  height: 5rem;
-  line-height: 1.25rem;
-}
-
-.c39 textarea::-webkit-input-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c39 textarea::-moz-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c39 textarea:-ms-input-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c39 textarea::placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c67 {
-  background: transparent;
-  border: none;
-  position: relative;
-  outline: none;
-}
-
-.c67[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c67[aria-disabled='true'] svg path {
+.c74 path {
   fill: #666687;
-}
-
-.c67 svg {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  font-size: 0.625rem;
-}
-
-.c67 svg path {
-  fill: #4945ff;
-}
-
-.c67:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c67:focus-visible {
-  outline: none;
-}
-
-.c67:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
 }
 
 .c4 {
@@ -2573,6 +2420,99 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   max-width: 100%;
 }
 
+.c40 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c40:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c41 {
+  display: block;
+  width: 100%;
+  font-weight: 400;
+  font-size: 0.875rem;
+  border: none;
+  color: #32324d;
+  resize: none;
+  background: inherit;
+}
+
+.c41::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c41::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c41:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c41::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c41:focus-within {
+  outline: none;
+}
+
+.c39 textarea {
+  height: 5rem;
+  line-height: 1.25rem;
+}
+
+.c39 textarea::-webkit-input-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c39 textarea::-moz-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c39 textarea:-ms-input-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c39 textarea::placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
 .c61 {
   border: 1px solid #f6f6f9;
 }
@@ -2611,6 +2551,63 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
 
 .c75:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
   background: #d9d8ff;
+}
+
+.c67 {
+  background: transparent;
+  border: none;
+  position: relative;
+  outline: none;
+}
+
+.c67[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c67[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c67 svg {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  font-size: 0.625rem;
+}
+
+.c67 svg path {
+  fill: #4945ff;
+}
+
+.c67:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c67:focus-visible {
+  outline: none;
+}
+
+.c67:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
 }
 
 .c68 {
@@ -2880,7 +2877,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           <label
                             class="c7 c34"
                             for="textinput-28"
-                            required=""
                           >
                             <div
                               class="c1 c9 c11"
@@ -2899,6 +2895,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
+                              aria-required="true"
                               class="c38"
                               id="textinput-28"
                               name="name"
@@ -2943,6 +2940,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           >
                             <textarea
                               aria-invalid="false"
+                              aria-required="false"
                               class="c41"
                               id="textarea-29"
                               name="description"
@@ -2969,8 +2967,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         <span
                           class="c7 c34"
                           for="select-30"
-                          id="select-30-label"
-                          required=""
                         >
                           <div
                             class="c1 c9 c11"
@@ -3066,8 +3062,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         <span
                           class="c7 c34"
                           for="select-31"
-                          id="select-31-label"
-                          required=""
                         >
                           <div
                             class="c1 c9 c11"

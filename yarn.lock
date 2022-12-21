@@ -5809,10 +5809,10 @@
     regenerator-runtime "^0.13.7"
     resolve-from "^5.0.0"
 
-"@strapi/design-system@1.4.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@strapi/design-system/-/design-system-1.4.0.tgz#1e4932278cdd6b4e9fc0add25686abe9032e6e3a"
-  integrity sha512-K0qqnQL+Pu+Q059cVy2WYburTQeRimJfVDMNM1aPuSf9HeKcjDDYoeNxYSO5GZmucnAGkXUK1mYpaW0vzMkhmQ==
+"@strapi/design-system@1.4.1":
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/@strapi/design-system/-/design-system-1.4.1.tgz#f2daa634eaa4f22ac29e6b2b86791187aaa9887e"
+  integrity sha512-olDi71FFQFU9luSC0yvIwB0i77Y/JIvt9HyLcUhK/rsRyiaiNzplAe5hi5aaphhJv++9rML2nSiwgfX/V4a5ZA==
   dependencies:
     "@floating-ui/react-dom" "^1.0.0"
     "@internationalized/number" "^3.1.1"
@@ -5842,10 +5842,10 @@
   optionalDependencies:
     typescript "^4.6.2"
 
-"@strapi/icons@1.4.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-1.4.0.tgz#1dd5b639eac800fc7c7630d6870dfb20dfd0fa14"
-  integrity sha512-Ywzet8obDRAJuLKPw4mNcF4owZt7UeGu/+mGLQEmIUij03li8wTSHIZPa/Yd7/0SXI/cozqoFW2PwBQ8zdR1/w==
+"@strapi/icons@1.4.1":
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-1.4.1.tgz#121a2f68f65ac1b29031b7ab1e9774e17dbaeead"
+  integrity sha512-bwVM5NVXUJEUbbeelOVEslDIbGdZAGSwFSdV6Erb2Cwp3gtYB5Hfu4bRbVPeSwRWsd3IseC0USDpOQ3PzLK1qg==
 
 "@stylelint/postcss-css-in-js@^0.37.2":
   version "0.37.3"
@@ -17233,10 +17233,10 @@ nodemailer-shared@1.1.0:
   dependencies:
     nodemailer-fetch "1.6.0"
 
-nodemailer@6.7.7:
-  version "6.7.7"
-  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-6.7.7.tgz#e522fbd7507b81c51446d3f79c4603bf00083ddd"
-  integrity sha512-pOLC/s+2I1EXuSqO5Wa34i3kXZG3gugDssH+ZNCevHad65tc8vQlCQpOLaUjopvkRQKm2Cki2aME7fEOPRy3bA==
+nodemailer@6.8.0:
+  version "6.8.0"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-6.8.0.tgz#804bcc5256ee5523bc914506ee59f8de8f0b1cd5"
+  integrity sha512-EjYvSmHzekz6VNkNd12aUqAco+bOkRe3Of5jVhltqKhEsjw/y0PYPJfp83+s9Wzh1dspYAkUW/YNQ350NATbSQ==
 
 nopt@^5.0.0:
   version "5.0.0"
