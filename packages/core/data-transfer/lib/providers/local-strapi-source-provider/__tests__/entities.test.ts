@@ -46,10 +46,13 @@ describe('Local Strapi Source Provider - Entities Streaming', () => {
           { id: 2, age: 84 },
         ],
       });
-
+      const contentTypes = getContentTypes();
       const strapi = getStrapiFactory({
-        contentTypes: getContentTypes(),
+        contentTypes,
         db: { queryBuilder },
+        getModel: jest.fn((uid) => {
+          return contentTypes[uid];
+        }),
       })();
 
       const entitiesStream = createEntitiesStream(strapi);
