@@ -27,6 +27,8 @@ import { AssetType, AssetDefinition } from '../../../constants';
 import { AssetPreview } from './AssetPreview';
 import { createAssetUrl } from '../../../utils';
 
+import 'cropperjs/dist/cropper.css';
+
 export const PreviewBox = ({
   asset,
   canUpdate,
