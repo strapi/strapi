@@ -11,5 +11,5 @@ module.exports = async ({ strapi }) => {
     await auditLogsService.register();
   }
 
-  executeCERegister({ strapi });
+  await executeCERegister({ strapi });
 };
