@@ -586,7 +586,6 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                         <span
                           class="c10 c26"
                           for="select-1"
-                          id="select-1-label"
                         >
                           <div
                             class="c0 c13"
@@ -678,7 +677,6 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                         <span
                           class="c10 c26"
                           for="select-2"
-                          id="select-2-label"
                         >
                           <div
                             class="c0 c13"
