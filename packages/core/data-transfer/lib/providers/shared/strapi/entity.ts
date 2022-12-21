@@ -3,7 +3,7 @@ import type { ContentTypeSchema } from '@strapi/strapi';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import * as componentsService from '@strapi/strapi/lib/services/entity-service/components';
-import { assign, map, omit } from 'lodash/fp';
+import { assign, isArray, isEmpty, isObject, map, omit, size } from 'lodash/fp';
 
 const sanitizeComponentLikeAttributes = <T extends object>(model: ContentTypeSchema, data: T) => {
   const { attributes } = model;
@@ -74,7 +74,73 @@ const createEntityQuery = (strapi: Strapi.Strapi) => {
       return deletedEntities;
     };
 
-    return { create, createMany, deleteMany };
+    const getDeepPopulateComponentLikeQuery = (
+      contentType: ContentTypeSchema,
+      params = { select: '*' }
+    ) => {
+      const { attributes } = contentType;
+
+      const populate: any = {};
+
+      const entries: [string, any][] = Object.entries(attributes);
+
+      for (const [key, attribute] of entries) {
+        if (attribute.type === 'component') {
+          const component = strapi.getModel(attribute.component);
+          const subPopulate = getDeepPopulateComponentLikeQuery(component, params);
+
+          if ((isArray(subPopulate) || isObject(subPopulate)) && size(subPopulate) > 0) {
+            populate[key] = { ...params, populate: subPopulate };
+          }
+
+          if (isArray(subPopulate) && isEmpty(subPopulate)) {
+            populate[key] = { ...params };
+          }
+        }
+
+        if (attribute.type === 'dynamiczone') {
+          const { components: componentsUID } = attribute;
+
+          const on: any = {};
+
+          for (const componentUID of componentsUID) {
+            const component = strapi.getModel(componentUID);
+            const subPopulate = getDeepPopulateComponentLikeQuery(component, params);
+
+            if ((isArray(subPopulate) || isObject(subPopulate)) && size(subPopulate) > 0) {
+              on[componentUID] = { ...params, populate: subPopulate };
+            }
+
+            if (isArray(subPopulate) && isEmpty(subPopulate)) {
+              on[componentUID] = { ...params };
+            }
+          }
+
+          populate[key] = size(on) > 0 ? { on } : true;
+        }
+      }
+
+      const values = Object.values(populate);
+
+      if (values.every((value) => value === true)) {
+        return Object.keys(populate);
+      }
+
+      return populate;
+    };
+
+    return {
+      create,
+      createMany,
+      deleteMany,
+      getDeepPopulateComponentLikeQuery,
+
+      get deepPopulateComponentLikeQuery() {
+        const contentType = strapi.getModel(uid);
+
+        return getDeepPopulateComponentLikeQuery(contentType);
+      },
+    };
   };
 
   return query;
