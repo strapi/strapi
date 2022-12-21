@@ -8,8 +8,8 @@ module.exports = async ({ strapi }) => {
   if (features.isEnabled('audit-logs')) {
     const auditLogsService = createAuditLogsService(strapi);
     strapi.container.register('audit-logs', auditLogsService);
-    auditLogsService.register();
+    await auditLogsService.register();
   }
 
-  await executeCERegister({ strapi });
+  executeCERegister({ strapi });
 };
