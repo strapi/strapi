@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Box, FocusTrap, Typography, Icon } from '@strapi/design-system';
+import { Box, Flex, FocusTrap, Typography, Icon, Stack } from '@strapi/design-system';
 import { Book, Cross, Information, Question } from '@strapi/icons';
 import { pxToRem } from '@strapi/helper-plugin';
 
@@ -13,7 +13,7 @@ const OnboardingWrapper = styled(Box)`
   right: ${({ theme }) => theme.spaces[2]};
 `;
 
-const Button = styled.button`
+const Button = styled(Box)`
   width: ${({ theme }) => theme.spaces[8]};
   height: ${({ theme }) => theme.spaces[8]};
   background: ${({ theme }) => theme.colors.primary600};
@@ -26,39 +26,30 @@ const Button = styled.button`
 `;
 
 const LinksWrapper = styled(Box)`
-  position: absolute;
   bottom: ${({ theme }) => `${theme.spaces[9]}`};
+  min-width: ${200 / 16}rem;
+  position: absolute;
   right: 0;
-  width: ${200 / 16}rem;
 `;
 
-const StyledLink = styled.a`
-  display: flex;
-  align-items: center;
+const StyledLink = styled(Flex)`
   text-decoration: none;
-  padding: ${({ theme }) => theme.spaces[2]};
-  padding-left: ${({ theme }) => theme.spaces[5]};
 
-  svg {
-    color: ${({ theme }) => theme.colors.neutral600};
-    margin-right: ${({ theme }) => theme.spaces[2]};
+  svg path {
+    fill: ${({ theme }) => theme.colors.neutral600};
   }
 
+  &:focus,
   &:hover {
     background: ${({ theme }) => theme.colors.neutral100};
-    color: ${({ theme }) => theme.colors.neutral500};
 
-    svg {
-      color: ${({ theme }) => theme.colors.neutral700};
+    svg path {
+      fill: ${({ theme }) => theme.colors.neutral700};
     }
 
     ${[Typography]} {
       color: ${({ theme }) => theme.colors.neutral700};
     }
-  }
-
-  ${[Typography]} {
-    color: ${({ theme }) => theme.colors.neutral600};
   }
 `;
 
@@ -94,6 +85,7 @@ const Onboarding = () => {
   return (
     <OnboardingWrapper as="aside">
       <Button
+        as="button"
         id="onboarding"
         aria-label={formatMessage(
           isOpen
@@ -115,22 +107,22 @@ const Onboarding = () => {
        + when v4 mockups for onboarding component are ready */}
       {isOpen && (
         <FocusTrap onEscape={handleClick}>
-          <LinksWrapper
-            background="neutral0"
-            hasRadius
-            shadow="tableShadow"
-            paddingBottom={2}
-            paddingTop={2}
-          >
+          <LinksWrapper background="neutral0" hasRadius shadow="tableShadow" padding={2}>
             {STATIC_LINKS.map((link) => (
               <StyledLink
+                as="a"
                 key={link.label}
                 rel="nofollow noreferrer noopener"
                 target="_blank"
                 href={link.destination}
+                padding={2}
+                hasRadius
+                alignItems="center"
               >
-                {link.Icon}
-                <Typography>{link.label}</Typography>
+                <Stack horizontal spacing={2}>
+                  {link.Icon}
+                  <Typography color="neutral600">{link.label}</Typography>
+                </Stack>
               </StyledLink>
             ))}
           </LinksWrapper>
