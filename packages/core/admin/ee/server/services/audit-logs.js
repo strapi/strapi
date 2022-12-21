@@ -13,6 +13,12 @@ const defaultEvents = [
   'user.update',
   'user.delete',
   'admin.auth.success',
+  'content-type.create',
+  'content-type.update',
+  'content-type.delete',
+  'component.create',
+  'component.update',
+  'component.delete',
 ];
 
 const getEventMap = (defaultEvents) => {
