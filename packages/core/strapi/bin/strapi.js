@@ -314,35 +314,42 @@ program
         }
         opts.key = answers.key;
       }
+    }
+  })
+  .hook('preAction', async (thisCommand) => {
+    const opts = thisCommand.opts();
+    const encrypt = path.extname(String(opts.file)) === '.enc';
+    const compress = ['.gz', '.gz.enc'].includes(path.extname(String(opts.file)));
 
-      // check that key works to decrypt the file
-      const fileProvider = createLocalFileSourceProvider({
-        file: {
-          path: opts.file,
-        },
-        encryption: {
-          enabled: true,
-          key: opts.key,
-        },
-        compression: {
-          enabled: opts.compress,
-        },
-      });
-      try {
-        await fileProvider.bootstrap();
-        const canDecrypt = await fileProvider.getMetadata();
-        if (!canDecrypt) {
-          console.error(
-            'Could not read metadata from file; key is incorrect or invalid Strapi export.'
-          );
-          process.exit(1);
-        }
-      } catch (e) {
-        console.error(
-          'Could not read metadata from file; key is incorrect or invalid Strapi export.'
-        );
+    // check that we can open file and read metadata from it before proceeding
+    const fileProvider = createLocalFileSourceProvider({
+      file: {
+        path: opts.file,
+      },
+      encryption: {
+        enabled: encrypt,
+        key: opts.key,
+      },
+      compression: {
+        enabled: compress,
+      },
+    });
+
+    let success = false;
+    try {
+      await fileProvider.bootstrap();
+      success = !!(await fileProvider.getMetadata());
+    } catch (e) {
+      success = false;
+    }
+    if (!success) {
+      if (encrypt) {
+        console.error('Could not read metadata from file; check that key is correct.');
         process.exit(1);
       }
+
+      console.error('Could not open invalid Strapi export; missing metadata.json');
+      process.exit(1);
     }
   })
   .hook(
