@@ -13,6 +13,7 @@ const defaultEvents = [
   'user.update',
   'user.delete',
   'admin.auth.success',
+  'admin.logout',
   'content-type.create',
   'content-type.update',
   'content-type.delete',
