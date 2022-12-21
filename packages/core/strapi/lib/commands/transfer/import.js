@@ -82,6 +82,28 @@ module.exports = async (opts) => {
   try {
     logger.info('Starting import...');
 
+    const progress = engine.progress.stream;
+    const telemetryPayload = (/* payload */) => {
+      return {
+        eventProperties: {
+          source: engine.sourceProvider.name,
+          destination: engine.destinationProvider.name,
+        },
+      };
+    };
+
+    progress.on('transfer::start', (payload) => {
+      strapiInstance.telemetry.send('didDEITSProcessStart', telemetryPayload(payload));
+    });
+
+    progress.on('transfer::finish', (payload) => {
+      strapiInstance.telemetry.send('didDEITSProcessFinish', telemetryPayload(payload));
+    });
+
+    progress.on('transfer::error', (payload) => {
+      strapiInstance.telemetry.send('didDEITSProcessFail', telemetryPayload(payload));
+    });
+
     const results = await engine.transfer();
     const table = buildTransferTable(results.engine);
     logger.info(table.toString());
