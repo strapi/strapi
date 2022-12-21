@@ -55,10 +55,12 @@ const createTelemetryInstance = (strapi) => {
           return sendEvent(
             'didCheckLicense',
             {
-              licenseInfo: {
-                ...ee.licenseInfo,
-                projectHash: hashProject(strapi),
-                dependencyHash: hashDep(strapi),
+              groupProperties: {
+                licenseInfo: {
+                  ...ee.licenseInfo,
+                  projectHash: hashProject(strapi),
+                  dependencyHash: hashDep(strapi),
+                },
               },
             },
             {

@@ -11,7 +11,7 @@
   "Auth.form.button.login.strapi": "Log in via Strapi",
   "Auth.form.button.password-recovery": "Password Recovery",
   "Auth.form.button.register": "Let's start",
-  "Auth.form.confirmPassword.label": "Confirmation Password",
+  "Auth.form.confirmPassword.label": "Confirm Password",
   "Auth.form.currentPassword.label": "Current Password",
   "Auth.form.email.label": "Email",
   "Auth.form.email.placeholder": "e.g. kai@doe.com",

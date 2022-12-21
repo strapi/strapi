@@ -39,6 +39,7 @@ const ModalDialog = ({ onToggle, data: { date, user, action } }) => {
           paddingLeft={6}
           paddingRight={6}
           background="neutral100"
+          hasRadius
         >
           <ActionItem
             actionLabel={{

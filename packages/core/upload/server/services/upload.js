@@ -340,6 +340,7 @@ module.exports = ({ strapi }) => ({
     if (user) {
       fileValues[UPDATED_BY_ATTRIBUTE] = user.id;
     }
+
     sendMediaMetrics(fileValues);
 
     const res = await strapi.entityService.update(FILE_MODEL_UID, id, { data: fileValues });
@@ -355,6 +356,7 @@ module.exports = ({ strapi }) => ({
       fileValues[UPDATED_BY_ATTRIBUTE] = user.id;
       fileValues[CREATED_BY_ATTRIBUTE] = user.id;
     }
+
     sendMediaMetrics(fileValues);
 
     const res = await strapi.query(FILE_MODEL_UID).create({ data: fileValues });
@@ -447,5 +449,15 @@ module.exports = ({ strapi }) => ({
     }
 
     return strapi.store({ type: 'plugin', name: 'upload', key: 'settings' }).set({ value });
+  },
+
+  getConfiguration() {
+    return strapi.store({ type: 'plugin', name: 'upload', key: 'view_configuration' }).get();
+  },
+
+  setConfiguration(value) {
+    return strapi
+      .store({ type: 'plugin', name: 'upload', key: 'view_configuration' })
+      .set({ value });
   },
 });

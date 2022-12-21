@@ -405,6 +405,12 @@ describe('Role', () => {
           subject: null,
         },
         {
+          action: 'plugin::upload.configure-view',
+          conditions: [],
+          properties: {},
+          subject: null,
+        },
+        {
           action: 'plugin::upload.assets.create',
           conditions: [],
           properties: {},
