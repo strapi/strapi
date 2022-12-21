@@ -85,8 +85,10 @@ module.exports = async (opts) => {
     const progress = engine.progress.stream;
     const telemetryPayload = (/* payload */) => {
       return {
-        source: engine.sourceProvider.name,
-        destination: engine.destinationProvider.name,
+        eventProperties: {
+          source: engine.sourceProvider.name,
+          destination: engine.destinationProvider.name,
+        },
       };
     };
 
