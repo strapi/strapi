@@ -51,6 +51,10 @@ const LinkUser = styled(RouterNavLink)`
 `;
 
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
+// Removing content type builder by Zach
+const [contentTypeBuilder, mediaGallery] = pluginsSectionLinks
+pluginsSectionLinks = [mediaGallery]
+
   const buttonRef = useRef();
   const [userLinksVisible, setUserLinksVisible] = useState(false);
   const {
