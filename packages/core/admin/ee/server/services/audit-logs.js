@@ -63,9 +63,9 @@ const createAuditLogsService = (strapi) => {
   };
 
   return {
-    register() {
+    async register() {
       this._eventHubUnsubscribe = strapi.eventHub.subscribe(handleEvent);
-      provider.register({ strapi });
+      await provider.register({ strapi });
       return this;
     },
 

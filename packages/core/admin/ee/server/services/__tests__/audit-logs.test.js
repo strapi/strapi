@@ -110,7 +110,7 @@ describe('Audit logs service', () => {
 
     it('should emit an event and capture it in the audit logs', async () => {
       const auditLogsService = createAuditLogsService(strapi);
-      auditLogsService.register();
+      await auditLogsService.register();
 
       jest.useFakeTimers().setSystemTime(new Date('1970-01-01T00:00:00.000Z'));
       await strapi.eventHub.emit('entry.create', { meta: 'test' });
