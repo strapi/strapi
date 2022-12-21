@@ -235,6 +235,7 @@ describe('<InputUID />', () => {
               <input
                 aria-disabled="false"
                 aria-invalid="false"
+                aria-required="false"
                 class="c6"
                 id="textinput-1"
                 name="test"

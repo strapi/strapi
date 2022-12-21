@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { ContentLayout } from '@strapi/design-system/Layout';
+import { Stack } from '@strapi/design-system/Stack';
 import HeaderContentBox from '../ContentBox';
 import FormApiTokenContainer from '../FormApiTokenContainer';
 import Permissions from '../Permissions';
-import { CalculatedHeightStack } from '../StickyAdvancedSettings';
 
 const FormBody = ({
   apiToken,
@@ -18,7 +18,7 @@ const FormBody = ({
 }) => {
   return (
     <ContentLayout>
-      <CalculatedHeightStack spacing={6}>
+      <Stack spacing={6}>
         {Boolean(apiToken?.name) && <HeaderContentBox apiToken={apiToken?.accessKey} />}
         <FormApiTokenContainer
           errors={errors}
@@ -35,7 +35,7 @@ const FormBody = ({
             !canEditInputs || values?.type === 'read-only' || values?.type === 'full-access'
           }
         />
-      </CalculatedHeightStack>
+      </Stack>
     </ContentLayout>
   );
 };

@@ -67,7 +67,6 @@ describe('Content Type Builder - Components', () => {
         body: {
           component: {
             category: 'default',
-            icon: 'default',
             displayName: 'Some Component',
             pluginOptions: {
               pluginName: {
@@ -108,7 +107,6 @@ describe('Content Type Builder - Components', () => {
         body: {
           component: {
             category: 'default',
-            icon: 'default',
             displayName: 'someComponent',
             attributes: {},
           },
@@ -173,7 +171,6 @@ describe('Content Type Builder - Components', () => {
           uid: 'default.some-component',
           category: 'default',
           schema: {
-            icon: 'default',
             displayName: 'Some Component',
             description: '',
             collectionName: 'components_default_some_components',
@@ -257,7 +254,6 @@ describe('Content Type Builder - Components', () => {
         body: {
           component: {
             category: 'default',
-            icon: 'default',
             displayName: 'New Component',
             attributes: {
               name: {

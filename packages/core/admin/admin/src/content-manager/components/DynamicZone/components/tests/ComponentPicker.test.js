@@ -7,10 +7,6 @@ import ComponentPicker from '../ComponentPicker';
 
 import { layoutData } from './fixtures';
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => null,
-}));
-
 jest.mock('../../../../hooks', () => ({
   useContentTypeLayout: jest.fn().mockReturnValue({
     getComponentLayout: jest.fn().mockImplementation((componentUid) => layoutData[componentUid]),
