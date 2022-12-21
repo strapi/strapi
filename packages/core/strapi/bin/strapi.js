@@ -13,6 +13,7 @@ const inquirer = require('inquirer');
 
 const program = new Command();
 
+const { createLocalFileSourceProvider } = require('@strapi/data-transfer');
 const packageJSON = require('../package.json');
 const { promptEncryptionKey, confirmMessage } = require('../lib/commands/utils/commander');
 
@@ -296,8 +297,9 @@ program
     const opts = thisCommand.opts();
     const ext = path.extname(String(opts.file));
 
-    // check extension to guess if we should prompt for key
+    // check extension to guess if file is encrypted
     if (ext === '.enc') {
+      // check if we need to prompt for a key
       if (!opts.key) {
         const answers = await inquirer.prompt([
           {
@@ -311,6 +313,35 @@ program
           process.exit(0);
         }
         opts.key = answers.key;
+      }
+
+      // check that key works to decrypt the file
+      const fileProvider = createLocalFileSourceProvider({
+        file: {
+          path: opts.file,
+        },
+        encryption: {
+          enabled: true,
+          key: opts.key,
+        },
+        compression: {
+          enabled: opts.compress,
+        },
+      });
+      try {
+        await fileProvider.bootstrap();
+        const canDecrypt = await fileProvider.getMetadata();
+        if (!canDecrypt) {
+          console.error(
+            'Could not read metadata from file; key is incorrect or invalid Strapi export.'
+          );
+          process.exit(1);
+        }
+      } catch (e) {
+        console.error(
+          'Could not read metadata from file; key is incorrect or invalid Strapi export.'
+        );
+        process.exit(1);
       }
     }
   })
