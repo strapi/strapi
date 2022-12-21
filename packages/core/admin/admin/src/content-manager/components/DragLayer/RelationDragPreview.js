@@ -7,7 +7,7 @@ import { Drag, Cross } from '@strapi/icons';
 import { getTrad } from '../../utils';
 import { PUBLICATION_STATES } from '../RelationInputDataManager/constants';
 import { ChildrenWrapper, StackWrapper } from '../RelationInput/components/RelationItem';
-import { BoxEllipsis, DisconnectButton } from '../RelationInput/RelationInput';
+import { LinkEllipsis, DisconnectButton } from '../RelationInput';
 
 export const RelationDragPreview = ({ status, displayedValue, width }) => {
   const { formatMessage } = useIntl();
@@ -44,11 +44,11 @@ export const RelationDragPreview = ({ status, displayedValue, width }) => {
             <Drag />
           </IconButton>
           <ChildrenWrapper justifyContent="space-between">
-            <BoxEllipsis minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
+            <LinkEllipsis minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
               <Typography textColor="primary600" ellipsis>
                 {displayedValue}
               </Typography>
-            </BoxEllipsis>
+            </LinkEllipsis>
             {status && (
               <Status variant={statusColor} showBullet={false} size="S">
                 <Typography fontWeight="bold" textColor={`${statusColor}700`}>

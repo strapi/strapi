@@ -9,10 +9,6 @@ import DynamicComponent from '../DynamicComponent';
 
 import { layoutData } from './fixtures';
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => null,
-}));
-
 jest.mock('../../../../hooks', () => ({
   ...jest.requireActual('../../../../hooks'),
   useContentTypeLayout: jest.fn().mockReturnValue({

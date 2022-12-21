@@ -67,7 +67,7 @@ const CustomDragLayer = () => {
             <ComponentPreview displayedValue={item.displayedValue} />
           )}
           {actualType === ItemTypes.DYNAMIC_ZONE && (
-            <ComponentPreview icon={item.icon} displayedValue={item.displayedValue} />
+            <ComponentPreview displayedValue={item.displayedValue} />
           )}
           {actualType === ItemTypes.RELATION && (
             <RelationDragPreview

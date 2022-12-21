@@ -30,8 +30,8 @@ const ComponentCategory = ({ category, components, variant, isOpen, onAddCompone
       <AccordionContent>
         <Box paddingTop={4} paddingBottom={4} paddingLeft={3} paddingRight={3}>
           <Grid>
-            {components.map(({ componentUid, info: { displayName, icon } }) => (
-              <ComponentCard key={componentUid} icon={icon} onClick={onAddComponent(componentUid)}>
+            {components.map(({ componentUid, info: { displayName } }) => (
+              <ComponentCard key={componentUid} onClick={onAddComponent(componentUid)}>
                 {formatMessage({ id: displayName, defaultMessage: displayName })}
               </ComponentCard>
             ))}

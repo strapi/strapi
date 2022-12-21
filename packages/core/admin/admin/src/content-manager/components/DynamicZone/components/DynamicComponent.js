@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import get from 'lodash/get';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 
@@ -194,7 +193,6 @@ const DynamicZoneComponent = ({
         ) : (
           <Accordion expanded={isOpen} onToggle={handleToggle} size="S" error={errorMessage}>
             <AccordionToggle
-              startIcon={icon && <FontAwesomeIcon icon={icon} />}
               action={accordionActions}
               title={`${friendlyName}${mainValue}`}
               togglePosition="left"

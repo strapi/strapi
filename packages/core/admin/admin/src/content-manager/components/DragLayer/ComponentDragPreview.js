@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Box, Flex, Typography, IconButton } from '@strapi/design-system';
 import { Trash, Drag, CarretDown } from '@strapi/icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const DragPreviewBox = styled(Box)`
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
@@ -27,13 +26,6 @@ const DropdownIconWrapper = styled(Box)`
   }
 `;
 
-const Icon = styled(FontAwesomeIcon)`
-  width: ${pxToRem(12)};
-  height: ${pxToRem(12)};
-
-  color: ${({ theme }) => theme.colors.neutral600};
-`;
-
 const ToggleButton = styled.button`
   border: none;
   background: transparent;
@@ -43,7 +35,7 @@ const ToggleButton = styled.button`
   padding: 0;
 `;
 
-const DragPreview = ({ displayedValue, icon }) => {
+const DragPreview = ({ displayedValue }) => {
   return (
     <DragPreviewBox
       paddingLeft={3}
@@ -60,8 +52,7 @@ const DragPreview = ({ displayedValue, icon }) => {
             <DropdownIconWrapper background="neutral200">
               <CarretDown />
             </DropdownIconWrapper>
-            <Flex gap={2} paddingLeft={icon ? 3 : 6} maxWidth={pxToRem(150)}>
-              {icon ? <Icon icon={icon} /> : null}
+            <Flex gap={2} paddingLeft={6} maxWidth={pxToRem(150)}>
               <Typography textColor="neutral700" ellipsis>
                 {displayedValue}
               </Typography>
@@ -85,13 +76,8 @@ const DragPreview = ({ displayedValue, icon }) => {
   );
 };
 
-DragPreview.defaultProps = {
-  icon: undefined,
-};
-
 DragPreview.propTypes = {
   displayedValue: PropTypes.string.isRequired,
-  icon: PropTypes.string,
 };
 
 export default DragPreview;
