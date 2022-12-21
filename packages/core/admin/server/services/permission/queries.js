@@ -44,9 +44,12 @@ const deleteByRolesIds = async (rolesIds) => {
  * @returns {Promise<array>}
  */
 const deleteByIds = async (ids) => {
+  const result = [];
   for (const id of ids) {
-    await strapi.query('admin::permission').delete({ where: { id } });
+    const queryResult = await strapi.query('admin::permission').delete({ where: { id } });
+    result.push(queryResult);
   }
+  strapi.eventHub.emit('permissions.delete', { permissions: result });
 };
 
 /**
@@ -61,7 +64,10 @@ const createMany = async (permissions) => {
     createdPermissions.push(newPerm);
   }
 
-  return permissionDomain.toPermission(createdPermissions);
+  const permissionsToReturn = permissionDomain.toPermission(createdPermissions);
+  strapi.eventHub.emit('permissions.create', { permissions: permissionsToReturn });
+
+  return permissionsToReturn;
 };
 
 /**
@@ -75,7 +81,10 @@ const update = async (params, attributes) => {
     .query('admin::permission')
     .update({ where: params, data: attributes });
 
-  return permissionDomain.toPermission(updatedPermission);
+  const permissionToReturn = permissionDomain.toPermission(updatedPermission);
+  strapi.eventHub.emit('permissions.update', { permissions: permissionToReturn });
+
+  return permissionToReturn;
 };
 
 /**

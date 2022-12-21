@@ -364,11 +364,6 @@ const assignPermissions = async (roleId, permissions = []) => {
     await getService('metrics').sendDidUpdateRolePermissions();
   }
 
-  strapi.eventHub.emit(
-    'role.permissions',
-    permissionsToReturn.map(permissionDomain.sanitizePermissionFields)
-  );
-
   return permissionsToReturn;
 };
 

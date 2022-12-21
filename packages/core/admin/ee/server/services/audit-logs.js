@@ -23,6 +23,9 @@ const defaultEvents = [
   'role.create',
   'role.update',
   'role.delete',
+  'permissions.create',
+  'permissions.update',
+  'permissions.delete',
 ];
 
 const getEventMap = (defaultEvents) => {
