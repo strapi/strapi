@@ -88,15 +88,15 @@ module.exports = async (opts) => {
       };
     };
 
-    progress.on('transfer::start', (payload = undefined) => {
+    progress.on('transfer::start', (payload) => {
       strapi.telemetry.send('didDEITSProcessStart', telemetryPayload(payload));
     });
 
-    progress.on('transfer::finish', (payload = undefined) => {
+    progress.on('transfer::finish', (payload) => {
       strapi.telemetry.send('didDEITSProcessFinish', telemetryPayload(payload));
     });
 
-    progress.on('transfer::error', (payload = undefined) => {
+    progress.on('transfer::error', (payload) => {
       strapi.telemetry.send('didDEITSProcessFail', telemetryPayload(payload));
     });
 

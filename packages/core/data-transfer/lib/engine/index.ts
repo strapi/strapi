@@ -360,10 +360,10 @@ class TransferEngine<
       await this.transferLinks();
       await this.transferConfiguration();
 
-      this.#emitTransferUpdate('finish');
-
       // Gracefully close the providers
       await this.close();
+
+      this.#emitTransferUpdate('finish');
     } catch (e: unknown) {
       this.#emitTransferUpdate('error', { error: e });
 
