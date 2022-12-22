@@ -129,7 +129,8 @@ module.exports = async (opts) => {
    * - *** any async code (for example, the fs.pathExists) after engine.transfer will execute next tick, therefore:
    * - the progress callbacks execute
    *
-   * Because of that, we can't exit the process in the progress callbacks and instead have to wait for them to tell us it's safe to exit
+   * Because of that, we have to wait until  the progress callbacks have executed, but can't allow them to exit by themselves.
+   * Instead we have to wait for them to tell us it's safe to exit
    */
   const waitForExitCode = async (maxWait) => {
     const startTime = Date.now();
