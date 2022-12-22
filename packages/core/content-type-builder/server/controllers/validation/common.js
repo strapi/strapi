@@ -13,7 +13,6 @@ const validators = {
 const NAME_REGEX = /^[A-Za-z][_0-9A-Za-z]*$/;
 const COLLECTION_NAME_REGEX = /^[A-Za-z][-_0-9A-Za-z]*$/;
 const CATEGORY_NAME_REGEX = /^[A-Za-z][-_0-9A-Za-z]*$/;
-const ICON_REGEX = /^[A-Za-z0-9][-A-Za-z0-9]*$/;
 const UID_REGEX = /^[A-Za-z0-9-_.~]*$/;
 
 const isValidName = {
@@ -38,12 +37,6 @@ const isValidCollectionName = {
   name: 'isValidCollectionName',
   message: `\${path} must match the following regex: ${COLLECTION_NAME_REGEX}`,
   test: (val) => val === '' || COLLECTION_NAME_REGEX.test(val),
-};
-
-const isValidIcon = {
-  name: 'isValidIcon',
-  message: `\${path} must match the following regex: ${ICON_REGEX}`,
-  test: (val) => val === '' || ICON_REGEX.test(val),
 };
 
 const isValidKey = (key) => ({
@@ -103,7 +96,6 @@ module.exports = {
   isValidCategoryName,
   isValidDefaultJSON,
   isValidName,
-  isValidIcon,
   isValidKey,
   isValidEnum,
   isValidUID,
