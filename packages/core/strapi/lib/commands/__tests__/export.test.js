@@ -1,6 +1,5 @@
 'use strict';
 
-const { Readable } = require('stream');
 const utils = require('../transfer/utils');
 
 const mockDataTransfer = {
@@ -11,7 +10,9 @@ const mockDataTransfer = {
       transfer: jest.fn().mockReturnValue(Promise.resolve({})),
       progress: {
         on: jest.fn(),
-        stream: Readable.from([1, 2, 3]),
+        stream: {
+          on: jest.fn(),
+        },
       },
     };
   },
