@@ -38,12 +38,13 @@ export const LinkEllipsis = styled(Link)`
 
 export const DisconnectButton = styled.button`
   svg path {
-    fill: ${({ theme }) => theme.colors.neutral500};
+    fill: ${({ theme, disabled }) =>
+      !disabled ? theme.colors.neutral500 : theme.colors.neutral600};
   }
 
   &:hover svg path,
   &:focus svg path {
-    fill: ${({ theme }) => theme.colors.neutral600};
+    fill: ${({ theme, disabled }) => !disabled && theme.colors.neutral600};
   }
 `;
 
@@ -103,8 +104,7 @@ const RelationInput = ({
   );
 
   const shouldDisplayLoadMoreButton =
-    (!!labelLoadMore && !disabled && paginatedRelations.hasNextPage) ||
-    paginatedRelations.isLoading;
+    (!!labelLoadMore && paginatedRelations.hasNextPage) || paginatedRelations.isLoading;
 
   const options = useMemo(
     () =>
@@ -503,9 +503,7 @@ const ListItem = ({ data, index, style }) => {
       <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
         <Tooltip description={mainField ?? `${id}`}>
           {href ? (
-            <LinkEllipsis to={href} disabled={disabled}>
-              {mainField ?? id}
-            </LinkEllipsis>
+            <LinkEllipsis to={href}>{mainField ?? id}</LinkEllipsis>
           ) : (
             <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
               {mainField ?? id}
