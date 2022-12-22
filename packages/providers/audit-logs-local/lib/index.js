@@ -23,13 +23,14 @@ const provider = {
     return this;
   },
 
-  async getAll() {
+  async findMany(query) {
     if (!this._registered) {
       throw Error('Audit log provider has not been registered');
     }
 
-    const result = await this.strapi.entityService.findMany('admin::audit-log', {
+    const result = await this.strapi.entityService.findPage('admin::audit-log', {
       populate: ['user'],
+      ...query,
     });
     return result;
   },

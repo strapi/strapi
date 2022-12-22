@@ -44,6 +44,7 @@ describe('Audit logs service', () => {
     const mockRegister = jest.fn();
     const mockAddContentType = jest.fn();
     const mockEntityServiceCreate = jest.fn();
+    const mockEntityServiceFindPage = jest.fn();
     const mockGet = jest.fn((name) => {
       if (name === 'content-types') {
         return {
@@ -66,6 +67,7 @@ describe('Audit logs service', () => {
       },
       entityService: {
         create: mockEntityServiceCreate,
+        findPage: mockEntityServiceFindPage,
       },
       eventHub: createEventHub(),
       requestContext: {
@@ -82,6 +84,7 @@ describe('Audit logs service', () => {
     };
 
     const mockSaveEvent = jest.fn();
+    const mockFindMany = jest.fn();
 
     beforeAll(() => {
       jest.mock('@strapi/strapi/lib/utils/ee', () => ({
@@ -99,6 +102,7 @@ describe('Audit logs service', () => {
 
     afterEach(() => {
       mockSaveEvent.mockClear();
+      mockFindMany.mockClear();
       mockEntityServiceCreate.mockClear();
     });
 
@@ -149,6 +153,20 @@ describe('Audit logs service', () => {
       await strapi.eventHub.emit(eventName, eventPayload);
 
       expect(mockSaveEvent).not.toHaveBeenCalled();
+    });
+
+    it('should find many audit logs with the right params', async () => {
+      const auditLogsService = createAuditLogsService(strapi);
+      await auditLogsService.register();
+      mockEntityServiceFindPage.mockResolvedValueOnce({ results: [], pagination: {} });
+
+      await strapi.eventHub.emit('entry.create', { meta: 'test' });
+
+      const params = { page: 1, pageSize: 10, order: 'createdAt:DESC', populate: ['user'] };
+      await auditLogsService.findMany(params);
+
+      expect(mockEntityServiceFindPage).toHaveBeenCalledTimes(1);
+      expect(mockEntityServiceFindPage).toHaveBeenCalledWith('admin::audit-log', params);
     });
   });
 });

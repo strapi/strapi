@@ -76,8 +76,8 @@ const createAuditLogsService = (strapi) => {
       return this;
     },
 
-    async getAll() {
-      const results = await provider.getAll();
+    async findMany(query) {
+      const { results, pagination } = await provider.findMany(query);
 
       const sanitizedResults = results.map((result) => {
         const { user, ...rest } = result;
@@ -87,7 +87,10 @@ const createAuditLogsService = (strapi) => {
         };
       });
 
-      return sanitizedResults;
+      return {
+        results: sanitizedResults,
+        pagination,
+      };
     },
 
     unsubscribe() {
