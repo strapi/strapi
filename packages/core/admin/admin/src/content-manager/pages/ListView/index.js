@@ -20,6 +20,7 @@ import {
   useRBACProvider,
   useTracking,
   Link,
+  formatAPIError,
 } from '@strapi/helper-plugin';
 
 import { IconButton } from '@strapi/design-system/IconButton';
@@ -147,7 +148,6 @@ function ListView({
           return;
         }
 
-        console.error(err);
         toggleNotification({
           type: 'warning',
           message: { id: getTrad('error.model.fetch') },
@@ -170,11 +170,11 @@ function ListView({
       } catch (err) {
         toggleNotification({
           type: 'warning',
-          message: { id: getTrad('error.record.delete') },
+          message: formatAPIError(err, { formatMessage, getTrad }),
         });
       }
     },
-    [fetchData, params, slug, toggleNotification]
+    [fetchData, params, slug, toggleNotification, formatMessage]
   );
 
   const handleConfirmDeleteData = useCallback(
@@ -190,15 +190,9 @@ function ListView({
           message: { id: getTrad('success.record.delete') },
         });
       } catch (err) {
-        const errorMessage = get(
-          err,
-          'response.payload.message',
-          formatMessage({ id: getTrad('error.record.delete') })
-        );
-
         toggleNotification({
           type: 'warning',
-          message: errorMessage,
+          message: formatAPIError(err, { formatMessage, getTrad }),
         });
       }
     },

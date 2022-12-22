@@ -101,4 +101,7 @@ export { default as wrapAxiosInstance } from './utils/wrapAxiosInstance';
 export { default as request } from './utils/request';
 export { default as getAPIInnerErrors } from './utils/getAPIInnerErrors';
 export { default as getYupInnerErrors } from './utils/getYupInnerErrors';
+export { default as formatAPIError } from './utils/formatAPIError';
+export { default as normalizeAPIError } from './utils/normalizeAPIError';
+
 export { default as getFetchClient } from './utils/getFetchClient';

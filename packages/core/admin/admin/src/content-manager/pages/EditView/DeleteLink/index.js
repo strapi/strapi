@@ -1,10 +1,9 @@
 import React, { memo, useState } from 'react';
 import { useIntl } from 'react-intl';
-import get from 'lodash/get';
 import isEqual from 'react-fast-compare';
 import { Button } from '@strapi/design-system/Button';
 import Trash from '@strapi/icons/Trash';
-import { ConfirmDialog, useNotification } from '@strapi/helper-plugin';
+import { ConfirmDialog, useNotification, formatAPIError } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { getTrad } from '../../../utils';
 import { connect, select } from './utils';
@@ -29,14 +28,12 @@ const DeleteLink = ({ isCreatingEntry, onDelete, onDeleteSucceeded, trackerPrope
       toggleWarningDelete();
       onDeleteSucceeded();
     } catch (err) {
-      const errorMessage = get(
-        err,
-        'response.payload.message',
-        formatMessage({ id: getTrad('error.record.delete') })
-      );
       setIsModalConfirmButtonLoading(false);
       toggleWarningDelete();
-      toggleNotification({ type: 'warning', message: errorMessage });
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(err, { formatMessage, getTrad }),
+      });
     }
   };
 

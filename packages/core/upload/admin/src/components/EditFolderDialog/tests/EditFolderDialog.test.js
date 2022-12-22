@@ -167,11 +167,13 @@ describe('EditFolderDialog', () => {
       response: {
         data: {
           error: {
+            name: 'ValidationError',
             details: {
               errors: [
                 {
                   path: ['parent'],
                   message: FIXTURE_ERROR_MESSAGE,
+                  name: 'ValidationError',
                 },
               ],
             },
