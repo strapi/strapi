@@ -1,13 +1,20 @@
 'use strict';
 
+const { Readable } = require('stream');
 const utils = require('../transfer/utils');
 
 const mockDataTransfer = {
   createLocalFileDestinationProvider: jest.fn(),
   createLocalStrapiSourceProvider: jest.fn(),
-  createTransferEngine: jest.fn().mockReturnValue({
-    transfer: jest.fn().mockReturnValue(Promise.resolve({})),
-  }),
+  createTransferEngine() {
+    return {
+      transfer: jest.fn().mockReturnValue(Promise.resolve({})),
+      progress: {
+        on: jest.fn(),
+        stream: Readable.from([1, 2, 3]),
+      },
+    };
+  },
 };
 
 jest.mock(
@@ -85,12 +92,17 @@ describe('export', () => {
     expect(exit).toHaveBeenCalled();
   });
 
-  it('compresses the output file if specified', async () => {
-    const compress = true;
-    await exportCommand({ compress });
+  it('uses compress option', async () => {
+    await exportCommand({ compress: false });
     expect(mockDataTransfer.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
-        compression: { enabled: compress },
+        compression: { enabled: false },
+      })
+    );
+    await exportCommand({ compress: true });
+    expect(mockDataTransfer.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+      expect.objectContaining({
+        compression: { enabled: true },
       })
     );
     expect(exit).toHaveBeenCalled();
