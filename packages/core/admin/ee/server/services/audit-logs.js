@@ -1,5 +1,7 @@
 'use strict';
 
+const localProvider = require('@strapi/provider-audit-logs-local');
+
 const defaultEvents = [
   'entry.create',
   'entry.update',
@@ -54,26 +56,22 @@ const createAuditLogsService = (strapi) => {
       action: name,
       date: new Date().toISOString(),
       payload: getPayload(...args) || {},
-      userId: strapi.requestContext.get().state?.user?.id,
+      userId: strapi.requestContext.get()?.state?.user?.id,
     };
   };
 
-  const handleEvent = (name, ...args) => {
-    if (!name) {
-      throw Error('Name is required');
-    }
-
+  async function handleEvent(name, ...args) {
     const processedEvent = processEvent(name, ...args);
 
     if (processedEvent) {
-      // TODO: save events here via provider
-      console.log('Saving event', processedEvent);
+      await this._provider.saveEvent(processedEvent);
     }
-  };
+  }
 
   return {
-    register() {
-      this._eventHubUnsubscribe = strapi.eventHub.subscribe(handleEvent);
+    async register() {
+      this._provider = await localProvider.register({ strapi });
+      this._eventHubUnsubscribe = strapi.eventHub.subscribe(handleEvent.bind(this));
       return this;
     },
 

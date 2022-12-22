@@ -55,6 +55,11 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
   },
 
   async emitEvent(uid, event, entity) {
+    // Ignore audit log events to prevent infinite loops
+    if (uid === 'admin::audit-log') {
+      return;
+    }
+
     const model = strapi.getModel(uid);
     const sanitizedEntity = await sanitize.sanitizers.defaultSanitizeOutput(model, entity);
 
