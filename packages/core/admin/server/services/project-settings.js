@@ -137,7 +137,7 @@ const updateProjectSettings = async (newSettings) => {
     }
 
     // If the user input is undefined reuse previous setting (do not update field)
-    if (!newSettings[inputName]) {
+    if (!newSettings[inputName] && previousSettings) {
       newSettings[inputName] = previousSettings[inputName];
       return;
     }
