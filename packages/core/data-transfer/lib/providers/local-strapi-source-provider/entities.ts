@@ -32,11 +32,15 @@ export const createEntitiesStream = (strapi: Strapi.Strapi): Readable => {
       contentType: ContentTypeSchema;
     }> {
       for await (const { stream, contentType } of contentTypeStreamGenerator()) {
-        for await (const entity of stream) {
-          yield { entity, contentType };
+        try {
+          for await (const entity of stream) {
+            yield { entity, contentType };
+          }
+        } catch {
+          // ignore
+        } finally {
+          stream.destroy();
         }
-
-        stream.destroy();
       }
     })()
   );

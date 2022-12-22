@@ -258,6 +258,15 @@ program
   .option('-s, --silent', `Run the generation silently, without any output`, false)
   .action(getLocalScript('ts/generate-types'));
 
+// `$ strapi transfer`
+program
+  .command('transfer')
+  .description('Transfer data from one source to another')
+  .addOption(new Option('--from <source>', `Source of your data`).default('local'))
+  .addOption(new Option('--to <destination>', `Destination of your data`).default('remote'))
+  .allowExcessArguments(false)
+  .action(getLocalScript('transfer/transfer'));
+
 // `$ strapi export`
 program
   .command('export')

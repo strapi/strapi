@@ -9,8 +9,9 @@ import * as utils from '../../utils';
 export const VALID_CONFLICT_STRATEGIES = ['restore', 'merge'];
 export const DEFAULT_CONFLICT_STRATEGY = 'restore';
 
-interface ILocalStrapiDestinationProviderOptions {
+export interface ILocalStrapiDestinationProviderOptions {
   getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>;
+  autoDestroy?: boolean;
   restore?: restore.IRestoreOptions;
   strategy: 'restore' | 'merge';
 }
@@ -37,7 +38,12 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async close(): Promise<void> {
-    await this.strapi?.destroy?.();
+    const { autoDestroy } = this.options;
+
+    // Basically `!== false` but more deterministic
+    if (autoDestroy === undefined || autoDestroy === true) {
+      await this.strapi?.destroy();
+    }
   }
 
   #validateOptions() {
@@ -60,7 +66,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     }
   }
 
-  getMetadata(): IMetadata | Promise<IMetadata> {
+  getMetadata(): IMetadata {
     const strapiVersion = strapi.config.get('info.strapi');
     const createdAt = new Date().toISOString();
 

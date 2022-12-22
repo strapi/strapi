@@ -239,6 +239,21 @@ class TransferEngine<
     const { stage, source, destination, transform, tracker } = options;
 
     if (!source || !destination) {
+      // Wait until source and destination are closed
+      await Promise.allSettled(
+        [source, destination].map((stream) => {
+          // if stream is undefined or already closed, resolve immediately
+          if (!stream || stream.destroyed) {
+            return Promise.resolve();
+          }
+
+          // Wait until the close event is produced and then destroy the stream and resolve
+          return new Promise((resolve, reject) => {
+            stream.on('close', resolve).on('error', reject).destroy();
+          });
+        })
+      );
+
       return;
     }
 
