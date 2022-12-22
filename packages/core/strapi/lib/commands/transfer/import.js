@@ -120,7 +120,7 @@ module.exports = async (opts) => {
 
   /*
    * We need to wait for the telemetry to finish before exiting the process.
-   * The order of execution for this function is:
+   * The order of execution for the overall import function is:
    * - create providers and engine
    * - create progress callbacks
    * - await the engine transfer
