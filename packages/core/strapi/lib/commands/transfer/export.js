@@ -75,34 +75,34 @@ module.exports = async (opts) => {
   });
 
   let transferExitCode;
-  try {
-    logger.log(`Starting export...`);
+  logger.log(`Starting export...`);
 
-    const progress = engine.progress.stream;
+  const progress = engine.progress.stream;
 
-    const telemetryPayload = (/* payload */) => {
-      return {
-        eventProperties: {
-          source: engine.sourceProvider.name,
-          destination: engine.destinationProvider.name,
-        },
-      };
+  const telemetryPayload = (/* payload */) => {
+    return {
+      eventProperties: {
+        source: engine.sourceProvider.name,
+        destination: engine.destinationProvider.name,
+      },
     };
+  };
 
-    progress.on('transfer::start', async (payload) => {
-      await strapi.telemetry.send('didDEITSProcessStart', telemetryPayload(payload));
-    });
+  progress.on('transfer::start', async (payload) => {
+    await strapi.telemetry.send('didDEITSProcessStart', telemetryPayload(payload));
+  });
 
-    progress.on('transfer::finish', async (payload) => {
-      await strapi.telemetry.send('didDEITSProcessFinish', telemetryPayload(payload));
-      transferExitCode = 0;
-    });
+  progress.on('transfer::finish', async (payload) => {
+    await strapi.telemetry.send('didDEITSProcessFinish', telemetryPayload(payload));
+    transferExitCode = 0;
+  });
 
-    progress.on('transfer::error', async (payload) => {
-      await strapi.telemetry.send('didDEITSProcessFail', telemetryPayload(payload));
-      transferExitCode = 1;
-    });
+  progress.on('transfer::error', async (payload) => {
+    await strapi.telemetry.send('didDEITSProcessFail', telemetryPayload(payload));
+    transferExitCode = 1;
+  });
 
+  try {
     const results = await engine.transfer();
     const outFile = results.destination.file.path;
 
