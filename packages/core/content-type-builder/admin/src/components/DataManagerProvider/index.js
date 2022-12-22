@@ -54,7 +54,6 @@ import makeSelectDataManagerProvider from './selectors';
 import formatSchemas from './utils/formatSchemas';
 
 const DataManagerProvider = ({
-  allIcons,
   children,
   components,
   contentTypes,
@@ -579,7 +578,6 @@ const DataManagerProvider = ({
         addCustomFieldAttribute,
         addCreatedComponentToDynamicZone,
         allComponentsCategories: retrieveSpecificInfoFromComponents(components, ['category']),
-        allIcons,
         changeDynamicZoneComponents,
         components,
         componentsGroupedByCategory: groupBy(components, 'category'),
@@ -622,7 +620,6 @@ DataManagerProvider.defaultProps = {
 };
 
 DataManagerProvider.propTypes = {
-  allIcons: PropTypes.array.isRequired,
   children: PropTypes.node.isRequired,
   components: PropTypes.object,
   contentTypes: PropTypes.object.isRequired,
