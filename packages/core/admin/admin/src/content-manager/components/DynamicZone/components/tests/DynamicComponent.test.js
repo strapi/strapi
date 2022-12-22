@@ -35,6 +35,7 @@ describe('DynamicComponent', () => {
 
   const defaultProps = {
     componentUid: 'component1',
+    sourceComponentId: 1,
     name: 'dynamiczone',
     onMoveComponent: jest.fn(),
     onRemoveComponentClick: jest.fn(),

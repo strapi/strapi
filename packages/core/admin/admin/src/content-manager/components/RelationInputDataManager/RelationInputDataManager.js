@@ -35,6 +35,7 @@ export const RelationInputDataManager = ({
   relationType,
   size,
   targetModel,
+  source,
 }) => {
   const [liveText, setLiveText] = useState('');
 
@@ -53,8 +54,10 @@ export const RelationInputDataManager = ({
 
   const currentLastPage = Math.ceil(get(initialData, name, []).length / RELATIONS_TO_DISPLAY);
 
-  const { relations, search, searchFor } = useRelation(`${slug}-${name}-${initialData?.id ?? ''}`, {
+  const cacheKey = `${slug}-${name}-${initialData?.id ?? ''}`;
+  const { relations, search, searchFor } = useRelation(cacheKey, {
     name,
+    source,
     relation: {
       enabled: !!endpoints.relation,
       endpoint: endpoints.relation,
@@ -70,7 +73,6 @@ export const RelationInputDataManager = ({
         targetModel,
       },
     },
-
     search: {
       endpoint: endpoints.search,
       pageParams: {
@@ -365,6 +367,10 @@ RelationInputDataManager.defaultProps = {
   isFieldAllowed: true,
   placeholder: null,
   required: false,
+  source: {
+    type: '',
+    componentId: 0,
+  },
 };
 
 RelationInputDataManager.propTypes = {
@@ -408,6 +414,10 @@ RelationInputDataManager.propTypes = {
     }).isRequired,
     shouldDisplayRelationLink: PropTypes.bool.isRequired,
   }).isRequired,
+  source: PropTypes.shape({
+    type: PropTypes.string,
+    componentId: PropTypes.number,
+  }),
 };
 
 const Memoized = memo(RelationInputDataManager);

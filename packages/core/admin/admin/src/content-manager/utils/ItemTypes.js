@@ -4,4 +4,5 @@ export default {
   FIELD: 'field',
   DYNAMIC_ZONE: 'dynamicZone',
   RELATION: 'relation',
+  REPEATABLE_COMPONENT: 'repeatableComponent',
 };

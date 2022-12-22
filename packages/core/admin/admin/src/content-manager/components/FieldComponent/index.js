@@ -10,7 +10,7 @@ import { Box } from '@strapi/design-system/Box';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
-import { getTrad } from '../../utils';
+import { getTrad, ItemTypes } from '../../utils';
 import ComponentInitializer from '../ComponentInitializer';
 import NonRepeatableComponent from '../NonRepeatableComponent';
 import RepeatableComponent from '../RepeatableComponent';
@@ -26,7 +26,6 @@ const FieldComponent = ({
   // formErrors,
   intlLabel,
   isCreatingEntry,
-  isFromDynamicZone,
   isRepeatable,
   isNested,
   labelAction,
@@ -40,9 +39,12 @@ const FieldComponent = ({
   componentValue,
   removeComponentFromField,
   required,
+  source,
 }) => {
+  const isFromDynamicZone = source.type === ItemTypes.DYNAMIC_ZONE;
   const { formatMessage } = useIntl();
   const componentValueLength = size(componentValue);
+
   const isInitialized = componentValue !== null || isFromDynamicZone;
   const showResetComponent =
     !isRepeatable && isInitialized && !isFromDynamicZone && hasChildrenAllowedFields;
@@ -103,7 +105,7 @@ const FieldComponent = ({
         {!isRepeatable && isInitialized && (
           <NonRepeatableComponent
             componentUid={componentUid}
-            isFromDynamicZone={isFromDynamicZone}
+            source={source}
             isNested={isNested}
             name={name}
           />
@@ -129,7 +131,6 @@ FieldComponent.defaultProps = {
   hasChildrenAllowedFields: false,
   hasChildrenReadableFields: false,
   intlLabel: undefined,
-  isFromDynamicZone: false,
   isReadOnly: false,
   isRepeatable: false,
   isNested: false,
@@ -137,6 +138,10 @@ FieldComponent.defaultProps = {
   max: Infinity,
   min: -Infinity,
   required: false,
+  source: {
+    type: '',
+    componentId: 0,
+  },
 };
 
 FieldComponent.propTypes = {
@@ -146,7 +151,6 @@ FieldComponent.propTypes = {
   hasChildrenAllowedFields: PropTypes.bool,
   hasChildrenReadableFields: PropTypes.bool,
   isCreatingEntry: PropTypes.bool.isRequired,
-  isFromDynamicZone: PropTypes.bool,
   isReadOnly: PropTypes.bool,
   isRepeatable: PropTypes.bool,
   isNested: PropTypes.bool,
@@ -161,6 +165,10 @@ FieldComponent.propTypes = {
   name: PropTypes.string.isRequired,
   removeComponentFromField: PropTypes.func.isRequired,
   required: PropTypes.bool,
+  source: PropTypes.shape({
+    type: PropTypes.string,
+    componentId: PropTypes.number,
+  }),
 };
 
 const Memoized = memo(FieldComponent, isEqual);

@@ -10,6 +10,7 @@ function useSelect({
   isUserAllowedToReadField,
   name,
   queryInfos,
+  source,
 }) {
   const {
     isCreatingEntry,
@@ -59,6 +60,15 @@ function useSelect({
       return null;
     }
 
+    if (source?.componentId) {
+      // A componentId in the source should be used to build the API endpoint
+      // whenever present. It serves as a reliable ID for use in DynamicZones
+      // and RepeatableComponents.
+      return getRequestUrl(
+        `relations/${componentUid}/${source.componentId}/${fieldNameKeys.at(-1)}`
+      );
+    }
+
     if (componentUid) {
       // repeatable components and dz are dynamically created
       // if no componentId exists in initialData it means that the user just created it
@@ -69,7 +79,16 @@ function useSelect({
     }
 
     return getRequestUrl(`relations/${slug}/${initialData.id}/${name.split('.').at(-1)}`);
-  }, [isCreatingEntry, componentUid, slug, initialData.id, name, componentId, fieldNameKeys]);
+  }, [
+    isCreatingEntry,
+    componentUid,
+    slug,
+    initialData.id,
+    name,
+    componentId,
+    fieldNameKeys,
+    source,
+  ]);
 
   // /content-manager/relations/[model]/[field-name]
   const relationSearchEndpoint = useMemo(() => {

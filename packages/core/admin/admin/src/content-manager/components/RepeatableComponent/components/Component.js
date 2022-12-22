@@ -88,6 +88,7 @@ const DraggedItem = ({
   onGrabItem,
   onDropItem,
   onCancel,
+  sourceComponentId,
 }) => {
   const { modifiedData, removeRepeatableField, triggerFormValidation } = useCMEditViewDataManager();
 
@@ -191,6 +192,10 @@ const DraggedItem = ({
                         return (
                           <GridItem col={size} s={12} xs={12} key={name}>
                             <FieldComponent
+                              source={{
+                                type: ItemTypes.REPEATABLE_COMPONENT,
+                                componentId: sourceComponentId,
+                              }}
                               componentUid={componentUid}
                               intlLabel={{
                                 id: metadatas.label,
@@ -210,6 +215,10 @@ const DraggedItem = ({
                       return (
                         <GridItem key={keys} col={size} s={12} xs={12}>
                           <Inputs
+                            source={{
+                              type: ItemTypes.REPEATABLE_COMPONENT,
+                              componentId: sourceComponentId,
+                            }}
                             componentUid={componentUid}
                             fieldSchema={fieldSchema}
                             keys={keys}
@@ -257,6 +266,7 @@ DraggedItem.propTypes = {
   onCancel: PropTypes.func,
   onClickToggle: PropTypes.func.isRequired,
   toggleCollapses: PropTypes.func,
+  sourceComponentId: PropTypes.number.isRequired,
 };
 
 export default memo(DraggedItem);

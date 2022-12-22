@@ -82,6 +82,7 @@ const DynamicZoneComponent = ({
   onGrabItem,
   onDropItem,
   onCancel,
+  sourceComponentId,
 }) => {
   const [isOpen, setIsOpen] = useState(true);
   const { formatMessage } = useIntl();
@@ -168,7 +169,9 @@ const DynamicZoneComponent = ({
         role="button"
         noBorder
         tabIndex={0}
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
         data-handler-id={handlerId}
         ref={dragRef}
         label={formatMessage({
@@ -203,7 +206,10 @@ const DynamicZoneComponent = ({
                   componentUid={componentUid}
                   icon={icon}
                   name={`${name}.${index}`}
-                  isFromDynamicZone
+                  source={{
+                    type: ItemTypes.DYNAMIC_ZONE,
+                    componentId: sourceComponentId,
+                  }}
                 />
               </AccordionContentRadius>
             </AccordionContent>
@@ -224,6 +230,7 @@ DynamicZoneComponent.defaultProps = {
 };
 
 DynamicZoneComponent.propTypes = {
+  sourceComponentId: PropTypes.number.isRequired,
   componentUid: PropTypes.string.isRequired,
   formErrors: PropTypes.object,
   index: PropTypes.number,

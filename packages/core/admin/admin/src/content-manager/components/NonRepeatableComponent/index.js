@@ -10,8 +10,9 @@ import { useContentTypeLayout } from '../../hooks';
 import FieldComponent from '../FieldComponent';
 import Inputs from '../Inputs';
 import useLazyComponents from '../../hooks/useLazyComponents';
+import { ItemTypes } from '../../utils';
 
-const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, name }) => {
+const NonRepeatableComponent = ({ componentUid, isNested, name, source }) => {
   const { getComponentLayout } = useContentTypeLayout();
   const componentLayoutData = useMemo(
     () => getComponentLayout(componentUid),
@@ -20,6 +21,8 @@ const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, nam
   const fields = componentLayoutData.layouts.edit;
 
   const { lazyComponentStore } = useLazyComponents();
+
+  const isFromDynamicZone = source.type === ItemTypes.DYNAMIC_ZONE;
 
   return (
     <Box
@@ -64,6 +67,7 @@ const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, nam
                 return (
                   <GridItem col={size} key={fieldName} s={12} xs={12}>
                     <Inputs
+                      source={source}
                       componentUid={componentUid}
                       keys={keys}
                       fieldSchema={fieldSchema}
@@ -84,15 +88,21 @@ const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, nam
 };
 
 NonRepeatableComponent.defaultProps = {
-  isFromDynamicZone: false,
   isNested: false,
+  source: {
+    type: '',
+    componentId: 0,
+  },
 };
 
 NonRepeatableComponent.propTypes = {
   componentUid: PropTypes.string.isRequired,
-  isFromDynamicZone: PropTypes.bool,
   isNested: PropTypes.bool,
   name: PropTypes.string.isRequired,
+  source: PropTypes.shape({
+    type: PropTypes.string,
+    componentId: PropTypes.number,
+  }),
 };
 
 export default NonRepeatableComponent;
