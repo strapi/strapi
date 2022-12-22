@@ -5,10 +5,6 @@ import { IntlProvider } from 'react-intl';
 
 import ComponentCategory from '../ComponentCategory';
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => null,
-}));
-
 describe('ComponentCategory', () => {
   const setup = (props) =>
     render(
