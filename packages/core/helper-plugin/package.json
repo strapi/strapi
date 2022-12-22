@@ -39,7 +39,7 @@
     "watch": "yarn create:index && cross-env NODE_ENV=development webpack-cli -w"
   },
   "dependencies": {
-    "axios": "0.27.2",
+    "axios": "1.2.1",
     "date-fns": "2.29.2",
     "formik": "^2.2.6",
     "immer": "9.0.6",
