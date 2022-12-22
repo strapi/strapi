@@ -1,6 +1,5 @@
 import React, { memo, useState } from 'react';
 import { useIntl } from 'react-intl';
-import get from 'lodash/get';
 import isEqual from 'react-fast-compare';
 import { Button } from '@strapi/design-system/Button';
 import Trash from '@strapi/icons/Trash';
@@ -29,14 +28,13 @@ const DeleteLink = ({ isCreatingEntry, onDelete, onDeleteSucceeded, trackerPrope
       toggleWarningDelete();
       onDeleteSucceeded();
     } catch (err) {
-      const errorMessage = get(
-        err,
-        'response.payload.message',
-        formatMessage({ id: getTrad('error.record.delete') })
-      );
       setIsModalConfirmButtonLoading(false);
       toggleWarningDelete();
-      toggleNotification({ type: 'warning', message: errorMessage });
+      toggleNotification({
+        type: 'warning',
+        message:
+          err.response.data.error?.message ?? formatMessage({ id: getTrad('error.record.delete') }),
+      });
     }
   };
 
