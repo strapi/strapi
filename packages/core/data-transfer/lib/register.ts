@@ -1,70 +1,35 @@
 import type { Context } from 'koa';
 import type { ServerOptions } from 'ws';
 import { WebSocket } from 'ws';
-import { Writable } from 'stream';
-import { IAsset, IConfiguration, IEntity, ILink, IMetadata, TransferStage } from '../types';
+import { Writable, PassThrough } from 'stream';
+import { v4 } from 'uuid';
 import {
-  createLocalStrapiDestinationProvider,
+  IAsset,
+  IConfiguration,
+  Message,
+  ILink,
+  IMetadata,
+  PushTransferMessage,
+  PushEntitiesTransferMessage,
+  TransferKind,
+  InitMessage,
+  PushTransferStage,
+} from '../types';
+import {
   ILocalStrapiDestinationProviderOptions,
+  createLocalStrapiDestinationProvider,
 } from './providers';
 
-type PushTransferStage = Exclude<TransferStage, 'schemas'>;
-type MessageKind = 'push' | 'pull';
-
-type Message = { uuid: string } & (InitMessage | TransferMessage | ActionMessage | TeardownMessage);
-
-// init
-
-type InitMessage = { type: 'init' } & (IPushInitMessage | IPullInitMessage);
-
-interface IPushInitMessage {
-  type: 'init';
-  kind: 'push';
-  data: Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'>;
-}
-
-interface IPullInitMessage {
-  type: 'init';
-  kind: 'pull';
-}
-
-// teardown
-
-type TeardownMessage = { type: 'teardown' };
-
-// action
-
-type ActionMessage = {
-  type: 'action';
-  action: 'bootstrap' | 'close' | 'beforeTransfer' | 'getMetadata' | 'getSchemas';
-};
-
-// transfer
-
-type TransferMessage = PushTransferMessage;
-
-type PushTransferMessage = { type: 'transfer' } & (
-  | PushEntityMessage
-  | PushLinkMessage
-  | PushAssetMessage
-  | PushConfigurationMessage
-);
-
-type PushEntityMessage = { stage: 'entities'; data: IEntity };
-type PushLinkMessage = { stage: 'links'; data: ILink };
-type PushAssetMessage = { stage: 'assets'; data: IAsset };
-type PushConfigurationMessage = { stage: 'configuration'; data: IConfiguration };
-
-// Internal state
-
 interface ITransferState {
-  kind?: MessageKind;
+  kind?: TransferKind;
+  transferID?: string;
   controller?: IPushController;
 }
 
 // Controllers
 
 interface IPushController {
+  streams: { [stage in PushTransferStage]?: Writable };
   actions: {
     getMetadata(): Promise<IMetadata>;
     getSchemas(): Strapi.Schemas;
@@ -73,20 +38,17 @@ interface IPushController {
     beforeTransfer(): Promise<void>;
   };
   transfer: {
-    entities(entity: IEntity): Promise<void> | void;
-    links(link: ILink): Promise<void> | void;
-    configuration(configuration: IConfiguration): Promise<void> | void;
-    assets(asset: IAsset): Promise<void> | void;
+    [key in PushTransferStage]: <T extends PushTransferMessage, P extends PushTransferStage = key>(
+      value: T extends { stage: P; data: infer U } ? U : never
+    ) => Promise<void>;
   };
 }
 
-const createPushController = (
-  ws: WebSocket,
-  options: ILocalStrapiDestinationProviderOptions
-): IPushController => {
+const createPushController = (options: ILocalStrapiDestinationProviderOptions): IPushController => {
   const provider = createLocalStrapiDestinationProvider(options);
 
   const streams: { [stage in PushTransferStage]?: Writable } = {};
+  const assets: { [filepath: string]: IAsset & { stream: PassThrough } } = {};
 
   const writeAsync = <T>(stream: Writable, data: T) => {
     return new Promise<void>((resolve, reject) => {
@@ -101,6 +63,8 @@ const createPushController = (
   };
 
   return {
+    streams,
+
     actions: {
       async getSchemas() {
         return provider.getSchemas();
@@ -129,7 +93,7 @@ const createPushController = (
           streams.entities = provider.getEntitiesStream();
         }
 
-        await writeAsync(streams.entities, entity);
+        await writeAsync(streams.entities!, entity);
       },
 
       async links(link) {
@@ -137,7 +101,7 @@ const createPushController = (
           streams.links = await provider.getLinksStream();
         }
 
-        await writeAsync(streams.links, link);
+        await writeAsync(streams.links!, link);
       },
 
       async configuration(config) {
@@ -145,14 +109,46 @@ const createPushController = (
           streams.configuration = await provider.getConfigurationStream();
         }
 
-        await writeAsync(streams.configuration, config);
+        await writeAsync(streams.configuration!, config);
       },
 
-      async assets(asset) {
+      async assets(asset: any) {
+        if (asset === null) {
+          streams.assets?.end();
+          return;
+        }
+
+        const { step, assetID } = asset;
+
         if (!streams.assets) {
           streams.assets = await provider.getAssetsStream();
         }
-        await writeAsync(streams.assets, asset);
+
+        // on init, we create a passthrough stream for the asset chunks
+        // send to the assets destination stream the metadata for the current asset
+        // + the stream that we just created for the asset
+        if (step === 'start') {
+          assets[assetID] = { ...asset.data, stream: new PassThrough() };
+          writeAsync(streams.assets!, assets[assetID]);
+        }
+
+        // propagate the chunk
+        if (step === 'stream') {
+          await writeAsync(assets[assetID].stream, Buffer.from(asset.data.chunk));
+        }
+
+        // on end, we indicate that all the chunks have been sent
+        if (step === 'end') {
+          await new Promise<void>((resolve, reject) => {
+            assets[assetID].stream
+              .on('close', () => {
+                delete assets[assetID];
+                resolve();
+              })
+              .on('error', reject)
+              .end();
+          });
+        }
       },
     },
   };
@@ -211,18 +207,21 @@ const createTransferController =
         const teardown = () => {
           delete state.kind;
           delete state.controller;
+          delete state.transferID;
 
           return { ok: true };
         };
 
-        const init = (kind: MessageKind, data: unknown = {}) => {
+        const init = (msg: InitMessage) => {
+          const { kind, options: controllerOptions } = msg;
+
           if (state.controller) {
             throw new Error('Transfer already in progres');
           }
 
           if (kind === 'push') {
-            state.controller = createPushController(ws, {
-              ...(data as IPushInitMessage['data']),
+            state.controller = createPushController({
+              ...controllerOptions,
               autoDestroy: false,
               getStrapi() {
                 return strapi;
@@ -230,7 +229,14 @@ const createTransferController =
             });
           }
 
-          return { ok: true };
+          // Pull or others
+          else {
+            throw new Error(`${kind} transfer not implemented`);
+          }
+
+          state.transferID = v4();
+
+          return { transferID: state.transferID };
         };
 
         ws.on('close', () => {
@@ -252,7 +258,7 @@ const createTransferController =
           uuid = msg.uuid;
 
           if (msg.type === 'init') {
-            await answer(() => init(msg.kind, (msg as any)?.data));
+            await answer(() => init(msg));
           }
 
           if (msg.type === 'teardown') {
@@ -264,7 +270,13 @@ const createTransferController =
           }
 
           if (msg.type === 'transfer') {
-            await answer(() => state.controller?.transfer[msg.stage]?.(msg.data as any));
+            await answer(() => {
+              const fn = state.controller?.transfer[msg.stage];
+
+              type Msg = typeof msg;
+
+              fn?.<Msg, Msg['stage']>(msg.data);
+            });
           }
         });
       });
@@ -287,3 +299,18 @@ const register = (strapi: any) => {
 };
 
 export default register;
+
+/**
+ * entities:start
+ * entities:transfer
+ * entities:end
+ *
+ *
+ * assets:start
+ *
+ * assets:transfer:start
+ * assets:transfer:stream
+ * assets:transfer:end
+ *
+ * assets:end
+ */

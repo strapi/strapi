@@ -3,3 +3,4 @@ export * from './providers';
 export * from './transfer-engine';
 export * from './utils';
 export * from './encryption';
+export * from './remote';

@@ -2,7 +2,6 @@ import { WebSocket } from 'ws';
 import { v4 } from 'uuid';
 import { Writable } from 'stream';
 
-import type { restore } from '../local-strapi-destination-provider/strategies';
 import type {
   IDestinationProvider,
   IEntity,
@@ -11,6 +10,7 @@ import type {
   ProviderType,
   IConfiguration,
   TransferStage,
+  IAsset,
 } from '../../../types';
 import type { ILocalStrapiDestinationProviderOptions } from '../local-strapi-destination-provider';
 
@@ -196,6 +196,41 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         const e = await this.#dispatchTransfer('configuration', configuration);
 
         callback(e);
+      },
+    });
+  }
+
+  getAssetsStream(): Writable | Promise<Writable> {
+    return new Writable({
+      objectMode: true,
+      final: async (callback) => {
+        const e = await this.#dispatchTransfer('assets', null);
+        callback(e);
+      },
+      write: async (asset: IAsset, _encoding, callback) => {
+        const { filename, filepath, stats, stream } = asset;
+        const assetID = v4();
+
+        await this.#dispatchTransfer('assets', {
+          step: 'start',
+          assetID,
+          data: { filename, filepath, stats },
+        });
+
+        for await (const chunk of stream) {
+          await this.#dispatchTransfer('assets', {
+            step: 'stream',
+            assetID,
+            data: { chunk },
+          });
+        }
+
+        await this.#dispatchTransfer('assets', {
+          step: 'end',
+          assetID,
+        });
+
+        callback();
       },
     });
   }

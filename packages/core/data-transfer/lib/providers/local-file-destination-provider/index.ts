@@ -255,6 +255,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
         entry
           .on('finish', () => {
+            console.log('FINISH WRITING ALREADY');
             callback(null);
           })
           .on('error', (error) => {
