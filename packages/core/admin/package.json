@@ -62,7 +62,7 @@
     "codemirror": "^5.65.8",
     "cross-env": "^7.0.3",
     "css-loader": "6.7.2",
-    "date-fns": "2.29.2",
+    "date-fns": "2.29.3",
     "dotenv": "8.5.1",
     "esbuild-loader": "^2.20.0",
     "execa": "^1.0.0",

@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "axios": "1.2.1",
-    "date-fns": "2.29.2",
+    "date-fns": "2.29.3",
     "formik": "^2.2.6",
     "immer": "9.0.6",
     "invariant": "^2.2.1",
