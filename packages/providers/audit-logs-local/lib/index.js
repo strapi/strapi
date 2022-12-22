@@ -22,6 +22,17 @@ const provider = {
     await this.strapi.entityService.create('admin::audit-log', { data: auditLog });
     return this;
   },
+
+  async getAll() {
+    if (!this._registered) {
+      throw Error('Audit log provider has not been registered');
+    }
+
+    const result = await this.strapi.entityService.findMany('admin::audit-log', {
+      populate: ['user'],
+    });
+    return result;
+  },
 };
 
 module.exports = provider;
