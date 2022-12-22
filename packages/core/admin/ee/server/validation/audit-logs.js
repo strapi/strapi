@@ -2,7 +2,7 @@
 
 const { yup, validateYupSchema } = require('@strapi/utils');
 
-const ALLOWED_SORT_STRINGS = ['action:ASC', 'action:DESC', 'createdAt:ASC', 'createdAt:DESC'];
+const ALLOWED_SORT_STRINGS = ['action:ASC', 'action:DESC', 'date:ASC', 'date:DESC'];
 
 const validateFindManySchema = yup
   .object()

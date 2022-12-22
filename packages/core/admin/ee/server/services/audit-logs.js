@@ -77,13 +77,13 @@ const createAuditLogsService = (strapi) => {
     },
 
     async findMany(query) {
-      const { results, pagination } = await localProvider.findMany(query);
+      const { results, pagination } = await this._provider.findMany(query);
 
       const sanitizedResults = results.map((result) => {
         const { user, ...rest } = result;
         return {
           ...rest,
-          user: getService('user').sanitizeUser(user),
+          user: user ? getService('user').sanitizeUser(user) : null,
         };
       });
 

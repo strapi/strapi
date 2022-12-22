@@ -97,6 +97,7 @@ describe('Audit logs service', () => {
       jest.mock('@strapi/provider-audit-logs-local', () => ({
         register: jest.fn().mockResolvedValue({
           saveEvent: mockSaveEvent,
+          findMany: mockFindMany,
         }),
       }));
     });
@@ -164,10 +165,11 @@ describe('Audit logs service', () => {
       await strapi.eventHub.emit('entry.create', { meta: 'test' });
 
       const params = { page: 1, pageSize: 10, order: 'createdAt:DESC', populate: ['user'] };
-      await auditLogsService.findMany(params);
+      const result = await auditLogsService.findMany(params);
 
       expect(mockEntityServiceFindPage).toHaveBeenCalledTimes(1);
       expect(mockEntityServiceFindPage).toHaveBeenCalledWith('admin::audit-log', params);
+      expect(result).toEqual({ results: [], pagination: {} });
     });
   });
 });
