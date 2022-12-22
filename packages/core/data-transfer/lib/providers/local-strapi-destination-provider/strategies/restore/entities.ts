@@ -25,30 +25,30 @@ const createEntitiesWriteStream = (options: IEntitiesRestoreStreamOptions) => {
       const contentType = strapi.getModel(type);
 
       const resolveType = (paths: string[]) => {
-        let type = contentType;
+        let cType = contentType;
         let value: unknown = data;
 
         for (const path of paths) {
           value = get(path, value);
 
-          if (typeof type === 'function') {
-            type = type(value);
+          if (typeof cType === 'function') {
+            cType = cType(value);
           }
 
-          if (path in type.attributes) {
-            const attribute = type.attributes[path];
+          if (path in cType.attributes) {
+            const attribute = cType.attributes[path];
 
             if (attribute.type === 'component') {
-              type = strapi.getModel(attribute.component);
+              cType = strapi.getModel(attribute.component);
             }
 
             if (attribute.type === 'dynamiczone') {
-              type = ({ __component }: { __component: string }) => strapi.getModel(__component);
+              cType = ({ __component }: { __component: string }) => strapi.getModel(__component);
             }
           }
         }
 
-        return type.uid;
+        return cType.uid;
       };
 
       try {
