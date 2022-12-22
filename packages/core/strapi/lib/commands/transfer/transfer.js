@@ -53,6 +53,9 @@ module.exports = async (opts) => {
       url: opts.to,
       auth: false,
       strategy: 'restore',
+      restore: {
+        entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },
+      },
     });
   }
   if (!source || !destination) {

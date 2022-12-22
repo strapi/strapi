@@ -20,7 +20,7 @@ type InitMessage = { type: 'init' } & (IPushInitMessage | IPullInitMessage);
 interface IPushInitMessage {
   type: 'init';
   kind: 'push';
-  data: { strategy: ILocalStrapiDestinationProviderOptions['strategy'] };
+  data: Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'>;
 }
 
 interface IPullInitMessage {
@@ -221,14 +221,8 @@ const createTransferController =
           }
 
           if (kind === 'push') {
-            const { strategy } = data as Partial<IPushInitMessage['data']>;
-
-            if (!strategy) {
-              throw new Error('Tried to initiate a push transfer without a strategy');
-            }
-
             state.controller = createPushController(ws, {
-              strategy,
+              ...(data as IPushInitMessage['data']),
               autoDestroy: false,
               getStrapi() {
                 return strapi;

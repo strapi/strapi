@@ -2,6 +2,7 @@ import { WebSocket } from 'ws';
 import { v4 } from 'uuid';
 import { Writable } from 'stream';
 
+import type { restore } from '../local-strapi-destination-provider/strategies';
 import type {
   IDestinationProvider,
   IEntity,
@@ -24,10 +25,10 @@ interface ICredentialsAuth {
   password: string;
 }
 
-interface IRemoteStrapiDestinationProvider {
+interface IRemoteStrapiDestinationProvider
+  extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
   url: string;
   auth?: ITokenAuth | ICredentialsAuth;
-  strategy: ILocalStrapiDestinationProviderOptions['strategy'];
 }
 
 type Actions = 'bootstrap' | 'close' | 'beforeTransfer' | 'getMetadata' | 'getSchemas';
@@ -104,7 +105,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async bootstrap(): Promise<void> {
-    const { url, auth, strategy } = this.options;
+    const { url, auth, strategy, restore } = this.options;
 
     let ws: WebSocket;
 
@@ -130,7 +131,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     // Wait for the connection to be made to the server, then init the transfer
     await new Promise<void>((resolve, reject) => {
       ws.once('open', async () => {
-        await this.#dispatch({ type: 'init', kind: 'push', data: { strategy } });
+        await this.#dispatch({ type: 'init', kind: 'push', data: { strategy, restore } });
         resolve();
       }).once('error', reject);
     });
