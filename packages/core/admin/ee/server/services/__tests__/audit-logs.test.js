@@ -95,8 +95,9 @@ describe('Audit logs service', () => {
       }));
 
       jest.mock('@strapi/provider-audit-logs-local', () => ({
-        register: jest.fn(),
-        saveEvent: mockSaveEvent,
+        register: jest.fn().mockResolvedValue({
+          saveEvent: mockSaveEvent,
+        }),
       }));
     });
 
