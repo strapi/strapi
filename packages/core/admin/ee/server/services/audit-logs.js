@@ -1,6 +1,7 @@
 'use strict';
 
 const localProvider = require('@strapi/provider-audit-logs-local');
+const { getService } = require('../../../server/utils');
 
 const defaultEvents = [
   'entry.create',
@@ -73,6 +74,23 @@ const createAuditLogsService = (strapi) => {
       this._provider = await localProvider.register({ strapi });
       this._eventHubUnsubscribe = strapi.eventHub.subscribe(handleEvent.bind(this));
       return this;
+    },
+
+    async findMany(query) {
+      const { results, pagination } = await this._provider.findMany(query);
+
+      const sanitizedResults = results.map((result) => {
+        const { user, ...rest } = result;
+        return {
+          ...rest,
+          user: user ? getService('user').sanitizeUser(user) : null,
+        };
+      });
+
+      return {
+        results: sanitizedResults,
+        pagination,
+      };
     },
 
     unsubscribe() {

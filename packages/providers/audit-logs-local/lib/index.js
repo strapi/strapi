@@ -18,6 +18,13 @@ const provider = {
 
         return this;
       },
+
+      findMany(query) {
+        return strapi.entityService.findPage('admin::audit-log', {
+          populate: ['user'],
+          ...query,
+        });
+      },
     };
   },
 };
