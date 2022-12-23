@@ -43,7 +43,7 @@ const create = async (attributes) => {
 
   getService('metrics').sendDidInviteUser();
 
-  strapi.eventHub.emit('user.create', sanitizeUser(createdUser));
+  strapi.eventHub.emit('user.create', { user: sanitizeUser(createdUser) });
 
   return createdUser;
 };
@@ -87,7 +87,7 @@ const updateById = async (id, attributes) => {
       populate: ['roles'],
     });
 
-    strapi.eventHub.emit('user.update', sanitizeUser(updatedUser));
+    strapi.eventHub.emit('user.update', { user: sanitizeUser(updatedUser) });
 
     return updatedUser;
   }
@@ -98,7 +98,7 @@ const updateById = async (id, attributes) => {
     populate: ['roles'],
   });
 
-  strapi.eventHub.emit('user.update', sanitizeUser(updatedUser));
+  strapi.eventHub.emit('user.update', { user: sanitizeUser(updatedUser) });
 
   return updatedUser;
 };
@@ -240,7 +240,7 @@ const deleteById = async (id) => {
     .query('admin::user')
     .delete({ where: { id }, populate: ['roles'] });
 
-  strapi.eventHub.emit('user.delete', sanitizeUser(deletedUser));
+  strapi.eventHub.emit('user.delete', { user: sanitizeUser(deletedUser) });
 
   return deletedUser;
 };

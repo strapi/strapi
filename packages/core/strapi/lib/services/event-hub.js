@@ -40,10 +40,10 @@ module.exports = function createEventHub() {
 
     on(eventName, listener) {
       if (!listeners.has(eventName)) {
-        listeners.set(eventName, []);
+        listeners.set(eventName, [listener]);
+      } else {
+        listeners.get(eventName).push(listener);
       }
-
-      listeners.get(eventName).push(listener);
 
       // Return a function to remove the listener
       return () => {
