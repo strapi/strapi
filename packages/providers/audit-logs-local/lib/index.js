@@ -22,7 +22,15 @@ const provider = {
       findMany(query) {
         return strapi.entityService.findPage('admin::audit-log', {
           populate: ['user'],
+          fields: ['action', 'date'],
           ...query,
+        });
+      },
+
+      findOne(id) {
+        return strapi.entityService.findOne('admin::audit-log', id, {
+          populate: ['user'],
+          fields: ['action', 'date', 'payload'],
         });
       },
     };
