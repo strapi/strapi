@@ -43,7 +43,7 @@ export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditA
       {onEditAsset && (
         <IconButton
           label={formatMessage({
-            id: getTrad('app.utils.edit'),
+            id: 'app.utils.edit',
             defaultMessage: 'edit',
           })}
           icon={<PencilIcon />}
