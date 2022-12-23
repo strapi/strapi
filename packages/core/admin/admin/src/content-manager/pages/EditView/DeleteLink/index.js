@@ -3,7 +3,7 @@ import { useIntl } from 'react-intl';
 import isEqual from 'react-fast-compare';
 import { Button } from '@strapi/design-system/Button';
 import Trash from '@strapi/icons/Trash';
-import { ConfirmDialog, useNotification } from '@strapi/helper-plugin';
+import { ConfirmDialog, useNotification, handleAPIError } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { getTrad } from '../../../utils';
 import { connect, select } from './utils';
@@ -32,8 +32,7 @@ const DeleteLink = ({ isCreatingEntry, onDelete, onDeleteSucceeded, trackerPrope
       toggleWarningDelete();
       toggleNotification({
         type: 'warning',
-        message:
-          err.response.data.error?.message ?? formatMessage({ id: getTrad('error.record.delete') }),
+        message: handleAPIError(err, formatMessage({ id: getTrad('error.record.delete') })),
       });
     }
   };

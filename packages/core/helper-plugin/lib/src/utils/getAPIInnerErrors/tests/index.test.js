@@ -1,28 +1,5 @@
 import getAPIInnerErrors from '../index';
 
-const API_YUP_VALIDATION_ERROR_FIXTURE = {
-  response: {
-    data: {
-      error: {
-        name: 'YupValidationError',
-        details: {
-          errors: [
-            {
-              path: ['field', '0', 'name'],
-              message: 'Field contains errors',
-            },
-
-            {
-              path: ['field'],
-              message: 'Field must be unique',
-            },
-          ],
-        },
-      },
-    },
-  },
-};
-
 const API_VALIDATION_ERROR_FIXTURE = {
   response: {
     data: {
@@ -58,19 +35,6 @@ const API_APPLICATION_ERROR_FIXTURE = {
 };
 
 describe('getAPIInnerError', () => {
-  test('handles YupValidationError errors', () => {
-    expect(
-      getAPIInnerErrors(API_YUP_VALIDATION_ERROR_FIXTURE, { getTrad: (translation) => translation })
-    ).toMatchObject({
-      'field.0.name': {
-        id: 'apiError.Field contains errors',
-      },
-      field: {
-        id: 'apiError.Field must be unique',
-      },
-    });
-  });
-
   test('handles ValidationError errors', () => {
     expect(
       getAPIInnerErrors(API_VALIDATION_ERROR_FIXTURE, { getTrad: (translation) => translation })
@@ -87,10 +51,6 @@ describe('getAPIInnerError', () => {
   test('handles ApplicationError errors', () => {
     expect(
       getAPIInnerErrors(API_APPLICATION_ERROR_FIXTURE, { getTrad: (translation) => translation })
-    ).toMatchObject({
-      'ApplicationError.0': {
-        id: 'apiError.Error message',
-      },
-    });
+    ).toBe('Error message');
   });
 });
