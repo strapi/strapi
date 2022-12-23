@@ -93,6 +93,20 @@ const createAuditLogsService = (strapi) => {
       };
     },
 
+    async findOne(id) {
+      const result = await this._provider.findOne(id);
+
+      if (!result) {
+        return null;
+      }
+
+      const { user, ...rest } = result;
+      return {
+        ...rest,
+        user: user ? getService('user').sanitizeUser(user) : null,
+      };
+    },
+
     unsubscribe() {
       if (this._eventHubUnsubscribe) {
         this._eventHubUnsubscribe();

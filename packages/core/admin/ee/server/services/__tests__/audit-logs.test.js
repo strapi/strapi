@@ -45,6 +45,7 @@ describe('Audit logs service', () => {
     const mockAddContentType = jest.fn();
     const mockEntityServiceCreate = jest.fn();
     const mockEntityServiceFindPage = jest.fn();
+    const mockEntityServiceFindOne = jest.fn();
     const mockGet = jest.fn((name) => {
       if (name === 'content-types') {
         return {
@@ -68,6 +69,7 @@ describe('Audit logs service', () => {
       entityService: {
         create: mockEntityServiceCreate,
         findPage: mockEntityServiceFindPage,
+        findOne: mockEntityServiceFindOne,
       },
       eventHub: createEventHub(),
       requestContext: {
@@ -164,12 +166,33 @@ describe('Audit logs service', () => {
 
       await strapi.eventHub.emit('entry.create', { meta: 'test' });
 
-      const params = { page: 1, pageSize: 10, order: 'createdAt:DESC', populate: ['user'] };
+      const params = { page: 1, pageSize: 10, order: 'createdAt:DESC' };
       const result = await auditLogsService.findMany(params);
 
       expect(mockEntityServiceFindPage).toHaveBeenCalledTimes(1);
-      expect(mockEntityServiceFindPage).toHaveBeenCalledWith('admin::audit-log', params);
+      expect(mockEntityServiceFindPage).toHaveBeenCalledWith('admin::audit-log', {
+        ...params,
+        populate: ['user'],
+        fields: ['action', 'date'],
+      });
       expect(result).toEqual({ results: [], pagination: {} });
+    });
+
+    it('should find one audit log with the right params', async () => {
+      const auditLogsService = createAuditLogsService(strapi);
+      await auditLogsService.register();
+      mockEntityServiceFindOne.mockResolvedValueOnce({ id: 1 });
+
+      await strapi.eventHub.emit('entry.create', { meta: 'test' });
+
+      const result = await auditLogsService.findOne(1);
+
+      expect(mockEntityServiceFindOne).toHaveBeenCalledTimes(1);
+      expect(mockEntityServiceFindOne).toHaveBeenCalledWith('admin::audit-log', 1, {
+        populate: ['user'],
+        fields: ['action', 'date', 'payload'],
+      });
+      expect(result).toEqual({ id: 1, user: null });
     });
   });
 });
