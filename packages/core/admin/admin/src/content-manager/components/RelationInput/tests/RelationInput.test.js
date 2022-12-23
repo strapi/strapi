@@ -136,12 +136,12 @@ describe('Content-Manager || RelationInput', () => {
     });
 
     test('should call onRelationLoadMore', () => {
-      const spy = jest.fn();
-      setup({ onRelationLoadMore: spy });
+      const onRelationLoadMoreSpy = jest.fn();
+      setup({ onRelationLoadMore: onRelationLoadMoreSpy });
 
       fireEvent.click(screen.getByText('Load more'));
 
-      expect(spy).toHaveBeenCalled();
+      expect(onRelationLoadMoreSpy).toHaveBeenCalled();
     });
 
     test('should call onSearch', () => {
@@ -306,7 +306,7 @@ describe('Content-Manager || RelationInput', () => {
         },
       });
 
-      expect(screen.getByRole('button', { name: /load more/i })).toHaveAttribute(
+      expect(screen.getByRole('button', { name: 'Load more' })).toHaveAttribute(
         'aria-disabled',
         'true'
       );
@@ -318,12 +318,21 @@ describe('Content-Manager || RelationInput', () => {
       expect(screen.getByText('This is an error')).toBeInTheDocument();
     });
 
-    test('should apply disabled state', () => {
-      const { queryByText, getByTestId, container } = setup({ disabled: true });
+    test('should display disabled state with only read permission', () => {
+      const onRelationLoadMoreSpy = jest.fn();
+      const { getAllByRole, getByRole, getByTestId, getByText, container } = setup({
+        disabled: true,
+        onRelationLoadMore: onRelationLoadMoreSpy,
+      });
 
-      expect(queryByText('Load more')).not.toBeInTheDocument();
+      fireEvent.click(getByText('Load more'));
+      expect(onRelationLoadMoreSpy).toHaveBeenCalledTimes(1);
+
       expect(container.querySelector('input')).toBeDisabled();
       expect(getByTestId('remove-relation-1')).toBeDisabled();
+      const [dragButton] = getAllByRole('button', { name: 'Drag' });
+      expect(dragButton).toHaveAttribute('aria-disabled', 'true');
+      expect(getByRole('link', { name: 'Relation 1' })).toBeInTheDocument();
     });
   });
 });
