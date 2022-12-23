@@ -170,7 +170,7 @@ function ListView({
       } catch (err) {
         toggleNotification({
           type: 'warning',
-          message: { id: getTrad('error.record.delete') },
+          message: err.response.data.error?.message ?? { id: getTrad('error.record.delete') },
         });
       }
     },
@@ -190,15 +190,11 @@ function ListView({
           message: { id: getTrad('success.record.delete') },
         });
       } catch (err) {
-        const errorMessage = get(
-          err,
-          'response.payload.message',
-          formatMessage({ id: getTrad('error.record.delete') })
-        );
-
         toggleNotification({
           type: 'warning',
-          message: errorMessage,
+          message:
+            err.response.data.error?.message ??
+            formatMessage({ id: getTrad('error.record.delete') }),
         });
       }
     },
