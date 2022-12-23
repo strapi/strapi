@@ -105,9 +105,9 @@ const FieldComponent = ({
         {!isRepeatable && isInitialized && (
           <NonRepeatableComponent
             componentUid={componentUid}
-            source={source}
             isNested={isNested}
             name={name}
+            source={source}
           />
         )}
         {isRepeatable && (

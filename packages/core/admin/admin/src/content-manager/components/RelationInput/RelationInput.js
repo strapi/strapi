@@ -473,7 +473,7 @@ const ListItem = ({ data, index, style }) => {
       ariaDescribedBy={ariaDescribedBy}
       canDrag={canDrag}
       disabled={disabled}
-      displayValue={mainField ?? id}
+      displayValue={String(mainField ?? id)}
       iconButtonAriaLabel={iconButtonAriaLabel}
       id={id}
       index={index}

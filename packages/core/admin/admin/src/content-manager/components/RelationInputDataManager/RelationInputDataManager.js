@@ -367,10 +367,6 @@ RelationInputDataManager.defaultProps = {
   isFieldAllowed: true,
   placeholder: null,
   required: false,
-  source: {
-    type: '',
-    componentId: 0,
-  },
 };
 
 RelationInputDataManager.propTypes = {
@@ -417,7 +413,7 @@ RelationInputDataManager.propTypes = {
   source: PropTypes.shape({
     type: PropTypes.string,
     componentId: PropTypes.number,
-  }),
+  }).isRequired,
 };
 
 const Memoized = memo(RelationInputDataManager);

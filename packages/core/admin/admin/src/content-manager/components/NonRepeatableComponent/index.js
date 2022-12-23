@@ -89,10 +89,6 @@ const NonRepeatableComponent = ({ componentUid, isNested, name, source }) => {
 
 NonRepeatableComponent.defaultProps = {
   isNested: false,
-  source: {
-    type: '',
-    componentId: 0,
-  },
 };
 
 NonRepeatableComponent.propTypes = {
@@ -102,7 +98,7 @@ NonRepeatableComponent.propTypes = {
   source: PropTypes.shape({
     type: PropTypes.string,
     componentId: PropTypes.number,
-  }),
+  }).isRequired,
 };
 
 export default NonRepeatableComponent;

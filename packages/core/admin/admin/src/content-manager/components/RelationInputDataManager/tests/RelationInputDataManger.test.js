@@ -11,6 +11,7 @@ import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { useRelation } from '../../../hooks/useRelation';
 
 import { RelationInputDataManager } from '..';
+import { ItemTypes } from '../../../utils';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,7 +31,6 @@ jest.mock('../../../hooks/useRelation', () => ({
       isSuccess: true,
       status: 'success',
     },
-
     search: {
       data: {
         pages: [
@@ -133,6 +133,10 @@ const RelationInputDataManagerComponent = (props) => (
               targetModel="something"
               queryInfos={{
                 shouldDisplayRelationLink: true,
+              }}
+              source={{
+                type: ItemTypes.DYNAMIC_ZONE,
+                componentId: 0,
               }}
               {...props}
             />
@@ -400,7 +404,7 @@ describe('RelationInputDataManager', () => {
     fireEvent.dragOver(dropZone);
     fireEvent.drop(dropZone);
 
-    expect(relationReorder).toBeCalledWith({ name: 'relation', newIndex: 0, oldIndex: 1 });
+    expect(relationReorder).toBeCalledWith({ name: 'relation', newIndex: 1, oldIndex: 0 });
   });
 
   describe('Accessibility', () => {
@@ -564,7 +568,7 @@ describe('RelationInputDataManager', () => {
       expect(queryByText(/\(8\)/)).toBeInTheDocument();
     });
 
-    it.only('should not crash, if the field is not set in modifiedData (e.g. in components)', () => {
+    it('should not crash, if the field is not set in modifiedData (e.g. in components)', () => {
       useCMEditViewDataManager.mockImplementation(() => ({
         isCreatingEntry: false,
         createActionAllowedFields: ['relation'],

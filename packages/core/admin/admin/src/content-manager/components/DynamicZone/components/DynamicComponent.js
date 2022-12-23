@@ -230,7 +230,6 @@ DynamicZoneComponent.defaultProps = {
 };
 
 DynamicZoneComponent.propTypes = {
-  sourceComponentId: PropTypes.number.isRequired,
   componentUid: PropTypes.string.isRequired,
   formErrors: PropTypes.object,
   index: PropTypes.number,
@@ -241,6 +240,7 @@ DynamicZoneComponent.propTypes = {
   onCancel: PropTypes.func,
   onMoveComponent: PropTypes.func.isRequired,
   onRemoveComponentClick: PropTypes.func.isRequired,
+  sourceComponentId: PropTypes.number.isRequired,
 };
 
 export default DynamicZoneComponent;
