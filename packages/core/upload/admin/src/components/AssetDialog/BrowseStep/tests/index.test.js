@@ -250,11 +250,11 @@ describe('BrowseStep', () => {
     it('should render the table headers', () => {
       usePersistentState.mockReturnValueOnce([viewOptions.LIST]);
 
-      const { getByText } = setup();
-      expect(getByText('preview')).toBeInTheDocument();
+      const { getByText, getByRole } = setup();
+      expect(getByRole('gridcell', { name: 'preview' })).toBeInTheDocument();
       expect(getByText('name')).toBeInTheDocument();
-      expect(getByText('extension')).toBeInTheDocument();
-      expect(getByText('size')).toBeInTheDocument();
+      expect(getByRole('gridcell', { name: 'extension' })).toBeInTheDocument();
+      expect(getByRole('gridcell', { name: 'size' })).toBeInTheDocument();
       expect(getByText('created')).toBeInTheDocument();
       expect(getByText('last update')).toBeInTheDocument();
     });
