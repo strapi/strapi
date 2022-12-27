@@ -28,8 +28,8 @@ export type PushTransferStage = PushTransferMessage['stage'];
 
 // init should return a transfer ID used in the teardown
 export type InitMessage = { type: 'init' } & (
-  | { kind: 'pull'; options: EmptyObject }
-  | { kind: 'push'; options: Pick<ILocalStrapiDestinationProviderOptions, 'strategy' | 'restore'> }
+  | { kind: 'pull'; data: EmptyObject }
+  | { kind: 'push'; data: Pick<ILocalStrapiDestinationProviderOptions, 'strategy' | 'restore'> }
 );
 
 /**

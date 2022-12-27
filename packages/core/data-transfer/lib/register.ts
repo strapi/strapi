@@ -179,7 +179,7 @@ const createTransferController =
             const payload = JSON.stringify({
               uuid,
               data: data ?? {},
-              error: e,
+              error: JSON.stringify(e?.message),
             });
 
             ws.send(payload, (error) => (error ? reject(error) : resolve()));
@@ -210,7 +210,7 @@ const createTransferController =
         };
 
         const init = (msg: InitMessage) => {
-          const { kind, options: controllerOptions } = msg;
+          const { kind, data: controllerOptions } = msg;
 
           if (state.controller) {
             throw new Error('Transfer already in progres');
