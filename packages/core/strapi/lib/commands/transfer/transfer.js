@@ -4,6 +4,7 @@ const {
   createRemoteStrapiDestinationProvider,
   createLocalStrapiSourceProvider,
   createTransferEngine,
+  createLocalStrapiDestinationProvider,
   // TODO: we need to solve this issue with typescript modules
   // eslint-disable-next-line import/no-unresolved, node/no-missing-require
 } = require('@strapi/data-transfer');
@@ -16,16 +17,14 @@ const {
   DEFAULT_IGNORED_CONTENT_TYPES,
 } = require('./utils');
 
+const logger = console;
+
 /**
  * @typedef ImportCommandOptions Options given to the CLI import command
  *
- * @property {string} [file] The file path to import
- * @property {boolean} [encrypt] Used to encrypt the final archive
- * @property {string} [key] Encryption key, only useful when encryption is enabled
- * @property {boolean} [compress] Used to compress the final archive
+ * @property {string} [to] The destination provider to use ("local" or the url of a remote Strapi)
+ * @property {string} [from] The source provider to use ("local" or the url of a remote Strapi)
  */
-
-const logger = console;
 
 /**
  * Import command.
@@ -45,11 +44,27 @@ module.exports = async (opts) => {
 
   let source;
   let destination;
+
   if (opts.from === 'local') {
-    source = createSourceProvider(strapi);
+    source = createLocalStrapiSourceProvider({
+      getStrapi: () => strapi,
+    });
+  } else {
+    logger.error(`Cannot transfer from provider '${opts.from}'`);
+    process.exit(1);
   }
-  if (opts.to) {
-    destination = createDestinationProvider({
+
+  if (opts.to === 'local') {
+    if (opts.from === 'local') {
+      logger.error('Source and destination cannot both be local Strapi instances.');
+      process.exit(1);
+    }
+
+    destination = createLocalStrapiDestinationProvider({
+      getStrapi: () => strapi,
+    });
+  } else if (opts.to) {
+    destination = createRemoteStrapiDestinationProvider({
       url: opts.to,
       auth: false,
       strategy: 'restore',
@@ -57,9 +72,13 @@ module.exports = async (opts) => {
         entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },
       },
     });
+  } else {
+    logger.error(`Cannot transfer from provider '${opts.from}'`);
+    process.exit(1);
   }
+
   if (!source || !destination) {
-    logger.error("Couldn't create providers");
+    logger.error('Could not create providers');
     process.exit(1);
   }
 
@@ -88,7 +107,7 @@ module.exports = async (opts) => {
   });
 
   try {
-    logger.log(`Starting export...`);
+    logger.log(`Starting transfer...`);
 
     const results = await engine.transfer();
 
@@ -101,22 +120,4 @@ module.exports = async (opts) => {
     logger.error('Transfer process failed unexpectedly:', e);
     process.exit(1);
   }
-};
-
-/**
- * It creates a local strapi destination provider
- */
-const createSourceProvider = (strapi) => {
-  return createLocalStrapiSourceProvider({
-    async getStrapi() {
-      return strapi;
-    },
-  });
-};
-
-/**
- * It creates a remote strapi destination provider based on the given options
- */
-const createDestinationProvider = (opts) => {
-  return createRemoteStrapiDestinationProvider(opts);
 };
