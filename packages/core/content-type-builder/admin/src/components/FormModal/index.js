@@ -36,7 +36,6 @@ import BooleanRadioGroup from '../BooleanRadioGroup';
 import CheckboxWithNumberField from '../CheckboxWithNumberField';
 import CustomRadioGroup from '../CustomRadioGroup';
 import ContentTypeRadioGroup from '../ContentTypeRadioGroup';
-import ComponentIconPicker from '../ComponentIconPicker';
 import Relation from '../Relation';
 import PluralName from '../PluralName';
 import SelectCategory from '../SelectCategory';
@@ -227,7 +226,6 @@ const FormModal = () => {
           data: {
             displayName: data.schema.displayName,
             category: data.category,
-            icon: data.schema.icon,
           },
         });
       }
@@ -877,7 +875,6 @@ const FormModal = () => {
       'allowed-types-select': AllowedTypesSelect,
       'boolean-radio-group': BooleanRadioGroup,
       'checkbox-with-number-field': CheckboxWithNumberField,
-      'component-icon-picker': ComponentIconPicker,
       'content-type-radio-group': ContentTypeRadioGroup,
       'radio-group': CustomRadioGroup,
       relation: Relation,
@@ -941,6 +938,15 @@ const FormModal = () => {
   );
 
   const schemaKind = get(contentTypes, [targetUid, 'schema', 'kind']);
+
+  const checkIsEditingFieldName = () =>
+    actionType === 'edit' && attributes.every(({ name }) => name !== modifiedData?.name);
+
+  const handleClickFinish = () => {
+    if (checkIsEditingFieldName()) {
+      trackUsage('didEditFieldNameOnContentType');
+    }
+  };
 
   return (
     <ModalLayout onClose={handleClosed} labelledBy="title">
@@ -1072,6 +1078,7 @@ const FormModal = () => {
                 onSubmitEditContentType={handleSubmit}
                 onSubmitEditCustomFieldAttribute={handleSubmit}
                 onSubmitEditDz={handleSubmit}
+                onClickFinish={handleClickFinish}
               />
             }
             startActions={

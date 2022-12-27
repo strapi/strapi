@@ -62,40 +62,40 @@ module.exports = ({ strapi }) => ({
     return assoc(`${CREATED_BY_ATTRIBUTE}.roles`, roles, entity);
   },
 
-  find(opts, uid, populate) {
-    const params = { ...opts, populate: getDeepPopulate(uid, populate) };
+  find(opts, uid) {
+    const params = { ...opts, populate: getDeepPopulate(uid) };
 
     return strapi.entityService.findMany(uid, params);
   },
 
-  findPage(opts, uid, populate) {
-    const params = { ...opts, populate: getDeepPopulate(uid, populate, { maxLevel: 1 }) };
+  findPage(opts, uid) {
+    const params = { ...opts, populate: getDeepPopulate(uid, { maxLevel: 1 }) };
 
     return strapi.entityService.findPage(uid, params);
   },
 
-  findWithRelationCountsPage(opts, uid, populate) {
-    const counterPopulate = getDeepPopulate(uid, populate, { countMany: true, maxLevel: 1 });
+  findWithRelationCountsPage(opts, uid) {
+    const counterPopulate = getDeepPopulate(uid, { countMany: true, maxLevel: 1 });
     const params = { ...opts, populate: addCreatedByRolesPopulate(counterPopulate) };
 
     return strapi.entityService.findWithRelationCountsPage(uid, params);
   },
 
-  findOneWithCreatorRolesAndCount(id, uid, populate) {
-    const counterPopulate = getDeepPopulate(uid, populate, { countMany: true, countOne: true });
+  findOneWithCreatorRolesAndCount(id, uid) {
+    const counterPopulate = getDeepPopulate(uid, { countMany: true, countOne: true });
     const params = { populate: addCreatedByRolesPopulate(counterPopulate) };
 
     return strapi.entityService.findOne(uid, id, params);
   },
 
-  async findOne(id, uid, populate) {
-    const params = { populate: getDeepPopulate(uid, populate) };
+  async findOne(id, uid) {
+    const params = { populate: getDeepPopulate(uid) };
 
     return strapi.entityService.findOne(uid, id, params);
   },
 
-  async findOneWithCreatorRoles(id, uid, populate) {
-    const entity = await this.findOne(id, uid, populate);
+  async findOneWithCreatorRoles(id, uid) {
+    const entity = await this.findOne(id, uid);
 
     if (!entity) {
       return entity;
@@ -114,7 +114,7 @@ module.exports = ({ strapi }) => ({
 
     const params = {
       data: publishData,
-      populate: getDeepPopulate(uid, null, { countMany: true, countOne: true }),
+      populate: getDeepPopulate(uid, { countMany: true, countOne: true }),
     };
 
     return strapi.entityService.create(uid, params);
@@ -125,14 +125,14 @@ module.exports = ({ strapi }) => ({
 
     const params = {
       data: publishData,
-      populate: getDeepPopulate(uid, null, { countMany: true, countOne: true }),
+      populate: getDeepPopulate(uid, { countMany: true, countOne: true }),
     };
 
     return strapi.entityService.update(uid, entity.id, params);
   },
 
   delete(entity, uid) {
-    const params = { populate: getDeepPopulate(uid, null, { countMany: true, countOne: true }) };
+    const params = { populate: getDeepPopulate(uid, { countMany: true, countOne: true }) };
 
     return strapi.entityService.delete(uid, entity.id, params);
   },
@@ -161,7 +161,7 @@ module.exports = ({ strapi }) => ({
 
     const params = {
       data,
-      populate: getDeepPopulate(uid, null, { countMany: true, countOne: true }),
+      populate: getDeepPopulate(uid, { countMany: true, countOne: true }),
     };
 
     return strapi.entityService.update(uid, entity.id, params);
@@ -176,7 +176,7 @@ module.exports = ({ strapi }) => ({
 
     const params = {
       data,
-      populate: getDeepPopulate(uid, null, { countMany: true, countOne: true }),
+      populate: getDeepPopulate(uid, { countMany: true, countOne: true }),
     };
 
     return strapi.entityService.update(uid, entity.id, params);

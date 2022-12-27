@@ -29,7 +29,7 @@ describe('DocAssetCard', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c32 {
+      .c33 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -84,9 +84,9 @@ describe('DocAssetCard', () => {
       }
 
       .c28 {
-        background: #f6f6f9;
-        padding: 4px;
-        border-radius: 4px;
+        background: #eaeaef;
+        padding-right: 8px;
+        padding-left: 8px;
         min-width: 20px;
       }
 
@@ -179,7 +179,7 @@ describe('DocAssetCard', () => {
         color: #666687;
       }
 
-      .c31 {
+      .c32 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
@@ -374,6 +374,11 @@ describe('DocAssetCard', () => {
         right: 12px;
       }
 
+      .c30 {
+        border-radius: 4px;
+        height: 1.5rem;
+      }
+
       .c27 {
         margin-left: auto;
         -webkit-flex-shrink: 0;
@@ -381,7 +386,7 @@ describe('DocAssetCard', () => {
         flex-shrink: 0;
       }
 
-      .c30 {
+      .c31 {
         margin-left: 4px;
       }
 
@@ -549,10 +554,10 @@ describe('DocAssetCard', () => {
                   class="c27"
                 >
                   <div
-                    class="c28 c29 c30"
+                    class="c28 c29 c30 c31"
                   >
                     <span
-                      class="c31"
+                      class="c32"
                     >
                       Doc
                     </span>
@@ -563,7 +568,7 @@ describe('DocAssetCard', () => {
           </div>
         </article>
         <div
-          class="c32"
+          class="c33"
         >
           <p
             aria-live="polite"

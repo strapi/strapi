@@ -13,11 +13,11 @@ module.exports = ({ strapi }) => {
     ).length;
 
     const data = {
-      containsRelationalFields: !!displayedRelationalFields,
+      eventProperties: { containsRelationalFields: !!displayedRelationalFields },
     };
 
-    if (data.containsRelationalFields) {
-      Object.assign(data, {
+    if (data.eventProperties.containsRelationalFields) {
+      Object.assign(data.eventProperties, {
         displayedFields,
         displayedRelationalFields,
       });

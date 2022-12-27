@@ -370,8 +370,7 @@ describe('Upload | SettingsPage', () => {
         color: #666687;
       }
 
-      .c8[aria-disabled='true'] svg > g,
-      .c8[aria-disabled='true'] svg path {
+      .c8[aria-disabled='true'] svg > g,.c8[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -384,8 +383,7 @@ describe('Upload | SettingsPage', () => {
         color: #666687;
       }
 
-      .c8[aria-disabled='true']:active svg > g,
-      .c8[aria-disabled='true']:active svg path {
+      .c8[aria-disabled='true']:active svg > g,.c8[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -670,6 +668,7 @@ describe('Upload | SettingsPage', () => {
                                       <input
                                         aria-disabled="false"
                                         aria-label="responsiveDimensions"
+                                        aria-required="false"
                                         checked=""
                                         class="c37"
                                         data-testid="responsiveDimensions"
@@ -751,6 +750,7 @@ describe('Upload | SettingsPage', () => {
                                       <input
                                         aria-disabled="false"
                                         aria-label="sizeOptimization"
+                                        aria-required="false"
                                         class="c37"
                                         data-testid="sizeOptimization"
                                         id="toggleinput-2"
@@ -831,6 +831,7 @@ describe('Upload | SettingsPage', () => {
                                       <input
                                         aria-disabled="false"
                                         aria-label="autoOrientation"
+                                        aria-required="false"
                                         checked=""
                                         class="c37"
                                         data-testid="autoOrientation"

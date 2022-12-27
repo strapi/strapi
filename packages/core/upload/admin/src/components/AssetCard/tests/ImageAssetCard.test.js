@@ -32,7 +32,7 @@ describe('ImageAssetCard', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c31 {
+      .c32 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -82,9 +82,9 @@ describe('ImageAssetCard', () => {
       }
 
       .c27 {
-        background: #f6f6f9;
-        padding: 4px;
-        border-radius: 4px;
+        background: #eaeaef;
+        padding-right: 8px;
+        padding-left: 8px;
         min-width: 20px;
       }
 
@@ -210,12 +210,17 @@ describe('ImageAssetCard', () => {
         color: #666687;
       }
 
-      .c30 {
+      .c31 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
         color: #666687;
+      }
+
+      .c29 {
+        border-radius: 4px;
+        height: 1.5rem;
       }
 
       .c26 {
@@ -225,7 +230,7 @@ describe('ImageAssetCard', () => {
         flex-shrink: 0;
       }
 
-      .c29 {
+      .c30 {
         margin-left: 4px;
       }
 
@@ -547,10 +552,10 @@ describe('ImageAssetCard', () => {
                   class="c26"
                 >
                   <div
-                    class="c27 c28 c29"
+                    class="c27 c28 c29 c30"
                   >
                     <span
-                      class="c30"
+                      class="c31"
                     >
                       Image
                     </span>
@@ -561,7 +566,7 @@ describe('ImageAssetCard', () => {
           </div>
         </article>
         <div
-          class="c31"
+          class="c32"
         >
           <p
             aria-live="polite"

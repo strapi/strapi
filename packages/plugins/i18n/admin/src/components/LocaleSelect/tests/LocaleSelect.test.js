@@ -84,7 +84,7 @@ describe('LocaleSelect', () => {
     await waitFor(() =>
       expect(screen.queryByText('Loading the available locales...')).not.toBeInTheDocument()
     );
-    fireEvent.click(screen.getByLabelText('Locales'));
+    fireEvent.click(screen.getByText('Locales'));
     await waitFor(() => screen.getByText('Afrikaans (af)'));
 
     expect(screen.getByText('Afrikaans (af)')).toBeVisible();
@@ -99,7 +99,7 @@ describe('LocaleSelect', () => {
     await waitFor(() =>
       expect(screen.queryByText('Loading the available locales...')).not.toBeInTheDocument()
     );
-    fireEvent.click(screen.getByLabelText('Locales'));
+    fireEvent.click(screen.getByText('Locales'));
     await waitFor(() => screen.getByText('Afrikaans (af)'));
     fireEvent.click(screen.getByText('French (fr)'));
 
