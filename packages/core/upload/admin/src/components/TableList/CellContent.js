@@ -8,30 +8,13 @@ import { Typography } from '@strapi/design-system/Typography';
 import { PreviewCell } from './PreviewCell';
 import { formatBytes } from '../../utils';
 
-export const CellContent = ({
-  alternativeText,
-  content,
-  cellType,
-  elementType,
-  mime,
-  fileExtension,
-  thumbnailURL,
-  url,
-}) => {
+export const CellContent = ({ content, cellType, elementType, element }) => {
   const { formatDate, formatMessage } = useIntl();
 
   switch (cellType) {
     case 'image':
-      return (
-        <PreviewCell
-          alternativeText={alternativeText}
-          fileExtension={fileExtension}
-          mime={mime}
-          type={elementType}
-          thumbnailURL={thumbnailURL}
-          url={url}
-        />
-      );
+      return <PreviewCell type={elementType} element={element} />;
+
     case 'date':
       return <Typography>{formatDate(parseISO(content), { dateStyle: 'full' })}</Typography>;
 
@@ -83,21 +66,22 @@ export const CellContent = ({
 };
 
 CellContent.defaultProps = {
-  alternativeText: null,
   content: '',
-  fileExtension: '',
-  mime: '',
-  thumbnailURL: null,
-  url: null,
 };
 
 CellContent.propTypes = {
-  alternativeText: PropTypes.string,
   content: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  fileExtension: PropTypes.string,
-  mime: PropTypes.string,
-  thumbnailURL: PropTypes.string,
   cellType: PropTypes.string.isRequired,
   elementType: PropTypes.string.isRequired,
-  url: PropTypes.string,
+  element: PropTypes.shape({
+    alternativeText: PropTypes.string,
+    ext: PropTypes.string,
+    formats: PropTypes.shape({
+      thumbnail: PropTypes.shape({
+        url: PropTypes.string,
+      }),
+    }),
+    mime: PropTypes.string,
+    url: PropTypes.string,
+  }).isRequired,
 };

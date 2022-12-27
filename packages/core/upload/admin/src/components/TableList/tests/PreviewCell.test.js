@@ -5,12 +5,17 @@ import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { PreviewCell } from '../PreviewCell';
 
 const PROPS_FIXTURE = {
-  alternativeText: 'alternative alt',
-  fileExtension: 'jpeg',
-  mime: 'image/jpeg',
-  name: 'michka',
-  thumbnailURL: 'michka-picture-url-thumbnail.jpeg',
-  url: 'michka-picture-url-default.jpeg',
+  element: {
+    alternativeText: 'alternative alt',
+    ext: 'jpeg',
+    formats: {
+      thumbnail: {
+        url: 'michka-picture-url-thumbnail.jpeg',
+      },
+    },
+    mime: 'image/jpeg',
+    url: 'michka-picture-url-default.jpeg',
+  },
   type: 'asset',
 };
 
@@ -41,7 +46,7 @@ describe('TableList | PreviewCell', () => {
     });
 
     it('should render an image with default url if thumbnail is not available', () => {
-      const { getByRole } = setup({ thumbnailURL: undefined });
+      const { getByRole } = setup({ element: { ...PROPS_FIXTURE.element, formats: undefined } });
 
       expect(getByRole('img', { name: 'alternative alt' })).toHaveAttribute(
         'src',
@@ -59,7 +64,9 @@ describe('TableList | PreviewCell', () => {
 
   describe('rendering files', () => {
     it('should render a file with fileExtension', () => {
-      const { getByText } = setup({ mime: 'application/pdf', fileExtension: 'pdf' });
+      const { getByText } = setup({
+        element: { ...PROPS_FIXTURE.element, mime: 'application/pdf', ext: 'pdf' },
+      });
 
       expect(getByText('pdf')).toBeInTheDocument();
     });

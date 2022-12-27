@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
-import { getFileExtension, onRowClick, stopPropagation } from '@strapi/helper-plugin';
+import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { Flex } from '@strapi/design-system/Flex';
 import { IconButton } from '@strapi/design-system/IconButton';
@@ -35,18 +35,7 @@ export const TableRows = ({
   return (
     <Tbody>
       {rows.map((element) => {
-        const {
-          alternativeText,
-          id,
-          isSelectable,
-          name,
-          ext,
-          url,
-          mime,
-          folderURL,
-          formats,
-          type: elementType,
-        } = element;
+        const { id, isSelectable, name, folderURL, type: elementType } = element;
 
         const isSelected = !!selected.find((currentRow) => currentRow.id === id);
 
@@ -76,14 +65,10 @@ export const TableRows = ({
               return (
                 <Td key={name}>
                   <CellContent
-                    alternativeText={alternativeText}
                     content={element[name]}
-                    fileExtension={getFileExtension(ext)}
-                    mime={mime}
                     cellType={cellType}
                     elementType={elementType}
-                    thumbnailURL={formats?.thumbnail?.url}
-                    url={url}
+                    element={element}
                   />
                 </Td>
               );

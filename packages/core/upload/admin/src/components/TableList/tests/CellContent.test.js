@@ -6,14 +6,20 @@ import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { CellContent } from '../CellContent';
 
 const PROPS_FIXTURE = {
-  alternativeText: 'alternative alt',
   cellType: 'image',
   elementType: 'asset',
   content: 'michka-picture-url-default.jpeg',
-  fileExtension: '.jpeg',
-  mime: 'image/jpeg',
-  thumbnailURL: 'michka-picture-url-thumbnail.jpeg',
-  url: 'michka-picture-url-default.jpeg',
+  element: {
+    alternativeText: 'alternative alt',
+    ext: 'jpeg',
+    formats: {
+      thumbnail: {
+        url: 'michka-picture-url-thumbnail.jpeg',
+      },
+    },
+    mime: 'image/jpeg',
+    url: 'michka-picture-url-default.jpeg',
+  },
 };
 
 const ComponentFixture = (props) => {
@@ -42,7 +48,9 @@ describe('TableList | CellContent', () => {
   });
 
   it('should render image cell type when element type is asset and mime does not include image', () => {
-    const { container, getByText } = setup({ mime: 'application/pdf', fileExtension: 'pdf' });
+    const { container, getByText } = setup({
+      element: { ...PROPS_FIXTURE.element, mime: 'application/pdf', ext: 'pdf' },
+    });
 
     expect(getByText('pdf')).toBeInTheDocument();
     expect(container).toMatchSnapshot();
