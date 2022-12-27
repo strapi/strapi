@@ -122,4 +122,34 @@ describe('findLeafByPathAndReplace', () => {
       },
     });
   });
+
+  it('should only replace the leaf if it is the last item in the array of paths', () => {
+    const obj = {
+      a: {
+        a: [
+          {
+            a: 'd',
+          },
+        ],
+      },
+    };
+
+    const path = ['a', 'a', 'a'];
+
+    const [lastPath] = path.slice(-1);
+
+    const findLeaf = findLeafByPathAndReplace(lastPath, []);
+
+    path.reduce(findLeaf, obj);
+
+    expect(obj).toMatchObject({
+      a: {
+        a: [
+          {
+            a: [],
+          },
+        ],
+      },
+    });
+  });
 });
