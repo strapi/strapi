@@ -39,7 +39,7 @@ export const LinkEllipsis = styled(Link)`
 export const DisconnectButton = styled.button`
   svg path {
     fill: ${({ theme, disabled }) =>
-      !disabled ? theme.colors.neutral500 : theme.colors.neutral600};
+      disabled ? theme.colors.neutral600 : theme.colors.neutral500};
   }
 
   &:hover svg path,
