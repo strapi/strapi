@@ -179,7 +179,7 @@ const createTransferController =
             const payload = JSON.stringify({
               uuid,
               data: data ?? {},
-              error: e,
+              error: e?.message || 'Unknown error',
             });
 
             ws.send(payload, (error) => (error ? reject(error) : resolve()));
