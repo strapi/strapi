@@ -8,20 +8,20 @@ const { RateLimitError } = utils.errors;
 module.exports =
   (config, { strapi }) =>
   async (ctx, next) => {
-    let ratelimitConfig = strapi.config.get('admin.ratelimit');
+    let rateLimitConfig = strapi.config.get('admin.rateLimit');
 
-    if (!ratelimitConfig) {
-      ratelimitConfig = {
+    if (!rateLimitConfig) {
+      rateLimitConfig = {
         enabled: true,
       };
     }
 
-    if (!has('enabled', ratelimitConfig)) {
-      ratelimitConfig.enabled = true;
+    if (!has('enabled', rateLimitConfig)) {
+      rateLimitConfig.enabled = true;
     }
 
-    if (ratelimitConfig.enabled === true) {
-      const ratelimit = require('koa2-ratelimit').RateLimit;
+    if (rateLimitConfig.enabled === true) {
+      const rateLimit = require('koa2-ratelimit').RateLimit;
 
       const userEmail = toLower(ctx.request.body.email) || 'unknownEmail';
 
@@ -32,13 +32,11 @@ module.exports =
         handler() {
           throw new RateLimitError();
         },
-        ...ratelimitConfig,
+        ...rateLimitConfig,
         ...config,
       };
 
-      console.log(loadConfig);
-
-      return ratelimit.middleware(loadConfig)(ctx, next);
+      return rateLimit.middleware(loadConfig)(ctx, next);
     }
 
     return next();
