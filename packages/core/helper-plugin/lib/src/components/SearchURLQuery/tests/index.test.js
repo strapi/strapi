@@ -442,6 +442,7 @@ describe('<SearchURLQuery />', () => {
                   <input
                     aria-disabled="false"
                     aria-invalid="false"
+                    aria-required="false"
                     class="c10"
                     id="field-5"
                     name="search"

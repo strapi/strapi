@@ -751,10 +751,6 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         fill: #666687;
       }
 
-      .c21 path {
-        fill: #32324d;
-      }
-
       .c47 {
         position: absolute;
         left: 0;
@@ -826,6 +822,10 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
 
       .c48 {
         width: 100%;
+      }
+
+      .c21 path {
+        fill: #32324d;
       }
 
       .c56 > * + * {

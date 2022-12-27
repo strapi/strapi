@@ -61,13 +61,13 @@ const ComponentFixture = (props) => {
 const setup = (props) => render(<ComponentFixture {...props} />);
 
 describe('TableList', () => {
-  it('should render table headers labels', () => {
-    const { getByText } = setup();
+  it.only('should render table headers labels', () => {
+    const { getByText, getByRole } = setup();
 
-    expect(getByText('preview')).toBeInTheDocument();
+    expect(getByRole('gridcell', { name: 'preview' })).toBeInTheDocument();
     expect(getByText('name')).toBeInTheDocument();
-    expect(getByText('extension')).toBeInTheDocument();
-    expect(getByText('size')).toBeInTheDocument();
+    expect(getByRole('gridcell', { name: 'extension' })).toBeInTheDocument();
+    expect(getByRole('gridcell', { name: 'size' })).toBeInTheDocument();
     expect(getByText('created')).toBeInTheDocument();
     expect(getByText('last update')).toBeInTheDocument();
   });
