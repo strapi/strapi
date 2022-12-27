@@ -44,6 +44,7 @@ module.exports = async ({ buildDestDir, forceBuild = true, optimization, srcDir 
       options: {
         backend: serverUrl,
         adminPath: addSlash(adminPath),
+        telemetryIsDisabled: strapiInstance.telemetry.isDisabled,
       },
     })
     .then(() => {

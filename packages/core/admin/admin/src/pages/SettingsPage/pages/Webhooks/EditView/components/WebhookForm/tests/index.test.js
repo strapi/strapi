@@ -1,5 +1,4 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
@@ -39,6 +38,9 @@ describe('Create Webhook', () => {
         isTriggerIdle={false}
         isDraftAndPublishEvents={false}
         triggerWebhook={triggerWebhook}
+        data={{
+          name: '',
+        }}
       />
     );
 
@@ -59,16 +61,19 @@ describe('Create Webhook', () => {
         isTriggerIdle={false}
         isDraftAndPublishEvents={false}
         triggerWebhook={triggerWebhook}
+        data={{
+          name: '',
+        }}
       />
     );
 
     render(App);
 
-    userEvent.type(screen.getByLabelText(/name/i), 'My webhook');
-    userEvent.type(screen.getByLabelText(/url/i), 'https://google.fr');
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'My webhook' } });
+    fireEvent.change(screen.getByLabelText(/url/i), { target: { value: 'https://google.fr' } });
     fireEvent.click(screen.getByRole('checkbox', { name: /entry.create/i }));
 
-    userEvent.click(screen.getByRole('button', { name: /Save/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Save/i }));
 
     await waitFor(() => {
       expect(handleSubmit).toHaveBeenCalledTimes(1);

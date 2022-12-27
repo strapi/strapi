@@ -13,7 +13,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['packages/**/*.js', 'test/**/*.js', 'scripts/**/*.js'],
+      files: ['packages/**/*.js', 'test/**/*.js', 'scripts/**/*.js', 'jest.*.js'],
       excludedFiles: frontPaths,
       ...require('./.eslintrc.back.js'),
     },

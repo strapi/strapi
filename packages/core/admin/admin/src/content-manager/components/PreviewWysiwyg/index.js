@@ -13,7 +13,7 @@ import sanitizeHtml from './utils/satinizeHtml';
 import Wrapper from './Wrapper';
 
 const PreviewWysiwyg = ({ data }) => {
-  const html = useMemo(() => sanitizeHtml(md.render(data || '')), [data]);
+  const html = useMemo(() => sanitizeHtml(md.render(data.replaceAll('\\n', '\n') || '')), [data]);
 
   return (
     <Wrapper>

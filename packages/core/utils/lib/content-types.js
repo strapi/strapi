@@ -104,7 +104,26 @@ const isPrivateAttribute = (model = {}, attributeName) => {
 };
 
 const isScalarAttribute = (attribute) => {
-  return !['media', 'component', 'relation', 'dynamiczone'].includes(attribute.type);
+  return !['media', 'component', 'relation', 'dynamiczone'].includes(attribute?.type);
+};
+const isMediaAttribute = (attribute) => attribute?.type === 'media';
+const isRelationalAttribute = (attribute) => attribute?.type === 'relation';
+const isComponentAttribute = (attribute) => ['component', 'dynamiczone'].includes(attribute?.type);
+
+const isDynamicZoneAttribute = (attribute) => attribute?.type === 'dynamiczone';
+const isMorphToRelationalAttribute = (attribute) => {
+  return isRelationalAttribute(attribute) && attribute?.relation?.startsWith?.('morphTo');
+};
+
+const getComponentAttributes = (schema) => {
+  return _.reduce(
+    schema.attributes,
+    (acc, attr, attrName) => {
+      if (isComponentAttribute(attr)) acc.push(attrName);
+      return acc;
+    },
+    []
+  );
 };
 
 const getScalarAttributes = (schema) => {
@@ -117,10 +136,6 @@ const getScalarAttributes = (schema) => {
     []
   );
 };
-
-const isMediaAttribute = (attribute) => attribute.type === 'media';
-const isRelationalAttribute = (attribute) => attribute.type === 'relation';
-const isComponentAttribute = (attribute) => ['component', 'dynamiczone'].includes(attribute.type);
 
 /**
  * Checks if an attribute is of type `type`
@@ -147,11 +162,14 @@ module.exports = {
   isMediaAttribute,
   isRelationalAttribute,
   isComponentAttribute,
+  isDynamicZoneAttribute,
+  isMorphToRelationalAttribute,
   isTypedAttribute,
   getPrivateAttributes,
   isPrivateAttribute,
   constants,
   getNonWritableAttributes,
+  getComponentAttributes,
   getScalarAttributes,
   getWritableAttributes,
   isWritableAttribute,

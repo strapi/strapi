@@ -32,7 +32,7 @@ const CellValue = ({ type, value }) => {
     formattedValue = formatNumber(value, {
       // Should be kept in sync with the corresponding value
       // in the design-system/NumberInput: https://github.com/strapi/design-system/blob/main/packages/strapi-design-system/src/NumberInput/NumberInput.js#L53
-      maximumFractionDigits: 21,
+      maximumFractionDigits: 20,
     });
   }
 

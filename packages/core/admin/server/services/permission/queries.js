@@ -144,7 +144,7 @@ const cleanPermissionsInDatabase = async () => {
   const total = await strapi.query('admin::permission').count();
   const pageCount = Math.ceil(total / pageSize);
 
-  for (let page = 0; page < pageCount; page++) {
+  for (let page = 0; page < pageCount; page += 1) {
     // 1. Find invalid permissions and collect their ID to delete them later
     const results = await strapi
       .query('admin::permission')

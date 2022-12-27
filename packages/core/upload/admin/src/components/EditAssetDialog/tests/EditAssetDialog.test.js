@@ -1,6 +1,5 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -21,7 +20,7 @@ const messageForPlugin = Object.keys(en).reduce((acc, curr) => {
 const asset = {
   id: 8,
   name: 'Screenshot 2.png',
-  alternativeText: null,
+  alternativeText: '',
   caption: null,
   width: 1476,
   height: 780,
@@ -141,10 +140,12 @@ describe('<EditAssetDialog />', () => {
     });
 
     it('open confirm box on close if data has changed', () => {
-      renderCompo();
+      const { getByRole } = renderCompo();
 
-      userEvent.type(screen.getByLabelText('Alternative text'), 'Test');
-      fireEvent.click(screen.getByText('Cancel'));
+      fireEvent.change(getByRole('textbox', { name: /alternative text/i }), {
+        target: { value: 'Test' },
+      });
+      fireEvent.click(getByRole('button', { name: /cancel/i }));
 
       expect(window.confirm).toBeCalled();
     });

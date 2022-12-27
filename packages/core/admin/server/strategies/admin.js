@@ -33,10 +33,16 @@ const authenticate = async (ctx) => {
 
   const userAbility = await getService('permission').engine.generateUserAbility(user);
 
+  // TODO: use the ability from ctx.state.auth instead of
+  // ctx.state.userAbility, and remove the assign below
   ctx.state.userAbility = userAbility;
   ctx.state.user = user;
 
-  return { authenticated: true, credentials: user };
+  return {
+    authenticated: true,
+    credentials: user,
+    ability: userAbility,
+  };
 };
 
 /** @type {import('.').AuthStrategy} */

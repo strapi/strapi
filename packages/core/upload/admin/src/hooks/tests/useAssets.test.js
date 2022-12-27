@@ -97,7 +97,7 @@ describe('useAssets', () => {
     };
 
     expect(axiosInstance.get).toBeCalledWith(
-      `/upload/files?${stringify(expected, { encode: false })}`
+      `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
     );
   });
 
@@ -120,7 +120,7 @@ describe('useAssets', () => {
     };
 
     expect(axiosInstance.get).toBeCalledWith(
-      `/upload/files?${stringify(expected, { encode: false })}`
+      `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
     );
   });
 
@@ -148,7 +148,7 @@ describe('useAssets', () => {
     };
 
     expect(axiosInstance.get).toBeCalledWith(
-      `/upload/files?${stringify(expected, { encode: false })}`
+      `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
     );
   });
 
@@ -172,7 +172,32 @@ describe('useAssets', () => {
     };
 
     expect(axiosInstance.get).toBeCalledWith(
-      `/upload/files?${stringify(expected, { encode: false })}`
+      `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
+    );
+  });
+
+  test('correctly encodes the search query _q', async () => {
+    const _q = 'something&else';
+    const { result, waitFor, waitForNextUpdate } = await setup({
+      query: { folder: 5, _q, filters: { $and: [{ something: 'true' }] } },
+    });
+
+    await waitFor(() => result.current.isSuccess);
+    await waitForNextUpdate();
+
+    const expected = {
+      filters: {
+        $and: [
+          {
+            something: true,
+          },
+        ],
+      },
+      _q: encodeURIComponent(_q),
+    };
+
+    expect(axiosInstance.get).toBeCalledWith(
+      `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
     );
   });
 

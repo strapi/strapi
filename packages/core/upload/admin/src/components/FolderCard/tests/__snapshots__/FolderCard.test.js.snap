@@ -1,10 +1,64 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FolderCard has all required ids set when rendering a start action 1`] = `
+.c0 {
+  position: relative;
+}
+
+.c2 {
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #eaeaef;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  cursor: pointer;
+  cursor: pointer;
+}
+
+.c5 {
+  position: relative;
+  z-index: 2;
+}
+
+.c7 {
+  background: #eaf5ff;
+  color: #66b7f1;
+  padding-top: 8px;
+  padding-right: 12px;
+  padding-bottom: 8px;
+  padding-left: 12px;
+  border-radius: 4px;
+}
+
 .c9 {
   position: relative;
   overflow: hidden;
   max-width: 100%;
+}
+
+.c12 {
+  padding: 4px;
+  max-width: 100%;
+}
+
+.c16 {
+  right: 16px;
+}
+
+.c3 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
 }
 
 .c10 {
@@ -21,7 +75,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   flex-direction: column;
 }
 
-.c20 {
+.c18 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -34,10 +88,19 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 }
 
 .c14 {
-  font-weight: 500;
-  color: #32324d;
   font-size: 0.875rem;
   line-height: 1.43;
+  font-weight: 500;
+  color: #32324d;
+}
+
+.c4 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c4 > * + * {
+  margin-left: 8px;
 }
 
 .c6 {
@@ -108,93 +171,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   background-color: #8e8ea9;
 }
 
-.c0 {
-  position: relative;
-}
-
-.c5 {
-  position: relative;
-  z-index: 2;
-}
-
-.c7 {
-  background: #eaf5ff;
-  color: #66b7f1;
-  padding-top: 8px;
-  padding-right: 12px;
-  padding-bottom: 8px;
-  padding-left: 12px;
-  border-radius: 4px;
-}
-
-.c12 {
-  padding: 4px;
-  max-width: 100%;
-}
-
-.c2 {
-  background: #ffffff;
-  padding: 12px;
-  border-radius: 4px;
-  border-style: solid;
-  border-width: 1px;
-  border-color: #eaeaef;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-  cursor: pointer;
-  cursor: pointer;
-}
-
-.c3 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c4 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c4 > * + * {
-  margin-left: 8px;
-}
-
-.c16 {
-  right: 16px;
-}
-
 .c17 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c18 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c18 > * + * {
-  margin-left: 8px;
-}
-
-.c19 {
   position: absolute;
   top: 12px;
 }
@@ -254,11 +231,15 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
       <div
         class="c5"
       >
-        <input
-          aria-labelledby="folder-3-title"
-          class="c6"
-          type="checkbox"
-        />
+        <div
+          class=""
+        >
+          <input
+            aria-labelledby="folder-3-title"
+            class="c6"
+            type="checkbox"
+          />
+        </div>
       </div>
       <div
         class="c7"
@@ -301,14 +282,14 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
         class="c15"
       >
         <div
-          class="c16 c17 c18 c19"
+          class="c16 c3 c4 c17"
           spacing="2"
         />
       </div>
     </div>
   </div>
   <div
-    class="c20"
+    class="c18"
   >
     <p
       aria-live="polite"
@@ -333,62 +314,8 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 `;
 
 exports[`FolderCard renders and matches the snapshot 1`] = `
-.c7 {
-  position: relative;
-  overflow: hidden;
-  max-width: 100%;
-}
-
-.c8 {
-  -webkit-align-items: flex-start;
-  -webkit-box-align: flex-start;
-  -ms-flex-align: flex-start;
-  align-items: flex-start;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c18 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
-.c12 {
-  font-weight: 500;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
 .c0 {
   position: relative;
-}
-
-.c5 {
-  background: #eaf5ff;
-  color: #66b7f1;
-  padding-top: 8px;
-  padding-right: 12px;
-  padding-bottom: 8px;
-  padding-left: 12px;
-  border-radius: 4px;
-}
-
-.c10 {
-  padding: 4px;
-  max-width: 100%;
 }
 
 .c2 {
@@ -401,6 +328,31 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
   cursor: pointer;
   cursor: pointer;
+}
+
+.c5 {
+  background: #eaf5ff;
+  color: #66b7f1;
+  padding-top: 8px;
+  padding-right: 12px;
+  padding-bottom: 8px;
+  padding-left: 12px;
+  border-radius: 4px;
+}
+
+.c7 {
+  position: relative;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.c10 {
+  padding: 4px;
+  max-width: 100%;
+}
+
+.c14 {
+  right: 16px;
 }
 
 .c3 {
@@ -417,6 +369,39 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
+.c8 {
+  -webkit-align-items: flex-start;
+  -webkit-box-align: flex-start;
+  -ms-flex-align: flex-start;
+  align-items: flex-start;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c16 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c12 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 500;
+  color: #32324d;
+}
+
 .c4 > * {
   margin-left: 0;
   margin-right: 0;
@@ -426,34 +411,7 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
   margin-left: 8px;
 }
 
-.c14 {
-  right: 16px;
-}
-
 .c15 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c16 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c16 > * + * {
-  margin-left: 8px;
-}
-
-.c17 {
   position: absolute;
   top: 12px;
 }
@@ -551,14 +509,14 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
         class="c13"
       >
         <div
-          class="c14 c15 c16 c17"
+          class="c14 c3 c4 c15"
           spacing="2"
         />
       </div>
     </div>
   </div>
   <div
-    class="c18"
+    class="c16"
   >
     <p
       aria-live="polite"
