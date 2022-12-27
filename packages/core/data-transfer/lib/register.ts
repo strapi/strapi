@@ -210,7 +210,7 @@ const createTransferController =
         };
 
         const init = (msg: InitMessage) => {
-          const { kind, data: controllerOptions } = msg;
+          const { kind, options: controllerOptions } = msg;
 
           if (state.controller) {
             throw new Error('Transfer already in progres');

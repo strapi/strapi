@@ -99,7 +99,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     // Wait for the connection to be made to the server, then init the transfer
     await new Promise<void>((resolve, reject) => {
       ws.once('open', async () => {
-        await dispatch(this.ws, { type: 'init', kind: 'push', data: { strategy, restore } });
+        await dispatch(this.ws, { type: 'init', kind: 'push', options: { strategy, restore } });
         resolve();
       }).once('error', reject);
     });
