@@ -421,6 +421,30 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   width: 100%;
 }
 
+.c1 {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.c3 {
+  overflow-x: hidden;
+}
+
+.c21 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c22 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c4:focus-visible {
+  outline: none;
+}
+
 .c26 {
   position: relative;
   display: inline-block;
@@ -490,30 +514,6 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
 
 .c23 {
   max-width: 320px;
-}
-
-.c1 {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-
-.c3 {
-  overflow-x: hidden;
-}
-
-.c21 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
-}
-
-.c22 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c4:focus-visible {
-  outline: none;
 }
 
 @media (max-width:68.75rem) {
@@ -675,6 +675,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                           <input
                             aria-disabled="false"
                             aria-label="autoRegister"
+                            aria-required="false"
                             checked=""
                             class="c36"
                             data-testid="autoRegister"
@@ -708,7 +709,6 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                       <span
                         class="c8 c25"
                         for="select-2"
-                        id="select-2-label"
                       >
                         <div
                           class="c0 c7"

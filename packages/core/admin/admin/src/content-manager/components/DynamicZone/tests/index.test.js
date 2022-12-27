@@ -7,10 +7,6 @@ import { DynamicZone } from '../index';
 
 import { layoutData } from './fixtures';
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => null,
-}));
-
 const toggleNotification = jest.fn();
 
 jest.mock('@strapi/helper-plugin', () => ({

@@ -80,8 +80,8 @@ export const TableList = ({
                 }
                 key={key}
               >
-                {isSortable ? (
-                  <Tooltip label={sortLabel}>
+                <Tooltip label={isSortable ? sortLabel : tableHeaderLabel}>
+                  {isSortable ? (
                     <Typography
                       onClick={() => handleClickSort(isSorted, name)}
                       as={isSorted ? 'span' : 'button'}
@@ -91,12 +91,12 @@ export const TableList = ({
                     >
                       {tableHeaderLabel}
                     </Typography>
-                  </Tooltip>
-                ) : (
-                  <Typography textColor="neutral600" variant="sigma">
-                    {tableHeaderLabel}
-                  </Typography>
-                )}
+                  ) : (
+                    <Typography textColor="neutral600" variant="sigma">
+                      {tableHeaderLabel}
+                    </Typography>
+                  )}
+                </Tooltip>
               </Th>
             );
           })}
