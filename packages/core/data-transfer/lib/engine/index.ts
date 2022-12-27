@@ -338,28 +338,23 @@ class TransferEngine<
   async transfer(): Promise<ITransferResults<S, D>> {
     try {
       await this.bootstrap();
-      await this.init();
-
-      const isValidTransfer = await this.integrityCheck();
-
-      if (!isValidTransfer) {
-        // TODO: provide the log from the integrity check
-        throw new Error(
-          `Unable to transfer the data between ${this.sourceProvider.name} and ${this.destinationProvider.name}.\nPlease refer to the log above for more information.`
-        );
-      }
-
-      await this.beforeTransfer();
-
+      // await this.init();
+      // const isValidTransfer = await this.integrityCheck();
+      // if (!isValidTransfer) {
+      //   // TODO: provide the log from the integrity check
+      //   throw new Error(
+      //     `Unable to transfer the data between ${this.sourceProvider.name} and ${this.destinationProvider.name}.\nPlease refer to the log above for more information.`
+      //   );
+      // }
+      // await this.beforeTransfer();
       // Run the transfer stages
-      await this.transferSchemas();
-      await this.transferEntities();
-      await this.transferAssets();
-      await this.transferLinks();
-      await this.transferConfiguration();
-
+      // await this.transferSchemas();
+      // await this.transferEntities();
+      // await this.transferAssets();
+      // await this.transferLinks();
+      // await this.transferConfiguration();
       // Gracefully close the providers
-      await this.close();
+      // await this.close();
     } catch (e: unknown) {
       // Rollback the destination provider if an exception is thrown during the transfer
       // Note: This will be configurable in the future

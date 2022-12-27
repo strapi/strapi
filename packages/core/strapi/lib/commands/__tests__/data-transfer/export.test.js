@@ -1,6 +1,6 @@
 'use strict';
 
-const utils = require('../transfer/utils');
+const utils = require('../../transfer/utils');
 
 const mockDataTransfer = {
   createLocalFileDestinationProvider: jest.fn(),
@@ -18,12 +18,12 @@ jest.mock(
   { virtual: true }
 );
 
-const exportCommand = require('../transfer/export');
+const exportCommand = require('../../transfer/export');
 
 const exit = jest.spyOn(process, 'exit').mockImplementation(() => {});
 jest.spyOn(console, 'error').mockImplementation(() => {});
 
-jest.mock('../transfer/utils');
+jest.mock('../../transfer/utils');
 
 const defaultFileName = 'defaultFilename';
 

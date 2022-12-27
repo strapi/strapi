@@ -17,12 +17,10 @@ const {
 } = require('./utils');
 
 /**
- * @typedef ImportCommandOptions Options given to the CLI import command
+ * @typedef TransferCommandOptions Options given to the CLI import command
  *
- * @property {string} [file] The file path to import
- * @property {boolean} [encrypt] Used to encrypt the final archive
- * @property {string} [key] Encryption key, only useful when encryption is enabled
- * @property {boolean} [compress] Used to compress the final archive
+ * @property {string} [from] The source strapi project
+ * @property {string} [to] The destination strapi project
  */
 
 const logger = console;
@@ -32,7 +30,7 @@ const logger = console;
  *
  * It transfers data from a local file to a local strapi instance
  *
- * @param {ImportCommandOptions} opts
+ * @param {TransferCommandOptions} opts
  */
 module.exports = async (opts) => {
   // Validate inputs from Commander

@@ -5,12 +5,9 @@ import { Writable, PassThrough } from 'stream';
 import { v4 } from 'uuid';
 import {
   IAsset,
-  IConfiguration,
   Message,
-  ILink,
   IMetadata,
   PushTransferMessage,
-  PushEntitiesTransferMessage,
   TransferKind,
   InitMessage,
   PushTransferStage,
@@ -38,8 +35,8 @@ interface IPushController {
     beforeTransfer(): Promise<void>;
   };
   transfer: {
-    [key in PushTransferStage]: <T extends PushTransferMessage, P extends PushTransferStage = key>(
-      value: T extends { stage: P; data: infer U } ? U : never
+    [key in PushTransferStage]: <T extends PushTransferMessage>(
+      value: T extends { stage: key; data: infer U } ? U : never
     ) => Promise<void>;
   };
 }
@@ -66,7 +63,7 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
     streams,
 
     actions: {
-      async getSchemas() {
+      async getSchemas(): Promise<Strapi.Schemas> {
         return provider.getSchemas();
       },
 
@@ -112,35 +109,35 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
         await writeAsync(streams.configuration!, config);
       },
 
-      async assets(asset: any) {
-        if (asset === null) {
+      async assets(payload) {
+        console.log('llega');
+        if (payload === null) {
           streams.assets?.end();
           return;
         }
 
-        const { step, assetID } = asset;
+        const { step, assetID } = payload;
 
         if (!streams.assets) {
           streams.assets = await provider.getAssetsStream();
         }
 
-        // on init, we create a passthrough stream for the asset chunks
-        // send to the assets destination stream the metadata for the current asset
-        // + the stream that we just created for the asset
         if (step === 'start') {
-          assets[assetID] = { ...asset.data, stream: new PassThrough() };
-          writeAsync(streams.assets!, assets[assetID]);
+          assets[assetID] = { ...payload.data, stream: new PassThrough() };
+          writeAsync(streams.assets, assets[assetID]);
         }
 
-        // propagate the chunk
         if (step === 'stream') {
-          await writeAsync(assets[assetID].stream, Buffer.from(asset.data.chunk));
+          const chunk = Buffer.from(payload.data.chunk.data);
+
+          await writeAsync(assets[assetID].stream, chunk);
         }
 
-        // on end, we indicate that all the chunks have been sent
         if (step === 'end') {
           await new Promise<void>((resolve, reject) => {
-            assets[assetID].stream
+            const { stream } = assets[assetID];
+
+            stream
               .on('close', () => {
                 delete assets[assetID];
                 resolve();
@@ -271,11 +268,9 @@ const createTransferController =
 
           if (msg.type === 'transfer') {
             await answer(() => {
-              const fn = state.controller?.transfer[msg.stage];
+              const { stage, data } = msg;
 
-              type Msg = typeof msg;
-
-              fn?.<Msg, Msg['stage']>(msg.data);
+              return state.controller?.transfer[stage](data as never);
             });
           }
         });
@@ -299,18 +294,3 @@ const register = (strapi: any) => {
 };
 
 export default register;
-
-/**
- * entities:start
- * entities:transfer
- * entities:end
- *
- *
- * assets:start
- *
- * assets:transfer:start
- * assets:transfer:stream
- * assets:transfer:end
- *
- * assets:end
- */
