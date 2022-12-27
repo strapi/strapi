@@ -34,7 +34,6 @@ describe('strapi command', () => {
     expect(exit).toHaveBeenCalledWith(1);
 
     expect(commanderWriteErr).toHaveBeenCalledTimes(1);
-    // trim to ignore newlines
     expect(commanderWriteErr.mock.calls[0][0]).toContain(cmd);
     expect(commanderWriteErr.mock.calls[0][0]).toContain('error');
   });
