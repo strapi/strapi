@@ -10,10 +10,14 @@ module.exports =
   async (ctx, next) => {
     let ratelimitConfig = strapi.config.get('admin.ratelimit');
 
-    if (!ratelimitConfig || !has('enabled', ratelimitConfig)) {
+    if (!ratelimitConfig) {
       ratelimitConfig = {
         enabled: true,
       };
+    }
+
+    if (!has('enabled', ratelimitConfig)) {
+      ratelimitConfig.enabled = true;
     }
 
     if (ratelimitConfig.enabled === true) {
@@ -21,7 +25,7 @@ module.exports =
 
       const userEmail = toLower(ctx.request.body.email) || 'unknownEmail';
 
-      return ratelimit.middleware({
+      const loadConfig = {
         interval: { min: 5 },
         max: 5,
         prefixKey: `${userEmail}:${ctx.request.path}:${ctx.request.ip}`,
@@ -30,7 +34,11 @@ module.exports =
         },
         ...ratelimitConfig,
         ...config,
-      })(ctx, next);
+      };
+
+      console.log(loadConfig);
+
+      return ratelimit.middleware(loadConfig)(ctx, next);
     }
 
     return next();
