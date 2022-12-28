@@ -117,6 +117,10 @@ module.exports = function createComponentBuilder() {
         const attribute = infos.attributes[key];
 
         if (isRelation(attribute)) {
+          if (['manyToMany', 'oneToOne'].includes(attribute.relation)) {
+            attribute.dominant = true;
+          }
+
           this.setRelation({
             key,
             uid,

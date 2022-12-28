@@ -8,7 +8,6 @@ import { Flex } from '@strapi/design-system/Flex';
 import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
 
 const AccordionFooter = styled(Box)`
-  overflow: hidden;
   border-bottom: 1px solid ${({ theme }) => theme.colors.neutral200};
   border-right: 1px solid ${({ theme }) => theme.colors.neutral200};
   border-left: 1px solid ${({ theme }) => theme.colors.neutral200};

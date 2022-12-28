@@ -75,6 +75,29 @@ module.exports = async (opts) => {
   try {
     logger.log(`Starting export...`);
 
+    const progress = engine.progress.stream;
+
+    const telemetryPayload = (/* payload */) => {
+      return {
+        eventProperties: {
+          source: engine.sourceProvider.name,
+          destination: engine.destinationProvider.name,
+        },
+      };
+    };
+
+    progress.on('transfer::start', (payload) => {
+      strapi.telemetry.send('didDEITSProcessStart', telemetryPayload(payload));
+    });
+
+    progress.on('transfer::finish', (payload) => {
+      strapi.telemetry.send('didDEITSProcessFinish', telemetryPayload(payload));
+    });
+
+    progress.on('transfer::error', (payload) => {
+      strapi.telemetry.send('didDEITSProcessFail', telemetryPayload(payload));
+    });
+
     const results = await engine.transfer();
     const outFile = results.destination.file.path;
 

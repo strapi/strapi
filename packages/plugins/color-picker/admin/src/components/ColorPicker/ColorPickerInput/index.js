@@ -101,11 +101,10 @@ const ColorPickerInput = ({
       // GenericInput calls formatMessage and returns a string for the error
       error={error}
       hint={description && formatMessage(description)}
+      required={required}
     >
       <Stack spacing={1}>
-        <FieldLabel action={labelAction} required={required}>
-          {formatMessage(intlLabel)}
-        </FieldLabel>
+        <FieldLabel action={labelAction}>{formatMessage(intlLabel)}</FieldLabel>
         <ColorPickerToggle
           ref={colorPickerButtonRef}
           aria-label={formatMessage({
