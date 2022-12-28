@@ -80,8 +80,6 @@ module.exports = async (opts) => {
   const engine = createTransferEngine(source, destination, engineOptions);
 
   try {
-    logger.info('Starting import...');
-
     const progress = engine.progress.stream;
     const telemetryPayload = (/* payload */) => {
       return {
@@ -93,6 +91,7 @@ module.exports = async (opts) => {
     };
 
     progress.on('transfer::start', (payload) => {
+      logger.info('Starting import...');
       strapiInstance.telemetry.send('didDEITSProcessStart', telemetryPayload(payload));
     });
 

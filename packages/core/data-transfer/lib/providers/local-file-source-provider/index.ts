@@ -49,6 +49,8 @@ class LocalFileSourceProvider implements ISourceProvider {
 
   options: ILocalFileSourceProviderOptions;
 
+  #metadata?: IMetadata;
+
   constructor(options: ILocalFileSourceProviderOptions) {
     this.options = options;
 
@@ -60,15 +62,20 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   /**
-   * Pre flight checks regarding the provided options (making sure that the provided path is correct, etc...)
+   * Pre flight checks regarding the provided options, making sure that the file can be opened (decrypted, decompressed), etc.
    */
   async bootstrap() {
     const { path: filePath } = this.options.file;
+
     try {
-      // This is only to show a nicer error, it doesn't ensure the file will still exist when we try to open it later
-      await fs.access(filePath, fs.constants.R_OK);
+      // Read the metadata to ensure the file can be parsed
+      this.#metadata = await this.getMetadata();
     } catch (e) {
-      throw new Error(`Can't access file "${filePath}".`);
+      throw new Error(`Can't read file "${filePath}".`);
+    }
+
+    if (!this.#metadata) {
+      throw new Error('Can\'t read file "metadata.json"');
     }
   }
 
