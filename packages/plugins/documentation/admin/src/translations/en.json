@@ -29,7 +29,7 @@
   "pages.PluginPage.table.icon.regenerate": "Regenerate {target}",
   "pages.PluginPage.table.icon.show": "Open {target}",
   "pages.PluginPage.table.version": "Version",
-  "pages.SettingsPage.Button.description": "Configure the documentation plugin",
+  "pages.SettingsPage.header.description": "Configure the documentation plugin",
   "pages.SettingsPage.header.save": "Save",
   "pages.SettingsPage.toggle.hint": "Make the documentation endpoint private",
   "pages.SettingsPage.toggle.label": "Restricted Access",
