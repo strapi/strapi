@@ -29,7 +29,7 @@
   "pages.PluginPage.table.icon.regenerate": "重新產生 {target}",
   "pages.PluginPage.table.icon.show": "開啟 {target}",
   "pages.PluginPage.table.version": "版本",
-  "pages.SettingsPage.Button.description": "設定說明文件外掛程式",
+  "pages.SettingsPage.header.description": "設定說明文件外掛程式",
   "pages.SettingsPage.header.save": "儲存",
   "pages.SettingsPage.toggle.hint": "將說明文件端點設為私人",
   "pages.SettingsPage.toggle.label": "受限存取",
