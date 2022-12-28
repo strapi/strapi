@@ -69,6 +69,7 @@ export const TableRows = ({
                     cellType={cellType}
                     elementType={elementType}
                     element={element}
+                    name={name}
                   />
                 </Td>
               );

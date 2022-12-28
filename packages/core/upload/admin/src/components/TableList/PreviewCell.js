@@ -51,7 +51,7 @@ export const PreviewCell = ({ type, element }) => {
     );
   }
 
-  const { alternativeText, ext, formats, mime, url } = element;
+  const { alternativeText, ext, formats, mime, name, url } = element;
 
   if (mime.includes(AssetType.Image)) {
     const mediaURL =
@@ -61,19 +61,21 @@ export const PreviewCell = ({ type, element }) => {
   }
 
   if (mime.includes(AssetType.Video)) {
+    // TODO: Replace with Avatar when DS is released
     return (
       <VideoPreviewWrapper>
         <VideoPreview
           url={createAssetUrl(element, true)}
           mime={mime}
           onLoadDuration={() => {}}
-          alt={alternativeText}
+          alt={alternativeText ?? name}
         />
       </VideoPreviewWrapper>
     );
   }
 
   return (
+    // TODO: Replace with Initials when DS is released
     <GenericAssetWrapper
       background="secondary100"
       height={pxToRem(26)}
@@ -98,6 +100,7 @@ PreviewCell.propTypes = {
       }),
     }),
     mime: PropTypes.string,
+    name: PropTypes.string,
     url: PropTypes.string,
   }).isRequired,
   type: PropTypes.string.isRequired,
