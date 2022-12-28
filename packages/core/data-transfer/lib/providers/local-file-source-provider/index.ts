@@ -74,9 +74,6 @@ class LocalFileSourceProvider implements ISourceProvider {
       throw new Error(`Can't read file "${filePath}".`);
     }
 
-    if (!this.#metadata) {
-      throw new Error('Can\'t read file "metadata.json"');
-    }
   }
 
   getMetadata() {
