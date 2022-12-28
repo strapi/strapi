@@ -45,7 +45,8 @@ module.exports = async (opts) => {
   let source;
   let destination;
 
-  if (opts.from === 'local') {
+  // if no URL provided, use local Strapi
+  if (!opts.from) {
     source = createLocalStrapiSourceProvider({
       getStrapi: () => strapi,
     });
@@ -54,16 +55,18 @@ module.exports = async (opts) => {
     process.exit(1);
   }
 
-  if (opts.to === 'local') {
-    if (opts.from === 'local') {
-      logger.error('Source and destination cannot both be local Strapi instances.');
+  // if no URL provided, use local Strapi
+  if (!opts.to) {
+    // at least one of the two must be remote, however
+    if (!opts.from) {
+      logger.error(`At least 'to' or 'from' must be provided.`);
       process.exit(1);
     }
 
     destination = createLocalStrapiDestinationProvider({
       getStrapi: () => strapi,
     });
-  } else if (opts.to) {
+  } else {
     destination = createRemoteStrapiDestinationProvider({
       url: opts.to,
       auth: false,
@@ -72,9 +75,6 @@ module.exports = async (opts) => {
         entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },
       },
     });
-  } else {
-    logger.error(`Cannot transfer from provider '${opts.from}'`);
-    process.exit(1);
   }
 
   if (!source || !destination) {
@@ -117,7 +117,8 @@ module.exports = async (opts) => {
     logger.log(`${chalk.bold('Transfer process has been completed successfully!')}`);
     process.exit(0);
   } catch (e) {
-    logger.error('Transfer process failed unexpectedly:', e);
+    logger.error('Transfer process failed unexpectedly');
+    logger.error(e);
     process.exit(1);
   }
 };
