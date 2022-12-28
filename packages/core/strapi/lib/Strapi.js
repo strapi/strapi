@@ -127,7 +127,7 @@ class Strapi {
   }
 
   get EE() {
-    return ee({ dir: this.dirs.dist.root, logger: this.log });
+    return ee({ dir: this.dirs.app.root, logger: this.log });
   }
 
   get services() {
@@ -242,11 +242,14 @@ class Strapi {
   sendStartupTelemetry() {
     // Emit started event.
     // do not await to avoid slower startup
+    // This event is anonymous
     this.telemetry.send('didStartServer', {
-      database: strapi.config.get('database.connection.client'),
-      plugins: Object.keys(strapi.plugins),
-      // TODO: to add back
-      // providers: this.config.installedProviders,
+      groupProperties: {
+        database: strapi.config.get('database.connection.client'),
+        plugins: Object.keys(strapi.plugins),
+        // TODO: to add back
+        // providers: this.config.installedProviders,
+      },
     });
   }
 

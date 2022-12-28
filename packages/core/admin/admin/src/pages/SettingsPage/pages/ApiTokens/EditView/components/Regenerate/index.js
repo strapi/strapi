@@ -62,7 +62,7 @@ Regenerate.defaultProps = { onRegenerate() {} };
 
 Regenerate.propTypes = {
   onRegenerate: PropTypes.func,
-  idToRegenerate: PropTypes.string.isRequired,
+  idToRegenerate: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
 };
 
 export default Regenerate;

@@ -7,4 +7,5 @@ module.exports = {
   ...baseConfig,
   displayName: (pkg.strapi && pkg.strapi.name) || pkg.name,
   roots: [__dirname],
+  testMatch: ['<rootDir>/**/*.test.js'],
 };

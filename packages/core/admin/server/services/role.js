@@ -282,6 +282,7 @@ const getDefaultPluginPermissions = ({ isAuthor = false } = {}) => {
   // add plugin permissions for each role
   return [
     { action: 'plugin::upload.read', conditions },
+    { action: 'plugin::upload.configure-view' },
     { action: 'plugin::upload.assets.create' },
     { action: 'plugin::upload.assets.update', conditions },
     { action: 'plugin::upload.assets.download' },

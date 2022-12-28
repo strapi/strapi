@@ -12,7 +12,6 @@ import {
 } from '@strapi/helper-plugin';
 import { Main } from '@strapi/design-system/Main';
 import { Formik } from 'formik';
-import { get } from 'lodash';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { formatAPIErrors } from '../../../../../utils';
@@ -152,6 +151,10 @@ const ApiTokenCreateView = () => {
   const handleSubmit = async (body, actions) => {
     trackUsageRef.current(isCreating ? 'willCreateToken' : 'willEditToken');
     lockApp();
+    const lifespanVal =
+      body.lifespan && parseInt(body.lifespan, 10) && body.lifespan !== '0'
+        ? parseInt(body.lifespan, 10)
+        : null;
 
     try {
       const {
@@ -159,10 +162,7 @@ const ApiTokenCreateView = () => {
       } = isCreating
         ? await axiosInstance.post(`/admin/api-tokens`, {
             ...body,
-            lifespan:
-              body.lifespan && parseInt(body.lifespan, 10)
-                ? parseInt(body.lifespan, 10)
-                : body.lifespan,
+            lifespan: lifespanVal,
             permissions: body.type === 'custom' ? state.selectedActions : null,
           })
         : await axiosInstance.put(`/admin/api-tokens/${id}`, {
@@ -204,12 +204,12 @@ const ApiTokenCreateView = () => {
       if (err?.response?.data?.error?.message === MSG_ERROR_NAME_TAKEN) {
         toggleNotification({
           type: 'warning',
-          message: get(err, 'response.data.message', 'notification.error.tokennamenotunique'),
+          message: err.response.data.message || 'notification.error.tokennamenotunique',
         });
       } else {
         toggleNotification({
           type: 'warning',
-          message: get(err, 'response.data.message', 'notification.error'),
+          message: err?.response?.data?.message || 'notification.error',
         });
       }
       unlockApp();

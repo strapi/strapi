@@ -30,7 +30,7 @@ const EditViewLayoutManager = ({ layout, ...rest }) => {
     return <LoadingIndicatorPage />;
   }
 
-  return <Permissions {...rest} layout={currentLayout} userPermissions={permissions} />;
+  return <Permissions {...rest} userPermissions={permissions} />;
 };
 
 EditViewLayoutManager.propTypes = {

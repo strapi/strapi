@@ -4,7 +4,7 @@ const path = require('path');
 const _ = require('lodash');
 const fse = require('fs-extra');
 
-const { importDefault } = require('../utils');
+const { importDefault } = require('@strapi/utils');
 const glob = require('./glob');
 const filePathToPath = require('./filepath-to-prop-path');
 

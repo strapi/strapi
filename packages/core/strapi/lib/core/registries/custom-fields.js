@@ -1,7 +1,25 @@
 'use strict';
 
 const { has } = require('lodash/fp');
-const validators = require('../../services/entity-validator/validators');
+
+const ALLOWED_TYPES = [
+  'biginteger',
+  'boolean',
+  'date',
+  'datetime',
+  'decimal',
+  'email',
+  'enumeration',
+  'float',
+  'integer',
+  'json',
+  'password',
+  'richtext',
+  'string',
+  'text',
+  'time',
+  'uid',
+];
 
 const customFieldsRegistry = (strapi) => {
   const customFields = {};
@@ -27,7 +45,7 @@ const customFieldsRegistry = (strapi) => {
         }
 
         const { name, plugin, type } = cf;
-        if (!has(type, validators)) {
+        if (!ALLOWED_TYPES.includes(type)) {
           throw new Error(
             `Custom field type: '${type}' is not a valid Strapi type or it can't be used with a Custom Field`
           );
