@@ -73,7 +73,6 @@ class LocalFileSourceProvider implements ISourceProvider {
     } catch (e) {
       throw new Error(`Can't read file "${filePath}".`);
     }
-
   }
 
   getMetadata() {
