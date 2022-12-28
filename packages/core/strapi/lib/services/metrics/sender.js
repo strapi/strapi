@@ -65,7 +65,7 @@ module.exports = (strapi) => {
   addPackageJsonStrapiMetadata(anonymousGroupProperties, strapi);
 
   return async (event, payload = {}, opts = {}) => {
-    const userId = generateAdminUserHash();
+    const userId = generateAdminUserHash(strapi);
 
     const reqParams = {
       method: 'POST',

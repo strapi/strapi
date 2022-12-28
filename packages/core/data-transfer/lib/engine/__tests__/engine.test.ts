@@ -2,7 +2,7 @@ import { join } from 'path';
 import { cloneDeep } from 'lodash/fp';
 import { Readable, Writable } from 'stream-chain';
 import type { Schema } from '@strapi/strapi';
-import { createTransferEngine } from '..';
+import { createTransferEngine, TRANSFER_STAGES } from '..';
 import type {
   IAsset,
   IConfiguration,
@@ -388,12 +388,38 @@ describe('Transfer engine', () => {
   });
 
   describe('progressStream', () => {
-    test("emits 'progress' events", async () => {
+    test("emits 'transfer::start' and 'transfer::finish' events", async () => {
+      const source = createSource();
+      const engine = createTransferEngine(source, completeDestination, defaultOptions);
+
+      let calledStart = 0;
+      engine.progress.stream.on('transfer::start', (/* payload */) => {
+        calledStart += 1;
+      });
+
+      let calledFinish = 0;
+      engine.progress.stream.on('transfer::finish', (/* payload */) => {
+        calledFinish += 1;
+      });
+
+      // first call
+      await engine.transfer();
+      expect(calledStart).toEqual(1);
+      expect(calledFinish).toEqual(1);
+
+      // second call -- currently not supported
+      // await engine.transfer();
+      // expect(calledStart).toEqual(2);
+      // expect(calledFinish).toEqual(2);
+    });
+
+    test("emits 'stage::progress' events", async () => {
       const source = createSource();
       const engine = createTransferEngine(source, completeDestination, defaultOptions);
 
       let calls = 0;
-      engine.progress.stream.on('progress', ({ data }) => {
+      engine.progress.stream.on('stage::progress', ({ stage, data }) => {
+        expect(TRANSFER_STAGES.includes(stage)).toBe(true);
         expect(data).toMatchObject(engine.progress.data);
         calls += 1;
       });
@@ -401,14 +427,64 @@ describe('Transfer engine', () => {
       await engine.transfer();
 
       // Two values are emitted by default for each stage
+      // TODO: this is no longer true, we should be checking the sum of the various mocked streams
       const itemPerStage = 2;
 
       expect(calls).toEqual((sourceStages.length - providerStages.length) * itemPerStage);
     });
 
-    // TODO: to implement these, the mocked streams need to be improved
-    test.todo("emits 'start' events");
-    test.todo("emits 'complete' events");
+    test("emits 'stage::start' events", async () => {
+      const source = createSource();
+      const engine = createTransferEngine(source, completeDestination, defaultOptions);
+
+      let calls = 0;
+      engine.progress.stream.on('stage::start', ({ stage, data }) => {
+        expect(TRANSFER_STAGES.includes(stage)).toBe(true);
+        expect(data).toMatchObject(engine.progress.data);
+        calls += 1;
+      });
+
+      await engine.transfer();
+
+      expect(calls).toEqual(TRANSFER_STAGES.length);
+    });
+
+    test("emits 'stage::finish' events", async () => {
+      const source = createSource();
+      const engine = createTransferEngine(source, completeDestination, defaultOptions);
+
+      let calls = 0;
+      engine.progress.stream.on('stage::finish', ({ stage, data }) => {
+        expect(TRANSFER_STAGES.includes(stage)).toBe(true);
+        expect(data).toMatchObject(engine.progress.data);
+        calls += 1;
+      });
+
+      await engine.transfer();
+
+      expect(calls).toEqual(TRANSFER_STAGES.length);
+    });
+
+    test("emits 'stage::skip' events", async () => {
+      const source = createSource();
+      const engine = createTransferEngine(source, completeDestination, defaultOptions);
+
+      // delete 3 stages from source
+      delete source.streamSchemas;
+      delete source.streamLinks;
+      delete source.streamEntities;
+
+      let calls = 0;
+      engine.progress.stream.on('stage::skip', ({ stage, data }) => {
+        expect(TRANSFER_STAGES.includes(stage)).toBe(true);
+        expect(data).toMatchObject(engine.progress.data);
+        calls += 1;
+      });
+
+      await engine.transfer();
+
+      expect(calls).toEqual(3); // 3 deleted stages above
+    });
   });
 
   describe('integrity checks', () => {

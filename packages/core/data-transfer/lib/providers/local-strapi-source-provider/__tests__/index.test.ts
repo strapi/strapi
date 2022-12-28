@@ -95,6 +95,9 @@ describe('Local Strapi Source Provider', () => {
           db: {
             queryBuilder,
           },
+          getModel: jest.fn((uid) => {
+            return contentTypes[uid];
+          }),
         }),
       });
 

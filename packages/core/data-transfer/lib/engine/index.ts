@@ -1,4 +1,4 @@
-import { PassThrough, Transform, Readable, Writable } from 'stream';
+import { PassThrough, Transform, Readable, Writable, Stream } from 'stream';
 import { extname } from 'path';
 import { isEmpty, uniq } from 'lodash/fp';
 import { diff as semverDiff } from 'semver';
@@ -14,7 +14,6 @@ import type {
   ITransferEngineOptions,
   TransferProgress,
   ITransferResults,
-  Stream,
   TransferStage,
   TransferTransform,
 } from '../../types';
@@ -22,6 +21,14 @@ import type { Diff } from '../utils/json';
 
 import compareSchemas from '../strategies';
 import { filter, map } from '../utils/stream';
+
+export const TRANSFER_STAGES: ReadonlyArray<TransferStage> = Object.freeze([
+  'entities',
+  'links',
+  'assets',
+  'schemas',
+  'configuration',
+]);
 
 export const DEFAULT_VERSION_STRATEGY = 'ignore';
 export const DEFAULT_SCHEMA_STRATEGY = 'strict';
@@ -152,8 +159,12 @@ class TransferEngine<
     });
   }
 
-  #emitStageUpdate(type: 'start' | 'complete' | 'progress', transferStage: TransferStage) {
-    this.progress.stream.emit(type, {
+  #emitTransferUpdate(type: 'start' | 'finish' | 'error', payload?: object) {
+    this.progress.stream.emit(`transfer::${type}`, payload);
+  }
+
+  #emitStageUpdate(type: 'start' | 'finish' | 'progress' | 'skip', transferStage: TransferStage) {
+    this.progress.stream.emit(`stage::${type}`, {
       data: this.progress.data,
       stage: transferStage,
     });
@@ -254,6 +265,8 @@ class TransferEngine<
         })
       );
 
+      this.#emitStageUpdate('skip', stage);
+
       return;
     }
 
@@ -273,7 +286,7 @@ class TransferEngine<
       stream.pipe(destination).on('error', reject).on('close', resolve);
     });
 
-    this.#emitStageUpdate('complete', stage);
+    this.#emitStageUpdate('finish', stage);
   }
 
   async init(): Promise<void> {
@@ -336,6 +349,11 @@ class TransferEngine<
   }
 
   async transfer(): Promise<ITransferResults<S, D>> {
+    // reset data between transfers
+    this.progress.data = {};
+
+    this.#emitTransferUpdate('start');
+
     try {
       await this.bootstrap();
       await this.init();
@@ -360,7 +378,11 @@ class TransferEngine<
 
       // Gracefully close the providers
       await this.close();
+
+      this.#emitTransferUpdate('finish');
     } catch (e: unknown) {
+      this.#emitTransferUpdate('error', { error: e });
+
       // Rollback the destination provider if an exception is thrown during the transfer
       // Note: This will be configurable in the future
       await this.destinationProvider.rollback?.(e as Error);

@@ -18,7 +18,6 @@ const formatComponent = (component) => {
     category,
     apiId: modelName,
     schema: {
-      icon: _.get(info, 'icon'),
       displayName: _.get(info, 'displayName'),
       description: _.get(info, 'description', ''),
       connection,
