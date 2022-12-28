@@ -186,8 +186,6 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
           data: { filename, filepath, stats },
         });
 
-        console.log('is writing');
-
         for await (const chunk of stream) {
           await this.#dispatchTransfer('assets', {
             step: 'stream',

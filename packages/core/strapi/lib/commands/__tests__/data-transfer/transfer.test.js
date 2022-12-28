@@ -21,7 +21,7 @@ jest.mock(
 const transferCommand = require('../../transfer/transfer');
 
 const exit = jest.spyOn(process, 'exit').mockImplementation(() => {});
-jest.spyOn(console, 'error').mockImplementation(() => {});
+const logger = jest.spyOn(console, 'error').mockImplementation(() => {});
 
 jest.mock('../../transfer/utils');
 
@@ -69,10 +69,6 @@ describe('transfer', () => {
     expect(exit).toHaveBeenCalled();
   });
 
-  it('uses destination url provided by user with authentication', async () => {
-    // TODO when authentication is implemented
-  });
-
   it('uses restore as the default strategy', async () => {
     await transferCommand({ from: 'local', to: destinationUrl });
 
@@ -92,7 +88,9 @@ describe('transfer', () => {
     expect(exit).toHaveBeenCalled();
   });
 
-  it('creates the transfer engine successfully', async () => {
-    await transferCommand({ from: 'local', to: destinationUrl });
+  it('Logs an error when the source provider does not exist', async () => {
+    await transferCommand({ from: 'test', to: destinationUrl });
+
+    expect(logger).toHaveBeenCalledWith("Couldn't create providers");
   });
 });
