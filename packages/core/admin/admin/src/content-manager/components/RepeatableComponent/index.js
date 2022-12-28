@@ -54,9 +54,7 @@ const RepeatableComponent = ({
     [componentUid, getComponentLayout]
   );
 
-  const nextTempKey = useMemo(() => {
-    return getMaxTempKey(componentValue || []) + 1;
-  }, [componentValue]);
+  const nextTempKey = useMemo(() => getMaxTempKey(componentValue || []) + 1, [componentValue]);
 
   const componentErrorKeys = getComponentErrorKeys(name, formErrors);
 

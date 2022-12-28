@@ -24,7 +24,8 @@ export const findLeafByPathAndReplace = (endpath, replaceWith) => {
      * and the current path is not undefined in the accumulator
      * then we assume it's a leaf and we can replace it.
      */
-    if (endpath === curr && acc[curr] !== undefined) {
+
+    if (ind === currentArr.length - 1 && endpath === curr && acc[curr] !== undefined) {
       set(acc, curr, replaceWith);
 
       return acc;

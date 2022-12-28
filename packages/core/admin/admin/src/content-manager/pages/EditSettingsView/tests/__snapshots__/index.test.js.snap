@@ -947,7 +947,6 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                       <span
                         class="c7 c25"
                         for="select-1"
-                        id="select-1-label"
                       >
                         <div
                           class="c1 c10"
@@ -2406,7 +2405,6 @@ exports[`EditSettingsView should add field 1`] = `
                       <span
                         class="c7 c25"
                         for="select-11"
-                        id="select-11-label"
                       >
                         <div
                           class="c1 c10"
