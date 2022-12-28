@@ -58,7 +58,7 @@ module.exports = async (opts) => {
   }
   // if URL provided, set up a remote source provider
   else {
-    logger.error(`Remote Strapi destination provider not yet implemented`);
+    logger.error(`Remote Strapi source provider not yet implemented`);
     process.exit(1);
   }
 
