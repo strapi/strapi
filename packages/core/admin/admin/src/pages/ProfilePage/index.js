@@ -458,7 +458,7 @@ const ProfilePage = () => {
                                     href="https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#locales"
                                   >
                                     {formatMessage({
-                                      id: 'Settings.profile.form.section.experience.documentation',
+                                      id: 'Settings.profile.form.section.experience.here',
                                       defaultMessage: 'here',
                                     })}
                                   </DocumentationLink>
