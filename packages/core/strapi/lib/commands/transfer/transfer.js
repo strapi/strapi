@@ -55,8 +55,10 @@ module.exports = async (opts) => {
     source = createLocalStrapiSourceProvider({
       getStrapi: () => strapi,
     });
-  } else {
-    logger.error(`Cannot transfer from provider '${opts.from}'`);
+  }
+  // if URL provided, set up a remote source provider
+  else {
+    logger.error(`Remote Strapi destination provider not yet implemented`);
     process.exit(1);
   }
 
@@ -65,7 +67,9 @@ module.exports = async (opts) => {
     destination = createLocalStrapiDestinationProvider({
       getStrapi: () => strapi,
     });
-  } else {
+  }
+  // if URL provided, set up a remote destination provider
+  else {
     destination = createRemoteStrapiDestinationProvider({
       url: opts.to,
       auth: false,
