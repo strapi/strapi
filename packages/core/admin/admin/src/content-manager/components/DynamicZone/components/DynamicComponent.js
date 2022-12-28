@@ -2,7 +2,6 @@ import React, { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import get from 'lodash/get';
 
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
@@ -20,6 +19,7 @@ import ArrowUp from '@strapi/icons/ArrowUp';
 import { useContentTypeLayout } from '../../../hooks';
 import { getTrad } from '../../../utils';
 
+import { ComponentIcon } from '../../ComponentIcon';
 import FieldComponent from '../../FieldComponent';
 
 const IconButtonCustom = styled(IconButton)`
@@ -73,7 +73,7 @@ const DynamicZoneComponent = ({
 
     const mainField = get(modifiedData, [name, index, mainFieldKey]) ?? '';
 
-    const displayedValue = mainFieldKey === 'id' ? '' : mainField.trim();
+    const displayedValue = mainFieldKey === 'id' ? '' : String(mainField).trim();
 
     const mainValue = displayedValue.length > 0 ? ` - ${displayedValue}` : displayedValue;
 
@@ -111,7 +111,7 @@ const DynamicZoneComponent = ({
       <StyledBox hasRadius>
         <Accordion expanded={isOpen} onToggle={handleToggle} size="S" error={errorMessage}>
           <AccordionToggle
-            startIcon={icon && <FontAwesomeIcon icon={icon} />}
+            startIcon={<ComponentIcon showBackground={false} size="S" />}
             action={
               <Stack horizontal spacing={0} expanded={isOpen}>
                 {showDownIcon && (

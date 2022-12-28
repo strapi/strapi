@@ -460,6 +460,7 @@
   "app.utils.select-filter": "Select filter",
   "app.utils.unpublish": "Unpublish",
   "clearLabel": "Clear",
+  "selectButtonTitle": "Select",
   "coming.soon": "This content is currently under construction and will be back in a few weeks!",
   "component.Input.error.validation.integer": "The value must be an integer",
   "components.AutoReloadBlocker.description": "Run Strapi with one of the following commands:",
