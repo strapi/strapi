@@ -29,7 +29,7 @@
   "pages.PluginPage.table.icon.regenerate": "Regenerér {target}",
   "pages.PluginPage.table.icon.show": "Åben {target}",
   "pages.PluginPage.table.version": "Version",
-  "pages.SettingsPage.Button.description": "Konfigurér dokumentations pluginnet",
+  "pages.SettingsPage.header.description": "Konfigurér dokumentations pluginnet",
   "pages.SettingsPage.header.save": "Gem",
   "pages.SettingsPage.toggle.hint": "Gør dokumentationens endpoint privat",
   "pages.SettingsPage.toggle.label": "Begrænset adgang",
