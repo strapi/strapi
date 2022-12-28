@@ -1,98 +1,146 @@
 'use strict';
 
-const utils = require('../transfer/utils');
-
-const mockDataTransfer = {
-  createLocalFileDestinationProvider: jest.fn(),
-  createLocalStrapiSourceProvider: jest.fn(),
-  createTransferEngine: jest.fn().mockReturnValue({
-    transfer: jest.fn().mockReturnValue(Promise.resolve({})),
-  }),
-};
-
-jest.mock(
-  '@strapi/data-transfer',
-  () => {
-    return mockDataTransfer;
-  },
-  { virtual: true }
-);
-
-const exportCommand = require('../transfer/export');
-
-const exit = jest.spyOn(process, 'exit').mockImplementation(() => {});
-jest.spyOn(console, 'error').mockImplementation(() => {});
-
-jest.mock('../transfer/utils');
-
-const defaultFileName = 'defaultFilename';
-
 describe('export', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
+  const defaultFileName = 'defaultFilename';
+
+  // mock @strapi/data-transfer
+  const mockDataTransfer = {
+    createLocalFileDestinationProvider: jest.fn().mockReturnValue({ name: 'testDest' }),
+    createLocalStrapiSourceProvider: jest.fn().mockReturnValue({ name: 'testSource' }),
+    createTransferEngine() {
+      return {
+        transfer: jest.fn().mockReturnValue(Promise.resolve({})),
+        progress: {
+          on: jest.fn(),
+          stream: {
+            on: jest.fn(),
+          },
+        },
+        sourceProvider: { name: 'testSource' },
+        destinationProvider: { name: 'testDestination' },
+      };
+    },
+  };
+  jest.mock(
+    '@strapi/data-transfer',
+    () => {
+      return mockDataTransfer;
+    },
+    { virtual: true }
+  );
+
+  // mock utils
+  const mockUtils = {
+    createStrapiInstance() {
+      return {
+        telemetry: {
+          send: jest.fn(),
+        },
+      };
+    },
+    getDefaultExportName: jest.fn(() => defaultFileName),
+  };
+  jest.mock(
+    '../transfer/utils',
+    () => {
+      return mockUtils;
+    },
+    { virtual: true }
+  );
+
+  // other spies=
+  jest.spyOn(console, 'log').mockImplementation(() => {});
+  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+
+  // Now that everything is mocked, import export command
+  const exportCommand = require('../transfer/export');
+
+  const expectExit = async (code, fn) => {
+    const exit = jest.spyOn(process, 'exit').mockImplementation((number) => {
+      throw new Error(`process.exit: ${number}`);
+    });
+    await expect(async () => {
+      await fn();
+    }).rejects.toThrow();
+    expect(exit).toHaveBeenCalledWith(code);
+    exit.mockRestore();
+  };
+
+  beforeEach(() => {});
 
   it('uses path provided by user', async () => {
-    const filename = 'testfile';
+    const filename = 'test';
 
-    await exportCommand({ file: filename });
+    await expectExit(1, async () => {
+      await exportCommand({ file: filename });
+    });
 
     expect(mockDataTransfer.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         file: { path: filename },
       })
     );
-    expect(utils.getDefaultExportName).not.toHaveBeenCalled();
-    expect(exit).toHaveBeenCalled();
+    expect(mockUtils.getDefaultExportName).not.toHaveBeenCalled();
   });
 
   it('uses default path if not provided by user', async () => {
-    utils.getDefaultExportName.mockReturnValue(defaultFileName);
+    await expectExit(1, async () => {
+      await exportCommand({});
+    });
 
-    await exportCommand({});
-
+    expect(mockUtils.getDefaultExportName).toHaveBeenCalledTimes(1);
     expect(mockDataTransfer.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         file: { path: defaultFileName },
       })
     );
-
-    expect(utils.getDefaultExportName).toHaveBeenCalled();
-    expect(exit).toHaveBeenCalled();
   });
 
   it('encrypts the output file if specified', async () => {
     const encrypt = true;
-    await exportCommand({ encrypt });
+    await expectExit(1, async () => {
+      await exportCommand({ encrypt });
+    });
+
     expect(mockDataTransfer.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         encryption: { enabled: encrypt },
       })
     );
-    expect(exit).toHaveBeenCalled();
   });
 
   it('encrypts the output file with the given key', async () => {
     const key = 'secret-key';
     const encrypt = true;
+    await expectExit(1, async () => {
+      await exportCommand({ encrypt, key });
+    });
 
-    await exportCommand({ encrypt, key });
     expect(mockDataTransfer.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         encryption: { enabled: encrypt, key },
       })
     );
-    expect(exit).toHaveBeenCalled();
   });
 
-  it('compresses the output file if specified', async () => {
-    const compress = true;
-    await exportCommand({ compress });
+  it('uses compress option', async () => {
+    await expectExit(1, async () => {
+      await exportCommand({ compress: false });
+    });
+
     expect(mockDataTransfer.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
-        compression: { enabled: compress },
+        compression: { enabled: false },
       })
     );
-    expect(exit).toHaveBeenCalled();
+    await expectExit(1, async () => {
+      await exportCommand({ compress: true });
+    });
+    expect(mockDataTransfer.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+      expect.objectContaining({
+        compression: { enabled: true },
+      })
+    );
   });
 });
