@@ -7,6 +7,7 @@ import { Grid } from '@strapi/design-system/Grid';
 import { Box } from '@strapi/design-system/Box';
 import { Typography } from '@strapi/design-system/Typography';
 import { pxToRem } from '@strapi/helper-plugin';
+import getDefaultMessage from '../utils/getActionTypesDefaultMessages';
 import useFormatTimeStamp from '../hooks/useFormatTimeStamp';
 import ActionItem from './ActionItem';
 
@@ -42,25 +43,28 @@ const ModalDialog = ({ onToggle, data: { date, user, action } }) => {
           hasRadius
         >
           <ActionItem
-            actionLabel={{
+            actionLabel={formatMessage({
               id: 'Settings.permissions.auditLogs.action',
               defaultMessage: 'Action',
-            }}
-            actionName={action}
+            })}
+            actionName={formatMessage({
+              id: `Settings.permissions.auditLogs.${action}`,
+              defaultMessage: getDefaultMessage(action),
+            })}
           />
           <ActionItem
-            actionLabel={{
+            actionLabel={formatMessage({
               id: 'Settings.permissions.auditLogs.date',
               defaultMessage: 'Date',
-            }}
+            })}
             actionName={formattedDate}
           />
           <ActionItem
-            actionLabel={{
+            actionLabel={formatMessage({
               id: 'Settings.permissions.auditLogs.user',
               defaultMessage: 'User',
-            }}
-            actionName={user}
+            })}
+            actionName={user || '-'}
           />
         </Grid>
       </ModalBody>
