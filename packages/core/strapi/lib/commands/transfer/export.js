@@ -74,12 +74,11 @@ module.exports = async (opts) => {
     },
   });
 
-  let transferExitCode;
   logger.log(`Starting export...`);
 
   const progress = engine.progress.stream;
 
-  const telemetryPayload = (/* payload */) => {
+  const getTelemetryPayload = (/* payload */) => {
     return {
       eventProperties: {
         source: engine.sourceProvider.name,
@@ -88,18 +87,8 @@ module.exports = async (opts) => {
     };
   };
 
-  progress.on('transfer::start', async (payload) => {
-    await strapi.telemetry.send('didDEITSProcessStart', telemetryPayload(payload));
-  });
-
-  progress.on('transfer::finish', async (payload) => {
-    await strapi.telemetry.send('didDEITSProcessFinish', telemetryPayload(payload));
-    transferExitCode = 0;
-  });
-
-  progress.on('transfer::error', async (payload) => {
-    await strapi.telemetry.send('didDEITSProcessFail', telemetryPayload(payload));
-    transferExitCode = 1;
+  progress.on('transfer::start', async () => {
+    await strapi.telemetry.send('didDEITSProcessStart', getTelemetryPayload());
   });
 
   try {
@@ -117,37 +106,14 @@ module.exports = async (opts) => {
     logger.log(`${chalk.bold('Export process has been completed successfully!')}`);
     logger.log(`Export archive is in ${chalk.green(outFile)}`);
   } catch (e) {
+    await strapi.telemetry.send('didDEITSProcessFail', getTelemetryPayload());
     logger.error('Export process failed unexpectedly:', e.toString());
     process.exit(1);
   }
 
-  /*
-   * We need to wait for the telemetry to finish before exiting the process.
-   * The order of execution for the overall export function is:
-   * - create providers and engine
-   * - create progress callbacks
-   * - await the engine transfer
-   *   - having async calls inside, it allows the transfer::start to process
-   * - the code block including the table printing executes
-   * - *** any async code (for example, the fs.pathExists) after engine.transfer will execute next tick, therefore:
-   * - the progress callbacks execute
-   *
-   * Because of that, we have to wait until  the progress callbacks have executed, but can't allow them to exit by themselves.
-   * Instead we have to wait for them to tell us it's safe to exit
-   */
-  const waitForExitCode = async (maxWait) => {
-    const startTime = Date.now();
-    while (Date.now() - startTime < maxWait) {
-      if (transferExitCode !== undefined) {
-        process.exit(transferExitCode);
-      }
-      await new Promise((resolve) => {
-        setTimeout(resolve, 50);
-      });
-    }
-    process.exit(0);
-  };
-  waitForExitCode(5000);
+  // Note: Telemetry can't be sent in a finish event, because it runs async after this block but we can't await it, so if process.exit is used it won't send
+  await strapi.telemetry.send('didDEITSProcessFinish', getTelemetryPayload());
+  process.exit(0);
 };
 
 /**
