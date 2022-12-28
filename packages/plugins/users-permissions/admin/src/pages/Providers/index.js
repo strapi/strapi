@@ -14,7 +14,6 @@ import {
 } from '@strapi/helper-plugin';
 import has from 'lodash/has';
 import upperFirst from 'lodash/upperFirst';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { HeaderLayout, Layout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
@@ -163,16 +162,9 @@ export const ProvidersPage = () => {
           <LoadingIndicatorPage />
         ) : (
           <ContentLayout>
-            <Table colCount={4} rowCount={rowCount + 1}>
+            <Table colCount={3} rowCount={rowCount + 1}>
               <Thead>
                 <Tr>
-                  <Th>
-                    <Typography variant="sigma" textColor="neutral600">
-                      <VisuallyHidden>
-                        {formatMessage({ id: getTrad('Providers.image'), defaultMessage: 'Image' })}
-                      </VisuallyHidden>
-                    </Typography>
-                  </Th>
                   <Th>
                     <Typography variant="sigma" textColor="neutral600">
                       {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
@@ -204,9 +196,6 @@ export const ProvidersPage = () => {
                       condition: canUpdate,
                     })}
                   >
-                    <Td width="">
-                      <FontAwesomeIcon icon={provider.icon} />
-                    </Td>
                     <Td width="45%">
                       <Typography fontWeight="semiBold" textColor="neutral800">
                         {provider.name}

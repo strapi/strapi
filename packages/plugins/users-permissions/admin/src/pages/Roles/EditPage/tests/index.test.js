@@ -532,6 +532,97 @@ describe('Admin | containers | RoleEditPage', () => {
         fill: #666687;
       }
 
+      .c4 {
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+        position: relative;
+        outline: none;
+      }
+
+      .c4 svg path {
+        fill: #4945ff;
+      }
+
+      .c4 svg {
+        font-size: 0.625rem;
+      }
+
+      .c4:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c4:focus-visible {
+        outline: none;
+      }
+
+      .c4:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c6 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+      }
+
+      .c24 {
+        display: grid;
+        grid-template-columns: repeat(12,1fr);
+        gap: 16px;
+      }
+
+      .c34 {
+        display: grid;
+        grid-template-columns: repeat(12,1fr);
+        gap: 0px;
+      }
+
+      .c25 {
+        grid-column: span 6;
+        max-width: 100%;
+      }
+
+      .c35 {
+        grid-column: span 7;
+        max-width: 100%;
+      }
+
+      .c55 {
+        grid-column: span 5;
+        max-width: 100%;
+      }
+
+      .c0:focus-visible {
+        outline: none;
+      }
+
       .c31 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
@@ -625,6 +716,26 @@ describe('Admin | containers | RoleEditPage', () => {
         opacity: 1;
       }
 
+      .c41 {
+        border: 1px solid #f6f6f9;
+      }
+
+      .c41:hover:not([aria-disabled='true']) {
+        border: 1px solid #4945ff;
+      }
+
+      .c41:hover:not([aria-disabled='true']) .c7 {
+        color: #4945ff;
+      }
+
+      .c41:hover:not([aria-disabled='true']) > .c9 {
+        background: #f0f0ff;
+      }
+
+      .c41:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+        background: #d9d8ff;
+      }
+
       .c47 {
         background: transparent;
         border: none;
@@ -680,117 +791,6 @@ describe('Admin | containers | RoleEditPage', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
-      }
-
-      .c4 {
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-text-decoration: none;
-        text-decoration: none;
-        position: relative;
-        outline: none;
-      }
-
-      .c4 svg path {
-        fill: #4945ff;
-      }
-
-      .c4 svg {
-        font-size: 0.625rem;
-      }
-
-      .c4:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c4:focus-visible {
-        outline: none;
-      }
-
-      .c4:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c6 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-      }
-
-      .c24 {
-        display: grid;
-        grid-template-columns: repeat(12,1fr);
-        gap: 16px;
-      }
-
-      .c34 {
-        display: grid;
-        grid-template-columns: repeat(12,1fr);
-        gap: 0px;
-      }
-
-      .c25 {
-        grid-column: span 6;
-        max-width: 100%;
-      }
-
-      .c35 {
-        grid-column: span 7;
-        max-width: 100%;
-      }
-
-      .c55 {
-        grid-column: span 5;
-        max-width: 100%;
-      }
-
-      .c0:focus-visible {
-        outline: none;
-      }
-
-      .c41 {
-        border: 1px solid #f6f6f9;
-      }
-
-      .c41:hover:not([aria-disabled='true']) {
-        border: 1px solid #4945ff;
-      }
-
-      .c41:hover:not([aria-disabled='true']) .c7 {
-        color: #4945ff;
-      }
-
-      .c41:hover:not([aria-disabled='true']) > .c9 {
-        background: #f0f0ff;
-      }
-
-      .c41:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
-        background: #d9d8ff;
       }
 
       .c48 {
@@ -1002,6 +1002,7 @@ describe('Admin | containers | RoleEditPage', () => {
                                 <input
                                   aria-disabled="false"
                                   aria-invalid="false"
+                                  aria-required="false"
                                   class="c29"
                                   id="textinput-1"
                                   name="name"
@@ -1046,6 +1047,7 @@ describe('Admin | containers | RoleEditPage', () => {
                               >
                                 <textarea
                                   aria-invalid="false"
+                                  aria-required="false"
                                   class="c32"
                                   id="textarea-2"
                                   name="description"

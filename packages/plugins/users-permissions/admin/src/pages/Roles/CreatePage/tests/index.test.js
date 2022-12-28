@@ -652,6 +652,26 @@ describe('Admin | containers | RoleCreatePage', () => {
         fill: #666687;
       }
 
+      .c37 {
+        border: 1px solid #f6f6f9;
+      }
+
+      .c37:hover:not([aria-disabled='true']) {
+        border: 1px solid #4945ff;
+      }
+
+      .c37:hover:not([aria-disabled='true']) .c6 {
+        color: #4945ff;
+      }
+
+      .c37:hover:not([aria-disabled='true']) > .c3 {
+        background: #f0f0ff;
+      }
+
+      .c37:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+        background: #d9d8ff;
+      }
+
       .c43 {
         background: transparent;
         border: none;
@@ -707,26 +727,6 @@ describe('Admin | containers | RoleCreatePage', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
-      }
-
-      .c37 {
-        border: 1px solid #f6f6f9;
-      }
-
-      .c37:hover:not([aria-disabled='true']) {
-        border: 1px solid #4945ff;
-      }
-
-      .c37:hover:not([aria-disabled='true']) .c6 {
-        color: #4945ff;
-      }
-
-      .c37:hover:not([aria-disabled='true']) > .c3 {
-        background: #f0f0ff;
-      }
-
-      .c37:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
-        background: #d9d8ff;
       }
 
       .c44 {
@@ -906,6 +906,7 @@ describe('Admin | containers | RoleCreatePage', () => {
                                 <input
                                   aria-disabled="false"
                                   aria-invalid="false"
+                                  aria-required="false"
                                   class="c25"
                                   id="textinput-1"
                                   name="name"
@@ -950,6 +951,7 @@ describe('Admin | containers | RoleCreatePage', () => {
                               >
                                 <textarea
                                   aria-invalid="false"
+                                  aria-required="false"
                                   class="c28"
                                   id="textarea-2"
                                   name="description"
