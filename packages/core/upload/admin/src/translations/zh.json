@@ -87,6 +87,7 @@
   "modal.selected-list.sub-header-subtitle": "於此欄位拖曳檔案排序清單",
   "modal.upload-list.footer.button": "上傳 {number, plural, one {# 個} other {# 個}}素材至媒體庫",
   "modal.upload-list.sub-header-subtitle": "上傳到媒體庫前管理你的素材",
+  "modal.upload-list.sub-header.add-folder": "新增資料夾",
   "modal.upload-list.sub-header.button": "新增更多素材",
   "modal.upload.cancelled": "上傳遭手動中斷。",
   "page.title": "設定 - 媒體庫",
