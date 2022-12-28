@@ -2,7 +2,7 @@
 
 const path = require('path');
 
-const { map, get, values, isEqual, sumBy, sum } = require('lodash/fp');
+const { map, values, sumBy, pipe, flatMap, propEq } = require('lodash/fp');
 const execa = require('execa');
 const _ = require('lodash');
 const { exists } = require('fs-extra');
@@ -100,12 +100,13 @@ module.exports = {
 
     const numberOfContentTypes = _.size(strapi.contentTypes);
     const numberOfComponents = _.size(strapi.components);
-    const numberOfDynamicZones = sum(
-      map(
-        (ct) => sumBy(isEqual('dynamiczone'), map(get('type'), values(get('attributes', ct)))),
-        strapi.contentTypes
-      )
-    );
+
+    const getNumberOfDynamicZones = () =>
+      pipe(
+        map('attributes'),
+        flatMap(values),
+        sumBy(propEq('type', 'dynamiczone'))
+      )(strapi.contentTypes);
 
     return {
       data: {
@@ -114,7 +115,7 @@ module.exports = {
         isHostedOnStrapiCloud,
         numberOfContentTypes,
         numberOfComponents,
-        numberOfDynamicZones,
+        numberOfDynamicZones: getNumberOfDynamicZones(),
       },
     };
   },
