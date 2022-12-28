@@ -45,6 +45,11 @@ module.exports = async (opts) => {
   let source;
   let destination;
 
+  if (!opts.from && !opts.to) {
+    logger.error('At least one source (from) or destination (to) option must be provided');
+    process.exit(1);
+  }
+
   // if no URL provided, use local Strapi
   if (!opts.from) {
     source = createLocalStrapiSourceProvider({
@@ -57,12 +62,6 @@ module.exports = async (opts) => {
 
   // if no URL provided, use local Strapi
   if (!opts.to) {
-    // at least one of the two must be remote, however
-    if (!opts.from) {
-      logger.error(`At least 'to' or 'from' must be provided.`);
-      process.exit(1);
-    }
-
     destination = createLocalStrapiDestinationProvider({
       getStrapi: () => strapi,
     });
