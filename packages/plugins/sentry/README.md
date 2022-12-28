@@ -100,7 +100,8 @@ const sentryInstance = strapi
 
 ## Disabling for non-production environments
 
-The plugin will only send errors to Sentry when the `dsn` config property is set. If the `dsn` property is set to a nil value, the Sentry plugin will still be available to use in the running Strapi instance, but the service it will not actually send errors to Sentry.  
+If the `dsn` property is set to a nil value (`null` or `undefined`) while `enabled` is true, the Sentry plugin will be available to use in the running Strapi instance, but the service will not actually send errors to Sentry. That allows you to write code that runs on every environment without additional checks, but only send errors to Sentry in production.
+  
 When you start Strapi with a nil `dsn` config property, the plugin will print a warning:  
 `info: @strapi/plugin-sentry is disabled because no Sentry DSN was provided`
 
