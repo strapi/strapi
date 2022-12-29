@@ -11,7 +11,7 @@ import getDefaultMessage from '../utils/getActionTypesDefaultMessages';
 import useFormatTimeStamp from '../hooks/useFormatTimeStamp';
 import ActionItem from './ActionItem';
 
-const ModalDialog = ({ onToggle, data: { date, user, action } }) => {
+const ModalDialog = ({ onToggle, data: { date, fullname: user, action } }) => {
   const { formatMessage } = useIntl();
   const formatTimeStamp = useFormatTimeStamp();
   const formattedDate = formatTimeStamp(date);

@@ -21,17 +21,17 @@ const tableHeaders = [
       sortable: true,
     },
   },
-  // {
-  //   key: 'user',
-  //   name: 'user',
-  //   metadatas: {
-  //     label: {
-  //       id: 'Settings.permissions.auditLogs.user',
-  //       defaultMessage: 'User',
-  //     },
-  //     sortable: true,
-  //   },
-  // },
+  {
+    key: 'fullname',
+    name: 'fullname',
+    metadatas: {
+      label: {
+        id: 'Settings.permissions.auditLogs.user',
+        defaultMessage: 'User',
+      },
+      sortable: true,
+    },
+  },
 ];
 
 export default tableHeaders;
