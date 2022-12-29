@@ -77,22 +77,40 @@ module.exports = async (opts) => {
       ],
     },
   };
+
   const engine = createTransferEngine(source, destination, engineOptions);
 
-  try {
-    logger.info('Starting import...');
+  const progress = engine.progress.stream;
+  const getTelemetryPayload = () => {
+    return {
+      eventProperties: {
+        source: engine.sourceProvider.name,
+        destination: engine.destinationProvider.name,
+      },
+    };
+  };
 
+  progress.on('transfer::start', async () => {
+    logger.info('Starting import...');
+    await strapiInstance.telemetry.send('didDEITSProcessStart', getTelemetryPayload());
+  });
+
+  try {
     const results = await engine.transfer();
     const table = buildTransferTable(results.engine);
     logger.info(table.toString());
 
     logger.info('Import process has been completed successfully!');
-    process.exit(0);
   } catch (e) {
+    await strapiInstance.telemetry.send('didDEITSProcessFail', getTelemetryPayload());
     logger.error('Import process failed unexpectedly:');
     logger.error(e);
     process.exit(1);
   }
+
+  // Note: Telemetry can't be sent in a finish event, because it runs async after this block but we can't await it, so if process.exit is used it won't send
+  await strapi.telemetry.send('didDEITSProcessFinish', getTelemetryPayload());
+  process.exit(0);
 };
 
 /**

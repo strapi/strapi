@@ -74,9 +74,23 @@ module.exports = async (opts) => {
     },
   });
 
-  try {
-    logger.log(`Starting export...`);
+  const progress = engine.progress.stream;
 
+  const getTelemetryPayload = (/* payload */) => {
+    return {
+      eventProperties: {
+        source: engine.sourceProvider.name,
+        destination: engine.destinationProvider.name,
+      },
+    };
+  };
+
+  progress.on('transfer::start', async () => {
+    logger.log(`Starting export...`);
+    await strapi.telemetry.send('didDEITSProcessStart', getTelemetryPayload());
+  });
+
+  try {
     const results = await engine.transfer();
     const outFile = results.destination.file.path;
 
@@ -90,11 +104,15 @@ module.exports = async (opts) => {
 
     logger.log(`${chalk.bold('Export process has been completed successfully!')}`);
     logger.log(`Export archive is in ${chalk.green(outFile)}`);
-    process.exit(0);
   } catch (e) {
+    await strapi.telemetry.send('didDEITSProcessFail', getTelemetryPayload());
     logger.error('Export process failed unexpectedly:', e.toString());
     process.exit(1);
   }
+
+  // Note: Telemetry can't be sent in a finish event, because it runs async after this block but we can't await it, so if process.exit is used it won't send
+  await strapi.telemetry.send('didDEITSProcessFinish', getTelemetryPayload());
+  process.exit(0);
 };
 
 /**
