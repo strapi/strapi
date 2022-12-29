@@ -1,55 +1,83 @@
+const actionTypes = {
+  ENTRY_CREATE: 'entry.create',
+  ENTRY_UPDATE: 'entry.update',
+  ENTRY_DELETE: 'entry.delete',
+  ENTRY_PUBLISH: 'entry.publish',
+  ENTRY_UNPUBLISH: 'entry.unpublish',
+  MEDIA_CREATE: 'media.create',
+  MEDIA_UPDATE: 'media.update',
+  MEDIA_DELETE: 'media.delete',
+  USER_CREATE: 'user.create',
+  USER_UPDATE: 'user.update',
+  USER_DELETE: 'user.delete',
+  ADMIN_LOGIN: 'admin.auth.success',
+  ADMIN_LOGOUT: 'admin.logout',
+  CONTENT_TYPE_CREATE: 'content-type.create',
+  CONTENT_TYP_UPDATE: 'content-type.update',
+  CONTENT_TYP_DELETE: 'content-type.delete',
+  COMPONENT_CREATE: 'component.create',
+  COMPONENT_UPDATE: 'component.update',
+  COMPONENT_DELETE: 'component.delete',
+  ROLE_CREATE: 'role.create',
+  ROLE_UPDATE: 'role.update',
+  ROLE_DELETE: 'role.delete',
+  PERMISSION_CREATE: 'permission.create',
+  PERMISSION_UPDATE: 'permission.update',
+  PERMISSION_DELETE: 'permission.delete',
+};
+
 const getDefaultMessage = (value) => {
   switch (value) {
-    case 'entry.create':
+    case actionTypes.ENTRY_CREATE:
       return 'Create entry';
-    case 'entry.update':
+    case actionTypes.ENTRY_UPDATE:
       return 'Update entry';
-    case 'entry.delete':
+    case actionTypes.ENTRY_DELETE:
       return 'Delete entry';
-    case 'entry.publish':
+    case actionTypes.ENTRY_PUBLISH:
       return 'Publish entry';
-    case 'entry.unpublish':
+    case actionTypes.ENTRY_UNPUBLISH:
       return 'Unpublish entry';
-    case 'media.create':
+    case actionTypes.MEDIA_CREATE:
       return 'Create media';
-    case 'media.update':
+    case actionTypes.MEDIA_UPDATE:
       return 'Update media';
-    case 'media.delete':
+    case actionTypes.MEDIA_DELETE:
       return 'Delete media';
-    case 'user.create':
+    case actionTypes.USER_CREATE:
       return 'Create user';
-    case 'user.update':
+    case actionTypes.USER_UPDATE:
       return 'Update user';
-    case 'user.delete':
+    case actionTypes.USER_DELETE:
       return 'Delete user';
-    case 'admin.auth.success':
+    case actionTypes.ADMIN_LOGIN:
       return 'Admin login';
-    case 'admin.logout':
+    case actionTypes.ADMIN_LOGOUT:
       return 'Admin logout';
-    case 'content-type.create':
+    case actionTypes.CONTENT_TYPE_CREATE:
       return 'Create content type';
-    case 'content-type.update':
+    case actionTypes.CONTENT_TYP_UPDATE:
       return 'Update content type';
-    case 'content-type.delete':
+    case actionTypes.CONTENT_TYP_DELETE:
       return 'Delete content type';
-    case 'component.create':
+    case actionTypes.COMPONENT_CREATE:
       return 'Create component';
-    case 'component.update':
+    case actionTypes.COMPONENT_UPDATE:
       return 'Update component';
-    case 'component.delete':
+    case actionTypes.COMPONENT_DELETE:
       return 'Delete component';
-    case 'role.create':
+    case actionTypes.ROLE_CREATE:
       return 'Create role';
-    case 'role.delete':
-      return 'Delete role';
-    case 'role.update':
+    case actionTypes.ROLE_UPDATE:
       return 'Update role';
-    case 'permission.create':
+    case actionTypes.ROLE_DELETE:
+      return 'Delete role';
+    case actionTypes.PERMISSION_CREATE:
       return 'Create permission';
-    case 'permission.delete':
-      return 'Delete permission';
-    case 'permission.update':
+    case actionTypes.PERMISSION_UPDATE:
       return 'Update permission';
+    case actionTypes.PERMISSION_DELETE:
+      return 'Delete permission';
     default:
       return '-';
   }
