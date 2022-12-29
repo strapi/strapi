@@ -472,6 +472,22 @@ describe('Admin | UseCasePage', () => {
         fill: #ffffff;
       }
 
+      .c8 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c8 svg {
+        height: 4px;
+        width: 6px;
+      }
+
       .c25 {
         position: absolute;
         left: 0;
@@ -545,10 +561,6 @@ describe('Admin | UseCasePage', () => {
         width: 100%;
       }
 
-      .c10:focus-visible {
-        outline: none;
-      }
-
       .c37 {
         background: transparent;
         border: none;
@@ -606,24 +618,12 @@ describe('Admin | UseCasePage', () => {
         border: 2px solid #4945ff;
       }
 
+      .c10:focus-visible {
+        outline: none;
+      }
+
       .c15 {
         height: 4.5rem;
-      }
-
-      .c8 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c8 svg {
-        height: 4px;
-        width: 6px;
       }
 
       .c12 {
@@ -732,6 +732,7 @@ describe('Admin | UseCasePage', () => {
                         <span
                           class="c5 c22"
                           for="usecase"
+                          id="usecase-label"
                         >
                           <div
                             class="c0 c23"
