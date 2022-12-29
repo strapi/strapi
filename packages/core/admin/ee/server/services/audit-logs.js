@@ -104,7 +104,7 @@ const createAuditLogsService = (strapi) => {
       const { user, ...rest } = result;
       return {
         ...rest,
-        fullname: user ? `${user.firstname} ${user.lastname}` : null,
+        fullname: user ? getFullName(user) : null,
       };
     },
 
