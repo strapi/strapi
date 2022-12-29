@@ -41,7 +41,7 @@ describe('export', () => {
     getDefaultExportName: jest.fn(() => defaultFileName),
   };
   jest.mock(
-    '../transfer/utils',
+    '../../transfer/utils',
     () => {
       return mockUtils;
     },
