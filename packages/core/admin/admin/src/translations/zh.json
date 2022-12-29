@@ -786,6 +786,13 @@
   "notification.warning.title": "警告:",
   "notification.warning.404": "404 - 找不到",
   "or": "或",
+  "relation.loadMore": "載入更多",
+  "relation.disconnect": "刪除",
+  "relation.isLoading": "關聯載入中",
+  "relation.notAvailable": "沒有可用關聯",
+  "relation.add": "加入關聯",
+  "relation.publicationState.draft": "草稿",
+  "relation.publicationState.published": "已發布",
   "request.error.model.unknown": "不存在的資料",
   "skipToContent": "跳過到內容",
   "submit": "送出"
