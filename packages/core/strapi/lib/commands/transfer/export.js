@@ -74,8 +74,6 @@ module.exports = async (opts) => {
     },
   });
 
-  logger.log(`Starting export...`);
-
   const progress = engine.progress.stream;
 
   const getTelemetryPayload = (/* payload */) => {
@@ -88,6 +86,7 @@ module.exports = async (opts) => {
   };
 
   progress.on('transfer::start', async () => {
+    logger.log(`Starting export...`);
     await strapi.telemetry.send('didDEITSProcessStart', getTelemetryPayload());
   });
 
