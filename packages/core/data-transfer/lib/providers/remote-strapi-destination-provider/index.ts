@@ -172,7 +172,6 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     return new Writable({
       objectMode: true,
       final: async (callback) => {
-        console.log('FINAL');
         const e = await this.#dispatchTransfer('assets', null);
         callback(e);
       },

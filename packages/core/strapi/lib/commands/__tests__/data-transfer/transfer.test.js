@@ -44,9 +44,7 @@ describe('transfer', () => {
     expect(exit).toHaveBeenCalled();
   });
 
-  it('uses destination url provided by user with authentication', async () => {
-    // TODO when authentication is implemented
-  });
+  it.todo('uses destination url provided by user with authentication');
 
   it('uses restore as the default strategy', async () => {
     await transferCommand({ from: 'local', to: destinationUrl });
