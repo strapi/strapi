@@ -791,6 +791,13 @@
   "notification.warning.title": "Warning:",
   "notification.warning.404": "404 - Not found",
   "or": "OR",
+  "relation.loadMore": "Load More",
+  "relation.disconnect": "Remove",
+  "relation.isLoading": "Relations are loading",
+  "relation.notAvailable": "No relations available",
+  "relation.add": "Add relation",
+  "relation.publicationState.draft": "Draft",
+  "relation.publicationState.published": "Published",
   "request.error.model.unknown": "This model doesn't exist",
   "skipToContent": "Skip to content",
   "submit": "Submit"
