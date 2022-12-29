@@ -79,7 +79,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
     expect(subTitle).toBeInTheDocument();
   });
 
-  it('should show a list of audit logs with right count', async () => {
+  it('should show a list of audit logs with all actions', async () => {
     render(App);
 
     await waitFor(() => {
