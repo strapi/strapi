@@ -30,6 +30,8 @@ const defaultEvents = [
   'permission.delete',
 ];
 
+const getFullName = (user) => `${user.firstname} ${user.lastname}`;
+
 const getEventMap = (defaultEvents) => {
   const getDefaultPayload = (...args) => args[0];
 
@@ -82,7 +84,7 @@ const createAuditLogsService = (strapi) => {
         const { user, ...rest } = result;
         return {
           ...rest,
-          fullname: user ? `${user.firstname} ${user.lastname}` : null,
+          fullname: user ? getFullName(user) : null,
         };
       });
 
