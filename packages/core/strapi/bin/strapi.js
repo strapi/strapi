@@ -14,7 +14,13 @@ const inquirer = require('inquirer');
 const program = new Command();
 
 const packageJSON = require('../package.json');
-const { promptEncryptionKey, confirmMessage } = require('../lib/commands/utils/commander');
+const {
+  promptEncryptionKey,
+  confirmMessage,
+  ifOptions,
+  exitWith,
+  getAuthResolverFor,
+} = require('../lib/commands/utils/commander');
 
 const checkCwdIsStrapiApp = (name) => {
   const logErrorAndExit = () => {
@@ -264,13 +270,60 @@ program
   .description('Transfer data from one source to another')
   .addOption(new Option('--from <sourceURL>', `URL of remote Strapi instance to get data from.`))
   .addOption(new Option('--to <destinationURL>', `URL of remote Strapi instance to send data to`))
-  .hook('preAction', async (thisCommand) => {
-    const opts = thisCommand.opts();
-
-    if (!opts.from && !opts.to) {
-      console.error('At least one source (from) or destination (to) option must be provided');
-      process.exit(1);
-    }
+  // Hidden (undocumented) options to define keys for
+  .addOption(
+    new Option('--fromToken <bearerToken>', `API or Bearer token to use with source`).hideHelp()
+  )
+  .addOption(
+    new Option('--toToken <bearerToken>', `API or Bearer token to use with destination`).hideHelp()
+  )
+  // -- Email
+  .addOption(
+    new Option('--fromEmail <email>', `Email address to use with source authorization`).hideHelp()
+  )
+  .addOption(
+    new Option(
+      '--toEmail <email>',
+      `Email address to use with destination authorization`
+    ).hideHelp()
+  )
+  // -- Password
+  .addOption(
+    new Option('--fromPassword <password>', `Password to use with source authorization`).hideHelp()
+  )
+  .addOption(
+    new Option(
+      '--toPassword <password>',
+      `Password to use with destination authorization`
+    ).hideHelp()
+  )
+  // Hooks
+  .hook(
+    'preAction',
+    ifOptions(
+      (opts) => !opts.from && !opts.to,
+      () => exitWith(1, 'At least one source (from) or destination (to) option must be provided')
+    )
+  )
+  .hook(
+    'preAction',
+    ifOptions(
+      (opts) =>
+        opts.from?.length &&
+        !(opts.fromToken || (opts.fromEmail?.length && opts.fromPassword?.length)),
+      getAuthResolverFor('from')
+    )
+  )
+  .hook(
+    'preAction',
+    ifOptions(
+      (opts) =>
+        opts.to?.length && !(opts.toToken || (opts.toEmail?.length && opts.toPassword?.length)),
+      getAuthResolverFor('to')
+    )
+  )
+  .hook('preAction', (command) => {
+    console.log(`Command opts:${JSON.stringify(command.opts())}`);
   })
   .allowExcessArguments(false)
   .action(getLocalScript('transfer/transfer'));

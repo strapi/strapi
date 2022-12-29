@@ -1,6 +1,10 @@
 'use strict';
 
+const chalk = require('chalk');
 const inquirer = require('inquirer');
+const { isArray } = require('lodash');
+const { isString } = require('lodash/fp');
+const axios = require('axios');
 
 /**
  * argsParser: Parse a comma-delimited string as an array
@@ -48,6 +52,76 @@ const promptEncryptionKey = async (thisCommand) => {
 };
 
 /**
+ * prompt for auth information for Strapi
+ */
+const promptAuth = async (name) => {
+  const answers = await inquirer.prompt([
+    {
+      type: 'email', // must match the email field from the admin API /login route
+      message: `Please enter the email address for the admin account at ${name}`,
+      name: `email`,
+      validate(email) {
+        if (email.length > 0) return true;
+
+        return 'Email must not be blank';
+      },
+    },
+    {
+      type: 'password', // must match the password field from the admin API /login route
+      message: `Please enter the password for the admin account at ${name}`,
+      name: `password`,
+      validate(pass) {
+        if (pass.length > 0) return true;
+
+        return 'Password must not be blank';
+      },
+    },
+  ]);
+  return answers;
+};
+
+/**
+ * given a field containing a url, prompt for email/password and use it to attempt to get a bearer token from the remote content api, and add it to command opts as {field}Token
+ */
+const getAuthResolverFor = (field) => {
+  return async (command) => {
+    const opts = command.opts();
+    if (!opts[field]) {
+      return;
+    }
+
+    const login = await promptAuth(opts[field]);
+    console.log('got ', login);
+    try {
+      const token = await resolveAuth(login, opts[field]);
+      opts[`${field}Token`] = token;
+    } catch (e) {
+      console.log('error', e);
+      throw e;
+    }
+  };
+};
+
+/**
+ * call the admin api login with login info
+ */
+const resolveAuth = async (login, url) => {
+  try {
+    const res = await axios.post(`${url}/login`, login, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (res.data?.data?.token) {
+      return res.data.data.token;
+    }
+
+    // TODO: read actual response to provide reason (site couldn't be reached, login didn't work, etc)
+    throw new Error('Could not authenticate');
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+/**
  * hook: require a confirmation message to be accepted
  */
 const confirmMessage = (message) => {
@@ -66,8 +140,47 @@ const confirmMessage = (message) => {
   };
 };
 
+const ifOptions = (conditionCallback, isMetCallback = () => {}, isNotMetCallback = () => {}) => {
+  return async (command) => {
+    const opts = command.opts();
+    if (await conditionCallback(opts)) {
+      await isMetCallback(command);
+    } else {
+      await isNotMetCallback(command);
+    }
+  };
+};
+
+/**
+ *
+ * Display message(s) to console and then call process.exit with code.
+ * If code is zero, console.log and green text is used for messages, otherwise console.error and red text.
+ *
+ * @param {number} code Code to exit process with
+ * @param {string | Array} message Message(s) to display before exiting
+ */
+const exitWith = (code, message = undefined) => {
+  const logger = (message) => {
+    if (code === 0) {
+      console.log(chalk.green(message));
+    } else {
+      console.log(chalk.red(message));
+    }
+  };
+
+  if (isString(message)) {
+    logger(message);
+  } else if (isArray(message)) {
+    message.forEach((msg) => logger(msg));
+  }
+  process.exit(code);
+};
+
 module.exports = {
   parseInputList,
   promptEncryptionKey,
   confirmMessage,
+  getAuthResolverFor,
+  ifOptions,
+  exitWith,
 };

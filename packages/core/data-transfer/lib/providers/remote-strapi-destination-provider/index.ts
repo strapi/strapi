@@ -19,16 +19,10 @@ interface ITokenAuth {
   token: string;
 }
 
-interface ICredentialsAuth {
-  type: 'credentials';
-  email: string;
-  password: string;
-}
-
 interface IRemoteStrapiDestinationProvider
   extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
   url: string;
-  auth?: ITokenAuth | ICredentialsAuth;
+  auth?: ITokenAuth;
 }
 
 type Actions = 'bootstrap' | 'close' | 'beforeTransfer' | 'getMetadata' | 'getSchemas';
@@ -118,7 +112,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     else if (auth.type === 'token') {
       const headers = { Authentication: `Bearer ${auth.token}` };
 
-      ws = new WebSocket(this.options.url, { headers });
+      ws = new WebSocket(`${this.options.url}/transfer`, { headers });
     }
 
     // Invalid auth method provided

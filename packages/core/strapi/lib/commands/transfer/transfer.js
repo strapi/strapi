@@ -22,8 +22,10 @@ const logger = console;
 /**
  * @typedef ImportCommandOptions Options given to the CLI import command
  *
- * @property {string} [to] The destination provider to use ("local" or the url of a remote Strapi)
- * @property {string} [from] The source provider to use ("local" or the url of a remote Strapi)
+ * @property {string|undefined} [to] The url of the remote destination provider
+ * @property {string|undefined} [toToken] The bearer token to use at destination
+ * @property {string|undefined} [from] The url of the remote source provider
+ * @property {string|undefined} [fromToken] The bearer token to use at source
  */
 
 /**
@@ -72,7 +74,7 @@ module.exports = async (opts) => {
   else {
     destination = createRemoteStrapiDestinationProvider({
       url: opts.to,
-      auth: false,
+      auth: { type: 'token', token: opts.toToken },
       strategy: 'restore',
       restore: {
         entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },
