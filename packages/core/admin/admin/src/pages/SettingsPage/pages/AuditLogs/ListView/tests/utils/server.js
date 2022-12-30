@@ -12,13 +12,21 @@ const handlers = [
             id: 1,
             action: 'role.create',
             date: '2022-12-27T10:02:06.598Z',
-            fullname: 'test user',
+            user: {
+              id: 1,
+              fullname: 'test user',
+              email: 'test@test.com',
+            },
           },
           {
             id: 2,
             action: 'role.delete',
             date: '2022-12-27T16:28:08.977Z',
-            fullname: 'test user',
+            user: {
+              id: 1,
+              fullname: 'test user',
+              email: 'test@test.com',
+            },
           },
           {
             id: 3,
@@ -30,7 +38,11 @@ const handlers = [
             id: 4,
             action: 'admin.logout',
             date: '2022-12-27T17:51:04.146Z',
-            fullname: 'test user',
+            user: {
+              id: 1,
+              fullname: 'test user',
+              email: 'test@test.com',
+            },
           },
         ],
       })

@@ -22,8 +22,8 @@ const tableHeaders = [
     },
   },
   {
-    key: 'fullname',
-    name: 'fullname',
+    key: 'user',
+    name: 'user',
     metadatas: {
       label: {
         id: 'Settings.permissions.auditLogs.user',
@@ -31,6 +31,7 @@ const tableHeaders = [
       },
       sortable: true,
     },
+    cellFormatter: (user) => (user ? user.fullname : ''),
   },
 ];
 

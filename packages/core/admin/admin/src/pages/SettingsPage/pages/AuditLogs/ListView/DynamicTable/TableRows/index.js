@@ -22,11 +22,14 @@ const TableRows = ({ headers, rows, onModalToggle }) => {
               fn: () => onModalToggle(data.id),
             })}
           >
-            {headers.map(({ key, name }) => {
+            {headers.map(({ key, name, cellFormatter }) => {
               return (
                 <Td key={key}>
                   <Typography textColor="neutral800">
-                    <CellValue type={key} value={data[name] || ''} />
+                    <CellValue
+                      type={key}
+                      value={cellFormatter ? cellFormatter(data[name]) : data[name]}
+                    />
                   </Typography>
                 </Td>
               );
