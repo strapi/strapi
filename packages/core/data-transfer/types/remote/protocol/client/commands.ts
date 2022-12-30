@@ -1,8 +1,6 @@
 import { ILocalStrapiDestinationProviderOptions } from '../../../../lib';
 
-export type CommandType = 'command';
-
-export type CommandMessage = { type: CommandType } & (InitCommand | EndCommand);
+export type CommandMessage = { type: 'command' } & (InitCommand | EndCommand | StatusCommand);
 
 export type InitCommand = CreateCommand<
   'init',
