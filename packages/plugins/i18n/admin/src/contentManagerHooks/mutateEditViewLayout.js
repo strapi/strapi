@@ -5,38 +5,24 @@ import StrikedWorld from '@strapi/icons/EarthStriked';
 import LabelAction from '../components/LabelAction';
 import { getTrad } from '../utils';
 
-const enhanceRelationLayout = (layout, locale) =>
-  layout.map((current) => {
-    const labelActionProps = {
-      title: {
-        id: getTrad('Field.localized'),
-        defaultMessage: 'This value is unique for the selected locale',
-      },
-      icon: <I18N aria-hidden />,
-    };
-    let queryInfos = current.queryInfos;
+const getRelationFieldQueryInfos = (field, currentLocale) => ({
+  queryInfos: {
+    ...field.queryInfos,
+    defaultParams: { ...field.queryInfos.defaultParams, locale: currentLocale },
+    paramsToKeep: ['plugins.i18n.locale'],
+  },
+});
 
-    if (get(current, ['targetModelPluginOptions', 'i18n', 'localized'], false)) {
-      queryInfos = {
-        ...queryInfos,
-        defaultParams: { ...queryInfos.defaultParams, locale },
-        paramsToKeep: ['plugins.i18n.locale'],
-      };
-    }
+const shouldLocalizeRelationField = (field) =>
+  field?.fieldSchema?.type === 'relation' && field?.targetModelPluginOptions?.i18n?.localized;
 
-    return { ...current, labelAction: <LabelAction {...labelActionProps} />, queryInfos };
-  });
-
-const enhanceEditLayout = (layout) =>
+const enhanceEditLayout = (layout, currentLocale) =>
   layout.map((row) => {
     const enhancedRow = row.reduce((acc, field) => {
-      const type = get(field, ['fieldSchema', 'type'], null);
-      const hasI18nEnabled = get(
-        field,
-        ['fieldSchema', 'pluginOptions', 'i18n', 'localized'],
-        type === 'uid'
-      );
-
+      const type = field?.fieldSchema?.type ?? null;
+      // uid and relation fields are always localized
+      const hasI18nEnabled =
+        field?.fieldSchema?.pluginOptions?.i18n?.localized ?? ['uid', 'relation'].includes(type);
       const labelActionProps = {
         title: {
           id: hasI18nEnabled ? getTrad('Field.localized') : getTrad('Field.not-localized'),
@@ -46,8 +32,19 @@ const enhanceEditLayout = (layout) =>
         },
         icon: hasI18nEnabled ? <I18N aria-hidden /> : <StrikedWorld aria-hidden />,
       };
+      const labelAction = <LabelAction {...labelActionProps} />;
 
-      acc.push({ ...field, labelAction: <LabelAction {...labelActionProps} /> });
+      if (shouldLocalizeRelationField(field)) {
+        acc.push({
+          ...field,
+          labelAction,
+          ...getRelationFieldQueryInfos(field, currentLocale),
+        });
+
+        return acc;
+      }
+
+      acc.push({ ...field, labelAction });
 
       return acc;
     }, []);
@@ -76,22 +73,13 @@ const enhanceComponentsLayout = (components, locale) => {
 const enhanceComponentLayoutForRelations = (layout, locale) =>
   layout.map((row) => {
     const enhancedRow = row.reduce((acc, field) => {
-      if (
-        get(field, ['fieldSchema', 'type']) === 'relation' &&
-        get(field, ['targetModelPluginOptions', 'i18n', 'localized'], false)
-      ) {
-        const queryInfos = {
-          ...field.queryInfos,
-          defaultParams: { ...field.queryInfos.defaultParams, locale },
-          paramsToKeep: ['plugins.i18n.locale'],
-        };
-
-        acc.push({ ...field, queryInfos });
+      if (shouldLocalizeRelationField(field)) {
+        acc.push({ ...field, ...getRelationFieldQueryInfos(field, locale) });
 
         return acc;
       }
 
-      acc.push({ ...field });
+      acc.push(field);
 
       return acc;
     }, []);
@@ -120,15 +108,11 @@ const mutateEditViewLayoutHook = ({ layout, query }) => {
   }
 
   const editLayoutPath = getPathToContentType(['layouts', 'edit']);
-  const editRelationsPath = getPathToContentType(['layouts', 'editRelations']);
   const editLayout = get(layout, editLayoutPath);
-  const editRelationsLayout = get(layout, editRelationsPath);
-  const nextEditRelationLayout = enhanceRelationLayout(editRelationsLayout, currentLocale);
-  const nextEditLayout = enhanceEditLayout(editLayout);
+  const nextEditLayout = enhanceEditLayout(editLayout, currentLocale);
 
   const enhancedLayouts = {
     ...layout.contentType.layouts,
-    editRelations: nextEditRelationLayout,
     edit: nextEditLayout,
   };
 
@@ -150,9 +134,4 @@ const mutateEditViewLayoutHook = ({ layout, query }) => {
 };
 
 export default mutateEditViewLayoutHook;
-export {
-  enhanceComponentLayoutForRelations,
-  enhanceComponentsLayout,
-  enhanceEditLayout,
-  enhanceRelationLayout,
-};
+export { enhanceComponentLayoutForRelations, enhanceComponentsLayout, enhanceEditLayout };

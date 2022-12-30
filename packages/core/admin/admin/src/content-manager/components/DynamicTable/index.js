@@ -3,14 +3,21 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { DynamicTable as Table, useStrapiApp } from '@strapi/helper-plugin';
 import { useSelector } from 'react-redux';
-import isEmpty from 'lodash/isEmpty';
+import styled from 'styled-components';
+
+import { Status } from '@strapi/design-system/Status';
+import { Typography } from '@strapi/design-system/Typography';
+
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 import { selectDisplayedHeaders } from '../../pages/ListView/selectors';
 import { getTrad } from '../../utils';
-import State from '../State';
 import TableRows from './TableRows';
 import ConfirmDialogDeleteAll from './ConfirmDialogDeleteAll';
 import ConfirmDialogDelete from './ConfirmDialogDelete';
+
+const StyledStatus = styled(Status)`
+  width: min-content;
+`;
 
 const DynamicTable = ({
   canCreate,
@@ -87,9 +94,19 @@ const DynamicTable = ({
           sortable: true,
         },
         cellFormatter(cellData) {
-          const isPublished = !isEmpty(cellData.publishedAt);
+          const isPublished = cellData.publishedAt;
+          const variant = isPublished ? 'success' : 'secondary';
 
-          return <State isPublished={isPublished} />;
+          return (
+            <StyledStatus showBullet={false} variant={variant} size="S">
+              <Typography fontWeight="bold" textColor={`${variant}700`}>
+                {formatMessage({
+                  id: getTrad(`containers.List.${isPublished ? 'published' : 'draft'}`),
+                  defaultMessage: isPublished ? 'Published' : 'Draft',
+                })}
+              </Typography>
+            </StyledStatus>
+          );
         },
       },
     ];
@@ -112,6 +129,7 @@ const DynamicTable = ({
       <TableRows
         canCreate={canCreate}
         canDelete={canDelete}
+        contentType={layout.contentType}
         headers={tableHeaders}
         rows={rows}
         withBulkActions
@@ -139,7 +157,6 @@ DynamicTable.propTypes = {
       metadatas: PropTypes.object.isRequired,
       layouts: PropTypes.shape({
         list: PropTypes.array.isRequired,
-        editRelations: PropTypes.array,
       }).isRequired,
       options: PropTypes.object.isRequired,
       settings: PropTypes.object.isRequired,

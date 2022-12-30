@@ -134,6 +134,11 @@
     "custom_field": {
       "type": "customField",
       "customField": "plugin::color-picker.color"
+    },
+    "custom_field_with_default_options": {
+      "type": "customField",
+      "regex": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
+      "customField": "plugin::color-picker.color"
     }
   }
 }

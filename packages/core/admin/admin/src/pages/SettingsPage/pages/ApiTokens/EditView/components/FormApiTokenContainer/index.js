@@ -111,7 +111,7 @@ const FormApiTokenContainer = ({
                 id: 'Settings.apiTokens.form.duration',
                 defaultMessage: 'Token duration',
               })}
-              value={values.lifespan}
+              value={values.lifespan !== null ? values.lifespan : '0'}
               error={
                 errors.lifespan
                   ? formatMessage(
@@ -146,7 +146,7 @@ const FormApiTokenContainer = ({
                   defaultMessage: '90 days',
                 })}
               </Option>
-              <Option value={null}>
+              <Option value="0">
                 {formatMessage({
                   id: 'Settings.apiTokens.duration.unlimited',
                   defaultMessage: 'Unlimited',
@@ -229,26 +229,27 @@ FormApiTokenContainer.propTypes = {
   values: PropTypes.shape({
     name: PropTypes.string,
     description: PropTypes.string,
-    lifespan: PropTypes.string,
+    lifespan: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     type: PropTypes.string,
   }).isRequired,
   isCreating: PropTypes.bool.isRequired,
   apiToken: PropTypes.shape({
-    id: PropTypes.string,
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     type: PropTypes.string,
-    lifespan: PropTypes.number,
+    lifespan: PropTypes.string,
     name: PropTypes.string,
     accessKey: PropTypes.string,
     permissions: PropTypes.array,
     description: PropTypes.string,
     createdAt: PropTypes.string,
-  }).isRequired,
+  }),
   onDispatch: PropTypes.func.isRequired,
   setHasChangedPermissions: PropTypes.func.isRequired,
 };
 
 FormApiTokenContainer.defaultProps = {
   errors: {},
+  apiToken: {},
 };
 
 export default FormApiTokenContainer;

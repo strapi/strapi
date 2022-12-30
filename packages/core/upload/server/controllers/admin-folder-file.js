@@ -40,10 +40,12 @@ module.exports = {
 
     if (deletedFiles.length + deletedFolders.length > 1) {
       strapi.telemetry.send('didBulkDeleteMediaLibraryElements', {
-        rootFolderNumber: deletedFolders.length,
-        rootAssetNumber: deletedFiles.length,
-        totalFolderNumber,
-        totalAssetNumber: totalFileNumber + deletedFiles.length,
+        eventProperties: {
+          rootFolderNumber: deletedFolders.length,
+          rootAssetNumber: deletedFiles.length,
+          totalFolderNumber,
+          totalAssetNumber: totalFileNumber + deletedFiles.length,
+        },
       });
     }
 
@@ -154,7 +156,7 @@ module.exports = {
 
           // update path for folders themselves & folders below
           totalFolderNumber = await strapi.db
-            .connection(folderTable)
+            .getConnection(folderTable)
             .transacting(trx)
             .where(pathColName, existingFolder.path)
             .orWhere(pathColName, 'like', `${existingFolder.path}/%`)
@@ -169,7 +171,7 @@ module.exports = {
 
           // update path of files below
           totalFileNumber = await strapi.db
-            .connection(fileTable)
+            .getConnection(fileTable)
             .transacting(trx)
             .where(folderPathColName, existingFolder.path)
             .orWhere(folderPathColName, 'like', `${existingFolder.path}/%`)
@@ -209,7 +211,7 @@ module.exports = {
 
         // update files main fields (path + updatedBy)
         await strapi.db
-          .connection(fileTable)
+          .getConnection(fileTable)
           .transacting(trx)
           .whereIn('id', fileIds)
           .update(folderPathColName, destinationFolderPath);
@@ -229,10 +231,12 @@ module.exports = {
     });
 
     strapi.telemetry.send('didBulkMoveMediaLibraryElements', {
-      rootFolderNumber: updatedFolders.length,
-      rootAssetNumber: updatedFiles.length,
-      totalFolderNumber,
-      totalAssetNumber: totalFileNumber + updatedFiles.length,
+      eventProperties: {
+        rootFolderNumber: updatedFolders.length,
+        rootAssetNumber: updatedFiles.length,
+        totalFolderNumber,
+        totalAssetNumber: totalFileNumber + updatedFiles.length,
+      },
     });
 
     ctx.body = {

@@ -44,8 +44,10 @@ const FilterTag = ({ attribute, filter, onClick, operator, value }) => {
   })} ${formattedValue}`;
 
   return (
-    <Box padding={1} onClick={handleClick}>
-      <Tag icon={<Cross />}>{content}</Tag>
+    <Box padding={1}>
+      <Tag onClick={handleClick} icon={<Cross />}>
+        {content}
+      </Tag>
     </Box>
   );
 };

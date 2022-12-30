@@ -18,22 +18,23 @@ const uploadAsset = (asset, folderId, cancelToken, onProgress) => {
     'fileInfo',
     JSON.stringify({
       name,
-      caption: caption || name,
-      alternativeText: alternativeText || name,
+      caption,
+      alternativeText,
       folder: folderId,
     })
   );
 
-  return axiosInstance({
-    method: 'post',
-    url: endpoint,
-    headers: {},
-    data: formData,
-    cancelToken: cancelToken.token,
-    onUploadProgress({ total, loaded }) {
-      onProgress((loaded / total) * 100);
-    },
-  }).then((res) => res.data);
+  return axiosInstance
+    .post(endpoint, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      cancelToken: cancelToken.token,
+      onUploadProgress({ total, loaded }) {
+        onProgress((loaded / total) * 100);
+      },
+    })
+    .then((res) => res.data);
 };
 
 export const useUpload = () => {

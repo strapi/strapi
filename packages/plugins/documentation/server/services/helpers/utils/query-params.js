@@ -14,7 +14,7 @@ module.exports = [
   {
     name: 'pagination[withCount]',
     in: 'query',
-    description: 'Retun page/pageSize (default: true)',
+    description: 'Return page/pageSize (default: true)',
     deprecated: false,
     required: false,
     schema: {
@@ -91,5 +91,15 @@ module.exports = [
       type: 'object',
     },
     style: 'deepObject',
+  },
+  {
+    name: 'locale',
+    in: 'query',
+    description: 'Locale to apply',
+    deprecated: false,
+    required: false,
+    schema: {
+      type: 'string',
+    },
   },
 ];

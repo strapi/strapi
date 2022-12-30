@@ -20,7 +20,9 @@ const strapiVersion = packageJSON.version;
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  auth: { getUserInfo: () => ({ firstname: 'kai', lastname: 'doe' }) },
+  auth: {
+    getUserInfo: () => ({ firstname: 'kai', lastname: 'doe', email: 'testemail@strapi.io' }),
+  },
   useGuidedTour: jest.fn(() => ({
     setGuidedTourVisibility: jest.fn(),
   })),
@@ -97,24 +99,6 @@ describe('Admin | components | AuthenticatedApp', () => {
     const { container } = render(<App />);
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c0 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: space-around;
-        -webkit-justify-content: space-around;
-        -ms-flex-pack: space-around;
-        justify-content: space-around;
-      }
-
       .c2 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
@@ -131,6 +115,24 @@ describe('Admin | components | AuthenticatedApp', () => {
         -webkit-animation: gzYjWD 1s infinite linear;
         animation: gzYjWD 1s infinite linear;
         will-change: transform;
+      }
+
+      .c0 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: space-around;
+        -webkit-justify-content: space-around;
+        -ms-flex-pack: space-around;
+        justify-content: space-around;
       }
 
       .c1 {
