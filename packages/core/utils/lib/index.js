@@ -24,7 +24,7 @@ const {
   joinBy,
   toKebabCase,
 } = require('./string-formatting');
-const { removeUndefined } = require('./object-formatting');
+const { removeUndefined, keysDeep } = require('./object-formatting');
 const { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('./config');
 const { generateTimestampCode } = require('./code-generator');
 const contentTypes = require('./content-types');
@@ -62,6 +62,7 @@ module.exports = {
   getConfigUrls,
   escapeQuery,
   removeUndefined,
+  keysDeep,
   getAbsoluteAdminUrl,
   getAbsoluteServerUrl,
   generateTimestampCode,

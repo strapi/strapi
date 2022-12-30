@@ -3,6 +3,7 @@
 const _ = require('lodash');
 const {
   template: { createStrictInterpolationRegExp },
+  keysDeep,
 } = require('@strapi/utils/');
 
 const getProviderSettings = () => {
@@ -29,7 +30,7 @@ const sendTemplatedEmail = (emailOptions = {}, emailTemplate = {}, data = {}) =>
     );
   }
 
-  const allowedInterpolationVariables = Object.keys(data).join('|');
+  const allowedInterpolationVariables = keysDeep(data);
   const interpolate = createStrictInterpolationRegExp(allowedInterpolationVariables, 'g');
 
   const templatedAttributes = attributes.reduce(
