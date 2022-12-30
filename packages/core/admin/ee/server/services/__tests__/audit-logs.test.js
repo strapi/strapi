@@ -192,7 +192,7 @@ describe('Audit logs service', () => {
         populate: ['user'],
         fields: ['action', 'date', 'payload'],
       });
-      expect(result).toEqual({ id: 1, fullname: null });
+      expect(result).toEqual({ id: 1, user: null });
     });
   });
 });
