@@ -40,6 +40,7 @@ const traverseEntity = require('./traverse-entity');
 const pipeAsync = require('./pipe-async');
 const convertQueryParams = require('./convert-query-params');
 const importDefault = require('./import-default');
+const template = require('./template');
 
 module.exports = {
   yup,
@@ -66,6 +67,7 @@ module.exports = {
   generateTimestampCode,
   stringIncludes,
   stringEquals,
+  template,
   isKebabCase,
   isCamelCase,
   toKebabCase,
