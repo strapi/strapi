@@ -27,11 +27,13 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "compile": "tsc -p tsconfig.json",
     "clean": "rimraf ./dist",
-    "compile:clean": "yarn clean && yarn compile",
-    "watch": "yarn compile -w",
-    "test:unit": "jest --verbose"
+    "build": "yarn build:ts",
+    "build:ts": "tsc -p tsconfig.json",
+    "build:clean": "yarn clean && yarn build",
+    "watch": "yarn build:ts -w",
+    "test:unit": "jest --verbose",
+    "prepublishOnly": "yarn build:clean"
   },
   "directories": {
     "lib": "./dist"
