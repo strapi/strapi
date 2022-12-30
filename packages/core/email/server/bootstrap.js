@@ -1,7 +1,7 @@
 'use strict';
 
 const createProvider = (emailConfig) => {
-  const providerName = emailConfig.provider.toLowerCase();
+  const providerName = emailConfig.provider?.toLowerCase();
   let provider;
 
   let modulePath;

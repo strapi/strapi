@@ -77,8 +77,8 @@ module.exports = ({ strapi }) => ({
     if (!ext) {
       ext = `.${extension(type)}`;
     }
-    const basename = path.basename(fileInfo.name || filename, ext);
-    const usedName = fileInfo.name || filename;
+    const usedName = (fileInfo.name || filename).normalize();
+    const basename = path.basename(usedName, ext);
 
     const entity = {
       name: usedName,
@@ -449,5 +449,15 @@ module.exports = ({ strapi }) => ({
     }
 
     return strapi.store({ type: 'plugin', name: 'upload', key: 'settings' }).set({ value });
+  },
+
+  getConfiguration() {
+    return strapi.store({ type: 'plugin', name: 'upload', key: 'view_configuration' }).get();
+  },
+
+  setConfiguration(value) {
+    return strapi
+      .store({ type: 'plugin', name: 'upload', key: 'view_configuration' })
+      .set({ value });
   },
 });
