@@ -29,7 +29,7 @@
   "pages.PluginPage.table.icon.regenerate": "Återskapa {target}",
   "pages.PluginPage.table.icon.show": "Öppna {target}",
   "pages.PluginPage.table.version": "Version",
-  "pages.SettingsPage.Button.description": "Konfigurera dokumentationspluginet",
+  "pages.SettingsPage.header.description": "Konfigurera dokumentationspluginet",
   "pages.SettingsPage.header.save": "Spara",
   "pages.SettingsPage.toggle.hint": "Gör dokumentationensrutten privat",
   "pages.SettingsPage.toggle.label": "Begränsad åtkomst",
