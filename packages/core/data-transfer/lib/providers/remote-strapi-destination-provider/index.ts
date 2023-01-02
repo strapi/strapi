@@ -111,7 +111,6 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     // Common token auth, this should be the main auth method
     else if (auth.type === 'token') {
       const headers = { Authentication: `Bearer ${auth.token}` };
-
       ws = new WebSocket(`${this.options.url}/transfer`, { headers });
     }
 

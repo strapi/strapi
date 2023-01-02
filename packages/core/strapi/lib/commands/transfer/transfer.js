@@ -27,7 +27,7 @@ const logger = console;
  */
 
 /**
- * Import command.
+ * Transfer command.
  *
  * It transfers data from a local file to a local strapi instance
  *
@@ -79,7 +79,7 @@ module.exports = async (opts) => {
       },
     });
   }
-
+  
   if (!source || !destination) {
     logger.error('Could not create providers');
     process.exit(1);
