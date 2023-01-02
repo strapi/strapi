@@ -134,9 +134,11 @@ export const MediaLibraryInput = ({
   if (uploadedFiles.length > 0) {
     const allowedUploadedFiles = getAllowedFiles(fieldAllowedTypes, uploadedFiles);
 
-    initiallySelectedAssets = multiple
-      ? [...allowedUploadedFiles, ...selectedAssets]
-      : [allowedUploadedFiles[0]];
+    if (allowedUploadedFiles.length) {
+      initiallySelectedAssets = multiple
+        ? [...allowedUploadedFiles, ...selectedAssets]
+        : [allowedUploadedFiles[0]];
+    }
   }
 
   return (
