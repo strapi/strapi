@@ -24,17 +24,17 @@
       "url": "https://strapi.io"
     }
   ],
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "clean": "rimraf ./dist",
+    "clean": "rimraf ./lib",
     "build:clean": "yarn clean && yarn build",
     "watch": "yarn build -w --preserveWatchOutput",
     "test:unit": "jest --verbose"
   },
   "directories": {
-    "lib": "./dist"
+    "lib": "./lib"
   },
   "dependencies": {
     "@strapi/logger": "4.5.4",
@@ -61,7 +61,7 @@
     "@types/tar": "6.1.3",
     "@types/tar-stream": "2.2.2",
     "@types/uuid": "9.0.0",
-    "koa": "2.14.1",
+    "@types/koa": "2.13.1",
     "rimraf": "3.0.2",
     "typescript": "4.6.2"
   },
