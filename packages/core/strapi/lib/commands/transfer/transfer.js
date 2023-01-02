@@ -5,8 +5,6 @@ const {
   createLocalStrapiSourceProvider,
   createTransferEngine,
   createLocalStrapiDestinationProvider,
-  // TODO: we need to solve this issue with typescript modules
-  // eslint-disable-next-line import/no-unresolved, node/no-missing-require
 } = require('@strapi/data-transfer');
 const { isObject } = require('lodash/fp');
 const chalk = require('chalk');
@@ -20,7 +18,7 @@ const {
 const logger = console;
 
 /**
- * @typedef ImportCommandOptions Options given to the CLI import command
+ * @typedef TransferCommandOptions Options given to the CLI transfer command
  *
  * @property {string|undefined} [to] The url of the remote destination provider
  * @property {string|undefined} [toToken] The bearer token to use at destination
@@ -33,7 +31,7 @@ const logger = console;
  *
  * It transfers data from a local file to a local strapi instance
  *
- * @param {ImportCommandOptions} opts
+ * @param {TransferCommandOptions} opts
  */
 module.exports = async (opts) => {
   // Validate inputs from Commander
