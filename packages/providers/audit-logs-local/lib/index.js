@@ -2,7 +2,6 @@
 
 const auditLogContentType = require('./content-types/audit-log');
 
-// @TODO: Hardcoded for now, we should get this from the config later
 const RETENTION_DAYS = 7;
 
 const provider = {
