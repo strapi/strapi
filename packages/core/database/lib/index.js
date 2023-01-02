@@ -11,8 +11,7 @@ const errors = require('./errors');
 
 // TODO: move back into strapi
 const { transformContentTypes } = require('./utils/content-types');
-const { getJoinTableName } = require('./metadata/relations');
-const types = require('./types');
+const { validateDatabase } = require('./validations');
 
 class Database {
   constructor(config) {
@@ -74,80 +73,11 @@ class Database {
   }
 }
 
-const getLinks = ({ db }) => {
-  const relationsToUpdate = {};
-
-  db.metadata.forEach((contentType) => {
-    const attributes = contentType.attributes;
-
-    // For each relation type, add the joinTable name to tablesToUpdate
-    Object.values(attributes).forEach((attribute) => {
-      if (!types.isRelation(attribute.type)) return;
-
-      if (attribute.inversedBy) {
-        const invRelation = db.metadata.get(attribute.target).attributes[attribute.inversedBy];
-
-        // Both relations use inversedBy
-        if (invRelation?.inversedBy) {
-          relationsToUpdate[attribute.joinTable.name] = {
-            relation: attribute,
-            invRelation,
-          };
-        }
-      }
-    });
-  });
-
-  return Object.values(relationsToUpdate);
-};
-
 // TODO: move into strapi
 Database.transformContentTypes = transformContentTypes;
 Database.init = async (config) => {
   const db = new Database(config);
-
-  // TODO: Create validations folder for this.
-  const links = getLinks({ db });
-
-  const errorList = [];
-
-  for (const { relation, invRelation } of links) {
-    // Generate the join table name based on the relation target
-    // table and attribute name.
-    const joinTableName = getJoinTableName(
-      db.metadata.get(relation.target).tableName,
-      relation.inversedBy
-    );
-
-    const contentType = db.metadata.get(invRelation.target);
-    const invContentType = db.metadata.get(relation.target);
-
-    // If both sides use inversedBy
-    if (relation.inversedBy && invRelation.inversedBy) {
-      // If the generated join table name is the same as the one assigned in relation.joinTable,
-      // relation is on the inversed side of the bidirectional relation.
-      // and the other is on the owner side.
-      if (joinTableName === relation.joinTable.name) {
-        errorList.push(
-          `Error on attribute "${invRelation.inversedBy}" in model "${invContentType.tableName}"(${invContentType.uid}):` +
-            ` One of the sides of the relationship must be the owning side. You should use mappedBy` +
-            ` instead of inversedBy in the relation "${invRelation.inversedBy}".`
-        );
-      } else {
-        errorList.push(
-          `Error on attribute "${relation.inversedBy}" in model "${contentType.tableName}"(${contentType.uid}):` +
-            ` One of the sides of the relationship must be the owning side. You should use mappedBy` +
-            ` instead of inversedBy in the relation "${relation.inversedBy}".`
-        );
-      }
-    }
-  }
-
-  if (errorList.length > 0) {
-    errorList.forEach((error) => strapi.log.error(error));
-    throw new Error('There are errors in some of your models. Please check the logs above.');
-  }
-
+  await validateDatabase(db);
   return db;
 };
 
