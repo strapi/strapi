@@ -80,14 +80,18 @@ Complete installation requirements can be found in the documentation under <a hr
 - CentOS/RHEL 8
 - macOS Mojave
 - Windows 10
-- Docker - [Docker-Repo](https://github.com/strapi/strapi-docker)
+- Docker
 
 (Please note that Strapi may work on other operating systems, but these are not tested nor officially supported at this time.)
 
 **Node:**
 
-- NodeJS >= 14 <= 18
-- NPM >= 6.x
+Strapi only supports maintenance and LTS versions of Node.js. Please refer to the <a href="https://nodejs.org/en/about/releases/">Node.js release schedule</a> for more information. NPM versions installed by default with Node.js are supported. Generally it's recommended to use yarn over npm where possible.
+
+| Strapi Version | Recommended | Minimum |
+| -------------- | ----------- | ------- |
+| 4.3.9 and up   | 18.x        | 14.x    |
+| 4.0.x to 4.3.8 | 16.x        | 14.x    |
 
 **Database:**
 
@@ -98,7 +102,7 @@ Complete installation requirements can be found in the documentation under <a hr
 | PostgreSQL | 11.0    | 14.0        |
 | SQLite     | 3       | 3           |
 
-**We recommend always using the latest version of Strapi to start your new projects**.
+**We recommend always using the latest version of Strapi stable to start your new projects**.
 
 ## Features
 

@@ -98,7 +98,7 @@ const DynamicZoneComponent = ({
 
     const mainField = get(modifiedData, [name, index, mainFieldKey]) ?? '';
 
-    const displayedValue = mainFieldKey === 'id' ? '' : mainField.trim();
+    const displayedValue = mainFieldKey === 'id' ? '' : String(mainField).trim();
 
     const mainValue = displayedValue.length > 0 ? ` - ${displayedValue}` : displayedValue;
 
