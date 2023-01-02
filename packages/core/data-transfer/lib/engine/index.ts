@@ -356,9 +356,7 @@ class TransferEngine<
       this.#emitTransferUpdate('init');
       await this.bootstrap();
       await this.init();
-
       const isValidTransfer = await this.integrityCheck();
-
       if (!isValidTransfer) {
         // TODO: provide the log from the integrity check
         throw new Error(
@@ -369,14 +367,12 @@ class TransferEngine<
       this.#emitTransferUpdate('start');
 
       await this.beforeTransfer();
-
       // Run the transfer stages
       await this.transferSchemas();
       await this.transferEntities();
       await this.transferAssets();
       await this.transferLinks();
       await this.transferConfiguration();
-
       // Gracefully close the providers
       await this.close();
 

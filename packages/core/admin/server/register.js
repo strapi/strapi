@@ -1,7 +1,5 @@
 'use strict';
 
-// TODO: we need to solve this issue with typescript modules
-// eslint-disable-next-line import/no-unresolved, node/no-missing-require
 const { register: registerDataTransfer } = require('@strapi/data-transfer');
 
 const registerAdminPanelRoute = require('./routes/serve-admin-panel');

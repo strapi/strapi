@@ -41,7 +41,7 @@ describe('export', () => {
     getDefaultExportName: jest.fn(() => defaultFileName),
   };
   jest.mock(
-    '../transfer/utils',
+    '../../transfer/utils',
     () => {
       return mockUtils;
     },
@@ -54,7 +54,7 @@ describe('export', () => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
 
   // Now that everything is mocked, import export command
-  const exportCommand = require('../transfer/export');
+  const exportCommand = require('../../transfer/export');
 
   const expectExit = async (code, fn) => {
     const exit = jest.spyOn(process, 'exit').mockImplementation((number) => {
