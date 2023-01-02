@@ -1,12 +1,12 @@
 'use strict';
 
-const { register: registerDataTransfer } = require('@strapi/data-transfer');
+const { register: registerDataTransfer } = require('@strapi/data-transfer/lib/strapi');
 
 const registerAdminPanelRoute = require('./routes/serve-admin-panel');
 const adminAuthStrategy = require('./strategies/admin');
 const apiTokenAuthStrategy = require('./strategies/api-token');
 
-module.exports = ({ strapi }) => {
+module.exports = async ({ strapi }) => {
   const passportMiddleware = strapi.admin.services.passport.init();
 
   strapi.server.api('admin').use(passportMiddleware);

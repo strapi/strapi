@@ -1,15 +1,17 @@
 'use strict';
 
 const {
-  createLocalFileSourceProvider,
-  createLocalStrapiDestinationProvider,
+  providers: { createLocalFileSourceProvider },
+} = require('@strapi/data-transfer/lib/file');
+const {
+  providers: { createLocalStrapiDestinationProvider, DEFAULT_CONFLICT_STRATEGY },
+} = require('@strapi/data-transfer/lib/strapi');
+const {
   createTransferEngine,
   DEFAULT_VERSION_STRATEGY,
   DEFAULT_SCHEMA_STRATEGY,
-  DEFAULT_CONFLICT_STRATEGY,
-  // TODO: we need to solve this issue with typescript modules
-  // eslint-disable-next-line import/no-unresolved, node/no-missing-require
-} = require('@strapi/data-transfer');
+} = require('@strapi/data-transfer/lib/engine');
+
 const { isObject } = require('lodash/fp');
 const path = require('path');
 
@@ -45,6 +47,7 @@ module.exports = async (opts) => {
     async getStrapi() {
       return strapiInstance;
     },
+    autoDestroy: false,
     strategy: opts.conflictStrategy || DEFAULT_CONFLICT_STRATEGY,
     restore: {
       entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },
@@ -109,7 +112,9 @@ module.exports = async (opts) => {
   }
 
   // Note: Telemetry can't be sent in a finish event, because it runs async after this block but we can't await it, so if process.exit is used it won't send
-  await strapi.telemetry.send('didDEITSProcessFinish', getTelemetryPayload());
+  await strapiInstance.telemetry.send('didDEITSProcessFinish', getTelemetryPayload());
+  await strapiInstance.destroy();
+
   process.exit(0);
 };
 
