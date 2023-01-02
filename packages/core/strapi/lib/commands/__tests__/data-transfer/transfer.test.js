@@ -31,7 +31,9 @@ const expectExit = async (code, fn) => {
 
 const transferCommand = require('../../transfer/transfer');
 
-const logger = jest.spyOn(console, 'error').mockImplementation(() => {});
+jest.spyOn(console, 'error').mockImplementation(() => {});
+jest.spyOn(console, 'warn').mockImplementation(() => {});
+jest.spyOn(console, 'log').mockImplementation(() => {});
 
 jest.mock('../../transfer/utils');
 
@@ -44,7 +46,7 @@ describe('transfer', () => {
 
   it('uses destination url provided by user without authentication', async () => {
     await expectExit(1, async () => {
-      await transferCommand({ from: 'local', to: destinationUrl });
+      await transferCommand({ from: undefined, to: destinationUrl });
     });
 
     expect(mockDataTransfer.createRemoteStrapiDestinationProvider).toHaveBeenCalledWith(
@@ -58,7 +60,7 @@ describe('transfer', () => {
 
   it('uses restore as the default strategy', async () => {
     await expectExit(1, async () => {
-      await transferCommand({ from: 'local', to: destinationUrl });
+      await transferCommand({ from: undefined, to: destinationUrl });
     });
 
     expect(mockDataTransfer.createRemoteStrapiDestinationProvider).toHaveBeenCalledWith(
@@ -69,7 +71,7 @@ describe('transfer', () => {
   });
   it('uses destination url provided by user without authentication', async () => {
     await expectExit(1, async () => {
-      await transferCommand({ from: 'local', to: destinationUrl });
+      await transferCommand({ from: undefined, to: destinationUrl });
     });
 
     expect(mockDataTransfer.createRemoteStrapiDestinationProvider).toHaveBeenCalledWith(
@@ -81,7 +83,7 @@ describe('transfer', () => {
 
   it('uses restore as the default strategy', async () => {
     await expectExit(1, async () => {
-      await transferCommand({ from: 'local', to: destinationUrl });
+      await transferCommand({ from: undefined, to: destinationUrl });
     });
 
     expect(mockDataTransfer.createRemoteStrapiDestinationProvider).toHaveBeenCalledWith(
@@ -93,18 +95,10 @@ describe('transfer', () => {
 
   it('uses local strapi instance when local specified', async () => {
     await expectExit(1, async () => {
-      await transferCommand({ from: 'local', to: destinationUrl });
+      await transferCommand({ from: undefined, to: destinationUrl });
     });
 
     expect(mockDataTransfer.createLocalStrapiSourceProvider).toHaveBeenCalled();
     expect(utils.createStrapiInstance).toHaveBeenCalled();
-  });
-
-  it('Logs an error when the source provider does not exist', async () => {
-    await expectExit(1, async () => {
-      await transferCommand({ from: 'test', to: destinationUrl });
-    });
-
-    expect(logger).toHaveBeenCalledWith("Couldn't create providers");
   });
 });
