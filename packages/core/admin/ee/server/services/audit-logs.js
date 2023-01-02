@@ -1,6 +1,7 @@
 'use strict';
 
 const localProvider = require('@strapi/provider-audit-logs-local');
+const { scheduleJob } = require('node-schedule');
 
 const defaultEvents = [
   'entry.create',
@@ -78,6 +79,7 @@ const createAuditLogsService = (strapi) => {
     async register() {
       this._provider = await localProvider.register({ strapi });
       this._eventHubUnsubscribe = strapi.eventHub.subscribe(handleEvent.bind(this));
+      this._deleteExpiredJob = scheduleJob('0 0 * * *', this._provider.deleteExpiredEvents);
       return this;
     },
 
@@ -116,6 +118,11 @@ const createAuditLogsService = (strapi) => {
       if (this._eventHubUnsubscribe) {
         this._eventHubUnsubscribe();
       }
+
+      if (this._deleteExpiredJob) {
+        this._deleteExpiredJob.cancel();
+      }
+
       return this;
     },
 
