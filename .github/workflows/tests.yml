@@ -34,7 +34,7 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
 
       - run: yarn install --frozen-lockfile
-      - name: Build TypeScript packages
+      - name: Build TypeScript packages # for lint we need to build ts, for rules checking if paths exist
         run: yarn build:ts
       - name: Run lint
         run: yarn run -s lint
@@ -57,7 +57,7 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
 
       - run: yarn install --frozen-lockfile
-      - name: Build TypeScript packages
+      - name: Build TypeScript packages # for unit tests we need to build ts, for finding and mocking ts packages
         run: yarn build:ts
       - name: Run tests
         run: yarn run -s test:unit --coverage
@@ -88,8 +88,6 @@ jobs:
       - run: yarn install --frozen-lockfile
       - name: Build
         run: yarn build
-      - name: Build TypeScript packages
-        run: yarn build:ts
       - name: Run test
         run: yarn run -s test:front --coverage
       - name: Upload coverage to Codecov
