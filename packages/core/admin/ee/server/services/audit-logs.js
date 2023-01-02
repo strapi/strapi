@@ -2,7 +2,6 @@
 
 const localProvider = require('@strapi/provider-audit-logs-local');
 const { scheduleJob } = require('node-schedule');
-const { getService } = require('../../../server/utils');
 
 const defaultEvents = [
   'entry.create',
@@ -31,6 +30,12 @@ const defaultEvents = [
   'permission.update',
   'permission.delete',
 ];
+
+const getSanitizedUser = (user) => ({
+  id: user.id,
+  email: user.email,
+  fullname: `${user.firstname} ${user.lastname}`,
+});
 
 const getEventMap = (defaultEvents) => {
   const getDefaultPayload = (...args) => args[0];
@@ -74,7 +79,7 @@ const createAuditLogsService = (strapi) => {
     async register() {
       this._provider = await localProvider.register({ strapi });
       this._eventHubUnsubscribe = strapi.eventHub.subscribe(handleEvent.bind(this));
-      this._deleteExpiredJob = scheduleJob('0 0 * * *', () => this._provider.deleteExpiredEvents());
+      this._deleteExpiredJob = scheduleJob('0 0 * * *', this._provider.deleteExpiredEvents);
       return this;
     },
 
@@ -85,7 +90,7 @@ const createAuditLogsService = (strapi) => {
         const { user, ...rest } = result;
         return {
           ...rest,
-          user: user ? getService('user').sanitizeUser(user) : null,
+          user: user ? getSanitizedUser(user) : null,
         };
       });
 
@@ -105,7 +110,7 @@ const createAuditLogsService = (strapi) => {
       const { user, ...rest } = result;
       return {
         ...rest,
-        user: user ? getService('user').sanitizeUser(user) : null,
+        user: user ? getSanitizedUser(user) : null,
       };
     },
 
