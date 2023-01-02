@@ -34,7 +34,7 @@
     "build": "lerna run --stream build --no-private",
     "generate": "plop --plopfile ./packages/generators/admin/plopfile.js",
     "lint": "npm-run-all -p lint:code lint:css",
-    "lint:code": "eslint --cache --cache-strategy content .",
+    "lint:code": "eslint --cache --cache-strategy content --cache-location ./node_modules/.cache/eslint .",
     "lint:css": "stylelint packages/**/admin/src/**/*.js",
     "lint:fix": "eslint --fix .",
     "lint:other": "npm run prettier:other -- --check",
