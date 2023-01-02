@@ -74,7 +74,9 @@ const createAuditLogsService = (strapi) => {
     async register() {
       this._provider = await localProvider.register({ strapi });
       this._eventHubUnsubscribe = strapi.eventHub.subscribe(handleEvent.bind(this));
-      this._job = scheduleJob('0 0 * * *', () => this._provider.deleteExpiredEvents());
+      this._deleteExpiredsJob = scheduleJob('0 0 * * *', () =>
+        this._provider.deleteExpiredEvents()
+      );
       return this;
     },
 
@@ -114,8 +116,8 @@ const createAuditLogsService = (strapi) => {
         this._eventHubUnsubscribe();
       }
 
-      if (this._job) {
-        this._job.cancel();
+      if (this._deleteExpiredsJob) {
+        this._deleteExpiredsJob.cancel();
       }
 
       return this;
