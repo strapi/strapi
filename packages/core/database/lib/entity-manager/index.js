@@ -220,22 +220,19 @@ const createEntityManager = (db) => {
       }
 
       const dataToInsert = processData(metadata, data, { withDefaults: true });
-      let id;
+
+      const res = await this.createQueryBuilder(uid).insert(dataToInsert).execute();
+
+      const id = res[0].id || res[0];
 
       const trx = await strapi.db.transaction();
       try {
-        const res = await this.createQueryBuilder(uid)
-          .insert(dataToInsert)
-          .transacting(trx)
-          .execute();
-
-        id = res[0].id || res[0];
-
         await this.attachRelations(uid, id, data, { transaction: trx });
 
         await trx.commit();
       } catch (e) {
         await trx.rollback();
+        await this.createQueryBuilder(uid).where({ id }).delete().execute();
         throw e;
       }
 
@@ -294,7 +291,11 @@ const createEntityManager = (db) => {
         throw new Error('Update requires a where parameter');
       }
 
-      const entity = await this.createQueryBuilder(uid).select('id').where(where).first().execute();
+      const entity = await this.createQueryBuilder(uid)
+        .select('*')
+        .where(where)
+        .first()
+        .execute({ mapResults: false });
 
       if (!entity) {
         return null;
@@ -302,23 +303,19 @@ const createEntityManager = (db) => {
 
       const { id } = entity;
 
+      const dataToUpdate = processData(metadata, data);
+
+      if (!isEmpty(dataToUpdate)) {
+        await this.createQueryBuilder(uid).where({ id }).update(dataToUpdate).execute();
+      }
+
       const trx = await strapi.db.transaction();
       try {
-        const dataToUpdate = processData(metadata, data);
-
-        if (!isEmpty(dataToUpdate)) {
-          await this.createQueryBuilder(uid)
-            .where({ id })
-            .update(dataToUpdate)
-            .transacting(trx)
-            .execute();
-        }
-
         await this.updateRelations(uid, id, data, { transaction: trx });
-
         await trx.commit();
       } catch (e) {
         await trx.rollback();
+        await this.createQueryBuilder(uid).where({ id }).update(entity).execute();
         throw e;
       }
 
@@ -381,10 +378,10 @@ const createEntityManager = (db) => {
 
       const { id } = entity;
 
+      await this.createQueryBuilder(uid).where({ id }).delete().execute();
+
       const trx = await strapi.db.transaction();
       try {
-        await this.createQueryBuilder(uid).where({ id }).delete().transacting(trx).execute();
-
         await this.deleteRelations(uid, id, { transaction: trx });
 
         await trx.commit();

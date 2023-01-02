@@ -311,8 +311,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         color: #666687;
       }
 
-      .c4[aria-disabled='true'] svg > g,
-      .c4[aria-disabled='true'] svg path {
+      .c4[aria-disabled='true'] svg > g,.c4[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -325,8 +324,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         color: #666687;
       }
 
-      .c4[aria-disabled='true']:active svg > g,
-      .c4[aria-disabled='true']:active svg path {
+      .c4[aria-disabled='true']:active svg > g,.c4[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -384,8 +382,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         color: #666687;
       }
 
-      .c32[aria-disabled='true'] svg > g,
-      .c32[aria-disabled='true'] svg path {
+      .c32[aria-disabled='true'] svg > g,.c32[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -398,8 +395,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         color: #666687;
       }
 
-      .c32[aria-disabled='true']:active svg > g,
-      .c32[aria-disabled='true']:active svg path {
+      .c32[aria-disabled='true']:active svg > g,.c32[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -499,22 +495,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         align-items: center;
       }
 
-      .c8 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c8 svg {
-        height: 4px;
-        width: 6px;
-      }
-
       .c35 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
@@ -570,6 +550,22 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
 
       .c10:focus-visible {
         outline: none;
+      }
+
+      .c8 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c8 svg {
+        height: 4px;
+        width: 6px;
       }
 
       .c12 {
@@ -698,7 +694,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                         <label
                           class="c5 c21"
                           for="textinput-2"
-                          required=""
                         >
                           <div
                             class="c0 c13"
@@ -718,6 +713,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                             aria-describedby="textinput-2-hint"
                             aria-disabled="false"
                             aria-invalid="false"
+                            aria-required="true"
                             class="c26 c27"
                             id="textinput-2"
                             name="password"
@@ -765,12 +761,11 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                         <label
                           class="c5 c21"
                           for="textinput-3"
-                          required=""
                         >
                           <div
                             class="c0 c13"
                           >
-                            Confirmation Password
+                            Confirm Password
                             <span
                               class="c5 c22 c23"
                             >
@@ -784,6 +779,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                           <input
                             aria-disabled="false"
                             aria-invalid="false"
+                            aria-required="true"
                             class="c26 c27"
                             id="textinput-3"
                             name="confirmPassword"

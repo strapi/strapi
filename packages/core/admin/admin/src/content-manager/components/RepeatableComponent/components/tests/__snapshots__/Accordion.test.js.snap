@@ -15,7 +15,6 @@ exports[`RepeatableComponent | Accordion Content should render and match the sna
 
 .c0 {
   border-bottom: none;
-  overflow: hidden;
 }
 
 .c0 > div > div {

@@ -238,8 +238,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         color: #666687;
       }
 
-      .c4[aria-disabled='true'] svg > g,
-      .c4[aria-disabled='true'] svg path {
+      .c4[aria-disabled='true'] svg > g,.c4[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -252,8 +251,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         color: #666687;
       }
 
-      .c4[aria-disabled='true']:active svg > g,
-      .c4[aria-disabled='true']:active svg path {
+      .c4[aria-disabled='true']:active svg > g,.c4[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -273,22 +271,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
       .c4 svg > g,
       .c4 svg path {
         fill: #8e8ea9;
-      }
-
-      .c8 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c8 svg {
-        height: 4px;
-        width: 6px;
       }
 
       .c21 {
@@ -346,6 +328,22 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
 
       .c10:focus-visible {
         outline: none;
+      }
+
+      .c8 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c8 svg {
+        height: 4px;
+        width: 6px;
       }
 
       .c12 {

@@ -14,7 +14,6 @@ export const Footer = styled(Box)`
 
 export const Content = styled(Box)`
   border-bottom: none;
-  overflow: hidden;
 
   /* add the borders and make sure the top is transparent to avoid jumping with the hover effect  */
   & > div > div {

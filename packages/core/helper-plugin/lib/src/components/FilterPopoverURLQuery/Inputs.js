@@ -2,13 +2,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import parseISO from 'date-fns/parseISO';
 import formatISO from 'date-fns/formatISO';
-import { DatePicker } from '@strapi/design-system/DatePicker';
-import { Field, FieldInput } from '@strapi/design-system/Field';
-import { NumberInput } from '@strapi/design-system/NumberInput';
-import { TimePicker } from '@strapi/design-system/TimePicker';
-import { Select, Option } from '@strapi/design-system/Select';
+import {
+  DatePicker,
+  DateTimePicker,
+  Field,
+  NumberInput,
+  TimePicker,
+  Select,
+} from '@strapi/design-system';
+import { FieldInput } from '@strapi/design-system/Field';
+import { Option } from '@strapi/design-system/Select';
 import { useIntl } from 'react-intl';
-import DateTimePicker from '../DateTimePicker';
 
 const Inputs = ({ label, onChange, options, type, value }) => {
   const { formatMessage } = useIntl();
@@ -51,6 +55,7 @@ const Inputs = ({ label, onChange, options, type, value }) => {
         onClear={() => onChange(null)}
         value={value ? new Date(value) : null}
         selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}
+        selectButtonTitle={formatMessage({ id: 'selectButtonTitle', defaultMessage: 'Select' })}
       />
     );
   }
