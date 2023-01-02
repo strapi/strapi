@@ -33,6 +33,7 @@
     "clean": "lerna run --stream clean --no-private",
     "watch": "lerna run --stream watch --no-private --parallel",
     "build": "lerna run --stream build --no-private",
+    "build:ts": "lerna run --stream build:ts --no-private",
     "generate": "plop --plopfile ./packages/generators/admin/plopfile.js",
     "lint": "npm-run-all -p lint:code lint:css",
     "lint:code": "eslint .",
