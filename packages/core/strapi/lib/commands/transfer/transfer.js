@@ -20,18 +20,18 @@ const {
 const logger = console;
 
 /**
- * @typedef ImportCommandOptions Options given to the CLI import command
+ * @typedef TransferCommandOptions Options given to the CLI transfer command
  *
- * @property {string} [to] The destination provider to use ("local" or the url of a remote Strapi)
- * @property {string} [from] The source provider to use ("local" or the url of a remote Strapi)
+ * @property {string} [to] The url of a remote Strapi to use as remote destination
+ * @property {string} [from] The url of a remote Strapi to use as remote source
  */
 
 /**
- * Import command.
+ * Transfer command.
  *
  * It transfers data from a local file to a local strapi instance
  *
- * @param {ImportCommandOptions} opts
+ * @param {TransferCommandOptions} opts
  */
 module.exports = async (opts) => {
   // Validate inputs from Commander
