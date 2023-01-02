@@ -98,9 +98,14 @@ const sentryInstance = strapi
   .getInstance();
 ```
 
-## Disabling
+## Disabling for non-production environments
 
-This plugin can be disabled in the plugins configuration file. With the `env` utility, it is also possible to disable it depending on the environment.
+If the `dsn` property is set to a nil value (`null` or `undefined`) while `enabled` is true, the Sentry plugin will be available to use in the running Strapi instance, but the service will not actually send errors to Sentry. That allows you to write code that runs on every environment without additional checks, but only send errors to Sentry in production.
+  
+When you start Strapi with a nil `dsn` config property, the plugin will print a warning:  
+`info: @strapi/plugin-sentry is disabled because no Sentry DSN was provided`
+
+You can make use of that by using the `env` utility to set the `dsn` config property depending on the environment.
 
 **Example**
 
@@ -110,8 +115,29 @@ This plugin can be disabled in the plugins configuration file. With the `env` ut
 module.exports = ({ env }) => ({
   // ...
   sentry: {
-    // Only enable Sentry in production
-    enabled: env('NODE_ENV') === 'production',
+    enabled: true,
+    config: {
+      // Only set `dsn` property in production
+      dsn: env('NODE_ENV') === 'production' ? env('SENTRY_DSN') : null,
+    },
+  },
+  // ...
+});
+```
+
+## Disabling altogether
+
+Like every other plugin, you can also disable this plugin in the plugins configuration file. This will cause `strapi.plugins('sentry')` to return undefined.
+
+**Example**
+
+`./config/plugins.js`
+
+```js
+module.exports = ({ env }) => ({
+  // ...
+  sentry: {
+    enabled: false
   },
   // ...
 });
