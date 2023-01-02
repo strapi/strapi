@@ -22,8 +22,8 @@ const logger = console;
 /**
  * @typedef TransferCommandOptions Options given to the CLI transfer command
  *
- * @property {string} [to] The url of a remote Strapi to use as remote destination
- * @property {string} [from] The url of a remote Strapi to use as remote source
+ * @property {string|undefined} [to] The url of a remote Strapi to use as remote destination
+ * @property {string|undefined} [from] The url of a remote Strapi to use as remote source
  */
 
 /**
