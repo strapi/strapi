@@ -31,7 +31,7 @@
     "build": "yarn build:ts",
     "build:ts": "tsc -p tsconfig.json",
     "build:clean": "yarn clean && yarn build",
-    "watch": "yarn build:ts -w",
+    "watch": "yarn build:ts -w --preserveWatchOutput",
     "test:unit": "jest --verbose",
     "prepublishOnly": "yarn build:clean"
   },

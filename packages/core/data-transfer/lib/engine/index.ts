@@ -159,7 +159,7 @@ class TransferEngine<
     });
   }
 
-  #emitTransferUpdate(type: 'start' | 'finish' | 'error', payload?: object) {
+  #emitTransferUpdate(type: 'init' | 'start' | 'finish' | 'error', payload?: object) {
     this.progress.stream.emit(`transfer::${type}`, payload);
   }
 
@@ -336,9 +336,8 @@ class TransferEngine<
     // reset data between transfers
     this.progress.data = {};
 
-    this.#emitTransferUpdate('start');
-
     try {
+      this.#emitTransferUpdate('init');
       await this.bootstrap();
       await this.init();
 
@@ -350,6 +349,8 @@ class TransferEngine<
           `Unable to transfer the data between ${this.sourceProvider.name} and ${this.destinationProvider.name}.\nPlease refer to the log above for more information.`
         );
       }
+
+      this.#emitTransferUpdate('start');
 
       await this.beforeTransfer();
 
