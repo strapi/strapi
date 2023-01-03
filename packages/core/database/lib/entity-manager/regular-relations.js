@@ -296,7 +296,9 @@ const cleanOrderColumnsForInnoDB = async ({
                 FROM :joinTableName: b
                 WHERE a.:orderColumnName: >= b.:orderColumnName: AND a.:joinColumnName: = b.:joinColumnName: AND a.:joinColumnName: = :id
               ) AS src_order
-            FROM :joinTableName: a`,
+            FROM :joinTableName: a
+            WHERE a.:joinColumnName: = :id
+            `,
           {
             tempOrderTableName,
             joinTableName: joinTable.name,
@@ -338,9 +340,7 @@ const cleanOrderColumnsForInnoDB = async ({
                   .map(() => '?')
                   .join(', ')})
               ) AS inv_order
-            FROM ?? a
-            WHERE a.:joinColumnName: = :id
-            `,
+            FROM ?? a`,
           [
             tempInvOrderTableName,
             joinTable.name,
