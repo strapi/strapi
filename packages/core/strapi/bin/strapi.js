@@ -277,26 +277,6 @@ program
   .addOption(
     new Option('--toToken <bearerToken>', `API or Bearer token to use with destination`).hideHelp()
   )
-  // -- Email
-  .addOption(
-    new Option('--fromEmail <email>', `Email address to use with source authorization`).hideHelp()
-  )
-  .addOption(
-    new Option(
-      '--toEmail <email>',
-      `Email address to use with destination authorization`
-    ).hideHelp()
-  )
-  // -- Password
-  .addOption(
-    new Option('--fromPassword <password>', `Password to use with source authorization`).hideHelp()
-  )
-  .addOption(
-    new Option(
-      '--toPassword <password>',
-      `Password to use with destination authorization`
-    ).hideHelp()
-  )
   // Hooks
   .hook(
     'preAction',
@@ -313,9 +293,6 @@ program
     'preAction',
     ifOptions((opts) => opts.to?.length && !opts.toToken, getAuthResolverFor('to'))
   )
-  .hook('preAction', (command) => {
-    console.log(`Command opts:${JSON.stringify(command.opts())}`);
-  })
   .allowExcessArguments(false)
   .action(getLocalScript('transfer/transfer'));
 
