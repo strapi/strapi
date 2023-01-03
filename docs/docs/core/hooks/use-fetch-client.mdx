@@ -7,15 +7,48 @@ tags:
   - fetch-client
 ---
 
-An abstraction around the axios instance wrapped in a hook. It provides a simple interface to handle API calls to the Strapi backend.
-It handles request cancellation under the hook with `AbortController`, and when the component gets unmounted all the reqeusts that it has made are aborted.
+## Usage
+
+The following examples shows a basic way to use the `useFetchClient` hook to make a get request to a strapi backend endpoint:
+
+```jsx
+import {useState} from "react"
+import useFetchClient from '@strapi/admin/admin/src/hooks/useFetchClient';
+
+const Component () => {
+    const [items, setItems] = useState([]);
+    const { get } = useFetchClient();
+    const requestURL = "/some-endpoint";
+
+    const handleGetData = () => {
+        const { data } = await get(requestURL);
+        setItems(data.items);
+    }
+
+    return(
+        <div>
+            <div>
+                {
+                    items && items.map(item => <h1>{item.name}</h1>)
+                }
+            </div>
+            <button onClick={handleGetData}>Show Items</button>
+        </div>
+    )
+}
+```
+
+## Methods
+
+Essentially, this is an abstraction around the axios instance wrapped in a hook. It provides a simple interface to handle API calls to the Strapi backend.
+It handles request cancellation under the hook with [`AbortController`](https://developer.mozilla.org/en-US/docs/Web/API/AbortController), and when the component gets unmounted all the reqeusts that it has made are aborted.
 
 The hook exposes four methods:
 
-- **get(url, config)**: which is a method that given a relative url, will make a GET request to the Strapi backend with the configuration passed as second parameter, if needed.
-- **post(url, data, config)**: which is a method that given a relative url, will make a POST request with the data provided to the Strapi backend with the configuration passed as third parameter, if needed.
-- **put(url, data, config)**: which is a method that given a relative url, will make a PUT request with the data provided to the Strapi backend with the configuration passed as third parameter, if needed.
-- **del(url, config)**: which is a method that given a relative url, will make a DELETE request to the Strapi backend with the configuration passed as second parameter, if needed.
+- **get(url, config)**: which is a method that given a relative url (string), will make a GET request to the Strapi backend with the configuration (object) passed as second parameter, if needed.
+- **post(url, data, config)**: which is a method that given a relative url (string), will make a POST request with the data (object) provided to the Strapi backend with the configuration passed as third parameter (object), if needed.
+- **put(url, data, config)**: which is a method that given a relative url (string), will make a PUT request with the data (object) provided to the Strapi backend with the configuration passed as third parameter (object), if needed.
+- **del(url, config)**: which is a method that given a relative url (string), will make a DELETE request to the Strapi backend with the configuration passed as second parameter (object), if needed.
 
 ## Implementation details
 
@@ -47,37 +80,6 @@ the application storage and the window will be reload
 :::caution
 Have this in mind if using this hook in pages where the auth token is not available, such as login, because it will create an infinite loop if not treating the error correctly. See section [Troubleshooting](#troubleshooting)
 :::
-
-### Basic usage
-
-Below is a basic example usage where we fetch the Strapi backend content types
-
-```jsx
-import {useState} from "react"
-import useFetchClient from '@strapi/admin/admin/src/hooks/useFetchClient';
-
-const Component () => {
-    const [items, setItems] = useState([]);
-    const { get } = useFetchClient();
-    const requestURL = "/some-endpoint";
-
-    const handleGetData = () => {
-        const { data } = await get(requestURL);
-        setItems(data.items);
-    }
-
-    return(
-        <div>
-            <div>
-                {
-                    items && items.map(item => <h1>{item.name}</h1>)
-                }
-            </div>
-            <button onClick={handleGetData}>Show Items</button>
-        </div>
-    )
-}
-```
 
 ## Further Reading
 
