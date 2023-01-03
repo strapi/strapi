@@ -53,6 +53,7 @@ describe('Audit logs service', () => {
         };
       }
     });
+    const mockScheduleJob = jest.fn();
 
     const strapi = {
       admin: {
@@ -102,6 +103,11 @@ describe('Audit logs service', () => {
           findMany: mockFindMany,
         }),
       }));
+      jest.mock('node-schedule', () => {
+        return {
+          scheduleJob: mockScheduleJob,
+        };
+      });
     });
 
     afterEach(() => {
@@ -193,6 +199,14 @@ describe('Audit logs service', () => {
         fields: ['action', 'date', 'payload'],
       });
       expect(result).toEqual({ id: 1, user: null });
+    });
+
+    it('should create a cron job that executed one time a day', async () => {
+      const auditLogsService = createAuditLogsService(strapi);
+      await auditLogsService.register();
+
+      expect(mockScheduleJob).toHaveBeenCalledTimes(1);
+      expect(mockScheduleJob).toHaveBeenCalledWith('0 0 * * *', expect.any(Function));
     });
   });
 });
