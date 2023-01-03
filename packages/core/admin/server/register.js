@@ -1,6 +1,5 @@
 'use strict';
 
-// eslint-disable-next-line import/no-unresolved, node/no-missing-require
 const { register: registerDataTransfer } = require('@strapi/data-transfer');
 
 const registerAdminPanelRoute = require('./routes/serve-admin-panel');
