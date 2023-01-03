@@ -1,33 +1,39 @@
 'use strict';
 
-describe('export', () => {
+describe('Export', () => {
   const defaultFileName = 'defaultFilename';
 
-  // mock @strapi/data-transfer
   const mockDataTransfer = {
-    createLocalFileDestinationProvider: jest.fn().mockReturnValue({ name: 'testDest' }),
-    createLocalStrapiSourceProvider: jest.fn().mockReturnValue({ name: 'testSource' }),
-    createTransferEngine() {
-      return {
-        transfer: jest.fn().mockReturnValue(Promise.resolve({})),
-        progress: {
-          on: jest.fn(),
-          stream: {
+    file: {
+      providers: {
+        createLocalFileDestinationProvider: jest.fn().mockReturnValue({ name: 'testDest' }),
+      },
+    },
+    strapi: {
+      providers: {
+        createLocalStrapiSourceProvider: jest.fn().mockReturnValue({ name: 'testSource' }),
+      },
+    },
+    engine: {
+      createTransferEngine() {
+        return {
+          transfer: jest.fn().mockReturnValue(Promise.resolve({})),
+          progress: {
             on: jest.fn(),
+            stream: {
+              on: jest.fn(),
+            },
           },
-        },
-        sourceProvider: { name: 'testSource' },
-        destinationProvider: { name: 'testDestination' },
-      };
+          sourceProvider: { name: 'testSource' },
+          destinationProvider: { name: 'testDestination' },
+        };
+      },
     },
   };
-  jest.mock(
-    '@strapi/data-transfer',
-    () => {
-      return mockDataTransfer;
-    },
-    { virtual: true }
-  );
+
+  jest.mock('@strapi/data-transfer/lib/engine', () => mockDataTransfer.engine, { virtual: true });
+  jest.mock('@strapi/data-transfer/lib/strapi', () => mockDataTransfer.strapi, { virtual: true });
+  jest.mock('@strapi/data-transfer/lib/file', () => mockDataTransfer.file, { virtual: true });
 
   // mock utils
   const mockUtils = {
@@ -76,7 +82,7 @@ describe('export', () => {
       await exportCommand({ file: filename });
     });
 
-    expect(mockDataTransfer.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+    expect(mockDataTransfer.file.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         file: { path: filename },
       })
@@ -90,7 +96,7 @@ describe('export', () => {
     });
 
     expect(mockUtils.getDefaultExportName).toHaveBeenCalledTimes(1);
-    expect(mockDataTransfer.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+    expect(mockDataTransfer.file.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         file: { path: defaultFileName },
       })
@@ -103,7 +109,7 @@ describe('export', () => {
       await exportCommand({ encrypt });
     });
 
-    expect(mockDataTransfer.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+    expect(mockDataTransfer.file.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         encryption: { enabled: encrypt },
       })
@@ -117,7 +123,7 @@ describe('export', () => {
       await exportCommand({ encrypt, key });
     });
 
-    expect(mockDataTransfer.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+    expect(mockDataTransfer.file.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         encryption: { enabled: encrypt, key },
       })
@@ -129,7 +135,7 @@ describe('export', () => {
       await exportCommand({ compress: false });
     });
 
-    expect(mockDataTransfer.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+    expect(mockDataTransfer.file.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         compression: { enabled: false },
       })
@@ -137,7 +143,7 @@ describe('export', () => {
     await expectExit(1, async () => {
       await exportCommand({ compress: true });
     });
-    expect(mockDataTransfer.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+    expect(mockDataTransfer.file.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         compression: { enabled: true },
       })

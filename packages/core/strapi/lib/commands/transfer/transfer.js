@@ -1,12 +1,9 @@
 'use strict';
 
+const { createTransferEngine } = require('@strapi/data-transfer/lib/engine');
 const {
-  createRemoteStrapiDestinationProvider,
-  createLocalStrapiSourceProvider,
-  createTransferEngine,
-  // TODO: we need to solve this issue with typescript modules
-  // eslint-disable-next-line import/no-unresolved, node/no-missing-require
-} = require('@strapi/data-transfer');
+  providers: { createRemoteStrapiDestinationProvider, createLocalStrapiSourceProvider },
+} = require('@strapi/data-transfer/lib/strapi');
 const { isObject } = require('lodash/fp');
 const chalk = require('chalk');
 
