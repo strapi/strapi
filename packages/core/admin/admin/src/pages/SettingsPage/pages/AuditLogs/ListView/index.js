@@ -32,7 +32,7 @@ const ListView = () => {
 
   const fetchData = ({ queryKey }) => get(`/admin/audit-logs${queryKey[1]}`);
 
-  const { data, isFetching: isLoading } = useQuery(['auditLogs', search], fetchData, {
+  const { data, isLoading } = useQuery(['auditLogs', search], fetchData, {
     enabled: canRead,
     keepPreviousData: true,
     retry: false,
