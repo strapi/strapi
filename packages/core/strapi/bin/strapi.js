@@ -262,8 +262,16 @@ program
 program
   .command('transfer')
   .description('Transfer data from one source to another')
-  .addOption(new Option('--from <source>', `Source of your data`).default('local'))
-  .addOption(new Option('--to <destination>', `Destination of your data`).default('remote'))
+  .addOption(new Option('--from <sourceURL>', `URL of remote Strapi instance to get data from.`))
+  .addOption(new Option('--to <destinationURL>', `URL of remote Strapi instance to send data to`))
+  .hook('preAction', async (thisCommand) => {
+    const opts = thisCommand.opts();
+
+    if (!opts.from && !opts.to) {
+      console.error('At least one source (from) or destination (to) option must be provided');
+      process.exit(1);
+    }
+  })
   .allowExcessArguments(false)
   .action(getLocalScript('transfer/transfer'));
 
