@@ -31,6 +31,7 @@ const tableHeaders = [
       },
       sortable: true,
     },
+    cellFormatter: (user) => (user ? user.fullname : ''),
   },
 ];
 
