@@ -2,7 +2,11 @@
 
 const { createTransferEngine } = require('@strapi/data-transfer/lib/engine');
 const {
-  providers: { createRemoteStrapiDestinationProvider, createLocalStrapiSourceProvider },
+  providers: {
+    createRemoteStrapiDestinationProvider,
+    createLocalStrapiSourceProvider,
+    createLocalStrapiDestinationProvider,
+  },
 } = require('@strapi/data-transfer/lib/strapi');
 const { isObject } = require('lodash/fp');
 const chalk = require('chalk');
@@ -13,17 +17,17 @@ const {
   DEFAULT_IGNORED_CONTENT_TYPES,
 } = require('./utils');
 
-/**
- * @typedef TransferCommandOptions Options given to the CLI import command
- *
- * @property {string} [from] The source strapi project
- * @property {string} [to] The destination strapi project
- */
-
 const logger = console;
 
 /**
- * Import command.
+ * @typedef TransferCommandOptions Options given to the CLI transfer command
+ *
+ * @property {string|undefined} [to] The url of a remote Strapi to use as remote destination
+ * @property {string|undefined} [from] The url of a remote Strapi to use as remote source
+ */
+
+/**
+ * Transfer command.
  *
  * It transfers data from a local file to a local strapi instance
  *
@@ -40,11 +44,33 @@ module.exports = async (opts) => {
 
   let source;
   let destination;
-  if (opts.from === 'local') {
-    source = createSourceProvider(strapi);
+
+  if (!opts.from && !opts.to) {
+    logger.error('At least one source (from) or destination (to) option must be provided');
+    process.exit(1);
   }
-  if (opts.to) {
-    destination = createDestinationProvider({
+
+  // if no URL provided, use local Strapi
+  if (!opts.from) {
+    source = createLocalStrapiSourceProvider({
+      getStrapi: () => strapi,
+    });
+  }
+  // if URL provided, set up a remote source provider
+  else {
+    logger.error(`Remote Strapi source provider not yet implemented`);
+    process.exit(1);
+  }
+
+  // if no URL provided, use local Strapi
+  if (!opts.to) {
+    destination = createLocalStrapiDestinationProvider({
+      getStrapi: () => strapi,
+    });
+  }
+  // if URL provided, set up a remote destination provider
+  else {
+    destination = createRemoteStrapiDestinationProvider({
       url: opts.to,
       auth: false,
       strategy: 'restore',
@@ -53,8 +79,9 @@ module.exports = async (opts) => {
       },
     });
   }
+
   if (!source || !destination) {
-    logger.error("Couldn't create providers");
+    logger.error('Could not create providers');
     process.exit(1);
   }
 
@@ -83,7 +110,7 @@ module.exports = async (opts) => {
   });
 
   try {
-    logger.log(`Starting export...`);
+    logger.log(`Starting transfer...`);
 
     const results = await engine.transfer();
 
@@ -93,25 +120,8 @@ module.exports = async (opts) => {
     logger.log(`${chalk.bold('Transfer process has been completed successfully!')}`);
     process.exit(0);
   } catch (e) {
-    logger.error('Transfer process failed unexpectedly:', e);
+    logger.error('Transfer process failed unexpectedly');
+    logger.error(e);
     process.exit(1);
   }
-};
-
-/**
- * It creates a local strapi destination provider
- */
-const createSourceProvider = (strapi) => {
-  return createLocalStrapiSourceProvider({
-    async getStrapi() {
-      return strapi;
-    },
-  });
-};
-
-/**
- * It creates a remote strapi destination provider based on the given options
- */
-const createDestinationProvider = (opts) => {
-  return createRemoteStrapiDestinationProvider(opts);
 };
