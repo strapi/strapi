@@ -180,5 +180,13 @@ module.exports = {
       section: 'settings',
       category: 'project',
     },
+    {
+      uid: 'transfer.push',
+      displayName: 'Transfer data to this project',
+      pluginName: 'admin',
+      section: 'settings',
+      category: 'project',
+      subCategory: 'transfer',
+    },
   ],
 };
