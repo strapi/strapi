@@ -307,20 +307,11 @@ program
   )
   .hook(
     'preAction',
-    ifOptions(
-      (opts) =>
-        opts.from?.length &&
-        !(opts.fromToken || (opts.fromEmail?.length && opts.fromPassword?.length)),
-      getAuthResolverFor('from')
-    )
+    ifOptions((opts) => opts.from?.length && !opts.fromToken, getAuthResolverFor('from'))
   )
   .hook(
     'preAction',
-    ifOptions(
-      (opts) =>
-        opts.to?.length && !(opts.toToken || (opts.toEmail?.length && opts.toPassword?.length)),
-      getAuthResolverFor('to')
-    )
+    ifOptions((opts) => opts.to?.length && !opts.toToken, getAuthResolverFor('to'))
   )
   .hook('preAction', (command) => {
     console.log(`Command opts:${JSON.stringify(command.opts())}`);
