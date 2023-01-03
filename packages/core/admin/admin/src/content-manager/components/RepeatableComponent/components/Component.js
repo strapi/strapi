@@ -28,6 +28,7 @@ import Inputs from '../../Inputs';
 import FieldComponent from '../../FieldComponent';
 
 import Preview from './Preview';
+import useLazyComponents from '../../../hooks/useLazyComponents';
 
 const CustomIconButton = styled(IconButton)`
   background-color: transparent;
@@ -96,9 +97,11 @@ const DraggedItem = ({
   const accordionRef = useRef(null);
   const { formatMessage } = useIntl();
 
+  const [parentFieldName] = componentFieldName.split('.');
+
   const [{ handlerId, isDragging, handleKeyDown }, boxRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop(!isReadOnly, {
-      type: ItemTypes.COMPONENT,
+      type: `${ItemTypes.COMPONENT}_${parentFieldName}`,
       index,
       item: {
         displayedValue,
@@ -119,15 +122,17 @@ const DraggedItem = ({
 
   useEffect(() => {
     dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
-  }, [dragPreviewRef]);
+  }, [dragPreviewRef, index]);
 
   const composedAccordionRefs = composeRefs(accordionRef, dragRef);
   const composedBoxRefs = composeRefs(boxRef, dropRef);
 
+  const { lazyComponentStore } = useLazyComponents();
+
   return (
     <Box ref={composedBoxRefs}>
       {isDragging ? (
-        <Preview ref={dragPreviewRef} />
+        <Preview />
       ) : (
         <Accordion expanded={isOpen} onToggle={onClickToggle} id={componentFieldName} size="S">
           <AccordionToggle
@@ -147,7 +152,6 @@ const DraggedItem = ({
                     })}
                     icon={<Trash />}
                   />
-                  {/* react-dnd is broken in firefox with our IconButton, maybe a ref issue */}
                   <IconButton
                     className="drag-handle"
                     ref={composedAccordionRefs}
@@ -212,6 +216,7 @@ const DraggedItem = ({
                             metadatas={metadatas}
                             queryInfos={queryInfos}
                             size={size}
+                            customFieldInputs={lazyComponentStore}
                           />
                         </GridItem>
                       );

@@ -12,6 +12,7 @@ import { useKeyboardDragAndDrop } from './useKeyboardDragAndDrop';
  *  item?: object,
  *  onStart?: () => void,
  *  onEnd?: () => void,
+ *  dropSensitivity?: 'regular' | 'immediate'
  * } & import('./useKeyboardDragAndDrop').UseKeyboardDragAndDropCallbacks}
  */
 
@@ -39,6 +40,7 @@ export const useDragAndDrop = (
     onDropItem,
     onCancel,
     onMoveItem,
+    dropSensitivity = 'regular',
   }
 ) => {
   const objectRef = useRef(null);
@@ -55,31 +57,33 @@ export const useDragAndDrop = (
         return;
       }
       const dragIndex = item.index;
-      const currentIndex = index;
+      const newInd = index;
 
       // Don't replace items with themselves
-      if (dragIndex === currentIndex) {
+      if (dragIndex === newInd) {
         return;
       }
 
-      const hoverBoundingRect = objectRef.current.getBoundingClientRect();
-      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      const clientOffset = monitor.getClientOffset();
-      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+      if (dropSensitivity === 'regular') {
+        const hoverBoundingRect = objectRef.current.getBoundingClientRect();
+        const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+        const clientOffset = monitor.getClientOffset();
+        const hoverClientY = clientOffset.y - hoverBoundingRect.top;
 
-      // Dragging downwards
-      if (dragIndex < currentIndex && hoverClientY < hoverMiddleY) {
-        return;
-      }
+        // Dragging downwards
+        if (dragIndex < newInd && hoverClientY < hoverMiddleY) {
+          return;
+        }
 
-      // Dragging upwards
-      if (dragIndex > currentIndex && hoverClientY > hoverMiddleY) {
-        return;
+        // Dragging upwards
+        if (dragIndex > newInd && hoverClientY > hoverMiddleY) {
+          return;
+        }
       }
 
       // Time to actually perform the action
-      onMoveItem(dragIndex, currentIndex);
-      item.index = currentIndex;
+      onMoveItem(newInd, dragIndex);
+      item.index = newInd;
     },
   });
 
@@ -90,7 +94,13 @@ export const useDragAndDrop = (
         onStart();
       }
 
-      return { index, ...item };
+      /**
+       * This will be attached and it helps define the preview sizes
+       * when a component is flexy e.g. Relations
+       */
+      const { width } = objectRef.current?.getBoundingClientRect() ?? {};
+
+      return { index, width, ...item };
     },
     end() {
       if (onEnd) {
@@ -98,6 +108,16 @@ export const useDragAndDrop = (
       }
     },
     canDrag: active,
+    /**
+     * This is for useful when the item is in a virtualized list.
+     * However, if we don't have an ID then we want the libraries
+     * defaults to take care of this.
+     */
+    isDragging: item.id
+      ? (monitor) => {
+          return item.id === monitor.getItem().id;
+        }
+      : undefined,
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),

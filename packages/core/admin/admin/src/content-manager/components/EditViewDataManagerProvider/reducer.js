@@ -88,6 +88,7 @@ const reducer = (state, action) =>
             ? {
                 ...state.componentsDataStructure[componentLayoutData.uid],
                 __component: componentLayoutData.uid,
+                __temp_key__: getMaxTempKey(currentValue) + 1,
               }
             : {
                 ...state.componentsDataStructure[componentLayoutData.uid],
@@ -104,6 +105,11 @@ const reducer = (state, action) =>
           (value) => value.type === 'component' && value.repeatable
         )(componentLayoutData.attributes);
 
+        const nonRepeatableComponentPaths = recursivelyFindPathsBasedOnCondition(
+          allComponents,
+          (value) => value.type === 'component' && !value.repeatable
+        )(componentLayoutData.attributes);
+
         const componentDataStructure = relationPaths.reduce((acc, current) => {
           const [componentName] = current.split('.');
 
@@ -112,8 +118,21 @@ const reducer = (state, action) =>
            * has another repeatable component inside of it we
            * don't need to attach the array at this point because that will be
            * done again deeper in the nest.
+           *
+           * We also need to handle cases with single components nested within
+           * repeatables by checking that the relation path does not match a
+           * non-repeatable component path. This accounts for component
+           * structures such as:
+           * - outer_single_compo
+           *    - level_one_repeatable
+           *        - level_two_single_component
+           *            - level_three_repeatable
            */
-          if (!repeatableFields.includes(componentName)) {
+
+          if (
+            !repeatableFields.includes(componentName) &&
+            !nonRepeatableComponentPaths.includes(componentName)
+          ) {
             set(acc, current, []);
           }
 
@@ -128,7 +147,6 @@ const reducer = (state, action) =>
 
         break;
       }
-
       case 'LOAD_RELATION': {
         const initialDataPath = ['initialData', ...action.keys];
         const modifiedDataPath = ['modifiedData', ...action.keys];
@@ -206,6 +224,7 @@ const reducer = (state, action) =>
           componentPaths = [],
           repeatableComponentPaths = [],
           dynamicZonePaths = [],
+          setModifiedDataOnly,
         } = action;
 
         /**
@@ -257,7 +276,10 @@ const reducer = (state, action) =>
             return acc;
           }, data);
 
-        draftState.initialData = mergeDataWithPreparedRelations;
+        if (!setModifiedDataOnly) {
+          draftState.initialData = mergeDataWithPreparedRelations;
+        }
+
         draftState.modifiedData = mergeDataWithPreparedRelations;
 
         draftState.formErrors = {};

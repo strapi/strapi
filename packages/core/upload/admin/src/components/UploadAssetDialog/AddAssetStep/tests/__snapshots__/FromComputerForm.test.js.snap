@@ -216,8 +216,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
   color: #666687;
 }
 
-.c15[aria-disabled='true'] svg > g,
-.c15[aria-disabled='true'] svg path {
+.c15[aria-disabled='true'] svg > g,.c15[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -230,8 +229,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
   color: #666687;
 }
 
-.c15[aria-disabled='true']:active svg > g,
-.c15[aria-disabled='true']:active svg path {
+.c15[aria-disabled='true']:active svg > g,.c15[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -288,8 +286,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
   color: #666687;
 }
 
-.c21[aria-disabled='true'] svg > g,
-.c21[aria-disabled='true'] svg path {
+.c21[aria-disabled='true'] svg > g,.c21[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -302,8 +299,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
   color: #666687;
 }
 
-.c21[aria-disabled='true']:active svg > g,
-.c21[aria-disabled='true']:active svg path {
+.c21[aria-disabled='true']:active svg > g,.c21[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 

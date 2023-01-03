@@ -26,25 +26,50 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 describe('useLazyComponents', () => {
+  let cleanup;
+
+  afterEach(() => {
+    if (typeof cleanup === 'function') {
+      cleanup();
+      cleanup = undefined;
+    }
+  });
+
   it('lazy loads the components', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result, waitFor } = renderHook(() => useLazyComponents(['plugin::test.test']));
+
+    cleanup = result.current.cleanup;
+
+    expect(result.current.isLazyLoading).toEqual(true);
+    expect(result.current.lazyComponentStore).toEqual({});
+
+    await waitFor(() => expect(result.current.isLazyLoading).toEqual(false));
+
+    expect(result.current.lazyComponentStore['plugin::test.test']).toBeDefined();
+  });
+
+  test('assuming the store has been initialised before hand, other hooks called should be able to access the global cache', async () => {
+    const { result: initialResult, waitFor } = renderHook(() =>
       useLazyComponents(['plugin::test.test'])
     );
 
-    expect(result.current).toEqual({ isLazyLoading: true, lazyComponentStore: {} });
-
-    await waitForNextUpdate();
-
-    expect(JSON.stringify(result.current)).toEqual(
-      JSON.stringify({
-        isLazyLoading: false,
-        lazyComponentStore: { 'plugin::test.test': jest.fn() },
-      })
+    await waitFor(() =>
+      expect(initialResult.current.lazyComponentStore['plugin::test.test']).toBeDefined()
     );
+
+    const { result: actualResult, waitFor: secondWaitFor } = renderHook(() => useLazyComponents());
+
+    cleanup = actualResult.current.cleanup;
+
+    await secondWaitFor(() => expect(actualResult.current.isLazyLoading).toBe(false));
+
+    expect(actualResult.current.lazyComponentStore['plugin::test.test']).toBeDefined();
   });
-  it('handles no components to load', async () => {
+
+  test('given there are no components to load it should not be loading and the store should be empty', async () => {
     const { result } = renderHook(() => useLazyComponents([]));
 
-    expect(result.current).toEqual({ isLazyLoading: false, lazyComponentStore: {} });
+    expect(result.current.isLazyLoading).toEqual(false);
+    expect(result.current.lazyComponentStore).toEqual({});
   });
 });

@@ -5,7 +5,7 @@ const getMaxTempKey = (arr) => {
 
   return Math.max.apply(
     Math,
-    arr.map((o) => o.__temp_key__)
+    arr.map((o) => o.__temp_key__ ?? o.id)
   );
 };
 
