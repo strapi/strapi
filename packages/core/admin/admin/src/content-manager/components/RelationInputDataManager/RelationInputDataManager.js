@@ -35,7 +35,6 @@ export const RelationInputDataManager = ({
   relationType,
   size,
   targetModel,
-  source,
 }) => {
   const [liveText, setLiveText] = useState('');
 
@@ -57,7 +56,6 @@ export const RelationInputDataManager = ({
   const cacheKey = `${slug}-${name}-${initialData?.id ?? ''}`;
   const { relations, search, searchFor } = useRelation(cacheKey, {
     name,
-    source,
     relation: {
       enabled: !!endpoints.relation,
       endpoint: endpoints.relation,
@@ -409,10 +407,6 @@ RelationInputDataManager.propTypes = {
       search: PropTypes.string.isRequired,
     }).isRequired,
     shouldDisplayRelationLink: PropTypes.bool.isRequired,
-  }).isRequired,
-  source: PropTypes.shape({
-    type: PropTypes.string,
-    componentId: PropTypes.number,
   }).isRequired,
 };
 

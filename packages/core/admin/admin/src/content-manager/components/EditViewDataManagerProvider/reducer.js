@@ -148,22 +148,26 @@ const reducer = (state, action) =>
         break;
       }
       case 'LOAD_RELATION': {
-        const initialDataPath = ['initialData', ...action.keys];
-        const modifiedDataPath = ['modifiedData', ...action.keys];
-        const { value } = action;
+        const { value, keys } = action;
+
+        const initialDataPath = ['initialData', ...keys];
+        const modifiedDataPath = ['modifiedData', ...keys];
 
         const initialDataRelations = get(state, initialDataPath);
         const modifiedDataRelations = get(state, modifiedDataPath);
 
-        set(draftState, initialDataPath, uniqBy([...value, ...initialDataRelations], 'id'));
+        if (initialDataRelations) {
+          set(draftState, initialDataPath, uniqBy([...value, ...initialDataRelations], 'id'));
+        }
 
-        /**
-         * We need to set the value also on modifiedData, because initialData
-         * and modifiedData need to stay in sync, so that the CM can compare
-         * both states, to render the dirty UI state
-         */
-
-        set(draftState, modifiedDataPath, uniqBy([...value, ...modifiedDataRelations], 'id'));
+        if (modifiedDataRelations) {
+          /**
+           * We need to set the value also on modifiedData, because initialData
+           * and modifiedData need to stay in sync, so that the CM can compare
+           * both states, to render the dirty UI state
+           */
+          set(draftState, modifiedDataPath, uniqBy([...value, ...modifiedDataRelations], 'id'));
+        }
 
         break;
       }
