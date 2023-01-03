@@ -45,4 +45,20 @@ describe('sortConnectArray', () => {
       'There was a problem connecting relation with id 1 at position {"after":2}. The relation with id 2 needs to be connected first.'
     );
   });
+
+  test('error with circular references', () => {
+    const sortConnect = () =>
+      sortConnectArray(
+        [
+          { id: 2, position: { after: 1 } },
+          { id: 3, position: { after: 1 } },
+          { id: 1, position: { after: 3 } },
+        ],
+        []
+      );
+
+    expect(sortConnect).toThrowError(
+      'A circular reference was found in the connect array. One relation is trying to connect before/after another one that is trying to connect before/after it'
+    );
+  });
 });

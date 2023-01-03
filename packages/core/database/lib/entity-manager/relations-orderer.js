@@ -44,47 +44,58 @@ const sortConnectArray = (connectArr, initialArr = [], strictSort = true) => {
   if (!needsSorting) return connectArr;
 
   // Iterate over connectArr and populate sortedConnect
-  connectArr.forEach((rel, idx) => {
-    const pushRelation = (rel) => {
-      sortedConnect.push(rel);
-      relInArray[rel.id] = true;
-    };
+  try {
+    connectArr.forEach((rel, idx) => {
+      const pushRelation = (rel) => {
+        sortedConnect.push(rel);
+        relInArray[rel.id] = true;
+      };
 
-    const computeRelation = (rel) => {
-      const adjacentRelId = rel.position?.before || rel.position?.after;
+      const computeRelation = (rel) => {
+        const adjacentRelId = rel.position?.before || rel.position?.after;
 
-      // This connect has already been computed
-      if (idx in computedIdx) return;
+        // This connect has already been computed
+        if (idx in computedIdx) return;
 
-      if (!adjacentRelId || relInArray[adjacentRelId]) {
-        return pushRelation(rel);
-      }
+        if (!adjacentRelId || relInArray[adjacentRelId]) {
+          return pushRelation(rel);
+        }
 
-      // Look if id is referenced elsewhere in the array
-      const adjacentRelIdx = firstSeen[adjacentRelId];
-      if (adjacentRelIdx) {
-        const adjacentRel = connectArr[adjacentRelIdx];
-        // Mark adjacent relation idx as computed,
-        // so it is not computed again later in the loop
-        computedIdx[adjacentRelIdx] = true;
-        computeRelation(adjacentRel);
-        pushRelation(rel);
-      } else if (strictSort) {
-        // If we reach this point, it means that the adjacent relation is not in the connect array
-        // and it is not in the database. This should not happen.
-        throw new InvalidRelationError(
-          `There was a problem connecting relation with id ${rel.id} at position ${JSON.stringify(
-            rel.position
-          )}. The relation with id ${adjacentRelId} needs to be connected first.`
-        );
-      } else {
-        // We are in non-strict mode so we can push the relation.
-        pushRelation({ id: rel.id, position: { end: true } });
-      }
-    };
+        // Look if id is referenced elsewhere in the array
+        const adjacentRelIdx = firstSeen[adjacentRelId];
+        if (adjacentRelIdx) {
+          const adjacentRel = connectArr[adjacentRelIdx];
+          // Mark adjacent relation idx as computed,
+          // so it is not computed again later in the loop
+          computedIdx[adjacentRelIdx] = true;
+          computeRelation(adjacentRel);
+          pushRelation(rel);
+        } else if (strictSort) {
+          // If we reach this point, it means that the adjacent relation is not in the connect array
+          // and it is not in the database. This should not happen.
+          throw new InvalidRelationError(
+            `There was a problem connecting relation with id ${rel.id} at position ${JSON.stringify(
+              rel.position
+            )}. The relation with id ${adjacentRelId} needs to be connected first.`
+          );
+        } else {
+          // We are in non-strict mode so we can push the relation.
+          pushRelation({ id: rel.id, position: { end: true } });
+        }
+      };
 
-    computeRelation(rel);
-  });
+      computeRelation(rel);
+    });
+  } catch (err) {
+    // If it is a RangeError, there is a circular dependency in the connect array.
+    if (err instanceof RangeError)
+      throw new InvalidRelationError(
+        'A circular reference was found in the connect array. ' +
+          'One relation is trying to connect before/after another one that is trying to connect before/after it'
+      );
+
+    throw err;
+  }
 
   return sortedConnect;
 };
