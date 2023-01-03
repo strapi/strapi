@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
 import {
   SettingsPageTitle,
   DynamicTable,
@@ -10,14 +9,13 @@ import {
 } from '@strapi/helper-plugin';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
+import { useLocation } from 'react-router-dom';
+import { useQuery } from 'react-query';
 import adminPermissions from '../../../../../permissions';
-// import { useFetchClient } from '../../../../../hooks';
+import { useFetchClient } from '../../../../../hooks';
 import TableRows from './DynamicTable/TableRows';
 import tableHeaders from './utils/tableHeaders';
-import { fetchData } from './utils/api';
 import ModalDialog from './ModalDialog';
-
-const QUERY = 'audit-logs';
 
 const ListView = () => {
   const { formatMessage } = useIntl();
@@ -27,22 +25,14 @@ const ListView = () => {
   const {
     allowedActions: { canRead },
   } = useRBAC(adminPermissions.settings.auditLogs);
+  const { get } = useFetchClient();
+  const { search } = useLocation();
 
   useFocusWhenNavigate();
 
-  /**
-   * TODO: using fetchclient facing difficulties to mock, for time being using axiosinstance to pass the tests
-   *
-  const { get } = useFetchClient();
-  const fetchData = async () => {
-    const {
-      data: { results },
-    } = await get(`/admin/audit-logs`);
+  const fetchData = ({ queryKey }) => get(`/admin/audit-logs${queryKey[1]}`);
 
-    return results;
-  }; */
-
-  const { status, data, isFetching } = useQuery(QUERY, fetchData, {
+  const { data, isFetching: isLoading } = useQuery(['auditLogs', search], fetchData, {
     enabled: canRead,
     keepPreviousData: true,
     retry: false,
@@ -54,8 +44,6 @@ const ListView = () => {
       });
     },
   });
-
-  const isLoading = status === 'loading' || isFetching;
 
   const title = formatMessage({
     id: 'global.auditLogs',
@@ -89,15 +77,15 @@ const ListView = () => {
           defaultMessage: 'Logs of all the activities that happened in your environment',
         })}
       />
-      <ContentLayout>
+      <ContentLayout canRead={canRead}>
         <DynamicTable
           contentType="Audit logs"
           headers={headers}
-          rows={data}
+          rows={data?.data.results}
           withBulkActions
           isLoading={isLoading}
         >
-          <TableRows headers={headers} rows={data} onModalToggle={handleToggle} />
+          <TableRows headers={headers} rows={data?.data.results} onModalToggle={handleToggle} />
         </DynamicTable>
       </ContentLayout>
       {isModalOpen && <ModalDialog onToggle={handleToggle} data={detailsActionData} />}

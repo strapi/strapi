@@ -13,8 +13,8 @@ const actionTypes = {
   ADMIN_LOGIN: 'admin.auth.success',
   ADMIN_LOGOUT: 'admin.logout',
   CONTENT_TYPE_CREATE: 'content-type.create',
-  CONTENT_TYP_UPDATE: 'content-type.update',
-  CONTENT_TYP_DELETE: 'content-type.delete',
+  CONTENT_TYPE_UPDATE: 'content-type.update',
+  CONTENT_TYPE_DELETE: 'content-type.delete',
   COMPONENT_CREATE: 'component.create',
   COMPONENT_UPDATE: 'component.update',
   COMPONENT_DELETE: 'component.delete',
@@ -56,9 +56,9 @@ const getDefaultMessage = (value) => {
       return 'Admin logout';
     case actionTypes.CONTENT_TYPE_CREATE:
       return 'Create content type';
-    case actionTypes.CONTENT_TYP_UPDATE:
+    case actionTypes.CONTENT_TYPE_UPDATE:
       return 'Update content type';
-    case actionTypes.CONTENT_TYP_DELETE:
+    case actionTypes.CONTENT_TYPE_DELETE:
       return 'Delete content type';
     case actionTypes.COMPONENT_CREATE:
       return 'Create component';
@@ -79,7 +79,7 @@ const getDefaultMessage = (value) => {
     case actionTypes.PERMISSION_DELETE:
       return 'Delete permission';
     default:
-      return '-';
+      return value;
   }
 };
 
