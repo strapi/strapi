@@ -6,7 +6,7 @@ export * from './action';
 export * from './pull';
 export * from './push';
 
-export type TransferMessage = { type: 'transfer' } & (
+export type TransferMessage = { type: 'transfer'; transferID: string } & (
   | Action
   | TransferPushMessage
   | TransferPullMessage

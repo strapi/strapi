@@ -2,6 +2,8 @@ import { WebSocket } from 'ws';
 import { v4 } from 'uuid';
 import { Writable } from 'stream';
 
+import { createDispatcher } from './utils';
+
 import type {
   IDestinationProvider,
   IEntity,
@@ -9,11 +11,10 @@ import type {
   IMetadata,
   ProviderType,
   IConfiguration,
-  TransferStage,
   IAsset,
 } from '../../../../types';
+import type { client, server } from '../../../../types/remote/protocol';
 import type { ILocalStrapiDestinationProviderOptions } from '../local-destination';
-import { dispatch } from './utils';
 
 interface ITokenAuth {
   type: 'token';
@@ -32,14 +33,6 @@ export interface IRemoteStrapiDestinationProviderOptions
   auth?: ITokenAuth | ICredentialsAuth;
 }
 
-type Actions = 'bootstrap' | 'close' | 'beforeTransfer' | 'getMetadata' | 'getSchemas';
-
-export const createRemoteStrapiDestinationProvider = (
-  options: IRemoteStrapiDestinationProviderOptions
-) => {
-  return new RemoteStrapiDestinationProvider(options);
-};
-
 class RemoteStrapiDestinationProvider implements IDestinationProvider {
   name = 'destination::remote-strapi';
 
@@ -49,21 +42,53 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
   ws: WebSocket | null;
 
+  dispatcher: ReturnType<typeof createDispatcher> | null;
+
   constructor(options: IRemoteStrapiDestinationProviderOptions) {
     this.options = options;
     this.ws = null;
+    this.dispatcher = null;
   }
 
-  async #dispatchAction<T = unknown>(action: Actions) {
-    return dispatch<T>(this.ws, { type: 'action', action });
+  async initTransfer(): Promise<string> {
+    const { strategy, restore } = this.options;
+
+    // Wait for the connection to be made to the server, then init the transfer
+    return new Promise<string>((resolve, reject) => {
+      this.ws
+        ?.once('open', async () => {
+          const query = this.dispatcher?.dispatchCommand({
+            command: 'init',
+            params: { options: { strategy, restore }, transfer: 'push' },
+          });
+
+          const res = (await query) as server.Payload<server.InitMessage>;
+
+          if (!res?.transferID) {
+            return reject(new Error('Init failed, invalid response from the server'));
+          }
+
+          resolve(res.transferID);
+        })
+        .once('error', reject);
+    });
   }
 
-  async #dispatchTransfer<T = unknown>(stage: TransferStage, data: T) {
+  async #streamStep<T extends client.TransferPushStep>(
+    step: T,
+    data: client.GetTransferPushStreamData<T>
+  ) {
+    const query = this.dispatcher?.dispatchTransferStep({ action: 'stream', step, data });
+
     try {
-      await dispatch(this.ws, { type: 'transfer', stage, data });
+      await query;
     } catch (e) {
       if (e instanceof Error) {
         return e;
+      }
+
+      if (typeof e === 'string') {
+        return new Error(e);
       }
 
       return new Error('Unexpected error');
@@ -73,7 +98,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async bootstrap(): Promise<void> {
-    const { url, auth, strategy, restore } = this.options;
+    const { url, auth } = this.options;
 
     let ws: WebSocket;
 
@@ -95,21 +120,17 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     }
 
     this.ws = ws;
+    this.dispatcher = createDispatcher(this.ws);
 
-    // Wait for the connection to be made to the server, then init the transfer
-    await new Promise<void>((resolve, reject) => {
-      ws.once('open', async () => {
-        await dispatch(this.ws, { type: 'init', kind: 'push', options: { strategy, restore } });
-        resolve();
-      }).once('error', reject);
-    });
+    const transferID = await this.initTransfer();
 
-    // Run the bootstrap
-    await this.#dispatchAction('bootstrap');
+    this.dispatcher.setTransferProperties({ id: transferID, kind: 'push' });
+
+    await this.dispatcher.dispatchTransferAction('bootstrap');
   }
 
   async close() {
-    await this.#dispatchAction('close');
+    await this.dispatcher?.dispatchTransferAction('close');
 
     await new Promise<void>((resolve) => {
       const { ws } = this;
@@ -124,22 +145,26 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   }
 
   getMetadata() {
-    return this.#dispatchAction<IMetadata>('getMetadata');
+    return this.dispatcher?.dispatchTransferAction<IMetadata>('getMetadata') ?? null;
   }
 
   async beforeTransfer() {
-    await this.#dispatchAction('beforeTransfer');
+    await this.dispatcher?.dispatchTransferAction('beforeTransfer');
   }
 
-  getSchemas(): Promise<Strapi.Schemas> {
-    return this.#dispatchAction<Strapi.Schemas>('getSchemas');
+  getSchemas(): Promise<Strapi.Schemas | null> {
+    if (!this.dispatcher) {
+      return Promise.resolve(null);
+    }
+
+    return this.dispatcher.dispatchTransferAction<Strapi.Schemas>('getSchemas');
   }
 
   getEntitiesStream(): Writable {
     return new Writable({
       objectMode: true,
       write: async (entity: IEntity, _encoding, callback) => {
-        const e = await this.#dispatchTransfer('entities', entity);
+        const e = await this.#streamStep('entities', entity);
 
         callback(e);
       },
@@ -150,7 +175,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     return new Writable({
       objectMode: true,
       write: async (link: ILink, _encoding, callback) => {
-        const e = await this.#dispatchTransfer('links', link);
+        const e = await this.#streamStep('links', link);
 
         callback(e);
       },
@@ -161,7 +186,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     return new Writable({
       objectMode: true,
       write: async (configuration: IConfiguration, _encoding, callback) => {
-        const e = await this.#dispatchTransfer('configuration', configuration);
+        const e = await this.#streamStep('configuration', configuration);
 
         callback(e);
       },
@@ -172,29 +197,31 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     return new Writable({
       objectMode: true,
       final: async (callback) => {
-        const e = await this.#dispatchTransfer('assets', null);
+        // TODO: replace this stream call by an end call
+        const e = await this.#streamStep('assets', null);
+
         callback(e);
       },
       write: async (asset: IAsset, _encoding, callback) => {
         const { filename, filepath, stats, stream } = asset;
         const assetID = v4();
 
-        await this.#dispatchTransfer('assets', {
-          step: 'start',
+        await this.#streamStep('assets', {
+          action: 'start',
           assetID,
           data: { filename, filepath, stats },
         });
 
         for await (const chunk of stream) {
-          await this.#dispatchTransfer('assets', {
-            step: 'stream',
+          await this.#streamStep('assets', {
+            action: 'stream',
             assetID,
-            data: { chunk },
+            data: chunk,
           });
         }
 
-        await this.#dispatchTransfer('assets', {
-          step: 'end',
+        await this.#streamStep('assets', {
+          action: 'end',
           assetID,
         });
 
@@ -203,3 +230,9 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     });
   }
 }
+
+export const createRemoteStrapiDestinationProvider = (
+  options: IRemoteStrapiDestinationProviderOptions
+) => {
+  return new RemoteStrapiDestinationProvider(options);
+};

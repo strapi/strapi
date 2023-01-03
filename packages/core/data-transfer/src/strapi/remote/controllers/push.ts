@@ -1,13 +1,17 @@
 import { PassThrough, Writable } from 'stream-chain';
 
-import { IAsset, IMetadata, PushTransferMessage, PushTransferStage } from '../../../../types';
+import type { IAsset, IMetadata } from '../../../../types';
+import type {
+  TransferPushMessage,
+  TransferPushStep,
+} from '../../../../types/remote/protocol/client';
 import {
   createLocalStrapiDestinationProvider,
   ILocalStrapiDestinationProviderOptions,
 } from '../../providers';
 
 export interface IPushController {
-  streams: { [stage in PushTransferStage]?: Writable };
+  streams: { [stage in TransferPushStep]?: Writable };
   actions: {
     getMetadata(): Promise<IMetadata>;
     getSchemas(): Strapi.Schemas;
@@ -16,8 +20,8 @@ export interface IPushController {
     beforeTransfer(): Promise<void>;
   };
   transfer: {
-    [key in PushTransferStage]: <T extends PushTransferMessage>(
-      value: T extends { stage: key; data: infer U } ? U : never
+    [key in TransferPushStep]: <T extends TransferPushMessage>(
+      value: T extends { step: key; data: infer U } ? U : never
     ) => Promise<void>;
   };
 }
@@ -25,7 +29,7 @@ export interface IPushController {
 const createPushController = (options: ILocalStrapiDestinationProviderOptions): IPushController => {
   const provider = createLocalStrapiDestinationProvider(options);
 
-  const streams: { [stage in PushTransferStage]?: Writable } = {};
+  const streams: { [stage in TransferPushStep]?: Writable } = {};
   const assets: { [filepath: string]: IAsset & { stream: PassThrough } } = {};
 
   const writeAsync = <T>(stream: Writable, data: T) => {
@@ -91,29 +95,33 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
       },
 
       async assets(payload) {
+        // TODO: close the stream upong receiving an 'end' event instead
         if (payload === null) {
           streams.assets?.end();
           return;
         }
 
-        const { step, assetID } = payload;
+        const { action, assetID } = payload;
 
         if (!streams.assets) {
           streams.assets = await provider.getAssetsStream();
         }
 
-        if (step === 'start') {
+        if (action === 'start') {
           assets[assetID] = { ...payload.data, stream: new PassThrough() };
           writeAsync(streams.assets, assets[assetID]);
         }
 
-        if (step === 'stream') {
-          const chunk = Buffer.from(payload.data.chunk.data);
+        if (action === 'stream') {
+          // The buffer has gone through JSON operations and is now of shape { type: "Buffer"; data: UInt8Array }
+          // We need to transform it back into a Buffer instance
+          const rawBuffer = payload.data as unknown as { type: 'Buffer'; data: Uint8Array };
+          const chunk = Buffer.from(rawBuffer.data);
 
           await writeAsync(assets[assetID].stream, chunk);
         }
 
-        if (step === 'end') {
+        if (action === 'end') {
           await new Promise<void>((resolve, reject) => {
             const { stream } = assets[assetID];
 
