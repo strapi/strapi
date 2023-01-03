@@ -169,9 +169,7 @@ const DynamicZoneComponent = ({
         role="button"
         noBorder
         tabIndex={0}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
+        onClick={(e) => e.stopPropagation()}
         data-handler-id={handlerId}
         ref={dragRef}
         label={formatMessage({
