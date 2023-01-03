@@ -13,13 +13,14 @@ import type {
   IAsset,
 } from '../../../types';
 import type { ILocalStrapiDestinationProviderOptions } from '../local-strapi-destination-provider';
+import { dispatch } from './utils';
 
 interface ITokenAuth {
   type: 'token';
   token: string;
 }
 
-interface IRemoteStrapiDestinationProvider
+export interface IRemoteStrapiDestinationProviderOptions
   extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
   url: string;
   auth?: ITokenAuth;
@@ -28,7 +29,7 @@ interface IRemoteStrapiDestinationProvider
 type Actions = 'bootstrap' | 'close' | 'beforeTransfer' | 'getMetadata' | 'getSchemas';
 
 export const createRemoteStrapiDestinationProvider = (
-  options: IRemoteStrapiDestinationProvider
+  options: IRemoteStrapiDestinationProviderOptions
 ) => {
   return new RemoteStrapiDestinationProvider(options);
 };
@@ -38,61 +39,28 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
   type: ProviderType = 'destination';
 
-  options: IRemoteStrapiDestinationProvider;
+  options: IRemoteStrapiDestinationProviderOptions;
 
   ws: WebSocket | null;
 
-  constructor(options: IRemoteStrapiDestinationProvider) {
+  constructor(options: IRemoteStrapiDestinationProviderOptions) {
     this.options = options;
     this.ws = null;
   }
 
-  async #dispatch<U = unknown, T extends object = object>(message: T): Promise<U> {
-    const { ws } = this;
-
-    if (!ws) {
-      throw new Error('No ws connection found');
-    }
-
-    return new Promise((resolve, reject) => {
-      const uuid = v4();
-      const payload = JSON.stringify({ ...message, uuid });
-
-      ws.send(payload, (error) => {
-        if (error) {
-          reject(error);
-        }
-      });
-
-      ws.once('message', (raw) => {
-        const response: { uuid: string; data: U; error: string | null } = JSON.parse(
-          raw.toString()
-        );
-
-        if (response.error) {
-          return reject(new Error(response.error));
-        }
-
-        if (response.uuid === uuid) {
-          return resolve(response.data);
-        }
-      });
-    });
-  }
-
   async #dispatchAction<T = unknown>(action: Actions) {
-    return this.#dispatch<T>({ type: 'action', action });
+    return dispatch<T>(this.ws, { type: 'action', action });
   }
 
   async #dispatchTransfer<T = unknown>(stage: TransferStage, data: T) {
     try {
-      await this.#dispatch({ type: 'transfer', stage, data });
+      await dispatch(this.ws, { type: 'transfer', stage, data });
     } catch (e) {
       if (e instanceof Error) {
         return e;
       }
 
-      return new Error('Unexected error');
+      return new Error('Unexpected error');
     }
 
     return null;
@@ -124,7 +92,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     // Wait for the connection to be made to the server, then init the transfer
     await new Promise<void>((resolve, reject) => {
       ws.once('open', async () => {
-        await this.#dispatch({ type: 'init', kind: 'push', data: { strategy, restore } });
+        await dispatch(this.ws, { type: 'init', kind: 'push', options: { strategy, restore } });
         resolve();
       }).once('error', reject);
     });
