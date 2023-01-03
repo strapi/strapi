@@ -182,11 +182,19 @@ module.exports = {
     },
     {
       uid: 'transfer.push',
-      displayName: 'Transfer data to this project',
+      displayName: 'Transfer data to the current project',
       pluginName: 'admin',
       section: 'settings',
-      category: 'project',
-      subCategory: 'transfer',
+      category: 'data management',
+      subCategory: 'Data transfer',
+    },
+    {
+      uid: 'transfer.pull',
+      displayName: 'Transfer data from the current project',
+      pluginName: 'admin',
+      section: 'settings',
+      category: 'data management',
+      subCategory: 'Data transfer',
     },
   ],
 };
