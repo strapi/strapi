@@ -121,10 +121,6 @@ const sortConnectArray = (connectArr, initialArr = [], strictSort = true) => {
  * - The final step would be to recalculate fractional order values.
  *      [ { id: 2, order: 4 }, { id: 5, order: 3.33 },  { id: 4, order: 3.66 }, { id: 3, order: 10 } ]
  *
- * Constraints:
- * - Expects you will never connect a relation before / after one that does not exist
- * - Expect initArr to have all relations referenced in the positional attributes
- *
  * @param {Array<*>} initArr - array of relations to initialize the class with
  * @param {string} idColumn - the column name of the id
  * @param {string} orderColumn - the column name of the order
