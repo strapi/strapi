@@ -32,7 +32,12 @@ const ListView = () => {
 
   const fetchData = ({ queryKey }) => get(`/admin/audit-logs${queryKey[1]}`);
 
-  const { data, isLoading } = useQuery(['auditLogs', search], fetchData, {
+  const {
+    data: {
+      data: { results },
+    },
+    isLoading,
+  } = useQuery(['auditLogs', search], fetchData, {
     enabled: canRead,
     keepPreviousData: true,
     retry: false,
@@ -62,7 +67,7 @@ const ListView = () => {
     setIsModalOpen((prev) => !prev);
 
     if (id) {
-      const actionData = data.find((action) => action.id === id);
+      const actionData = results.find((action) => action.id === id);
       setDetailsActionData(actionData);
     }
   };
@@ -81,11 +86,11 @@ const ListView = () => {
         <DynamicTable
           contentType="Audit logs"
           headers={headers}
-          rows={data?.data.results}
+          rows={results || []}
           withBulkActions
           isLoading={isLoading}
         >
-          <TableRows headers={headers} rows={data?.data.results} onModalToggle={handleToggle} />
+          <TableRows headers={headers} rows={results} onModalToggle={handleToggle} />
         </DynamicTable>
       </ContentLayout>
       {isModalOpen && <ModalDialog onToggle={handleToggle} data={detailsActionData} />}
