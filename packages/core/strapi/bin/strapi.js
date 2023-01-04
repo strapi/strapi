@@ -268,8 +268,12 @@ program
 program
   .command('transfer')
   .description('Transfer data from one source to another')
-  .addOption(new Option('--from <sourceURL>', `URL of remote Strapi instance to get data from.`))
-  .addOption(new Option('--to <destinationURL>', `URL of remote Strapi instance to send data to`))
+  .addOption(
+    new Option('--from <sourceURL>', `Admin URL of remote Strapi instance to get data from`)
+  )
+  .addOption(
+    new Option('--to <destinationURL>', `Admin URL of remote Strapi instance to send data to`)
+  )
   // Hidden (undocumented) options to define keys for
   .addOption(
     new Option('--fromToken <bearerToken>', `API or Bearer token to use with source`).hideHelp()
