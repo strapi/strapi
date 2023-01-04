@@ -271,11 +271,11 @@ program
   .command('transfer')
   .description('Transfer data from one source to another')
   .addOption(
-    new Option(
-      '--from <sourceURL>',
-      `Admin URL of remote Strapi instance to get data from`
-    ).argParser(parseURL)
+    new Option('--from <sourceURL>', `Admin URL of remote Strapi instance to get data from`)
+      .argParser(parseURL)
+      .hideHelp()
   )
+
   .addOption(
     new Option(
       '--to <destinationURL>',
