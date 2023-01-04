@@ -107,7 +107,7 @@ module.exports = async (opts) => {
   }
 
   // Note: Telemetry can't be sent in a finish event, because it runs async after this block but we can't await it, so if process.exit is used it won't send
-  await strapi.telemetry.send('didDEITSProcessFinish', getTelemetryPayload());
+  await strapiInstance.telemetry.send('didDEITSProcessFinish', getTelemetryPayload());
   process.exit(0);
 };
 
