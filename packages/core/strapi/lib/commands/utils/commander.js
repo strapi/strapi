@@ -107,18 +107,14 @@ const getAuthResolverFor = (field) => {
         password: { disabled: !!opts[`${field}Password`] },
       });
     }
-    console.log('using auth', login);
 
     try {
       const token = await resolveAuth(login, opts[field]);
       opts[`${field}Token`] = token;
-
-      console.log('resolved auth', token);
     } catch (e) {
       console.error(JSON.stringify(e));
       process.exit(1);
     }
-    process.exit(0);
   };
 };
 
