@@ -54,29 +54,36 @@ const promptEncryptionKey = async (thisCommand) => {
 /**
  * prompt for auth information for Strapi
  */
-const promptAuth = async (name) => {
-  const answers = await inquirer.prompt([
-    {
+const promptAuth = async (name, options) => {
+  const prompts = [];
+  if (!options?.email?.disabled) {
+    prompts.push({
       type: 'email', // must match the email field from the admin API /login route
-      message: `Please enter the email address for the admin account at ${name}`,
+      message: `Enter the admin user email for ${name}`,
       name: `email`,
       validate(email) {
         if (email.length > 0) return true;
 
         return 'Email must not be blank';
       },
-    },
-    {
+    });
+  }
+  if (!options?.password?.disabled) {
+    prompts.push({
       type: 'password', // must match the password field from the admin API /login route
-      message: `Please enter the password for the admin account at ${name}`,
+      message: `Please enter the admin user password for ${name}`,
       name: `password`,
       validate(pass) {
         if (pass.length > 0) return true;
 
         return 'Password must not be blank';
       },
-    },
-  ]);
+    });
+  }
+
+  if (!prompts.length) return undefined;
+
+  const answers = await inquirer.prompt(prompts);
   return answers;
 };
 
@@ -90,15 +97,28 @@ const getAuthResolverFor = (field) => {
       return;
     }
 
-    const login = await promptAuth(opts[field]);
-    console.log('got ', login);
+    console.log('opts', opts);
+    let login;
+    if (opts[`${field}Email`] && opts[`${field}Password`]) {
+      login = { email: opts[`${field}Email`], password: opts[`${field}Password`] };
+    } else {
+      login = await promptAuth(opts[field], {
+        email: { disabled: !!opts[`${field}Email`] },
+        password: { disabled: !!opts[`${field}Password`] },
+      });
+    }
+    console.log('using auth', login);
+
     try {
       const token = await resolveAuth(login, opts[field]);
       opts[`${field}Token`] = token;
+
+      console.log('resolved auth', token);
     } catch (e) {
-      console.log('error', e);
-      throw e;
+      console.error(JSON.stringify(e));
+      process.exit(1);
     }
+    process.exit(0);
   };
 };
 
@@ -114,10 +134,27 @@ const resolveAuth = async (login, url) => {
       return res.data.data.token;
     }
 
-    // TODO: read actual response to provide reason (site couldn't be reached, login didn't work, etc)
-    throw new Error('Could not authenticate');
+    // This should only be possible if the site returns a 200 status without a token; probably not a Strapi instance?
+    throw new Error(`Could not authenticate with ${url}`);
   } catch (e) {
-    console.error(e);
+    // an error response from server
+    const data = e?.response?.data;
+    if (data?.error?.message) {
+      console.error(`"${data.error.message}" received from ${url}`);
+      process.exit(1);
+    }
+
+    // failure to get response from server
+    const errorCode = e?.code;
+    if (errorCode) {
+      console.error(`"${errorCode}" received from ${url}`);
+      process.exit(1);
+    }
+
+    // Unknown error
+    console.error(`Unknown error from ${url}:`);
+    console.error(JSON.stringify(e, undefined, 2));
+    process.exit(1);
   }
 };
 
