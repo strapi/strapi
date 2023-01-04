@@ -83,6 +83,7 @@
     "@strapi/admin": "4.5.5",
     "@strapi/data-transfer": "4.5.5",
     "@strapi/database": "4.5.5",
+    "@strapi/data-transfer": "4.5.5",
     "@strapi/generate-new": "4.5.5",
     "@strapi/generators": "4.5.5",
     "@strapi/logger": "4.5.5",

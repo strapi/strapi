@@ -46,6 +46,7 @@
     "@casl/ability": "^5.4.3",
     "@fingerprintjs/fingerprintjs": "3.3.3",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.7",
+    "@strapi/data-transfer": "4.5.5",
     "@strapi/babel-plugin-switch-ee-ce": "4.5.5",
     "@strapi/design-system": "1.4.1",
     "@strapi/helper-plugin": "4.5.5",

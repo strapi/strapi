@@ -4,11 +4,11 @@
     "strict": true,
     "lib": ["ESNEXT"],
     "skipLibCheck": true,
-    "outDir": "dist",
+    "outDir": "lib",
     "declaration": true,
     "sourceMap": true,
     "esModuleInterop": true
   },
-  "include": ["types", "lib/**/*.ts"],
-  "exclude": ["node_modules", "lib/**/__tests__"]
+  "include": ["types", "src/**/*.ts"],
+  "exclude": ["node_modules", "src/**/__tests__"]
 }
