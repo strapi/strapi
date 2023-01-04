@@ -10,7 +10,8 @@ import { pipeline, PassThrough } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
 import type { IAsset, IMetadata, ISourceProvider, ProviderType } from '../../../../types';
 
-import * as utils from '../../../utils';
+import { createDecryptionCipher } from '../../../utils/encryption';
+import { collect } from '../../../utils/stream';
 
 type StreamItemArray = Parameters<typeof chain>[0];
 
@@ -82,7 +83,7 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   async getSchemas() {
-    const schemas = await utils.stream.collect(this.streamSchemas());
+    const schemas = await collect(this.streamSchemas());
 
     return keyBy('uid', schemas);
   }
@@ -151,7 +152,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     }
 
     if (encryption.enabled && encryption.key) {
-      streams.push(utils.encryption.createDecryptionCipher(encryption.key));
+      streams.push(createDecryptionCipher(encryption.key));
     }
 
     if (compression.enabled) {
