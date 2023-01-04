@@ -24,7 +24,7 @@ npm install @strapi/provider-upload-aws-s3 --save
 ## Configuration
 
 - `provider` defines the name of the provider
-- `providerOptions` is passed down during the construction of the provider. (ex: `new AWS.S3(config)`). [Complete list of options](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#constructor-property)
+- `providerOptions.s3` is passed down during the construction of the provider. (ex: `new AWS.S3(config)`). [Complete list of options](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#constructor-property)
 - `actionOptions` is passed directly to the parameters to each method respectively. You can find the complete list of [upload/ uploadStream options](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#upload-property) and [delete options](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#deleteObject-property)
 
 See the [documentation about using a provider](https://docs.strapi.io/developer-docs/latest/plugins/upload.html#using-a-provider) for information on installing and using a provider. To understand how environment variables are used in Strapi, please refer to the [documentation about environment variables](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#environment-variables).
@@ -40,12 +40,15 @@ module.exports = ({ env }) => ({
     config: {
       provider: 'aws-s3',
       providerOptions: {
-        accessKeyId: env('AWS_ACCESS_KEY_ID'),
-        secretAccessKey: env('AWS_ACCESS_SECRET'),
-        region: env('AWS_REGION'),
-        params: {
-          Bucket: env('AWS_BUCKET'),
+        s3: {
+          accessKeyId: env('AWS_ACCESS_KEY_ID'),
+          secretAccessKey: env('AWS_ACCESS_SECRET'),
+          region: env('AWS_REGION'),
+          params: {
+            Bucket: env('AWS_BUCKET'),
+          },
         },
+        pathPrefix: '', // bucket can be shared via different prefixes
       },
       actionOptions: {
         upload: {},
@@ -70,11 +73,13 @@ module.exports = ({ env }) => ({
     config: {
       provider: 'aws-s3',
       providerOptions: {
-        accessKeyId: env('SCALEWAY_ACCESS_KEY_ID'),
-        secretAccessKey: env('SCALEWAY_ACCESS_SECRET'),
-        endpoint: env('SCALEWAY_ENDPOINT'), // e.g. "s3.fr-par.scw.cloud"
-        params: {
-          Bucket: env('SCALEWAY_BUCKET'),
+        s3: {
+          accessKeyId: env('SCALEWAY_ACCESS_KEY_ID'),
+          secretAccessKey: env('SCALEWAY_ACCESS_SECRET'),
+          endpoint: env('SCALEWAY_ENDPOINT'), // e.g. "s3.fr-par.scw.cloud"
+          params: {
+            Bucket: env('SCALEWAY_BUCKET'),
+          },
         },
       },
     },

@@ -6,7 +6,6 @@
 
 /* eslint-disable no-unused-vars */
 // Public node modules.
-const _ = require('lodash');
 const AWS = require('aws-sdk');
 
 function assertUrlProtocol(url) {
@@ -14,17 +13,26 @@ function assertUrlProtocol(url) {
   return /^\w*:\/\//.test(url);
 }
 
+function buildPath(file, pathPrefix) {
+  const path = file.path ? `${file.path}/` : '';
+
+  return pathPrefix ? `${pathPrefix}/${path}` : path;
+}
+
 module.exports = {
-  init(config) {
+  init(providerOptions) {
+    // config is the fallback if no s3 property is given
+    const { s3, pathPrefix, ...config } = providerOptions;
+
     const S3 = new AWS.S3({
       apiVersion: '2006-03-01',
-      ...config,
+      ...(s3 ?? config),
     });
 
     const upload = (file, customParams = {}) =>
       new Promise((resolve, reject) => {
         // upload file on S3 bucket
-        const path = file.path ? `${file.path}/` : '';
+        const path = buildPath(file, pathPrefix);
         S3.upload(
           {
             Key: `${path}${file.hash}${file.ext}`,
@@ -61,7 +69,7 @@ module.exports = {
       delete(file, customParams = {}) {
         return new Promise((resolve, reject) => {
           // delete file on S3 bucket
-          const path = file.path ? `${file.path}/` : '';
+          const path = buildPath(file, pathPrefix);
           S3.deleteObject(
             {
               Key: `${path}${file.hash}${file.ext}`,
