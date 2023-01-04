@@ -83,8 +83,8 @@ export const RelationItem = ({
           paddingRight={4}
           hasRadius
           borderSize={1}
-          background={disabled ? 'neutral150' : 'neutral0'}
           borderColor="neutral200"
+          background={disabled ? 'neutral150' : 'neutral0'}
           justifyContent="space-between"
           ref={canDrag ? composedRefs : undefined}
           data-handler-id={handlerId}
@@ -99,6 +99,7 @@ export const RelationItem = ({
                 aria-label={iconButtonAriaLabel}
                 noBorder
                 onKeyDown={handleKeyDown}
+                disabled={disabled}
               >
                 <Drag />
               </IconButton>
