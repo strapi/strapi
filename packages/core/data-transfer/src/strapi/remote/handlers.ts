@@ -1,4 +1,3 @@
-// eslint-disable-next-line node/no-extraneous-import
 import type { Context } from 'koa';
 import type { ServerOptions } from 'ws';
 
