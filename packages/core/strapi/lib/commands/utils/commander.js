@@ -97,7 +97,6 @@ const getAuthResolverFor = (field) => {
       return;
     }
 
-    console.log('opts', opts);
     let login;
     if (opts[`${field}Email`] && opts[`${field}Password`]) {
       login = { email: opts[`${field}Email`], password: opts[`${field}Password`] };
