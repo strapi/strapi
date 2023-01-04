@@ -1,6 +1,6 @@
 import { axiosInstance } from '../../../../../../core/utils';
 
-const fetchData = async () => {
+const fetchAuditLogsPage = async () => {
   const {
     data: { results },
   } = await axiosInstance.get(`/admin/audit-logs?pageSize=30`);
@@ -8,4 +8,10 @@ const fetchData = async () => {
   return results;
 };
 
-export { fetchData };
+const fetchAuditLog = async (id) => {
+  const { data } = await axiosInstance.get(`/admin/audit-logs/${id}`);
+
+  return data;
+};
+
+export { fetchAuditLogsPage, fetchAuditLog };

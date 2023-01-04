@@ -11,7 +11,9 @@ import getDefaultMessage from '../utils/getActionTypesDefaultMessages';
 import useFormatTimeStamp from '../hooks/useFormatTimeStamp';
 import ActionItem from './ActionItem';
 
-const ModalDialog = ({ onToggle, data: { date, user, action } }) => {
+const ModalDialog = ({ onToggle, data }) => {
+  const { date, user, action, payload } = data;
+
   const { formatMessage } = useIntl();
   const formatTimeStamp = useFormatTimeStamp();
   const formattedDate = formatTimeStamp(date);
@@ -67,6 +69,10 @@ const ModalDialog = ({ onToggle, data: { date, user, action } }) => {
             actionName={user ? user.fullname : '-'}
           />
         </Grid>
+        {/* TODO remove when adding JSON component */}
+        <Box as="pre" marginTop={4}>
+          <Typography>{JSON.stringify({ payload }, null, 2)}</Typography>
+        </Box>
       </ModalBody>
     </ModalLayout>
   );

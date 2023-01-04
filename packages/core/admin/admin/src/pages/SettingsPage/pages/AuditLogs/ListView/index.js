@@ -14,15 +14,11 @@ import adminPermissions from '../../../../../permissions';
 // import { useFetchClient } from '../../../../../hooks';
 import TableRows from './DynamicTable/TableRows';
 import tableHeaders from './utils/tableHeaders';
-import { fetchData } from './utils/api';
+import { fetchAuditLogsPage, fetchAuditLog } from './utils/api';
 import ModalDialog from './ModalDialog';
-
-const QUERY = 'audit-logs';
 
 const ListView = () => {
   const { formatMessage } = useIntl();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [detailsActionData, setDetailsActionData] = useState(null);
   const toggleNotification = useNotification();
   const {
     allowedActions: { canRead },
@@ -42,7 +38,7 @@ const ListView = () => {
     return results;
   }; */
 
-  const { status, data, isFetching } = useQuery(QUERY, fetchData, {
+  const { status, data, isFetching } = useQuery('audit-logs', fetchAuditLogsPage, {
     enabled: canRead,
     keepPreviousData: true,
     retry: false,
@@ -70,13 +66,20 @@ const ListView = () => {
     },
   }));
 
-  const handleToggle = (id) => {
-    setIsModalOpen((prev) => !prev);
-
-    if (id) {
-      const actionData = data.find((action) => action.id === id);
-      setDetailsActionData(actionData);
+  const [openedLogId, setOpenedLogId] = useState(null);
+  const { data: openedLogData, status: openedLogStatus } = useQuery(
+    ['audit-log', openedLogId],
+    () => fetchAuditLog(openedLogId),
+    {
+      enabled: !!openedLogId,
     }
+  );
+
+  console.log({ openedLogData, openedLogId });
+
+  const handleToggle = (id) => {
+    // Either saves the id of the log to open or closes the modal
+    setOpenedLogId(id);
   };
 
   return (
@@ -100,7 +103,9 @@ const ListView = () => {
           <TableRows headers={headers} rows={data} onModalToggle={handleToggle} />
         </DynamicTable>
       </ContentLayout>
-      {isModalOpen && <ModalDialog onToggle={handleToggle} data={detailsActionData} />}
+      {openedLogId && openedLogStatus === 'success' && (
+        <ModalDialog onToggle={handleToggle} data={openedLogData} />
+      )}
     </Main>
   );
 };
