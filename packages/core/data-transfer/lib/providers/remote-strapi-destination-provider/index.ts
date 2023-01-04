@@ -22,7 +22,7 @@ interface ITokenAuth {
 
 export interface IRemoteStrapiDestinationProviderOptions
   extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
-  url: string;
+  url: URL;
   auth?: ITokenAuth;
 }
 
@@ -71,15 +71,19 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
     let ws: WebSocket;
 
+    const wsUrl = `${url.protocol === 'https:' ? 'wss:' : 'ws:'}${url.host}${
+      url.pathname
+    }/transfer`;
+
     // No auth defined, trying public access for transfer
     if (!auth) {
-      ws = new WebSocket(url);
+      ws = new WebSocket(wsUrl);
     }
 
     // Common token auth, this should be the main auth method
     else if (auth.type === 'token') {
       const headers = { Authentication: `Bearer ${auth.token}` };
-      ws = new WebSocket(`${this.options.url}/transfer`, { headers });
+      ws = new WebSocket(wsUrl, { headers });
     }
 
     // Invalid auth method provided

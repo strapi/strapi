@@ -5,12 +5,60 @@ const inquirer = require('inquirer');
 const { isArray } = require('lodash');
 const { isString } = require('lodash/fp');
 const axios = require('axios');
+const { InvalidOptionArgumentError } = require('commander');
 
 /**
  * argsParser: Parse a comma-delimited string as an array
  */
 const parseInputList = (value) => {
   return value.split(',');
+};
+
+const parseURL = (value) => {
+  try {
+    const url = new URL(value);
+    if (!url.host) {
+      throw new InvalidOptionArgumentError(`Could not parse url ${value}`);
+    }
+
+    return url;
+  } catch (e) {
+    throw new InvalidOptionArgumentError(`Could not parse url ${value}`);
+  }
+};
+
+/**
+ * assert that a given URL has a given protocol
+ *
+ * @param {URL} url
+ * @param {string[]|undefined} protocol
+ */
+
+const assertUrlHasProtocol = (url, protocol = undefined) => {
+  if (!url.protocol) {
+    console.error(`${url.toString()} does not have a protocol`);
+    process.exit(1);
+  }
+
+  // if just checking for the existence of a protocol, return
+  if (!protocol) {
+    return;
+  }
+
+  if (isString(protocol)) {
+    if (protocol !== url.protocol) {
+      exitWith(1, `${url.toString()} must have the protocol ${protocol}`);
+    }
+    return;
+  }
+
+  // assume an array
+  if (!protocol.some((protocol) => url.protocol === protocol)) {
+    return exitWith(
+      1,
+      `${url.toString()} must have one of the following protocols: ${protocol.join(',')}`
+    );
+  }
 };
 
 /**
@@ -20,8 +68,7 @@ const promptEncryptionKey = async (thisCommand) => {
   const opts = thisCommand.opts();
 
   if (!opts.encrypt && opts.key) {
-    console.error('Key may not be present unless encryption is used');
-    process.exit(1);
+    return exitWith(1, 'Key may not be present unless encryption is used');
   }
 
   // if encrypt==true but we have no key, prompt for it
@@ -41,12 +88,10 @@ const promptEncryptionKey = async (thisCommand) => {
       ]);
       opts.key = answers.key;
     } catch (e) {
-      console.error('Failed to get encryption key');
-      process.exit(1);
+      return exitWith(1, 'Failed to get encryption key');
     }
     if (!opts.key) {
-      console.error('Failed to get encryption key');
-      process.exit(1);
+      return exitWith(1, 'Failed to get encryption key');
     }
   }
 };
@@ -101,14 +146,14 @@ const getAuthResolverFor = (field) => {
     if (opts[`${field}Email`] && opts[`${field}Password`]) {
       login = { email: opts[`${field}Email`], password: opts[`${field}Password`] };
     } else {
-      login = await promptAuth(opts[field], {
+      login = await promptAuth(opts[field].toString(), {
         email: { disabled: !!opts[`${field}Email`] },
         password: { disabled: !!opts[`${field}Password`] },
       });
     }
 
     try {
-      const token = await resolveAuth(login, opts[field]);
+      const token = await resolveAuth(login, opts[field].toString());
       opts[`${field}Token`] = token;
     } catch (e) {
       console.error(JSON.stringify(e));
@@ -135,21 +180,17 @@ const resolveAuth = async (login, url) => {
     // an error response from server
     const data = e?.response?.data;
     if (data?.error?.message) {
-      console.error(`"${data.error.message}" received from ${url}`);
-      process.exit(1);
+      exitWith(1, `"${data.error.message}" received from ${url}`);
     }
 
     // failure to get response from server
     const errorCode = e?.code;
     if (errorCode) {
-      console.error(`"${errorCode}" received from ${url}`);
-      process.exit(1);
+      exitWith(`"${errorCode}" received from ${url}`);
     }
 
     // Unknown error
-    console.error(`Unknown error from ${url}:`);
-    console.error(JSON.stringify(e, undefined, 2));
-    process.exit(1);
+    exitWith([`Unknown error from ${url}:`, JSON.stringify(e, undefined, 2)]);
   }
 };
 
@@ -167,7 +208,7 @@ const confirmMessage = (message) => {
       },
     ]);
     if (!answers.confirm) {
-      process.exit(0);
+      exitWith(0);
     }
   };
 };
@@ -210,6 +251,8 @@ const exitWith = (code, message = undefined) => {
 
 module.exports = {
   parseInputList,
+  parseURL,
+  assertUrlHasProtocol,
   promptEncryptionKey,
   confirmMessage,
   getAuthResolverFor,

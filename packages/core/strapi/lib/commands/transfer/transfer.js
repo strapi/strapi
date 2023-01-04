@@ -20,9 +20,9 @@ const logger = console;
 /**
  * @typedef TransferCommandOptions Options given to the CLI transfer command
  *
- * @property {string|undefined} [to] The url of the remote destination provider
+ * @property {URL|undefined} [to] The URL object for the remote destination provider
  * @property {string|undefined} [toToken] The bearer token to use at destination
- * @property {string|undefined} [from] The url of the remote source provider
+ * @property {URL|undefined} [from] The URL object for the remote source provider
  * @property {string|undefined} [fromToken] The bearer token to use at source
  */
 

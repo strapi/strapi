@@ -20,6 +20,8 @@ const {
   ifOptions,
   exitWith,
   getAuthResolverFor,
+  parseURL,
+  assertUrlHasProtocol,
 } = require('../lib/commands/utils/commander');
 
 const checkCwdIsStrapiApp = (name) => {
@@ -269,10 +271,16 @@ program
   .command('transfer')
   .description('Transfer data from one source to another')
   .addOption(
-    new Option('--from <sourceURL>', `Admin URL of remote Strapi instance to get data from`)
+    new Option(
+      '--from <sourceURL>',
+      `Admin URL of remote Strapi instance to get data from`
+    ).argParser(parseURL)
   )
   .addOption(
-    new Option('--to <destinationURL>', `Admin URL of remote Strapi instance to send data to`)
+    new Option(
+      '--to <destinationURL>',
+      `Admin URL of remote Strapi instance to send data to`
+    ).argParser(parseURL)
   )
   // Hidden (undocumented) options for byassing prompts
   .addOption(
@@ -289,7 +297,21 @@ program
   .addOption(
     new Option('--fromPassword <password>', `Password for admin account for source`).hideHelp()
   )
-  // Hooks
+  // Validate URLs
+  .hook(
+    'preAction',
+    ifOptions(
+      (opts) => opts.from,
+      (thisCommand) => assertUrlHasProtocol(thisCommand.opts().from, ['https:', 'http:'])
+    )
+  )
+  .hook(
+    'preAction',
+    ifOptions(
+      (opts) => opts.to,
+      (thisCommand) => assertUrlHasProtocol(thisCommand.opts().to, ['https:', 'http:'])
+    )
+  )
   .hook(
     'preAction',
     ifOptions(
@@ -297,14 +319,16 @@ program
       () => exitWith(1, 'At least one source (from) or destination (to) option must be provided')
     )
   )
+  // Authentication
   .hook(
     'preAction',
-    ifOptions((opts) => opts.from?.length && !opts.fromToken, getAuthResolverFor('from'))
+    ifOptions((opts) => opts.from && !opts.fromToken, getAuthResolverFor('from'))
   )
   .hook(
     'preAction',
-    ifOptions((opts) => opts.to?.length && !opts.toToken, getAuthResolverFor('to'))
+    ifOptions((opts) => opts.to && !opts.toToken, getAuthResolverFor('to'))
   )
+
   .allowExcessArguments(false)
   .action(getLocalScript('transfer/transfer'));
 
