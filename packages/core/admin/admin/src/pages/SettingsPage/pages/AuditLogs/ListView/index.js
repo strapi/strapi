@@ -32,7 +32,7 @@ const ListView = () => {
 
   const fetchData = async ({ queryKey }) => {
     const [, search] = queryKey;
-    const { data } = await get('/admin/audit-logs', { params: { ...search } });
+    const { data } = await get(`/admin/audit-logs${search}`);
 
     return data;
   };
