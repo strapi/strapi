@@ -3,20 +3,21 @@
 const utils = require('../../transfer/utils');
 
 const mockDataTransfer = {
-  createRemoteStrapiDestinationProvider: jest.fn(),
-  createLocalStrapiSourceProvider: jest.fn(),
-  createTransferEngine: jest.fn().mockReturnValue({
-    transfer: jest.fn().mockReturnValue(Promise.resolve({})),
-  }),
+  strapi: {
+    providers: {
+      createRemoteStrapiDestinationProvider: jest.fn(),
+      createLocalStrapiSourceProvider: jest.fn(),
+    },
+  },
+  engine: {
+    createTransferEngine: jest.fn().mockReturnValue({
+      transfer: jest.fn().mockReturnValue(Promise.resolve({})),
+    }),
+  },
 };
 
-jest.mock(
-  '@strapi/data-transfer',
-  () => {
-    return mockDataTransfer;
-  },
-  { virtual: true }
-);
+jest.mock('@strapi/data-transfer/lib/engine', () => mockDataTransfer.engine, { virtual: true });
+jest.mock('@strapi/data-transfer/lib/strapi', () => mockDataTransfer.strapi, { virtual: true });
 
 const expectExit = async (code, fn) => {
   const exit = jest.spyOn(process, 'exit').mockImplementation((number) => {
@@ -39,7 +40,7 @@ jest.mock('../../transfer/utils');
 
 const destinationUrl = 'ws://strapi.com';
 
-describe('transfer', () => {
+describe('Transfer', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -49,7 +50,9 @@ describe('transfer', () => {
       await transferCommand({ from: undefined, to: destinationUrl });
     });
 
-    expect(mockDataTransfer.createRemoteStrapiDestinationProvider).toHaveBeenCalledWith(
+    expect(
+      mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
+    ).toHaveBeenCalledWith(
       expect.objectContaining({
         url: destinationUrl,
       })
@@ -63,7 +66,9 @@ describe('transfer', () => {
       await transferCommand({ from: undefined, to: destinationUrl });
     });
 
-    expect(mockDataTransfer.createRemoteStrapiDestinationProvider).toHaveBeenCalledWith(
+    expect(
+      mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
+    ).toHaveBeenCalledWith(
       expect.objectContaining({
         strategy: 'restore',
       })
@@ -74,7 +79,9 @@ describe('transfer', () => {
       await transferCommand({ from: undefined, to: destinationUrl });
     });
 
-    expect(mockDataTransfer.createRemoteStrapiDestinationProvider).toHaveBeenCalledWith(
+    expect(
+      mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
+    ).toHaveBeenCalledWith(
       expect.objectContaining({
         url: destinationUrl,
       })
@@ -86,7 +93,9 @@ describe('transfer', () => {
       await transferCommand({ from: undefined, to: destinationUrl });
     });
 
-    expect(mockDataTransfer.createRemoteStrapiDestinationProvider).toHaveBeenCalledWith(
+    expect(
+      mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
+    ).toHaveBeenCalledWith(
       expect.objectContaining({
         strategy: 'restore',
       })
@@ -98,7 +107,7 @@ describe('transfer', () => {
       await transferCommand({ from: undefined, to: destinationUrl });
     });
 
-    expect(mockDataTransfer.createLocalStrapiSourceProvider).toHaveBeenCalled();
+    expect(mockDataTransfer.strapi.providers.createLocalStrapiSourceProvider).toHaveBeenCalled();
     expect(utils.createStrapiInstance).toHaveBeenCalled();
   });
 });

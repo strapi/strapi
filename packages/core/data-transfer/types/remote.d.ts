@@ -1,4 +1,4 @@
-import type { ILocalStrapiDestinationProviderOptions } from '../lib';
+import type { ILocalStrapiDestinationProviderOptions } from '../src/strapi/providers';
 import type { IAsset, IConfiguration, IEntity, ILink } from './common-entities';
 
 /**

@@ -1,6 +1,6 @@
 'use strict';
 
-const { register: registerDataTransfer } = require('@strapi/data-transfer');
+const { register: registerDataTransfer } = require('@strapi/data-transfer/lib/strapi');
 
 const registerAdminPanelRoute = require('./routes/serve-admin-panel');
 const adminAuthStrategy = require('./strategies/admin');
