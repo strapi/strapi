@@ -274,12 +274,20 @@ program
   .addOption(
     new Option('--to <destinationURL>', `Admin URL of remote Strapi instance to send data to`)
   )
-  // Hidden (undocumented) options to define keys for
+  // Hidden (undocumented) options for byassing prompts
   .addOption(
     new Option('--fromToken <bearerToken>', `API or Bearer token to use with source`).hideHelp()
   )
   .addOption(
     new Option('--toToken <bearerToken>', `API or Bearer token to use with destination`).hideHelp()
+  )
+  .addOption(new Option('--toEmail <email>', `Email for admin account for destination`).hideHelp())
+  .addOption(
+    new Option('--toPassword <password>', `Password for admin account for destination`).hideHelp()
+  )
+  .addOption(new Option('--fromEmail <email>', `Email for admin account for source`).hideHelp())
+  .addOption(
+    new Option('--fromPassword <password>', `Password for admin account for source`).hideHelp()
   )
   // Hooks
   .hook(
