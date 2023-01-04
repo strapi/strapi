@@ -1,14 +1,15 @@
+import { WebSocket } from 'ws';
 import type { IRemoteStrapiDestinationProviderOptions } from '..';
 
 import { createRemoteStrapiDestinationProvider } from '..';
 
 const defaultOptions: IRemoteStrapiDestinationProviderOptions = {
   strategy: 'restore',
-  url: 'ws://test.com/admin/transfer',
+  url: '<some_url>',
 };
 
 jest.mock('../utils', () => ({
-  dispatch: jest.fn(),
+  createDispatcher: jest.fn(),
 }));
 
 jest.mock('ws', () => ({
@@ -40,9 +41,14 @@ describe('Remote Strapi Destination', () => {
 
     test('Should have a defined websocket connection if bootstrap has been called', async () => {
       const provider = createRemoteStrapiDestinationProvider(defaultOptions);
-      await provider.bootstrap();
+      try {
+        await provider.bootstrap();
+      } catch {
+        // ignore ws connection error
+      }
 
       expect(provider.ws).not.toBeNull();
+      expect(provider.ws?.readyState).toBe(WebSocket.CLOSED);
     });
   });
 });

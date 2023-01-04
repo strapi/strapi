@@ -63,7 +63,8 @@
     "@types/tar": "6.1.3",
     "@types/tar-stream": "2.2.2",
     "@types/uuid": "9.0.0",
-    "@types/koa": "2.13.1",
+    "koa": "2.13.4",
+    "@types/koa": "2.13.4",
     "rimraf": "3.0.2",
     "typescript": "4.6.2"
   },

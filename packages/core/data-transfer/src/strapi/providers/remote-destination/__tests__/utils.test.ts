@@ -1,5 +1,6 @@
 import { WebSocket } from 'ws';
-import { dispatch } from '../utils';
+import { CommandMessage } from '../../../../../types/remote/protocol/client';
+import { createDispatcher } from '../utils';
 
 jest.mock('ws', () => ({
   WebSocket: jest.fn().mockImplementation(() => {
@@ -18,11 +19,12 @@ afterEach(() => {
 describe('Remote Strapi Destination Utils', () => {
   test('Dispatch method sends payload', () => {
     const ws = new WebSocket('ws://test/admin/transfer');
-    const message = {
-      test: 'hello',
+    const message: CommandMessage = {
+      type: 'command',
+      command: 'status',
     };
 
-    dispatch(ws, message);
+    createDispatcher(ws).dispatch(message);
 
     expect.extend({
       toContain(receivedString, expected) {
