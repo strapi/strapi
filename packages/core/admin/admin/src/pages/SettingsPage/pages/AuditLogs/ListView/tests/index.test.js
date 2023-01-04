@@ -9,10 +9,48 @@ import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { TrackingProvider } from '@strapi/helper-plugin';
 // import { useFetchClient } from '../../../../../../hooks';
 import ListView from '../index';
-import server from './utils/server';
 
 const history = createMemoryHistory();
 const user = userEvent.setup();
+
+const TEST_DATA = [
+  {
+    id: 1,
+    action: 'role.create',
+    date: '2022-12-27T10:02:06.598Z',
+    user: {
+      id: 1,
+      fullname: 'test user',
+      email: 'test@test.com',
+    },
+  },
+  {
+    id: 2,
+    action: 'role.delete',
+    date: '2022-12-27T16:28:08.977Z',
+    user: {
+      id: 1,
+      fullname: 'test user',
+      email: 'test@test.com',
+    },
+  },
+  {
+    id: 3,
+    action: 'entry.create',
+    date: '2022-12-27T17:34:00.673Z',
+    user: null,
+  },
+  {
+    id: 4,
+    action: 'admin.logout',
+    date: '2022-12-27T17:51:04.146Z',
+    user: {
+      id: 1,
+      fullname: 'test user',
+      email: 'test@test.com',
+    },
+  },
+];
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -23,10 +61,15 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-// jest.mock('../../../../../../hooks', () => ({
-//   ...jest.requireActual('../../../../../../hooks'),
-//   useFetchClient: jest.fn(),
-// }));
+const mockUseQuery = jest.fn();
+jest.mock('react-query', () => {
+  const actual = jest.requireActual('react-query');
+
+  return {
+    ...actual,
+    useQuery: () => mockUseQuery(),
+  };
+});
 
 const client = new QueryClient({
   defaultOptions: {
@@ -51,25 +94,22 @@ const App = (
 );
 
 describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
-  beforeAll(() => {
-    server.listen();
-    // useFetchClient.mockImplementationOnce(() => ({
-    //   get: jest.fn(),
-    // }));
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  afterEach(() => server.resetHandlers());
-
   afterAll(() => {
-    server.close();
     jest.resetAllMocks();
   });
 
   it('should render page with right header details', () => {
+    mockUseQuery.mockReturnValue({
+      data: {
+        results: [],
+      },
+      isLoading: false,
+    });
+
     render(App);
     const title = screen.getByText(/audit logs/i);
     expect(title).toBeInTheDocument();
@@ -80,6 +120,12 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
   });
 
   it('should show a list of audit logs with all actions', async () => {
+    mockUseQuery.mockReturnValue({
+      data: {
+        results: TEST_DATA,
+      },
+      isLoading: false,
+    });
     render(App);
 
     await waitFor(() => {
@@ -91,16 +137,23 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
   });
 
   it('should open a modal when clicked on a table row and close modal when clicked', async () => {
+    mockUseQuery.mockReturnValue({
+      data: {
+        results: TEST_DATA,
+      },
+      isLoading: false,
+    });
+
     const { container } = render(App);
-    expect(screen.queryByText(/log details/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 
     const rows = container.querySelector('tbody').querySelectorAll('tr');
     await user.click(rows[0]);
-    expect(screen.getByText(/log details/i)).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
 
     const label = screen.getByText(/close the modal/i);
     const closeButton = label.closest('button');
     await user.click(closeButton);
-    expect(screen.queryByText(/log details/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });

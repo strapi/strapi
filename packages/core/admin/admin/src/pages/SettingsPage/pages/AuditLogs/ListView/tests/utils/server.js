@@ -32,7 +32,7 @@ const handlers = [
             id: 3,
             action: 'entry.create',
             date: '2022-12-27T17:34:00.673Z',
-            fullname: null,
+            user: null,
           },
           {
             id: 4,

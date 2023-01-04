@@ -30,14 +30,14 @@ const ListView = () => {
 
   useFocusWhenNavigate();
 
-  const fetchData = ({ queryKey }) => get(`/admin/audit-logs${queryKey[1]}`);
+  const fetchData = async ({ queryKey }) => {
+    const [, search] = queryKey;
+    const { data } = await get('/admin/audit-logs', { params: { ...search } });
 
-  const {
-    data: {
-      data: { results },
-    },
-    isLoading,
-  } = useQuery(['auditLogs', search], fetchData, {
+    return data;
+  };
+
+  const { data, isLoading } = useQuery(['auditLogs', search], fetchData, {
     enabled: canRead,
     keepPreviousData: true,
     retry: false,
@@ -66,8 +66,8 @@ const ListView = () => {
   const handleToggle = (id) => {
     setIsModalOpen((prev) => !prev);
 
-    if (id) {
-      const actionData = results.find((action) => action.id === id);
+    if (data.results && id) {
+      const actionData = data.results.find((action) => action.id === id);
       setDetailsActionData(actionData);
     }
   };
@@ -86,11 +86,11 @@ const ListView = () => {
         <DynamicTable
           contentType="Audit logs"
           headers={headers}
-          rows={results || []}
+          rows={data?.results || []}
           withBulkActions
           isLoading={isLoading}
         >
-          <TableRows headers={headers} rows={results} onModalToggle={handleToggle} />
+          <TableRows headers={headers} rows={data?.results || []} onModalToggle={handleToggle} />
         </DynamicTable>
       </ContentLayout>
       {isModalOpen && <ModalDialog onToggle={handleToggle} data={detailsActionData} />}
