@@ -36,8 +36,7 @@ const parseURL = (value) => {
 
 const assertUrlHasProtocol = (url, protocol = undefined) => {
   if (!url.protocol) {
-    console.error(`${url.toString()} does not have a protocol`);
-    process.exit(1);
+    exitWith(1, `${url.toString()} does not have a protocol`);
   }
 
   // if just checking for the existence of a protocol, return
@@ -142,22 +141,23 @@ const getAuthResolverFor = (field) => {
       return;
     }
 
+    const urlString = opts[field].toString();
+
     let login;
     if (opts[`${field}Email`] && opts[`${field}Password`]) {
       login = { email: opts[`${field}Email`], password: opts[`${field}Password`] };
     } else {
-      login = await promptAuth(opts[field].toString(), {
+      login = await promptAuth(urlString, {
         email: { disabled: !!opts[`${field}Email`] },
         password: { disabled: !!opts[`${field}Password`] },
       });
     }
 
     try {
-      const token = await resolveAuth(login, opts[field].toString());
+      const token = await resolveAuth(login, urlString);
       opts[`${field}Token`] = token;
     } catch (e) {
-      console.error(JSON.stringify(e));
-      process.exit(1);
+      exitWith(1, `Error authenticating with ${urlString}`);
     }
   };
 };
@@ -186,11 +186,11 @@ const resolveAuth = async (login, url) => {
     // failure to get response from server
     const errorCode = e?.code;
     if (errorCode) {
-      exitWith(`"${errorCode}" received from ${url}`);
+      exitWith(1, `"${errorCode}" received from ${url}`);
     }
 
     // Unknown error
-    exitWith([`Unknown error from ${url}:`, JSON.stringify(e, undefined, 2)]);
+    exitWith(1, [`Unknown error from ${url}:`, JSON.stringify(e, undefined, 2)]);
   }
 };
 
