@@ -78,10 +78,8 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     step: T,
     data: client.GetTransferPushStreamData<T>
   ) {
-    const query = this.dispatcher?.dispatchTransferStep({ action: 'stream', step, data });
-
     try {
-      await query;
+      await this.dispatcher?.dispatchTransferStep({ action: 'stream', step, data });
     } catch (e) {
       if (e instanceof Error) {
         return e;
