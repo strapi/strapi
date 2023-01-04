@@ -342,13 +342,11 @@ program
     )
   )
   .allowExcessArguments(false)
-  .hook('preAction', async (thisCommand) => {
-    const opts = thisCommand.opts();
-    const ext = path.extname(String(opts.file));
-
-    // check extension to guess if we should prompt for key
-    if (ext === '.enc') {
-      if (!opts.key) {
+  .hook(
+    'preAction',
+    ifOptions(
+      (opts) => path.extname(String(opts.file)) === '.enc' && !opts.key,
+      async (thisCommand) => {
         const answers = await inquirer.prompt([
           {
             type: 'password',
@@ -360,10 +358,10 @@ program
           console.log('No key entered, aborting import.');
           process.exit(0);
         }
-        opts.key = answers.key;
+        thisCommand.opts().key = answers.key;
       }
-    }
-  })
+    )
+  )
   .hook(
     'preAction',
     confirmMessage(
