@@ -60,7 +60,7 @@
     "bcryptjs": "2.4.3",
     "chalk": "^4.1.1",
     "chokidar": "^3.5.1",
-    "codemirror": "^5.65.8",
+    "codemirror": "^5.65.11",
     "cross-env": "^7.0.3",
     "css-loader": "6.7.2",
     "date-fns": "2.29.3",
