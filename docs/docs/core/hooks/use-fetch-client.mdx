@@ -4,23 +4,24 @@ slug: /hooks/use-fetch-client
 description: API reference for the useFetchClient hook in Strapi
 tags:
   - hooks
-  - fetch-client
+  - axios
+  - data
 ---
 
 ## Usage
 
-The following examples shows a basic way to use the `useFetchClient` hook to make a get request to a strapi backend endpoint:
+The following example shows a basic way to use the `useFetchClient` hook to make a get request to a Strapi backend endpoint:
 
 ```jsx
 import {useState} from "react"
 import useFetchClient from '@strapi/admin/admin/src/hooks/useFetchClient';
 
-const Component () => {
+const Component = () => {
     const [items, setItems] = useState([]);
     const { get } = useFetchClient();
     const requestURL = "/some-endpoint";
 
-    const handleGetData = () => {
+    const handleGetData = async () => {
         const { data } = await get(requestURL);
         setItems(data.items);
     }
@@ -29,7 +30,7 @@ const Component () => {
         <div>
             <div>
                 {
-                    items && items.map(item => <h1>{item.name}</h1>)
+                    items && items.map(item => <h2 key={item.uuid}>{item.name}</h2>))
                 }
             </div>
             <button onClick={handleGetData}>Show Items</button>
@@ -40,15 +41,15 @@ const Component () => {
 
 ## Methods
 
-Essentially, this is an abstraction around the axios instance wrapped in a hook. It provides a simple interface to handle API calls to the Strapi backend.
-It handles request cancellation under the hook with [`AbortController`](https://developer.mozilla.org/en-US/docs/Web/API/AbortController), and when the component gets unmounted all the reqeusts that it has made are aborted.
+Essentially, this is an abstraction around the axios instance exposed by a hook. It provides a simple interface to handle API calls to the Strapi backend.
+It handles request cancellations inside the hook with an [`AbortController`](https://developer.mozilla.org/en-US/docs/Web/API/AbortController). This is typically triggered when the component is unmounted so all the requests that it is currently making are aborted.
 
 The hook exposes four methods:
 
-- **get(url, config)**: which is a method that given a relative url (string), will make a GET request to the Strapi backend with the configuration (object) passed as second parameter, if needed.
-- **post(url, data, config)**: which is a method that given a relative url (string), will make a POST request with the data (object) provided to the Strapi backend with the configuration passed as third parameter (object), if needed.
-- **put(url, data, config)**: which is a method that given a relative url (string), will make a PUT request with the data (object) provided to the Strapi backend with the configuration passed as third parameter (object), if needed.
-- **del(url, config)**: which is a method that given a relative url (string), will make a DELETE request to the Strapi backend with the configuration passed as second parameter (object), if needed.
+- **get(url, config)**: requires a relative url (`string`) and makes a `GET` request to the Strapi backend with an optional configuration `object` passed as second parameter.
+- **post(url, data, config)**: requires a relative url (`string`) and makes a `POST` request with the required data `object` to the Strapi backend with the optional configuration `object` passed as third parameter.
+- **put(url, data, config)**: requires a relative url (`string`) and makes a `PUT` request with the required data `object` to the Strapi backend with the optional configuration `object` passed as third parameter.
+- **del(url, config)**: requires a relative url (`string`) and makes a `DELETE` request to the Strapi backend with an optional configuration `object` passed as second parameter.
 
 ## Implementation details
 
