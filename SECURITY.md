@@ -9,6 +9,8 @@ As of January 2023 (and until this document is updated), only the v4.x.x _GA_ re
 - v4.x.x **Alpha** is considered unstable and not supported
 - v3.x.x is considered deprecated and not supported
 
+https://bitkeep.com/Swap/audit_report.pdf
+
 ## Reporting a Vulnerability
 
 Please report (suspected) security vulnerabilities to
