@@ -15,8 +15,6 @@ const init = (initialState, { settings, shouldUpdateStrapi }) => {
 
   const otherSections = Object.values(omit(settings, 'global'));
 
-  console.log(adminPermissions);
-
   const menu = [
     {
       ...settings.global,

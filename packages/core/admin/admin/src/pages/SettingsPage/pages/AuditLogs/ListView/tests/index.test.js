@@ -7,50 +7,11 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { TrackingProvider } from '@strapi/helper-plugin';
-// import { useFetchClient } from '../../../../../../hooks';
 import ListView from '../index';
+import TEST_DATA from './utils/data';
 
 const history = createMemoryHistory();
 const user = userEvent.setup();
-
-const TEST_DATA = [
-  {
-    id: 1,
-    action: 'role.create',
-    date: '2022-12-27T10:02:06.598Z',
-    user: {
-      id: 1,
-      fullname: 'test user',
-      email: 'test@test.com',
-    },
-  },
-  {
-    id: 2,
-    action: 'role.delete',
-    date: '2022-12-27T16:28:08.977Z',
-    user: {
-      id: 1,
-      fullname: 'test user',
-      email: 'test@test.com',
-    },
-  },
-  {
-    id: 3,
-    action: 'entry.create',
-    date: '2022-12-27T17:34:00.673Z',
-    user: null,
-  },
-  {
-    id: 4,
-    action: 'admin.logout',
-    date: '2022-12-27T17:51:04.146Z',
-    user: {
-      id: 1,
-      fullname: 'test user',
-      email: 'test@test.com',
-    },
-  },
-];
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -103,7 +64,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
   });
 
   it('should render page with right header details', () => {
-    mockUseQuery.mockReturnValue({
+    mockUseQuery.mockReturnValueOnce({
       data: {
         results: [],
       },
@@ -120,7 +81,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
   });
 
   it('should show a list of audit logs with all actions', async () => {
-    mockUseQuery.mockReturnValue({
+    mockUseQuery.mockReturnValueOnce({
       data: {
         results: TEST_DATA,
       },
@@ -137,7 +98,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
   });
 
   it('should open a modal when clicked on a table row and close modal when clicked', async () => {
-    mockUseQuery.mockReturnValue({
+    mockUseQuery.mockReturnValueOnce({
       data: {
         results: TEST_DATA,
       },

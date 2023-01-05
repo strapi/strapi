@@ -85,7 +85,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView | Dynamic Table | Table Rows', (
     expect(screen.getByText(/november 4, 2022, 18:24:00/i)).toBeInTheDocument();
     expect(screen.getAllByText(/kai doe/i).length).toBe(2);
 
-    // empty cell displays '-', here action with id: 3
+    // For custom actions without translation it should show the action without formatting
     expect(screen.getByText('custom.action')).toBeInTheDocument();
   });
 

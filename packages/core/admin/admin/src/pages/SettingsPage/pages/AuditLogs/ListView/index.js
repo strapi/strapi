@@ -31,7 +31,7 @@ const ListView = () => {
   useFocusWhenNavigate();
 
   const fetchData = async ({ queryKey }) => {
-    const [, search] = queryKey;
+    const search = queryKey[1];
     const { data } = await get(`/admin/audit-logs${search}`);
 
     return data;
