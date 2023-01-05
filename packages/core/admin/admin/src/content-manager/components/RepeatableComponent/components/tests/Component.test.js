@@ -30,7 +30,6 @@ describe('RepeatableComponent | Component', () => {
   const defaultProps = {
     componentFieldName: 'test',
     index: 0,
-    sourceComponentId: 0,
     mainField: 'test',
     moveComponentField: jest.fn(),
     onClickToggle: jest.fn(),

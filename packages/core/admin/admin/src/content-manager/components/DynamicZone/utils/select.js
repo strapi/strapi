@@ -17,11 +17,12 @@ function useSelect(name) {
 
   const dynamicDisplayedComponents = useMemo(
     () =>
-      get(modifiedData, [name], []).map((data) => ({
-        componentUid: data.__component,
-        componentId: data.id,
-        id: data.id ?? data.__temp_key__,
-      })),
+      get(modifiedData, [name], []).map((data) => {
+        return {
+          componentUid: data.__component,
+          id: data.id ?? data.__temp_key__,
+        };
+      }),
     [modifiedData, name]
   );
 

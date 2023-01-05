@@ -90,8 +90,8 @@ describe('DynamicZone', () => {
     it('should render the dynamic zone of components when there are dynamic components to render', () => {
       setup({
         dynamicDisplayedComponents: [
-          { componentUid: 'component1', id: 0, componentId: 0 },
-          { componentUid: 'component2', id: 0, componentId: 0 },
+          { componentUid: 'component1', id: 0 },
+          { componentUid: 'component2', id: 0 },
         ],
       });
 
@@ -156,8 +156,8 @@ describe('DynamicZone', () => {
       setup({
         removeComponentFromDynamicZone,
         dynamicDisplayedComponents: [
-          { componentUid: 'component1', id: 0, componentId: 0 },
-          { componentUid: 'component2', id: 0, componentId: 0 },
+          { componentUid: 'component1', id: 0 },
+          { componentUid: 'component2', id: 0 },
         ],
       });
 
@@ -173,9 +173,9 @@ describe('DynamicZone', () => {
     it('should call the toggleNotification callback if the amount of dynamic components has hit its max and the user tries to add another', () => {
       setup({
         dynamicDisplayedComponents: [
-          { componentUid: 'component1', id: 0, componentId: 0 },
-          { componentUid: 'component2', id: 0, componentId: 0 },
-          { componentUid: 'component3', id: 0, componentId: 0 },
+          { componentUid: 'component1', id: 0 },
+          { componentUid: 'component2', id: 0 },
+          { componentUid: 'component3', id: 0 },
         ],
         fieldSchema: {
           components: ['component1', 'component2', 'component3'],
@@ -200,8 +200,8 @@ describe('DynamicZone', () => {
     it('should have have description text', () => {
       setup({
         dynamicDisplayedComponents: [
-          { componentUid: 'component1', id: 0, componentId: 0 },
-          { componentUid: 'component2', id: 0, componentId: 0 },
+          { componentUid: 'component1', id: 0 },
+          { componentUid: 'component2', id: 0 },
         ],
       });
 
@@ -211,8 +211,8 @@ describe('DynamicZone', () => {
     it('should update the live text when an item has been grabbed', async () => {
       setup({
         dynamicDisplayedComponents: [
-          { componentUid: 'component1', id: 0, componentId: 0 },
-          { componentUid: 'component2', id: 0, componentId: 0 },
+          { componentUid: 'component1', id: 0 },
+          { componentUid: 'component2', id: 0 },
         ],
       });
 
@@ -230,8 +230,8 @@ describe('DynamicZone', () => {
     it('should change the live text when an item has been moved', () => {
       setup({
         dynamicDisplayedComponents: [
-          { componentUid: 'component1', id: 0, componentId: 0 },
-          { componentUid: 'component2', id: 0, componentId: 0 },
+          { componentUid: 'component1', id: 0 },
+          { componentUid: 'component2', id: 0 },
         ],
       });
 
@@ -246,8 +246,8 @@ describe('DynamicZone', () => {
     it('should change the live text when an item has been dropped', () => {
       setup({
         dynamicDisplayedComponents: [
-          { componentUid: 'component1', id: 0, componentId: 0 },
-          { componentUid: 'component2', id: 0, componentId: 0 },
+          { componentUid: 'component1', id: 0 },
+          { componentUid: 'component2', id: 0 },
         ],
       });
 
@@ -263,8 +263,8 @@ describe('DynamicZone', () => {
     it('should change the live text after the reordering interaction has been cancelled', () => {
       setup({
         dynamicDisplayedComponents: [
-          { componentUid: 'component1', id: 0, componentId: 0 },
-          { componentUid: 'component2', id: 0, componentId: 0 },
+          { componentUid: 'component1', id: 0 },
+          { componentUid: 'component2', id: 0 },
         ],
       });
 

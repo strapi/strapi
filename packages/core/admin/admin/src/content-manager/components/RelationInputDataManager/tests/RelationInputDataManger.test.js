@@ -11,7 +11,6 @@ import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { useRelation } from '../../../hooks/useRelation';
 
 import { RelationInputDataManager } from '..';
-import { ItemTypes } from '../../../utils';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -133,10 +132,6 @@ const RelationInputDataManagerComponent = (props) => (
               targetModel="something"
               queryInfos={{
                 shouldDisplayRelationLink: true,
-              }}
-              source={{
-                type: ItemTypes.DYNAMIC_ZONE,
-                componentId: 0,
               }}
               {...props}
             />

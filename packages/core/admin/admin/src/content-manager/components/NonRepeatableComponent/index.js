@@ -11,7 +11,7 @@ import FieldComponent from '../FieldComponent';
 import Inputs from '../Inputs';
 import useLazyComponents from '../../hooks/useLazyComponents';
 
-const NonRepeatableComponent = ({ componentUid, isNested, name, isFromDynamicZone }) => {
+const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, name }) => {
   const { getComponentLayout } = useContentTypeLayout();
   const componentLayoutData = useMemo(
     () => getComponentLayout(componentUid),
@@ -84,15 +84,15 @@ const NonRepeatableComponent = ({ componentUid, isNested, name, isFromDynamicZon
 };
 
 NonRepeatableComponent.defaultProps = {
-  isNested: false,
   isFromDynamicZone: false,
+  isNested: false,
 };
 
 NonRepeatableComponent.propTypes = {
   componentUid: PropTypes.string.isRequired,
+  isFromDynamicZone: PropTypes.bool,
   isNested: PropTypes.bool,
   name: PropTypes.string.isRequired,
-  isFromDynamicZone: PropTypes.bool,
 };
 
 export default NonRepeatableComponent;

@@ -102,10 +102,7 @@ describe('RepeatableComponents', () => {
       const user = userEvent.setup();
 
       const { getAllByText, getByRole } = setup({
-        componentValue: [
-          { id: 1, __temp_key__: 1 },
-          { id: 2, __temp_key__: 2 },
-        ],
+        componentValue: [{ __temp_key__: 1 }, { __temp_key__: 2 }],
         componentValueLength: 2,
       });
 
@@ -122,10 +119,7 @@ describe('RepeatableComponents', () => {
 
     it('should render a passed error message', () => {
       const { queryByText, getAllByRole, getByText } = setup({
-        componentValue: [
-          { id: 1, __temp_key__: 1 },
-          { id: 2, __temp_key__: 2 },
-        ],
+        componentValue: [{ __temp_key__: 1 }, { __temp_key__: 2 }],
         componentValueLength: 2,
         name: 'error-field',
       });
@@ -137,10 +131,7 @@ describe('RepeatableComponents', () => {
 
     it('should render a specific min error when error message contains the word min', () => {
       const { queryByText, getAllByRole, getByText } = setup({
-        componentValue: [
-          { id: 1, __temp_key__: 1 },
-          { id: 2, __temp_key__: 2 },
-        ],
+        componentValue: [{ __temp_key__: 1 }, { __temp_key__: 2 }],
         componentValueLength: 2,
         min: 4,
         name: 'error-min',
@@ -174,10 +165,7 @@ describe('RepeatableComponents', () => {
       });
 
       const { getByRole } = setup({
-        componentValue: [
-          { id: 1, __temp_key__: 1 },
-          { id: 2, __temp_key__: 2 },
-        ],
+        componentValue: [{ __temp_key__: 1 }, { __temp_key__: 2 }],
         componentValueLength: 2,
       });
 
@@ -197,10 +185,7 @@ describe('RepeatableComponents', () => {
       useNotification.mockReturnValueOnce(toggleNotification);
 
       const { getByRole } = setup({
-        componentValue: [
-          { id: 1, __temp_key__: 1 },
-          { id: 2, __temp_key__: 2 },
-        ],
+        componentValue: [{ __temp_key__: 1 }, { __temp_key__: 2 }],
         componentValueLength: 2,
         max: 2,
       });
@@ -232,10 +217,7 @@ describe('RepeatableComponents', () => {
       });
 
       const { getAllByRole } = setup({
-        componentValue: [
-          { id: 1, __temp_key__: 1 },
-          { id: 2, __temp_key__: 2 },
-        ],
+        componentValue: [{ __temp_key__: 1 }, { __temp_key__: 2 }],
         componentValueLength: 2,
       });
 
@@ -275,10 +257,7 @@ describe('RepeatableComponents', () => {
       });
 
       const { getAllByRole } = setup({
-        componentValue: [
-          { id: 1, __temp_key__: 1 },
-          { id: 2, __temp_key__: 2 },
-        ],
+        componentValue: [{ __temp_key__: 1 }, { __temp_key__: 2 }],
         componentValueLength: 2,
       });
 
@@ -319,10 +298,7 @@ describe('RepeatableComponents', () => {
       }));
 
       const { getByRole, rerender } = setup({
-        componentValue: [
-          { id: 1, __temp_key__: 1 },
-          { id: 2, __temp_key__: 2 },
-        ],
+        componentValue: [{ __temp_key__: 1 }, { __temp_key__: 2 }],
         componentValueLength: 2,
       });
 
@@ -334,11 +310,7 @@ describe('RepeatableComponents', () => {
       rerender(
         <TestComponent
           componentValueLength={3}
-          componentValue={[
-            { id: 1, __temp_key__: 1 },
-            { id: 2, __temp_key__: 2 },
-            { id: 3, __temp_key__: 3 },
-          ]}
+          componentValue={[{ __temp_key__: 1 }, { __temp_key__: 2 }, { __temp_key__: 3 }]}
         />
       );
 
@@ -351,10 +323,7 @@ describe('RepeatableComponents', () => {
   describe('Accessibility', () => {
     it('should have have description text', () => {
       setup({
-        componentValue: [
-          { id: 1, __temp_key__: 1 },
-          { id: 2, __temp_key__: 2 },
-        ],
+        componentValue: [{ __temp_key__: 1 }, { __temp_key__: 2 }],
         componentValueLength: 2,
       });
 
@@ -363,10 +332,7 @@ describe('RepeatableComponents', () => {
 
     it('should update the live text when an item has been grabbed', async () => {
       setup({
-        componentValue: [
-          { id: 1, __temp_key__: 1 },
-          { id: 2, __temp_key__: 2 },
-        ],
+        componentValue: [{ __temp_key__: 1 }, { __temp_key__: 2 }],
         componentValueLength: 2,
       });
 
@@ -383,10 +349,7 @@ describe('RepeatableComponents', () => {
 
     it('should change the live text when an item has been moved', () => {
       setup({
-        componentValue: [
-          { id: 1, __temp_key__: 1 },
-          { id: 2, __temp_key__: 2 },
-        ],
+        componentValue: [{ __temp_key__: 1 }, { __temp_key__: 2 }],
         componentValueLength: 2,
       });
 
@@ -400,10 +363,7 @@ describe('RepeatableComponents', () => {
 
     it('should change the live text when an item has been dropped', () => {
       setup({
-        componentValue: [
-          { id: 1, __temp_key__: 1 },
-          { id: 2, __temp_key__: 2 },
-        ],
+        componentValue: [{ __temp_key__: 1 }, { __temp_key__: 2 }],
         componentValueLength: 2,
       });
 
@@ -418,10 +378,7 @@ describe('RepeatableComponents', () => {
 
     it('should change the live text after the reordering interaction has been cancelled', () => {
       setup({
-        componentValue: [
-          { id: 1, __temp_key__: 1 },
-          { id: 2, __temp_key__: 2 },
-        ],
+        componentValue: [{ __temp_key__: 1 }, { __temp_key__: 2 }],
         componentValueLength: 2,
       });
 

@@ -28,6 +28,7 @@ const FieldComponent = ({
   // formErrors,
   intlLabel,
   isCreatingEntry,
+  isFromDynamicZone,
   isRepeatable,
   isNested,
   labelAction,
@@ -41,11 +42,9 @@ const FieldComponent = ({
   componentValue,
   removeComponentFromField,
   required,
-  isFromDynamicZone,
 }) => {
   const { formatMessage } = useIntl();
   const componentValueLength = size(componentValue);
-
   const isInitialized = componentValue !== null || isFromDynamicZone;
   const showResetComponent =
     !isRepeatable && isInitialized && !isFromDynamicZone && hasChildrenAllowedFields;
@@ -106,9 +105,9 @@ const FieldComponent = ({
         {!isRepeatable && isInitialized && (
           <NonRepeatableComponent
             componentUid={componentUid}
+            isFromDynamicZone={isFromDynamicZone}
             isNested={isNested}
             name={name}
-            isFromDynamicZone={isFromDynamicZone}
           />
         )}
         {isRepeatable && (
@@ -132,6 +131,7 @@ FieldComponent.defaultProps = {
   hasChildrenAllowedFields: false,
   hasChildrenReadableFields: false,
   intlLabel: undefined,
+  isFromDynamicZone: false,
   isReadOnly: false,
   isRepeatable: false,
   isNested: false,
@@ -139,7 +139,6 @@ FieldComponent.defaultProps = {
   max: Infinity,
   min: -Infinity,
   required: false,
-  isFromDynamicZone: false,
 };
 
 FieldComponent.propTypes = {
@@ -149,6 +148,7 @@ FieldComponent.propTypes = {
   hasChildrenAllowedFields: PropTypes.bool,
   hasChildrenReadableFields: PropTypes.bool,
   isCreatingEntry: PropTypes.bool.isRequired,
+  isFromDynamicZone: PropTypes.bool,
   isReadOnly: PropTypes.bool,
   isRepeatable: PropTypes.bool,
   isNested: PropTypes.bool,
@@ -163,7 +163,6 @@ FieldComponent.propTypes = {
   name: PropTypes.string.isRequired,
   removeComponentFromField: PropTypes.func.isRequired,
   required: PropTypes.bool,
-  isFromDynamicZone: PropTypes.bool,
 };
 
 const Memoized = memo(FieldComponent, isEqual);
