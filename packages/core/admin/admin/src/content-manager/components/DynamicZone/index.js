@@ -193,10 +193,9 @@ const DynamicZone = ({
           </VisuallyHidden>
           <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
           <ol aria-describedby={ariaDescriptionId}>
-            {dynamicDisplayedComponents.map(({ componentUid, id, componentId }, index) => (
+            {dynamicDisplayedComponents.map(({ componentUid, id }, index) => (
               <DynamicZoneComponent
                 componentUid={componentUid}
-                sourceComponentId={componentId}
                 formErrors={formErrors}
                 key={`${componentUid}-${id}`}
                 index={index}

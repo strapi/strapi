@@ -4,20 +4,22 @@ import PropTypes from 'prop-types';
 import size from 'lodash/size';
 import isEqual from 'react-fast-compare';
 import { useIntl } from 'react-intl';
+
 import { NotAllowedInput } from '@strapi/helper-plugin';
 import Trash from '@strapi/icons/Trash';
 import { Box } from '@strapi/design-system/Box';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
-import { getTrad, ItemTypes } from '../../utils';
-import ComponentInitializer from '../ComponentInitializer';
-import NonRepeatableComponent from '../NonRepeatableComponent';
-import RepeatableComponent from '../RepeatableComponent';
+
 import connect from './utils/connect';
 import select from './utils/select';
 import Label from './Label';
+import ComponentInitializer from '../ComponentInitializer';
+import NonRepeatableComponent from '../NonRepeatableComponent';
+import RepeatableComponent from '../RepeatableComponent';
 import { useContentTypeLayout } from '../../hooks';
+import { getTrad } from '../../utils';
 
 const FieldComponent = ({
   addNonRepeatableComponentToField,
@@ -39,9 +41,8 @@ const FieldComponent = ({
   componentValue,
   removeComponentFromField,
   required,
-  source,
+  isFromDynamicZone,
 }) => {
-  const isFromDynamicZone = source.type === ItemTypes.DYNAMIC_ZONE;
   const { formatMessage } = useIntl();
   const componentValueLength = size(componentValue);
 
@@ -107,7 +108,7 @@ const FieldComponent = ({
             componentUid={componentUid}
             isNested={isNested}
             name={name}
-            source={source}
+            isFromDynamicZone={isFromDynamicZone}
           />
         )}
         {isRepeatable && (
@@ -138,10 +139,7 @@ FieldComponent.defaultProps = {
   max: Infinity,
   min: -Infinity,
   required: false,
-  source: {
-    type: '',
-    componentId: 0,
-  },
+  isFromDynamicZone: false,
 };
 
 FieldComponent.propTypes = {
@@ -165,10 +163,7 @@ FieldComponent.propTypes = {
   name: PropTypes.string.isRequired,
   removeComponentFromField: PropTypes.func.isRequired,
   required: PropTypes.bool,
-  source: PropTypes.shape({
-    type: PropTypes.string,
-    componentId: PropTypes.number,
-  }),
+  isFromDynamicZone: PropTypes.bool,
 };
 
 const Memoized = memo(FieldComponent, isEqual);

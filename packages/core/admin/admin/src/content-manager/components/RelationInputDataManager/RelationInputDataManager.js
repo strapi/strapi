@@ -49,6 +49,7 @@ export const RelationInputDataManager = ({
     relationReorder,
   } = useCMEditViewDataManager();
 
+  const __temp_key__ = get(modifiedData, [...name.split('.').slice(0, -1), '__temp_key__']);
   const relationsFromModifiedData = get(modifiedData, name, []);
 
   const currentLastPage = Math.ceil(get(initialData, name, []).length / RELATIONS_TO_DISPLAY);
@@ -56,6 +57,7 @@ export const RelationInputDataManager = ({
   const cacheKey = `${slug}-${name}-${initialData?.id ?? ''}`;
   const { relations, search, searchFor } = useRelation(cacheKey, {
     name,
+    __temp_key__,
     relation: {
       enabled: !!endpoints.relation,
       endpoint: endpoints.relation,

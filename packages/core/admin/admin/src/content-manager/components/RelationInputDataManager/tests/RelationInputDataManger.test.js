@@ -231,6 +231,7 @@ describe('RelationInputDataManager', () => {
       updateActionAllowedFields: [],
       slug: 'test',
       initialData: {},
+      modifiedData: {},
       relationLoad: jest.fn(),
     });
 
@@ -250,6 +251,7 @@ describe('RelationInputDataManager', () => {
       updateActionAllowedFields: [],
       slug: 'test',
       initialData: {},
+      modifiedData: {},
       relationLoad: jest.fn(),
     });
 
@@ -271,6 +273,7 @@ describe('RelationInputDataManager', () => {
       updateActionAllowedFields: [],
       slug: 'test',
       initialData: {},
+      modifiedData: {},
       relationLoad: jest.fn(),
     });
 
@@ -332,6 +335,7 @@ describe('RelationInputDataManager', () => {
       updateActionAllowedFields: ['relation'],
       slug: 'test',
       initialData: {},
+      modifiedData: {},
       relationLoad: jest.fn(),
     });
 

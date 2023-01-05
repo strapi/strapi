@@ -6,6 +6,9 @@ import take from 'lodash/take';
 import cloneDeep from 'lodash/cloneDeep';
 import uniqBy from 'lodash/uniqBy';
 import merge from 'lodash/merge';
+import findIndex from 'lodash/findIndex';
+import castArray from 'lodash/castArray';
+import isNil from 'lodash/isNil';
 
 import {
   findLeafByPathAndReplace,
@@ -148,26 +151,40 @@ const reducer = (state, action) =>
         break;
       }
       case 'LOAD_RELATION': {
-        const { value, keys } = action;
+        const { value, keys, __temp_key__ } = action;
 
-        const initialDataPath = ['initialData', ...keys];
-        const modifiedDataPath = ['modifiedData', ...keys];
+        const [sectionName, , relationName] = keys;
+        let initialDataPath;
+        let modifiedDataPath;
+
+        if (__temp_key__) {
+          const initialDataIdx = findIndex(
+            state.initialData[sectionName],
+            (entry) => entry.__temp_key__ === __temp_key__
+          );
+          const modifiedDataIdx = findIndex(
+            state.modifiedData[sectionName],
+            (entry) => entry.__temp_key__ === __temp_key__
+          );
+
+          initialDataPath = ['initialData', sectionName, initialDataIdx, relationName];
+          modifiedDataPath = ['modifiedData', sectionName, modifiedDataIdx, relationName];
+        } else {
+          initialDataPath = ['initialData', ...keys];
+          modifiedDataPath = ['modifiedData', ...keys];
+        }
 
         const initialDataRelations = get(state, initialDataPath);
         const modifiedDataRelations = get(state, modifiedDataPath);
 
-        if (initialDataRelations) {
-          set(draftState, initialDataPath, uniqBy([...value, ...initialDataRelations], 'id'));
-        }
+        set(draftState, initialDataPath, uniqBy([...value, ...initialDataRelations], 'id'));
 
-        if (modifiedDataRelations) {
-          /**
-           * We need to set the value also on modifiedData, because initialData
-           * and modifiedData need to stay in sync, so that the CM can compare
-           * both states, to render the dirty UI state
-           */
-          set(draftState, modifiedDataPath, uniqBy([...value, ...modifiedDataRelations], 'id'));
-        }
+        /**
+         * We need to set the value also on modifiedData, because initialData
+         * and modifiedData need to stay in sync, so that the CM can compare
+         * both states, to render the dirty UI state
+         */
+        set(draftState, modifiedDataPath, uniqBy([...value, ...modifiedDataRelations], 'id'));
 
         break;
       }
@@ -250,6 +267,17 @@ const reducer = (state, action) =>
           .map((path) => path.split('.'))
           .reduce((acc, currentPaths) => {
             const [componentName] = currentPaths;
+
+            const existingComponents = castArray(acc[componentName] || []);
+            existingComponents.reduce((result, currentEntry) => {
+              if (!isNil(get(currentEntry, [`__temp_key__`]))) {
+                return result;
+              }
+
+              set(currentEntry, [`__temp_key__`], getMaxTempKey(result) + 1);
+
+              return result;
+            }, existingComponents);
 
             if (state.modifiedData && get(state.modifiedData, componentName)) {
               /**

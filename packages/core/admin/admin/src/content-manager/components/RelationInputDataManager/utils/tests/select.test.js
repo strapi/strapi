@@ -16,7 +16,7 @@ const CM_DATA_FIXTURE = {
   readActionAllowedFields: true,
   updateActionAllowedFields: ['test'],
   slug: 'slug',
-  initialData: {
+  modifiedData: {
     id: 2,
   },
 };
@@ -37,7 +37,7 @@ jest.mock('@strapi/helper-plugin', () => ({
     readActionAllowedFields: true,
     updateActionAllowedFields: ['test'],
     slug: 'slug',
-    initialData: {
+    modifiedData: {
       id: 2,
     },
   }),
@@ -187,7 +187,7 @@ describe('RelationInputDataManager | select', () => {
     useCMEditViewDataManager.mockReturnValueOnce({
       ...CM_DATA_FIXTURE,
       isCreatingEntry: false,
-      initialData: {
+      modifiedData: {
         singleComp: {
           id: 1,
         },
@@ -212,7 +212,7 @@ describe('RelationInputDataManager | select', () => {
     useCMEditViewDataManager.mockReturnValueOnce({
       ...CM_DATA_FIXTURE,
       isCreatingEntry: false,
-      initialData: {
+      modifiedData: {
         repComp: [
           {
             id: 1,
@@ -235,36 +235,11 @@ describe('RelationInputDataManager | select', () => {
     });
   });
 
-  test('returns endpoints constructed using `componentId` from the source object when provided', async () => {
-    useCMEditViewDataManager.mockReturnValueOnce({
-      ...CM_DATA_FIXTURE,
-      isCreatingEntry: false,
-    });
-    const componentId = 10;
-
-    const { result } = await setup({
-      ...SELECT_ATTR_FIXTURE,
-      name: 'repComp.0.field-name',
-      componentUid: 'basic.comp-relation',
-      source: {
-        type: 'dynamicZone',
-        componentId,
-      },
-    });
-
-    expect(result.current.queryInfos).toStrictEqual({
-      endpoints: {
-        relation: `/content-manager/relations/basic.comp-relation/${componentId}/field-name`,
-        search: '/content-manager/relations/basic.comp-relation/field-name',
-      },
-    });
-  });
-
   test('returns a component ID', async () => {
     useCMEditViewDataManager.mockReturnValueOnce({
       ...CM_DATA_FIXTURE,
       isCreatingEntry: false,
-      initialData: {
+      modifiedData: {
         repComp: [
           {
             id: 1,
@@ -286,7 +261,7 @@ describe('RelationInputDataManager | select', () => {
     useCMEditViewDataManager.mockReturnValueOnce({
       ...CM_DATA_FIXTURE,
       isCreatingEntry: false,
-      initialData: {
+      modifiedData: {
         repComp: [
           {
             id: 1,

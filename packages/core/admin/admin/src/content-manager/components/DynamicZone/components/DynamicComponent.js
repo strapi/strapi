@@ -82,7 +82,6 @@ const DynamicZoneComponent = ({
   onGrabItem,
   onDropItem,
   onCancel,
-  sourceComponentId,
 }) => {
   const [isOpen, setIsOpen] = useState(true);
   const { formatMessage } = useIntl();
@@ -204,10 +203,7 @@ const DynamicZoneComponent = ({
                   componentUid={componentUid}
                   icon={icon}
                   name={`${name}.${index}`}
-                  source={{
-                    type: ItemTypes.DYNAMIC_ZONE,
-                    componentId: sourceComponentId,
-                  }}
+                  isFromDynamicZone
                 />
               </AccordionContentRadius>
             </AccordionContent>
@@ -238,7 +234,6 @@ DynamicZoneComponent.propTypes = {
   onCancel: PropTypes.func,
   onMoveComponent: PropTypes.func.isRequired,
   onRemoveComponentClick: PropTypes.func.isRequired,
-  sourceComponentId: PropTypes.number.isRequired,
 };
 
 export default DynamicZoneComponent;

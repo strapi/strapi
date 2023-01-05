@@ -197,11 +197,10 @@ const RepeatableComponent = ({
       <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
       <Accordion.Group error={errorMessage} ariaDescribedBy={ariaDescriptionId}>
         <Accordion.Content aria-describedby={ariaDescriptionId}>
-          {componentValue.map(({ id: componentId, __temp_key__: key }, index) => (
+          {componentValue.map(({ __temp_key__: key }, index) => (
             <Component
               componentFieldName={`${name}.${index}`}
               componentUid={componentUid}
-              sourceComponentId={componentId}
               fields={componentLayoutData.layouts.edit}
               key={key}
               index={index}

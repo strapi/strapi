@@ -1118,6 +1118,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
             ok: true,
             relation: [],
             component: {
+              __temp_key__: expect.any(Number),
               relation: [],
             },
           },
@@ -1125,6 +1126,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
             ok: true,
             relation: [],
             component: {
+              __temp_key__: expect.any(Number),
               relation: [],
             },
           },
@@ -1162,6 +1164,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
             ok: true,
             relation: [],
             component: {
+              __temp_key__: expect.any(Number),
               field1: {
                 field2: [],
               },
@@ -1171,6 +1174,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
             ok: true,
             relation: [],
             component: {
+              __temp_key__: expect.any(Number),
               field1: {
                 field2: [],
               },
@@ -1425,6 +1429,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           categories: 'my_category',
           component: {
             id: 2,
+            __temp_key__: 2,
             repeatable_simple: [
               {
                 id: 18,
@@ -1454,6 +1459,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
             categories: 'my_category',
             component: {
               id: 2,
+              __temp_key__: 2,
               repeatable_simple: [
                 {
                   id: 18,
@@ -1468,6 +1474,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
             categories: 'my_category',
             component: {
               id: 2,
+              __temp_key__: 2,
               repeatable_simple: [
                 {
                   id: 18,
@@ -1512,6 +1519,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
             ok: true,
             dynamic_relations: [
               {
+                __temp_key__: expect.any(Number),
                 __component: 'basic.simple',
                 id: 36,
                 my_name: null,
@@ -1523,6 +1531,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
             ok: true,
             dynamic_relations: [
               {
+                __temp_key__: expect.any(Number),
                 __component: 'basic.simple',
                 id: 36,
                 my_name: null,
@@ -1574,6 +1583,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
             dynamic_relations: [
               {
                 __component: 'basic.nested-simple',
+                __temp_key__: expect.any(Number),
                 id: 7,
                 simple: {
                   id: 47,
@@ -1588,6 +1598,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
             dynamic_relations: [
               {
                 __component: 'basic.nested-simple',
+                __temp_key__: expect.any(Number),
                 id: 7,
                 simple: {
                   id: 47,
@@ -1645,6 +1656,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
               {
                 __component: 'basic.repeatable-repeatble-relation',
                 id: 5,
+                __temp_key__: 0,
                 repeatable_simple: [
                   {
                     id: 48,
@@ -1668,6 +1680,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
               {
                 __component: 'basic.repeatable-repeatble-relation',
                 id: 5,
+                __temp_key__: 0,
                 repeatable_simple: [
                   {
                     id: 48,
@@ -1697,6 +1710,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
               {
                 __component: 'basic.repeatable-repeatble-relation',
                 id: 5,
+                __temp_key__: 0,
                 repeatable_simple: [
                   {
                     id: 48,
@@ -1713,6 +1727,91 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
                       count: 1,
                     },
                     __temp_key__: 1,
+                  },
+                ],
+              },
+            ],
+          },
+          relationalFieldPaths: ['dynamic_relations.repeatable_simple.categories'],
+          dynamicZonePaths: ['dynamic_relations'],
+        };
+
+        expect(reducer(state, action)).toEqual(expected);
+      });
+
+      it('should assign __temp_key__ to components when not in initialData', () => {
+        const state = {
+          ...initialState,
+          formErrors: true,
+          initialData: {},
+          modifiedData: {},
+          modifiedDZName: true,
+          shouldCheckErrors: true,
+        };
+
+        const expected = {
+          ...initialState,
+          formErrors: {},
+          initialData: {
+            ok: true,
+            dynamic_relations: [
+              {
+                __component: 'basic.repeatable-repeatble-relation',
+                id: 5,
+                __temp_key__: expect.any(Number),
+                repeatable_simple: [
+                  {
+                    id: 48,
+                    my_name: null,
+                  },
+                  {
+                    id: 49,
+                    my_name: null,
+                  },
+                ],
+              },
+            ],
+          },
+          modifiedData: {
+            ok: true,
+            dynamic_relations: [
+              {
+                __component: 'basic.repeatable-repeatble-relation',
+                id: 5,
+                __temp_key__: expect.any(Number),
+                repeatable_simple: [
+                  {
+                    id: 48,
+                    my_name: null,
+                  },
+                  {
+                    id: 49,
+                    my_name: null,
+                  },
+                ],
+              },
+            ],
+          },
+          modifiedDZName: null,
+          shouldCheckErrors: false,
+        };
+
+        const action = {
+          type: 'INIT_FORM',
+          initialValues: {
+            ok: true,
+            dynamic_relations: [
+              {
+                __component: 'basic.repeatable-repeatble-relation',
+                id: 5,
+                repeatable_simple: [
+                  {
+                    id: 48,
+                    my_name: null,
+                  },
+                  {
+                    id: 49,
+                    my_name: null,
                   },
                 ],
               },

@@ -38,7 +38,6 @@ function Inputs({
   value,
   size,
   customFieldInputs,
-  source,
 }) {
   const { fields } = useLibrary();
   const { formatMessage } = useIntl();
@@ -217,7 +216,6 @@ function Inputs({
       <RelationInputDataManager
         {...metadatas}
         {...fieldSchema}
-        source={source}
         componentUid={componentUid}
         description={
           metadatas.description
@@ -296,10 +294,6 @@ Inputs.defaultProps = {
   value: null,
   queryInfos: {},
   customFieldInputs: {},
-  source: {
-    type: '',
-    componentId: 0,
-  },
 };
 
 Inputs.propTypes = {
@@ -322,10 +316,6 @@ Inputs.propTypes = {
     endPoint: PropTypes.string,
   }),
   customFieldInputs: PropTypes.object,
-  source: PropTypes.shape({
-    type: PropTypes.string,
-    componentId: PropTypes.number,
-  }),
 };
 
 const Memoized = memo(Inputs, isEqual);
