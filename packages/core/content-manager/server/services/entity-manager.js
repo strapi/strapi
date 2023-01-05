@@ -50,7 +50,7 @@ const addCreatedByRolesPopulate = (populate) => {
 };
 
 const getEntityPopulate = (uid) => {
-  const relationsPerformanceEnabled = strapi.config.get('admin.relations.performance', false);
+  const relationsPerformanceEnabled = strapi.config.get('admin.relations.performance', true);
 
   if (relationsPerformanceEnabled) {
     return getDeepPopulate(uid, { countMany: true, countOne: true });
