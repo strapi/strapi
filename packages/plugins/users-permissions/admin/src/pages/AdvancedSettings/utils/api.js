@@ -1,7 +1,9 @@
+import { getFetchClient } from '@strapi/admin/admin/src/utils/getFetchClient';
 import { axiosInstance, getRequestURL } from '../../../utils';
 
 const fetchData = async () => {
-  const { data } = await axiosInstance.get(getRequestURL('advanced'));
+  const { get } = getFetchClient();
+  const { data } = await get(getRequestURL('advanced'));
 
   return data;
 };
