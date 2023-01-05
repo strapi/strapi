@@ -95,10 +95,9 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
     let ws: WebSocket;
 
-    const wsUrl = `${url.protocol === 'https:' ? 'wss:' : 'ws:'}${url.host}${
+    const wsUrl = `${url.protocol === 'https:' ? 'wss:' : 'ws:'}//${url.host}${
       url.pathname
     }${TRANSFER_URL}`;
-
     // No auth defined, trying public access for transfer
     if (!auth) {
       ws = new WebSocket(wsUrl);
@@ -106,7 +105,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
     // Common token auth, this should be the main auth method
     else if (auth.type === 'token') {
-      const headers = { Authentication: `Bearer ${auth.token}` };
+      const headers = { Authorization: `Bearer ${auth.token}` };
       ws = new WebSocket(wsUrl, { headers });
     }
 
