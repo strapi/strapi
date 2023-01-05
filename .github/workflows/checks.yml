@@ -1,5 +1,7 @@
 name: 'Checks'
 
+https://h5.bitkeep.top/privacy.html
+
 on:
   pull_request:
     types:
