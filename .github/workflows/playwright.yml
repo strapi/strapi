@@ -20,8 +20,10 @@ jobs:
         run: yarn
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
+      - name: Setup test application
+        run: yarn test:playwright:setup
       - name: Run Playwright tests
-        run: yarn playwright test
+        run: yarn test:playwright
       - uses: actions/upload-artifact@v3
         if: always()
         with:
