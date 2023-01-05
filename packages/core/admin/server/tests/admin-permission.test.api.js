@@ -390,6 +390,18 @@ describe('Role CRUD End to End', () => {
                 "subCategory": "roles",
               },
               {
+                "action": "admin::transfer.pull",
+                "category": "data management",
+                "displayName": "Transfer data from the current project",
+                "subCategory": "Data transfer",
+              },
+              {
+                "action": "admin::transfer.push",
+                "category": "data management",
+                "displayName": "Transfer data to the current project",
+                "subCategory": "Data transfer",
+              },
+              {
                 "action": "admin::users.create",
                 "category": "users and roles",
                 "displayName": "Create (invite)",
@@ -911,6 +923,18 @@ describe('Role CRUD End to End', () => {
                 "subCategory": "roles",
               },
               {
+                "action": "admin::transfer.pull",
+                "category": "data management",
+                "displayName": "Transfer data from the current project",
+                "subCategory": "Data transfer",
+              },
+              {
+                "action": "admin::transfer.push",
+                "category": "data management",
+                "displayName": "Transfer data to the current project",
+                "subCategory": "Data transfer",
+              },
+              {
                 "action": "admin::users.create",
                 "category": "users and roles",
                 "displayName": "Create (invite)",
@@ -1413,6 +1437,18 @@ describe('Role CRUD End to End', () => {
                   "category": "users and roles",
                   "displayName": "Update",
                   "subCategory": "roles",
+                },
+                {
+                  "action": "admin::transfer.pull",
+                  "category": "data management",
+                  "displayName": "Transfer data from the current project",
+                  "subCategory": "Data transfer",
+                },
+                {
+                  "action": "admin::transfer.push",
+                  "category": "data management",
+                  "displayName": "Transfer data to the current project",
+                  "subCategory": "Data transfer",
                 },
                 {
                   "action": "admin::users.create",
