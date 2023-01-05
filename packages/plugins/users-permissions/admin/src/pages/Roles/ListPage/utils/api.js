@@ -1,8 +1,10 @@
+import { getFetchClient } from '@strapi/admin/admin/src/utils/getFetchClient';
 import { getRequestURL, axiosInstance } from '../../../../utils';
 
 export const fetchData = async (toggleNotification, notifyStatus) => {
   try {
-    const { data } = await axiosInstance.get(getRequestURL('roles'));
+    const { get } = getFetchClient();
+    const { data } = await get(getRequestURL('roles'));
     notifyStatus('The roles have loaded successfully');
 
     return data;
