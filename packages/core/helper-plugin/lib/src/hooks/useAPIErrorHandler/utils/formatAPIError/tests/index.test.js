@@ -1,4 +1,4 @@
-import formatAPIError from '../index';
+import { formatAPIError } from '..';
 
 const API_VALIDATION_ERROR_FIXTURE = {
   response: {

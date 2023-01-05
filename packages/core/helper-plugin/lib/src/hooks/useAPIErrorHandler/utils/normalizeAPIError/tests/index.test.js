@@ -1,4 +1,4 @@
-import normalizeAPIError from '../';
+import { normalizeAPIError } from '..';
 
 const API_VALIDATION_ERROR_FIXTURE = {
   response: {

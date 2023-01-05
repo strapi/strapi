@@ -1,6 +1,6 @@
-import normalizeAPIError from '../normalizeAPIError';
+import { normalizeAPIError } from '../normalizeAPIError';
 
-export default function formatAPIError(error, { formatMessage, getTrad }) {
+export function formatAPIError(error, { formatMessage, getTrad }) {
   if (!formatMessage) {
     throw new Error('formatMessage() is a mandatory argument.');
   }

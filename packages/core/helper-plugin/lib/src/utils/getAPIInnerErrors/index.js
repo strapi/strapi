@@ -1,4 +1,4 @@
-import normalizeAPIError from '../normalizeAPIError';
+import { normalizeAPIError } from '../../hooks/useAPIErrorHandler';
 
 export default function getAPIInnerErrors(error, { getTrad }) {
   const normalizedError = normalizeAPIError(error, getTrad);

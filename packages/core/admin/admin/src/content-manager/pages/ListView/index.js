@@ -20,7 +20,7 @@ import {
   useRBACProvider,
   useTracking,
   Link,
-  formatAPIError,
+  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 
 import { IconButton } from '@strapi/design-system/IconButton';
@@ -86,6 +86,7 @@ function ListView({
   const trackUsageRef = useRef(trackUsage);
   const fetchPermissionsRef = useRef(refetchPermissions);
   const { notifyStatus } = useNotifyAT();
+  const { formatAPIError } = useAPIErrorHandler(getTrad);
 
   useFocusWhenNavigate();
 
@@ -170,11 +171,11 @@ function ListView({
       } catch (err) {
         toggleNotification({
           type: 'warning',
-          message: formatAPIError(err, { formatMessage, getTrad }),
+          message: formatAPIError(err),
         });
       }
     },
-    [fetchData, params, slug, toggleNotification, formatMessage]
+    [fetchData, params, slug, toggleNotification, formatAPIError]
   );
 
   const handleConfirmDeleteData = useCallback(
@@ -192,11 +193,11 @@ function ListView({
       } catch (err) {
         toggleNotification({
           type: 'warning',
-          message: formatAPIError(err, { formatMessage, getTrad }),
+          message: formatAPIError(err),
         });
       }
     },
-    [slug, params, fetchData, toggleNotification, formatMessage]
+    [slug, params, fetchData, toggleNotification, formatAPIError]
   );
 
   useEffect(() => {

@@ -9,11 +9,11 @@ function getPrefixedId(message, getTrad) {
   return prefixedMessage;
 }
 
-export default function normalizeAPIError(resError, getTrad) {
+export function normalizeAPIError(resError, getTrad) {
   const { error } = resError.response.data;
 
   switch (error.name) {
-    case 'ValidationError':
+    case 'ValidationError': {
       const { errors } = error.details;
 
       const normalizedErrors = errors.reduce((acc, err) => {
@@ -35,8 +35,9 @@ export default function normalizeAPIError(resError, getTrad) {
         name: error.name,
         errors: normalizedErrors,
       };
+    }
 
-    default:
+    default: {
       const { message } = error;
 
       return {
@@ -44,5 +45,6 @@ export default function normalizeAPIError(resError, getTrad) {
         id: getPrefixedId(message, getTrad),
         defaultMessage: message,
       };
+    }
   }
 }
