@@ -2,7 +2,8 @@
   "extends": "@tsconfig/node16/tsconfig.json",
   "compilerOptions": {
     "strict": true,
-    "lib": ["ESNEXT"],
+    "lib": ["ES2020"],
+    "target": "ES2020",
     "skipLibCheck": true,
     "outDir": "lib",
     "declaration": true,

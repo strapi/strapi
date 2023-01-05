@@ -1,6 +1,6 @@
 import type { SchemaUID } from '@strapi/strapi/lib/types/utils';
 
-import { get } from 'lodash/fp';
+import { get, last } from 'lodash/fp';
 import { Writable } from 'stream';
 
 import type { IEntity } from '../../../../../../types';
@@ -72,7 +72,7 @@ const createEntitiesWriteStream = (options: IEntitiesRestoreStreamOptions) => {
         // For each difference found on an ID attribute,
         // update the mapping the table accordingly
         diffs.forEach((diff) => {
-          if (diff.kind === 'modified' && diff.path.at(-1) === 'id') {
+          if (diff.kind === 'modified' && last(diff.path) === 'id') {
             const target = resolveType(diff.path);
 
             // If no type is found for the given path, then ignore the diff
