@@ -1,5 +1,5 @@
 import { getFetchClient } from '@strapi/admin/admin/src/utils/getFetchClient';
-import { getRequestURL, axiosInstance } from '../../../../utils';
+import { getRequestURL } from '../../../../utils';
 
 export const fetchData = async (toggleNotification, notifyStatus) => {
   try {
@@ -20,7 +20,8 @@ export const fetchData = async (toggleNotification, notifyStatus) => {
 
 export const deleteData = async (id, toggleNotification) => {
   try {
-    await axiosInstance.delete(`${getRequestURL('roles')}/${id}`);
+    const { del } = getFetchClient();
+    await del(`${getRequestURL('roles')}/${id}`);
   } catch (error) {
     toggleNotification({
       type: 'warning',
