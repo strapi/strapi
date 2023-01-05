@@ -39,7 +39,7 @@ const databases = {
 const main = async (database, appPath, opts) => {
   try {
     await cleanTestApp(appPath);
-    await generateTestApp({ appPath, database });
+    await generateTestApp({ appPath, database, template: opts.template });
 
     if (opts.run) {
       await runTestApp(appPath);
@@ -69,29 +69,32 @@ yargs
         type: 'string',
         default: 'test-apps/base',
       });
+
+      yarg.positional('template', {
+        type: 'string',
+        default: '../e2e/app-template',
+      });
     },
     (argv) => {
-      const { database, run, appPath = 'test-apps/base' } = argv;
+      const { database, run, appPath = 'test-apps/base', template = '../e2e/app-template' } = argv;
 
-      if (argv.dbclient) {
-        return main(
-          {
-            client: argv.dbclient,
-            connection: {
-              host: argv.dbhost,
-              port: argv.dbport,
-              database: argv.dbname,
-              username: argv.dbusername,
-              password: argv.dbpassword,
-              filename: argv.dbfile,
-            },
-          },
-          appPath,
-          { run }
-        );
-      }
-
-      return main(databases[database], appPath, { run });
+      return main(
+        argv.dbclient
+          ? {
+              client: argv.dbclient,
+              connection: {
+                host: argv.dbhost,
+                port: argv.dbport,
+                database: argv.dbname,
+                username: argv.dbusername,
+                password: argv.dbpassword,
+                filename: argv.dbfile,
+              },
+            }
+          : databases[database],
+        appPath,
+        { run, template }
+      );
     }
   )
   .help().argv;
