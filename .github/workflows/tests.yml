@@ -1,4 +1,4 @@
-name: 'Tests'
+[![Tests](https://github.com/strapi/strapi/actions/workflows/tests.yml/badge.svg?branch=chore%2Fcli-factory&event=project)](https://github.com/strapi/strapi/actions/workflows/tests.yml)
 
 on:
   push:
