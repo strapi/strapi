@@ -13,7 +13,7 @@ import { useLocation } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import adminPermissions from '../../../../../permissions';
 import { useFetchClient } from '../../../../../hooks';
-import TableRows from './DynamicTable/TableRows';
+import TableRows from './TableRows';
 import tableHeaders from './utils/tableHeaders';
 import ModalDialog from './ModalDialog';
 

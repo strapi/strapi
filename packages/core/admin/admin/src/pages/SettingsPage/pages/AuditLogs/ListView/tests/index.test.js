@@ -64,7 +64,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
   });
 
   it('should render page with right header details', () => {
-    mockUseQuery.mockReturnValueOnce({
+    mockUseQuery.mockReturnValue({
       data: {
         results: [],
       },
@@ -81,7 +81,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
   });
 
   it('should show a list of audit logs with all actions', async () => {
-    mockUseQuery.mockReturnValueOnce({
+    mockUseQuery.mockReturnValue({
       data: {
         results: TEST_DATA,
       },
@@ -98,7 +98,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
   });
 
   it('should open a modal when clicked on a table row and close modal when clicked', async () => {
-    mockUseQuery.mockReturnValueOnce({
+    mockUseQuery.mockReturnValue({
       data: {
         results: TEST_DATA,
       },
