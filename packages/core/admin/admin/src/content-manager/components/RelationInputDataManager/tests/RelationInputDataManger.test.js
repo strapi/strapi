@@ -70,12 +70,14 @@ jest.mock('@strapi/helper-plugin', () => ({
       relation: [
         {
           id: 1,
+          __temp_key__: 1,
           mainField: 'Relation 1',
           name: 'Relation 1',
         },
 
         {
           id: 2,
+          __temp_key__: 2,
           mainField: 'Relation 2',
           name: 'Relation 2',
         },
@@ -85,12 +87,14 @@ jest.mock('@strapi/helper-plugin', () => ({
       relation: [
         {
           id: 1,
+          __temp_key__: 1,
           mainField: 'Relation 1',
           name: 'Relation 1',
         },
 
         {
           id: 2,
+          __temp_key__: 2,
           mainField: 'Relation 2',
           name: 'Relation 2',
         },
@@ -197,6 +201,19 @@ describe('RelationInputDataManager', () => {
             something: true,
           }),
         }),
+      })
+    );
+  });
+
+  test('Correctly computes __temp_key__ and passes this to useRelation', async () => {
+    setup({
+      name: 'relation.1.subRelation',
+    });
+
+    expect(useRelation).toBeCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        __temp_key__: 2,
       })
     );
   });

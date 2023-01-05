@@ -1016,6 +1016,139 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
       });
     });
+
+    it('should use __temp_key__ when provided to index both initalData and modifiedData', () => {
+      const state = {
+        ...initialState,
+        initialData: {
+          id: 2,
+          dz: [
+            {
+              __component: 'default.compo1',
+              id: 7,
+              __temp_key__: 9,
+              publishers: [],
+            },
+            {
+              __component: 'default.compo2',
+              id: 3,
+              __temp_key__: 10,
+            },
+            {
+              __component: 'default.compo1',
+              id: 8,
+              __temp_key__: 11,
+              publishers: [],
+            },
+          ],
+        },
+        modifiedData: {
+          id: 2,
+          dz: [
+            {
+              __component: 'default.compo2',
+              id: 3,
+              __temp_key__: 10,
+            },
+            {
+              __component: 'default.compo1',
+              id: 7,
+              __temp_key__: 9,
+              publishers: [],
+            },
+            {
+              __component: 'default.compo1',
+              id: 8,
+              __temp_key__: 11,
+
+              publishers: [],
+            },
+          ],
+        },
+      };
+
+      const action = {
+        type: 'LOAD_RELATION',
+        keys: ['dz', '0', 'publishers'],
+        __temp_key__: 9,
+        value: [
+          {
+            id: 1,
+            name: 'P3',
+          },
+          {
+            id: 2,
+            name: 'P4',
+          },
+        ],
+      };
+
+      expect(reducer(state, action)).toStrictEqual({
+        ...initialState,
+        initialData: {
+          id: 2,
+          dz: [
+            {
+              __component: 'default.compo1',
+              __temp_key__: 9,
+              id: 7,
+              publishers: [
+                {
+                  id: 1,
+                  name: 'P3',
+                },
+                {
+                  id: 2,
+                  name: 'P4',
+                },
+              ],
+            },
+            {
+              __component: 'default.compo2',
+              __temp_key__: 10,
+              id: 3,
+            },
+            {
+              __component: 'default.compo1',
+              __temp_key__: 11,
+              id: 8,
+              publishers: [],
+            },
+          ],
+        },
+        modifiedData: {
+          id: 2,
+          dz: [
+            {
+              __component: 'default.compo2',
+              __temp_key__: 10,
+              id: 3,
+            },
+            {
+              __component: 'default.compo1',
+              __temp_key__: 9,
+              id: 7,
+              publishers: [
+                {
+                  id: 1,
+                  name: 'P3',
+                },
+                {
+                  id: 2,
+                  name: 'P4',
+                },
+              ],
+            },
+            {
+              __component: 'default.compo1',
+              __temp_key__: 11,
+              id: 8,
+              publishers: [],
+            },
+          ],
+        },
+      });
+    });
   });
 
   describe('DISCONNECT_RELATION', () => {
