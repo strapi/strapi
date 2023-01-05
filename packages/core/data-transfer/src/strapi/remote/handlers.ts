@@ -14,15 +14,14 @@ interface ITransferState {
   controller?: IPushController;
 }
 
-export const createTransferHandler =
-  (options: ServerOptions = {}) =>
-  async (ctx: Context) => {
+export const createTransferHandler = (options: ServerOptions = {}) => {
+  // Create the websocket server
+  const wss = new WebSocket.Server({ ...options, noServer: true });
+
+  return async (ctx: Context) => {
     const upgradeHeader = (ctx.request.headers.upgrade || '')
       .split(',')
       .map((s) => s.trim().toLowerCase());
-
-    // Create the websocket server
-    const wss = new WebSocket.Server({ ...options, noServer: true });
 
     if (upgradeHeader.includes('websocket')) {
       wss.handleUpgrade(ctx.req, ctx.request.socket, Buffer.alloc(0), (ws) => {
@@ -82,7 +81,9 @@ export const createTransferHandler =
           return { ok: true };
         };
 
-        const init = (msg: client.InitCommand): server.Payload<server.InitMessage> => {
+        const init = async (
+          msg: client.InitCommand
+        ): Promise<server.Payload<server.InitMessage>> => {
           if (state.controller) {
             throw new Error('Transfer already in progres');
           }
@@ -91,6 +92,8 @@ export const createTransferHandler =
 
           // Push transfer
           if (transfer === 'push') {
+            // await updatePermissions();
+
             const { options: controllerOptions } = msg.params;
 
             state.controller = createPushController({
@@ -219,3 +222,4 @@ export const createTransferHandler =
       ctx.respond = false;
     }
   };
+};
