@@ -5,6 +5,12 @@ test.describe('Authentication', () => {
     await page.goto('/admin');
   });
 
+  test.afterEach(async ({ page }) => {
+    await page.request.fetch('http://localhost:1337/api/database-dump', {
+      method: 'POST',
+    });
+  });
+
   test('a user should be able to signup when the strapi instance starts fresh', async ({
     page,
   }) => {
