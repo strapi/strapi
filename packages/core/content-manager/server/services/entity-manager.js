@@ -49,6 +49,16 @@ const addCreatedByRolesPopulate = (populate) => {
   };
 };
 
+const getEntityPopulate = (uid) => {
+  const relationsPerformanceEnabled = strapi.config.get('admin.relations.performance', false);
+
+  if (relationsPerformanceEnabled) {
+    return getDeepPopulate(uid, { countMany: true, countOne: true });
+  }
+
+  return getDeepPopulate(uid, {});
+};
+
 /**
  * @type {import('./entity-manager').default}
  */
@@ -114,7 +124,7 @@ module.exports = ({ strapi }) => ({
 
     const params = {
       data: publishData,
-      populate: getDeepPopulate(uid, { countMany: true, countOne: true }),
+      populate: getEntityPopulate(uid),
     };
 
     return strapi.entityService.create(uid, params);
@@ -125,14 +135,14 @@ module.exports = ({ strapi }) => ({
 
     const params = {
       data: publishData,
-      populate: getDeepPopulate(uid, { countMany: true, countOne: true }),
+      populate: getEntityPopulate(uid),
     };
 
     return strapi.entityService.update(uid, entity.id, params);
   },
 
   delete(entity, uid) {
-    const params = { populate: getDeepPopulate(uid, { countMany: true, countOne: true }) };
+    const params = { populate: getEntityPopulate(uid) };
 
     return strapi.entityService.delete(uid, entity.id, params);
   },
@@ -161,7 +171,7 @@ module.exports = ({ strapi }) => ({
 
     const params = {
       data,
-      populate: getDeepPopulate(uid, { countMany: true, countOne: true }),
+      populate: getEntityPopulate(uid),
     };
 
     return strapi.entityService.update(uid, entity.id, params);
@@ -176,7 +186,7 @@ module.exports = ({ strapi }) => ({
 
     const params = {
       data,
-      populate: getDeepPopulate(uid, { countMany: true, countOne: true }),
+      populate: getEntityPopulate(uid),
     };
 
     return strapi.entityService.update(uid, entity.id, params);
