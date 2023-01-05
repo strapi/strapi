@@ -28,7 +28,7 @@ const parseURL = (value) => {
 };
 
 /**
- * assert that a given URL has a given protocol
+ * assert that a URL object has a protocol value
  *
  * @param {URL} url
  * @param {string[]|undefined} protocol
