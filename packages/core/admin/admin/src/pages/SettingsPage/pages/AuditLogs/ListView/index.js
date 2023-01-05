@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
 import {
   SettingsPageTitle,
   DynamicTable,
@@ -10,11 +9,12 @@ import {
 } from '@strapi/helper-plugin';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
+import { useLocation } from 'react-router-dom';
+import { useQuery } from 'react-query';
 import adminPermissions from '../../../../../permissions';
-// import { useFetchClient } from '../../../../../hooks';
-import TableRows from './DynamicTable/TableRows';
+import { useFetchClient } from '../../../../../hooks';
+import TableRows from './TableRows';
 import tableHeaders from './utils/tableHeaders';
-import { fetchAuditLogsPage, fetchAuditLog } from './utils/api';
 import ModalDialog from './ModalDialog';
 
 const ListView = () => {
@@ -23,22 +23,25 @@ const ListView = () => {
   const {
     allowedActions: { canRead },
   } = useRBAC(adminPermissions.settings.auditLogs);
+  const { get } = useFetchClient();
+  const { search } = useLocation();
 
   useFocusWhenNavigate();
 
-  /**
-   * TODO: using fetchclient facing difficulties to mock, for time being using axiosinstance to pass the tests
-   *
-  const { get } = useFetchClient();
-  const fetchData = async () => {
-    const {
-      data: { results },
-    } = await get(`/admin/audit-logs`);
+  const fetchAuditLogsPage = async ({ queryKey }) => {
+    const search = queryKey[1];
+    const { data } = await get(`/admin/audit-logs${search}`);
 
-    return results;
-  }; */
+    return data;
+  };
 
-  const { status, data, isFetching } = useQuery('audit-logs', fetchAuditLogsPage, {
+  const fetchAuditLog = async (id) => {
+    const { data } = await get(`/admin/audit-logs/${id}`);
+
+    return data;
+  };
+
+  const { data, isLoading } = useQuery(['auditLogs', search], fetchAuditLogsPage, {
     enabled: canRead,
     keepPreviousData: true,
     retry: false,
@@ -50,8 +53,6 @@ const ListView = () => {
       });
     },
   });
-
-  const isLoading = status === 'loading' || isFetching;
 
   const title = formatMessage({
     id: 'global.auditLogs',
@@ -92,15 +93,15 @@ const ListView = () => {
           defaultMessage: 'Logs of all the activities that happened in your environment',
         })}
       />
-      <ContentLayout>
+      <ContentLayout canRead={canRead}>
         <DynamicTable
           contentType="Audit logs"
           headers={headers}
-          rows={data}
+          rows={data?.results || []}
           withBulkActions
           isLoading={isLoading}
         >
-          <TableRows headers={headers} rows={data} onModalToggle={handleToggle} />
+          <TableRows headers={headers} rows={data?.results || []} onModalToggle={handleToggle} />
         </DynamicTable>
       </ContentLayout>
       {openedLogId && openedLogStatus === 'success' && (

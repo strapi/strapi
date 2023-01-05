@@ -20,9 +20,10 @@ const headers = [
     metadatas: { label: 'Date', sortable: true },
   },
   {
-    key: 'fullname',
-    name: 'fullname',
-    metadatas: { label: 'User', sortable: true },
+    key: 'user',
+    name: 'user',
+    metadatas: { label: 'User', sortable: false },
+    cellFormatter: (value) => (value ? value.fullname : null),
   },
 ];
 
@@ -31,19 +32,31 @@ const rows = [
     id: 1,
     action: 'role.update',
     date: '2022-11-14T23:04:00.000Z',
-    fullname: 'John Doe',
+    user: {
+      id: 1,
+      fullname: 'John Doe',
+      email: 'test@email.com',
+    },
   },
   {
     id: 2,
     action: 'permission.create',
     date: '2022-11-04T18:24:00.000Z',
-    fullname: 'Kai Doe',
+    user: {
+      id: 2,
+      fullname: 'Kai Doe',
+      email: 'test2@email.com',
+    },
   },
   {
     id: 3,
-    action: '',
+    action: 'custom.action',
     date: '2022-11-04T18:23:00.000Z',
-    fullname: 'Kai Doe',
+    user: {
+      id: 2,
+      fullname: 'Kai Doe',
+      email: 'test2@email.com',
+    },
   },
 ];
 
@@ -72,8 +85,8 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView | Dynamic Table | Table Rows', (
     expect(screen.getByText(/november 4, 2022, 18:24:00/i)).toBeInTheDocument();
     expect(screen.getAllByText(/kai doe/i).length).toBe(2);
 
-    // empty cell displays '-', here action with id: 3
-    expect(screen.getByText('-')).toBeInTheDocument();
+    // For custom actions without translation it should show the action without formatting
+    expect(screen.getByText('custom.action')).toBeInTheDocument();
   });
 
   it('should open a modal when clicked on a view details icon button', () => {

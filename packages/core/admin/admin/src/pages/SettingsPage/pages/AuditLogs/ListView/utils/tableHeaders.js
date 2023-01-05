@@ -29,7 +29,7 @@ const tableHeaders = [
         id: 'Settings.permissions.auditLogs.user',
         defaultMessage: 'User',
       },
-      sortable: true,
+      sortable: false,
     },
     cellFormatter: (user) => (user ? user.fullname : ''),
   },

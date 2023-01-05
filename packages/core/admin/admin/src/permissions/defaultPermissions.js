@@ -35,8 +35,8 @@ const permissions = {
   },
   settings: {
     auditLogs: {
-      // Note:update to admin::auditLogs permissions when set in BE
-      main: [{ action: 'admin::roles.create', subject: null }],
+      main: [{ action: 'admin::audit-logs.read', subject: null }],
+      read: [{ action: 'admin::audit-logs.read', subject: null }],
     },
     roles: {
       main: [
