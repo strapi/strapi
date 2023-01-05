@@ -2,6 +2,7 @@ import { getStrapiFactory } from '../../__tests__/test-utils';
 
 import { createTransferHandler } from '../remote/handlers';
 import register from '../register';
+import { TRANSFER_URL } from '../remote/constants';
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -20,17 +21,19 @@ jest.mock('../remote/handlers', () => ({
 }));
 
 describe('Register the Transfer route', () => {
-  test('registers the /transfer route', () => {
+  test('registers the transfer route', () => {
     const strapi = strapiMockFactory();
 
     register(strapi);
-    expect(strapi.admin.routes.push).toHaveBeenCalledWith({
-      method: 'GET',
-      path: '/transfer',
-      handler: createTransferHandler(),
-      config: {
-        auth: false,
-      },
-    });
+    expect(strapi.admin.routes.push).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'GET',
+        path: TRANSFER_URL,
+        handler: createTransferHandler(),
+        config: {
+          policies: expect.any(Array),
+        },
+      })
+    );
   });
 });
