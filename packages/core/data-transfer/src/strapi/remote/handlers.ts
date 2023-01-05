@@ -14,11 +14,18 @@ interface ITransferState {
   controller?: IPushController;
 }
 
+const updateAbilityMilliseconds = 60 * 1000; // 60 * 1000 = 1 minute
+const openStates: unknown[] = [WebSocket.OPEN, WebSocket.CONNECTING, WebSocket.CLOSING];
+
 export const createTransferHandler = (options: ServerOptions = {}) => {
   // Create the websocket server
   const wss = new WebSocket.Server({ ...options, noServer: true });
 
   return async (ctx: Context) => {
+    let userAbility = ctx.state.userAbility;
+    const user = ctx.state.user;
+    let updateUserAbilityTimer: ReturnType<typeof setTimeout>;
+
     const upgradeHeader = (ctx.request.headers.upgrade || '')
       .split(',')
       .map((s) => s.trim().toLowerCase());
@@ -75,10 +82,35 @@ export const createTransferHandler = (options: ServerOptions = {}) => {
         };
 
         const teardown = (): server.Payload<server.EndMessage> => {
+          clearTimeout(updateUserAbilityTimer);
           delete state.controller;
           delete state.transfer;
-
           return { ok: true };
+        };
+
+        // TODO: set a maximum time allowed to pass without a successful userAbility ability
+
+        /**
+         * update userAbility
+         */
+        const updateUserAbility = async () => {
+          // TODO: clean this up using getService if possible OR create typings for PermissionEngineService instead of using `any`
+          userAbility = await strapi
+            .service<any>('admin::permission')
+            .engine.generateUserAbility(user);
+          // only restart timer if connection is still open, in case something went wrong in teardown
+          if (openStates.includes(ws.readyState)) {
+            updateUserAbilityTimer = setTimeout(updateUserAbility, updateAbilityMilliseconds);
+          }
+        };
+        /**
+         * start a timer that updates userAbility as long as the connection is alive
+         */
+        const initializeAbilityTimer = () => {
+          if (updateUserAbilityTimer) {
+            clearTimeout(updateUserAbilityTimer);
+          }
+          updateUserAbilityTimer = setTimeout(updateUserAbility, updateAbilityMilliseconds);
         };
 
         const init = async (
@@ -90,9 +122,14 @@ export const createTransferHandler = (options: ServerOptions = {}) => {
 
           const { transfer } = msg.params;
 
+          initializeAbilityTimer();
+
           // Push transfer
           if (transfer === 'push') {
-            // await updatePermissions();
+            if (userAbility.cannot('admin::transfer.push')) {
+              // TODO: create unauthorizedError
+              throw new Error('Not authorized.');
+            }
 
             const { options: controllerOptions } = msg.params;
 
