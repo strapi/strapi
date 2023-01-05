@@ -266,8 +266,8 @@ program
   .option('-s, --silent', `Run the generation silently, without any output`, false)
   .action(getLocalScript('ts/generate-types'));
 
-// `$ strapi transfer`
 if (process.env.STRAPI_EXPERIMENTAL) {
+  // `$ strapi transfer`
   program
     .command('transfer')
     .description('Transfer data from one source to another')
