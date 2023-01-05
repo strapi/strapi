@@ -25,39 +25,41 @@ const sortConnectArray = (connectArr, initialArr = [], strictSort = true) => {
   // Boolean to know if we have to recalculate the order of the relations
   let needsSorting = false;
   // Map to validate if relation is already in sortedConnect or DB.
-  const relInArray = initialArr.reduce((acc, rel) => ({ ...acc, [rel.id]: true }), {});
+  const relationInArray = initialArr.reduce((acc, rel) => ({ ...acc, [rel.id]: true }), {});
   // Map to store the first index where a relation id is connected
-  const firstSeen = {};
+  const mappedRelationsIndex = connectArr.reduce((mapper, relation, index) => {
+    const adjacentRelId = relation.position?.before || relation.position?.after;
+
+    if (!relationInArray[adjacentRelId] && !mapper[adjacentRelId]) {
+      needsSorting = true;
+    }
+
+    return {
+      [relation.id]: mapper[relation.id] || index, // If the relation is already in the array, we keep the first index
+      ...mapper,
+    };
+  }, {});
   // Map to validate if connect relation has already been computed
   const computedIdx = {};
-
-  connectArr.forEach((rel, idx) => {
-    // If adjacent relation is not in the database or seen yet in the connect array
-    // then we need to sort the connect array
-    const adjacentRelId = rel.position?.before || rel.position?.after;
-    if (!relInArray[adjacentRelId] && !firstSeen[adjacentRelId]) needsSorting = true;
-    // Populate firstSeen
-    if (!(rel.id in firstSeen)) firstSeen[rel.id] = idx;
-  });
 
   // If we don't need to sort the connect array, we can return it as is
   if (!needsSorting) return connectArr;
 
   // Add relation to sortedConnect and mark it as seen
-  const pushRelation = (rel) => {
-    sortedConnect.push(rel);
-    relInArray[rel.id] = true;
+  const pushRelation = (relation) => {
+    sortedConnect.push(relation);
+    relationInArray[relation.id] = true;
   };
 
   // Recursively compute in which order the relation should be connected
-  const computeRelation = (rel, idx, relationsSeenInBranch) => {
-    const adjacentRelId = rel.position?.before || rel.position?.after;
+  const computeRelation = (relation, idx, relationsSeenInBranch) => {
+    const adjacentRelId = relation.position?.before || relation.position?.after;
 
     // This connect has already been computed
     if (idx in computedIdx) return;
 
-    if (!adjacentRelId || relInArray[adjacentRelId]) {
-      return pushRelation(rel);
+    if (!adjacentRelId || relationInArray[adjacentRelId]) {
+      return pushRelation(relation);
     }
 
     // If the relation has already been seen in the current branch,
@@ -70,7 +72,7 @@ const sortConnectArray = (connectArr, initialArr = [], strictSort = true) => {
     }
 
     // Look if id is referenced elsewhere in the array
-    const adjacentRelIdx = firstSeen[adjacentRelId];
+    const adjacentRelIdx = mappedRelationsIndex[adjacentRelId];
 
     if (adjacentRelIdx) {
       const adjacentRel = connectArr[adjacentRelIdx];
@@ -78,25 +80,27 @@ const sortConnectArray = (connectArr, initialArr = [], strictSort = true) => {
       // Mark adjacent relation idx as computed,
       // so it is not computed again later in the loop
       computedIdx[adjacentRelIdx] = true;
-      computeRelation(adjacentRel, idx, { ...relationsSeenInBranch, [rel.id]: true });
-      pushRelation(rel);
+      computeRelation(adjacentRel, idx, { ...relationsSeenInBranch, [relation.id]: true });
+      pushRelation(relation);
     } else if (strictSort) {
       // If we reach this point, it means that the adjacent relation is not in the connect array
       // and it is not in the database. This should not happen.
       throw new InvalidRelationError(
-        `There was a problem connecting relation with id ${rel.id} at position ${JSON.stringify(
-          rel.position
+        `There was a problem connecting relation with id ${
+          relation.id
+        } at position ${JSON.stringify(
+          relation.position
         )}. The relation with id ${adjacentRelId} needs to be connected first.`
       );
     } else {
       // We are in non-strict mode so we can push the relation.
-      pushRelation({ id: rel.id, position: { end: true } });
+      pushRelation({ id: relation.id, position: { end: true } });
     }
   };
 
   // Iterate over connectArr and populate sortedConnect
-  connectArr.forEach((rel, idx) => {
-    computeRelation(rel, idx, {});
+  connectArr.forEach((relation, idx) => {
+    computeRelation(relation, idx, {});
   });
 
   return sortedConnect;
@@ -184,8 +188,7 @@ const relationsOrderer = (initArr, idColumn, orderColumn, strict) => {
       return this;
     },
     connect(relations) {
-      const sortedRelations = sortConnectArray(relations, arr, strict);
-      sortedRelations.forEach((relation) => {
+      sortConnectArray(_.castArray(relations), arr, strict).forEach((relation) => {
         this.disconnect(relation);
 
         try {
