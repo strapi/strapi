@@ -16,6 +16,7 @@ import { useFetchClient } from '../../../../../hooks';
 import TableRows from './TableRows';
 import tableHeaders from './utils/tableHeaders';
 import ModalDialog from './ModalDialog';
+import PaginationFooter from './PaginationFooter';
 
 const ListView = () => {
   const { formatMessage } = useIntl();
@@ -92,6 +93,7 @@ const ListView = () => {
         >
           <TableRows headers={headers} rows={data?.results || []} onModalToggle={handleToggle} />
         </DynamicTable>
+        <PaginationFooter pagination={data?.pagination} />
       </ContentLayout>
       {isModalOpen && <ModalDialog onToggle={handleToggle} data={detailsActionData} />}
     </Main>

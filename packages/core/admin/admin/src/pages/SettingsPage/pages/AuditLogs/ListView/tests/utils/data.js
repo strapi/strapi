@@ -1,4 +1,4 @@
-const TEST_DATA = [
+export const TEST_DATA = [
   {
     id: 1,
     action: 'role.create',
@@ -37,4 +37,15 @@ const TEST_DATA = [
   },
 ];
 
-export default TEST_DATA;
+export const getBigTestData = (quantity) => {
+  const data = [];
+
+  for (let i = 0; i < quantity; i++) {
+    data.push({
+      ...TEST_DATA[i % TEST_DATA.length],
+      id: i + 1,
+    });
+  }
+
+  return data;
+};

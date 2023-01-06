@@ -8,7 +8,7 @@ import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { TrackingProvider } from '@strapi/helper-plugin';
 import ListView from '../index';
-import TEST_DATA from './utils/data';
+import { TEST_DATA, getBigTestData } from './utils/data';
 
 const history = createMemoryHistory();
 const user = userEvent.setup();
@@ -116,5 +116,72 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
     const closeButton = label.closest('button');
     await user.click(closeButton);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('should show pagination and be on page 1 on first render', async () => {
+    mockUseQuery.mockReturnValue({
+      data: {
+        results: getBigTestData(15),
+        pagination: {
+          page: 1,
+          pageSize: 10,
+          pageCount: 2,
+          total: 15,
+        },
+      },
+      isLoading: false,
+    });
+
+    const { container } = render(App);
+
+    const pagination = await waitFor(() => container.querySelector('nav[aria-label="pagination"]'));
+
+    expect(pagination).toBeInTheDocument();
+    expect(pagination.querySelectorAll('ul li')[1].querySelector('a')).toHaveTextContent('1');
+    expect(pagination.querySelectorAll('ul li')[1].querySelector('a')).toHaveClass('active');
+  });
+
+  it('should add the right query params when page 2 is clicked', async () => {
+    mockUseQuery.mockReturnValue({
+      data: {
+        results: getBigTestData(15),
+        pagination: {
+          page: 1,
+          pageSize: 10,
+          pageCount: 2,
+          total: 15,
+        },
+      },
+      isLoading: false,
+    });
+
+    const { container } = render(App);
+
+    const pagination = await waitFor(() => container.querySelector('nav[aria-label="pagination"]'));
+
+    await user.click(pagination.querySelectorAll('ul li')[2].querySelector('a'));
+    expect(history.location.search).toEqual('?page=2');
+  });
+
+  it('should show 20 elements if pageSize is 20', async () => {
+    history.location.search = '?pageSize=20';
+
+    mockUseQuery.mockReturnValue({
+      data: {
+        results: getBigTestData(20),
+        pagination: {
+          page: 1,
+          pageSize: 20,
+          pageCount: 1,
+          total: 20,
+        },
+      },
+      isLoading: false,
+    });
+
+    const { container } = render(App);
+
+    const rows = await waitFor(() => container.querySelector('tbody').querySelectorAll('tr'));
+    expect(rows.length).toEqual(20);
   });
 });
