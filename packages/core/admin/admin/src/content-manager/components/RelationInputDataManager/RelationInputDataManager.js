@@ -11,6 +11,8 @@ import { RelationInput } from '../RelationInput';
 
 import { useRelation } from '../../hooks/useRelation';
 
+import { getTrad } from '../../utils';
+
 import { PUBLICATION_STATES, RELATIONS_TO_DISPLAY, SEARCH_RESULTS_TO_DISPLAY } from './constants';
 import { connect, select, normalizeSearchResults, diffRelations, normalizeRelation } from './utils';
 
@@ -172,23 +174,23 @@ export const RelationInputDataManager = ({
       labelLoadMore={
         !isCreatingEntry
           ? formatMessage({
-              id: 'relation.loadMore',
+              id: getTrad('relation.loadMore'),
               defaultMessage: 'Load More',
             })
           : null
       }
       labelDisconnectRelation={formatMessage({
-        id: 'relation.disconnect',
+        id: getTrad('relation.disconnect'),
         defaultMessage: 'Remove',
       })}
       listHeight={320}
       loadingMessage={formatMessage({
-        id: 'relation.isLoading',
+        id: getTrad('relation.isLoading'),
         defaultMessage: 'Relations are loading',
       })}
       name={name}
       noRelationsMessage={formatMessage({
-        id: 'relation.notAvailable',
+        id: getTrad('relation.notAvailable'),
         defaultMessage: 'No relations available',
       })}
       numberOfRelationsToDisplay={RELATIONS_TO_DISPLAY}
@@ -199,18 +201,18 @@ export const RelationInputDataManager = ({
       onSearchNextPage={() => handleSearchMore()}
       placeholder={formatMessage(
         placeholder || {
-          id: 'relation.add',
+          id: getTrad('relation.add'),
           defaultMessage: 'Add relation',
         }
       )}
       publicationStateTranslations={{
         [PUBLICATION_STATES.DRAFT]: formatMessage({
-          id: 'relation.publicationState.draft',
+          id: getTrad('relation.publicationState.draft'),
           defaultMessage: 'Draft',
         }),
 
         [PUBLICATION_STATES.PUBLISHED]: formatMessage({
-          id: 'relation.publicationState.published',
+          id: getTrad('relation.publicationState.published'),
           defaultMessage: 'Published',
         }),
       }}
