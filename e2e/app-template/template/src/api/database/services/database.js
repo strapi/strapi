@@ -1,8 +1,8 @@
-const { createCoreController } = require('@strapi/strapi').factories;
+const { createCoreService } = require('@strapi/strapi').factories;
 
-module.exports = createCoreController('api::database-dump.database-dump', ({ strapi }) => {
+module.exports = createCoreService('api::database.database', ({ strapi }) => {
   return {
-    async dump(ctx) {
+    async dumpDatabaseTables() {
       const db = strapi.db.getConnection(); // knexjs
       const metadata = strapi.db.metadata;
       const promises = [];
@@ -18,8 +18,6 @@ module.exports = createCoreController('api::database-dump.database-dump', ({ str
       });
 
       await Promise.all(promises);
-
-      ctx.send(200);
     },
   };
 });
