@@ -57,6 +57,7 @@
     "babel-loader": "8.2.5",
     "babel-plugin-styled-components": "2.0.2",
     "bcryptjs": "2.4.3",
+    "browserslist-to-esbuild": "1.2.0",
     "chalk": "^4.1.1",
     "chokidar": "^3.5.1",
     "codemirror": "^5.65.11",
@@ -160,5 +161,10 @@
         ]
       }
     }
-  }
+  },
+  "browserslist": [
+    "last 3 major versions",
+    "Firefox ESR",
+    "last 2 Opera versions"
+  ]
 }
