@@ -42,6 +42,7 @@ describe('normalizeAPIError', () => {
         field: {
           defaultMessage: 'Field must be unique',
           id: 'apiError.Field must be unique',
+          name: 'ValidationError',
           values: {
             field: 'field',
           },
@@ -50,6 +51,7 @@ describe('normalizeAPIError', () => {
         'field.0.name': {
           defaultMessage: 'Field contains errors',
           id: 'apiError.Field contains errors',
+          name: 'ValidationError',
           values: {
             field: 'name',
           },
@@ -65,6 +67,7 @@ describe('normalizeAPIError', () => {
       name: 'ValidationError',
       errors: {
         field: {
+          name: 'ValidationError',
           defaultMessage: 'Field must be unique',
           id: 'custom.apiError.Field must be unique',
           values: {
@@ -73,6 +76,7 @@ describe('normalizeAPIError', () => {
         },
 
         'field.0.name': {
+          name: 'ValidationError',
           defaultMessage: 'Field contains errors',
           id: 'custom.apiError.Field contains errors',
           values: {

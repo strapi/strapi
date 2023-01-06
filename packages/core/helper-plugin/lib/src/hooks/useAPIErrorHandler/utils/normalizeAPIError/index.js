@@ -12,47 +12,50 @@ function getPrefixedId(message, callback) {
   return prefixedMessage;
 }
 
+function normalizeError(error, { name, intlMessagePrefixCallback }) {
+  const { message, path } = error;
+  const fullPath = path?.join('.');
+  const body = {
+    id: getPrefixedId(message, intlMessagePrefixCallback),
+    defaultMessage: message,
+    name: error?.name ?? name,
+  };
+
+  const normalizedError = fullPath
+    ? {
+        [fullPath]: body,
+      }
+    : body;
+
+  // ValidationErrors expose a path about the affected field
+  // formatMessage() needs the `field` information to properly
+  // display error messages
+  if ((error?.name === 'ValidationError' || name === 'ValidationError') && fullPath) {
+    normalizedError[fullPath].values = {
+      field: error.path[error.path.length - 1],
+    };
+  }
+
+  return normalizedError;
+}
+
 export function normalizeAPIError(resError, intlMessagePrefixCallback) {
   const { error } = resError.response.data;
 
   // some errors carry multiple errors (such as ValidationError)
   if (error?.details?.errors) {
-    const { errors } = error.details;
-
-    const normalizedErrors = errors.reduce((acc, err) => {
-      const path = err?.path.join('.');
-      const { message } = err;
-
-      acc[path] = {
-        id: getPrefixedId(message, intlMessagePrefixCallback),
-        defaultMessage: message,
-      };
-
-      // ValidationErrors expose a path about the affected field
-      // formatMessage() needs the `field` information to properly
-      // display error messages
-      if (err.name === 'ValidationError') {
-        if (path) {
-          acc[path].values = {
-            field: err.path[err.path.length - 1],
-          };
-        }
-      }
-
-      return acc;
-    }, {});
-
     return {
       name: error.name,
-      errors: normalizedErrors,
+      errors: error.details.errors.reduce((acc, err) => {
+        acc = {
+          ...acc,
+          ...normalizeError(err, { name: error.name, intlMessagePrefixCallback }),
+        };
+
+        return acc;
+      }, {}),
     };
   }
 
-  const { message } = error;
-
-  return {
-    name: error.name,
-    id: getPrefixedId(message, intlMessagePrefixCallback),
-    defaultMessage: message,
-  };
+  return normalizeError(error, { intlMessagePrefixCallback });
 }
