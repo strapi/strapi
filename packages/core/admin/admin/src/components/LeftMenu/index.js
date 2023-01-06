@@ -17,7 +17,6 @@ import { FocusTrap } from '@strapi/design-system/FocusTrap';
 import { Box } from '@strapi/design-system/Box';
 import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
-import Write from '@strapi/icons/Write';
 import Exit from '@strapi/icons/Exit';
 import { auth, usePersistentState, useAppInfos, useTracking } from '@strapi/helper-plugin';
 import useConfigurations from '../../hooks/useConfigurations';
@@ -93,6 +92,8 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
     defaultMessage: 'Strapi Dashboard',
   });
 
+  console.log(pluginsSectionLinks);
+
   return (
     <MainNav condensed={condensed}>
       <NavBrand
@@ -116,14 +117,14 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
       <Divider />
 
       <NavSections>
-        <NavLink
+        {/* <NavLink
           as={RouterNavLink}
           to="/content-manager"
           icon={<Write />}
           onClick={() => handleClickOnLink('/content-manager')}
         >
           {formatMessage({ id: 'global.content-manager', defaultMessage: 'Content manager' })}
-        </NavLink>
+        </NavLink> */}
 
         {pluginsSectionLinks.length > 0 ? (
           <NavSection

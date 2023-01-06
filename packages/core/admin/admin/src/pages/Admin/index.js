@@ -18,9 +18,6 @@ import { createRoute } from '../../utils';
 import { SET_APP_RUNTIME_STATUS } from '../App/constants';
 import Onboarding from './Onboarding';
 
-const CM = lazy(() =>
-  import(/* webpackChunkName: "content-manager" */ '../../content-manager/pages/App')
-);
 const HomePage = lazy(() => import(/* webpackChunkName: "Admin_homePage" */ '../HomePage'));
 const InstalledPluginsPage = lazy(() =>
   import(/* webpackChunkName: "Admin_pluginsPage" */ '../InstalledPluginsPage')
@@ -66,6 +63,8 @@ const Admin = () => {
   const { isLoading, generalSectionLinks, pluginsSectionLinks } = useMenu();
   const { menu } = useStrapiApp();
 
+  console.log(menu);
+
   const routes = useMemo(() => {
     return menu
       .filter((link) => link.Component)
@@ -90,7 +89,6 @@ const Admin = () => {
           <Switch>
             <Route path="/" component={HomePage} exact />
             <Route path="/me" component={ProfilePage} exact />
-            <Route path="/content-manager" component={CM} />
             {routes}
             <Route path="/settings/:settingId" component={SettingsPage} />
             <Route path="/settings" component={SettingsPage} exact />

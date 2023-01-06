@@ -99,6 +99,7 @@ class StrapiApp {
   };
 
   addMenuLink = (link) => {
+    console.log('link', link);
     const stringifiedLink = JSON.stringify(link);
 
     invariant(link.to, `link.to should be defined for ${stringifiedLink}`);

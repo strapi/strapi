@@ -10,6 +10,8 @@ const useMenu = () => {
   const { shouldUpdateStrapi } = useAppInfos();
   const { menu } = useStrapiApp();
 
+  console.log(menu);
+
   // We are using a ref because we don't want our effect to have this in its dependencies array
   const generalSectionLinksRef = useRef(state.generalSectionLinks);
   const shouldUpdateStrapiRef = useRef(shouldUpdateStrapi);

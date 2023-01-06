@@ -1,25 +1,4 @@
 const permissions = {
-  contentManager: {
-    main: [],
-    collectionTypesConfigurations: [
-      {
-        action: 'plugin::content-manager.collection-types.configure-view',
-        subject: null,
-      },
-    ],
-    componentsConfigurations: [
-      {
-        action: 'plugin::content-manager.components.configure-layout',
-        subject: null,
-      },
-    ],
-    singleTypesConfigurations: [
-      {
-        action: 'plugin::content-manager.single-types.configure-view',
-        subject: null,
-      },
-    ],
-  },
   marketplace: {
     main: [
       { action: 'admin::marketplace.read', subject: null },
