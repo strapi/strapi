@@ -90,10 +90,5 @@
   },
   "peerDependencies": {
     "webpack": "^5.74.0"
-  },
-  "browserslist": [
-    "last 3 major versions",
-    "Firefox ESR",
-    "last 2 Opera versions"
-  ]
+  }
 }
