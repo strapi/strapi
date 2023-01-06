@@ -162,37 +162,35 @@ const reducer = (state, action) =>
 
           let tempKeyIndex = 0;
           keys.forEach((currentValue) => {
-            const initialDataValue = get(state, ['initialData', ...initialDataPath, currentValue]);
-            const modifiedDataValue = get(state, [
-              'modifiedData',
-              ...modifiedDataPath,
-              currentValue,
-            ]);
+            const initialDataParent = get(state, ['initialData', ...initialDataPath]);
+            const modifiedDataParent = get(state, ['modifiedData', ...modifiedDataPath]);
 
-            const modifiedTempKey = get(modifiedDataValue, '__temp_key__');
-            const initialTempKey = get(initialDataValue, '__temp_key__');
+            const initialTempKey = get(initialDataParent, [currentValue, '__temp_key__']);
+            const modifiedTempKey = get(modifiedDataParent, [currentValue, '__temp_key__']);
 
-            if (!(isNil(modifiedTempKey) && isNil(initialTempKey))) {
-              tempKeyIndex += 1;
+            if (isNil(modifiedTempKey) || isNil(initialTempKey)) {
+              initialDataPath.push(currentValue);
+              modifiedDataPath.push(currentValue);
+
+              return;
+            }
+
+            tempKeyIndex += 1;
+
+            if (!Array.isArray(initialDataParent) || !Array.isArray(modifiedDataParent)) {
+              initialDataPath.push(currentValue);
+              modifiedDataPath.push(currentValue);
+
+              return;
             }
 
             const currentTempKey = tempKeys[tempKeyIndex - 1];
             initialDataPath.push(
-              isNil(initialTempKey)
-                ? currentValue
-                : findIndex(
-                    get(state, ['initialData', ...initialDataPath]),
-                    (entry) => entry.__temp_key__ === currentTempKey
-                  )
+              findIndex(initialDataParent, (entry) => entry.__temp_key__ === currentTempKey)
             );
 
             modifiedDataPath.push(
-              isNil(modifiedTempKey)
-                ? currentValue
-                : findIndex(
-                    get(state, ['modifiedData', ...modifiedDataPath]),
-                    (entry) => entry.__temp_key__ === currentTempKey
-                  )
+              findIndex(modifiedDataParent, (entry) => entry.__temp_key__ === currentTempKey)
             );
           });
 
