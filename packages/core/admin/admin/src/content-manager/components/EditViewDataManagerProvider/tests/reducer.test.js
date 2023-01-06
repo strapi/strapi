@@ -1023,18 +1023,18 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         initialData: {
           dz: [
             {
-              __component: 'default.compo1',
+              __component: 'default.componentWithToManyRelation',
               id: 7,
               __temp_key__: 9,
               publishers: [],
             },
             {
-              __component: 'default.compo2',
+              __component: 'default.blank',
               id: 3,
               __temp_key__: 10,
             },
             {
-              __component: 'default.compo1',
+              __component: 'default.componentWithToManyRelation',
               id: 8,
               __temp_key__: 11,
               publishers: [],
@@ -1044,18 +1044,18 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         modifiedData: {
           dz: [
             {
-              __component: 'default.compo2',
+              __component: 'default.blank',
               id: 3,
               __temp_key__: 10,
             },
             {
-              __component: 'default.compo1',
+              __component: 'default.componentWithToManyRelation',
               id: 7,
               __temp_key__: 9,
               publishers: [],
             },
             {
-              __component: 'default.compo1',
+              __component: 'default.componentWithToManyRelation',
               id: 8,
               __temp_key__: 11,
 
@@ -1086,7 +1086,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         initialData: {
           dz: [
             {
-              __component: 'default.compo1',
+              __component: 'default.componentWithToManyRelation',
               __temp_key__: 9,
               id: 7,
               publishers: [
@@ -1101,12 +1101,12 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
               ],
             },
             {
-              __component: 'default.compo2',
+              __component: 'default.blank',
               __temp_key__: 10,
               id: 3,
             },
             {
-              __component: 'default.compo1',
+              __component: 'default.componentWithToManyRelation',
               __temp_key__: 11,
               id: 8,
               publishers: [],
@@ -1116,12 +1116,12 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         modifiedData: {
           dz: [
             {
-              __component: 'default.compo2',
+              __component: 'default.blank',
               __temp_key__: 10,
               id: 3,
             },
             {
-              __component: 'default.compo1',
+              __component: 'default.componentWithToManyRelation',
               __temp_key__: 9,
               id: 7,
               publishers: [
@@ -1136,7 +1136,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
               ],
             },
             {
-              __component: 'default.compo1',
+              __component: 'default.componentWithToManyRelation',
               __temp_key__: 11,
               id: 8,
               publishers: [],
@@ -1146,7 +1146,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       });
     });
 
-    it('should use tempKeys to index nested content', () => {
+    it('should use tempKeys to index nested content within initialData and modifiedData', () => {
       const state = {
         ...initialState,
         initialData: {
@@ -1156,7 +1156,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
               __temp_key__: 6,
             },
             {
-              __component: 'default.nesting-compo',
+              __component: 'default.withToManyComponentRelation',
               __temp_key__: 7,
               toManyRelation: [
                 {
@@ -1185,7 +1185,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
               __temp_key__: 6,
             },
             {
-              __component: 'default.nesting-compo',
+              __component: 'default.withToManyComponentRelation',
               __temp_key__: 7,
               toManyRelation: [
                 {
@@ -1234,7 +1234,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
               __temp_key__: 6,
             },
             {
-              __component: 'default.nesting-compo',
+              __component: 'default.withToManyComponentRelation',
               __temp_key__: 7,
               toManyRelation: [
                 {
@@ -1271,7 +1271,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
               __temp_key__: 6,
             },
             {
-              __component: 'default.nesting-compo',
+              __component: 'default.withToManyComponentRelation',
               __temp_key__: 7,
               toManyRelation: [
                 {

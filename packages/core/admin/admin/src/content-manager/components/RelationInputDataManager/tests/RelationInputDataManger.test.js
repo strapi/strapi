@@ -684,7 +684,7 @@ describe('RelationInputDataManager', () => {
     });
   });
 
-  test('correctly computes tempKeys and passes this to useRelation', async () => {
+  test('correctly computes tempKeys for nested content and passes this to useRelation', async () => {
     const data = {
       dz: [
         {
@@ -692,7 +692,7 @@ describe('RelationInputDataManager', () => {
           __temp_key__: 6,
         },
         {
-          __component: 'default.nesting-compo',
+          __component: 'default.withToManyComponentRelation',
           __temp_key__: 7,
           toManyRelation: [
             {
