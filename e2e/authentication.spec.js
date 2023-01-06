@@ -8,7 +8,7 @@ test.describe('Authentication', () => {
   });
 
   test.afterEach(async ({ page }) => {
-    await page.request.fetch('http://localhost:1337/api/database-dump', {
+    await page.request.fetch('/api/database/dump', {
       method: 'POST',
     });
   });
