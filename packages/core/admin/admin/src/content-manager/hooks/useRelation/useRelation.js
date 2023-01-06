@@ -5,7 +5,7 @@ import { axiosInstance } from '../../../core/utils';
 
 import { normalizeRelations } from '../../components/RelationInputDataManager/utils';
 
-export const useRelation = (cacheKey, { name, __temp_key__, relation, search }) => {
+export const useRelation = (cacheKey, { name, tempKeys, relation, search }) => {
   const [searchParams, setSearchParams] = useState({});
   const [currentPage, setCurrentPage] = useState(0);
 
@@ -128,12 +128,12 @@ export const useRelation = (cacheKey, { name, __temp_key__, relation, search }) 
 
       // this is loadRelation from EditViewDataManagerProvider
       onLoadRelationsCallback({
-        target: { name, __temp_key__, value: normalizedResults },
+        target: { name, tempKeys, value: normalizedResults },
       });
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, onLoadRelationsCallback, name, data, __temp_key__]);
+  }, [status, onLoadRelationsCallback, name, data]);
 
   const searchRes = useInfiniteQuery(
     ['relation', cacheKey, 'search', JSON.stringify(searchParams)],

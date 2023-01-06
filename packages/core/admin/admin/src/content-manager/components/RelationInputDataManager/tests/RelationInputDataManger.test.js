@@ -205,7 +205,7 @@ describe('RelationInputDataManager', () => {
     );
   });
 
-  test('Correctly computes __temp_key__ and passes this to useRelation', async () => {
+  test('Correctly computes tempKeys and passes this to useRelation', async () => {
     setup({
       name: 'relation.1.subRelation',
     });
@@ -213,10 +213,12 @@ describe('RelationInputDataManager', () => {
     expect(useRelation).toBeCalledWith(
       expect.any(String),
       expect.objectContaining({
-        __temp_key__: 2,
+        tempKeys: [2],
       })
     );
   });
+
+  // TODO add another case testing tempKeys calulation with nested content
 
   test('Sets the disabled prop for non editable relations (edit entity)', async () => {
     const { container } = setup({

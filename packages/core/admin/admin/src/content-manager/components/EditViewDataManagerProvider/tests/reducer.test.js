@@ -1017,7 +1017,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       });
     });
 
-    it('should use __temp_key__ when provided to index both initalData and modifiedData', () => {
+    it('should use tempKeys when provided to index both initalData and modifiedData', () => {
       const state = {
         ...initialState,
         initialData: {
@@ -1070,7 +1070,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       const action = {
         type: 'LOAD_RELATION',
         keys: ['dz', '0', 'publishers'],
-        __temp_key__: 9,
+        tempKeys: [9],
         value: [
           {
             id: 1,
@@ -1149,6 +1149,8 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
       });
     });
+
+    // TODO add another case with nested content and multiple tempKeys
   });
 
   describe('DISCONNECT_RELATION', () => {

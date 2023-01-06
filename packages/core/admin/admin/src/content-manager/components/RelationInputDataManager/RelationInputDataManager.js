@@ -4,6 +4,8 @@ import React, { memo, useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 import pick from 'lodash/pick';
+import take from 'lodash/take';
+import isNil from 'lodash/isNil';
 
 import { useCMEditViewDataManager, NotAllowedInput } from '@strapi/helper-plugin';
 
@@ -49,7 +51,20 @@ export const RelationInputDataManager = ({
     relationReorder,
   } = useCMEditViewDataManager();
 
-  const __temp_key__ = get(modifiedData, [...name.split('.').slice(0, -1), '__temp_key__']);
+  const tempKeys = [];
+  const nameSplit = name.split('.');
+  nameSplit.reduce((acc, currentValue, index) => {
+    const pathSoFar = take(nameSplit, index);
+    const modifiedDataValue = get(modifiedData, [...pathSoFar, currentValue]);
+    const tempKey = get(modifiedDataValue, '__temp_key__');
+
+    if (!isNil(tempKey)) {
+      acc.push(tempKey);
+    }
+
+    return acc;
+  }, tempKeys);
+
   const relationsFromModifiedData = get(modifiedData, name, []);
 
   const currentLastPage = Math.ceil(get(initialData, name, []).length / RELATIONS_TO_DISPLAY);
@@ -57,7 +72,7 @@ export const RelationInputDataManager = ({
   const cacheKey = `${slug}-${name}-${initialData?.id ?? ''}`;
   const { relations, search, searchFor } = useRelation(cacheKey, {
     name,
-    __temp_key__,
+    tempKeys,
     relation: {
       enabled: !!endpoints.relation,
       endpoint: endpoints.relation,

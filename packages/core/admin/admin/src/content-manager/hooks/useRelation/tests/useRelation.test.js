@@ -32,7 +32,7 @@ const client = new QueryClient({
 const ComponentFixture = ({ children }) => (
   <QueryClientProvider client={client}>{children}</QueryClientProvider>
 );
-const __temp_key__ = 10;
+const tempKeys = [1, 2, 3, 4];
 
 function setup(args, name = 'test') {
   return new Promise((resolve) => {
@@ -42,7 +42,7 @@ function setup(args, name = 'test') {
           () =>
             useRelation(name, {
               name,
-              __temp_key__,
+              tempKeys,
               relation: {
                 enabled: true,
                 endpoint: '/',
@@ -100,7 +100,7 @@ describe('useRelation', () => {
       expect(onLoadMock).toBeCalledWith({
         target: {
           name: 'test',
-          __temp_key__,
+          tempKeys,
           value: [expect.objectContaining({ id: 1 }), expect.objectContaining({ id: 2 })],
         },
       })
@@ -133,7 +133,7 @@ describe('useRelation', () => {
       expect(onLoadMock).toBeCalledWith({
         target: {
           name: 'test',
-          __temp_key__,
+          tempKeys,
           value: [expect.objectContaining({ id: 1 })],
         },
       })
