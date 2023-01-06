@@ -218,8 +218,6 @@ describe('RelationInputDataManager', () => {
     );
   });
 
-  // TODO add another case testing tempKeys calulation with nested content
-
   test('Sets the disabled prop for non editable relations (edit entity)', async () => {
     const { container } = setup({
       editable: false,
@@ -684,5 +682,53 @@ describe('RelationInputDataManager', () => {
 
       expect(queryByText(/\(7\)/)).toBeInTheDocument();
     });
+  });
+
+  test('correctly computes tempKeys and passes this to useRelation', async () => {
+    const data = {
+      dz: [
+        {
+          __component: 'default.blank',
+          __temp_key__: 6,
+        },
+        {
+          __component: 'default.nesting-compo',
+          __temp_key__: 7,
+          toManyRelation: [
+            {
+              id: 13,
+              publishers: [],
+              __temp_key__: 0,
+            },
+            {
+              id: 14,
+              publishers: [],
+              __temp_key__: 1,
+            },
+          ],
+        },
+      ],
+    };
+
+    useCMEditViewDataManager.mockImplementation(() => ({
+      isCreatingEntry: true,
+      createActionAllowedFields: ['relation'],
+      readActionAllowedFields: ['relation'],
+      updateActionAllowedFields: ['relation'],
+      slug: 'test',
+      initialData: data,
+      modifiedData: data,
+    }));
+
+    setup({
+      name: 'dz.1.toManyRelation.0.publishers',
+    });
+
+    expect(useRelation).toBeCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        tempKeys: [7, 0],
+      })
+    );
   });
 });

@@ -1021,7 +1021,6 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       const state = {
         ...initialState,
         initialData: {
-          id: 2,
           dz: [
             {
               __component: 'default.compo1',
@@ -1043,7 +1042,6 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           ],
         },
         modifiedData: {
-          id: 2,
           dz: [
             {
               __component: 'default.compo2',
@@ -1086,7 +1084,6 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       expect(reducer(state, action)).toStrictEqual({
         ...initialState,
         initialData: {
-          id: 2,
           dz: [
             {
               __component: 'default.compo1',
@@ -1117,7 +1114,6 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           ],
         },
         modifiedData: {
-          id: 2,
           dz: [
             {
               __component: 'default.compo2',
@@ -1150,7 +1146,163 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       });
     });
 
-    // TODO add another case with nested content and multiple tempKeys
+    it('should use tempKeys to index nested content', () => {
+      const state = {
+        ...initialState,
+        initialData: {
+          dz: [
+            {
+              __component: 'default.blank',
+              __temp_key__: 6,
+            },
+            {
+              __component: 'default.nesting-compo',
+              __temp_key__: 7,
+              toManyRelation: [
+                {
+                  id: 13,
+                  publishers: [
+                    {
+                      id: 3,
+                      name: 'P1',
+                    },
+                  ],
+                  __temp_key__: 0,
+                },
+                {
+                  id: 14,
+                  publishers: [],
+                  __temp_key__: 1,
+                },
+              ],
+            },
+          ],
+        },
+        modifiedData: {
+          dz: [
+            {
+              __component: 'default.blank',
+              __temp_key__: 6,
+            },
+            {
+              __component: 'default.nesting-compo',
+              __temp_key__: 7,
+              toManyRelation: [
+                {
+                  id: 14,
+                  publishers: [],
+                  __temp_key__: 1,
+                },
+                {
+                  id: 13,
+                  publishers: [
+                    {
+                      id: 3,
+                      name: 'P1',
+                    },
+                  ],
+                  __temp_key__: 0,
+                },
+              ],
+            },
+          ],
+        },
+      };
+
+      const action = {
+        type: 'LOAD_RELATION',
+        keys: ['dz', '1', 'toManyRelation', '1', 'publishers'],
+        tempKeys: [7, 0],
+        value: [
+          {
+            id: 1,
+            name: 'P3',
+          },
+          {
+            id: 2,
+            name: 'P4',
+          },
+        ],
+      };
+
+      expect(reducer(state, action)).toStrictEqual({
+        ...initialState,
+        initialData: {
+          dz: [
+            {
+              __component: 'default.blank',
+              __temp_key__: 6,
+            },
+            {
+              __component: 'default.nesting-compo',
+              __temp_key__: 7,
+              toManyRelation: [
+                {
+                  id: 13,
+                  publishers: [
+                    {
+                      id: 1,
+                      name: 'P3',
+                    },
+                    {
+                      id: 2,
+                      name: 'P4',
+                    },
+                    {
+                      id: 3,
+                      name: 'P1',
+                    },
+                  ],
+                  __temp_key__: 0,
+                },
+                {
+                  id: 14,
+                  publishers: [],
+                  __temp_key__: 1,
+                },
+              ],
+            },
+          ],
+        },
+        modifiedData: {
+          dz: [
+            {
+              __component: 'default.blank',
+              __temp_key__: 6,
+            },
+            {
+              __component: 'default.nesting-compo',
+              __temp_key__: 7,
+              toManyRelation: [
+                {
+                  id: 14,
+                  publishers: [],
+                  __temp_key__: 1,
+                },
+                {
+                  id: 13,
+                  publishers: [
+                    {
+                      id: 1,
+                      name: 'P3',
+                    },
+                    {
+                      id: 2,
+                      name: 'P4',
+                    },
+                    {
+                      id: 3,
+                      name: 'P1',
+                    },
+                  ],
+                  __temp_key__: 0,
+                },
+              ],
+            },
+          ],
+        },
+      });
+    });
   });
 
   describe('DISCONNECT_RELATION', () => {
