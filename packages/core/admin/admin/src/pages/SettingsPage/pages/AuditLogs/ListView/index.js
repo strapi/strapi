@@ -35,12 +35,6 @@ const ListView = () => {
     return data;
   };
 
-  const fetchAuditLog = async (id) => {
-    const { data } = await get(`/admin/audit-logs/${id}`);
-
-    return data;
-  };
-
   const { data, isLoading } = useQuery(['auditLogs', search], fetchAuditLogsPage, {
     enabled: canRead,
     keepPreviousData: true,
@@ -68,20 +62,6 @@ const ListView = () => {
   }));
 
   const [openedLogId, setOpenedLogId] = useState(null);
-  const { data: openedLogData, status: openedLogStatus } = useQuery(
-    ['audit-log', openedLogId],
-    () => fetchAuditLog(openedLogId),
-    {
-      enabled: !!openedLogId,
-    }
-  );
-
-  console.log({ openedLogData, openedLogId });
-
-  const handleToggle = (id) => {
-    // Either saves the id of the log to open or closes the modal
-    setOpenedLogId(id);
-  };
 
   return (
     <Main aria-busy={isLoading}>
@@ -101,12 +81,14 @@ const ListView = () => {
           withBulkActions
           isLoading={isLoading}
         >
-          <TableRows headers={headers} rows={data?.results || []} onModalToggle={handleToggle} />
+          <TableRows
+            headers={headers}
+            rows={data?.results || []}
+            onOpenModal={(id) => setOpenedLogId(id)}
+          />
         </DynamicTable>
       </ContentLayout>
-      {openedLogId && openedLogStatus === 'success' && (
-        <ModalDialog onToggle={handleToggle} data={openedLogData} />
-      )}
+      {openedLogId && <ModalDialog onClose={() => setOpenedLogId(null)} logId={openedLogId} />}
     </Main>
   );
 };

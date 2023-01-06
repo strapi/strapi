@@ -60,14 +60,14 @@ const rows = [
   },
 ];
 
-const onModalToggle = jest.fn();
+const onModalOpen = jest.fn();
 
 // eslint-disable-next-line react/prop-types
 const App = (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
       <Router history={history}>
-        <TableRows headers={headers} rows={rows} onModalToggle={onModalToggle} />
+        <TableRows headers={headers} rows={rows} onOpenModal={onModalOpen} />
       </Router>
     </IntlProvider>
   </ThemeProvider>
@@ -94,13 +94,13 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView | Dynamic Table | Table Rows', (
     const label = screen.getByText(/update action details/i);
     const viewDetailsButton = label.closest('button');
     fireEvent.click(viewDetailsButton);
-    expect(onModalToggle).toHaveBeenCalled();
+    expect(onModalOpen).toHaveBeenCalled();
   });
 
   it('should open a modal when clicked on a row', () => {
     render(App);
     const rows = document.querySelectorAll('tr');
     fireEvent.click(rows[0]);
-    expect(onModalToggle).toHaveBeenCalled();
+    expect(onModalOpen).toHaveBeenCalled();
   });
 });

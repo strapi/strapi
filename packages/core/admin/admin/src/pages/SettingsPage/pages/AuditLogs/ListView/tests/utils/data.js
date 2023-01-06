@@ -1,4 +1,4 @@
-const TEST_DATA = [
+const TEST_PAGE_DATA = [
   {
     id: 1,
     action: 'role.create',
@@ -37,4 +37,18 @@ const TEST_DATA = [
   },
 ];
 
-export default TEST_DATA;
+const TEST_SINGLE_DATA = {
+  id: 1,
+  action: 'role.create',
+  date: '2022-12-22T16:11:03.126Z',
+  payload: {
+    meta: 'data',
+  },
+  user: {
+    id: 1,
+    fullname: 'test user',
+    email: 'test@test.com',
+  },
+};
+
+export { TEST_PAGE_DATA, TEST_SINGLE_DATA };

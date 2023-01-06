@@ -1,31 +1,60 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import { useQuery } from 'react-query';
 import { ModalLayout, ModalHeader, ModalBody } from '@strapi/design-system/ModalLayout';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/Breadcrumbs';
+import { Loader } from '@strapi/design-system/Loader';
 import { Grid } from '@strapi/design-system/Grid';
 import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
-import { pxToRem } from '@strapi/helper-plugin';
+import { pxToRem, useNotification } from '@strapi/helper-plugin';
 import getDefaultMessage from '../utils/getActionTypesDefaultMessages';
 import useFormatTimeStamp from '../hooks/useFormatTimeStamp';
 import ActionItem from './ActionItem';
+import { useFetchClient } from '../../../../../../hooks';
 
-const ModalDialog = ({ onToggle, data }) => {
-  const { date, user, action, payload } = data;
+const ModalDialog = ({ onClose, logId }) => {
+  const { get } = useFetchClient();
+  const toggleNotification = useNotification();
+
+  const fetchAuditLog = async (id) => {
+    const { data } = await get(`/admin/audit-logs/${id}`);
+
+    return data;
+  };
+
+  const { data: { date, user, action, payload } = {}, status } = useQuery(
+    ['audit-log', logId],
+    () => fetchAuditLog(logId),
+    {
+      onError() {
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        });
+        onClose();
+      },
+    }
+  );
 
   const { formatMessage } = useIntl();
   const formatTimeStamp = useFormatTimeStamp();
-  const formattedDate = formatTimeStamp(date);
 
-  return (
-    <ModalLayout onClose={onToggle} labelledBy="title">
-      <ModalHeader>
-        <Breadcrumbs label={formattedDate}>
-          <Crumb>{formattedDate}</Crumb>
-        </Breadcrumbs>
-      </ModalHeader>
-      <ModalBody>
+  const formattedDate = status === 'success' ? formatTimeStamp(date) : '';
+
+  const getModalBody = () => {
+    if (status === 'loading') {
+      return (
+        <Flex padding={7} justifyContent="center" alignItems="center">
+          <Loader />
+        </Flex>
+      );
+    }
+
+    return (
+      <>
         <Box marginBottom={pxToRem(12)}>
           <Typography variant="delta" id="title">
             {formatMessage({
@@ -71,16 +100,27 @@ const ModalDialog = ({ onToggle, data }) => {
         </Grid>
         {/* TODO remove when adding JSON component */}
         <Box as="pre" marginTop={4}>
-          <Typography>{JSON.stringify({ payload }, null, 2)}</Typography>
+          <Typography>{JSON.stringify(payload, null, 2)}</Typography>
         </Box>
-      </ModalBody>
+      </>
+    );
+  };
+
+  return (
+    <ModalLayout onClose={onClose} labelledBy="title">
+      <ModalHeader>
+        <Breadcrumbs label={formattedDate}>
+          <Crumb>{formattedDate}</Crumb>
+        </Breadcrumbs>
+      </ModalHeader>
+      <ModalBody>{getModalBody()}</ModalBody>
     </ModalLayout>
   );
 };
 
 ModalDialog.propTypes = {
-  onToggle: PropTypes.func.isRequired,
-  data: PropTypes.object.isRequired,
+  onClose: PropTypes.func.isRequired,
+  logId: PropTypes.number.isRequired,
 };
 
 export default ModalDialog;
