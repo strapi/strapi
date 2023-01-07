@@ -50,6 +50,13 @@ const LinkUser = styled(RouterNavLink)`
   }
 `;
 
+const StyledMainNav = styled(MainNav)`
+  > div:first-of-type {
+    height: calc(100vh - 126px);
+    overflow-y: auto;
+  }
+`;
+
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   const buttonRef = useRef();
   const [userLinksVisible, setUserLinksVisible] = useState(false);
@@ -94,7 +101,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   });
 
   return (
-    <MainNav condensed={condensed}>
+    <StyledMainNav condensed={condensed}>
       <NavBrand
         as={RouterNavLink}
         workplace={formatMessage({
@@ -230,7 +237,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
               defaultMessage: 'Collapse the navbar',
             })}
       </NavCondense>
-    </MainNav>
+    </StyledMainNav>
   );
 };
 
