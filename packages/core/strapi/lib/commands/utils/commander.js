@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * This file includes hooks to use for commander.hook and argsParsers for commander.argsParser
+ * This file includes hooks to use for commander.hook and argParsers for commander.argParser
  */
 
 const inquirer = require('inquirer');
@@ -9,14 +9,14 @@ const { InvalidOptionArgumentError } = require('commander');
 const { exitWith } = require('./helpers');
 
 /**
- * argsParser: Parse a comma-delimited string as an array
+ * argParser: Parse a comma-delimited string as an array
  */
 const parseInputList = (value) => {
   return value.split(',');
 };
 
 /**
- * argsParser: Parse a string as a URL object
+ * argParser: Parse a string as a URL object
  */
 const parseURL = (value) => {
   try {
