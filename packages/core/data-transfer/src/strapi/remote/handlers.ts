@@ -24,7 +24,7 @@ export const createTransferHandler = (options: ServerOptions = {}) => {
   return async (ctx: Context) => {
     let userAbility = ctx.state.userAbility;
     const user = ctx.state.user;
-    let updateUserAbilityTimer: ReturnType<typeof setTimeout>;
+    let updateUserAbilityTimer: NodeJS.Timeout;
 
     const upgradeHeader = (ctx.request.headers.upgrade || '')
       .split(',')
