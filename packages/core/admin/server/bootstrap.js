@@ -2,6 +2,7 @@
 
 const { merge, map, difference, uniq } = require('lodash/fp');
 const { pipeAsync } = require('@strapi/utils');
+const { bootstrap: bootstrapDataTransfer } = require('@strapi/data-transfer/lib/strapi');
 const { getService } = require('./utils');
 const adminActions = require('./config/admin-actions');
 const adminConditions = require('./config/admin-conditions');
@@ -94,4 +95,6 @@ module.exports = async () => {
 
   apiTokenService.checkSaltIsDefined();
   tokenService.checkSecretIsDefined();
+
+  await bootstrapDataTransfer(strapi);
 };
