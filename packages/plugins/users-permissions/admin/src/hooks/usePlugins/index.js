@@ -18,11 +18,11 @@ const usePlugins = (shouldFetchData = true) => {
       dispatch({
         type: 'GET_DATA',
       });
-      const { get: getClient } = getFetchClient();
+      const fetchClient = getFetchClient();
 
       const [{ permissions }, { routes }] = await Promise.all(
         [`/${pluginId}/permissions`, `/${pluginId}/routes`].map(async (endpoint) => {
-          const res = await getClient(endpoint);
+          const res = await fetchClient.get(endpoint);
 
           return res.data;
         })
