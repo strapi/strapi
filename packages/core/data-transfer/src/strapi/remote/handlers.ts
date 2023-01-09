@@ -106,9 +106,11 @@ export const createTransferHandler = (options: ServerOptions = {}) => {
         /**
          * start a timer that updates userAbility as long as the connection is alive
          */
-        const initializeAbilityTimer = () => {
+        const initializeAbilityTimer = async () => {
           if (updateUserAbilityTimer) {
             clearTimeout(updateUserAbilityTimer);
+          } else {
+            await updateUserAbility();
           }
           updateUserAbilityTimer = setTimeout(updateUserAbility, updateAbilityMilliseconds);
         };
@@ -121,8 +123,7 @@ export const createTransferHandler = (options: ServerOptions = {}) => {
           }
 
           const { transfer } = msg.params;
-
-          initializeAbilityTimer();
+          await initializeAbilityTimer();
 
           // Push transfer
           if (transfer === 'push') {
