@@ -2,6 +2,50 @@
 
 const { strict: assert } = require('assert');
 const jwt = require('jsonwebtoken');
+const jwkToPem = require('jwk-to-pem');
+
+const getCognitoPayload = async (idToken, purest) => {
+  const {
+    header: { kid },
+    payload,
+  } = jwt.decode(idToken, { complete: true });
+
+  if (!payload || !kid) {
+    throw new Error('The provided token is not valid');
+  }
+
+  const { iss } = payload;
+
+  const config = {
+    cognito: {
+      discovery: {
+        origin: `${iss}/.well-known/jwks.json`,
+        path: '',
+      },
+    },
+  };
+  try {
+    const cognito = purest({ provider: 'cognito', config });
+    // get the JSON Web Key (JWK) for the user pool
+    const { body: jwk } = await cognito('discovery').request();
+    // Get the key with the same Key ID as the provided token
+    const key = jwk.keys.find(({ kid: jwkKid }) => jwkKid === kid);
+    const pem = jwkToPem(key);
+
+    // https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-using-tokens-verifying-a-jwt.html
+    const decodedToken = await new Promise((resolve, reject) => {
+      jwt.verify(idToken, pem, { algorithms: ['RS256'] }, (err, decodedToken) => {
+        if (err) {
+          reject();
+        }
+        resolve(decodedToken);
+      });
+    });
+    return decodedToken;
+  } catch (err) {
+    throw new Error('There was an error verifying the token');
+  }
+};
 
 const getInitialProviders = ({ purest }) => ({
   async discord({ accessToken }) {
@@ -20,18 +64,12 @@ const getInitialProviders = ({ purest }) => ({
       });
   },
   async cognito({ query }) {
-    // get the id_token
     const idToken = query.id_token;
-    // decode the jwt token
-    const tokenPayload = jwt.decode(idToken);
-    if (!tokenPayload) {
-      throw new Error('unable to decode jwt token');
-    } else {
-      return {
-        username: tokenPayload['cognito:username'],
-        email: tokenPayload.email,
-      };
-    }
+    const tokenPayload = await getCognitoPayload(idToken, purest);
+    return {
+      username: tokenPayload['cognito:username'],
+      email: tokenPayload.email,
+    };
   },
   async facebook({ accessToken }) {
     const facebook = purest({ provider: 'facebook' });
