@@ -38,14 +38,14 @@ jest.spyOn(console, 'log').mockImplementation(() => {});
 
 jest.mock('../../transfer/utils');
 
-const destinationUrl = 'ws://strapi.com';
+const destinationUrl = new URL('http://strapi.com/admin');
 
 describe('Transfer', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
-  it('uses destination url provided by user without authentication', async () => {
+  it('uses the destination url provided by user', async () => {
     await expectExit(1, async () => {
       await transferCommand({ from: undefined, to: destinationUrl });
     });
@@ -59,7 +59,20 @@ describe('Transfer', () => {
     );
   });
 
-  it.todo('uses destination url provided by user with authentication');
+  it('uses the destination token provided by user', async () => {
+    const testToken = 'TEST_TOKEN1234';
+    await expectExit(1, async () => {
+      await transferCommand({ from: undefined, to: destinationUrl, toToken: testToken });
+    });
+
+    expect(
+      mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({
+        auth: { type: 'token', token: testToken },
+      })
+    );
+  });
 
   it('uses restore as the default strategy', async () => {
     await expectExit(1, async () => {
