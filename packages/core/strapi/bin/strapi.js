@@ -285,13 +285,10 @@ if (process.env.STRAPI_EXPERIMENTAL) {
     )
     // Hidden (undocumented) options for byassing prompts
     .addOption(
-      new Option('--fromToken <bearerToken>', `API or Bearer token to use with source`).hideHelp()
+      new Option('--fromToken <bearerToken>', `Bearer token to use with source`).hideHelp()
     )
     .addOption(
-      new Option(
-        '--toToken <bearerToken>',
-        `API or Bearer token to use with destination`
-      ).hideHelp()
+      new Option('--toToken <bearerToken>', `Bearer token to use with destination`).hideHelp()
     )
     .addOption(
       new Option('--toEmail <email>', `Email for admin account for destination`).hideHelp()
