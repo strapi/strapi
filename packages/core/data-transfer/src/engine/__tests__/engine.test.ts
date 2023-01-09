@@ -253,17 +253,23 @@ const createSource = (streamData?: {
     bootstrap: jest.fn(),
     close: jest.fn(),
 
-    streamEntities: jest.fn().mockResolvedValue(getEntitiesMockSourceStream(streamData?.entities)),
-    streamLinks: jest.fn().mockResolvedValue(getLinksMockSourceStream(streamData?.links)),
-    streamAssets: jest.fn().mockResolvedValue(getAssetsMockSourceStream(streamData?.assets)),
-    streamConfiguration: jest
+    createEntitiesReadStream: jest
+      .fn()
+      .mockResolvedValue(getEntitiesMockSourceStream(streamData?.entities)),
+    createLinksReadStream: jest.fn().mockResolvedValue(getLinksMockSourceStream(streamData?.links)),
+    createAssetsReadStream: jest
+      .fn()
+      .mockResolvedValue(getAssetsMockSourceStream(streamData?.assets)),
+    createConfigurationReadStream: jest
       .fn()
       .mockResolvedValue(getConfigurationMockSourceStream(streamData?.configuration)),
-    streamSchemas: jest.fn().mockReturnValue(getSchemasMockSourceStream(streamData?.schemas)),
+    createSchemasReadStream: jest
+      .fn()
+      .mockReturnValue(getSchemasMockSourceStream(streamData?.schemas)),
   };
 };
 
-const createDestination = () => {
+const createDestination = (): IDestinationProvider => {
   return {
     type: 'destination',
     name: 'completeDestination',
@@ -273,12 +279,12 @@ const createDestination = () => {
     bootstrap: jest.fn(),
     close: jest.fn(),
 
-    getEntitiesStream: jest.fn().mockResolvedValue(getMockDestinationStream()),
-    getLinksStream: jest.fn().mockResolvedValue(getMockDestinationStream()),
-    getAssetsStream: jest.fn().mockResolvedValue(getMockDestinationStream()),
-    getConfigurationStream: jest.fn().mockResolvedValue(getMockDestinationStream()),
-    getSchemasStream: jest.fn().mockResolvedValue(getMockDestinationStream()),
-  } as IDestinationProvider;
+    createEntitiesWriteStream: jest.fn().mockResolvedValue(getMockDestinationStream()),
+    createLinksWriteStream: jest.fn().mockResolvedValue(getMockDestinationStream()),
+    createAssetsWriteStream: jest.fn().mockResolvedValue(getMockDestinationStream()),
+    createConfigurationWriteStream: jest.fn().mockResolvedValue(getMockDestinationStream()),
+    createSchemasWriteStream: jest.fn().mockResolvedValue(getMockDestinationStream()),
+  };
 };
 
 describe('Transfer engine', () => {
@@ -470,9 +476,9 @@ describe('Transfer engine', () => {
       const engine = createTransferEngine(source, completeDestination, defaultOptions);
 
       // delete 3 stages from source
-      delete source.streamSchemas;
-      delete source.streamLinks;
-      delete source.streamEntities;
+      delete source.createSchemasReadStream;
+      delete source.createLinksReadStream;
+      delete source.createEntitiesReadStream;
 
       let calls = 0;
       engine.progress.stream.on('stage::skip', ({ stage, data }) => {

@@ -401,8 +401,8 @@ class TransferEngine<
   async transferSchemas(): Promise<void> {
     const stage: TransferStage = 'schemas';
 
-    const source = await this.sourceProvider.streamSchemas?.();
-    const destination = await this.destinationProvider.getSchemasStream?.();
+    const source = await this.sourceProvider.createSchemasReadStream?.();
+    const destination = await this.destinationProvider.createSchemasWriteStream?.();
 
     const transform = this.#createStageTransformStream(stage);
     const tracker = this.#progressTracker(stage, { key: (value: Schema) => value.modelType });
@@ -413,8 +413,8 @@ class TransferEngine<
   async transferEntities(): Promise<void> {
     const stage: TransferStage = 'entities';
 
-    const source = await this.sourceProvider.streamEntities?.();
-    const destination = await this.destinationProvider.getEntitiesStream?.();
+    const source = await this.sourceProvider.createEntitiesReadStream?.();
+    const destination = await this.destinationProvider.createEntitiesWriteStream?.();
 
     const transform = this.#createStageTransformStream(stage);
     const tracker = this.#progressTracker(stage, { key: (value: IEntity) => value.type });
@@ -425,8 +425,8 @@ class TransferEngine<
   async transferLinks(): Promise<void> {
     const stage: TransferStage = 'links';
 
-    const source = await this.sourceProvider.streamLinks?.();
-    const destination = await this.destinationProvider.getLinksStream?.();
+    const source = await this.sourceProvider.createLinksReadStream?.();
+    const destination = await this.destinationProvider.createLinksWriteStream?.();
 
     const transform = this.#createStageTransformStream(stage);
     const tracker = this.#progressTracker(stage);
@@ -437,8 +437,8 @@ class TransferEngine<
   async transferAssets(): Promise<void> {
     const stage: TransferStage = 'assets';
 
-    const source = await this.sourceProvider.streamAssets?.();
-    const destination = await this.destinationProvider.getAssetsStream?.();
+    const source = await this.sourceProvider.createAssetsReadStream?.();
+    const destination = await this.destinationProvider.createAssetsWriteStream?.();
 
     const transform = this.#createStageTransformStream(stage);
     const tracker = this.#progressTracker(stage, {
@@ -452,8 +452,8 @@ class TransferEngine<
   async transferConfiguration(): Promise<void> {
     const stage: TransferStage = 'configuration';
 
-    const source = await this.sourceProvider.streamConfiguration?.();
-    const destination = await this.destinationProvider.getConfigurationStream?.();
+    const source = await this.sourceProvider.createConfigurationReadStream?.();
+    const destination = await this.destinationProvider.createConfigurationWriteStream?.();
 
     const transform = this.#createStageTransformStream(stage);
     const tracker = this.#progressTracker(stage);

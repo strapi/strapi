@@ -1,6 +1,8 @@
 import type { Readable, Writable, Duplex, Transform } from 'stream';
 import type { IDestinationProvider, ISourceProvider } from './providers';
 
+export type MaybePromise<T> = T | Promise<T>;
+
 /**
  * Define a transfer transform which will be used to intercept
  * and potentially discard or modify the transferred data
