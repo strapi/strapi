@@ -1,4 +1,4 @@
-import { routes, actions } from './remote';
+import { routes } from './remote';
 /**
  * This is intended to be called on Strapi register phase.
  *
