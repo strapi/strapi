@@ -25,7 +25,7 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
       strategy: 'restore',
     });
 
-    await expect(() => provider.getAssetsStream()).rejects.toThrowError(
+    await expect(() => provider.createAssetsWriteStream()).rejects.toThrowError(
       'Not able to stream Assets. Strapi instance not found'
     );
   });
@@ -42,7 +42,7 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
     });
     await provider.bootstrap();
 
-    const stream = await provider.getAssetsStream();
+    const stream = await provider.createAssetsWriteStream();
 
     expect(stream instanceof Writable).toBeTruthy();
   });
@@ -68,7 +68,7 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
     });
 
     await provider.bootstrap();
-    const stream = await provider.getAssetsStream();
+    const stream = await provider.createAssetsWriteStream();
 
     const error = await new Promise<Error | null | undefined>((resolve) => {
       stream.write(file, resolve);

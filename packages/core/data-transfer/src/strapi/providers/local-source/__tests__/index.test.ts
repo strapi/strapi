@@ -71,7 +71,7 @@ describe('Local Strapi Source Provider', () => {
     test('Should throw an error if strapi is not defined', async () => {
       const provider = createLocalStrapiSourceProvider({ getStrapi: getStrapiFactory() });
 
-      await expect(() => provider.streamEntities()).rejects.toThrowError(
+      await expect(() => provider.createEntitiesReadStream()).rejects.toThrowError(
         'Not able to stream entities. Strapi instance not found'
       );
     });
@@ -107,7 +107,7 @@ describe('Local Strapi Source Provider', () => {
 
       await provider.bootstrap();
 
-      const entitiesStream = (await provider.streamEntities()) as Readable;
+      const entitiesStream = (await provider.createEntitiesReadStream()) as Readable;
       const entities = await collect<IEntity>(entitiesStream);
 
       // Should have been called with 'foo', then 'bar'
@@ -170,7 +170,7 @@ describe('Local Strapi Source Provider', () => {
 
       await provider.bootstrap();
 
-      const schemasStream = provider.streamSchemas() as Readable;
+      const schemasStream = provider.createSchemasReadStream();
       const schemas = await collect(schemasStream);
 
       expect(schemasStream).toBeInstanceOf(Readable);
