@@ -64,7 +64,7 @@ module.exports = (strapi) => {
     useTypescriptOnServer: isUsingTypeScriptSync(serverRootPath),
     useTypescriptOnAdmin: isUsingTypeScriptSync(adminRootPath),
     isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
-    numberOfContentTypes: _.size(strapi.contentTypes),
+    numberOfAllContentTypes: _.size(strapi.contentTypes),
     numberOfComponents: _.size(strapi.components),
     numberOfDynamicZones: getNumberOfDynamicZones(),
   };

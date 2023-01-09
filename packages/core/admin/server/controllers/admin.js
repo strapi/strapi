@@ -98,7 +98,7 @@ module.exports = {
     );
     const isHostedOnStrapiCloud = env('STRAPI_HOSTING', null) === 'strapi.cloud';
 
-    const numberOfContentTypes = _.size(strapi.contentTypes);
+    const numberOfAllContentTypes = _.size(strapi.contentTypes);
     const numberOfComponents = _.size(strapi.components);
 
     const getNumberOfDynamicZones = () =>
@@ -113,7 +113,7 @@ module.exports = {
         useTypescriptOnServer,
         useTypescriptOnAdmin,
         isHostedOnStrapiCloud,
-        numberOfContentTypes,
+        numberOfAllContentTypes,
         numberOfComponents,
         numberOfDynamicZones: getNumberOfDynamicZones(),
       },
