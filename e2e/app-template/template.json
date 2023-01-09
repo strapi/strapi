@@ -1,1 +1,5 @@
-{}
+{
+  "package": {
+    "private": true
+  }
+}
