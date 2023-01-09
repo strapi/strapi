@@ -6,6 +6,7 @@ import get from 'lodash/get';
 import pick from 'lodash/pick';
 import take from 'lodash/take';
 import isNil from 'lodash/isNil';
+import findIndex from 'lodash/findIndex';
 
 import { useCMEditViewDataManager, NotAllowedInput } from '@strapi/helper-plugin';
 
@@ -39,7 +40,6 @@ export const RelationInputDataManager = ({
   targetModel,
 }) => {
   const [liveText, setLiveText] = useState('');
-
   const { formatMessage } = useIntl();
   const {
     slug,
@@ -51,19 +51,29 @@ export const RelationInputDataManager = ({
     relationReorder,
   } = useCMEditViewDataManager();
 
-  const tempKeys = [];
+  const initialDataPath = [];
   const nameSplit = name.split('.');
   nameSplit.reduce((acc, currentValue, index) => {
     const pathSoFar = take(nameSplit, index);
+
+    const initialDataParent = get(initialData, pathSoFar);
     const modifiedDataValue = get(modifiedData, [...pathSoFar, currentValue]);
     const tempKey = get(modifiedDataValue, '__temp_key__');
 
-    if (!isNil(tempKey)) {
-      acc.push(tempKey);
+    if (!isNil(tempKey) && Array.isArray(initialDataParent)) {
+      const initialDataIndex = findIndex(
+        initialDataParent,
+        (entry) => entry.__temp_key__ === tempKey
+      );
+      acc.push(`${initialDataIndex}`);
+
+      return acc;
     }
 
+    acc.push(currentValue);
+
     return acc;
-  }, tempKeys);
+  }, initialDataPath);
 
   const relationsFromModifiedData = get(modifiedData, name, []);
 
@@ -71,8 +81,8 @@ export const RelationInputDataManager = ({
 
   const cacheKey = `${slug}-${name}-${initialData?.id ?? ''}`;
   const { relations, search, searchFor } = useRelation(cacheKey, {
-    name,
-    tempKeys,
+    initialDataPath: ['initialData', ...initialDataPath],
+    modifiedDataPath: ['modifiedData', ...nameSplit],
     relation: {
       enabled: !!endpoints.relation,
       endpoint: endpoints.relation,
@@ -274,7 +284,7 @@ export const RelationInputDataManager = ({
    * actually subtract from the total number on the server (regardless of how many you fetched).
    */
   const browserRelationsCount = relationsFromModifiedData.length;
-  const serverRelationsCount = (get(initialData, name) ?? []).length;
+  const serverRelationsCount = (get(initialData, initialDataPath) ?? []).length;
   const realServerRelationsCount = relations.data?.pages[0]?.pagination?.total ?? 0;
   /**
    * _IF_ theres no relations data and the browserCount is the same as serverCount you can therefore assume

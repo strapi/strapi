@@ -261,11 +261,11 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const relationLoad = useCallback(({ target: { name, tempKeys, value } }) => {
+  const relationLoad = useCallback(({ target: { initialDataPath, modifiedDataPath, value } }) => {
     dispatch({
       type: 'LOAD_RELATION',
-      keys: name.split('.'),
-      tempKeys,
+      modifiedDataPath,
+      initialDataPath,
       value,
     });
   }, []);

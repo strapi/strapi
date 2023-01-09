@@ -32,17 +32,19 @@ const client = new QueryClient({
 const ComponentFixture = ({ children }) => (
   <QueryClientProvider client={client}>{children}</QueryClientProvider>
 );
-const tempKeys = [1, 2, 3, 4];
 
-function setup(args, name = 'test') {
+const cacheKey = 'useRelation-cache-key';
+const initialDataPath = ['initial', 'path', 'to', 'data'];
+const modifiedDataPath = ['modified', 'path', 'to', 'data'];
+function setup(args) {
   return new Promise((resolve) => {
     act(() => {
       resolve(
         renderHook(
           () =>
-            useRelation(name, {
-              name,
-              tempKeys,
+            useRelation(cacheKey, {
+              initialDataPath,
+              modifiedDataPath,
               relation: {
                 enabled: true,
                 endpoint: '/',
@@ -99,8 +101,8 @@ describe('useRelation', () => {
     await waitFor(() =>
       expect(onLoadMock).toBeCalledWith({
         target: {
-          name: 'test',
-          tempKeys,
+          initialDataPath,
+          modifiedDataPath,
           value: [expect.objectContaining({ id: 1 }), expect.objectContaining({ id: 2 })],
         },
       })
@@ -132,8 +134,8 @@ describe('useRelation', () => {
     await waitFor(() =>
       expect(onLoadMock).toBeCalledWith({
         target: {
-          name: 'test',
-          tempKeys,
+          initialDataPath,
+          modifiedDataPath,
           value: [expect.objectContaining({ id: 1 })],
         },
       })

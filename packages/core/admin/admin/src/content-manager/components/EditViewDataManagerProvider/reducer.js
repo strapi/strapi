@@ -6,7 +6,6 @@ import take from 'lodash/take';
 import cloneDeep from 'lodash/cloneDeep';
 import uniqBy from 'lodash/uniqBy';
 import merge from 'lodash/merge';
-import findIndex from 'lodash/findIndex';
 import castArray from 'lodash/castArray';
 import isNil from 'lodash/isNil';
 
@@ -151,55 +150,7 @@ const reducer = (state, action) =>
         break;
       }
       case 'LOAD_RELATION': {
-        const { value, keys, tempKeys } = action;
-
-        let initialDataPath;
-        let modifiedDataPath;
-
-        if (!isNil(tempKeys)) {
-          initialDataPath = [];
-          modifiedDataPath = [];
-
-          let tempKeyIndex = 0;
-          keys.forEach((currentValue) => {
-            const initialDataParent = get(state, ['initialData', ...initialDataPath]);
-            const modifiedDataParent = get(state, ['modifiedData', ...modifiedDataPath]);
-
-            const initialTempKey = get(initialDataParent, [currentValue, '__temp_key__']);
-            const modifiedTempKey = get(modifiedDataParent, [currentValue, '__temp_key__']);
-
-            if (isNil(modifiedTempKey) || isNil(initialTempKey)) {
-              initialDataPath.push(currentValue);
-              modifiedDataPath.push(currentValue);
-
-              return;
-            }
-
-            tempKeyIndex += 1;
-
-            if (!Array.isArray(initialDataParent) || !Array.isArray(modifiedDataParent)) {
-              initialDataPath.push(currentValue);
-              modifiedDataPath.push(currentValue);
-
-              return;
-            }
-
-            const currentTempKey = tempKeys[tempKeyIndex - 1];
-            initialDataPath.push(
-              findIndex(initialDataParent, (entry) => entry.__temp_key__ === currentTempKey)
-            );
-
-            modifiedDataPath.push(
-              findIndex(modifiedDataParent, (entry) => entry.__temp_key__ === currentTempKey)
-            );
-          });
-
-          initialDataPath.unshift('initialData');
-          modifiedDataPath.unshift('modifiedData');
-        } else {
-          initialDataPath = ['initialData', ...keys];
-          modifiedDataPath = ['modifiedData', ...keys];
-        }
+        const { initialDataPath, modifiedDataPath, value } = action;
 
         const initialDataRelations = get(state, initialDataPath);
         const modifiedDataRelations = get(state, modifiedDataPath);

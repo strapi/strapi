@@ -940,9 +940,13 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
       };
 
+      const initialDataPath = ['initialData', 'relation'];
+      const modifiedDataPath = ['modifiedData', 'relation'];
+
       let nextState = reducer(state, {
         type: 'LOAD_RELATION',
-        keys: ['relation'],
+        initialDataPath,
+        modifiedDataPath,
         value: [{ id: 1 }],
       });
 
@@ -959,7 +963,8 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       expect(
         reducer(nextState, {
           type: 'LOAD_RELATION',
-          keys: ['relation'],
+          initialDataPath,
+          modifiedDataPath,
           value: [{ id: 2 }],
         })
       ).toStrictEqual({
@@ -984,9 +989,13 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
       };
 
+      const initialDataPath = ['initialData', 'relation'];
+      const modifiedDataPath = ['modifiedData', 'relation'];
+
       let nextState = reducer(state, {
         type: 'LOAD_RELATION',
-        keys: ['relation'],
+        initialDataPath,
+        modifiedDataPath,
         value: [{ id: 1 }],
       });
 
@@ -1003,7 +1012,8 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       expect(
         reducer(nextState, {
           type: 'LOAD_RELATION',
-          keys: ['relation'],
+          initialDataPath,
+          modifiedDataPath,
           value: [{ id: 1 }],
         })
       ).toStrictEqual({
@@ -1013,293 +1023,6 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
         modifiedData: {
           relation: [{ id: 1 }],
-        },
-      });
-    });
-
-    it('should use tempKeys when provided to index both initalData and modifiedData', () => {
-      const state = {
-        ...initialState,
-        initialData: {
-          dz: [
-            {
-              __component: 'default.componentWithToManyRelation',
-              id: 7,
-              __temp_key__: 9,
-              publishers: [],
-            },
-            {
-              __component: 'default.blank',
-              id: 3,
-              __temp_key__: 10,
-            },
-            {
-              __component: 'default.componentWithToManyRelation',
-              id: 8,
-              __temp_key__: 11,
-              publishers: [],
-            },
-          ],
-        },
-        modifiedData: {
-          dz: [
-            {
-              __component: 'default.blank',
-              id: 3,
-              __temp_key__: 10,
-            },
-            {
-              __component: 'default.componentWithToManyRelation',
-              id: 7,
-              __temp_key__: 9,
-              publishers: [],
-            },
-            {
-              __component: 'default.componentWithToManyRelation',
-              id: 8,
-              __temp_key__: 11,
-
-              publishers: [],
-            },
-          ],
-        },
-      };
-
-      const action = {
-        type: 'LOAD_RELATION',
-        keys: ['dz', '0', 'publishers'],
-        tempKeys: [9],
-        value: [
-          {
-            id: 1,
-            name: 'P3',
-          },
-          {
-            id: 2,
-            name: 'P4',
-          },
-        ],
-      };
-
-      expect(reducer(state, action)).toStrictEqual({
-        ...initialState,
-        initialData: {
-          dz: [
-            {
-              __component: 'default.componentWithToManyRelation',
-              __temp_key__: 9,
-              id: 7,
-              publishers: [
-                {
-                  id: 1,
-                  name: 'P3',
-                },
-                {
-                  id: 2,
-                  name: 'P4',
-                },
-              ],
-            },
-            {
-              __component: 'default.blank',
-              __temp_key__: 10,
-              id: 3,
-            },
-            {
-              __component: 'default.componentWithToManyRelation',
-              __temp_key__: 11,
-              id: 8,
-              publishers: [],
-            },
-          ],
-        },
-        modifiedData: {
-          dz: [
-            {
-              __component: 'default.blank',
-              __temp_key__: 10,
-              id: 3,
-            },
-            {
-              __component: 'default.componentWithToManyRelation',
-              __temp_key__: 9,
-              id: 7,
-              publishers: [
-                {
-                  id: 1,
-                  name: 'P3',
-                },
-                {
-                  id: 2,
-                  name: 'P4',
-                },
-              ],
-            },
-            {
-              __component: 'default.componentWithToManyRelation',
-              __temp_key__: 11,
-              id: 8,
-              publishers: [],
-            },
-          ],
-        },
-      });
-    });
-
-    it('should use tempKeys to index nested content within initialData and modifiedData', () => {
-      const state = {
-        ...initialState,
-        initialData: {
-          dz: [
-            {
-              __component: 'default.blank',
-              __temp_key__: 6,
-            },
-            {
-              __component: 'default.withToManyComponentRelation',
-              __temp_key__: 7,
-              toManyRelation: [
-                {
-                  id: 13,
-                  publishers: [
-                    {
-                      id: 3,
-                      name: 'P1',
-                    },
-                  ],
-                  __temp_key__: 0,
-                },
-                {
-                  id: 14,
-                  publishers: [],
-                  __temp_key__: 1,
-                },
-              ],
-            },
-          ],
-        },
-        modifiedData: {
-          dz: [
-            {
-              __component: 'default.blank',
-              __temp_key__: 6,
-            },
-            {
-              __component: 'default.withToManyComponentRelation',
-              __temp_key__: 7,
-              toManyRelation: [
-                {
-                  id: 14,
-                  publishers: [],
-                  __temp_key__: 1,
-                },
-                {
-                  id: 13,
-                  publishers: [
-                    {
-                      id: 3,
-                      name: 'P1',
-                    },
-                  ],
-                  __temp_key__: 0,
-                },
-              ],
-            },
-          ],
-        },
-      };
-
-      const action = {
-        type: 'LOAD_RELATION',
-        keys: ['dz', '1', 'toManyRelation', '1', 'publishers'],
-        tempKeys: [7, 0],
-        value: [
-          {
-            id: 1,
-            name: 'P3',
-          },
-          {
-            id: 2,
-            name: 'P4',
-          },
-        ],
-      };
-
-      expect(reducer(state, action)).toStrictEqual({
-        ...initialState,
-        initialData: {
-          dz: [
-            {
-              __component: 'default.blank',
-              __temp_key__: 6,
-            },
-            {
-              __component: 'default.withToManyComponentRelation',
-              __temp_key__: 7,
-              toManyRelation: [
-                {
-                  id: 13,
-                  publishers: [
-                    {
-                      id: 1,
-                      name: 'P3',
-                    },
-                    {
-                      id: 2,
-                      name: 'P4',
-                    },
-                    {
-                      id: 3,
-                      name: 'P1',
-                    },
-                  ],
-                  __temp_key__: 0,
-                },
-                {
-                  id: 14,
-                  publishers: [],
-                  __temp_key__: 1,
-                },
-              ],
-            },
-          ],
-        },
-        modifiedData: {
-          dz: [
-            {
-              __component: 'default.blank',
-              __temp_key__: 6,
-            },
-            {
-              __component: 'default.withToManyComponentRelation',
-              __temp_key__: 7,
-              toManyRelation: [
-                {
-                  id: 14,
-                  publishers: [],
-                  __temp_key__: 1,
-                },
-                {
-                  id: 13,
-                  publishers: [
-                    {
-                      id: 1,
-                      name: 'P3',
-                    },
-                    {
-                      id: 2,
-                      name: 'P4',
-                    },
-                    {
-                      id: 3,
-                      name: 'P1',
-                    },
-                  ],
-                  __temp_key__: 0,
-                },
-              ],
-            },
-          ],
         },
       });
     });

@@ -213,7 +213,8 @@ describe('RelationInputDataManager', () => {
     expect(useRelation).toBeCalledWith(
       expect.any(String),
       expect.objectContaining({
-        tempKeys: [2],
+        initialDataPath: ['initialData', 'relation', '1', 'subRelation'],
+        modifiedDataPath: ['modifiedData', 'relation', '1', 'subRelation'],
       })
     );
   });
@@ -684,8 +685,33 @@ describe('RelationInputDataManager', () => {
     });
   });
 
-  test('correctly computes tempKeys for nested content and passes this to useRelation', async () => {
-    const data = {
+  test('correctly computes modified and initial data paths for nested content and passes this to useRelation', async () => {
+    const initialData = {
+      dz: [
+        {
+          __component: 'default.blank',
+          __temp_key__: 6,
+        },
+        {
+          __component: 'default.withToManyComponentRelation',
+          __temp_key__: 7,
+          toManyRelation: [
+            {
+              id: 14,
+              publishers: [],
+              __temp_key__: 1,
+            },
+            {
+              id: 13,
+              publishers: [],
+              __temp_key__: 0,
+            },
+          ],
+        },
+      ],
+    };
+
+    const modifiedData = {
       dz: [
         {
           __component: 'default.blank',
@@ -716,8 +742,8 @@ describe('RelationInputDataManager', () => {
       readActionAllowedFields: ['relation'],
       updateActionAllowedFields: ['relation'],
       slug: 'test',
-      initialData: data,
-      modifiedData: data,
+      initialData,
+      modifiedData,
     }));
 
     setup({
@@ -727,7 +753,8 @@ describe('RelationInputDataManager', () => {
     expect(useRelation).toBeCalledWith(
       expect.any(String),
       expect.objectContaining({
-        tempKeys: [7, 0],
+        initialDataPath: ['initialData', 'dz', '1', 'toManyRelation', '1', 'publishers'],
+        modifiedDataPath: ['modifiedData', 'dz', '1', 'toManyRelation', '0', 'publishers'],
       })
     );
   });
