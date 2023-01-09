@@ -1,4 +1,4 @@
-name: Playwright Tests
+name: E2E Tests
 on:
   push:
     branches:
@@ -20,10 +20,8 @@ jobs:
         run: yarn
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
-      - name: Setup test application
-        run: yarn test:playwright:setup
-      - name: Run Playwright tests
-        run: yarn test:playwright
+      - name: Run E2E tests
+        run: yarn test:e2e
       - uses: actions/upload-artifact@v3
         if: always()
         with:
