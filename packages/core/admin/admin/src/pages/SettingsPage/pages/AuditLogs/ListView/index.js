@@ -15,7 +15,7 @@ import adminPermissions from '../../../../../permissions';
 import { useFetchClient } from '../../../../../hooks';
 import TableRows from './TableRows';
 import tableHeaders from './utils/tableHeaders';
-import ModalDialog from './ModalDialog';
+import Modal from './Modal';
 
 const ListView = () => {
   const { formatMessage } = useIntl();
@@ -61,7 +61,7 @@ const ListView = () => {
     },
   }));
 
-  const [openedLogId, setOpenedLogId] = useState(null);
+  const [modalLogId, setModalLogId] = useState(null);
 
   return (
     <Main aria-busy={isLoading}>
@@ -84,11 +84,11 @@ const ListView = () => {
           <TableRows
             headers={headers}
             rows={data?.results || []}
-            onOpenModal={(id) => setOpenedLogId(id)}
+            onOpenModal={(id) => setModalLogId(id)}
           />
         </DynamicTable>
       </ContentLayout>
-      {openedLogId && <ModalDialog onClose={() => setOpenedLogId(null)} logId={openedLogId} />}
+      {modalLogId && <Modal handleClose={() => setModalLogId(null)} logId={modalLogId} />}
     </Main>
   );
 };

@@ -119,13 +119,12 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
     const modal = screen.getByRole('dialog');
     expect(modal).toBeInTheDocument();
 
-    expect(within(modal).getByText('Create role')).toBeInTheDocument();
-    expect(within(modal).getByText('test user')).toBeInTheDocument();
-    expect(within(modal).getAllByText('December 22, 2022, 16:11:03')).toHaveLength(3);
+    const modalContainer = within(modal);
+    expect(modalContainer.getByText('Create role')).toBeInTheDocument();
+    expect(modalContainer.getByText('test user')).toBeInTheDocument();
+    expect(modalContainer.getAllByText('December 22, 2022, 16:11:03')).toHaveLength(3);
 
-    const closeButton = within(modal)
-      .getByText(/close the modal/i)
-      .closest('button');
+    const closeButton = modalContainer.getByText(/close the modal/i).closest('button');
     await user.click(closeButton);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
