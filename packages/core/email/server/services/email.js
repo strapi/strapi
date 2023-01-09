@@ -37,9 +37,11 @@ const sendTemplatedEmail = (emailOptions = {}, emailTemplate = {}, data = {}) =>
     (compiled, attribute) =>
       emailTemplate[attribute]
         ? Object.assign(compiled, {
-            [attribute]: _.template(emailTemplate[attribute], { interpolate, evaluate: false })(
-              data
-            ),
+            [attribute]: _.template(emailTemplate[attribute], {
+              interpolate,
+              evaluate: false,
+              escape: false,
+            })(data),
           })
         : compiled,
     {}

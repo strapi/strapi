@@ -241,7 +241,7 @@ module.exports = ({ strapi }) => ({
     const interpolate = createStrictInterpolationRegExp(allowedTemplateVariables, 'g');
 
     try {
-      return _.template(layout, { interpolate, evaluate: false })(data);
+      return _.template(layout, { interpolate, evaluate: false, escape: false })(data);
     } catch (e) {
       throw new errors.ApplicationError('Invalid email template');
     }
