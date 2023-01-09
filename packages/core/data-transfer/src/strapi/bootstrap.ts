@@ -1,8 +1,8 @@
 import { actions } from './remote';
 /**
- * This is intended to be called on Strapi register phase.
+ * This is intended to be called on Strapi bootstrap phase.
  *
- * It registers a transfer route in the Strapi admin router.
+ * It registers the admin actions for data-transfer
  */
 const bootstrap = async (strapi: Strapi.Strapi) => {
   await actions.registerAdminTransferActions(strapi);
