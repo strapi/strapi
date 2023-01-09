@@ -54,6 +54,10 @@ const App = (
   </QueryClientProvider>
 );
 
+const waitForReload = async () => {
+  await screen.findByText('Audit Logs', { selector: 'h1' });
+};
+
 describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -141,26 +145,46 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
     expect(pagination.querySelectorAll('ul li')[1].querySelector('a')).toHaveClass('active');
   });
 
-  it('should add the right query params when page 2 is clicked', async () => {
+  it('paginates the results', async () => {
     mockUseQuery.mockReturnValue({
       data: {
-        results: getBigTestData(15),
+        results: getBigTestData(35),
         pagination: {
           page: 1,
           pageSize: 10,
-          pageCount: 2,
-          total: 15,
+          pageCount: 4,
+          total: 35,
         },
       },
       isLoading: false,
     });
 
-    const { container } = render(App);
+    render(App);
+    await waitForReload();
 
-    const pagination = await waitFor(() => container.querySelector('nav[aria-label="pagination"]'));
+    // Should have pagination section with 4 pages
+    const pagination = screen.getByLabelText(/pagination/i);
+    expect(pagination).toBeVisible();
+    const pageButtons = screen.getAllByText(/go to page \d+/i).map((el) => el.closest('a'));
+    expect(pageButtons.length).toBe(4);
 
-    await user.click(pagination.querySelectorAll('ul li')[2].querySelector('a'));
-    expect(history.location.search).toEqual('?page=2');
+    // Can't go to previous page since there isn't one
+    expect(screen.getByText(/go to previous page/i).closest('a')).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+
+    // Can go to next page
+    await user.click(screen.getByText(/go to next page/i).closest('a'));
+    expect(history.location.search).toBe('?page=2');
+
+    // Can go to previous page
+    await user.click(screen.getByText(/go to previous page/i).closest('a'));
+    expect(history.location.search).toBe('?page=1');
+
+    // Can go to specific page
+    await user.click(screen.getByText(/go to page 3/i).closest('a'));
+    expect(history.location.search).toBe('?page=3');
   });
 
   it('should show 20 elements if pageSize is 20', async () => {

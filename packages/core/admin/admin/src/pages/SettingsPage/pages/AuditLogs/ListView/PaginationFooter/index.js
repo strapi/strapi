@@ -8,7 +8,7 @@ const PaginationFooter = ({ pagination }) => {
   return (
     <Box paddingTop={4}>
       <Flex alignItems="flex-end" justifyContent="space-between">
-        <PageSizeURLQuery trackedEvent="willChangeNumberOfEntriesPerPage" />
+        <PageSizeURLQuery />
         <PaginationURLQuery pagination={pagination} />
       </Flex>
     </Box>
@@ -18,7 +18,7 @@ const PaginationFooter = ({ pagination }) => {
 PaginationFooter.defaultProps = {
   pagination: {
     pageCount: 0,
-    pageSize: 10,
+    pageSize: 50,
     total: 0,
   },
 };
