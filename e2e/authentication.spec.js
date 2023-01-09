@@ -1,4 +1,5 @@
 const { test } = require('@playwright/test');
+const { reset } = require('./transfer');
 
 test.describe('Authentication', () => {
   test.beforeEach(async ({ page }) => {
@@ -6,9 +7,10 @@ test.describe('Authentication', () => {
   });
 
   test.afterEach(async ({ page }) => {
-    await page.request.fetch('/api/database/dump', {
-      method: 'POST',
-    });
+    // await page.request.fetch('/api/database/dump', {
+    //   method: 'POST',
+    // });
+    await reset('./e2e/backup.tar');
   });
 
   test('a user should be able to signup when the strapi instance starts fresh', async ({
