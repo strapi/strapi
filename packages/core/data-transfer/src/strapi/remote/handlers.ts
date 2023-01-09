@@ -103,6 +103,7 @@ export const createTransferHandler = (options: ServerOptions = {}) => {
             updateUserAbilityTimer = setTimeout(updateUserAbility, updateAbilityMilliseconds);
           }
         };
+
         /**
          * start a timer that updates userAbility as long as the connection is alive
          */
