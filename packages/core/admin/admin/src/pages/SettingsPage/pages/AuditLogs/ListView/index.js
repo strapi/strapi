@@ -15,12 +15,10 @@ import adminPermissions from '../../../../../permissions';
 import { useFetchClient } from '../../../../../hooks';
 import TableRows from './TableRows';
 import tableHeaders from './utils/tableHeaders';
-import ModalDialog from './ModalDialog';
+import Modal from './Modal';
 
 const ListView = () => {
   const { formatMessage } = useIntl();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [detailsActionData, setDetailsActionData] = useState(null);
   const toggleNotification = useNotification();
   const {
     allowedActions: { canRead },
@@ -30,14 +28,14 @@ const ListView = () => {
 
   useFocusWhenNavigate();
 
-  const fetchData = async ({ queryKey }) => {
+  const fetchAuditLogsPage = async ({ queryKey }) => {
     const search = queryKey[1];
     const { data } = await get(`/admin/audit-logs${search}`);
 
     return data;
   };
 
-  const { data, isLoading } = useQuery(['auditLogs', search], fetchData, {
+  const { data, isLoading } = useQuery(['auditLogs', search], fetchAuditLogsPage, {
     enabled: canRead,
     keepPreviousData: true,
     retry: false,
@@ -63,14 +61,7 @@ const ListView = () => {
     },
   }));
 
-  const handleToggle = (id) => {
-    setIsModalOpen((prev) => !prev);
-
-    if (data.results && id) {
-      const actionData = data.results.find((action) => action.id === id);
-      setDetailsActionData(actionData);
-    }
-  };
+  const [modalLogId, setModalLogId] = useState(null);
 
   return (
     <Main aria-busy={isLoading}>
@@ -90,10 +81,14 @@ const ListView = () => {
           withBulkActions
           isLoading={isLoading}
         >
-          <TableRows headers={headers} rows={data?.results || []} onModalToggle={handleToggle} />
+          <TableRows
+            headers={headers}
+            rows={data?.results || []}
+            onOpenModal={(id) => setModalLogId(id)}
+          />
         </DynamicTable>
       </ContentLayout>
-      {isModalOpen && <ModalDialog onToggle={handleToggle} data={detailsActionData} />}
+      {modalLogId && <Modal handleClose={() => setModalLogId(null)} logId={modalLogId} />}
     </Main>
   );
 };

@@ -2,13 +2,13 @@ import React from 'react';
 import { Router } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
 import { createMemoryHistory } from 'history';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { TrackingProvider } from '@strapi/helper-plugin';
 import ListView from '../index';
-import TEST_DATA from './utils/data';
+import { TEST_PAGE_DATA, TEST_SINGLE_DATA } from './utils/data';
 
 const history = createMemoryHistory();
 const user = userEvent.setup();
@@ -83,7 +83,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
   it('should show a list of audit logs with all actions', async () => {
     mockUseQuery.mockReturnValue({
       data: {
-        results: TEST_DATA,
+        results: TEST_PAGE_DATA,
       },
       isLoading: false,
     });
@@ -100,20 +100,31 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
   it('should open a modal when clicked on a table row and close modal when clicked', async () => {
     mockUseQuery.mockReturnValue({
       data: {
-        results: TEST_DATA,
+        results: TEST_PAGE_DATA,
       },
       isLoading: false,
     });
+    render(App);
 
-    const { container } = render(App);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 
-    const rows = container.querySelector('tbody').querySelectorAll('tr');
-    await user.click(rows[0]);
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    mockUseQuery.mockReturnValue({
+      data: TEST_SINGLE_DATA,
+      status: 'success',
+    });
 
-    const label = screen.getByText(/close the modal/i);
-    const closeButton = label.closest('button');
+    const auditLogRow = screen.getByText('Create role').closest('tr');
+    await user.click(auditLogRow);
+
+    const modal = screen.getByRole('dialog');
+    expect(modal).toBeInTheDocument();
+
+    const modalContainer = within(modal);
+    expect(modalContainer.getByText('Create role')).toBeInTheDocument();
+    expect(modalContainer.getByText('test user')).toBeInTheDocument();
+    expect(modalContainer.getAllByText('December 22, 2022, 16:11:03')).toHaveLength(3);
+
+    const closeButton = modalContainer.getByText(/close the modal/i).closest('button');
     await user.click(closeButton);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
