@@ -31,7 +31,7 @@ const parseURL = (value) => {
  * assert that a URL object has a protocol value
  *
  * @param {URL} url
- * @param {string[]|undefined} protocol
+ * @param {string[]|string|undefined} [protocol]
  */
 
 const assertUrlHasProtocol = (url, protocol = undefined) => {
