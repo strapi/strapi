@@ -8,6 +8,7 @@ import React, { useMemo, useState } from 'react';
 import { useSelector, shallowEqual } from 'react-redux';
 import { useIntl } from 'react-intl';
 import matchSorter from 'match-sorter';
+import sortBy from 'lodash/sortBy';
 import toLower from 'lodash/toLower';
 import { NavLink } from 'react-router-dom';
 import {
@@ -21,7 +22,9 @@ import getTrad from '../../../utils/getTrad';
 import { makeSelectModelLinks } from '../selectors';
 
 const matchByTitle = (links, search) =>
-  search ? matchSorter(links, toLower(search), { keys: [(item) => toLower(item.title)] }) : links;
+  search
+    ? matchSorter(links, toLower(search), { keys: [(item) => toLower(item.title)] })
+    : sortBy(links, (object) => object.title.toLowerCase());
 
 const LeftMenu = () => {
   const [search, setSearch] = useState('');
