@@ -2,13 +2,14 @@
   "extends": "@tsconfig/node16/tsconfig.json",
   "compilerOptions": {
     "strict": true,
-    "lib": ["ESNEXT"],
+    "lib": ["ES2020"],
+    "target": "ES2020",
     "skipLibCheck": true,
-    "outDir": "dist",
+    "outDir": "lib",
     "declaration": true,
     "sourceMap": true,
     "esModuleInterop": true
   },
-  "include": ["types", "lib/**/*.ts"],
-  "exclude": ["node_modules", "lib/**/__tests__"]
+  "include": ["types", "src/**/*.ts"],
+  "exclude": ["node_modules", "src/**/__tests__"]
 }

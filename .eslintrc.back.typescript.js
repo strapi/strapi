@@ -22,6 +22,7 @@ module.exports = {
     '@typescript-eslint/brace-style': 'off', // TODO: fix conflict with prettier/prettier in data-transfer/engine/index.ts
     // to be cleaned up throughout codebase (too many to fix at the moment)
     '@typescript-eslint/no-use-before-define': 'warn',
+    '@typescript-eslint/comma-dangle': 'off',
   },
   // Disable only for tests
   overrides: [
