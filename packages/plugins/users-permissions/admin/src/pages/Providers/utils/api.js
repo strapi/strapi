@@ -1,5 +1,5 @@
 import { getFetchClient } from '@strapi/admin/admin/src/utils/getFetchClient';
-import { getRequestURL, axiosInstance } from '../../../utils';
+import { getRequestURL } from '../../../utils';
 
 // eslint-disable-next-line import/prefer-default-export
 export const fetchData = async (toggleNotification) => {
@@ -19,5 +19,7 @@ export const fetchData = async (toggleNotification) => {
 };
 
 export const putProvider = (body) => {
-  return axiosInstance.put(getRequestURL('providers'), body);
+  const { put } = getFetchClient();
+
+  return put(getRequestURL('providers'), body);
 };
