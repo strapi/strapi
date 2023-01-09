@@ -1,1 +1,1 @@
-export const TRANSFER_URL = '/transfer';
+export const TRANSFER_PATH = '/transfer';

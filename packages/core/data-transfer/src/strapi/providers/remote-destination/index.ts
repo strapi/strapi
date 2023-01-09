@@ -15,7 +15,7 @@ import type {
 } from '../../../../types';
 import type { client, server } from '../../../../types/remote/protocol';
 import type { ILocalStrapiDestinationProviderOptions } from '../local-destination';
-import { TRANSFER_URL } from '../../remote/constants';
+import { TRANSFER_PATH } from '../../remote/constants';
 
 interface ITokenAuth {
   type: 'token';
@@ -97,7 +97,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
     const wsUrl = `${url.protocol === 'https:' ? 'wss:' : 'ws:'}//${url.host}${
       url.pathname
-    }${TRANSFER_URL}`;
+    }${TRANSFER_PATH}`;
     // No auth defined, trying public access for transfer
     if (!auth) {
       ws = new WebSocket(wsUrl);
