@@ -120,14 +120,15 @@ class Strapi {
     this.customFields = createCustomFields(this);
 
     createUpdateNotifier(this).notify();
+
+    Object.defineProperty(this, 'EE', {
+      get: () => ee.isEE,
+      configurable: false,
+    });
   }
 
   get config() {
     return this.container.get('config');
-  }
-
-  get EE() {
-    return ee.isEE;
   }
 
   get services() {

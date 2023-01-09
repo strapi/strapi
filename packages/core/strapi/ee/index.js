@@ -1,11 +1,8 @@
 'use strict';
 
-const fs = require('fs');
-const { join } = require('path');
-const crypto = require('crypto');
-const fetch = require('node-fetch');
 const { pick } = require('lodash/fp');
 
+const { readLicense, verifyLicense, fetchLicense, LicenseCheckError } = require('./license');
 const { coreStoreModel } = require('../lib/services/core-store');
 const { getRecurringCronExpression } = require('../lib/utils/cron');
 
@@ -16,73 +13,16 @@ const DEFAULT_FEATURES = {
   gold: ['sso'],
 };
 
-const publicKey = fs.readFileSync(join(__dirname, 'resources/key.pub'));
-
 const ee = {
   enabled: false,
   licenseInfo: {},
 };
 
-const disable = (message = 'Invalid license. Starting in CE.') => {
-  ee.logger?.warn(message);
+const disable = (message) => {
+  ee.logger?.warn(`${message} Switching to CE.`);
   // Only keep the license key for potential re-enabling during a later check
   ee.licenseInfo = pick('licenseKey', ee.licenseInfo);
   ee.enabled = false;
-};
-
-const readLicense = (directory) => {
-  try {
-    const path = join(directory, 'license.txt');
-    return fs.readFileSync(path).toString();
-  } catch (error) {
-    if (error.code !== 'ENOENT') {
-      // Permission denied, directory found instead of file, etc.
-    }
-  }
-};
-
-const fetchLicense = async (key, fallback) => {
-  const fallbackToStoredLicense = () => {
-    const error = 'Could not proceed to the online verification of your license.';
-
-    if (fallback) {
-      ee.logger(`${error} We will try to use the locally stored one as a potential fallback.`);
-      return fallback;
-    }
-
-    disable(`${error} Sorry for the inconvenience. Starting in CE.`);
-    return null;
-  };
-
-  try {
-    const response = await fetch(`https://license.strapi.io/api/licenses/${key}`);
-
-    if (response.status >= 500) {
-      return fallbackToStoredLicense();
-    }
-
-    if (response.status >= 400) {
-      disable();
-      return null;
-    }
-
-    return response.text();
-  } catch {
-    return fallbackToStoredLicense();
-  }
-};
-
-const verifyLicense = (license) => {
-  const [signature, base64Content] = Buffer.from(license, 'base64').toString().split('\n');
-  const stringifiedContent = Buffer.from(base64Content, 'base64').toString();
-
-  const verifier = crypto.createVerify('RSA-SHA256');
-  verifier.update(stringifiedContent);
-  verifier.end();
-
-  const verified = verifier.verify(publicKey, signature, 'base64');
-
-  return { verified, licenseInfo: verified ? JSON.parse(stringifiedContent) : null };
 };
 
 let initialized = false;
@@ -100,26 +40,24 @@ const init = (licenseDir, logger) => {
     return;
   }
 
-  const license = process.env.STRAPI_LICENSE || readLicense(licenseDir);
+  try {
+    const license = process.env.STRAPI_LICENSE || readLicense(licenseDir);
 
-  if (license) {
-    const { verified, licenseInfo } = verifyLicense(license);
-
-    if (verified) {
+    if (license) {
+      ee.licenseInfo = verifyLicense(license);
       ee.enabled = true; // Optimistically enable EE during initialization
-      ee.licenseInfo = licenseInfo;
-    } else {
-      return disable();
     }
+  } catch (error) {
+    disable(error.message);
   }
 };
 
-const onlineUpdate = async (db) => {
-  const transaction = await db.transaction();
+const onlineUpdate = async ({ strapi }) => {
+  const transaction = await strapi.db.transaction();
 
   try {
     // TODO: Use the core store interface instead, it does not support transactions and "FOR UPDATE" at the moment
-    const eeInfo = await db
+    const eeInfo = await strapi.db
       .queryBuilder(coreStoreModel.uid)
       .where({ key: 'ee_information' })
       .select('value')
@@ -129,24 +67,42 @@ const onlineUpdate = async (db) => {
       .execute()
       .then((result) => (result ? JSON.parse(result.value) : result));
 
-    const useStoredLicense = eeInfo?.lastOnlineCheck > Date.now() - ONE_MINUTE;
-    const license = useStoredLicense
-      ? eeInfo.license
-      : await fetchLicense(ee.licenseInfo.licenseKey, eeInfo?.license);
+    // Limit the number of requests to the license registry, especially in the case of horizontally scaled project
+    const shouldContactRegistry = (eeInfo?.lastCheckAt ?? 0) < Date.now() - ONE_MINUTE;
+    const value = { lastCheckAt: Date.now() };
+
+    const fallback = (error) => {
+      if (error instanceof LicenseCheckError && error.shouldFallback && eeInfo?.license) {
+        ee.logger?.warn(
+          `${error.message} The last stored one will be used as a potential fallback.`
+        );
+        return eeInfo.license;
+      }
+
+      value.error = error.message;
+      disable(error.message);
+    };
+
+    const license = shouldContactRegistry
+      ? await fetchLicense(ee.licenseInfo.licenseKey, strapi.config.get('uuid')).catch(fallback)
+      : eeInfo.license;
 
     if (license) {
-      const { verified, licenseInfo } = verifyLicense(license);
-
-      if (verified) {
-        ee.licenseInfo = licenseInfo;
-      } else {
-        disable();
+      try {
+        ee.licenseInfo = verifyLicense(license);
+        validateInfo();
+      } catch (error) {
+        disable(error.message);
       }
+    } else if (!shouldContactRegistry) {
+      // Show the latest error
+      disable(eeInfo.error);
     }
 
-    if (!useStoredLicense) {
-      const value = { license, lastOnlineCheck: Date.now() };
-      const query = db.queryBuilder(coreStoreModel.uid).transacting(transaction);
+    // If the registry was contacted, store the result in database, even in case of an error
+    if (shouldContactRegistry) {
+      const query = strapi.db.queryBuilder(coreStoreModel.uid).transacting(transaction);
+      value.license = license ?? null;
 
       if (!eeInfo) {
         query.insert({ key: 'ee_information', value: JSON.stringify(value), type: typeof value });
@@ -155,8 +111,6 @@ const onlineUpdate = async (db) => {
       }
 
       await query.execute();
-    } else if (!license) {
-      disable();
     }
 
     await transaction.commit();
@@ -167,51 +121,48 @@ const onlineUpdate = async (db) => {
 };
 
 const validateInfo = () => {
-  if (!ee.licenseInfo.expireAt) {
-    return;
-  }
-
   const expirationTime = new Date(ee.licenseInfo.expireAt).getTime();
 
   if (expirationTime < new Date().getTime()) {
-    return disable('License expired. Starting in CE.');
+    return disable('License expired.');
   }
-
-  ee.enabled = true;
 
   if (!ee.licenseInfo.features) {
     ee.licenseInfo.features = DEFAULT_FEATURES[ee.licenseInfo.type];
   }
-};
 
-const recurringCheck = async ({ strapi }) => {
-  await onlineUpdate(strapi.db);
-  validateInfo();
+  ee.enabled = true;
+  Object.freeze(ee.licenseInfo.features);
 };
-
-// This env variable support is temporary to ease the migration between online vs offline
-const shouldStayOffline = process.env.STRAPI_DISABLE_LICENSE_PING?.toLowerCase() === 'true';
 
 const checkLicense = async ({ strapi }) => {
-  if (!shouldStayOffline) {
-    await onlineUpdate(strapi.db);
-    const now = new Date();
-    strapi.cron.add({ [getRecurringCronExpression(now)]: recurringCheck });
-  } else if (!ee.licenseInfo.expireAt) {
-    return disable('Your license does not have offline support. Starting in CE.');
-  }
+  const shouldStayOffline =
+    ee.licenseInfo.type === 'gold' &&
+    // This env variable support is temporarily used to ease the migration between online vs offline
+    process.env.STRAPI_DISABLE_LICENSE_PING?.toLowerCase() === 'true';
 
-  validateInfo();
+  if (!shouldStayOffline) {
+    await onlineUpdate({ strapi });
+    strapi.cron.add({ [getRecurringCronExpression()]: onlineUpdate });
+  } else {
+    if (!ee.licenseInfo.expireAt) {
+      return disable('Your license does not have offline support.');
+    }
+
+    validateInfo();
+  }
 };
 
-module.exports = {
+module.exports = Object.freeze({
   init,
   checkLicense,
+
   get isEE() {
     return ee.enabled;
   },
-  features: {
+
+  features: Object.freeze({
     isEnabled: (feature) => (ee.enabled && ee.licenseInfo.features?.includes(feature)) || false,
-    getEnabled: () => (ee.enabled && Object.freeze(ee.licenseInfo.features)) || [],
-  },
-};
+    getEnabled: () => (ee.enabled && ee.licenseInfo.features) || [],
+  }),
+});

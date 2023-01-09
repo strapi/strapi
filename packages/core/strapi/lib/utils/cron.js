@@ -9,7 +9,8 @@ const shiftHours = (date, step) => {
 
 // TODO: This should be transformed into a cron expression shifter that could be reused in other places
 // For now it's tailored to the license check cron, scheduled every 12h
-const getRecurringCronExpression = (date) => `${date.getMinutes()} ${shiftHours(date, 12)} * * *`;
+const getRecurringCronExpression = (date = new Date()) =>
+  `${date.getMinutes()} ${shiftHours(date, 12)} * * *`;
 
 module.exports = {
   getRecurringCronExpression,
