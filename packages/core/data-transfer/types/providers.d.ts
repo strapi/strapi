@@ -3,6 +3,7 @@ import type {
   IProviderTransferResults,
   ISourceProviderTransferResults,
   Stream,
+  MaybePromise,
 } from './utils';
 import type { IMetadata } from './common-entities';
 import type { PipelineSource, PipelineDestination, Readable, Writable } from 'stream';
@@ -14,24 +15,24 @@ interface IProvider {
   name: string;
   results?: IProviderTransferResults;
 
-  bootstrap?(): Promise<void> | void;
-  getSchemas?(): any;
-  close?(): Promise<void> | void;
-  getMetadata(): IMetadata | null | Promise<IMetadata | null>;
-  beforeTransfer?(): Promise<void>;
-  validateOptions?(): void;
+  bootstrap?(): MaybePromise<void>;
+  close?(): MaybePromise<void>;
+
+  getMetadata(): MaybePromise<IMetadata | null>;
+  getSchemas?(): MaybePromise<Strapi.Schemas>;
+
+  beforeTransfer?(): MaybePromise<void>;
+  validateOptions?(): MaybePromise<void>;
 }
 
 export interface ISourceProvider extends IProvider {
   results?: ISourceProviderTransferResults;
 
-  // Getters for the source's transfer streams
-  streamEntities?(): Readable | Promise<Readable>;
-  streamLinks?(): Readable | Promise<Readable>;
-  streamAssets?(): Readable | Promise<Readable>;
-  streamConfiguration?(): Readable | Promise<Readable>;
-  getSchemas?(): Strapi.Schemas | Promise<Strapi.Schemas>;
-  streamSchemas?(): Readable | Promise<Readable>;
+  createEntitiesReadStream?(): MaybePromise<Readable>;
+  createLinksReadStream?(): MaybePromise<Readable>;
+  createAssetsReadStream?(): MaybePromise<Readable>;
+  createConfigurationReadStream?(): MaybePromise<Readable>;
+  createSchemasReadStream?(): MaybePromise<Readable>;
 }
 
 export interface IDestinationProvider extends IProvider {
@@ -40,15 +41,13 @@ export interface IDestinationProvider extends IProvider {
   /**
    * Optional rollback implementation
    */
-  rollback?<T extends Error = Error>(e: T): void | Promise<void>;
+  rollback?<T extends Error = Error>(e: T): MaybePromise<void>;
 
   setMetadata?(target: ProviderType, metadata: IMetadata): IDestinationProvider;
 
-  // Getters for the destination's transfer streams
-  getEntitiesStream?(): Writable | Promise<Writable>;
-  getLinksStream?(): Writable | Promise<Writable>;
-  getAssetsStream?(): Writable | Promise<Writable>;
-  getConfigurationStream?(): Writable | Promise<Writable>;
-  getSchemas?(): Strapi.Schemas | Promise<Strapi.Schemas>;
-  getSchemasStream?(): Writable | Promise<Writable>;
+  createEntitiesWriteStream?(): MaybePromise<Writable>;
+  createLinksWriteStream?(): MaybePromise<Writable>;
+  createAssetsWriteStream?(): MaybePromise<Writable>;
+  createConfigurationWriteStream?(): MaybePromise<Writable>;
+  createSchemasWriteStream?(): MaybePromise<Writable>;
 }
