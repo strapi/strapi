@@ -141,8 +141,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
     const pagination = await waitFor(() => container.querySelector('nav[aria-label="pagination"]'));
 
     expect(pagination).toBeInTheDocument();
-    expect(pagination.querySelectorAll('ul li')[1].querySelector('a')).toHaveTextContent('1');
-    expect(pagination.querySelectorAll('ul li')[1].querySelector('a')).toHaveClass('active');
+    expect(screen.getByText(/go to page 1/i).closest('a')).toHaveClass('active');
   });
 
   it('paginates the results', async () => {
