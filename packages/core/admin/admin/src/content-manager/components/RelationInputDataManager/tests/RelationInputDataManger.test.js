@@ -205,7 +205,7 @@ describe('RelationInputDataManager', () => {
     );
   });
 
-  test('Correctly computes tempKeys and passes this to useRelation', async () => {
+  test('Correctly computes modified and initial data paths and passes this to useRelation', async () => {
     setup({
       name: 'relation.1.subRelation',
     });
