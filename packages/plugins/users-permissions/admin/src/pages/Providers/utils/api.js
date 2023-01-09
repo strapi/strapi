@@ -1,9 +1,11 @@
+import { getFetchClient } from '@strapi/admin/admin/src/utils/getFetchClient';
 import { getRequestURL, axiosInstance } from '../../../utils';
 
 // eslint-disable-next-line import/prefer-default-export
 export const fetchData = async (toggleNotification) => {
   try {
-    const { data } = await axiosInstance.get(getRequestURL('providers'));
+    const { get } = getFetchClient();
+    const { data } = await get(getRequestURL('providers'));
 
     return data;
   } catch (err) {
