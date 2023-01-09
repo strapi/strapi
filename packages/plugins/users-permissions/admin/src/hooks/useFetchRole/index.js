@@ -1,6 +1,6 @@
 import { useCallback, useReducer, useEffect, useRef } from 'react';
 import { useNotification } from '@strapi/helper-plugin';
-import { getFetchClient } from '@strapi/admin/admin/src/utils/getFetchClient';
+import useFetchClient from '@strapi/admin/admin/src/hooks/useFetchClient';
 import reducer, { initialState } from './reducer';
 import pluginId from '../../pluginId';
 
@@ -8,7 +8,7 @@ const useFetchRole = (id) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const toggleNotification = useNotification();
   const isMounted = useRef(null);
-  const { get } = getFetchClient();
+  const { get } = useFetchClient();
 
   useEffect(() => {
     isMounted.current = true;
