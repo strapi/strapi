@@ -34,7 +34,7 @@ const Modal = ({ handleClose, logId }) => {
   return (
     <ModalLayout onClose={handleClose} labelledBy="title">
       <ModalHeader>
-        <Breadcrumbs label={formattedDate}>
+        <Breadcrumbs label={formattedDate} id="title">
           <Crumb>{formattedDate}</Crumb>
         </Breadcrumbs>
       </ModalHeader>
