@@ -68,10 +68,7 @@ try {
   // Your code here
 } catch (error) {
   // Either send a simple error
-  strapi
-    .plugin('sentry')
-    .service('sentry')
-    .sendError(error);
+  strapi.plugin('sentry').service('sentry').sendError(error);
 
   // Or send an error with a customized Sentry scope
   strapi
@@ -92,16 +89,13 @@ Use it if you need direct access to the Sentry instance, which should already al
 **Example**
 
 ```js
-const sentryInstance = strapi
-  .plugin('sentry')
-  .service('sentry')
-  .getInstance();
+const sentryInstance = strapi.plugin('sentry').service('sentry').getInstance();
 ```
 
 ## Disabling for non-production environments
 
 If the `dsn` property is set to a nil value (`null` or `undefined`) while `enabled` is true, the Sentry plugin will be available to use in the running Strapi instance, but the service will not actually send errors to Sentry. That allows you to write code that runs on every environment without additional checks, but only send errors to Sentry in production.
-  
+
 When you start Strapi with a nil `dsn` config property, the plugin will print a warning:  
 `info: @strapi/plugin-sentry is disabled because no Sentry DSN was provided`
 
@@ -137,7 +131,7 @@ Like every other plugin, you can also disable this plugin in the plugins configu
 module.exports = ({ env }) => ({
   // ...
   sentry: {
-    enabled: false
+    enabled: false,
   },
   // ...
 });
