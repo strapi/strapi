@@ -6,7 +6,6 @@ import get from 'lodash/get';
 import pick from 'lodash/pick';
 import take from 'lodash/take';
 import isNil from 'lodash/isNil';
-import findIndex from 'lodash/findIndex';
 
 import { useCMEditViewDataManager, NotAllowedInput } from '@strapi/helper-plugin';
 
@@ -54,16 +53,16 @@ export const RelationInputDataManager = ({
   const initialDataPath = [];
   const nameSplit = name.split('.');
   nameSplit.reduce((acc, currentValue, index) => {
-    const pathSoFar = take(nameSplit, index);
+    const initialDataParent = get(initialData, initialDataPath);
+    const modifiedDataTempKey = get(modifiedData, [
+      ...take(nameSplit, index),
+      currentValue,
+      '__temp_key__',
+    ]);
 
-    const initialDataParent = get(initialData, pathSoFar);
-    const modifiedDataValue = get(modifiedData, [...pathSoFar, currentValue]);
-    const tempKey = get(modifiedDataValue, '__temp_key__');
-
-    if (!isNil(tempKey) && Array.isArray(initialDataParent)) {
-      const initialDataIndex = findIndex(
-        initialDataParent,
-        (entry) => entry.__temp_key__ === tempKey
+    if (!isNil(modifiedDataTempKey) && Array.isArray(initialDataParent)) {
+      const initialDataIndex = initialDataParent.findIndex(
+        (entry) => entry.__temp_key__ === modifiedDataTempKey
       );
       acc.push(`${initialDataIndex}`);
 

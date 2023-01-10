@@ -689,10 +689,6 @@ describe('RelationInputDataManager', () => {
     const initialData = {
       dz: [
         {
-          __component: 'default.blank',
-          __temp_key__: 6,
-        },
-        {
           __component: 'default.withToManyComponentRelation',
           __temp_key__: 7,
           toManyRelation: [
@@ -707,6 +703,10 @@ describe('RelationInputDataManager', () => {
               __temp_key__: 0,
             },
           ],
+        },
+        {
+          __component: 'default.blank',
+          __temp_key__: 6,
         },
       ],
     };
@@ -753,7 +753,7 @@ describe('RelationInputDataManager', () => {
     expect(useRelation).toBeCalledWith(
       expect.any(String),
       expect.objectContaining({
-        initialDataPath: ['initialData', 'dz', '1', 'toManyRelation', '1', 'publishers'],
+        initialDataPath: ['initialData', 'dz', '0', 'toManyRelation', '1', 'publishers'],
         modifiedDataPath: ['modifiedData', 'dz', '1', 'toManyRelation', '0', 'publishers'],
       })
     );
