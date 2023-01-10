@@ -10,7 +10,7 @@ import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import useFormatTimeStamp from '../hooks/useFormatTimeStamp';
 import getDefaultMessage from '../utils/getActionTypesDefaultMessages';
 
-const TableRows = ({ headers, rows, onModalToggle }) => {
+const TableRows = ({ headers, rows, onOpenModal }) => {
   const { formatMessage } = useIntl();
   const formatTimeStamp = useFormatTimeStamp();
 
@@ -36,7 +36,7 @@ const TableRows = ({ headers, rows, onModalToggle }) => {
           <Tr
             key={data.id}
             {...onRowClick({
-              fn: () => onModalToggle(data.id),
+              fn: () => onOpenModal(data.id),
             })}
           >
             {headers.map(({ key, name, cellFormatter }) => {
@@ -55,7 +55,7 @@ const TableRows = ({ headers, rows, onModalToggle }) => {
             <Td {...stopPropagation}>
               <Flex justifyContent="end">
                 <IconButton
-                  onClick={() => onModalToggle(data.id)}
+                  onClick={() => onOpenModal(data.id)}
                   aria-label={formatMessage(
                     { id: 'app.component.table.view', defaultMessage: '{target} details' },
                     { target: `${data.action} action` }
@@ -79,7 +79,7 @@ TableRows.defaultProps = {
 TableRows.propTypes = {
   headers: PropTypes.array.isRequired,
   rows: PropTypes.array,
-  onModalToggle: PropTypes.func.isRequired,
+  onOpenModal: PropTypes.func.isRequired,
 };
 
 export default TableRows;

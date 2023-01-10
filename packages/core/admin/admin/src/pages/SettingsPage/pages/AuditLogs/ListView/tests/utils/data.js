@@ -1,4 +1,4 @@
-export const TEST_DATA = [
+const TEST_PAGE_DATA = [
   {
     id: 1,
     action: 'role.create',
@@ -37,15 +37,31 @@ export const TEST_DATA = [
   },
 ];
 
-export const getBigTestData = (quantity) => {
+const TEST_SINGLE_DATA = {
+  id: 1,
+  action: 'role.create',
+  date: '2022-12-22T16:11:03.126Z',
+  payload: {
+    meta: 'data',
+  },
+  user: {
+    id: 1,
+    fullname: 'test user',
+    email: 'test@test.com',
+  },
+};
+
+const getBigTestPageData = (quantity) => {
   const data = [];
 
   for (let i = 0; i < quantity; i++) {
     data.push({
-      ...TEST_DATA[i % TEST_DATA.length],
+      ...TEST_PAGE_DATA[i % TEST_PAGE_DATA.length],
       id: i + 1,
     });
   }
 
   return data;
 };
+
+export { TEST_PAGE_DATA, TEST_SINGLE_DATA, getBigTestPageData };
