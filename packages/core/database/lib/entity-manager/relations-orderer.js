@@ -68,16 +68,16 @@ const sortConnectArray = (connectArr, initialArr = [], strictSort = true) => {
     // This relation has already been computed
     if (mappedRelations[relation.id]?.computed) return;
 
+    mappedRelations[relation.id].computed = true;
+
     // Relation does not have a before or after attribute or is in the initial array
     if (!adjacentRelId || relationInInitialArray[adjacentRelId]) {
-      mappedRelations[relation.id].computed = true;
       sortedConnect.push(relation);
       return;
     }
 
     // Look if id is referenced elsewhere in the array
     if (mappedRelations[adjacentRelId]) {
-      mappedRelations[relation.id].computed = true;
       computeRelation(adjacentRelation, { ...relationsSeenInBranch, [relation.id]: true });
       sortedConnect.push(relation);
     } else if (strictSort) {
@@ -92,7 +92,6 @@ const sortConnectArray = (connectArr, initialArr = [], strictSort = true) => {
       );
     } else {
       // We are in non-strict mode so we can push the relation.
-      mappedRelations[relation.id].computed = true;
       sortedConnect.push({ id: relation.id, position: { end: true } });
     }
   };
