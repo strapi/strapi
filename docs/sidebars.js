@@ -41,6 +41,17 @@ const sidebars = {
         },
         {
           type: 'category',
+          label: 'Hooks',
+          items: [
+            {
+              type: 'doc',
+              label: 'useFetchClient',
+              id: 'core/hooks/use-fetch-client',
+            },
+          ],
+        },
+        {
+          type: 'category',
           label: 'Content Type Builder',
           link: {
             type: 'doc',
