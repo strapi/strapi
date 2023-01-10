@@ -1,14 +1,10 @@
-const { test } = require('@playwright/test');
+import { test } from '@playwright/test';
+import { resetDatabaseAndImportDataFromPath } from './scripts/data-transfer';
 
 test.describe('Authentication', () => {
   test.beforeEach(async ({ page }) => {
+    await resetDatabaseAndImportDataFromPath('./e2e/data/backup.tar');
     await page.goto('/admin');
-  });
-
-  test.afterEach(async ({ page }) => {
-    await page.request.fetch('/api/database/dump', {
-      method: 'POST',
-    });
   });
 
   test('a user should be able to signup when the strapi instance starts fresh', async ({
@@ -23,7 +19,7 @@ test.describe('Authentication', () => {
       })
       .fill('myTestPassw0rd');
     await page
-      .getByLabel('Confirmation Password*', {
+      .getByLabel('Confirm Password*', {
         exact: true,
       })
       .fill('myTestPassw0rd');
