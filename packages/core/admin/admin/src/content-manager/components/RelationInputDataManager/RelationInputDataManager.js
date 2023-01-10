@@ -4,8 +4,6 @@ import React, { memo, useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 import pick from 'lodash/pick';
-import take from 'lodash/take';
-import isNil from 'lodash/isNil';
 
 import { useCMEditViewDataManager, NotAllowedInput } from '@strapi/helper-plugin';
 
@@ -50,21 +48,22 @@ export const RelationInputDataManager = ({
     relationReorder,
   } = useCMEditViewDataManager();
 
-  const initialDataPath = [];
   const nameSplit = name.split('.');
-  nameSplit.reduce((acc, currentValue, index) => {
-    const initialDataParent = get(initialData, initialDataPath);
+
+  const initialDataPath = nameSplit.reduce((acc, currentValue, index) => {
+    const initialDataParent = get(initialData, acc);
     const modifiedDataTempKey = get(modifiedData, [
-      ...take(nameSplit, index),
+      ...nameSplit.slice(0, index),
       currentValue,
       '__temp_key__',
     ]);
 
-    if (!isNil(modifiedDataTempKey) && Array.isArray(initialDataParent)) {
+    if (Array.isArray(initialDataParent) && typeof modifiedDataTempKey === 'number') {
       const initialDataIndex = initialDataParent.findIndex(
         (entry) => entry.__temp_key__ === modifiedDataTempKey
       );
-      acc.push(`${initialDataIndex}`);
+
+      acc.push(initialDataIndex.toString());
 
       return acc;
     }
@@ -72,16 +71,14 @@ export const RelationInputDataManager = ({
     acc.push(currentValue);
 
     return acc;
-  }, initialDataPath);
+  }, []);
 
   const relationsFromModifiedData = get(modifiedData, name, []);
 
   const currentLastPage = Math.ceil(get(initialData, name, []).length / RELATIONS_TO_DISPLAY);
 
-  const cacheKey = `${slug}-${name}-${initialData?.id ?? ''}`;
+  const cacheKey = `${slug}-${initialDataPath.join('.')}`;
   const { relations, search, searchFor } = useRelation(cacheKey, {
-    initialDataPath: ['initialData', ...initialDataPath],
-    modifiedDataPath: ['modifiedData', ...nameSplit],
     relation: {
       enabled: !!endpoints.relation,
       endpoint: endpoints.relation,
@@ -90,7 +87,15 @@ export const RelationInputDataManager = ({
         ...defaultParams,
         pageSize: RELATIONS_TO_DISPLAY,
       },
-      onLoad: relationLoad,
+      onLoad(value) {
+        relationLoad({
+          target: {
+            initialDataPath: ['initialData', ...initialDataPath],
+            modifiedDataPath: ['modifiedData', ...nameSplit],
+            value,
+          },
+        });
+      },
       normalizeArguments: {
         mainFieldName: mainField.name,
         shouldAddLink: shouldDisplayRelationLink,

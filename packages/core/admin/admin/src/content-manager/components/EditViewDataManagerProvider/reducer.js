@@ -155,14 +155,28 @@ const reducer = (state, action) =>
         const initialDataRelations = get(state, initialDataPath);
         const modifiedDataRelations = get(state, modifiedDataPath);
 
-        set(draftState, initialDataPath, uniqBy([...value, ...initialDataRelations], 'id'));
+        /**
+         * Check if the values we're loading are already in initial
+         * data if they are then we don't need to load them at all
+         */
+        const valuesToLoad = value.filter((relation) => {
+          return !initialDataRelations.some((initialDataRelation) => {
+            return initialDataRelation.id === relation.id;
+          });
+        });
+
+        set(draftState, initialDataPath, uniqBy([...valuesToLoad, ...initialDataRelations], 'id'));
 
         /**
          * We need to set the value also on modifiedData, because initialData
          * and modifiedData need to stay in sync, so that the CM can compare
          * both states, to render the dirty UI state
          */
-        set(draftState, modifiedDataPath, uniqBy([...value, ...modifiedDataRelations], 'id'));
+        set(
+          draftState,
+          modifiedDataPath,
+          uniqBy([...valuesToLoad, ...modifiedDataRelations], 'id')
+        );
 
         break;
       }

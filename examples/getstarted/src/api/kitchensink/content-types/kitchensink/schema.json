@@ -156,6 +156,13 @@
       "type": "customField",
       "regex": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
       "customField": "plugin::color-picker.color"
+    },
+    "cats": {
+      "type": "dynamiczone",
+      "components": [
+        "basic.relation",
+        "basic.simple"
+      ]
     }
   }
 }
