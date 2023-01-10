@@ -72,7 +72,7 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
     transfer: {
       async entities(entity) {
         if (!streams.entities) {
-          streams.entities = provider.getEntitiesStream();
+          streams.entities = provider.createEntitiesWriteStream();
         }
 
         await writeAsync(streams.entities, entity);
@@ -80,7 +80,7 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
 
       async links(link) {
         if (!streams.links) {
-          streams.links = await provider.getLinksStream();
+          streams.links = await provider.createLinksWriteStream();
         }
 
         await writeAsync(streams.links, link);
@@ -88,7 +88,7 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
 
       async configuration(config) {
         if (!streams.configuration) {
-          streams.configuration = await provider.getConfigurationStream();
+          streams.configuration = await provider.createConfigurationWriteStream();
         }
 
         await writeAsync(streams.configuration, config);
@@ -104,7 +104,7 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
         const { action, assetID } = payload;
 
         if (!streams.assets) {
-          streams.assets = await provider.getAssetsStream();
+          streams.assets = await provider.createAssetsWriteStream();
         }
 
         if (action === 'start') {

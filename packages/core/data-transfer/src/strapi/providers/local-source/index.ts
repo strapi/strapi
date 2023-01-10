@@ -63,7 +63,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     };
   }
 
-  async streamEntities(): Promise<Readable> {
+  async createEntitiesReadStream(): Promise<Readable> {
     if (!this.strapi) {
       throw new Error('Not able to stream entities. Strapi instance not found');
     }
@@ -77,7 +77,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     ]);
   }
 
-  streamLinks(): Readable {
+  createLinksReadStream(): Readable {
     if (!this.strapi) {
       throw new Error('Not able to stream links. Strapi instance not found');
     }
@@ -85,7 +85,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     return createLinksStream(this.strapi);
   }
 
-  streamConfiguration(): Readable {
+  createConfigurationReadStream(): Readable {
     if (!this.strapi) {
       throw new Error('Not able to stream configuration. Strapi instance not found');
     }
@@ -106,11 +106,11 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     return utils.schema.mapSchemasValues(schemas);
   }
 
-  streamSchemas(): Readable {
+  createSchemasReadStream(): Readable {
     return Readable.from(Object.values(this.getSchemas()));
   }
 
-  streamAssets(): Readable {
+  createAssetsReadStream(): Readable {
     if (!this.strapi) {
       throw new Error('Not able to stream assets. Strapi instance not found');
     }

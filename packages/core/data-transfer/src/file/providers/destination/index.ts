@@ -12,6 +12,7 @@ import type {
   IDestinationProvider,
   IDestinationProviderTransferResults,
   IMetadata,
+  MaybePromise,
   ProviderType,
   Stream,
 } from '../../../../types';
@@ -165,7 +166,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return createTarEntryStream(stream, () => 'metadata.json');
   }
 
-  getSchemasStream() {
+  createSchemasWriteStream() {
     if (!this.#archive.stream) {
       throw new Error('Archive stream is unavailable');
     }
@@ -181,7 +182,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return chain([stringer(), entryStream]);
   }
 
-  getEntitiesStream(): Writable {
+  createEntitiesWriteStream(): Writable {
     if (!this.#archive.stream) {
       throw new Error('Archive stream is unavailable');
     }
@@ -197,7 +198,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return chain([stringer(), entryStream]);
   }
 
-  getLinksStream(): Writable {
+  createLinksWriteStream(): Writable {
     if (!this.#archive.stream) {
       throw new Error('Archive stream is unavailable');
     }
@@ -213,7 +214,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return chain([stringer(), entryStream]);
   }
 
-  getConfigurationStream(): Writable {
+  createConfigurationWriteStream(): Writable {
     if (!this.#archive.stream) {
       throw new Error('Archive stream is unavailable');
     }
@@ -229,7 +230,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return chain([stringer(), entryStream]);
   }
 
-  getAssetsStream(): Writable {
+  createAssetsWriteStream(): Writable {
     const { stream: archiveStream } = this.#archive;
 
     if (!archiveStream) {

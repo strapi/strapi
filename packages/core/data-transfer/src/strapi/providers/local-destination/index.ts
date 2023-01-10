@@ -101,7 +101,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     return utils.schema.mapSchemasValues(schemas);
   }
 
-  getEntitiesStream(): Writable {
+  createEntitiesWriteStream(): Writable {
     if (!this.strapi) {
       throw new Error('Not able to import entities. Strapi instance not found');
     }
@@ -127,7 +127,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   // TODO: Move this logic to the restore strategy
-  async getAssetsStream(): Promise<Writable> {
+  async createAssetsWriteStream(): Promise<Writable> {
     if (!this.strapi) {
       throw new Error('Not able to stream Assets. Strapi instance not found');
     }
@@ -175,7 +175,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     });
   }
 
-  async getConfigurationStream(): Promise<Writable> {
+  async createConfigurationWriteStream(): Promise<Writable> {
     if (!this.strapi) {
       throw new Error('Not able to stream Configurations. Strapi instance not found');
     }
@@ -189,7 +189,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     throw new Error(`Invalid strategy supplied: "${strategy}"`);
   }
 
-  async getLinksStream(): Promise<Writable> {
+  async createLinksWriteStream(): Promise<Writable> {
     if (!this.strapi) {
       throw new Error('Not able to stream links. Strapi instance not found');
     }

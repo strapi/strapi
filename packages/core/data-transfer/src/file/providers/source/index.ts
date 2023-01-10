@@ -8,6 +8,7 @@ import { keyBy } from 'lodash/fp';
 import { chain } from 'stream-chain';
 import { pipeline, PassThrough } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
+import type { Schema } from '@strapi/strapi';
 import type { IAsset, IMetadata, ISourceProvider, ProviderType } from '../../../../types';
 
 import { createDecryptionCipher } from '../../../utils/encryption';
@@ -83,29 +84,29 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   async getSchemas() {
-    const schemas = await collect(this.streamSchemas());
+    const schemas = await collect<Schema>(this.createSchemasReadStream());
 
     return keyBy('uid', schemas);
   }
 
-  streamEntities(): Readable {
+  createEntitiesReadStream(): Readable {
     return this.#streamJsonlDirectory('entities');
   }
 
-  streamSchemas(): Readable {
+  createSchemasReadStream(): Readable {
     return this.#streamJsonlDirectory('schemas');
   }
 
-  streamLinks(): Readable {
+  createLinksReadStream(): Readable {
     return this.#streamJsonlDirectory('links');
   }
 
-  streamConfiguration(): Readable {
+  createConfigurationReadStream(): Readable {
     // NOTE: TBD
     return this.#streamJsonlDirectory('configuration');
   }
 
-  streamAssets(): Readable | Promise<Readable> {
+  createAssetsReadStream(): Readable | Promise<Readable> {
     const inStream = this.#getBackupStream();
     const outStream = new PassThrough({ objectMode: true });
 

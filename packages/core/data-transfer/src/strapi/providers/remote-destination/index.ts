@@ -155,7 +155,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     return this.dispatcher.dispatchTransferAction<Strapi.Schemas>('getSchemas');
   }
 
-  getEntitiesStream(): Writable {
+  createEntitiesWriteStream(): Writable {
     return new Writable({
       objectMode: true,
       write: async (entity: IEntity, _encoding, callback) => {
@@ -166,7 +166,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     });
   }
 
-  getLinksStream(): Writable {
+  createLinksWriteStream(): Writable {
     return new Writable({
       objectMode: true,
       write: async (link: ILink, _encoding, callback) => {
@@ -177,7 +177,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     });
   }
 
-  getConfigurationStream(): Writable {
+  createConfigurationWriteStream(): Writable {
     return new Writable({
       objectMode: true,
       write: async (configuration: IConfiguration, _encoding, callback) => {
@@ -188,7 +188,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     });
   }
 
-  getAssetsStream(): Writable | Promise<Writable> {
+  createAssetsWriteStream(): Writable | Promise<Writable> {
     return new Writable({
       objectMode: true,
       final: async (callback) => {

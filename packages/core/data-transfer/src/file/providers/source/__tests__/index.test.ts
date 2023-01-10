@@ -17,7 +17,7 @@ describe('Stream assets', () => {
       },
     };
     const provider = createLocalFileSourceProvider(options);
-    const stream = provider.streamAssets();
+    const stream = provider.createAssetsReadStream();
 
     expect(stream instanceof Readable).toBeTruthy();
   });
