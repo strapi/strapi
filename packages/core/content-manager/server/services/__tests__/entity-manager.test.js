@@ -1,5 +1,6 @@
 'use strict';
 
+const _ = require('lodash');
 const entityManagerLoader = require('../entity-manager');
 
 let entityManager;
@@ -11,6 +12,7 @@ describe('Content-Manager', () => {
   };
 
   describe('Publish', () => {
+    const defaultConfig = {};
     beforeEach(() => {
       global.strapi = {
         entityService: {
@@ -21,6 +23,9 @@ describe('Content-Manager', () => {
         },
         eventHub: { emit: jest.fn(), sanitizeEntity: (entity) => entity },
         getModel: jest.fn(() => fakeModel),
+        config: {
+          get: (path, defaultValue) => _.get(defaultConfig, path, defaultValue),
+        },
       };
       entityManager = entityManagerLoader({ strapi });
     });
@@ -42,6 +47,7 @@ describe('Content-Manager', () => {
   });
 
   describe('Unpublish', () => {
+    const defaultConfig = {};
     beforeEach(() => {
       global.strapi = {
         entityService: {
@@ -49,6 +55,9 @@ describe('Content-Manager', () => {
         },
         eventHub: { emit: jest.fn(), sanitizeEntity: (entity) => entity },
         getModel: jest.fn(() => fakeModel),
+        config: {
+          get: (path, defaultValue) => _.get(defaultConfig, path, defaultValue),
+        },
       };
       entityManager = entityManagerLoader({ strapi });
     });
