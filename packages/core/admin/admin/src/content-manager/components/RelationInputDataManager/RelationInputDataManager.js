@@ -15,6 +15,7 @@ import { getTrad } from '../../utils';
 
 import { PUBLICATION_STATES, RELATIONS_TO_DISPLAY, SEARCH_RESULTS_TO_DISPLAY } from './constants';
 import { connect, select, normalizeSearchResults, diffRelations, normalizeRelation } from './utils';
+import { getInitialDataPathUsingTempKeys } from '../../utils/paths';
 
 export const RelationInputDataManager = ({
   error,
@@ -50,28 +51,7 @@ export const RelationInputDataManager = ({
 
   const nameSplit = name.split('.');
 
-  const initialDataPath = nameSplit.reduce((acc, currentValue, index) => {
-    const initialDataParent = get(initialData, acc);
-    const modifiedDataTempKey = get(modifiedData, [
-      ...nameSplit.slice(0, index),
-      currentValue,
-      '__temp_key__',
-    ]);
-
-    if (Array.isArray(initialDataParent) && typeof modifiedDataTempKey === 'number') {
-      const initialDataIndex = initialDataParent.findIndex(
-        (entry) => entry.__temp_key__ === modifiedDataTempKey
-      );
-
-      acc.push(initialDataIndex.toString());
-
-      return acc;
-    }
-
-    acc.push(currentValue);
-
-    return acc;
-  }, []);
+  const initialDataPath = getInitialDataPathUsingTempKeys(initialData, modifiedData)(name);
 
   const relationsFromModifiedData = get(modifiedData, name, []);
 
