@@ -804,7 +804,6 @@ describe('Relations', () => {
           { id: id1, position: { start: true } },
           { id: id2, position: { start: true } },
           { id: id3, position: { after: id1 } },
-          { id: id1, position: { after: id2 } },
         ],
       });
 
@@ -852,10 +851,7 @@ describe('Relations', () => {
         ],
       });
 
-      const expectedShop = shopFactory({
-        anyToManyRel: [{ id: id2 }, { id: id1 }],
-      });
-      expect(updatedShop.data).toMatchObject(expectedShop);
+      expect(updatedShop.error).toMatchObject({ status: 400, name: 'ValidationError' });
     });
 
     test('Update relations with invalid connect array in strict mode', async () => {

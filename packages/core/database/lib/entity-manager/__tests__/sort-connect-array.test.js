@@ -61,4 +61,19 @@ describe('sortConnectArray', () => {
       'A circular reference was found in the connect array. One relation is trying to connect before/after another one that is trying to connect before/after it'
     );
   });
+
+  test('error when connecting same relation twice', () => {
+    const sortConnect = () =>
+      sortConnectArray(
+        [
+          { id: 1, position: { after: 2 } },
+          { id: 1, position: { after: 3 } },
+        ],
+        []
+      );
+
+    expect(sortConnect).toThrowError(
+      'The relation with id 1 is already connected. You cannot connect the same relation twice.'
+    );
+  });
 });

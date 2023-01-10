@@ -58,7 +58,6 @@ describe('Given I have some relations in the database', () => {
       );
 
       orderer.connect([
-        { id: 4, position: { before: 2 } },
         { id: 4, position: { before: 3 } },
         { id: 5, position: { before: 4 } },
       ]);
