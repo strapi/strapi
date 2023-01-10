@@ -188,6 +188,7 @@ module.exports = ({ strapi }) => ({
    * @param {*} fileData
    */
   async uploadImage(fileData) {
+    const config = strapi.config.get('plugin.upload');
     const { getDimensions, generateThumbnail, generateResponsiveFormats, isOptimizableImage } =
       getService('image-manipulation');
 
@@ -220,9 +221,11 @@ module.exports = ({ strapi }) => ({
 
     // Generate & Upload thumbnail and responsive formats
     if (await isOptimizableImage(fileData)) {
-      const thumbnailFile = await generateThumbnail(fileData);
-      if (thumbnailFile) {
-        uploadPromises.push(uploadThumbnail(thumbnailFile));
+      if (config.generateThumbnails) {
+        const thumbnailFile = await generateThumbnail(fileData);
+        if (thumbnailFile) {
+          uploadPromises.push(uploadThumbnail(thumbnailFile));
+        }
       }
 
       const formats = await generateResponsiveFormats(fileData);

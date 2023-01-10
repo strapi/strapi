@@ -8,6 +8,7 @@ module.exports = {
       sizeLimit: 1000000,
     },
     actionOptions: {},
+    generateThumbnails: true
   },
   validator() {},
 };
