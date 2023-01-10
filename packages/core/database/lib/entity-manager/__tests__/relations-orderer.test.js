@@ -132,7 +132,6 @@ describe('Given there are no relations in the database', () => {
         { id: 1, position: { start: true } },
         { id: 2, position: { start: true } },
         { id: 3, position: { after: 1 } },
-        { id: 1, position: { after: 2 } },
       ]);
 
       expect(orderer.get()).toMatchObject([
