@@ -26,7 +26,7 @@ const init = (initialState, { settings, shouldUpdateStrapi }) => {
       links: [
         {
           intlLabel: { id: 'global.auditLogs', defaultMessage: 'Audit Logs' },
-          to: '/settings/audit-logs',
+          to: '/settings/audit-logs?pageSize=50',
           id: 'auditLogs',
           isDisplayed: false,
           permissions: adminPermissions.settings.auditLogs.main,

@@ -15,6 +15,7 @@ import adminPermissions from '../../../../../permissions';
 import { useFetchClient } from '../../../../../hooks';
 import TableRows from './TableRows';
 import tableHeaders from './utils/tableHeaders';
+import PaginationFooter from './PaginationFooter';
 import Modal from './Modal';
 
 const ListView = () => {
@@ -87,6 +88,7 @@ const ListView = () => {
             onOpenModal={(id) => setModalLogId(id)}
           />
         </DynamicTable>
+        <PaginationFooter pagination={data?.pagination} />
       </ContentLayout>
       {modalLogId && <Modal handleClose={() => setModalLogId(null)} logId={modalLogId} />}
     </Main>

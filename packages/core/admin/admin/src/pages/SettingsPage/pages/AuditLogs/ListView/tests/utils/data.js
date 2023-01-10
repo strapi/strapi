@@ -51,4 +51,17 @@ const TEST_SINGLE_DATA = {
   },
 };
 
-export { TEST_PAGE_DATA, TEST_SINGLE_DATA };
+const getBigTestPageData = (quantity) => {
+  const data = [];
+
+  for (let i = 0; i < quantity; i++) {
+    data.push({
+      ...TEST_PAGE_DATA[i % TEST_PAGE_DATA.length],
+      id: i + 1,
+    });
+  }
+
+  return data;
+};
+
+export { TEST_PAGE_DATA, TEST_SINGLE_DATA, getBigTestPageData };
