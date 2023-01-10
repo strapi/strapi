@@ -13,4 +13,8 @@ module.exports = ({ env }) => ({
   app: {
     keys: env.array('APP_KEYS', ['toBeModified1', 'toBeModified2']),
   },
+  // Receive populated relations in webhook and db lifecycle payloads
+  relations: {
+    populate: true,
+  },
 });
