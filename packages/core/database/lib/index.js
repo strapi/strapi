@@ -20,6 +20,8 @@ class Database {
       connection: {},
       settings: {
         forceMigration: true,
+        runMigrations: true,
+        ...config.settings,
       },
       ...config,
     };

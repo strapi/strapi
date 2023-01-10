@@ -180,6 +180,7 @@ describe('<Input />', () => {
                 aria-disabled="false"
                 aria-invalid="false"
                 aria-label="test"
+                aria-required="false"
                 class="c6"
                 id="textinput-1"
                 name="test"

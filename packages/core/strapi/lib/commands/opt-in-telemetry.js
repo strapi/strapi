@@ -53,12 +53,12 @@ const generateNewPackageJSON = (packageObj) => {
 
 const sendEvent = async (uuid) => {
   try {
-    await fetch('https://analytics.strapi.io/track', {
+    await fetch('https://analytics.strapi.io/api/v2/track', {
       method: 'POST',
       body: JSON.stringify({
         event: 'didOptInTelemetry',
-        uuid,
         deviceId: machineID(),
+        groupProperties: { projectId: uuid },
       }),
       headers: { 'Content-Type': 'application/json' },
     });

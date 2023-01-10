@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { auth } from '@strapi/helper-plugin';
+import { auth, wrapAxiosInstance } from '@strapi/helper-plugin';
+// TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from getFetchClient
 import pluginId from '../pluginId';
 
 const instance = axios.create({
@@ -34,4 +35,6 @@ instance.interceptors.response.use(
   }
 );
 
-export default instance;
+const wrapper = wrapAxiosInstance(instance);
+
+export default wrapper;

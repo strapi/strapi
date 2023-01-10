@@ -360,8 +360,7 @@ describe('Admin | UseCasePage', () => {
         color: #666687;
       }
 
-      .c4[aria-disabled='true'] svg > g,
-      .c4[aria-disabled='true'] svg path {
+      .c4[aria-disabled='true'] svg > g,.c4[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -374,8 +373,7 @@ describe('Admin | UseCasePage', () => {
         color: #666687;
       }
 
-      .c4[aria-disabled='true']:active svg > g,
-      .c4[aria-disabled='true']:active svg path {
+      .c4[aria-disabled='true']:active svg > g,.c4[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -442,8 +440,7 @@ describe('Admin | UseCasePage', () => {
         color: #666687;
       }
 
-      .c33[aria-disabled='true'] svg > g,
-      .c33[aria-disabled='true'] svg path {
+      .c33[aria-disabled='true'] svg > g,.c33[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -456,8 +453,7 @@ describe('Admin | UseCasePage', () => {
         color: #666687;
       }
 
-      .c33[aria-disabled='true']:active svg > g,
-      .c33[aria-disabled='true']:active svg path {
+      .c33[aria-disabled='true']:active svg > g,.c33[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -474,22 +470,6 @@ describe('Admin | UseCasePage', () => {
       .c33 svg > g,
       .c33 svg path {
         fill: #ffffff;
-      }
-
-      .c8 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c8 svg {
-        height: 4px;
-        width: 6px;
       }
 
       .c25 {
@@ -565,6 +545,10 @@ describe('Admin | UseCasePage', () => {
         width: 100%;
       }
 
+      .c10:focus-visible {
+        outline: none;
+      }
+
       .c37 {
         background: transparent;
         border: none;
@@ -622,12 +606,24 @@ describe('Admin | UseCasePage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c10:focus-visible {
-        outline: none;
-      }
-
       .c15 {
         height: 4.5rem;
+      }
+
+      .c8 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c8 svg {
+        height: 4px;
+        width: 6px;
       }
 
       .c12 {
@@ -736,7 +732,6 @@ describe('Admin | UseCasePage', () => {
                         <span
                           class="c5 c22"
                           for="usecase"
-                          id="usecase-label"
                         >
                           <div
                             class="c0 c23"
