@@ -1,6 +1,6 @@
 'use strict';
 
-const _ = require('lodash');
+const { trim } = require('lodash/fp');
 const {
   template: { createLooseInterpolationRegExp, createStrictInterpolationRegExp },
 } = require('@strapi/utils');
@@ -33,7 +33,7 @@ const matchAll = (pattern, src) => {
   while ((match = regexPatternWithGlobal.exec(src))) {
     const [, group] = match;
 
-    matches.push(_.trim(group));
+    matches.push(trim(group));
   }
 
   return matches;
