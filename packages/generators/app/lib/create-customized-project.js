@@ -61,7 +61,7 @@ async function askDbInfosAndTest(scope) {
       .then((result) => {
         if (result && result.shouldRetry === true && retries < MAX_RETRIES - 1) {
           console.log('Retrying...');
-          retries++;
+          retries += 1;
           return loop();
         }
       })
@@ -86,7 +86,7 @@ async function askDbInfosAndTest(scope) {
           }
 
           console.log('Retrying...');
-          retries++;
+          retries += 1;
           return loop();
         }
 

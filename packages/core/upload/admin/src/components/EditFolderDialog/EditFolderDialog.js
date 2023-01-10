@@ -258,7 +258,7 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                         disabled={!canUpdate || isEditFolderLoading}
                       >
                         {formatMessage({
-                          id: 'modal.folder.create.delete',
+                          id: getTrad('modal.folder.create.delete'),
                           defaultMessage: 'Delete folder',
                         })}
                       </Button>
@@ -272,8 +272,8 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                     >
                       {formatMessage(
                         isEditing
-                          ? { id: 'modal.folder.edit.submit', defaultMessage: 'Save' }
-                          : { id: 'modal.folder.create.submit', defaultMessage: 'Create' }
+                          ? { id: getTrad('modal.folder.edit.submit'), defaultMessage: 'Save' }
+                          : { id: getTrad('modal.folder.create.submit'), defaultMessage: 'Create' }
                       )}
                     </Button>
                   </Stack>

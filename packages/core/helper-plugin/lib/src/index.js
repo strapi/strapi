@@ -15,6 +15,7 @@ export { default as useAppInfos } from './hooks/useAppInfos';
 
 export { default as useQuery } from './hooks/useQuery';
 export { default as useLibrary } from './hooks/useLibrary';
+export { default as useCustomFields } from './hooks/useCustomFields';
 export { default as useNotification } from './hooks/useNotification';
 export { default as useStrapiApp } from './hooks/useStrapiApp';
 export { default as useTracking } from './hooks/useTracking';
@@ -32,6 +33,7 @@ export { default as useLockScroll } from './hooks/useLockScroll';
 // Providers
 export { default as GuidedTourProvider } from './providers/GuidedTourProvider';
 export { default as LibraryProvider } from './providers/LibraryProvider';
+export { default as CustomFieldsProvider } from './providers/CustomFieldsProvider';
 export { default as NotificationsProvider } from './providers/NotificationsProvider';
 export { default as StrapiAppProvider } from './providers/StrapiAppProvider';
 export { default as TrackingProvider } from './providers/TrackingProvider';
@@ -93,6 +95,7 @@ export { default as contentManagementUtilRemoveFieldsFromData } from './content-
 export { default as getFileExtension } from './utils/getFileExtension/getFileExtension';
 export * from './utils/stopPropagation';
 export { default as difference } from './utils/difference';
+export { default as wrapAxiosInstance } from './utils/wrapAxiosInstance';
 
 export { default as request } from './utils/request';
 export { default as getAPIInnerErrors } from './utils/getAPIInnerErrors';

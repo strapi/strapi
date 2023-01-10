@@ -62,186 +62,55 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c13 {
-        background: #ffffff;
-        padding-top: 24px;
-        padding-right: 32px;
-        padding-bottom: 24px;
-        padding-left: 32px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c11 {
+      .c35 {
+        font-size: 0.75rem;
+        line-height: 1.33;
         font-weight: 600;
         color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
       }
 
-      .c8 {
-        padding-right: 8px;
+      .c43 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #b72b1a;
+        text-transform: uppercase;
       }
 
-      .c5 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
+      .c45 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #666687;
+        text-transform: uppercase;
+      }
+
+      .c47 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
+      .c38 {
+        background: #f6f6f9;
+        padding: 4px;
         border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
-      }
-
-      .c5 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c5 svg > g,
-      .c5 svg path {
-        fill: #ffffff;
-      }
-
-      .c5[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c5:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c5:focus-visible {
-        outline: none;
-      }
-
-      .c5:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c9 {
-        height: 100%;
-      }
-
-      .c6 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        padding: 10px 16px;
-        background: #4945ff;
-        border: 1px solid #4945ff;
-      }
-
-      .c6 .c7 {
+        border-style: solid;
+        border-width: 1px;
+        border-color: #dcdce4;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
-      .c6 .c10 {
-        color: #ffffff;
-      }
-
-      .c6[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c6[aria-disabled='true'] .c10 {
-        color: #666687;
-      }
-
-      .c6[aria-disabled='true'] svg > g,
-      .c6[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c6[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c6[aria-disabled='true']:active .c10 {
-        color: #666687;
-      }
-
-      .c6[aria-disabled='true']:active svg > g,
-      .c6[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c6:hover {
-        border: 1px solid #7b79ff;
-        background: #7b79ff;
-      }
-
-      .c6:active {
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c6 svg > g,
-      .c6 svg path {
-        fill: #ffffff;
-      }
-
-      .c24 {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        top: 0;
-        width: 100%;
-        background: transparent;
-        border: none;
-      }
-
-      .c24:focus {
-        outline: none;
-      }
-
-      .c24[aria-disabled='true'] {
-        cursor: not-allowed;
-      }
-
-      .c27 {
-        padding-right: 16px;
-        padding-left: 16px;
-      }
-
-      .c29 {
+      .c40 {
+        padding-right: 12px;
         padding-left: 12px;
+        border-radius: 4px;
       }
 
-      .c19 {
+      .c32 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
         -ms-flex-align: stretch;
@@ -255,7 +124,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         flex-direction: column;
       }
 
-      .c22 {
+      .c34 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -269,7 +138,25 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         flex-direction: row;
       }
 
-      .c25 {
+      .c41 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+      }
+
+      .c49 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -287,46 +174,120 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         justify-content: space-between;
       }
 
-      .c21 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c28 {
-        color: #32324d;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c32 {
-        color: #666687;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c20 > * {
+      .c33 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c20 > * + * {
+      .c33 > * + * {
         margin-top: 4px;
       }
 
-      .c23 {
-        position: relative;
+      .c37 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c51 {
+        border: none;
+        border-radius: 4px;
+        padding-bottom: 0.65625rem;
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-top: 0.65625rem;
+        color: #32324d;
+        font-weight: 400;
+        font-size: 0.875rem;
+        display: block;
+        width: 100%;
+        background: inherit;
+      }
+
+      .c51::-webkit-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c51::-moz-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c51:-ms-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c51::placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c51[aria-disabled='true'] {
+        color: inherit;
+      }
+
+      .c51:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
+      .c53 {
+        border: none;
+        border-radius: 4px;
+        padding-bottom: 0.65625rem;
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-top: 0.65625rem;
+        cursor: not-allowed;
+        color: #32324d;
+        font-weight: 400;
+        font-size: 0.875rem;
+        display: block;
+        width: 100%;
+        background: inherit;
+      }
+
+      .c53::-webkit-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c53::-moz-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c53:-ms-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c53::placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c53[aria-disabled='true'] {
+        color: inherit;
+      }
+
+      .c53:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
+      .c50 {
         border: 1px solid #dcdce4;
-        padding-right: 12px;
         border-radius: 4px;
         background: #ffffff;
-        overflow: hidden;
-        min-height: 2.5rem;
         outline: none;
         box-shadow: 0;
         -webkit-transition-property: border-color,box-shadow,fill;
@@ -335,42 +296,167 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         transition-duration: 0.2s;
       }
 
-      .c23:focus-within {
+      .c50:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c30 {
-        background: transparent;
-        border: none;
+      .c52 {
+        border: 1px solid #dcdce4;
+        border-radius: 4px;
+        background: #ffffff;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        color: #666687;
+        background: #eaeaef;
+      }
+
+      .c52:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c36 {
         position: relative;
+        display: inline-block;
+        z-index: 0;
+        width: 100%;
+      }
+
+      .c39 {
+        overflow: hidden;
+        -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+      }
+
+      .c39:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c42 {
+        background-color: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        z-index: 2;
+        -webkit-flex: 1 1 50%;
+        -ms-flex: 1 1 50%;
+        flex: 1 1 50%;
+        padding-top: 6px;
+        padding-bottom: 6px;
+      }
+
+      .c44 {
+        background-color: transparent;
+        border: 1px solid #f6f6f9;
+        position: relative;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        z-index: 2;
+        -webkit-flex: 1 1 50%;
+        -ms-flex: 1 1 50%;
+        flex: 1 1 50%;
+        padding-top: 6px;
+        padding-bottom: 6px;
+      }
+
+      .c46 {
+        height: 100%;
+        left: 0;
+        opacity: 0;
+        position: absolute;
+        top: 0;
         z-index: 1;
-      }
-
-      .c30 svg {
-        height: 0.6875rem;
-        width: 0.6875rem;
-      }
-
-      .c30 svg path {
-        fill: #666687;
+        width: 100%;
       }
 
       .c31 {
+        max-width: 320px;
+      }
+
+      .c2 {
+        background: #f6f6f9;
+        padding-top: 40px;
+        padding-right: 56px;
+        padding-bottom: 40px;
+        padding-left: 56px;
+      }
+
+      .c12 {
+        padding-right: 56px;
+        padding-left: 56px;
+      }
+
+      .c9 {
+        padding-right: 8px;
+      }
+
+      .c13 {
+        background: #ffffff;
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c24 {
+        padding-right: 16px;
+        padding-left: 16px;
+      }
+
+      .c26 {
+        padding-left: 12px;
+      }
+
+      .c3 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        background: none;
-        border: none;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
       }
 
-      .c31 svg {
-        width: 0.375rem;
-      }
-
-      .c26 {
-        width: 100%;
+      .c4 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
       }
 
       .c14 {
@@ -387,6 +473,51 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         flex-direction: column;
       }
 
+      .c6 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c11 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        line-height: 1.14;
+        color: #32324d;
+      }
+
+      .c16 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c20 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c25 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #32324d;
+      }
+
+      .c29 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
       .c15 > * {
         margin-top: 0;
         margin-bottom: 0;
@@ -396,304 +527,172 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         margin-top: 16px;
       }
 
-      .c51 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
+      .c19 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c19 > * + * {
+        margin-top: 4px;
+      }
+
+      .c7 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c54 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c55 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-      }
-
-      .c53 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c58 {
-        color: #666687;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c57 {
-        border: none;
-        border-radius: 4px;
-        padding-bottom: 0.65625rem;
-        padding-left: 16px;
-        padding-right: 16px;
-        padding-top: 0.65625rem;
-        color: #32324d;
-        font-weight: 400;
-        font-size: 0.875rem;
-        display: block;
-        width: 100%;
-        background: inherit;
-      }
-
-      .c57::-webkit-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c57::-moz-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c57:-ms-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c57::placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c57[aria-disabled='true'] {
-        color: inherit;
-      }
-
-      .c57:focus {
-        outline: none;
-        box-shadow: none;
-      }
-
-      .c60 {
-        border: none;
-        border-radius: 4px;
-        padding-bottom: 0.65625rem;
-        padding-left: 16px;
-        padding-right: 16px;
-        padding-top: 0.65625rem;
-        cursor: not-allowed;
-        color: #32324d;
-        font-weight: 400;
-        font-size: 0.875rem;
-        display: block;
-        width: 100%;
-        background: inherit;
-      }
-
-      .c60::-webkit-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c60::-moz-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c60:-ms-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c60::placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c60[aria-disabled='true'] {
-        color: inherit;
-      }
-
-      .c60:focus {
-        outline: none;
-        box-shadow: none;
-      }
-
-      .c56 {
-        border: 1px solid #dcdce4;
+        cursor: pointer;
+        padding: 8px;
         border-radius: 4px;
         background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
         outline: none;
-        box-shadow: 0;
-        -webkit-transition-property: border-color,box-shadow,fill;
-        transition-property: border-color,box-shadow,fill;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
       }
 
-      .c56:focus-within {
+      .c7 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c7 svg > g,
+      .c7 svg path {
+        fill: #ffffff;
+      }
+
+      .c7[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c7:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c7:focus-visible {
+        outline: none;
+      }
+
+      .c7:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c10 {
+        height: 100%;
+      }
+
+      .c8 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        background-color: #4945ff;
         border: 1px solid #4945ff;
-        box-shadow: #4945ff 0px 0px 0px 2px;
+        height: 2rem;
+        padding-left: 16px;
+        padding-right: 16px;
       }
 
-      .c59 {
+      .c8 .c1 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c8 .c5 {
+        color: #ffffff;
+      }
+
+      .c8[aria-disabled='true'] {
         border: 1px solid #dcdce4;
-        border-radius: 4px;
-        background: #ffffff;
-        outline: none;
-        box-shadow: 0;
-        -webkit-transition-property: border-color,box-shadow,fill;
-        transition-property: border-color,box-shadow,fill;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        color: #666687;
         background: #eaeaef;
       }
 
-      .c59:focus-within {
+      .c8[aria-disabled='true'] .c5 {
+        color: #666687;
+      }
+
+      .c8[aria-disabled='true'] svg > g,.c8[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c8[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c8[aria-disabled='true']:active .c5 {
+        color: #666687;
+      }
+
+      .c8[aria-disabled='true']:active svg > g,.c8[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c8:hover {
+        border: 1px solid #7b79ff;
+        background: #7b79ff;
+      }
+
+      .c8:active {
         border: 1px solid #4945ff;
-        box-shadow: #4945ff 0px 0px 0px 2px;
+        background: #4945ff;
       }
 
-      .c52 > * {
-        margin-top: 0;
-        margin-bottom: 0;
+      .c8 svg > g,
+      .c8 svg path {
+        fill: #ffffff;
       }
 
-      .c52 > * + * {
-        margin-top: 4px;
-      }
-
-      .c41 {
-        background: #f6f6f9;
-        padding: 4px;
-        border-radius: 4px;
-        border-style: solid;
-        border-width: 1px;
-        border-color: #dcdce4;
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-      }
-
-      .c43 {
-        padding-right: 32px;
-        padding-left: 32px;
-        border-radius: 4px;
-      }
-
-      .c35 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c37 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c38 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c45 {
-        font-weight: 600;
-        color: #b72b1a;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c47 {
-        font-weight: 600;
-        color: #666687;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c49 {
-        color: #666687;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c36 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c36 > * + * {
-        margin-top: 4px;
-      }
-
-      .c40 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
+      .c22 {
         position: absolute;
-        width: 1px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
+        width: 100%;
+        background: transparent;
+        border: none;
       }
 
-      .c39 {
+      .c22:focus {
+        outline: none;
+      }
+
+      .c22[aria-disabled='true'] {
+        cursor: not-allowed;
+      }
+
+      .c21 {
         position: relative;
-        display: inline-block;
-      }
-
-      .c42 {
-        height: 2.5rem;
+        border: 1px solid #dcdce4;
+        padding-right: 12px;
+        border-radius: 4px;
+        background: #ffffff;
         overflow: hidden;
+        min-height: 2.5rem;
         outline: none;
         box-shadow: 0;
         -webkit-transition-property: border-color,box-shadow,fill;
@@ -702,110 +701,46 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         transition-duration: 0.2s;
       }
 
-      .c42:focus-within {
+      .c21:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c44 {
-        background-color: #ffffff;
-        border: 1px solid #dcdce4;
+      .c27 {
+        background: transparent;
+        border: none;
         position: relative;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        z-index: 2;
-      }
-
-      .c46 {
-        background-color: transparent;
-        border: 1px solid #f6f6f9;
-        position: relative;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        z-index: 2;
-      }
-
-      .c48 {
-        height: 100%;
-        left: 0;
-        opacity: 0;
-        position: absolute;
-        top: 0;
         z-index: 1;
+      }
+
+      .c27 svg {
+        height: 0.6875rem;
+        width: 0.6875rem;
+      }
+
+      .c27 svg path {
+        fill: #666687;
+      }
+
+      .c28 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        background: none;
+        border: none;
+      }
+
+      .c28 svg {
+        width: 0.375rem;
+      }
+
+      .c23 {
         width: 100%;
-      }
-
-      .c34 {
-        width: -webkit-fit-content;
-        width: -moz-fit-content;
-        width: fit-content;
-      }
-
-      .c16 {
-        color: #32324d;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
       }
 
       .c0:focus-visible {
         outline: none;
-      }
-
-      .c1 {
-        background: #f6f6f9;
-        padding-top: 40px;
-        padding-right: 56px;
-        padding-bottom: 40px;
-        padding-left: 56px;
-      }
-
-      .c12 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
-
-      .c2 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-      }
-
-      .c3 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c4 {
-        color: #32324d;
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
       }
 
       .c17 {
@@ -819,12 +754,12 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         max-width: 100%;
       }
 
-      .c33 {
+      .c30 {
         grid-column: span 12;
         max-width: 100%;
       }
 
-      .c50 {
+      .c48 {
         grid-column: span 6;
         max-width: 100%;
       }
@@ -842,25 +777,25 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c33 {
+        .c30 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c33 {
+        .c30 {
           grid-column: span 12;
         }
       }
 
       @media (max-width:68.75rem) {
-        .c50 {
+        .c48 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c50 {
+        .c48 {
           grid-column: span 12;
         }
       }
@@ -880,29 +815,29 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
             style="height: 0px;"
           >
             <div
-              class="c1"
+              class="c1 c2"
               data-strapi-header="true"
             >
               <div
-                class="c2"
+                class="c1 c3"
               >
                 <div
-                  class="c3"
+                  class="c1 c4"
                 >
                   <h1
-                    class="c4"
+                    class="c5 c6"
                   >
                     Advanced Settings
                   </h1>
                 </div>
                 <button
                   aria-disabled="false"
-                  class="c5 c6"
+                  class="c7 c8"
                   type="submit"
                 >
                   <div
                     aria-hidden="true"
-                    class="c7 c8 c9"
+                    class="c1 c9 c10"
                   >
                     <svg
                       fill="none"
@@ -918,7 +853,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     </svg>
                   </div>
                   <span
-                    class="c10 c11"
+                    class="c5 c11"
                   >
                     Save
                   </span>
@@ -927,47 +862,46 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
             </div>
           </div>
           <div
-            class="c12"
+            class="c1 c12"
           >
             <div
-              class="c13"
+              class="c1 c13"
             >
               <div
-                class="c14 c15"
+                class="c1 c14 c15"
                 spacing="4"
               >
                 <h2
-                  class="c16"
+                  class="c5 c16"
                 >
                   Settings
                 </h2>
                 <div
-                  class="c17"
+                  class="c1 c17"
                 >
                   <div
                     class="c18"
                   >
                     <div
-                      class=""
+                      class="c1 "
                     >
                       <div>
                         <div
-                          class="c19 c20"
+                          class="c1 c14 c19"
                           spacing="1"
                         >
                           <span
-                            class="c21"
+                            class="c5 c20"
                             for="select-1"
-                            id="select-1-label"
                           >
                             <div
-                              class="c22"
+                              class="c1 c4"
                             >
                               Default role for authenticated users
                             </div>
                           </span>
                           <div
-                            class="c22 c23"
+                            class="c1 c4 c21"
                           >
                             <button
                               aria-describedby="select-1-hint"
@@ -975,21 +909,21 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               aria-expanded="false"
                               aria-haspopup="listbox"
                               aria-labelledby="select-1-label select-1-content"
-                              class="c24"
+                              class="c22"
                               id="select-1"
                               type="button"
                             />
                             <div
-                              class="c25 c26"
+                              class="c1 c3 c23"
                             >
                               <div
-                                class="c22"
+                                class="c1 c4"
                               >
                                 <div
-                                  class="c27"
+                                  class="c1 c24"
                                 >
                                   <span
-                                    class="c28"
+                                    class="c5 c25"
                                     id="select-1-content"
                                   >
                                     Authenticated
@@ -997,12 +931,13 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 </div>
                               </div>
                               <div
-                                class="c22"
+                                class="c1 c4"
                               >
                                 <button
                                   aria-hidden="true"
-                                  class="c29 c30 c31"
+                                  class="c1 c26 c27 c28"
                                   tabindex="-1"
+                                  title="Carret Down Button"
                                   type="button"
                                 >
                                   <svg
@@ -1024,7 +959,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                             </div>
                           </div>
                           <p
-                            class="c32"
+                            class="c5 c29"
                             id="select-1-hint"
                           >
                             It will attach the new authenticated user to the selected role.
@@ -1034,67 +969,68 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     </div>
                   </div>
                   <div
-                    class="c33"
+                    class="c30"
                   >
                     <div
-                      class=""
+                      class="c1 "
                     >
                       <div
-                        class="c34"
+                        class="c31"
                       >
                         <div
-                          class="c35 c36"
+                          class="c32 c33"
                           spacing="1"
                         >
                           <div
-                            class="c37"
+                            class="c34"
                           >
                             <label
-                              class="c38"
+                              class="c35"
                               for="toggleinput-1"
                             >
                               <div
-                                class="c37"
+                                class="c34"
                               >
                                 One account per email address
                               </div>
                             </label>
                           </div>
                           <label
-                            class="c39"
+                            class="c36"
                           >
                             <div
-                              class="c40"
+                              class="c37"
                             >
                               One account per email address
                             </div>
                             <div
-                              class="c41 c42"
-                              display="inline-flex"
+                              class="c38 c39"
+                              display="flex"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c43 c37 c44"
+                                class="c40 c41 c42"
                               >
                                 <span
-                                  class="c45"
+                                  class="c43"
                                 >
                                   False
                                 </span>
                               </div>
                               <div
                                 aria-hidden="true"
-                                class="c43 c37 c46"
+                                class="c40 c41 c44"
                               >
                                 <span
-                                  class="c47"
+                                  class="c45"
                                 >
                                   True
                                 </span>
                               </div>
                               <input
                                 aria-disabled="false"
-                                class="c48"
+                                aria-required="false"
+                                class="c46"
                                 id="toggleinput-1"
                                 name="unique_email"
                                 type="checkbox"
@@ -1102,7 +1038,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                             </div>
                           </label>
                           <p
-                            class="c49"
+                            class="c47"
                             id="toggleinput-1-hint"
                           >
                             Disallow the user to create multiple accounts using the same email address with different authentication providers.
@@ -1112,67 +1048,68 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     </div>
                   </div>
                   <div
-                    class="c33"
+                    class="c30"
                   >
                     <div
-                      class=""
+                      class="c1 "
                     >
                       <div
-                        class="c34"
+                        class="c31"
                       >
                         <div
-                          class="c35 c36"
+                          class="c32 c33"
                           spacing="1"
                         >
                           <div
-                            class="c37"
+                            class="c34"
                           >
                             <label
-                              class="c38"
+                              class="c35"
                               for="toggleinput-2"
                             >
                               <div
-                                class="c37"
+                                class="c34"
                               >
                                 Enable sign-ups
                               </div>
                             </label>
                           </div>
                           <label
-                            class="c39"
+                            class="c36"
                           >
                             <div
-                              class="c40"
+                              class="c37"
                             >
                               Enable sign-ups
                             </div>
                             <div
-                              class="c41 c42"
-                              display="inline-flex"
+                              class="c38 c39"
+                              display="flex"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c43 c37 c44"
+                                class="c40 c41 c42"
                               >
                                 <span
-                                  class="c45"
+                                  class="c43"
                                 >
                                   False
                                 </span>
                               </div>
                               <div
                                 aria-hidden="true"
-                                class="c43 c37 c46"
+                                class="c40 c41 c44"
                               >
                                 <span
-                                  class="c47"
+                                  class="c45"
                                 >
                                   True
                                 </span>
                               </div>
                               <input
                                 aria-disabled="false"
-                                class="c48"
+                                aria-required="false"
+                                class="c46"
                                 id="toggleinput-2"
                                 name="allow_register"
                                 type="checkbox"
@@ -1180,7 +1117,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                             </div>
                           </label>
                           <p
-                            class="c49"
+                            class="c47"
                             id="toggleinput-2-hint"
                           >
                             When disabled (OFF), the registration process is forbidden. No one can subscribe anymore no matter the used provider.
@@ -1190,35 +1127,36 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     </div>
                   </div>
                   <div
-                    class="c50"
+                    class="c48"
                   >
                     <div
-                      class=""
+                      class="c1 "
                     >
                       <div>
                         <div>
                           <div
-                            class="c51 c52"
+                            class="c32 c33"
                             spacing="1"
                           >
                             <label
-                              class="c53"
+                              class="c35"
                               for="email_reset_password"
                             >
                               <div
-                                class="c54"
+                                class="c34"
                               >
                                 Reset password page
                               </div>
                             </label>
                             <div
-                              class="c55 c56"
+                              class="c49 c50"
                             >
                               <input
                                 aria-describedby="email_reset_password-hint"
                                 aria-disabled="false"
                                 aria-invalid="false"
-                                class="c57"
+                                aria-required="false"
+                                class="c51"
                                 id="email_reset_password"
                                 name="email_reset_password"
                                 placeholder="ex: https://youtfrontend.com/reset-password"
@@ -1227,7 +1165,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               />
                             </div>
                             <p
-                              class="c58"
+                              class="c47"
                               id="email_reset_password-hint"
                             >
                               URL of your application's reset password page.
@@ -1238,67 +1176,68 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     </div>
                   </div>
                   <div
-                    class="c33"
+                    class="c30"
                   >
                     <div
-                      class=""
+                      class="c1 "
                     >
                       <div
-                        class="c34"
+                        class="c31"
                       >
                         <div
-                          class="c35 c36"
+                          class="c32 c33"
                           spacing="1"
                         >
                           <div
-                            class="c37"
+                            class="c34"
                           >
                             <label
-                              class="c38"
+                              class="c35"
                               for="toggleinput-3"
                             >
                               <div
-                                class="c37"
+                                class="c34"
                               >
                                 Enable email confirmation
                               </div>
                             </label>
                           </div>
                           <label
-                            class="c39"
+                            class="c36"
                           >
                             <div
-                              class="c40"
+                              class="c37"
                             >
                               Enable email confirmation
                             </div>
                             <div
-                              class="c41 c42"
-                              display="inline-flex"
+                              class="c38 c39"
+                              display="flex"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c43 c37 c44"
+                                class="c40 c41 c42"
                               >
                                 <span
-                                  class="c45"
+                                  class="c43"
                                 >
                                   False
                                 </span>
                               </div>
                               <div
                                 aria-hidden="true"
-                                class="c43 c37 c46"
+                                class="c40 c41 c44"
                               >
                                 <span
-                                  class="c47"
+                                  class="c45"
                                 >
                                   True
                                 </span>
                               </div>
                               <input
                                 aria-disabled="false"
-                                class="c48"
+                                aria-required="false"
+                                class="c46"
                                 id="toggleinput-3"
                                 name="email_confirmation"
                                 type="checkbox"
@@ -1306,7 +1245,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                             </div>
                           </label>
                           <p
-                            class="c49"
+                            class="c47"
                             id="toggleinput-3-hint"
                           >
                             When enabled (ON), new registered users receive a confirmation email.
@@ -1316,36 +1255,37 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     </div>
                   </div>
                   <div
-                    class="c50"
+                    class="c48"
                   >
                     <div
-                      class=""
+                      class="c1 "
                     >
                       <div>
                         <div>
                           <div
-                            class="c51 c52"
+                            class="c32 c33"
                             spacing="1"
                           >
                             <label
-                              class="c53"
+                              class="c35"
                               for="email_confirmation_redirection"
                             >
                               <div
-                                class="c54"
+                                class="c34"
                               >
                                 Redirection url
                               </div>
                             </label>
                             <div
-                              class="c55 c59"
+                              class="c49 c52"
                               disabled=""
                             >
                               <input
                                 aria-describedby="email_confirmation_redirection-hint"
                                 aria-disabled="true"
                                 aria-invalid="false"
-                                class="c60"
+                                aria-required="false"
+                                class="c53"
                                 id="email_confirmation_redirection"
                                 name="email_confirmation_redirection"
                                 placeholder="ex: https://youtfrontend.com/email-confirmation"
@@ -1354,7 +1294,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               />
                             </div>
                             <p
-                              class="c58"
+                              class="c47"
                               id="email_confirmation_redirection-hint"
                             >
                               After you confirmed your email, choose where you will be redirected.

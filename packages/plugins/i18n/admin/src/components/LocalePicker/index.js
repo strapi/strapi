@@ -49,13 +49,23 @@ const LocalePicker = () => {
       return;
     }
 
-    dispatch({ type: 'ContentManager/RBACManager/RESET_PERMISSIONS' });
-
     setSelected(code);
 
-    setQuery({
-      page: 1,
-      plugins: { ...query.plugins, i18n: { locale: code } },
+    /**
+     * if the selected value is set at the same time as the dispatcher
+     * is run, react might not have enough time to re-render the Select
+     * component, which leads to the `source` ref, which is passed to
+     * Popout, not being defined.
+     *
+     * By pushing the dispatcher to the end of the current execution
+     * context, we can guarantee the rendering can finish before.
+     */
+    setTimeout(() => {
+      dispatch({ type: 'ContentManager/RBACManager/RESET_PERMISSIONS' });
+      setQuery({
+        page: 1,
+        plugins: { ...query.plugins, i18n: { locale: code } },
+      });
     });
   };
 

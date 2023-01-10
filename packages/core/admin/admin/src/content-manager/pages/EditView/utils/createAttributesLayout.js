@@ -1,14 +1,19 @@
 import { get, isEmpty } from 'lodash';
-// TODO: refacto this file to avoid eslint issues
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-unused-vars */
 
-const createAttributesLayout = (currentLayout, attributes) => {
+const createAttributesLayout = (currentContentTypeLayoutData) => {
+  if (!currentContentTypeLayoutData.layouts) {
+    return [];
+  }
+
+  const currentLayout = currentContentTypeLayoutData.layouts.edit;
+  const attributes = currentContentTypeLayoutData.attributes;
+
   const getType = (name) => get(attributes, [name, 'type'], '');
+
   let currentRowIndex = 0;
   const newLayout = [];
 
-  for (let row of currentLayout) {
+  currentLayout.forEach((row) => {
     const hasDynamicZone = row.some(({ name }) => getType(name) === 'dynamiczone');
 
     if (!newLayout[currentRowIndex]) {
@@ -27,7 +32,7 @@ const createAttributesLayout = (currentLayout, attributes) => {
     } else {
       newLayout[currentRowIndex].push(row);
     }
-  }
+  });
 
   return newLayout.filter((arr) => arr.length > 0);
 };

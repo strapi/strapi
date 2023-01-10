@@ -133,7 +133,7 @@ export const SettingsPage = () => {
               loading={isSubmiting}
               type="submit"
               startIcon={<Check />}
-              size="L"
+              size="S"
             >
               {formatMessage({
                 id: 'global.save',

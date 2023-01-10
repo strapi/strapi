@@ -210,7 +210,6 @@
   "content-manager.containers.SettingPage.editSettings.title": "Chỉnh sửa hiển thị (các cài đặt)",
   "content-manager.containers.SettingPage.layout": "Bố cục",
   "content-manager.containers.SettingPage.listSettings.title": "Hiển thị danh sách (các cài đặt)",
-  "content-manager.containers.SettingPage.relations": "Các trường Quan Hệ",
   "content-manager.containers.SettingPage.settings": "Các cài đặt",
   "content-manager.containers.SettingViewModel.pluginHeader.title": "Quản Lý Nội Dung - {name}",
   "content-manager.containers.SettingsPage.Block.contentType.description": "Cấu hình các cài đặt riêng",

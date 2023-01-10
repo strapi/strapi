@@ -105,7 +105,7 @@ const ListPage = () => {
       data-testid="create-user-button"
       onClick={handleToggle}
       startIcon={<Envelop />}
-      size="L"
+      size="S"
     >
       {formatMessage({
         id: 'Settings.permissions.users.create',

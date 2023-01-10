@@ -5,7 +5,8 @@
 
 'use strict';
 
-const { has, assoc, prop, isObject } = require('lodash/fp');
+const { uniqBy, castArray, isNil, isArray, mergeWith } = require('lodash');
+const { has, assoc, prop, isObject, isEmpty } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
 const validators = require('./validators');
 
@@ -14,51 +15,56 @@ const { isMediaAttribute, isScalarAttribute, getWritableAttributes } = strapiUti
 const { ValidationError } = strapiUtils.errors;
 
 const addMinMax = (validator, { attr, updatedAttribute }) => {
+  let nextValidator = validator;
+
   if (
     Number.isInteger(attr.min) &&
     (attr.required || (Array.isArray(updatedAttribute.value) && updatedAttribute.value.length > 0))
   ) {
-    validator = validator.min(attr.min);
+    nextValidator = nextValidator.min(attr.min);
   }
   if (Number.isInteger(attr.max)) {
-    validator = validator.max(attr.max);
+    nextValidator = nextValidator.max(attr.max);
   }
-  return validator;
+  return nextValidator;
 };
 
-const addRequiredValidation =
-  (createOrUpdate) =>
-  (validator, { attr: { required } }) => {
+const addRequiredValidation = (createOrUpdate) => {
+  return (validator, { attr: { required } }) => {
+    let nextValidator = validator;
     if (required) {
       if (createOrUpdate === 'creation') {
-        validator = validator.notNil();
+        nextValidator = nextValidator.notNil();
       } else if (createOrUpdate === 'update') {
-        validator = validator.notNull();
+        nextValidator = nextValidator.notNull();
       }
     } else {
-      validator = validator.nullable();
+      nextValidator = nextValidator.nullable();
     }
-    return validator;
+    return nextValidator;
   };
+};
 
-const addDefault =
-  (createOrUpdate) =>
-  (validator, { attr }) => {
+const addDefault = (createOrUpdate) => {
+  return (validator, { attr }) => {
+    let nextValidator = validator;
+
     if (createOrUpdate === 'creation') {
       if (
         ((attr.type === 'component' && attr.repeatable) || attr.type === 'dynamiczone') &&
         !attr.required
       ) {
-        validator = validator.default([]);
+        nextValidator = nextValidator.default([]);
       } else {
-        validator = validator.default(attr.default);
+        nextValidator = nextValidator.default(attr.default);
       }
     } else {
-      validator = validator.default(undefined);
+      nextValidator = nextValidator.default(undefined);
     }
 
-    return validator;
+    return nextValidator;
   };
+};
 
 const preventCast = (validator) => validator.transform((val, originalVal) => originalVal);
 
@@ -217,9 +223,158 @@ const createValidateEntity =
         entity,
       },
       { isDraft }
-    ).required();
+    )
+      .test('relations-test', 'check that all relations exist', async function (data) {
+        try {
+          await checkRelationsExist(buildRelationsStore({ uid: model.uid, data }));
+        } catch (e) {
+          return this.createError({
+            path: this.path,
+            message: e.message,
+          });
+        }
+        return true;
+      })
+      .required();
+
     return validateYupSchema(validator, { strict: false, abortEarly: false })(data);
   };
+
+/**
+ * Builds an object containing all the media and relations being associated with an entity
+ * @param {String} uid of the model
+ * @param {Object} data
+ * @returns {Object}
+ */
+const buildRelationsStore = ({ uid, data }) => {
+  if (!uid) {
+    throw new ValidationError(`Cannot build relations store: "uid" is undefined`);
+  }
+
+  if (isEmpty(data)) {
+    return {};
+  }
+
+  const currentModel = strapi.getModel(uid);
+
+  return Object.keys(currentModel.attributes).reduce((result, attributeName) => {
+    const attribute = currentModel.attributes[attributeName];
+    const value = data[attributeName];
+
+    if (isNil(value)) {
+      return result;
+    }
+
+    switch (attribute.type) {
+      case 'relation':
+      case 'media': {
+        if (attribute.relation === 'morphToMany' || attribute.relation === 'morphToOne') {
+          // TODO: handle polymorphic relations
+          break;
+        }
+
+        const target = attribute.type === 'media' ? 'plugin::upload.file' : attribute.target;
+        // As there are multiple formats supported for associating relations
+        // with an entity, the value here can be an: array, object or number.
+        let source;
+        if (Array.isArray(value)) {
+          source = value;
+        } else if (isObject(value)) {
+          source = value.connect ?? value.set ?? [];
+        } else {
+          source = castArray(value);
+        }
+        const idArray = source.map((v) => ({ id: v.id || v }));
+
+        // Update the relationStore to keep track of all associations being made
+        // with relations and media.
+        result[target] = result[target] || [];
+        result[target].push(...idArray);
+        break;
+      }
+      case 'component': {
+        return castArray(value).reduce((relationsStore, componentValue) => {
+          if (!attribute.component) {
+            throw new ValidationError(
+              `Cannot build relations store from component, component identifier is undefined`
+            );
+          }
+
+          return mergeWith(
+            relationsStore,
+            buildRelationsStore({
+              uid: attribute.component,
+              data: componentValue,
+            }),
+            (objValue, srcValue) => {
+              if (isArray(objValue)) {
+                return objValue.concat(srcValue);
+              }
+            }
+          );
+        }, result);
+      }
+      case 'dynamiczone': {
+        return value.reduce((relationsStore, dzValue) => {
+          if (!dzValue.__component) {
+            throw new ValidationError(
+              `Cannot build relations store from dynamiczone, component identifier is undefined`
+            );
+          }
+
+          return mergeWith(
+            relationsStore,
+            buildRelationsStore({
+              uid: dzValue.__component,
+              data: dzValue,
+            }),
+            (objValue, srcValue) => {
+              if (isArray(objValue)) {
+                return objValue.concat(srcValue);
+              }
+            }
+          );
+        }, result);
+      }
+      default:
+        break;
+    }
+
+    return result;
+  }, {});
+};
+
+/**
+ * Iterate through the relations store and validates that every relation or media
+ * mentioned exists
+ */
+const checkRelationsExist = async (relationsStore = {}) => {
+  const promises = [];
+
+  for (const [key, value] of Object.entries(relationsStore)) {
+    const evaluate = async () => {
+      const uniqueValues = uniqBy(value, `id`);
+      const count = await strapi.db.query(key).count({
+        where: {
+          id: {
+            $in: uniqueValues.map((v) => v.id),
+          },
+        },
+      });
+
+      if (count !== uniqueValues.length) {
+        throw new ValidationError(
+          `${
+            uniqueValues.length - count
+          } relation(s) of type ${key} associated with this entity do not exist`
+        );
+      }
+    };
+    promises.push(evaluate());
+  }
+
+  return Promise.all(promises);
+};
 
 module.exports = {
   validateEntityCreation: createValidateEntity('creation'),

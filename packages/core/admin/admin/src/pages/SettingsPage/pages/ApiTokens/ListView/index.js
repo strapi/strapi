@@ -128,7 +128,7 @@ const ApiTokenListView = () => {
             <LinkButton
               data-testid="create-api-token-button"
               startIcon={<Plus />}
-              size="L"
+              size="S"
               onClick={() => trackUsage('willAddTokenFromList')}
               to="/settings/api-tokens/create"
             >
@@ -147,15 +147,16 @@ const ApiTokenListView = () => {
             headers={headers}
             contentType="api-tokens"
             rows={apiTokens}
-            withBulkActions={canDelete || canUpdate}
+            withBulkActions={canDelete || canUpdate || canRead}
             isLoading={isLoading}
             onConfirmDelete={(id) => deleteMutation.mutateAsync(id)}
           >
             <TableRows
+              canRead={canRead}
               canDelete={canDelete}
               canUpdate={canUpdate}
               rows={apiTokens}
-              withBulkActions={canDelete || canUpdate}
+              withBulkActions={canDelete || canUpdate || canRead}
             />
           </DynamicTable>
         )}

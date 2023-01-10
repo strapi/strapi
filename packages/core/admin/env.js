@@ -25,6 +25,7 @@ const getClientEnvironment = (options) => {
         ADMIN_PATH: options.adminPath,
         NODE_ENV: options.env || 'development',
         STRAPI_ADMIN_BACKEND_URL: options.backend,
+        STRAPI_TELEMETRY_DISABLED: options.telemetryDisabled,
       }
     );
 

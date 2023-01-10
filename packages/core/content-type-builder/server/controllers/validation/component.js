@@ -4,19 +4,18 @@ const _ = require('lodash');
 const { yup, validateYupSchema } = require('@strapi/utils');
 
 const { modelTypes, DEFAULT_TYPES } = require('../../services/constants');
-const { isValidCategoryName, isValidIcon } = require('./common');
+const { isValidCategoryName } = require('./common');
 const createSchema = require('./model-schema');
 const { removeEmptyDefaults } = require('./data-transform');
 
 const VALID_RELATIONS = ['oneToOne', 'oneToMany'];
-const VALID_TYPES = [...DEFAULT_TYPES, 'component'];
+const VALID_TYPES = [...DEFAULT_TYPES, 'component', 'customField'];
 
 const componentSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
   modelType: modelTypes.COMPONENT,
 })
   .shape({
     displayName: yup.string().min(1).required('displayName.required'),
-    icon: yup.string().nullable().test(isValidIcon),
     category: yup.string().nullable().test(isValidCategoryName).required('category.required'),
   })
   .required()
