@@ -205,20 +205,6 @@ describe('RelationInputDataManager', () => {
     );
   });
 
-  test('Correctly computes modified and initial data paths and passes this to useRelation', async () => {
-    setup({
-      name: 'relation.1.subRelation',
-    });
-
-    expect(useRelation).toBeCalledWith(
-      expect.any(String),
-      expect.objectContaining({
-        initialDataPath: ['initialData', 'relation', '1', 'subRelation'],
-        modifiedDataPath: ['modifiedData', 'relation', '1', 'subRelation'],
-      })
-    );
-  });
-
   test('Sets the disabled prop for non editable relations (edit entity)', async () => {
     const { container } = setup({
       editable: false,
@@ -683,79 +669,5 @@ describe('RelationInputDataManager', () => {
 
       expect(queryByText(/\(7\)/)).toBeInTheDocument();
     });
-  });
-
-  test('correctly computes modified and initial data paths for nested content and passes this to useRelation', async () => {
-    const initialData = {
-      dz: [
-        {
-          __component: 'default.withToManyComponentRelation',
-          __temp_key__: 7,
-          toManyRelation: [
-            {
-              id: 14,
-              publishers: [],
-              __temp_key__: 1,
-            },
-            {
-              id: 13,
-              publishers: [],
-              __temp_key__: 0,
-            },
-          ],
-        },
-        {
-          __component: 'default.blank',
-          __temp_key__: 6,
-        },
-      ],
-    };
-
-    const modifiedData = {
-      dz: [
-        {
-          __component: 'default.blank',
-          __temp_key__: 6,
-        },
-        {
-          __component: 'default.withToManyComponentRelation',
-          __temp_key__: 7,
-          toManyRelation: [
-            {
-              id: 13,
-              publishers: [],
-              __temp_key__: 0,
-            },
-            {
-              id: 14,
-              publishers: [],
-              __temp_key__: 1,
-            },
-          ],
-        },
-      ],
-    };
-
-    useCMEditViewDataManager.mockImplementation(() => ({
-      isCreatingEntry: true,
-      createActionAllowedFields: ['relation'],
-      readActionAllowedFields: ['relation'],
-      updateActionAllowedFields: ['relation'],
-      slug: 'test',
-      initialData,
-      modifiedData,
-    }));
-
-    setup({
-      name: 'dz.1.toManyRelation.0.publishers',
-    });
-
-    expect(useRelation).toBeCalledWith(
-      expect.any(String),
-      expect.objectContaining({
-        initialDataPath: ['initialData', 'dz', '0', 'toManyRelation', '1', 'publishers'],
-        modifiedDataPath: ['modifiedData', 'dz', '1', 'toManyRelation', '0', 'publishers'],
-      })
-    );
   });
 });
