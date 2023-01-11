@@ -39,7 +39,7 @@ const {
   deleteRelations,
   cleanOrderColumns,
 } = require('./regular-relations');
-const relationsOrderer = require('./relations-orderer');
+const { relationsOrderer } = require('./relations-orderer');
 
 const toId = (value) => value.id || value;
 const toIds = (value) => castArray(value || []).map(toId);
@@ -78,6 +78,9 @@ const toAssocs = (data) => {
   }
 
   return {
+    options: {
+      strict: data?.options?.strict,
+    },
     connect: toIdArray(data?.connect).map((elm) => ({
       id: elm.id,
       position: elm.position ? elm.position : { end: true },
@@ -583,7 +586,12 @@ const createEntityManager = (db) => {
             });
           } else if (cleanRelationData.connect && hasOrderColumn(attribute)) {
             // use position attributes to calculate order
-            const orderMap = relationsOrderer([], inverseJoinColumn.name, joinTable.orderColumnName)
+            const orderMap = relationsOrderer(
+              [],
+              inverseJoinColumn.name,
+              joinTable.orderColumnName,
+              true // Always make an strict connect when inserting
+            )
               .connect(relsToAdd)
               .get()
               // set the order based on the order of the ids
@@ -873,7 +881,8 @@ const createEntityManager = (db) => {
                 const orderMap = relationsOrderer(
                   adjacentRelations,
                   inverseJoinColumn.name,
-                  joinTable.orderColumnName
+                  joinTable.orderColumnName,
+                  cleanRelationData.options.strict
                 )
                   .connect(cleanRelationData.connect)
                   .getOrderMap();
