@@ -90,5 +90,4 @@ module.exports = {
   parseURL,
   promptEncryptionKey,
   confirmMessage,
-  exitWith,
 };
