@@ -1,5 +1,6 @@
 'use strict';
 
+const { castArray } = require('lodash/fp');
 const _ = require('lodash/fp');
 const { InvalidRelationError } = require('../errors');
 /**
@@ -131,23 +132,23 @@ const sortConnectArray = (connectArr, initialArr = [], strictSort = true) => {
  * @return {*}
  */
 const relationsOrderer = (initArr, idColumn, orderColumn, strict) => {
-  const arr = _.castArray(initArr || []).map((r) => ({
+  const computedRelations = _.castArray(initArr || []).map((r) => ({
     init: true,
     id: r[idColumn],
     order: r[orderColumn],
   }));
 
-  const maxOrder = _.maxBy('order', arr)?.order || 0;
+  const maxOrder = _.maxBy('order', computedRelations)?.order || 0;
 
   const findRelation = (id) => {
-    const idx = arr.findIndex((r) => r.id === id);
-    return { idx, relation: arr[idx] };
+    const idx = computedRelations.findIndex((r) => r.id === id);
+    return { idx, relation: computedRelations[idx] };
   };
 
   const removeRelation = (r) => {
     const { idx } = findRelation(r.id);
     if (idx >= 0) {
-      arr.splice(idx, 1);
+      computedRelations.splice(idx, 1);
     }
   };
 
@@ -169,22 +170,22 @@ const relationsOrderer = (initArr, idColumn, orderColumn, strict) => {
       idx = 0;
     } else {
       r.order = maxOrder + 0.5;
-      idx = arr.length;
+      idx = computedRelations.length;
     }
 
     // Insert the relation in the array
-    arr.splice(idx, 0, r);
+    computedRelations.splice(idx, 0, r);
   };
 
   return {
     disconnect(relations) {
-      _.castArray(relations).forEach((relation) => {
+      castArray(relations).forEach((relation) => {
         removeRelation(relation);
       });
       return this;
     },
     connect(relations) {
-      sortConnectArray(_.castArray(relations), arr, strict).forEach((relation) => {
+      sortConnectArray(castArray(relations), computedRelations, strict).forEach((relation) => {
         this.disconnect(relation);
 
         try {
@@ -202,13 +203,13 @@ const relationsOrderer = (initArr, idColumn, orderColumn, strict) => {
       return this;
     },
     get() {
-      return arr;
+      return computedRelations;
     },
     /**
      * Get a map between the relation id and its order
      */
     getOrderMap() {
-      return _(arr)
+      return _(computedRelations)
         .groupBy('order')
         .reduce((acc, relations) => {
           if (relations[0]?.init) return acc;
