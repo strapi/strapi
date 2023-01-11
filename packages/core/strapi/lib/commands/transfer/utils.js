@@ -88,7 +88,6 @@ const createStrapiInstance = async (logLevel = 'error') => {
 module.exports = {
   buildTransferTable,
   getDefaultExportName,
-  yyyymmddHHMMSS,
   DEFAULT_IGNORED_CONTENT_TYPES,
   createStrapiInstance,
 };
