@@ -7,7 +7,7 @@
 const _ = require('lodash');
 const path = require('path');
 const resolveCwd = require('resolve-cwd');
-const { yellow } = require('chalk');
+const { yellow, bold } = require('chalk');
 const { Command, Option } = require('commander');
 const inquirer = require('inquirer');
 
@@ -336,6 +336,12 @@ program
     new Option(
       '-k, --key <string>',
       'Provide encryption key in command instead of using the prompt'
+    )
+  )
+  .addOption(
+    new Option(
+      '--force-yes',
+      `Automatic yes to prompts; answer "yes" to ${bold('all')} prompts and run non-interactively.`
     )
   )
   .allowExcessArguments(false)
