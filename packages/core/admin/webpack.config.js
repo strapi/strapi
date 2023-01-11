@@ -53,6 +53,8 @@ module.exports = ({
 
   const excludeRegex = createPluginsExcludePath(pluginsPath);
 
+  const buildTarget = browserslistToEsbuild();
+
   return {
     mode: isProduction ? 'production' : 'development',
     bail: !!isProduction,
@@ -73,7 +75,7 @@ module.exports = ({
       minimize: optimize,
       minimizer: [
         new ESBuildMinifyPlugin({
-          target: 'es2015',
+          target: buildTarget,
           css: true, // Apply minification to CSS assets
         }),
       ],
@@ -89,7 +91,7 @@ module.exports = ({
           exclude: excludeRegex,
           options: {
             loader: 'tsx',
-            target: browserslistToEsbuild(),
+            target: buildTarget,
           },
         },
         {
@@ -153,7 +155,7 @@ module.exports = ({
                 loader: require.resolve('esbuild-loader'),
                 options: {
                   loader: 'jsx',
-                  target: browserslistToEsbuild(),
+                  target: buildTarget,
                 },
               },
             },
@@ -166,7 +168,7 @@ module.exports = ({
             loader: require.resolve('esbuild-loader'),
             options: {
               loader: 'jsx',
-              target: browserslistToEsbuild(),
+              target: buildTarget,
             },
           },
         },
