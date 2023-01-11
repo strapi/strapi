@@ -101,6 +101,10 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
     let ws: WebSocket;
 
+    if (!['https:', 'http:'].includes(url.protocol)) {
+      throw new Error(`Invalid protocol "${url.protocol}"`);
+    }
+
     const wsUrl = `${url.protocol === 'https:' ? 'wss:' : 'ws:'}//${url.host}${
       url.pathname
     }${TRANSFER_PATH}`;
