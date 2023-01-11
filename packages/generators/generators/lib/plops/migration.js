@@ -1,13 +1,11 @@
 'use strict';
 
+const moment = require('moment');
 const tsUtils = require('@strapi/typescript-utils');
 
-const getDestinationPrompts = require('./prompts/get-destination-prompts');
-const getFilePath = require('./utils/get-file-path');
-const moment = require('moment/moment');
 
 const validateInput = (input) => {
-  const regex = /^[A-Za-z-\_0-9]+$/g;
+  const regex = /^[A-Za-z-_0-9]+$/g;
 
   if (!input) {
     return 'You must provide an input';
@@ -29,7 +27,6 @@ module.exports = (plop) => {
       },
     ],
     actions(answers) {
-      const filePath = getFilePath(answers.destination);
       const currentDir = process.cwd();
       const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
       const timestamp = moment().format('YYYY_MM_DD_HH_mm_ss');
