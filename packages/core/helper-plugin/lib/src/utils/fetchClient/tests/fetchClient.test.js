@@ -13,7 +13,7 @@ const token = 'coolToken';
 auth.getToken = jest.fn().mockReturnValue(token);
 auth.clearAppStorage = jest.fn().mockReturnValue(token);
 
-describe('ADMIN | utils | fetchClient', () => {
+describe('HELPER-PLUGIN | utils | fetchClient', () => {
   describe('Test the interceptors', () => {
     it('API request should add authorization token to header', async () => {
       const apiInstance = fetchClient({

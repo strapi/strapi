@@ -1,7 +1,7 @@
 import instance from '../fetchClient';
 
 const getFetchClient = (defaultOptions = {}) => {
-  instance.defaults.baseUrl = window.strapi.backendURL;
+  instance.defaults.baseURL = window.strapi.backendURL;
   return {
     get: (url, config) => instance.get(url, { ...defaultOptions, ...config }),
     put: (url, data, config) => instance.put(url, data, { ...defaultOptions, ...config }),
