@@ -44,4 +44,4 @@ export const fetchClient = ({ baseURL }) => {
   return instance;
 };
 
-export default fetchClient;
+export default fetchClient({});
