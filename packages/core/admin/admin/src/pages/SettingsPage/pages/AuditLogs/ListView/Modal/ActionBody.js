@@ -6,7 +6,7 @@ import { Grid } from '@strapi/design-system/Grid';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
-import { JSONInput } from '@strapi/design-system/JSON';
+import { JSONInput } from '@strapi/design-system/JSONInput';
 import { pxToRem } from '@strapi/helper-plugin';
 import getDefaultMessage from '../utils/getActionTypesDefaultMessages';
 import ActionItem from './ActionItem';
