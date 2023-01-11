@@ -4,7 +4,7 @@ const { strict: assert } = require('assert');
 const jwt = require('jsonwebtoken');
 const jwkToPem = require('jwk-to-pem');
 
-const getCognitoPayload = async (idToken, purest) => {
+const getCognitoPayload = async ({ idToken, jwksUrl, purest }) => {
   const {
     header: { kid },
     payload,
@@ -14,12 +14,10 @@ const getCognitoPayload = async (idToken, purest) => {
     throw new Error('The provided token is not valid');
   }
 
-  const { iss } = payload;
-
   const config = {
     cognito: {
       discovery: {
-        origin: `${iss}/.well-known/jwks.json`,
+        origin: jwksUrl,
         path: '',
       },
     },
@@ -63,9 +61,10 @@ const getInitialProviders = ({ purest }) => ({
         };
       });
   },
-  async cognito({ query }) {
+  async cognito({ query, providers }) {
+    const jwksUrl = providers.cognito.jwksurl;
     const idToken = query.id_token;
-    const tokenPayload = await getCognitoPayload(idToken, purest);
+    const tokenPayload = await getCognitoPayload({ idToken, jwksUrl, purest });
     return {
       username: tokenPayload['cognito:username'],
       email: tokenPayload.email,
