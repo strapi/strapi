@@ -34,8 +34,6 @@ const ComponentFixture = ({ children }) => (
 );
 
 const cacheKey = 'useRelation-cache-key';
-const initialDataPath = ['initial', 'path', 'to', 'data'];
-const modifiedDataPath = ['modified', 'path', 'to', 'data'];
 function setup(args) {
   return new Promise((resolve) => {
     act(() => {
@@ -43,8 +41,6 @@ function setup(args) {
         renderHook(
           () =>
             useRelation(cacheKey, {
-              initialDataPath,
-              modifiedDataPath,
               relation: {
                 enabled: true,
                 endpoint: '/',
