@@ -99,13 +99,10 @@ describe('useRelation', () => {
     });
 
     await waitFor(() =>
-      expect(onLoadMock).toBeCalledWith({
-        target: {
-          initialDataPath,
-          modifiedDataPath,
-          value: [expect.objectContaining({ id: 1 }), expect.objectContaining({ id: 2 })],
-        },
-      })
+      expect(onLoadMock).toBeCalledWith([
+        expect.objectContaining({ id: 1 }),
+        expect.objectContaining({ id: 2 }),
+      ])
     );
   });
 
@@ -131,15 +128,7 @@ describe('useRelation', () => {
 
     await waitFor(() => expect(result.current.relations.isSuccess).toBe(true));
 
-    await waitFor(() =>
-      expect(onLoadMock).toBeCalledWith({
-        target: {
-          initialDataPath,
-          modifiedDataPath,
-          value: [expect.objectContaining({ id: 1 })],
-        },
-      })
-    );
+    await waitFor(() => expect(onLoadMock).toBeCalledWith([expect.objectContaining({ id: 1 })]));
   });
 
   test('fetch relations with different limit', async () => {

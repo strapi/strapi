@@ -5,7 +5,7 @@ const getMaxTempKey = (arr) => {
 
   const maxTempKey = Math.max.apply(
     Math,
-    arr.map((o) => o.__temp_key__ ?? o.id)
+    arr.map((o) => o.__temp_key__ ?? 0)
   );
 
   return Number.isNaN(maxTempKey) ? -1 : maxTempKey;

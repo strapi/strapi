@@ -4,8 +4,6 @@ import React, { memo, useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 import pick from 'lodash/pick';
-import take from 'lodash/take';
-import isNil from 'lodash/isNil';
 
 import { useCMEditViewDataManager, NotAllowedInput } from '@strapi/helper-plugin';
 
@@ -17,6 +15,7 @@ import { getTrad } from '../../utils';
 
 import { PUBLICATION_STATES, RELATIONS_TO_DISPLAY, SEARCH_RESULTS_TO_DISPLAY } from './constants';
 import { connect, select, normalizeSearchResults, diffRelations, normalizeRelation } from './utils';
+import { getInitialDataPathUsingTempKeys } from '../../utils/paths';
 
 export const RelationInputDataManager = ({
   error,
@@ -50,38 +49,16 @@ export const RelationInputDataManager = ({
     relationReorder,
   } = useCMEditViewDataManager();
 
-  const initialDataPath = [];
   const nameSplit = name.split('.');
-  nameSplit.reduce((acc, currentValue, index) => {
-    const initialDataParent = get(initialData, initialDataPath);
-    const modifiedDataTempKey = get(modifiedData, [
-      ...take(nameSplit, index),
-      currentValue,
-      '__temp_key__',
-    ]);
 
-    if (!isNil(modifiedDataTempKey) && Array.isArray(initialDataParent)) {
-      const initialDataIndex = initialDataParent.findIndex(
-        (entry) => entry.__temp_key__ === modifiedDataTempKey
-      );
-      acc.push(`${initialDataIndex}`);
-
-      return acc;
-    }
-
-    acc.push(currentValue);
-
-    return acc;
-  }, initialDataPath);
+  const initialDataPath = getInitialDataPathUsingTempKeys(initialData, modifiedData)(name);
 
   const relationsFromModifiedData = get(modifiedData, name, []);
 
   const currentLastPage = Math.ceil(get(initialData, name, []).length / RELATIONS_TO_DISPLAY);
 
-  const cacheKey = `${slug}-${name}-${initialData?.id ?? ''}`;
+  const cacheKey = `${slug}-${initialDataPath.join('.')}`;
   const { relations, search, searchFor } = useRelation(cacheKey, {
-    initialDataPath: ['initialData', ...initialDataPath],
-    modifiedDataPath: ['modifiedData', ...nameSplit],
     relation: {
       enabled: !!endpoints.relation,
       endpoint: endpoints.relation,
@@ -90,7 +67,15 @@ export const RelationInputDataManager = ({
         ...defaultParams,
         pageSize: RELATIONS_TO_DISPLAY,
       },
-      onLoad: relationLoad,
+      onLoad(value) {
+        relationLoad({
+          target: {
+            initialDataPath: ['initialData', ...initialDataPath],
+            modifiedDataPath: ['modifiedData', ...nameSplit],
+            value,
+          },
+        });
+      },
       normalizeArguments: {
         mainFieldName: mainField.name,
         shouldAddLink: shouldDisplayRelationLink,
