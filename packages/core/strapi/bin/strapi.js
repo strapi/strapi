@@ -276,7 +276,6 @@ if (process.env.STRAPI_EXPERIMENTAL) {
         .argParser(parseURL)
         .hideHelp()
     )
-
     .addOption(
       new Option(
         '--to <destinationURL>',
