@@ -23,7 +23,7 @@ const cleanData = ({ browserState, serverState }, currentSchema, componentsSchem
    * @param {object} browserState – the modifiedData from REDUX
    * @param {object} serverState – the initialData from REDUX
    * @param {*} schema
-   * @param {string} path
+   * @param {string} pathToParent - the path to the parent of the current entry
    * @returns
    */
   const recursiveCleanData = (browserState, serverState, schema, pathToParent) => {
