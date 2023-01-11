@@ -1,12 +1,34 @@
 'use strict';
 
+/**
+ * This file includes hooks to use for commander.hook and argParsers for commander.argParser
+ */
+
 const inquirer = require('inquirer');
+const { InvalidOptionArgumentError } = require('commander');
+const { exitWith } = require('./helpers');
 
 /**
- * argsParser: Parse a comma-delimited string as an array
+ * argParser: Parse a comma-delimited string as an array
  */
 const parseInputList = (value) => {
   return value.split(',');
+};
+
+/**
+ * argParser: Parse a string as a URL object
+ */
+const parseURL = (value) => {
+  try {
+    const url = new URL(value);
+    if (!url.host) {
+      throw new InvalidOptionArgumentError(`Could not parse url ${value}`);
+    }
+
+    return url;
+  } catch (e) {
+    throw new InvalidOptionArgumentError(`Could not parse url ${value}`);
+  }
 };
 
 /**
@@ -16,8 +38,7 @@ const promptEncryptionKey = async (thisCommand) => {
   const opts = thisCommand.opts();
 
   if (!opts.encrypt && opts.key) {
-    console.error('Key may not be present unless encryption is used');
-    process.exit(1);
+    return exitWith(1, 'Key may not be present unless encryption is used');
   }
 
   // if encrypt==true but we have no key, prompt for it
@@ -37,12 +58,10 @@ const promptEncryptionKey = async (thisCommand) => {
       ]);
       opts.key = answers.key;
     } catch (e) {
-      console.error('Failed to get encryption key');
-      process.exit(1);
+      return exitWith(1, 'Failed to get encryption key');
     }
     if (!opts.key) {
-      console.error('Failed to get encryption key');
-      process.exit(1);
+      return exitWith(1, 'Failed to get encryption key');
     }
   }
 };
@@ -61,13 +80,15 @@ const confirmMessage = (message) => {
       },
     ]);
     if (!answers.confirm) {
-      process.exit(0);
+      exitWith(0);
     }
   };
 };
 
 module.exports = {
   parseInputList,
+  parseURL,
   promptEncryptionKey,
   confirmMessage,
+  exitWith,
 };

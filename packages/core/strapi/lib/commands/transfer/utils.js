@@ -2,7 +2,7 @@
 
 const chalk = require('chalk');
 const Table = require('cli-table3');
-const { readableBytes } = require('../utils');
+const { readableBytes } = require('../utils/helpers');
 const strapi = require('../../index');
 
 const pad = (n) => {

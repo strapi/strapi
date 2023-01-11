@@ -1,7 +1,7 @@
 // eslint-disable-next-line node/no-extraneous-import
 import type { Context } from 'koa';
 
-import { TRANSFER_URL } from './constants';
+import { TRANSFER_PATH } from './constants';
 import { createTransferHandler } from './handlers';
 
 // Extend Strapi interface type to access the admin routes' API
@@ -29,7 +29,7 @@ declare module '@strapi/strapi' {
 export const registerAdminTransferRoute = (strapi: Strapi.Strapi) => {
   strapi.admin.routes.push({
     method: 'GET',
-    path: TRANSFER_URL,
+    path: TRANSFER_PATH,
     handler: createTransferHandler(),
     config: { auth: false },
   });

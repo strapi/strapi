@@ -14,7 +14,12 @@ const inquirer = require('inquirer');
 const program = new Command();
 
 const packageJSON = require('../package.json');
-const { promptEncryptionKey, confirmMessage } = require('../lib/commands/utils/commander');
+const {
+  promptEncryptionKey,
+  confirmMessage,
+  parseURL,
+} = require('../lib/commands/utils/commander');
+const { ifOptions, assertUrlHasProtocol, exitWith } = require('../lib/commands/utils/helpers');
 
 const checkCwdIsStrapiApp = (name) => {
   const logErrorAndExit = () => {
@@ -263,16 +268,39 @@ if (process.env.STRAPI_EXPERIMENTAL) {
   program
     .command('transfer')
     .description('Transfer data from one source to another')
-    .addOption(new Option('--from <sourceURL>', `URL of remote Strapi instance to get data from.`))
-    .addOption(new Option('--to <destinationURL>', `URL of remote Strapi instance to send data to`))
-    .hook('preAction', async (thisCommand) => {
-      const opts = thisCommand.opts();
-
-      if (!opts.from && !opts.to) {
-        console.error('At least one source (from) or destination (to) option must be provided');
-        process.exit(1);
-      }
-    })
+    .addOption(
+      new Option('--from <sourceURL>', `URL of remote Strapi instance to get data from.`).argParser(
+        parseURL
+      )
+    )
+    .addOption(
+      new Option(
+        '--to <destinationURL>',
+        `URL of remote Strapi instance to send data to`
+      ).argParser(parseURL)
+    )
+    // Validate URLs
+    .hook(
+      'preAction',
+      ifOptions(
+        (opts) => opts.from,
+        (thisCommand) => assertUrlHasProtocol(thisCommand.opts().from, ['https:', 'http:'])
+      )
+    )
+    .hook(
+      'preAction',
+      ifOptions(
+        (opts) => opts.to,
+        (thisCommand) => assertUrlHasProtocol(thisCommand.opts().to, ['https:', 'http:'])
+      )
+    )
+    .hook(
+      'preAction',
+      ifOptions(
+        (opts) => !opts.from && !opts.to,
+        () => exitWith(1, 'At least one source (from) or destination (to) option must be provided')
+      )
+    )
     .allowExcessArguments(false)
     .action(getLocalScript('transfer/transfer'));
 }
