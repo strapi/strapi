@@ -1106,6 +1106,7 @@ exports[`ApplicationInfosPage shoud render from url tab and match snapshot 1`] =
                     <input
                       aria-disabled="false"
                       aria-invalid="false"
+                      aria-required="false"
                       class="c18"
                       id="textinput-6"
                       name="logo-url"
