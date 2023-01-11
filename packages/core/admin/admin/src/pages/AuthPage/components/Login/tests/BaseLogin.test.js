@@ -516,21 +516,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         align-items: center;
       }
 
-      .c27 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: flex-start;
-        -webkit-box-align: flex-start;
-        -ms-flex-align: flex-start;
-        align-items: flex-start;
-      }
-
-      .c27 * {
-        cursor: pointer;
-      }
-
       .c35 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
@@ -586,6 +571,21 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
 
       .c0:focus-visible {
         outline: none;
+      }
+
+      .c27 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: flex-start;
+        -webkit-box-align: flex-start;
+        -ms-flex-align: flex-start;
+        align-items: flex-start;
+      }
+
+      .c27 * {
+        cursor: pointer;
       }
 
       .c3 {
@@ -670,7 +670,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                     <label
                       class="c8 c15"
                       for="textinput-1"
-                      required=""
                     >
                       <div
                         class="c1 c4"
@@ -689,6 +688,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                       <input
                         aria-disabled="false"
                         aria-invalid="false"
+                        aria-required="true"
                         class="c20"
                         id="textinput-1"
                         name="email"
@@ -708,7 +708,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                     <label
                       class="c8 c15"
                       for="textinput-2"
-                      required=""
                     >
                       <div
                         class="c1 c4"
@@ -727,6 +726,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                       <input
                         aria-disabled="false"
                         aria-invalid="false"
+                        aria-required="true"
                         class="c21 c22"
                         id="textinput-2"
                         name="password"

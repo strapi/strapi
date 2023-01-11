@@ -273,22 +273,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         fill: #8e8ea9;
       }
 
-      .c8 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c8 svg {
-        height: 4px;
-        width: 6px;
-      }
-
       .c21 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
@@ -344,6 +328,22 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
 
       .c10:focus-visible {
         outline: none;
+      }
+
+      .c8 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c8 svg {
+        height: 4px;
+        width: 6px;
       }
 
       .c12 {

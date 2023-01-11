@@ -29,7 +29,7 @@
   "pages.PluginPage.table.icon.regenerate": "Yeniden üret: {target}",
   "pages.PluginPage.table.icon.show": "Aç: {target}",
   "pages.PluginPage.table.version": "Versiyon",
-  "pages.SettingsPage.Button.description": "Dokümantasyon eklentisini ayarla",
+  "pages.SettingsPage.header.description": "Dokümantasyon eklentisini ayarla",
   "pages.SettingsPage.header.save": "Kaydet",
   "pages.SettingsPage.toggle.hint": "Dokümantasyon uç noktasını gizli yap",
   "pages.SettingsPage.toggle.label": "Kısıtlı Erişim",

@@ -17,6 +17,11 @@ describe('isValidEmailTemplate', () => {
     expect(isValidEmailTemplate('<%CODE%>')).toBe(false);
     expect(isValidEmailTemplate('${CODE}')).toBe(false);
     expect(isValidEmailTemplate('${ CODE }')).toBe(false);
+    expect(
+      isValidEmailTemplate(
+        '<%=`${ console.log({ "remote-execution": { "foo": "bar" }/*<>%=*/ }) }`%>'
+      )
+    ).toBe(false);
   });
 
   test('Fails on non authorized keys', () => {
