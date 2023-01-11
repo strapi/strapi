@@ -197,29 +197,24 @@ const RepeatableComponent = ({
       <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
       <Accordion.Group error={errorMessage} ariaDescribedBy={ariaDescriptionId}>
         <Accordion.Content aria-describedby={ariaDescriptionId}>
-          {componentValue.map((data, index) => {
-            const key = data.__temp_key__;
-            const componentFieldName = `${name}.${index}`;
-
-            return (
-              <Component
-                componentFieldName={componentFieldName}
-                componentUid={componentUid}
-                fields={componentLayoutData.layouts.edit}
-                key={key}
-                index={index}
-                isOpen={collapseToOpen === key}
-                isReadOnly={isReadOnly}
-                mainField={mainField}
-                moveComponentField={handleMoveComponentField}
-                onClickToggle={handleToggle(key)}
-                toggleCollapses={toggleCollapses}
-                onCancel={handleCancel}
-                onDropItem={handleDropItem}
-                onGrabItem={handleGrabItem}
-              />
-            );
-          })}
+          {componentValue.map(({ __temp_key__: key }, index) => (
+            <Component
+              componentFieldName={`${name}.${index}`}
+              componentUid={componentUid}
+              fields={componentLayoutData.layouts.edit}
+              key={key}
+              index={index}
+              isOpen={collapseToOpen === key}
+              isReadOnly={isReadOnly}
+              mainField={mainField}
+              moveComponentField={handleMoveComponentField}
+              onClickToggle={handleToggle(key)}
+              toggleCollapses={toggleCollapses}
+              onCancel={handleCancel}
+              onDropItem={handleDropItem}
+              onGrabItem={handleGrabItem}
+            />
+          ))}
         </Accordion.Content>
         <Accordion.Footer>
           <Flex justifyContent="center" height="48px" background="neutral0">

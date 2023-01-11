@@ -15,8 +15,8 @@ jest.mock('@strapi/helper-plugin', () => ({
   useCMEditViewDataManager: jest.fn().mockImplementation(() => ({
     modifiedData: {
       test: {
-        test: 'repetable-component',
-        drag: 'repetable-component2',
+        test: 'repeatable-component',
+        drag: 'repeatable-component2',
       },
     },
   })),
@@ -52,7 +52,7 @@ describe('RepeatableComponent | Component', () => {
   it('should render my accordion by default', () => {
     const { getByRole, queryByText } = setup();
 
-    expect(getByRole('button', { name: 'repetable-component' })).toBeInTheDocument();
+    expect(getByRole('button', { name: 'repeatable-component' })).toBeInTheDocument();
     expect(queryByText("I'm a field component")).not.toBeInTheDocument();
     expect(queryByText("I'm inputs")).not.toBeInTheDocument();
   });

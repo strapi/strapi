@@ -30,7 +30,6 @@ jest.mock('../../../hooks/useRelation', () => ({
       isSuccess: true,
       status: 'success',
     },
-
     search: {
       data: {
         pages: [
@@ -71,12 +70,14 @@ jest.mock('@strapi/helper-plugin', () => ({
       relation: [
         {
           id: 1,
+          __temp_key__: 1,
           mainField: 'Relation 1',
           name: 'Relation 1',
         },
 
         {
           id: 2,
+          __temp_key__: 2,
           mainField: 'Relation 2',
           name: 'Relation 2',
         },
@@ -86,12 +87,14 @@ jest.mock('@strapi/helper-plugin', () => ({
       relation: [
         {
           id: 1,
+          __temp_key__: 1,
           mainField: 'Relation 1',
           name: 'Relation 1',
         },
 
         {
           id: 2,
+          __temp_key__: 2,
           mainField: 'Relation 2',
           name: 'Relation 2',
         },
@@ -227,6 +230,7 @@ describe('RelationInputDataManager', () => {
       updateActionAllowedFields: [],
       slug: 'test',
       initialData: {},
+      modifiedData: {},
       relationLoad: jest.fn(),
     });
 
@@ -246,6 +250,7 @@ describe('RelationInputDataManager', () => {
       updateActionAllowedFields: [],
       slug: 'test',
       initialData: {},
+      modifiedData: {},
       relationLoad: jest.fn(),
     });
 
@@ -267,6 +272,7 @@ describe('RelationInputDataManager', () => {
       updateActionAllowedFields: [],
       slug: 'test',
       initialData: {},
+      modifiedData: {},
       relationLoad: jest.fn(),
     });
 
@@ -328,6 +334,7 @@ describe('RelationInputDataManager', () => {
       updateActionAllowedFields: ['relation'],
       slug: 'test',
       initialData: {},
+      modifiedData: {},
       relationLoad: jest.fn(),
     });
 
@@ -400,7 +407,7 @@ describe('RelationInputDataManager', () => {
     fireEvent.dragOver(dropZone);
     fireEvent.drop(dropZone);
 
-    expect(relationReorder).toBeCalledWith({ name: 'relation', newIndex: 0, oldIndex: 1 });
+    expect(relationReorder).toBeCalledWith({ name: 'relation', newIndex: 1, oldIndex: 0 });
   });
 
   describe('Accessibility', () => {
@@ -564,7 +571,7 @@ describe('RelationInputDataManager', () => {
       expect(queryByText(/\(8\)/)).toBeInTheDocument();
     });
 
-    it.only('should not crash, if the field is not set in modifiedData (e.g. in components)', () => {
+    it('should not crash, if the field is not set in modifiedData (e.g. in components)', () => {
       useCMEditViewDataManager.mockImplementation(() => ({
         isCreatingEntry: false,
         createActionAllowedFields: ['relation'],

@@ -15,6 +15,7 @@ import { getTrad } from '../../utils';
 
 import { PUBLICATION_STATES, RELATIONS_TO_DISPLAY, SEARCH_RESULTS_TO_DISPLAY } from './constants';
 import { connect, select, normalizeSearchResults, diffRelations, normalizeRelation } from './utils';
+import { getInitialDataPathUsingTempKeys } from '../../utils/paths';
 
 export const RelationInputDataManager = ({
   error,
@@ -37,7 +38,6 @@ export const RelationInputDataManager = ({
   targetModel,
 }) => {
   const [liveText, setLiveText] = useState('');
-
   const { formatMessage } = useIntl();
   const {
     slug,
@@ -49,12 +49,16 @@ export const RelationInputDataManager = ({
     relationReorder,
   } = useCMEditViewDataManager();
 
+  const nameSplit = name.split('.');
+
+  const initialDataPath = getInitialDataPathUsingTempKeys(initialData, modifiedData)(name);
+
   const relationsFromModifiedData = get(modifiedData, name, []);
 
   const currentLastPage = Math.ceil(get(initialData, name, []).length / RELATIONS_TO_DISPLAY);
 
-  const { relations, search, searchFor } = useRelation(`${slug}-${name}-${initialData?.id ?? ''}`, {
-    name,
+  const cacheKey = `${slug}-${initialDataPath.join('.')}`;
+  const { relations, search, searchFor } = useRelation(cacheKey, {
     relation: {
       enabled: !!endpoints.relation,
       endpoint: endpoints.relation,
@@ -63,14 +67,21 @@ export const RelationInputDataManager = ({
         ...defaultParams,
         pageSize: RELATIONS_TO_DISPLAY,
       },
-      onLoad: relationLoad,
+      onLoad(value) {
+        relationLoad({
+          target: {
+            initialDataPath: ['initialData', ...initialDataPath],
+            modifiedDataPath: ['modifiedData', ...nameSplit],
+            value,
+          },
+        });
+      },
       normalizeArguments: {
         mainFieldName: mainField.name,
         shouldAddLink: shouldDisplayRelationLink,
         targetModel,
       },
     },
-
     search: {
       endpoint: endpoints.search,
       pageParams: {
@@ -257,7 +268,7 @@ export const RelationInputDataManager = ({
    * actually subtract from the total number on the server (regardless of how many you fetched).
    */
   const browserRelationsCount = relationsFromModifiedData.length;
-  const serverRelationsCount = (get(initialData, name) ?? []).length;
+  const serverRelationsCount = (get(initialData, initialDataPath) ?? []).length;
   const realServerRelationsCount = relations.data?.pages[0]?.pagination?.total ?? 0;
   /**
    * _IF_ theres no relations data and the browserCount is the same as serverCount you can therefore assume

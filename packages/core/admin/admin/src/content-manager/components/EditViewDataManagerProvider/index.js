@@ -21,7 +21,7 @@ import {
   getAPIInnerErrors,
 } from '@strapi/helper-plugin';
 
-import { getTrad, removeKeyInObject } from '../../utils';
+import { getTrad } from '../../utils';
 
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
 
@@ -261,10 +261,11 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const relationLoad = useCallback(({ target: { name, value } }) => {
+  const relationLoad = useCallback(({ target: { initialDataPath, modifiedDataPath, value } }) => {
     dispatch({
       type: 'LOAD_RELATION',
-      keys: name.split('.'),
+      modifiedDataPath,
+      initialDataPath,
       value,
     });
   }, []);
@@ -360,11 +361,9 @@ const EditViewDataManagerProvider = ({
 
   const createFormData = useCallback(
     (modifiedData, initialData) => {
-      // First we need to remove the added keys needed for the dnd
-      const preparedData = removeKeyInObject(cloneDeep(modifiedData), '__temp_key__');
       // Then we need to apply our helper
       const cleanedData = cleanData(
-        { browserState: preparedData, serverState: initialData },
+        { browserState: modifiedData, serverState: initialData },
         currentContentTypeLayout,
         allLayoutData.components
       );
