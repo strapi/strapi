@@ -21,5 +21,5 @@ export interface CollectionTypeService extends BaseService {
 export type Service = SingleTypeService | CollectionTypeService;
 
 export type GenericService = Partial<Service> & {
-  [method: string | number | symbol]: <T = any>(...args: any) => T;
+  [method: string | number | symbol]: (...args: any) => any;
 };
