@@ -38,6 +38,11 @@ const sidebars = {
               items: [
                 {
                   type: 'doc',
+                  label: 'useCallbackRef',
+                  id: 'core/content-manager/hooks/use-callback-ref',
+                },
+                {
+                  type: 'doc',
                   label: 'useDragAndDrop',
                   id: 'core/content-manager/hooks/use-drag-and-drop',
                 },
