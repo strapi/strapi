@@ -1,5 +1,5 @@
 import axios from 'axios';
-import auth from '../../utils/auth';
+import auth from '../auth';
 
 export const reqInterceptor = async (config) => {
   config.headers = {
@@ -44,4 +44,4 @@ export const fetchClient = ({ baseURL }) => {
   return instance;
 };
 
-export default fetchClient({ baseURL: process.env.STRAPI_ADMIN_BACKEND_URL });
+export default fetchClient;
