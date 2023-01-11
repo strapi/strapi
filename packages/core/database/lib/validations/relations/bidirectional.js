@@ -17,7 +17,7 @@ const getLinksWithoutMappedBy = (db) => {
         const invRelation = db.metadata.get(attribute.target).attributes[attribute.inversedBy];
 
         // Both relations use inversedBy.
-        if (invRelation?.inversedBy) {
+        if (invRelation.inversedBy) {
           relationsToUpdate[attribute.joinTable.name] = {
             relation: attribute,
             invRelation,
@@ -36,7 +36,7 @@ const isLinkTableEmpty = async (db, linkTableName) => {
   if (!exists) return true;
 
   const result = await db.getConnection().count('* as count').from(linkTableName);
-  return result.count === 0;
+  return Number(result[0].count) === 0;
 };
 
 /**
@@ -53,41 +53,31 @@ const validateBidirectionalRelations = async (db) => {
   const errorList = [];
 
   for (const { relation, invRelation } of invalidLinks) {
-    // Generate the join table name based on the relation target
-    // table and attribute name.
-    const inverseJoinTableName = getJoinTableName(
-      db.metadata.get(relation.target).tableName,
-      relation.inversedBy
-    );
-    const joinTableName = getJoinTableName(
-      db.metadata.get(invRelation.target).tableName,
-      invRelation.inversedBy
-    );
-
     const contentType = db.metadata.get(invRelation.target);
     const invContentType = db.metadata.get(relation.target);
 
-    // If both sides use inversedBy
-    if (relation.inversedBy && invRelation.inversedBy) {
-      const linkTableEmpty = await isLinkTableEmpty(db, joinTableName);
-      const inverseLinkTableEmpty = await isLinkTableEmpty(db, inverseJoinTableName);
+    // Generate the join table name based on the relation target table and attribute name.
+    const joinTableName = getJoinTableName(contentType.tableName, invRelation.inversedBy);
+    const inverseJoinTableName = getJoinTableName(invContentType.tableName, relation.inversedBy);
 
-      if (linkTableEmpty) {
-        errorList.push(
-          `Error on attribute "${relation.inversedBy}" in model "${contentType.tableName}"(${contentType.uid}):` +
-            ` One of the sides of the relationship must be the owning side. You should use mappedBy` +
-            ` instead of inversedBy in the relation "${relation.inversedBy}".`
-        );
-      } else if (inverseLinkTableEmpty) {
-        // Its safe to delete the inverse join table
-        errorList.push(
-          `Error on attribute "${invRelation.inversedBy}" in model "${invContentType.tableName}"(${invContentType.uid}):` +
-            ` One of the sides of the relationship must be the owning side. You should use mappedBy` +
-            ` instead of inversedBy in the relation "${invRelation.inversedBy}".`
-        );
-      } else {
-        // Both sides have data in the join table
-      }
+    const joinTableEmpty = await isLinkTableEmpty(db, joinTableName);
+    const inverseJoinTableEmpty = await isLinkTableEmpty(db, inverseJoinTableName);
+
+    if (joinTableEmpty) {
+      process.emitWarning(
+        `Error on attribute "${relation.inversedBy}" in model "${contentType.singularName}" (${contentType.uid}).` +
+          ` Please modify your schema by renaming the key inversedBy by mappedBy.` +
+          ` Ex: { inversedBy: "${relation.inversedBy}" } -> { mappedBy: "${relation.inversedBy}" } }`
+      );
+    } else if (inverseJoinTableEmpty) {
+      // Its safe to delete the inverse join table
+      process.emitWarning(
+        `Error on attribute "${invRelation.inversedBy}" in model "${invContentType.singularName}" (${invContentType.uid}).` +
+          ` Please modify your schema by renaming the key inversedBy by mappedBy.` +
+          ` Ex: { inversedBy: "${invRelation.inversedBy}" } -> { mappedBy: "${invRelation.inversedBy}" } }`
+      );
+    } else {
+      // Both sides have data in the join table
     }
   }
 
