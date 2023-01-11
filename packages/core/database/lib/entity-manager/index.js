@@ -586,7 +586,12 @@ const createEntityManager = (db) => {
             });
           } else if (cleanRelationData.connect && hasOrderColumn(attribute)) {
             // use position attributes to calculate order
-            const orderMap = relationsOrderer([], inverseJoinColumn.name, joinTable.orderColumnName)
+            const orderMap = relationsOrderer(
+              [],
+              inverseJoinColumn.name,
+              joinTable.orderColumnName,
+              true // Always make an strict connect when inserting
+            )
               .connect(relsToAdd)
               .get()
               // set the order based on the order of the ids
