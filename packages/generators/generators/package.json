@@ -36,8 +36,7 @@
     "fs-extra": "10.0.0",
     "node-plop": "0.26.3",
     "plop": "2.7.6",
-    "pluralize": "8.0.0",
-    "moment": "^2.29.4"
+    "pluralize": "8.0.0"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",

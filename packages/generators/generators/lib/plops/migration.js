@@ -14,6 +14,13 @@ const validateInput = (input) => {
   return regex.test(input) || "Please use only letters and number, '-' or '_' and no spaces";
 };
 
+const getFormattedDate = (date = new Date()) => {
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+    .toISOString()
+    .split(".")[0]
+    .replace(/[-T:]/g, "_");
+};
+
 module.exports = (plop) => {
   // Migration generator
   plop.setGenerator('migration', {
@@ -29,7 +36,7 @@ module.exports = (plop) => {
     actions(answers) {
       const currentDir = process.cwd();
       const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
-      const timestamp = moment().format('YYYY_MM_DD_HH_mm_ss');
+      const timestamp = getFormattedDate();
 
       return [
         {
