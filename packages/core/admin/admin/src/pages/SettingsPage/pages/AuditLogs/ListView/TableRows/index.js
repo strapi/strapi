@@ -51,7 +51,6 @@ const TableRows = ({ headers, rows, onOpenModal }) => {
                 </Td>
               );
             })}
-
             <Td {...stopPropagation}>
               <Flex justifyContent="end">
                 <IconButton
