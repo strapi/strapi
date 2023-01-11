@@ -20,6 +20,7 @@ import { ModalLayout, ModalBody, ModalFooter } from '@strapi/design-system/Modal
 import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
+import { isEqual } from 'lodash';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
@@ -790,13 +791,35 @@ const FormModal = () => {
     }
   };
 
+  const handleConfirmClose = () => {
+    // eslint-disable-next-line no-alert
+    const confirm = window.confirm(
+      formatMessage({
+        id: 'window.confirm.close-modal.file',
+        defaultMessage: 'Are you sure? Your changes will be lost.',
+      })
+    );
+
+    if (confirm) {
+      onCloseModal();
+
+      dispatch({
+        type: RESET_PROPS,
+      });
+    }
+  };
+
   const handleClosed = () => {
     // Close the modal
-    onCloseModal();
-    // Reset the reducer
-    dispatch({
-      type: RESET_PROPS,
-    });
+    if (!isEqual(modifiedData, initialData)) {
+      handleConfirmClose();
+    } else {
+      onCloseModal();
+      // Reset the reducer
+      dispatch({
+        type: RESET_PROPS,
+      });
+    }
   };
 
   const sendAdvancedTabEvent = (tab) => {
