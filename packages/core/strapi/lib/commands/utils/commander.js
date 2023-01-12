@@ -5,7 +5,7 @@
  */
 
 const inquirer = require('inquirer');
-const { InvalidOptionArgumentError } = require('commander');
+const { InvalidOptionArgumentError, Option } = require('commander');
 const { bold, green, cyan } = require('chalk');
 const { exitWith } = require('./helpers');
 
@@ -77,7 +77,7 @@ const confirmMessage = (message) => {
   return async (command) => {
     // if we have a force option, assume yes
     const opts = command.opts();
-    if (opts?.force) {
+    if (opts?.force === true) {
       // attempt to mimic the inquirer prompt exactly
       console.log(`${green('?')} ${bold(message)} ${cyan('Yes')}`);
       return;
@@ -97,9 +97,15 @@ const confirmMessage = (message) => {
   };
 };
 
+const forceOption = new Option(
+  '-f, --force',
+  `Automatically nswer "yes" to all prompts, including potentially destructive requests, and run non-interactively.`
+);
+
 module.exports = {
   parseInputList,
   parseURL,
   promptEncryptionKey,
   confirmMessage,
+  forceOption,
 };

@@ -18,6 +18,7 @@ const {
   promptEncryptionKey,
   confirmMessage,
   parseURL,
+  forceOption,
 } = require('../lib/commands/utils/commander');
 const { ifOptions, assertUrlHasProtocol, exitWith } = require('../lib/commands/utils/helpers');
 
@@ -338,12 +339,7 @@ program
       'Provide encryption key in command instead of using the prompt'
     )
   )
-  .addOption(
-    new Option(
-      '-f, --force',
-      `Automatically nswer "yes" to all prompts, including potentially destructive requests, and run non-interactively.`
-    )
-  )
+  .addOption(forceOption)
   .allowExcessArguments(false)
   .hook('preAction', async (thisCommand) => {
     const opts = thisCommand.opts();
