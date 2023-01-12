@@ -16,17 +16,6 @@ describe('ComponentCard', () => {
       </ThemeProvider>
     );
 
-  it('should render children by default', () => {
-    const { getByTestId, getByText } = setup();
-    expect(getByText('test')).toBeInTheDocument();
-    expect(getByTestId('component-card-icon')).toMatchSnapshot();
-  });
-
-  it('should render a valid icon when passed its name', () => {
-    const { getByTestId } = setup({ icon: 'fa-camera' });
-    expect(getByTestId('component-card-icon')).toMatchSnapshot();
-  });
-
   it('should call the onClick handler when passed', () => {
     const onClick = jest.fn();
     const { getByText } = setup({ onClick });

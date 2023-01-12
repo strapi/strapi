@@ -464,8 +464,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   color: #666687;
 }
 
-.c46[aria-disabled='true'] svg > g,
-.c46[aria-disabled='true'] svg path {
+.c46[aria-disabled='true'] svg > g,.c46[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -478,8 +477,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   color: #666687;
 }
 
-.c46[aria-disabled='true']:active svg > g,
-.c46[aria-disabled='true']:active svg path {
+.c46[aria-disabled='true']:active svg > g,.c46[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -538,8 +536,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   color: #666687;
 }
 
-.c73[aria-disabled='true'] svg > g,
-.c73[aria-disabled='true'] svg path {
+.c73[aria-disabled='true'] svg > g,.c73[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -552,8 +549,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   color: #666687;
 }
 
-.c73[aria-disabled='true']:active svg > g,
-.c73[aria-disabled='true']:active svg path {
+.c73[aria-disabled='true']:active svg > g,.c73[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -587,6 +583,25 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
 .c63 {
   height: 1px;
   border: none;
+}
+
+.c38 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c38:focus {
+  outline: none;
+}
+
+.c38[aria-disabled='true'] {
+  cursor: not-allowed;
 }
 
 .c25 {
@@ -648,37 +663,6 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
 .c21:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c58 path {
-  fill: #666687;
-}
-
-.c60 path {
-  fill: #f29d41;
-}
-
-.c75 path {
-  fill: #328048;
-}
-
-.c38 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c38:focus {
-  outline: none;
-}
-
-.c38[aria-disabled='true'] {
-  cursor: not-allowed;
 }
 
 .c37 {
@@ -767,6 +751,18 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
+.c58 path {
+  fill: #666687;
+}
+
+.c60 path {
+  fill: #f29d41;
+}
+
+.c75 path {
+  fill: #328048;
+}
+
 .c10 {
   cursor: pointer;
 }
@@ -810,8 +806,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   color: #666687;
 }
 
-.c12[aria-disabled='true'] svg > g,
-.c12[aria-disabled='true'] svg path {
+.c12[aria-disabled='true'] svg > g,.c12[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -824,8 +819,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   color: #666687;
 }
 
-.c12[aria-disabled='true']:active svg > g,
-.c12[aria-disabled='true']:active svg path {
+.c12[aria-disabled='true']:active svg > g,.c12[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -1057,6 +1051,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                 <input
                   aria-disabled="false"
                   aria-invalid="false"
+                  aria-required="false"
                   class="c25"
                   id="field-1"
                   name="searchbar"

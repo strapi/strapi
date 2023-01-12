@@ -24,18 +24,13 @@ import { RELATION_ITEM_HEIGHT } from './constants';
 import { usePrev } from '../../hooks';
 
 const LinkEllipsis = styled(Link)`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: inherit;
-`;
+  display: block;
 
-const BoxEllipsis = styled(Box)`
   > span {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    display: inherit;
+    display: block;
   }
 `;
 
@@ -231,15 +226,13 @@ const RelationInput = ({
   }, [previewRelationsLength, relations]);
 
   return (
-    <Field error={error} name={name} hint={description} id={id}>
+    <Field error={error} name={name} hint={description} id={id} required={required}>
       <Relation
         totalNumberOfRelations={totalNumberOfRelations}
         size={size}
         search={
           <>
-            <FieldLabel action={labelAction} required={required}>
-              {label}
-            </FieldLabel>
+            <FieldLabel action={labelAction}>{label}</FieldLabel>
             <ReactSelect
               // position fixed doesn't update position on scroll
               // react select doesn't update menu position on options change
@@ -322,7 +315,7 @@ const RelationInput = ({
                   }
                   style={style}
                 >
-                  <BoxEllipsis minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
+                  <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
                     <Tooltip description={mainField ?? `${id}`}>
                       {href ? (
                         <LinkEllipsis to={href} disabled={disabled}>
@@ -334,7 +327,7 @@ const RelationInput = ({
                         </Typography>
                       )}
                     </Tooltip>
-                  </BoxEllipsis>
+                  </Box>
 
                   {publicationState && (
                     <Status variant={statusColor} showBullet={false} size="S">
