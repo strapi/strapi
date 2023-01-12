@@ -29,7 +29,7 @@ const NpmPackagesGrid = ({
   if (status === 'loading') {
     return (
       <Flex justifyContent="center" paddingTop={8}>
-        <Loader />
+        <Loader>Loading content...</Loader>
       </Flex>
     );
   }
@@ -47,7 +47,7 @@ const NpmPackagesGrid = ({
   }
 
   return (
-    <Grid gap={4}>
+    <Grid gap={4} data-testid="marketplace-results">
       {npmPackages.map((npmPackage) => (
         <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={npmPackage.id}>
           <NpmPackageCard

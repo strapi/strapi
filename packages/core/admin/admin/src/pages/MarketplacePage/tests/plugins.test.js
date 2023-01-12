@@ -14,6 +14,7 @@ import server from './server';
 jest.setTimeout(50000);
 const toggleNotification = jest.fn();
 jest.mock('../../../hooks/useNavigatorOnLine', () => jest.fn(() => true));
+jest.mock('../../../content-manager/components/InputUID/useDebounce', () => (value) => value);
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(() => {
@@ -43,7 +44,7 @@ const client = new QueryClient({
 });
 
 const waitForReload = async () => {
-  await screen.findByText('Marketplace', { selector: 'h1' });
+  await screen.findByTestId('marketplace-results');
 };
 
 describe('Marketplace page - plugins tab', () => {
@@ -99,6 +100,7 @@ describe('Marketplace page - plugins tab', () => {
     const input = screen.getByPlaceholderText('Search');
 
     await user.type(input, 'comment');
+    await waitForReload();
 
     const match = screen.getByText('Comments');
     const notMatch = screen.queryByText('Sentry');
@@ -113,12 +115,13 @@ describe('Marketplace page - plugins tab', () => {
     const input = screen.getByPlaceholderText('Search');
     const badQuery = 'asdf';
     await user.type(input, badQuery);
+    await waitForReload();
 
     const noResult = screen.getByText(`No result for "${badQuery}"`);
     expect(noResult).toBeVisible();
   });
 
-  it('shows the installed text for installed plugins', () => {
+  it('shows the installed text for installed plugins', async () => {
     // Plugin that's already installed
     const alreadyInstalledCard = screen
       .getAllByTestId('npm-package-card')
@@ -241,8 +244,6 @@ describe('Marketplace page - plugins tab', () => {
     const collectionOption = screen.getByTestId('Made by Strapi-13');
     // When they click the option
     await user.click(collectionOption);
-    // When they click the filters button again
-    await user.click(await screen.findByTestId('filters-button'));
     // They should see the collections button indicating 1 option selected
     await user.click(
       screen.getByRole('combobox', { name: 'Collections 1 collection selected Made by Strapi' })

@@ -16,6 +16,7 @@ import server from './server';
 jest.setTimeout(50000);
 const toggleNotification = jest.fn();
 jest.mock('../../../hooks/useNavigatorOnLine', () => jest.fn(() => true));
+jest.mock('../../../content-manager/components/InputUID/useDebounce', () => (value) => value);
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(() => {
@@ -45,7 +46,7 @@ const client = new QueryClient({
 });
 
 const waitForReload = async () => {
-  await screen.findByText('Marketplace', { selector: 'h1' });
+  await screen.findByTestId('marketplace-results');
 };
 
 describe('Marketplace page - providers tab', () => {
@@ -99,6 +100,7 @@ describe('Marketplace page - providers tab', () => {
   it('should return providers search results matching the query', async () => {
     const input = screen.getByPlaceholderText('Search');
     await user.type(input, 'cloudina');
+    await waitForReload();
     const match = screen.getByText('Cloudinary');
     const notMatch = screen.queryByText('Mailgun');
     const plugin = screen.queryByText('Comments');
@@ -115,6 +117,7 @@ describe('Marketplace page - providers tab', () => {
     const input = getByPlaceholderText(renderedContainer, 'Search');
     const badQuery = 'asdf';
     await user.type(input, badQuery);
+    await waitForReload();
     const noResult = screen.getByText(`No result for "${badQuery}"`);
 
     expect(noResult).toBeVisible();

@@ -61,7 +61,7 @@ const App = (
 );
 
 const waitForReload = async () => {
-  await screen.findByText('Marketplace', { selector: 'h1' });
+  await screen.findByTestId('marketplace-results');
 };
 
 describe('Marketplace page - layout', () => {

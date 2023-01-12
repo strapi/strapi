@@ -708,6 +708,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   outline: none;
 }
 
+<<<<<<< HEAD
 .c29 {
   font-size: 0.8rem;
 }
@@ -749,6 +750,37 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
 }
 
 .c32[aria-disabled='true'] {
+=======
+.c22 {
+  color: #4945ff;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.c24 {
+  color: #666687;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.c20 {
+  padding: 16px;
+}
+
+.c21 {
+  border-bottom: 2px solid #4945ff;
+}
+
+.c23 {
+  border-bottom: 2px solid transparent;
+}
+
+.c19[aria-disabled='true'] {
+>>>>>>> 7f2d56c537 (Fix marketplace tests)
   cursor: not-allowed;
 }
 
@@ -1025,6 +1057,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
       <div
         class="c19"
       >
+<<<<<<< HEAD
         <div
           class="c20"
         >
@@ -1087,6 +1120,11 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
         <div>
           <div
             class="c31"
+=======
+        <div>
+          <div
+            class="c17 c18"
+>>>>>>> 7f2d56c537 (Fix marketplace tests)
           >
             <div
               aria-label="Plugins and Providers for Strapi"
@@ -1096,53 +1134,136 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                 aria-controls="tabs-0-tabpanel"
                 aria-disabled="false"
                 aria-selected="true"
+<<<<<<< HEAD
                 class="c32"
+=======
+                class="c19"
+>>>>>>> 7f2d56c537 (Fix marketplace tests)
                 id="tabs-0-tab"
                 role="tab"
                 tabindex="0"
                 type="button"
               >
                 <div
+<<<<<<< HEAD
                   class="c33 c34"
                 >
                   <span
                     class="c8 c35"
+=======
+                  class="c20 c21"
+                >
+                  <span
+                    class="c22"
+>>>>>>> 7f2d56c537 (Fix marketplace tests)
                   >
                     Plugins
                      
-                    (
-                    96
-                    )
+                    (96)
                   </span>
                 </div>
               </button>
               <button
                 aria-disabled="false"
                 aria-selected="false"
+<<<<<<< HEAD
                 class="c32"
+=======
+                class="c19"
+>>>>>>> 7f2d56c537 (Fix marketplace tests)
                 id="tabs-1-tab"
                 role="tab"
                 tabindex="-1"
                 type="button"
               >
                 <div
+<<<<<<< HEAD
                   class="c33 c36"
                 >
                   <span
                     class="c8 c37"
+=======
+                  class="c20 c23"
+                >
+                  <span
+                    class="c24"
+>>>>>>> 7f2d56c537 (Fix marketplace tests)
                   >
                     Providers
                      
-                    (
-                    96
-                    )
+                    (96)
                   </span>
                 </div>
               </button>
             </div>
+            <div
+              class="c25"
+              width="25%"
+            >
+              <div
+                class="c26"
+              >
+                <div>
+                  <div
+                    class="c27"
+                  >
+                    <label
+                      class="c28"
+                      for="field-1"
+                    >
+                      <div
+                        class="c29"
+                      >
+                        Search
+                      </div>
+                    </label>
+                  </div>
+                  <div
+                    class="c30 c31 c32"
+                  >
+                    <div
+                      class="c33"
+                    >
+                      <div
+                        class="c34 c29 c35"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          fill="none"
+                          height="1em"
+                          viewBox="0 0 24 24"
+                          width="1em"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            clip-rule="evenodd"
+                            d="M23.813 20.163l-5.3-5.367a9.792 9.792 0 001.312-4.867C19.825 4.455 15.375 0 9.913 0 4.45 0 0 4.455 0 9.929c0 5.473 4.45 9.928 9.912 9.928a9.757 9.757 0 005.007-1.4l5.275 5.35a.634.634 0 00.913 0l2.706-2.737a.641.641 0 000-.907zM9.91 3.867c3.338 0 6.05 2.718 6.05 6.061s-2.712 6.061-6.05 6.061c-3.337 0-6.05-2.718-6.05-6.06 0-3.344 2.713-6.062 6.05-6.062z"
+                            fill="#32324D"
+                            fill-rule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                    <input
+                      aria-disabled="false"
+                      aria-invalid="false"
+                      class="c36"
+                      id="field-1"
+                      name="searchbar"
+                      placeholder="Search"
+                      value=""
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div
+<<<<<<< HEAD
             class="c31 c38"
+=======
+            class="c17 c37"
+>>>>>>> 7f2d56c537 (Fix marketplace tests)
           >
             <div
               class="c39"
@@ -1259,7 +1380,12 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
               tabindex="0"
             >
               <div
+<<<<<<< HEAD
                 class="c55"
+=======
+                class="c60"
+                data-testid="marketplace-results"
+>>>>>>> 7f2d56c537 (Fix marketplace tests)
               >
                 <div
                   class="c56"
