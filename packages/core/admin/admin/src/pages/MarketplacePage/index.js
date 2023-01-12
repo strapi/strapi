@@ -31,7 +31,7 @@ import NpmPackagesGrid from './components/NpmPackagesGrid';
 import SortSelect from './components/SortSelect';
 import NpmPackagesFilters from './components/NpmPackagesFilters';
 import NpmPackagesPagination from './components/NpmPackagesPagination';
-import useDebounce from '../../content-manager/components/InputUID/useDebounce';
+import useDebounce from '../../hooks/useDebounce';
 import OfflineLayout from './components/OfflineLayout';
 import useMarketplaceData from './utils/useMarketplaceData';
 

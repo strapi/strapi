@@ -16,7 +16,7 @@ import server from './server';
 jest.setTimeout(50000);
 const toggleNotification = jest.fn();
 jest.mock('../../../hooks/useNavigatorOnLine', () => jest.fn(() => true));
-jest.mock('../../../content-manager/components/InputUID/useDebounce', () => (value) => value);
+jest.mock('../../../hooks/useDebounce', () => (value) => value);
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(() => {
