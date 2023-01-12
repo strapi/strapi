@@ -42,6 +42,18 @@ const AttributeTag = ({ attribute, filter, onClick, operator, value }) => {
     formattedValue = formatNumber(value);
   }
 
+  // Handle custom input
+  if (attribute.metadatas.customInput) {
+    // If options, get the option label
+    if (attribute.metadatas.options) {
+      const selectedOption = attribute.metadatas.options.find((option) => {
+        return option.customValue === value;
+      });
+      // Set the provided option label or fallback to the value from query
+      formattedValue = selectedOption?.label || value;
+    }
+  }
+
   const content = `${attribute.metadatas.label || attribute.name} ${formatMessage({
     id: `components.FilterOptions.FILTER_TYPES.${operator}`,
     defaultMessage: operator,
@@ -60,7 +72,11 @@ AttributeTag.propTypes = {
   attribute: PropTypes.shape({
     name: PropTypes.string.isRequired,
     fieldSchema: PropTypes.object.isRequired,
-    metadatas: PropTypes.shape({ label: PropTypes.string.isRequired }).isRequired,
+    metadatas: PropTypes.shape({
+      label: PropTypes.string.isRequired,
+      options: PropTypes.array,
+      customInput: PropTypes.func,
+    }).isRequired,
   }).isRequired,
   filter: PropTypes.object.isRequired,
   onClick: PropTypes.func.isRequired,

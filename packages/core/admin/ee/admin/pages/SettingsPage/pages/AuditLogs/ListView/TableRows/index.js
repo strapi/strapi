@@ -25,7 +25,7 @@ const TableRows = ({ headers, rows, onOpenModal }) => {
           id: `Settings.permissions.auditLogs.${value}`,
           defaultMessage: getDefaultMessage(value),
         },
-        { model }
+        { model: `(${model})` }
       );
     }
 

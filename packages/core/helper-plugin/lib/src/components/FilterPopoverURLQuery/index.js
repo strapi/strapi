@@ -50,7 +50,7 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
     }
 
     if (type === 'enumeration') {
-      filterValue = options[0];
+      filterValue = options && options[0];
     }
 
     const filter = getFilterList(nextField)[0].value;
@@ -113,6 +113,8 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
 
   const appliedFilter = displayedFilters.find((filter) => filter.name === modifiedData.name);
   const operator = modifiedData.filter;
+  const filterList = appliedFilter.metadatas.customOperators || getFilterList(appliedFilter);
+  const CustomInput = appliedFilter.metadatas.customInput;
 
   return (
     <Popover source={source} padding={3} spacing={4} onBlur={onBlur}>
@@ -150,7 +152,7 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
                 value={modifiedData.filter}
                 onChange={handleChangeOperator}
               >
-                {getFilterList(appliedFilter).map((option) => {
+                {filterList.map((option) => {
                   return (
                     <Option key={option.value} value={option.value}>
                       {formatMessage(option.intlLabel)}
@@ -161,12 +163,21 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
             </Box>
             {operator !== '$null' && operator !== '$notNull' && (
               <Box>
-                <Inputs
-                  {...appliedFilter.metadatas}
-                  {...appliedFilter.fieldSchema}
-                  value={modifiedData.value}
-                  onChange={(value) => setModifiedData((prev) => ({ ...prev, value }))}
-                />
+                {CustomInput ? (
+                  <CustomInput
+                    {...appliedFilter.metadatas}
+                    {...appliedFilter.fieldSchema}
+                    value={modifiedData.value}
+                    setModifiedData={setModifiedData}
+                  />
+                ) : (
+                  <Inputs
+                    {...appliedFilter.metadatas}
+                    {...appliedFilter.fieldSchema}
+                    value={modifiedData.value}
+                    onChange={(value) => setModifiedData((prev) => ({ ...prev, value }))}
+                  />
+                )}
               </Box>
             )}
             <Box>
