@@ -22,7 +22,7 @@ So to solve this, you could use custom API endpoints of the application and whil
 The full documentation of the feature can be seen [here](https://docs.strapi.io/developer-docs/latest/developer-resources/data-management.html). Below are a couple of scenarios you might find yourself.
 
 :::warning
-Admin users and API tokens are not exported. Therefore, restored data does not include the users table, which means that createdBy and updatedBy are empty in a restored instance. Relations between entities are also broken in the import/export sequence.
+Admin users and API tokens are not exported. Therefore, restored data does not include the users table, which means that createdBy and updatedBy are empty in a restored instance.
 :::
 
 ### Creating a data packet
