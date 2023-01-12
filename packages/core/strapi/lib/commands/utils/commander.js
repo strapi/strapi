@@ -79,7 +79,7 @@ const confirmMessage = (message) => {
     const opts = command.opts();
     if (opts?.force) {
       // attempt to mimic the inquirer prompt exactly
-      console.warn(`${green('?')} ${bold(message)} ${cyan('Yes')}`);
+      console.log(`${green('?')} ${bold(message)} ${cyan('Yes')}`);
       return;
     }
 
