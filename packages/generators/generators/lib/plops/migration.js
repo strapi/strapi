@@ -1,6 +1,5 @@
 'use strict';
 
-const moment = require('moment');
 const tsUtils = require('@strapi/typescript-utils');
 
 
