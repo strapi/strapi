@@ -121,7 +121,7 @@ describe('Marketplace page - plugins tab', () => {
     expect(noResult).toBeVisible();
   });
 
-  it('shows the installed text for installed plugins', async () => {
+  it('shows the installed text for installed plugins', () => {
     // Plugin that's already installed
     const alreadyInstalledCard = screen
       .getAllByTestId('npm-package-card')

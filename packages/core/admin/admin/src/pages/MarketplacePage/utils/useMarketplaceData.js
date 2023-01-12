@@ -47,16 +47,16 @@ function useMarketplaceData({ npmPackageType, debouncedSearch, query, tabQuery }
     }
   );
 
-  const relevantResponse = npmPackageType === 'plugin' ? pluginsResponse : providersResponse;
-  const relevantStatus = npmPackageType === 'plugin' ? pluginsStatus : providersStatus;
+  const npmPackageTypeResponse = npmPackageType === 'plugin' ? pluginsResponse : providersResponse;
+  const npmPackageTypeStatus = npmPackageType === 'plugin' ? pluginsStatus : providersStatus;
 
   const [possibleCollections, setPossibleCollections] = useState({});
   const [possibleCategories, setPossibleCategories] = useState({});
 
   // Keep possible filters up to date, but don't lose them while loading
   useEffect(() => {
-    if (relevantStatus === 'success') {
-      setPossibleCollections(relevantResponse.meta.collections);
+    if (npmPackageTypeStatus === 'success') {
+      setPossibleCollections(npmPackageTypeResponse.meta.collections);
     }
 
     if (pluginsStatus === 'success') {
@@ -65,11 +65,11 @@ function useMarketplaceData({ npmPackageType, debouncedSearch, query, tabQuery }
   }, [
     pluginsResponse?.meta.categories,
     pluginsStatus,
-    relevantResponse?.meta.collections,
-    relevantStatus,
+    npmPackageTypeResponse?.meta.collections,
+    npmPackageTypeStatus,
   ]);
 
-  const { pagination } = relevantStatus === 'success' ? relevantResponse.meta : {};
+  const { pagination } = npmPackageTypeStatus === 'success' ? npmPackageTypeResponse.meta : {};
 
   return {
     pluginsResponse,
