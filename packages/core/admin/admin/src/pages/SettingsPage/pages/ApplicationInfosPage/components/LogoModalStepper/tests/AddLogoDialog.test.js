@@ -14,7 +14,7 @@ const render = (props) =>
     </ThemeProvider>
   );
 
-describe('ApplicationInfosPage', () => {
+describe('ApplicationInfosPage | AddLogoDialog', () => {
   it('shoud render from computer tab and match snapshot', () => {
     const { container, getByText } = render();
 
