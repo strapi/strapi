@@ -11,7 +11,7 @@ import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import Loader from '@strapi/icons/Loader';
 import { axiosInstance } from '../../../core/utils';
 import { getRequestUrl } from '../../utils';
-import useDebounce from './useDebounce';
+import useDebounce from '../../../hooks/useDebounce';
 import UID_REGEX from './regex';
 import {
   EndActionWrapper,

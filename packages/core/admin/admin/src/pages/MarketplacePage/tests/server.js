@@ -6,7 +6,11 @@ import { responses as providerResponses } from './mocks/providers';
 
 const handlers = [
   rest.get('https://market-api.strapi.io/plugins', (req, res, ctx) => {
-    const { collections = [], categories = [] } = qs.parse(req.url.searchParams.toString());
+    const {
+      collections = [],
+      categories = [],
+      search = '',
+    } = qs.parse(req.url.searchParams.toString());
     const [madeByStrapi, verified] = collections;
     const [customFields, monitoring] = categories;
 
@@ -35,7 +39,19 @@ const handlers = [
       responseData = pluginResponses.plugins;
     }
 
-    return res(ctx.status(200), ctx.json(responseData));
+    const filteredResponse = {
+      ...responseData,
+      data: responseData.data.filter((plugin) => {
+        const nameMatch = plugin.attributes.name.toLowerCase().includes(search.toLowerCase());
+        const descriptionMatch = plugin.attributes.description
+          .toLowerCase()
+          .includes(search.toLowerCase());
+
+        return nameMatch || descriptionMatch;
+      }),
+    };
+
+    return res(ctx.status(200), ctx.json(filteredResponse));
   }),
 
   rest.get('*/admin/information', (req, res, ctx) => {
@@ -59,7 +75,7 @@ const handlers = [
   }),
 
   rest.get('https://market-api.strapi.io/providers', (req, res, ctx) => {
-    const { collections = [] } = qs.parse(req.url.searchParams.toString());
+    const { collections = [], search = '' } = qs.parse(req.url.searchParams.toString());
     const [madeByStrapi, verified] = collections;
 
     let responseData;
@@ -75,7 +91,19 @@ const handlers = [
       responseData = providerResponses.providers;
     }
 
-    return res(ctx.status(200), ctx.json(responseData));
+    const filteredResponse = {
+      ...responseData,
+      data: responseData.data.filter((provider) => {
+        const nameMatch = provider.attributes.name.toLowerCase().includes(search.toLowerCase());
+        const descriptionMatch = provider.attributes.description
+          .toLowerCase()
+          .includes(search.toLowerCase());
+
+        return nameMatch || descriptionMatch;
+      }),
+    };
+
+    return res(ctx.status(200), ctx.json(filteredResponse));
   }),
 ];
 
