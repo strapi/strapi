@@ -1,3 +1,4 @@
+export { default as buildDescription } from './fieldDescription';
 export { default as connect } from './connect';
 export { default as generateOptions } from './generateOptions';
 export { default as getInputType } from './getInputType';

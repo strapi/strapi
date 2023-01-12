@@ -14,6 +14,7 @@ import InputUID from '../InputUID';
 import { RelationInputDataManager } from '../RelationInputDataManager';
 
 import {
+  buildDescription,
   connect,
   generateOptions,
   getInputType,
@@ -166,6 +167,8 @@ function Inputs({
   );
 
   const { label, description, placeholder, visible } = metadatas;
+  const { minLength, maxLength } = fieldSchema;
+  const builtDescription = buildDescription(description, minLength, maxLength);
 
   /**
    * It decides whether using the default `step` accoding to its `inputType` or the one
@@ -218,10 +221,11 @@ function Inputs({
         {...fieldSchema}
         componentUid={componentUid}
         description={
-          metadatas.description
+          builtDescription.id
             ? formatMessage({
-                id: metadatas.description,
-                defaultMessage: metadatas.description,
+                id: builtDescription.id,
+                defaultMessage: builtDescription.defaultMessage,
+                values: builtDescription.values,
               })
             : undefined
         }
@@ -265,7 +269,15 @@ function Inputs({
       intlLabel={{ id: label, defaultMessage: label }}
       // in case the default value of the boolean is null, attribute.default doesn't exist
       isNullable={inputType === 'bool' && [null, undefined].includes(fieldSchema.default)}
-      description={description ? { id: description, defaultMessage: description } : null}
+      description={
+        builtDescription.id
+          ? {
+              id: builtDescription.id,
+              defaultMessage: builtDescription.defaultMessage,
+              values: builtDescription.values,
+            }
+          : null
+      }
       disabled={shouldDisableField}
       error={error}
       labelAction={labelAction}
