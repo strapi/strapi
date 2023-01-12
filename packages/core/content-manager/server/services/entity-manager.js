@@ -26,6 +26,14 @@ const wrapWithEmitEvent = (event, fn) => async (entity, body, model) => {
     entry: sanitizedEntity,
   });
 
+  // If relations were populated, load the entity again without populating them,
+  // to avoid performance issues
+  if (isRelationsPopulateEnabled(model)) {
+    return strapi.entityService.findOne(model, entity.id, {
+      populate: getCountDeepPopulate(model),
+    });
+  }
+
   return result;
 };
 
@@ -48,6 +56,18 @@ const addCreatedByRolesPopulate = (populate) => {
     },
   };
 };
+
+/**
+ * When relations.populate is set to true, populated relations
+ * will be passed to the webhook and db lifecycles events. The entity-manager
+ * response will not have the populated relations though.
+ * For performance reasons, it is recommended to set it to false,
+ */
+const isRelationsPopulateEnabled = () => {
+  return strapi.config.get('server.relations.populate', false);
+};
+
+const getCountDeepPopulate = (uid) => getDeepPopulate(uid, { countMany: true, countOne: true });
 
 /**
  * @type {import('./entity-manager').default}
@@ -107,6 +127,7 @@ module.exports = ({ strapi }) => ({
   async create(body, uid) {
     const modelDef = strapi.getModel(uid);
     const publishData = { ...body };
+    const populateRelations = isRelationsPopulateEnabled(uid);
 
     if (hasDraftAndPublish(modelDef)) {
       publishData[PUBLISHED_AT_ATTRIBUTE] = null;
@@ -114,45 +135,57 @@ module.exports = ({ strapi }) => ({
 
     const params = {
       data: publishData,
-      populate: getDeepPopulate(uid, {}),
+      populate: populateRelations ? getDeepPopulate(uid, {}) : getCountDeepPopulate(uid),
     };
 
     const entity = await strapi.entityService.create(uid, params);
 
     // If relations were populated, load the entity again without populating them,
     // to avoid performance issues
-    return strapi.entityService.findOne(uid, entity.id, {
-      populate: getDeepPopulate(uid, { countMany: true, countOne: true }),
-    });
+    if (populateRelations) {
+      return strapi.entityService.findOne(uid, entity.id, { populate: getCountDeepPopulate(uid) });
+    }
+
+    return entity;
   },
 
   async update(entity, body, uid) {
     const publishData = omitPublishedAtField(body);
+    const populateRelations = isRelationsPopulateEnabled(uid);
 
     const params = {
       data: publishData,
-      populate: getDeepPopulate(uid, {}),
+      populate: populateRelations ? getDeepPopulate(uid, {}) : getCountDeepPopulate(uid),
     };
 
-    await strapi.entityService.update(uid, entity.id, params);
+    const updatedEntity = await strapi.entityService.update(uid, entity.id, params);
 
-    return strapi.entityService.findOne(uid, entity.id, {
-      populate: getDeepPopulate(uid, { countMany: true, countOne: true }),
-    });
+    // If relations were populated, load the entity again without populating them,
+    // to avoid performance issues
+    if (populateRelations) {
+      return strapi.entityService.findOne(uid, entity.id, { populate: getCountDeepPopulate(uid) });
+    }
+
+    return updatedEntity;
   },
 
   async delete(entity, uid) {
+    let entityToDelete;
+    const populateRelations = isRelationsPopulateEnabled(uid);
+
     const params = {
-      populate: getDeepPopulate(uid, {}),
+      populate: populateRelations ? getDeepPopulate(uid, {}) : getCountDeepPopulate(uid),
     };
 
-    const deletedEntity = await strapi.entityService.findOne(uid, entity.id, {
-      populate: getDeepPopulate(uid, { countMany: true, countOne: true }),
-    });
+    if (populateRelations) {
+      entityToDelete = await strapi.entityService.findOne(uid, entity.id, {
+        populate: getCountDeepPopulate(uid),
+      });
+    }
 
-    await strapi.entityService.delete(uid, entity.id, params);
+    const deletedEntity = await strapi.entityService.delete(uid, entity.id, params);
 
-    return deletedEntity;
+    return entityToDelete || deletedEntity;
   },
 
   // FIXME: handle relations
@@ -176,17 +209,22 @@ module.exports = ({ strapi }) => ({
     );
 
     const data = { ...body, [PUBLISHED_AT_ATTRIBUTE]: new Date() };
+    const populateRelations = isRelationsPopulateEnabled(uid);
 
     const params = {
       data,
-      populate: getDeepPopulate(uid, {}),
+      populate: populateRelations ? getDeepPopulate(uid, {}) : getCountDeepPopulate(uid),
     };
 
-    await strapi.entityService.update(uid, entity.id, params);
+    const updatedEntity = await strapi.entityService.update(uid, entity.id, params);
 
-    return strapi.entityService.findOne(uid, entity.id, {
-      populate: getDeepPopulate(uid, { countMany: true, countOne: true }),
-    });
+    // If relations were populated, load the entity again without populating them,
+    // to avoid performance issues
+    if (populateRelations) {
+      return strapi.entityService.findOne(uid, entity.id, { populate: getCountDeepPopulate(uid) });
+    }
+
+    return updatedEntity;
   }),
 
   unpublish: wrapWithEmitEvent(ENTRY_UNPUBLISH, async (entity, body = {}, uid) => {
@@ -195,17 +233,14 @@ module.exports = ({ strapi }) => ({
     }
 
     const data = { ...body, [PUBLISHED_AT_ATTRIBUTE]: null };
+    const populateRelations = isRelationsPopulateEnabled(uid);
 
     const params = {
       data,
-      populate: getDeepPopulate(uid, {}),
+      populate: populateRelations ? getDeepPopulate(uid, {}) : getCountDeepPopulate(uid),
     };
 
-    await strapi.entityService.update(uid, entity.id, params);
-
-    return strapi.entityService.findOne(uid, entity.id, {
-      populate: getDeepPopulate(uid, { countMany: true, countOne: true }),
-    });
+    return strapi.entityService.update(uid, entity.id, params);
   }),
 
   async getNumberOfDraftRelations(id, uid) {
