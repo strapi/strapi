@@ -15,10 +15,6 @@ const forms = {
       return {
         sections: [
           {
-            sectionTitle: {
-              id: getTrad('form.contentType.divider.draft-publish'),
-              defaultMessage: 'Draft/Publish',
-            },
             items: [
               {
                 intlLabel: {
