@@ -198,9 +198,6 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
       expect(result).toEqual({
         component: {
           relation: {
-            options: {
-              strict: false,
-            },
             connect: [{ id: 1, position: { end: true } }],
             disconnect: [],
           },
@@ -257,9 +254,6 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
         component: {
           component2: {
             relation: {
-              options: {
-                strict: false,
-              },
               connect: [{ id: 1, position: { end: true } }],
               disconnect: [],
             },
@@ -425,9 +419,6 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
 
       expect(result).toStrictEqual({
         relation: {
-          options: {
-            strict: false,
-          },
           connect: [{ id: 1, position: { end: true } }],
           disconnect: [{ id: 2 }],
         },
@@ -450,9 +441,6 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
 
       expect(result).toStrictEqual({
         relation: {
-          options: {
-            strict: false,
-          },
           connect: [{ id: 1, position: { end: true } }],
           disconnect: [],
         },
@@ -475,9 +463,6 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
 
       expect(result).toStrictEqual({
         relation: {
-          options: {
-            strict: false,
-          },
           disconnect: [{ id: 1 }],
           connect: [],
         },
@@ -524,9 +509,6 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             id: 1,
             relation_component: {
               relation: {
-                options: {
-                  strict: false,
-                },
                 disconnect: [],
                 connect: [{ id: 1, position: { end: true } }],
               },
@@ -536,9 +518,6 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             id: 2,
             relation_component: {
               relation: {
-                options: {
-                  strict: false,
-                },
                 disconnect: [],
                 connect: [{ id: 2, position: { end: true } }],
               },
@@ -594,9 +573,6 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             id: 1,
             relation_component: {
               relation: {
-                options: {
-                  strict: false,
-                },
                 disconnect: [{ id: 1 }],
                 connect: [],
               },
@@ -606,9 +582,6 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             id: 2,
             relation_component: {
               relation: {
-                options: {
-                  strict: false,
-                },
                 disconnect: [],
                 connect: [],
               },
@@ -686,9 +659,6 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             __component: 'basic.relation',
             id: 1,
             relation: {
-              options: {
-                strict: false,
-              },
               connect: [{ id: 1, position: { end: true } }],
               disconnect: [],
             },
@@ -698,9 +668,6 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             id: 2,
             relation_component: {
               relation: {
-                options: {
-                  strict: false,
-                },
                 connect: [{ id: 2, position: { end: true } }],
                 disconnect: [],
               },
@@ -714,9 +681,6 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
                 __component: 'basic.relation',
                 id: 1,
                 relation: {
-                  options: {
-                    strict: false,
-                  },
                   connect: [{ id: 3, position: { end: true } }],
                   disconnect: [],
                 },
@@ -805,9 +769,6 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             __component: 'basic.relation',
             id: 1,
             relation: {
-              options: {
-                strict: false,
-              },
               connect: [],
               disconnect: [{ id: 1 }],
             },
@@ -817,9 +778,6 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             id: 2,
             relation_component: {
               relation: {
-                options: {
-                  strict: false,
-                },
                 connect: [],
                 disconnect: [{ id: 2 }],
               },
@@ -833,9 +791,6 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
                 __component: 'basic.relation',
                 id: 1,
                 relation: {
-                  options: {
-                    strict: false,
-                  },
                   connect: [],
                   disconnect: [],
                 },
@@ -844,9 +799,6 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
                 __component: 'basic.relation',
                 id: 2,
                 relation: {
-                  options: {
-                    strict: false,
-                  },
                   connect: [],
                   disconnect: [{ id: 4 }],
                 },
@@ -873,12 +825,9 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
 
       expect(result).toStrictEqual({
         relation: {
-          options: {
-            strict: false,
-          },
           connect: [
-            { id: 1, position: { before: 2 } },
             { id: 2, position: { end: true } },
+            { id: 1, position: { before: 2 } },
           ],
           disconnect: [],
         },
@@ -901,16 +850,13 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
 
       expect(result).toStrictEqual({
         relation: {
-          options: {
-            strict: false,
-          },
           connect: [
+            { id: 2, position: { end: true } },
+            { id: 1, position: { before: 2 } },
             {
               id: 3,
               position: { before: 1 },
             },
-            { id: 1, position: { before: 2 } },
-            { id: 2, position: { end: true } },
           ],
           disconnect: [],
         },
@@ -933,17 +879,14 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
 
       expect(result).toStrictEqual({
         relation: {
-          options: {
-            strict: false,
-          },
           connect: [
-            {
-              id: 3,
-              position: { before: 4 },
-            },
             {
               id: 4,
               position: { end: true },
+            },
+            {
+              id: 3,
+              position: { before: 4 },
             },
           ],
           disconnect: [],
