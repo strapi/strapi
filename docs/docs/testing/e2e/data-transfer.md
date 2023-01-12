@@ -21,6 +21,10 @@ So to solve this, you could use custom API endpoints of the application and whil
 
 The full documentation of the feature can be seen [here](https://docs.strapi.io/developer-docs/latest/developer-resources/data-management.html). Below are a couple of scenarios you might find yourself.
 
+:::warning
+Admin users and API tokens are not exported. Therefore, restored data does not include the users table, which means that createdBy and updatedBy are empty in a restored instance. Relations between entities are also broken in the import/export sequence.
+:::
+
 ### Creating a data packet
 
 Because we're using an Strapi template for the test instance, it makes the most sense to add/edit the dataset in said templated instance. Begin by creating the instance:
