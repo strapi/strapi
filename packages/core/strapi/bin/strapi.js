@@ -269,14 +269,15 @@ if (process.env.STRAPI_EXPERIMENTAL) {
     .command('transfer')
     .description('Transfer data from one source to another')
     .addOption(
-      new Option('--from <sourceURL>', `URL of remote Strapi instance to get data from.`).argParser(
-        parseURL
-      )
+      new Option(
+        '--from <sourceURL>',
+        `URL of the remote Strapi instance to get data from`
+      ).argParser(parseURL)
     )
     .addOption(
       new Option(
         '--to <destinationURL>',
-        `URL of remote Strapi instance to send data to`
+        `URL of the remote Strapi instance to send data to`
       ).argParser(parseURL)
     )
     // Validate URLs
@@ -354,8 +355,7 @@ program
           },
         ]);
         if (!answers.key?.length) {
-          console.log('No key entered, aborting import.');
-          process.exit(0);
+          exitWith(0, 'No key entered, aborting import.');
         }
         opts.key = answers.key;
       }
