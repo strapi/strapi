@@ -7,7 +7,7 @@
 const _ = require('lodash');
 const path = require('path');
 const resolveCwd = require('resolve-cwd');
-const { yellow, bold } = require('chalk');
+const { yellow } = require('chalk');
 const { Command, Option } = require('commander');
 const inquirer = require('inquirer');
 
@@ -340,8 +340,8 @@ program
   )
   .addOption(
     new Option(
-      '--force-yes',
-      `Automatic yes to prompts; answer "yes" to ${bold('all')} prompts and run non-interactively.`
+      '-f, --force',
+      `Automatically nswer "yes" to all prompts, including potentially destructive requests, and run non-interactively.`
     )
   )
   .allowExcessArguments(false)

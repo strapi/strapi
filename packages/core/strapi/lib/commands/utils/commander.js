@@ -68,16 +68,16 @@ const promptEncryptionKey = async (thisCommand) => {
 };
 
 /**
- * hook: require a confirmation message to be accepted
+ * hook: require a confirmation message to be accepted (unless --force option is used)
  *
  * @param {string} message The message to confirm with user
  * @param {object} options Additional options
  */
 const confirmMessage = (message) => {
   return async (command) => {
-    // if we have a forceYes option, assume yes
+    // if we have a force option, assume yes
     const opts = command.opts();
-    if (opts?.forceYes) {
+    if (opts?.force) {
       // attempt to mimic the inquirer prompt exactly
       console.warn(`${green('?')} ${bold(message)} ${cyan('Yes')}`);
       return;
