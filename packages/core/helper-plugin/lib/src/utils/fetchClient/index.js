@@ -31,9 +31,8 @@ export const addInterceptors = (instance) => {
   instance.interceptors.response.use(resInterceptor, resErrorInterceptor);
 };
 
-export const fetchClient = ({ baseURL }) => {
+export const fetchClient = () => {
   const instance = axios.create({
-    baseURL,
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
@@ -44,4 +43,4 @@ export const fetchClient = ({ baseURL }) => {
   return instance;
 };
 
-export default fetchClient({});
+export default fetchClient();
