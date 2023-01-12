@@ -3652,18 +3652,18 @@
     node-addon-api "^3.2.1"
     node-gyp-build "^4.3.0"
 
-"@pmmmwh/react-refresh-webpack-plugin@0.5.7", "@pmmmwh/react-refresh-webpack-plugin@^0.5.3":
-  version "0.5.7"
-  resolved "https://registry.yarnpkg.com/@pmmmwh/react-refresh-webpack-plugin/-/react-refresh-webpack-plugin-0.5.7.tgz#58f8217ba70069cc6a73f5d7e05e85b458c150e2"
-  integrity sha512-bcKCAzF0DV2IIROp9ZHkRJa6O4jy7NlnHdWL3GmcUxYWNjLXkK5kfELELwEfSP5hXPfVL/qOGMAROuMQb9GG8Q==
+"@pmmmwh/react-refresh-webpack-plugin@0.5.10", "@pmmmwh/react-refresh-webpack-plugin@^0.5.3":
+  version "0.5.10"
+  resolved "https://registry.yarnpkg.com/@pmmmwh/react-refresh-webpack-plugin/-/react-refresh-webpack-plugin-0.5.10.tgz#2eba163b8e7dbabb4ce3609ab5e32ab63dda3ef8"
+  integrity sha512-j0Ya0hCFZPd4x40qLzbhGsh9TMtdb+CJQiso+WxLOPNasohq9cc5SNUcwsZaRH6++Xh91Xkm/xHCkuIiIu0LUA==
   dependencies:
     ansi-html-community "^0.0.8"
     common-path-prefix "^3.0.0"
-    core-js-pure "^3.8.1"
+    core-js-pure "^3.23.3"
     error-stack-parser "^2.0.6"
     find-up "^5.0.0"
     html-entities "^2.1.0"
-    loader-utils "^2.0.0"
+    loader-utils "^2.0.4"
     schema-utils "^3.0.0"
     source-map "^0.7.3"
 
@@ -9196,10 +9196,10 @@ core-js-compat@^3.8.1:
   dependencies:
     browserslist "^4.21.3"
 
-core-js-pure@^3.20.2, core-js-pure@^3.8.1:
-  version "3.24.1"
-  resolved "https://registry.yarnpkg.com/core-js-pure/-/core-js-pure-3.24.1.tgz#8839dde5da545521bf282feb7dc6d0b425f39fd3"
-  integrity sha512-r1nJk41QLLPyozHUUPmILCEMtMw24NG4oWK6RbsDdjzQgg9ZvrUsPBj1MnG0wXXp1DCDU6j+wUvEmBSrtRbLXg==
+core-js-pure@^3.20.2, core-js-pure@^3.23.3:
+  version "3.27.1"
+  resolved "https://registry.yarnpkg.com/core-js-pure/-/core-js-pure-3.27.1.tgz#ede4a6b8440585c7190062757069c01d37a19dca"
+  integrity sha512-BS2NHgwwUppfeoqOXqi08mUqS5FiZpuRuJJpKsaME7kJz0xxuk0xkhDdfMIlP/zLa80krBqss1LtD7f889heAw==
 
 core-js@3.26.1, core-js@^3.0.4, core-js@^3.6.5, core-js@^3.8.2:
   version "3.26.1"
@@ -15043,10 +15043,10 @@ loader-utils@^1.2.3:
     emojis-list "^3.0.0"
     json5 "^1.0.1"
 
-loader-utils@^2.0.0:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/loader-utils/-/loader-utils-2.0.2.tgz#d6e3b4fb81870721ae4e0868ab11dd638368c129"
-  integrity sha512-TM57VeHptv569d/GKh6TAYdzKblwDNiumOdkFnejjD0XwTH87K90w3O7AiJRqdQoXygvi1VQTJTLGhJl7WqA7A==
+loader-utils@^2.0.0, loader-utils@^2.0.4:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/loader-utils/-/loader-utils-2.0.4.tgz#8b5cb38b5c34a9a018ee1fc0e6a066d1dfcc528c"
+  integrity sha512-xXqpXoINfFhgua9xiqD8fPFHgkoq1mmmpE92WlDbm9rNRd/EbRb+Gqf908T2DMfuHjjJlksiK2RbHVOdD/MqSw==
   dependencies:
     big.js "^5.2.2"
     emojis-list "^3.0.0"
