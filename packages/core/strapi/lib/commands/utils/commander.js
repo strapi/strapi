@@ -68,7 +68,7 @@ const promptEncryptionKey = async (thisCommand) => {
 };
 
 /**
- * hook: require a confirmation message to be accepted (unless --force option is used)
+ * hook: require a confirmation message to be accepted unless forceOption (-f,--force) is used
  *
  * @param {string} message The message to confirm with user
  * @param {object} options Additional options
@@ -99,7 +99,7 @@ const confirmMessage = (message) => {
 
 const forceOption = new Option(
   '-f, --force',
-  `Automatically nswer "yes" to all prompts, including potentially destructive requests, and run non-interactively.`
+  `Automatically answer "yes" to all prompts, including potentially destructive requests, and run non-interactively.`
 );
 
 module.exports = {
