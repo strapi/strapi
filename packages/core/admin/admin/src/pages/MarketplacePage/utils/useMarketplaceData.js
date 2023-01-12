@@ -50,8 +50,8 @@ function useMarketplaceData({ npmPackageType, debouncedSearch, query, tabQuery }
   const relevantResponse = npmPackageType === 'plugin' ? pluginsResponse : providersResponse;
   const relevantStatus = npmPackageType === 'plugin' ? pluginsStatus : providersStatus;
 
-  const [possibleCollections, setPossibleCollections] = useState([]);
-  const [possibleCategories, setPossibleCategories] = useState([]);
+  const [possibleCollections, setPossibleCollections] = useState({});
+  const [possibleCategories, setPossibleCategories] = useState({});
 
   // Keep possible filters up to date, but don't lose them while loading
   useEffect(() => {
