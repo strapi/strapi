@@ -1,24 +1,8 @@
 'use strict';
 
 const tsUtils = require('@strapi/typescript-utils');
-
-
-const validateInput = (input) => {
-  const regex = /^[A-Za-z-_0-9]+$/g;
-
-  if (!input) {
-    return 'You must provide an input';
-  }
-
-  return regex.test(input) || "Please use only letters and number, '-' or '_' and no spaces";
-};
-
-const getFormattedDate = (date = new Date()) => {
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-    .toISOString()
-    .split(".")[0]
-    .replace(/[-T:]/g, "_");
-};
+const validateFileNameInput = require('./utils/validate-file-name-input');
+const getFormattedDate = require('./utils/get-formatted-date');
 
 module.exports = (plop) => {
   // Migration generator
@@ -27,12 +11,12 @@ module.exports = (plop) => {
     prompts: [
       {
         type: 'input',
-        name: 'id',
+        name: 'name',
         message: 'Migration name',
-        validate: (input) => validateInput(input),
+        validate: (input) => validateFileNameInput(input),
       },
     ],
-    actions(answers) {
+    actions() {
       const currentDir = process.cwd();
       const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
       const timestamp = getFormattedDate();
@@ -40,7 +24,7 @@ module.exports = (plop) => {
       return [
         {
           type: 'add',
-          path: `${currentDir}/database/migrations/${timestamp}_{{ id }}.${language}`,
+          path: `${currentDir}/database/migrations/${timestamp}_{{ name }}.${language}`,
           templateFile: `templates/${language}/migration.${language}.hbs`,
         },
       ];
