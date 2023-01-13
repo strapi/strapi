@@ -180,6 +180,7 @@
   "Settings.permissions.auditLogs.user": "User",
   "Settings.permissions.auditLogs.userId": "User ID",
   "Settings.permissions.auditLogs.details": "Log Details",
+  "Settings.permissions.auditLogs.payload": "Payload",
   "Settings.permissions.auditLogs.listview.header.subtitle": "Logs of all the activities that happened in your environment",
   "Settings.permissions.auditLogs.entry.create": "Create entry ({model})",
   "Settings.permissions.auditLogs.entry.update": "Update entry ({model})",

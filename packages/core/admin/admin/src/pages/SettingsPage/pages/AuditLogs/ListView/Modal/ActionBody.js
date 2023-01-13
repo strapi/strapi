@@ -6,6 +6,7 @@ import { Grid } from '@strapi/design-system/Grid';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
+import { JSONInput } from '@strapi/design-system/JSONInput';
 import { pxToRem } from '@strapi/helper-plugin';
 import getDefaultMessage from '../utils/getActionTypesDefaultMessages';
 import ActionItem from './ActionItem';
@@ -25,7 +26,7 @@ const ActionBody = ({ status, data, formattedDate }) => {
 
   return (
     <>
-      <Box marginBottom={pxToRem(12)}>
+      <Box marginBottom={3}>
         <Typography variant="delta" id="title">
           {formatMessage({
             id: 'Settings.permissions.auditLogs.details',
@@ -40,6 +41,7 @@ const ActionBody = ({ status, data, formattedDate }) => {
         paddingBottom={4}
         paddingLeft={6}
         paddingRight={6}
+        marginBottom={4}
         background="neutral100"
         hasRadius
       >
@@ -78,10 +80,15 @@ const ActionBody = ({ status, data, formattedDate }) => {
           actionName={user?.id.toString() || '-'}
         />
       </Grid>
-      {/* TODO remove when adding JSON component */}
-      <Box as="pre" marginTop={4}>
-        <Typography>{JSON.stringify(payload, null, 2)}</Typography>
-      </Box>
+      <JSONInput
+        value={JSON.stringify(payload, null, 2)}
+        disabled
+        height={pxToRem(150)}
+        label={formatMessage({
+          id: 'Settings.permissions.auditLogs.payload',
+          defaultMessage: 'Payload',
+        })}
+      />
     </>
   );
 };
