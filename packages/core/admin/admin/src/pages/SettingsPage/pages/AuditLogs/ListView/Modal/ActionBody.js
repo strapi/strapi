@@ -16,7 +16,7 @@ const ActionBody = ({ status, data, formattedDate }) => {
   if (status === 'loading') {
     return (
       <Flex padding={7} justifyContent="center" alignItems="center">
-        <Loader />
+        <Loader>Loading content...</Loader>
       </Flex>
     );
   }
@@ -48,10 +48,13 @@ const ActionBody = ({ status, data, formattedDate }) => {
             id: 'Settings.permissions.auditLogs.action',
             defaultMessage: 'Action',
           })}
-          actionName={formatMessage({
-            id: `Settings.permissions.auditLogs.${action}`,
-            defaultMessage: getDefaultMessage(action),
-          })}
+          actionName={formatMessage(
+            {
+              id: `Settings.permissions.auditLogs.${action}`,
+              defaultMessage: getDefaultMessage(action),
+            },
+            { model: payload?.model }
+          )}
         />
         <ActionItem
           actionLabel={formatMessage({
@@ -65,7 +68,14 @@ const ActionBody = ({ status, data, formattedDate }) => {
             id: 'Settings.permissions.auditLogs.user',
             defaultMessage: 'User',
           })}
-          actionName={user ? user.fullname : '-'}
+          actionName={user?.fullname || '-'}
+        />
+        <ActionItem
+          actionLabel={formatMessage({
+            id: 'Settings.permissions.auditLogs.userId',
+            defaultMessage: 'User ID',
+          })}
+          actionName={user?.id.toString() || '-'}
         />
       </Grid>
       {/* TODO remove when adding JSON component */}

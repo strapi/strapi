@@ -96,7 +96,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
     await waitFor(() => {
       expect(screen.getByText('Create role')).toBeInTheDocument();
       expect(screen.getByText('Delete role')).toBeInTheDocument();
-      expect(screen.getByText('Create entry')).toBeInTheDocument();
+      expect(screen.getByText('Create entry (article)')).toBeInTheDocument();
       expect(screen.getByText('Admin logout')).toBeInTheDocument();
     });
   });

@@ -8,6 +8,7 @@ const TEST_PAGE_DATA = [
       fullname: 'test user',
       email: 'test@test.com',
     },
+    payload: {},
   },
   {
     id: 2,
@@ -18,12 +19,16 @@ const TEST_PAGE_DATA = [
       fullname: 'test user',
       email: 'test@test.com',
     },
+    payload: {},
   },
   {
     id: 3,
     action: 'entry.create',
     date: '2022-12-27T17:34:00.673Z',
     user: null,
+    payload: {
+      model: 'article',
+    },
   },
   {
     id: 4,
@@ -34,6 +39,7 @@ const TEST_PAGE_DATA = [
       fullname: 'test user',
       email: 'test@test.com',
     },
+    payload: {},
   },
 ];
 
