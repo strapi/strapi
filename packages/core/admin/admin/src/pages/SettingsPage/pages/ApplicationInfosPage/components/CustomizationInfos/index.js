@@ -11,7 +11,7 @@ import LogoInput from '../LogoInput';
 import reducer, { initialState } from './reducer';
 import init from './init';
 
-const Form = forwardRef(({ canUpdate, projectSettingsStored }, ref) => {
+const CustomizationInfos = forwardRef(({ canUpdate, projectSettingsStored }, ref) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const {
@@ -124,12 +124,12 @@ const Form = forwardRef(({ canUpdate, projectSettingsStored }, ref) => {
   );
 });
 
-Form.defaultProps = {
+CustomizationInfos.defaultProps = {
   canUpdate: false,
   projectSettingsStored: null,
 };
 
-Form.propTypes = {
+CustomizationInfos.propTypes = {
   canUpdate: PropTypes.bool,
   projectSettingsStored: PropTypes.shape({
     menuLogo: PropTypes.shape({
@@ -139,4 +139,4 @@ Form.propTypes = {
   }),
 };
 
-export default Form;
+export default CustomizationInfos;

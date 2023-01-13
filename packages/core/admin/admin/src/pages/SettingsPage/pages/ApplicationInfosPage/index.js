@@ -21,7 +21,7 @@ import ExternalLink from '@strapi/icons/ExternalLink';
 import Check from '@strapi/icons/Check';
 import adminPermissions from '../../../../permissions';
 import { useConfigurations } from '../../../../hooks';
-import Form from './components/Form';
+import CustomizationInfos from './components/CustomizationInfos';
 import { fetchProjectSettings, postProjectSettings } from './utils/api';
 import getFormData from './utils/getFormData';
 
@@ -41,7 +41,7 @@ const ApplicationInfosPage = () => {
   } = useRBAC(adminPermissions.settings['project-settings']);
   const canSubmit = canRead && canUpdate;
 
-  const { data } = useQuery('project-settings', fetchProjectSettings);
+  const { data } = useQuery('project-settings', fetchProjectSettings, { enabled: canRead });
 
   const currentPlan = appInfos.communityEdition
     ? 'app.components.UpgradePlanModal.text-ce'
@@ -56,6 +56,9 @@ const ApplicationInfosPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!canUpdate) return;
+
     const inputValues = inputsRef.current.getValues();
     const formData = getFormData(inputValues);
 
@@ -93,7 +96,7 @@ const ApplicationInfosPage = () => {
     <Layout>
       <SettingsPageTitle name="Application" />
       <Main>
-        <form onSubmit={canSubmit && handleSubmit}>
+        <form onSubmit={handleSubmit}>
           <HeaderLayout
             title={formatMessage({ id: 'Settings.application.title', defaultMessage: 'Overview' })}
             subtitle={formatMessage({
@@ -209,7 +212,11 @@ const ApplicationInfosPage = () => {
                 </Box>
               </Stack>
               {canRead && data && (
-                <Form canUpdate={canUpdate} ref={inputsRef} projectSettingsStored={data} />
+                <CustomizationInfos
+                  canUpdate={canUpdate}
+                  ref={inputsRef}
+                  projectSettingsStored={data}
+                />
               )}
             </Stack>
           </ContentLayout>

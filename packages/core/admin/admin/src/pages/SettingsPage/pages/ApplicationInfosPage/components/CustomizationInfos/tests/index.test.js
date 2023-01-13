@@ -3,7 +3,7 @@ import { IntlProvider } from 'react-intl';
 import { render as renderTL } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 
-import Form from '..';
+import CustomizationInfos from '..';
 
 const PROJECT_SETTINGS_DATA_FIXTURES = {
   authLogo: {
@@ -40,7 +40,11 @@ const render = (props) =>
   renderTL(
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} textComponent="span">
-        <Form canUpdate projectSettingsStored={PROJECT_SETTINGS_DATA_FIXTURES} {...props} />
+        <CustomizationInfos
+          canUpdate
+          projectSettingsStored={PROJECT_SETTINGS_DATA_FIXTURES}
+          {...props}
+        />
       </IntlProvider>
     </ThemeProvider>
   );
