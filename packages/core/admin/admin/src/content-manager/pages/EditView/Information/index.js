@@ -49,7 +49,7 @@ const Information = () => {
 
   return (
     <Stack spacing={2}>
-      <Typography variant="sigma" id="additional-information">
+      <Typography variant="sigma" textColor="neutral600" id="additional-information">
         {formatMessage({
           id: getTrad('containers.Edit.information'),
           defaultMessage: 'Information',

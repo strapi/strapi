@@ -1,0 +1,187 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CONTENT MANAGER | EditView | Information renders and matches the snaphsot 1`] = `
+.c2 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #32324d;
+}
+
+.c9 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c10 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
+}
+
+.c3 {
+  padding-bottom: 16px;
+}
+
+.c4 {
+  background: #eaeaef;
+}
+
+.c0 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c8 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c1 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c1 > * + * {
+  margin-top: 8px;
+}
+
+.c6 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c6 > * + * {
+  margin-top: 16px;
+}
+
+.c7 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c7 > * + * {
+  margin-top: 4px;
+}
+
+.c5 {
+  height: 1px;
+  border: none;
+  margin: 0;
+}
+
+<div
+  class="c0 c1"
+  spacing="2"
+>
+  <span
+    class="c2"
+    id="additional-information"
+  >
+    Information
+  </span>
+  <div
+    class="c3"
+  >
+    <hr
+      class="c4 c5"
+    />
+  </div>
+  <div
+    class="c0 c6"
+    spacing="4"
+  >
+    <div
+      class="c0 c7"
+      spacing="1"
+    >
+      <p
+        class="c8"
+      >
+        <span
+          class="c9"
+        >
+          Created
+        </span>
+        <span
+          class="c10"
+        >
+          now
+        </span>
+      </p>
+      <p
+        class="c8"
+      >
+        <span
+          class="c9"
+        >
+          By
+        </span>
+        <span
+          class="c10"
+        >
+          -
+        </span>
+      </p>
+    </div>
+    <div
+      class="c0 c7"
+      spacing="1"
+    >
+      <p
+        class="c8"
+      >
+        <span
+          class="c9"
+        >
+          Last update
+        </span>
+        <span
+          class="c10"
+        >
+          now
+        </span>
+      </p>
+      <p
+        class="c8"
+      >
+        <span
+          class="c9"
+        >
+          By
+        </span>
+        <span
+          class="c10"
+        >
+          -
+        </span>
+      </p>
+    </div>
+  </div>
+</div>
+`;
