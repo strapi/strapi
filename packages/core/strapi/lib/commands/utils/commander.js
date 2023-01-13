@@ -5,7 +5,8 @@
  */
 
 const inquirer = require('inquirer');
-const { InvalidOptionArgumentError } = require('commander');
+const { InvalidOptionArgumentError, Option } = require('commander');
+const { bold, green, cyan } = require('chalk');
 const { exitWith } = require('./helpers');
 
 /**
@@ -67,10 +68,21 @@ const promptEncryptionKey = async (thisCommand) => {
 };
 
 /**
- * hook: require a confirmation message to be accepted
+ * hook: require a confirmation message to be accepted unless forceOption (-f,--force) is used
+ *
+ * @param {string} message The message to confirm with user
+ * @param {object} options Additional options
  */
 const confirmMessage = (message) => {
-  return async () => {
+  return async (command) => {
+    // if we have a force option, assume yes
+    const opts = command.opts();
+    if (opts?.force === true) {
+      // attempt to mimic the inquirer prompt exactly
+      console.log(`${green('?')} ${bold(message)} ${cyan('Yes')}`);
+      return;
+    }
+
     const answers = await inquirer.prompt([
       {
         type: 'confirm',
@@ -85,9 +97,15 @@ const confirmMessage = (message) => {
   };
 };
 
+const forceOption = new Option(
+  '-f, --force',
+  `Automatically answer "yes" to all prompts, including potentially destructive requests, and run non-interactively.`
+);
+
 module.exports = {
   parseInputList,
   parseURL,
   promptEncryptionKey,
   confirmMessage,
+  forceOption,
 };
