@@ -18,7 +18,7 @@ Replace the version number in both `strapi/packages/core/admin/package.json` and
 
 Alternatively, you can use [`yarn link`](https://classic.yarnpkg.com/lang/en/docs/cli/link/) by first running `yarn link` in `strapi-design-system/packages/design-system` and then `yarn link @strapi/design-system` in both `strapi/packages/core/admin` and `strapi/packages/core/helper-plugin`. With this approach, no changes need to be made to the `package.json`
 
-Once the link is setup, run the following command from the root of `@strapi/strapi`
+Once the link is setup, run the following command from the root of the monorepo
 
 ```
 yarn lerna clean && yarn setup
