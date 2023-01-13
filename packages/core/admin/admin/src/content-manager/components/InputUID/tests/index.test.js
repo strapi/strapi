@@ -105,6 +105,12 @@ describe('<InputUID />', () => {
         color: #32324d;
       }
 
+      .c12 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
       .c1 > * {
         margin-top: 0;
         margin-bottom: 0;
@@ -233,6 +239,7 @@ describe('<InputUID />', () => {
               class="c4 c5"
             >
               <input
+                aria-describedby="textinput-1-hint"
                 aria-disabled="false"
                 aria-invalid="false"
                 aria-required="false"
@@ -275,6 +282,12 @@ describe('<InputUID />', () => {
                 </div>
               </div>
             </div>
+            <p
+              class="c12"
+              id="textinput-1-hint"
+            >
+              
+            </p>
           </div>
         </div>
       </div>

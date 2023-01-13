@@ -14,7 +14,7 @@ import InputUID from '../InputUID';
 import { RelationInputDataManager } from '../RelationInputDataManager';
 
 import {
-  buildDescription,
+  buildMinMaxDescription,
   connect,
   generateOptions,
   getInputType,
@@ -167,8 +167,6 @@ function Inputs({
   );
 
   const { label, description, placeholder, visible } = metadatas;
-  const { minLength, maxLength } = fieldSchema;
-  const builtDescription = buildDescription(description, minLength, maxLength);
 
   /**
    * It decides whether using the default `step` accoding to its `inputType` or the one
@@ -221,11 +219,10 @@ function Inputs({
         {...fieldSchema}
         componentUid={componentUid}
         description={
-          builtDescription.id
+          metadatas.description
             ? formatMessage({
-                id: builtDescription.id,
-                defaultMessage: builtDescription.defaultMessage,
-                values: builtDescription.values,
+                id: metadatas.description,
+                defaultMessage: metadatas.description,
               })
             : undefined
         }
@@ -262,6 +259,14 @@ function Inputs({
     ...customFieldInputs,
   };
 
+  const { minLength, maxLength, max, min } = fieldSchema;
+  const genericInputType = customFieldUid || inputType;
+  const minMaxDescription = buildMinMaxDescription(
+    genericInputType,
+    min || minLength,
+    max || maxLength
+  );
+
   return (
     <GenericInput
       attribute={fieldSchema}
@@ -269,12 +274,13 @@ function Inputs({
       intlLabel={{ id: label, defaultMessage: label }}
       // in case the default value of the boolean is null, attribute.default doesn't exist
       isNullable={inputType === 'bool' && [null, undefined].includes(fieldSchema.default)}
-      description={
-        builtDescription.id
+      description={description ? { id: description, defaultMessage: description } : null}
+      minMaxDescription={
+        minMaxDescription
           ? {
-              id: builtDescription.id,
-              defaultMessage: builtDescription.defaultMessage,
-              values: builtDescription.values,
+              id: minMaxDescription.id,
+              defaultMessage: minMaxDescription.defaultMessage,
+              values: minMaxDescription.values,
             }
           : null
       }
@@ -290,7 +296,7 @@ function Inputs({
       placeholder={placeholder ? { id: placeholder, defaultMessage: placeholder } : null}
       required={fieldSchema.required || false}
       step={inputStep}
-      type={customFieldUid || inputType}
+      type={genericInputType}
       // validations={validations}
       value={inputValue}
       withDefaultValue={false}

@@ -30,6 +30,7 @@ const GenericInput = ({
   autoComplete,
   customInputs,
   description,
+  minMaxDescription,
   disabled,
   intlLabel,
   labelAction,
@@ -92,6 +93,7 @@ const GenericInput = ({
       <CustomInput
         {...rest}
         description={description}
+        minMaxDescription={minMaxDescription}
         disabled={disabled}
         intlLabel={intlLabel}
         labelAction={labelAction}
@@ -127,6 +129,14 @@ const GenericInput = ({
         { ...placeholder.values }
       )
     : '';
+
+  const formattedMinMaxDescription = minMaxDescription
+    ? formatMessage(
+        { id: minMaxDescription.id, defaultMessage: minMaxDescription.defaultMessage },
+        { ...minMaxDescription.values }
+      )
+    : [];
+  const combinedHint = [...formattedMinMaxDescription, hint];
 
   switch (type) {
     case 'bool': {
@@ -210,7 +220,10 @@ const GenericInput = ({
           required={required}
           value={value && new Date(value)}
           selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}
-          selectButtonTitle={formatMessage({ id: 'selectButtonTitle', defaultMessage: 'Select' })}
+          selectButtonTitle={formatMessage({
+            id: 'selectButtonTitle',
+            defaultMessage: 'Select',
+          })}
         />
       );
     }
@@ -252,7 +265,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={hint}
+          hint={combinedHint}
           name={name}
           onValueChange={(value) => onChange({ target: { name, value, type } })}
           placeholder={formattedPlaceholder}
@@ -271,7 +284,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={hint}
+          hint={combinedHint}
           name={name}
           onChange={onChange}
           placeholder={formattedPlaceholder}
@@ -292,7 +305,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={hint}
+          hint={combinedHint}
           name={name}
           onChange={onChange}
           placeholder={formattedPlaceholder}
@@ -334,7 +347,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={hint}
+          hint={combinedHint}
           name={name}
           onChange={onChange}
           placeholder={formattedPlaceholder}
@@ -377,7 +390,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={hint}
+          hint={combinedHint}
           name={name}
           onChange={onChange}
           required={required}
@@ -442,6 +455,7 @@ GenericInput.defaultProps = {
   autoComplete: undefined,
   customInputs: null,
   description: null,
+  minMaxDescription: null,
   disabled: false,
   error: '',
   isNullable: undefined,
@@ -457,6 +471,11 @@ GenericInput.propTypes = {
   autoComplete: PropTypes.string,
   customInputs: PropTypes.object,
   description: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
+  }),
+  minMaxDescription: PropTypes.shape({
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,

@@ -24,6 +24,7 @@ const InputUID = ({
   attribute,
   contentTypeUID,
   description,
+  minMaxDescription,
   disabled,
   error,
   intlLabel,
@@ -67,6 +68,14 @@ const InputUID = ({
         { ...placeholder.values }
       )
     : '';
+
+  const formattedMinMaxDescription = minMaxDescription
+    ? formatMessage(
+        { id: minMaxDescription.id, defaultMessage: minMaxDescription.defaultMessage },
+        { ...minMaxDescription.values }
+      )
+    : [];
+  const combinedHint = [...formattedMinMaxDescription, hint];
 
   generateUid.current = async (shouldSetInitialValue = false) => {
     setIsLoading(true);
@@ -233,7 +242,7 @@ const InputUID = ({
           </FieldActionWrapper>
         </EndActionWrapper>
       }
-      hint={hint}
+      hint={combinedHint}
       label={label}
       labelAction={labelAction}
       name={name}
@@ -252,6 +261,11 @@ InputUID.propTypes = {
   }).isRequired,
   contentTypeUID: PropTypes.string.isRequired,
   description: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
+  }),
+  minMaxDescription: PropTypes.shape({
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
@@ -277,6 +291,7 @@ InputUID.propTypes = {
 
 InputUID.defaultProps = {
   description: undefined,
+  minMaxDescription: undefined,
   disabled: false,
   error: undefined,
   labelAction: undefined,

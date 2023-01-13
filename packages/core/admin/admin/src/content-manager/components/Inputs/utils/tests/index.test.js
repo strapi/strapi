@@ -1,46 +1,69 @@
 import React from 'react';
-import { buildDescription } from '../index';
+import { buildMinMaxDescription } from '../index';
 
 describe('CONTENT MANAGER | Inputs | Utils', () => {
   describe('fieldDescription', () => {
-    const description =
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
-    const values = { br: <br /> };
+    const id = 'content-manager.form.Input.minMaxDescription';
+    const values = (min, max) => ({ br: <br />, min, max });
 
-    it('correctly generates field description', () => {
-      const minLength = 2;
-      const maxLength = 100;
+    it('ignores unsupported field types', () => {
+      const result = buildMinMaxDescription('someType');
+      expect(result).toBeNull();
+    });
 
-      const result = buildDescription(description, minLength, maxLength);
-      expect(result).toEqual({
-        defaultMessage: `min. ${minLength} / max. ${maxLength} characters{br}${description}`,
-        id: description,
-        values,
+    it('expects one of min or max to be a number ', () => {
+      const result = buildMinMaxDescription('text', null, 'test');
+      expect(result).toBeNull();
+    });
+
+    describe('correctly generates field description', () => {
+      it('text field', () => {
+        const min = 2;
+        const max = 100;
+
+        const result = buildMinMaxDescription('text', min, max);
+        expect(result).toEqual({
+          id,
+          defaultMessage: `min. {min} / max. {max} characters{br}`,
+          values: values(min, max),
+        });
+      });
+
+      it('number field', () => {
+        const min = 2;
+        const max = 100;
+
+        const result = buildMinMaxDescription('number', min, max);
+        expect(result).toEqual({
+          id,
+          defaultMessage: `min. {min} / max. {max}{br}`,
+          values: values(min, max),
+        });
       });
     });
 
     describe('correctly ignores omissions', () => {
-      it('minLength', () => {
-        const minLength = 0;
-        const maxLength = 100;
+      it('min', () => {
+        const min = 0;
+        const max = 100;
 
-        const result = buildDescription(description, minLength, maxLength);
+        const result = buildMinMaxDescription('text', min, max);
         expect(result).toEqual({
-          defaultMessage: `max. ${maxLength} characters{br}${description}`,
-          id: description,
-          values,
+          id,
+          defaultMessage: `max. {max} characters{br}`,
+          values: values(min, max),
         });
       });
 
-      it('maxLength', () => {
-        const minLength = 5;
-        const maxLength = 0;
+      it('max', () => {
+        const min = 5;
+        const max = 0;
 
-        const result = buildDescription(description, minLength, maxLength);
+        const result = buildMinMaxDescription('text', min, max);
         expect(result).toEqual({
-          defaultMessage: `min. ${minLength} characters{br}${description}`,
-          id: description,
-          values,
+          id,
+          defaultMessage: `min. {min} characters{br}`,
+          values: values(min, max),
         });
       });
     });
