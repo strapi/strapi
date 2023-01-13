@@ -48,19 +48,40 @@ class Database {
     return this.entityManager.getRepository(uid);
   }
 
-  async transaction(cb) {
+  async transaction(cb, { onError, onSuccess } = {}) {
+    const notNestedTransaction = !transactionCtx.get();
+    const trx = notNestedTransaction ? await this.connection.transaction() : transactionCtx.get();
     if (!cb) {
-      return this.connection.transaction();
+      return {
+        async commit() {
+          if (notNestedTransaction) {
+            await trx.commit();
+          }
+        },
+        async rollback() {
+          if (notNestedTransaction) {
+            await trx.rollback();
+          }
+        },
+        get() {
+          return trx;
+        },
+      };
     }
 
-    const trx = await this.connection.transaction();
     return transactionCtx.run(trx, async () => {
       try {
-        const res = await cb();
-        await trx.commit();
+        const res = await cb(trx);
+        if (notNestedTransaction) {
+          await trx.commit();
+        }
+        await onSuccess?.();
         return res;
       } catch (error) {
-        await trx.rollback();
+        if (notNestedTransaction) {
+          await trx.rollback();
+        }
+        await onError?.();
         throw error;
       }
     });

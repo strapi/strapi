@@ -103,7 +103,7 @@ const update = async (id, { name, parent }, { user }) => {
         .queryBuilder(FOLDER_MODEL_UID)
         .select(['pathId', 'path'])
         .where({ id })
-        .transacting(trx)
+        .transacting(trx.get())
         .forUpdate()
         .first()
         .execute();
@@ -112,7 +112,7 @@ const update = async (id, { name, parent }, { user }) => {
       const { joinTable } = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.parent;
       await strapi.db
         .queryBuilder(joinTable.name)
-        .transacting(trx)
+        .transacting(trx.get())
         .delete()
         .where({ [joinTable.joinColumn.name]: id })
         .execute();
@@ -120,7 +120,7 @@ const update = async (id, { name, parent }, { user }) => {
       if (parent !== null) {
         await strapi.db
           .queryBuilder(joinTable.name)
-          .transacting(trx)
+          .transacting(trx.get())
           .insert({ [joinTable.inverseJoinColumn.name]: parent, [joinTable.joinColumn.name]: id })
           .where({ [joinTable.joinColumn.name]: id })
           .execute();
@@ -133,7 +133,7 @@ const update = async (id, { name, parent }, { user }) => {
           .queryBuilder(FOLDER_MODEL_UID)
           .select('path')
           .where({ id: parent })
-          .transacting(trx)
+          .transacting(trx.get())
           .first()
           .execute();
         destinationFolderPath = destinationFolder.path;
@@ -148,7 +148,7 @@ const update = async (id, { name, parent }, { user }) => {
       // update folders below
       await strapi.db
         .getConnection(folderTable)
-        .transacting(trx)
+        .transacting(trx.get())
         .where(pathColumnName, existingFolder.path)
         .orWhere(pathColumnName, 'like', `${existingFolder.path}/%`)
         .update(
@@ -163,7 +163,7 @@ const update = async (id, { name, parent }, { user }) => {
       // update files below
       await strapi.db
         .getConnection(fileTable)
-        .transacting(trx)
+        .transacting(trx.get())
         .where(folderPathColumnName, existingFolder.path)
         .orWhere(folderPathColumnName, 'like', `${existingFolder.path}/%`)
         .update(
