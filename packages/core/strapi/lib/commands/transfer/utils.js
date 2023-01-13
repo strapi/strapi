@@ -2,7 +2,7 @@
 
 const chalk = require('chalk');
 const Table = require('cli-table3');
-const { readableBytes } = require('../utils');
+const { readableBytes } = require('../utils/helpers');
 const strapi = require('../../index');
 
 const pad = (n) => {
@@ -88,7 +88,6 @@ const createStrapiInstance = async (logLevel = 'error') => {
 module.exports = {
   buildTransferTable,
   getDefaultExportName,
-  yyyymmddHHMMSS,
   DEFAULT_IGNORED_CONTENT_TYPES,
   createStrapiInstance,
 };

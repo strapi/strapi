@@ -38,7 +38,7 @@ jest.spyOn(console, 'log').mockImplementation(() => {});
 
 jest.mock('../../transfer/utils');
 
-const destinationUrl = 'ws://strapi.com';
+const destinationUrl = new URL('http://strapi.com/admin');
 
 describe('Transfer', () => {
   beforeEach(() => {

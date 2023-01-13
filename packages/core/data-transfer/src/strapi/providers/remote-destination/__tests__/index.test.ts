@@ -2,10 +2,12 @@ import { WebSocket } from 'ws';
 import type { IRemoteStrapiDestinationProviderOptions } from '..';
 
 import { createRemoteStrapiDestinationProvider } from '..';
+import { TRANSFER_PATH } from '../../../remote/constants';
 
 const defaultOptions: IRemoteStrapiDestinationProviderOptions = {
   strategy: 'restore',
-  url: '<some_url>',
+  url: new URL('http://strapi.com/admin'),
+  auth: undefined,
 };
 
 jest.mock('../utils', () => ({
@@ -50,5 +52,39 @@ describe('Remote Strapi Destination', () => {
       expect(provider.ws).not.toBeNull();
       expect(provider.ws?.readyState).toBe(WebSocket.CLOSED);
     });
+  });
+
+  test('Should use ws protocol for http urls', async () => {
+    const provider = createRemoteStrapiDestinationProvider(defaultOptions);
+    try {
+      await provider.bootstrap();
+    } catch {
+      // ignore ws connection error
+    }
+
+    expect(WebSocket).toHaveBeenCalledWith(`ws://strapi.com/admin${TRANSFER_PATH}`);
+  });
+
+  test('Should use wss protocol for https urls', async () => {
+    const provider = createRemoteStrapiDestinationProvider({
+      ...defaultOptions,
+      url: new URL('https://strapi.com/admin'),
+    });
+    try {
+      await provider.bootstrap();
+    } catch {
+      // ignore ws connection error
+    }
+
+    expect(WebSocket).toHaveBeenCalledWith(`wss://strapi.com/admin${TRANSFER_PATH}`);
+  });
+
+  test('Should throw on invalid protocol', async () => {
+    const provider = createRemoteStrapiDestinationProvider({
+      ...defaultOptions,
+      url: new URL('ws://strapi.com/admin'),
+    });
+
+    await expect(provider.bootstrap()).rejects.toThrowError('Invalid protocol');
   });
 });
