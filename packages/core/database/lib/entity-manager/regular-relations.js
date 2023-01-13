@@ -340,7 +340,9 @@ const cleanOrderColumnsForInnoDB = async ({
                   .map(() => '?')
                   .join(', ')})
               ) AS inv_order
-            FROM ?? a`,
+            FROM ?? a
+            WHERE a.?? IN (${inverseRelIds.map(() => '?').join(', ')})
+            `,
           [
             tempInvOrderTableName,
             joinTable.name,
@@ -351,6 +353,8 @@ const cleanOrderColumnsForInnoDB = async ({
             inverseJoinColumn.name,
             ...inverseRelIds,
             joinTable.name,
+            inverseJoinColumn.name,
+            ...inverseRelIds,
           ]
         )
         .transacting(trx);
