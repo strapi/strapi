@@ -3,6 +3,11 @@
 const _ = require('lodash');
 const { filter, map, pipe, prop } = require('lodash/fp');
 const urlJoin = require('url-join');
+const {
+  template: { createStrictInterpolationRegExp },
+  errors,
+  keysDeep,
+} = require('@strapi/utils');
 
 const { getService } = require('../utils');
 
@@ -230,7 +235,15 @@ module.exports = ({ strapi }) => ({
   },
 
   template(layout, data) {
-    const compiledObject = _.template(layout);
-    return compiledObject(data);
+    const allowedTemplateVariables = keysDeep(data);
+
+    // Create a strict interpolation RegExp based on possible variable names
+    const interpolate = createStrictInterpolationRegExp(allowedTemplateVariables, 'g');
+
+    try {
+      return _.template(layout, { interpolate, evaluate: false, escape: false })(data);
+    } catch (e) {
+      throw new errors.ApplicationError('Invalid email template');
+    }
   },
 });
