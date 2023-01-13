@@ -29,7 +29,7 @@ found at `template/src/api/database`
 import { test } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
-  await page.request.fetch('http://localhost:1337/api/database-dump', {
+  await page.request.fetch('http://localhost:1337/api/database/dump', {
     method: 'POST',
   });
 });
