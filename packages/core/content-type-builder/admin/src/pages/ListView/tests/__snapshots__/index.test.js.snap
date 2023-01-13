@@ -431,8 +431,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c13[aria-disabled='true'] svg > g,
-.c13[aria-disabled='true'] svg path {
+.c13[aria-disabled='true'] svg > g,.c13[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -445,8 +444,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c13[aria-disabled='true']:active svg > g,
-.c13[aria-disabled='true']:active svg path {
+.c13[aria-disabled='true']:active svg > g,.c13[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -505,8 +503,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c17[aria-disabled='true'] svg > g,
-.c17[aria-disabled='true'] svg path {
+.c17[aria-disabled='true'] svg > g,.c17[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -519,8 +516,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c17[aria-disabled='true']:active svg > g,
-.c17[aria-disabled='true']:active svg path {
+.c17[aria-disabled='true']:active svg > g,.c17[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -587,8 +583,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c18[aria-disabled='true'] svg > g,
-.c18[aria-disabled='true'] svg path {
+.c18[aria-disabled='true'] svg > g,.c18[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -601,8 +596,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c18[aria-disabled='true']:active svg > g,
-.c18[aria-disabled='true']:active svg path {
+.c18[aria-disabled='true']:active svg > g,.c18[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
