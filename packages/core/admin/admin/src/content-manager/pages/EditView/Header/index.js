@@ -74,7 +74,7 @@ const Header = ({
             {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
           </Button>
         )}
-        <Button disabled={!didChangeData} isLoading={status === 'submit-pending'} type="submit">
+        <Button disabled={!didChangeData} loading={status === 'submit-pending'} type="submit">
           {formatMessage({
             id: getTrad('containers.Edit.submit'),
             defaultMessage: 'Save',

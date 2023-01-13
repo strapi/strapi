@@ -122,7 +122,6 @@ describe('Content type validator', () => {
         components: [
           {
             uid: 'edit',
-            icon: 'star',
             displayName: 'test',
             category: 'test',
             attributes: {
@@ -134,7 +133,6 @@ describe('Content type validator', () => {
           },
           {
             tmpUID: 'random',
-            icon: 'star',
             displayName: 'test2',
             category: 'test',
             attributes: {
