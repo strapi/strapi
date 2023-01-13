@@ -35,7 +35,7 @@ const AttributeTag = ({ attribute, filter, onClick, operator, value }) => {
     formattedValue = formatTime(date, {
       numeric: 'auto',
       style: 'short',
-    });
+    }).replace('\u202f', ' ');
   }
 
   if (['float', 'integer', 'biginteger', 'decimal'].includes(type)) {

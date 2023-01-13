@@ -20,7 +20,7 @@ const RelativeTime = ({ timestamp }) => {
   return (
     <time
       dateTime={timestamp.toISOString()}
-      title={`${formatDate(timestamp)} ${formatTime(timestamp)}`}
+      title={`${formatDate(timestamp)} ${formatTime(timestamp).replace('\u202f', ' ')}`}
     >
       {formatRelativeTime(relativeTime, unit, { numeric: 'auto' })}
     </time>
