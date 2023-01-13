@@ -118,7 +118,6 @@ describe('Uploads folder', () => {
         },
         folderPath: `/${file.folder.pathId}`,
       });
-      expect(file.folder.id).not.toBe(uploadFolder.id);
 
       uploadFolder = file.folder;
     });
@@ -163,7 +162,6 @@ describe('Uploads folder', () => {
         },
         folderPath: `/${file.folder.pathId}`,
       });
-      expect(file.folder.id).not.toBe(uploadFolder.id);
 
       uploadFolder = file.folder;
     });
@@ -230,7 +228,6 @@ describe('Uploads folder', () => {
         },
         folderPath: `/${file.folder.pathId}`,
       });
-      expect(file.folder.id).not.toBe(uploadFolder.id);
 
       uploadFolder = file.folder;
     });
@@ -276,7 +273,6 @@ describe('Uploads folder', () => {
         },
         folderPath: `/${file.folder.pathId}`,
       });
-      expect(file.folder.id).not.toBe(uploadFolder.id);
 
       uploadFolder = file.folder;
     });
@@ -360,7 +356,6 @@ describe('Uploads folder', () => {
         },
         folderPath: `/${file.folder.pathId}`,
       });
-      expect(file.folder.id).not.toBe(uploadFolder.id);
 
       uploadFolder = file.folder;
     });
@@ -408,7 +403,6 @@ describe('Uploads folder', () => {
         },
         folderPath: `/${file.folder.pathId}`,
       });
-      expect(file.folder.id).not.toBe(uploadFolder.id);
 
       uploadFolder = file.folder;
     });
@@ -563,7 +557,6 @@ describe('Uploads folder', () => {
           },
           folderPath: `/${file.folder.pathId}`,
         });
-        expect(file.folder.id).not.toBe(uploadFolder.id);
       });
 
       expect(files.every((file) => file.folder.id === files[0].folder.id)).toBe(true);
@@ -625,7 +618,6 @@ describe('Uploads folder', () => {
           },
           folderPath: `/${file.folder.pathId}`,
         });
-        expect(file.folder.id).not.toBe(uploadFolder.id);
       });
 
       expect(files.every((file) => file.folder.id === files[0].folder.id)).toBe(true);

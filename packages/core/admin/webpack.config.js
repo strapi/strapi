@@ -169,7 +169,19 @@ module.exports = ({
             },
           },
         },
-
+        /**
+         * This is used to avoid webpack import errors where
+         * the origin is strict EcmaScript Module.
+         *
+         * e. g. a module with javascript mimetype, a '.mjs' file,
+         * or a '.js' file where the package.json contains '"type": "module"'
+         */
+        {
+          test: /\.m?jsx?$/,
+          resolve: {
+            fullySpecified: false,
+          },
+        },
         {
           test: /\.css$/i,
           use: ['style-loader', 'css-loader'],

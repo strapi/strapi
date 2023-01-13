@@ -5,6 +5,7 @@ import { useIntl } from 'react-intl';
 import { Typography } from '@strapi/design-system/Typography';
 import { Box } from '@strapi/design-system/Box';
 import { Badge } from '@strapi/design-system/Badge';
+import { Flex } from '@strapi/design-system/Flex';
 import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
 import { Loader } from '@strapi/design-system/Loader';
 import styled from 'styled-components';
@@ -38,8 +39,8 @@ const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, conte
   const [isOpen, setIsOpen] = useState(false);
 
   const Label = (
-    <>
-      <Badge>{value.count}</Badge>{' '}
+    <Flex gap={1} wrap="nowrap">
+      <Badge>{value.count}</Badge>
       {formatMessage(
         {
           id: 'content-manager.containers.ListPage.items',
@@ -47,7 +48,7 @@ const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, conte
         },
         { number: value.count }
       )}
-    </>
+    </Flex>
   );
 
   const notify = () => {

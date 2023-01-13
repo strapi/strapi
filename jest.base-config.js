@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = {
   rootDir: __dirname,
   setupFilesAfterEnv: ['<rootDir>/test/unit.setup.js'],

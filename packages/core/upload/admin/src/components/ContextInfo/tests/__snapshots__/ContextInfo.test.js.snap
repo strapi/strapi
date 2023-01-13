@@ -57,17 +57,17 @@ exports[`ContextInfo renders 1`] = `
 }
 
 .c5 {
-  color: #666687;
   font-weight: 600;
   font-size: 0.6875rem;
   line-height: 1.45;
   text-transform: uppercase;
+  color: #666687;
 }
 
 .c6 {
-  color: #4a4a6a;
   font-size: 0.75rem;
   line-height: 1.33;
+  color: #4a4a6a;
 }
 
 @media (max-width:68.75rem) {

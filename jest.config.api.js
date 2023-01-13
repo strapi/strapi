@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = {
   displayName: 'API integration tests',
   testMatch: ['**/?(*.)+(spec|test).api.js'],

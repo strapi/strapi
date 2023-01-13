@@ -51,4 +51,58 @@ describe('CTB | components | FormModal | reducer | actions | SET_CUSTOM_FIELD_DA
 
     expect(reducer(initialState, action)).toEqual(expected);
   });
+
+  it("adds a custom field's default options", () => {
+    const mockCustomFieldWithOptionsPath = {
+      ...mockCustomField,
+      options: {
+        advanced: [
+          {
+            name: 'regex',
+            type: 'text',
+            defaultValue: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
+          },
+          {
+            sectionTitle: {
+              id: 'global.settings',
+              defaultMessage: 'Settings',
+            },
+            items: [
+              {
+                name: 'required',
+                type: 'checkbox',
+                defaultValue: true,
+              },
+              {
+                name: 'options.format',
+                type: 'text',
+                defaultValue: 'hex',
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    const action = {
+      type: actions.SET_CUSTOM_FIELD_DATA_SCHEMA,
+      customField: mockCustomFieldWithOptionsPath,
+      isEditing: false,
+      modifiedDataToSetForEditing: { name: null },
+    };
+
+    const expected = {
+      ...initialState,
+      modifiedData: {
+        type: mockCustomField.type,
+        required: true,
+        regex: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
+        options: {
+          format: 'hex',
+        },
+      },
+    };
+
+    expect(reducer(initialState, action)).toEqual(expected);
+  });
 });

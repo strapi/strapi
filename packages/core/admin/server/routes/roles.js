@@ -2,14 +2,6 @@
 
 module.exports = [
   {
-    method: 'POST',
-    path: '/users/batch-delete',
-    handler: 'user.deleteMany',
-    config: {
-      policies: [{ name: 'admin::hasPermissions', config: { actions: ['admin::users.delete'] } }],
-    },
-  },
-  {
     method: 'GET',
     path: '/roles/:id/permissions',
     handler: 'role.getPermissions',

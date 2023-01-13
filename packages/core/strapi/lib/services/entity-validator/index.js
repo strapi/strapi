@@ -5,8 +5,8 @@
 
 'use strict';
 
-const { uniqBy, castArray, isNil } = require('lodash');
-const { has, assoc, prop, isObject, isEmpty, merge } = require('lodash/fp');
+const { uniqBy, castArray, isNil, isArray, mergeWith } = require('lodash');
+const { has, assoc, prop, isObject, isEmpty } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
 const validators = require('./validators');
 
@@ -247,9 +247,14 @@ const createValidateEntity =
  * @returns {Object}
  */
 const buildRelationsStore = ({ uid, data }) => {
+  if (!uid) {
+    throw new ValidationError(`Cannot build relations store: "uid" is undefined`);
+  }
+
   if (isEmpty(data)) {
     return {};
   }
+
   const currentModel = strapi.getModel(uid);
 
   return Object.keys(currentModel.attributes).reduce((result, attributeName) => {
@@ -288,30 +293,48 @@ const buildRelationsStore = ({ uid, data }) => {
         break;
       }
       case 'component': {
-        return castArray(value).reduce(
-          (relationsStore, componentValue) =>
-            merge(
-              relationsStore,
-              buildRelationsStore({
-                uid: attribute.component,
-                data: componentValue,
-              })
-            ),
-          result
-        );
+        return castArray(value).reduce((relationsStore, componentValue) => {
+          if (!attribute.component) {
+            throw new ValidationError(
+              `Cannot build relations store from component, component identifier is undefined`
+            );
+          }
+
+          return mergeWith(
+            relationsStore,
+            buildRelationsStore({
+              uid: attribute.component,
+              data: componentValue,
+            }),
+            (objValue, srcValue) => {
+              if (isArray(objValue)) {
+                return objValue.concat(srcValue);
+              }
+            }
+          );
+        }, result);
       }
       case 'dynamiczone': {
-        return value.reduce(
-          (relationsStore, dzValue) =>
-            merge(
-              relationsStore,
-              buildRelationsStore({
-                uid: dzValue.__component,
-                data: dzValue,
-              })
-            ),
-          result
-        );
+        return value.reduce((relationsStore, dzValue) => {
+          if (!dzValue.__component) {
+            throw new ValidationError(
+              `Cannot build relations store from dynamiczone, component identifier is undefined`
+            );
+          }
+
+          return mergeWith(
+            relationsStore,
+            buildRelationsStore({
+              uid: dzValue.__component,
+              data: dzValue,
+            }),
+            (objValue, srcValue) => {
+              if (isArray(objValue)) {
+                return objValue.concat(srcValue);
+              }
+            }
+          );
+        }, result);
       }
       default:
         break;

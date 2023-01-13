@@ -1,13 +1,12 @@
 'use strict';
 
 const path = require('path');
+const findRoot = require('find-root');
 
 const aliasExactMatch = [
   '@strapi/design-system',
   '@strapi/helper-plugin',
   '@strapi/icons',
-  '@fortawesome/fontawesome-svg-core',
-  '@fortawesome/free-solid-svg-icons',
   'date-fns',
   'formik',
   'history',
@@ -40,7 +39,7 @@ const aliasExactMatch = [
 // See https://webpack.js.org/configuration/resolve/
 module.exports = {
   ...aliasExactMatch.reduce((acc, moduleName) => {
-    acc[`${moduleName}$`] = path.dirname(require.resolve(`${moduleName}/package.json`));
+    acc[`${moduleName}$`] = findRoot(require.resolve(moduleName));
     return acc;
   }, {}),
 

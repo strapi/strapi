@@ -3,6 +3,7 @@
 const entityValidator = require('..');
 
 describe('Entity validator', () => {
+  const modelBase = { uid: 'api::test.test' };
   describe('Published input', () => {
     describe('General Errors', () => {
       let model;
@@ -15,6 +16,7 @@ describe('Entity validator', () => {
 
       it('Throws a badRequest error on invalid input', async () => {
         model = {
+          ...modelBase,
           attributes: {
             title: {
               type: 'string',
@@ -47,6 +49,7 @@ describe('Entity validator', () => {
 
       it('Returns data on valid input', async () => {
         model = {
+          ...modelBase,
           attributes: {
             title: {
               type: 'string',
@@ -64,6 +67,7 @@ describe('Entity validator', () => {
 
       it('Returns casted data when possible', async () => {
         model = {
+          ...modelBase,
           attributes: {
             title: {
               type: 'string',
@@ -87,6 +91,7 @@ describe('Entity validator', () => {
 
       test('Throws on required not respected', async () => {
         model = {
+          ...modelBase,
           attributes: {
             title: {
               type: 'string',
@@ -136,6 +141,7 @@ describe('Entity validator', () => {
 
       it('Supports custom field types', async () => {
         model = {
+          ...modelBase,
           attributes: {
             uuid: {
               type: 'uuid',
@@ -164,6 +170,7 @@ describe('Entity validator', () => {
         };
 
         const model = {
+          ...modelBase,
           attributes: {
             title: {
               type: 'string',
@@ -197,6 +204,7 @@ describe('Entity validator', () => {
 
       test('Throws on max length not respected', async () => {
         const model = {
+          ...modelBase,
           attributes: {
             title: {
               type: 'string',
@@ -230,6 +238,7 @@ describe('Entity validator', () => {
 
       test('Allows empty strings even when required', async () => {
         const model = {
+          ...modelBase,
           attributes: {
             title: {
               type: 'string',
@@ -248,6 +257,7 @@ describe('Entity validator', () => {
 
       test('Assign default values', async () => {
         const model = {
+          ...modelBase,
           attributes: {
             title: {
               type: 'string',
@@ -287,6 +297,7 @@ describe('Entity validator', () => {
 
       test("Don't assign default value if empty string", async () => {
         const model = {
+          ...modelBase,
           attributes: {
             title: {
               type: 'string',
@@ -324,7 +335,7 @@ describe('Entity validator', () => {
         };
 
         const model = {
-          uid: 'api::test.test',
+          ...modelBase,
           attributes: {
             title: {
               type: 'string',
@@ -357,6 +368,7 @@ describe('Entity validator', () => {
 
       it('Returns data on valid input', async () => {
         const model = {
+          ...modelBase,
           attributes: {
             title: {
               type: 'string',
@@ -374,6 +386,7 @@ describe('Entity validator', () => {
 
       it('Returns casted data when possible', async () => {
         const model = {
+          ...modelBase,
           attributes: {
             title: {
               type: 'string',
@@ -397,6 +410,7 @@ describe('Entity validator', () => {
 
       test('Does not throws on required not respected', async () => {
         const model = {
+          ...modelBase,
           attributes: {
             title: {
               type: 'string',
@@ -420,6 +434,7 @@ describe('Entity validator', () => {
 
       it('Supports custom field types', async () => {
         const model = {
+          ...modelBase,
           attributes: {
             uuid: {
               type: 'uuid',
@@ -441,6 +456,7 @@ describe('Entity validator', () => {
     describe('String validator', () => {
       test('Does not throws on min length not respected', async () => {
         const model = {
+          ...modelBase,
           attributes: {
             title: {
               type: 'string',
@@ -466,6 +482,7 @@ describe('Entity validator', () => {
 
       test('Throws on max length not respected', async () => {
         const model = {
+          ...modelBase,
           attributes: {
             title: {
               type: 'string',
@@ -499,6 +516,7 @@ describe('Entity validator', () => {
 
       test('Allows empty strings even when required', async () => {
         const model = {
+          ...modelBase,
           attributes: {
             title: {
               type: 'string',
@@ -516,6 +534,7 @@ describe('Entity validator', () => {
 
       test('Assign default values', async () => {
         const model = {
+          ...modelBase,
           attributes: {
             title: {
               type: 'string',
@@ -557,6 +576,7 @@ describe('Entity validator', () => {
 
       test("Don't assign default value if empty string", async () => {
         const model = {
+          ...modelBase,
           attributes: {
             title: {
               type: 'string',
