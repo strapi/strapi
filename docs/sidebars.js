@@ -41,6 +41,28 @@ const sidebars = {
         },
         {
           type: 'category',
+          label: 'Hooks',
+          items: [
+            {
+              type: 'doc',
+              label: 'useFetchClient',
+              id: 'core/hooks/use-fetch-client',
+            },
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Admin',
+          items: [
+            {
+              type: 'doc',
+              label: 'Link Strapi Design System',
+              id: 'core/admin/link-strapi-design-system',
+            },
+          ],
+        },
+        {
+          type: 'category',
           label: 'Content Type Builder',
           link: {
             type: 'doc',
