@@ -327,7 +327,8 @@ describe('Homepage', () => {
         color: #666687;
       }
 
-      .c18[aria-disabled='true'] svg > g,.c18[aria-disabled='true'] svg path {
+      .c18[aria-disabled='true'] svg > g,
+      .c18[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -340,7 +341,8 @@ describe('Homepage', () => {
         color: #666687;
       }
 
-      .c18[aria-disabled='true']:active svg > g,.c18[aria-disabled='true']:active svg path {
+      .c18[aria-disabled='true']:active svg > g,
+      .c18[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -462,7 +464,8 @@ describe('Homepage', () => {
         color: #666687;
       }
 
-      .c45[aria-disabled='true'] svg > g,.c45[aria-disabled='true'] svg path {
+      .c45[aria-disabled='true'] svg > g,
+      .c45[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -475,7 +478,8 @@ describe('Homepage', () => {
         color: #666687;
       }
 
-      .c45[aria-disabled='true']:active svg > g,.c45[aria-disabled='true']:active svg path {
+      .c45[aria-disabled='true']:active svg > g,
+      .c45[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 

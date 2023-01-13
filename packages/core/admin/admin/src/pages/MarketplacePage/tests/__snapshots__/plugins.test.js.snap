@@ -464,7 +464,8 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   color: #666687;
 }
 
-.c46[aria-disabled='true'] svg > g,.c46[aria-disabled='true'] svg path {
+.c46[aria-disabled='true'] svg > g,
+.c46[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -477,7 +478,8 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   color: #666687;
 }
 
-.c46[aria-disabled='true']:active svg > g,.c46[aria-disabled='true']:active svg path {
+.c46[aria-disabled='true']:active svg > g,
+.c46[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -536,7 +538,8 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   color: #666687;
 }
 
-.c73[aria-disabled='true'] svg > g,.c73[aria-disabled='true'] svg path {
+.c73[aria-disabled='true'] svg > g,
+.c73[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -549,7 +552,8 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   color: #666687;
 }
 
-.c73[aria-disabled='true']:active svg > g,.c73[aria-disabled='true']:active svg path {
+.c73[aria-disabled='true']:active svg > g,
+.c73[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -806,7 +810,8 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   color: #666687;
 }
 
-.c12[aria-disabled='true'] svg > g,.c12[aria-disabled='true'] svg path {
+.c12[aria-disabled='true'] svg > g,
+.c12[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -819,7 +824,8 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   color: #666687;
 }
 
-.c12[aria-disabled='true']:active svg > g,.c12[aria-disabled='true']:active svg path {
+.c12[aria-disabled='true']:active svg > g,
+.c12[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 

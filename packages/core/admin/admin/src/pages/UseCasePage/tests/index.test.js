@@ -360,7 +360,8 @@ describe('Admin | UseCasePage', () => {
         color: #666687;
       }
 
-      .c4[aria-disabled='true'] svg > g,.c4[aria-disabled='true'] svg path {
+      .c4[aria-disabled='true'] svg > g,
+      .c4[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -373,7 +374,8 @@ describe('Admin | UseCasePage', () => {
         color: #666687;
       }
 
-      .c4[aria-disabled='true']:active svg > g,.c4[aria-disabled='true']:active svg path {
+      .c4[aria-disabled='true']:active svg > g,
+      .c4[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -440,7 +442,8 @@ describe('Admin | UseCasePage', () => {
         color: #666687;
       }
 
-      .c33[aria-disabled='true'] svg > g,.c33[aria-disabled='true'] svg path {
+      .c33[aria-disabled='true'] svg > g,
+      .c33[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -453,7 +456,8 @@ describe('Admin | UseCasePage', () => {
         color: #666687;
       }
 
-      .c33[aria-disabled='true']:active svg > g,.c33[aria-disabled='true']:active svg path {
+      .c33[aria-disabled='true']:active svg > g,
+      .c33[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 

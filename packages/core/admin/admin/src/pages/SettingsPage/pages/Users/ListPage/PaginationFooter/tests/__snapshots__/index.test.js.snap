@@ -427,7 +427,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
       </div>
       <nav
         aria-label="pagination"
-        class=""
+        class="sc-cfJLRR"
       >
         <ul
           class="c2 c16"

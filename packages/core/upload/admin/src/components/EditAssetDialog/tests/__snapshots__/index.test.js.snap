@@ -315,7 +315,8 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c41[aria-disabled='true'] svg > g,.c41[aria-disabled='true'] svg path {
+.c41[aria-disabled='true'] svg > g,
+.c41[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -328,7 +329,8 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c41[aria-disabled='true']:active svg > g,.c41[aria-disabled='true']:active svg path {
+.c41[aria-disabled='true']:active svg > g,
+.c41[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -387,7 +389,8 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c43[aria-disabled='true'] svg > g,.c43[aria-disabled='true'] svg path {
+.c43[aria-disabled='true'] svg > g,
+.c43[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -400,7 +403,8 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c43[aria-disabled='true']:active svg > g,.c43[aria-disabled='true']:active svg path {
+.c43[aria-disabled='true']:active svg > g,
+.c43[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -467,7 +471,8 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c44[aria-disabled='true'] svg > g,.c44[aria-disabled='true'] svg path {
+.c44[aria-disabled='true'] svg > g,
+.c44[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -480,7 +485,8 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c44[aria-disabled='true']:active svg > g,.c44[aria-disabled='true']:active svg path {
+.c44[aria-disabled='true']:active svg > g,
+.c44[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 

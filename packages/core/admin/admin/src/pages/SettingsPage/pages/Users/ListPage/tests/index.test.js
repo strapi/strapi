@@ -416,7 +416,8 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         color: #666687;
       }
 
-      .c8[aria-disabled='true'] svg > g,.c8[aria-disabled='true'] svg path {
+      .c8[aria-disabled='true'] svg > g,
+      .c8[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -429,7 +430,8 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         color: #666687;
       }
 
-      .c8[aria-disabled='true']:active svg > g,.c8[aria-disabled='true']:active svg path {
+      .c8[aria-disabled='true']:active svg > g,
+      .c8[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -486,7 +488,8 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         color: #666687;
       }
 
-      .c23[aria-disabled='true'] svg > g,.c23[aria-disabled='true'] svg path {
+      .c23[aria-disabled='true'] svg > g,
+      .c23[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -499,7 +502,8 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         color: #666687;
       }
 
-      .c23[aria-disabled='true']:active svg > g,.c23[aria-disabled='true']:active svg path {
+      .c23[aria-disabled='true']:active svg > g,
+      .c23[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -1441,7 +1445,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
               </div>
               <nav
                 aria-label="pagination"
-                class=""
+                class="sc-cfJLRR"
               >
                 <ul
                   class="c1 c4 c56"

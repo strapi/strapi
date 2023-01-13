@@ -220,7 +220,8 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c26[aria-disabled='true'] svg > g,.c26[aria-disabled='true'] svg path {
+.c26[aria-disabled='true'] svg > g,
+.c26[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -233,7 +234,8 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c26[aria-disabled='true']:active svg > g,.c26[aria-disabled='true']:active svg path {
+.c26[aria-disabled='true']:active svg > g,
+.c26[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -290,7 +292,8 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c28[aria-disabled='true'] svg > g,.c28[aria-disabled='true'] svg path {
+.c28[aria-disabled='true'] svg > g,
+.c28[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -303,7 +306,8 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c28[aria-disabled='true']:active svg > g,.c28[aria-disabled='true']:active svg path {
+.c28[aria-disabled='true']:active svg > g,
+.c28[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
