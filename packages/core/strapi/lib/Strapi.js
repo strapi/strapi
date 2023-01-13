@@ -70,8 +70,49 @@ const resolveWorkingDirectories = (opts) => {
   return { app: appDir, dist: distDir };
 };
 
+// TODO put this in /docs/docs/API/Strapi
+/*
+
+The Strapi class is the main class of a Strapi project
+
+The instance of Strapi class is used to manipulate everything related to strapi content management system.
+
+> Example
+
+
+ */
 /** @implements {import('@strapi/strapi').Strapi} */
 class Strapi {
+  // TODO put this in /docs/docs/API/Strapi
+  /*
+   What is opts?
+   opts is a JS Object
+    {
+      autoReload: true,
+      serveAdminPanel: true,
+      distDir: '',
+      appDir: '',
+    }
+
+    autoReload:
+      If false -> Deactivate auto reload
+      If you modify any file in your Strapi project, it reloads your nodejs app
+      If any content-type is changed, it will reload the nodejs app
+
+    serveAdminPanel:
+      Should the admin panel be loaded and serve as a FE
+      FE build wont be delivered if false
+      Is the content-manager controller loaded if false?
+
+ * Behavior:
+ * - `appDir` is the directory where Strapi will write every file (schemas, generated APIs, controllers or services)
+ * - `distDir` is the directory where Strapi will read configurations, schemas and any compiled code
+ *
+ * Default values:
+ * - If `appDir` is `undefined`, it'll be set to `process.cwd()`
+ * - If `distDir` is `undefined`, it'll be set to `appDir`
+
+   */
   constructor(opts = {}) {
     destroyOnSignal(this);
 
@@ -80,6 +121,31 @@ class Strapi {
     // Load the app configuration from the dist directory
     const appConfig = loadConfiguration({ appDir: rootDirs.app, distDir: rootDirs.dist }, opts);
 
+    // TODO put this in /docs/docs/API/Strapi
+    /*
+      Where all registries are stored
+      Object
+        register(name, resolver):
+          Add an attribute 'name' to the container and assign 'resolver'
+          name:
+            String
+          resolver:
+            Can be any type.
+            If Function, call function at first get (link to get) occurrence
+              Parameters of the function:
+                { strapi: current Strapi instance }
+                args -> any
+        get(name, args):
+          Get the content of the mapped attribute 'name'.
+          name:
+            String
+
+          args:
+            If resolver was a Function, send args to the resolver function on first used of get on this attribute
+
+        extend():
+          TODO
+     */
     // Instantiate the Strapi container
     this.container = createContainer(this);
 
@@ -100,23 +166,137 @@ class Strapi {
     this.container.register('sanitizers', sanitizersRegistry(this));
 
     // Create a mapping of every useful directory (for the app, dist and static directories)
+    // TODO put this in /docs/docs/API/Strapi
+    /*
+        Javascript Object
+        Stored paths of file system
+
+        dist -> Link to StrapiPathObject
+          Builded folder
+        app -> Link to StrapiPathObject
+          Source folder
+        StrapiPathObject:
+          root:
+            Root path to (app|dist)
+          src:
+            Source root path to project files
+          api:
+            Path to the folder where user API files are stored (content-types, controllers, services, routes, etc..)
+          components:
+            Path to the folder where the Strapi user components are stored
+          policies:
+            Path to the folder where the Strapi user policies are stored
+            Function that check state of the data and prevent access to the API if falsy returned
+          middlewares:
+            Path to the folder where the Strapi user middleware are stored
+            Function that wrap around a route
+          config:
+            Path to the folder containing user config files
+        static:
+          Define path to directories involving client display
+          public:
+            Path to the folder to serve publicly (like files, images, etc..)
+     */
     this.dirs = utils.getDirs(rootDirs, { strapi: this });
 
     // Strapi state management variables
+    // TODO put this in /docs/docs/API/Strapi
+    /*
+      Boolean
+        false if there is still something to load (registers / bootstrap)
+        true if everything have been loaded
+     */
     this.isLoaded = false;
+    // TODO put this in /docs/docs/API/Strapi
+    /*
+        function to reload the app
+
+        To define
+     */
     this.reload = this.reload();
 
     // Instantiate the Koa app & the HTTP server
+    // TODO put this in /docs/docs/API/Strapi
+    /*
+        Strapi server object
+
+        Link to server/index.js
+     */
     this.server = createServer(this);
 
     // Strapi utils instanciation
+    // TODO put this in /docs/docs/API/Strapi
+    /*
+      Wrapper around fs module
+      writeAppFile(optPath, data): deprecated
+      writePluginFile(plugin, optPath, data): deprecated
+      removeAppFile(optPath): deprecated
+      appendFile(optPath, data):
+        normalize path (root dir) + fs.appendFileSync
+     */
     this.fs = createStrapiFs(this);
+
+    // TODO put this in /docs/docs/API/Strapi
+    /*
+      eventHub instance of EventEmitter = require('events');
+      Link to nodejs events doc
+     */
     this.eventHub = createEventHub();
+
+    // TODO put this in /docs/docs/API/Strapi
+    /**
+     * Object containing predefined logger functions
+     * Logs for Strapi startup
+     *
+     * logStats()
+     *  Display stats about Strapi instance
+     *  TODO list stats
+     * logFirstStartupMessage()
+     *  Display the first startup message (asking to create an administrator)
+     * logDefaultStartupMessage()
+     *  Display startup message
+     * logStartupMessage({ isInitialized } = {})
+     *  Call either logFirstStartupMessage or logDefaultStartupMessage depending on ENV_VAR STRAPI_HIDE_STARTUP_MESSAGE
+     */
     this.startupLogger = createStartupLogger(this);
+
+    // TODO put this in /docs/docs/API/Strapi
+    /**
+     * Logger
+     *
+     * winston -> link to winston doc
+     */
     this.log = createLogger(this.config.get('logger', {}));
+
+    // TODO put this in /docs/docs/API/Strapi
+    /**
+     * CRON module that use node-schedule
+     *
+     * TODO add every method
+     */
     this.cron = createCronService();
+    // TODO put this in /docs/docs/API/Strapi
+    /**
+     * Service used to send statistical data to Amplitude
+     */
     this.telemetry = createTelemetry(this);
+
+    // TODO put this in /docs/docs/API/Strapi
+    /**
+     * TODO ask JS | Alex
+     * Wrapper around async_hooks AsyncLocalStorage
+     */
     this.requestContext = requestContext;
+
+    // TODO put this in /docs/docs/API/Strapi
+    /**
+     * Object
+     *  register(customField):
+     *    Add a new custom field to the Strapi instance
+     *
+     *    customField:
+     *      TODO describe custom field
+     */
     this.customFields = createCustomFields(this);
 
     createUpdateNotifier(this).notify();
@@ -130,6 +310,32 @@ class Strapi {
     });
   }
 
+  // TODO put this in /docs/docs/API/Strapi
+  /*
+    config attribute (JS Object)
+    Describe all possibilities inside Strapi config
+
+    launchedAt (Number, Date.now() by default):
+      Date in milliseconds when the server has started
+
+    serveAdminPanel (boolean, true by default) -> link to opts.serveAdminPanel
+    autoReload (boolean, false by default) -> link to opts.autoReload
+    environment (string):
+      process.env.NODE_ENV
+    uuid (optional):
+      uuid describe in the project's package.json
+      Generated automatically (used by Amplitude) by strapi project generator. Used to identify the project (for stats purposes).
+    packageJsonStrapi:
+      strapi object can contain any attribute to describe the Strapi project
+      uuid is omitted in this config attribute
+
+      telemetryDisabled (boolean, undefined):
+        If true, disable the telemetry for the app (connected to Amplitude)
+
+      TODO: find where this config is used and list all possible attributes
+    info:
+      Package.json + strapi version
+   */
   get config() {
     return this.container.get('config');
   }
