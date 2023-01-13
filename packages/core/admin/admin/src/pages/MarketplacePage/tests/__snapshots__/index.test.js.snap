@@ -741,6 +741,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
+<<<<<<< HEAD
 .c34 {
   border-bottom: 2px solid #4945ff;
 }
@@ -782,6 +783,22 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
 .c19[aria-disabled='true'] {
 >>>>>>> 7f2d56c537 (Fix marketplace tests)
   cursor: not-allowed;
+=======
+.c58 path {
+  fill: #666687;
+}
+
+.c60 path {
+  fill: #f29d41;
+}
+
+.c75 path {
+  fill: #328048;
+}
+
+.c81 > * + * {
+  margin-left: 4px;
+>>>>>>> c302f36bd8 (Fix marketplace data fetching)
 }
 
 .c86 {
@@ -2249,7 +2266,237 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
           </div>
         </div>
         <div
+<<<<<<< HEAD
           class="c83"
+=======
+          class="c0 c65"
+        >
+          <div
+            class="c0 c80"
+          >
+            <div
+              class="c0 c7"
+            >
+              <div>
+                <div
+                  class="c0 c35 c36"
+                >
+                  <div
+                    class="c0 c7 c37"
+                  >
+                    <button
+                      aria-disabled="false"
+                      aria-expanded="false"
+                      aria-haspopup="listbox"
+                      aria-label="Entries per page"
+                      aria-labelledby="select-13-label select-13-content"
+                      class="c38"
+                      id="select-13"
+                      type="button"
+                    />
+                    <div
+                      class="c0 c6 c39"
+                    >
+                      <div
+                        class="c0 c7"
+                      >
+                        <div
+                          class="c0 c40"
+                        >
+                          <span
+                            class="c8 c41"
+                            id="select-13-content"
+                          >
+                            24
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="c0 c7"
+                      >
+                        <button
+                          aria-hidden="true"
+                          class="c0 c42 c43 c44"
+                          tabindex="-1"
+                          title="Carret Down Button"
+                          type="button"
+                        >
+                          <svg
+                            fill="none"
+                            height="1em"
+                            viewBox="0 0 14 8"
+                            width="1em"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              clip-rule="evenodd"
+                              d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                              fill="#32324D"
+                              fill-rule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="c0 c72"
+              >
+                <label
+                  class="c8 c68"
+                  for="page-size"
+                >
+                  Entries per page
+                </label>
+              </div>
+            </div>
+            <nav
+              aria-label="pagination"
+              class=""
+            >
+              <ul
+                class="c0 c7 c81"
+              >
+                <li>
+                  <a
+                    aria-current="page"
+                    aria-disabled="true"
+                    class="c82 c83 active"
+                    href="/"
+                    tabindex="-1"
+                  >
+                    <div
+                      class="c26"
+                    >
+                      Go to previous page
+                    </div>
+                    <svg
+                      aria-hidden="true"
+                      fill="none"
+                      height="1em"
+                      viewBox="0 0 10 16"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M9.88 14.12L3.773 8 9.88 1.88 8 0 0 8l8 8 1.88-1.88z"
+                        fill="#32324D"
+                      />
+                    </svg>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    aria-current="page"
+                    class="c84 c85 active"
+                    href="/?page=1"
+                  >
+                    <div
+                      class="c26"
+                    >
+                      Go to page 1
+                    </div>
+                    <span
+                      aria-hidden="true"
+                      class="c8 c14 c86"
+                    >
+                      1
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    aria-current="page"
+                    class="c82 c87 active"
+                    href="/?page=2"
+                  >
+                    <div
+                      class="c26"
+                    >
+                      Go to page 2
+                    </div>
+                    <span
+                      aria-hidden="true"
+                      class="c8 c61 c86"
+                    >
+                      2
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    aria-current="page"
+                    class="c82 c87 active"
+                    href="/?page=3"
+                  >
+                    <div
+                      class="c26"
+                    >
+                      Go to page 3
+                    </div>
+                    <span
+                      aria-hidden="true"
+                      class="c8 c61 c86"
+                    >
+                      3
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    aria-current="page"
+                    class="c82 c87 active"
+                    href="/?page=4"
+                  >
+                    <div
+                      class="c26"
+                    >
+                      Go to page 4
+                    </div>
+                    <span
+                      aria-hidden="true"
+                      class="c8 c61 c86"
+                    >
+                      4
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    aria-current="page"
+                    aria-disabled="false"
+                    class="c82 c88 active"
+                    href="/?page=2"
+                  >
+                    <div
+                      class="c26"
+                    >
+                      Go to next page
+                    </div>
+                    <svg
+                      aria-hidden="true"
+                      fill="none"
+                      height="1em"
+                      viewBox="0 0 10 16"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M0 1.88L6.107 8 0 14.12 1.88 16l8-8-8-8L0 1.88z"
+                        fill="#32324D"
+                      />
+                    </svg>
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+        <div
+          class="c0 c89"
+>>>>>>> c302f36bd8 (Fix marketplace data fetching)
         >
           <a
             href="https://strapi.canny.io/plugin-requests"
