@@ -1,24 +1,38 @@
 import React, { useRef } from 'react';
+import propTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { Box } from '@strapi/design-system/Box';
-import { Divider } from '@strapi/design-system/Divider';
-import { Typography } from '@strapi/design-system/Typography';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
+import { Box, Divider, Flex, Stack, Typography } from '@strapi/design-system';
+
 import { getTrad } from '../../../utils';
 import getUnits from './utils/getUnits';
 import { getFullName } from '../../../../utils';
 
-const Informations = () => {
+const KeyValuePair = ({ label, value }) => {
+  return (
+    <Flex justifyContent="space-between" as="p">
+      <Typography fontWeight="bold">{label}</Typography>
+      <Typography>{value}</Typography>
+    </Flex>
+  );
+};
+
+KeyValuePair.propTypes = {
+  label: propTypes.string.isRequired,
+  value: propTypes.string.isRequired,
+};
+
+const Information = () => {
   const { formatMessage, formatRelativeTime } = useIntl();
   const { initialData, isCreatingEntry } = useCMEditViewDataManager();
   const currentTime = useRef(Date.now());
 
   const getFieldInfo = (atField, byField) => {
-    const userFirstname = initialData[byField]?.firstname || '';
-    const userLastname = initialData[byField]?.lastname || '';
-    const userUsername = initialData[byField]?.username;
+    const { firstname, lastname, username } = initialData[byField] ?? {};
+
+    const userFirstname = firstname ?? '';
+    const userLastname = lastname ?? '';
+    const userUsername = username;
     const user = userUsername || getFullName(userFirstname, userLastname);
     const timestamp = initialData[atField] ? new Date(initialData[atField]).getTime() : Date.now();
     const elapsed = timestamp - currentTime.current;
@@ -34,56 +48,57 @@ const Informations = () => {
   const created = getFieldInfo('createdAt', 'createdBy');
 
   return (
-    <Box>
-      <Typography variant="sigma" textColor="neutral600" id="additional-informations">
+    <Stack spacing={2}>
+      <Typography variant="sigma" id="additional-information">
         {formatMessage({
           id: getTrad('containers.Edit.information'),
           defaultMessage: 'Information',
         })}
       </Typography>
-      <Box paddingTop={2} paddingBottom={6}>
+
+      <Box paddingBottom={4}>
         <Divider />
       </Box>
+
       <Stack spacing={4}>
-        <Flex justifyContent="space-between">
-          <Typography fontWeight="bold">
-            {formatMessage({
+        <Stack spacing={1}>
+          <KeyValuePair
+            label={formatMessage({
               id: getTrad('containers.Edit.information.created'),
               defaultMessage: 'Created',
             })}
-          </Typography>
-          <Typography>{created.at}</Typography>
-        </Flex>
-        <Flex justifyContent="space-between">
-          <Typography fontWeight="bold">
-            {formatMessage({
+            value={created.at}
+          />
+
+          <KeyValuePair
+            label={formatMessage({
               id: getTrad('containers.Edit.information.by'),
               defaultMessage: 'By',
             })}
-          </Typography>
-          <Typography>{created.by}</Typography>
-        </Flex>
-        <Flex justifyContent="space-between">
-          <Typography fontWeight="bold">
-            {formatMessage({
+            value={created.by}
+          />
+        </Stack>
+
+        <Stack spacing={1}>
+          <KeyValuePair
+            label={formatMessage({
               id: getTrad('containers.Edit.information.lastUpdate'),
               defaultMessage: 'Last update',
             })}
-          </Typography>
-          <Typography>{updated.at}</Typography>
-        </Flex>
-        <Flex justifyContent="space-between">
-          <Typography fontWeight="bold">
-            {formatMessage({
+            value={updated.at}
+          />
+
+          <KeyValuePair
+            label={formatMessage({
               id: getTrad('containers.Edit.information.by'),
               defaultMessage: 'By',
             })}
-          </Typography>
-          <Typography>{updated.by}</Typography>
-        </Flex>
+            value={updated.by}
+          />
+        </Stack>
       </Stack>
-    </Box>
+    </Stack>
   );
 };
 
-export default Informations;
+export default Information;
