@@ -77,7 +77,6 @@ const parseType = ({ type, value, forceCast = false }) => {
       throw new Error('Invalid boolean input. Expected "t","1","true","false","0","f"');
     }
     case 'integer':
-    case 'biginteger':
     case 'float':
     case 'decimal': {
       return _.toNumber(value);
