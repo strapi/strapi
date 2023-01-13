@@ -1,7 +1,10 @@
-import type { IAsset, IEntity, ILink } from './common-entities';
-import type { ITransferResults, TransferTransform } from './utils';
-import type { ISourceProvider, IDestinationProvider } from './providers';
+import { PassThrough } from 'stream';
 import type { Schema } from '@strapi/strapi';
+import type { IAsset, IEntity, ILink } from './common-entities';
+import type { ITransferResults, TransferTransform, TransferProgress } from './utils';
+import type { ISourceProvider, IDestinationProvider } from './providers';
+import type { Severity } from '../src/errors';
+import type { DiagnosticReporter } from '../src/engine/diagnostic';
 
 /**
  * Defines the capabilities and properties of the transfer engine
@@ -22,6 +25,18 @@ export interface ITransferEngine<
    * The options used to customize the behavio of the transfer engine
    */
   options: ITransferEngineOptions;
+  /**
+   * A diagnostic reporter instance used to gather information about
+   * errors, warnings and information emitted by the engine
+   */
+  diagnostics: DiagnosticReporter;
+  /**
+   * Utilities used to retrieve transfer progress data
+   */
+  progress: {
+    data: TransferProgress;
+    stream: PassThrough;
+  };
 
   /**
    * Runs the integrity check which will make sure it's possible
@@ -29,7 +44,7 @@ export interface ITransferEngine<
    *
    * Note: It requires to read the content of the source & destination metadata files
    */
-  integrityCheck(): Promise<boolean>;
+  integrityCheck(): Promise<void | never>;
 
   /**
    * Start streaming selected data from the source to the destination

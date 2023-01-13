@@ -1,1 +1,2 @@
-export * as schemas from './schemas';
+export * from './schemas';
+export * from './provider';
