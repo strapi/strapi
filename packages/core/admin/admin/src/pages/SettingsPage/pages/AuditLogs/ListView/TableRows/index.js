@@ -14,16 +14,19 @@ const TableRows = ({ headers, rows, onOpenModal }) => {
   const { formatMessage } = useIntl();
   const formatTimeStamp = useFormatTimeStamp();
 
-  const getCellValue = ({ type, value }) => {
+  const getCellValue = ({ type, value, model }) => {
     if (type === 'date') {
       return formatTimeStamp(value);
     }
 
     if (type === 'action') {
-      return formatMessage({
-        id: `Settings.permissions.auditLogs.${value}`,
-        defaultMessage: getDefaultMessage(value),
-      });
+      return formatMessage(
+        {
+          id: `Settings.permissions.auditLogs.${value}`,
+          defaultMessage: getDefaultMessage(value),
+        },
+        { model }
+      );
     }
 
     return value || '-';
@@ -46,6 +49,7 @@ const TableRows = ({ headers, rows, onOpenModal }) => {
                     {getCellValue({
                       type: key,
                       value: cellFormatter ? cellFormatter(data[name]) : data[name],
+                      model: data.payload?.model,
                     })}
                   </Typography>
                 </Td>

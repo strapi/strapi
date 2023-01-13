@@ -48,10 +48,13 @@ const ActionBody = ({ status, data, formattedDate }) => {
             id: 'Settings.permissions.auditLogs.action',
             defaultMessage: 'Action',
           })}
-          actionName={formatMessage({
-            id: `Settings.permissions.auditLogs.${action}`,
-            defaultMessage: getDefaultMessage(action),
-          })}
+          actionName={formatMessage(
+            {
+              id: `Settings.permissions.auditLogs.${action}`,
+              defaultMessage: getDefaultMessage(action),
+            },
+            { model: payload?.model }
+          )}
         />
         <ActionItem
           actionLabel={formatMessage({

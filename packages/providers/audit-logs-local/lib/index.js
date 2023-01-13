@@ -24,7 +24,7 @@ const provider = {
       findMany(query) {
         return strapi.entityService.findPage('admin::audit-log', {
           populate: ['user'],
-          fields: ['action', 'date'],
+          fields: ['action', 'date', 'payload'],
           ...query,
         });
       },
