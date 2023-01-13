@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
+import { IntlProvider, useIntl } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import RelativeTime from '../index';
 
@@ -11,6 +11,15 @@ const App = (
     </IntlProvider>
   </ThemeProvider>
 );
+
+jest.mock('react-intl', () => ({
+  ...jest.requireActual('react-intl'),
+  useIntl: jest.fn(() => ({
+    formatDate: jest.fn(() => '10/1/2015'),
+    formatTime: jest.fn(() => '7:55 AM'),
+    formatRelativeTime: jest.fn(() => '5 minutes ago'),
+  })),
+}));
 
 describe('RelativeTime', () => {
   beforeEach(() => {
@@ -37,6 +46,11 @@ describe('RelativeTime', () => {
   });
 
   it('can display the relative time for a future date', () => {
+    useIntl.mockReturnValueOnce({
+      formatDate: jest.fn(() => '10/1/2015'),
+      formatTime: jest.fn(() => '7:50 AM'),
+      formatRelativeTime: jest.fn(() => 'in 5 minutes'),
+    });
     jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01 07:50:00'));
 
     render(App);
@@ -45,6 +59,11 @@ describe('RelativeTime', () => {
   });
 
   it('can display the relative time for a past date', () => {
+    useIntl.mockReturnValueOnce({
+      formatDate: jest.fn(() => '10/1/2015'),
+      formatTime: jest.fn(() => '8:00 AM'),
+      formatRelativeTime: jest.fn(() => '5 minutes ago'),
+    });
     jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01 08:00:00'));
 
     render(App);
