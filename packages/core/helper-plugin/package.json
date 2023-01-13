@@ -20,8 +20,14 @@
       "url": "https://strapi.io"
     }
   ],
-  "main": "build/helper-plugin.cjs.js",
+  "main": "build/index.js",
   "module": "build/helper-plugin.esm.js",
+  "exports": {
+    ".": {
+      "require": "./build/index.js",
+      "import": "./build/helper-plugin.esm.js"
+    }
+  },
   "files": [
     "build"
   ],

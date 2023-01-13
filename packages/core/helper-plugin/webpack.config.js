@@ -62,6 +62,18 @@ const config = [
     ...baseConfig,
     output: {
       path: `${__dirname}/build`,
+      filename: `helper-plugin.${process.env.NODE_ENV}.js`,
+      library: {
+        name: 'helperPlugin',
+        type: 'umd',
+      },
+      umdNamedDefine: true,
+    },
+  },
+  {
+    ...baseConfig,
+    output: {
+      path: `${__dirname}/build`,
       filename: `helper-plugin.esm.js`,
       library: {
         type: 'module',
