@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ApplicationInfosPage shoud render from computer tab and match snapshot 1`] = `
+exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and match snapshot 1`] = `
 .c32 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -607,7 +607,7 @@ exports[`ApplicationInfosPage shoud render from computer tab and match snapshot 
 </div>
 `;
 
-exports[`ApplicationInfosPage shoud render from url tab and match snapshot 1`] = `
+exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and match snapshot 1`] = `
 .c26 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
