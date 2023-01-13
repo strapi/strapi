@@ -68,6 +68,7 @@
     "@strapi/icons": "1.4.1",
     "@testing-library/react": "12.1.4",
     "@testing-library/react-hooks": "8.0.1",
+    "browserslist-to-esbuild": "1.2.0",
     "cross-env": "^7.0.3",
     "esbuild-loader": "^2.20.0",
     "react-test-renderer": "^17.0.2",
