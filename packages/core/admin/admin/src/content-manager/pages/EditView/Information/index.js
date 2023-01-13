@@ -32,8 +32,7 @@ const Information = () => {
 
     const userFirstname = firstname ?? '';
     const userLastname = lastname ?? '';
-    const userUsername = username;
-    const user = userUsername || getFullName(userFirstname, userLastname);
+    const user = username ?? getFullName(userFirstname, userLastname);
     const timestamp = initialData[atField] ? new Date(initialData[atField]).getTime() : Date.now();
     const elapsed = timestamp - currentTime.current;
     const { unit, value } = getUnits(-elapsed);
