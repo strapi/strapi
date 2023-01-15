@@ -21,10 +21,6 @@ jest.mock('../useModels', () =>
   })
 );
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => null,
-}));
-
 jest.mock('../../NoContentType', () => () => {
   return <div>NoContentType</div>;
 });
