@@ -77,6 +77,7 @@ const Notification = ({ dispatch, notification }) => {
       {formattedMessage({
         id: message?.id || message,
         defaultMessage: message?.defaultMessage || message?.id || message,
+        values: message?.values,
       })}
     </Alert>
   );

@@ -680,6 +680,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 .c50 canvas,
 .c50 video {
   display: block;
+  pointer-events: none;
   max-width: 100%;
   max-height: 5.5rem;
 }
