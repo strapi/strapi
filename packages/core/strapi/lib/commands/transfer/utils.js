@@ -91,11 +91,13 @@ const createStrapiInstance = async (logLevel = 'error') => {
 const transferDataTypes = Object.keys(TransferGroupPresets);
 const excludeOption = new Option(
   '--exclude <comma-separated data types>',
-  'Exclude this data.'
+  `Exclude this data. Options used here override --only. Available types: ${transferDataTypes.join(
+    ','
+  )}`
 ).argParser(getParseListWithChoices(transferDataTypes, 'Invalid options for "exclude"'));
 const onlyOption = new Option(
   '--only <command-separated data types>',
-  'Include only this data.'
+  `Include only this data. Available types: ${transferDataTypes.join(',')}`
 ).argParser(getParseListWithChoices(transferDataTypes, 'Invalid options for "only"'));
 
 module.exports = {
