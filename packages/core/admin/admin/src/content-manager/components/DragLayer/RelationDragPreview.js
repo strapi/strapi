@@ -43,12 +43,14 @@ export const RelationDragPreview = ({ status, displayedValue, width }) => {
           <IconButton noBorder>
             <Drag />
           </IconButton>
-          <ChildrenWrapper justifyContent="space-between">
-            <LinkEllipsis minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
-              <Typography textColor="primary600" ellipsis>
-                {displayedValue}
-              </Typography>
-            </LinkEllipsis>
+          <ChildrenWrapper maxWidth="100%" justifyContent="space-between">
+            <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
+              <LinkEllipsis>
+                <Typography textColor="primary600" ellipsis>
+                  {displayedValue}
+                </Typography>
+              </LinkEllipsis>
+            </Box>
             {status && (
               <Status variant={statusColor} showBullet={false} size="S">
                 <Typography fontWeight="bold" textColor={`${statusColor}700`}>
