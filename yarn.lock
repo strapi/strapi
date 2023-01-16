@@ -1889,10 +1889,10 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
-"@fingerprintjs/fingerprintjs@3.3.3":
-  version "3.3.3"
-  resolved "https://registry.yarnpkg.com/@fingerprintjs/fingerprintjs/-/fingerprintjs-3.3.3.tgz#ead445032c92a79d5f585953019402ed223edc7d"
-  integrity sha512-HH6KqZnopF3NIXypYG4f2qxoSRmGCSzp81wJMfWjSTtvsX3cAg12RFJcm+a6Az3XadcZUrXKW3p5Dv0wyCUeuA==
+"@fingerprintjs/fingerprintjs@3.3.6":
+  version "3.3.6"
+  resolved "https://registry.yarnpkg.com/@fingerprintjs/fingerprintjs/-/fingerprintjs-3.3.6.tgz#4c3f1726dc0cb10b915cfce78d9471b38cd809bd"
+  integrity sha512-Inh0OoFVzO2PLvrUF8RZhY9NVDdg9DJHQ5YlvXhrGtQxSPzy2smS3TWzLAi+zlHSJNHSvi+1zYayLen2lGxjdA==
   dependencies:
     tslib "^2.0.1"
 
@@ -5316,10 +5316,10 @@
     regenerator-runtime "^0.13.7"
     resolve-from "^5.0.0"
 
-"@strapi/design-system@1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@strapi/design-system/-/design-system-1.4.1.tgz#f2daa634eaa4f22ac29e6b2b86791187aaa9887e"
-  integrity sha512-olDi71FFQFU9luSC0yvIwB0i77Y/JIvt9HyLcUhK/rsRyiaiNzplAe5hi5aaphhJv++9rML2nSiwgfX/V4a5ZA==
+"@strapi/design-system@1.4.2":
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/@strapi/design-system/-/design-system-1.4.2.tgz#fbbce86ca616f3dd33c811029bfbc90e1fa38a12"
+  integrity sha512-0zH2c2t2XFKhw7N7VCmH4goaFZi6bKseyMtrb15oo4WYJzqZgTR/ER88L6gaDserW5xFu97yXHkYz+Ammk1exQ==
   dependencies:
     "@floating-ui/react-dom" "^1.0.0"
     "@internationalized/number" "^3.1.1"
@@ -5349,10 +5349,10 @@
   optionalDependencies:
     typescript "^4.6.2"
 
-"@strapi/icons@1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-1.4.1.tgz#121a2f68f65ac1b29031b7ab1e9774e17dbaeead"
-  integrity sha512-bwVM5NVXUJEUbbeelOVEslDIbGdZAGSwFSdV6Erb2Cwp3gtYB5Hfu4bRbVPeSwRWsd3IseC0USDpOQ3PzLK1qg==
+"@strapi/icons@1.4.2":
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-1.4.2.tgz#29e52aef88e9c5b125f296af9e861bc71433e16e"
+  integrity sha512-V56sfBItnQ+lU/fU+nCYSQDjBK57EOxWKeM99tBx0RYhZzMJ5gRplWKsNRl/JhErVEPait0Dlv73EaixhdTyhw==
 
 "@stylelint/postcss-css-in-js@^0.37.2":
   version "0.37.3"
@@ -7374,10 +7374,10 @@ axe-core@^4.4.3:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.4.3.tgz#11c74d23d5013c0fa5d183796729bc3482bd2f6f"
   integrity sha512-32+ub6kkdhhWick/UjvEwRchgoetXqTK14INLqbGm5U2TzBkBNF3nQtLYm8ovxSkQWArjEQvftCKryjZaATu3w==
 
-axios@1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-1.2.1.tgz#44cf04a3c9f0c2252ebd85975361c026cb9f864a"
-  integrity sha512-I88cFiGu9ryt/tfVEi4kX2SITsvDddTajXTOFmt2uK1ZVA8LytjtdeyefdQWEf5PU8w+4SSJDoYnggflB5tW4A==
+axios@1.2.2, axios@^1.0.0:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.2.2.tgz#72681724c6e6a43a9fea860fc558127dbe32f9f1"
+  integrity sha512-bz/J4gS2S3I7mpN/YZfGFTqhXTYzRho8Ay38w2otuuDR322KzFIWm/4W2K6gIwvWaws5n+mnb7D1lN9uD+QH6Q==
   dependencies:
     follow-redirects "^1.15.0"
     form-data "^4.0.0"
@@ -7389,15 +7389,6 @@ axios@^0.26.0:
   integrity sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==
   dependencies:
     follow-redirects "^1.14.8"
-
-axios@^1.0.0:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-1.2.2.tgz#72681724c6e6a43a9fea860fc558127dbe32f9f1"
-  integrity sha512-bz/J4gS2S3I7mpN/YZfGFTqhXTYzRho8Ay38w2otuuDR322KzFIWm/4W2K6gIwvWaws5n+mnb7D1lN9uD+QH6Q==
-  dependencies:
-    follow-redirects "^1.15.0"
-    form-data "^4.0.0"
-    proxy-from-env "^1.1.0"
 
 axobject-query@^2.2.0:
   version "2.2.0"
@@ -17492,8 +17483,6 @@ path-case@^2.1.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/path-case/-/path-case-2.1.1.tgz#94b8037c372d3fe2906e465bb45e25d226e8eea5"
   integrity sha1-lLgDfDctP+KQbkZbtF4l0ibo7qU=
-  dependencies:
-    no-case "^2.2.0"
 
 path-dirname@^1.0.0:
   version "1.0.2"
