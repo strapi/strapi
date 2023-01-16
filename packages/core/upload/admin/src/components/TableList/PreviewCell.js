@@ -11,7 +11,6 @@ import { AssetType } from '../../constants';
 import { createAssetUrl } from '../../utils';
 import { VideoPreview } from '../AssetCard/VideoPreview';
 
-// Temp: Avatar should support video preview
 const VideoPreviewWrapper = styled(Box)`
   figure {
     width: 26px;
