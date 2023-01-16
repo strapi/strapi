@@ -522,6 +522,10 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   min-width: 0;
 }
 
+.c21 > div[role='button'] {
+  cursor: all-scroll;
+}
+
 .c25 {
   width: 100%;
   min-width: 0;

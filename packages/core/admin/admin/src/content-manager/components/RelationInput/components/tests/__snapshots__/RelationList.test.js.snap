@@ -75,6 +75,10 @@ exports[`Content-Manager || RelationInput || RelationList should render and matc
   min-width: 0;
 }
 
+.c6 > div[role='button'] {
+  cursor: all-scroll;
+}
+
 .c7 {
   width: 100%;
   min-width: 0;
