@@ -13,6 +13,7 @@ const VideoPreviewWrapper = styled(Box)`
   canvas,
   video {
     display: block;
+    pointer-events: none;
     max-width: 100%;
     max-height: ${({ size }) => (size === 'M' ? 164 / 16 : 88 / 16)}rem;
   }
