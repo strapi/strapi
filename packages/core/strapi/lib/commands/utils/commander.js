@@ -13,7 +13,6 @@ const { exitWith } = require('./helpers');
  * argParser: Parse a comma-delimited string as an array
  */
 const parseList = (value) => {
-  console.log(`parsing input ${value}`);
   let list;
   try {
     list = value.split(',').map((item) => item.trim()); // trim shouldn't be necessary but might help catch unexpected whitespace characters
