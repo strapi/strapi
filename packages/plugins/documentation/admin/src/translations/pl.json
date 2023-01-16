@@ -29,7 +29,7 @@
   "pages.PluginPage.table.icon.regenerate": "Wygeneruj ponownie {target}",
   "pages.PluginPage.table.icon.show": "Otwórz {target}",
   "pages.PluginPage.table.version": "Wersja",
-  "pages.SettingsPage.Button.description": "Skonfiguruj plugin dokumentacji",
+  "pages.SettingsPage.header.description": "Skonfiguruj plugin dokumentacji",
   "pages.SettingsPage.header.save": "Zapisz",
   "pages.SettingsPage.toggle.hint": "Ustaw endpoint dokumentacji na prywatny",
   "pages.SettingsPage.toggle.label": "Dostęp ograniczony",

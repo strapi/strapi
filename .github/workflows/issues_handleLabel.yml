@@ -61,7 +61,7 @@ jobs:
 
             Hello @${{ github.event.issue.user.login }},
 
-            Thank you for reporting this potential bug report, please keep in mind that we are no longer accepting bug reports unless they could be deemed high or critical severity or related to security in nature.
+            Thank you for reporting this potential bug report, please keep in mind that we are no longer accepting bug reports for Strapi v3.
             The recommended action we suggest for v3 users is to utilize the various migration resources to upgrade your package from Strapi v3 to Strapi v4:
 
             - [Code Migration Guide](https://docs.strapi.io/developer-docs/latest/update-migration-guides/migration-guides/v4/code-migration.html) and/or [Codemods project](https://github.com/strapi/codemods)
@@ -69,7 +69,7 @@ jobs:
             - [Plugin Migration Guide](https://docs.strapi.io/developer-docs/latest/update-migration-guides/migration-guides/v4/plugin-migration.html)
 
             Please see our [Security file](https://github.com/strapi/strapi/security) for more information about supported versions.
-            For now this issue is marked as closed as we do not believe this issue is Critical/High Severity nor related to security.
+            For now this issue is marked as closed.
 
             Thank You
       - name: 'Close: unsupported v3 issues'
