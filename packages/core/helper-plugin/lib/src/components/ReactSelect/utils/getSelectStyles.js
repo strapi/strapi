@@ -39,7 +39,7 @@ const getSelectStyles = (theme, error) => {
       margin: 0,
       padding: 0,
       color: theme.colors.neutral800,
-      gridTemplateColumns: 'unset',
+      gridTemplateColumns: '0 100%',
     }),
     menu(base) {
       return {

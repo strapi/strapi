@@ -621,7 +621,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                 Select...
               </div>
               <div
-                class=" css-1rkub9f-Input"
+                class=" css-566e1j-Input"
                 data-value=""
               >
                 <input
