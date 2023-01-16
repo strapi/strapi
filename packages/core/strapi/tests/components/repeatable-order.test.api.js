@@ -78,7 +78,7 @@ describe('Given a content type with a repeatable component and two entities crea
   describe('When I update the order of one of the entities components', () => {
     test('Then the order of both entity components is preserved', async () => {
       const updatedEntity1 = await updateEntity(entity1.id, {
-        field: [{ name: 'field2' }, { name: 'field1' }],
+        field: [entity1.attributes.field[1], entity1.attributes.field[0]],
       });
 
       const res = await getEntity(entity2.id);
