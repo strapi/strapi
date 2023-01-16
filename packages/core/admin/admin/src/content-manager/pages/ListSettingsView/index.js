@@ -5,6 +5,7 @@ import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import pick from 'lodash/pick';
 import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
 import { stringify } from 'qs';
 import { useNotification, useTracking, ConfirmDialog, Link } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
@@ -35,12 +36,12 @@ const ListSettingsView = ({ layout, slug }) => {
 
   const [showWarningSubmit, setWarningSubmit] = useState(false);
   const toggleWarningSubmit = () => setWarningSubmit((prevState) => !prevState);
-  const [isModalFormOpen, setIsModalFormOpen] = useState(false);
-  const toggleModalForm = () => setIsModalFormOpen((prevState) => !prevState);
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, layout)
   );
   const { fieldToEdit, fieldForm, initialData, modifiedData } = reducerState;
+  const isModalFormOpen = !isEmpty(fieldForm);
+
   const { attributes } = layout;
   const displayedFields = modifiedData.layouts.list;
 
@@ -110,19 +111,16 @@ const ListSettingsView = ({ layout, slug }) => {
       type: 'SET_FIELD_TO_EDIT',
       fieldToEdit,
     });
-    toggleModalForm();
   };
 
   const handleCloseModal = () => {
     dispatch({
       type: 'UNSET_FIELD_TO_EDIT',
     });
-    toggleModalForm();
   };
 
   const handleSubmitFieldEdit = (e) => {
     e.preventDefault();
-    toggleModalForm();
     dispatch({
       type: 'SUBMIT_FIELD_FORM',
     });
