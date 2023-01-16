@@ -17,9 +17,13 @@ import { useState } from 'react';
  *
  * @internal - You should use `useDragAndDrop` instead.
  *
- * @type {(index: number, callbacks: UseKeyboardDragAndDropCallbacks) => (event: React.KeyboardEvent<HTMLButtonElement>) => void}
+ * @type {(active: boolean, index: number, callbacks: UseKeyboardDragAndDropCallbacks) => (event: React.KeyboardEvent<HTMLButtonElement>) => void}
  */
-export const useKeyboardDragAndDrop = (index, { onCancel, onDropItem, onGrabItem, onMoveItem }) => {
+export const useKeyboardDragAndDrop = (
+  active,
+  index,
+  { onCancel, onDropItem, onGrabItem, onMoveItem }
+) => {
   const [isSelected, setIsSelected] = useState(false);
   /**
    * @type {(movement: 'UP' | 'DOWN') => void})}
@@ -64,6 +68,10 @@ export const useKeyboardDragAndDrop = (index, { onCancel, onDropItem, onGrabItem
    * @type {React.KeyboardEventHandler<HTMLButtonElement>}
    */
   const handleKeyDown = (e) => {
+    if (!active) {
+      return;
+    }
+
     if (e.key === 'Tab' && !isSelected) {
       return;
     }

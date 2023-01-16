@@ -123,7 +123,7 @@ export const useDragAndDrop = (
     }),
   });
 
-  const handleKeyDown = useKeyboardDragAndDrop(index, {
+  const handleKeyDown = useKeyboardDragAndDrop(active, index, {
     onGrabItem,
     onDropItem,
     onCancel,
