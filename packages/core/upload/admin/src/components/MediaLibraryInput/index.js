@@ -9,6 +9,7 @@ import { CarouselAssets } from './Carousel/CarouselAssets';
 import { EditFolderDialog } from '../EditFolderDialog';
 import { UploadAssetDialog } from '../UploadAssetDialog/UploadAssetDialog';
 import getAllowedFiles from '../../utils/getAllowedFiles';
+import getTrad from '../../utils/getTrad';
 
 const STEPS = {
   AssetSelect: 'SelectAsset',
@@ -112,11 +113,11 @@ export const MediaLibraryInput = ({
         type: 'warning',
         timeout: 4000,
         message: {
-          id: 'input.notification.not-supported',
-          defaultMessage: `You can't upload this type of file, only the following types are accepted – ${fieldAllowedTypes.join(
-            ','
-          )}`,
-          assetTypes: fieldAllowedTypes.join(','),
+          id: getTrad('input.notification.not-supported'),
+          defaultMessage: `You can't upload this type of file.`,
+          values: {
+            fileTypes: fieldAllowedTypes.join(','),
+          },
         },
       });
     }
