@@ -39,7 +39,7 @@
     "watch": "yarn create:index && cross-env NODE_ENV=development webpack-cli -w"
   },
   "dependencies": {
-    "axios": "1.2.1",
+    "axios": "1.2.2",
     "date-fns": "2.29.3",
     "formik": "^2.2.6",
     "immer": "9.0.6",
@@ -65,9 +65,10 @@
     "@storybook/manager-webpack5": "6.5.15",
     "@storybook/react": "^6.5.10",
     "@strapi/design-system": "1.4.2",
-    "@strapi/icons": "1.4.1",
+    "@strapi/icons": "1.4.2",
     "@testing-library/react": "12.1.4",
     "@testing-library/react-hooks": "8.0.1",
+    "browserslist-to-esbuild": "1.2.0",
     "cross-env": "^7.0.3",
     "esbuild-loader": "^2.20.0",
     "react-test-renderer": "^17.0.2",
