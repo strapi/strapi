@@ -38,6 +38,7 @@
   "input.placeholder.icon": "Drop the asset in this zone",
   "input.url.description": "Separate your URL links by a carriage return.",
   "input.url.label": "URL",
+  "input.notification.not-supported": "You can't upload this type of file.",
   "list.assets.title": "Assets ({count})",
   "list.asset.at.finished": "The assets have finished loading.",
   "list.assets-empty.search": "No result found",
