@@ -20,7 +20,7 @@ const ShadowBox = styled(Box)`
     /* TODO: as for DS Table component we would need this to be handled by the DS theme */
     content: ${({ overflowDirection }) =>
       overflowDirection === 'top-bottom' || overflowDirection === 'top' ? "''" : undefined};
-    background: linear-gradient(rgba(33, 33, 52, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
+    background: linear-gradient(#c0c0cf 0%, rgba(0, 0, 0, 0) 100%);
     top: 0;
   }
 
@@ -28,7 +28,7 @@ const ShadowBox = styled(Box)`
     /* TODO: as for DS Table component we would need this to be handled by the DS theme */
     content: ${({ overflowDirection }) =>
       overflowDirection === 'top-bottom' || overflowDirection === 'bottom' ? "''" : undefined};
-    background: linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(33, 33, 52, 0.1) 100%);
+    background: linear-gradient(0deg, #c0c0cf 0%, rgba(0, 0, 0, 0) 100%);
     bottom: 0;
   }
 `;
