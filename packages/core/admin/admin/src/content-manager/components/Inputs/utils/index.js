@@ -1,4 +1,3 @@
-export { default as buildMinMaxDescription } from './minMaxDescription';
 export { default as connect } from './connect';
 export { default as generateOptions } from './generateOptions';
 export { default as getInputType } from './getInputType';

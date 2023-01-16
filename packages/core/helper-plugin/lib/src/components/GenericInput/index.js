@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import parseISO from 'date-fns/parseISO';
 import formatISO from 'date-fns/formatISO';
 import { useIntl } from 'react-intl';
+
 import {
   Checkbox,
   DatePicker,
@@ -24,13 +25,14 @@ import {
 import { Option } from '@strapi/design-system/Select';
 import EyeStriked from '@strapi/icons/EyeStriked';
 import Eye from '@strapi/icons/Eye';
+
 import NotSupported from './NotSupported';
+import useFieldHint from '../../hooks/useFieldHint';
 
 const GenericInput = ({
   autoComplete,
   customInputs,
   description,
-  minMaxDescription,
   disabled,
   intlLabel,
   labelAction,
@@ -44,9 +46,17 @@ const GenericInput = ({
   type,
   value: defaultValue,
   isNullable,
+  minimum,
+  maximum,
   ...rest
 }) => {
   const { formatMessage } = useIntl();
+  const { fieldHint } = useFieldHint({
+    isNumber: type === 'number',
+    description,
+    minimum,
+    maximum,
+  });
   const [showPassword, setShowPassword] = useState(false);
 
   const CustomInput = customInputs ? customInputs[type] : null;
@@ -93,7 +103,8 @@ const GenericInput = ({
       <CustomInput
         {...rest}
         description={description}
-        minMaxDescription={minMaxDescription}
+        minimum={minimum}
+        maximum={maximum}
         disabled={disabled}
         intlLabel={intlLabel}
         labelAction={labelAction}
@@ -116,27 +127,12 @@ const GenericInput = ({
       )
     : name;
 
-  const hint = description
-    ? formatMessage(
-        { id: description.id, defaultMessage: description.defaultMessage },
-        { ...description.values }
-      )
-    : '';
-
   const formattedPlaceholder = placeholder
     ? formatMessage(
         { id: placeholder.id, defaultMessage: placeholder.defaultMessage },
         { ...placeholder.values }
       )
     : '';
-
-  const formattedMinMaxDescription = minMaxDescription
-    ? formatMessage(
-        { id: minMaxDescription.id, defaultMessage: minMaxDescription.defaultMessage },
-        { ...minMaxDescription.values }
-      )
-    : [];
-  const combinedHint = [...formattedMinMaxDescription, hint];
 
   switch (type) {
     case 'bool': {
@@ -159,7 +155,7 @@ const GenericInput = ({
         <ToggleInput
           checked={defaultValue === null ? null : defaultValue || false}
           disabled={disabled}
-          hint={hint}
+          hint={fieldHint}
           label={label}
           error={errorMessage}
           labelAction={labelAction}
@@ -185,7 +181,7 @@ const GenericInput = ({
         <Checkbox
           disabled={disabled}
           error={errorMessage}
-          hint={hint}
+          hint={fieldHint}
           id={name}
           name={name}
           onValueChange={(value) => {
@@ -207,7 +203,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={hint}
+          hint={fieldHint}
           name={name}
           onChange={(date) => {
             const formattedDate = date.toISOString();
@@ -242,7 +238,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={hint}
+          hint={fieldHint}
           name={name}
           onChange={(date) => {
             onChange({
@@ -265,7 +261,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={combinedHint}
+          hint={fieldHint}
           name={name}
           onValueChange={(value) => onChange({ target: { name, value, type } })}
           placeholder={formattedPlaceholder}
@@ -284,7 +280,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={combinedHint}
+          hint={fieldHint}
           name={name}
           onChange={onChange}
           placeholder={formattedPlaceholder}
@@ -305,7 +301,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={combinedHint}
+          hint={fieldHint}
           name={name}
           onChange={onChange}
           placeholder={formattedPlaceholder}
@@ -347,7 +343,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={combinedHint}
+          hint={fieldHint}
           name={name}
           onChange={onChange}
           placeholder={formattedPlaceholder}
@@ -365,7 +361,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={hint}
+          hint={fieldHint}
           name={name}
           onChange={(value) => onChange({ target: { name, value, type: 'select' } })}
           placeholder={formattedPlaceholder}
@@ -390,7 +386,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={combinedHint}
+          hint={fieldHint}
           name={name}
           onChange={onChange}
           required={required}
@@ -421,7 +417,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={hint}
+          hint={fieldHint}
           name={name}
           onChange={(time) => {
             onChange({ target: { name, value: `${time}`, type } });
@@ -442,7 +438,7 @@ const GenericInput = ({
           name={name}
           label={label}
           labelAction={labelAction}
-          hint={hint}
+          hint={fieldHint}
           error={errorMessage}
           required={required}
         />
@@ -455,7 +451,6 @@ GenericInput.defaultProps = {
   autoComplete: undefined,
   customInputs: null,
   description: null,
-  minMaxDescription: null,
   disabled: false,
   error: '',
   isNullable: undefined,
@@ -465,17 +460,14 @@ GenericInput.defaultProps = {
   options: [],
   step: 1,
   value: undefined,
+  minimum: undefined,
+  maximum: undefined,
 };
 
 GenericInput.propTypes = {
   autoComplete: PropTypes.string,
   customInputs: PropTypes.object,
   description: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }),
-  minMaxDescription: PropTypes.shape({
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
@@ -520,6 +512,8 @@ GenericInput.propTypes = {
   step: PropTypes.number,
   type: PropTypes.string.isRequired,
   value: PropTypes.any,
+  minimum: PropTypes.number,
+  maximum: PropTypes.number,
 };
 
 export default GenericInput;

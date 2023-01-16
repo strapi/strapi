@@ -14,7 +14,6 @@ import InputUID from '../InputUID';
 import { RelationInputDataManager } from '../RelationInputDataManager';
 
 import {
-  buildMinMaxDescription,
   connect,
   generateOptions,
   getInputType,
@@ -260,12 +259,6 @@ function Inputs({
   };
 
   const { minLength, maxLength, max, min } = fieldSchema;
-  const genericInputType = customFieldUid || inputType;
-  const minMaxDescription = buildMinMaxDescription(
-    genericInputType,
-    min || minLength,
-    max || maxLength
-  );
 
   return (
     <GenericInput
@@ -275,15 +268,8 @@ function Inputs({
       // in case the default value of the boolean is null, attribute.default doesn't exist
       isNullable={inputType === 'bool' && [null, undefined].includes(fieldSchema.default)}
       description={description ? { id: description, defaultMessage: description } : null}
-      minMaxDescription={
-        minMaxDescription
-          ? {
-              id: minMaxDescription.id,
-              defaultMessage: minMaxDescription.defaultMessage,
-              values: minMaxDescription.values,
-            }
-          : null
-      }
+      minimum={min || minLength}
+      maximum={max || maxLength}
       disabled={shouldDisableField}
       error={error}
       labelAction={labelAction}
@@ -296,7 +282,7 @@ function Inputs({
       placeholder={placeholder ? { id: placeholder, defaultMessage: placeholder } : null}
       required={fieldSchema.required || false}
       step={inputStep}
-      type={genericInputType}
+      type={customFieldUid || inputType}
       // validations={validations}
       value={inputValue}
       withDefaultValue={false}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { useCMEditViewDataManager } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager, useFieldHint } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 import { TextInput } from '@strapi/design-system/TextInput';
@@ -24,7 +24,8 @@ const InputUID = ({
   attribute,
   contentTypeUID,
   description,
-  minMaxDescription,
+  minimum,
+  maximum,
   disabled,
   error,
   intlLabel,
@@ -36,6 +37,7 @@ const InputUID = ({
   required,
 }) => {
   const { modifiedData, initialData, layout } = useCMEditViewDataManager();
+  const { fieldHint } = useFieldHint({ description, minimum, maximum });
   const [isLoading, setIsLoading] = useState(false);
   const [availability, setAvailability] = useState(null);
   const debouncedValue = useDebounce(value, 300);
@@ -55,27 +57,12 @@ const InputUID = ({
       )
     : name;
 
-  const hint = description
-    ? formatMessage(
-        { id: description.id, defaultMessage: description.defaultMessage },
-        { ...description.values }
-      )
-    : '';
-
   const formattedPlaceholder = placeholder
     ? formatMessage(
         { id: placeholder.id, defaultMessage: placeholder.defaultMessage },
         { ...placeholder.values }
       )
     : '';
-
-  const formattedMinMaxDescription = minMaxDescription
-    ? formatMessage(
-        { id: minMaxDescription.id, defaultMessage: minMaxDescription.defaultMessage },
-        { ...minMaxDescription.values }
-      )
-    : [];
-  const combinedHint = [...formattedMinMaxDescription, hint];
 
   generateUid.current = async (shouldSetInitialValue = false) => {
     setIsLoading(true);
@@ -242,7 +229,7 @@ const InputUID = ({
           </FieldActionWrapper>
         </EndActionWrapper>
       }
-      hint={combinedHint}
+      hint={fieldHint}
       label={label}
       labelAction={labelAction}
       name={name}
@@ -265,11 +252,6 @@ InputUID.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }),
-  minMaxDescription: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }),
   disabled: PropTypes.bool,
   error: PropTypes.string,
   intlLabel: PropTypes.shape({
@@ -287,17 +269,20 @@ InputUID.propTypes = {
     values: PropTypes.object,
   }),
   required: PropTypes.bool,
+  minimum: PropTypes.number,
+  maximum: PropTypes.number,
 };
 
 InputUID.defaultProps = {
   description: undefined,
-  minMaxDescription: undefined,
   disabled: false,
   error: undefined,
   labelAction: undefined,
   placeholder: undefined,
   value: '',
   required: false,
+  minimum: undefined,
+  maximum: undefined,
 };
 
 export default InputUID;

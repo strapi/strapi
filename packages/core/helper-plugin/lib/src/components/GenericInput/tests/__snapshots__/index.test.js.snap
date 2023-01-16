@@ -14,12 +14,6 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
   color: #d02b20;
 }
 
-.c14 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
 .c9 {
   padding-right: 12px;
   padding-left: 8px;
@@ -88,7 +82,7 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
   fill: #8e8ea9;
 }
 
-.c15 {
+.c14 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -233,7 +227,6 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
         class="c6 c7"
       >
         <input
-          aria-describedby="number-hint"
           aria-disabled="false"
           aria-invalid="false"
           aria-required="true"
@@ -295,16 +288,10 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
           </button>
         </div>
       </div>
-      <p
-        class="c14"
-        id="number-hint"
-      >
-        
-      </p>
     </div>
   </div>
   <div
-    class="c15"
+    class="c14"
   >
     <p
       aria-live="polite"
