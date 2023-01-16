@@ -2,6 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
+
+import { usePersistentState } from '@strapi/helper-plugin';
 import { Button } from '@strapi/design-system/Button';
 import { Flex } from '@strapi/design-system/Flex';
 import { Box } from '@strapi/design-system/Box';
@@ -13,13 +15,21 @@ import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { IconButton } from '@strapi/design-system/IconButton';
 import PencilIcon from '@strapi/icons/Pencil';
 import PlusIcon from '@strapi/icons/Plus';
+import Grid from '@strapi/icons/Grid';
+import List from '@strapi/icons/List';
 
-import { FolderDefinition, AssetDefinition } from '../../../constants';
+import {
+  FolderDefinition,
+  AssetDefinition,
+  viewOptions,
+  localStorageKeys,
+} from '../../../constants';
 import getTrad from '../../../utils/getTrad';
-import { getBreadcrumbDataCM } from '../../../utils';
+import { getBreadcrumbDataCM, toSingularTypes } from '../../../utils';
 import getAllowedFiles from '../../../utils/getAllowedFiles';
-import { AssetList } from '../../AssetList';
-import { FolderList } from '../../FolderList';
+import { AssetGridList } from '../../AssetGridList';
+import { TableList } from '../../TableList';
+import { FolderGridList } from '../../FolderGridList';
 import { EmptyAssets } from '../../EmptyAssets';
 import { Breadcrumbs } from '../../Breadcrumbs';
 import SortPicker from '../../SortPicker';
@@ -29,6 +39,7 @@ import { Filters } from './Filters';
 import PaginationFooter from './PaginationFooter';
 import PageSize from './PageSize';
 import SearchAsset from './SearchAsset';
+import { isSelectable } from './utils/isSelectable';
 
 const StartBlockActions = styled(Flex)`
   & > * + * {
@@ -45,9 +56,17 @@ const TypographyMaxWidth = styled(Typography)`
   max-width: 100%;
 `;
 
+const ActionContainer = styled(Box)`
+  svg {
+    path {
+      fill: ${({ theme }) => theme.colors.neutral500};
+    }
+  }
+`;
+
 export const BrowseStep = ({
   allowedTypes,
-  assets,
+  assets: rawAssets,
   canCreate,
   canRead,
   folders,
@@ -68,6 +87,8 @@ export const BrowseStep = ({
   selectedAssets,
 }) => {
   const { formatMessage } = useIntl();
+  const [view, setView] = usePersistentState(localStorageKeys.modalView, viewOptions.GRID);
+  const isGridView = view === viewOptions.GRID;
 
   const { data: currentFolder, isLoading: isCurrentFolderLoading } = useFolder(
     queryObject?.folder,
@@ -75,6 +96,13 @@ export const BrowseStep = ({
       enabled: canRead && !!queryObject?.folder,
     }
   );
+
+  const singularTypes = toSingularTypes(allowedTypes);
+  const assets = rawAssets.map((asset) => ({
+    ...asset,
+    isSelectable: isSelectable(singularTypes, asset?.mime),
+    type: 'asset',
+  }));
 
   const breadcrumbs = !isCurrentFolderLoading && getBreadcrumbDataCM(currentFolder);
 
@@ -101,11 +129,11 @@ export const BrowseStep = ({
   return (
     <Box>
       {onSelectAllAsset && (
-        <Box>
+        <Box paddingBottom={4}>
           <Flex justifyContent="space-between" alignItems="flex-start">
             {(assetCount > 0 || folderCount > 0 || isFiltering) && (
               <StartBlockActions wrap="wrap">
-                {multiple && (
+                {multiple && isGridView && (
                   <Flex
                     paddingLeft={2}
                     paddingRight={2}
@@ -125,7 +153,7 @@ export const BrowseStep = ({
                     />
                   </Flex>
                 )}
-                <SortPicker onChangeSort={onChangeSort} />
+                {isGridView && <SortPicker onChangeSort={onChangeSort} />}
                 <Filters
                   appliedFilters={queryObject?.filters?.$and}
                   onChangeFilters={onChangeFilters}
@@ -135,6 +163,23 @@ export const BrowseStep = ({
 
             {(assetCount > 0 || folderCount > 0 || isSearching) && (
               <EndBlockActions pullRight>
+                <ActionContainer paddingTop={1} paddingBottom={1}>
+                  <IconButton
+                    icon={isGridView ? <List /> : <Grid />}
+                    label={
+                      isGridView
+                        ? formatMessage({
+                            id: 'view-switch.list',
+                            defaultMessage: 'List View',
+                          })
+                        : formatMessage({
+                            id: 'view-switch.grid',
+                            defaultMessage: 'Grid View',
+                          })
+                    }
+                    onClick={() => setView(isGridView ? viewOptions.LIST : viewOptions.GRID)}
+                  />
+                </ActionContainer>
                 <SearchAsset onChangeSearch={onChangeSearch} queryValue={queryObject._q || ''} />
               </EndBlockActions>
             )}
@@ -195,99 +240,130 @@ export const BrowseStep = ({
         </Box>
       )}
 
-      {folderCount > 0 && (
-        <FolderList
-          title={
-            (((isSearchingOrFiltering && assetCount > 0) || !isSearchingOrFiltering) &&
-              formatMessage(
-                {
-                  id: getTrad('list.folders.title'),
-                  defaultMessage: 'Folders ({count})',
-                },
-                { count: folderCount }
-              )) ||
-            ''
-          }
-        >
-          {folders.map((folder) => {
-            return (
-              <GridItem col={3} key={`folder-${folder.id}`}>
-                <FolderCard
-                  ariaLabel={folder.name}
-                  id={`folder-${folder.id}`}
-                  onClick={() => handleClickFolderCard(folder.id)}
-                  cardActions={
-                    onEditFolder && (
-                      <IconButton
-                        icon={<PencilIcon />}
-                        aria-label={formatMessage({
-                          id: getTrad('list.folder.edit'),
-                          defaultMessage: 'Edit folder',
-                        })}
-                        onClick={() => onEditFolder(folder)}
-                      />
-                    )
-                  }
-                >
-                  <FolderCardBody>
-                    <FolderCardBodyAction onClick={() => handleClickFolderCard(folder.id)}>
-                      <Flex as="h2" direction="column" alignItems="start" maxWidth="100%">
-                        <TypographyMaxWidth fontWeight="semiBold" ellipsis>
-                          {folder.name}
-                          <VisuallyHidden>:</VisuallyHidden>
-                        </TypographyMaxWidth>
-                        <TypographyMaxWidth as="span" textColor="neutral600" variant="pi" ellipsis>
-                          {formatMessage(
-                            {
-                              id: getTrad('list.folder.subtitle'),
-                              defaultMessage:
-                                '{folderCount, plural, =0 {# folder} one {# folder} other {# folders}}, {filesCount, plural, =0 {# asset} one {# asset} other {# assets}}',
-                            },
-                            {
-                              folderCount: folder.children.count,
-                              filesCount: folder.files.count,
-                            }
-                          )}
-                        </TypographyMaxWidth>
-                      </Flex>
-                    </FolderCardBodyAction>
-                  </FolderCardBody>
-                </FolderCard>
-              </GridItem>
-            );
-          })}
-        </FolderList>
+      {!isGridView && (folderCount > 0 || assetCount > 0) && (
+        <TableList
+          allowedTypes={allowedTypes}
+          assetCount={assetCount}
+          folderCount={folderCount}
+          indeterminate={!areAllAssetSelected && hasSomeAssetSelected}
+          isFolderSelectionAllowed={false}
+          onChangeSort={onChangeSort}
+          onChangeFolder={handleClickFolderCard}
+          onEditAsset={onEditAsset}
+          onEditFolder={onEditFolder}
+          onSelectOne={onSelectAsset}
+          onSelectAll={onSelectAllAsset}
+          rows={[...folders.map((folder) => ({ ...folder, type: 'folder' })), ...assets]}
+          selected={selectedAssets}
+          shouldDisableBulkSelect={!multiple}
+          sortQuery={queryObject?.sort ?? ''}
+        />
       )}
 
-      {assetCount > 0 && folderCount > 0 && (
-        <Box paddingTop={6}>
-          <Divider />
-        </Box>
-      )}
+      {isGridView && (
+        <>
+          {folderCount > 0 && (
+            <FolderGridList
+              title={
+                (((isSearchingOrFiltering && assetCount > 0) || !isSearchingOrFiltering) &&
+                  formatMessage(
+                    {
+                      id: getTrad('list.folders.title'),
+                      defaultMessage: 'Folders ({count})',
+                    },
+                    { count: folderCount }
+                  )) ||
+                ''
+              }
+            >
+              {folders.map((folder) => {
+                return (
+                  <GridItem col={3} key={`folder-${folder.id}`}>
+                    <FolderCard
+                      ariaLabel={folder.name}
+                      id={`folder-${folder.id}`}
+                      onClick={() => handleClickFolderCard(folder.id)}
+                      cardActions={
+                        onEditFolder && (
+                          <IconButton
+                            icon={<PencilIcon />}
+                            aria-label={formatMessage({
+                              id: getTrad('list.folder.edit'),
+                              defaultMessage: 'Edit folder',
+                            })}
+                            onClick={() => onEditFolder(folder)}
+                          />
+                        )
+                      }
+                    >
+                      <FolderCardBody>
+                        <FolderCardBodyAction onClick={() => handleClickFolderCard(folder.id)}>
+                          <Flex as="h2" direction="column" alignItems="start" maxWidth="100%">
+                            <TypographyMaxWidth fontWeight="semiBold" ellipsis>
+                              {folder.name}
+                              {/* VisuallyHidden dash here allows to separate folder title and count informations 
+                              for voice reading structure purpose */}
+                              <VisuallyHidden>-</VisuallyHidden>
+                            </TypographyMaxWidth>
+                            <TypographyMaxWidth
+                              as="span"
+                              textColor="neutral600"
+                              variant="pi"
+                              ellipsis
+                            >
+                              {formatMessage(
+                                {
+                                  id: getTrad('list.folder.subtitle'),
+                                  defaultMessage:
+                                    '{folderCount, plural, =0 {# folder} one {# folder} other {# folders}}, {filesCount, plural, =0 {# asset} one {# asset} other {# assets}}',
+                                },
+                                {
+                                  folderCount: folder.children.count,
+                                  filesCount: folder.files.count,
+                                }
+                              )}
+                            </TypographyMaxWidth>
+                          </Flex>
+                        </FolderCardBodyAction>
+                      </FolderCardBody>
+                    </FolderCard>
+                  </GridItem>
+                );
+              })}
+            </FolderGridList>
+          )}
 
-      {assetCount > 0 && (
-        <Box paddingTop={6}>
-          <AssetList
-            allowedTypes={allowedTypes}
-            size="S"
-            assets={assets}
-            onSelectAsset={onSelectAsset}
-            selectedAssets={selectedAssets}
-            onEditAsset={onEditAsset}
-            title={
-              ((!isSearchingOrFiltering || (isSearchingOrFiltering && folderCount > 0)) &&
-                queryObject.page === 1 &&
-                formatMessage(
-                  {
-                    id: getTrad('list.assets.title'),
-                    defaultMessage: 'Assets ({count})',
-                  },
-                  { count: assetCount }
-                )) ||
-              ''
-            }
-          />
-        </Box>
+          {assetCount > 0 && folderCount > 0 && (
+            <Box paddingTop={6}>
+              <Divider />
+            </Box>
+          )}
+
+          {assetCount > 0 && (
+            <Box paddingTop={6}>
+              <AssetGridList
+                allowedTypes={allowedTypes}
+                size="S"
+                assets={assets}
+                onSelectAsset={onSelectAsset}
+                selectedAssets={selectedAssets}
+                onEditAsset={onEditAsset}
+                title={
+                  ((!isSearchingOrFiltering || (isSearchingOrFiltering && folderCount > 0)) &&
+                    queryObject.page === 1 &&
+                    formatMessage(
+                      {
+                        id: getTrad('list.assets.title'),
+                        defaultMessage: 'Assets ({count})',
+                      },
+                      { count: assetCount }
+                    )) ||
+                  ''
+                }
+              />
+            </Box>
+          )}
+        </>
       )}
 
       {pagination.pageCount > 0 && (
@@ -309,8 +385,6 @@ BrowseStep.defaultProps = {
   folders: [],
   multiple: false,
   onSelectAllAsset: undefined,
-  onEditAsset: undefined,
-  onEditFolder: undefined,
 };
 BrowseStep.propTypes = {
   allowedTypes: PropTypes.arrayOf(PropTypes.string),
@@ -326,8 +400,8 @@ BrowseStep.propTypes = {
   onChangePageSize: PropTypes.func.isRequired,
   onChangeSort: PropTypes.func.isRequired,
   onChangeSearch: PropTypes.func.isRequired,
-  onEditAsset: PropTypes.func,
-  onEditFolder: PropTypes.func,
+  onEditAsset: PropTypes.func.isRequired,
+  onEditFolder: PropTypes.func.isRequired,
   onSelectAsset: PropTypes.func.isRequired,
   onSelectAllAsset: PropTypes.func,
   queryObject: PropTypes.shape({
@@ -335,6 +409,7 @@ BrowseStep.propTypes = {
     page: PropTypes.number.isRequired,
     pageSize: PropTypes.number.isRequired,
     _q: PropTypes.string,
+    sort: PropTypes.string,
     folder: PropTypes.number,
   }).isRequired,
   pagination: PropTypes.shape({ pageCount: PropTypes.number.isRequired }).isRequired,

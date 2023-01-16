@@ -125,6 +125,7 @@ module.exports = {
     const autoReload = strapi.config.get('autoReload', false);
     const strapiVersion = strapi.config.get('info.strapi', null);
     const dependencies = strapi.config.get('info.dependencies', {});
+    const projectId = strapi.config.get('uuid', null);
     const nodeVersion = process.version;
     const communityEdition = !strapi.EE;
     const useYarn = await exists(path.join(process.cwd(), 'yarn.lock'));
@@ -135,6 +136,7 @@ module.exports = {
         autoReload,
         strapiVersion,
         dependencies,
+        projectId,
         nodeVersion,
         communityEdition,
         useYarn,

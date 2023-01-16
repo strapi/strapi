@@ -28,12 +28,12 @@ const writePackageJSON = async (path, file, spacing) => {
 
 const sendEvent = async (uuid) => {
   try {
-    await fetch('https://analytics.strapi.io/track', {
+    await fetch('https://analytics.strapi.io/api/v2/track', {
       method: 'POST',
       body: JSON.stringify({
         event: 'didOptOutTelemetry',
-        uuid,
         deviceId: machineID(),
+        groupProperties: { projectId: uuid },
       }),
       headers: { 'Content-Type': 'application/json' },
     });
