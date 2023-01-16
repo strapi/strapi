@@ -50,7 +50,7 @@ class Database {
     return this.entityManager.getRepository(uid);
   }
 
-  async transaction(cb, { onError, onSuccess } = {}) {
+  async transaction(cb) {
     const notNestedTransaction = !transactionCtx.get();
     const trx = notNestedTransaction ? await this.connection.transaction() : transactionCtx.get();
     if (!cb) {
@@ -77,13 +77,11 @@ class Database {
         if (notNestedTransaction) {
           await trx.commit();
         }
-        await onSuccess?.();
         return res;
       } catch (error) {
         if (notNestedTransaction) {
           await trx.rollback();
         }
-        await onError?.();
         throw error;
       }
     });

@@ -161,8 +161,7 @@ export interface Database {
 
   query<T extends keyof AllTypes>(uid: T): QueryFromContentType<T>;
   transaction(
-    cb?: (trx: Knex.Transaction) => Promise<any>,
-    options?: any
+    cb?: (trx: Knex.Transaction) => Promise<any>
   ):
     | Promise<void>
     | { get: () => Knex.Transaction; rollback: () => Promise<void>; commit: () => Promise<void> };
