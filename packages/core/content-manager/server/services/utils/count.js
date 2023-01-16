@@ -5,7 +5,6 @@ const { merge } = require('lodash/fp');
 function getCountForRelation(entity, attributeName) {
   const entityAttribute = entity[attributeName];
 
-  // Check if is an array? what happens if its a one to one relation?
   if (Array.isArray(entityAttribute)) {
     return { count: entityAttribute.length };
   }
