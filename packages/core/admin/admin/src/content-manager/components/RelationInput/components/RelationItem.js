@@ -16,6 +16,10 @@ export const StackWrapper = styled(Stack)`
   width: 100%;
   /* Used to prevent endAction to be pushed out of container */
   min-width: 0;
+
+  & > div[role='button'] {
+    cursor: all-scroll;
+  }
 `;
 
 export const ChildrenWrapper = styled(Flex)`
