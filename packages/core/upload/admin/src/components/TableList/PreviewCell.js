@@ -2,23 +2,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { getFileExtension, prefixFileUrlWithBackendUrl, pxToRem } from '@strapi/helper-plugin';
-import { Avatar } from '@strapi/design-system/Avatar';
-import { Flex } from '@strapi/design-system/Flex';
+import { Avatar, Initials } from '@strapi/design-system/Avatar';
 import { Box } from '@strapi/design-system/Box';
-import { Typography } from '@strapi/design-system/Typography';
 import { Icon } from '@strapi/design-system/Icon';
 import Folder from '@strapi/icons/Folder';
 
 import { AssetType } from '../../constants';
 import { createAssetUrl } from '../../utils';
 import { VideoPreview } from '../AssetCard/VideoPreview';
-
-const GenericAssetWrapper = styled(Flex)`
-  span {
-    /* The smallest fontSize in the DS is not small enough in this case */
-    font-size: ${pxToRem(10)};
-  }
-`;
 
 // Temp: Avatar should support video preview
 const VideoPreviewWrapper = styled(Box)`
@@ -39,15 +30,9 @@ const VideoPreviewWrapper = styled(Box)`
 export const PreviewCell = ({ type, element }) => {
   if (type === 'folder') {
     return (
-      <Flex
-        background="secondary100"
-        height={pxToRem(26)}
-        justifyContent="center"
-        width={pxToRem(26)}
-        borderRadius="50%"
-      >
-        <Icon color="secondary500" as={Folder} />
-      </Flex>
+      <Initials background="secondary100" textColor="secondary600">
+        <Icon color="secondary500" width={pxToRem(15)} height={pxToRem(15)} as={Folder} />
+      </Initials>
     );
   }
 
@@ -61,7 +46,6 @@ export const PreviewCell = ({ type, element }) => {
   }
 
   if (mime.includes(AssetType.Video)) {
-    // TODO: Replace with Avatar when DS is released
     return (
       <VideoPreviewWrapper>
         <VideoPreview
@@ -75,18 +59,9 @@ export const PreviewCell = ({ type, element }) => {
   }
 
   return (
-    // TODO: Replace with Initials when DS is released
-    <GenericAssetWrapper
-      background="secondary100"
-      height={pxToRem(26)}
-      justifyContent="center"
-      width={pxToRem(26)}
-      borderRadius="50%"
-    >
-      <Typography variant="sigma" textColor="secondary600">
-        {getFileExtension(ext)}
-      </Typography>
-    </GenericAssetWrapper>
+    <Initials background="secondary100" textColor="secondary600">
+      {getFileExtension(ext)}
+    </Initials>
   );
 };
 
