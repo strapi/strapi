@@ -6,7 +6,7 @@ import { Link } from '@strapi/design-system/v2/Link';
 
 const Notification = ({ dispatch, notification }) => {
   const { formatMessage } = useIntl();
-  const { message, link, type, id, onClose, timeout, blockTransition } = notification;
+  const { message, link, type, id, onClose, timeout, blockTransition, title } = notification;
 
   const formattedMessage = (msg) =>
     typeof msg === 'string' ? msg : formatMessage(msg, msg.values);
@@ -37,6 +37,7 @@ const Notification = ({ dispatch, notification }) => {
   let variant;
   let alertTitle;
 
+  // TODO break out this logic into separate file
   if (type === 'info') {
     variant = 'default';
     alertTitle = formatMessage({
@@ -44,17 +45,29 @@ const Notification = ({ dispatch, notification }) => {
       defaultMessage: 'Information:',
     });
   } else if (type === 'warning') {
+    // type should be renamed to danger in the future, but it might introduce changes if done now
+    variant = 'danger';
     alertTitle = formatMessage({
       id: 'notification.warning.title',
       defaultMessage: 'Warning:',
     });
-    variant = 'danger';
+  } else if (type === 'softWarning') {
+    // type should be renamed to just warning in the future
+    variant = 'warning';
+    alertTitle = formatMessage({
+      id: 'notification.warning.title',
+      defaultMessage: 'Warning:',
+    });
   } else {
+    variant = 'success';
     alertTitle = formatMessage({
       id: 'notification.success.title',
       defaultMessage: 'Success:',
     });
-    variant = 'success';
+  }
+
+  if (title) {
+    alertTitle = typeof title === 'string' ? title : formatMessage(title);
   }
 
   return (
@@ -124,6 +137,14 @@ Notification.propTypes = {
     onClose: PropTypes.func,
     timeout: PropTypes.number,
     blockTransition: PropTypes.bool,
+    title: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        defaultMessage: PropTypes.string,
+        values: PropTypes.object,
+      }),
+    ]),
   }),
 };
 
