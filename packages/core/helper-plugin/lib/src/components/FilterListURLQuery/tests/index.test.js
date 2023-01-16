@@ -13,6 +13,8 @@ import { createMemoryHistory } from 'history';
 import qs from 'qs';
 import FilterListURLQuery from '../index';
 
+// TO BE REMOVED: we have added this mock to prevent errors in the snapshots caused by the Unicode space character
+// before AM/PM in the dates, after the introduction of node 18.13
 jest.mock('react-intl', () => {
   const reactIntl = jest.requireActual('react-intl');
   const intl = reactIntl.createIntl({
