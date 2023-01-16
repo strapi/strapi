@@ -35,6 +35,8 @@ const getParseListWithChoices = (choices, errorMessage = 'Invalid options:') => 
     if (invalid.length > 0) {
       exitWith(1, `${errorMessage}: ${invalid.join(',')}`);
     }
+
+    return list;
   };
 };
 

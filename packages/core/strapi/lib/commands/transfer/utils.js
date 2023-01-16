@@ -3,6 +3,7 @@
 const chalk = require('chalk');
 const Table = require('cli-table3');
 const { Option } = require('commander');
+const { TransferGroupPresets } = require('@strapi/data-transfer/lib/engine');
 const { readableBytes } = require('../utils/helpers');
 const strapi = require('../../index');
 const { getParseListWithChoices } = require('../utils/commander');
@@ -87,7 +88,7 @@ const createStrapiInstance = async (logLevel = 'error') => {
   return app.load();
 };
 
-const transferDataTypes = ['content', 'assets', 'config']; // TODO: build this from the actual filters object
+const transferDataTypes = Object.keys(TransferGroupPresets);
 const excludeOption = new Option(
   '--exclude <comma-separated data types>',
   'Exclude this data.'
