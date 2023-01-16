@@ -208,15 +208,7 @@ module.exports = ({ strapi }) => ({
       populate: populateRelations ? getDeepPopulate(uid, {}) : getCountDeepPopulate(uid),
     };
 
-    const updatedEntity = await strapi.entityService.update(uid, entity.id, params);
-
-    // If relations were populated, load the entity again without populating them,
-    // to avoid performance issues
-    if (populateRelations) {
-      return strapi.entityService.findOne(uid, entity.id, { populate: getCountDeepPopulate(uid) });
-    }
-
-    return updatedEntity;
+    return strapi.entityService.update(uid, entity.id, params);
   }),
 
   unpublish: wrapWithEmitEvent(ENTRY_UNPUBLISH, async (entity, body = {}, uid) => {
