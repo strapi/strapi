@@ -1,6 +1,6 @@
 'use strict';
 
-const { register: registerDataTransfer } = require('@strapi/data-transfer/lib/strapi');
+const { register: registerDataTransferRoute } = require('@strapi/data-transfer/lib/strapi');
 
 const registerAdminPanelRoute = require('./routes/serve-admin-panel');
 const adminAuthStrategy = require('./strategies/admin');
@@ -17,5 +17,10 @@ module.exports = ({ strapi }) => {
     registerAdminPanelRoute({ strapi });
   }
 
-  registerDataTransfer(strapi);
+  if (
+    process.env.STRAPI_EXPERIMENTAL === 'true' &&
+    process.env.STRAPI_DISABLE_REMOTE_DATA_TRANSFER !== 'true'
+  ) {
+    registerDataTransferRoute(strapi);
+  }
 };

@@ -86,8 +86,8 @@ module.exports = async (opts) => {
   }
 
   const engine = createTransferEngine(source, destination, {
-    versionStrategy: 'exact', // for an export to file, versionStrategy will always be skipped
-    schemaStrategy: 'exact', // for an export to file, schemaStrategy will always be skipped
+    versionStrategy: 'strict',
+    schemaStrategy: 'strict',
     transforms: {
       links: [
         {

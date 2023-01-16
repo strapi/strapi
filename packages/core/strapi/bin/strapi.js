@@ -7,7 +7,7 @@
 const _ = require('lodash');
 const path = require('path');
 const resolveCwd = require('resolve-cwd');
-const { yellow, bold } = require('chalk');
+const { yellow } = require('chalk');
 const { Command, Option } = require('commander');
 const inquirer = require('inquirer');
 
@@ -18,6 +18,7 @@ const {
   promptEncryptionKey,
   confirmMessage,
   parseURL,
+  forceOption,
 } = require('../lib/commands/utils/commander');
 const { ifOptions, assertUrlHasProtocol, exitWith } = require('../lib/commands/utils/helpers');
 const { excludeOption, onlyOption } = require('../lib/commands/transfer/utils');
@@ -264,20 +265,21 @@ program
   .option('-s, --silent', `Run the generation silently, without any output`, false)
   .action(getLocalScript('ts/generate-types'));
 
-if (process.env.STRAPI_EXPERIMENTAL) {
+if (process.env.STRAPI_EXPERIMENTAL === 'true') {
   // `$ strapi transfer`
   program
     .command('transfer')
     .description('Transfer data from one source to another')
     .addOption(
-      new Option('--from <sourceURL>', `URL of remote Strapi instance to get data from.`).argParser(
-        parseURL
-      )
+      new Option(
+        '--from <sourceURL>',
+        `URL of the remote Strapi instance to get data from`
+      ).argParser(parseURL)
     )
     .addOption(
       new Option(
         '--to <destinationURL>',
-        `URL of remote Strapi instance to send data to`
+        `URL of the remote Strapi instance to send data to`
       ).argParser(parseURL)
     )
     // Validate URLs
@@ -302,6 +304,8 @@ if (process.env.STRAPI_EXPERIMENTAL) {
         () => exitWith(1, 'At least one source (from) or destination (to) option must be provided')
       )
     )
+    .addOption(excludeOption)
+    .addOption(onlyOption)
     .allowExcessArguments(false)
     .action(getLocalScript('transfer/transfer'));
 }
@@ -341,12 +345,7 @@ program
       'Provide encryption key in command instead of using the prompt'
     )
   )
-  .addOption(
-    new Option(
-      '--force-yes',
-      `Automatic yes to prompts; answer "yes" to ${bold('all')} prompts and run non-interactively.`
-    )
-  )
+  .addOption(forceOption)
   .addOption(excludeOption)
   .addOption(onlyOption)
   .allowExcessArguments(false)
@@ -365,8 +364,7 @@ program
           },
         ]);
         if (!answers.key?.length) {
-          console.log('No key entered, aborting import.');
-          process.exit(0);
+          exitWith(0, 'No key entered, aborting import.');
         }
         opts.key = answers.key;
       }
