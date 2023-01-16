@@ -5,6 +5,7 @@ const Table = require('cli-table3');
 const { Option } = require('commander');
 const { readableBytes } = require('../utils/helpers');
 const strapi = require('../../index');
+const { getParseListWithChoices } = require('../utils/commander');
 
 const pad = (n) => {
   return (n < 10 ? '0' : '') + String(n);
@@ -87,8 +88,14 @@ const createStrapiInstance = async (logLevel = 'error') => {
 };
 
 const transferDataTypes = ['content', 'assets', 'config']; // TODO: build this from the actual filters object
-const excludeOption = new Option('--exclude', 'Exclude this data.').choices(transferDataTypes);
-const onlyOption = new Option('--only', 'Include only this data.').choices(transferDataTypes);
+const excludeOption = new Option(
+  '--exclude <comma-separated data types>',
+  'Exclude this data.'
+).argParser(getParseListWithChoices(transferDataTypes, 'Invalid options for "exclude"'));
+const onlyOption = new Option(
+  '--only <command-separated data types>',
+  'Include only this data.'
+).argParser(getParseListWithChoices(transferDataTypes, 'Invalid options for "only"'));
 
 module.exports = {
   buildTransferTable,

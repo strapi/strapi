@@ -42,7 +42,7 @@ const exitWith = (code, message = undefined) => {
     if (code === 0) {
       console.log(chalk.green(message));
     } else {
-      console.log(chalk.red(message));
+      console.error(chalk.red(message));
     }
   };
 
