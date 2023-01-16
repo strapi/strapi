@@ -2,6 +2,7 @@
 
 const chalk = require('chalk');
 const Table = require('cli-table3');
+const { Option } = require('commander');
 const { readableBytes } = require('../utils/helpers');
 const strapi = require('../../index');
 
@@ -85,9 +86,15 @@ const createStrapiInstance = async (logLevel = 'error') => {
   return app.load();
 };
 
+const transferDataTypes = ['content', 'assets', 'config']; // TODO: build this from the actual filters object
+const excludeOption = new Option('--exclude', 'Exclude this data.').choices(transferDataTypes);
+const onlyOption = new Option('--only', 'Include only this data.').choices(transferDataTypes);
+
 module.exports = {
   buildTransferTable,
   getDefaultExportName,
   DEFAULT_IGNORED_CONTENT_TYPES,
   createStrapiInstance,
+  excludeOption,
+  onlyOption,
 };

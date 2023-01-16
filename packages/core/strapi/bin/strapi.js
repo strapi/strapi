@@ -20,6 +20,7 @@ const {
   parseURL,
 } = require('../lib/commands/utils/commander');
 const { ifOptions, assertUrlHasProtocol, exitWith } = require('../lib/commands/utils/helpers');
+const { excludeOption, onlyOption } = require('../lib/commands/transfer/utils');
 
 const checkCwdIsStrapiApp = (name) => {
   const logErrorAndExit = () => {
@@ -320,6 +321,8 @@ program
     )
   )
   .addOption(new Option('-f, --file <file>', 'name to use for exported file (without extensions)'))
+  .addOption(excludeOption)
+  .addOption(onlyOption)
   .allowExcessArguments(false)
   .hook('preAction', promptEncryptionKey)
   .action(getLocalScript('transfer/export'));
@@ -344,6 +347,8 @@ program
       `Automatic yes to prompts; answer "yes" to ${bold('all')} prompts and run non-interactively.`
     )
   )
+  .addOption(excludeOption)
+  .addOption(onlyOption)
   .allowExcessArguments(false)
   .hook('preAction', async (thisCommand) => {
     const opts = thisCommand.opts();
