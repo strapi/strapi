@@ -647,9 +647,9 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
             <div
               class=" css-1hb7zxy-IndicatorsContainer"
             >
-              <button
+              <div
+                aria-hidden="true"
                 class="c8 c9 c10"
-                type="button"
               >
                 <svg
                   fill="none"
@@ -665,7 +665,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                     fill-rule="evenodd"
                   />
                 </svg>
-              </button>
+              </div>
             </div>
           </div>
           <input
