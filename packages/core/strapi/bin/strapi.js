@@ -21,7 +21,7 @@ const {
   forceOption,
 } = require('../lib/commands/utils/commander');
 const { ifOptions, assertUrlHasProtocol, exitWith } = require('../lib/commands/utils/helpers');
-const { excludeOption, onlyOption } = require('../lib/commands/transfer/utils');
+const { excludeOption, forceOption, onlyOption } = require('../lib/commands/transfer/utils');
 
 const checkCwdIsStrapiApp = (name) => {
   const logErrorAndExit = () => {
@@ -282,6 +282,7 @@ if (process.env.STRAPI_EXPERIMENTAL === 'true') {
         `URL of the remote Strapi instance to send data to`
       ).argParser(parseURL)
     )
+    .addOption(forceOption)
     // Validate URLs
     .hook(
       'preAction',
@@ -304,8 +305,15 @@ if (process.env.STRAPI_EXPERIMENTAL === 'true') {
         () => exitWith(1, 'At least one source (from) or destination (to) option must be provided')
       )
     )
+    .addOption(forceOption)
     .addOption(excludeOption)
     .addOption(onlyOption)
+    .hook(
+      'preAction',
+      confirmMessage(
+        'The import will delete all data in the remote database. Are you sure you want to proceed?'
+      )
+    )
     .allowExcessArguments(false)
     .action(getLocalScript('transfer/transfer'));
 }
