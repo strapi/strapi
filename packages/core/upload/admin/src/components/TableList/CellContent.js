@@ -8,18 +8,18 @@ import { Typography } from '@strapi/design-system/Typography';
 import { PreviewCell } from './PreviewCell';
 import { formatBytes } from '../../utils';
 
-export const CellContent = ({ content, cellType, elementType, element }) => {
+export const CellContent = ({ cellType, contentType, content, name }) => {
   const { formatDate, formatMessage } = useIntl();
 
   switch (cellType) {
     case 'image':
-      return <PreviewCell type={elementType} element={element} />;
+      return <PreviewCell type={contentType} content={content} />;
 
     case 'date':
-      return <Typography>{formatDate(parseISO(content), { dateStyle: 'full' })}</Typography>;
+      return <Typography>{formatDate(parseISO(content[name]), { dateStyle: 'full' })}</Typography>;
 
     case 'size':
-      if (elementType === 'folder')
+      if (contentType === 'folder')
         return (
           <Typography
             aria-label={formatMessage({
@@ -31,10 +31,10 @@ export const CellContent = ({ content, cellType, elementType, element }) => {
           </Typography>
         );
 
-      return <Typography>{formatBytes(content)}</Typography>;
+      return <Typography>{formatBytes(content[name])}</Typography>;
 
     case 'ext':
-      if (elementType === 'folder')
+      if (contentType === 'folder')
         return (
           <Typography
             aria-label={formatMessage({
@@ -46,10 +46,10 @@ export const CellContent = ({ content, cellType, elementType, element }) => {
           </Typography>
         );
 
-      return <Typography>{getFileExtension(content).toUpperCase()}</Typography>;
+      return <Typography>{getFileExtension(content[name]).toUpperCase()}</Typography>;
 
     case 'text':
-      return <Typography>{content}</Typography>;
+      return <Typography>{content[name]}</Typography>;
 
     default:
       return (
@@ -65,15 +65,10 @@ export const CellContent = ({ content, cellType, elementType, element }) => {
   }
 };
 
-CellContent.defaultProps = {
-  content: '',
-};
-
 CellContent.propTypes = {
-  content: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   cellType: PropTypes.string.isRequired,
-  elementType: PropTypes.string.isRequired,
-  element: PropTypes.shape({
+  contentType: PropTypes.string.isRequired,
+  content: PropTypes.shape({
     alternativeText: PropTypes.string,
     ext: PropTypes.string,
     formats: PropTypes.shape({
@@ -84,4 +79,5 @@ CellContent.propTypes = {
     mime: PropTypes.string,
     url: PropTypes.string,
   }).isRequired,
+  name: PropTypes.string.isRequired,
 };

@@ -26,16 +26,16 @@ const VideoPreviewWrapper = styled(Box)`
   }
 `;
 
-export const PreviewCell = ({ type, element }) => {
+export const PreviewCell = ({ type, content }) => {
   if (type === 'folder') {
     return (
       <Initials background="secondary100" textColor="secondary600">
-        <Icon color="secondary500" width={pxToRem(15)} height={pxToRem(15)} as={Folder} />
+        <Icon color="secondary500" width={pxToRem(16)} height={pxToRem(16)} as={Folder} />
       </Initials>
     );
   }
 
-  const { alternativeText, ext, formats, mime, name, url } = element;
+  const { alternativeText, ext, formats, mime, name, url } = content;
 
   if (mime.includes(AssetType.Image)) {
     const mediaURL =
@@ -48,9 +48,8 @@ export const PreviewCell = ({ type, element }) => {
     return (
       <VideoPreviewWrapper>
         <VideoPreview
-          url={createAssetUrl(element, true)}
+          url={createAssetUrl(content, true)}
           mime={mime}
-          onLoadDuration={() => {}}
           alt={alternativeText ?? name}
         />
       </VideoPreviewWrapper>
@@ -65,7 +64,7 @@ export const PreviewCell = ({ type, element }) => {
 };
 
 PreviewCell.propTypes = {
-  element: PropTypes.shape({
+  content: PropTypes.shape({
     alternativeText: PropTypes.string,
     ext: PropTypes.string,
     formats: PropTypes.shape({

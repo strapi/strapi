@@ -35,7 +35,7 @@ export const TableRows = ({
   return (
     <Tbody>
       {rows.map((element) => {
-        const { id, isSelectable, name, folderURL, type: elementType } = element;
+        const { id, isSelectable, name, folderURL, type: contentType } = element;
 
         const isSelected = !!selected.find((currentRow) => currentRow.id === id);
 
@@ -43,16 +43,16 @@ export const TableRows = ({
           <Tr
             key={id}
             {...onRowClick({
-              fn: () => handleRowClickFn(element, elementType, id),
+              fn: () => handleRowClickFn(element, contentType, id),
             })}
           >
             <Td {...stopPropagation}>
               <BaseCheckbox
                 aria-label={formatMessage(
                   {
-                    id: elementType === 'asset' ? 'list-assets-select' : 'list.folder.select',
+                    id: contentType === 'asset' ? 'list-assets-select' : 'list.folder.select',
                     defaultMessage:
-                      elementType === 'asset' ? 'Select {name} asset' : 'Select {name} folder',
+                      contentType === 'asset' ? 'Select {name} asset' : 'Select {name} folder',
                   },
                   { name }
                 )}
@@ -65,10 +65,9 @@ export const TableRows = ({
               return (
                 <Td key={name}>
                   <CellContent
-                    content={element[name]}
+                    content={element}
                     cellType={cellType}
-                    elementType={elementType}
-                    element={element}
+                    contentType={contentType}
                     name={name}
                   />
                 </Td>
@@ -77,7 +76,7 @@ export const TableRows = ({
 
             <Td {...stopPropagation}>
               <Flex justifyContent="flex-end">
-                {elementType === 'folder' && (
+                {contentType === 'folder' && (
                   <IconButton
                     forwardedAs={folderURL ? Link : undefined}
                     label={formatMessage({
@@ -97,7 +96,7 @@ export const TableRows = ({
                     defaultMessage: 'Edit',
                   })}
                   onClick={() =>
-                    elementType === 'asset' ? onEditAsset(element) : onEditFolder(element)
+                    contentType === 'asset' ? onEditAsset(element) : onEditFolder(element)
                   }
                   noBorder
                 >
