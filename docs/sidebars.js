@@ -33,9 +33,47 @@ const sidebars = {
           },
           items: [
             {
+              type: 'category',
+              label: 'Hooks',
+              items: [
+                {
+                  type: 'doc',
+                  label: 'useCallbackRef',
+                  id: 'core/content-manager/hooks/use-callback-ref',
+                },
+                {
+                  type: 'doc',
+                  label: 'useDragAndDrop',
+                  id: 'core/content-manager/hooks/use-drag-and-drop',
+                },
+              ],
+            },
+            {
               type: 'doc',
               label: 'Relations',
               id: 'core/content-manager/relations',
+            },
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Hooks',
+          items: [
+            {
+              type: 'doc',
+              label: 'useFetchClient',
+              id: 'core/hooks/use-fetch-client',
+            },
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Admin',
+          items: [
+            {
+              type: 'doc',
+              label: 'Link Strapi Design System',
+              id: 'core/admin/link-strapi-design-system',
             },
           ],
         },
