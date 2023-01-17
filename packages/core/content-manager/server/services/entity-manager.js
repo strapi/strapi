@@ -61,7 +61,7 @@ const addCreatedByRolesPopulate = (populate) => {
  * For performance reasons, it is recommended to set it to false,
  */
 const isRelationsPopulateEnabled = () => {
-  return strapi.config.get('server.relations.populate', true);
+  return strapi.config.get('admin.relations.populate', true);
 };
 
 const getCountDeepPopulate = (uid) => getDeepPopulate(uid, { countMany: true, countOne: true });
