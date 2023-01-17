@@ -179,7 +179,7 @@ describe('Audit logs service', () => {
       expect(mockEntityServiceFindPage).toHaveBeenCalledWith('admin::audit-log', {
         ...params,
         populate: ['user'],
-        fields: ['action', 'date'],
+        fields: ['action', 'date', 'payload'],
       });
       expect(result).toEqual({ results: [], pagination: {} });
     });
