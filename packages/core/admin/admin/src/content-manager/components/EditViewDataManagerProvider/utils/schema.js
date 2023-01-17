@@ -284,7 +284,8 @@ const createYupSchemaAttribute = (type, validations, options) => {
                   }
 
                   if (type === 'boolean') {
-                    return value !== null;
+                    // Boolean value can be undefined/unset in modifiedData when generated in a new component
+                    return value !== null && value !== undefined;
                   }
 
                   if (type === 'date' || type === 'datetime') {

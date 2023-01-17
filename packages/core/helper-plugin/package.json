@@ -1,6 +1,6 @@
 {
   "name": "@strapi/helper-plugin",
-  "version": "4.5.4",
+  "version": "4.5.6",
   "description": "Helper for Strapi plugins development",
   "repository": {
     "type": "git",
@@ -39,7 +39,7 @@
     "watch": "yarn create:index && cross-env NODE_ENV=development webpack-cli -w"
   },
   "dependencies": {
-    "axios": "1.2.1",
+    "axios": "1.2.2",
     "date-fns": "2.29.3",
     "formik": "^2.2.6",
     "immer": "9.0.6",
@@ -61,13 +61,14 @@
     "@storybook/addon-actions": "6.5.10",
     "@storybook/addon-essentials": "6.5.10",
     "@storybook/addon-links": "6.5.10",
-    "@storybook/builder-webpack5": "6.5.9",
-    "@storybook/manager-webpack5": "6.4.10",
+    "@storybook/builder-webpack5": "6.5.15",
+    "@storybook/manager-webpack5": "6.5.15",
     "@storybook/react": "^6.5.10",
-    "@strapi/design-system": "1.4.1",
-    "@strapi/icons": "1.4.1",
+    "@strapi/design-system": "1.4.2",
+    "@strapi/icons": "1.4.2",
     "@testing-library/react": "12.1.4",
     "@testing-library/react-hooks": "8.0.1",
+    "browserslist-to-esbuild": "1.2.0",
     "cross-env": "^7.0.3",
     "esbuild-loader": "^2.20.0",
     "react-test-renderer": "^17.0.2",
