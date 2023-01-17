@@ -16,7 +16,6 @@ export { default as useAppInfos } from './hooks/useAppInfos';
 export { default as useQuery } from './hooks/useQuery';
 export { default as useLibrary } from './hooks/useLibrary';
 export { default as useCustomFields } from './hooks/useCustomFields';
-export { default as useFieldHint } from './hooks/useFieldHint';
 export { default as useNotification } from './hooks/useNotification';
 export { default as useStrapiApp } from './hooks/useStrapiApp';
 export { default as useTracking } from './hooks/useTracking';
