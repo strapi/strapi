@@ -2,7 +2,7 @@ import { getStrapiFactory } from '../../__tests__/test-utils';
 
 import { createTransferHandler } from '../remote/handlers';
 import register from '../register';
-import { TRANSFER_PATH } from '../../../lib/strapi/remote/constants';
+import { TRANSFER_PATH } from '../remote/constants';
 
 afterEach(() => {
   jest.clearAllMocks();
