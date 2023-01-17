@@ -281,6 +281,7 @@ if (process.env.STRAPI_EXPERIMENTAL === 'true') {
         `URL of the remote Strapi instance to send data to`
       ).argParser(parseURL)
     )
+    .addOption(forceOption)
     // Validate URLs
     .hook(
       'preAction',
@@ -301,6 +302,12 @@ if (process.env.STRAPI_EXPERIMENTAL === 'true') {
       ifOptions(
         (opts) => !opts.from && !opts.to,
         () => exitWith(1, 'At least one source (from) or destination (to) option must be provided')
+      )
+    )
+    .hook(
+      'preAction',
+      confirmMessage(
+        'The import will delete all data in the remote database. Are you sure you want to proceed?'
       )
     )
     .allowExcessArguments(false)
