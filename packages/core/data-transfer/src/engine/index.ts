@@ -463,7 +463,7 @@ class TransferEngine<
   async close(): Promise<void> {
     const results = await Promise.allSettled([
       this.sourceProvider.close?.(),
-      this.destinationProvider.bootstrap?.(),
+      this.destinationProvider.close?.(),
     ]);
 
     results.forEach((result) => {
