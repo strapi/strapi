@@ -51,24 +51,30 @@ describe('Async utils', () => {
       }).rejects.toThrow('input');
     });
     test('Should resolve elements two at a time', async () => {
-      const numberPromiseArray = [1, 2, 3];
+      const numberPromiseArray = [1, 2, 3, 4, 5, 6];
       const getPromiseDelayed = (speed = 0) =>
         new Promise((resolve) => {
           setTimeout(resolve, speed);
         });
-      const opOrder = [];
+      let maxOperations = 0;
+      let operationsCounter = 0;
 
-      const mapFunc = mapAsync(numberPromiseArray, { concurrency: 2 });
-      const result = await mapFunc(async (value, index) => {
-        if (index === 0) {
+      const mapFunc = mapAsync(numberPromiseArray);
+      const result = await mapFunc(
+        async (value) => {
+          operationsCounter += 1;
+          if (operationsCounter > maxOperations) {
+            maxOperations = operationsCounter;
+          }
           await getPromiseDelayed(20);
-        }
-        opOrder.push(index);
-        return value;
-      });
+          operationsCounter -= 1;
+          return value;
+        },
+        { concurrency: 2 }
+      );
 
-      expect(result).toEqual([1, 2, 3]);
-      expect(opOrder).toEqual([1, 0, 2]);
+      expect(result).toEqual([1, 2, 3, 4, 5, 6]);
+      expect(maxOperations).toEqual(2);
     });
   });
   describe('reduceAsync', () => {
