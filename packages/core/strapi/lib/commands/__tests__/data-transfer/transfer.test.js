@@ -24,8 +24,8 @@ describe('Transfer', () => {
     },
   };
 
-  jest.mock('@strapi/data-transfer/lib/engine', () => mockDataTransfer?.engine, { virtual: true });
-  jest.mock('@strapi/data-transfer/lib/strapi', () => mockDataTransfer?.strapi, { virtual: true });
+  jest.mock('@strapi/data-transfer/lib/engine', () => mockDataTransfer.engine, { virtual: true });
+  jest.mock('@strapi/data-transfer/lib/strapi', () => mockDataTransfer.strapi, { virtual: true });
 
   const expectExit = async (code, fn) => {
     const exit = jest.spyOn(process, 'exit').mockImplementation((number) => {
