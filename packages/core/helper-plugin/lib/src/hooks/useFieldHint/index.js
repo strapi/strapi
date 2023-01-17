@@ -7,12 +7,12 @@ import { useIntl } from 'react-intl';
  * @param {Object} description - the description of the field
  * @param {Number} minimum - the minimum length or value of the field
  * @param {Number} maximum - the maximum length or value of the field
- * @param {Boolean} isNumber - whether this is a number field
+ * @param {String} units
  */
-const useFieldHint = ({ description, minimum, maximum, isNumber = false }) => {
+const useFieldHint = ({ description, minimum, maximum, units }) => {
   const { formatMessage } = useIntl();
 
-  const [fieldHint, setFieldHint] = useState([]);
+  const [hint, setHint] = useState([]);
 
   /**
    * @returns {String}
@@ -39,10 +39,10 @@ const useFieldHint = ({ description, minimum, maximum, isNumber = false }) => {
 
     const minMaxDescription = [];
 
-    if (minIsNumber && minimum > 0) {
+    if (minIsNumber) {
       minMaxDescription.push(`min. {minimum}`);
     }
-    if (maxIsNumber && maximum > 0) {
+    if (maxIsNumber) {
       minMaxDescription.push(`max. {maximum}`);
     }
 
@@ -50,23 +50,19 @@ const useFieldHint = ({ description, minimum, maximum, isNumber = false }) => {
 
     if (minMaxDescription.length === 0) {
       defaultMessage = '';
-    } else if (isNumber) {
-      defaultMessage = `${minMaxDescription.join(' / ')}{br}`;
     } else {
-      defaultMessage = `${minMaxDescription.join(
-        ' / '
-      )} {isPlural, select, true {characters} other {character}}{br}`;
+      defaultMessage = `${minMaxDescription.join(' / ')} {units}{br}`;
     }
 
     return formatMessage(
       {
-        id: `content-manager.form.Input.minMaxDescription${isNumber ? '.number' : ''}`,
+        id: `content-manager.form.Input.minMaxDescription`,
         defaultMessage,
       },
       {
         minimum,
         maximum,
-        isPlural: Math.max(minimum || 0, maximum || 0) > 1,
+        units,
         br: <br />,
       }
     );
@@ -77,16 +73,16 @@ const useFieldHint = ({ description, minimum, maximum, isNumber = false }) => {
     const minMaxHint = buildMinMaxHint();
 
     if (description.length === 0 && minMaxHint.length === 0) {
-      setFieldHint('');
+      setHint('');
 
       return;
     }
-    setFieldHint([...minMaxHint, description]);
+    setHint([...minMaxHint, description]);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isNumber, description, minimum, maximum]);
+  }, [units, description, minimum, maximum]);
 
-  return { fieldHint };
+  return { hint };
 };
 
 export default useFieldHint;

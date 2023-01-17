@@ -28,6 +28,7 @@ import Eye from '@strapi/icons/Eye';
 
 import NotSupported from './NotSupported';
 import useFieldHint from '../../hooks/useFieldHint';
+import { getFieldUnits } from './utils';
 
 const GenericInput = ({
   autoComplete,
@@ -51,11 +52,11 @@ const GenericInput = ({
   ...rest
 }) => {
   const { formatMessage } = useIntl();
-  const { fieldHint } = useFieldHint({
-    isNumber: type === 'number',
+  const { hint } = useFieldHint({
     description,
     minimum,
     maximum,
+    units: getFieldUnits(type, minimum, maximum),
   });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -103,7 +104,7 @@ const GenericInput = ({
       <CustomInput
         {...rest}
         description={description}
-        fieldHint={fieldHint}
+        hint={hint}
         disabled={disabled}
         intlLabel={intlLabel}
         labelAction={labelAction}
@@ -154,7 +155,7 @@ const GenericInput = ({
         <ToggleInput
           checked={defaultValue === null ? null : defaultValue || false}
           disabled={disabled}
-          hint={fieldHint}
+          hint={hint}
           label={label}
           error={errorMessage}
           labelAction={labelAction}
@@ -180,7 +181,7 @@ const GenericInput = ({
         <Checkbox
           disabled={disabled}
           error={errorMessage}
-          hint={fieldHint}
+          hint={hint}
           id={name}
           name={name}
           onValueChange={(value) => {
@@ -202,7 +203,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={fieldHint}
+          hint={hint}
           name={name}
           onChange={(date) => {
             const formattedDate = date.toISOString();
@@ -237,7 +238,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={fieldHint}
+          hint={hint}
           name={name}
           onChange={(date) => {
             onChange({
@@ -260,7 +261,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={fieldHint}
+          hint={hint}
           name={name}
           onValueChange={(value) => onChange({ target: { name, value, type } })}
           placeholder={formattedPlaceholder}
@@ -279,7 +280,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={fieldHint}
+          hint={hint}
           name={name}
           onChange={onChange}
           placeholder={formattedPlaceholder}
@@ -300,7 +301,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={fieldHint}
+          hint={hint}
           name={name}
           onChange={onChange}
           placeholder={formattedPlaceholder}
@@ -342,7 +343,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={fieldHint}
+          hint={hint}
           name={name}
           onChange={onChange}
           placeholder={formattedPlaceholder}
@@ -360,7 +361,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={fieldHint}
+          hint={hint}
           name={name}
           onChange={(value) => onChange({ target: { name, value, type: 'select' } })}
           placeholder={formattedPlaceholder}
@@ -385,7 +386,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={fieldHint}
+          hint={hint}
           name={name}
           onChange={onChange}
           required={required}
@@ -416,7 +417,7 @@ const GenericInput = ({
           label={label}
           labelAction={labelAction}
           id={name}
-          hint={fieldHint}
+          hint={hint}
           name={name}
           onChange={(time) => {
             onChange({ target: { name, value: `${time}`, type } });
@@ -437,7 +438,7 @@ const GenericInput = ({
           name={name}
           label={label}
           labelAction={labelAction}
-          hint={fieldHint}
+          hint={hint}
           error={errorMessage}
           required={required}
         />

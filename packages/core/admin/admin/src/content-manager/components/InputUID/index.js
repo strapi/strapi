@@ -23,7 +23,7 @@ import {
 const InputUID = ({
   attribute,
   contentTypeUID,
-  fieldHint,
+  hint,
   disabled,
   error,
   intlLabel,
@@ -226,7 +226,7 @@ const InputUID = ({
           </FieldActionWrapper>
         </EndActionWrapper>
       }
-      hint={fieldHint}
+      hint={hint}
       label={label}
       labelAction={labelAction}
       name={name}
@@ -261,7 +261,7 @@ InputUID.propTypes = {
     values: PropTypes.object,
   }),
   required: PropTypes.bool,
-  fieldHint: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
+  hint: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
 };
 
 InputUID.defaultProps = {
@@ -271,7 +271,7 @@ InputUID.defaultProps = {
   placeholder: undefined,
   value: '',
   required: false,
-  fieldHint: '',
+  hint: '',
 };
 
 export default InputUID;

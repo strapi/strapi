@@ -17,6 +17,7 @@ import {
   connect,
   generateOptions,
   getInputType,
+  getMinMax,
   getStep,
   select,
   VALIDATIONS_TO_OMIT,
@@ -258,22 +259,7 @@ function Inputs({
     ...customFieldInputs,
   };
 
-  const { minLength, maxLength, max, min } = fieldSchema;
-
-  let genericMinimum;
-  let genericMaximum;
-
-  if (typeof min === 'number') {
-    genericMinimum = min;
-  } else if (typeof minLength === 'number') {
-    genericMinimum = minLength;
-  }
-
-  if (typeof max === 'number') {
-    genericMaximum = max;
-  } else if (typeof maxLength === 'number') {
-    genericMaximum = maxLength;
-  }
+  const { inputMaximum, inputMinimum } = getMinMax(fieldSchema);
 
   return (
     <GenericInput
@@ -283,8 +269,8 @@ function Inputs({
       // in case the default value of the boolean is null, attribute.default doesn't exist
       isNullable={inputType === 'bool' && [null, undefined].includes(fieldSchema.default)}
       description={description ? { id: description, defaultMessage: description } : null}
-      minimum={genericMinimum}
-      maximum={genericMaximum}
+      minimum={inputMinimum}
+      maximum={inputMaximum}
       disabled={shouldDisableField}
       error={error}
       labelAction={labelAction}
