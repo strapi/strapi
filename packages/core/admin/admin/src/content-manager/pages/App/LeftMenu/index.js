@@ -8,9 +8,12 @@ import React, { useMemo, useState } from 'react';
 import { useSelector, shallowEqual } from 'react-redux';
 import { useIntl } from 'react-intl';
 import matchSorter from 'match-sorter';
+import { NavLink } from 'react-router-dom';
+
 import sortBy from 'lodash/sortBy';
 import toLower from 'lodash/toLower';
-import { NavLink } from 'react-router-dom';
+import camelCase from 'lodash/camelCase';
+
 import {
   SubNav,
   SubNavHeader,
@@ -18,13 +21,14 @@ import {
   SubNavSections,
   SubNavLink,
 } from '@strapi/design-system/v2/SubNav';
+
 import getTrad from '../../../utils/getTrad';
 import { makeSelectModelLinks } from '../selectors';
 
 const matchByTitle = (links, search) =>
   search
     ? matchSorter(links, toLower(search), { keys: [(item) => toLower(item.title)] })
-    : sortBy(links, (object) => object.title.toLowerCase());
+    : sortBy(links, (object) => camelCase(object.title));
 
 const LeftMenu = () => {
   const [search, setSearch] = useState('');
