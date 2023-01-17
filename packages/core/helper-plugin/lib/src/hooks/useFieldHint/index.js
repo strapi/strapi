@@ -8,7 +8,6 @@ import { useIntl } from 'react-intl';
  * @param {Number} minimum - the minimum length or value of the field
  * @param {Number} maximum - the maximum length or value of the field
  * @param {Boolean} isNumber - whether this is a number field
- * @returns {Array}
  */
 const useFieldHint = ({ description, minimum, maximum, isNumber = false }) => {
   const { formatMessage } = useIntl();
@@ -31,16 +30,19 @@ const useFieldHint = ({ description, minimum, maximum, isNumber = false }) => {
    * @returns {Array}
    */
   const buildMinMaxHint = () => {
-    if (typeof minimum !== 'number' && typeof maximum !== 'number') {
+    const minIsNumber = typeof minimum === 'number';
+    const maxIsNumber = typeof maximum === 'number';
+
+    if (!minIsNumber && !maxIsNumber) {
       return [];
     }
 
     const minMaxDescription = [];
 
-    if (typeof minimum === 'number' && minimum > 0) {
+    if (minIsNumber && minimum > 0) {
       minMaxDescription.push(`min. {minimum}`);
     }
-    if (typeof maximum === 'number' && maximum > 0) {
+    if (maxIsNumber && maximum > 0) {
       minMaxDescription.push(`max. {maximum}`);
     }
 
