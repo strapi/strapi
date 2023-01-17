@@ -11,6 +11,8 @@ module.exports = {
   options: {
     draftAndPublish: false,
     timestamps: false,
+  },
+  pluginOptions: {
     'content-manager': {
       visible: false,
     },
@@ -18,7 +20,6 @@ module.exports = {
       visible: false,
     },
   },
-  pluginOptions: {},
   attributes: {
     action: {
       type: 'string',
