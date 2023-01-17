@@ -16,6 +16,12 @@ const sanitizeLocale = (locale) => {
 };
 
 module.exports = {
+  /**
+   * @deprecated use find() instead.
+   */
+  async listLocales(ctx) {
+    await this.find(ctx);
+  },
   async createLocale(ctx) {
     const { user } = ctx.state;
     const { body } = ctx.request;
