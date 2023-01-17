@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
 
 const ShadowBox = styled(Box)`
   position: relative;
@@ -19,25 +18,29 @@ const ShadowBox = styled(Box)`
 
   &:before {
     /* TODO: as for DS Table component we would need this to be handled by the DS theme */
-    content: ${({ overflowDirection }) =>
-      overflowDirection === 'top-bottom' || overflowDirection === 'top' ? "''" : undefined};
-    background: linear-gradient(rgba(33, 33, 52, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
+    content: '';
+    background: linear-gradient(rgba(3, 3, 5, 0.2) 0%, rgba(0, 0, 0, 0) 100%);
     top: 0;
+    opacity: ${({ overflowDirection }) =>
+      overflowDirection === 'top-bottom' || overflowDirection === 'top' ? 1 : 0};
+    transition: opacity 0.2s ease-in-out;
   }
 
   &:after {
     /* TODO: as for DS Table component we would need this to be handled by the DS theme */
-    content: ${({ overflowDirection }) =>
-      overflowDirection === 'top-bottom' || overflowDirection === 'bottom' ? "''" : undefined};
-    background: linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(33, 33, 52, 0.1) 100%);
+    content: '';
+    background: linear-gradient(0deg, rgba(3, 3, 5, 0.2) 0%, rgba(0, 0, 0, 0) 100%);
     bottom: 0;
+    opacity: ${({ overflowDirection }) =>
+      overflowDirection === 'top-bottom' || overflowDirection === 'bottom' ? 1 : 0};
+    transition: opacity 0.2s ease-in-out;
   }
 `;
 
 export const RelationList = ({ children, overflow, ...props }) => {
   return (
     <ShadowBox overflowDirection={overflow} {...props}>
-      <Stack spacing={1}>{children}</Stack>
+      {children}
     </ShadowBox>
   );
 };
