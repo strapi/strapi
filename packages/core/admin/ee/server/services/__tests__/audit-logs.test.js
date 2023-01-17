@@ -46,6 +46,7 @@ describe('Audit logs service', () => {
     const mockEntityServiceCreate = jest.fn();
     const mockEntityServiceFindPage = jest.fn();
     const mockEntityServiceFindOne = jest.fn();
+    const mockEntityServiceDeleteMany = jest.fn();
     const mockGet = jest.fn((name) => {
       if (name === 'content-types') {
         return {
@@ -53,7 +54,7 @@ describe('Audit logs service', () => {
         };
       }
     });
-    const mockScheduleJob = jest.fn();
+    const mockScheduleJob = jest.fn((rule, callback) => callback());
 
     const strapi = {
       admin: {
@@ -71,6 +72,7 @@ describe('Audit logs service', () => {
         create: mockEntityServiceCreate,
         findPage: mockEntityServiceFindPage,
         findOne: mockEntityServiceFindOne,
+        deleteMany: mockEntityServiceDeleteMany,
       },
       eventHub: createEventHub(),
       requestContext: {
@@ -88,6 +90,7 @@ describe('Audit logs service', () => {
 
     const mockSaveEvent = jest.fn();
     const mockFindMany = jest.fn();
+    const mockDeleteExpiredEvents = jest.fn();
 
     beforeAll(() => {
       jest.mock('@strapi/strapi/lib/utils/ee', () => ({
@@ -101,6 +104,7 @@ describe('Audit logs service', () => {
         register: jest.fn().mockResolvedValue({
           saveEvent: mockSaveEvent,
           findMany: mockFindMany,
+          deleteExpiredEvents: mockDeleteExpiredEvents,
         }),
       }));
       jest.mock('node-schedule', () => {
@@ -207,6 +211,7 @@ describe('Audit logs service', () => {
 
       expect(mockScheduleJob).toHaveBeenCalledTimes(1);
       expect(mockScheduleJob).toHaveBeenCalledWith('0 0 * * *', expect.any(Function));
+      expect(mockDeleteExpiredEvents).toHaveBeenCalledWith(expect.any(Date));
     });
   });
 });
