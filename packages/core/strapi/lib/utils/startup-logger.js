@@ -6,7 +6,7 @@ const _ = require('lodash/fp');
 const { getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('@strapi/utils');
 const ee = require('./ee');
 
-module.exports = app => {
+module.exports = (app) => {
   return {
     logStats() {
       const columns = Math.min(process.stderr.columns, 80) - 2;
@@ -23,7 +23,7 @@ module.exports = app => {
 
       infoTable.push(
         [chalk.blue('Time'), `${new Date()}`],
-        [chalk.blue('Launched in'), Date.now() - app.config.launchedAt + ' ms'],
+        [chalk.blue('Launched in'), `${Date.now() - app.config.launchedAt} ms`],
         [chalk.blue('Environment'), app.config.environment],
         [chalk.blue('Process PID'), process.pid],
         [chalk.blue('Version'), `${app.config.info.strapi} (node ${process.version})`],

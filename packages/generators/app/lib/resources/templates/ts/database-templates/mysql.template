@@ -1,0 +1,13 @@
+export default ({ env }) => ({
+  connection: {
+    client: 'mysql',
+    connection: {
+      host: env('DATABASE_HOST', '<%= connection.host %>'),
+      port: env.int('DATABASE_PORT', <%= connection.port %>),
+      database: env('DATABASE_NAME', '<%= connection.database %>'),
+      user: env('DATABASE_USERNAME', '<%= connection.username %>'),
+      password: env('DATABASE_PASSWORD', '<%= connection.password %>'),
+      ssl: env.bool('DATABASE_SSL', <%= connection.ssl %>),
+    },
+  },
+});

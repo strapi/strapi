@@ -16,7 +16,7 @@ const BaseForm = () => {
    * it
    */
   const handleLocaleChange = useCallback(
-    nextLocale => {
+    (nextLocale) => {
       setFieldValue('displayName', nextLocale.displayName);
       setFieldValue('code', nextLocale.code);
     },

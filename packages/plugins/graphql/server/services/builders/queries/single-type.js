@@ -11,7 +11,7 @@ module.exports = ({ strapi }) => {
 
   const { getFindOneQueryName, getEntityResponseName } = naming;
 
-  const buildSingleTypeQueries = contentType => {
+  const buildSingleTypeQueries = (contentType) => {
     const findQueryName = `Query.${getFindOneQueryName(contentType)}`;
 
     const extension = getService('extension');
@@ -20,7 +20,7 @@ module.exports = ({ strapi }) => {
       return extension.use({ resolversConfig: { [action]: { auth } } });
     };
 
-    const isActionEnabled = action => {
+    const isActionEnabled = (action) => {
       return extension.shadowCRUD(contentType.uid).isActionEnabled(action);
     };
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { QueryClientProvider, QueryClient } from 'react-query';
-import { LibraryProvider, StrapiAppProvider } from '@strapi/helper-plugin';
+import { LibraryProvider, CustomFieldsProvider, StrapiAppProvider } from '@strapi/helper-plugin';
 import { Provider } from 'react-redux';
 import { AdminContext } from '../../contexts';
 import ConfigurationsProvider from '../ConfigurationsProvider';
@@ -25,6 +25,7 @@ const Providers = ({
   authLogo,
   children,
   components,
+  customFields,
   fields,
   getAdminInjectedComponents,
   getPlugin,
@@ -64,15 +65,17 @@ const Providers = ({
                   settings={settings}
                 >
                   <LibraryProvider components={components} fields={fields}>
-                    <LanguageProvider messages={messages} localeNames={localeNames}>
-                      <AutoReloadOverlayBlockerProvider>
-                        <OverlayBlocker>
-                          <GuidedTour>
-                            <Notifications>{children}</Notifications>
-                          </GuidedTour>
-                        </OverlayBlocker>
-                      </AutoReloadOverlayBlockerProvider>
-                    </LanguageProvider>
+                    <CustomFieldsProvider customFields={customFields}>
+                      <LanguageProvider messages={messages} localeNames={localeNames}>
+                        <AutoReloadOverlayBlockerProvider>
+                          <OverlayBlocker>
+                            <GuidedTour>
+                              <Notifications>{children}</Notifications>
+                            </GuidedTour>
+                          </OverlayBlocker>
+                        </AutoReloadOverlayBlockerProvider>
+                      </LanguageProvider>
+                    </CustomFieldsProvider>
                   </LibraryProvider>
                 </StrapiAppProvider>
               </ConfigurationsProvider>
@@ -88,6 +91,7 @@ Providers.propTypes = {
   authLogo: PropTypes.oneOfType([PropTypes.string, PropTypes.any]).isRequired,
   children: PropTypes.element.isRequired,
   components: PropTypes.object.isRequired,
+  customFields: PropTypes.object.isRequired,
   fields: PropTypes.object.isRequired,
   getAdminInjectedComponents: PropTypes.func.isRequired,
   getPlugin: PropTypes.func.isRequired,

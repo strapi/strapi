@@ -43,8 +43,8 @@ const ApplicationInfosPage = () => {
     ? 'app.components.UpgradePlanModal.text-ce'
     : 'app.components.UpgradePlanModal.text-ee';
 
-  const submitMutation = useMutation(body => postProjectSettings(body), {
-    onSuccess: async ({ menuLogo }) => {
+  const submitMutation = useMutation((body) => postProjectSettings(body), {
+    async onSuccess({ menuLogo }) {
       await queryClient.invalidateQueries('project-settings', { refetchActive: true });
       updateProjectSettings({ menuLogo: menuLogo?.url });
     },
@@ -55,14 +55,14 @@ const ApplicationInfosPage = () => {
     const formData = getFormData(inputValues);
 
     submitMutation.mutate(formData, {
-      onSuccess: () => {
+      onSuccess() {
         const { menuLogo } = inputValues;
 
         if (menuLogo.rawFile) {
           trackUsage('didChangeLogo');
         }
       },
-      onError: () => {
+      onError() {
         toggleNotification({
           type: 'warning',
           message: { id: 'notification.error', defaultMessage: 'An error occurred' },

@@ -18,7 +18,7 @@ const LogoModalStepper = ({
   const [{ localImage }, dispatch] = useReducer(reducer, initialState);
   const { formatMessage } = useIntl();
 
-  const setLocalImage = asset => {
+  const setLocalImage = (asset) => {
     dispatch({
       type: 'SET_LOCAL_IMAGE',
       value: asset,

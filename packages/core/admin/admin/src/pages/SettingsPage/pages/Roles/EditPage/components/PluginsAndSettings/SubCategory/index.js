@@ -42,11 +42,8 @@ const CheckboxWrapper = styled.div`
 
 const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, pathToData }) => {
   const [isModalOpen, setModalOpen] = useState(false);
-  const {
-    modifiedData,
-    onChangeParentCheckbox,
-    onChangeSimpleCheckbox,
-  } = usePermissionsDataManager();
+  const { modifiedData, onChangeParentCheckbox, onChangeSimpleCheckbox } =
+    usePermissionsDataManager();
   const { formatMessage } = useIntl();
 
   const mainData = get(modifiedData, pathToData, {});
@@ -61,7 +58,7 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
   const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(dataWithoutCondition);
 
   const handleToggleModalIsOpen = () => {
-    setModalOpen(s => !s);
+    setModalOpen((s) => !s);
   };
 
   const handleModalClose = () => {
@@ -86,7 +83,7 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
               name={pathToData.join('..')}
               disabled={isFormDisabled || IS_DISABLED}
               // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-              onValueChange={value => {
+              onValueChange={(value) => {
                 onChangeParentCheckbox({
                   target: {
                     name: pathToData.join('..'),
@@ -114,7 +111,7 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
                       name={checkboxName}
                       disabled={isFormDisabled || IS_DISABLED}
                       // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                      onValueChange={value => {
+                      onValueChange={(value) => {
                         onChangeSimpleCheckbox({
                           target: {
                             name: checkboxName,

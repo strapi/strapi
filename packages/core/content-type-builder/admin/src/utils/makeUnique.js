@@ -1,3 +1,3 @@
-const makeUnique = array => [...new Set(array)];
+const makeUnique = (array) => [...new Set(array)];
 
 export default makeUnique;

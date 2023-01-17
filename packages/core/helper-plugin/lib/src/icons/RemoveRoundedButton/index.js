@@ -21,6 +21,6 @@ const StyledIconButton = styled(IconButton)(
 `
 );
 
-const RemoveRoundedButton = props => <StyledIconButton icon={<Minus />} {...props} />;
+const RemoveRoundedButton = (props) => <StyledIconButton icon={<Minus />} {...props} />;
 
 export default RemoveRoundedButton;

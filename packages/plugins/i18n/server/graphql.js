@@ -24,7 +24,7 @@ module.exports = ({ strapi }) => ({
 
     const extensionService = getGraphQLService('extension');
 
-    const getCreateLocalizationMutationType = contentType => {
+    const getCreateLocalizationMutationType = (contentType) => {
       const { getTypeName } = getGraphQLService('utils').naming;
 
       return `create${getTypeName(contentType)}Localization`;
@@ -36,16 +36,10 @@ module.exports = ({ strapi }) => ({
     Object.entries(strapi.contentTypes).forEach(([uid, ct]) => {
       if (isLocalizedContentType(ct)) {
         // Disable locale field in localized inputs
-        extensionService
-          .shadowCRUD(uid)
-          .field('locale')
-          .disableInput();
+        extensionService.shadowCRUD(uid).field('locale').disableInput();
 
         // Disable localizations field in localized inputs
-        extensionService
-          .shadowCRUD(uid)
-          .field('localizations')
-          .disableInput();
+        extensionService.shadowCRUD(uid).field('localizations').disableInput();
       }
     });
 
@@ -66,6 +60,10 @@ module.exports = ({ strapi }) => ({
           ...createLocalizationResolversConfig,
           // locale arg transformation for localized createEntity mutations
           ...getLocalizedCreateMutationsResolversConfigs({ typeRegistry }),
+
+          // Modify the default scope associated to find and findOne locale queries to match the actual action name
+          'Query.i18NLocale': { auth: { scope: 'plugin::i18n.locales.listLocales' } },
+          'Query.i18NLocales': { auth: { scope: 'plugin::i18n.locales.listLocales' } },
         },
       };
     });
@@ -102,7 +100,7 @@ module.exports = ({ strapi }) => ({
         prop('config.contentType')
       );
 
-      const createLocalizationComponents = localizedContentTypes.map(ct =>
+      const createLocalizationComponents = localizedContentTypes.map((ct) =>
         getCreateLocalizationComponents(ct, { nexus })
       );
 
@@ -195,7 +193,7 @@ module.exports = ({ strapi }) => ({
     const getI18nLocaleArgPlugin = ({ nexus, typeRegistry }) => {
       const { isLocalizedContentType } = getI18NService('content-types');
 
-      const addLocaleArg = config => {
+      const addLocaleArg = (config) => {
         const { parentType } = config;
 
         // Only target queries or mutations
@@ -209,7 +207,7 @@ module.exports = ({ strapi }) => ({
           return;
         }
 
-        const contentType = registryType.config.contentType;
+        const { contentType } = registryType.config;
 
         // Ignore non-localized content types
         if (!isLocalizedContentType(contentType)) {

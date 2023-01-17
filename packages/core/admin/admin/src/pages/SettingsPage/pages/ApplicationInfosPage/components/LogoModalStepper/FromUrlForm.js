@@ -14,12 +14,11 @@ const FromUrlForm = ({ goTo, next, onClose, setLocalImage }) => {
   const [logoUrl, setLogoUrl] = useState('');
   const [error, setError] = useState(null);
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     setLogoUrl(e.target.value);
   };
 
-  const handleSubmit = async e => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     try {
       const file = await urlToFile(logoUrl);
       const asset = await parseFileMetadatas(file);
@@ -36,7 +35,12 @@ const FromUrlForm = ({ goTo, next, onClose, setLocalImage }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleSubmit();
+      }}
+    >
       <Box paddingLeft={8} paddingRight={8} paddingTop={6} paddingBottom={6}>
         <TextInput
           label={formatMessage({

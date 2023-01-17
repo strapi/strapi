@@ -37,7 +37,7 @@ describe('Upload plugin register function', () => {
     const registerRoute = jest.fn();
 
     global.strapi = {
-      dirs: { root: process.cwd(), public: join(process.cwd(), 'public') },
+      dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
       plugins: { upload: {} },
       server: { app: { on: jest.fn() }, routes: registerRoute },
       admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
@@ -56,7 +56,7 @@ describe('Upload plugin register function', () => {
     const setConfig = jest.fn();
 
     global.strapi = {
-      dirs: { root: process.cwd(), public: join(process.cwd(), 'public') },
+      dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
       plugins: { upload: {} },
       server: { app: { on: jest.fn() }, routes: jest.fn() },
       admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },

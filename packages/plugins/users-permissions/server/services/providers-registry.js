@@ -4,15 +4,15 @@ const { strict: assert } = require('assert');
 const jwt = require('jsonwebtoken');
 
 const getInitialProviders = ({ purest }) => ({
-  async discord({ access_token }) {
+  async discord({ accessToken }) {
     const discord = purest({ provider: 'discord' });
     return discord
       .get('users/@me')
-      .auth(access_token)
+      .auth(accessToken)
       .request()
       .then(({ body }) => {
         // Combine username and discriminator because discord username is not unique
-        var username = `${body.username}#${body.discriminator}`;
+        const username = `${body.username}#${body.discriminator}`;
         return {
           username,
           email: body.email,
@@ -33,12 +33,12 @@ const getInitialProviders = ({ purest }) => ({
       };
     }
   },
-  async facebook({ access_token }) {
+  async facebook({ accessToken }) {
     const facebook = purest({ provider: 'facebook' });
 
     return facebook
       .get('me')
-      .auth(access_token)
+      .auth(accessToken)
       .qs({ fields: 'name,email' })
       .request()
       .then(({ body }) => ({
@@ -46,20 +46,20 @@ const getInitialProviders = ({ purest }) => ({
         email: body.email,
       }));
   },
-  async google({ access_token }) {
+  async google({ accessToken }) {
     const google = purest({ provider: 'google' });
 
     return google
       .query('oauth')
       .get('tokeninfo')
-      .qs({ access_token })
+      .qs({ accessToken })
       .request()
       .then(({ body }) => ({
         username: body.email.split('@')[0],
         email: body.email,
       }));
   },
-  async github({ access_token }) {
+  async github({ accessToken }) {
     const github = purest({
       provider: 'github',
       defaults: {
@@ -69,10 +69,7 @@ const getInitialProviders = ({ purest }) => ({
       },
     });
 
-    const { body: userBody } = await github
-      .get('user')
-      .auth(access_token)
-      .request();
+    const { body: userBody } = await github.get('user').auth(accessToken).request();
 
     // This is the public email on the github profile
     if (userBody.email) {
@@ -82,31 +79,28 @@ const getInitialProviders = ({ purest }) => ({
       };
     }
     // Get the email with Github's user/emails API
-    const { body: emailBody } = await github
-      .get('user/emails')
-      .auth(access_token)
-      .request();
+    const { body: emailBody } = await github.get('user/emails').auth(accessToken).request();
 
     return {
       username: userBody.login,
       email: Array.isArray(emailBody)
-        ? emailBody.find(email => email.primary === true).email
+        ? emailBody.find((email) => email.primary === true).email
         : null,
     };
   },
-  async microsoft({ access_token }) {
+  async microsoft({ accessToken }) {
     const microsoft = purest({ provider: 'microsoft' });
 
     return microsoft
       .get('me')
-      .auth(access_token)
+      .auth(accessToken)
       .request()
       .then(({ body }) => ({
         username: body.userPrincipalName,
         email: body.userPrincipalName,
       }));
   },
-  async twitter({ access_token, query, providers }) {
+  async twitter({ accessToken, query, providers }) {
     const twitter = purest({
       provider: 'twitter',
       defaults: {
@@ -119,7 +113,7 @@ const getInitialProviders = ({ purest }) => ({
 
     return twitter
       .get('account/verify_credentials')
-      .auth(access_token, query.access_secret)
+      .auth(accessToken, query.access_secret)
       .qs({ screen_name: query['raw[screen_name]'], include_email: 'true' })
       .request()
       .then(({ body }) => ({
@@ -127,12 +121,12 @@ const getInitialProviders = ({ purest }) => ({
         email: body.email,
       }));
   },
-  async instagram({ access_token }) {
+  async instagram({ accessToken }) {
     const instagram = purest({ provider: 'instagram' });
 
     return instagram
       .get('me')
-      .auth(access_token)
+      .auth(accessToken)
       .qs({ fields: 'id,username' })
       .request()
       .then(({ body }) => ({
@@ -140,12 +134,12 @@ const getInitialProviders = ({ purest }) => ({
         email: `${body.username}@strapi.io`, // dummy email as Instagram does not provide user email
       }));
   },
-  async vk({ access_token, query }) {
+  async vk({ accessToken, query }) {
     const vk = purest({ provider: 'vk' });
 
     return vk
       .get('users.get')
-      .auth(access_token)
+      .auth(accessToken)
       .qs({ id: query.raw.user_id, v: '5.122' })
       .request()
       .then(({ body }) => ({
@@ -153,7 +147,7 @@ const getInitialProviders = ({ purest }) => ({
         email: query.raw.email,
       }));
   },
-  async twitch({ access_token, providers }) {
+  async twitch({ accessToken, providers }) {
     const twitch = purest({
       provider: 'twitch',
       config: {
@@ -172,26 +166,23 @@ const getInitialProviders = ({ purest }) => ({
 
     return twitch
       .get('users')
-      .auth(access_token, providers.twitch.key)
+      .auth(accessToken, providers.twitch.key)
       .request()
       .then(({ body }) => ({
         username: body.data[0].login,
         email: body.data[0].email,
       }));
   },
-  async linkedin({ access_token }) {
+  async linkedin({ accessToken }) {
     const linkedIn = purest({ provider: 'linkedin' });
     const {
       body: { localizedFirstName },
-    } = await linkedIn
-      .get('me')
-      .auth(access_token)
-      .request();
+    } = await linkedIn.get('me').auth(accessToken).request();
     const {
       body: { elements },
     } = await linkedIn
       .get('emailAddress?q=members&projection=(elements*(handle~))')
-      .auth(access_token)
+      .auth(accessToken)
       .request();
 
     const email = elements[0]['handle~'];
@@ -201,7 +192,7 @@ const getInitialProviders = ({ purest }) => ({
       email: email.emailAddress,
     };
   },
-  async reddit({ access_token }) {
+  async reddit({ accessToken }) {
     const reddit = purest({
       provider: 'reddit',
       config: {
@@ -221,20 +212,20 @@ const getInitialProviders = ({ purest }) => ({
 
     return reddit
       .get('me')
-      .auth(access_token)
+      .auth(accessToken)
       .request()
       .then(({ body }) => ({
         username: body.name,
         email: `${body.name}@strapi.io`, // dummy email as Reddit does not provide user email
       }));
   },
-  async auth0({ access_token, providers }) {
+  async auth0({ accessToken, providers }) {
     const auth0 = purest({ provider: 'auth0' });
 
     return auth0
       .get('userinfo')
       .subdomain(providers.auth0.subdomain)
-      .auth(access_token)
+      .auth(accessToken)
       .request()
       .then(({ body }) => {
         const username = body.username || body.nickname || body.name || body.email.split('@')[0];
@@ -246,13 +237,13 @@ const getInitialProviders = ({ purest }) => ({
         };
       });
   },
-  async cas({ access_token, providers }) {
+  async cas({ accessToken, providers }) {
     const cas = purest({ provider: 'cas' });
 
     return cas
       .get('oidc/profile')
       .subdomain(providers.cas.subdomain)
-      .auth(access_token)
+      .auth(accessToken)
       .request()
       .then(({ body }) => {
         // CAS attribute may be in body.attributes or "FLAT", depending on CAS config
@@ -264,7 +255,7 @@ const getInitialProviders = ({ purest }) => ({
           : body.strapiemail || body.email;
         if (!username || !email) {
           strapi.log.warn(
-            'CAS Response Body did not contain required attributes: ' + JSON.stringify(body)
+            `CAS Response Body did not contain required attributes: ${JSON.stringify(body)}`
           );
         }
         return {
@@ -288,14 +279,14 @@ module.exports = () => {
       providersCallbacks[providerName] = provider({ purest });
     },
 
-    async run({ provider, access_token, query, providers }) {
+    async run({ provider, accessToken, query, providers }) {
       if (!providersCallbacks[provider]) {
         throw new Error('Unknown provider.');
       }
 
       const providerCb = providersCallbacks[provider];
 
-      return providerCb({ access_token, query, providers });
+      return providerCb({ accessToken, query, providers });
     },
   };
 };

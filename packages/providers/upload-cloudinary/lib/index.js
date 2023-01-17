@@ -14,7 +14,7 @@ module.exports = {
     cloudinary.config(config);
 
     const upload = (file, customConfig = {}) =>
-      new Promise(resolve => {
+      new Promise((resolve, reject) => {
         const config = {
           resource_type: 'auto',
           public_id: file.hash,
@@ -24,14 +24,16 @@ module.exports = {
           config.filename = `${file.hash}${file.ext}`;
         }
 
-        const upload_stream = cloudinary.uploader.upload_stream(
+        const uploadStream = cloudinary.uploader.upload_stream(
           { ...config, ...customConfig },
           (err, image) => {
             if (err) {
               if (err.message.includes('File size too large')) {
-                throw new PayloadTooLargeError();
+                reject(new PayloadTooLargeError());
+              } else {
+                reject(new Error(`Error uploading to cloudinary: ${err.message}`));
               }
-              throw new Error(`Error uploading to cloudinary: ${err.message}`);
+              return;
             }
 
             if (image.resource_type === 'video') {
@@ -49,11 +51,16 @@ module.exports = {
               public_id: image.public_id,
               resource_type: image.resource_type,
             };
+
             resolve();
           }
         );
 
-        file.stream ? file.stream.pipe(upload_stream) : intoStream(file.buffer).pipe(upload_stream);
+        if (file.stream) {
+          file.stream.pipe(uploadStream);
+        } else {
+          intoStream(file.buffer).pipe(uploadStream);
+        }
       });
 
     return {
@@ -65,10 +72,10 @@ module.exports = {
       },
       async delete(file, customConfig = {}) {
         try {
-          const { resource_type, public_id } = file.provider_metadata;
-          const response = await cloudinary.uploader.destroy(public_id, {
+          const { resource_type: resourceType, public_id: publicId } = file.provider_metadata;
+          const response = await cloudinary.uploader.destroy(publicId, {
             invalidate: true,
-            resource_type: resource_type || 'image',
+            resource_type: resourceType || 'image',
             ...customConfig,
           });
 

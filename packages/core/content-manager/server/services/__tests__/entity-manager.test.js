@@ -19,7 +19,7 @@ describe('Content-Manager', () => {
         entityValidator: {
           validateEntityCreation() {},
         },
-        eventHub: { emit: jest.fn(), sanitizeEntity: entity => entity },
+        eventHub: { emit: jest.fn(), sanitizeEntity: (entity) => entity },
         getModel: jest.fn(() => fakeModel),
       };
       entityManager = entityManagerLoader({ strapi });
@@ -47,7 +47,7 @@ describe('Content-Manager', () => {
         entityService: {
           update: jest.fn(),
         },
-        eventHub: { emit: jest.fn(), sanitizeEntity: entity => entity },
+        eventHub: { emit: jest.fn(), sanitizeEntity: (entity) => entity },
         getModel: jest.fn(() => fakeModel),
       };
       entityManager = entityManagerLoader({ strapi });

@@ -17,7 +17,7 @@ function useSelect(name) {
   } = useCMEditViewDataManager();
 
   const dynamicDisplayedComponents = useMemo(
-    () => get(modifiedData, [name], []).map(data => data.__component),
+    () => get(modifiedData, [name], []).map((data) => data.__component),
     [modifiedData, name]
   );
 

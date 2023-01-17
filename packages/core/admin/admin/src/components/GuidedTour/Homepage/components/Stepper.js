@@ -19,7 +19,7 @@ const getType = (activeSectionIndex, index) => {
 };
 
 const StepperHomepage = ({ sections, currentSectionKey }) => {
-  const activeSectionIndex = sections.findIndex(section => section.key === currentSectionKey);
+  const activeSectionIndex = sections.findIndex((section) => section.key === currentSectionKey);
 
   return (
     <Box>

@@ -23,6 +23,11 @@ module.exports = ({ strapi }) => {
     'Mutation.forgotPassword': { auth: false },
     'Mutation.resetPassword': { auth: false },
     'Mutation.emailConfirmation': { auth: false },
+    'Mutation.changePassword': {
+      auth: {
+        scope: 'plugin::users-permissions.auth.changePassword',
+      },
+    },
 
     // Scoped auth for replaced CRUD operations
     // Role

@@ -6,16 +6,17 @@
 
 import React, { Suspense, useEffect, useMemo, lazy } from 'react';
 import { Switch, Route } from 'react-router-dom';
-// Components from @strapi/helper-plugin
 import { useTracking, LoadingIndicatorPage, useStrapiApp } from '@strapi/helper-plugin';
+import { useDispatch, useSelector } from 'react-redux';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import GuidedTourModal from '../../components/GuidedTour/Modal';
 import LeftMenu from '../../components/LeftMenu';
 import AppLayout from '../../layouts/AppLayout';
 import { useMenu } from '../../hooks';
-import Onboarding from './Onboarding';
 import { createRoute } from '../../utils';
-import GuidedTourModal from '../../components/GuidedTour/Modal';
+import { SET_APP_RUNTIME_STATUS } from '../App/constants';
+import Onboarding from './Onboarding';
 
 const CM = lazy(() =>
   import(/* webpackChunkName: "content-manager" */ '../../content-manager/pages/App')
@@ -44,11 +45,20 @@ const SettingsPage = lazy(() =>
 // Simple hook easier for testing
 const useTrackUsage = () => {
   const { trackUsage } = useTracking();
+  const dispatch = useDispatch();
+  const appStatus = useSelector((state) => state.admin_app.status);
 
   useEffect(() => {
-    trackUsage('didAccessAuthenticatedAdministration');
+    // Make sure the event is only send once after accessing the admin panel
+    // and not at runtime for example when regenerating the permissions with the ctb
+    // or with i18n
+    if (appStatus === 'init') {
+      trackUsage('didAccessAuthenticatedAdministration');
+
+      dispatch({ type: SET_APP_RUNTIME_STATUS });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [appStatus]);
 };
 
 const Admin = () => {
@@ -58,7 +68,7 @@ const Admin = () => {
 
   const routes = useMemo(() => {
     return menu
-      .filter(link => link.Component)
+      .filter((link) => link.Component)
       .map(({ to, Component, exact }) => createRoute(Component, to, exact));
   }, [menu]);
 

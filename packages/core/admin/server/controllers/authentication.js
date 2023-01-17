@@ -37,7 +37,7 @@ module.exports = {
         return next();
       })(ctx, next);
     },
-    ctx => {
+    (ctx) => {
       const { user } = ctx.state;
 
       ctx.body = {

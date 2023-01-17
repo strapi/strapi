@@ -1,14 +1,14 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { NotificationsProvider } from '@strapi/helper-plugin';
+import { NotificationsProvider, TrackingProvider } from '@strapi/helper-plugin';
 import { EditAssetDialog } from '../index';
 import en from '../../../translations/en.json';
 import { downloadFile } from '../../../utils/downloadFile';
 
+jest.mock('../../../hooks/useFolderStructure');
 jest.mock('../../../utils/downloadFile');
 
 const messageForPlugin = Object.keys(en).reduce((acc, curr) => {
@@ -20,7 +20,7 @@ const messageForPlugin = Object.keys(en).reduce((acc, curr) => {
 const asset = {
   id: 8,
   name: 'Screenshot 2.png',
-  alternativeText: null,
+  alternativeText: '',
   caption: null,
   width: 1476,
   height: 780,
@@ -96,15 +96,17 @@ const renderCompo = (
 ) =>
   render(
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={lightTheme}>
-        <NotificationsProvider toggleNotification={toggleNotification}>
-          <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
-            <EditAssetDialog asset={asset} onClose={jest.fn()} {...props} />
-          </IntlProvider>
-        </NotificationsProvider>
-      </ThemeProvider>
+      <TrackingProvider>
+        <ThemeProvider theme={lightTheme}>
+          <NotificationsProvider toggleNotification={toggleNotification}>
+            <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
+              <EditAssetDialog asset={asset} onClose={jest.fn()} {...props} />
+            </IntlProvider>
+          </NotificationsProvider>
+        </ThemeProvider>
+      </TrackingProvider>
     </QueryClientProvider>,
-    { container: document.body }
+    { container: document.getElementById('app') }
   );
 
 describe('<EditAssetDialog />', () => {
@@ -123,9 +125,9 @@ describe('<EditAssetDialog />', () => {
   });
 
   it('renders and matches the snapshot', () => {
-    const { container } = renderCompo();
+    renderCompo();
 
-    expect(container).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   describe('metadata form', () => {
@@ -138,10 +140,12 @@ describe('<EditAssetDialog />', () => {
     });
 
     it('open confirm box on close if data has changed', () => {
-      renderCompo();
+      const { getByRole } = renderCompo();
 
-      userEvent.type(screen.getByLabelText('Alternative text'), 'Test');
-      fireEvent.click(screen.getByText('Cancel'));
+      fireEvent.change(getByRole('textbox', { name: /alternative text/i }), {
+        target: { value: 'Test' },
+      });
+      fireEvent.click(getByRole('button', { name: /cancel/i }));
 
       expect(window.confirm).toBeCalled();
     });
@@ -263,16 +267,16 @@ describe('<EditAssetDialog />', () => {
       const file = new File(['Replacement media'], 'test.png', { type: 'image/png' });
 
       const fileList = [file];
-      fileList.item = i => fileList[i];
+      fileList.item = (i) => fileList[i];
 
-      const { container } = renderCompo({
+      renderCompo({
         canUpdate: true,
         canCopyLink: false,
         canDownload: false,
       });
 
-      fireEvent.change(container.querySelector('[type="file"]'), { target: { files: fileList } });
-      const img = container.querySelector('img');
+      fireEvent.change(document.querySelector('[type="file"]'), { target: { files: fileList } });
+      const img = document.querySelector('img');
 
       expect(img).toHaveAttribute('src', 'http://localhost:4000/assets/test.png');
     });

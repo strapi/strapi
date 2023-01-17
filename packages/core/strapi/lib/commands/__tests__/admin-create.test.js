@@ -25,7 +25,11 @@ const mock = {
 };
 
 jest.mock('../../index', () => {
-  return jest.fn(() => mock);
+  const impl = jest.fn(() => mock);
+
+  impl.compile = jest.fn();
+
+  return impl;
 });
 
 const inquirer = require('inquirer');
@@ -73,7 +77,7 @@ describe('admin:create command', () => {
 
       const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-      await createAdminCommand().catch(err => {
+      await createAdminCommand().catch((err) => {
         expect(err).toEqual(new Error('exit'));
       });
 
@@ -108,7 +112,7 @@ describe('admin:create command', () => {
         throw new Error('exit');
       });
 
-      await createAdminCommand().catch(err => {
+      await createAdminCommand().catch((err) => {
         expect(err).toEqual(new Error('exit'));
       });
 
@@ -260,7 +264,7 @@ describe('admin:create command', () => {
       });
       const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-      await createAdminCommand().catch(err => {
+      await createAdminCommand().catch((err) => {
         expect(err).toEqual(new Error('exit'));
       });
 
@@ -297,7 +301,7 @@ describe('admin:create command', () => {
       });
       const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-      await createAdminCommand().catch(err => {
+      await createAdminCommand().catch((err) => {
         expect(err).toEqual(new Error('exit'));
       });
 
@@ -330,7 +334,7 @@ describe('admin:create command', () => {
       });
       const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-      await createAdminCommand().catch(err => {
+      await createAdminCommand().catch((err) => {
         expect(err).toEqual(new Error('exit'));
       });
 
@@ -363,7 +367,7 @@ describe('admin:create command', () => {
       });
       const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-      await createAdminCommand().catch(err => {
+      await createAdminCommand().catch((err) => {
         expect(err).toEqual(new Error('exit'));
       });
 
@@ -396,7 +400,7 @@ describe('admin:create command', () => {
       });
       const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-      await createAdminCommand().catch(err => {
+      await createAdminCommand().catch((err) => {
         expect(err).toEqual(new Error('exit'));
       });
 
@@ -429,7 +433,7 @@ describe('admin:create command', () => {
       });
       const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-      await createAdminCommand().catch(err => {
+      await createAdminCommand().catch((err) => {
         expect(err).toEqual(new Error('exit'));
       });
 

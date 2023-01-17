@@ -58,7 +58,7 @@ describe('Content type validator', () => {
 
       expect.assertions(1);
 
-      await validateUpdateContentTypeInput(data).catch(err => {
+      await validateUpdateContentTypeInput(data).catch((err) => {
         expect(err).toMatchObject({
           name: 'ValidationError',
           message: 'Attribute keys cannot be one of __component, __contentType, thisIsReserved',
@@ -99,7 +99,7 @@ describe('Content type validator', () => {
 
       expect.assertions(1);
 
-      await validateContentTypeInput(input).then(data => {
+      await validateContentTypeInput(input).then((data) => {
         expect(data.contentType.attributes).toBe(input.contentType.attributes);
       });
     });
@@ -122,7 +122,6 @@ describe('Content type validator', () => {
         components: [
           {
             uid: 'edit',
-            icon: 'star',
             displayName: 'test',
             category: 'test',
             attributes: {
@@ -134,7 +133,6 @@ describe('Content type validator', () => {
           },
           {
             tmpUID: 'random',
-            icon: 'star',
             displayName: 'test2',
             category: 'test',
             attributes: {
@@ -197,7 +195,7 @@ describe('Content type validator', () => {
 
       expect.assertions(1);
 
-      await validateUpdateContentTypeInput(input).then(data => {
+      await validateUpdateContentTypeInput(input).then((data) => {
         expect(data.contentType.attributes).toBe(input.contentType.attributes);
       });
     });

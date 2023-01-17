@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-module.exports = ctx => {
+module.exports = (ctx) => {
   if (!ctx.is('multipart')) {
     return { data: ctx.request.body, files: {} };
   }

@@ -9,7 +9,7 @@ const InjectionZone = ({ area, ...props }) => {
     return null;
   }
 
-  return compos.map(compo => <compo.Component key={compo.name} {...props} />);
+  return compos.map((compo) => <compo.Component key={compo.name} {...props} />);
 };
 
 InjectionZone.propTypes = {

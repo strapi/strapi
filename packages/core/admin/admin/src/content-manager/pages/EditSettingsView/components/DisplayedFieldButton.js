@@ -215,7 +215,7 @@ const DisplayedFieldButton = ({
       item.itemIndex = hoverIndex;
       item.rowIndex = targetRow;
     },
-    collect: monitor => ({
+    collect: (monitor) => ({
       canDrop: monitor.canDrop(),
       clientOffset: monitor.getClientOffset(),
       isOver: monitor.isOver(),
@@ -225,7 +225,7 @@ const DisplayedFieldButton = ({
   });
   const [{ isDragging, getItem }, drag, dragPreview] = useDrag({
     type: ItemTypes.EDIT_FIELD,
-    item: () => {
+    item() {
       setIsDraggingSibling(true);
 
       return {
@@ -244,11 +244,11 @@ const DisplayedFieldButton = ({
       // We will need to add a 12 size _TEMP_ div to offer a drop target between each existing row.
       return name !== '_TEMP_';
     },
-    collect: monitor => ({
+    collect: (monitor) => ({
       isDragging: monitor.isDragging(),
       getItem: monitor.getItem(),
     }),
-    end: () => {
+    end() {
       setIsDraggingSibling(false);
     },
   });
@@ -344,7 +344,7 @@ const DisplayedFieldButton = ({
             as="span"
             type="button"
             ref={refs.dragRef}
-            onClick={e => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
             alignItems="center"
             paddingLeft={3}
             paddingRight={3}

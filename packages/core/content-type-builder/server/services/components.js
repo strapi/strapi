@@ -10,7 +10,7 @@ const createBuilder = require('./schema-builder');
  * @param {string} uid - string
  * @param {Object} component - strapi component model
  */
-const formatComponent = component => {
+const formatComponent = (component) => {
   const { uid, modelName, connection, collectionName, info, category } = component;
 
   return {
@@ -18,7 +18,6 @@ const formatComponent = component => {
     category,
     apiId: modelName,
     schema: {
-      icon: _.get(info, 'icon'),
       displayName: _.get(info, 'displayName'),
       description: _.get(info, 'description', ''),
       connection,
@@ -43,7 +42,7 @@ const createComponent = async ({ component, components = [] }) => {
 
   const newComponent = builder.createComponent(replaceTmpUIDs(component));
 
-  components.forEach(component => {
+  components.forEach((component) => {
     if (!_.has(component, 'uid')) {
       return builder.createComponent(replaceTmpUIDs(component));
     }
@@ -72,7 +71,7 @@ const editComponent = async (uid, { component, components = [] }) => {
     ...replaceTmpUIDs(component),
   });
 
-  components.forEach(component => {
+  components.forEach((component) => {
     if (!_.has(component, 'uid')) {
       return builder.createComponent(replaceTmpUIDs(component));
     }
@@ -84,7 +83,7 @@ const editComponent = async (uid, { component, components = [] }) => {
   return updatedComponent;
 };
 
-const deleteComponent = async uid => {
+const deleteComponent = async (uid) => {
   const builder = createBuilder();
 
   const deletedComponent = builder.deleteComponent(uid);

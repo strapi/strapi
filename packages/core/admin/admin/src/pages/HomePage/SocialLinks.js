@@ -33,13 +33,13 @@ const StyledReddit = styled(Reddit)`
 `;
 const StyledStrapi = styled(Strapi)`
   > path:first-child {
-    fill: #8e75ff;
+    fill: #4945ff;
   }
   > path:nth-child(2) {
-    fill: #8e75ff;
+    fill: #fff;
   }
-  > path:nth-child(3) {
-    fill: #8e75ff;
+  > path:nth-child(4) {
+    fill: #9593ff;
   }
 `;
 
@@ -79,7 +79,7 @@ const socialLinks = [
   },
   {
     name: 'Discord',
-    link: 'https://slack.strapi.io/',
+    link: 'https://discord.strapi.io/',
     icon: <StyledDiscord />,
     alt: 'discord',
   },
@@ -176,7 +176,7 @@ const SocialLinks = () => {
         </Stack>
       </Box>
       <GridGap>
-        {socialLinks.map(socialLink => {
+        {socialLinks.map((socialLink) => {
           return (
             <GridItem col={6} s={12} key={socialLink.name}>
               <LinkCustom

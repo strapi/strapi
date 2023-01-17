@@ -10,6 +10,7 @@ const INITIAL_STATE_DATA = {
   kind: null,
   step: null,
   targetUid: null,
+  customFieldUid: null,
 };
 
 export { INITIAL_STATE_DATA };

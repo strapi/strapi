@@ -1,6 +1,6 @@
 'use strict';
 
-var open = require('open');
+const open = require('open');
 const { getAbsoluteAdminUrl } = require('@strapi/utils');
 
 async function openBrowser(config) {

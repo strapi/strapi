@@ -24,6 +24,14 @@ describe('metrics', () => {
       server: {
         use,
       },
+      dirs: {
+        app: {
+          root: process.cwd(),
+        },
+      },
+      requestContext: {
+        get: jest.fn(() => ({})),
+      },
     });
 
     metricsInstance.register();
@@ -50,7 +58,16 @@ describe('metrics', () => {
       server: {
         use,
       },
+      dirs: {
+        app: {
+          root: process.cwd(),
+        },
+      },
+      requestContext: {
+        get: jest.fn(() => ({})),
+      },
     });
+
     metricsInstance.register();
 
     expect(use).not.toHaveBeenCalled();
@@ -73,18 +90,26 @@ describe('metrics', () => {
       server: {
         use() {},
       },
+      dirs: {
+        app: {
+          root: process.cwd(),
+        },
+      },
+      requestContext: {
+        get: jest.fn(() => ({})),
+      },
     });
 
     send('someEvent');
 
     expect(fetch).toHaveBeenCalled();
-    expect(fetch.mock.calls[0][0]).toBe('https://analytics.strapi.io/track');
+    expect(fetch.mock.calls[0][0]).toBe('https://analytics.strapi.io/api/v2/track');
     expect(fetch.mock.calls[0][1].method).toBe('POST');
     expect(JSON.parse(fetch.mock.calls[0][1].body)).toMatchObject({
       event: 'someEvent',
-      uuid: 'test',
-      properties: {
+      groupProperties: {
         projectType: 'Community',
+        projectId: 'test',
       },
     });
 
@@ -106,6 +131,14 @@ describe('metrics', () => {
       },
       server: {
         use() {},
+      },
+      dirs: {
+        app: {
+          root: process.cwd(),
+        },
+      },
+      requestContext: {
+        get: jest.fn(() => ({})),
       },
     });
 

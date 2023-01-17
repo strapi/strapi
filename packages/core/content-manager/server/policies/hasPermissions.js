@@ -17,8 +17,8 @@ module.exports = createPolicy({
     } = ctx;
 
     const isAuthorized = hasAtLeastOne
-      ? actions.some(action => userAbility.can(action, model))
-      : actions.every(action => userAbility.can(action, model));
+      ? actions.some((action) => userAbility.can(action, model))
+      : actions.every((action) => userAbility.can(action, model));
 
     return isAuthorized;
   },

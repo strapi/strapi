@@ -58,7 +58,7 @@ const sanitizeActionAttributes = pick(actionFields);
  * @param {CreateActionPayload} attributes
  * @return {string}
  */
-const computeActionId = attributes => {
+const computeActionId = (attributes) => {
   const { pluginName, uid } = attributes;
 
   if (!pluginName) {
@@ -77,14 +77,14 @@ const computeActionId = attributes => {
  * @param {CreateActionPayload} attrs - Payload used to create an action
  * @return {CreateActionPayload}
  */
-const assignActionId = attrs => set('actionId', computeActionId(attrs), attrs);
+const assignActionId = (attrs) => set('actionId', computeActionId(attrs), attrs);
 
 /**
  * Transform an action by adding or removing the {@link Action.subCategory} attribute
  * @param {Action} action - The action to process
  * @return {Action}
  */
-const assignOrOmitSubCategory = action => {
+const assignOrOmitSubCategory = (action) => {
   const shouldHaveSubCategory = ['settings', 'plugins'].includes(action.section);
 
   return shouldHaveSubCategory

@@ -6,7 +6,7 @@ import PermissionRow from './Row';
 const PluginsAndSettingsPermissions = ({ isFormDisabled, kind, layout }) => {
   const [openedCategory, setOpenedCategory] = useState(null);
 
-  const handleOpenCategory = categoryName => {
+  const handleOpenCategory = (categoryName) => {
     setOpenedCategory(categoryName === openedCategory ? null : categoryName);
   };
 

@@ -3,13 +3,15 @@
  * NotificationsProvider
  *
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import NotificationsContext from '../../contexts/NotificationsContext';
 
 const NotificationsProvider = ({ children, toggleNotification }) => {
+  const notificationValue = useMemo(() => ({ toggleNotification }), [toggleNotification]);
+
   return (
-    <NotificationsContext.Provider value={{ toggleNotification }}>
+    <NotificationsContext.Provider value={notificationValue}>
       {children}
     </NotificationsContext.Provider>
   );

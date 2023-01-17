@@ -2,7 +2,7 @@ import localePermissionMiddleware from '../localePermissionMiddleware';
 
 describe('localePermissionMiddleware', () => {
   it('does not modify the action when the type is not "ContentManager/RBACManager/SET_PERMISSIONS"', () => {
-    const nextFn = jest.fn(x => x);
+    const nextFn = jest.fn((x) => x);
     const action = {
       type: 'UNKNOWN_TYPE',
     };
@@ -13,7 +13,7 @@ describe('localePermissionMiddleware', () => {
   });
 
   it('does not modify the action when it the __meta__ key is not set', () => {
-    const nextFn = jest.fn(x => x);
+    const nextFn = jest.fn((x) => x);
     const action = {
       type: 'ContentManager/RBACManager/SET_PERMISSIONS',
       __meta__: undefined,
@@ -25,7 +25,7 @@ describe('localePermissionMiddleware', () => {
   });
 
   it('does not modify the action when it the __meta__.containerName is not "listView"', () => {
-    const nextFn = jest.fn(x => x);
+    const nextFn = jest.fn((x) => x);
     const action = {
       type: 'ContentManager/RBACManager/SET_PERMISSIONS',
       __meta__: { containerName: undefined },
@@ -37,7 +37,7 @@ describe('localePermissionMiddleware', () => {
   });
 
   it('does not modify the action when it the __meta__.plugins is not set', () => {
-    const nextFn = jest.fn(x => x);
+    const nextFn = jest.fn((x) => x);
     const action = {
       type: 'ContentManager/RBACManager/SET_PERMISSIONS',
       __meta__: { containerName: 'listView' },
@@ -49,7 +49,7 @@ describe('localePermissionMiddleware', () => {
   });
 
   it('does not modify the action when it the __meta__.plugins.i18n.locale is not set', () => {
-    const nextFn = jest.fn(x => x);
+    const nextFn = jest.fn((x) => x);
     const action = {
       type: 'ContentManager/RBACManager/SET_PERMISSIONS',
       __meta__: {
@@ -64,7 +64,7 @@ describe('localePermissionMiddleware', () => {
   });
 
   it('creates an empty permissions object from an empty array', () => {
-    const nextFn = jest.fn(x => x);
+    const nextFn = jest.fn((x) => x);
     const action = {
       type: 'ContentManager/RBACManager/SET_PERMISSIONS',
       __meta__: {
@@ -88,7 +88,7 @@ describe('localePermissionMiddleware', () => {
   });
 
   it('creates a valid permissions object from a filled array', () => {
-    const nextFn = jest.fn(x => x);
+    const nextFn = jest.fn((x) => x);
     const action = {
       type: 'ContentManager/RBACManager/SET_PERMISSIONS',
       __meta__: {

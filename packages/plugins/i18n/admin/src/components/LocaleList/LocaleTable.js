@@ -40,7 +40,7 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
         </Tr>
       </Thead>
       <Tbody>
-        {locales.map(locale => (
+        {locales.map((locale) => (
           <Tr
             key={locale.id}
             {...onRowClick({

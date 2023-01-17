@@ -25,7 +25,7 @@ export default {
         defaultMessage: 'Media Library',
       },
       permissions: pluginPermissions.main,
-      Component: async () => {
+      async Component() {
         const component = await import(/* webpackChunkName: "upload" */ './pages/App');
 
         return component;
@@ -48,7 +48,7 @@ export default {
         defaultMessage: 'Media Library',
       },
       to: '/settings/media-library',
-      Component: async () => {
+      async Component() {
         const component = await import(
           /* webpackChunkName: "upload-settings" */ './pages/SettingsPage'
         );
@@ -60,7 +60,7 @@ export default {
   },
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
-      locales.map(locale => {
+      locales.map((locale) => {
         return import(
           /* webpackChunkName: "upload-translation-[request]" */ `./translations/${locale}.json`
         )

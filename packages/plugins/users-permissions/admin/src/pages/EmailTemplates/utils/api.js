@@ -6,7 +6,7 @@ const fetchData = async () => {
   return data;
 };
 
-const putEmailTemplate = body => {
+const putEmailTemplate = (body) => {
   return axiosInstance.put(getRequestURL('email-templates'), body);
 };
 

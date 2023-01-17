@@ -174,7 +174,7 @@ const InputUID = ({
     setRegenerateLabel(null);
   };
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     if (e.target.value && isCreation) {
       setIsCustomized(true);
     }

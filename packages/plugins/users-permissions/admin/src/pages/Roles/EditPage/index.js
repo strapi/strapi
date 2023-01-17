@@ -40,7 +40,7 @@ const EditPage = () => {
   const { role, onSubmitSucceeded, isLoading: isLoadingRole } = useFetchRole(id);
   const permissionsRef = useRef();
 
-  const handleEditRoleSubmit = async data => {
+  const handleEditRoleSubmit = async (data) => {
     // Set loading state
     lockApp();
     setIsSubmitting(true);

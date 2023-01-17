@@ -11,7 +11,7 @@ const { metadataToSchema } = require('./schema');
 /**
  * @type {import('.').default}
  */
-const createSchemaProvider = db => {
+const createSchemaProvider = (db) => {
   const schema = metadataToSchema(db.metadata);
 
   return {
@@ -92,7 +92,6 @@ const createSchemaProvider = db => {
       }
 
       debug('Schema unchanged');
-      return;
     },
   };
 };

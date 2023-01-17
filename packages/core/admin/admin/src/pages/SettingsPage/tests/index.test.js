@@ -1,6 +1,6 @@
 import React from 'react';
 import { Router, Route } from 'react-router-dom';
-import { StrapiAppProvider, AppInfosContext } from '@strapi/helper-plugin';
+import { StrapiAppProvider, AppInfosContext, TrackingProvider } from '@strapi/helper-plugin';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
@@ -16,36 +16,38 @@ jest.mock('../../../hooks', () => ({
   useThemeToggle: jest.fn(() => ({ currentTheme: 'light', themes: { light: lightTheme } })),
 }));
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => null,
-}));
-
 jest.mock('react-intl', () => ({
   FormattedMessage: ({ id }) => id,
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => id) }),
 }));
-jest.mock('../pages/ApplicationInfosPage', () => () => <h1>App infos</h1>);
+jest.mock('../pages/ApplicationInfosPage', () => () => {
+  return <h1>App infos</h1>;
+});
+
+const appInfos = { shouldUpdateStrapi: false };
 
 const makeApp = (history, settings) => (
   <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-    <Theme>
-      <AppInfosContext.Provider value={{ shouldUpdateStrapi: false }}>
-        <StrapiAppProvider
-          settings={settings}
-          plugins={{}}
-          getPlugin={jest.fn()}
-          runHookParallel={jest.fn()}
-          runHookWaterfall={jest.fn()}
-          runHookSeries={jest.fn()}
-          menu={[]}
-        >
-          <Router history={history}>
-            <Route path="/settings/:settingId" component={SettingsPage} />
-            <Route path="/settings" component={SettingsPage} />
-          </Router>
-        </StrapiAppProvider>
-      </AppInfosContext.Provider>
-    </Theme>
+    <TrackingProvider>
+      <Theme>
+        <AppInfosContext.Provider value={appInfos}>
+          <StrapiAppProvider
+            settings={settings}
+            plugins={{}}
+            getPlugin={jest.fn()}
+            runHookParallel={jest.fn()}
+            runHookWaterfall={jest.fn()}
+            runHookSeries={jest.fn()}
+            menu={[]}
+          >
+            <Router history={history}>
+              <Route path="/settings/:settingId" component={SettingsPage} />
+              <Route path="/settings" component={SettingsPage} />
+            </Router>
+          </StrapiAppProvider>
+        </AppInfosContext.Provider>
+      </Theme>
+    </TrackingProvider>
   </ThemeToggleProvider>
 );
 
@@ -68,19 +70,6 @@ describe('ADMIN | pages | SettingsPage', () => {
     const { container } = render(App);
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c12 {
-        padding-bottom: 56px;
-      }
-
-      .c0 {
-        display: grid;
-        grid-template-columns: auto 1fr;
-      }
-
-      .c13 {
-        overflow-x: hidden;
-      }
-
       .c2 {
         padding-top: 24px;
         padding-right: 16px;
@@ -101,16 +90,8 @@ describe('ADMIN | pages | SettingsPage', () => {
         padding-bottom: 16px;
       }
 
-      .c1 {
-        width: 14.5rem;
-        background: #f6f6f9;
-        position: -webkit-sticky;
-        position: sticky;
-        top: 0;
-        height: 100vh;
-        overflow-y: auto;
-        border-right: 1px solid #dcdce4;
-        z-index: 1;
+      .c12 {
+        padding-bottom: 56px;
       }
 
       .c3 {
@@ -146,21 +127,10 @@ describe('ADMIN | pages | SettingsPage', () => {
       }
 
       .c4 {
-        color: #32324d;
         font-weight: 600;
         font-size: 1.125rem;
         line-height: 1.22;
-      }
-
-      .c7 {
-        height: 1px;
-        border: none;
-        margin: 0;
-      }
-
-      .c8 {
-        width: 1.5rem;
-        background-color: #dcdce4;
+        color: #32324d;
       }
 
       .c11 > * {
@@ -170,6 +140,38 @@ describe('ADMIN | pages | SettingsPage', () => {
 
       .c11 > * + * {
         margin-top: 8px;
+      }
+
+      .c7 {
+        height: 1px;
+        border: none;
+        margin: 0;
+      }
+
+      .c0 {
+        display: grid;
+        grid-template-columns: auto 1fr;
+      }
+
+      .c13 {
+        overflow-x: hidden;
+      }
+
+      .c1 {
+        width: 14.5rem;
+        background: #f6f6f9;
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        border-right: 1px solid #dcdce4;
+        z-index: 1;
+      }
+
+      .c8 {
+        width: 1.5rem;
+        background-color: #dcdce4;
       }
 
       <div
@@ -202,7 +204,7 @@ describe('ADMIN | pages | SettingsPage', () => {
           <div
             class="c9"
           >
-            <ul
+            <ol
               class="c10 c11"
               spacing="2"
             />
@@ -314,19 +316,20 @@ describe('ADMIN | pages | SettingsPage', () => {
       },
     });
     const route = '/settings/application-infos';
+    const user = userEvent.setup();
     history.push(route);
 
     render(App);
 
     expect(screen.getByText(/App infos/)).toBeInTheDocument();
 
-    userEvent.click(screen.getByText('i18n.plugin.name'));
+    await user.click(screen.getByText('i18n.plugin.name'));
 
     await waitFor(() => {
       expect(screen.getByText(/i18n settings/)).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByText('email'));
+    await user.click(screen.getByText('email'));
 
     await waitFor(() => {
       expect(screen.getByText(/email settings/)).toBeInTheDocument();

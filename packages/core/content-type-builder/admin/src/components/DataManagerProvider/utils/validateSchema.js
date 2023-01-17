@@ -1,4 +1,4 @@
-const validateSchema = schema => {
+const validateSchema = (schema) => {
   const dynamicZoneAttributes = Object.values(schema.attributes).filter(
     ({ type }) => type === 'dynamiczone'
   );

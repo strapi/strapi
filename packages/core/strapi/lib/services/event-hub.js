@@ -1,6 +1,7 @@
 /**
  * The event hub is Strapi's event control center.
  */
+
 'use strict';
 
 const EventEmitter = require('events');

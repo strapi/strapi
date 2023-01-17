@@ -3,7 +3,7 @@ import { request } from '@strapi/helper-plugin';
 
 import reducer, { initialState } from './reducer';
 
-const useFetchPermissionsLayout = id => {
+const useFetchPermissionsLayout = (id) => {
   const [{ data, error, isLoading }, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {

@@ -14,7 +14,7 @@ const {
   transformPaginationResponse,
 } = require('./pagination');
 
-const setPublishedAt = data => {
+const setPublishedAt = (data) => {
   data[PUBLISHED_AT_ATTRIBUTE] = propOr(new Date(), PUBLISHED_AT_ATTRIBUTE, data);
 };
 

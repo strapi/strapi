@@ -1,4 +1,4 @@
-const getAttributeDisplayedType = type => {
+const getAttributeDisplayedType = (type) => {
   let displayedType;
 
   switch (type) {

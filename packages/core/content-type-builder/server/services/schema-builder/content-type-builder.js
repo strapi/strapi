@@ -79,14 +79,19 @@ module.exports = function createComponentBuilder() {
 
       const contentType = createSchemaHandler({
         modelName: infos.singularName,
-        dir: path.join(strapi.dirs.api, infos.singularName, 'content-types', infos.singularName),
+        dir: path.join(
+          strapi.dirs.app.api,
+          infos.singularName,
+          'content-types',
+          infos.singularName
+        ),
         filename: `schema.json`,
       });
 
       this.contentTypes.set(uid, contentType);
 
       // support self referencing content type relation
-      Object.keys(infos.attributes).forEach(key => {
+      Object.keys(infos.attributes).forEach((key) => {
         const { target } = infos.attributes[key];
         if (target === '__self__') {
           infos.attributes[key].target = uid;
@@ -108,10 +113,14 @@ module.exports = function createComponentBuilder() {
         .set('config', infos.config)
         .setAttributes(this.convertAttributes(infos.attributes));
 
-      Object.keys(infos.attributes).forEach(key => {
+      Object.keys(infos.attributes).forEach((key) => {
         const attribute = infos.attributes[key];
 
         if (isRelation(attribute)) {
+          if (['manyToMany', 'oneToOne'].includes(attribute.relation)) {
+            attribute.dominant = true;
+          }
+
           this.setRelation({
             key,
             uid,
@@ -143,7 +152,7 @@ module.exports = function createComponentBuilder() {
       const remainingKeys = _.intersection(Object.keys(oldAttributes), Object.keys(newAttributes));
 
       // remove old relations
-      deletedKeys.forEach(key => {
+      deletedKeys.forEach((key) => {
         const attribute = oldAttributes[key];
 
         const targetAttributeName = attribute.inversedBy || attribute.mappedBy;
@@ -154,7 +163,7 @@ module.exports = function createComponentBuilder() {
         }
       });
 
-      remainingKeys.forEach(key => {
+      remainingKeys.forEach((key) => {
         const oldAttribute = oldAttributes[key];
         const newAttribute = newAttributes[key];
 
@@ -198,10 +207,14 @@ module.exports = function createComponentBuilder() {
       });
 
       // add new relations
-      newKeys.forEach(key => {
+      newKeys.forEach((key) => {
         const attribute = newAttributes[key];
 
         if (isRelation(attribute)) {
+          if (['manyToMany', 'oneToOne'].includes(attribute.relation)) {
+            attribute.dominant = true;
+          }
+
           this.setRelation({
             key,
             uid,
@@ -226,11 +239,11 @@ module.exports = function createComponentBuilder() {
         throw new ApplicationError('contentType.notFound');
       }
 
-      this.components.forEach(compo => {
+      this.components.forEach((compo) => {
         compo.removeContentType(uid);
       });
 
-      this.contentTypes.forEach(ct => {
+      this.contentTypes.forEach((ct) => {
         ct.removeContentType(uid);
       });
 
@@ -254,6 +267,7 @@ const generateRelation = ({ key, attribute, uid, targetAttribute = {} }) => {
     target: uid,
     autoPopulate: targetAttribute.autoPopulate,
     private: targetAttribute.private || undefined,
+    pluginOptions: targetAttribute.pluginOptions || undefined,
   };
 
   switch (attribute.relation) {

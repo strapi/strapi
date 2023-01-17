@@ -8,7 +8,7 @@ module.exports = ({ strapi }) => ({
     const { operators } = strapi.plugin('graphql').service('builders').filters;
 
     const associations = mapValues(
-      map(operatorName => operators[operatorName]),
+      map((operatorName) => operators[operatorName]),
       GRAPHQL_SCALAR_OPERATORS
     );
 

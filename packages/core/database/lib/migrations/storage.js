@@ -6,7 +6,7 @@ const createStorage = (opts = {}) => {
   const hasMigrationTable = () => db.getSchemaConnection().hasTable(tableName);
 
   const createMigrationTable = () => {
-    return db.getSchemaConnection().createTable(tableName, table => {
+    return db.getSchemaConnection().createTable(tableName, (table) => {
       table.increments('id');
       table.string('name');
       table.datetime('time', { useTz: false });
@@ -25,10 +25,7 @@ const createStorage = (opts = {}) => {
     },
 
     async unlogMigration({ name }) {
-      await db
-        .getConnection(tableName)
-        .del()
-        .where({ name });
+      await db.getConnection(tableName).del().where({ name });
     },
 
     async executed() {
@@ -37,13 +34,9 @@ const createStorage = (opts = {}) => {
         return [];
       }
 
-      const logs = await db
-        .getConnection(tableName)
-        .select()
-        .from(tableName)
-        .orderBy('time');
+      const logs = await db.getConnection(tableName).select().from(tableName).orderBy('time');
 
-      return logs.map(log => log.name);
+      return logs.map((log) => log.name);
     },
   };
 };

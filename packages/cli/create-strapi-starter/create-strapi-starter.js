@@ -57,7 +57,9 @@ function generateApp(projectArgs, programArgs) {
 }
 
 async function initProject(projectArgs, program) {
-  const hasIncompatibleQuickstartOptions = incompatibleQuickstartOptions.some(opt => program[opt]);
+  const hasIncompatibleQuickstartOptions = incompatibleQuickstartOptions.some(
+    (opt) => program[opt]
+  );
 
   if (program.quickstart && hasIncompatibleQuickstartOptions) {
     console.error(
@@ -96,7 +98,7 @@ async function initProject(projectArgs, program) {
 try {
   program.parse(process.argv);
 } catch (err) {
-  if (err.exitCode && err.exitCode != 0) {
+  if (err.exitCode && err.exitCode !== 0) {
     program.outputHelp();
   }
 }

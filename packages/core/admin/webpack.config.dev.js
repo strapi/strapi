@@ -1,9 +1,11 @@
 'use strict';
 
-const path = require('path');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-const { DuplicateReporterPlugin } = require('duplicate-dependencies-webpack-plugin');
+/* eslint-disable import/no-extraneous-dependencies */
 
+const path = require('path');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const { DuplicateReporterPlugin } = require('duplicate-dependencies-webpack-plugin');
+const getPluginsPath = require('./utils/get-plugins-path');
 const webpackConfig = require('./webpack.config');
 
 module.exports = () => {
@@ -18,15 +20,29 @@ module.exports = () => {
   const options = {
     backend: 'http://localhost:1337',
     adminPath: '/admin/',
+
+    /**
+     * Ideally this would take more scenarios into account, such
+     * as the `telemetryDisabled` property in the package.json
+     * of the users project. For builds based on an app we are
+     * passing this information throgh, but here we do not have access
+     * to the app's package.json. By using at least an environment variable
+     * we can make sure developers can actually test this functionality in
+     * dev-mode.
+     */
+
+    telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true',
   };
+  const pluginsPath = getPluginsPath();
 
   const args = {
     entry,
     cacheDir: __dirname,
-    pluginsPath: [path.resolve(__dirname, '../../../packages')],
+    pluginsPath,
     dest,
     env,
     options,
+    tsConfigFilePath: path.resolve(__dirname, 'admin', 'src', 'tsconfig.json'),
   };
 
   const config = webpackConfig(args);
@@ -41,27 +57,6 @@ module.exports = () => {
 
   return {
     ...config,
-    snapshot: {
-      managedPaths: [
-        path.resolve(__dirname, '../content-type-builder'),
-        path.resolve(__dirname, '../upload'),
-        path.resolve(__dirname, '../helper-plugin'),
-      ],
-      buildDependencies: {
-        hash: true,
-        timestamp: true,
-      },
-      module: {
-        timestamp: true,
-      },
-      resolve: {
-        timestamp: true,
-      },
-      resolveBuildDependencies: {
-        hash: true,
-        timestamp: true,
-      },
-    },
 
     devServer: {
       port: 4000,

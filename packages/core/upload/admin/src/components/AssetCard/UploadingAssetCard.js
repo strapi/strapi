@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { useIntl } from 'react-intl';
+
 import {
   Card,
   CardBody,
@@ -13,7 +15,8 @@ import {
 import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
-import { useIntl } from 'react-intl';
+import { Flex } from '@strapi/design-system/Flex';
+
 import { getTrad } from '../../utils';
 import { AssetType } from '../../constants';
 import { useUpload } from '../../hooks/useUpload';
@@ -28,11 +31,20 @@ const Extension = styled.span`
   text-transform: uppercase;
 `;
 
-export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploadedFiles }) => {
-  const { upload, cancel, error, progress, status } = useUpload(asset);
+export const UploadingAssetCard = ({
+  asset,
+  onCancel,
+  onStatusChange,
+  addUploadedFiles,
+  folderId,
+}) => {
+  const { upload, cancel, error, progress, status } = useUpload();
   const { formatMessage } = useIntl();
 
-  let badgeContent;
+  let badgeContent = formatMessage({
+    id: getTrad('settings.section.doc.label'),
+    defaultMessage: 'Doc',
+  });
 
   if (asset.type === AssetType.Image) {
     badgeContent = formatMessage({
@@ -49,16 +61,11 @@ export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploade
       id: getTrad('settings.section.audio.label'),
       defaultMessage: 'Audio',
     });
-  } else {
-    badgeContent = formatMessage({
-      id: getTrad('settings.section.doc.label'),
-      defaultMessage: 'Doc',
-    });
   }
 
   useEffect(() => {
     const uploadFile = async () => {
-      const files = await upload(asset);
+      const files = await upload(asset, folderId);
 
       if (addUploadedFiles) {
         addUploadedFiles(files);
@@ -80,7 +87,7 @@ export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploade
 
   return (
     <Stack spacing={1}>
-      <Card borderColor={error ? 'danger600' : undefined}>
+      <Card borderColor={error ? 'danger600' : 'neutral150'}>
         <CardHeader>
           <UploadProgressWrapper>
             <UploadProgress error={error} onCancel={handleCancel} progress={progress} />
@@ -95,25 +102,37 @@ export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploade
               <Extension>{asset.ext}</Extension>
             </CardSubtitle>
           </CardContent>
-          <CardBadge>{badgeContent}</CardBadge>
+          <Flex paddingTop={1} grow={1}>
+            <CardBadge>{badgeContent}</CardBadge>
+          </Flex>
         </CardBody>
       </Card>
       {error ? (
         <Typography variant="pi" fontWeight="bold" textColor="danger600">
-          {formatMessage({
-            id: getTrad(`apiError.${error.response.data.error.message}`),
-            defaultMessage: error.response.data.error.message,
-          })}
+          {formatMessage(
+            error?.response?.data?.error?.message
+              ? {
+                  id: getTrad(`apiError.${error.response.data.error.message}`),
+                  defaultMessage: error.response.data.error.message,
+                  /* See issue: https://github.com/strapi/strapi/issues/13867
+             A proxy might return an error, before the request reaches Strapi
+             and therefore we need to handle errors gracefully.
+          */
+                }
+              : {
+                  id: getTrad('upload.generic-error'),
+                  defaultMessage: 'An error occured while uploading the file.',
+                }
+          )}
         </Typography>
-      ) : (
-        undefined
-      )}
+      ) : undefined}
     </Stack>
   );
 };
 
 UploadingAssetCard.defaultProps = {
   addUploadedFiles: undefined,
+  folderId: null,
 };
 
 UploadingAssetCard.propTypes = {
@@ -124,6 +143,7 @@ UploadingAssetCard.propTypes = {
     rawFile: PropTypes.instanceOf(File),
     type: PropTypes.oneOf(Object.values(AssetType)),
   }).isRequired,
+  folderId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   onCancel: PropTypes.func.isRequired,
   onStatusChange: PropTypes.func.isRequired,
 };

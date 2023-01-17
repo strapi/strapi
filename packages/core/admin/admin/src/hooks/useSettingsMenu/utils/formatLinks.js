@@ -1,6 +1,6 @@
-const formatLinks = menu => {
-  return menu.map(menuSection => {
-    const formattedLinks = menuSection.links.map(link => ({
+const formatLinks = (menu) => {
+  return menu.map((menuSection) => {
+    const formattedLinks = menuSection.links.map((link) => ({
       ...link,
       isDisplayed: false,
     }));

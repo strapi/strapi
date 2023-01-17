@@ -1,9 +1,9 @@
 import get from 'lodash/get';
 
-const filterPermissionWithLocale = locale => permission =>
+const filterPermissionWithLocale = (locale) => (permission) =>
   get(permission, 'properties.locales', []).indexOf(locale) !== -1;
 
-const localePermissionMiddleware = () => () => next => action => {
+const localePermissionMiddleware = () => () => (next) => (action) => {
   if (action.type !== 'ContentManager/RBACManager/SET_PERMISSIONS') {
     return next(action);
   }

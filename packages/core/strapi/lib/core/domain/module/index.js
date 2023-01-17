@@ -4,7 +4,7 @@ const _ = require('lodash');
 const { removeNamespace } = require('../../utils');
 const { validateModule } = require('./validation');
 
-const uidToPath = uid => uid.replace('::', '.');
+const uidToPath = (uid) => uid.replace('::', '.');
 
 // Removes the namespace from a map with keys prefixed with a namespace
 const removeNamespacedKeys = (map, namespace) => {

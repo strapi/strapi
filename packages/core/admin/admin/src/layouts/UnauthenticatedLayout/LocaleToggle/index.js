@@ -15,7 +15,7 @@ const LocaleToggle = () => {
 
   return (
     <SimpleMenu label={localeNames[locale]}>
-      {Object.keys(localeNames).map(lang => (
+      {Object.keys(localeNames).map((lang) => (
         <MenuItem onClick={() => changeLocale(lang)} key={lang}>
           {localeNames[lang]}
         </MenuItem>

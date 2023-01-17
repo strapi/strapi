@@ -8,7 +8,7 @@ const koaStatic = require('koa-static');
  * @param {{ strapi: import('@strapi/strapi').Strapi }}
  */
 module.exports = ({ strapi }) => {
-  strapi.server.app.on('error', err => {
+  strapi.server.app.on('error', (err) => {
     if (err.code === 'EPIPE') {
       // when serving audio or video the browsers sometimes close the connection to go to range requests instead.
       // This causes koa to emit a write EPIPE error. We can ignore it.
@@ -25,7 +25,7 @@ module.exports = ({ strapi }) => {
     {
       method: 'GET',
       path: '/uploads/(.*)',
-      handler: [range, koaStatic(strapi.dirs.public, { defer: true, ...localServerConfig })],
+      handler: [range, koaStatic(strapi.dirs.static.public, { defer: true, ...localServerConfig })],
       config: { auth: false },
     },
   ]);

@@ -9,7 +9,7 @@ const { formatLocale } = require('../domain/locale');
 const { setCreatorFields, sanitize } = utils;
 const { ApplicationError } = utils.errors;
 
-const sanitizeLocale = locale => {
+const sanitizeLocale = (locale) => {
   const model = strapi.getModel('plugin::i18n.locale');
 
   return sanitize.contentAPI.output(locale, model);
@@ -28,7 +28,7 @@ module.exports = {
   async createLocale(ctx) {
     const { user } = ctx.state;
     const { body } = ctx.request;
-    let { isDefault, ...localeToCreate } = body;
+    const { isDefault, ...localeToCreate } = body;
 
     await validateCreateLocaleInput(body);
 
@@ -39,10 +39,9 @@ module.exports = {
       throw new ApplicationError('This locale already exists');
     }
 
-    localeToCreate = formatLocale(localeToCreate);
-    localeToCreate = setCreatorFields({ user })(localeToCreate);
+    const localeToPersist = setCreatorFields({ user })(formatLocale(localeToCreate));
 
-    const locale = await localesService.create(localeToCreate);
+    const locale = await localesService.create(localeToPersist);
 
     if (isDefault) {
       await localesService.setDefaultLocale(locale);
@@ -57,7 +56,7 @@ module.exports = {
     const { user } = ctx.state;
     const { id } = ctx.params;
     const { body } = ctx.request;
-    let { isDefault, ...updates } = body;
+    const { isDefault, ...updates } = body;
 
     await validateUpdateLocaleInput(body);
 

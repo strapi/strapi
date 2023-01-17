@@ -15,7 +15,7 @@ const DEFAULT_PROPS_FIXTURE = {
     },
   },
   value: {
-    count: 1,
+    name: 1,
   },
 };
 

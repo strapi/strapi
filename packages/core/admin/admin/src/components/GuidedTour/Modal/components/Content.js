@@ -8,6 +8,9 @@ import { useIntl } from 'react-intl';
 
 const LiStyled = styled.li`
   list-style: disc;
+  &::marker {
+    color: ${({ theme }) => theme.colors.neutral800};
+  }
 `;
 
 const Content = ({ id, defaultMessage }) => {
@@ -18,24 +21,26 @@ const Content = ({ id, defaultMessage }) => {
       {formatMessage(
         { id, defaultMessage },
         {
-          documentationLink: children => (
-            <a
+          documentationLink: (children) => (
+            <Typography
+              as="a"
+              textColor="primary600"
               target="_blank"
               rel="noopener noreferrer"
               href="https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest-api.html#api-parameters"
             >
               {children}
-            </a>
+            </Typography>
           ),
-          b: children => <Typography fontWeight="semiBold">{children}</Typography>,
-          p: children => <Typography>{children}</Typography>,
-          light: children => <Typography textColor="neutral600">{children}</Typography>,
-          ul: children => (
+          b: (children) => <Typography fontWeight="semiBold">{children}</Typography>,
+          p: (children) => <Typography>{children}</Typography>,
+          light: (children) => <Typography textColor="neutral600">{children}</Typography>,
+          ul: (children) => (
             <Box paddingLeft={6}>
               <ul>{children}</ul>
             </Box>
           ),
-          li: children => <LiStyled>{children}</LiStyled>,
+          li: (children) => <LiStyled>{children}</LiStyled>,
         }
       )}
     </Stack>

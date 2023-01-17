@@ -1,3 +1,3 @@
-const getTrad = id => `content-manager.${id}`;
+const getTrad = (id) => `content-manager.${id}`;
 
 export default getTrad;

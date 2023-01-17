@@ -55,7 +55,7 @@ describe('Permission Service', () => {
 
   describe('Sanitize Permission', () => {
     test('Removes unwanted properties', () => {
-      const isValidCondition = jest.fn(condition => ['cond'].includes(condition));
+      const isValidCondition = jest.fn((condition) => ['cond'].includes(condition));
 
       global.strapi = merge(global.strapi, {
         admin: { services: { condition: { isValidCondition } } },
@@ -122,7 +122,7 @@ describe('Permission Service', () => {
         permsInDb[2],
         { ...permsInDb[4], properties: { fields: ['name', 'galaxy'] } },
         { ...permsInDb[5], properties: { fields: ['name'] } },
-      ].map(p => ({ ...p, conditions: [] }));
+      ].map((p) => ({ ...p, conditions: [] }));
 
       const findMany = jest.fn(() => Promise.resolve(permsInDb));
 
@@ -142,8 +142,8 @@ describe('Permission Service', () => {
             'content-type': { cleanPermissionFields },
             permission: {
               actionProvider: {
-                has: jest.fn(id => registeredPerms.has(id)),
-                get: jest.fn(id => registeredPerms.get(id)),
+                has: jest.fn((id) => registeredPerms.has(id)),
+                get: jest.fn((id) => registeredPerms.get(id)),
               },
             },
           },

@@ -22,7 +22,7 @@ export default {
         defaultMessage: 'Documentation',
       },
       permissions: pluginPermissions.main,
-      Component: async () => {
+      async Component() {
         const component = await import(
           /* webpackChunkName: "documentation-page" */ './pages/PluginPage'
         );
@@ -44,7 +44,7 @@ export default {
       },
       id: 'documentation',
       to: `/settings/${pluginId}`,
-      Component: async () => {
+      async Component() {
         const component = await import(
           /* webpackChunkName: "documentation-settings" */ './pages/SettingsPage'
         );
@@ -56,7 +56,7 @@ export default {
   },
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
-      locales.map(locale => {
+      locales.map((locale) => {
         return import(
           /* webpackChunkName: "documentation-translation-[request]" */ `./translations/${locale}.json`
         )

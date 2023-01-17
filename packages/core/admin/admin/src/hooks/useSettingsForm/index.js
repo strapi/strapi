@@ -61,7 +61,7 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
     });
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const errors = await checkFormValidity(modifiedData, schema);
@@ -82,7 +82,7 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
         const cleanedData = omit(modifiedData, ['confirmPassword', 'registrationToken']);
 
         if (cleanedData.roles) {
-          cleanedData.roles = cleanedData.roles.map(role => role.id);
+          cleanedData.roles = cleanedData.roles.map((role) => role.id);
         }
 
         const { data } = await request(endPoint, {

@@ -1,6 +1,6 @@
 'use strict';
 
-function buildEntityMetaDefinition(/*contentType*/) {}
+function buildEntityMetaDefinition(/* contentType */) {}
 
 module.exports = () => ({
   buildEntityMetaDefinition,

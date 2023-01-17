@@ -8,7 +8,7 @@ const { getService } = require('../utils');
  * Adds the default locale to an object if it isn't defined yet
  * @param {Object} data a data object before being persisted into db
  */
-const assignDefaultLocale = async data => {
+const assignDefaultLocale = async (data) => {
   const { getDefaultLocale } = getService('locales');
 
   if (isNil(data.locale)) {
@@ -26,8 +26,8 @@ const syncLocalizations = async (entry, { model }) => {
   if (Array.isArray(entry.localizations)) {
     const newLocalizations = [entry.id, ...entry.localizations.map(prop('id'))];
 
-    const updateLocalization = id => {
-      const localizations = newLocalizations.filter(localizationId => localizationId !== id);
+    const updateLocalization = (id) => {
+      const localizations = newLocalizations.filter((localizationId) => localizationId !== id);
 
       return strapi.query(model.uid).update({ where: { id }, data: { localizations } });
     };
@@ -52,7 +52,7 @@ const syncNonLocalizedAttributes = async (entry, { model }) => {
       return;
     }
 
-    const updateLocalization = id => {
+    const updateLocalization = (id) => {
       return strapi.entityService.update(model.uid, id, { data: nonLocalizedAttributes });
     };
 

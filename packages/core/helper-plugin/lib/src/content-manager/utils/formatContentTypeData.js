@@ -12,20 +12,20 @@ const formatContentTypeData = (data, ct, composSchema) => {
       const compoUid = getOtherInfos(schema, [current, 'component']);
       const isRepeatable = getOtherInfos(schema, [current, 'repeatable']);
 
+      if (type === 'json' && value !== undefined) {
+        acc[current] = JSON.stringify(value, null, 2);
+
+        return acc;
+      }
+
       if (!value) {
         acc[current] = value;
 
         return acc;
       }
 
-      if (type === 'json') {
-        acc[current] = JSON.stringify(value, null, 2);
-
-        return acc;
-      }
-
       if (type === 'dynamiczone') {
-        acc[current] = value.map(componentValue => {
+        acc[current] = value.map((componentValue) => {
           const formattedData = recursiveFormatData(
             componentValue,
             composSchema[componentValue.__component]

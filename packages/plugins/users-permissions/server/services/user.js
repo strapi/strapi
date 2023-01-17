@@ -87,13 +87,6 @@ module.exports = ({ strapi }) => ({
   async remove(params) {
     return strapi.query('plugin::users-permissions.user').delete({ where: params });
   },
-  isHashed(password) {
-    if (typeof password !== 'string' || !password) {
-      return false;
-    }
-
-    return password.split('$').length === 4;
-  },
 
   validatePassword(password, hash) {
     return bcrypt.compare(password, hash);
@@ -106,7 +99,7 @@ module.exports = ({ strapi }) => ({
 
     const settings = await pluginStore
       .get({ key: 'email' })
-      .then(storeEmail => storeEmail['email_confirmation'].options);
+      .then((storeEmail) => storeEmail.email_confirmation.options);
 
     // Sanitize the template's user information
     const sanitizedUserInfo = await sanitize.sanitizers.defaultSanitizeOutput(userSchema, user);
@@ -116,17 +109,25 @@ module.exports = ({ strapi }) => ({
     await this.edit(user.id, { confirmationToken });
 
     const apiPrefix = strapi.config.get('api.rest.prefix');
-    settings.message = await userPermissionService.template(settings.message, {
-      URL: urlJoin(getAbsoluteServerUrl(strapi.config), apiPrefix, '/auth/email-confirmation'),
-      SERVER_URL: getAbsoluteServerUrl(strapi.config),
-      ADMIN_URL: getAbsoluteAdminUrl(strapi.config),
-      USER: sanitizedUserInfo,
-      CODE: confirmationToken,
-    });
 
-    settings.object = await userPermissionService.template(settings.object, {
-      USER: sanitizedUserInfo,
-    });
+    try {
+      settings.message = await userPermissionService.template(settings.message, {
+        URL: urlJoin(getAbsoluteServerUrl(strapi.config), apiPrefix, '/auth/email-confirmation'),
+        SERVER_URL: getAbsoluteServerUrl(strapi.config),
+        ADMIN_URL: getAbsoluteAdminUrl(strapi.config),
+        USER: sanitizedUserInfo,
+        CODE: confirmationToken,
+      });
+
+      settings.object = await userPermissionService.template(settings.object, {
+        USER: sanitizedUserInfo,
+      });
+    } catch {
+      strapi.log.error(
+        '[plugin::users-permissions.sendConfirmationEmail]: Failed to generate a template for "user confirmation email". Please make sure your email template is valid and does not contain invalid characters or patterns'
+      );
+      return;
+    }
 
     // Send an email to the user.
     await strapi

@@ -22,7 +22,7 @@ describe('Passport', () => {
       jest.mock('@strapi/strapi/lib/utils/ee', () => ({
         features: {
           // Disable the SSO feature
-          isEnabled: feature => feature !== 'sso',
+          isEnabled: (feature) => feature !== 'sso',
         },
       }));
     });

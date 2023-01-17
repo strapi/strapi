@@ -1,7 +1,7 @@
 import transform from 'lodash/transform';
 import { prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
 
-const prefixAllUrls = data =>
+const prefixAllUrls = (data) =>
   transform(
     data,
     (result, value, key) => {

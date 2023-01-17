@@ -1,6 +1,6 @@
 import { chain } from 'lodash';
 
-const replaceName = name => name.split(' ').join('-');
+const replaceName = (name) => name.split(' ').join('-');
 
 const formatLayout = (layout, groupByKey) => {
   return chain(layout)

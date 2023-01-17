@@ -16,7 +16,7 @@ const LogoInput = ({ customLogo, defaultLogo, onChangeLogo, onResetMenuLogo }) =
   const { Component, next, prev, modalTitle } = stepper[currentStep] || {};
   const { formatMessage } = useIntl();
 
-  const goTo = to => {
+  const goTo = (to) => {
     dispatch({
       type: 'GO_TO',
       to,

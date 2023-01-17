@@ -9,7 +9,7 @@ const defaults = {
 /**
  * @type {import('./').MiddlewareFactory}
  */
-module.exports = config => {
+module.exports = (config) => {
   const { poweredBy } = defaultsDeep(defaults, config);
 
   return async (ctx, next) => {

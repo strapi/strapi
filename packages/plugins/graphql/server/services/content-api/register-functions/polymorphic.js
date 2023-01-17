@@ -31,9 +31,9 @@ const registerPolymorphicContentType = (contentType, { registry, strapi }) => {
     // Transform target UIDs into types names
     const members = target
       // Get content types definitions
-      .map(uid => strapi.getModel(uid))
+      .map((uid) => strapi.getModel(uid))
       // Resolve types names
-      .map(contentType => naming.getTypeName(contentType));
+      .map((contentType) => naming.getTypeName(contentType));
 
     // Register the new polymorphic union type
     registry.register(

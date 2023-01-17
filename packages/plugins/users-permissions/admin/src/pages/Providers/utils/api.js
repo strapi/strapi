@@ -1,7 +1,7 @@
 import { getRequestURL, axiosInstance } from '../../../utils';
 
 // eslint-disable-next-line import/prefer-default-export
-export const fetchData = async toggleNotification => {
+export const fetchData = async (toggleNotification) => {
   try {
     const { data } = await axiosInstance.get(getRequestURL('providers'));
 
@@ -16,6 +16,6 @@ export const fetchData = async toggleNotification => {
   }
 };
 
-export const putProvider = body => {
+export const putProvider = (body) => {
   return axiosInstance.put(getRequestURL('providers'), body);
 };

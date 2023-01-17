@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'qs';
 
-const useQueryParams = initialParams => {
+const useQueryParams = (initialParams) => {
   const { search } = useLocation();
   const { push } = useHistory();
 
@@ -21,7 +21,7 @@ const useQueryParams = initialParams => {
       let nextQuery = { ...query };
 
       if (method === 'remove') {
-        Object.keys(nextParams).forEach(key => {
+        Object.keys(nextParams).forEach((key) => {
           delete nextQuery[key];
         });
       } else {

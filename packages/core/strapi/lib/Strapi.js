@@ -1,5 +1,6 @@
 'use strict';
 
+const path = require('path');
 const _ = require('lodash');
 const { isFunction } = require('lodash/fp');
 const { createLogger } = require('@strapi/logger');
@@ -20,9 +21,13 @@ const createEntityService = require('./services/entity-service');
 const createCronService = require('./services/cron');
 const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
+const requestContext = require('./services/request-context');
 const createAuth = require('./services/auth');
+const createCustomFields = require('./services/custom-fields');
+const createContentAPI = require('./services/content-api');
 const createUpdateNotifier = require('./utils/update-notifier');
 const createStartupLogger = require('./utils/startup-logger');
+const { LIFECYCLES } = require('./utils/lifecycles');
 const ee = require('./utils/ee');
 const contentTypesRegistry = require('./core/registries/content-types');
 const servicesRegistry = require('./core/registries/services');
@@ -32,28 +37,52 @@ const hooksRegistry = require('./core/registries/hooks');
 const controllersRegistry = require('./core/registries/controllers');
 const modulesRegistry = require('./core/registries/modules');
 const pluginsRegistry = require('./core/registries/plugins');
+const customFieldsRegistry = require('./core/registries/custom-fields');
 const createConfigProvider = require('./core/registries/config');
 const apisRegistry = require('./core/registries/apis');
 const bootstrap = require('./core/bootstrap');
 const loaders = require('./core/loaders');
 const { destroyOnSignal } = require('./utils/signals');
 const sanitizersRegistry = require('./core/registries/sanitizers');
+const convertCustomFieldType = require('./utils/convert-custom-field-type');
 
 // TODO: move somewhere else
 const draftAndPublishSync = require('./migrations/draft-publish');
 
-const LIFECYCLES = {
-  REGISTER: 'register',
-  BOOTSTRAP: 'bootstrap',
-  DESTROY: 'destroy',
+/**
+ * Resolve the working directories based on the instance options.
+ *
+ * Behavior:
+ * - `appDir` is the directory where Strapi will write every file (schemas, generated APIs, controllers or services)
+ * - `distDir` is the directory where Strapi will read configurations, schemas and any compiled code
+ *
+ * Default values:
+ * - If `appDir` is `undefined`, it'll be set to `process.cwd()`
+ * - If `distDir` is `undefined`, it'll be set to `appDir`
+ */
+const resolveWorkingDirectories = (opts) => {
+  const cwd = process.cwd();
+
+  const appDir = opts.appDir ? path.resolve(cwd, opts.appDir) : cwd;
+  const distDir = opts.distDir ? path.resolve(cwd, opts.distDir) : appDir;
+
+  return { app: appDir, dist: distDir };
 };
 
+/** @implements {import('@strapi/strapi').Strapi} */
 class Strapi {
   constructor(opts = {}) {
     destroyOnSignal(this);
-    const rootDir = opts.dir || process.cwd();
-    const appConfig = loadConfiguration(rootDir, opts);
+
+    const rootDirs = resolveWorkingDirectories(opts);
+
+    // Load the app configuration from the dist directory
+    const appConfig = loadConfiguration({ appDir: rootDirs.app, distDir: rootDirs.dist }, opts);
+
+    // Instantiate the Strapi container
     this.container = createContainer(this);
+
+    // Register every Strapi registry in the container
     this.container.register('config', createConfigProvider(appConfig));
     this.container.register('content-types', contentTypesRegistry(this));
     this.container.register('services', servicesRegistry(this));
@@ -63,22 +92,32 @@ class Strapi {
     this.container.register('controllers', controllersRegistry(this));
     this.container.register('modules', modulesRegistry(this));
     this.container.register('plugins', pluginsRegistry(this));
+    this.container.register('custom-fields', customFieldsRegistry(this));
     this.container.register('apis', apisRegistry(this));
     this.container.register('auth', createAuth(this));
+    this.container.register('content-api', createContentAPI(this));
     this.container.register('sanitizers', sanitizersRegistry(this));
 
-    this.dirs = utils.getDirs(rootDir, { strapi: this });
+    // Create a mapping of every useful directory (for the app, dist and static directories)
+    this.dirs = utils.getDirs(rootDirs, { strapi: this });
 
+    // Strapi state management variables
     this.isLoaded = false;
     this.reload = this.reload();
+
+    // Instantiate the Koa app & the HTTP server
     this.server = createServer(this);
 
+    // Strapi utils instanciation
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
     this.startupLogger = createStartupLogger(this);
     this.log = createLogger(this.config.get('logger', {}));
     this.cron = createCronService();
     this.telemetry = createTelemetry(this);
+    this.requestContext = requestContext;
+
+    this.customFields = createCustomFields(this);
 
     createUpdateNotifier(this).notify();
   }
@@ -88,7 +127,7 @@ class Strapi {
   }
 
   get EE() {
-    return ee({ dir: this.dirs.root, logger: this.log });
+    return ee({ dir: this.dirs.app.root, logger: this.log });
   }
 
   get services() {
@@ -159,6 +198,10 @@ class Strapi {
     return this.container.get('auth');
   }
 
+  get contentAPI() {
+    return this.container.get('content-api');
+  }
+
   get sanitizers() {
     return this.container.get('sanitizers');
   }
@@ -199,11 +242,14 @@ class Strapi {
   sendStartupTelemetry() {
     // Emit started event.
     // do not await to avoid slower startup
+    // This event is anonymous
     this.telemetry.send('didStartServer', {
-      database: strapi.config.get('database.connection.client'),
-      plugins: Object.keys(strapi.plugins),
-      // TODO: to add back
-      // providers: this.config.installedProviders,
+      groupProperties: {
+        database: strapi.config.get('database.connection.client'),
+        plugins: Object.keys(strapi.plugins),
+        // TODO: to add back
+        // providers: this.config.installedProviders,
+      },
     });
   }
 
@@ -236,7 +282,7 @@ class Strapi {
    */
   async listen() {
     return new Promise((resolve, reject) => {
-      const onListen = async error => {
+      const onListen = async (error) => {
         if (error) {
           return reject(error);
         }
@@ -253,11 +299,11 @@ class Strapi {
       const listenSocket = this.config.get('server.socket');
 
       if (listenSocket) {
-        return this.server.listen(listenSocket, onListen);
+        this.server.listen(listenSocket, onListen);
+      } else {
+        const { host, port } = this.config.get('server');
+        this.server.listen(port, host, onListen);
       }
-
-      const { host, port } = this.config.get('server');
-      return this.server.listen(port, host, onListen);
     });
   }
 
@@ -348,6 +394,8 @@ class Strapi {
     this.telemetry.register();
 
     await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
+    // NOTE: Swap type customField for underlying data type
+    convertCustomFieldType(this);
 
     return this;
   }
@@ -376,8 +424,10 @@ class Strapi {
       entityValidator: this.entityValidator,
     });
 
-    const cronTasks = this.config.get('server.cron.tasks', {});
-    this.cron.add(cronTasks);
+    if (strapi.config.get('server.cron.enabled', true)) {
+      const cronTasks = this.config.get('server.cron.tasks', {});
+      this.cron.add(cronTasks);
+    }
 
     this.telemetry.bootstrap();
 
@@ -414,6 +464,8 @@ class Strapi {
     await this.server.initMiddlewares();
     await this.server.initRouting();
 
+    await this.contentAPI.permissions.registerActions();
+
     await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
 
     this.cron.start();
@@ -432,7 +484,7 @@ class Strapi {
 
   async startWebhooks() {
     const webhooks = await this.webhookStore.findWebhooks();
-    webhooks.forEach(webhook => this.webhookRunner.add(webhook));
+    webhooks.forEach((webhook) => this.webhookRunner.add(webhook));
   }
 
   reload() {
@@ -440,7 +492,7 @@ class Strapi {
       shouldReload: 0,
     };
 
-    const reload = function() {
+    const reload = function () {
       if (state.shouldReload > 0) {
         // Reset the reloading state
         state.shouldReload -= 1;
@@ -504,7 +556,7 @@ class Strapi {
   }
 }
 
-module.exports = options => {
+module.exports = (options) => {
   const strapi = new Strapi(options);
   global.strapi = strapi;
   return strapi;

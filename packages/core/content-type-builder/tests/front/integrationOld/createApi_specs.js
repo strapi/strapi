@@ -17,7 +17,7 @@ describe('Test CTB', () => {
     beforeEach(() => {
       cy.server();
       cy.route(`${backendUrl}/content-type-builder/autoReload`).as('initContentTypeBuilder');
-      cy.login().then(data => {
+      cy.login().then((data) => {
         jwt = data.jwt;
         userId = data.user._id || data.user.id;
       });
@@ -55,40 +55,32 @@ describe('Test CTB', () => {
         .should('have.value', 'notcamelcase');
     });
 
-    it('Should create a TAG API', function() {
+    it('Should create a TAG API', function () {
       cy.server();
       cy.route('GET', `${backendUrl}/content-type-builder/models`).as('models');
       cy.route('POST', `${backendUrl}/content-type-builder/models`).as('createModel');
       cy.route('DELETE', `${backendUrl}/content-type-builder/models/tag`).as('deleteTag');
 
-      cy.get('a[href="/admin/plugins/content-type-builder"')
-        .click()
-        .wait('@models');
+      cy.get('a[href="/admin/plugins/content-type-builder"').click().wait('@models');
 
       // Open modal
-      cy.get('#openAddCT')
-        .click()
-        .wait(animDelay);
+      cy.get('#openAddCT').click().wait(animDelay);
 
       // Check the modal is opened this will tell is if we have a build issue
       cy.checkModalOpening();
       cy.get('.modal').invoke('show');
 
       // Fill the form
-      Object.keys(TAG_API).forEach(key => {
+      Object.keys(TAG_API).forEach((key) => {
         cy.log(key);
         cy.get(`#${key}`).type(TAG_API[key]);
       });
 
       // Submit the form and navigate to product page
-      cy.submitForm()
-        .url()
-        .should('equal', `${pluginUrl}/models/tag`);
+      cy.submitForm().url().should('equal', `${pluginUrl}/models/tag`);
 
       // Open the attributes's modal
-      cy.get('#openAddAttr')
-        .click()
-        .wait(animDelay);
+      cy.get('#openAddAttr').click().wait(animDelay);
 
       // Check that we don't have a build error from reacstrap
       cy.checkModalOpening().should('be.visible');
@@ -108,9 +100,7 @@ describe('Test CTB', () => {
         .wait('@createModel')
         .wait(frontLoadingDelay);
 
-      cy.get('#attributesList li')
-        .first()
-        .should('contain', 'name');
+      cy.get('#attributesList li').first().should('contain', 'name');
 
       // Delete tag API
       cy.get('a[href="/admin/plugins/content-type-builder"]')
@@ -151,14 +141,9 @@ describe('Test CTB', () => {
         .get('#continue')
         .click();
 
-      cy.get('#attributesList li')
-        .first()
-        .contains('updatedName'); // Yield el in .nav containing 'About'
+      cy.get('#attributesList li').first().contains('updatedName'); // Yield el in .nav containing 'About'
 
-      cy.get('button#saveData')
-        .click()
-        .wait('@updateProductModel')
-        .wait(frontLoadingDelay);
+      cy.get('button#saveData').click().wait('@updateProductModel').wait(frontLoadingDelay);
 
       // Check that we can still go to the create page
       cy.get('a[href="/admin/plugins/content-manager/product?source=content-manager"')
@@ -169,7 +154,7 @@ describe('Test CTB', () => {
       cy.window()
         .its('__store__')
         .its('store')
-        .then(pluginStore => {
+        .then((pluginStore) => {
           const displayedFields = pluginStore
             .getState()
             .getIn([
@@ -241,8 +226,6 @@ describe('Test CTB', () => {
   });
 
   after(() => {
-    cy.deleteApi('tag', jwt)
-      .deleteApi('produit', jwt)
-      .deleteUser(userId, jwt);
+    cy.deleteApi('tag', jwt).deleteApi('produit', jwt).deleteUser(userId, jwt);
   });
 });

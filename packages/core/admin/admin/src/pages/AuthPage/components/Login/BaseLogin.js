@@ -113,9 +113,9 @@ const Login = ({ onSubmit, schema, children }) => {
                   type={passwordShown ? 'text' : 'password'}
                   endAction={
                     <FieldActionWrapper
-                      onClick={e => {
+                      onClick={(e) => {
                         e.stopPropagation();
-                        setPasswordShown(prev => !prev);
+                        setPasswordShown((prev) => !prev);
                       }}
                       label={formatMessage(
                         passwordShown
@@ -135,7 +135,7 @@ const Login = ({ onSubmit, schema, children }) => {
                   required
                 />
                 <Checkbox
-                  onValueChange={checked => {
+                  onValueChange={(checked) => {
                     handleChange({ target: { value: checked, name: 'rememberMe' } });
                   }}
                   value={values.rememberMe}
@@ -172,7 +172,7 @@ const Login = ({ onSubmit, schema, children }) => {
 
 Login.defaultProps = {
   children: null,
-  onSubmit: () => {},
+  onSubmit() {},
 };
 
 Login.propTypes = {

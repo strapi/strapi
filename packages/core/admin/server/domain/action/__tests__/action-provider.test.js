@@ -2,7 +2,7 @@
 
 const { omit } = require('lodash/fp');
 const createActionProvider = require('../provider');
-const domain = require('../');
+const domain = require('..');
 
 const providerMethods = [
   'register',
@@ -33,7 +33,7 @@ describe('Action Provider', () => {
 
     expect(actionProvider).toHaveProperty('hooks', expect.any(Object));
 
-    providerMethods.forEach(methodName =>
+    providerMethods.forEach((methodName) =>
       expect(actionProvider).toHaveProperty(methodName, expect.any(Function))
     );
   });
@@ -314,7 +314,7 @@ describe('Action Provider', () => {
           jest.fn(() => false),
         ];
 
-        hooks.forEach(hook => actionProvider.hooks.appliesPropertyToSubject.register(hook));
+        hooks.forEach((hook) => actionProvider.hooks.appliesPropertyToSubject.register(hook));
 
         await actionProvider.register(action);
 
@@ -323,7 +323,7 @@ describe('Action Provider', () => {
 
         expect(applies).toBe(false);
 
-        hooks.forEach(hook =>
+        hooks.forEach((hook) =>
           expect(hook).toHaveBeenCalledWith({
             property: 'fields',
             action: actionFromProvider,
@@ -354,7 +354,7 @@ describe('Action Provider', () => {
           jest.fn(() => new Date()),
         ];
 
-        hooks.forEach(hook => actionProvider.hooks.appliesPropertyToSubject.register(hook));
+        hooks.forEach((hook) => actionProvider.hooks.appliesPropertyToSubject.register(hook));
 
         await actionProvider.register(action);
 
@@ -363,7 +363,7 @@ describe('Action Provider', () => {
 
         expect(applies).toBe(true);
 
-        hooks.forEach(hook =>
+        hooks.forEach((hook) =>
           expect(hook).toHaveBeenCalledWith({
             property: 'fields',
             action: actionFromProvider,

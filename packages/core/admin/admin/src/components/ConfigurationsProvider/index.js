@@ -1,4 +1,4 @@
-import React, { useReducer, useRef } from 'react';
+import React, { useMemo, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { ConfigurationsContext } from '../../contexts';
 import reducer, { initialState } from './reducer';
@@ -23,18 +23,27 @@ const ConfigurationsProvider = ({
 
   const updateProjectSettingsRef = useRef(updateProjectSettings);
 
+  const configurationValue = useMemo(() => {
+    return {
+      logos: {
+        menu: { custom: menuLogo, default: defaultMenuLogo },
+        auth: { custom: null, default: authLogo },
+      },
+      updateProjectSettings: updateProjectSettingsRef.current,
+      showReleaseNotification,
+      showTutorials,
+    };
+  }, [
+    authLogo,
+    menuLogo,
+    showReleaseNotification,
+    showTutorials,
+    updateProjectSettingsRef,
+    defaultMenuLogo,
+  ]);
+
   return (
-    <ConfigurationsContext.Provider
-      value={{
-        logos: {
-          menu: { custom: menuLogo, default: defaultMenuLogo },
-          auth: { custom: null, default: authLogo },
-        },
-        updateProjectSettings: updateProjectSettingsRef.current,
-        showReleaseNotification,
-        showTutorials,
-      }}
-    >
+    <ConfigurationsContext.Provider value={configurationValue}>
       {children}
     </ConfigurationsContext.Provider>
   );

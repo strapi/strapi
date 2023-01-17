@@ -6,7 +6,7 @@ import { getTrad } from '../../utils';
 import { ADD_LOCALE } from '../constants';
 
 const addLocale = async ({ code, name, isDefault }, toggleNotification) => {
-  const data = await request(`/i18n/locales`, {
+  const data = await request('/i18n/locales', {
     method: 'POST',
     body: {
       name,
@@ -28,7 +28,7 @@ const useAddLocale = () => {
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
 
-  const persistLocale = async locale => {
+  const persistLocale = async (locale) => {
     setLoading(true);
 
     try {

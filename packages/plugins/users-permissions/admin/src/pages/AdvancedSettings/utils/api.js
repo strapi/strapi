@@ -6,7 +6,7 @@ const fetchData = async () => {
   return data;
 };
 
-const putAdvancedSettings = body => {
+const putAdvancedSettings = (body) => {
   return axiosInstance.put(getRequestURL('advanced'), body);
 };
 

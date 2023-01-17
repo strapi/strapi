@@ -22,7 +22,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));
 
-const makeApp = history => (
+const makeApp = (history) => (
   <IntlProvider
     messages={{ 'Settings.roles.form.created': 'Created' }}
     textComponent="span"

@@ -15,23 +15,25 @@ module.exports = ({ strapi }) => {
 
   return {
     registerDoc(doc) {
+      let registeredDoc = doc;
       // parseYaml
       if (typeof doc === 'string') {
-        doc = require('yaml').parse(doc);
+        registeredDoc = require('yaml').parse(registeredDoc);
       }
       // receive an object we can register it directly
-      registeredDocs.push(doc);
+      registeredDocs.push(registeredDoc);
     },
     getDocumentationVersion() {
       return _.get(config, 'info.version');
     },
 
     getFullDocumentationPath() {
-      return path.join(strapi.dirs.extensions, 'documentation', 'documentation');
+      return path.join(strapi.dirs.app.extensions, 'documentation', 'documentation');
     },
 
     getCustomDocumentationPath() {
-      return path.join(strapi.dirs.extensions, 'documentation', 'config', 'settings.json');
+      // ??
+      return path.join(strapi.dirs.app.extensions, 'documentation', 'config', 'settings.json');
     },
 
     getDocumentationVersions() {
@@ -81,10 +83,10 @@ module.exports = ({ strapi }) => {
      */
     getApiDocumentationPath(api) {
       if (api.getter === 'plugin') {
-        return path.join(strapi.dirs.extensions, api.name, 'documentation');
+        return path.join(strapi.dirs.app.extensions, api.name, 'documentation');
       }
 
-      return path.join(strapi.dirs.api, api.name, 'documentation');
+      return path.join(strapi.dirs.app.api, api.name, 'documentation');
     },
 
     async deleteDocumentation(version) {

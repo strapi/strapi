@@ -17,10 +17,7 @@ module.exports = ({ nexus, strapi }) => {
 
       koaContext.params = { role: args.id };
 
-      await strapi
-        .plugin('users-permissions')
-        .controller('role')
-        .deleteRole(koaContext);
+      await strapi.plugin('users-permissions').controller('role').deleteRole(koaContext);
 
       return { ok: true };
     },

@@ -13,7 +13,7 @@ module.exports = () => {
     },
 
     registerMany(providers) {
-      providers.forEach(provider => {
+      providers.forEach((provider) => {
         this.register(provider);
       });
     },

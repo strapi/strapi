@@ -6,6 +6,7 @@ import {
   SET_DATA_STRUCTURES,
   SET_STATUS,
   SUBMIT_SUCCEEDED,
+  CLEAR_SET_MODIFIED_DATA_ONLY,
 } from './constants';
 
 export const getData = () => {
@@ -14,7 +15,7 @@ export const getData = () => {
   };
 };
 
-export const getDataSucceeded = data => ({
+export const getDataSucceeded = (data) => ({
   type: GET_DATA_SUCCEEDED,
   data,
 });
@@ -33,12 +34,16 @@ export const setDataStructures = (componentsDataStructure, contentTypeDataStruct
   contentTypeDataStructure,
 });
 
-export const setStatus = status => ({
+export const setStatus = (status) => ({
   type: SET_STATUS,
   status,
 });
 
-export const submitSucceeded = data => ({
+export const submitSucceeded = (data) => ({
   type: SUBMIT_SUCCEEDED,
   data,
+});
+
+export const clearSetModifiedDataOnly = () => ({
+  type: CLEAR_SET_MODIFIED_DATA_ONLY,
 });

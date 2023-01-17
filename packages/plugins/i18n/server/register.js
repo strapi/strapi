@@ -18,7 +18,7 @@ module.exports = ({ strapi }) => {
  * Adds middleware on CM creation routes to use i18n locale passed in a specific param
  * @param {Strapi} strapi
  */
-const addContentManagerLocaleMiddleware = strapi => {
+const addContentManagerLocaleMiddleware = (strapi) => {
   strapi.server.router.use('/content-manager/collection-types/:model', (ctx, next) => {
     if (ctx.method === 'POST') {
       return validateLocaleCreation(ctx, next);
@@ -40,7 +40,7 @@ const addContentManagerLocaleMiddleware = strapi => {
  * Adds hooks to migration content types locales on enable/disable of I18N
  * @param {Strapi} strapi
  */
-const addContentTypeSyncHooks = strapi => {
+const addContentTypeSyncHooks = (strapi) => {
   strapi.hook('strapi::content-types.beforeSync').register(disableContentType);
   strapi.hook('strapi::content-types.afterSync').register(enableContentType);
 };
@@ -49,11 +49,11 @@ const addContentTypeSyncHooks = strapi => {
  * Adds locale and localization fields to localized content types
  * @param {Strapi} strapi
  */
-const extendLocalizedContentTypes = strapi => {
+const extendLocalizedContentTypes = (strapi) => {
   const contentTypeService = getService('content-types');
   const coreApiService = getService('core-api');
 
-  Object.values(strapi.contentTypes).forEach(contentType => {
+  Object.values(strapi.contentTypes).forEach((contentType) => {
     if (contentTypeService.isLocalizedContentType(contentType)) {
       const { attributes } = contentType;
 

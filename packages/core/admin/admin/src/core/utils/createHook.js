@@ -25,7 +25,7 @@ const createHook = () => {
       return result;
     },
     runSeries(...args) {
-      return _handlers.map(fn => fn(...args));
+      return _handlers.map((fn) => fn(...args));
     },
     async runSeriesAsync(...args) {
       const result = [];
@@ -38,7 +38,7 @@ const createHook = () => {
     },
     runParallel(...args) {
       return Promise.all(
-        _handlers.map(fn => {
+        _handlers.map((fn) => {
           return fn(...args);
         })
       );

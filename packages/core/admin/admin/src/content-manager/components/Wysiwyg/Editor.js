@@ -37,13 +37,13 @@ const Editor = ({
     });
 
     CodeMirror.commands.newlineAndIndentContinueMarkdownList = newlineAndIndentContinueMarkdownList;
-    editorRef.current.on('change', doc => {
+    editorRef.current.on('change', (doc) => {
       onChangeRef.current({ target: { name, value: doc.getValue(), type: 'wysiwyg' } });
     });
   }, [editorRef, textareaRef, name, placeholder]);
 
   useEffect(() => {
-    if (value && !editorRef.current.state.focused) {
+    if (value && !editorRef.current.hasFocus()) {
       editorRef.current.setValue(value);
     }
   }, [editorRef, value]);

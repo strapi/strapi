@@ -78,7 +78,7 @@ export const EditorLayout = ({ children, isExpandMode, error, previewContent, on
               overflow="hidden"
               width="70%"
               height="70%"
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
             >
               <Flex height="100%" alignItems="flex-start">
                 <BoxWithBorder flex="1" height="100%">

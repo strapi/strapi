@@ -74,15 +74,12 @@ const SubActionRow = ({
   propertyName,
 }) => {
   const { formatMessage } = useIntl();
-  const {
-    modifiedData,
-    onChangeParentCheckbox,
-    onChangeSimpleCheckbox,
-  } = usePermissionsDataManager();
+  const { modifiedData, onChangeParentCheckbox, onChangeSimpleCheckbox } =
+    usePermissionsDataManager();
   const [rowToOpen, setRowToOpen] = useState(null);
 
-  const handleClickToggleSubLevel = name => {
-    setRowToOpen(prev => {
+  const handleClickToggleSubLevel = (name) => {
+    setRowToOpen((prev) => {
       if (prev === name) {
         return null;
       }
@@ -166,7 +163,7 @@ const SubActionRow = ({
                                 { label: `${parentName} ${label} ${propertyLabel}` }
                               )}
                               // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                              onValueChange={value => {
+                              onValueChange={(value) => {
                                 onChangeSimpleCheckbox({
                                   target: {
                                     name: checkboxName.join('..'),
@@ -180,9 +177,8 @@ const SubActionRow = ({
                         );
                       }
 
-                      const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(
-                        checkboxValue
-                      );
+                      const { hasAllActionsSelected, hasSomeActionsSelected } =
+                        getCheckboxState(checkboxValue);
 
                       return (
                         <Cell key={propertyLabel} justifyContent="center" alignItems="center">
@@ -198,7 +194,7 @@ const SubActionRow = ({
                               { label: `${parentName} ${label} ${propertyLabel}` }
                             )}
                             // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                            onValueChange={value => {
+                            onValueChange={(value) => {
                               onChangeParentCheckbox({
                                 target: {
                                   name: checkboxName.join('..'),

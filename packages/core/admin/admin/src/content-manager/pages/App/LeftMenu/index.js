@@ -22,19 +22,21 @@ import getTrad from '../../../utils/getTrad';
 import { makeSelectModelLinks } from '../selectors';
 
 const matchByTitle = (links, search) =>
-  matchSorter(links, toLower(search), { keys: [item => toLower(item.title)] });
+  search
+    ? matchSorter(links, toLower(search), { keys: [(item) => toLower(item.title)] })
+    : sortBy(links, (object) => object.title.toLowerCase());
 
 const LeftMenu = () => {
   const [search, setSearch] = useState('');
   const { formatMessage } = useIntl();
   const modelLinksSelector = useMemo(makeSelectModelLinks, []);
   const { collectionTypeLinks, singleTypeLinks } = useSelector(
-    state => modelLinksSelector(state),
+    (state) => modelLinksSelector(state),
     shallowEqual
   );
 
-  const toIntl = links =>
-    links.map(link => {
+  const toIntl = (links) =>
+    links.map((link) => {
       return {
         ...link,
         title: formatMessage({ id: link.title, defaultMessage: link.title }),
@@ -52,9 +54,7 @@ const LeftMenu = () => {
         defaultMessage: 'Collection Types',
       },
       searchable: true,
-      links: sortBy(matchByTitle(intlCollectionTypeLinks, search), object =>
-        object.title.toLowerCase()
-      ),
+      links: matchByTitle(intlCollectionTypeLinks, search),
     },
     {
       id: 'singleTypes',
@@ -63,9 +63,7 @@ const LeftMenu = () => {
         defaultMessage: 'Single Types',
       },
       searchable: true,
-      links: sortBy(matchByTitle(intlSingleTypeLinks, search), object =>
-        object.title.toLowerCase()
-      ),
+      links: matchByTitle(intlSingleTypeLinks, search),
     },
   ];
 
@@ -96,7 +94,7 @@ const LeftMenu = () => {
         })}
       />
       <SubNavSections>
-        {menu.map(section => {
+        {menu.map((section) => {
           const label = formatMessage(
             { id: section.title.id, defaultMessage: section.title.defaultMessage },
             section.title.values
@@ -108,7 +106,7 @@ const LeftMenu = () => {
               label={label}
               badgeLabel={section.links.length.toString()}
             >
-              {section.links.map(link => {
+              {section.links.map((link) => {
                 const search = link.search ? `?${link.search}` : '';
 
                 return (

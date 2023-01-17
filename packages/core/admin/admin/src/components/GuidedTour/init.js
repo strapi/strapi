@@ -5,14 +5,14 @@ import persistStateToLocaleStorage, {
   SKIPPED,
 } from './utils/persistStateToLocaleStorage';
 
-const init = initialState => {
+const init = (initialState) => {
   const copyInitialState = { ...initialState };
   const guidedTourLocaleStorage = persistStateToLocaleStorage.get(COMPLETED_STEPS);
   const currentStepLocaleStorage = persistStateToLocaleStorage.get(CURRENT_STEP);
   const skippedLocaleStorage = persistStateToLocaleStorage.get(SKIPPED);
 
   if (guidedTourLocaleStorage) {
-    guidedTourLocaleStorage.forEach(step => {
+    guidedTourLocaleStorage.forEach((step) => {
       const [sectionName, stepName] = step.split('.');
       set(copyInitialState, ['guidedTourState', sectionName, stepName], true);
     });

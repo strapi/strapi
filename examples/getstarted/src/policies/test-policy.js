@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * `test-policy` policy.
+ * `test-policy` policy
  */
 
 module.exports = (policyCtx, config, { strapi }) => {

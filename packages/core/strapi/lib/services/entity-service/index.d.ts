@@ -6,6 +6,7 @@ type ID = number | string;
 type EntityServiceAction =
   | 'findMany'
   | 'findPage'
+  | 'findWithRelationCountsPage'
   | 'findWithRelationCounts'
   | 'findOne'
   | 'count'
@@ -54,13 +55,18 @@ export interface EntityService {
     pagination: PaginationInfo;
   }>;
 
-  findWithRelationCounts<K extends keyof AllTypes, T extends AllTypes[K]>(
+  findWithRelationCountsPage<K extends keyof AllTypes, T extends AllTypes[K]>(
     uid: K,
     params: Params<T>
   ): Promise<{
     results: T[];
     pagination: PaginationInfo;
   }>;
+
+  findWithRelationCounts<K extends keyof AllTypes, T extends AllTypes[K]>(
+    uid: K,
+    params: Params<T>
+  ): Promise<T[]>;
 
   findOne<K extends keyof AllTypes, T extends AllTypes[K]>(
     uid: K,

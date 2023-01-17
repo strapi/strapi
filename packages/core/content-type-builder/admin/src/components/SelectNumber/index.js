@@ -14,7 +14,7 @@ const SelectNumber = ({ intlLabel, error, modifiedData, name, onChange, options,
   const label = formatMessage(intlLabel);
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
 
-  const handleChange = nextValue => {
+  const handleChange = (nextValue) => {
     onChange({ target: { name, value: nextValue, type: 'select' } });
 
     if (!value) {

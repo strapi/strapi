@@ -61,7 +61,7 @@ function DynamicZoneList({ customRowComponent, components, addComponent, name, t
   const [activeTab, setActiveTab] = useState(0);
   const { formatMessage } = useIntl();
 
-  const toggle = tab => {
+  const toggle = (tab) => {
     if (activeTab !== tab) {
       setActiveTab(tab);
     }
@@ -137,7 +137,7 @@ function DynamicZoneList({ customRowComponent, components, addComponent, name, t
 }
 
 DynamicZoneList.defaultProps = {
-  addComponent: () => {},
+  addComponent() {},
   components: [],
   customRowComponent: null,
   name: null,

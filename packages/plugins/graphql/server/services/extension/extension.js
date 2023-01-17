@@ -50,15 +50,14 @@ const createExtension = ({ strapi } = {}) => {
      * @return {object}
      */
     generate({ typeRegistry }) {
-      const resolveConfig = config => {
+      const resolveConfig = (config) => {
         return typeof config === 'function' ? config({ strapi, nexus, typeRegistry }) : config;
       };
 
       // Evaluate & merge every registered configuration object, then return the result
       return configs.reduce((acc, configuration) => {
-        const { types, typeDefs, resolvers, resolversConfig, plugins } = resolveConfig(
-          configuration
-        );
+        const { types, typeDefs, resolvers, resolversConfig, plugins } =
+          resolveConfig(configuration);
 
         // Register type definitions
         if (typeof typeDefs === 'string') {

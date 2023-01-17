@@ -1,9 +1,9 @@
 'use strict';
 
-// eslint-disable-next-line node/no-extraneous-require
 const { combineReducers, createStore } = require('redux');
 
 const reducers = {
+  admin_app: jest.fn(() => ({ status: 'init' })),
   'content-manager_app': jest.fn(() => ({
     components: [],
     status: 'loading',
@@ -29,6 +29,7 @@ const reducers = {
     contentTypeDataStructure: {},
     isLoading: true,
     data: null,
+    setModifiedDataOnly: false,
     status: 'resolved',
   })),
   rbacProvider: jest.fn(() => ({ allPermissions: null, collectionTypesRelatedPermissions: {} })),

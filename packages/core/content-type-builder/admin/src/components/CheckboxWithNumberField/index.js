@@ -33,12 +33,12 @@ const CheckboxWithNumberField = ({ error, intlLabel, modifiedData, name, onChang
       <Checkbox
         id={name}
         name={name}
-        onValueChange={value => {
+        onValueChange={(value) => {
           const initValue = type === 'text' ? '0' : 0;
           const nextValue = value ? initValue : null;
 
           onChange({ target: { name, value: nextValue } });
-          setShowInput(prev => !prev);
+          setShowInput((prev) => !prev);
         }}
         value={showInput}
       >
@@ -63,7 +63,7 @@ const CheckboxWithNumberField = ({ error, intlLabel, modifiedData, name, onChang
               error={errorMessage}
               id={name}
               name={name}
-              onValueChange={value => {
+              onValueChange={(value) => {
                 onChange({ target: { name, value, type } });
               }}
               value={value || 0}

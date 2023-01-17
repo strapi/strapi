@@ -6,7 +6,7 @@ const mutationsResolvers = require('./mutation');
 const componentResolvers = require('./component');
 const dynamicZoneResolvers = require('./dynamic-zone');
 
-module.exports = context => ({
+module.exports = (context) => ({
   // Generics
   ...associationResolvers(context),
 

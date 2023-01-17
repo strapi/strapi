@@ -30,7 +30,7 @@ const getCorePluginsPath = () => {
  * @param {Object[]} pluginsToInstall array of plugins located in the plugins folder
  * @returns Object of plugin's paths
  */
-const getPluginToInstallPath = pluginsToInstall => {
+const getPluginToInstallPath = (pluginsToInstall) => {
   const plugins = {};
 
   for (const dep of pluginsToInstall) {
@@ -49,7 +49,7 @@ const getPluginToInstallPath = pluginsToInstall => {
  * Write the plugins.js file
  * @param {Object} plugins
  */
-const createPluginsFile = async plugins => {
+const createPluginsFile = async (plugins) => {
   const pluginFileDest = resolve(__dirname, '..', 'admin', 'src', 'plugins.js');
 
   const allPluginsArray = Object.entries(plugins).map(([plugin, pluginPath]) => {

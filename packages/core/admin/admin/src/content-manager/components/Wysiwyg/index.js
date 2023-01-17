@@ -52,11 +52,11 @@ const Wysiwyg = ({
 
   const MediaLibraryDialog = components['media-library'];
 
-  const handleToggleMediaLib = () => setMediaLibVisible(prev => !prev);
-  const handleTogglePreviewMode = () => setIsPreviewMode(prev => !prev);
+  const handleToggleMediaLib = () => setMediaLibVisible((prev) => !prev);
+  const handleTogglePreviewMode = () => setIsPreviewMode((prev) => !prev);
   const handleToggleExpand = () => {
     setIsPreviewMode(false);
-    setIsExpandMode(prev => !prev);
+    setIsExpandMode((prev) => !prev);
   };
 
   const handleActionClick = (value, currentEditorRef, togglePopover) => {
@@ -100,8 +100,8 @@ const Wysiwyg = ({
     }
   };
 
-  const handleSelectAssets = files => {
-    const formattedFiles = files.map(f => ({
+  const handleSelectAssets = (files) => {
+    const formattedFiles = files.map((f) => ({
       alt: f.alternativeText || f.name,
       url: prefixFileUrlWithBackendUrl(f.url),
       mime: f.mime,

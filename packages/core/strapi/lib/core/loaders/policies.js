@@ -2,10 +2,11 @@
 
 const { join, extname, basename } = require('path');
 const fse = require('fs-extra');
+const { importDefault } = require('@strapi/utils');
 
 // TODO:: allow folders with index.js inside for bigger policies
 module.exports = async function loadPolicies(strapi) {
-  const dir = strapi.dirs.policies;
+  const dir = strapi.dirs.dist.policies;
 
   if (!(await fse.pathExists(dir))) {
     return;
@@ -20,7 +21,7 @@ module.exports = async function loadPolicies(strapi) {
 
     if (fd.isFile() && extname(name) === '.js') {
       const key = basename(name, '.js');
-      policies[key] = require(fullPath);
+      policies[key] = importDefault(fullPath);
     }
   }
 

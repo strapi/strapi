@@ -2,7 +2,7 @@
 
 const { omit } = require('lodash/fp');
 const createConditionProvider = require('../provider');
-const domain = require('../');
+const domain = require('..');
 
 const providerMethods = [
   'register',
@@ -29,7 +29,7 @@ describe('Condition Provider', () => {
 
     expect(conditionProvider).toHaveProperty('hooks', expect.any(Object));
 
-    providerMethods.forEach(methodName =>
+    providerMethods.forEach((methodName) =>
       expect(conditionProvider).toHaveProperty(methodName, expect.any(Function))
     );
   });

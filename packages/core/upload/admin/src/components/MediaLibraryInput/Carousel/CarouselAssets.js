@@ -15,6 +15,7 @@ export const CarouselAssets = ({
   error,
   hint,
   label,
+  labelAction,
   onAddAsset,
   onDeleteAsset,
   onDeleteAssetFromMediaLibrary,
@@ -35,6 +36,7 @@ export const CarouselAssets = ({
     <>
       <CarouselInput
         label={label}
+        labelAction={labelAction}
         secondaryLabel={currentAsset?.name}
         selectedSlide={selectedAssetIndex}
         previousLabel={formatMessage({
@@ -55,13 +57,10 @@ export const CarouselAssets = ({
             <CarouselAssetActions
               asset={currentAsset}
               onDeleteAsset={disabled ? undefined : onDeleteAsset}
-              onDeleteAssetFromMediaLibrary={onDeleteAssetFromMediaLibrary}
               onAddAsset={disabled ? undefined : onAddAsset}
               onEditAsset={onEditAsset ? () => setIsEditingAsset(true) : undefined}
             />
-          ) : (
-            undefined
-          )
+          ) : undefined
         }
       >
         {assets.length === 0 ? (
@@ -93,7 +92,7 @@ export const CarouselAssets = ({
 
       {isEditingAsset && (
         <EditAssetDialog
-          onClose={editedAsset => {
+          onClose={(editedAsset) => {
             setIsEditingAsset(false);
 
             // The asset has been deleted
@@ -120,6 +119,7 @@ CarouselAssets.defaultProps = {
   disabled: false,
   error: undefined,
   hint: undefined,
+  labelAction: undefined,
   onDropAsset: undefined,
   required: false,
   trackedLocation: undefined,
@@ -131,6 +131,7 @@ CarouselAssets.propTypes = {
   error: PropTypes.string,
   hint: PropTypes.string,
   label: PropTypes.string.isRequired,
+  labelAction: PropTypes.node,
   onAddAsset: PropTypes.func.isRequired,
   onDeleteAsset: PropTypes.func.isRequired,
   onDeleteAssetFromMediaLibrary: PropTypes.func.isRequired,

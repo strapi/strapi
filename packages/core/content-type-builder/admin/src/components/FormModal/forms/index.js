@@ -5,8 +5,77 @@ import { categoryForm, createCategorySchema } from '../category';
 import { contentTypeForm, createContentTypeSchema } from '../contentType';
 import { createComponentSchema, componentForm } from '../component';
 import { dynamiczoneForm } from '../dynamicZone';
+import { nameField } from '../attributes/nameField';
+import addItemsToFormSection from './utils/addItemsToFormSection';
+import getUsedAttributeNames from './utils/getUsedAttributeNames';
+import getTrad from '../../../utils/getTrad';
 
 const forms = {
+  customField: {
+    schema({
+      schemaAttributes,
+      attributeType,
+      customFieldValidator,
+      reservedNames,
+      schemaData,
+      ctbFormsAPI,
+    }) {
+      const usedAttributeNames = getUsedAttributeNames(schemaAttributes, schemaData);
+
+      const attributeShape = attributeTypes[attributeType](
+        usedAttributeNames,
+        reservedNames.attributes
+      );
+
+      return ctbFormsAPI.makeCustomFieldValidator(
+        attributeShape,
+        customFieldValidator,
+        usedAttributeNames,
+        reservedNames.attributes,
+        schemaData
+      );
+    },
+    form: {
+      base({ customField }) {
+        // Default section with required name field
+        const sections = [{ sectionTitle: null, items: [nameField] }];
+
+        if (customField.options?.base) {
+          addItemsToFormSection(customField.options.base, sections);
+        }
+
+        return { sections };
+      },
+      advanced({ customField, data, step, extensions, ...rest }) {
+        // Default section with no fields
+        const sections = [{ sectionTitle: null, items: [] }];
+        const injectedInputs = extensions.getAdvancedForm(['attribute', customField.type], {
+          data,
+          type: customField.type,
+          step,
+          ...rest,
+        });
+
+        if (customField.options?.advanced) {
+          addItemsToFormSection(customField.options.advanced, sections);
+        }
+
+        if (injectedInputs) {
+          const extendedSettings = {
+            sectionTitle: {
+              id: getTrad('modalForm.custom-fields.advanced.settings.extended'),
+              defaultMessage: 'Extended settings',
+            },
+            items: injectedInputs,
+          };
+
+          sections.push(extendedSettings);
+        }
+
+        return { sections };
+      },
+    },
+  },
   attribute: {
     schema(
       currentSchema,
@@ -16,13 +85,9 @@ const forms = {
       options,
       extensions
     ) {
+      // Get the attributes object on the schema
       const attributes = get(currentSchema, ['schema', 'attributes'], []);
-
-      const usedAttributeNames = attributes
-        .filter(({ name }) => {
-          return name !== options.initialData.name;
-        })
-        .map(({ name }) => name);
+      const usedAttributeNames = getUsedAttributeNames(attributes, options);
 
       try {
         let attributeShape = attributeTypes[attributeType](
@@ -93,20 +158,20 @@ const forms = {
   },
   contentType: {
     schema(alreadyTakenNames, isEditing, ctUid, reservedNames, extensions, contentTypes) {
-      const singularNames = Object.values(contentTypes).map(contentType => {
+      const singularNames = Object.values(contentTypes).map((contentType) => {
         return contentType.schema.singularName;
       });
 
-      const pluralNames = Object.values(contentTypes).map(contentType => {
-        return contentType.schema.pluralNames;
+      const pluralNames = Object.values(contentTypes).map((contentType) => {
+        return get(contentType, ['schema', 'pluralName'], '');
       });
 
       const takenNames = isEditing
-        ? alreadyTakenNames.filter(uid => uid !== ctUid)
+        ? alreadyTakenNames.filter((uid) => uid !== ctUid)
         : alreadyTakenNames;
 
       const takenSingularNames = isEditing
-        ? singularNames.filter(singName => {
+        ? singularNames.filter((singName) => {
             const currentSingularName = get(contentTypes, [ctUid, 'schema', 'singularName'], '');
 
             return currentSingularName !== singName;
@@ -114,19 +179,19 @@ const forms = {
         : singularNames;
 
       const takenPluralNames = isEditing
-        ? pluralNames.filter(pluralName => {
+        ? pluralNames.filter((pluralName) => {
             const currentPluralName = get(contentTypes, [ctUid, 'schema', 'pluralName'], '');
 
             return currentPluralName !== pluralName;
           })
         : pluralNames;
 
-      const contentTypeShape = createContentTypeSchema(
-        takenNames,
-        reservedNames.models,
-        takenSingularNames,
-        takenPluralNames
-      );
+      const contentTypeShape = createContentTypeSchema({
+        usedContentTypeNames: takenNames,
+        reservedModels: reservedNames.models,
+        singularNames: takenSingularNames,
+        pluralNames: takenPluralNames,
+      });
 
       // FIXME
       return extensions.makeValidator(
@@ -174,7 +239,7 @@ const forms = {
       compoUid = null
     ) {
       const takenNames = isEditing
-        ? alreadyTakenAttributes.filter(uid => uid !== compoUid)
+        ? alreadyTakenAttributes.filter((uid) => uid !== compoUid)
         : alreadyTakenAttributes;
 
       return createComponentSchema(takenNames, reservedNames.models, componentCategory);
@@ -211,8 +276,8 @@ const forms = {
   editCategory: {
     schema(allCategories, initialData) {
       const allowedCategories = allCategories
-        .filter(cat => cat !== initialData.name)
-        .map(cat => toLower(cat));
+        .filter((cat) => cat !== initialData.name)
+        .map((cat) => toLower(cat));
 
       return createCategorySchema(allowedCategories);
     },

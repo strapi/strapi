@@ -2,6 +2,7 @@
 
 const path = require('path');
 const { propOr, isArray, isNil } = require('lodash/fp');
+const { importDefault } = require('@strapi/utils');
 
 const getMiddlewareConfig = propOr([], 'config.middlewares');
 
@@ -90,7 +91,7 @@ const resolveMiddlewares = (config, strapi) => {
     );
   }
 
-  middlewares.forEach(middleware => {
+  middlewares.forEach((middleware) => {
     // NOTE: we replace null middlewares by a dumb one to avoid having to filter later on
     if (isNil(middleware.handler)) {
       middleware.handler = (_, next) => next();
@@ -112,14 +113,14 @@ const resolveCustomMiddleware = (resolve, strapi) => {
     modulePath = require.resolve(resolve);
   } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
-      modulePath = path.resolve(strapi.dirs.root, resolve);
+      modulePath = path.resolve(strapi.dirs.dist.root, resolve);
     } else {
       throw error;
     }
   }
 
   try {
-    return require(modulePath);
+    return importDefault(modulePath);
   } catch (err) {
     throw new Error(`Could not load middleware "${modulePath}".`);
   }

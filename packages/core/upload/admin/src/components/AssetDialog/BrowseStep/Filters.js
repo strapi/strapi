@@ -12,7 +12,7 @@ export const Filters = ({ appliedFilters, onChangeFilters }) => {
   const [isVisible, setVisible] = useState(false);
   const { formatMessage } = useIntl();
 
-  const toggleFilter = () => setVisible(prev => !prev);
+  const toggleFilter = () => setVisible((prev) => !prev);
 
   return (
     <>
@@ -35,11 +35,13 @@ export const Filters = ({ appliedFilters, onChangeFilters }) => {
         />
       )}
 
-      <FilterList
-        appliedFilters={appliedFilters}
-        filtersSchema={displayedFilters}
-        onRemoveFilter={onChangeFilters}
-      />
+      {appliedFilters && (
+        <FilterList
+          appliedFilters={appliedFilters}
+          filtersSchema={displayedFilters}
+          onRemoveFilter={onChangeFilters}
+        />
+      )}
     </>
   );
 };

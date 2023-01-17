@@ -519,7 +519,7 @@ describe('User', () => {
 
     test('Calls udpate service', async () => {
       const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
-      const updateById = jest.fn(user => Promise.resolve(user));
+      const updateById = jest.fn((user) => Promise.resolve(user));
 
       global.strapi = {
         query() {
@@ -553,7 +553,7 @@ describe('User', () => {
 
     test('Set user to active', async () => {
       const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
-      const updateById = jest.fn(user => Promise.resolve(user));
+      const updateById = jest.fn((user) => Promise.resolve(user));
 
       global.strapi = {
         query() {
@@ -584,7 +584,7 @@ describe('User', () => {
 
     test('Reset registrationToken', async () => {
       const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
-      const updateById = jest.fn(user => Promise.resolve(user));
+      const updateById = jest.fn((user) => Promise.resolve(user));
 
       global.strapi = {
         query() {
@@ -675,7 +675,7 @@ describe('User', () => {
 
     test.each(['abc', 'Abcd', 'Abcdefgh', 'Abcd123'])(
       'Throws on invalid password',
-      async password => {
+      async (password) => {
         const email = 'email@email.fr';
 
         const findOne = jest.fn(() => ({ id: 1 }));

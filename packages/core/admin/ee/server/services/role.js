@@ -3,7 +3,7 @@
 const { toString } = require('lodash/fp');
 const { ApplicationError } = require('@strapi/utils').errors;
 
-const ssoCheckRolesIdForDeletion = async ids => {
+const ssoCheckRolesIdForDeletion = async (ids) => {
   const adminStore = await strapi.store({ type: 'core', name: 'admin' });
 
   const {

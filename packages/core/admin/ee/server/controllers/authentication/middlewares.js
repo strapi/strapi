@@ -90,7 +90,7 @@ const nonExistingUserScenario = (ctx, next) => async (profile, provider) => {
   return next();
 };
 
-const redirectWithAuth = ctx => {
+const redirectWithAuth = (ctx) => {
   const {
     params: { provider },
   } = ctx;

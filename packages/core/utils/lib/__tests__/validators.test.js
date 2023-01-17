@@ -36,10 +36,7 @@ describe('validators', () => {
     ])('yup.strapiID().required(): %s => %s', async (value, expectedResult) => {
       let result = true;
       try {
-        await yup
-          .strapiID()
-          .required()
-          .validate(value);
+        await yup.strapiID().required().validate(value);
       } catch (e) {
         result = false;
       }
@@ -59,10 +56,7 @@ describe('validators', () => {
     ])('yup.strapiID().nullable(): %s => %s', async (value, expectedResult) => {
       let result = true;
       try {
-        await yup
-          .strapiID()
-          .nullable()
-          .validate(value);
+        await yup.strapiID().nullable().validate(value);
       } catch (e) {
         result = false;
       }
@@ -82,11 +76,7 @@ describe('validators', () => {
     ])('yup.strapiID().nullable().defined(): %s => %s', async (value, expectedResult) => {
       let result = true;
       try {
-        await yup
-          .strapiID()
-          .nullable()
-          .defined()
-          .validate(value);
+        await yup.strapiID().nullable().defined().validate(value);
       } catch (e) {
         result = false;
       }

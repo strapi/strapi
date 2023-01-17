@@ -5,6 +5,7 @@ import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import pick from 'lodash/pick';
 import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
 import { stringify } from 'qs';
 import { useNotification, useTracking, ConfirmDialog, Link } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
@@ -34,13 +35,13 @@ const ListSettingsView = ({ layout, slug }) => {
   const { refetchData } = useContext(ModelsContext);
 
   const [showWarningSubmit, setWarningSubmit] = useState(false);
-  const toggleWarningSubmit = () => setWarningSubmit(prevState => !prevState);
-  const [isModalFormOpen, setIsModalFormOpen] = useState(false);
-  const toggleModalForm = () => setIsModalFormOpen(prevState => !prevState);
+  const toggleWarningSubmit = () => setWarningSubmit((prevState) => !prevState);
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, layout)
   );
   const { fieldToEdit, fieldForm, initialData, modifiedData } = reducerState;
+  const isModalFormOpen = !isEmpty(fieldForm);
+
   const { attributes } = layout;
   const displayedFields = modifiedData.layouts.list;
 
@@ -76,7 +77,7 @@ const ListSettingsView = ({ layout, slug }) => {
     submitMutation.mutate(body);
   };
 
-  const handleAddField = item => {
+  const handleAddField = (item) => {
     dispatch({
       type: 'ADD_FIELD',
       item,
@@ -99,41 +100,38 @@ const ListSettingsView = ({ layout, slug }) => {
     }
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     toggleWarningSubmit();
     trackUsage('willSaveContentTypeLayout');
   };
 
-  const handleClickEditField = fieldToEdit => {
+  const handleClickEditField = (fieldToEdit) => {
     dispatch({
       type: 'SET_FIELD_TO_EDIT',
       fieldToEdit,
     });
-    toggleModalForm();
   };
 
   const handleCloseModal = () => {
     dispatch({
       type: 'UNSET_FIELD_TO_EDIT',
     });
-    toggleModalForm();
   };
 
-  const handleSubmitFieldEdit = e => {
+  const handleSubmitFieldEdit = (e) => {
     e.preventDefault();
-    toggleModalForm();
     dispatch({
       type: 'SUBMIT_FIELD_FORM',
     });
   };
 
-  const submitMutation = useMutation(body => putCMSettingsLV(body, slug), {
-    onSuccess: () => {
+  const submitMutation = useMutation((body) => putCMSettingsLV(body, slug), {
+    onSuccess() {
       trackUsage('didEditListSettings');
       refetchData();
     },
-    onError: () => {
+    onError() {
       toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
@@ -195,7 +193,7 @@ const ListSettingsView = ({ layout, slug }) => {
             }
             primaryAction={
               <Button
-                size="L"
+                size="S"
                 startIcon={<Check />}
                 disabled={isEqual(modifiedData, initialData)}
                 type="submit"

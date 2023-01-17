@@ -65,7 +65,7 @@ export const SingleSignOn = () => {
       <SettingsPageTitle name="SSO" />
       <Main tabIndex={-1}>
         <form
-          onSubmit={e => {
+          onSubmit={(e) => {
             if (isHeaderButtonDisabled) {
               e.preventDefault();
 
@@ -131,7 +131,7 @@ export const SingleSignOn = () => {
                         id: 'app.components.ToggleCheckbox.on-label',
                         defaultMessage: 'On',
                       })}
-                      onChange={e => {
+                      onChange={(e) => {
                         handleChange({
                           target: { name: 'autoRegister', value: e.target.checked },
                         });
@@ -159,7 +159,7 @@ export const SingleSignOn = () => {
                         defaultMessage: 'Default role',
                       })}
                       name="defaultRole"
-                      onChange={value => {
+                      onChange={(value) => {
                         handleChange({ target: { name: 'defaultRole', value } });
                       }}
                       placeholder={formatMessage({

@@ -3,7 +3,7 @@ import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
-import { AssetList } from '../../AssetList';
+import { AssetGridList } from '../../AssetGridList';
 import getTrad from '../../../utils/getTrad';
 
 export const SelectedStep = ({ selectedAssets, onSelectAsset, onReorderAsset }) => {
@@ -15,7 +15,7 @@ export const SelectedStep = ({ selectedAssets, onSelectAsset, onReorderAsset }) 
         <Typography variant="pi" fontWeight="bold" textColor="neutral800">
           {formatMessage(
             {
-              id: getTrad('list.assets.selected'),
+              id: getTrad('list.assets.to-upload'),
               defaultMessage:
                 '{number, plural, =0 {No asset} one {1 asset} other {# assets}} ready to upload',
             },
@@ -30,7 +30,7 @@ export const SelectedStep = ({ selectedAssets, onSelectAsset, onReorderAsset }) 
         </Typography>
       </Stack>
 
-      <AssetList
+      <AssetGridList
         size="S"
         assets={selectedAssets}
         onSelectAsset={onSelectAsset}

@@ -36,7 +36,7 @@ const EditPage = () => {
   const { trackUsage } = useTracking();
   const permissionsRef = useRef();
 
-  const handleCreateRoleSubmit = async data => {
+  const handleCreateRoleSubmit = async (data) => {
     // Set loading state
     lockApp();
     setIsSubmitting(true);

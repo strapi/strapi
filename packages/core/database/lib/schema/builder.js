@@ -3,7 +3,7 @@
 const { isNil, prop, omit, castArray } = require('lodash/fp');
 const debug = require('debug')('strapi::database');
 
-module.exports = db => {
+module.exports = (db) => {
   const helpers = createHelpers(db);
 
   return {
@@ -20,7 +20,7 @@ module.exports = db => {
      * @param {Schema} schema - database schema
      */
     async createSchema(schema) {
-      await db.connection.transaction(async trx => {
+      await db.connection.transaction(async (trx) => {
         await this.createTables(schema.tables, trx);
       });
     },
@@ -56,7 +56,7 @@ module.exports = db => {
         return;
       }
 
-      await db.connection.transaction(async trx => {
+      await db.connection.transaction(async (trx) => {
         for (const table of schema.tables.reverse()) {
           const schemaBuilder = this.getSchemaBuilder(trx);
           await helpers.dropTable(schemaBuilder, table);
@@ -73,7 +73,7 @@ module.exports = db => {
       const { forceMigration } = db.config.settings;
 
       await db.dialect.startSchemaUpdate();
-      await db.connection.transaction(async trx => {
+      await db.connection.transaction(async (trx) => {
         await this.createTables(schemaDiff.tables.added, trx);
 
         if (forceMigration) {
@@ -110,7 +110,7 @@ module.exports = db => {
   };
 };
 
-const createHelpers = db => {
+const createHelpers = (db) => {
   /**
    *  Creates a foreign key on a table
    * @param {Knex.TableBuilder} tableBuilder
@@ -244,23 +244,25 @@ const createHelpers = db => {
    * @param {Table} table
    */
   const createTable = async (schemaBuilder, table) => {
-    await schemaBuilder.createTable(table.name, tableBuilder => {
+    await schemaBuilder.createTable(table.name, (tableBuilder) => {
       // columns
-      (table.columns || []).forEach(column => createColumn(tableBuilder, column));
+      (table.columns || []).forEach((column) => createColumn(tableBuilder, column));
 
       // indexes
-      (table.indexes || []).forEach(index => createIndex(tableBuilder, index));
+      (table.indexes || []).forEach((index) => createIndex(tableBuilder, index));
 
       // foreign keys
 
       if (!db.dialect.canAlterConstraints()) {
-        (table.foreignKeys || []).forEach(foreignKey => createForeignKey(tableBuilder, foreignKey));
+        (table.foreignKeys || []).forEach((foreignKey) =>
+          createForeignKey(tableBuilder, foreignKey)
+        );
       }
     });
   };
 
   const alterTable = async (schemaBuilder, table) => {
-    await schemaBuilder.alterTable(table.name, tableBuilder => {
+    await schemaBuilder.alterTable(table.name, (tableBuilder) => {
       // Delete indexes / fks / columns
       for (const removedIndex of table.indexes.removed) {
         debug(`Dropping index ${removedIndex.name}`);
@@ -288,8 +290,6 @@ const createHelpers = db => {
       }
 
       // Update existing columns / foreign keys / indexes
-      // console.log('tables');
-      // console.log(JSON.stringify(table, null, 2));
       for (const updatedColumn of table.columns.updated) {
         debug(`Updating column ${updatedColumn.name}`);
         console.log(`Updating column ${updatedColumn.name}`);
@@ -298,8 +298,11 @@ const createHelpers = db => {
         //   continue;
         // }
 
-        // createColumn(tableBuilder, object)
-        createColumn(tableBuilder, object).alter({ alterNullable: false, alterType: true });
+        if (object.type === 'increments') {
+          createColumn(tableBuilder, { ...object, type: 'integer' }).alter();
+        } else {
+          createColumn(tableBuilder, object).alter();
+        }
       }
 
       for (const updatedForeignKey of table.foreignKeys.updated) {
@@ -314,7 +317,13 @@ const createHelpers = db => {
 
       for (const addedColumn of table.columns.added) {
         debug(`Creating column ${addedColumn.name}`);
-        createColumn(tableBuilder, addedColumn);
+
+        if (addedColumn.type === 'increments' && !db.dialect.canAddIncrements()) {
+          tableBuilder.integer(addedColumn.name).unsigned();
+          tableBuilder.primary(addedColumn.name);
+        } else {
+          createColumn(tableBuilder, addedColumn);
+        }
       }
 
       for (const addedForeignKey of table.foreignKeys.added) {
@@ -349,8 +358,8 @@ const createHelpers = db => {
    */
   const createTableForeignKeys = async (schemaBuilder, table) => {
     // foreign keys
-    await schemaBuilder.table(table.name, tableBuilder => {
-      (table.foreignKeys || []).forEach(foreignKey => createForeignKey(tableBuilder, foreignKey));
+    await schemaBuilder.table(table.name, (tableBuilder) => {
+      (table.foreignKeys || []).forEach((foreignKey) => createForeignKey(tableBuilder, foreignKey));
     });
   };
 
@@ -365,8 +374,8 @@ const createHelpers = db => {
     }
 
     // foreign keys
-    await schemaBuilder.table(table.name, tableBuilder => {
-      (table.foreignKeys || []).forEach(foreignKey => dropForeignKey(tableBuilder, foreignKey));
+    await schemaBuilder.table(table.name, (tableBuilder) => {
+      (table.foreignKeys || []).forEach((foreignKey) => dropForeignKey(tableBuilder, foreignKey));
     });
   };
 
