@@ -68,6 +68,7 @@ class TransferEngine<
     this.diagnostics = createDiagnosticReporter();
 
     validateProvider('source', sourceProvider);
+    validateProvider('destination', destinationProvider);
 
     this.sourceProvider = sourceProvider;
     this.destinationProvider = destinationProvider;
