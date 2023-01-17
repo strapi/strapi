@@ -5,7 +5,7 @@ import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { PreviewCell } from '../PreviewCell';
 
 const PROPS_FIXTURE = {
-  element: {
+  content: {
     alternativeText: 'alternative alt',
     ext: 'jpeg',
     formats: {
@@ -46,7 +46,7 @@ describe('TableList | PreviewCell', () => {
     });
 
     it('should render an image with default url if thumbnail is not available', () => {
-      const { getByRole } = setup({ element: { ...PROPS_FIXTURE.element, formats: undefined } });
+      const { getByRole } = setup({ content: { ...PROPS_FIXTURE.content, formats: undefined } });
 
       expect(getByRole('img', { name: 'alternative alt' })).toHaveAttribute(
         'src',
@@ -65,7 +65,7 @@ describe('TableList | PreviewCell', () => {
   describe('rendering files', () => {
     it('should render a file with fileExtension', () => {
       const { getByText } = setup({
-        element: { ...PROPS_FIXTURE.element, mime: 'application/pdf', ext: 'pdf' },
+        content: { ...PROPS_FIXTURE.content, mime: 'application/pdf', ext: 'pdf' },
       });
 
       expect(getByText('pdf')).toBeInTheDocument();

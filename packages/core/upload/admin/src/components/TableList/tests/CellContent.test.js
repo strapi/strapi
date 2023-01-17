@@ -7,9 +7,8 @@ import { CellContent } from '../CellContent';
 
 const PROPS_FIXTURE = {
   cellType: 'image',
-  elementType: 'asset',
-  content: 'michka-picture-url-default.jpeg',
-  element: {
+  contentType: 'asset',
+  content: {
     alternativeText: 'alternative alt',
     ext: 'jpeg',
     formats: {
@@ -20,6 +19,7 @@ const PROPS_FIXTURE = {
     mime: 'image/jpeg',
     url: 'michka-picture-url-default.jpeg',
   },
+  name: 'preview',
 };
 
 const ComponentFixture = (props) => {
@@ -49,7 +49,7 @@ describe('TableList | CellContent', () => {
 
   it('should render image cell type when element type is asset and mime does not include image', () => {
     const { container, getByText } = setup({
-      element: { ...PROPS_FIXTURE.element, mime: 'application/pdf', ext: 'pdf' },
+      content: { ...PROPS_FIXTURE.element, mime: 'application/pdf', ext: 'pdf' },
     });
 
     expect(getByText('pdf')).toBeInTheDocument();
@@ -57,42 +57,54 @@ describe('TableList | CellContent', () => {
   });
 
   it('should render image cell type when element type is folder', () => {
-    const { container } = setup({ elementType: 'folder' });
+    const { container } = setup({ contentType: 'folder' });
 
     expect(container.querySelector('path')).toBeInTheDocument();
     expect(container).toMatchSnapshot();
   });
 
   it('should render text cell type', () => {
-    const { container, getByText } = setup({ cellType: 'text', content: 'some text' });
+    const { container, getByText } = setup({
+      cellType: 'text',
+      content: { ...PROPS_FIXTURE.content, name: 'some text' },
+      name: 'name',
+    });
 
     expect(getByText('some text')).toBeInTheDocument();
     expect(container).toMatchSnapshot();
   });
 
   it('should render extension cell type when element type is asset', () => {
-    const { container, getByText } = setup({ cellType: 'ext', content: '.pdf' });
+    const { container, getByText } = setup({
+      cellType: 'ext',
+      content: { ...PROPS_FIXTURE.content, ext: '.pdf' },
+      name: 'ext',
+    });
 
     expect(getByText('PDF')).toBeInTheDocument();
     expect(container).toMatchSnapshot();
   });
 
   it('should render extension cell type with "-" when element type is folder', () => {
-    const { container, getByText } = setup({ cellType: 'ext', elementType: 'folder' });
+    const { container, getByText } = setup({ cellType: 'ext', contentType: 'folder' });
 
     expect(getByText('-')).toBeInTheDocument();
     expect(container).toMatchSnapshot();
   });
 
   it('should render size cell type when element type is asset', () => {
-    const { container, getByText } = setup({ cellType: 'size', content: '20.5435' });
+    const { container, getByText } = setup({
+      cellType: 'size',
+      content: { ...PROPS_FIXTURE.content, size: '20.5435' },
+      name: 'size',
+    });
 
     expect(getByText('21KB')).toBeInTheDocument();
     expect(container).toMatchSnapshot();
   });
 
   it('should render size cell type with "-" when element type is folder', () => {
-    const { container, getByText } = setup({ cellType: 'size', elementType: 'folder' });
+    const { container, getByText } = setup({ cellType: 'size', contentType: 'folder' });
 
     expect(getByText('-')).toBeInTheDocument();
     expect(container).toMatchSnapshot();
@@ -101,7 +113,8 @@ describe('TableList | CellContent', () => {
   it('should render date cell type', () => {
     const { container, getByText } = setup({
       cellType: 'date',
-      content: '2022-11-18T12:08:02.202Z',
+      content: { ...PROPS_FIXTURE.content, updatedAt: '2022-11-18T12:08:02.202Z' },
+      name: 'updatedAt',
     });
 
     expect(getByText('Friday, November 18, 2022')).toBeInTheDocument();

@@ -377,8 +377,8 @@ exports[`TableList | CellContent should render image cell type when element type
 
 .c4 {
   color: #66b7f1;
-  width: 0.9375rem;
-  height: 0.9375rem;
+  width: 1rem;
+  height: 1rem;
 }
 
 .c1 {
@@ -428,9 +428,9 @@ exports[`TableList | CellContent should render image cell type when element type
       <svg
         class="c4 c5"
         fill="none"
-        height="0.9375rem"
+        height="1rem"
         viewBox="0 0 24 24"
-        width="0.9375rem"
+        width="1rem"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
