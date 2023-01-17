@@ -718,9 +718,9 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                             <div
                               class=" css-1hb7zxy-IndicatorsContainer"
                             >
-                              <button
+                              <div
+                                aria-hidden="true"
                                 class="c2 c23 c24 c25"
-                                type="button"
                               >
                                 <svg
                                   fill="none"
@@ -736,7 +736,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                                     fill-rule="evenodd"
                                   />
                                 </svg>
-                              </button>
+                              </div>
                             </div>
                           </div>
                           <input
