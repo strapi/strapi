@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { useCMEditViewDataManager, useFieldHint } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 import { TextInput } from '@strapi/design-system/TextInput';
@@ -23,9 +23,7 @@ import {
 const InputUID = ({
   attribute,
   contentTypeUID,
-  description,
-  minimum,
-  maximum,
+  fieldHint,
   disabled,
   error,
   intlLabel,
@@ -37,7 +35,6 @@ const InputUID = ({
   required,
 }) => {
   const { modifiedData, initialData, layout } = useCMEditViewDataManager();
-  const { fieldHint } = useFieldHint({ description, minimum, maximum });
   const [isLoading, setIsLoading] = useState(false);
   const [availability, setAvailability] = useState(null);
   const debouncedValue = useDebounce(value, 300);
@@ -247,11 +244,6 @@ InputUID.propTypes = {
     required: PropTypes.bool,
   }).isRequired,
   contentTypeUID: PropTypes.string.isRequired,
-  description: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }),
   disabled: PropTypes.bool,
   error: PropTypes.string,
   intlLabel: PropTypes.shape({
@@ -269,20 +261,17 @@ InputUID.propTypes = {
     values: PropTypes.object,
   }),
   required: PropTypes.bool,
-  minimum: PropTypes.number,
-  maximum: PropTypes.number,
+  fieldHint: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
 };
 
 InputUID.defaultProps = {
-  description: undefined,
   disabled: false,
   error: undefined,
   labelAction: undefined,
   placeholder: undefined,
   value: '',
   required: false,
-  minimum: undefined,
-  maximum: undefined,
+  fieldHint: '',
 };
 
 export default InputUID;

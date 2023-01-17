@@ -103,8 +103,7 @@ const GenericInput = ({
       <CustomInput
         {...rest}
         description={description}
-        minimum={minimum}
-        maximum={maximum}
+        fieldHint={fieldHint}
         disabled={disabled}
         intlLabel={intlLabel}
         labelAction={labelAction}
