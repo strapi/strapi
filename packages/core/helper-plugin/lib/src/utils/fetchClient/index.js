@@ -1,11 +1,9 @@
 import axios from 'axios';
-import { auth } from '@strapi/helper-plugin';
+import auth from '../auth';
 
 export const reqInterceptor = async (config) => {
   config.headers = {
     Authorization: `Bearer ${auth.getToken()}`,
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
   };
 
   return config;
@@ -33,13 +31,16 @@ export const addInterceptors = (instance) => {
   instance.interceptors.response.use(resInterceptor, resErrorInterceptor);
 };
 
-export const fetchClient = ({ baseURL }) => {
+export const fetchClient = () => {
   const instance = axios.create({
-    baseURL,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
   });
   addInterceptors(instance);
 
   return instance;
 };
 
-export default fetchClient({ baseURL: process.env.STRAPI_ADMIN_BACKEND_URL });
+export default fetchClient();
