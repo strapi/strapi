@@ -1127,6 +1127,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                                 <input
                                   aria-disabled="false"
                                   aria-invalid="false"
+                                  aria-required="false"
                                   class="c34"
                                   id="textinput-9"
                                   name="name"
@@ -1159,6 +1160,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                                   aria-describedby="textinput-10-hint"
                                   aria-disabled="false"
                                   aria-invalid="false"
+                                  aria-required="false"
                                   class="c34"
                                   id="textinput-10"
                                   name="alternativeText"
@@ -1196,6 +1198,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                                 <input
                                   aria-disabled="false"
                                   aria-invalid="false"
+                                  aria-required="false"
                                   class="c34"
                                   id="textinput-11"
                                   name="caption"
@@ -1260,9 +1263,9 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                               <div
                                 class=" css-1hb7zxy-IndicatorsContainer"
                               >
-                                <button
+                                <div
+                                  aria-hidden="true"
                                   class="c2 c36 c37 c38"
-                                  type="button"
                                 >
                                   <svg
                                     fill="none"
@@ -1278,7 +1281,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                                       fill-rule="evenodd"
                                     />
                                   </svg>
-                                </button>
+                                </div>
                               </div>
                             </div>
                             <input

@@ -29,7 +29,7 @@
   "pages.PluginPage.table.icon.regenerate": "Regenerar {target}",
   "pages.PluginPage.table.icon.show": "Abrir {target}",
   "pages.PluginPage.table.version": "Versión",
-  "pages.SettingsPage.Button.description": "Configura el plugin de documentación",
+  "pages.SettingsPage.header.description": "Configura el plugin de documentación",
   "pages.SettingsPage.header.save": "Guardar",
   "pages.SettingsPage.toggle.hint": "Hacer que la documentación sea privada",
   "pages.SettingsPage.toggle.label": "Acceso restringido",

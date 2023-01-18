@@ -227,7 +227,6 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
               <span
                 class="c5"
                 for="select-1"
-                id="select-1-label"
               >
                 <div
                   class="c6"
@@ -319,7 +318,6 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
               <span
                 class="c5"
                 for="select-2"
-                id="select-2-label"
               >
                 <div
                   class="c6"
