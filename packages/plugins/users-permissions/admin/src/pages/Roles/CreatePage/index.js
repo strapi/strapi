@@ -15,11 +15,11 @@ import { useIntl } from 'react-intl';
 import {
   useOverlayBlocker,
   SettingsPageTitle,
+  useFetchClient,
   useTracking,
   Form,
   useNotification,
 } from '@strapi/helper-plugin';
-import useFetchClient from '@strapi/admin/admin/src/hooks/useFetchClient';
 import UsersPermissions from '../../../components/UsersPermissions';
 import getTrad from '../../../utils/getTrad';
 import pluginId from '../../../pluginId';
