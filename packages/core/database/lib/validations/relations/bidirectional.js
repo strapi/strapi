@@ -66,14 +66,14 @@ const validateBidirectionalRelations = async (db) => {
     if (joinTableEmpty) {
       process.emitWarning(
         `Error on attribute "${invRelation.inversedBy}" in model "${contentType.singularName}" (${contentType.uid}).` +
-          ` Please modify your ${contentType.singularName} schema by renaming the key inversedBy by mappedBy.` +
+          ` Please modify your ${contentType.singularName} schema by renaming the key "inversedBy" by "mappedBy".` +
           ` Ex: { inversedBy: "${relation.inversedBy}" } -> { mappedBy: "${relation.inversedBy}" } }`
       );
     } else if (inverseJoinTableEmpty) {
       // Its safe to delete the inverse join table
       process.emitWarning(
         `Error on attribute "${relation.inversedBy}" in model "${invContentType.singularName}" (${invContentType.uid}).` +
-          ` Please modify your ${invContentType.singularName} schema by renaming the key inversedBy by mappedBy.` +
+          ` Please modify your ${invContentType.singularName} schema by renaming the key "inversedBy" by "mappedBy".` +
           ` Ex: { inversedBy: "${invRelation.inversedBy}" } -> { mappedBy: "${invRelation.inversedBy}" } }`
       );
     } else {
