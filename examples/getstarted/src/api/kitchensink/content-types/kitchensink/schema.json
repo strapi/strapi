@@ -57,19 +57,33 @@
     },
     "enumeration": {
       "type": "enumeration",
-      "enum": ["A", "B", "C", "D", "E"]
+      "enum": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ]
     },
     "single_media": {
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": ["images", "files", "videos"]
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos"
+      ]
     },
     "multiple_media": {
       "type": "media",
       "multiple": true,
       "required": false,
-      "allowedTypes": ["images", "files", "videos"]
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos"
+      ]
     },
     "json": {
       "type": "json"
@@ -86,7 +100,10 @@
     },
     "dynamiczone": {
       "type": "dynamiczone",
-      "components": ["basic.simple"]
+      "components": [
+        "basic.simple",
+        "blog.test-como"
+      ]
     },
     "one_way_tag": {
       "type": "relation",
@@ -130,6 +147,22 @@
     "morph_to_many": {
       "type": "relation",
       "relation": "morphToMany"
+    },
+    "custom_field": {
+      "type": "customField",
+      "customField": "plugin::color-picker.color"
+    },
+    "custom_field_with_default_options": {
+      "type": "customField",
+      "regex": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
+      "customField": "plugin::color-picker.color"
+    },
+    "cats": {
+      "type": "dynamiczone",
+      "components": [
+        "basic.relation",
+        "basic.simple"
+      ]
     }
   }
 }

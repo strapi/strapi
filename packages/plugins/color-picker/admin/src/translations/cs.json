@@ -1,0 +1,12 @@
+{
+  "color-picker.label": "Barva",
+  "color-picker.description": "Vyberte libovolnou barvu",
+  "color-picker.settings": "Nastavení",
+  "color-picket.input.format": "HEX",
+  "color-picker.options.advanced.regex": "RegExp vzor",
+  "color-picker.options.advanced.regex.description": "Zadejte regulární výraz pro ověření hodnoty HEX",
+  "color-picker.options.advanced.requiredField": "Povinné pole",
+  "color-picker.options.advanced.requiredField.description": "Pokud je toto pole prázdné, nebudete moci vytvořit záznam",
+  "color-picker.toggle.aria-label": "Přepínač výběru barvy",
+  "color-picker.input.aria-label": "Vstup pro výběr barvy"
+}

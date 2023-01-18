@@ -695,7 +695,7 @@ paths:
             type: string
           description: user Id
       responses:
-        "200":
+        '200':
           description: Returns deleted user info
           content:
             application/json:
@@ -868,4 +868,3 @@ components:
                   controllerA:
                     find:
                       enabled: true
-

@@ -12,7 +12,7 @@ import { getTrad } from '../../../utils';
 import RowsLayout from './RowsLayout';
 import LinkToCTB from './LinkToCTB';
 
-const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField, onAddField }) => {
+const DisplayedFields = ({ editLayout, fields, onRemoveField, onAddField }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -55,9 +55,9 @@ const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField,
             startIcon={<Plus />}
             endIcon={null}
             variant="secondary"
-            disabled={editLayoutRemainingFields.length === 0}
+            disabled={fields.length === 0}
           >
-            {editLayoutRemainingFields.map((field) => (
+            {fields.map((field) => (
               <MenuItem key={field} onClick={() => onAddField(field)}>
                 {field}
               </MenuItem>
@@ -71,7 +71,7 @@ const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField,
 
 DisplayedFields.propTypes = {
   editLayout: PropTypes.array.isRequired,
-  editLayoutRemainingFields: PropTypes.array.isRequired,
+  fields: PropTypes.array.isRequired,
   onAddField: PropTypes.func.isRequired,
   onRemoveField: PropTypes.func.isRequired,
 };

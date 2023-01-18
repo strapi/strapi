@@ -18,7 +18,7 @@ const getBreadcrumbDataML = (folder, { pathname, query }) => {
     data.push({
       id: folder.parent.id,
       label: folder.parent.name,
-      href: getFolderURL(pathname, query, folder.parent),
+      href: getFolderURL(pathname, query, folder.parent?.id),
     });
   }
 

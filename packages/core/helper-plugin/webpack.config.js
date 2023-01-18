@@ -1,5 +1,7 @@
 const webpack = require('webpack');
-const path = require('path');
+const { ESBuildMinifyPlugin } = require('esbuild-loader');
+const browserslistToEsbuild = require('browserslist-to-esbuild');
+
 const packageJson = require('./package.json');
 
 const nodeModules = [];
@@ -16,6 +18,14 @@ module.exports = {
   externals: nodeModules,
   mode: process.env.NODE_ENV,
   devtool: process.env.NODE_ENV === 'production' ? false : 'eval-source-map',
+  optimization: {
+    minimize: process.env.NODE_ENV === 'production',
+    minimizer: [
+      new ESBuildMinifyPlugin({
+        target: 'es2015',
+      }),
+    ],
+  },
   output: {
     path: `${__dirname}/build`,
     filename: `helper-plugin.${process.env.NODE_ENV}.js`,
@@ -28,10 +38,14 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/,
-        include: path.resolve(__dirname, 'lib', 'src'),
-        loader: 'babel-loader',
-        exclude: /(node_modules)/,
+        test: /\.m?jsx?$/,
+        use: {
+          loader: require.resolve('esbuild-loader'),
+          options: {
+            loader: 'jsx',
+            target: browserslistToEsbuild(),
+          },
+        },
       },
       {
         test: /\.(png|svg|jpg|gif)$/,

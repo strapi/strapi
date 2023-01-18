@@ -24,6 +24,8 @@ module.exports = {
       name: trim(body.name),
       description: trim(body.description),
       type: body.type,
+      permissions: body.permissions,
+      lifespan: body.lifespan,
     };
 
     await validateApiTokenCreationInput(attributes);
@@ -35,6 +37,21 @@ module.exports = {
 
     const apiToken = await apiTokenService.create(attributes);
     ctx.created({ data: apiToken });
+  },
+
+  async regenerate(ctx) {
+    const { id } = ctx.params;
+    const apiTokenService = getService('api-token');
+
+    const apiTokenExists = await apiTokenService.getById(id);
+    if (!apiTokenExists) {
+      ctx.notFound('API Token not found');
+      return;
+    }
+
+    const accessToken = await apiTokenService.regenerate(id);
+
+    ctx.created({ data: accessToken });
   },
 
   async list(ctx) {
@@ -59,7 +76,6 @@ module.exports = {
 
     if (!apiToken) {
       ctx.notFound('API Token not found');
-
       return;
     }
 
@@ -107,5 +123,12 @@ module.exports = {
 
     const apiToken = await apiTokenService.update(id, attributes);
     ctx.send({ data: apiToken });
+  },
+
+  async getLayout(ctx) {
+    const apiTokenService = getService('api-token');
+    const layout = await apiTokenService.getApiTokenLayout();
+
+    ctx.send({ data: layout });
   },
 };

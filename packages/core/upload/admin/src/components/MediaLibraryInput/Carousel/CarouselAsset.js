@@ -7,7 +7,7 @@ import { Flex } from '@strapi/design-system/Flex';
 import { AssetType, AssetDefinition } from '../../../constants';
 import { VideoPreview } from '../../AssetCard/VideoPreview';
 import { AudioPreview } from '../../AssetCard/AudioPreview';
-import { createAssetUrl } from '../../../utils/createAssetUrl';
+import { createAssetUrl } from '../../../utils';
 
 const DocAsset = styled(Flex)`
   background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);
