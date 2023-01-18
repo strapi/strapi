@@ -98,8 +98,7 @@ describe('Count', () => {
 
       expect(count).toEqual({
         relationAttrName: {
-          id: 2,
-          name: 'rel1',
+          count: 1,
         },
       });
     });
