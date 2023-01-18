@@ -12,8 +12,32 @@ const { exitWith } = require('./helpers');
 /**
  * argParser: Parse a comma-delimited string as an array
  */
-const parseInputList = (value) => {
-  return value.split(',');
+const parseList = (value) => {
+  let list;
+  try {
+    list = value.split(',').map((item) => item.trim()); // trim shouldn't be necessary but might help catch unexpected whitespace characters
+  } catch (e) {
+    exitWith(1, `Unrecognized input: ${value}`);
+  }
+  return list;
+};
+
+/**
+ * Returns an argParser that returns a list
+ */
+const getParseListWithChoices = (choices, errorMessage = 'Invalid options:') => {
+  return (value) => {
+    const list = parseList(value);
+    const invalid = list.filter((item) => {
+      return !choices.includes(item);
+    });
+
+    if (invalid.length > 0) {
+      exitWith(1, `${errorMessage}: ${invalid.join(',')}`);
+    }
+
+    return list;
+  };
 };
 
 /**
@@ -103,7 +127,8 @@ const forceOption = new Option(
 );
 
 module.exports = {
-  parseInputList,
+  getParseListWithChoices,
+  parseList,
   parseURL,
   promptEncryptionKey,
   confirmMessage,

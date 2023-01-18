@@ -2,45 +2,50 @@
 
 const utils = require('../../transfer/utils');
 
-const mockDataTransfer = {
-  strapi: {
-    providers: {
-      createRemoteStrapiDestinationProvider: jest.fn(),
-      createLocalStrapiSourceProvider: jest.fn(),
-    },
-  },
-  engine: {
-    createTransferEngine: jest.fn().mockReturnValue({
-      transfer: jest.fn().mockReturnValue(Promise.resolve({})),
-    }),
-  },
-};
-
-jest.mock('@strapi/data-transfer/lib/engine', () => mockDataTransfer.engine, { virtual: true });
-jest.mock('@strapi/data-transfer/lib/strapi', () => mockDataTransfer.strapi, { virtual: true });
-
-const expectExit = async (code, fn) => {
-  const exit = jest.spyOn(process, 'exit').mockImplementation((number) => {
-    throw new Error(`process.exit: ${number}`);
-  });
-  await expect(async () => {
-    await fn();
-  }).rejects.toThrow();
-  expect(exit).toHaveBeenCalledWith(code);
-  exit.mockRestore();
-};
-
-const transferCommand = require('../../transfer/transfer');
-
-jest.spyOn(console, 'error').mockImplementation(() => {});
-jest.spyOn(console, 'warn').mockImplementation(() => {});
-jest.spyOn(console, 'log').mockImplementation(() => {});
-
 jest.mock('../../transfer/utils');
 
-const destinationUrl = new URL('http://strapi.com/admin');
-
 describe('Transfer', () => {
+  const createRemoteStrapiDestinationProvider = jest.fn();
+  const createLocalStrapiSourceProvider = jest.fn();
+  const cteTransfer = jest.fn().mockReturnValue(Promise.resolve({}));
+  const createTransferEngine = jest.fn().mockReturnValue({
+    transfer: cteTransfer,
+  });
+
+  const mockDataTransfer = {
+    strapi: {
+      providers: {
+        createRemoteStrapiDestinationProvider,
+        createLocalStrapiSourceProvider,
+      },
+    },
+    engine: {
+      createTransferEngine,
+    },
+  };
+
+  jest.mock('@strapi/data-transfer/lib/engine', () => mockDataTransfer.engine, { virtual: true });
+  jest.mock('@strapi/data-transfer/lib/strapi', () => mockDataTransfer.strapi, { virtual: true });
+
+  const expectExit = async (code, fn) => {
+    const exit = jest.spyOn(process, 'exit').mockImplementation((number) => {
+      throw new Error(`process.exit: ${number}`);
+    });
+    await expect(async () => {
+      await fn();
+    }).rejects.toThrow();
+    expect(exit).toHaveBeenCalledWith(code);
+    exit.mockRestore();
+  };
+
+  const transferCommand = require('../../transfer/transfer');
+
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  jest.spyOn(console, 'log').mockImplementation(() => {});
+
+  const destinationUrl = new URL('http://strapi.com/admin');
+
   beforeEach(() => {
     jest.resetAllMocks();
   });

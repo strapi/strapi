@@ -21,6 +21,11 @@ const {
   forceOption,
 } = require('../lib/commands/utils/commander');
 const { ifOptions, assertUrlHasProtocol, exitWith } = require('../lib/commands/utils/helpers');
+const {
+  excludeOption,
+  onlyOption,
+  validateExcludeOnly,
+} = require('../lib/commands/transfer/utils');
 
 const checkCwdIsStrapiApp = (name) => {
   const logErrorAndExit = () => {
@@ -269,6 +274,7 @@ if (process.env.STRAPI_EXPERIMENTAL === 'true') {
   program
     .command('transfer')
     .description('Transfer data from one source to another')
+    .allowExcessArguments(false)
     .addOption(
       new Option(
         '--from <sourceURL>',
@@ -304,13 +310,16 @@ if (process.env.STRAPI_EXPERIMENTAL === 'true') {
         () => exitWith(1, 'At least one source (from) or destination (to) option must be provided')
       )
     )
+    .addOption(forceOption)
+    .addOption(excludeOption)
+    .addOption(onlyOption)
+    .hook('preAction', validateExcludeOnly)
     .hook(
       'preAction',
       confirmMessage(
         'The import will delete all data in the remote database. Are you sure you want to proceed?'
       )
     )
-    .allowExcessArguments(false)
     .action(getLocalScript('transfer/transfer'));
 }
 
@@ -318,6 +327,7 @@ if (process.env.STRAPI_EXPERIMENTAL === 'true') {
 program
   .command('export')
   .description('Export data from Strapi to file')
+  .allowExcessArguments(false)
   .addOption(
     new Option('--no-encrypt', `Disables 'aes-128-ecb' encryption of the output file`).default(true)
   )
@@ -329,7 +339,9 @@ program
     )
   )
   .addOption(new Option('-f, --file <file>', 'name to use for exported file (without extensions)'))
-  .allowExcessArguments(false)
+  .addOption(excludeOption)
+  .addOption(onlyOption)
+  .hook('preAction', validateExcludeOnly)
   .hook('preAction', promptEncryptionKey)
   .action(getLocalScript('transfer/export'));
 
@@ -337,6 +349,7 @@ program
 program
   .command('import')
   .description('Import data from file to Strapi')
+  .allowExcessArguments(false)
   .requiredOption(
     '-f, --file <file>',
     'path and filename for the Strapi export file you want to import'
@@ -348,7 +361,9 @@ program
     )
   )
   .addOption(forceOption)
-  .allowExcessArguments(false)
+  .addOption(excludeOption)
+  .addOption(onlyOption)
+  .hook('preAction', validateExcludeOnly)
   .hook('preAction', async (thisCommand) => {
     const opts = thisCommand.opts();
     const ext = path.extname(String(opts.file));
