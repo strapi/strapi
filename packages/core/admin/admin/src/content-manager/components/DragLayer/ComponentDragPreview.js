@@ -2,13 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { pxToRem } from '@strapi/helper-plugin';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import { IconButton } from '@strapi/design-system/IconButton';
-import Trash from '@strapi/icons/Trash';
-import DragHandle from '@strapi/icons/Drag';
-import CarretDown from '@strapi/icons/CarretDown';
+import { Box, Flex, Typography, IconButton } from '@strapi/design-system';
+import { Trash, Drag, CarretDown } from '@strapi/icons';
 
 const DragPreviewBox = styled(Box)`
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
@@ -57,18 +52,22 @@ const DragPreview = ({ displayedValue }) => {
             <DropdownIconWrapper background="neutral200">
               <CarretDown />
             </DropdownIconWrapper>
-            <Box paddingLeft={6} maxWidth={pxToRem(150)}>
+            <Flex gap={2} paddingLeft={6} maxWidth={pxToRem(150)}>
               <Typography textColor="neutral700" ellipsis>
                 {displayedValue}
               </Typography>
-            </Box>
+            </Flex>
           </Flex>
         </ToggleButton>
         <Box paddingLeft={3}>
           <Flex>
-            <IconButton icon={<Trash />} />
+            <IconButton noBorder>
+              <Trash />
+            </IconButton>
             <Box paddingLeft={2}>
-              <IconButton icon={<DragHandle />} />
+              <IconButton noBorder>
+                <Drag />
+              </IconButton>
             </Box>
           </Flex>
         </Box>

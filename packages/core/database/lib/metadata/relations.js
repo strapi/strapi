@@ -233,7 +233,7 @@ const createMorphToMany = (attributeName, attribute, meta, metadata) => {
         type: 'string',
       },
       order: {
-        type: 'integer',
+        type: 'float',
         column: {
           unsigned: true,
         },
@@ -487,7 +487,7 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
   // order
   if (isAnyToMany(attribute)) {
     metadataSchema.attributes[orderColumnName] = {
-      type: 'integer',
+      type: 'float',
       column: {
         unsigned: true,
         defaultTo: null,
@@ -504,7 +504,7 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
   // inv order
   if (isBidirectional(attribute) && isManyToAny(attribute)) {
     metadataSchema.attributes[inverseOrderColumnName] = {
-      type: 'integer',
+      type: 'float',
       column: {
         unsigned: true,
         defaultTo: null,
