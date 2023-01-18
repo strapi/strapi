@@ -136,6 +136,7 @@ export const MediaLibrary = () => {
     assetsData?.results?.map((asset) => ({ ...asset, type: 'asset', isSelectable: canUpdate })) ||
     [];
   const assetCount = assets?.length ?? 0;
+  const totalAssetCount = assetsData?.pagination?.total;
 
   const isLoading = isCurrentFolderLoading || foldersLoading || permissionsLoading || assetsLoading;
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
@@ -458,7 +459,7 @@ export const MediaLibrary = () => {
                           id: getTrad('list.assets.title'),
                           defaultMessage: 'Assets ({count})',
                         },
-                        { count: assetCount }
+                        { count: totalAssetCount }
                       )) ||
                     ''
                   }

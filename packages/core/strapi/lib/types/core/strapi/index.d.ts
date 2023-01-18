@@ -373,6 +373,11 @@ export interface Strapi {
   telemetry: any;
 
   /**
+   * Used to access ctx from anywhere within the Strapi application
+   */
+  requestContext: any;
+
+  /**
    * Strapi DB layer instance
    */
   db: Database;

@@ -21,7 +21,7 @@ describe('Content-Manager || RelationInput || Option', () => {
     setup({ options: [{ id: 1, mainField: 'relation 1', publicationState: 'published' }] });
 
     act(() => {
-      fireEvent.mouseDown(screen.getByRole('button'));
+      fireEvent.mouseDown(screen.getByRole('combobox'));
     });
 
     expect(screen.getByText('relation 1')).toBeInTheDocument();
@@ -32,7 +32,7 @@ describe('Content-Manager || RelationInput || Option', () => {
     setup({ options: [{ id: 1, mainField: 'relation 1', publicationState: 'draft' }] });
 
     act(() => {
-      fireEvent.mouseDown(screen.getByRole('button'));
+      fireEvent.mouseDown(screen.getByRole('combobox'));
     });
 
     expect(screen.getByText('relation 1')).toBeInTheDocument();
