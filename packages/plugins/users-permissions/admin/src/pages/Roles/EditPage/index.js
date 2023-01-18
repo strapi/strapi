@@ -3,6 +3,7 @@ import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
 import {
+  useFetchClient,
   useOverlayBlocker,
   SettingsPageTitle,
   LoadingIndicatorPage,
@@ -21,7 +22,6 @@ import { Typography } from '@strapi/design-system/Typography';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Check from '@strapi/icons/Check';
 import { GridItem, Grid } from '@strapi/design-system/Grid';
-import useFetchClient from '@strapi/admin/admin/src/hooks/useFetchClient';
 import UsersPermissions from '../../../components/UsersPermissions';
 import getTrad from '../../../utils/getTrad';
 import pluginId from '../../../pluginId';
