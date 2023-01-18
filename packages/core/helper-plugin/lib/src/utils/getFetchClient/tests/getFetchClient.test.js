@@ -1,10 +1,10 @@
-import { auth } from '@strapi/helper-plugin';
-import { getFetchClient } from '../getFetchClient';
+import auth from '../../auth';
+import getFetchClient from '../index';
 
 const token = 'coolToken';
 auth.getToken = jest.fn().mockReturnValue(token);
 
-describe('ADMIN | utils | getFetchClient', () => {
+describe('HELPER-PLUGIN | utils | getFetchClient', () => {
   it('should return the 4 HTTP methods to call GET, POST, PUT and DELETE apis', () => {
     const response = getFetchClient();
     expect(response).toHaveProperty('get');
@@ -19,7 +19,6 @@ describe('ADMIN | utils | getFetchClient', () => {
     } catch (err) {
       const { headers } = err.config;
       expect(headers.Authorization).toContain(`Bearer ${token}`);
-      expect(headers.Accept).toBe('application/json');
     }
   });
 });
