@@ -8,6 +8,6 @@ module.exports = ({ env }) => ({
   },
   // Receive populated relations in webhook and db lifecycle payloads
   relations: {
-    populate: false,
+    populate: true,
   },
 });

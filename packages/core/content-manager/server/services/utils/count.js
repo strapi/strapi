@@ -1,15 +1,21 @@
 'use strict';
 
 const { merge } = require('lodash/fp');
+const { isVisibleAttribute } = require('@strapi/utils').contentTypes;
 
-function getCountForRelation(entity, attributeName) {
+function getCountForRelation(attributeName, entity, model) {
   const entityAttribute = entity[attributeName];
+
+  // do not count createdBy, updatedBy, localizations etc.
+  if (!isVisibleAttribute(model, attributeName)) {
+    return entityAttribute;
+  }
 
   if (Array.isArray(entityAttribute)) {
     return { count: entityAttribute.length };
   }
 
-  return entityAttribute;
+  return entityAttribute ? { count: 1 } : { count: 0 };
 }
 
 function getCountForDZ(attributeName, entity) {
@@ -21,15 +27,10 @@ function getCountForDZ(attributeName, entity) {
 function getCountFor(attributeName, entity, model) {
   const attribute = model.attributes[attributeName];
 
-  // Check if attribute is empty
-  if (!entity[attributeName]) {
-    return { [attributeName]: entity[attributeName] };
-  }
-
   switch (attribute?.type) {
     case 'relation':
       return {
-        [attributeName]: getCountForRelation(entity, attributeName),
+        [attributeName]: getCountForRelation(attributeName, entity, model),
       };
     case 'component':
       return {
