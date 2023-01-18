@@ -1,5 +1,10 @@
+/**
+ *
+ * useFetchClient
+ *
+ */
 import { useEffect, useRef } from 'react';
-import { getFetchClient } from '../../utils/getFetchClient';
+import getFetchClient from '../../utils/getFetchClient';
 
 const useFetchClient = () => {
   const controller = useRef(null);
@@ -7,6 +12,7 @@ const useFetchClient = () => {
   if (controller.current === null) {
     controller.current = new AbortController();
   }
+
   useEffect(() => {
     return () => {
       controller.current.abort();
