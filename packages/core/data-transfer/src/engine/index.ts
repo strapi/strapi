@@ -273,6 +273,11 @@ class TransferEngine<
   shouldSkipStage(stage: TransferStage) {
     const { exclude, only } = this.options;
 
+    // schemas must always be included
+    if (stage === 'schemas') {
+      return false;
+    }
+
     // everything is included by default unless 'only' has been set
     let included = isEmpty(only);
     if (only?.length > 0) {

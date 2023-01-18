@@ -99,7 +99,7 @@ const excludeOption = new Option(
 
 const onlyOption = new Option(
   '--only <command-separated data types>',
-  `Include only this data. Available types: ${transferDataTypes.join(',')}`
+  `Include only this data (plus schemas). Available types: ${transferDataTypes.join(',')}`
 ).argParser(getParseListWithChoices(transferDataTypes, 'Invalid options for "only"'));
 
 const validateExcludeOnly = (command) => {
