@@ -89,9 +89,9 @@ exports[`SelectTree renders 1`] = `
           <div
             class=" css-1hb7zxy-IndicatorsContainer"
           >
-            <button
+            <div
+              aria-hidden="true"
               class="c0 c1 c2"
-              type="button"
             >
               <svg
                 fill="none"
@@ -107,7 +107,7 @@ exports[`SelectTree renders 1`] = `
                   fill-rule="evenodd"
                 />
               </svg>
-            </button>
+            </div>
           </div>
         </div>
       </div>
@@ -220,9 +220,9 @@ exports[`SelectTree renders 1`] = `
         <div
           class=" css-1hb7zxy-IndicatorsContainer"
         >
-          <button
+          <div
+            aria-hidden="true"
             class="c0 c1 c2"
-            type="button"
           >
             <svg
               fill="none"
@@ -238,7 +238,7 @@ exports[`SelectTree renders 1`] = `
                 fill-rule="evenodd"
               />
             </svg>
-          </button>
+          </div>
         </div>
       </div>
     </div>

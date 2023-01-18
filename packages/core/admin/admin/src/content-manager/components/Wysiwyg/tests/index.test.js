@@ -973,7 +973,7 @@ describe('Wysiwyg render and actions buttons', () => {
                         fill="none"
                         focusable="false"
                         height="1em"
-                        viewBox="0 0 24"
+                        viewBox="0 0 24 24"
                         width="1em"
                         xmlns="http://www.w3.org/2000/svg"
                       >
