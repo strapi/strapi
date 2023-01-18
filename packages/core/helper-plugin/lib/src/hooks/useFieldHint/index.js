@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useIntl } from 'react-intl';
 
 /**
@@ -17,70 +17,72 @@ const useFieldHint = ({ description, minimum, maximum, units }) => {
   /**
    * @returns {String}
    */
-  const buildDescription = () =>
-    description
-      ? formatMessage(
-          { id: description.id, defaultMessage: description.defaultMessage },
-          { ...description.values }
-        )
-      : '';
+  const buildDescription = useCallback(
+    (desc) =>
+      desc
+        ? formatMessage({ id: desc.id, defaultMessage: desc.defaultMessage }, { ...desc.values })
+        : '',
+    [formatMessage]
+  );
 
   /**
    * Constructs a suitable description of a field's minimum and maximum limits
+   * @param {Number} minimum - the minimum length or value of the field
+   * @param {Number} maximum - the maximum length or value of the field
+   * @param {String} units
    * @returns {Array}
    */
-  const buildMinMaxHint = () => {
-    const minIsNumber = typeof minimum === 'number';
-    const maxIsNumber = typeof maximum === 'number';
+  const buildMinMaxHint = useCallback(
+    (min, max, units) => {
+      const minIsNumber = typeof min === 'number';
+      const maxIsNumber = typeof max === 'number';
 
-    if (!minIsNumber && !maxIsNumber) {
-      return [];
-    }
-
-    const minMaxDescription = [];
-
-    if (minIsNumber) {
-      minMaxDescription.push(`min. {minimum}`);
-    }
-    if (maxIsNumber) {
-      minMaxDescription.push(`max. {maximum}`);
-    }
-
-    let defaultMessage;
-
-    if (minMaxDescription.length === 0) {
-      defaultMessage = '';
-    } else {
-      defaultMessage = `${minMaxDescription.join(' / ')} {units}{br}`;
-    }
-
-    return formatMessage(
-      {
-        id: `content-manager.form.Input.minMaxDescription`,
-        defaultMessage,
-      },
-      {
-        minimum,
-        maximum,
-        units,
-        br: <br />,
+      if (!minIsNumber && !maxIsNumber) {
+        return [];
       }
-    );
-  };
+      const minMaxDescription = [];
+
+      if (minIsNumber) {
+        minMaxDescription.push(`min. {min}`);
+      }
+      if (maxIsNumber) {
+        minMaxDescription.push(`max. {max}`);
+      }
+      let defaultMessage;
+
+      if (minMaxDescription.length === 0) {
+        defaultMessage = '';
+      } else {
+        defaultMessage = `${minMaxDescription.join(' / ')} {units}{br}`;
+      }
+
+      return formatMessage(
+        {
+          id: `content-manager.form.Input.minMaxDescription`,
+          defaultMessage,
+        },
+        {
+          min,
+          max,
+          units,
+          br: <br />,
+        }
+      );
+    },
+    [formatMessage]
+  );
 
   useEffect(() => {
-    const description = buildDescription();
-    const minMaxHint = buildMinMaxHint();
+    const newDescription = buildDescription(description);
+    const minMaxHint = buildMinMaxHint(minimum, maximum, units);
 
-    if (description.length === 0 && minMaxHint.length === 0) {
+    if (newDescription.length === 0 && minMaxHint.length === 0) {
       setHint('');
 
       return;
     }
-    setHint([...minMaxHint, description]);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [units, description, minimum, maximum]);
+    setHint([...minMaxHint, newDescription]);
+  }, [units, description, minimum, maximum, buildMinMaxHint, buildDescription]);
 
   return { hint };
 };

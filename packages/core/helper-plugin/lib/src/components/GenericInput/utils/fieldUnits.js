@@ -2,7 +2,7 @@
  * @param {String} type
  * @param {Number} minimum
  * @param {Number} maximum
- * @returns
+ * @returns {'' | 'characters' | 'character'}
  */
 const getFieldUnits = (type, minimum, maximum) => {
   if (type === 'number') {

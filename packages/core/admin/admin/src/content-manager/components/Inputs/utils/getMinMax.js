@@ -1,7 +1,6 @@
 /**
  * Get the minimum and maximum limits for an input
- * @param {Object} fieldSchema
- * @returns {Object}
+ * @type { (fieldSchema: { minLength?: number; maxLength?: number; max?: number; min?: number } ) => { inputMaximum: number; inputMinimum: number } }
  */
 const getMinMax = (fieldSchema) => {
   const { minLength, maxLength, max, min } = fieldSchema;
