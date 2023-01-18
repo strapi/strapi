@@ -1,6 +1,5 @@
 import { useCallback, useReducer, useEffect, useRef } from 'react';
-import { useNotification } from '@strapi/helper-plugin';
-import useFetchClient from '@strapi/admin/admin/src/hooks/useFetchClient';
+import { useNotification, useFetchClient } from '@strapi/helper-plugin';
 import reducer, { initialState } from './reducer';
 import pluginId from '../../pluginId';
 
