@@ -18,6 +18,8 @@ import type {
   TransferStage,
   TransferTransform,
   IProvider,
+  TransferFilters,
+  TransferFilterPreset,
 } from '../../types';
 import type { Diff } from '../utils/json';
 
@@ -38,6 +40,34 @@ export const TRANSFER_STAGES: ReadonlyArray<TransferStage> = Object.freeze([
   'schemas',
   'configuration',
 ]);
+
+export type TransferGroupFilter = Record<TransferFilterPreset, TransferFilters>;
+
+/**
+ * Preset filters for only/exclude options
+ * */
+export const TransferGroupPresets: TransferGroupFilter = {
+  content: {
+    links: true, // Example: content includes the entire links stage
+    entities: true,
+    // TODO: If we need to implement filtering on a running stage, it would be done like this, but we still need to implement it
+    // [
+    //   // Example: content processes the entities stage, but filters individual entities
+    //   {
+    //     filter(data) {
+    //       return shouldIncludeThisData(data);
+    //     },
+    //   },
+    // ],
+  },
+  files: {
+    assets: true,
+    links: true,
+  },
+  config: {
+    configuration: true,
+  },
+};
 
 export const DEFAULT_VERSION_STRATEGY = 'ignore';
 export const DEFAULT_SCHEMA_STRATEGY = 'strict';
@@ -362,9 +392,28 @@ class TransferEngine<
     }
   }
 
-  /**
-   * Build a run a stage transfer based on the given parameters.
-   */
+  shouldSkipStage(stage: TransferStage) {
+    const { exclude, only } = this.options;
+
+    // everything is included by default unless 'only' has been set
+    let included = isEmpty(only);
+    if (only?.length > 0) {
+      included = only.some((transferGroup) => {
+        return TransferGroupPresets[transferGroup][stage];
+      });
+    }
+
+    if (exclude?.length > 0) {
+      if (included) {
+        included = !exclude.some((transferGroup) => {
+          return TransferGroupPresets[transferGroup][stage];
+        });
+      }
+    }
+
+    return !included;
+  }
+
   async #transferStage(options: {
     stage: TransferStage;
     source?: Readable;
@@ -374,7 +423,7 @@ class TransferEngine<
   }) {
     const { stage, source, destination, transform, tracker } = options;
 
-    if (!source || !destination) {
+    if (!source || !destination || this.shouldSkipStage(stage)) {
       // Wait until source and destination are closed
       const results = await Promise.allSettled(
         [source, destination].map((stream) => {

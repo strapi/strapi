@@ -1,10 +1,15 @@
 import { PassThrough } from 'stream';
+import type { IAsset, IEntity, ILink } from './common-entities';
+import type { ITransferResults, TransferTransform, TransferTransforms } from './utils';
+import type { ISourceProvider, IDestinationProvider } from './providers';
 import type { Schema } from '@strapi/strapi';
 import type { IAsset, IEntity, ILink } from './common-entities';
 import type { ITransferResults, TransferTransform, TransferProgress } from './utils';
 import type { ISourceProvider, IDestinationProvider } from './providers';
 import type { Severity } from '../src/errors';
 import type { DiagnosticReporter } from '../src/engine/diagnostic';
+
+export type TransferFilterPreset = 'content' | 'files' | 'config';
 
 /**
  * Defines the capabilities and properties of the transfer engine
@@ -135,12 +140,9 @@ export interface ITransferEngineOptions {
   schemaStrategy: 'exact' | 'strict' | 'ignore';
 
   // List of rules to integrate into the final pipelines
-  transforms?: {
-    global?: TransferTransform<unknown>[];
-    schemas?: TransferTransform<Schema>[];
-    entities?: TransferTransform<IEntity>[];
-    links?: TransferTransform<ILink>[];
-    assets?: TransferTransform<IAsset>[];
-    configuration?: TransferTransform<unknown>[];
-  };
+  transforms?: TransferTransforms;
+
+  // List of TransferTransformList preset options to exclude/include
+  exclude: TransferFilterPreset[];
+  only: TransferFilterPreset[];
 }
