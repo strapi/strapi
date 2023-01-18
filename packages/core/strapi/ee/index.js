@@ -3,7 +3,7 @@
 const { pick } = require('lodash/fp');
 
 const { readLicense, verifyLicense, fetchLicense, LicenseCheckError } = require('./license');
-const { coreStoreModel } = require('../lib/services/core-store');
+const { eeStoreModel } = require('./ee-store');
 const { getRecurringCronExpression } = require('../lib/utils/cron');
 
 const ONE_MINUTE = 1000 * 60;
@@ -58,7 +58,7 @@ const onlineUpdate = async ({ strapi }) => {
   try {
     // TODO: Use the core store interface instead, it does not support transactions and "FOR UPDATE" at the moment
     const eeInfo = await strapi.db
-      .queryBuilder(coreStoreModel.uid)
+      .queryBuilder(eeStoreModel.uid)
       .where({ key: 'ee_information' })
       .select('value')
       .first()
@@ -101,11 +101,11 @@ const onlineUpdate = async ({ strapi }) => {
 
     // If the registry was contacted, store the result in database, even in case of an error
     if (shouldContactRegistry) {
-      const query = strapi.db.queryBuilder(coreStoreModel.uid).transacting(transaction);
+      const query = strapi.db.queryBuilder(eeStoreModel.uid).transacting(transaction);
       value.license = license ?? null;
 
       if (!eeInfo) {
-        query.insert({ key: 'ee_information', value: JSON.stringify(value), type: typeof value });
+        query.insert({ key: 'ee_information', value: JSON.stringify(value) });
       } else {
         query.update({ value: JSON.stringify(value) }).where({ key: 'ee_information' });
       }

@@ -69,6 +69,8 @@ const fetchLicense = async (key, projectId) => {
         return data.license;
       case 400:
         throw new LicenseCheckError(error.message);
+      case 404:
+        throw new LicenseCheckError('The license used does not exists.');
       default:
         throwError();
     }

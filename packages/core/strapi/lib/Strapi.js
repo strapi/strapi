@@ -17,6 +17,7 @@ const { createServer } = require('./services/server');
 const createWebhookRunner = require('./services/webhook-runner');
 const { webhookModel, createWebhookStore } = require('./services/webhook-store');
 const { createCoreStore, coreStoreModel } = require('./services/core-store');
+const { eeStoreModel } = require('../ee/ee-store');
 const createEntityService = require('./services/entity-service');
 const createCronService = require('./services/cron');
 const entityValidator = require('./services/entity-validator');
@@ -407,6 +408,7 @@ class Strapi {
     const contentTypes = [
       coreStoreModel,
       webhookModel,
+      eeStoreModel,
       ...Object.values(strapi.contentTypes),
       ...Object.values(strapi.components),
     ];
