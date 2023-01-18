@@ -126,7 +126,7 @@ data for the api.
 
 ### Cleaning data to be posted to the API
 
-The API to update the entiy expects relations to be categorised into two groups, a `connect` array and `disconnect` array.
+The API to update the entity expects relations to be categorised into two groups, a `connect` array and `disconnect` array.
 You could do this as the user interacts with the input but we found this to be confusing and then involved us managing three
 different arrays which makes the code more complex. Instead, because the browser doesn't really care about whats new and removed
 and we have a copy of the slice of data we're mutating from the server we can run a small diff algorithm to determine which
