@@ -1,8 +1,10 @@
+import _ from 'lodash';
 import { Writable } from 'stream';
 import chalk from 'chalk';
 import { IConfiguration } from '../../../../../../types';
 
-const restoreCoreStore = async <T extends { value: unknown }>(strapi: Strapi.Strapi, data: T) => {
+const restoreCoreStore = async <T extends { value: unknown }>(strapi: Strapi.Strapi, values: T) => {
+  const data = _.omit(values, ['id']);
   return strapi.db.query('strapi::core-store').create({
     data: {
       ...data,
@@ -11,7 +13,8 @@ const restoreCoreStore = async <T extends { value: unknown }>(strapi: Strapi.Str
   });
 };
 
-const restoreWebhooks = async (strapi: Strapi.Strapi, data: unknown) => {
+const restoreWebhooks = async <T extends { value: unknown }>(strapi: Strapi.Strapi, values: T) => {
+  const data = _.omit(values, ['id']);
   return strapi.db.query('webhook').create({ data });
 };
 
@@ -21,11 +24,11 @@ export const restoreConfigs = async (strapi: Strapi.Strapi, config: IConfigurati
   }
 
   if (config.type === 'webhook') {
-    return restoreWebhooks(strapi, config.value);
+    return restoreWebhooks(strapi, config.value as { value: unknown });
   }
 };
 
-export const createConfigurationWriteStream = async (strapi: Strapi.Strapi) => {
+export const createConfigurationWriteStream = async (strapi: Strapi.Strapi, transaction: any) => {
   return new Writable({
     objectMode: true,
     async write<T extends { id: number }>(
@@ -33,18 +36,18 @@ export const createConfigurationWriteStream = async (strapi: Strapi.Strapi) => {
       _encoding: BufferEncoding,
       callback: (error?: Error | null) => void
     ) {
-      try {
-        await restoreConfigs(strapi, config);
-      } catch (error) {
-        return callback(
-          new Error(
-            `Failed to import ${chalk.yellowBright(config.type)} (${chalk.greenBright(
-              config.value.id
-            )}`
-          )
-        );
-      }
-      callback();
+      return transaction(async () => {
+        try {
+          await restoreConfigs(strapi, config);
+        } catch (error) {
+          return callback(
+            new Error(
+              `Failed to import ${chalk.yellowBright(config.type)} (${chalk.greenBright(error)}`
+            )
+          );
+        }
+        callback();
+      });
     },
   });
 };

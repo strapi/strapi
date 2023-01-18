@@ -25,6 +25,10 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   strapi?: Strapi.Strapi;
 
+  transaction?: any;
+
+  endTransaction?: any;
+
   /**
    * The entities mapper is used to map old entities to their new IDs
    */
@@ -42,6 +46,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   async close(): Promise<void> {
     const { autoDestroy } = this.options;
+    this.endTransaction();
 
     // Basically `!== false` but more deterministic
     if (autoDestroy === undefined || autoDestroy === true) {
@@ -64,9 +69,23 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async beforeTransfer() {
-    if (this.options.strategy === 'restore') {
-      await this.#deleteAll();
+    if (!this.strapi) {
+      throw new Error('Strapi instance not found');
     }
+
+    const { transaction, endTransaction } = await utils.transaction.createTransaction(this.strapi);
+    this.transaction = transaction;
+    this.endTransaction = endTransaction;
+
+    await this.transaction(async () => {
+      try {
+        if (this.options.strategy === 'restore') {
+          await this.#deleteAll();
+        }
+      } catch (error) {
+        throw new Error(`restore failed ${error}`);
+      }
+    });
   }
 
   getMetadata(): IMetadata {
@@ -120,6 +139,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       return restore.createEntitiesWriteStream({
         strapi: this.strapi,
         updateMappingTable,
+        transaction: this.transaction,
       });
     }
 
@@ -183,7 +203,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     const { strategy } = this.options;
 
     if (strategy === 'restore') {
-      return restore.createConfigurationWriteStream(this.strapi);
+      return restore.createConfigurationWriteStream(this.strapi, this.transaction);
     }
 
     throw new Error(`Invalid strategy supplied: "${strategy}"`);
@@ -198,7 +218,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     const mapID = (uid: string, id: number): number | undefined => this.#entitiesMapper[uid]?.[id];
 
     if (strategy === 'restore') {
-      return restore.createLinksWriteStream(mapID, this.strapi);
+      return restore.createLinksWriteStream(mapID, this.strapi, this.transaction);
     }
 
     throw new Error(`Invalid strategy supplied: "${strategy}"`);

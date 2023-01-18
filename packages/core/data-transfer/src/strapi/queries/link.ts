@@ -4,7 +4,7 @@ import { ILink } from '../../../types';
 
 // TODO: Remove any types when we'll have types for DB metadata
 
-export const createLinkQuery = (strapi: Strapi.Strapi) => {
+export const createLinkQuery = (strapi: Strapi.Strapi, trx?: any) => {
   const query = () => {
     const { connection } = strapi.db;
 
@@ -32,6 +32,10 @@ export const createLinkQuery = (strapi: Strapi.Strapi) => {
         const joinColumnName: string = attribute.joinColumn.name;
 
         const qb = connection.queryBuilder().select('id', joinColumnName).from(metadata.tableName);
+
+        if (trx) {
+          qb.transacting(trx);
+        }
 
         // TODO: stream the query to improve performances
         const entries = await qb;
@@ -114,6 +118,10 @@ export const createLinkQuery = (strapi: Strapi.Strapi) => {
 
         qb.select(validColumns);
 
+        if (trx) {
+          qb.transacting(trx);
+        }
+
         // TODO: stream the query to improve performances
         const entries = await qb;
 
@@ -180,10 +188,16 @@ export const createLinkQuery = (strapi: Strapi.Strapi) => {
 
       if (attribute.joinColumn) {
         const joinColumnName = attribute.joinColumn.name;
-
-        await connection(metadata.tableName)
-          .where('id', left.ref)
-          .update({ [joinColumnName]: right.ref });
+        if (trx) {
+          await connection(metadata.tableName)
+            .where('id', left.ref)
+            .transacting(trx)
+            .update({ [joinColumnName]: right.ref });
+        } else {
+          await connection(metadata.tableName)
+            .where('id', left.ref)
+            .update({ [joinColumnName]: right.ref });
+        }
       }
 
       if (attribute.joinTable) {
@@ -242,7 +256,11 @@ export const createLinkQuery = (strapi: Strapi.Strapi) => {
 
         assignOrderColumns();
 
-        await connection.insert(payload).into(name);
+        if (trx) {
+          await connection.insert(payload).transacting(trx).into(name);
+        } else {
+          await connection.insert(payload).into(name);
+        }
       }
     };
 
