@@ -80,7 +80,6 @@ module.exports = (db) => {
           // drop all delete table foreign keys then delete the tables
           for (const table of schemaDiff.tables.removed) {
             debug(`Removing table foreign keys: ${table.name}`);
-            console.log(`Removing table foreign keys: ${table.name}`);
 
             const schemaBuilder = this.getSchemaBuilder(trx);
             await helpers.dropTableForeignKeys(schemaBuilder, table);
@@ -88,7 +87,6 @@ module.exports = (db) => {
 
           for (const table of schemaDiff.tables.removed) {
             debug(`Removing table: ${table.name}`);
-            console.log(`Removing table: ${table.name}`);
 
             const schemaBuilder = this.getSchemaBuilder(trx);
             await helpers.dropTable(schemaBuilder, table);
@@ -97,7 +95,6 @@ module.exports = (db) => {
 
         for (const table of schemaDiff.tables.updated) {
           debug(`Updating table: ${table.name}`);
-          console.log(`Updating table: ${table.name}`);
           // alter table
           const schemaBuilder = this.getSchemaBuilder(trx);
 
@@ -144,7 +141,6 @@ const createHelpers = (db) => {
    */
   const dropForeignKey = (tableBuilder, foreignKey) => {
     const { name, columns } = foreignKey;
-    console.log('dropping foreign key', name);
     tableBuilder.dropForeign(columns, name);
   };
 
@@ -292,7 +288,6 @@ const createHelpers = (db) => {
       // Update existing columns / foreign keys / indexes
       for (const updatedColumn of table.columns.updated) {
         debug(`Updating column ${updatedColumn.name}`);
-        console.log(`Updating column ${updatedColumn.name}`);
         const { object } = updatedColumn;
         // if (updatedColumn.name === 'id') {
         //   continue;

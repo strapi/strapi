@@ -134,12 +134,10 @@ module.exports = ({ strapi }) => ({
           .delete({ where: { id: permission.id } })
       )
     );
-
-    await Promise.all(
-      toCreate.map((permissionInfo) =>
-        strapi.query('plugin::users-permissions.permission').create({ data: permissionInfo })
-      )
-    );
+    // shouldn't be promise.all because it causes race condition in the db
+    for (const permissionInfo of toCreate) {
+      await strapi.query('plugin::users-permissions.permission').create({ data: permissionInfo });
+    }
   },
 
   async deleteRole(roleID, publicRoleID) {
