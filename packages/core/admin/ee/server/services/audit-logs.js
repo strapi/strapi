@@ -59,6 +59,12 @@ const createAuditLogsService = (strapi) => {
       return null;
     }
 
+    // Ignore some events based on payload
+    const ignoredUids = ['plugin::upload.file', 'plugin::upload.folder'];
+    if (ignoredUids.includes(args[0]?.uid)) {
+      return null;
+    }
+
     return {
       action: name,
       date: new Date().toISOString(),

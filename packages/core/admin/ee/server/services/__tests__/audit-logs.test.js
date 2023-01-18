@@ -165,6 +165,16 @@ describe('Audit logs service', () => {
       expect(mockSaveEvent).not.toHaveBeenCalled();
     });
 
+    it('ignores entry events from the upload plugin', async () => {
+      const auditLogsService = createAuditLogsService(strapi);
+      auditLogsService.register();
+
+      await strapi.eventHub.emit('entry.create', { uid: 'plugin::upload.file' });
+      await strapi.eventHub.emit('entry.update', { uid: 'plugin::upload.folder' });
+
+      expect(mockSaveEvent).not.toHaveBeenCalled();
+    });
+
     it('should find many audit logs with the right params', async () => {
       const auditLogsService = createAuditLogsService(strapi);
       await auditLogsService.register();
