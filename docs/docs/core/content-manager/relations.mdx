@@ -181,13 +181,13 @@ type RelationConfiguration = {
   endpoint: string;   // URL from where existing relations should be fetched
   enabled: boolean;   // defines whether relations should be fetched once the hook is called
   pageParams: object; // additional query params which will be appended to `endpoint`
-  onLoad: ({ target: { name: string, value: RelationResults }}):void => {};
+  onLoad: (results: RelationResult[]) => void;  // callback that will be fired after relations have been fetched (paginated)
   normalizeArguments = {
     mainFieldName: string;  // name of the target model main field, determining which field to display (fallback: id)
     shouldAddLink: boolean; // if the user is allowed to read the target model, the returned relations should include a link to the target
     targetModel: object;    // target content-type model
   };
-  pageGoal: number; // the current page-count of the already loaded relations
+  pageGoal: number; // the current page-count of the already loaded relations used to keep the redux store and query cache in sync.
 }
 
 type SearchConfiguration = {
@@ -204,6 +204,7 @@ type SearchConfiguration = {
 type RelationResults = RelationResult[];
 
 type RelationResult = {
+  id: number;
   href?: string;  // based on `shouldAddLink` and the `targetModel`
   publicationState: 'draft' | 'published';
   mainField: string;  // will fallback to "id" if not set
