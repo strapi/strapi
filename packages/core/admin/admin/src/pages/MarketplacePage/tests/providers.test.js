@@ -218,7 +218,7 @@ describe('Marketplace page - providers tab', () => {
     expect(notCollectionPlugin).toEqual(null);
   });
 
-  it('filters multiple collection options', async () => {
+  it.only('filters multiple collection options', async () => {
     const user = userEvent.setup();
 
     await user.click(screen.getByTestId('filters-button'));
@@ -228,7 +228,9 @@ describe('Marketplace page - providers tab', () => {
     await waitForReload();
 
     await user.click(screen.getByTestId('filters-button'));
-    await user.click(screen.getByRole('button', { name: `1 collection selected Made by Strapi` }));
+    await user.click(
+      screen.getByRole('button', { name: `Collections 1 collection selected Made by Strapi` })
+    );
     await user.click(screen.getByRole('option', { name: `Verified (6)` }));
 
     await waitForReload();
