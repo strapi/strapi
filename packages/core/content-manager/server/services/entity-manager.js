@@ -59,6 +59,9 @@ const addCreatedByRolesPopulate = (populate) => {
  * will be passed to the webhook and db lifecycles events. The entity-manager
  * response will not have the populated relations though.
  * For performance reasons, it is recommended to set it to false,
+ *
+ * TODO V5: Remove this function and always load and return populated relations.
+ * TODO V5: Make webhooks always send the same entity data.
  */
 const isRelationsPopulateEnabled = () => {
   return strapi.config.get('admin.relations.populate', true);
