@@ -1,4 +1,4 @@
-import { getFetchClient } from '@strapi/admin/admin/src/utils/getFetchClient';
+import { getFetchClient } from '@strapi/helper-plugin';
 import { getRequestURL } from '../../../../utils';
 
 export const fetchData = async (toggleNotification, notifyStatus) => {
