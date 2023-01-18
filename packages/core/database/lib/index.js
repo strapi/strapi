@@ -8,6 +8,7 @@ const { createMigrationsProvider } = require('./migrations');
 const { createLifecyclesProvider } = require('./lifecycles');
 const createConnection = require('./connection');
 const errors = require('./errors');
+const transactionCtx = require('./transaction-context');
 
 // TODO: move back into strapi
 const { transformContentTypes } = require('./utils/content-types');
@@ -49,6 +50,43 @@ class Database {
     return this.entityManager.getRepository(uid);
   }
 
+  async transaction(cb) {
+    const notNestedTransaction = !transactionCtx.get();
+    const trx = notNestedTransaction ? await this.connection.transaction() : transactionCtx.get();
+    if (!cb) {
+      return {
+        async commit() {
+          if (notNestedTransaction) {
+            await trx.commit();
+          }
+        },
+        async rollback() {
+          if (notNestedTransaction) {
+            await trx.rollback();
+          }
+        },
+        get() {
+          return trx;
+        },
+      };
+    }
+
+    return transactionCtx.run(trx, async () => {
+      try {
+        const res = await cb(trx);
+        if (notNestedTransaction) {
+          await trx.commit();
+        }
+        return res;
+      } catch (error) {
+        if (notNestedTransaction) {
+          await trx.rollback();
+        }
+        throw error;
+      }
+    });
+  }
+
   getConnection(tableName) {
     const schema = this.connection.getSchemaName();
     const connection = tableName ? this.connection(tableName) : this.connection;
@@ -58,10 +96,6 @@ class Database {
   getSchemaConnection(trx = this.connection) {
     const schema = this.connection.getSchemaName();
     return schema ? trx.schema.withSchema(schema) : trx.schema;
-  }
-
-  transaction() {
-    return this.connection.transaction();
   }
 
   queryBuilder(uid) {
