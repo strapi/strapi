@@ -14,7 +14,7 @@ The following example shows a basic way to use the `useFetchClient` hook to make
 
 ```jsx
 import {useState} from "react"
-import useFetchClient from '@strapi/admin/admin/src/hooks/useFetchClient';
+import { useFetchClient } from '@strapi/helper-plugin';
 
 const Component = () => {
     const [items, setItems] = useState([]);
@@ -57,7 +57,7 @@ The following information is the internal additions we've added to the axios ins
 
 ### Base URL
 
-The default URL will be the one defined in the environment variable: `STRAPI_ADMIN_BACKEND_URL`.
+The default URL is the one defined in the _getFetchClient_ utility
 
 ### Interceptors
 
@@ -68,8 +68,6 @@ The request interceptor adds the following parameters to the header:
 ```js
 {
     Authorization: `Bearer <AUTH_TOKEN>`,
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
 }
 ```
 
