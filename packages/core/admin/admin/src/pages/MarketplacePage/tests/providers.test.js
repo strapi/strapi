@@ -218,7 +218,7 @@ describe('Marketplace page - providers tab', () => {
     expect(notCollectionPlugin).toEqual(null);
   });
 
-  it.only('filters multiple collection options', async () => {
+  it('filters multiple collection options', async () => {
     const user = userEvent.setup();
 
     await user.click(screen.getByTestId('filters-button'));
