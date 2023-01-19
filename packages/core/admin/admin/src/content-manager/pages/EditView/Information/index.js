@@ -12,7 +12,7 @@ const KeyValuePair = ({ label, value }) => {
   return (
     <Flex justifyContent="space-between" as="p">
       <Typography fontWeight="bold">{label}</Typography>
-      <Typography>{value}</Typography>
+      <Typography textColor="neutral600">{value}</Typography>
     </Flex>
   );
 };
@@ -60,7 +60,7 @@ const Information = () => {
       </Box>
 
       <Stack spacing={4}>
-        <Stack spacing={1}>
+        <Stack spacing={2}>
           <KeyValuePair
             label={formatMessage({
               id: getTrad('containers.Edit.information.created'),
@@ -78,7 +78,7 @@ const Information = () => {
           />
         </Stack>
 
-        <Stack spacing={1}>
+        <Stack spacing={2}>
           <KeyValuePair
             label={formatMessage({
               id: getTrad('containers.Edit.information.lastUpdate'),
