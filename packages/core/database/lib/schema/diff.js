@@ -123,6 +123,14 @@ module.exports = (db) => {
     if (oldDefaultTo === null || _.toLower(oldDefaultTo) === 'null') {
       return _.isNil(defaultTo) || _.toLower(defaultTo) === 'null';
     }
+    // cockroach db returns bigInt as type and unique_rowid() as defaultTo for auto increment
+    if (
+      db.dialect.client === 'cockroachdb' &&
+      column.type === 'increments' &&
+      oldDefaultTo === 'unique_rowid()'
+    ) {
+      return true;
+    }
 
     return (
       _.toLower(oldDefaultTo) === _.toLower(column.defaultTo) ||
@@ -138,13 +146,17 @@ module.exports = (db) => {
   const diffColumns = (oldColumn, column) => {
     const changes = [];
 
-    // const isIgnoredType = ['increments'].includes(column.type);
-    // const oldType = oldColumn.type;
-    // const type = db.dialect.getSqlType(column.type);
+    const isIgnoredType = ['increments'].includes(column.type);
+    const oldType = oldColumn.type;
+    const type = db.dialect.getSqlType(column.type);
 
-    // if (oldType !== type && !isIgnoredType) {
-    //   changes.push('type');
-    // }
+    if (oldType !== type && !isIgnoredType) {
+      // alter type isn't suppored in crdb
+      if (db.dialect.client === 'cockroachdb') {
+        column.isAlterType = true;
+      }
+      changes.push('type');
+    }
 
     // NOTE: compare args at some point and split them into specific properties instead
 
@@ -152,10 +164,10 @@ module.exports = (db) => {
       changes.push('notNullable');
     }
 
-    // const hasSameDefault = diffDefault(oldColumn, column);
-    // if (!hasSameDefault) {
-    //   changes.push('defaultTo');
-    // }
+    const hasSameDefault = diffDefault(oldColumn, column);
+    if (!hasSameDefault) {
+      changes.push('defaultTo');
+    }
 
     if (oldColumn.unsigned !== column.unsigned && db.dialect.supportsUnsigned()) {
       changes.push('unsigned');
@@ -193,6 +205,9 @@ module.exports = (db) => {
     }
 
     for (const srcColumn of srcTable.columns) {
+      if (srcColumn.name === 'rowid') {
+        continue;
+      }
       if (!helpers.hasColumn(destTable, srcColumn.name)) {
         removedColumns.push(srcColumn);
       }

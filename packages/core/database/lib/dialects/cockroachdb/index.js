@@ -16,7 +16,7 @@ class CockroachDialect extends Dialect {
   }
 
   initialize() {
-    this.db.connection.client.driver.types.setTypeParser(1082, 'text', v => v); // Don't cast DATE string to Date()
+    this.db.connection.client.driver.types.setTypeParser(1082, 'text', (v) => v); // Don't cast DATE string to Date()
     this.db.connection.client.driver.types.setTypeParser(1700, 'text', parseFloat);
   }
 
@@ -28,6 +28,9 @@ class CockroachDialect extends Dialect {
     switch (type) {
       case 'timestamp': {
         return 'datetime';
+      }
+      case 'integer': {
+        return 'bigInteger';
       }
       default: {
         return type;

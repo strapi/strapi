@@ -592,9 +592,10 @@ const createEntityManager = (db) => {
               (acc, res) => Object.assign(acc, { [res[inverseJoinColumn.name]]: res.max }),
               {}
             );
-
             insert.forEach((rel) => {
-              rel[inverseOrderColumnName] = (maxMap[rel[inverseJoinColumn.name]] || 0) + 1;
+              // Needs to parse int because on CRDB maxMap is a string.
+              rel[inverseOrderColumnName] =
+                parseInt(maxMap[rel[inverseJoinColumn.name]] || '0', 10) + 1;
             });
           }
 

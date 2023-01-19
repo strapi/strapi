@@ -289,11 +289,18 @@ const createHelpers = (db) => {
       for (const updatedColumn of table.columns.updated) {
         debug(`Updating column ${updatedColumn.name}`);
         const { object } = updatedColumn;
-        // if (updatedColumn.name === 'id') {
-        //   continue;
-        // }
-
-        if (object.type === 'increments') {
+        if (db.dialect.client === 'cockroachdb' && object.isAlterType) {
+          // CRDB does not support alter types
+          console.log(
+            'Altering column type not supported in CockroachDB. Remove the field and restart Strapi. Then add the field back. '
+          );
+          console.log(
+            'If you are running in production, you will need to create a migration to do this.'
+          );
+          console.log(
+            'https://docs.strapi.io/developer-docs/latest/developer-resources/database-migrations.html'
+          );
+        } else if (object.type === 'increments') {
           createColumn(tableBuilder, { ...object, type: 'integer' }).alter();
         } else {
           createColumn(tableBuilder, object).alter();

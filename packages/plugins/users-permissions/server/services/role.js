@@ -134,7 +134,7 @@ module.exports = ({ strapi }) => ({
           .delete({ where: { id: permission.id } })
       )
     );
-    // shouldn't be promise.all because it causes race condition in the db
+
     for (const permissionInfo of toCreate) {
       await strapi.query('plugin::users-permissions.permission').create({ data: permissionInfo });
     }
