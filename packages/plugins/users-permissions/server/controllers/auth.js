@@ -294,34 +294,7 @@ module.exports = {
       throw new ApplicationError('Impossible to find the default role');
     }
 
-    const { email, username, provider } = params;
-
-    const identifierFilter = {
-      $or: [
-        { email: email.toLowerCase() },
-        { username: email.toLowerCase() },
-        { username },
-        { email: username },
-      ],
-    };
-
-    const conflictingUserCount = await strapi.query('plugin::users-permissions.user').count({
-      where: { ...identifierFilter, provider },
-    });
-
-    if (conflictingUserCount > 0) {
-      throw new ApplicationError('Email or Username are already taken');
-    }
-
-    if (settings.unique_email) {
-      const conflictingUserCount = await strapi.query('plugin::users-permissions.user').count({
-        where: { ...identifierFilter },
-      });
-
-      if (conflictingUserCount > 0) {
-        throw new ApplicationError('Email or Username are already taken');
-      }
-    }
+    const { email, username } = params;
 
     const newUser = {
       ...params,

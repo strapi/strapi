@@ -28,6 +28,7 @@ module.exports = {
       minLength: 6,
       configurable: false,
       required: true,
+      unique: true
     },
     provider: {
       type: 'string',
