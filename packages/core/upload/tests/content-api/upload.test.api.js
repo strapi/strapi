@@ -165,7 +165,22 @@ describe('Upload plugin', () => {
       );
     });
     test('Get one file', async () => {
-      const getRes = await rq({ method: 'GET', url: '/upload/files/1' });
+      const dogEntity = await strapi.entityService.create('api::dog.dog', {
+        data: {},
+        files: {
+          profilePicture: {
+            path: path.join(__dirname, '../utils/rec.jpg'),
+            name: 'rec',
+            type: 'jpg',
+            size: 0,
+          },
+        },
+        populate: 'profilePicture',
+      });
+      const getRes = await rq({
+        method: 'GET',
+        url: `/upload/files/${dogEntity.profilePicture.id}`,
+      });
 
       expect(getRes.statusCode).toBe(200);
       expect(getRes.body).toEqual(
@@ -174,6 +189,7 @@ describe('Upload plugin', () => {
           url: expect.any(String),
         })
       );
+      await strapi.entityService.delete('api::dog.dog', dogEntity.id);
     });
   });
 
