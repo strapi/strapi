@@ -51,11 +51,13 @@ describe('CONTENT MANAGER | EditView | Information', () => {
       isCreatingEntry: true,
     }));
 
-    const {
-      container: { firstChild },
-    } = render(makeApp());
+    const { getByText, getAllByText } = render(makeApp());
 
-    expect(firstChild).toMatchSnapshot();
+    expect(getByText('Created')).toBeInTheDocument();
+    expect(getByText('Last update')).toBeInTheDocument();
+    expect(getAllByText('By').length).toBe(2);
+    expect(getAllByText('now').length).toBe(2);
+    expect(getAllByText('-').length).toBe(2);
   });
 
   it('renders and matches the snaphsot in case an entry is edited', () => {
@@ -76,11 +78,10 @@ describe('CONTENT MANAGER | EditView | Information', () => {
       isCreatingEntry: false,
     }));
 
-    const {
-      container: { firstChild },
-    } = render(makeApp());
+    const { getAllByText } = render(makeApp());
 
-    expect(firstChild).toMatchSnapshot();
+    expect(getAllByText('8 months ago').length).toBe(2);
+    expect(getAllByText('First name Last name').length).toBe(2);
   });
 
   it('renders and matches the snaphsot in case a username is set', () => {
@@ -103,10 +104,10 @@ describe('CONTENT MANAGER | EditView | Information', () => {
       isCreatingEntry: false,
     }));
 
-    const {
-      container: { firstChild },
-    } = render(makeApp());
+    const { queryByText, getAllByText } = render(makeApp());
 
-    expect(firstChild).toMatchSnapshot();
+    expect(getAllByText('user@strapi.io').length).toBe(2);
+    expect(queryByText('First name')).toBeNull();
+    expect(queryByText('Last name')).toBeNull();
   });
 });
