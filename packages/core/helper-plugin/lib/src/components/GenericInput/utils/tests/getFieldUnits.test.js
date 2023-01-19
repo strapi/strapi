@@ -10,11 +10,11 @@ describe('Content Manager | Inputs | Utils', () => {
       expect(getFieldUnits({ name: 'BIGINT' })).toEqual('');
     });
 
-    it('returns "character" for other types when neither minimum or maximum is greater than 1', () => {
+    it('returns "character" when neither minimum or maximum is greater than 1', () => {
       expect(getFieldUnits({ type: 'text', minimum: 1, maximum: 1 })).toEqual('character');
     });
 
-    it('returns "characters" for other types when neither minimum or maximum is greater than 0', () => {
+    it('returns "characters" when either minimum or maximum is greater than 1', () => {
       expect(getFieldUnits({ type: 'text', maximum: 2 })).toEqual('characters');
     });
   });
