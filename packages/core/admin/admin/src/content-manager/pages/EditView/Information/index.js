@@ -11,8 +11,10 @@ import { getFullName } from '../../../../utils';
 const KeyValuePair = ({ label, value }) => {
   return (
     <Flex justifyContent="space-between" as="p">
-      <Typography fontWeight="bold">{label}</Typography>
-      <Typography textColor="neutral600">{value}</Typography>
+      <Typography fontWeight="bold" textColor="neutral600">
+        {label}
+      </Typography>
+      <Typography>{value}</Typography>
     </Flex>
   );
 };
