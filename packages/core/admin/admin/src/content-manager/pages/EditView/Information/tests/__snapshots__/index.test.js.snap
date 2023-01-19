@@ -9,14 +9,14 @@ exports[`CONTENT MANAGER | EditView | Information renders and matches the snaphs
   color: #666687;
 }
 
-.c9 {
+.c8 {
   font-size: 0.875rem;
   line-height: 1.43;
   font-weight: 600;
-  color: #32324d;
+  color: #666687;
 }
 
-.c10 {
+.c9 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #32324d;
@@ -44,7 +44,7 @@ exports[`CONTENT MANAGER | EditView | Information renders and matches the snaphs
   flex-direction: column;
 }
 
-.c8 {
+.c7 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -80,15 +80,6 @@ exports[`CONTENT MANAGER | EditView | Information renders and matches the snaphs
   margin-top: 16px;
 }
 
-.c7 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c7 > * + * {
-  margin-top: 4px;
-}
-
 .c5 {
   height: 1px;
   border: none;
@@ -117,66 +108,66 @@ exports[`CONTENT MANAGER | EditView | Information renders and matches the snaphs
     spacing="4"
   >
     <div
-      class="c0 c7"
-      spacing="1"
+      class="c0 c1"
+      spacing="2"
     >
       <p
-        class="c8"
+        class="c7"
       >
         <span
-          class="c9"
+          class="c8"
         >
           Created
         </span>
         <span
-          class="c10"
+          class="c9"
         >
           8 months ago
         </span>
       </p>
       <p
-        class="c8"
+        class="c7"
       >
         <span
-          class="c9"
+          class="c8"
         >
           By
         </span>
         <span
-          class="c10"
+          class="c9"
         >
           user@strapi.io
         </span>
       </p>
     </div>
     <div
-      class="c0 c7"
-      spacing="1"
+      class="c0 c1"
+      spacing="2"
     >
       <p
-        class="c8"
+        class="c7"
       >
         <span
-          class="c9"
+          class="c8"
         >
           Last update
         </span>
         <span
-          class="c10"
+          class="c9"
         >
           8 months ago
         </span>
       </p>
       <p
-        class="c8"
+        class="c7"
       >
         <span
-          class="c9"
+          class="c8"
         >
           By
         </span>
         <span
-          class="c10"
+          class="c9"
         >
           user@strapi.io
         </span>
@@ -195,14 +186,14 @@ exports[`CONTENT MANAGER | EditView | Information renders and matches the snaphs
   color: #666687;
 }
 
-.c9 {
+.c8 {
   font-size: 0.875rem;
   line-height: 1.43;
   font-weight: 600;
-  color: #32324d;
+  color: #666687;
 }
 
-.c10 {
+.c9 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #32324d;
@@ -230,7 +221,7 @@ exports[`CONTENT MANAGER | EditView | Information renders and matches the snaphs
   flex-direction: column;
 }
 
-.c8 {
+.c7 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -266,15 +257,6 @@ exports[`CONTENT MANAGER | EditView | Information renders and matches the snaphs
   margin-top: 16px;
 }
 
-.c7 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c7 > * + * {
-  margin-top: 4px;
-}
-
 .c5 {
   height: 1px;
   border: none;
@@ -303,66 +285,66 @@ exports[`CONTENT MANAGER | EditView | Information renders and matches the snaphs
     spacing="4"
   >
     <div
-      class="c0 c7"
-      spacing="1"
+      class="c0 c1"
+      spacing="2"
     >
       <p
-        class="c8"
+        class="c7"
       >
         <span
-          class="c9"
+          class="c8"
         >
           Created
         </span>
         <span
-          class="c10"
+          class="c9"
         >
           now
         </span>
       </p>
       <p
-        class="c8"
+        class="c7"
       >
         <span
-          class="c9"
+          class="c8"
         >
           By
         </span>
         <span
-          class="c10"
+          class="c9"
         >
           -
         </span>
       </p>
     </div>
     <div
-      class="c0 c7"
-      spacing="1"
+      class="c0 c1"
+      spacing="2"
     >
       <p
-        class="c8"
+        class="c7"
       >
         <span
-          class="c9"
+          class="c8"
         >
           Last update
         </span>
         <span
-          class="c10"
+          class="c9"
         >
           now
         </span>
       </p>
       <p
-        class="c8"
+        class="c7"
       >
         <span
-          class="c9"
+          class="c8"
         >
           By
         </span>
         <span
-          class="c10"
+          class="c9"
         >
           -
         </span>
@@ -381,14 +363,14 @@ exports[`CONTENT MANAGER | EditView | Information renders and matches the snaphs
   color: #666687;
 }
 
-.c9 {
+.c8 {
   font-size: 0.875rem;
   line-height: 1.43;
   font-weight: 600;
-  color: #32324d;
+  color: #666687;
 }
 
-.c10 {
+.c9 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #32324d;
@@ -416,7 +398,7 @@ exports[`CONTENT MANAGER | EditView | Information renders and matches the snaphs
   flex-direction: column;
 }
 
-.c8 {
+.c7 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -452,15 +434,6 @@ exports[`CONTENT MANAGER | EditView | Information renders and matches the snaphs
   margin-top: 16px;
 }
 
-.c7 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c7 > * + * {
-  margin-top: 4px;
-}
-
 .c5 {
   height: 1px;
   border: none;
@@ -489,66 +462,66 @@ exports[`CONTENT MANAGER | EditView | Information renders and matches the snaphs
     spacing="4"
   >
     <div
-      class="c0 c7"
-      spacing="1"
+      class="c0 c1"
+      spacing="2"
     >
       <p
-        class="c8"
+        class="c7"
       >
         <span
-          class="c9"
+          class="c8"
         >
           Created
         </span>
         <span
-          class="c10"
+          class="c9"
         >
           8 months ago
         </span>
       </p>
       <p
-        class="c8"
+        class="c7"
       >
         <span
-          class="c9"
+          class="c8"
         >
           By
         </span>
         <span
-          class="c10"
+          class="c9"
         >
           First name Last name
         </span>
       </p>
     </div>
     <div
-      class="c0 c7"
-      spacing="1"
+      class="c0 c1"
+      spacing="2"
     >
       <p
-        class="c8"
+        class="c7"
       >
         <span
-          class="c9"
+          class="c8"
         >
           Last update
         </span>
         <span
-          class="c10"
+          class="c9"
         >
           8 months ago
         </span>
       </p>
       <p
-        class="c8"
+        class="c7"
       >
         <span
-          class="c9"
+          class="c8"
         >
           By
         </span>
         <span
-          class="c10"
+          class="c9"
         >
           First name Last name
         </span>
