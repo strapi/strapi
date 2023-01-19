@@ -1152,7 +1152,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                         class="c1 c14 c30"
                         spacing="1"
                       >
-                        <span
+                        <label
                           class="c5 c31"
                           for="select-4"
                         >
@@ -1161,7 +1161,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           >
                             Interface language
                           </div>
-                        </span>
+                        </label>
                         <div
                           class="c1 c4 c40"
                         >
@@ -1170,7 +1170,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-4-label select-4-content"
+                            aria-labelledby="select-4 select-4-label select-4-content"
                             class="c41"
                             id="select-4"
                             type="button"
@@ -1261,7 +1261,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                         class="c1 c14 c30"
                         spacing="1"
                       >
-                        <span
+                        <label
                           class="c5 c31"
                           for="select-5"
                         >
@@ -1270,7 +1270,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           >
                             Interface mode
                           </div>
-                        </span>
+                        </label>
                         <div
                           class="c1 c4 c40"
                         >
@@ -1279,7 +1279,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-5-label select-5-content"
+                            aria-labelledby="select-5 select-5-label select-5-content"
                             class="c41"
                             id="select-5"
                             type="button"

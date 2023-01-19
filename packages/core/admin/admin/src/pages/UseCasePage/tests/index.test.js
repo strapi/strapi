@@ -729,7 +729,7 @@ describe('Admin | UseCasePage', () => {
                         class="c0 c19 c21"
                         spacing="1"
                       >
-                        <span
+                        <label
                           class="c5 c22"
                           for="usecase"
                         >
@@ -738,7 +738,7 @@ describe('Admin | UseCasePage', () => {
                           >
                             What type of work do you do?
                           </div>
-                        </span>
+                        </label>
                         <div
                           class="c0 c23 c24"
                         >
@@ -746,7 +746,7 @@ describe('Admin | UseCasePage', () => {
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="usecase-label usecase-content"
+                            aria-labelledby="usecase usecase-label usecase-content"
                             class="c25"
                             data-testid="usecase"
                             id="usecase"

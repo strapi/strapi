@@ -8,35 +8,18 @@ import { Typography } from '@strapi/design-system/Typography';
 import { PreviewCell } from './PreviewCell';
 import { formatBytes } from '../../utils';
 
-export const CellContent = ({
-  alternativeText,
-  content,
-  cellType,
-  elementType,
-  mime,
-  fileExtension,
-  thumbnailURL,
-  url,
-}) => {
+export const CellContent = ({ cellType, contentType, content, name }) => {
   const { formatDate, formatMessage } = useIntl();
 
   switch (cellType) {
     case 'image':
-      return (
-        <PreviewCell
-          alternativeText={alternativeText}
-          fileExtension={fileExtension}
-          mime={mime}
-          type={elementType}
-          thumbnailURL={thumbnailURL}
-          url={url}
-        />
-      );
+      return <PreviewCell type={contentType} content={content} />;
+
     case 'date':
-      return <Typography>{formatDate(parseISO(content), { dateStyle: 'full' })}</Typography>;
+      return <Typography>{formatDate(parseISO(content[name]), { dateStyle: 'full' })}</Typography>;
 
     case 'size':
-      if (elementType === 'folder')
+      if (contentType === 'folder')
         return (
           <Typography
             aria-label={formatMessage({
@@ -48,10 +31,10 @@ export const CellContent = ({
           </Typography>
         );
 
-      return <Typography>{formatBytes(content)}</Typography>;
+      return <Typography>{formatBytes(content[name])}</Typography>;
 
     case 'ext':
-      if (elementType === 'folder')
+      if (contentType === 'folder')
         return (
           <Typography
             aria-label={formatMessage({
@@ -63,10 +46,10 @@ export const CellContent = ({
           </Typography>
         );
 
-      return <Typography>{getFileExtension(content).toUpperCase()}</Typography>;
+      return <Typography>{getFileExtension(content[name]).toUpperCase()}</Typography>;
 
     case 'text':
-      return <Typography>{content}</Typography>;
+      return <Typography>{content[name]}</Typography>;
 
     default:
       return (
@@ -82,22 +65,19 @@ export const CellContent = ({
   }
 };
 
-CellContent.defaultProps = {
-  alternativeText: null,
-  content: '',
-  fileExtension: '',
-  mime: '',
-  thumbnailURL: null,
-  url: null,
-};
-
 CellContent.propTypes = {
-  alternativeText: PropTypes.string,
-  content: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  fileExtension: PropTypes.string,
-  mime: PropTypes.string,
-  thumbnailURL: PropTypes.string,
   cellType: PropTypes.string.isRequired,
-  elementType: PropTypes.string.isRequired,
-  url: PropTypes.string,
+  contentType: PropTypes.string.isRequired,
+  content: PropTypes.shape({
+    alternativeText: PropTypes.string,
+    ext: PropTypes.string,
+    formats: PropTypes.shape({
+      thumbnail: PropTypes.shape({
+        url: PropTypes.string,
+      }),
+    }),
+    mime: PropTypes.string,
+    url: PropTypes.string,
+  }).isRequired,
+  name: PropTypes.string.isRequired,
 };
