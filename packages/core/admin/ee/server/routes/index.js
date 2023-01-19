@@ -3,7 +3,6 @@
 const { features } = require('@strapi/strapi/lib/utils/ee');
 
 const enableFeatureMiddleware = (featureName) => (ctx, next) => {
-  console.log(featureName, features.isEnabled(featureName));
   if (features.isEnabled(featureName)) {
     return next();
   }

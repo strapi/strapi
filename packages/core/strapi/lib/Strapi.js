@@ -123,7 +123,10 @@ class Strapi {
     createUpdateNotifier(this).notify();
 
     Object.defineProperty(this, 'EE', {
-      get: () => ee.isEE,
+      get: () => {
+        ee.init(this.dirs.app.root, this.log);
+        return ee.isEE;
+      },
       configurable: false,
     });
   }
@@ -371,8 +374,6 @@ class Strapi {
   }
 
   async register() {
-    ee.init(this.dirs.app.root, this.log);
-
     await Promise.all([
       this.loadApp(),
       this.loadSanitizers(),

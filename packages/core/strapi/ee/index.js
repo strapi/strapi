@@ -56,7 +56,6 @@ const onlineUpdate = async ({ strapi }) => {
   const transaction = await strapi.db.transaction();
 
   try {
-    // TODO: Use the core store interface instead, it does not support transactions and "FOR UPDATE" at the moment
     const eeInfo = await strapi.db
       .queryBuilder(eeStoreModel.uid)
       .where({ key: 'ee_information' })
