@@ -40,10 +40,10 @@ const useFieldHint = ({ description, minimum, maximum, units }) => {
       if (!minIsNumber && !maxIsNumber) {
         return [];
       }
-      const ret = [];
+      const minMaxDescription = [];
 
       if (minIsNumber) {
-        ret.push(
+        minMaxDescription.push(
           formatMessage(
             {
               id: 'content-manager.form.Input.minimum',
@@ -57,7 +57,7 @@ const useFieldHint = ({ description, minimum, maximum, units }) => {
       }
       if (minIsNumber && maxIsNumber) {
         const connector = ' / ';
-        ret.push(
+        minMaxDescription.push(
           formatMessage({
             id: connector,
             defaultMessage: connector,
@@ -65,7 +65,7 @@ const useFieldHint = ({ description, minimum, maximum, units }) => {
         );
       }
       if (maxIsNumber) {
-        ret.push(
+        minMaxDescription.push(
           formatMessage(
             {
               id: 'content-manager.form.Input.maximum',
@@ -77,7 +77,7 @@ const useFieldHint = ({ description, minimum, maximum, units }) => {
           )
         );
       }
-      ret.push(
+      minMaxDescription.push(
         formatMessage(
           {
             id: 'content-manager.form.Input.units',
@@ -90,7 +90,7 @@ const useFieldHint = ({ description, minimum, maximum, units }) => {
         )
       );
 
-      return ret;
+      return minMaxDescription;
     },
     [formatMessage]
   );
