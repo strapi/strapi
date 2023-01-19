@@ -2,8 +2,6 @@
 
 const auditLogContentType = require('./content-types/audit-log');
 
-const RETENTION_DAYS = 7;
-
 const provider = {
   async register({ strapi }) {
     strapi.container.get('content-types').add('admin::', { 'audit-log': auditLogContentType });
@@ -36,11 +34,11 @@ const provider = {
         });
       },
 
-      deleteExpiredEvents() {
+      deleteExpiredEvents(expirationDate) {
         return strapi.entityService.deleteMany('admin::audit-log', {
           filters: {
             date: {
-              $lt: new Date(Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000).toISOString(),
+              $lt: expirationDate.toISOString(),
             },
           },
         });
