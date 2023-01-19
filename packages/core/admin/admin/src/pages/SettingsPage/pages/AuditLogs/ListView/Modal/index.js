@@ -3,9 +3,8 @@ import PropTypes from 'prop-types';
 import { useQuery } from 'react-query';
 import { ModalLayout, ModalHeader, ModalBody } from '@strapi/design-system/ModalLayout';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/Breadcrumbs';
-import { useNotification } from '@strapi/helper-plugin';
+import { useNotification, useFetchClient } from '@strapi/helper-plugin';
 import useFormatTimeStamp from '../hooks/useFormatTimeStamp';
-import { useFetchClient } from '../../../../../../hooks';
 import ActionBody from './ActionBody';
 
 const Modal = ({ handleClose, logId }) => {

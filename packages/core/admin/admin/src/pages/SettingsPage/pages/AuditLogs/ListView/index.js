@@ -6,13 +6,13 @@ import {
   useRBAC,
   useNotification,
   useFocusWhenNavigate,
+  useFetchClient,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { useLocation } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import adminPermissions from '../../../../../permissions';
-import { useFetchClient } from '../../../../../hooks';
 import TableRows from './TableRows';
 import tableHeaders from './utils/tableHeaders';
 import PaginationFooter from './PaginationFooter';

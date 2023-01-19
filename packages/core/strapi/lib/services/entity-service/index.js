@@ -70,6 +70,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     eventHub.emit(event, {
       model: model.modelName,
+      uid: model.uid,
       entry: sanitizedEntity,
     });
   },

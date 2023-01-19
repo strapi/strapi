@@ -12,6 +12,9 @@ const defaultEvents = [
   'media.create',
   'media.update',
   'media.delete',
+  'media-folder.create',
+  'media-folder.update',
+  'media-folder.delete',
   'user.create',
   'user.update',
   'user.delete',
@@ -56,6 +59,12 @@ const createAuditLogsService = (strapi) => {
 
     // Ignore the event if it's not in the map
     if (!getPayload) {
+      return null;
+    }
+
+    // Ignore some events based on payload
+    const ignoredUids = ['plugin::upload.file', 'plugin::upload.folder'];
+    if (ignoredUids.includes(args[0]?.uid)) {
       return null;
     }
 
