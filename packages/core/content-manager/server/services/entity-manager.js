@@ -55,8 +55,8 @@ const addCreatedByRolesPopulate = (populate) => {
 };
 
 /**
- * When relations.populate is set to true, populated relations
- * will be passed to the webhook and db lifecycles events. The entity-manager
+ * When webhooks.populateRelations is set to true, populated relations
+ * will be passed to any webhook event. The entity-manager
  * response will not have the populated relations though.
  * For performance reasons, it is recommended to set it to false,
  *
