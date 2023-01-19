@@ -5,7 +5,10 @@ module.exports = [
     method: 'POST',
     path: '/login',
     handler: 'authentication.login',
-    config: { auth: false },
+    config: {
+      auth: false,
+      middlewares: ['admin::rateLimit'],
+    },
   },
   {
     method: 'POST',

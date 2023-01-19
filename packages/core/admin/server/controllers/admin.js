@@ -4,6 +4,7 @@ const path = require('path');
 const execa = require('execa');
 const _ = require('lodash');
 const { exists } = require('fs-extra');
+const { env } = require('@strapi/utils');
 const { ValidationError } = require('@strapi/utils').errors;
 const { isUsingTypeScript } = require('@strapi/typescript-utils');
 // eslint-disable-next-line node/no-extraneous-require
@@ -93,11 +94,13 @@ module.exports = {
     const useTypescriptOnAdmin = await isUsingTypeScript(
       path.join(strapi.dirs.app.root, 'src', 'admin')
     );
+    const isHostedOnStrapiCloud = env('STRAPI_HOSTING', null) === 'strapi.cloud';
 
     return {
       data: {
         useTypescriptOnServer,
         useTypescriptOnAdmin,
+        isHostedOnStrapiCloud,
       },
     };
   },
@@ -107,6 +110,7 @@ module.exports = {
     const autoReload = strapi.config.get('autoReload', false);
     const strapiVersion = strapi.config.get('info.strapi', null);
     const dependencies = strapi.config.get('info.dependencies', {});
+    const projectId = strapi.config.get('uuid', null);
     const nodeVersion = process.version;
     const communityEdition = !strapi.EE;
     const useYarn = await exists(path.join(process.cwd(), 'yarn.lock'));
@@ -117,6 +121,7 @@ module.exports = {
         autoReload,
         strapiVersion,
         dependencies,
+        projectId,
         nodeVersion,
         communityEdition,
         useYarn,

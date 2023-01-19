@@ -225,6 +225,14 @@ export const EditAssetDialog = ({
                           }),
                           value: getFileExtension(asset.ext),
                         },
+
+                        {
+                          label: formatMessage({
+                            id: getTrad('modal.file-details.id'),
+                            defaultMessage: 'Asset ID',
+                          }),
+                          value: asset.id,
+                        },
                       ]}
                     />
 

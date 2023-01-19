@@ -4,6 +4,7 @@ import {
   useTracking,
   useNotification,
   useStrapiApp,
+  useCustomFields,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
@@ -11,16 +12,15 @@ import get from 'lodash/get';
 import has from 'lodash/has';
 import set from 'lodash/set';
 import toLower from 'lodash/toLower';
-import upperFirst from 'lodash/upperFirst';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
 import { Divider } from '@strapi/design-system/Divider';
 import { ModalLayout, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
-import { Typography } from '@strapi/design-system/Typography';
 import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
+import { isEqual } from 'lodash';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
@@ -30,13 +30,13 @@ import AttributeOptions from '../AttributeOptions';
 import DraftAndPublishToggle from '../DraftAndPublishToggle';
 import FormModalHeader from '../FormModalHeader';
 import FormModalEndActions from '../FormModalEndActions';
+import FormModalSubHeader from '../FormModalSubHeader';
 
 import BooleanDefaultValueSelect from '../BooleanDefaultValueSelect';
 import BooleanRadioGroup from '../BooleanRadioGroup';
 import CheckboxWithNumberField from '../CheckboxWithNumberField';
 import CustomRadioGroup from '../CustomRadioGroup';
 import ContentTypeRadioGroup from '../ContentTypeRadioGroup';
-import ComponentIconPicker from '../ComponentIconPicker';
 import Relation from '../Relation';
 import PluralName from '../PluralName';
 import SelectCategory from '../SelectCategory';
@@ -49,12 +49,7 @@ import TabForm from '../TabForm';
 import TextareaEnum from '../TextareaEnum';
 import findAttribute from '../../utils/findAttribute';
 import { getTrad, isAllowedContentTypesForRelations } from '../../utils';
-import {
-  canEditContentType,
-  getAttributesToDisplay,
-  getFormInputNames,
-  getModalTitleSubHeader,
-} from './utils';
+import { canEditContentType, getAttributesToDisplay, getFormInputNames } from './utils';
 import forms from './forms';
 import { createComponentUid, createUid } from './utils/createUid';
 
@@ -63,6 +58,7 @@ import {
   SET_DATA_TO_EDIT,
   SET_DYNAMIC_ZONE_DATA_SCHEMA,
   SET_ATTRIBUTE_DATA_SCHEMA,
+  SET_CUSTOM_FIELD_DATA_SCHEMA,
   SET_ERRORS,
   ON_CHANGE,
   RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
@@ -83,6 +79,7 @@ const FormModal = () => {
     actionType,
     attributeName,
     attributeType,
+    customFieldUid,
     categoryName,
     dynamicZoneTarget,
     forTarget,
@@ -92,6 +89,7 @@ const FormModal = () => {
     step,
     targetUid,
   } = useFormModalNavigation();
+  const customField = useCustomFields().get(customFieldUid);
 
   const tabGroupRef = useRef();
 
@@ -109,6 +107,7 @@ const FormModal = () => {
 
   const {
     addAttribute,
+    addCustomFieldAttribute,
     addCreatedComponentToDynamicZone,
     allComponentsCategories,
     changeDynamicZoneComponents,
@@ -118,6 +117,7 @@ const FormModal = () => {
     deleteCategory,
     deleteData,
     editCategory,
+    editCustomFieldAttribute,
     submitData,
     modifiedData: allDataSchema,
     nestedComponents,
@@ -227,7 +227,6 @@ const FormModal = () => {
           data: {
             displayName: data.schema.displayName,
             category: data.category,
-            icon: data.schema.icon,
           },
         });
       }
@@ -269,16 +268,27 @@ const FormModal = () => {
           }
         }
 
-        dispatch({
-          type: SET_ATTRIBUTE_DATA_SCHEMA,
-          attributeType,
-          nameToSetForRelation: get(collectionTypesForRelation, ['0', 'title'], 'error'),
-          targetUid: get(collectionTypesForRelation, ['0', 'uid'], 'error'),
-          isEditing: actionType === 'edit',
-          modifiedDataToSetForEditing: attributeToEdit,
-          step,
-          forTarget,
-        });
+        if (modalType === 'customField') {
+          dispatch({
+            type: SET_CUSTOM_FIELD_DATA_SCHEMA,
+            customField,
+            isEditing: actionType === 'edit',
+            modifiedDataToSetForEditing: attributeToEdit,
+            // NOTE: forTarget is used in the i18n middleware
+            forTarget,
+          });
+        } else {
+          dispatch({
+            type: SET_ATTRIBUTE_DATA_SCHEMA,
+            attributeType,
+            nameToSetForRelation: get(collectionTypesForRelation, ['0', 'title'], 'error'),
+            targetUid: get(collectionTypesForRelation, ['0', 'uid'], 'error'),
+            isEditing: actionType === 'edit',
+            modifiedDataToSetForEditing: attributeToEdit,
+            step,
+            forTarget,
+          });
+        }
       }
     } else {
       dispatch({ type: RESET_PROPS });
@@ -299,6 +309,7 @@ const FormModal = () => {
   const isCreatingContentType = modalType === 'contentType';
   const isCreatingComponent = modalType === 'component';
   const isCreatingAttribute = modalType === 'attribute';
+  const isCreatingCustomFieldAttribute = modalType === 'customField';
   const isComponentAttribute = attributeType === 'component' && isCreatingAttribute;
   const isCreating = actionType === 'create';
   const isCreatingComponentFromAView =
@@ -339,6 +350,15 @@ const FormModal = () => {
         get(allDataSchema, [...pathToSchema, 'uid'], null),
         ctbFormsAPI
       );
+    } else if (isCreatingCustomFieldAttribute) {
+      schema = forms.customField.schema({
+        schemaAttributes: get(allDataSchema, [...pathToSchema, 'schema', 'attributes'], []),
+        attributeType: customField.type,
+        reservedNames,
+        schemaData: { modifiedData, initialData },
+        ctbFormsAPI,
+        customFieldValidator: customField.options?.validator,
+      });
 
       // Check for validity for creating a component
       // This is happening when the user creates a component "on the fly"
@@ -541,6 +561,30 @@ const FormModal = () => {
         return;
         // Add/edit a field to a content type
         // Add/edit a field to a created component (the end modal is not step 2)
+      } else if (isCreatingCustomFieldAttribute) {
+        const customFieldAttributeUpdate = {
+          attributeToSet: { ...modifiedData, customField: customFieldUid },
+          forTarget,
+          targetUid,
+          initialAttribute: initialData,
+        };
+
+        if (actionType === 'edit') {
+          editCustomFieldAttribute(customFieldAttributeUpdate);
+        } else {
+          addCustomFieldAttribute(customFieldAttributeUpdate);
+        }
+
+        if (shouldContinue) {
+          onNavigateToChooseAttributeModal({
+            forTarget,
+            targetUid: ctTargetUid,
+          });
+        } else {
+          onCloseModal();
+        }
+
+        return;
       } else if (isCreatingAttribute && !isCreatingComponentFromAView) {
         const isDynamicZoneAttribute = attributeType === 'dynamiczone';
 
@@ -747,13 +791,35 @@ const FormModal = () => {
     }
   };
 
+  const handleConfirmClose = () => {
+    // eslint-disable-next-line no-alert
+    const confirm = window.confirm(
+      formatMessage({
+        id: 'window.confirm.close-modal.file',
+        defaultMessage: 'Are you sure? Your changes will be lost.',
+      })
+    );
+
+    if (confirm) {
+      onCloseModal();
+
+      dispatch({
+        type: RESET_PROPS,
+      });
+    }
+  };
+
   const handleClosed = () => {
     // Close the modal
-    onCloseModal();
-    // Reset the reducer
-    dispatch({
-      type: RESET_PROPS,
-    });
+    if (!isEqual(modifiedData, initialData)) {
+      handleConfirmClose();
+    } else {
+      onCloseModal();
+      // Reset the reducer
+      dispatch({
+        type: RESET_PROPS,
+      });
+    }
   };
 
   const sendAdvancedTabEvent = (tab) => {
@@ -832,7 +898,6 @@ const FormModal = () => {
       'allowed-types-select': AllowedTypesSelect,
       'boolean-radio-group': BooleanRadioGroup,
       'checkbox-with-number-field': CheckboxWithNumberField,
-      'component-icon-picker': ComponentIconPicker,
       'content-type-radio-group': ContentTypeRadioGroup,
       'radio-group': CustomRadioGroup,
       relation: Relation,
@@ -870,6 +935,7 @@ const FormModal = () => {
     extensions: ctbFormsAPI,
     forTarget,
     contentTypeSchema: allDataSchema.contentType || {},
+    customField,
   }).sections;
   const baseForm = formToDisplay.base({
     data: modifiedData,
@@ -880,18 +946,30 @@ const FormModal = () => {
     extensions: ctbFormsAPI,
     forTarget,
     contentTypeSchema: allDataSchema.contentType || {},
+    customField,
   }).sections;
 
   const baseFormInputNames = getFormInputNames(baseForm);
+
   const advancedFormInputNames = getFormInputNames(advancedForm);
   const doesBaseFormHasError = Object.keys(formErrors).some((key) =>
     baseFormInputNames.includes(key)
   );
+
   const doesAdvancedFormHasError = Object.keys(formErrors).some((key) =>
     advancedFormInputNames.includes(key)
   );
 
   const schemaKind = get(contentTypes, [targetUid, 'schema', 'kind']);
+
+  const checkIsEditingFieldName = () =>
+    actionType === 'edit' && attributes.every(({ name }) => name !== modifiedData?.name);
+
+  const handleClickFinish = () => {
+    if (checkIsEditingFieldName()) {
+      trackUsage('didEditFieldNameOnContentType');
+    }
+  };
 
   return (
     <ModalLayout onClose={handleClosed} labelledBy="title">
@@ -905,6 +983,7 @@ const FormModal = () => {
         forTarget={forTarget}
         targetUid={targetUid}
         attributeType={attributeType}
+        customFieldUid={customFieldUid}
       />
       {isPickingAttribute && (
         <AttributeOptions
@@ -928,29 +1007,16 @@ const FormModal = () => {
               }}
             >
               <Flex justifyContent="space-between">
-                <Typography as="h2" variant="beta">
-                  {formatMessage(
-                    {
-                      id: getModalTitleSubHeader({
-                        actionType,
-                        forTarget,
-                        kind,
-                        step,
-                        modalType,
-                      }),
-                      defaultMessage: 'Add new field',
-                    },
-                    {
-                      type: upperFirst(
-                        formatMessage({
-                          id: getTrad(`attribute.${attributeType}`),
-                        })
-                      ),
-                      name: upperFirst(attributeName),
-                      step,
-                    }
-                  )}
-                </Typography>
+                <FormModalSubHeader
+                  actionType={actionType}
+                  forTarget={forTarget}
+                  kind={kind}
+                  step={step}
+                  modalType={modalType}
+                  attributeType={attributeType}
+                  attributeName={attributeName}
+                  customField={customField}
+                />
                 <Tabs>
                   <Tab hasError={doesBaseFormHasError}>
                     {formatMessage({
@@ -1009,6 +1075,7 @@ const FormModal = () => {
                 deleteComponent={deleteData}
                 categoryName={initialData.name}
                 isAttributeModal={modalType === 'attribute'}
+                isCustomFieldModal={modalType === 'customField'}
                 isComponentToDzModal={modalType === 'addComponentToDynamicZone'}
                 isComponentAttribute={attributeType === 'component'}
                 isComponentModal={modalType === 'component'}
@@ -1032,7 +1099,9 @@ const FormModal = () => {
                 onSubmitEditCategory={handleSubmit}
                 onSubmitEditComponent={handleSubmit}
                 onSubmitEditContentType={handleSubmit}
+                onSubmitEditCustomFieldAttribute={handleSubmit}
                 onSubmitEditDz={handleSubmit}
+                onClickFinish={handleClickFinish}
               />
             }
             startActions={

@@ -1,19 +1,33 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useNotification, useTracking } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
 import { Icon } from '@strapi/design-system/Icon';
 import { Typography } from '@strapi/design-system/Typography';
 import Check from '@strapi/icons/Check';
-import Duplicate from '@strapi/icons/Duplicate';
-import { Button } from '@strapi/design-system/Button';
+import CardButton from './CardButton';
 
-const InstallPluginButton = ({ isInstalled, isInDevelopmentMode, commandToCopy }) => {
+const InstallPluginButton = ({
+  isInstalled,
+  isInDevelopmentMode,
+  commandToCopy,
+  strapiAppVersion,
+  strapiPeerDepVersion,
+  pluginName,
+}) => {
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(commandToCopy);
+    trackUsage('willInstallPlugin');
+    toggleNotification({
+      type: 'success',
+      message: { id: 'admin.pages.MarketPlacePage.plugin.copy.success' },
+    });
+  };
 
   // Already installed
   if (isInstalled) {
@@ -33,23 +47,12 @@ const InstallPluginButton = ({ isInstalled, isInDevelopmentMode, commandToCopy }
   // In development, show install button
   if (isInDevelopmentMode) {
     return (
-      <CopyToClipboard
-        onCopy={() => {
-          trackUsage('willInstallPlugin');
-          toggleNotification({
-            type: 'success',
-            message: { id: 'admin.pages.MarketPlacePage.plugin.copy.success' },
-          });
-        }}
-        text={commandToCopy}
-      >
-        <Button size="S" startIcon={<Duplicate />} variant="secondary">
-          {formatMessage({
-            id: 'admin.pages.MarketPlacePage.plugin.copy',
-            defaultMessage: 'Copy install command',
-          })}
-        </Button>
-      </CopyToClipboard>
+      <CardButton
+        strapiAppVersion={strapiAppVersion}
+        strapiPeerDepVersion={strapiPeerDepVersion}
+        handleCopy={handleCopy}
+        pluginName={pluginName}
+      />
     );
   }
 
@@ -57,10 +60,18 @@ const InstallPluginButton = ({ isInstalled, isInDevelopmentMode, commandToCopy }
   return null;
 };
 
+InstallPluginButton.defaultProps = {
+  strapiAppVersion: null,
+  strapiPeerDepVersion: null,
+};
+
 InstallPluginButton.propTypes = {
   isInstalled: PropTypes.bool.isRequired,
   isInDevelopmentMode: PropTypes.bool.isRequired,
   commandToCopy: PropTypes.string.isRequired,
+  strapiAppVersion: PropTypes.string,
+  strapiPeerDepVersion: PropTypes.string,
+  pluginName: PropTypes.string.isRequired,
 };
 
 export default InstallPluginButton;

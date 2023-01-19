@@ -53,32 +53,46 @@ function captureStderr(name, error) {
   return captureError(name);
 }
 
-const getProperties = (scope, error) => ({
-  error: typeof error === 'string' ? error : error && error.message,
-  os: os.type(),
-  osPlatform: os.platform(),
-  osArch: os.arch(),
-  osRelease: os.release(),
-  version: scope.strapiVersion,
-  nodeVersion: process.versions.node,
-  docker: scope.docker,
-  useYarn: scope.useYarn,
-  useTypescriptOnServer: scope.useTypescript,
-  useTypescriptOnAdmin: scope.useTypescript,
-  noRun: (scope.runQuickstartApp !== true).toString(),
-});
+const getProperties = (scope, error) => {
+  const eventProperties = {
+    error: typeof error === 'string' ? error : error && error.message,
+  };
+  const userProperties = {
+    os: os.type(),
+    osPlatform: os.platform(),
+    osArch: os.arch(),
+    osRelease: os.release(),
+    nodeVersion: process.versions.node,
+  };
+  const groupProperties = {
+    version: scope.strapiVersion,
+    docker: scope.docker,
+    useYarn: scope.useYarn,
+    useTypescriptOnServer: scope.useTypescript,
+    useTypescriptOnAdmin: scope.useTypescript,
+    isHostedOnStrapiCloud: process.env.STRAPI_HOSTING === 'strapi.cloud',
+    noRun: (scope.runQuickstartApp !== true).toString(),
+    projectId: scope.uuid,
+  };
 
-function trackEvent(event, body) {
+  return {
+    eventProperties,
+    userProperties,
+    groupProperties: addPackageJsonStrapiMetadata(groupProperties, scope),
+  };
+};
+
+function trackEvent(event, payload) {
   if (process.env.NODE_ENV === 'test') {
     return;
   }
 
   try {
-    return fetch('https://analytics.strapi.io/track', {
+    return fetch('https://analytics.strapi.io/api/v2/track', {
       method: 'POST',
       body: JSON.stringify({
         event,
-        ...body,
+        ...payload,
       }),
       timeout: 1000,
       headers: { 'Content-Type': 'application/json' },
@@ -90,14 +104,12 @@ function trackEvent(event, body) {
 }
 
 function trackError({ scope, error }) {
-  const { uuid } = scope;
   const properties = getProperties(scope, error);
 
   try {
     return trackEvent('didNotCreateProject', {
-      uuid,
       deviceId: scope.deviceId,
-      properties: addPackageJsonStrapiMetadata(properties, scope),
+      ...properties,
     });
   } catch (err) {
     /** ignore errors */
@@ -106,14 +118,12 @@ function trackError({ scope, error }) {
 }
 
 function trackUsage({ event, scope, error }) {
-  const { uuid } = scope;
   const properties = getProperties(scope, error);
 
   try {
     return trackEvent(event, {
-      uuid,
       deviceId: scope.deviceId,
-      properties: addPackageJsonStrapiMetadata(properties, scope),
+      ...properties,
     });
   } catch (err) {
     /** ignore errors */

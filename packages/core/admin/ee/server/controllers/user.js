@@ -1,5 +1,6 @@
 'use strict';
 
+const { get } = require('lodash');
 const { pick } = require('lodash/fp');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { validateUserCreationInput } = require('../validation/user');
@@ -10,11 +11,12 @@ const pickUserCreationAttributes = pick(['firstname', 'lastname', 'email', 'role
 module.exports = {
   async create(ctx) {
     const { body } = ctx.request;
+    const cleanData = { ...body, email: get(body, `email`, ``).toLowerCase() };
 
-    await validateUserCreationInput(body);
+    await validateUserCreationInput(cleanData);
 
-    const attributes = pickUserCreationAttributes(body);
-    const { useSSORegistration } = body;
+    const attributes = pickUserCreationAttributes(cleanData);
+    const { useSSORegistration } = cleanData;
 
     const userAlreadyExists = await getService('user').exists({ email: attributes.email });
 

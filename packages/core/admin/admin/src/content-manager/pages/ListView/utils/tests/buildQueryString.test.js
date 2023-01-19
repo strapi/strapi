@@ -58,4 +58,18 @@ describe('buildQueryString', () => {
       '?page=1&pageSize=10&sort=name:ASC&filters[0][name]=hello world&locale=en'
     );
   });
+
+  it('creates a valid query string with a search query', () => {
+    const _q = `test&query`;
+    const queryParams = {
+      page: '1',
+      pageSize: '10',
+      sort: 'name:ASC',
+      _q,
+    };
+
+    const queryString = buildQueryString(queryParams);
+
+    expect(queryString).toBe(`?page=1&pageSize=10&sort=name:ASC&_q=${encodeURIComponent(_q)}`);
+  });
 });

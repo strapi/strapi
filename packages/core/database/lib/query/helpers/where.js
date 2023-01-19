@@ -6,6 +6,7 @@ const types = require('../../types');
 const { createField } = require('../../fields');
 const { createJoin } = require('./join');
 const { toColumnName } = require('./transform');
+const { isKnexQuery } = require('../../utils/knex');
 
 const GROUP_OPERATORS = ['$and', '$or'];
 const OPERATORS = [
@@ -52,7 +53,7 @@ const castValue = (value, attribute) => {
     return value;
   }
 
-  if (types.isScalar(attribute.type)) {
+  if (types.isScalar(attribute.type) && !isKnexQuery(value)) {
     const field = createField(attribute);
 
     return value === null ? null : field.toDB(value);
@@ -206,12 +207,12 @@ const applyOperator = (qb, column, operator, value) => {
     }
 
     case '$in': {
-      qb.whereIn(column, _.castArray(value));
+      qb.whereIn(column, isKnexQuery(value) ? value : _.castArray(value));
       break;
     }
 
     case '$notIn': {
-      qb.whereNotIn(column, _.castArray(value));
+      qb.whereNotIn(column, isKnexQuery(value) ? value : _.castArray(value));
       break;
     }
 

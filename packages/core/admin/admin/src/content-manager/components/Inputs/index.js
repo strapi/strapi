@@ -11,7 +11,7 @@ import { getFieldName } from '../../utils';
 import Wysiwyg from '../Wysiwyg';
 import InputJSON from '../InputJSON';
 import InputUID from '../InputUID';
-import SelectWrapper from '../SelectWrapper';
+import { RelationInputDataManager } from '../RelationInputDataManager';
 
 import {
   connect,
@@ -24,6 +24,7 @@ import {
 
 function Inputs({
   allowedFields,
+  componentUid,
   fieldSchema,
   formErrors,
   isCreatingEntry,
@@ -35,13 +36,15 @@ function Inputs({
   shouldNotRunValidations,
   queryInfos,
   value,
+  size,
+  customFieldInputs,
 }) {
   const { fields } = useLibrary();
   const { formatMessage } = useIntl();
   const { contentType: currentContentTypeLayout } = useContentTypeLayout();
 
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
-  const type = fieldSchema.type;
+  const { type, customField: customFieldUid } = fieldSchema;
   const error = get(formErrors, [keys], null);
 
   const fieldName = useMemo(() => {
@@ -210,9 +213,10 @@ function Inputs({
 
   if (type === 'relation') {
     return (
-      <SelectWrapper
+      <RelationInputDataManager
         {...metadatas}
         {...fieldSchema}
+        componentUid={componentUid}
         description={
           metadatas.description
             ? formatMessage({
@@ -238,11 +242,21 @@ function Inputs({
             : null
         }
         queryInfos={queryInfos}
+        size={size}
         value={value}
         error={error && formatMessage(error)}
       />
     );
   }
+
+  const customInputs = {
+    json: InputJSON,
+    uid: InputUID,
+    media: fields.media,
+    wysiwyg: Wysiwyg,
+    ...fields,
+    ...customFieldInputs,
+  };
 
   return (
     <GenericInput
@@ -256,13 +270,7 @@ function Inputs({
       error={error}
       labelAction={labelAction}
       contentTypeUID={currentContentTypeLayout.uid}
-      customInputs={{
-        json: InputJSON,
-        uid: InputUID,
-        media: fields.media,
-        wysiwyg: Wysiwyg,
-        ...fields,
-      }}
+      customInputs={customInputs}
       multiple={fieldSchema.multiple || false}
       name={keys}
       onChange={onChange}
@@ -270,7 +278,7 @@ function Inputs({
       placeholder={placeholder ? { id: placeholder, defaultMessage: placeholder } : null}
       required={fieldSchema.required || false}
       step={inputStep}
-      type={inputType}
+      type={customFieldUid || inputType}
       // validations={validations}
       value={inputValue}
       withDefaultValue={false}
@@ -279,14 +287,18 @@ function Inputs({
 }
 
 Inputs.defaultProps = {
+  componentUid: undefined,
   formErrors: {},
   labelAction: undefined,
-  queryInfos: {},
+  size: undefined,
   value: null,
+  queryInfos: {},
+  customFieldInputs: {},
 };
 
 Inputs.propTypes = {
   allowedFields: PropTypes.array.isRequired,
+  componentUid: PropTypes.string,
   fieldSchema: PropTypes.object.isRequired,
   formErrors: PropTypes.object,
   keys: PropTypes.string.isRequired,
@@ -295,13 +307,15 @@ Inputs.propTypes = {
   metadatas: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
   readableFields: PropTypes.array.isRequired,
+  size: PropTypes.number,
   shouldNotRunValidations: PropTypes.bool.isRequired,
+  value: PropTypes.any,
   queryInfos: PropTypes.shape({
     containsKey: PropTypes.string,
     defaultParams: PropTypes.object,
     endPoint: PropTypes.string,
   }),
-  value: PropTypes.any,
+  customFieldInputs: PropTypes.object,
 };
 
 const Memoized = memo(Inputs, isEqual);

@@ -4,12 +4,12 @@ import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 import getTrad from '../../../utils/getTrad';
 import { createUid } from '../utils/createUid';
 
-const createContentTypeSchema = (
-  usedContentTypeNames,
-  reservedNames,
-  singularNames,
-  pluralNames
-) => {
+const createContentTypeSchema = ({
+  usedContentTypeNames = [],
+  reservedModels = [],
+  singularNames = [],
+  pluralNames = [],
+}) => {
   const shape = {
     displayName: yup
       .string()
@@ -34,7 +34,7 @@ const createContentTypeSchema = (
             return false;
           }
 
-          return !reservedNames.includes(toLower(trim(value)));
+          return !reservedModels.includes(toLower(trim(value)));
         },
       })
       .required(errorsTrads.required),
@@ -62,6 +62,17 @@ const createContentTypeSchema = (
           return context.parent.singularName !== value;
         },
       })
+      .test({
+        name: 'pluralNameNotAllowed',
+        message: getTrad('error.contentTypeName.reserved-name'),
+        test(value) {
+          if (!value) {
+            return false;
+          }
+
+          return !reservedModels.includes(toLower(trim(value)));
+        },
+      })
       .required(errorsTrads.required),
     singularName: yup
       .string()
@@ -85,6 +96,17 @@ const createContentTypeSchema = (
           }
 
           return context.parent.pluralName !== value;
+        },
+      })
+      .test({
+        name: 'singularNameNotAllowed',
+        message: getTrad('error.contentTypeName.reserved-name'),
+        test(value) {
+          if (!value) {
+            return false;
+          }
+
+          return !reservedModels.includes(toLower(trim(value)));
         },
       })
       .required(errorsTrads.required),

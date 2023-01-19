@@ -20,7 +20,7 @@ import {
   fetchUserRoles,
 } from './utils/api';
 import checkLatestStrapiVersion from './utils/checkLatestStrapiVersion';
-import { getFullName } from '../../utils';
+import { getFullName, hashAdminUserEmail } from '../../utils';
 
 const strapiVersion = packageJSON.version;
 
@@ -31,6 +31,7 @@ const AuthenticatedApp = () => {
   const userInfo = auth.getUserInfo();
   const userName = get(userInfo, 'username') || getFullName(userInfo.firstname, userInfo.lastname);
   const [userDisplayName, setUserDisplayName] = useState(userName);
+  const [userId, setUserId] = useState(null);
   const { showReleaseNotification } = useConfigurations();
   const [
     { data: appInfos, status },
@@ -65,11 +66,20 @@ const AuthenticatedApp = () => {
     if (userRoles) {
       const isUserSuperAdmin = userRoles.find(({ code }) => code === 'strapi-super-admin');
 
-      if (isUserSuperAdmin) {
+      if (isUserSuperAdmin && appInfos?.autoReload) {
         setGuidedTourVisibilityRef.current(true);
       }
     }
-  }, [userRoles]);
+  }, [userRoles, appInfos]);
+
+  useEffect(() => {
+    const getUserId = async () => {
+      const userId = await hashAdminUserEmail(userInfo);
+      setUserId(userId);
+    };
+
+    getUserId();
+  }, [userInfo]);
 
   // We don't need to wait for the release query to be fetched before rendering the plugins
   // however, we need the appInfos and the permissions
@@ -81,12 +91,13 @@ const AuthenticatedApp = () => {
   const appInfosValue = useMemo(() => {
     return {
       ...appInfos,
+      userId,
       latestStrapiReleaseTag: tag_name,
       setUserDisplayName,
       shouldUpdateStrapi,
       userDisplayName,
     };
-  }, [appInfos, tag_name, shouldUpdateStrapi, userDisplayName]);
+  }, [appInfos, tag_name, shouldUpdateStrapi, userDisplayName, userId]);
 
   if (shouldShowLoader) {
     return <LoadingIndicatorPage />;

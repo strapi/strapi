@@ -9,6 +9,11 @@
 const _ = require('lodash');
 const AWS = require('aws-sdk');
 
+function assertUrlProtocol(url) {
+  // Regex to test protocol like "http://", "https://"
+  return /^\w*:\/\//.test(url);
+}
+
 module.exports = {
   init(config) {
     const S3 = new AWS.S3({
@@ -34,7 +39,12 @@ module.exports = {
             }
 
             // set the bucket file url
-            file.url = data.Location;
+            if (assertUrlProtocol(data.Location)) {
+              file.url = data.Location;
+            } else {
+              // Default protocol to https protocol
+              file.url = `https://${data.Location}`;
+            }
 
             resolve();
           }

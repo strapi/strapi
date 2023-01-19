@@ -75,7 +75,7 @@
   "Settings.permissions.conditions.anytime": "Alltid",
   "Settings.permissions.conditions.apply": "Godkjenn",
   "Settings.permissions.conditions.can": "Kan",
-  "Settings.permissions.conditions.define-conditions": "Definér betingelser",
+  "Settings.permissions.conditions.conditions": "Definér betingelser",
   "Settings.permissions.conditions.links": "Linker",
   "Settings.permissions.conditions.no-actions": "Du må først velge handling (opprette, lese, oppdatere, ...) før du definerer betingelser for de.",
   "Settings.permissions.conditions.or": "ELLER",

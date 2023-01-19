@@ -38,6 +38,7 @@ const ListView = () => {
     onOpenModalAddField,
     onOpenModalEditField,
     onOpenModalEditSchema,
+    onOpenModalEditCustomField,
   } = useFormModalNavigation();
 
   const firstMainDataPath = isInContentTypeView ? 'contentType' : 'component';
@@ -56,17 +57,27 @@ const ListView = () => {
     onOpenModalAddComponentsToDZ({ dynamicZoneTarget, targetUid });
   };
 
-  const handleClickEditField = async (forTarget, targetUid, attributeName, type) => {
+  const handleClickEditField = async (forTarget, targetUid, attributeName, type, customField) => {
     const attributeType = getAttributeDisplayedType(type);
     const step = type === 'component' ? '2' : null;
 
-    onOpenModalEditField({
-      forTarget,
-      targetUid,
-      attributeName,
-      attributeType,
-      step,
-    });
+    if (customField) {
+      onOpenModalEditCustomField({
+        forTarget,
+        targetUid,
+        attributeName,
+        attributeType,
+        customFieldUid: customField,
+      });
+    } else {
+      onOpenModalEditField({
+        forTarget,
+        targetUid,
+        attributeName,
+        attributeType,
+        step,
+      });
+    }
   };
 
   let label = get(modifiedData, [firstMainDataPath, 'schema', 'displayName'], '');
