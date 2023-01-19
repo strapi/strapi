@@ -1,1 +1,1 @@
-export { default as getFieldUnits } from './fieldUnits';
+export { default as getFieldUnits } from './getFieldUnits';

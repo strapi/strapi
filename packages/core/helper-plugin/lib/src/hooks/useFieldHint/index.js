@@ -19,7 +19,7 @@ const useFieldHint = ({ description, minimum, maximum, units }) => {
    */
   const buildDescription = useCallback(
     (desc) =>
-      desc
+      desc?.id
         ? formatMessage({ id: desc.id, defaultMessage: desc.defaultMessage }, { ...desc.values })
         : '',
     [formatMessage]
@@ -40,34 +40,57 @@ const useFieldHint = ({ description, minimum, maximum, units }) => {
       if (!minIsNumber && !maxIsNumber) {
         return [];
       }
-      const minMaxDescription = [];
+      const ret = [];
 
       if (minIsNumber) {
-        minMaxDescription.push(`min. {min}`);
+        ret.push(
+          formatMessage(
+            {
+              id: 'content-manager.form.Input.minimum',
+              defaultMessage: 'min. {min}',
+            },
+            {
+              min,
+            }
+          )
+        );
+      }
+      if (minIsNumber && maxIsNumber) {
+        const connector = ' / ';
+        ret.push(
+          formatMessage({
+            id: connector,
+            defaultMessage: connector,
+          })
+        );
       }
       if (maxIsNumber) {
-        minMaxDescription.push(`max. {max}`);
+        ret.push(
+          formatMessage(
+            {
+              id: 'content-manager.form.Input.maximum',
+              defaultMessage: 'max. {max}',
+            },
+            {
+              max,
+            }
+          )
+        );
       }
-      let defaultMessage;
-
-      if (minMaxDescription.length === 0) {
-        defaultMessage = '';
-      } else {
-        defaultMessage = `${minMaxDescription.join(' / ')} {units}{br}`;
-      }
-
-      return formatMessage(
-        {
-          id: `content-manager.form.Input.minMaxDescription`,
-          defaultMessage,
-        },
-        {
-          min,
-          max,
-          units,
-          br: <br />,
-        }
+      ret.push(
+        formatMessage(
+          {
+            id: 'content-manager.form.Input.units',
+            defaultMessage: ' {units}{br}',
+          },
+          {
+            units,
+            br: <br />,
+          }
+        )
       );
+
+      return ret;
     },
     [formatMessage]
   );
