@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer } from 'react';
-import { useNotification, getFetchClient } from '@strapi/helper-plugin';
+import { useNotification, useFetchClient } from '@strapi/helper-plugin';
 import { get } from 'lodash';
 import init from './init';
 import pluginId from '../../pluginId';
@@ -11,13 +11,13 @@ const usePlugins = (shouldFetchData = true) => {
   const [{ permissions, routes, isLoading }, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, shouldFetchData)
   );
+  const fetchClient = useFetchClient();
 
   const fetchPlugins = useCallback(async () => {
     try {
       dispatch({
         type: 'GET_DATA',
       });
-      const fetchClient = getFetchClient();
 
       const [{ permissions }, { routes }] = await Promise.all(
         [`/${pluginId}/permissions`, `/${pluginId}/routes`].map(async (endpoint) => {
@@ -46,6 +46,8 @@ const usePlugins = (shouldFetchData = true) => {
         });
       }
     }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toggleNotification]);
 
   useEffect(() => {
