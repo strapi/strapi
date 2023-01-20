@@ -3,7 +3,11 @@ import getMinMax from '../getMinMax';
 describe('Content Manager | Inputs | Utils', () => {
   describe('getMinMax', () => {
     it('ignores a blank schema', () => {
-      expect(getMinMax({})).toEqual({ inputMaximum: undefined, inputMinimum: undefined });
+      expect(getMinMax({})).toEqual({ maximum: undefined, minimium: undefined });
+    });
+
+    it('ignores a null schema', () => {
+      expect(getMinMax(null)).toEqual({ maximum: undefined, minimium: undefined });
     });
 
     it('ignores values provided as strings that cannot be parsed to integers', () => {
@@ -14,7 +18,7 @@ describe('Content Manager | Inputs | Utils', () => {
         minLength: notANumber,
         maxLength: notANumber,
       };
-      expect(getMinMax(fieldSchema)).toEqual({ inputMaximum: undefined, inputMinimum: undefined });
+      expect(getMinMax(fieldSchema)).toEqual({ maximum: undefined, minimum: undefined });
     });
 
     it('correctly parses integer values from strings', () => {
@@ -22,7 +26,7 @@ describe('Content Manager | Inputs | Utils', () => {
         min: '2',
         max: '5',
       };
-      expect(getMinMax(fieldSchema)).toEqual({ inputMaximum: 5, inputMinimum: 2 });
+      expect(getMinMax(fieldSchema)).toEqual({ maximum: 5, minimum: 2 });
     });
 
     it('returns based on minLength and maxLength values', () => {
@@ -31,7 +35,7 @@ describe('Content Manager | Inputs | Utils', () => {
         maxLength: 20,
       };
 
-      expect(getMinMax(fieldSchema)).toEqual({ inputMaximum: 20, inputMinimum: 10 });
+      expect(getMinMax(fieldSchema)).toEqual({ maximum: 20, minimum: 10 });
     });
 
     it('returns based on min and max values', () => {
@@ -40,7 +44,7 @@ describe('Content Manager | Inputs | Utils', () => {
         max: 20,
       };
 
-      expect(getMinMax(fieldSchema)).toEqual({ inputMaximum: 20, inputMinimum: 10 });
+      expect(getMinMax(fieldSchema)).toEqual({ maximum: 20, minimum: 10 });
     });
   });
 });

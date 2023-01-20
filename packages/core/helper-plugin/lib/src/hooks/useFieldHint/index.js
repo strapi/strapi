@@ -1,17 +1,20 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useIntl } from 'react-intl';
+import { getFieldUnits, getMinMax } from './utils';
 
 /**
  * @description
  * A hook for generating the hint for a field
- * @param {Object} description - the description of the field
- * @param {Number} minimum - the minimum length or value of the field
- * @param {Number} maximum - the maximum length or value of the field
- * @param {String} units
+ * @type {
+ * ({ description: { id: string, defaultMessage: string },
+ *    type: string,
+ *    fieldSchema: { minLength?: number|string; maxLength?: number|string; max?: number|string; min?: number|string }
+ * })
+ * => { hint: ''|Array }
+ * }
  */
-const useFieldHint = ({ description, minimum, maximum, units }) => {
+const useFieldHint = ({ description, fieldSchema, type }) => {
   const { formatMessage } = useIntl();
-
   const [hint, setHint] = useState([]);
 
   /**
@@ -26,86 +29,53 @@ const useFieldHint = ({ description, minimum, maximum, units }) => {
   );
 
   /**
-   * Constructs a suitable description of a field's minimum and maximum limits
-   * @param {Number} minimum - the minimum length or value of the field
-   * @param {Number} maximum - the maximum length or value of the field
-   * @param {String} units
-   * @returns {Array}
+   * @returns {''|Array}
    */
-  const buildMinMaxHint = useCallback(
-    (min, max, units) => {
-      const minIsNumber = typeof min === 'number';
-      const maxIsNumber = typeof max === 'number';
+  const buildHint = useCallback(
+    (desc) => {
+      const { maximum, minimum } = getMinMax(fieldSchema);
+      const units = getFieldUnits({
+        type,
+        minimum,
+        maximum,
+      });
 
-      if (!minIsNumber && !maxIsNumber) {
-        return [];
-      }
-      const minMaxDescription = [];
+      const minIsNumber = typeof minimum === 'number';
+      const maxIsNumber = typeof maximum === 'number';
+      const hasMinAndMax = maxIsNumber && minIsNumber;
+      const hasMinOrMax = maxIsNumber || minIsNumber;
 
-      if (minIsNumber) {
-        minMaxDescription.push(
-          formatMessage(
-            {
-              id: 'content-manager.form.Input.minimum',
-              defaultMessage: 'min. {min}',
-            },
-            {
-              min,
-            }
-          )
-        );
+      if (!desc?.id && !hasMinOrMax) {
+        return '';
       }
-      if (minIsNumber && maxIsNumber) {
-        const connector = ' / ';
-        minMaxDescription.push(
-          formatMessage({
-            id: connector,
-            defaultMessage: connector,
-          })
-        );
-      }
-      if (maxIsNumber) {
-        minMaxDescription.push(
-          formatMessage(
-            {
-              id: 'content-manager.form.Input.maximum',
-              defaultMessage: 'max. {max}',
-            },
-            {
-              max,
-            }
-          )
-        );
-      }
-      minMaxDescription.push(
-        formatMessage(
-          {
-            id: 'content-manager.form.Input.units',
-            defaultMessage: ' {units}{br}',
-          },
-          {
-            units,
-            br: <br />,
-          }
-        )
+
+      return formatMessage(
+        {
+          id: 'content-manager.form.Input.hint.text',
+          defaultMessage:
+            '{min, select, undefined {} other {min. {min}}}{hasMinAndMax, select, true { {divider} } other {}}{max, select, undefined {} other {max. {max}}}{hasMinOrMax, select, true { {unit}{br}} other {}}{description}',
+        },
+        {
+          min: minimum,
+          max: maximum,
+          hasMinAndMax,
+          hasMinOrMax,
+          divider: formatMessage({
+            id: 'content-manager.form.Input.hint.minMaxDivider',
+            defaultMessage: '/',
+          }),
+          unit: units?.message ? formatMessage(units.message, units.values) : '',
+          br: <br />,
+          description: buildDescription(desc),
+        }
       );
-
-      return minMaxDescription;
     },
-    [formatMessage]
+    [formatMessage, buildDescription, fieldSchema, type]
   );
 
   useEffect(() => {
-    const newDescription = buildDescription(description);
-    const minMaxHint = buildMinMaxHint(minimum, maximum, units);
-
-    if (newDescription.length === 0 && minMaxHint.length === 0) {
-      setHint('');
-
-      return;
-    }
-    setHint([...minMaxHint, newDescription]);
-  }, [units, description, minimum, maximum, buildMinMaxHint, buildDescription]);
+    setHint(buildHint(description));
+  }, [description, buildHint]);
 
   return { hint };
 };

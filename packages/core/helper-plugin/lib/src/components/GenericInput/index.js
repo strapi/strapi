@@ -28,7 +28,6 @@ import Eye from '@strapi/icons/Eye';
 
 import NotSupported from './NotSupported';
 import useFieldHint from '../../hooks/useFieldHint';
-import { getFieldUnits } from './utils';
 
 const GenericInput = ({
   autoComplete,
@@ -47,16 +46,15 @@ const GenericInput = ({
   type,
   value: defaultValue,
   isNullable,
-  minimum,
-  maximum,
+  attribute,
   ...rest
 }) => {
   const { formatMessage } = useIntl();
+
   const { hint } = useFieldHint({
     description,
-    minimum,
-    maximum,
-    units: getFieldUnits({ type, minimum, maximum }),
+    fieldSchema: attribute,
+    type: attribute?.type || type,
   });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -103,6 +101,7 @@ const GenericInput = ({
     return (
       <CustomInput
         {...rest}
+        attribute={attribute}
         description={description}
         hint={hint}
         disabled={disabled}
@@ -460,8 +459,7 @@ GenericInput.defaultProps = {
   options: [],
   step: 1,
   value: undefined,
-  minimum: undefined,
-  maximum: undefined,
+  attribute: null,
 };
 
 GenericInput.propTypes = {
@@ -472,6 +470,7 @@ GenericInput.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }),
+  attribute: PropTypes.object,
   disabled: PropTypes.bool,
   error: PropTypes.oneOfType([
     PropTypes.string,
@@ -512,8 +511,6 @@ GenericInput.propTypes = {
   step: PropTypes.number,
   type: PropTypes.string.isRequired,
   value: PropTypes.any,
-  minimum: PropTypes.number,
-  maximum: PropTypes.number,
 };
 
 export default GenericInput;

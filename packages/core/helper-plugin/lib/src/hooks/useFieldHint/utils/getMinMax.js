@@ -1,32 +1,38 @@
 /**
  * Get the minimum and maximum limits for an input
- * @type { (fieldSchema: { minLength?: number|string; maxLength?: number|string; max?: number|string; min?: number|string } ) => { inputMaximum: number; inputMinimum: number } }
+ * @type {
+ * (fieldSchema: { minLength?: number|string; maxLength?: number|string; max?: number|string; min?: number|string } )
+ * => { maximum: number; minimum: number } }
  */
 const getMinMax = (fieldSchema) => {
+  if (!fieldSchema) {
+    return { maximum: undefined, minimum: undefined };
+  }
+
   const { minLength, maxLength, max, min } = fieldSchema;
 
-  let inputMinimum;
-  let inputMaximum;
+  let minimum;
+  let maximum;
 
   const parsedMin = parseInt(min, 10);
   const parsedMinLength = parseInt(minLength, 10);
 
   if (!Number.isNaN(parsedMin)) {
-    inputMinimum = parsedMin;
+    minimum = parsedMin;
   } else if (!Number.isNaN(parsedMinLength)) {
-    inputMinimum = parsedMinLength;
+    minimum = parsedMinLength;
   }
 
   const parsedMax = parseInt(max, 10);
   const parsedMaxLength = parseInt(maxLength, 10);
 
   if (!Number.isNaN(parsedMax)) {
-    inputMaximum = parsedMax;
+    maximum = parsedMax;
   } else if (!Number.isNaN(parsedMaxLength)) {
-    inputMaximum = parsedMaxLength;
+    maximum = parsedMaxLength;
   }
 
-  return { inputMaximum, inputMinimum };
+  return { maximum, minimum };
 };
 
 export default getMinMax;
