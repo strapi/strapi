@@ -6,8 +6,10 @@ import {
   useRBAC,
   useFocusWhenNavigate,
   useQueryParams,
+  AnErrorOccurred,
 } from '@strapi/helper-plugin';
-import { HeaderLayout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
+import { HeaderLayout, ContentLayout, ActionLayout, Layout } from '@strapi/design-system/Layout';
+import { Box } from '@strapi/design-system/Box';
 import { Main } from '@strapi/design-system/Main';
 import adminPermissions from '../../../../../../../admin/src/permissions';
 import TableRows from './TableRows';
@@ -25,7 +27,7 @@ const ListView = () => {
     allowedActions: { canRead },
   } = useRBAC(adminPermissions.settings.auditLogs);
   const [{ query }, setQuery] = useQueryParams();
-  const { auditLogs, users, isLoading } = useAuditLogsData({ canRead });
+  const { auditLogs, users, isLoading, hasError } = useAuditLogsData({ canRead });
 
   useFocusWhenNavigate();
 
@@ -64,6 +66,18 @@ const ListView = () => {
       label: formatMessage(header.metadatas.label),
     },
   }));
+
+  if (hasError) {
+    return (
+      <Layout>
+        <ContentLayout>
+          <Box paddingTop={8}>
+            <AnErrorOccurred />
+          </Box>
+        </ContentLayout>
+      </Layout>
+    );
+  }
 
   return (
     <Main aria-busy={isLoading}>

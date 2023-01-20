@@ -1,6 +1,7 @@
-import { useQueries } from 'react-query';
+import { useQuery } from 'react-query';
 import { useNotification, useFetchClient } from '@strapi/helper-plugin';
 import { useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 
 const useAuditLogsData = ({ canRead }) => {
   const { get } = useFetchClient();
@@ -24,26 +25,33 @@ const useAuditLogsData = ({ canRead }) => {
     enabled: canRead,
     keepPreviousData: true,
     retry: false,
-    staleTime: 1000 * 20,
-    onError() {
+    staleTime: 1000 * 20, // 20 seconds
+  };
+
+  const {
+    data: auditLogs,
+    isLoadingAuditLogs,
+    status: auditLogsStatus,
+  } = useQuery(['auditLogs', search], fetchAuditLogsPage, queryOptions);
+
+  const { data: users, status: userStatus } = useQuery(['auditLogsUsers'], fetchAllUsers, {
+    ...queryOptions,
+    staleTime: 2 * (1000 * 60), // 2 minutes
+  });
+
+  const isLoading = isLoadingAuditLogs;
+  const hasError = [userStatus, auditLogsStatus].includes('error');
+
+  useEffect(() => {
+    if (hasError) {
       toggleNotification({
         type: 'warning',
         message: { id: 'notification.error', defaultMessage: 'An error occured' },
       });
-    },
-  };
+    }
+  }, [hasError, toggleNotification]);
 
-  const [auditLogsData, userData] = useQueries([
-    { queryKey: ['auditLogs', search], queryFn: fetchAuditLogsPage, ...queryOptions },
-    { queryKey: ['auditLogsUsers'], queryFn: fetchAllUsers, ...queryOptions },
-  ]);
-
-  const { data: users, isLoading: isLoadingUsers } = userData;
-  const { data: auditLogs, isLoadingAuditLogs } = auditLogsData;
-
-  const isLoading = isLoadingAuditLogs || isLoadingUsers;
-
-  return { auditLogs, users: users?.data, isLoading };
+  return { auditLogs, users: users?.data, isLoading, hasError };
 };
 
 export default useAuditLogsData;
