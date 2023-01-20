@@ -43,4 +43,18 @@ module.exports = {
       },
     },
   ],
+  'review-workflows': [
+    {
+      method: 'GET',
+      path: '/review-workflows/workflows',
+      handler: 'workflow.list',
+      config: { auth: false },
+    },
+    {
+      method: 'GET',
+      path: '/review-workflows/workflows/:workflow_id',
+      handler: 'workflow.getOne',
+      config: { auth: false },
+    },
+  ],
 };

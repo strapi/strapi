@@ -18,7 +18,7 @@ const internals = {};
 const features = {
   bronze: [],
   silver: [],
-  gold: ['sso'],
+  gold: ['sso', 'review-workflows'],
 };
 
 module.exports = ({ dir, logger = noLog }) => {
@@ -116,8 +116,7 @@ Object.defineProperty(module.exports, 'features', {
 
 const mustHaveKey = (key) => {
   if (!_.has(internals, key)) {
-    const err = new Error('Tampering with license');
     // err.stack = null;
-    throw err;
+    throw new Error('Tampering with license');
   }
 };
