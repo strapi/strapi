@@ -56,7 +56,7 @@ const GenericInput = ({
     description,
     minimum,
     maximum,
-    units: getFieldUnits({ type, name, minimum, maximum }),
+    units: getFieldUnits({ type, minimum, maximum }),
   });
   const [showPassword, setShowPassword] = useState(false);
 

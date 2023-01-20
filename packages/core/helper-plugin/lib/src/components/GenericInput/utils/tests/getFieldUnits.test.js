@@ -6,10 +6,6 @@ describe('Content Manager | Inputs | Utils', () => {
       expect(getFieldUnits({ type: 'number' })).toEqual('');
     });
 
-    it('returns <empty string> for BIGINT types', () => {
-      expect(getFieldUnits({ name: 'BIGINT' })).toEqual('');
-    });
-
     it('returns "character" when neither minimum or maximum is greater than 1', () => {
       expect(getFieldUnits({ type: 'text', minimum: 1, maximum: 1 })).toEqual('character');
     });
