@@ -277,7 +277,9 @@ describe('Marketplace page - plugins tab', () => {
     // When they click the filters button again
     await user.click(screen.getByTestId('filters-button'));
     // They should see the collections button indicating 1 option selected
-    await user.click(screen.getByRole('button', { name: '1 collection selected Made by Strapi' }));
+    await user.click(
+      screen.getByRole('button', { name: 'Collections 1 collection selected Made by Strapi' })
+    );
     // They should the categories button with no options selected
     const categoriesButton = screen.getByTestId('Categories-button');
     await user.click(categoriesButton);
@@ -313,7 +315,9 @@ describe('Marketplace page - plugins tab', () => {
     await waitForReload();
 
     await user.click(screen.getByTestId('filters-button'));
-    await user.click(screen.getByRole('button', { name: `1 collection selected Made by Strapi` }));
+    await user.click(
+      screen.getByRole('button', { name: `Collections 1 collection selected Made by Strapi` })
+    );
     await user.click(screen.getByRole('option', { name: `Verified (29)` }));
 
     await waitForReload();
@@ -336,7 +340,9 @@ describe('Marketplace page - plugins tab', () => {
     await waitForReload();
 
     await user.click(screen.getByTestId('filters-button'));
-    await user.click(screen.getByRole('button', { name: `1 category selected Custom fields` }));
+    await user.click(
+      screen.getByRole('button', { name: `Categories 1 category selected Custom fields` })
+    );
     await user.click(screen.getByRole('option', { name: `Monitoring (1)` }));
 
     await waitForReload();

@@ -475,6 +475,9 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
 .c37 {
   height: 1px;
   border: none;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
   margin: 0;
 }
 
@@ -944,7 +947,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                       class="c1 c19 c24"
                       spacing="1"
                     >
-                      <span
+                      <label
                         class="c7 c25"
                         for="select-1"
                       >
@@ -953,7 +956,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                         >
                           Entry title
                         </div>
-                      </span>
+                      </label>
                       <div
                         class="c1 c10 c26"
                       >
@@ -962,7 +965,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                           aria-disabled="false"
                           aria-expanded="false"
                           aria-haspopup="listbox"
-                          aria-labelledby="select-1-label select-1-content"
+                          aria-labelledby="select-1 select-1-label select-1-content"
                           class="c27"
                           id="select-1"
                           type="button"
@@ -1933,6 +1936,9 @@ exports[`EditSettingsView should add field 1`] = `
 .c37 {
   height: 1px;
   border: none;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
   margin: 0;
 }
 
@@ -2402,7 +2408,7 @@ exports[`EditSettingsView should add field 1`] = `
                       class="c1 c19 c24"
                       spacing="1"
                     >
-                      <span
+                      <label
                         class="c7 c25"
                         for="select-11"
                       >
@@ -2411,7 +2417,7 @@ exports[`EditSettingsView should add field 1`] = `
                         >
                           Entry title
                         </div>
-                      </span>
+                      </label>
                       <div
                         class="c1 c10 c26"
                       >
@@ -2420,7 +2426,7 @@ exports[`EditSettingsView should add field 1`] = `
                           aria-disabled="false"
                           aria-expanded="false"
                           aria-haspopup="listbox"
-                          aria-labelledby="select-11-label select-11-content"
+                          aria-labelledby="select-11 select-11-label select-11-content"
                           class="c27"
                           id="select-11"
                           type="button"

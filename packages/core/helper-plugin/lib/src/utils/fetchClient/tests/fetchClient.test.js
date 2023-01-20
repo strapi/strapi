@@ -1,5 +1,5 @@
 import { AxiosError } from 'axios';
-import { auth } from '@strapi/helper-plugin';
+import auth from '../../auth';
 import {
   reqInterceptor,
   reqErrorInterceptor,
@@ -7,13 +7,13 @@ import {
   resErrorInterceptor,
   fetchClient,
   addInterceptors,
-} from '../fetchClient';
+} from '../index';
 
 const token = 'coolToken';
 auth.getToken = jest.fn().mockReturnValue(token);
 auth.clearAppStorage = jest.fn().mockReturnValue(token);
 
-describe('ADMIN | utils | fetchClient', () => {
+describe('HELPER-PLUGIN | utils | fetchClient', () => {
   describe('Test the interceptors', () => {
     it('API request should add authorization token to header', async () => {
       const apiInstance = fetchClient({
@@ -21,7 +21,6 @@ describe('ADMIN | utils | fetchClient', () => {
       });
       const result = await apiInstance.interceptors.request.handlers[0].fulfilled({ headers: {} });
       expect(result.headers.Authorization).toContain(`Bearer ${token}`);
-      expect(result.headers.Accept).toBe('application/json');
       expect(apiInstance.interceptors.response.handlers[0].fulfilled('foo')).toBe('foo');
     });
     describe('Test the addInterceptor function', () => {

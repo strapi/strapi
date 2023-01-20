@@ -1166,7 +1166,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         class="c1 c9 c19 c26"
                         spacing="1"
                       >
-                        <span
+                        <label
                           class="c7 c27"
                           for="select-3"
                         >
@@ -1180,7 +1180,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                               *
                             </span>
                           </div>
-                        </span>
+                        </label>
                         <div
                           class="c1 c9 c11 c35"
                         >
@@ -1188,7 +1188,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-3-label select-3-content"
+                            aria-labelledby="select-3 select-3-label select-3-content"
                             class="c36"
                             id="select-3"
                             name="lifespan"
@@ -1257,7 +1257,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         class="c1 c9 c19 c26"
                         spacing="1"
                       >
-                        <span
+                        <label
                           class="c7 c27"
                           for="select-4"
                         >
@@ -1271,7 +1271,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                               *
                             </span>
                           </div>
-                        </span>
+                        </label>
                         <div
                           class="c1 c9 c11 c35"
                         >
@@ -1279,7 +1279,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-4-label select-4-content"
+                            aria-labelledby="select-4 select-4-label select-4-content"
                             class="c36"
                             id="select-4"
                             name="type"
@@ -2964,7 +2964,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         class="c1 c9 c20 c25"
                         spacing="1"
                       >
-                        <span
+                        <label
                           class="c7 c34"
                           for="select-30"
                         >
@@ -2978,7 +2978,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                               *
                             </span>
                           </div>
-                        </span>
+                        </label>
                         <div
                           class="c1 c9 c11 c42"
                           disabled=""
@@ -2987,7 +2987,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             aria-disabled="true"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-30-label select-30-content"
+                            aria-labelledby="select-30 select-30-label select-30-content"
                             class="c43"
                             id="select-30"
                             name="lifespan"
@@ -3059,7 +3059,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         class="c1 c9 c20 c25"
                         spacing="1"
                       >
-                        <span
+                        <label
                           class="c7 c34"
                           for="select-31"
                         >
@@ -3073,7 +3073,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                               *
                             </span>
                           </div>
-                        </span>
+                        </label>
                         <div
                           class="c1 c9 c11 c51"
                         >
@@ -3081,7 +3081,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-31-label select-31-content"
+                            aria-labelledby="select-31 select-31-label select-31-content"
                             class="c43"
                             id="select-31"
                             name="type"
