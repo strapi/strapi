@@ -2,8 +2,11 @@
 
 const chalk = require('chalk');
 const Table = require('cli-table3');
-const { readableBytes } = require('../utils/helpers');
+const { Option } = require('commander');
+const { TransferGroupPresets } = require('@strapi/data-transfer/lib/engine');
+const { readableBytes, exitWith } = require('../utils/helpers');
 const strapi = require('../../index');
+const { getParseListWithChoices } = require('../utils/commander');
 
 const pad = (n) => {
   return (n < 10 ? '0' : '') + String(n);
@@ -85,9 +88,45 @@ const createStrapiInstance = async (logLevel = 'error') => {
   return app.load();
 };
 
+const transferDataTypes = Object.keys(TransferGroupPresets);
+
+const excludeOption = new Option(
+  '--exclude <comma-separated data types>',
+  `Exclude this data. Options used here override --only. Available types: ${transferDataTypes.join(
+    ','
+  )}`
+).argParser(getParseListWithChoices(transferDataTypes, 'Invalid options for "exclude"'));
+
+const onlyOption = new Option(
+  '--only <command-separated data types>',
+  `Include only this data. Available types: ${transferDataTypes.join(',')}`
+).argParser(getParseListWithChoices(transferDataTypes, 'Invalid options for "only"'));
+
+const validateExcludeOnly = (command) => {
+  const { exclude, only } = command.opts();
+  if (!only || !exclude) {
+    return;
+  }
+
+  const choicesInBoth = only.filter((n) => {
+    return exclude.indexOf(n) !== -1;
+  });
+  if (choicesInBoth.length > 0) {
+    exitWith(
+      1,
+      `Data types may not be used in both "exclude" and "only" in the same command. Found in both: ${choicesInBoth.join(
+        ','
+      )}`
+    );
+  }
+};
+
 module.exports = {
   buildTransferTable,
   getDefaultExportName,
   DEFAULT_IGNORED_CONTENT_TYPES,
   createStrapiInstance,
+  excludeOption,
+  onlyOption,
+  validateExcludeOnly,
 };

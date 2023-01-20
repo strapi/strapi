@@ -1,5 +1,5 @@
 import { WebSocket } from 'ws';
-import { TRANSFER_PATH } from '../../../../../lib/strapi/remote/constants';
+import { TRANSFER_PATH } from '../../../remote/constants';
 import { CommandMessage } from '../../../../../types/remote/protocol/client';
 import { createDispatcher } from '../utils';
 

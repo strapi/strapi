@@ -608,9 +608,9 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
                             <div
                               class=" css-1hb7zxy-IndicatorsContainer"
                             >
-                              <button
+                              <div
+                                aria-hidden="true"
                                 class="c2 c21 c22 c23"
-                                type="button"
                               >
                                 <svg
                                   fill="none"
@@ -626,7 +626,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
                                     fill-rule="evenodd"
                                   />
                                 </svg>
-                              </button>
+                              </div>
                             </div>
                           </div>
                           <input

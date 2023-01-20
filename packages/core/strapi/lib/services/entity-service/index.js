@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const delegate = require('delegates');
-const { InvalidTimeError, InvalidDateError, InvalidDateTimeError } =
+const { InvalidTimeError, InvalidDateError, InvalidDateTimeError, InvalidRelationError } =
   require('@strapi/database').errors;
 const {
   webhook: webhookUtils,
@@ -34,7 +34,12 @@ const transformLoadParamsToQuery = (uid, field, params = {}, pagination = {}) =>
 // TODO: those should be strapi events used by the webhooks not the other way arround
 const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
 
-const databaseErrorsToTransform = [InvalidTimeError, InvalidDateTimeError, InvalidDateError];
+const databaseErrorsToTransform = [
+  InvalidTimeError,
+  InvalidDateTimeError,
+  InvalidDateError,
+  InvalidRelationError,
+];
 
 const creationPipeline = (data, context) => {
   return applyTransforms(data, context);

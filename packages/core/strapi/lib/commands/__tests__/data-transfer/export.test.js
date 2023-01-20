@@ -26,6 +26,7 @@ describe('Export', () => {
           },
           sourceProvider: { name: 'testSource' },
           destinationProvider: { name: 'testDestination' },
+          diagnostics: { on: jest.fn().mockReturnThis() },
         };
       },
     },

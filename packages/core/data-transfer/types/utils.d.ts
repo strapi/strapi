@@ -1,26 +1,64 @@
 import type { Readable, Writable, Duplex, Transform } from 'stream';
 import type { IDestinationProvider, ISourceProvider } from './providers';
+import type { IAsset, IEntity, ILink } from './common-entities';
+import type { Schema } from '@strapi/strapi';
+import type { ITransferEngineOptions } from './transfer-engine';
 
 export type MaybePromise<T> = T | Promise<T>;
+
+// The data type passed in for each stage
+export type TransferStageTypeMap = {
+  schemas: Schema;
+  entities: IEntity;
+  links: ILink;
+  assets: IAsset;
+  configuration: unknown;
+};
 
 /**
  * Define a transfer transform which will be used to intercept
  * and potentially discard or modify the transferred data
  */
-export type TransferTransform<T> =
-  | {
-      filter: (data: T) => boolean;
-    }
-  | {
-      map: (data: T) => T;
-    };
+export type TransferTransform<T> = TransferFilter<T> | TransferMap<T>;
 
+export type TransferFilter<T> = {
+  filter: (data: T) => boolean;
+};
+
+export type TransferMap<T> = {
+  map: (data: T) => T;
+};
+
+type Stream = Readable | Writable | Duplex | Transform;
 export type TransformFunction = (chunk: any, encoding?: string) => any;
 export type StreamItem = Stream | TransformFunction;
-type Stream = Readable | Writable | Duplex | Transform;
 
-export type TransferStage = 'entities' | 'links' | 'assets' | 'schemas' | 'configuration';
+export type TransferTransformsTypeMap = TransferStageTypeMap & {
+  global: unknown;
+};
 
+export type TransferStage = keyof TransferStageTypeMap;
+
+export type TransferTransformArray<T> = TransferTransform<TransferStageTypeMap[T]>[];
+
+export type TransferTransformOption = keyof TransferTransformsTypeMap;
+
+export type TransferTransforms = {
+  [key in TransferTransformOption]?: TransferTransformArray<key>;
+};
+
+/**
+ * Filters
+ **/
+export type TransferFilterArray<T> = TransferFilter<TransferStageTypeMap[T]>[];
+
+export type TransferFilters = {
+  [key in TransferTransformOption]?: boolean | TransferFilterArray<key>;
+};
+
+/**
+ * Progress
+ **/
 export type TransferProgress = {
   [key in TransferStage]?: {
     count: number;
