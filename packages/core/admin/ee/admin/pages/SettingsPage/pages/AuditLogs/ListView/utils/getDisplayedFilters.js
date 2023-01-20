@@ -24,6 +24,11 @@ const getDisplayedFilters = ({ actionOptions, userOptions }) => {
       fieldSchema: { type: 'enumeration' },
     },
     {
+      name: 'date',
+      metadatas: { label: 'Date' },
+      fieldSchema: { type: 'datetime' },
+    },
+    {
       name: 'user',
       metadatas: {
         label: 'User',
@@ -48,11 +53,6 @@ const getDisplayedFilters = ({ actionOptions, userOptions }) => {
         customInput: ComboboxFilter,
       },
       fieldSchema: { type: 'relation', mainField: { name: 'id', schema: { type: 'integer' } } },
-    },
-    {
-      name: 'date',
-      metadatas: { label: 'Date' },
-      fieldSchema: { type: 'datetime' },
     },
   ];
 };
