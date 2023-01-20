@@ -68,7 +68,7 @@ const CellContent = ({ content, fieldSchema, metadatas, name, rowId, contentType
     default:
       return (
         <TypographyMaxWidth ellipsis textColor="neutral800">
-          <CellValue type={type} value={content} />
+          <CellValue type={type} value={content} isID={name === 'id'} />
         </TypographyMaxWidth>
       );
   }
