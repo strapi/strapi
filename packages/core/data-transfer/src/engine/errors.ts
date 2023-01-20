@@ -30,4 +30,17 @@ class TransferEngineValidationError<
   }
 }
 
-export { TransferEngineError, TransferEngineInitializationError, TransferEngineValidationError };
+class TransferEngineTransferError<
+  T extends { check: string } = { check: string }
+> extends TransferEngineError<'transfer', T> {
+  constructor(message?: string, details?: T) {
+    super(SeverityKind.FATAL, message, { step: 'transfer', details });
+  }
+}
+
+export {
+  TransferEngineError,
+  TransferEngineInitializationError,
+  TransferEngineValidationError,
+  TransferEngineTransferError,
+};

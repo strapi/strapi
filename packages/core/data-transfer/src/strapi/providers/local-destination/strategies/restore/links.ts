@@ -1,5 +1,6 @@
 import { Writable } from 'stream';
 import { ILink } from '../../../../../../types';
+import { ProviderTransferError } from '../../../../../errors/providers';
 import { createLinkQuery } from '../../../../queries/link';
 
 export const createLinksWriteStream = (
@@ -24,7 +25,7 @@ export const createLinksWriteStream = (
         }
 
         return callback(
-          new Error(`An error happened while trying to import a ${left.type} link. ${e}`)
+          new ProviderTransferError(`An error happened while trying to import a ${left.type} link.`)
         );
       }
 

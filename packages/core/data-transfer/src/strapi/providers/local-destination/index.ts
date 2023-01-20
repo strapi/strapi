@@ -5,6 +5,8 @@ import type { IAsset, IDestinationProvider, IMetadata, ProviderType } from '../.
 
 import { restore } from './strategies';
 import * as utils from '../../../utils';
+import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
+import { assertValidStrapi } from '../../../utils/providers';
 
 export const VALID_CONFLICT_STRATEGIES = ['restore', 'merge'];
 export const DEFAULT_CONFLICT_STRATEGY = 'restore';
@@ -51,15 +53,16 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   #validateOptions() {
     if (!VALID_CONFLICT_STRATEGIES.includes(this.options.strategy)) {
-      throw new Error(`Invalid stategy ${this.options.strategy}`);
+      throw new ProviderValidationError(`Invalid stategy ${this.options.strategy}`, {
+        check: 'strategy',
+        strategy: this.options.strategy,
+        validStrategies: VALID_CONFLICT_STRATEGIES,
+      });
     }
   }
 
   async #deleteAll() {
-    if (!this.strapi) {
-      throw new Error('Strapi instance not found');
-    }
-
+    assertValidStrapi(this.strapi);
     return restore.deleteRecords(this.strapi, this.options.restore);
   }
 
@@ -89,10 +92,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   getSchemas() {
-    if (!this.strapi) {
-      throw new Error('Not able to get Schemas. Strapi instance not found');
-    }
-
+    assertValidStrapi(this.strapi, 'Not able to get Schemas.');
     const schemas = {
       ...this.strapi.contentTypes,
       ...this.strapi.components,
@@ -102,10 +102,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   createEntitiesWriteStream(): Writable {
-    if (!this.strapi) {
-      throw new Error('Not able to import entities. Strapi instance not found');
-    }
-
+    assertValidStrapi(this.strapi, 'Not able to import entities');
     const { strategy } = this.options;
 
     const updateMappingTable = (type: string, oldID: number, newID: number) => {
@@ -128,9 +125,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   // TODO: Move this logic to the restore strategy
   async createAssetsWriteStream(): Promise<Writable> {
-    if (!this.strapi) {
-      throw new Error('Not able to stream Assets. Strapi instance not found');
-    }
+    assertValidStrapi(this.strapi, 'Not able to stream Assets.');
 
     const assetsDirectory = path.join(this.strapi.dirs.static.public, 'uploads');
     const backupDirectory = path.join(
@@ -159,12 +154,12 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
               await fse.rm(assetsDirectory, { recursive: true, force: true });
               await fse.rename(backupDirectory, assetsDirectory);
               this.destroy(
-                new Error(
+                new ProviderTransferError(
                   `There was an error during the transfer process. The original files have been restored to ${assetsDirectory}`
                 )
               );
             } catch (err) {
-              throw new Error(
+              throw new ProviderTransferError(
                 `There was an error doing the rollback process. The original files are in ${backupDirectory}, but we failed to restore them to ${assetsDirectory}`
               );
             } finally {
@@ -176,17 +171,19 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async createConfigurationWriteStream(): Promise<Writable> {
-    if (!this.strapi) {
-      throw new Error('Not able to stream Configurations. Strapi instance not found');
-    }
+    assertValidStrapi(this.strapi, 'Not able to stream Configurations.');
 
     const { strategy } = this.options;
 
-    if (strategy === 'restore') {
+    if (strategy !== 'restore') {
       return restore.createConfigurationWriteStream(this.strapi);
     }
 
-    throw new Error(`Invalid strategy supplied: "${strategy}"`);
+    throw new ProviderValidationError(`Invalid stategy ${strategy}`, {
+      check: 'strategy',
+      strategy,
+      validStrategies: VALID_CONFLICT_STRATEGIES,
+    });
   }
 
   async createLinksWriteStream(): Promise<Writable> {
@@ -201,7 +198,11 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       return restore.createLinksWriteStream(mapID, this.strapi);
     }
 
-    throw new Error(`Invalid strategy supplied: "${strategy}"`);
+    throw new ProviderValidationError(`Invalid stategy ${strategy}`, {
+      check: 'strategy',
+      strategy,
+      validStrategies: VALID_CONFLICT_STRATEGIES,
+    });
   }
 }
 

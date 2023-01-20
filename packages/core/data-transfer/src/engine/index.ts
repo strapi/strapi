@@ -30,6 +30,7 @@ import {
   IDiagnosticReporter,
   ErrorDiagnosticSeverity,
 } from './diagnostic';
+import { DataTransferError } from '../errors';
 
 export const TRANSFER_STAGES: ReadonlyArray<TransferStage> = Object.freeze([
   'entities',
@@ -341,7 +342,9 @@ class TransferEngine<
                 return `Modified "${diff.path}". "${diff.values[0]}" (${diff.types[0]}) => "${diff.values[1]}" (${diff.types[1]})`;
               }
 
-              throw new Error(`Invalid diff found for "${uid}"`);
+              throw new TransferEngineValidationError(`Invalid diff found for "${uid}"`, {
+                check: `schema on ${uid}`,
+              });
             })
             .map((line) => `  - ${line}`)
             .join(EOL);
@@ -462,7 +465,7 @@ class TransferEngine<
   async close(): Promise<void> {
     const results = await Promise.allSettled([
       this.sourceProvider.close?.(),
-      this.destinationProvider.bootstrap?.(),
+      this.destinationProvider.close?.(),
     ]);
 
     results.forEach((result) => {
@@ -541,13 +544,12 @@ class TransferEngine<
       this.#emitTransferUpdate('error', { error: e });
 
       const lastDiagnostic = last(this.diagnostics.stack.items);
-
       // Do not report an error diagnostic if the last one reported the same error
       if (
         e instanceof Error &&
         (!lastDiagnostic || lastDiagnostic.kind !== 'error' || lastDiagnostic.details.error !== e)
       ) {
-        this.#reportError(e, 'fatal');
+        this.#reportError(e, (e as DataTransferError).severity || 'fatal');
       }
 
       // Rollback the destination provider if an exception is thrown during the transfer

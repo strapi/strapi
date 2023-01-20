@@ -1,6 +1,7 @@
 import { Writable } from 'stream';
 import chalk from 'chalk';
 import { IConfiguration } from '../../../../../../types';
+import { ProviderTransferError } from '../../../../../errors/providers';
 
 const restoreCoreStore = async <T extends { value: unknown }>(strapi: Strapi.Strapi, data: T) => {
   return strapi.db.query('strapi::core-store').create({
@@ -37,7 +38,7 @@ export const createConfigurationWriteStream = async (strapi: Strapi.Strapi) => {
         await restoreConfigs(strapi, config);
       } catch (error) {
         return callback(
-          new Error(
+          new ProviderTransferError(
             `Failed to import ${chalk.yellowBright(config.type)} (${chalk.greenBright(
               config.value.id
             )}`

@@ -4,6 +4,7 @@ import { get, last } from 'lodash/fp';
 import { Writable } from 'stream';
 
 import type { IEntity } from '../../../../../../types';
+import { ProviderTransferError } from '../../../../../errors/providers';
 import { json } from '../../../../../utils';
 import * as queries from '../../../../queries';
 
@@ -90,7 +91,7 @@ const createEntitiesWriteStream = (options: IEntitiesRestoreStreamOptions) => {
           return callback(e);
         }
 
-        return callback(new Error(`Failed to create "${type}" (${id})`));
+        return callback(new ProviderTransferError(`Failed to create "${type}" (${id})`));
       }
 
       return callback(null);

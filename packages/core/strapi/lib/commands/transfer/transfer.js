@@ -11,13 +11,15 @@ const {
 const { isObject } = require('lodash/fp');
 const chalk = require('chalk');
 
+const { createLogger } = require('@strapi/logger');
 const {
   buildTransferTable,
   createStrapiInstance,
   DEFAULT_IGNORED_CONTENT_TYPES,
 } = require('./utils');
+const formatDiagnosticErrors = require('../utils/formatter');
 
-const logger = console;
+const logger = createLogger();
 
 /**
  * @typedef TransferCommandOptions Options given to the CLI transfer command
@@ -108,6 +110,8 @@ module.exports = async (opts) => {
       ],
     },
   });
+
+  engine.diagnostics.onDiagnostic(formatDiagnosticErrors);
 
   try {
     logger.log(`Starting transfer...`);

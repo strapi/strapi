@@ -7,6 +7,7 @@ import { createLinksStream } from './links';
 import { createConfigurationStream } from './configuration';
 import { createAssetsStream } from './assets';
 import * as utils from '../../../utils';
+import { assertValidStrapi } from '../../../utils/providers';
 
 export interface ILocalStrapiSourceProviderOptions {
   getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>;
@@ -64,9 +65,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
   }
 
   async createEntitiesReadStream(): Promise<Readable> {
-    if (!this.strapi) {
-      throw new Error('Not able to stream entities. Strapi instance not found');
-    }
+    assertValidStrapi(this.strapi, 'Not able to stream entities.');
 
     return chain([
       // Entities stream
@@ -78,25 +77,19 @@ class LocalStrapiSourceProvider implements ISourceProvider {
   }
 
   createLinksReadStream(): Readable {
-    if (!this.strapi) {
-      throw new Error('Not able to stream links. Strapi instance not found');
-    }
+    assertValidStrapi(this.strapi, 'Not able to stream links.');
 
     return createLinksStream(this.strapi);
   }
 
   createConfigurationReadStream(): Readable {
-    if (!this.strapi) {
-      throw new Error('Not able to stream configuration. Strapi instance not found');
-    }
+    assertValidStrapi(this.strapi, 'Not able to stream configuration. Strapi instance not found');
 
     return createConfigurationStream(strapi);
   }
 
   getSchemas() {
-    if (!this.strapi) {
-      throw new Error('Not able to get Schemas. Strapi instance not found');
-    }
+    assertValidStrapi(this.strapi, 'Not able to get Schemas');
 
     const schemas = {
       ...this.strapi.contentTypes,
@@ -111,9 +104,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
   }
 
   createAssetsReadStream(): Readable {
-    if (!this.strapi) {
-      throw new Error('Not able to stream assets. Strapi instance not found');
-    }
+    assertValidStrapi(this.strapi, 'Not able to stream assets');
 
     return createAssetsStream(this.strapi);
   }

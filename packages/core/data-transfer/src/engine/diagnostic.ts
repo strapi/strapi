@@ -78,6 +78,16 @@ const createDiagnosticReporter = (
     emitter.on(event, listener);
   };
 
+  const isDiagnosticValid = (diagnostic: Diagnostic) => {
+    if (!diagnostic.kind || !diagnostic.details) {
+      return false;
+    }
+    if (!diagnostic.details.message) {
+      return false;
+    }
+    return true;
+  };
+
   return {
     stack: {
       get size() {
@@ -90,6 +100,10 @@ const createDiagnosticReporter = (
     },
 
     report(diagnostic: Diagnostic) {
+      if (!isDiagnosticValid(diagnostic)) {
+        return this;
+      }
+
       emitter.emit('diagnostic', diagnostic);
       emitter.emit(`diagnostic.${diagnostic.kind}`, diagnostic);
 

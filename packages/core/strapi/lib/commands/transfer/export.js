@@ -11,12 +11,14 @@ const { isObject, isString, isFinite, toNumber } = require('lodash/fp');
 const fs = require('fs-extra');
 const chalk = require('chalk');
 
+const { TransferEngineTransferError } = require('@strapi/data-transfer/lib/engine/errors');
 const {
   getDefaultExportName,
   buildTransferTable,
   DEFAULT_IGNORED_CONTENT_TYPES,
   createStrapiInstance,
 } = require('./utils');
+const formatDiagnosticErrors = require('../utils/formatter');
 
 /**
  * @typedef ImportCommandOptions Options given to the CLI import command
@@ -74,28 +76,7 @@ module.exports = async (opts) => {
     },
   });
 
-  engine.diagnostics
-    .on('error', ({ details }) => {
-      const { createdAt, severity, name, message } = details;
-
-      logger.error(
-        chalk.red(`[${createdAt.toISOString()}] [error] (${severity}) ${name}: ${message}`)
-      );
-    })
-    .on('info', ({ details }) => {
-      const { createdAt, message, params } = details;
-
-      const msg = typeof message === 'function' ? message(params) : message;
-
-      logger.info(chalk.blue(`[${createdAt.toISOString()}] [info] ${msg}`));
-    })
-    .on('warning', ({ details }) => {
-      const { createdAt, origin, message } = details;
-
-      logger.warn(
-        chalk.yellow(`[${createdAt.toISOString()}] [warning] (${origin ?? 'transfer'}) ${message}`)
-      );
-    });
+  engine.diagnostics.onDiagnostic(formatDiagnosticErrors);
 
   const progress = engine.progress.stream;
 
@@ -122,7 +103,7 @@ module.exports = async (opts) => {
 
     const outFileExists = await fs.pathExists(outFile);
     if (!outFileExists) {
-      throw new Error(`Export file not created "${outFile}"`);
+      throw new TransferEngineTransferError(`Export file not created "${outFile}"`);
     }
 
     logger.log(`${chalk.bold('Export process has been completed successfully!')}`);
