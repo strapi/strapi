@@ -4,7 +4,7 @@ const { pick } = require('lodash/fp');
 
 const { readLicense, verifyLicense, fetchLicense, LicenseCheckError } = require('./license');
 const { eeStoreModel } = require('./ee-store');
-const { getRecurringCronExpression } = require('../lib/utils/cron');
+const { shiftCronExpression } = require('../lib/utils/cron');
 
 const ONE_MINUTE = 1000 * 60;
 const DEFAULT_FEATURES = {
@@ -142,7 +142,7 @@ const checkLicense = async ({ strapi }) => {
 
   if (!shouldStayOffline) {
     await onlineUpdate({ strapi });
-    strapi.cron.add({ [getRecurringCronExpression()]: onlineUpdate });
+    strapi.cron.add({ [shiftCronExpression('0 0 */12 * * *')]: onlineUpdate });
   } else {
     if (!ee.licenseInfo.expireAt) {
       return disable('Your license does not have offline support.');
