@@ -592,6 +592,7 @@ const createEntityManager = (db) => {
               (acc, res) => Object.assign(acc, { [res[inverseJoinColumn.name]]: res.max }),
               {}
             );
+
             insert.forEach((rel) => {
               rel[inverseOrderColumnName] = (maxMap[rel[inverseJoinColumn.name]] || 0) + 1;
             });
