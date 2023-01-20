@@ -593,8 +593,7 @@ const createEntityManager = (db) => {
               {}
             );
             insert.forEach((rel) => {
-              // Needs to parse int because on CRDB maxMap is a string.
-              rel[inverseOrderColumnName] = maxMap[rel[inverseJoinColumn.name]] || 0 + 1;
+              rel[inverseOrderColumnName] = (maxMap[rel[inverseJoinColumn.name]] || 0) + 1;
             });
           }
 
