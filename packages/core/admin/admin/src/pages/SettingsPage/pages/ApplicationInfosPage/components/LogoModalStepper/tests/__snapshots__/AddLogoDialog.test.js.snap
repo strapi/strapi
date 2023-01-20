@@ -183,6 +183,9 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
 .c10 {
   height: 1px;
   border: none;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
   margin: 0;
 }
 
@@ -740,6 +743,9 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
 .c10 {
   height: 1px;
   border: none;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
   margin: 0;
 }
 
