@@ -115,7 +115,6 @@ module.exports = (db) => {
     };
   };
 
-  // eslint-disable-next-line no-unused-vars
   const diffDefault = (oldColumn, column) => {
     const oldDefaultTo = oldColumn.defaultTo;
     const { defaultTo } = column;
