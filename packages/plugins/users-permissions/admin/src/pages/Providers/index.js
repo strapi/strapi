@@ -118,6 +118,10 @@ export const ProvidersPage = () => {
       return forms.email;
     }
 
+    if (providerToEditName === 'apple') {
+      return forms.providerApple;
+    }
+
     if (isProviderWithSubdomain) {
       return forms.providersWithSubdomain;
     }

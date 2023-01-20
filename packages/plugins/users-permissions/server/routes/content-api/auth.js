@@ -12,6 +12,15 @@ module.exports = [
   },
   {
     method: 'POST',
+    path: '/connect/(.*)',
+    handler: 'auth.connect',
+    config: {
+      middlewares: ['plugin::users-permissions.rateLimit'],
+      prefix: '',
+    },
+  },
+  {
+    method: 'POST',
     path: '/auth/local',
     handler: 'auth.callback',
     config: {

@@ -264,6 +264,20 @@ const getInitialProviders = ({ purest }) => ({
         };
       });
   },
+  async apple({ query }) {
+    // get the id_token
+    const idToken = query.id_token;
+    // decode the jwt token
+    const tokenPayload = jwt.decode(idToken);
+    if (!tokenPayload) {
+      throw new Error('unable to decode jwt token');
+    } else {
+      return {
+        username: tokenPayload.sub,
+        email: tokenPayload.email,
+      };
+    }
+  },
 });
 
 module.exports = () => {

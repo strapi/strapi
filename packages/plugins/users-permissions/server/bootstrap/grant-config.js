@@ -120,4 +120,20 @@ module.exports = (baseURL) => ({
     scope: ['openid email'], // scopes should be space delimited
     subdomain: 'my.subdomain.com/cas',
   },
+  apple: {
+    enabled: false,
+    icon: 'apple',
+    key: '',
+    secret: '',
+    teamId: '',
+    keyIdentifier: '',
+    callback: `${baseURL}/apple/callback`,
+    scope: ['name', 'email'],
+    nonce: true,
+    state: true,
+    custom_params: {
+      response_type: 'code id_token',
+      response_mode: 'form_post',
+    },
+  },
 });

@@ -199,6 +199,18 @@ module.exports = {
       grantConfig[provider].callback;
     grantConfig[provider].redirect_uri = getService('providers').buildRedirectUri(provider);
 
+    if (provider === 'apple') {
+      grantConfig.apple = {
+        ...grantConfig.apple,
+        secret: getService('providers').createAppleSecret({
+          key: grantConfig.apple.key,
+          teamId: grantConfig.apple.teamId,
+          keyIdentifier: grantConfig.apple.keyIdentifier,
+          privateKey: grantConfig.apple.secret,
+        }),
+      };
+    }
+
     return grant(grantConfig)(ctx, next);
   },
 
