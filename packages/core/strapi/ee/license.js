@@ -5,6 +5,12 @@ const { join } = require('path');
 const crypto = require('crypto');
 const fetch = require('node-fetch');
 
+const DEFAULT_FEATURES = {
+  bronze: [],
+  silver: [],
+  gold: ['sso'],
+};
+
 const publicKey = fs.readFileSync(join(__dirname, 'resources/key.pub'));
 
 class LicenseCheckError extends Error {
@@ -45,7 +51,14 @@ const verifyLicense = (license) => {
     throw new Error('Invalid license.');
   }
 
-  return JSON.parse(stringifiedContent);
+  const licenseInfo = JSON.parse(stringifiedContent);
+
+  if (!licenseInfo.features) {
+    licenseInfo.features = DEFAULT_FEATURES[licenseInfo.type];
+  }
+
+  Object.freeze(licenseInfo.features);
+  return licenseInfo;
 };
 
 const throwError = () => {

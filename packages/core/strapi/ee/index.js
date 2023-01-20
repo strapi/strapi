@@ -7,11 +7,6 @@ const { eeStoreModel } = require('./ee-store');
 const { shiftCronExpression } = require('../lib/utils/cron');
 
 const ONE_MINUTE = 1000 * 60;
-const DEFAULT_FEATURES = {
-  bronze: [],
-  silver: [],
-  gold: ['sso'],
-};
 
 const ee = {
   enabled: false,
@@ -126,12 +121,7 @@ const validateInfo = () => {
     return disable('License expired.');
   }
 
-  if (!ee.licenseInfo.features) {
-    ee.licenseInfo.features = DEFAULT_FEATURES[ee.licenseInfo.type];
-  }
-
   ee.enabled = true;
-  Object.freeze(ee.licenseInfo.features);
 };
 
 const checkLicense = async ({ strapi }) => {
