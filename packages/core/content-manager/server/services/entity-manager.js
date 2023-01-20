@@ -67,13 +67,6 @@ const isRelationsPopulateEnabled = () => {
   return strapi.config.get('server.webhooks.populateRelations', true);
 };
 
-if (isRelationsPopulateEnabled()) {
-  process.emitWarning(
-    '[deprecated] Relations population in webhooks is enabled. This is not recommended for production and will degrade performance. ' +
-      'Please set `server.webhooks.populateRelations` to `false` in your `config/server.js` file.'
-  );
-}
-
 const getCountDeepPopulate = (uid) => getDeepPopulate(uid, { countMany: true, countOne: true });
 
 /**
