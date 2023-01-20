@@ -115,13 +115,17 @@ describe('Local Strapi Source Destination', () => {
         };
       });
 
+      const transaction = jest.fn(async (cb) => {
+        await cb();
+      });
+
       const getModel = jest.fn((uid: string) => getContentTypes()[uid]);
 
       const strapi = getStrapiFactory({
         contentTypes: getContentTypes(),
         query,
         getModel,
-        db: { query },
+        db: { query, transaction },
       })();
 
       setGlobalStrapi(strapi);
@@ -138,8 +142,15 @@ describe('Local Strapi Source Destination', () => {
     });
 
     test('Should not delete if it is a merge strategy', async () => {
+      const transaction = jest.fn(async (cb) => {
+        await cb();
+      });
       const provider = createLocalStrapiDestinationProvider({
-        getStrapi: getStrapiFactory({}),
+        getStrapi: getStrapiFactory({
+          db: {
+            transaction,
+          },
+        }),
         strategy: 'merge',
       });
       const deleteAllSpy = jest.spyOn(restoreApi, 'deleteRecords');
