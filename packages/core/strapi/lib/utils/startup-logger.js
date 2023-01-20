@@ -9,6 +9,8 @@ const ee = require('./ee');
 module.exports = (app) => {
   return {
     logStats() {
+      // app.db.dialect.client
+      console.log(app);
       const columns = Math.min(process.stderr.columns, 80) - 2;
       console.log();
       console.log(chalk.black.bgWhite(_.padEnd(columns, ' Project information')));
@@ -34,6 +36,16 @@ module.exports = (app) => {
       console.log();
       console.log(chalk.black.bgWhite(_.padEnd(columns, ' Actions available')));
       console.log();
+      if (app.db.dialect.client === 'cockroachdb') {
+        console.log(
+          chalk.black.bgRed(
+            _.padEnd(
+              columns,
+              ' WARNING: CockroachDB is currently experimental. Do not use in production.'
+            )
+          )
+        );
+      }
     },
 
     logFirstStartupMessage() {
