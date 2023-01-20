@@ -7,9 +7,9 @@ import camelCase from 'lodash/camelCase';
 const matchByTitle = (links, search) =>
   search
     ? matchSorter(links, search.toLowerCase(), { keys: [(item) => item.title.toLowerCase()] })
-    : links.sort((link, linkNext) => {
+    : links.sort((link, nextLink) => {
         const title = camelCase(link.title);
-        const nextTitle = camelCase(linkNext.title);
+        const nextTitle = camelCase(nextLink.title);
 
         if (title < nextTitle) {
           return -1;
