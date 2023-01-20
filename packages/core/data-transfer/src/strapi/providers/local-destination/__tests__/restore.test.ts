@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { omit } from 'lodash/fp';
 import { deleteRecords, restoreConfigs } from '../strategies/restore';
 import {
   getStrapiFactory,
@@ -164,6 +164,6 @@ describe('Restore ', () => {
     const result = await restoreConfigs(strapi, config);
     expect(strapi.db.query).toBeCalledTimes(1);
     expect(strapi.db.query).toBeCalledWith('webhook');
-    expect(result.data).toMatchObject(_.omit(config.value, ['id']));
+    expect(result.data).toMatchObject(omit(['id'])(config.value));
   });
 });

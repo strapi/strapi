@@ -1,10 +1,12 @@
-import _ from 'lodash';
+import { omit } from 'lodash/fp';
 import { Writable } from 'stream';
 import chalk from 'chalk';
 import { IConfiguration } from '../../../../../../types';
 
+const omitInvalidCreationAttributes = omit(['id']);
+
 const restoreCoreStore = async <T extends { value: unknown }>(strapi: Strapi.Strapi, values: T) => {
-  const data = _.omit(values, ['id']);
+  const data = omitInvalidCreationAttributes(values);
   return strapi.db.query('strapi::core-store').create({
     data: {
       ...data,
@@ -14,7 +16,7 @@ const restoreCoreStore = async <T extends { value: unknown }>(strapi: Strapi.Str
 };
 
 const restoreWebhooks = async <T extends { value: unknown }>(strapi: Strapi.Strapi, values: T) => {
-  const data = _.omit(values, ['id']);
+  const data = omitInvalidCreationAttributes(values);
   return strapi.db.query('webhook').create({ data });
 };
 
