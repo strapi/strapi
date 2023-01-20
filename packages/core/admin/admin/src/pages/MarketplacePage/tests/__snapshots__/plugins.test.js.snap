@@ -583,6 +583,9 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
 .c63 {
   height: 1px;
   border: none;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
 }
 
 .c38 {
@@ -1136,7 +1139,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                       aria-disabled="false"
                       aria-expanded="false"
                       aria-haspopup="listbox"
-                      aria-labelledby="sort-by-select-label sort-by-select-content"
+                      aria-labelledby="sort-by-select sort-by-select-label sort-by-select-content"
                       class="c38"
                       id="sort-by-select"
                       type="button"

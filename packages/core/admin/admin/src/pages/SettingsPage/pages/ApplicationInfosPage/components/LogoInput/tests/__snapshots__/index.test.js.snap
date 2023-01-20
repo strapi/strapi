@@ -486,6 +486,9 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
 .c42 {
   height: 1px;
   border: none;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
   margin: 0;
 }
 
@@ -1515,6 +1518,9 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
 .c42 {
   height: 1px;
   border: none;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
   margin: 0;
 }
 
