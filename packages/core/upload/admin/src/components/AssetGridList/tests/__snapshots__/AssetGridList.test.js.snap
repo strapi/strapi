@@ -332,6 +332,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
 .c28 canvas,
 .c28 video {
   display: block;
+  pointer-events: none;
   max-width: 100%;
   max-height: 10.25rem;
 }

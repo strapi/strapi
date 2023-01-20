@@ -228,7 +228,9 @@ describe('Marketplace page - providers tab', () => {
     await waitForReload();
 
     await user.click(screen.getByTestId('filters-button'));
-    await user.click(screen.getByRole('button', { name: `1 collection selected Made by Strapi` }));
+    await user.click(
+      screen.getByRole('button', { name: `Collections 1 collection selected Made by Strapi` })
+    );
     await user.click(screen.getByRole('option', { name: `Verified (6)` }));
 
     await waitForReload();

@@ -14,7 +14,7 @@ Hook that manages the content manager edit view. Use this hooks when you want to
 ```js
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
-const MyCompo = () => {
+const MyComponent = () => {
   const {
     createActionAllowedFields: [], // Array of fields that the user is allowed to edit
     formErrors: {}, // Object errors
@@ -36,8 +36,10 @@ const MyCompo = () => {
     onUnpublish: () => {},
     addComponentToDynamicZone: () => {},
     addNonRepeatableComponentToField: () => {},
-    connectRelation: () => {},
-    disconnectRelation: () => {},
+    relationConnect: () => {},
+    relationDisconnect: () => {},
+    relationLoad: () => {},
+    relationReorder: () => {},
     addRepeatableComponentToField: () => {},
     moveComponentDown: () => {},
     moveComponentField: () => {},
