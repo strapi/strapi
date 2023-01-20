@@ -594,8 +594,7 @@ const createEntityManager = (db) => {
             );
 
             insert.forEach((rel) => {
-              rel[inverseOrderColumnName] =
-                parseInt(maxMap[rel[inverseJoinColumn.name]] || '0', 10) + 1;
+              rel[inverseOrderColumnName] = (maxMap[rel[inverseJoinColumn.name]] || '0') + 1;
             });
           }
 

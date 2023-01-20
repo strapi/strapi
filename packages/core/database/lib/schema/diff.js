@@ -122,11 +122,11 @@ module.exports = (db) => {
     if (oldDefaultTo === null || _.toLower(oldDefaultTo) === 'null') {
       return _.isNil(defaultTo) || _.toLower(defaultTo) === 'null';
     }
-    // cockroach db returns bigInt as type and unique_rowid() as defaultTo for auto increment
+    // cockroach db returns bigInt as type and nextval() as defaultTo for auto increment
     if (
       db.dialect.client === 'cockroachdb' &&
       column.type === 'increments' &&
-      oldDefaultTo === 'unique_rowid()'
+      oldDefaultTo.startsWith('nextval(')
     ) {
       return true;
     }

@@ -3,7 +3,7 @@ import { useIntl } from 'react-intl';
 import toString from 'lodash/toString';
 import parseISO from 'date-fns/parseISO';
 
-const CellValue = ({ type, value, isID }) => {
+const CellValue = ({ type, value }) => {
   const { formatDate, formatTime, formatNumber } = useIntl();
   let formattedValue = value;
 
@@ -36,7 +36,7 @@ const CellValue = ({ type, value, isID }) => {
     });
   }
 
-  if (['integer', 'biginteger'].includes(type) && !isID) {
+  if (['integer', 'biginteger'].includes(type)) {
     formattedValue = formatNumber(value, { maximumFractionDigits: 0 });
   }
 
@@ -46,7 +46,6 @@ const CellValue = ({ type, value, isID }) => {
 CellValue.propTypes = {
   type: PropTypes.string.isRequired,
   value: PropTypes.any.isRequired,
-  isID: PropTypes.bool,
 };
 
 export default CellValue;

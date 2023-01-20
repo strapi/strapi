@@ -53,10 +53,6 @@ export default function hasContent(type, content, metadatas, fieldSchema) {
       doesn't deal with them.
   */
   if (isFieldTypeNumber(type) && type !== 'biginteger') {
-    if (metadatas.label === 'id' && ![undefined, null].includes(content)) {
-      return true;
-    }
-
     return isNumber(content);
   }
 

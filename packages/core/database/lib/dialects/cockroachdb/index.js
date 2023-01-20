@@ -26,6 +26,11 @@ class CockroachDialect extends Dialect {
       'text',
       parseFloat
     );
+    // sets default int to 32 bit and sets serial normalization to sql_sequence to mimic postgres
+    this.db.connection.client.pool.on('acquireSuccess', async (eventId, resource) => {
+      resource.query('SET serial_normalization = "sql_sequence";');
+      resource.query('SET default_int_size = 4;');
+    });
   }
 
   usesForeignKeys() {
