@@ -2,13 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Combobox, ComboboxOption } from '@strapi/design-system/Combobox';
 
-const ComboboxFilter = ({ value, options, setModifiedData }) => {
+const ComboboxFilter = ({ value, options, onChange }) => {
   return (
-    <Combobox
-      aria-label="filter"
-      value={value}
-      onChange={(value) => setModifiedData((prev) => ({ ...prev, value }))}
-    >
+    <Combobox aria-label="filter" value={value} onChange={onChange}>
       {options.map(({ label, customValue }) => {
         return (
           <ComboboxOption key={customValue} value={customValue}>
@@ -32,7 +28,7 @@ ComboboxFilter.propTypes = {
       customValue: PropTypes.string.isRequired,
     })
   ).isRequired,
-  setModifiedData: PropTypes.func.isRequired,
+  onChange: PropTypes.func.isRequired,
 };
 
 export default ComboboxFilter;

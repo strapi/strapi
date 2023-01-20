@@ -16,7 +16,7 @@ import Plus from '@strapi/icons/Plus';
 import { useIntl } from 'react-intl';
 import useQueryParams from '../../hooks/useQueryParams';
 import useTracking from '../../hooks/useTracking';
-import Inputs from './Inputs';
+import DefaultInputs from './Inputs';
 import getFilterList from './utils/getFilterList';
 
 const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, source }) => {
@@ -50,7 +50,7 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
     }
 
     if (type === 'enumeration') {
-      filterValue = options && options[0];
+      filterValue = options?.[0];
     }
 
     const filter = getFilterList(nextField)[0].value;
@@ -114,7 +114,7 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
   const appliedFilter = displayedFilters.find((filter) => filter.name === modifiedData.name);
   const operator = modifiedData.filter;
   const filterList = appliedFilter.metadatas.customOperators || getFilterList(appliedFilter);
-  const CustomInput = appliedFilter.metadatas.customInput;
+  const Inputs = appliedFilter.metadatas.customInput || DefaultInputs;
 
   return (
     <Popover source={source} padding={3} spacing={4} onBlur={onBlur}>
@@ -163,21 +163,12 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
             </Box>
             {operator !== '$null' && operator !== '$notNull' && (
               <Box>
-                {CustomInput ? (
-                  <CustomInput
-                    {...appliedFilter.metadatas}
-                    {...appliedFilter.fieldSchema}
-                    value={modifiedData.value}
-                    setModifiedData={setModifiedData}
-                  />
-                ) : (
-                  <Inputs
-                    {...appliedFilter.metadatas}
-                    {...appliedFilter.fieldSchema}
-                    value={modifiedData.value}
-                    onChange={(value) => setModifiedData((prev) => ({ ...prev, value }))}
-                  />
-                )}
+                <Inputs
+                  {...appliedFilter.metadatas}
+                  {...appliedFilter.fieldSchema}
+                  value={modifiedData.value}
+                  onChange={(value) => setModifiedData((prev) => ({ ...prev, value }))}
+                />
               </Box>
             )}
             <Box>
