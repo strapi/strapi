@@ -1,19 +1,17 @@
-const ssoRoutes = strapi.features.isEnabled(strapi.features.SSO)
-  ? [
-      {
-        async Component() {
-          const component = await import(
-            /* webpackChunkName: "sso-settings-page" */ '../SingleSignOn'
-          );
+const routes = [];
 
-          return component;
-        },
-        to: '/settings/single-sign-on',
-        exact: true,
-      },
-    ]
-  : [];
+if (strapi.features.isEnabled(strapi.features.SSO)) {
+  routes.push({
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "sso-settings-page" */ '../pages/SingleSignOn'
+      );
 
-const customRoutes = [...ssoRoutes];
+      return component;
+    },
+    to: '/settings/single-sign-on',
+    exact: true,
+  });
+}
 
-export default customRoutes;
+export default routes;
