@@ -204,9 +204,6 @@ module.exports = (db) => {
     }
 
     for (const srcColumn of srcTable.columns) {
-      if (srcColumn.name === 'rowid') {
-        continue;
-      }
       if (!helpers.hasColumn(destTable, srcColumn.name)) {
         removedColumns.push(srcColumn);
       }
