@@ -498,7 +498,7 @@
   "components.Input.error.validation.min": "Value is smaller than the minimum",
   "components.Input.error.validation.minLength": "Value is shorter than the minimum",
   "components.Input.error.validation.minSupMax": "Value cannot be superior",
-  "components.Input.error.validation.regex": "Value does not match the the required pattern",
+  "components.Input.error.validation.regex": "Value does not match the required pattern",
   "components.Input.error.validation.required": "Value is required",
   "components.Input.error.validation.unique": "Value is already used",
   "components.InputSelect.option.placeholder": "Choose here",
