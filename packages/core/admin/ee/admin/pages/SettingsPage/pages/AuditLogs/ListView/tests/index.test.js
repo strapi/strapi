@@ -7,20 +7,14 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { TrackingProvider } from '@strapi/helper-plugin';
+import useAuditLogsData from '../hooks/useAuditLogsData';
 import ListView from '../index';
 import { TEST_PAGE_DATA, TEST_SINGLE_DATA, getBigTestPageData } from './utils/data';
 
 const history = createMemoryHistory();
 const user = userEvent.setup();
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(),
-  useFocusWhenNavigate: jest.fn(),
-  useRBAC: jest.fn(() => ({
-    allowedActions: { canRead: true },
-  })),
-}));
+jest.mock('../hooks/useAuditLogsData', () => jest.fn());
 
 const mockUseQuery = jest.fn();
 jest.mock('react-query', () => {
@@ -31,6 +25,15 @@ jest.mock('react-query', () => {
     useQuery: () => mockUseQuery(),
   };
 });
+
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useNotification: jest.fn(),
+  useFocusWhenNavigate: jest.fn(),
+  useRBAC: jest.fn(() => ({
+    allowedActions: { canRead: true },
+  })),
+}));
 
 const client = new QueryClient({
   defaultOptions: {
@@ -68,8 +71,8 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
   });
 
   it('should render page with right header details', () => {
-    mockUseQuery.mockReturnValue({
-      data: {
+    useAuditLogsData.mockReturnValue({
+      auditLogs: {
         results: [],
       },
       isLoading: false,
@@ -82,11 +85,12 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
       /logs of all the activities that happened in your environment/i
     );
     expect(subTitle).toBeInTheDocument();
+    expect(screen.getByText(/Filters/i)).toBeInTheDocument();
   });
 
   it('should show a list of audit logs with all actions', async () => {
-    mockUseQuery.mockReturnValue({
-      data: {
+    useAuditLogsData.mockReturnValue({
+      auditLogs: {
         results: TEST_PAGE_DATA,
       },
       isLoading: false,
@@ -103,7 +107,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
 
   it('should open a modal when clicked on a table row and close modal when clicked', async () => {
     mockUseQuery.mockReturnValue({
-      data: {
+      auditLogs: {
         results: TEST_PAGE_DATA,
       },
       isLoading: false,
@@ -134,8 +138,8 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
   });
 
   it('should show pagination and be on page 1 on first render', async () => {
-    mockUseQuery.mockReturnValue({
-      data: {
+    useAuditLogsData.mockReturnValue({
+      auditLogs: {
         results: getBigTestPageData(15),
         pagination: {
           page: 1,
@@ -155,9 +159,9 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
     expect(screen.getByText(/go to page 1/i).closest('a')).toHaveClass('active');
   });
 
-  it('paginates the results', async () => {
-    mockUseQuery.mockReturnValue({
-      data: {
+  it('should paginate the results', async () => {
+    useAuditLogsData.mockReturnValue({
+      auditLogs: {
         results: getBigTestPageData(35),
         pagination: {
           page: 1,
@@ -200,8 +204,8 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
   it('should show 20 elements if pageSize is 20', async () => {
     history.location.search = '?pageSize=20';
 
-    mockUseQuery.mockReturnValue({
-      data: {
+    useAuditLogsData.mockReturnValue({
+      auditLogs: {
         results: getBigTestPageData(20),
         pagination: {
           page: 1,
@@ -217,5 +221,24 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
 
     const rows = await waitFor(() => container.querySelector('tbody').querySelectorAll('tr'));
     expect(rows.length).toEqual(20);
+  });
+  it.only('should show the correct filters', () => {
+    useAuditLogsData.mockReturnValue({
+      auditLogs: {
+        results: TEST_PAGE_DATA,
+      },
+      isLoading: false,
+    });
+    render(App);
+    const filtersButton = screen.getByRole('button', { name: /filters/i });
+    user.click(filtersButton);
+    const filterTypeButton = screen.getByRole('button', { name: /action/i });
+    const dateButton = screen.getByRole('button', { name: /date/i });
+    const userButton = screen.getByRole('button', { name: /user/i });
+    expect(filterTypeButton).toBeInTheDocument();
+    expect(dateButton).toBeInTheDocument();
+    expect(userButton).toBeInTheDocument();
+
+    user.click(filterTypeButton);
   });
 });
