@@ -367,10 +367,7 @@ const applyWhere = (qb, where) => {
 
 const fieldLowerFn = (qb) => {
   // Postgres requires string to be passed
-  if (qb.client.config.client === 'postgres') {
-    return 'LOWER(CAST(?? AS VARCHAR))';
-  }
-  if (qb.client.config.client === 'cockroachdb') {
+  if (['postgres', 'cockroachdb'].includes(qb.client.config.client)) {
     return 'LOWER(CAST(?? AS VARCHAR))';
   }
 

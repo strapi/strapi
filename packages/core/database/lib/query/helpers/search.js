@@ -30,19 +30,9 @@ const applySearch = (knex, query, ctx) => {
   }
 
   switch (db.dialect.client) {
+    case 'cockroachdb':
     case 'postgres': {
       searchColumns.forEach((attr) => {
-        const columnName = toColumnName(meta, attr);
-        return knex.orWhereRaw(`??::text ILIKE ?`, [
-          qb.aliasColumn(columnName),
-          `%${escapeQuery(query, '*%\\')}%`,
-        ]);
-      });
-
-      break;
-    }
-    case 'cockroachdb': {
-      searchColumns.forEach(attr => {
         const columnName = toColumnName(meta, attr);
         return knex.orWhereRaw(`??::text ILIKE ?`, [
           qb.aliasColumn(columnName),
