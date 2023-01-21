@@ -295,10 +295,7 @@ const createHelpers = (db) => {
             'Altering column type not supported in CockroachDB. Remove the field and restart Strapi. Then add the field back. '
           );
           console.log(
-            'If you are running in production, you will need to create a migration to do this.'
-          );
-          console.log(
-            'https://docs.strapi.io/developer-docs/latest/developer-resources/database-migrations.html'
+            `Trying to alter "${object.name}" to "${object.type}" on table "${table.name}"`
           );
         } else if (object.type === 'increments') {
           createColumn(tableBuilder, { ...object, type: 'integer' }).alter();
