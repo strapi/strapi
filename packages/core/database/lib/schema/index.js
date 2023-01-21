@@ -55,6 +55,7 @@ const createSchemaProvider = (db) => {
       if (status === 'CHANGED') {
         await this.builder.updateSchema(diff);
       }
+
       await this.schemaStorage.add(schema);
     },
 

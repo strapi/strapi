@@ -141,6 +141,7 @@ const createHelpers = (db) => {
    */
   const dropForeignKey = (tableBuilder, foreignKey) => {
     const { name, columns } = foreignKey;
+
     tableBuilder.dropForeign(columns, name);
   };
 
@@ -176,6 +177,7 @@ const createHelpers = (db) => {
     }
 
     const { type, columns, name } = index;
+
     switch (type) {
       case 'primary': {
         return tableBuilder.dropPrimary(name);
@@ -212,6 +214,7 @@ const createHelpers = (db) => {
         col.defaultTo(value, opts);
       }
     }
+
     if (notNullable === true) {
       col.notNullable();
     } else {
@@ -260,6 +263,7 @@ const createHelpers = (db) => {
   const alterTable = async (schemaBuilder, table) => {
     await schemaBuilder.alterTable(table.name, (tableBuilder) => {
       // Delete indexes / fks / columns
+
       for (const removedIndex of table.indexes.removed) {
         debug(`Dropping index ${removedIndex.name}`);
         dropIndex(tableBuilder, removedIndex);
@@ -288,6 +292,7 @@ const createHelpers = (db) => {
       // Update existing columns / foreign keys / indexes
       for (const updatedColumn of table.columns.updated) {
         debug(`Updating column ${updatedColumn.name}`);
+
         const { object } = updatedColumn;
         if (db.dialect.client === 'cockroachdb' && object.isAlterType) {
           // CRDB does not support alter types
