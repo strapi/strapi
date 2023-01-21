@@ -42,9 +42,6 @@ class CockroachDialect extends Dialect {
       case 'timestamp': {
         return 'datetime';
       }
-      case 'integer': {
-        return 'bigInteger';
-      }
       default: {
         return type;
       }
