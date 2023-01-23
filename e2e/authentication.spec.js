@@ -1,4 +1,5 @@
 import { test } from '@playwright/test';
+// eslint-disable-next-line import/extensions
 import { resetDatabaseAndImportDataFromPath } from './scripts/data-transfer';
 
 test.describe('Authentication', () => {
