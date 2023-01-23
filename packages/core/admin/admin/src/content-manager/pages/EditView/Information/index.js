@@ -10,11 +10,11 @@ import { getFullName } from '../../../../utils';
 
 const KeyValuePair = ({ label, value }) => {
   return (
-    <Flex justifyContent="space-between" as="p">
-      <Typography fontWeight="bold" textColor="neutral600">
+    <Flex justifyContent="space-between">
+      <Typography as="dt" fontWeight="bold" textColor="neutral600">
         {label}
       </Typography>
-      <Typography>{value}</Typography>
+      <Typography as="dl">{value}</Typography>
     </Flex>
   );
 };
@@ -62,7 +62,7 @@ const Information = () => {
       </Box>
 
       <Stack spacing={4}>
-        <Stack spacing={2}>
+        <Stack spacing={2} as="dl">
           <KeyValuePair
             label={formatMessage({
               id: getTrad('containers.Edit.information.created'),
@@ -80,7 +80,7 @@ const Information = () => {
           />
         </Stack>
 
-        <Stack spacing={2}>
+        <Stack spacing={2} as="dl">
           <KeyValuePair
             label={formatMessage({
               id: getTrad('containers.Edit.information.lastUpdate'),
