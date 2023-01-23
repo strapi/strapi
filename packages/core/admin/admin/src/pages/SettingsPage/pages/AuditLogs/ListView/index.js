@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useIntl } from 'react-intl';
 import {
   SettingsPageTitle,
@@ -7,6 +7,7 @@ import {
   useNotification,
   useFocusWhenNavigate,
   useFetchClient,
+  useQueryParams,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -26,6 +27,7 @@ const ListView = () => {
   } = useRBAC(adminPermissions.settings.auditLogs);
   const { get } = useFetchClient();
   const { search } = useLocation();
+  const [{ query }, setQuery] = useQueryParams();
 
   useFocusWhenNavigate();
 
@@ -62,8 +64,6 @@ const ListView = () => {
     },
   }));
 
-  const [modalLogId, setModalLogId] = useState(null);
-
   return (
     <Main aria-busy={isLoading}>
       <SettingsPageTitle name={title} />
@@ -85,12 +85,12 @@ const ListView = () => {
           <TableRows
             headers={headers}
             rows={data?.results || []}
-            onOpenModal={(id) => setModalLogId(id)}
+            onOpenModal={(id) => setQuery({ id })}
           />
         </DynamicTable>
         <PaginationFooter pagination={data?.pagination} />
       </ContentLayout>
-      {modalLogId && <Modal handleClose={() => setModalLogId(null)} logId={modalLogId} />}
+      {query?.id && <Modal handleClose={() => setQuery({ id: null }, 'remove')} logId={query.id} />}
     </Main>
   );
 };

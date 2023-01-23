@@ -46,7 +46,7 @@ const Modal = ({ handleClose, logId }) => {
 
 Modal.propTypes = {
   handleClose: PropTypes.func.isRequired,
-  logId: PropTypes.number.isRequired,
+  logId: PropTypes.string.isRequired,
 };
 
 export default Modal;
