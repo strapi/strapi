@@ -1,9 +1,6 @@
 import { engine, file, strapi } from '@strapi/data-transfer';
 import { resolve } from 'path';
 
-/**
- * @type {(filePath: string) => Promise<void>}
- */
 export const resetDatabaseAndImportDataFromPath = async (filePath) => {
   const { createTransferEngine } = engine;
   const {
@@ -20,13 +17,15 @@ export const resetDatabaseAndImportDataFromPath = async (filePath) => {
   });
 
   const destination = createRemoteStrapiDestinationProvider({
-    url: 'ws://localhost:1337/admin/transfer',
+    url: new URL('http://localhost:1337/admin'),
     strategy: 'restore',
   });
 
   const transferEngine = createTransferEngine(source, destination, {
     schemaStrategy: 'ignore',
     versionStrategy: 'ignore',
+    exclude: [],
+    only: [],
   });
 
   try {

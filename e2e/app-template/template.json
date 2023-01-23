@@ -1,5 +1,8 @@
 {
   "package": {
-    "private": true
+    "private": true,
+    "scripts": {
+      "start-experimental": "STRAPI_EXPERIMENTAL=true strapi start"
+    }
   }
 }
