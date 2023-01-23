@@ -190,6 +190,7 @@ describe('Upload plugin', () => {
         })
       );
       await strapi.entityService.delete('api::dog.dog', dogEntity.id);
+      await strapi.entityService.delete('plugin::upload.file', dogEntity.profilePicture.id);
     });
   });
 
