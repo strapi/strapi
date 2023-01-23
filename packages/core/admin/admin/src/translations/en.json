@@ -698,6 +698,7 @@
   "content-manager.form.Input.search.field": "Enable search on this field",
   "content-manager.form.Input.sort.field": "Enable sort on this field",
   "content-manager.form.Input.sort.order": "Default sort order",
+  "content-manager.form.Input.wysiwyg": "Display as WYSIWYG",
   "content-manager.form.Input.hint.text": "{min, select, undefined {} other {min. {min}}}{divider}{max, select, undefined {} other {max. {max}}}{unit}{br}{description}",
   "content-manager.form.Input.hint.minMaxDivider": " / ",
   "content-manager.form.Input.hint.character.unit": "{maxValue, plural, one { character} other { characters}}",
