@@ -177,8 +177,9 @@ class LocalFileSourceProvider implements ISourceProvider {
               return false;
             }
 
-            const parts = filePath.split('/');
+            const parts = path.relative('.', filePath).split('/');
 
+            // TODO: this method is limiting us from having additional subdirectories and is requiring us to remove any "./" prefixes (the path.relative line above)
             if (parts.length !== 2) {
               return false;
             }
@@ -225,7 +226,7 @@ class LocalFileSourceProvider implements ISourceProvider {
              * Filter the parsed entries to only keep the one that matches the given filepath
              */
             filter(entryPath, entry) {
-              return entryPath === filePath && entry.type === 'File';
+              return !path.relative(filePath, entryPath).length && entry.type === 'File';
             },
 
             async onentry(entry) {
