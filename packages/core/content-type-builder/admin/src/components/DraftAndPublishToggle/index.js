@@ -66,8 +66,7 @@ const DraftAndPublishToggle = ({
         onConfirm={handleConfirm}
         bodyText={{
           id: getTrad('popUpWarning.draft-publish.message'),
-          defaultMessage:
-            'If you disable the draft & publish, your drafts will be deleted. Are you sure you want to disable it?',
+          defaultMessage: 'If you disable the draft & publish, your drafts will be deleted.',
         }}
         leftButtonText={{
           id: 'components.popUpWarning.button.cancel',
