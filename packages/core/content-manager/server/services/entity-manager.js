@@ -60,7 +60,7 @@ const addCreatedByRolesPopulate = (populate) => {
  * response will not have the populated relations though.
  * For performance reasons, it is recommended to set it to false,
  *
- * TODO V5: Remove this function and always load and return populated relations.
+ * TODO V5: Set to false by default.
  * TODO V5: Make webhooks always send the same entity data.
  */
 const isRelationsPopulateEnabled = () => {

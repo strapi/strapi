@@ -5,7 +5,6 @@ export default ({ env }) => ({
     keys: env.array('APP_KEYS'),
   },
   webhooks: {
-    // TODO: V5, remove this variable
     populateRelations: env.bool('WEBHOOKS_POPULATE_RELATIONS', false),
   },
 });
