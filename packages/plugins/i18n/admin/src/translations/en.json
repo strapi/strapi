@@ -56,7 +56,7 @@
   "plugin.name": "Internationalization",
   "plugin.schema.i18n.ensure-unique-localization": "Unique fields must be localized",
   "plugin.schema.i18n.localized.description-content-type": "Allows translating an entry into different languages",
-  "plugin.schema.i18n.localized.description-field": "The field can have different values in each locale",
-  "plugin.schema.i18n.localized.label-content-type": "Localization",
+  "plugin.schema.i18n.localized.description-field": "The field can have different values in each language",
+  "plugin.schema.i18n.localized.label-content-type": "Internationalization",
   "plugin.schema.i18n.localized.label-field": "Enable localization for this field"
 }
