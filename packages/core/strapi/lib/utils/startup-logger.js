@@ -27,7 +27,8 @@ module.exports = (app) => {
         [chalk.blue('Environment'), app.config.environment],
         [chalk.blue('Process PID'), process.pid],
         [chalk.blue('Version'), `${app.config.info.strapi} (node ${process.version})`],
-        [chalk.blue('Edition'), isEE ? 'Enterprise' : 'Community']
+        [chalk.blue('Edition'), isEE ? 'Enterprise' : 'Community'],
+        [chalk.blue('Database'), app.db.dialect.client]
       );
 
       console.log(infoTable.toString());

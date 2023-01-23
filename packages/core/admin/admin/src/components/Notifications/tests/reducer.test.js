@@ -36,6 +36,7 @@ describe('ADMIN | COMPONENTS | NOTIFICATIONS | reducer', () => {
             timeout: 2500,
             blockTransition: false,
             onClose: null,
+            title: null,
           },
         ],
         notifId: 1,
