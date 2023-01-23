@@ -14,6 +14,7 @@ import {
   TrackingProvider,
   prefixFileUrlWithBackendUrl,
   useAppInfos,
+  useFetchClient,
 } from '@strapi/helper-plugin';
 import axios from 'axios';
 import { SkipToContent } from '@strapi/design-system/Main';
@@ -25,7 +26,7 @@ import NotFoundPage from '../NotFoundPage';
 import UseCasePage from '../UseCasePage';
 import { getUID } from './utils';
 import routes from './utils/routes';
-import { useConfigurations, useFetchClient } from '../../hooks';
+import { useConfigurations } from '../../hooks';
 
 const AuthenticatedApp = lazy(() =>
   import(/* webpackChunkName: "Admin-authenticatedApp" */ '../../components/AuthenticatedApp')
@@ -79,11 +80,15 @@ function App() {
       try {
         const {
           data: {
-            data: { hasAdmin, uuid, menuLogo },
+            data: { hasAdmin, uuid, menuLogo, authLogo },
           },
         } = await axios.get(`${strapi.backendURL}/admin/init`);
 
-        updateProjectSettings({ menuLogo: prefixFileUrlWithBackendUrl(menuLogo) });
+        updateProjectSettings({
+          menuLogo: prefixFileUrlWithBackendUrl(menuLogo),
+          authLogo: prefixFileUrlWithBackendUrl(authLogo),
+        });
+
         const deviceId = await getUID();
 
         if (uuid) {

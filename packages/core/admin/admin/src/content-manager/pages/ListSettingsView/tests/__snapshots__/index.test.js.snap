@@ -443,6 +443,9 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
 .c56 {
   height: 1px;
   border: none;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
   margin: 0;
 }
 
@@ -1175,7 +1178,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           class="c0 c22 c28"
                           spacing="1"
                         >
-                          <span
+                          <label
                             class="c10 c29"
                             for="select-4"
                           >
@@ -1184,7 +1187,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                             >
                               Entries per page
                             </div>
-                          </span>
+                          </label>
                           <div
                             class="c0 c13 c44"
                           >
@@ -1193,7 +1196,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                               aria-disabled="false"
                               aria-expanded="false"
                               aria-haspopup="listbox"
-                              aria-labelledby="select-4-label select-4-content"
+                              aria-labelledby="select-4 select-4-label select-4-content"
                               class="c45"
                               id="select-4"
                               name="settings.pageSize"
@@ -1265,7 +1268,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           class="c0 c22 c28"
                           spacing="1"
                         >
-                          <span
+                          <label
                             class="c10 c29"
                             for="select-5"
                           >
@@ -1274,7 +1277,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                             >
                               Default sort attribute
                             </div>
-                          </span>
+                          </label>
                           <div
                             class="c0 c13 c44"
                           >
@@ -1282,7 +1285,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                               aria-disabled="false"
                               aria-expanded="false"
                               aria-haspopup="listbox"
-                              aria-labelledby="select-5-label select-5-content"
+                              aria-labelledby="select-5 select-5-label select-5-content"
                               class="c45"
                               id="select-5"
                               name="settings.defaultSortBy"
@@ -1348,7 +1351,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           class="c0 c22 c28"
                           spacing="1"
                         >
-                          <span
+                          <label
                             class="c10 c29"
                             for="select-6"
                           >
@@ -1357,7 +1360,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                             >
                               Default sort order
                             </div>
-                          </span>
+                          </label>
                           <div
                             class="c0 c13 c44"
                           >
@@ -1365,7 +1368,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                               aria-disabled="false"
                               aria-expanded="false"
                               aria-haspopup="listbox"
-                              aria-labelledby="select-6-label select-6-content"
+                              aria-labelledby="select-6 select-6-label select-6-content"
                               class="c45"
                               id="select-6"
                               name="settings.defaultSortOrder"
@@ -2173,6 +2176,9 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
 .c56 {
   height: 1px;
   border: none;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
   margin: 0;
 }
 
@@ -2904,7 +2910,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           class="c0 c22 c28"
                           spacing="1"
                         >
-                          <span
+                          <label
                             class="c10 c29"
                             for="select-34"
                           >
@@ -2913,7 +2919,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                             >
                               Entries per page
                             </div>
-                          </span>
+                          </label>
                           <div
                             class="c0 c13 c44"
                           >
@@ -2922,7 +2928,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                               aria-disabled="false"
                               aria-expanded="false"
                               aria-haspopup="listbox"
-                              aria-labelledby="select-34-label select-34-content"
+                              aria-labelledby="select-34 select-34-label select-34-content"
                               class="c45"
                               id="select-34"
                               name="settings.pageSize"
@@ -2994,7 +3000,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           class="c0 c22 c28"
                           spacing="1"
                         >
-                          <span
+                          <label
                             class="c10 c29"
                             for="select-35"
                           >
@@ -3003,7 +3009,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                             >
                               Default sort attribute
                             </div>
-                          </span>
+                          </label>
                           <div
                             class="c0 c13 c44"
                           >
@@ -3011,7 +3017,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                               aria-disabled="false"
                               aria-expanded="false"
                               aria-haspopup="listbox"
-                              aria-labelledby="select-35-label select-35-content"
+                              aria-labelledby="select-35 select-35-label select-35-content"
                               class="c45"
                               id="select-35"
                               name="settings.defaultSortBy"
@@ -3077,7 +3083,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           class="c0 c22 c28"
                           spacing="1"
                         >
-                          <span
+                          <label
                             class="c10 c29"
                             for="select-36"
                           >
@@ -3086,7 +3092,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                             >
                               Default sort order
                             </div>
-                          </span>
+                          </label>
                           <div
                             class="c0 c13 c44"
                           >
@@ -3094,7 +3100,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                               aria-disabled="false"
                               aria-expanded="false"
                               aria-haspopup="listbox"
-                              aria-labelledby="select-36-label select-36-content"
+                              aria-labelledby="select-36 select-36-label select-36-content"
                               class="c45"
                               id="select-36"
                               name="settings.defaultSortOrder"

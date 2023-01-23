@@ -364,6 +364,9 @@ describe('Admin | containers | ListView', () => {
       .c42 {
         height: 1px;
         border: none;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
         margin: 0;
       }
 

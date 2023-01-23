@@ -378,6 +378,9 @@ describe('Content manager | App | main', () => {
       .c11 {
         height: 1px;
         border: none;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
         margin: 0;
       }
 

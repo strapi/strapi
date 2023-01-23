@@ -11,6 +11,7 @@ const errors = require('./errors');
 
 // TODO: move back into strapi
 const { transformContentTypes } = require('./utils/content-types');
+const { validateDatabase } = require('./validations');
 
 class Database {
   constructor(config) {
@@ -76,7 +77,11 @@ class Database {
 
 // TODO: move into strapi
 Database.transformContentTypes = transformContentTypes;
-Database.init = async (config) => new Database(config);
+Database.init = async (config) => {
+  const db = new Database(config);
+  await validateDatabase(db);
+  return db;
+};
 
 module.exports = {
   Database,
