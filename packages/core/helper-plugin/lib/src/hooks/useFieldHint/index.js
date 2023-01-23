@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React from 'react';
 import { useIntl } from 'react-intl';
 import { getFieldUnits, getMinMax } from './utils';
 
@@ -15,69 +15,61 @@ import { getFieldUnits, getMinMax } from './utils';
  */
 const useFieldHint = ({ description, fieldSchema, type }) => {
   const { formatMessage } = useIntl();
-  const [hint, setHint] = useState([]);
 
   /**
    * @returns {String}
    */
-  const buildDescription = useCallback(
-    (desc) =>
-      desc?.id
-        ? formatMessage({ id: desc.id, defaultMessage: desc.defaultMessage }, { ...desc.values })
-        : '',
-    [formatMessage]
-  );
+  const buildDescription = () =>
+    description?.id
+      ? formatMessage(
+          { id: description.id, defaultMessage: description.defaultMessage },
+          { ...description.values }
+        )
+      : '';
 
   /**
    * @returns {''|Array}
    */
-  const buildHint = useCallback(
-    (desc) => {
-      const { maximum, minimum } = getMinMax(fieldSchema);
-      const units = getFieldUnits({
-        type,
-        minimum,
-        maximum,
-      });
+  const buildHint = () => {
+    const { maximum, minimum } = getMinMax(fieldSchema);
+    const units = getFieldUnits({
+      type,
+      minimum,
+      maximum,
+    });
 
-      const minIsNumber = typeof minimum === 'number';
-      const maxIsNumber = typeof maximum === 'number';
-      const hasMinAndMax = maxIsNumber && minIsNumber;
-      const hasMinOrMax = maxIsNumber || minIsNumber;
+    const minIsNumber = typeof minimum === 'number';
+    const maxIsNumber = typeof maximum === 'number';
+    const hasMinAndMax = maxIsNumber && minIsNumber;
+    const hasMinOrMax = maxIsNumber || minIsNumber;
 
-      if (!desc?.id && !hasMinOrMax) {
-        return '';
+    if (!description?.id && !hasMinOrMax) {
+      return '';
+    }
+
+    return formatMessage(
+      {
+        id: 'content-manager.form.Input.hint.text',
+        defaultMessage:
+          '{min, select, undefined {} other {min. {min}}}{divider}{max, select, undefined {} other {max. {max}}}{unit}{br}{description}',
+      },
+      {
+        min: minimum,
+        max: maximum,
+        description: buildDescription(),
+        unit: units?.message && hasMinOrMax ? formatMessage(units.message, units.values) : null,
+        divider: hasMinAndMax
+          ? formatMessage({
+              id: 'content-manager.form.Input.hint.minMaxDivider',
+              defaultMessage: ' / ',
+            })
+          : null,
+        br: hasMinOrMax ? <br /> : null,
       }
+    );
+  };
 
-      return formatMessage(
-        {
-          id: 'content-manager.form.Input.hint.text',
-          defaultMessage:
-            '{min, select, undefined {} other {min. {min}}}{divider}{max, select, undefined {} other {max. {max}}}{unit}{br}{description}',
-        },
-        {
-          min: minimum,
-          max: maximum,
-          description: buildDescription(desc),
-          unit: units?.message && hasMinOrMax ? formatMessage(units.message, units.values) : null,
-          divider: hasMinAndMax
-            ? formatMessage({
-                id: 'content-manager.form.Input.hint.minMaxDivider',
-                defaultMessage: ' / ',
-              })
-            : null,
-          br: hasMinOrMax ? <br /> : null,
-        }
-      );
-    },
-    [formatMessage, buildDescription, fieldSchema, type]
-  );
-
-  useEffect(() => {
-    setHint(buildHint(description));
-  }, [description, buildHint]);
-
-  return { hint };
+  return { hint: buildHint() };
 };
 
 export default useFieldHint;
