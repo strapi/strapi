@@ -3,7 +3,7 @@
 const localProvider = require('@strapi/provider-audit-logs-local');
 const { scheduleJob } = require('node-schedule');
 
-const RETENTION_DAYS = 7;
+const RETENTION_DAYS = 90;
 
 const defaultEvents = [
   'entry.create',
