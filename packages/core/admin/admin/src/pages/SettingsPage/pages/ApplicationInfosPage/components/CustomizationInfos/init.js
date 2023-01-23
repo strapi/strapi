@@ -5,6 +5,9 @@ const init = (initialState, projectSettingsStored) => {
     menuLogo: {
       display: projectSettingsStored.menuLogo,
     },
+    authLogo: {
+      display: projectSettingsStored.authLogo,
+    },
   });
 
   return copyInitialState;
