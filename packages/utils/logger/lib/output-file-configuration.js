@@ -17,7 +17,10 @@ const createOutputFileConfiguration = (filename) => {
     level: LEVEL_LABEL,
     levels: LEVELS,
     format: prettyPrint(),
-    transports: [new transports.Console(), new transports.File({ filename, format: getPlainText })],
+    transports: [
+      new transports.Console(),
+      new transports.File({ level: 'error', filename, format: getPlainText }),
+    ],
   };
 };
 

@@ -17,8 +17,8 @@ const {
   buildTransferTable,
   DEFAULT_IGNORED_CONTENT_TYPES,
   createStrapiInstance,
+  formatDiagnosticErrors,
 } = require('./utils');
-const formatDiagnosticErrors = require('../utils/formatter');
 
 /**
  * @typedef ImportCommandOptions Options given to the CLI import command

@@ -16,8 +16,11 @@ const { isObject } = require('lodash/fp');
 const path = require('path');
 
 const strapi = require('../../index');
-const { buildTransferTable, DEFAULT_IGNORED_CONTENT_TYPES } = require('./utils');
-const formatDiagnosticErrors = require('../utils/formatter');
+const {
+  buildTransferTable,
+  DEFAULT_IGNORED_CONTENT_TYPES,
+  formatDiagnosticErrors,
+} = require('./utils');
 
 /**
  * @typedef {import('@strapi/data-transfer').ILocalFileSourceProviderOptions} ILocalFileSourceProviderOptions

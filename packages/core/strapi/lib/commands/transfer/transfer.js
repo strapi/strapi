@@ -17,7 +17,7 @@ const {
   createStrapiInstance,
   DEFAULT_IGNORED_CONTENT_TYPES,
 } = require('./utils');
-const formatDiagnosticErrors = require('../utils/formatter');
+const formatDiagnosticErrors = require('./utils');
 
 const logger = createLogger();
 

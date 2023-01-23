@@ -53,7 +53,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   #validateOptions() {
     if (!VALID_CONFLICT_STRATEGIES.includes(this.options.strategy)) {
-      throw new ProviderValidationError(`Invalid stategy ${this.options.strategy}`, {
+      throw new ProviderValidationError(`Invalid strategy ${this.options.strategy}`, {
         check: 'strategy',
         strategy: this.options.strategy,
         validStrategies: VALID_CONFLICT_STRATEGIES,
@@ -120,7 +120,11 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       });
     }
 
-    throw new Error(`Invalid strategy supplied: "${strategy}"`);
+    throw new ProviderValidationError(`Invalid strategy ${this.options.strategy}`, {
+      check: 'strategy',
+      strategy: this.options.strategy,
+      validStrategies: VALID_CONFLICT_STRATEGIES,
+    });
   }
 
   // TODO: Move this logic to the restore strategy
@@ -175,11 +179,11 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
     const { strategy } = this.options;
 
-    if (strategy !== 'restore') {
+    if (strategy === 'restore') {
       return restore.createConfigurationWriteStream(this.strapi);
     }
 
-    throw new ProviderValidationError(`Invalid stategy ${strategy}`, {
+    throw new ProviderValidationError(`Invalid strategy ${strategy}`, {
       check: 'strategy',
       strategy,
       validStrategies: VALID_CONFLICT_STRATEGIES,
@@ -198,7 +202,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       return restore.createLinksWriteStream(mapID, this.strapi);
     }
 
-    throw new ProviderValidationError(`Invalid stategy ${strategy}`, {
+    throw new ProviderValidationError(`Invalid strategy ${strategy}`, {
       check: 'strategy',
       strategy,
       validStrategies: VALID_CONFLICT_STRATEGIES,
