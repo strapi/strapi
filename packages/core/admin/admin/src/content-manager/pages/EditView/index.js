@@ -25,7 +25,7 @@ import SingleTypeFormWrapper from '../../components/SingleTypeFormWrapper';
 import { getTrad } from '../../utils';
 import useLazyComponents from '../../hooks/useLazyComponents';
 import DraftAndPublishBadge from './DraftAndPublishBadge';
-import Informations from './Informations';
+import Information from './Information';
 import Header from './Header';
 import { getFieldsActionMatchingPermissions } from './utils';
 import DeleteLink from './DeleteLink';
@@ -175,7 +175,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
                       <DraftAndPublishBadge />
                       <Box
                         as="aside"
-                        aria-labelledby="additional-informations"
+                        aria-labelledby="additional-information"
                         background="neutral0"
                         borderColor="neutral150"
                         hasRadius
@@ -185,7 +185,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
                         paddingTop={6}
                         shadow="tableShadow"
                       >
-                        <Informations />
+                        <Information />
                         <InjectionZone area="contentManager.editView.informations" />
                       </Box>
                       <Box as="aside" aria-labelledby="links">

@@ -890,7 +890,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                           class="c1 c14 c19"
                           spacing="1"
                         >
-                          <span
+                          <label
                             class="c5 c20"
                             for="select-1"
                           >
@@ -899,7 +899,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                             >
                               Default role for authenticated users
                             </div>
-                          </span>
+                          </label>
                           <div
                             class="c1 c4 c21"
                           >
@@ -908,7 +908,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               aria-disabled="false"
                               aria-expanded="false"
                               aria-haspopup="listbox"
-                              aria-labelledby="select-1-label select-1-content"
+                              aria-labelledby="select-1 select-1-label select-1-content"
                               class="c22"
                               id="select-1"
                               type="button"

@@ -583,7 +583,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                         class="c0 c24 c25"
                         spacing="1"
                       >
-                        <span
+                        <label
                           class="c10 c26"
                           for="select-1"
                         >
@@ -592,7 +592,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                           >
                             Entries per page
                           </div>
-                        </span>
+                        </label>
                         <div
                           class="c0 c13 c27"
                         >
@@ -601,7 +601,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-1-label select-1-content"
+                            aria-labelledby="select-1 select-1-label select-1-content"
                             class="c28"
                             data-testid="pageSize-select"
                             id="select-1"
@@ -674,7 +674,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                         class="c0 c24 c25"
                         spacing="1"
                       >
-                        <span
+                        <label
                           class="c10 c26"
                           for="select-2"
                         >
@@ -683,7 +683,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                           >
                             Default sort order
                           </div>
-                        </span>
+                        </label>
                         <div
                           class="c0 c13 c27"
                         >
@@ -692,7 +692,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-2-label select-2-content"
+                            aria-labelledby="select-2 select-2-label select-2-content"
                             class="c28"
                             data-testid="sort-select"
                             id="select-2"
