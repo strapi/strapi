@@ -40,7 +40,7 @@ const ListView = () => {
     enabled: canRead,
     keepPreviousData: true,
     retry: false,
-    staleTime: 1000 * 20,
+    staleTime: 1000 * 10,
     onError() {
       toggleNotification({
         type: 'warning',
