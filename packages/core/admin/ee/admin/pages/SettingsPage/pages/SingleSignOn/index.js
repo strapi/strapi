@@ -17,9 +17,9 @@ import { Select, Option } from '@strapi/design-system/Select';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { useIntl } from 'react-intl';
 import isEqual from 'lodash/isEqual';
-import { getRequestUrl } from '../../../../../admin/src/utils';
-import { useRolesList, useSettingsForm } from '../../../../../admin/src/hooks';
-import adminPermissions from '../../../../../admin/src/permissions';
+import { getRequestUrl } from '../../../../../../admin/src/utils';
+import { useRolesList, useSettingsForm } from '../../../../../../admin/src/hooks';
+import adminPermissions from '../../../../../../admin/src/permissions';
 import schema from './utils/schema';
 
 const ssoPermissions = {
