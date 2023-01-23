@@ -19,13 +19,11 @@ export const createTransaction = (strapi: Strapi) => {
     done = true;
     resume?.();
   });
-  strapi.db.transaction(async (trx) => {
+  strapi.db.transaction(async ({ trx, rollback }) => {
     e.on('rollback', async () => {
-      await trx.rollback();
+      await rollback();
     });
-    e.on('commit', async () => {
-      await trx.commit();
-    });
+
     while (!done) {
       while (fns.length) {
         const item = fns.shift();
