@@ -91,7 +91,7 @@ const loadPlugins = async (strapi) => {
       serverEntrypointPath = join(enabledPlugin.pathToPlugin, 'strapi-server.js');
     } catch (e) {
       throw new Error(
-        `Error loading plugin ${pluginName}, plugin is not installed, please install the plugin or remove it's configuration.`
+        `Error loading the plugin ${pluginName} because ${pluginName} is not installed. Please either install the plugin or remove it's configuration.`
       );
     }
 
