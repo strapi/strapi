@@ -10,7 +10,7 @@ export const createLinksWriteStream = (
   return new Writable({
     objectMode: true,
     async write(link: ILink, _encoding, callback) {
-      return transaction(async (trx: any) => {
+      return transaction.attach(async (trx: any) => {
         const { left, right } = link;
         const query = createLinkQuery(strapi, trx);
 
@@ -29,7 +29,6 @@ export const createLinksWriteStream = (
             new Error(`An error happened while trying to import a ${left.type} link. ${e}`)
           );
         }
-
         callback(null);
       });
     },

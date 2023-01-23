@@ -2,23 +2,30 @@ import { EventEmitter } from 'events';
 import { randomUUID } from 'crypto';
 import { Strapi } from '@strapi/strapi';
 
-export const createTransaction = async (strapi: Strapi) => {
-  const fns: { fn: (trx?: any) => Promise<void>; uuid: string }[] = [];
+type TransactionCallback = (trx?: unknown) => Promise<void>;
+
+export const createTransaction = (strapi: Strapi) => {
+  const fns: { fn: TransactionCallback; uuid: string }[] = [];
   let done = false;
-  let resume = () => {};
+  let resume: null | (() => void) = null;
 
   const e = new EventEmitter();
   e.on('spawn', (uuid, cb) => {
     fns.push({ fn: cb, uuid });
-    resume();
-    return uuid;
+    resume?.();
   });
 
   e.on('close', () => {
     done = true;
-    resume();
+    resume?.();
   });
   strapi.db.transaction(async (trx) => {
+    e.on('rollback', async () => {
+      await trx.rollback();
+    });
+    e.on('commit', async () => {
+      await trx.commit();
+    });
     while (!done) {
       while (fns.length) {
         const item = fns.shift();
@@ -30,7 +37,6 @@ export const createTransaction = async (strapi: Strapi) => {
             const res = await fn(trx);
             e.emit(uuid, { data: res });
           } catch (error) {
-            await trx.rollback();
             e.emit(uuid, { error });
           }
         }
@@ -45,7 +51,7 @@ export const createTransaction = async (strapi: Strapi) => {
   });
 
   return {
-    async transaction<T = undefined>(callback: any): Promise<T | undefined> {
+    async attach<T = undefined>(callback: TransactionCallback): Promise<T | undefined> {
       const uuid = randomUUID();
       e.emit('spawn', uuid, callback);
       return new Promise<T | undefined>((resolve, reject) => {
@@ -61,8 +67,11 @@ export const createTransaction = async (strapi: Strapi) => {
         });
       });
     },
-    endTransaction() {
+    end() {
       return e.emit('close');
+    },
+    rollback() {
+      return e.emit('rollback');
     },
   };
 };

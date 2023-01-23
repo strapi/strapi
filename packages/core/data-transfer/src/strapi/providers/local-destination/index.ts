@@ -42,11 +42,13 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   async bootstrap(): Promise<void> {
     this.#validateOptions();
     this.strapi = await this.options.getStrapi();
+
+    this.transaction = utils.transaction.createTransaction(this.strapi);
   }
 
   async close(): Promise<void> {
     const { autoDestroy } = this.options;
-    this.endTransaction();
+    this.transaction.end();
 
     // Basically `!== false` but more deterministic
     if (autoDestroy === undefined || autoDestroy === true) {
@@ -69,9 +71,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async rollback(e: Error): Promise<void> {
-    await this.transaction(async () => {
-      throw e;
-    });
+    await this.transaction.rollback();
   }
 
   async beforeTransfer() {
@@ -79,11 +79,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       throw new Error('Strapi instance not found');
     }
 
-    const { transaction, endTransaction } = await utils.transaction.createTransaction(this.strapi);
-    this.transaction = transaction;
-    this.endTransaction = endTransaction;
-
-    await this.transaction(async () => {
+    await this.transaction.attach(async () => {
       try {
         if (this.options.strategy === 'restore') {
           await this.#deleteAll();
