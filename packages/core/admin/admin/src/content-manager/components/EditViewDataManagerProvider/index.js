@@ -66,6 +66,7 @@ const EditViewDataManagerProvider = ({
     modifiedDZName,
     shouldCheckErrors,
     publishConfirmation,
+    customYupSchema,
   } = reducerState;
 
   const { setModifiedDataOnly } = useSelector(selectCrudReducer);
@@ -300,6 +301,8 @@ const EditViewDataManagerProvider = ({
       try {
         // Validate the form using yup
         await yupSchema.validate(updatedData, { abortEarly: false });
+        // Validate the form using custom yup schema provided by the user
+        await yup.object().shape(customYupSchema).validate(updatedData, { abortEarly: false });
       } catch (err) {
         errors = getYupInnerErrors(err);
 
@@ -396,7 +399,10 @@ const EditViewDataManagerProvider = ({
       let errors = {};
 
       try {
+        // Validate the form using yup
         await yupSchema.validate(modifiedData, { abortEarly: false });
+        // Validate the form using custom yup schema provided by the user
+        await yup.object().shape(customYupSchema).validate(modifiedData, { abortEarly: false });
       } catch (err) {
         errors = getYupInnerErrors(err);
       }
@@ -581,6 +587,13 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
+  const setCustomYupSchema = useCallback((schema) => {
+    dispatch({
+      type: 'SET_CUSTOM_YUP_SCHEMA',
+      schema: schema
+    });
+  }, []);
+
   const triggerFormValidation = useCallback(() => {
     dispatch({
       type: 'TRIGGER_FORM_VALIDATION',
@@ -628,6 +641,7 @@ const EditViewDataManagerProvider = ({
         removeComponentFromDynamicZone,
         removeComponentFromField,
         removeRepeatableField,
+        setCustomYupSchema,
         slug,
         triggerFormValidation,
         updateActionAllowedFields,

@@ -2135,6 +2135,27 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
     });
   });
 
+  describe('SET_CUSTOM_YUP_SCHEMA', () => {
+    it('should set the customYupSchema correctly', () => {
+      const state = {
+        ...initialState,
+        customYupSchema: {},
+      };
+
+      const action = {
+        type: 'SET_CUSTOM_YUP_SCHEMA',
+        schema: { fieldName: 'Validation criteria' },
+      };
+
+      const expected = {
+        ...initialState,
+        customYupSchema: { fieldName: 'Validation criteria' },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
   describe('SET_PUBLISH_CONFIRMATION', () => {
     it('should set the publish confirmation object', () => {
       const state = {

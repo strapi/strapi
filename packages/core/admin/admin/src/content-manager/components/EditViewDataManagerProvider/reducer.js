@@ -18,6 +18,7 @@ const initialState = {
   componentsDataStructure: {},
   contentTypeDataStructure: {},
   formErrors: {},
+  customYupSchema: {},
   initialData: {},
   modifiedData: null,
   shouldCheckErrors: false,
@@ -379,6 +380,10 @@ const reducer = (state, action) =>
       case 'SET_FORM_ERRORS': {
         draftState.modifiedDZName = null;
         draftState.formErrors = action.errors;
+        break;
+      }
+      case 'SET_CUSTOM_YUP_SCHEMA': {
+        draftState.customYupSchema = { ...state.customYupSchema, ...action.schema };
         break;
       }
       case 'TRIGGER_FORM_VALIDATION': {
