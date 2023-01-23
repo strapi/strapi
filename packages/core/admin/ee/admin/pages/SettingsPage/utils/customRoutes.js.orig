@@ -1,11 +1,18 @@
 const routes = [];
 
-if (window.strapi.features.isEnabled(strapi.features.SSO)) {
+<<<<<<< HEAD
+if (strapi.features.isEnabled(strapi.features.SSO)) {
   routes.push({
     async Component() {
       const component = await import(
         /* webpackChunkName: "sso-settings-page" */ '../pages/SingleSignOn'
       );
+=======
+if (window.strapi.features.isEnabled(strapi.features.SSO)) {
+  routes.push({
+    async Component() {
+      const component = await import(/* webpackChunkName: "sso-settings-page" */ '../SingleSignOn');
+>>>>>>> feature/review-workflows-settings-setup
 
       return component;
     },
@@ -14,6 +21,8 @@ if (window.strapi.features.isEnabled(strapi.features.SSO)) {
   });
 }
 
+<<<<<<< HEAD
+=======
 if (window.strapi.isEE) {
   routes.push({
     async Component() {
@@ -28,4 +37,5 @@ if (window.strapi.isEE) {
   });
 }
 
+>>>>>>> feature/review-workflows-settings-setup
 export default routes;

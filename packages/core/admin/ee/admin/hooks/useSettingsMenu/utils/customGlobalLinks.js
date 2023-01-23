@@ -1,17 +1,25 @@
 import adminPermissions from '../../../../../admin/src/permissions';
 
-const ssoGlobalRoutes = strapi.features.isEnabled(strapi.features.SSO)
-  ? [
-      {
-        intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
-        to: '/settings/single-sign-on',
-        id: 'sso',
-        isDisplayed: false,
-        permissions: adminPermissions.settings.sso.main,
-      },
-    ]
-  : [];
+const items = [];
 
-const customGlobalLinks = [...ssoGlobalRoutes];
+if (window.strapi.features.isEnabled(strapi.features.SSO)) {
+  items.push({
+    intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
+    to: '/settings/single-sign-on',
+    id: 'sso',
+    isDisplayed: false,
+    permissions: adminPermissions.settings.sso.main,
+  });
+}
 
-export default customGlobalLinks;
+if (window.strapi.isEE) {
+  items.push({
+    intlLabel: { id: 'Settings.review-workflows.title', defaultMessage: 'Review Workflow' },
+    to: '/settings/review-workflows',
+    id: 'review-workflows',
+    isDisplayed: false,
+    permissions: adminPermissions.settings.reviewWorkflows.main,
+  });
+}
+
+export default items;
