@@ -120,7 +120,11 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       });
     }
 
-    throw new Error(`Invalid strategy supplied: "${strategy}"`);
+    throw new ProviderValidationError(`Invalid stategy ${strategy}`, {
+      check: 'strategy',
+      strategy,
+      validStrategies: VALID_CONFLICT_STRATEGIES,
+    });
   }
 
   // TODO: Move this logic to the restore strategy
@@ -175,7 +179,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
     const { strategy } = this.options;
 
-    if (strategy !== 'restore') {
+    if (strategy === 'restore') {
       return restore.createConfigurationWriteStream(this.strapi);
     }
 

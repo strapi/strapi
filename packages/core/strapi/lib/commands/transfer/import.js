@@ -42,7 +42,12 @@ module.exports = async (opts) => {
   /**
    * To local Strapi instance
    */
-  const strapiInstance = await strapi(await strapi.compile()).load();
+  let strapiInstance;
+  try {
+    strapiInstance = await strapi(await strapi.compile()).load();
+  } catch (_err) {
+    throw new Error('Process failed. Check the database connection with your Strapi project.');
+  }
 
   const destinationOptions = {
     async getStrapi() {

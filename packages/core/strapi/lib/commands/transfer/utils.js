@@ -80,12 +80,15 @@ const DEFAULT_IGNORED_CONTENT_TYPES = [
 ];
 
 const createStrapiInstance = async (logLevel = 'error') => {
-  const appContext = await strapi.compile();
-  const app = strapi(appContext);
+  try {
+    const appContext = await strapi.compile();
+    const app = strapi(appContext);
 
-  app.log.level = logLevel;
-
-  return app.load();
+    app.log.level = logLevel;
+    return await app.load();
+  } catch (_err) {
+    throw new Error('Process failed. Check the database connection with your Strapi project.');
+  }
 };
 
 const transferDataTypes = Object.keys(TransferGroupPresets);
