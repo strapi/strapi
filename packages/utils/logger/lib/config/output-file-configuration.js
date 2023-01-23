@@ -1,9 +1,13 @@
 'use strict';
 
 const { transports, format } = require('winston');
-const { LEVEL_LABEL, LEVELS } = require('./constants');
-const { prettyPrint } = require('./formats');
+const { LEVEL_LABEL, LEVELS } = require('../constants');
+const { prettyPrint } = require('../formats');
 
+/**
+ * This will remove the chalk color codes from the message provided.
+ * It's used to log plain text in the log file
+ */
 const getPlainText = format.printf(({ message }) => {
   return message.replace(
     // eslint-disable-next-line no-control-regex

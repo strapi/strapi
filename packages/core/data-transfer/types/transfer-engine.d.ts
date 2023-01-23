@@ -1,9 +1,8 @@
-import { PassThrough } from 'stream';
+import type { PassThrough } from 'stream';
 import type { IAsset, IEntity, ILink } from './common-entities';
 import type { ITransferResults, TransferTransform, TransferTransforms } from './utils';
 import type { ISourceProvider, IDestinationProvider } from './providers';
 import type { Schema } from '@strapi/strapi';
-import type { IAsset, IEntity, ILink } from './common-entities';
 import type { ITransferResults, TransferTransform, TransferProgress } from './utils';
 import type { ISourceProvider, IDestinationProvider } from './providers';
 import type { Severity } from '../src/errors';

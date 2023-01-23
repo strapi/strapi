@@ -11,7 +11,6 @@ const {
 const { isObject } = require('lodash/fp');
 const chalk = require('chalk');
 
-const { createLogger } = require('@strapi/logger');
 const {
   buildTransferTable,
   createStrapiInstance,
@@ -19,7 +18,7 @@ const {
 } = require('./utils');
 const formatDiagnosticErrors = require('./utils');
 
-const logger = createLogger();
+const logger = console;
 
 /**
  * @typedef TransferCommandOptions Options given to the CLI transfer command

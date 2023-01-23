@@ -4,7 +4,10 @@ const chalk = require('chalk');
 const Table = require('cli-table3');
 const { Option } = require('commander');
 const { TransferGroupPresets } = require('@strapi/data-transfer/lib/engine');
-const { createLogger, createOutputFileConfiguration } = require('@strapi/logger');
+const {
+  config: { createOutputFileConfiguration },
+  createLogger,
+} = require('@strapi/logger');
 const { readableBytes, exitWith } = require('../utils/helpers');
 const strapi = require('../../index');
 const { getParseListWithChoices } = require('../utils/commander');
@@ -130,7 +133,7 @@ const errorColors = {
   silly: chalk.yellow,
 };
 
-const formatDiagnosticErrors = ({ details, kind }) => {
+const formatDiagnostic = ({ details, kind }) => {
   try {
     if (kind === 'error') {
       const { message, severity = 'fatal', error, details: moreDetails } = details;
@@ -154,10 +157,7 @@ const formatDiagnosticErrors = ({ details, kind }) => {
     if (kind === 'info') {
       const { message, params } = details;
 
-      const msg =
-        typeof message === 'function'
-          ? message(params)
-          : `${message}\n${params ? JSON.stringify(params, null, 2) : ''}`;
+      const msg = `${message}\n${params ? JSON.stringify(params, null, 2) : ''}`;
 
       logger.info(msg);
     }
@@ -179,5 +179,5 @@ module.exports = {
   excludeOption,
   onlyOption,
   validateExcludeOnly,
-  formatDiagnosticErrors,
+  formatDiagnosticErrors: formatDiagnostic,
 };
