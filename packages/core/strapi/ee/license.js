@@ -5,6 +5,8 @@ const { join } = require('path');
 const crypto = require('crypto');
 const fetch = require('node-fetch');
 
+const machineId = require('../lib/utils/machine-id');
+
 const DEFAULT_FEATURES = {
   bronze: [],
   silver: [],
@@ -69,7 +71,7 @@ const fetchLicense = async (key, projectId) => {
   const response = await fetch(`https://license.strapi.io/api/licenses/validate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key, projectId }),
+    body: JSON.stringify({ key, projectId, deviceId: machineId() }),
   }).catch(throwError);
 
   const contentType = response.headers.get('Content-Type');
