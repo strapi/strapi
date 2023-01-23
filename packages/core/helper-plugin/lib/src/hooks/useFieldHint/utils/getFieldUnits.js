@@ -10,8 +10,8 @@ const getFieldUnits = ({ type, minimum, maximum }) => {
 
   return {
     message: {
-      id: 'content-manager.form.Input.hint.units',
-      defaultMessage: '{maxValue, plural, one {character} other {characters}}',
+      id: 'content-manager.form.Input.hint.character.unit',
+      defaultMessage: '{maxValue, plural, one { character} other { characters}}',
     },
     values: {
       maxValue,

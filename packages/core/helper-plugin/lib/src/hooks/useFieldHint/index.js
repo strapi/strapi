@@ -53,20 +53,20 @@ const useFieldHint = ({ description, fieldSchema, type }) => {
         {
           id: 'content-manager.form.Input.hint.text',
           defaultMessage:
-            '{min, select, undefined {} other {min. {min}}}{hasMinAndMax, select, true { {divider} } other {}}{max, select, undefined {} other {max. {max}}}{hasMinOrMax, select, true { {unit}{br}} other {}}{description}',
+            '{min, select, undefined {} other {min. {min}}}{divider}{max, select, undefined {} other {max. {max}}}{unit}{br}{description}',
         },
         {
           min: minimum,
           max: maximum,
-          hasMinAndMax,
-          hasMinOrMax,
-          divider: formatMessage({
-            id: 'content-manager.form.Input.hint.minMaxDivider',
-            defaultMessage: '/',
-          }),
-          unit: units?.message ? formatMessage(units.message, units.values) : '',
-          br: <br />,
           description: buildDescription(desc),
+          unit: units?.message && hasMinOrMax ? formatMessage(units.message, units.values) : null,
+          divider: hasMinAndMax
+            ? formatMessage({
+                id: 'content-manager.form.Input.hint.minMaxDivider',
+                defaultMessage: ' / ',
+              })
+            : null,
+          br: hasMinOrMax ? <br /> : null,
         }
       );
     },
