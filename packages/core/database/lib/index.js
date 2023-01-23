@@ -53,35 +53,35 @@ class Database {
   async transaction(cb) {
     const notNestedTransaction = !transactionCtx.get();
     const trx = notNestedTransaction ? await this.connection.transaction() : transactionCtx.get();
+
+    async function commit() {
+      if (notNestedTransaction) {
+        await trx.commit();
+      }
+    }
+
+    async function rollback() {
+      if (notNestedTransaction) {
+        await trx.rollback();
+      }
+    }
     if (!cb) {
       return {
-        async commit() {
-          if (notNestedTransaction) {
-            await trx.commit();
-          }
-        },
-        async rollback() {
-          if (notNestedTransaction) {
-            await trx.rollback();
-          }
-        },
+        commit,
+        rollback,
         get() {
           return trx;
         },
       };
     }
 
-    return transactionCtx.run(trx, async () => {
+    return transactionCtx.run({ trx, commit, rollback }, async () => {
       try {
         const res = await cb(trx);
-        if (notNestedTransaction) {
-          await trx.commit();
-        }
+        await commit();
         return res;
       } catch (error) {
-        if (notNestedTransaction) {
-          await trx.rollback();
-        }
+        await rollback();
         throw error;
       }
     });
