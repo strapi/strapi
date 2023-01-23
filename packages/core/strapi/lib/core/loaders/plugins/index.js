@@ -85,7 +85,15 @@ const loadPlugins = async (strapi) => {
   for (const pluginName of Object.keys(enabledPlugins)) {
     const enabledPlugin = enabledPlugins[pluginName];
 
-    const serverEntrypointPath = join(enabledPlugin.pathToPlugin, 'strapi-server.js');
+    let serverEntrypointPath;
+
+    try {
+      serverEntrypointPath = join(enabledPlugin.pathToPlugin, 'strapi-server.js');
+    } catch (e) {
+      throw new Error(
+        `Error loading plugin ${pluginName}, plugin is not installed, please install the plugin or remove it's configuration.`
+      );
+    }
 
     // only load plugins with a server entrypoint
     if (!(await fse.pathExists(serverEntrypointPath))) {
