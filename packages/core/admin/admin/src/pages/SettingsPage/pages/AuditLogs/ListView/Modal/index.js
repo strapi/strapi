@@ -14,6 +14,10 @@ const Modal = ({ handleClose, logId }) => {
   const fetchAuditLog = async (id) => {
     const { data } = await get(`/admin/audit-logs/${id}`);
 
+    if (!data) {
+      throw new Error('Audit log not found');
+    }
+
     return data;
   };
 
