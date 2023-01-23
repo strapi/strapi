@@ -16,6 +16,8 @@ const isAnyToMany = (attribute) => ['oneToMany', 'manyToMany'].includes(attribut
 const isBidirectional = (attribute) => hasInversedBy(attribute) || hasMappedBy(attribute);
 const isOwner = (attribute) => !isBidirectional(attribute) || hasInversedBy(attribute);
 const shouldUseJoinTable = (attribute) => attribute.useJoinTable !== false;
+const getJoinTableName = (tableName, attributeName) =>
+  _.snakeCase(`${tableName}_${attributeName}_links`);
 
 /**
  * Creates a oneToOne relation metadata
@@ -397,7 +399,7 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
     throw new Error(`Unknown target ${attribute.target}`);
   }
 
-  const joinTableName = _.snakeCase(`${meta.tableName}_${attributeName}_links`);
+  const joinTableName = getJoinTableName(meta.tableName, attributeName);
 
   const joinColumnName = _.snakeCase(`${meta.singularName}_id`);
   let inverseJoinColumnName = _.snakeCase(`${targetMeta.singularName}_id`);
@@ -560,4 +562,5 @@ module.exports = {
   isAnyToMany,
   hasOrderColumn,
   hasInverseOrderColumn,
+  getJoinTableName,
 };
