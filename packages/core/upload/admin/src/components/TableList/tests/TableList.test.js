@@ -61,7 +61,7 @@ const ComponentFixture = (props) => {
 const setup = (props) => render(<ComponentFixture {...props} />);
 
 describe('TableList', () => {
-  it.only('should render table headers labels', () => {
+  it('should render table headers labels', () => {
     const { getByText, getByRole } = setup();
 
     expect(getByRole('gridcell', { name: 'preview' })).toBeInTheDocument();

@@ -23,6 +23,7 @@ const notificationReducer = (state = initialState, action) =>
           timeout: get(action, ['config', 'timeout'], 2500),
           blockTransition: get(action, ['config', 'blockTransition'], false),
           onClose: get(action, ['config', 'onClose'], null),
+          title: get(action, ['config', 'title'], null),
         });
         draftState.notifId = state.notifId + 1;
         break;
