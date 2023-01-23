@@ -22,8 +22,10 @@ const disable = (message) => {
 
 let initialized = false;
 
+/**
+ * Optimistically enable EE if the format of the license is valid, only run once.
+ */
 const init = (licenseDir, logger) => {
-  // Can only be executed once, to prevent any abuse of the optimistic behavior
   if (initialized) {
     return;
   }
@@ -40,18 +42,23 @@ const init = (licenseDir, logger) => {
 
     if (license) {
       ee.licenseInfo = verifyLicense(license);
-      ee.enabled = true; // Optimistically enable EE during initialization
+      ee.enabled = true;
     }
   } catch (error) {
     disable(error.message);
   }
 };
 
+/**
+ * Contact the license registry to update the license to its latest state.
+ *
+ * Store the result in database to avoid unecessary requests, and will fallback to that in case of a network failure.
+ */
 const onlineUpdate = async ({ strapi }) => {
   const transaction = await strapi.db.transaction();
 
   try {
-    const eeInfo = await strapi.db
+    const storedInfo = await strapi.db
       .queryBuilder(eeStoreModel.uid)
       .where({ key: 'ee_information' })
       .select('value')
@@ -61,25 +68,24 @@ const onlineUpdate = async ({ strapi }) => {
       .execute()
       .then((result) => (result ? JSON.parse(result.value) : result));
 
-    // Limit the number of requests to the license registry, especially in the case of horizontally scaled project
-    const shouldContactRegistry = (eeInfo?.lastCheckAt ?? 0) < Date.now() - ONE_MINUTE;
-    const value = { lastCheckAt: Date.now() };
+    const shouldContactRegistry = (storedInfo?.lastCheckAt ?? 0) < Date.now() - ONE_MINUTE;
+    const result = { lastCheckAt: Date.now() };
 
     const fallback = (error) => {
-      if (error instanceof LicenseCheckError && error.shouldFallback && eeInfo?.license) {
+      if (error instanceof LicenseCheckError && error.shouldFallback && storedInfo?.license) {
         ee.logger?.warn(
           `${error.message} The last stored one will be used as a potential fallback.`
         );
-        return eeInfo.license;
+        return storedInfo.license;
       }
 
-      value.error = error.message;
+      result.error = error.message;
       disable(error.message);
     };
 
     const license = shouldContactRegistry
       ? await fetchLicense(ee.licenseInfo.licenseKey, strapi.config.get('uuid')).catch(fallback)
-      : eeInfo.license;
+      : storedInfo.license;
 
     if (license) {
       try {
@@ -89,19 +95,17 @@ const onlineUpdate = async ({ strapi }) => {
         disable(error.message);
       }
     } else if (!shouldContactRegistry) {
-      // Show the latest error
-      disable(eeInfo.error);
+      disable(storedInfo.error);
     }
 
-    // If the registry was contacted, store the result in database, even in case of an error
     if (shouldContactRegistry) {
+      result.license = license ?? null;
       const query = strapi.db.queryBuilder(eeStoreModel.uid).transacting(transaction);
-      value.license = license ?? null;
 
-      if (!eeInfo) {
-        query.insert({ key: 'ee_information', value: JSON.stringify(value) });
+      if (!storedInfo) {
+        query.insert({ key: 'ee_information', value: JSON.stringify(result) });
       } else {
-        query.update({ value: JSON.stringify(value) }).where({ key: 'ee_information' });
+        query.update({ value: JSON.stringify(result) }).where({ key: 'ee_information' });
       }
 
       await query.execute();
@@ -109,7 +113,7 @@ const onlineUpdate = async ({ strapi }) => {
 
     await transaction.commit();
   } catch (error) {
-    // The database can be locked at the time of writing, seems to just be a SQLite issue
+    // Example of errors: SQLite does not support FOR UPDATE
     await transaction.rollback();
   }
 };
