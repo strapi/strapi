@@ -14,7 +14,7 @@ const KeyValuePair = ({ label, value }) => {
       <Typography as="dt" fontWeight="bold" textColor="neutral600">
         {label}
       </Typography>
-      <Typography as="dl">{value}</Typography>
+      <Typography as="dd">{value}</Typography>
     </Flex>
   );
 };
