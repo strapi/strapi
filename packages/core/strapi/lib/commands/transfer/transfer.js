@@ -22,8 +22,8 @@ const logger = console;
 /**
  * @typedef TransferCommandOptions Options given to the CLI transfer command
  *
- * @property {string|undefined} [to] The url of a remote Strapi to use as remote destination
- * @property {string|undefined} [from] The url of a remote Strapi to use as remote source
+ * @property {URL|undefined} [to] The url of a remote Strapi to use as remote destination
+ * @property {URL|undefined} [from] The url of a remote Strapi to use as remote source
  */
 
 /**
@@ -86,8 +86,8 @@ module.exports = async (opts) => {
   }
 
   const engine = createTransferEngine(source, destination, {
-    versionStrategy: 'ignore', // for an export to file, versionStrategy will always be skipped
-    schemaStrategy: 'ignore', // for an export to file, schemaStrategy will always be skipped
+    versionStrategy: 'strict',
+    schemaStrategy: 'strict',
     transforms: {
       links: [
         {

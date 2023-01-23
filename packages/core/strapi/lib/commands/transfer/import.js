@@ -62,6 +62,7 @@ module.exports = async (opts) => {
     versionStrategy: opts.versionStrategy || DEFAULT_VERSION_STRATEGY,
     schemaStrategy: opts.schemaStrategy || DEFAULT_SCHEMA_STRATEGY,
     exclude: opts.exclude,
+    only: opts.only,
     rules: {
       links: [
         {

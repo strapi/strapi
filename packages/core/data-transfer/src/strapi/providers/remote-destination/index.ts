@@ -15,6 +15,7 @@ import type {
 } from '../../../../types';
 import type { client, server } from '../../../../types/remote/protocol';
 import type { ILocalStrapiDestinationProviderOptions } from '../local-destination';
+import { TRANSFER_PATH } from '../../remote/constants';
 
 interface ITokenAuth {
   type: 'token';
@@ -29,7 +30,7 @@ interface ICredentialsAuth {
 
 export interface IRemoteStrapiDestinationProviderOptions
   extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
-  url: string;
+  url: URL;
   auth?: ITokenAuth | ICredentialsAuth;
 }
 
@@ -100,16 +101,21 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
     let ws: WebSocket;
 
+    if (!['https:', 'http:'].includes(url.protocol)) {
+      throw new Error(`Invalid protocol "${url.protocol}"`);
+    }
+    const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProtocol}//${url.host}${url.pathname}${TRANSFER_PATH}`;
+
     // No auth defined, trying public access for transfer
     if (!auth) {
-      ws = new WebSocket(url);
+      ws = new WebSocket(wsUrl);
     }
 
     // Common token auth, this should be the main auth method
     else if (auth.type === 'token') {
-      const headers = { Authentication: `Bearer ${auth.token}` };
-
-      ws = new WebSocket(this.options.url, { headers });
+      const headers = { Authorization: `Bearer ${auth.token}` };
+      ws = new WebSocket(wsUrl, { headers });
     }
 
     // Invalid auth method provided

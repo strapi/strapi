@@ -1,4 +1,5 @@
 import { WebSocket } from 'ws';
+import { TRANSFER_PATH } from '../../../../../lib/strapi/remote/constants';
 import { CommandMessage } from '../../../../../types/remote/protocol/client';
 import { createDispatcher } from '../utils';
 
@@ -18,7 +19,7 @@ afterEach(() => {
 
 describe('Remote Strapi Destination Utils', () => {
   test('Dispatch method sends payload', () => {
-    const ws = new WebSocket('ws://test/admin/transfer');
+    const ws = new WebSocket(`ws://test/admin${TRANSFER_PATH}`);
     const message: CommandMessage = {
       type: 'command',
       command: 'status',
