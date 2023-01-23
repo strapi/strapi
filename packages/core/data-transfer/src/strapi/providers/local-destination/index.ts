@@ -68,6 +68,12 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     return restore.deleteRecords(this.strapi, this.options.restore);
   }
 
+  async rollback(e: Error): Promise<void> {
+    await this.transaction(async () => {
+      throw e;
+    });
+  }
+
   async beforeTransfer() {
     if (!this.strapi) {
       throw new Error('Strapi instance not found');

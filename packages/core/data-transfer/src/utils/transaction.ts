@@ -30,6 +30,7 @@ export const createTransaction = async (strapi: Strapi) => {
             const res = await fn(trx);
             e.emit(uuid, { data: res });
           } catch (error) {
+            await trx.rollback();
             e.emit(uuid, { error });
           }
         }
@@ -54,7 +55,7 @@ export const createTransaction = async (strapi: Strapi) => {
           }
 
           if (error) {
-            reject(data);
+            reject(error);
           }
           resolve(undefined);
         });
