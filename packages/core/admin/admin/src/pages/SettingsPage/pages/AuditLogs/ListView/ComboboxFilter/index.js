@@ -4,7 +4,7 @@ import { Combobox, ComboboxOption } from '@strapi/design-system/Combobox';
 
 const ComboboxFilter = ({ value, options, onChange }) => {
   return (
-    <Combobox aria-label="filter" value={value} onChange={onChange}>
+    <Combobox aria-label="combobox input" value={value} onChange={onChange}>
       {options.map(({ label, customValue }) => {
         return (
           <ComboboxOption key={customValue} value={customValue}>

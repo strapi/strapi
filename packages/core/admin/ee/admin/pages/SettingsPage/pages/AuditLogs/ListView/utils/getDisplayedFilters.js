@@ -1,4 +1,4 @@
-import ComboboxFilter from '../Filters/ComboboxFilter';
+import ComboboxFilter from '../ComboboxFilter';
 
 const customOperators = [
   {

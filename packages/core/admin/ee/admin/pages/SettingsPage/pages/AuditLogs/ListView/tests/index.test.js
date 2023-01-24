@@ -222,23 +222,47 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
     const rows = await waitFor(() => container.querySelector('tbody').querySelectorAll('tr'));
     expect(rows.length).toEqual(20);
   });
-  it.only('should show the correct filters', () => {
+  it('should show the correct inputs for filtering', async () => {
     useAuditLogsData.mockReturnValue({
       auditLogs: {
         results: TEST_PAGE_DATA,
       },
       isLoading: false,
     });
+
     render(App);
     const filtersButton = screen.getByRole('button', { name: /filters/i });
-    user.click(filtersButton);
-    const filterTypeButton = screen.getByRole('button', { name: /action/i });
-    const dateButton = screen.getByRole('button', { name: /date/i });
-    const userButton = screen.getByRole('button', { name: /user/i });
-    expect(filterTypeButton).toBeInTheDocument();
-    expect(dateButton).toBeInTheDocument();
-    expect(userButton).toBeInTheDocument();
+    await user.click(filtersButton);
 
-    user.click(filterTypeButton);
+    const filterButton = screen.getByLabelText(/select field/i, { name: 'action' });
+    const operatorButton = screen.getByLabelText(/select filter/i, { name: 'is' });
+    const comboBoxInput = screen.getByPlaceholderText(/select or enter a value/i);
+    const addFilterButton = screen.getByRole('button', { name: /add filter/i });
+
+    expect(filterButton).toBeVisible();
+    expect(operatorButton).toBeVisible();
+    expect(comboBoxInput).toBeVisible();
+    expect(addFilterButton).toBeVisible();
+  });
+  it('should add filters to the query params', async () => {
+    useAuditLogsData.mockReturnValue({
+      auditLogs: {
+        results: TEST_PAGE_DATA,
+      },
+      isLoading: false,
+    });
+
+    render(App);
+
+    const filtersButton = screen.getByRole('button', { name: /filters/i });
+    await user.click(filtersButton);
+
+    await user.click(screen.getByPlaceholderText(/select or enter a value/i));
+    user.selectOptions(screen.getByRole('listbox'), 'entry.create');
+
+    const addFilterButton = screen.getByRole('button', { name: /add filter/i });
+    await user.click(addFilterButton);
+
+    expect(history.location.search).toBe('?filters[$and][0][action][$eq]=entry.create');
   });
 });
