@@ -1,9 +1,10 @@
 module.exports = [
   {
-    method: 'GET',
-    path: '/',
-    handler: 'myController.index',
+    method: 'POST',
+    path: '/callback',
+    handler: 'auth.callback',
     config: {
+      auth: false,
       policies: [],
     },
   },

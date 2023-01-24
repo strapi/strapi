@@ -2,31 +2,81 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 import Initializer from './components/Initializer';
-import PluginIcon from './components/PluginIcon';
 
 const name = pluginPkg.strapi.name;
 
+const replaceFields = (list, fields) =>
+  list.map((items) => items.map((field) => ({ ...field, ...fields[field.name] })));
+
+const insertFields = (list, index, ...items) => [
+  ...list.slice(0, index),
+  ...items,
+  ...list.slice(index),
+];
+
 export default {
   register(app) {
-    app.addMenuLink({
-      to: `/plugins/${pluginId}`,
-      icon: PluginIcon,
-      intlLabel: {
-        id: `${pluginId}.plugin.name`,
-        defaultMessage: name,
-      },
-      Component: async () => {
-        const component = await import(/* webpackChunkName: "[request]" */ './pages/App');
+    const plugin = {
+      id: pluginId,
+      initializer: Initializer,
+      isReady: false,
+      name,
+    };
 
-        return component;
-      },
-      permissions: [
-        // Uncomment to set the permissions of the plugin here
-        // {
-        //   action: '', // the action name should be plugin::plugin-name.actionType
-        //   subject: null,
-        // },
-      ],
+    app.registerPlugin(plugin);
+
+    app.appPlugins['users-permissions'].transformFields('apple', (layout) => {
+      const BEFORE_CALLBACK = layout.form.findIndex((items) =>
+        items.find(({ name }) => name === 'callback')
+      );
+
+      return {
+        ...layout,
+        form: insertFields(
+          replaceFields(layout.form, {
+            secret: {
+              type: 'textarea',
+            },
+          }),
+          BEFORE_CALLBACK,
+          [
+            {
+              intlLabel: {
+                id: 'todo.teamId',
+                defaultMessage: 'Team ID',
+              },
+              name: 'teamId',
+              type: 'text',
+              placeholder: {
+                id: 'todo.placeholder',
+                defaultMessage: 'TEXT',
+              },
+              size: 12,
+              validations: {
+                required: true,
+              },
+            },
+          ],
+          [
+            {
+              intlLabel: {
+                id: 'todo.keyIdentifier',
+                defaultMessage: 'Key ID',
+              },
+              name: 'keyIdentifier',
+              type: 'text',
+              placeholder: {
+                id: 'todo.placeholder',
+                defaultMessage: 'TEXT',
+              },
+              size: 12,
+              validations: {
+                required: true,
+              },
+            },
+          ]
+        ),
+      };
     });
     app.registerPlugin({
       id: pluginId,

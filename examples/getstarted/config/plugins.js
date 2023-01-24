@@ -28,4 +28,8 @@ module.exports = () => ({
       testConf: 3,
     },
   },
+  apple: {
+    enabled: true,
+    resolve: `./src/plugins/apple`,
+  },
 });
