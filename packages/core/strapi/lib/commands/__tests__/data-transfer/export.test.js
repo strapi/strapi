@@ -26,7 +26,10 @@ describe('Export', () => {
           },
           sourceProvider: { name: 'testSource' },
           destinationProvider: { name: 'testDestination' },
-          diagnostics: { on: jest.fn().mockReturnThis() },
+          diagnostics: {
+            on: jest.fn().mockReturnThis(),
+            onDiagnostic: jest.fn().mockReturnThis(),
+          },
         };
       },
     },
@@ -38,6 +41,7 @@ describe('Export', () => {
 
   // mock utils
   const mockUtils = {
+    formatDiagnostic: jest.fn(),
     createStrapiInstance() {
       return {
         telemetry: {

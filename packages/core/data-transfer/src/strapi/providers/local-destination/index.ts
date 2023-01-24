@@ -92,7 +92,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   getSchemas() {
-    assertValidStrapi(this.strapi, 'Not able to get Schemas.');
+    assertValidStrapi(this.strapi, 'Not able to get Schemas');
     const schemas = {
       ...this.strapi.contentTypes,
       ...this.strapi.components,
@@ -129,7 +129,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   // TODO: Move this logic to the restore strategy
   async createAssetsWriteStream(): Promise<Writable> {
-    assertValidStrapi(this.strapi, 'Not able to stream Assets.');
+    assertValidStrapi(this.strapi, 'Not able to stream Assets');
 
     const assetsDirectory = path.join(this.strapi.dirs.static.public, 'uploads');
     const backupDirectory = path.join(
@@ -175,7 +175,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async createConfigurationWriteStream(): Promise<Writable> {
-    assertValidStrapi(this.strapi, 'Not able to stream Configurations.');
+    assertValidStrapi(this.strapi, 'Not able to stream Configurations');
 
     const { strategy } = this.options;
 

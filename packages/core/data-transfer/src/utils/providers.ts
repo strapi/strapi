@@ -10,6 +10,6 @@ export const assertValidStrapi: ValidStrapiAssertion = (
   msg = ''
 ): asserts strapi => {
   if (!strapi) {
-    throw new ProviderInitializationError(`Strapi instance not found. ${msg}`);
+    throw new ProviderInitializationError(`${msg}. Strapi instance not found.`);
   }
 };

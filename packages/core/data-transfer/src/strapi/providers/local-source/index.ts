@@ -65,7 +65,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
   }
 
   async createEntitiesReadStream(): Promise<Readable> {
-    assertValidStrapi(this.strapi, 'Not able to stream entities.');
+    assertValidStrapi(this.strapi, 'Not able to stream entities');
 
     return chain([
       // Entities stream
@@ -77,13 +77,13 @@ class LocalStrapiSourceProvider implements ISourceProvider {
   }
 
   createLinksReadStream(): Readable {
-    assertValidStrapi(this.strapi, 'Not able to stream links.');
+    assertValidStrapi(this.strapi, 'Not able to stream links');
 
     return createLinksStream(this.strapi);
   }
 
   createConfigurationReadStream(): Readable {
-    assertValidStrapi(this.strapi, 'Not able to stream configuration. Strapi instance not found');
+    assertValidStrapi(this.strapi, 'Not able to stream configuration');
 
     return createConfigurationStream(strapi);
   }
