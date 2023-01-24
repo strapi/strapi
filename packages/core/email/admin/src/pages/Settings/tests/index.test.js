@@ -171,14 +171,6 @@ describe('Email | Pages | Settings', () => {
         color: #666687;
       }
 
-      .c37 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        line-height: 1.14;
-        color: #32324d;
-      }
-
       .c10 > * {
         margin-top: 0;
         margin-bottom: 0;
@@ -929,7 +921,7 @@ describe('Email | Pages | Settings', () => {
                             </svg>
                           </div>
                           <span
-                            class="c5 c37"
+                            class="c5 c19"
                           >
                             Send test email
                           </span>
