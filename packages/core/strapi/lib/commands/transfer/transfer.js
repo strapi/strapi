@@ -110,7 +110,7 @@ module.exports = async (opts) => {
     },
   });
 
-  engine.diagnostics.onDiagnostic(formatDiagnostic);
+  engine.diagnostics.onDiagnostic(formatDiagnostic('transfer'));
 
   try {
     logger.log(`Starting transfer...`);

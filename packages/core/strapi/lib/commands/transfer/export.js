@@ -78,7 +78,7 @@ module.exports = async (opts) => {
     },
   });
 
-  engine.diagnostics.onDiagnostic(formatDiagnostic);
+  engine.diagnostics.onDiagnostic(formatDiagnostic('export'));
 
   const progress = engine.progress.stream;
 

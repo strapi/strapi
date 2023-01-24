@@ -87,7 +87,7 @@ module.exports = async (opts) => {
 
   const engine = createTransferEngine(source, destination, engineOptions);
 
-  engine.diagnostics.onDiagnostic(formatDiagnostic);
+  engine.diagnostics.onDiagnostic(formatDiagnostic('import'));
 
   const progress = engine.progress.stream;
   const getTelemetryPayload = () => {

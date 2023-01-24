@@ -126,51 +126,54 @@ const validateExcludeOnly = (command) => {
   }
 };
 
-const logger = createLogger(createOutputFileConfiguration(`import_error_log_${Date.now()}.log`));
-
 const errorColors = {
   fatal: chalk.red,
   error: chalk.red,
   silly: chalk.yellow,
 };
 
-const formatDiagnostic = ({ details, kind }) => {
-  try {
-    if (kind === 'error') {
-      const { message, severity = 'fatal', error, details: moreDetails } = details;
+const formatDiagnostic =
+  (operation) =>
+  ({ details, kind }) => {
+    const logger = createLogger(
+      createOutputFileConfiguration(`${operation}_error_log_${Date.now()}.log`)
+    );
+    try {
+      if (kind === 'error') {
+        const { message, severity = 'fatal', error, details: moreDetails } = details;
 
-      const detailsInfo = error ?? moreDetails;
-      let errorMessage = errorColors[severity](`[${severity.toUpperCase()}] ${message}`);
-      if (detailsInfo && detailsInfo.details) {
-        const {
-          origin,
-          details: { step, details: stepDetails, ...moreInfo },
-        } = detailsInfo;
-        errorMessage = `${errorMessage}. Thrown at ${origin} during ${step}.\n`;
-        if (stepDetails || moreInfo) {
-          const { check, ...info } = stepDetails ?? moreInfo;
-          errorMessage = `${errorMessage} Check ${check ?? ''}: ${JSON.stringify(info, null, 2)}`;
+        const detailsInfo = error ?? moreDetails;
+        let errorMessage = errorColors[severity](`[${severity.toUpperCase()}] ${message}`);
+        if (detailsInfo && detailsInfo.details) {
+          const {
+            origin,
+            details: { step, details: stepDetails, ...moreInfo },
+          } = detailsInfo;
+          errorMessage = `${errorMessage}. Thrown at ${origin} during ${step}.\n`;
+          if (stepDetails || moreInfo) {
+            const { check, ...info } = stepDetails ?? moreInfo;
+            errorMessage = `${errorMessage} Check ${check ?? ''}: ${JSON.stringify(info, null, 2)}`;
+          }
         }
+
+        logger.error(new Error(errorMessage, error));
       }
+      if (kind === 'info') {
+        const { message, params } = details;
 
-      logger.error(new Error(errorMessage, error));
+        const msg = `${message}\n${params ? JSON.stringify(params, null, 2) : ''}`;
+
+        logger.info(msg);
+      }
+      if (kind === 'warning') {
+        const { origin, message } = details;
+
+        logger.warn(`(${origin ?? 'transfer'}) ${message}`);
+      }
+    } catch (err) {
+      logger.error(err);
     }
-    if (kind === 'info') {
-      const { message, params } = details;
-
-      const msg = `${message}\n${params ? JSON.stringify(params, null, 2) : ''}`;
-
-      logger.info(msg);
-    }
-    if (kind === 'warning') {
-      const { origin, message } = details;
-
-      logger.warn(`(${origin ?? 'transfer'}) ${message}`);
-    }
-  } catch (err) {
-    logger.error(err);
-  }
-};
+  };
 
 module.exports = {
   buildTransferTable,
