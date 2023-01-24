@@ -13,11 +13,13 @@ const {
 } = require('@strapi/data-transfer/lib/engine');
 
 const { isObject } = require('lodash/fp');
-const path = require('path');
 
-const strapi = require('../../index');
-const { buildTransferTable, DEFAULT_IGNORED_CONTENT_TYPES } = require('./utils');
-const formatDiagnosticErrors = require('../utils/formatter');
+const {
+  buildTransferTable,
+  DEFAULT_IGNORED_CONTENT_TYPES,
+  createStrapiInstance,
+  formatDiagnostic,
+} = require('./utils');
 
 /**
  * @typedef {import('@strapi/data-transfer').ILocalFileSourceProviderOptions} ILocalFileSourceProviderOptions
@@ -42,12 +44,7 @@ module.exports = async (opts) => {
   /**
    * To local Strapi instance
    */
-  let strapiInstance;
-  try {
-    strapiInstance = await strapi(await strapi.compile()).load();
-  } catch (_err) {
-    throw new Error('Process failed. Check the database connection with your Strapi project.');
-  }
+  const strapiInstance = await createStrapiInstance();
 
   const destinationOptions = {
     async getStrapi() {
@@ -90,7 +87,7 @@ module.exports = async (opts) => {
 
   const engine = createTransferEngine(source, destination, engineOptions);
 
-  engine.diagnostics.onDiagnostic(formatDiagnosticErrors);
+  engine.diagnostics.onDiagnostic(formatDiagnostic('import'));
 
   const progress = engine.progress.stream;
   const getTelemetryPayload = () => {
@@ -115,8 +112,8 @@ module.exports = async (opts) => {
     logger.info('Import process has been completed successfully!');
   } catch (e) {
     await strapiInstance.telemetry.send('didDEITSProcessFail', getTelemetryPayload());
-    logger.error('Import process failed');
-
+    logger.error('Import process failed unexpectedly');
+    logger.error(e);
     process.exit(1);
   }
 
@@ -140,23 +137,9 @@ const getLocalFileSourceOptions = (opts) => {
    */
   const options = {
     file: { path: opts.file },
-    compression: { enabled: false },
-    encryption: { enabled: false },
+    compression: { enabled: !!opts.decompress },
+    encryption: { enabled: !!opts.decrypt, key: opts.key },
   };
-
-  const { extname, parse } = path;
-
-  let file = options.file.path;
-
-  if (extname(file) === '.enc') {
-    file = parse(file).name;
-    options.encryption = { enabled: true, key: opts.key };
-  }
-
-  if (extname(file) === '.gz') {
-    file = parse(file).name;
-    options.compression = { enabled: true };
-  }
 
   return options;
 };

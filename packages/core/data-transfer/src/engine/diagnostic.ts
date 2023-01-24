@@ -79,10 +79,7 @@ const createDiagnosticReporter = (
   };
 
   const isDiagnosticValid = (diagnostic: Diagnostic) => {
-    if (!diagnostic.kind || !diagnostic.details) {
-      return false;
-    }
-    if (!diagnostic.details.message) {
+    if (!diagnostic.kind || !diagnostic.details || !diagnostic.details.message) {
       return false;
     }
     return true;

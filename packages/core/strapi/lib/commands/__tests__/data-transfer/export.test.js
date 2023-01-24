@@ -1,5 +1,7 @@
 'use strict';
 
+const { expectExit } = require('./shared/transfer.test.utils');
+
 describe('Export', () => {
   const defaultFileName = 'defaultFilename';
 
@@ -26,7 +28,10 @@ describe('Export', () => {
           },
           sourceProvider: { name: 'testSource' },
           destinationProvider: { name: 'testDestination' },
-          diagnostics: { on: jest.fn().mockReturnThis() },
+          diagnostics: {
+            on: jest.fn().mockReturnThis(),
+            onDiagnostic: jest.fn().mockReturnThis(),
+          },
         };
       },
     },
@@ -38,6 +43,7 @@ describe('Export', () => {
 
   // mock utils
   const mockUtils = {
+    formatDiagnostic: jest.fn(),
     createStrapiInstance() {
       return {
         telemetry: {
@@ -55,26 +61,18 @@ describe('Export', () => {
     { virtual: true }
   );
 
-  // other spies=
+  // other spies
   jest.spyOn(console, 'log').mockImplementation(() => {});
   jest.spyOn(console, 'warn').mockImplementation(() => {});
+  jest.spyOn(console, 'info').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
 
-  // Now that everything is mocked, import export command
+  // Now that everything is mocked, load the 'export' command
   const exportCommand = require('../../transfer/export');
 
-  const expectExit = async (code, fn) => {
-    const exit = jest.spyOn(process, 'exit').mockImplementation((number) => {
-      throw new Error(`process.exit: ${number}`);
-    });
-    await expect(async () => {
-      await fn();
-    }).rejects.toThrow();
-    expect(exit).toHaveBeenCalledWith(code);
-    exit.mockRestore();
-  };
-
-  beforeEach(() => {});
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('uses path provided by user', async () => {
     const filename = 'test';

@@ -17,8 +17,8 @@ const {
   buildTransferTable,
   DEFAULT_IGNORED_CONTENT_TYPES,
   createStrapiInstance,
+  formatDiagnostic,
 } = require('./utils');
-const formatDiagnosticErrors = require('../utils/formatter');
 
 /**
  * @typedef ImportCommandOptions Options given to the CLI import command
@@ -78,7 +78,7 @@ module.exports = async (opts) => {
     },
   });
 
-  engine.diagnostics.onDiagnostic(formatDiagnosticErrors);
+  engine.diagnostics.onDiagnostic(formatDiagnostic('export'));
 
   const progress = engine.progress.stream;
 
