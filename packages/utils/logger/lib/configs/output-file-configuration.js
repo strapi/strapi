@@ -3,7 +3,7 @@
 const { transports } = require('winston');
 const { LEVEL_LABEL, LEVELS } = require('../constants');
 const { prettyPrint } = require('../formats');
-const excludeColors = require('../formats/exclude-colors');
+const { excludeColors } = require('../formats');
 
 const createOutputFileConfiguration = (filename) => {
   return {
