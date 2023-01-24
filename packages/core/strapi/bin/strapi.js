@@ -397,12 +397,14 @@ program
       file = parse(file).name; // trim the .enc extension
       thisCommand.opts().decrypt = true;
     } else {
-      opts.encrypt = false;
+      thisCommand.opts().decrypt = false;
     }
 
     if (extname(file) === '.gz') {
       file = parse(file).name; // trim the .gz extension
       thisCommand.opts().decompress = true;
+    } else {
+      thisCommand.opts().decompress = false;
     }
   })
   .hook(
