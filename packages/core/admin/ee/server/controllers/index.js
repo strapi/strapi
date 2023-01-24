@@ -5,5 +5,5 @@ module.exports = {
   permission: require('./permission'),
   role: require('./role'),
   user: require('./user'),
-  workflow: require('./workflow'),
+  workflow: require('./workflows'),
 };

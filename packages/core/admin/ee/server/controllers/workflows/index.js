@@ -1,6 +1,7 @@
 'use strict';
 
 const { pick } = require('lodash/fp');
+const { getService } = require('../../utils');
 
 function sanitizeWorkflowQuery(query = {}) {
   const picker = pick(['id']);
@@ -12,24 +13,28 @@ module.exports = {
    * List all workflows
    * @param {import('koa').BaseContext} ctx - koa context
    */
-  list(ctx) {
+  async find(ctx) {
     const query = sanitizeWorkflowQuery(ctx.query);
-    const workflows = strapi.query('admin::workflow').findMany(query);
+
+    const workflowService = getService('workflow');
+    const results = await workflowService.find(query);
 
     ctx.body = {
-      results: workflows,
+      results,
     };
   },
   /**
    * Get one workflow
    * @param {import('koa').BaseContext} ctx - koa context
    */
-  getOne(ctx) {
+  async findOne(ctx) {
     const query = sanitizeWorkflowQuery(ctx.query);
-    const workflow = strapi.query('admin::workflow').findOne({ where: query });
+
+    const workflowService = getService('workflow');
+    const data = await workflowService.findOne(query);
 
     ctx.body = {
-      data: workflow,
+      data,
     };
   },
 };

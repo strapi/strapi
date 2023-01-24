@@ -47,13 +47,13 @@ module.exports = {
     {
       method: 'GET',
       path: '/review-workflows/workflows',
-      handler: 'workflow.list',
+      handler: 'workflow.find',
       config: { auth: false },
     },
     {
       method: 'GET',
       path: '/review-workflows/workflows/:workflow_id',
-      handler: 'workflow.getOne',
+      handler: 'workflow.findOne',
       config: { auth: false },
     },
   ],
