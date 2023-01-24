@@ -346,7 +346,7 @@ class TransferEngine<
     keys.forEach((key) => {
       const sourceSchema = sourceSchemas[key];
       const destinationSchema = destinationSchemas[key];
-      const schemaDiffs = compareSchemas(sourceSchema, destinationSchema, strategy);
+      const schemaDiffs = compareSchemas(destinationSchema, sourceSchema, strategy);
 
       if (schemaDiffs.length) {
         diffs[key] = schemaDiffs;
@@ -361,16 +361,18 @@ class TransferEngine<
           msg += ctDiffs
             .sort((a, b) => (a.kind > b.kind ? -1 : 1))
             .map((diff) => {
+              const path = diff.path.join('.');
+
               if (diff.kind === 'added') {
-                return `Added "${diff.path}": "${diff.value}" (${diff.type})`;
+                return `Added "${path}": "${diff.value}" (${diff.type})`;
               }
 
               if (diff.kind === 'deleted') {
-                return `Removed "${diff.path}"`;
+                return `Removed "${path}"`;
               }
 
               if (diff.kind === 'modified') {
-                return `Modified "${diff.path}". "${diff.values[0]}" (${diff.types[0]}) => "${diff.values[1]}" (${diff.types[1]})`;
+                return `Modified "${path}": "${diff.values[0]}" (${diff.types[0]}) => "${diff.values[1]}" (${diff.types[1]})`;
               }
 
               throw new TransferEngineValidationError(`Invalid diff found for "${uid}"`, {
