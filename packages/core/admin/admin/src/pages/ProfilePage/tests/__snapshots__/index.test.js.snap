@@ -587,9 +587,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
     action="#"
     novalidate=""
   >
-    <div
-      style="height: 0px;"
-    >
+    <div>
       <div
         class="c1"
         data-strapi-header="true"
@@ -858,7 +856,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                         >
                           <label
                             class="c5 c21 c22"
-                            for="1"
+                            for=":r8:"
                           >
                             Current Password
                           </label>
@@ -870,7 +868,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                               aria-invalid="false"
                               aria-required="false"
                               class="c27 c28"
-                              id="1"
+                              id=":r8:"
                               name="currentPassword"
                               type="password"
                               value=""
@@ -928,7 +926,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                         >
                           <label
                             class="c5 c21 c22"
-                            for="3"
+                            for=":ra:"
                           >
                             Password
                           </label>
@@ -941,7 +939,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                               aria-required="false"
                               autocomplete="new-password"
                               class="c27 c28"
-                              id="3"
+                              id=":ra:"
                               name="password"
                               type="password"
                               value=""
@@ -995,7 +993,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                         >
                           <label
                             class="c5 c21 c22"
-                            for="5"
+                            for=":rc:"
                           >
                             Password confirmation
                           </label>
@@ -1008,7 +1006,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                               aria-required="false"
                               autocomplete="new-password"
                               class="c27 c28"
-                              id="5"
+                              id=":rc:"
                               name="confirmPassword"
                               type="password"
                               value=""
@@ -1096,7 +1094,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                       >
                         <label
                           class="c5 c21 c22"
-                          for="7"
+                          for=":re:"
                         >
                           Interface language
                         </label>
@@ -1104,13 +1102,13 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           class="c4 c37"
                         >
                           <button
-                            aria-describedby="7-hint"
+                            aria-describedby=":re:-hint"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="7 7-label 7-content"
+                            aria-labelledby=":re: :re:-label :re:-content"
                             aria-required="false"
                             class="c38"
-                            id="7"
+                            id=":re:"
                             role="combobox"
                             type="button"
                             value="en"
@@ -1126,7 +1124,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                               >
                                 <span
                                   class="c5 c41"
-                                  id="7-content"
+                                  id=":re:-content"
                                 >
                                   Select
                                 </span>
@@ -1182,7 +1180,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                         </div>
                         <p
                           class="c5 c45"
-                          id="7-hint"
+                          id=":re:-hint"
                         >
                           This will only display your own interface in the chosen language.
                         </p>
@@ -1204,7 +1202,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                       >
                         <label
                           class="c5 c21 c22"
-                          for="9"
+                          for=":rg:"
                         >
                           Interface mode
                         </label>
@@ -1212,13 +1210,13 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           class="c4 c37"
                         >
                           <button
-                            aria-describedby="9-hint"
+                            aria-describedby=":rg:-hint"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="9 9-label 9-content"
+                            aria-labelledby=":rg: :rg:-label :rg:-content"
                             aria-required="false"
                             class="c38"
-                            id="9"
+                            id=":rg:"
                             role="combobox"
                             type="button"
                             value="light"
@@ -1234,7 +1232,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                               >
                                 <span
                                   class="c5 c41"
-                                  id="9-content"
+                                  id=":rg:-content"
                                 >
                                   Light mode
                                 </span>
@@ -1270,7 +1268,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                         </div>
                         <p
                           class="c5 c45"
-                          id="9-hint"
+                          id=":rg:-hint"
                         >
                           Displays your interface in the chosen mode.
                         </p>

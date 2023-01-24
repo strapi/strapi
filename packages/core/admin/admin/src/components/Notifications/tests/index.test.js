@@ -5,10 +5,9 @@
  */
 
 import React from 'react';
-import { render, fireEvent, screen } from '@testing-library/react';
+import { render, fireEvent, screen, act } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { useNotification } from '@strapi/helper-plugin';
-import { act } from 'react-dom/test-utils';
 import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../Theme';
 import ThemeToggleProvider from '../../ThemeToggleProvider';

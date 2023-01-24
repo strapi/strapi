@@ -964,9 +964,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
       id="main-content"
       tabindex="-1"
     >
-      <div
-        style="height: 0px;"
-      >
+      <div>
         <div
           class="c4"
           data-strapi-header="true"
@@ -1039,7 +1037,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
               >
                 <label
                   class="c8 c23 c24"
-                  for="0"
+                  for=":r0:"
                 >
                   Search
                 </label>
@@ -1075,7 +1073,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                   aria-invalid="false"
                   aria-required="false"
                   class="c30"
-                  id="0"
+                  id=":r0:"
                   name="searchbar"
                   placeholder="Search"
                   value=""
@@ -1510,7 +1508,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                               Config Sync
                               <span>
                                 <div
-                                  aria-describedby="1"
+                                  aria-describedby=":r4:"
                                   class="c7"
                                   tabindex="0"
                                 >
@@ -1863,7 +1861,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                               Documentation
                               <span>
                                 <div
-                                  aria-describedby="2"
+                                  aria-describedby=":r6:"
                                   class="c7"
                                   tabindex="0"
                                 >

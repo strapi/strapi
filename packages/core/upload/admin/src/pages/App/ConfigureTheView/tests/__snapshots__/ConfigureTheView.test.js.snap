@@ -582,7 +582,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                       >
                         <label
                           class="c13 c26 c27"
-                          for="1"
+                          for=":r0:"
                         >
                           Entries per page
                         </label>
@@ -590,14 +590,14 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                           class="c12 c28"
                         >
                           <button
-                            aria-describedby="1-hint"
+                            aria-describedby=":r0:-hint"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="1 1-label 1-content"
+                            aria-labelledby=":r0: :r0:-label :r0:-content"
                             aria-required="false"
                             class="c29"
                             data-testid="pageSize-select"
-                            id="1"
+                            id=":r0:"
                             name="pageSize"
                             role="combobox"
                             type="button"
@@ -614,7 +614,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                               >
                                 <span
                                   class="c13 c32"
-                                  id="1-content"
+                                  id=":r0:-content"
                                 >
                                   10
                                 </span>
@@ -650,7 +650,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                         </div>
                         <p
                           class="c13 c36"
-                          id="1-hint"
+                          id=":r0:-hint"
                         >
                           Number of assets displayed by default in the Media Library
                         </p>
@@ -672,7 +672,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                       >
                         <label
                           class="c13 c26 c27"
-                          for="3"
+                          for=":r2:"
                         >
                           Default sort order
                         </label>
@@ -680,14 +680,14 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                           class="c12 c28"
                         >
                           <button
-                            aria-describedby="3-hint"
+                            aria-describedby=":r2:-hint"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="3 3-label 3-content"
+                            aria-labelledby=":r2: :r2:-label :r2:-content"
                             aria-required="false"
                             class="c29"
                             data-testid="sort-select"
-                            id="3"
+                            id=":r2:"
                             name="sort"
                             role="combobox"
                             type="button"
@@ -704,7 +704,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                               >
                                 <span
                                   class="c13 c32"
-                                  id="3-content"
+                                  id=":r2:-content"
                                 >
                                   createdAt:DESC
                                 </span>
@@ -740,7 +740,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                         </div>
                         <p
                           class="c13 c36"
-                          id="3-hint"
+                          id=":r2:-hint"
                         >
                           Note: You can override this value in the media library.
                         </p>

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
@@ -203,10 +203,10 @@ describe('<PageSizeURLQuery />', () => {
                 aria-expanded="false"
                 aria-haspopup="listbox"
                 aria-label="Entries per page"
-                aria-labelledby="1 1-label 1-content"
+                aria-labelledby=":r0: :r0:-label :r0:-content"
                 aria-required="false"
                 class="c3"
-                id="1"
+                id=":r0:"
                 role="combobox"
                 type="button"
                 value="10"
@@ -222,7 +222,7 @@ describe('<PageSizeURLQuery />', () => {
                   >
                     <span
                       class="c7"
-                      id="1-content"
+                      id=":r0:-content"
                     >
                       10
                     </span>
@@ -277,7 +277,7 @@ describe('<PageSizeURLQuery />', () => {
   it('should display the pageSize correctly', () => {
     const history = createMemoryHistory();
 
-    history.push({ search: 'pageSize=50' });
+    act(() => history.push({ search: 'pageSize=50' }));
 
     const { getByText } = render(makeApp(history));
 

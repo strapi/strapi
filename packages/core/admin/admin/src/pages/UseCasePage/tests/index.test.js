@@ -636,7 +636,7 @@ describe('Admin | UseCasePage', () => {
             >
               <div>
                 <button
-                  aria-controls="0"
+                  aria-controls=":r0:"
                   aria-disabled="false"
                   aria-expanded="false"
                   aria-haspopup="true"

@@ -526,11 +526,11 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
                   role="tablist"
                 >
                   <button
-                    aria-controls="0-0-tabpanel"
+                    aria-controls=":r0:-0-tabpanel"
                     aria-disabled="false"
                     aria-selected="true"
                     class="c15"
-                    id="0-0-tab"
+                    id=":r0:-0-tab"
                     role="tab"
                     tabindex="0"
                     type="button"
@@ -549,7 +549,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
                     aria-disabled="false"
                     aria-selected="false"
                     class="c15"
-                    id="0-1-tab"
+                    id=":r0:-1-tab"
                     role="tab"
                     tabindex="-1"
                     type="button"
@@ -571,8 +571,8 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
               </div>
               <div>
                 <div
-                  aria-labelledby="0-0-tab"
-                  id="0-0-tabpanel"
+                  aria-labelledby=":r0:-0-tab"
+                  id=":r0:-0-tabpanel"
                   role="tabpanel"
                   tabindex="0"
                 >
@@ -1287,7 +1287,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                     aria-disabled="false"
                     aria-selected="false"
                     class="c15"
-                    id="32-0-tab"
+                    id=":r10:-0-tab"
                     role="tab"
                     tabindex="-1"
                     type="button"
@@ -1303,11 +1303,11 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                     </div>
                   </button>
                   <button
-                    aria-controls="32-1-tabpanel"
+                    aria-controls=":r10:-1-tabpanel"
                     aria-disabled="false"
                     aria-selected="true"
                     class="c15"
-                    id="32-1-tab"
+                    id=":r10:-1-tab"
                     role="tab"
                     tabindex="0"
                     type="button"
@@ -1329,8 +1329,8 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
               </div>
               <div>
                 <div
-                  aria-labelledby="32-1-tab"
-                  id="32-1-tabpanel"
+                  aria-labelledby=":r10:-1-tab"
+                  id=":r10:-1-tabpanel"
                   role="tabpanel"
                   tabindex="0"
                 >
@@ -1355,7 +1355,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                             >
                               <label
                                 class="c9 c27 c28"
-                                for="34"
+                                for=":r11:"
                               >
                                 URL
                               </label>
@@ -1364,17 +1364,17 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                               class="c29"
                             >
                               <textarea
-                                aria-describedby="34-hint"
+                                aria-describedby=":r11:-hint"
                                 aria-invalid="false"
                                 aria-required="false"
                                 class="c30"
-                                id="34"
+                                id=":r11:"
                                 name="urls"
                               />
                             </div>
                             <p
                               class="c9 c31"
-                              id="34-hint"
+                              id=":r11:-hint"
                             >
                               Separate your URL links by a carriage return.
                             </p>

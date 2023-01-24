@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
+import { render, waitFor, act, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Router, Switch, Route } from 'react-router-dom';
@@ -37,7 +37,7 @@ function makeAndRenderApp() {
     </IntlProvider>
   );
   const renderResult = render(app);
-  history.push(`/settings/${pluginId}/roles/1`);
+  act(() => history.push(`/settings/${pluginId}/roles/1`));
 
   return renderResult;
 }
@@ -881,9 +881,7 @@ describe('Admin | containers | RoleEditPage', () => {
           action="#"
           novalidate=""
         >
-          <div
-            style="height: 0px;"
-          >
+          <div>
             <div
               class="c1"
               data-strapi-header="true"
@@ -1003,7 +1001,7 @@ describe('Admin | containers | RoleEditPage', () => {
                             >
                               <label
                                 class="c11 c27 c28"
-                                for="1"
+                                for=":r0:"
                               >
                                 Name
                               </label>
@@ -1015,7 +1013,7 @@ describe('Admin | containers | RoleEditPage', () => {
                                   aria-invalid="false"
                                   aria-required="false"
                                   class="c30"
-                                  id="1"
+                                  id=":r0:"
                                   name="name"
                                   value="Authenticated"
                                 />
@@ -1045,7 +1043,7 @@ describe('Admin | containers | RoleEditPage', () => {
                               >
                                 <label
                                   class="c11 c27 c28"
-                                  for="3"
+                                  for=":r2:"
                                 >
                                   Description
                                 </label>
@@ -1057,7 +1055,7 @@ describe('Admin | containers | RoleEditPage', () => {
                                   aria-invalid="false"
                                   aria-required="false"
                                   class="c33"
-                                  id="3"
+                                  id=":r2:"
                                   name="description"
                                 >
                                   Default role given to authenticated user.
@@ -1112,10 +1110,10 @@ describe('Admin | containers | RoleEditPage', () => {
                               class="c7 c45 c46"
                             >
                               <button
-                                aria-controls="accordion-content-4"
+                                aria-controls="accordion-content-:r4:"
                                 aria-disabled="false"
                                 aria-expanded="false"
-                                aria-labelledby="accordion-label-4"
+                                aria-labelledby="accordion-label-:r4:"
                                 class="c7 c47 c14 c48 c49"
                                 data-strapi-accordion-toggle="true"
                                 type="button"
@@ -1125,13 +1123,13 @@ describe('Admin | containers | RoleEditPage', () => {
                                 >
                                   <span
                                     class="c11 c51"
-                                    id="accordion-label-4"
+                                    id="accordion-label-:r4:"
                                   >
                                     Address
                                   </span>
                                   <p
                                     class="c11 c40"
-                                    id="accordion-desc-4"
+                                    id="accordion-desc-:r4:"
                                   >
                                     Define all allowed actions for the api::address plugin.
                                   </p>

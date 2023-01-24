@@ -1,6 +1,6 @@
 import React from 'react';
 import { QueryClientProvider, QueryClient } from 'react-query';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
 import { useFetchClient } from '@strapi/helper-plugin';
@@ -66,42 +66,43 @@ function setup(...args) {
 describe('useFolderStructure', () => {
   test('fetches data from the right URL', async () => {
     const { get } = useFetchClient();
-    const { waitForNextUpdate } = await setup();
 
-    await waitForNextUpdate();
+    await setup();
 
-    expect(get).toBeCalledWith('/upload/folder-structure');
+    await waitFor(() => {
+      expect(get).toBeCalledWith('/upload/folder-structure');
+    });
   });
 
   test('transforms the required object keys', async () => {
-    const { result, waitForNextUpdate } = await setup({});
+    const { result } = await setup({});
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.data).toStrictEqual([
+        {
+          label: 'Media Library',
+          value: null,
+          children: [
+            {
+              value: 1,
+              label: '1',
+              children: [],
+            },
 
-    expect(result.current.data).toStrictEqual([
-      {
-        label: 'Media Library',
-        value: null,
-        children: [
-          {
-            value: 1,
-            label: '1',
-            children: [],
-          },
-
-          {
-            value: 2,
-            label: '2',
-            children: [
-              {
-                value: 21,
-                label: '21',
-                children: [],
-              },
-            ],
-          },
-        ],
-      },
-    ]);
+            {
+              value: 2,
+              label: '2',
+              children: [
+                {
+                  value: 21,
+                  label: '21',
+                  children: [],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+    });
   });
 });

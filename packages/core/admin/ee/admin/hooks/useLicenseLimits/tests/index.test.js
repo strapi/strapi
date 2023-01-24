@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useFetchClient } from '@strapi/helper-plugin';
 import { useQuery } from 'react-query';
 import useLicenseLimits from '..';

@@ -1013,7 +1013,7 @@ describe('Admin | containers | ListView', () => {
                               <span>
                                 <button
                                   aria-disabled="false"
-                                  aria-labelledby="1"
+                                  aria-labelledby=":r1:"
                                   class="c42 c43 c44 c45"
                                   tabindex="-1"
                                   type="button"
@@ -1044,7 +1044,7 @@ describe('Admin | containers | ListView', () => {
                               <span>
                                 <button
                                   aria-disabled="false"
-                                  aria-labelledby="2"
+                                  aria-labelledby=":r3:"
                                   class="c42 c43 c44 c45"
                                   id="delete-1"
                                   tabindex="-1"
@@ -1176,7 +1176,7 @@ describe('Admin | containers | ListView', () => {
                               <span>
                                 <button
                                   aria-disabled="false"
-                                  aria-labelledby="3"
+                                  aria-labelledby=":r5:"
                                   class="c42 c43 c44 c45"
                                   tabindex="-1"
                                   type="button"
@@ -1207,7 +1207,7 @@ describe('Admin | containers | ListView', () => {
                               <span>
                                 <button
                                   aria-disabled="false"
-                                  aria-labelledby="4"
+                                  aria-labelledby=":r7:"
                                   class="c42 c43 c44 c45"
                                   id="delete-2"
                                   tabindex="-1"

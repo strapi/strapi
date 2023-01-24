@@ -678,7 +678,7 @@ describe('Email | Pages | Settings', () => {
                             >
                               <label
                                 class="c5 c18 c19"
-                                for="7"
+                                for=":r8:"
                               >
                                 Default sender email
                               </label>
@@ -693,7 +693,7 @@ describe('Email | Pages | Settings', () => {
                                   class="c21"
                                   data-disabled=""
                                   disabled=""
-                                  id="7"
+                                  id=":r8:"
                                   name="shipper-email"
                                   placeholder="ex: Strapi No-Reply <no-reply@strapi.io>"
                                   value=""
@@ -719,7 +719,7 @@ describe('Email | Pages | Settings', () => {
                             >
                               <label
                                 class="c5 c18 c19"
-                                for="9"
+                                for=":ra:"
                               >
                                 Default response email
                               </label>
@@ -734,7 +734,7 @@ describe('Email | Pages | Settings', () => {
                                   class="c21"
                                   data-disabled=""
                                   disabled=""
-                                  id="9"
+                                  id=":ra:"
                                   name="response-email"
                                   placeholder="ex: Strapi <example@strapi.io>"
                                   value=""
@@ -759,7 +759,7 @@ describe('Email | Pages | Settings', () => {
                           >
                             <label
                               class="c5 c18 c19"
-                              for="11"
+                              for=":rc:"
                             >
                               Email provider
                             </label>
@@ -770,12 +770,12 @@ describe('Email | Pages | Settings', () => {
                               <button
                                 aria-expanded="false"
                                 aria-haspopup="listbox"
-                                aria-labelledby="11 11-label 11-content"
+                                aria-labelledby=":rc: :rc:-label :rc:-content"
                                 aria-required="false"
                                 class="c23"
                                 data-disabled=""
                                 disabled=""
-                                id="11"
+                                id=":rc:"
                                 name="email-provider"
                                 role="combobox"
                                 type="button"
@@ -792,7 +792,7 @@ describe('Email | Pages | Settings', () => {
                                   >
                                     <span
                                       class="c5 c26"
-                                      id="11-content"
+                                      id=":rc:-content"
                                     >
                                       Select...
                                     </span>
@@ -801,7 +801,6 @@ describe('Email | Pages | Settings', () => {
                                 <div
                                   class="c4"
                                 >
-                                  
                                   <button
                                     aria-hidden="true"
                                     class="c27 c28 c29"

@@ -1034,7 +1034,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
               >
                 <label
                   class="c8 c23 c24"
-                  for="0"
+                  for=":r0:"
                 >
                   Search
                 </label>
@@ -1070,7 +1070,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                   aria-invalid="false"
                   aria-required="false"
                   class="c30"
-                  id="0"
+                  id=":r0:"
                   name="searchbar"
                   placeholder="Search"
                   value=""
@@ -1320,7 +1320,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               Amazon Ses
                               <span>
                                 <div
-                                  aria-describedby="5"
+                                  aria-describedby=":r8:"
                                   class="c7"
                                   tabindex="0"
                                 >
@@ -1478,7 +1478,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               AWS S3
                               <span>
                                 <div
-                                  aria-describedby="6"
+                                  aria-describedby=":ra:"
                                   class="c7"
                                   tabindex="0"
                                 >
@@ -1676,7 +1676,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               Cloudinary
                               <span>
                                 <div
-                                  aria-describedby="7"
+                                  aria-describedby=":rc:"
                                   class="c7"
                                   tabindex="0"
                                 >
@@ -1864,7 +1864,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               Local Upload
                               <span>
                                 <div
-                                  aria-describedby="8"
+                                  aria-describedby=":re:"
                                   class="c7"
                                   tabindex="0"
                                 >
@@ -2022,7 +2022,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               Mailgun
                               <span>
                                 <div
-                                  aria-describedby="9"
+                                  aria-describedby=":rg:"
                                   class="c7"
                                   tabindex="0"
                                 >
@@ -2180,7 +2180,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               Nodemailer
                               <span>
                                 <div
-                                  aria-describedby="10"
+                                  aria-describedby=":ri:"
                                   class="c7"
                                   tabindex="0"
                                 >
@@ -2338,7 +2338,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               Rackspace
                               <span>
                                 <div
-                                  aria-describedby="11"
+                                  aria-describedby=":rk:"
                                   class="c7"
                                   tabindex="0"
                                 >
@@ -2496,7 +2496,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               SendGrid
                               <span>
                                 <div
-                                  aria-describedby="12"
+                                  aria-describedby=":rm:"
                                   class="c7"
                                   tabindex="0"
                                 >
@@ -2654,7 +2654,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               Sendmail
                               <span>
                                 <div
-                                  aria-describedby="13"
+                                  aria-describedby=":ro:"
                                   class="c7"
                                   tabindex="0"
                                 >

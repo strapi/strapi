@@ -4,7 +4,7 @@
  *
  */
 import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { OverlayBlockerContext } from '@strapi/helper-plugin';
@@ -31,7 +31,7 @@ const Portal = ({ isOpen }) => {
   }, []);
 
   if (isOpen) {
-    return ReactDOM.createPortal(<Overlay />, overlayContainer);
+    return createPortal(<Overlay />, overlayContainer);
   }
 
   return null;

@@ -627,7 +627,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                       >
                         <label
                           class="c8 c24 c25"
-                          for="1"
+                          for=":r0:"
                         >
                           Auto-registration
                         </label>
@@ -665,14 +665,14 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                             </span>
                           </div>
                           <input
-                            aria-describedby="1-hint"
+                            aria-describedby=":r0:-hint"
                             aria-disabled="false"
                             aria-label="autoRegister"
                             aria-required="false"
                             checked=""
                             class="c36"
                             data-testid="autoRegister"
-                            id="1"
+                            id=":r0:"
                             name="autoRegister"
                             type="checkbox"
                           />
@@ -680,7 +680,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                       </label>
                       <p
                         class="c8 c37"
-                        id="1-hint"
+                        id=":r0:-hint"
                       >
                         Create new user on SSO login if no account exists
                       </p>
@@ -702,7 +702,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                     >
                       <label
                         class="c8 c24 c25"
-                        for="3"
+                        for=":r2:"
                       >
                         Default role
                       </label>
@@ -710,13 +710,13 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                         class="c7 c38"
                       >
                         <button
-                          aria-describedby="3-hint"
+                          aria-describedby=":r2:-hint"
                           aria-expanded="false"
                           aria-haspopup="listbox"
-                          aria-labelledby="3 3-label 3-content"
+                          aria-labelledby=":r2: :r2:-label :r2:-content"
                           aria-required="false"
                           class="c39"
-                          id="3"
+                          id=":r2:"
                           name="defaultRole"
                           role="combobox"
                           type="button"
@@ -733,7 +733,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                             >
                               <span
                                 class="c8 c42"
-                                id="3-content"
+                                id=":r2:-content"
                               >
                                 Editor
                               </span>
@@ -769,7 +769,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                       </div>
                       <p
                         class="c8 c37"
-                        id="3-hint"
+                        id=":r2:-hint"
                       >
                         It will attach the new authenticated user to the selected role
                       </p>
