@@ -3,11 +3,10 @@
 const winston = require('winston');
 
 const formats = require('./formats');
-const createDefaultConfiguration = require('./config/default-configuration');
-const createOutputFileConfiguration = require('./config/output-file-configuration');
+const configs = require('./configs');
 
 const createLogger = (userConfiguration = {}) => {
-  const configuration = createDefaultConfiguration();
+  const configuration = configs.createDefaultConfiguration();
 
   Object.assign(configuration, userConfiguration);
 
@@ -18,5 +17,5 @@ module.exports = {
   createLogger,
   winston,
   formats,
-  config: { createDefaultConfiguration, createOutputFileConfiguration },
+  configs,
 };

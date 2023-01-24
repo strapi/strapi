@@ -16,11 +16,7 @@ const { isObject } = require('lodash/fp');
 const path = require('path');
 
 const strapi = require('../../index');
-const {
-  buildTransferTable,
-  DEFAULT_IGNORED_CONTENT_TYPES,
-  formatDiagnosticErrors,
-} = require('./utils');
+const { buildTransferTable, DEFAULT_IGNORED_CONTENT_TYPES, formatDiagnostic } = require('./utils');
 
 /**
  * @typedef {import('@strapi/data-transfer').ILocalFileSourceProviderOptions} ILocalFileSourceProviderOptions
@@ -88,7 +84,7 @@ module.exports = async (opts) => {
 
   const engine = createTransferEngine(source, destination, engineOptions);
 
-  engine.diagnostics.onDiagnostic(formatDiagnosticErrors);
+  engine.diagnostics.onDiagnostic(formatDiagnostic);
 
   const progress = engine.progress.stream;
   const getTelemetryPayload = () => {

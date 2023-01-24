@@ -17,7 +17,7 @@ const {
   buildTransferTable,
   DEFAULT_IGNORED_CONTENT_TYPES,
   createStrapiInstance,
-  formatDiagnosticErrors,
+  formatDiagnostic,
 } = require('./utils');
 
 /**
@@ -78,7 +78,7 @@ module.exports = async (opts) => {
     },
   });
 
-  engine.diagnostics.onDiagnostic(formatDiagnosticErrors);
+  engine.diagnostics.onDiagnostic(formatDiagnostic);
 
   const progress = engine.progress.stream;
 

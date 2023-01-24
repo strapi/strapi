@@ -4,10 +4,11 @@ const chalk = require('chalk');
 const Table = require('cli-table3');
 const { Option } = require('commander');
 const { TransferGroupPresets } = require('@strapi/data-transfer/lib/engine');
+
 const {
-  config: { createOutputFileConfiguration },
+  configs: { createOutputFileConfiguration },
   createLogger,
-} = require('@strapi/logger');
+} = require('@strapi/logger/lib');
 const { readableBytes, exitWith } = require('../utils/helpers');
 const strapi = require('../../index');
 const { getParseListWithChoices } = require('../utils/commander');
@@ -179,5 +180,5 @@ module.exports = {
   excludeOption,
   onlyOption,
   validateExcludeOnly,
-  formatDiagnosticErrors: formatDiagnostic,
+  formatDiagnostic,
 };
