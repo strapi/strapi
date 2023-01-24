@@ -54,7 +54,6 @@ exports[`BulkActions renders 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
-  line-height: 1.14;
   color: #32324d;
 }
 
@@ -130,8 +129,8 @@ exports[`BulkActions renders 1`] = `
   height: 2rem;
   padding-left: 16px;
   padding-right: 16px;
-  border: 1px solid #f5c0b8;
-  background: #fcecea;
+  border: 1px solid undefined;
+  background: undefined;
 }
 
 .c7 .c0 {
@@ -181,25 +180,25 @@ exports[`BulkActions renders 1`] = `
 
 .c7:active {
   background-color: #ffffff;
-  border: 1px solid #d02b20;
+  border: 1px solid undefined;
 }
 
 .c7:active .c4 {
-  color: #d02b20;
+  color: undefined;
 }
 
 .c7:active svg > g,
 .c7:active svg path {
-  fill: #d02b20;
+  fill: undefined;
 }
 
 .c7 .c4 {
-  color: #b72b1a;
+  color: undefined;
 }
 
 .c7 svg > g,
 .c7 svg path {
-  fill: #b72b1a;
+  fill: undefined;
 }
 
 .c11 {
