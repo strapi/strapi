@@ -13,8 +13,8 @@ import { VideoPreview } from '../AssetCard/VideoPreview';
 
 const VideoPreviewWrapper = styled(Box)`
   figure {
-    width: 26px;
-    height: 26px;
+    width: ${({ theme }) => theme.spaces[7]};
+    height: ${({ theme }) => theme.spaces[7]};
   }
 
   canvas,
