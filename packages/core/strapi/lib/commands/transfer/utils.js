@@ -8,7 +8,7 @@ const { TransferGroupPresets } = require('@strapi/data-transfer/lib/engine');
 const {
   configs: { createOutputFileConfiguration },
   createLogger,
-} = require('@strapi/logger/lib');
+} = require('@strapi/logger');
 const { readableBytes, exitWith } = require('../utils/helpers');
 const strapi = require('../../index');
 const { getParseListWithChoices } = require('../utils/commander');
