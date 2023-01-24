@@ -74,7 +74,6 @@ describe('<GuidedTourModal />', () => {
 
       .c11 {
         padding-right: 32px;
-        padding-bottom: 0px;
         padding-left: 32px;
       }
 
@@ -241,7 +240,6 @@ describe('<GuidedTourModal />', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
-        line-height: 1.14;
         color: #32324d;
       }
 

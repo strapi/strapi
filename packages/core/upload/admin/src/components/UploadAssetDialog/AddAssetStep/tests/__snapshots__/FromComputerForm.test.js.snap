@@ -37,10 +37,10 @@ exports[`FromComputerForm snapshots the component 1`] = `
 
 .c11 {
   position: absolute;
-  left: 0px;
-  right: 0px;
-  top: 0px;
-  bottom: 0px;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
   z-index: 1;
   width: 100%;
 }
@@ -118,7 +118,6 @@ exports[`FromComputerForm snapshots the component 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
-  line-height: 1.14;
   color: #32324d;
 }
 
