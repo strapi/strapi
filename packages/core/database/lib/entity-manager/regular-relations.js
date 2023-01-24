@@ -279,96 +279,70 @@ const cleanOrderColumnsForInnoDB = async ({
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } = joinTable;
 
-  const now = new Date().valueOf();
-  const randomHex = randomBytes(16).toString('hex');
+  const randomSuffix = `${new Date().valueOf()}_${randomBytes(16).toString('hex')}`;
 
   if (hasOrderColumn(attribute) && id) {
-    const tempOrderTableName = `orderTable_${now}_${randomHex}`;
-    try {
-      await db.connection
-        .raw(
-          `
-          CREATE TABLE :tempOrderTableName:
-            SELECT
-              id,
-              (
-                SELECT count(*)
-                FROM :joinTableName: b
-                WHERE a.:orderColumnName: >= b.:orderColumnName: AND a.:joinColumnName: = b.:joinColumnName: AND a.:joinColumnName: = :id
-              ) AS src_order
-            FROM :joinTableName: a
-            WHERE a.:joinColumnName: = :id
-            `,
-          {
-            tempOrderTableName,
-            joinTableName: joinTable.name,
-            orderColumnName,
-            joinColumnName: joinColumn.name,
-            id,
-          }
-        )
-        .transacting(trx);
-
-      // raw query as knex doesn't allow updating from a subquery
-      // https://github.com/knex/knex/issues/2504
-      await db.connection
-        .raw(
-          `UPDATE ?? as a, (SELECT * FROM ??) AS b
-          SET ?? = b.src_order
-          WHERE a.id = b.id`,
-          [joinTable.name, tempOrderTableName, orderColumnName]
-        )
-        .transacting(trx);
-    } finally {
-      await db.connection.raw(`DROP TABLE IF EXISTS ??`, [tempOrderTableName]).transacting(trx);
-    }
+    // raw query as knex doesn't allow updating from a subquery
+    // https://github.com/knex/knex/issues/2504
+    const orderVar = `order_${randomSuffix}`;
+    await db.connection.raw(`SET @${orderVar} = 0;`).transacting(trx);
+    await db.connection
+      .raw(
+        `UPDATE :joinTableName: as a, (
+          SELECT id, (@${orderVar}:=@${orderVar} + 1) AS src_order
+          FROM :joinTableName:
+	        WHERE :joinColumnName: = :id
+	        ORDER BY :orderColumnName:
+        ) AS b
+        SET :orderColumnName: = b.src_order
+        WHERE a.id = b.id`,
+        {
+          joinTableName: joinTable.name,
+          orderColumnName,
+          joinColumnName: joinColumn.name,
+          id,
+        }
+      )
+      .transacting(trx);
   }
 
   if (hasInverseOrderColumn(attribute) && !isEmpty(inverseRelIds)) {
-    const tempInvOrderTableName = `invOrderTable_${now}_${randomHex}`;
-    try {
-      await db.connection
-        .raw(
-          `
-          CREATE TABLE ??
-            SELECT
-              id,
-              (
-                SELECT count(*)
-                FROM ?? b
-                WHERE a.?? >= b.?? AND a.?? = b.?? AND a.?? IN (${inverseRelIds
-                  .map(() => '?')
-                  .join(', ')})
-              ) AS inv_order
-            FROM ?? a
-            WHERE a.?? IN (${inverseRelIds.map(() => '?').join(', ')})
-            `,
-          [
-            tempInvOrderTableName,
-            joinTable.name,
-            inverseOrderColumnName,
-            inverseOrderColumnName,
-            inverseJoinColumn.name,
-            inverseJoinColumn.name,
-            inverseJoinColumn.name,
-            ...inverseRelIds,
-            joinTable.name,
-            inverseJoinColumn.name,
-            ...inverseRelIds,
-          ]
-        )
-        .transacting(trx);
-      await db.connection
-        .raw(
-          `UPDATE ?? as a, (SELECT * FROM ??) AS b
-            SET ?? = b.inv_order
-            WHERE a.id = b.id`,
-          [joinTable.name, tempInvOrderTableName, inverseOrderColumnName]
-        )
-        .transacting(trx);
-    } finally {
-      await db.connection.raw(`DROP TABLE IF EXISTS ??`, [tempInvOrderTableName]).transacting(trx);
-    }
+    const orderVar = `order_${randomSuffix}`;
+    const columnVar = `col_${randomSuffix}`;
+    await db.connection.raw(`SET @${orderVar} = 0;`).transacting(trx);
+    await db.connection
+      .raw(
+        `UPDATE ?? as a, (
+          SELECT
+          	id,
+            @${orderVar}:=CASE
+              WHEN @${columnVar} = ??
+        			THEN @${orderVar} + 1
+              ELSE 1
+              END AS inv_order,
+        	  @${columnVar}:=?? ??
+        	FROM
+        		?? a
+        	WHERE
+        		?? IN(${inverseRelIds.map(() => '?').join(', ')})
+        	ORDER BY ??, ??
+        ) AS b
+        SET ?? = b.inv_order
+        WHERE a.id = b.id`,
+        [
+          joinTable.name,
+          inverseJoinColumn.name,
+          inverseJoinColumn.name,
+          inverseJoinColumn.name,
+          joinTable.name,
+          inverseJoinColumn.name,
+          ...inverseRelIds,
+          inverseJoinColumn.name,
+          joinColumn.name,
+          inverseOrderColumnName,
+        ]
+      )
+      .transacting(trx);
   }
 };
 
