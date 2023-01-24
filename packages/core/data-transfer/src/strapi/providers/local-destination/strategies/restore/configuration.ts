@@ -1,7 +1,7 @@
 import { omit } from 'lodash/fp';
 import { Writable } from 'stream';
 import chalk from 'chalk';
-import { IConfiguration } from '../../../../../../types';
+import { IConfiguration, Transaction } from '../../../../../../types';
 
 const omitInvalidCreationAttributes = omit(['id']);
 
@@ -30,7 +30,10 @@ export const restoreConfigs = async (strapi: Strapi.Strapi, config: IConfigurati
   }
 };
 
-export const createConfigurationWriteStream = async (strapi: Strapi.Strapi, transaction: any) => {
+export const createConfigurationWriteStream = async (
+  strapi: Strapi.Strapi,
+  transaction?: Transaction
+) => {
   return new Writable({
     objectMode: true,
     async write<T extends { id: number }>(
@@ -38,7 +41,7 @@ export const createConfigurationWriteStream = async (strapi: Strapi.Strapi, tran
       _encoding: BufferEncoding,
       callback: (error?: Error | null) => void
     ) {
-      return transaction.attach(async () => {
+      return transaction?.attach(async () => {
         try {
           await restoreConfigs(strapi, config);
         } catch (error) {

@@ -65,6 +65,7 @@
     "@types/uuid": "9.0.0",
     "koa": "2.13.4",
     "@types/koa": "2.13.4",
+    "knex": "1.0.7",
     "rimraf": "3.0.2",
     "typescript": "4.6.2"
   },

@@ -3,14 +3,14 @@ import type { SchemaUID } from '@strapi/strapi/lib/types/utils';
 import { get, last } from 'lodash/fp';
 import { Writable } from 'stream';
 
-import type { IEntity } from '../../../../../../types';
+import type { IEntity, Transaction } from '../../../../../../types';
 import { json } from '../../../../../utils';
 import * as queries from '../../../../queries';
 
 interface IEntitiesRestoreStreamOptions {
   strapi: Strapi.Strapi;
   updateMappingTable<T extends SchemaUID | string>(type: T, oldID: number, newID: number): void;
-  transaction: any;
+  transaction?: Transaction;
 }
 
 const createEntitiesWriteStream = (options: IEntitiesRestoreStreamOptions) => {
@@ -21,7 +21,7 @@ const createEntitiesWriteStream = (options: IEntitiesRestoreStreamOptions) => {
     objectMode: true,
 
     async write(entity: IEntity, _encoding, callback) {
-      return transaction.attach(async () => {
+      return transaction?.attach(async () => {
         const { type, id, data } = entity;
         const { create, getDeepPopulateComponentLikeQuery } = query(type);
         const contentType = strapi.getModel(type);

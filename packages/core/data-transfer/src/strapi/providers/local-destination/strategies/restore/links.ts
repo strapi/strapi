@@ -1,16 +1,16 @@
 import { Writable } from 'stream';
-import { ILink } from '../../../../../../types';
+import { ILink, Transaction } from '../../../../../../types';
 import { createLinkQuery } from '../../../../queries/link';
 
 export const createLinksWriteStream = (
   mapID: (uid: string, id: number) => number | undefined,
   strapi: Strapi.Strapi,
-  transaction: any
+  transaction?: Transaction
 ) => {
   return new Writable({
     objectMode: true,
     async write(link: ILink, _encoding, callback) {
-      return transaction.attach(async (trx: any) => {
+      return transaction?.attach(async (trx) => {
         const { left, right } = link;
         const query = createLinkQuery(strapi, trx);
 

@@ -3,6 +3,7 @@ import type { IDestinationProvider, ISourceProvider } from './providers';
 import type { IAsset, IEntity, ILink } from './common-entities';
 import type { Schema } from '@strapi/strapi';
 import type { ITransferEngineOptions } from './transfer-engine';
+import type { KnexTransaction } from 'knex';
 
 export type MaybePromise<T> = T | Promise<T>;
 
@@ -82,3 +83,11 @@ export interface ITransferResults<S extends ISourceProvider, D extends IDestinat
 export type IProviderTransferResults = {};
 export type ISourceProviderTransferResults = {};
 export type IDestinationProviderTransferResults = {};
+
+export type TransactionCallback = (trx?: KnexTransaction) => Promise<void>;
+
+export type Transaction = {
+  attach<T = undefined>(callback: TransactionCallback): Promise<T | undefined>;
+  end(): boolean;
+  rollback(): boolean;
+};

@@ -1,7 +1,13 @@
 import { Writable } from 'stream';
 import path from 'path';
 import * as fse from 'fs-extra';
-import type { IAsset, IDestinationProvider, IMetadata, ProviderType } from '../../../../types';
+import type {
+  IAsset,
+  IDestinationProvider,
+  IMetadata,
+  ProviderType,
+  Transaction,
+} from '../../../../types';
 
 import { restore } from './strategies';
 import * as utils from '../../../utils';
@@ -25,9 +31,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   strapi?: Strapi.Strapi;
 
-  transaction?: any;
-
-  endTransaction?: any;
+  transaction?: Transaction;
 
   /**
    * The entities mapper is used to map old entities to their new IDs
@@ -48,7 +52,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   async close(): Promise<void> {
     const { autoDestroy } = this.options;
-    this.transaction.end();
+    this.transaction?.end();
 
     // Basically `!== false` but more deterministic
     if (autoDestroy === undefined || autoDestroy === true) {
@@ -71,7 +75,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async rollback(e: Error): Promise<void> {
-    await this.transaction.rollback();
+    await this.transaction?.rollback();
   }
 
   async beforeTransfer() {
@@ -79,7 +83,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       throw new Error('Strapi instance not found');
     }
 
-    await this.transaction.attach(async () => {
+    await this.transaction?.attach(async () => {
       try {
         if (this.options.strategy === 'restore') {
           await this.#deleteAll();
