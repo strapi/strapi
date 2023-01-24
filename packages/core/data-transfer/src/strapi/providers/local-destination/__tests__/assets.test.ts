@@ -17,6 +17,12 @@ const createWriteStreamMock = jest.fn(() => {
 });
 
 jest.mock('fs-extra');
+const transaction = jest.fn(async (cb) => {
+  const trx = {};
+  const rollback = jest.fn();
+  // eslint-disable-next-line node/no-callback-literal
+  await cb({ trx, rollback });
+});
 
 describe('Local Strapi Destination Provider - Get Assets Stream', () => {
   test('Throws an error if the Strapi instance is not provided', async () => {
@@ -37,6 +43,7 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
             public: 'static/public/assets',
           },
         },
+        db: { transaction },
       }),
       strategy: 'restore',
     });
@@ -63,6 +70,7 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
             public: assetsDirectory,
           },
         },
+        db: { transaction },
       }),
       strategy: 'restore',
     });
