@@ -1,6 +1,6 @@
 'use strict';
 
-const { expectExit } = require('./shared/test.utils');
+const { expectExit } = require('./shared/transfer.test.utils');
 
 describe('Export', () => {
   const defaultFileName = 'defaultFilename';

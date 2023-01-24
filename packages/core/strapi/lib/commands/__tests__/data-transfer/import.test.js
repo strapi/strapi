@@ -6,7 +6,7 @@ const {
   DEFAULT_VERSION_STRATEGY,
 } = require('@strapi/data-transfer');
 
-const { expectExit } = require('./shared/test.utils');
+const { expectExit } = require('./shared/transfer.test.utils');
 
 const createTransferEngine = jest.fn(() => {
   return {
