@@ -190,7 +190,6 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
         class="c6 c7"
         wrap="wrap"
       >
-        
         <input
           aria-activedescendant=""
           aria-autocomplete="list"
@@ -212,7 +211,6 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
       <div
         class="c4"
       >
-        
         <button
           aria-hidden="true"
           class="c9 c10 c11"

@@ -357,7 +357,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
       <div>
         <div>
           <div
-            aria-labelledby="0-label"
+            aria-labelledby=":r0:-label"
             aria-modal="true"
             class="c3 c4"
             role="dialog"
@@ -367,7 +367,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
             >
               <h2
                 class="c8 c9"
-                id="0-label"
+                id=":r0:-label"
               >
                 Confirmation
               </h2>

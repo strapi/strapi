@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Router } from 'react-router-dom';
@@ -155,9 +155,12 @@ describe('<FilterListURLQuery />', () => {
         ],
       },
     };
-    history.push({
-      pathname: '/',
-      search: qs.stringify(search, { encode: false }),
+
+    act(() => {
+      history.push({
+        pathname: '/',
+        search: qs.stringify(search, { encode: false }),
+      });
     });
 
     const { container } = render(makeApp(history, filtersSchema));

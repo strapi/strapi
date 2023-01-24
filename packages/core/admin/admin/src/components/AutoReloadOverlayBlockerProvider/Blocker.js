@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import ReactDOM from 'react-dom';
+import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled, { keyframes } from 'styled-components';
@@ -38,7 +38,7 @@ const Blocker = ({ displayedIcon, description, title, isOpen }) => {
   }, []);
 
   if (isOpen) {
-    return ReactDOM.createPortal(
+    return createPortal(
       <Overlay>
         <Content direction="column" alignItems="stretch" gap={6}>
           <Flex direction="column" alignItems="stretch" gap={2}>

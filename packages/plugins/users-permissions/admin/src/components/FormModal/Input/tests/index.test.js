@@ -155,7 +155,7 @@ describe('<Input />', () => {
           >
             <label
               class="c1 c2"
-              for="1"
+              for=":r0:"
             >
               Enabled
             </label>
@@ -168,7 +168,7 @@ describe('<Input />', () => {
                 aria-label="test"
                 aria-required="false"
                 class="c5"
-                id="1"
+                id=":r0:"
                 name="test"
                 placeholder=""
                 type="text"

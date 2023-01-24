@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Router, Route, Switch } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { auth } from '@strapi/helper-plugin';
 import PrivateRoute from '..';
 
@@ -36,7 +36,7 @@ describe('PrivateRoute', () => {
     auth.setToken('access-token');
     renderApp();
     // Visit a protected route
-    history.push('/protected');
+    act(() => history.push('/protected'));
     // Should see the protected route
     expect(await screen.findByText('You are authenticated'));
   });
@@ -45,7 +45,7 @@ describe('PrivateRoute', () => {
     renderApp();
 
     // Visit `/`
-    history.push('/');
+    act(() => history.push('/'));
     // Should redirected to `/auth/login`
     await waitFor(() => {
       expect(history.location.pathname).toBe('/auth/login');
@@ -55,7 +55,7 @@ describe('PrivateRoute', () => {
     });
 
     // Visit /settings/application-infos (no search params)
-    history.push('/settings/application-infos');
+    act(() => history.push('/settings/application-infos'));
     // Should redirected to `/auth/login` and preserve the `/settings/application-infos` path
     await waitFor(() => {
       expect(history.location.pathname).toBe('/auth/login');
@@ -67,7 +67,7 @@ describe('PrivateRoute', () => {
     });
 
     // Visit /settings/application-infos (have search params)
-    history.push('/settings/application-infos?hello=world');
+    act(() => history.push('/settings/application-infos?hello=world'));
     await waitFor(() => {
       expect(history.location.pathname).toBe('/auth/login');
       // Should preserve search params

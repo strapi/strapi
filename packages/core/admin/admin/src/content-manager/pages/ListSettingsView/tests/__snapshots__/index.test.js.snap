@@ -959,7 +959,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         >
                           <label
                             class="c13 c29 c30"
-                            for="1"
+                            for=":r0:"
                           >
                             Enable search
                           </label>
@@ -1001,7 +1001,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                               aria-required="false"
                               checked=""
                               class="c41"
-                              id="1"
+                              id=":r0:"
                               name="settings.searchable"
                               type="checkbox"
                             />
@@ -1024,7 +1024,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         >
                           <label
                             class="c13 c29 c30"
-                            for="3"
+                            for=":r2:"
                           >
                             Enable filters
                           </label>
@@ -1066,7 +1066,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                               aria-required="false"
                               checked=""
                               class="c41"
-                              id="3"
+                              id=":r2:"
                               name="settings.filterable"
                               type="checkbox"
                             />
@@ -1089,7 +1089,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         >
                           <label
                             class="c13 c29 c30"
-                            for="5"
+                            for=":r4:"
                           >
                             Enable bulk actions
                           </label>
@@ -1130,7 +1130,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                               aria-disabled="false"
                               aria-required="false"
                               class="c41"
-                              id="5"
+                              id=":r4:"
                               name="settings.bulkable"
                               type="checkbox"
                             />
@@ -1157,7 +1157,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         >
                           <label
                             class="c13 c29 c30"
-                            for="7"
+                            for=":r6:"
                           >
                             Entries per page
                           </label>
@@ -1165,13 +1165,13 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                             class="c12 c45"
                           >
                             <button
-                              aria-describedby="7-hint"
+                              aria-describedby=":r6:-hint"
                               aria-expanded="false"
                               aria-haspopup="listbox"
-                              aria-labelledby="7 7-label 7-content"
+                              aria-labelledby=":r6: :r6:-label :r6:-content"
                               aria-required="false"
                               class="c46"
-                              id="7"
+                              id=":r6:"
                               name="settings.pageSize"
                               role="combobox"
                               type="button"
@@ -1188,7 +1188,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                                 >
                                   <span
                                     class="c13 c49"
-                                    id="7-content"
+                                    id=":r6:-content"
                                   >
                                     10
                                   </span>
@@ -1224,7 +1224,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           </div>
                           <p
                             class="c13 c53"
-                            id="7-hint"
+                            id=":r6:-hint"
                           >
                             Note: You can override this value in the Collection Type settings page.
                           </p>
@@ -1246,7 +1246,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         >
                           <label
                             class="c13 c29 c30"
-                            for="9"
+                            for=":r8:"
                           >
                             Default sort attribute
                           </label>
@@ -1256,10 +1256,10 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                             <button
                               aria-expanded="false"
                               aria-haspopup="listbox"
-                              aria-labelledby="9 9-label 9-content"
+                              aria-labelledby=":r8: :r8:-label :r8:-content"
                               aria-required="false"
                               class="c46"
-                              id="9"
+                              id=":r8:"
                               name="settings.defaultSortBy"
                               role="combobox"
                               type="button"
@@ -1276,7 +1276,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                                 >
                                   <span
                                     class="c13 c49"
-                                    id="9-content"
+                                    id=":r8:-content"
                                   >
                                     id
                                   </span>
@@ -1328,7 +1328,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         >
                           <label
                             class="c13 c29 c30"
-                            for="11"
+                            for=":ra:"
                           >
                             Default sort order
                           </label>
@@ -1338,10 +1338,10 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                             <button
                               aria-expanded="false"
                               aria-haspopup="listbox"
-                              aria-labelledby="11 11-label 11-content"
+                              aria-labelledby=":ra: :ra:-label :ra:-content"
                               aria-required="false"
                               class="c46"
-                              id="11"
+                              id=":ra:"
                               name="settings.defaultSortOrder"
                               role="combobox"
                               type="button"
@@ -1358,7 +1358,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                                 >
                                   <span
                                     class="c13 c49"
-                                    id="11-content"
+                                    id=":ra:-content"
                                   >
                                     ASC
                                   </span>
@@ -1638,11 +1638,11 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                   <div>
                     <span>
                       <button
-                        aria-controls="13"
+                        aria-controls=":rc:"
                         aria-disabled="false"
                         aria-expanded="false"
                         aria-haspopup="true"
-                        aria-labelledby="12"
+                        aria-labelledby=":rd:"
                         class="c72 c36 c17 c73"
                         data-testid="add-field"
                         tabindex="0"
@@ -2661,7 +2661,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         >
                           <label
                             class="c13 c29 c30"
-                            for="33"
+                            for=":r10:"
                           >
                             Enable search
                           </label>
@@ -2703,7 +2703,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                               aria-required="false"
                               checked=""
                               class="c41"
-                              id="33"
+                              id=":r10:"
                               name="settings.searchable"
                               type="checkbox"
                             />
@@ -2726,7 +2726,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         >
                           <label
                             class="c13 c29 c30"
-                            for="35"
+                            for=":r12:"
                           >
                             Enable filters
                           </label>
@@ -2768,7 +2768,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                               aria-required="false"
                               checked=""
                               class="c41"
-                              id="35"
+                              id=":r12:"
                               name="settings.filterable"
                               type="checkbox"
                             />
@@ -2791,7 +2791,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         >
                           <label
                             class="c13 c29 c30"
-                            for="37"
+                            for=":r14:"
                           >
                             Enable bulk actions
                           </label>
@@ -2832,7 +2832,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                               aria-disabled="false"
                               aria-required="false"
                               class="c41"
-                              id="37"
+                              id=":r14:"
                               name="settings.bulkable"
                               type="checkbox"
                             />
@@ -2859,7 +2859,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         >
                           <label
                             class="c13 c29 c30"
-                            for="39"
+                            for=":r16:"
                           >
                             Entries per page
                           </label>
@@ -2867,13 +2867,13 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                             class="c12 c45"
                           >
                             <button
-                              aria-describedby="39-hint"
+                              aria-describedby=":r16:-hint"
                               aria-expanded="false"
                               aria-haspopup="listbox"
-                              aria-labelledby="39 39-label 39-content"
+                              aria-labelledby=":r16: :r16:-label :r16:-content"
                               aria-required="false"
                               class="c46"
-                              id="39"
+                              id=":r16:"
                               name="settings.pageSize"
                               role="combobox"
                               type="button"
@@ -2890,7 +2890,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                                 >
                                   <span
                                     class="c13 c49"
-                                    id="39-content"
+                                    id=":r16:-content"
                                   >
                                     10
                                   </span>
@@ -2926,7 +2926,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           </div>
                           <p
                             class="c13 c53"
-                            id="39-hint"
+                            id=":r16:-hint"
                           >
                             Note: You can override this value in the Collection Type settings page.
                           </p>
@@ -2948,7 +2948,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         >
                           <label
                             class="c13 c29 c30"
-                            for="41"
+                            for=":r18:"
                           >
                             Default sort attribute
                           </label>
@@ -2958,10 +2958,10 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                             <button
                               aria-expanded="false"
                               aria-haspopup="listbox"
-                              aria-labelledby="41 41-label 41-content"
+                              aria-labelledby=":r18: :r18:-label :r18:-content"
                               aria-required="false"
                               class="c46"
-                              id="41"
+                              id=":r18:"
                               name="settings.defaultSortBy"
                               role="combobox"
                               type="button"
@@ -2978,7 +2978,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                                 >
                                   <span
                                     class="c13 c49"
-                                    id="41-content"
+                                    id=":r18:-content"
                                   >
                                     id
                                   </span>
@@ -3030,7 +3030,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         >
                           <label
                             class="c13 c29 c30"
-                            for="43"
+                            for=":r1a:"
                           >
                             Default sort order
                           </label>
@@ -3040,10 +3040,10 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                             <button
                               aria-expanded="false"
                               aria-haspopup="listbox"
-                              aria-labelledby="43 43-label 43-content"
+                              aria-labelledby=":r1a: :r1a:-label :r1a:-content"
                               aria-required="false"
                               class="c46"
-                              id="43"
+                              id=":r1a:"
                               name="settings.defaultSortOrder"
                               role="combobox"
                               type="button"
@@ -3060,7 +3060,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                                 >
                                   <span
                                     class="c13 c49"
-                                    id="43-content"
+                                    id=":r1a:-content"
                                   >
                                     ASC
                                   </span>
@@ -3443,11 +3443,11 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                   <div>
                     <span>
                       <button
-                        aria-controls="45"
+                        aria-controls=":r1c:"
                         aria-disabled="false"
                         aria-expanded="true"
                         aria-haspopup="true"
-                        aria-labelledby="44"
+                        aria-labelledby=":r1d:"
                         class="c72 c36 c17 c73"
                         data-testid="add-field"
                         tabindex="0"

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
@@ -288,7 +288,7 @@ describe('<PaginationURLQuery />', () => {
 
   it('should change the page correctly', async () => {
     const history = createMemoryHistory();
-    history.push({ pathname: '/test', search: 'page=3&pageSize=10&sort=firstname' });
+    act(() => history.push({ pathname: '/test', search: 'page=3&pageSize=10&sort=firstname' }));
     render(makeApp(history, 10));
 
     expect(screen.getByText('Go to page 1')).toBeInTheDocument();
@@ -310,7 +310,7 @@ describe('<PaginationURLQuery />', () => {
 
   it('should display the dots correctly', () => {
     const history = createMemoryHistory();
-    history.push({ pathname: '/test', search: 'page=5&pageSize=10&sort=firstname' });
+    act(() => history.push({ pathname: '/test', search: 'page=5&pageSize=10&sort=firstname' }));
     const {
       container: { firstChild },
     } = render(makeApp(history, 10));
@@ -320,7 +320,7 @@ describe('<PaginationURLQuery />', () => {
 
   it('should work when the pageCount is inferior or equal to 4', async () => {
     const history = createMemoryHistory();
-    history.push({ pathname: '/test', search: 'page=1&pageSize=10&sort=firstname' });
+    act(() => history.push({ pathname: '/test', search: 'page=1&pageSize=10&sort=firstname' }));
     const {
       container: { firstChild },
     } = render(makeApp(history, 4));

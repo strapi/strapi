@@ -2,7 +2,7 @@ import React from 'react';
 import { stringify } from 'qs';
 import { IntlProvider } from 'react-intl';
 import { QueryClientProvider, QueryClient } from 'react-query';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
 import { NotificationsProvider, useNotification, useFetchClient } from '@strapi/helper-plugin';
@@ -73,10 +73,9 @@ describe('useFolders', () => {
 
   test('fetches data from the right URL if no query param was set', async () => {
     const { get } = useFetchClient();
-    const { result, waitFor, waitForNextUpdate } = await setup({});
+    const { result } = await setup({});
 
     await waitFor(() => result.current.isSuccess);
-    await waitForNextUpdate();
 
     const expected = {
       pagination: {
@@ -95,17 +94,17 @@ describe('useFolders', () => {
       },
     };
 
-    expect(get).toBeCalledWith(`/upload/folders?${stringify(expected, { encode: false })}`);
+    await waitFor(() =>
+      expect(get).toBeCalledWith(`/upload/folders?${stringify(expected, { encode: false })}`)
+    );
   });
 
   test('does not use parent filter in params if _q', async () => {
     const { get } = useFetchClient();
-    const { result, waitFor, waitForNextUpdate } = await setup({
+
+    await setup({
       query: { folder: 5, _q: 'something', filters: { $and: [{ something: 'true' }] } },
     });
-
-    await waitFor(() => result.current.isSuccess);
-    await waitForNextUpdate();
 
     const expected = {
       filters: {
@@ -126,10 +125,9 @@ describe('useFolders', () => {
 
   test('fetches data from the right URL if a query param was set', async () => {
     const { get } = useFetchClient();
-    const { result, waitFor, waitForNextUpdate } = await setup({ query: { folder: 1 } });
+    const { result } = await setup({ query: { folder: 1 } });
 
     await waitFor(() => result.current.isSuccess);
-    await waitForNextUpdate();
 
     const expected = {
       pagination: {
@@ -151,12 +149,9 @@ describe('useFolders', () => {
 
   test('allows to merge filter query params using filters.$and', async () => {
     const { get } = useFetchClient();
-    const { result, waitFor, waitForNextUpdate } = await setup({
+    await setup({
       query: { folder: 5, filters: { $and: [{ something: 'true' }] } },
     });
-
-    await waitFor(() => result.current.isSuccess);
-    await waitForNextUpdate();
 
     const expected = {
       filters: {
@@ -181,7 +176,7 @@ describe('useFolders', () => {
 
   test('it does not fetch, if enabled is set to false', async () => {
     const { get } = useFetchClient();
-    const { result, waitFor } = await setup({ enabled: false });
+    const { result } = await setup({ enabled: false });
 
     await waitFor(() => result.current.isSuccess);
 
@@ -191,11 +186,12 @@ describe('useFolders', () => {
   test('calls notifyStatus in case of success', async () => {
     const { notifyStatus } = useNotifyAT();
     const toggleNotification = useNotification();
-    const { waitForNextUpdate } = await setup({});
+    await setup({});
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(notifyStatus).toBeCalledWith('The folders have finished loading.');
+    });
 
-    expect(notifyStatus).toBeCalledWith('The folders have finished loading.');
     expect(toggleNotification).toBeCalledTimes(0);
   });
 
@@ -208,7 +204,7 @@ describe('useFolders', () => {
 
     const { notifyStatus } = useNotifyAT();
     const toggleNotification = useNotification();
-    const { waitFor } = await setup({});
+    await setup({});
 
     await waitFor(() => expect(toggleNotification).toBeCalled());
     await waitFor(() => expect(notifyStatus).not.toBeCalled());

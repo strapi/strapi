@@ -309,7 +309,7 @@ exports[`DateTimePicker snapshots the component 1`] = `
 }
 
 <div
-  aria-labelledby="6"
+  aria-labelledby=":r0:"
   class=""
   role="group"
 >
@@ -318,7 +318,7 @@ exports[`DateTimePicker snapshots the component 1`] = `
   >
     <label
       class="c1 c2"
-      for="6"
+      for=":r0:"
     >
       Date time picker
     </label>
@@ -359,13 +359,13 @@ exports[`DateTimePicker snapshots the component 1`] = `
                 </div>
                 <input
                   aria-autocomplete="none"
-                  aria-describedby="6-hint"
+                  aria-describedby=":r0:-hint"
                   aria-disabled="false"
                   aria-invalid="false"
                   aria-label="Date time picker"
                   aria-required="false"
                   class="c7"
-                  id="6"
+                  id=":r0:"
                   type="text"
                   value="10/13/2021"
                 />
@@ -401,7 +401,7 @@ exports[`DateTimePicker snapshots the component 1`] = `
               </div>
               <p
                 class="c14"
-                id="6-hint"
+                id=":r0:-hint"
               />
             </div>
           </div>
@@ -417,14 +417,14 @@ exports[`DateTimePicker snapshots the component 1`] = `
             class="c15 c16"
           >
             <button
-              aria-describedby="6-hint"
+              aria-describedby=":r0:-hint"
               aria-expanded="false"
               aria-haspopup="listbox"
               aria-label="Date time picker"
-              aria-labelledby="6 6-label 6-content"
+              aria-labelledby=":r0: :r0:-label :r0:-content"
               aria-required="false"
               class="c17"
-              id="6"
+              id=":r0:"
               role="combobox"
               type="button"
               value="10:00"
@@ -463,7 +463,7 @@ exports[`DateTimePicker snapshots the component 1`] = `
                 >
                   <span
                     class="c22"
-                    id="6-content"
+                    id=":r0:-content"
                   >
                     10:00
                   </span>
@@ -519,14 +519,14 @@ exports[`DateTimePicker snapshots the component 1`] = `
           </div>
           <p
             class="c14"
-            id="6-hint"
+            id=":r0:-hint"
           />
         </div>
       </div>
     </div>
     <p
       class="c14"
-      id="6-hint"
+      id=":r0:-hint"
     >
       This is a super description
     </p>
