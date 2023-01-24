@@ -318,15 +318,13 @@ const cleanOrderColumnsForInnoDB = async ({
           	id,
             @${orderVar}:=CASE WHEN @${columnVar} = ?? THEN @${orderVar} + 1 ELSE 1 END AS inv_order,
         	  @${columnVar}:=?? ??
-        	FROM
-        		?? a
-        	WHERE
-        		?? IN(${inverseRelIds.map(() => '?').join(', ')})
+        	FROM ?? a
+        	WHERE ?? IN(${inverseRelIds.map(() => '?').join(', ')})
         	ORDER BY ??, ??
         ) AS b
         SET ?? = b.inv_order
         WHERE a.id = b.id
-        AND ?? IN(${inverseRelIds.map(() => '?').join(', ')})`,
+        AND a.?? IN(${inverseRelIds.map(() => '?').join(', ')})`,
         [
           joinTable.name,
           inverseJoinColumn.name,
