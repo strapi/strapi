@@ -14,6 +14,10 @@ const Modal = ({ handleClose, logId }) => {
   const fetchAuditLog = async (id) => {
     const { data } = await get(`/admin/audit-logs/${id}`);
 
+    if (!data) {
+      throw new Error('Audit log not found');
+    }
+
     return data;
   };
 
@@ -46,7 +50,7 @@ const Modal = ({ handleClose, logId }) => {
 
 Modal.propTypes = {
   handleClose: PropTypes.func.isRequired,
-  logId: PropTypes.number.isRequired,
+  logId: PropTypes.string.isRequired,
 };
 
 export default Modal;
