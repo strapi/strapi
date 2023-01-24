@@ -12,6 +12,7 @@ import {
   NavSection,
   NavUser,
   NavCondense,
+  NavFooter,
 } from '@strapi/design-system/v2/MainNav';
 import { FocusTrap } from '@strapi/design-system/FocusTrap';
 import { Box } from '@strapi/design-system/Box';
@@ -183,57 +184,59 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
         ) : null}
       </NavSections>
 
-      <NavUser
-        id="main-nav-user-button"
-        ref={buttonRef}
-        onClick={handleToggleUserLinks}
-        initials={initials}
-      >
-        {userDisplayName}
-      </NavUser>
-      {userLinksVisible && (
-        <LinkUserWrapper
-          onBlur={handleBlur}
-          padding={1}
-          shadow="tableShadow"
-          background="neutral0"
-          hasRadius
+      <NavFooter>
+        <NavUser
+          id="main-nav-user-button"
+          ref={buttonRef}
+          onClick={handleToggleUserLinks}
+          initials={initials}
         >
-          <FocusTrap onEscape={handleToggleUserLinks}>
-            <Stack spacing={0}>
-              <LinkUser tabIndex={0} onClick={handleToggleUserLinks} to="/me">
-                <Typography>
-                  {formatMessage({
-                    id: 'global.profile',
-                    defaultMessage: 'Profile',
-                  })}
-                </Typography>
-              </LinkUser>
-              <LinkUser as="button" tabIndex={0} onClick={handleLogout} logout="logout">
-                <Typography textColor="danger600">
-                  {formatMessage({
-                    id: 'app.components.LeftMenu.logout',
-                    defaultMessage: 'Logout',
-                  })}
-                </Typography>
-                <Exit />
-              </LinkUser>
-            </Stack>
-          </FocusTrap>
-        </LinkUserWrapper>
-      )}
+          {userDisplayName}
+        </NavUser>
+        {userLinksVisible && (
+          <LinkUserWrapper
+            onBlur={handleBlur}
+            padding={1}
+            shadow="tableShadow"
+            background="neutral0"
+            hasRadius
+          >
+            <FocusTrap onEscape={handleToggleUserLinks}>
+              <Stack spacing={0}>
+                <LinkUser tabIndex={0} onClick={handleToggleUserLinks} to="/me">
+                  <Typography>
+                    {formatMessage({
+                      id: 'global.profile',
+                      defaultMessage: 'Profile',
+                    })}
+                  </Typography>
+                </LinkUser>
+                <LinkUser tabIndex={0} onClick={handleLogout} logout="logout" to="/auth/login">
+                  <Typography textColor="danger600">
+                    {formatMessage({
+                      id: 'app.components.LeftMenu.logout',
+                      defaultMessage: 'Logout',
+                    })}
+                  </Typography>
+                  <Exit />
+                </LinkUser>
+              </Stack>
+            </FocusTrap>
+          </LinkUserWrapper>
+        )}
 
-      <NavCondense onClick={() => setCondensed((s) => !s)}>
-        {condensed
-          ? formatMessage({
-              id: 'app.components.LeftMenu.expand',
-              defaultMessage: 'Expand the navbar',
-            })
-          : formatMessage({
-              id: 'app.components.LeftMenu.collapse',
-              defaultMessage: 'Collapse the navbar',
-            })}
-      </NavCondense>
+        <NavCondense onClick={() => setCondensed((s) => !s)}>
+          {condensed
+            ? formatMessage({
+                id: 'app.components.LeftMenu.expand',
+                defaultMessage: 'Expand the navbar',
+              })
+            : formatMessage({
+                id: 'app.components.LeftMenu.collapse',
+                defaultMessage: 'Collapse the navbar',
+              })}
+        </NavCondense>
+      </NavFooter>
     </MainNav>
   );
 };

@@ -144,7 +144,6 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   font-size: 0.875rem;
   line-height: 1.43;
   font-weight: 600;
-  line-height: 1.14;
   color: #32324d;
 }
 
@@ -706,7 +705,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                       class="c0 c18 c24"
                       spacing="1"
                     >
-                      <span
+                      <label
                         class="c8 c25"
                         for="select-2"
                       >
@@ -715,7 +714,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                         >
                           Default role
                         </div>
-                      </span>
+                      </label>
                       <div
                         class="c0 c7 c38"
                       >
@@ -724,7 +723,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                           aria-disabled="false"
                           aria-expanded="false"
                           aria-haspopup="listbox"
-                          aria-labelledby="select-2-label select-2-content"
+                          aria-labelledby="select-2 select-2-label select-2-content"
                           class="c39"
                           id="select-2"
                           name="defaultRole"
