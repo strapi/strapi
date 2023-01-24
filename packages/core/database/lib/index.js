@@ -76,9 +76,10 @@ class Database {
       };
     }
 
-    return transactionCtx.run({ trx, commit, rollback }, async () => {
+    return transactionCtx.run(trx, async () => {
       try {
-        const res = await cb(trx);
+        const callbackParams = { trx, commit, rollback };
+        const res = await cb(callbackParams);
         await commit();
         return res;
       } catch (error) {

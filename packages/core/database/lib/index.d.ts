@@ -168,7 +168,7 @@ export interface Database {
       trx: Knex.Transaction;
       rollback: () => Promise<void>;
       commit: () => Promise<void>;
-    }) => Promise<void>
+    }) => Promise<unknown>
   ):
     | Promise<unknown>
     | { get: () => Knex.Transaction; rollback: () => Promise<void>; commit: () => Promise<void> };
