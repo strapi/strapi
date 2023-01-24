@@ -385,7 +385,7 @@ program
       }
     }
   })
-  // set encrypt and compress option based on filename
+  // set decrypt and decompress options based on filename
   .hook('preAction', (thisCommand) => {
     const opts = thisCommand.opts();
 
