@@ -129,8 +129,8 @@ exports[`BulkActions renders 1`] = `
   height: 2rem;
   padding-left: 16px;
   padding-right: 16px;
-  border: 1px solid undefined;
-  background: undefined;
+  border: 1px solid #f5c0b8;
+  background: #fcecea;
 }
 
 .c7 .c0 {
@@ -180,25 +180,25 @@ exports[`BulkActions renders 1`] = `
 
 .c7:active {
   background-color: #ffffff;
-  border: 1px solid undefined;
+  border: 1px solid #d02b20;
 }
 
 .c7:active .c4 {
-  color: undefined;
+  color: #d02b20;
 }
 
 .c7:active svg > g,
 .c7:active svg path {
-  fill: undefined;
+  fill: #d02b20;
 }
 
 .c7 .c4 {
-  color: undefined;
+  color: #b72b1a;
 }
 
 .c7 svg > g,
 .c7 svg path {
-  fill: undefined;
+  fill: #b72b1a;
 }
 
 .c11 {

@@ -96,8 +96,8 @@ exports[`BulkDeleteButton renders 1`] = `
   height: 2rem;
   padding-left: 16px;
   padding-right: 16px;
-  border: 1px solid undefined;
-  background: undefined;
+  border: 1px solid #f5c0b8;
+  background: #fcecea;
 }
 
 .c1 .c2 {
@@ -147,25 +147,25 @@ exports[`BulkDeleteButton renders 1`] = `
 
 .c1:active {
   background-color: #ffffff;
-  border: 1px solid undefined;
+  border: 1px solid #d02b20;
 }
 
 .c1:active .c5 {
-  color: undefined;
+  color: #d02b20;
 }
 
 .c1:active svg > g,
 .c1:active svg path {
-  fill: undefined;
+  fill: #d02b20;
 }
 
 .c1 .c5 {
-  color: undefined;
+  color: #b72b1a;
 }
 
 .c1 svg > g,
 .c1 svg path {
-  fill: undefined;
+  fill: #b72b1a;
 }
 
 <div>

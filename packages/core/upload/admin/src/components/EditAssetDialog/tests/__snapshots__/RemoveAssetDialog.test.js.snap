@@ -314,8 +314,8 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   height: 2rem;
   padding-left: 16px;
   padding-right: 16px;
-  border: 1px solid undefined;
-  background: undefined;
+  border: 1px solid #f5c0b8;
+  background: #fcecea;
 }
 
 .c23 .c2 {
@@ -365,25 +365,25 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
 
 .c23:active {
   background-color: #ffffff;
-  border: 1px solid undefined;
+  border: 1px solid #d02b20;
 }
 
 .c23:active .c8 {
-  color: undefined;
+  color: #d02b20;
 }
 
 .c23:active svg > g,
 .c23:active svg path {
-  fill: undefined;
+  fill: #d02b20;
 }
 
 .c23 .c8 {
-  color: undefined;
+  color: #b72b1a;
 }
 
 .c23 svg > g,
 .c23 svg path {
-  fill: undefined;
+  fill: #b72b1a;
 }
 
 <body
