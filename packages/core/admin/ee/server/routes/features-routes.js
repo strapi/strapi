@@ -49,8 +49,15 @@ module.exports = {
       path: '/audit-logs',
       handler: 'auditLogs.findMany',
       config: {
-        // @TODO: Check to right permissions
-        policies: ['admin::isAuthenticatedAdmin'],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['admin::audit-logs.read'],
+            },
+          },
+        ],
       },
     },
     {
@@ -58,8 +65,15 @@ module.exports = {
       path: '/audit-logs/:id',
       handler: 'auditLogs.findOne',
       config: {
-        // @TODO: Check to right permissions
-        policies: ['admin::isAuthenticatedAdmin'],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['admin::audit-logs.read'],
+            },
+          },
+        ],
       },
     },
   ],
