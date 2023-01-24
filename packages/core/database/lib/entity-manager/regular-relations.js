@@ -295,7 +295,8 @@ const cleanOrderColumnsForInnoDB = async ({
 	        ORDER BY :orderColumnName:
         ) AS b
         SET :orderColumnName: = b.src_order
-        WHERE a.id = b.id`,
+        WHERE a.id = b.id
+        AND a.:joinColumnName: = :id`,
         {
           joinTableName: joinTable.name,
           orderColumnName,
@@ -315,11 +316,7 @@ const cleanOrderColumnsForInnoDB = async ({
         `UPDATE ?? as a, (
           SELECT
           	id,
-            @${orderVar}:=CASE
-              WHEN @${columnVar} = ??
-        			THEN @${orderVar} + 1
-              ELSE 1
-              END AS inv_order,
+            @${orderVar}:=CASE WHEN @${columnVar} = ?? THEN @${orderVar} + 1 ELSE 1 END AS inv_order,
         	  @${columnVar}:=?? ??
         	FROM
         		?? a
@@ -328,7 +325,8 @@ const cleanOrderColumnsForInnoDB = async ({
         	ORDER BY ??, ??
         ) AS b
         SET ?? = b.inv_order
-        WHERE a.id = b.id`,
+        WHERE a.id = b.id
+        AND ?? IN(${inverseRelIds.map(() => '?').join(', ')})`,
         [
           joinTable.name,
           inverseJoinColumn.name,
@@ -340,6 +338,8 @@ const cleanOrderColumnsForInnoDB = async ({
           inverseJoinColumn.name,
           joinColumn.name,
           inverseOrderColumnName,
+          inverseJoinColumn.name,
+          ...inverseRelIds,
         ]
       )
       .transacting(trx);
