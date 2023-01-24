@@ -385,6 +385,28 @@ program
       }
     }
   })
+  // set decrypt and decompress options based on filename
+  .hook('preAction', (thisCommand) => {
+    const opts = thisCommand.opts();
+
+    const { extname, parse } = path;
+
+    let file = opts.file;
+
+    if (extname(file) === '.enc') {
+      file = parse(file).name; // trim the .enc extension
+      thisCommand.opts().decrypt = true;
+    } else {
+      thisCommand.opts().decrypt = false;
+    }
+
+    if (extname(file) === '.gz') {
+      file = parse(file).name; // trim the .gz extension
+      thisCommand.opts().decompress = true;
+    } else {
+      thisCommand.opts().decompress = false;
+    }
+  })
   .hook(
     'preAction',
     confirmMessage(
