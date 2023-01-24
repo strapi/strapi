@@ -1,11 +1,9 @@
 'use strict';
 
 /**
- * An asynchronous bootstrap function that runs before
- * your application gets started.
+ * An asynchronous bootstrap function that runs before your application gets started.
  *
- * This gives you an opportunity to set up your data model,
- * run jobs, or perform some special logic.
+ * This gives you an opportunity to set up your data model, run jobs, or perform some special logic.
  */
 const crypto = require('crypto');
 const _ = require('lodash');
@@ -19,7 +17,18 @@ const initGrant = async (pluginStore) => {
   const apiPrefix = strapi.config.get('api.rest.prefix');
   const baseURL = urljoin(strapi.config.server.url, apiPrefix, 'auth');
 
-  const grantConfig = getGrantConfig(baseURL);
+  const grantConfig = Object.assign(
+    {},
+    getGrantConfig(baseURL),
+    ...Object.entries(
+      strapi.service('plugin::users-permissions.providers-registry').getCustomProviders()
+    ).map(([name, { defaultGrantConfig }]) => {
+      if (!defaultGrantConfig) return {};
+      return {
+        [name]: defaultGrantConfig(baseURL),
+      };
+    })
+  );
 
   const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) || {};
   // store grant auth config to db

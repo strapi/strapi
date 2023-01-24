@@ -29,6 +29,7 @@ import createProvidersArray from './utils/createProvidersArray';
 import { getTrad } from '../../utils';
 import pluginPermissions from '../../permissions';
 import FormModal from '../../components/FormModal';
+import { useTransformLayouts } from '../../components/ProviderTransformLayouts';
 
 export const ProvidersPage = () => {
   const { formatMessage } = useIntl();
@@ -42,6 +43,7 @@ export const ProvidersPage = () => {
   const [providerToEditName, setProviderToEditName] = useState(null);
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
+  const transformLayouts = useTransformLayouts();
 
   const updatePermissions = useMemo(() => {
     return { update: pluginPermissions.updateProviders };
@@ -124,6 +126,13 @@ export const ProvidersPage = () => {
 
     return forms.providers;
   }, [providerToEditName, isProviderWithSubdomain]);
+
+  const transformer = transformLayouts[providerToEditName];
+  const transformedLayout = useMemo(() => {
+    if (!transformer) return layoutToRender;
+
+    return transformer(layoutToRender);
+  }, [layoutToRender, transformer]);
 
   const handleToggleModal = () => {
     setIsOpen((prev) => !prev);
@@ -238,7 +247,7 @@ export const ProvidersPage = () => {
         initialData={modifiedData[providerToEditName]}
         isOpen={isOpen}
         isSubmiting={isSubmiting}
-        layout={layoutToRender}
+        layout={transformedLayout}
         headerBreadcrumbs={[
           formatMessage({
             id: getTrad('PopUpForm.header.edit.providers'),

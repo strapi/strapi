@@ -199,6 +199,11 @@ module.exports = {
       grantConfig[provider].callback;
     grantConfig[provider].redirect_uri = getService('providers').buildRedirectUri(provider);
 
+    grantConfig[provider] =
+      (await getService('providers-registry')
+        .getCustomProviders()
+        [provider]?.connectGrant?.(grantConfig[provider])) ?? grantConfig[provider];
+
     return grant(grantConfig)(ctx, next);
   },
 

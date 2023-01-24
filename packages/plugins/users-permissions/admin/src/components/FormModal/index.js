@@ -66,7 +66,9 @@ const FormModal = ({
                               {...input}
                               error={errors[input.name]}
                               onChange={handleChange}
-                              value={values[input.name]}
+                              value={
+                                input.name === 'noName' ? values.redirectUri : values[input.name]
+                              }
                               providerToEditName={providerToEditName}
                             />
                           </GridItem>

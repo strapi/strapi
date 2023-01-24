@@ -4,13 +4,17 @@
 // Here's the file: strapi/docs/3.0.0-beta.x/guides/registering-a-field-in-admin.md
 // Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
+import React from 'react';
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
 import getTrad from './utils/getTrad';
+import ProviderTransformLayouts from './components/ProviderTransformLayouts';
 
 const name = pluginPkg.strapi.name;
+
+const transformLayouts = {};
 
 export default {
   register(app) {
@@ -48,11 +52,17 @@ export default {
           id: 'providers',
           to: `/settings/${pluginId}/providers`,
           async Component() {
-            const component = await import(
+            const { default: PageProviders } = await import(
               /* webpackChunkName: "users-providers-settings-page" */ './pages/Providers'
             );
 
-            return component;
+            const ComposedComponent = (props) => (
+              <ProviderTransformLayouts value={transformLayouts}>
+                <PageProviders {...props} />
+              </ProviderTransformLayouts>
+            );
+
+            return { default: ComposedComponent };
           },
           permissions: pluginPermissions.readProviders,
         },
@@ -119,5 +129,8 @@ export default {
     );
 
     return Promise.resolve(importedTrads);
+  },
+  transformFields(providerName, transformer) {
+    transformLayouts[providerName] = transformer;
   },
 };

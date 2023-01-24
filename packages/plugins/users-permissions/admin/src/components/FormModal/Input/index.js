@@ -8,6 +8,7 @@ import React from 'react';
 import { useIntl } from 'react-intl';
 import { ToggleInput } from '@strapi/design-system/ToggleInput';
 import { TextInput } from '@strapi/design-system/TextInput';
+import { Textarea } from '@strapi/design-system/Textarea';
 import PropTypes from 'prop-types';
 
 const Input = ({
@@ -23,8 +24,6 @@ const Input = ({
   value,
 }) => {
   const { formatMessage } = useIntl();
-  const inputValue =
-    name === 'noName' ? `${strapi.backendURL}/api/connect/${providerToEditName}/callback` : value;
 
   const label = formatMessage(
     { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
@@ -70,8 +69,10 @@ const Input = ({
 
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
 
+  const InputComponent = type === 'textarea' ? Textarea : TextInput;
+
   return (
-    <TextInput
+    <InputComponent
       aria-label={name}
       disabled={disabled}
       error={errorMessage}
@@ -80,7 +81,7 @@ const Input = ({
       onChange={onChange}
       placeholder={formattedPlaceholder}
       type={type}
-      value={inputValue}
+      value={value}
     />
   );
 };

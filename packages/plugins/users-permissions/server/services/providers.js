@@ -105,7 +105,17 @@ module.exports = ({ strapi }) => {
 
   const buildRedirectUri = (provider = '') => {
     const apiPrefix = strapi.config.get('api.rest.prefix');
-    return urlJoin(getAbsoluteServerUrl(strapi.config), apiPrefix, 'connect', provider, 'callback');
+    const baseURL = getAbsoluteServerUrl(strapi.config);
+
+    const { [provider]: customProvider } = strapi
+      .service('plugin::users-permissions.providers-registry')
+      .getCustomProviders();
+
+    if (customProvider?.buildRedirectUri) {
+      return customProvider?.buildRedirectUri({ urlJoin, baseURL, apiPrefix });
+    }
+
+    return urlJoin(baseURL, apiPrefix, 'connect', provider, 'callback');
   };
 
   return {
