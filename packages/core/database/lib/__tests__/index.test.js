@@ -9,6 +9,7 @@ jest.mock('../connection', () =>
       rollback: jest.fn(),
     };
     return {
+      ...trx,
       transaction: jest.fn(async () => trx),
     };
   })
@@ -64,6 +65,19 @@ describe('Database', () => {
       const db = await Database.init(config);
       const result = await db.transaction(async () => 'test');
       expect(result).toBe('test');
+      expect(db.connection.commit).toHaveBeenCalledTimes(1);
+    });
+
+    it('rollback is called incase of error', async () => {
+      const db = await Database.init(config);
+      try {
+        await db.transaction(async () => {
+          throw new Error('test');
+        });
+      } catch {
+        /* ignore */
+      }
+      expect(db.connection.rollback).toHaveBeenCalledTimes(1);
     });
 
     it('should throw error', async () => {
