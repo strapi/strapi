@@ -5,10 +5,7 @@ export type ValidStrapiAssertion = (
   msg?: string
 ) => asserts strapi is Strapi.Strapi;
 
-export const assertValidStrapi: ValidStrapiAssertion = (
-  strapi?: unknown,
-  msg = ''
-): asserts strapi => {
+export const assertValidStrapi: ValidStrapiAssertion = (strapi?: unknown, msg = '') => {
   if (!strapi) {
     throw new ProviderInitializationError(`${msg}. Strapi instance not found.`);
   }
