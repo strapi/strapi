@@ -355,7 +355,7 @@ exports[`DateTimePicker snapshots the component 1`] = `
 }
 
 <div
-  aria-labelledby="6"
+  aria-labelledby=":r0:"
   class=""
   role="group"
 >
@@ -364,7 +364,7 @@ exports[`DateTimePicker snapshots the component 1`] = `
   >
     <label
       class="c1 c2 c3"
-      for="6"
+      for=":r0:"
     >
       Date time picker
     </label>
@@ -406,13 +406,13 @@ exports[`DateTimePicker snapshots the component 1`] = `
                 </div>
                 <input
                   aria-autocomplete="none"
-                  aria-describedby="6-hint"
+                  aria-describedby=":r0:-hint"
                   aria-disabled="false"
                   aria-invalid="false"
                   aria-label="Date time picker"
                   aria-required="false"
                   class="c9"
-                  id="6"
+                  id=":r0:"
                   type="text"
                   value="10/13/2021"
                 />
@@ -448,7 +448,7 @@ exports[`DateTimePicker snapshots the component 1`] = `
               </div>
               <p
                 class="c1 c16"
-                id="6-hint"
+                id=":r0:-hint"
               />
             </div>
           </div>
@@ -462,19 +462,19 @@ exports[`DateTimePicker snapshots the component 1`] = `
         >
           <label
             class="c1 c2 c3"
-            for="6"
+            for=":r0:"
           />
           <div
             aria-autocomplete="none"
-            aria-controls="radix-0"
-            aria-describedby="6-hint 6-error"
+            aria-controls="radix-:r7:"
+            aria-describedby=":r0:-hint :r0:-error"
             aria-disabled="false"
             aria-expanded="false"
             aria-required="false"
             class="c17 c18 c19"
             data-state="closed"
             dir="ltr"
-            id="6"
+            id=":r0:"
             overflow="hidden"
             role="combobox"
             tabindex="0"
@@ -562,14 +562,14 @@ exports[`DateTimePicker snapshots the component 1`] = `
           </div>
           <p
             class="c1 c16"
-            id="6-hint"
+            id=":r0:-hint"
           />
         </div>
       </div>
     </div>
     <p
       class="c1 c16"
-      id="6-hint"
+      id=":r0:-hint"
     >
       This is a super description
     </p>

@@ -7730,9 +7730,8 @@ __metadata:
     "@strapi/provider-audit-logs-local": 4.10.5
     "@strapi/typescript-utils": 4.10.5
     "@strapi/utils": 4.10.5
-    "@testing-library/dom": 8.19.0
-    "@testing-library/react": 12.1.4
-    "@testing-library/react-hooks": 8.0.1
+    "@testing-library/dom": 8.20.0
+    "@testing-library/react": 13.4.0
     "@testing-library/user-event": 14.4.3
     axios: 1.3.4
     babel-loader: ^9.1.2
@@ -7789,16 +7788,16 @@ __metadata:
     pluralize: 8.0.0
     prop-types: ^15.7.2
     qs: 6.11.1
-    react: ^17.0.2
+    react: ^18.2.0
     react-copy-to-clipboard: ^5.1.0
     react-dnd: 15.1.2
     react-dnd-html5-backend: 15.1.3
-    react-dom: ^17.0.2
+    react-dom: ^18.2.0
     react-error-boundary: 3.1.4
     react-helmet: ^6.1.0
     react-intl: 6.4.1
-    react-is: ^17.0.2
-    react-query: 3.24.3
+    react-is: ^18.2.0
+    react-query: 3.39.2
     react-redux: 8.0.5
     react-refresh: 0.14.0
     react-router-dom: 5.3.4
@@ -7988,8 +7987,7 @@ __metadata:
     "@storybook/react": ^6.5.16
     "@strapi/design-system": 1.7.5
     "@strapi/icons": 1.7.5
-    "@testing-library/react": 12.1.4
-    "@testing-library/react-hooks": 8.0.1
+    "@testing-library/react": 13.4.0
     "@testing-library/user-event": 14.4.3
     axios: 1.3.4
     browserslist-to-esbuild: 1.2.0
@@ -8002,8 +8000,8 @@ __metadata:
     lodash: 4.17.21
     prop-types: ^15.7.2
     qs: 6.11.1
-    react: ^17.0.2
-    react-dom: ^17.0.2
+    react: ^18.2.0
+    react-dom: ^18.2.0
     react-helmet: ^6.1.0
     react-intl: 6.4.1
     react-router-dom: 5.3.4
@@ -8016,8 +8014,8 @@ __metadata:
   peerDependencies:
     "@strapi/design-system": 1.7.5
     "@strapi/icons": 1.7.5
-    react: ^17.0.2
-    react-dom: ^17.0.2
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^5.3.4
     styled-components: ^5.3.3
   languageName: unknown
@@ -8062,20 +8060,20 @@ __metadata:
     "@strapi/design-system": 1.7.5
     "@strapi/helper-plugin": 4.10.5
     "@strapi/icons": 1.7.5
-    "@testing-library/react": 12.1.4
+    "@testing-library/react": 13.4.0
     prop-types: ^15.7.2
-    react: ^17.0.2
+    react: ^18.2.0
     react-colorful: 5.6.1
-    react-dom: ^17.0.2
+    react-dom: ^18.2.0
     react-intl: 6.4.1
     react-router-dom: 5.3.4
     styled-components: 5.3.3
   peerDependencies:
     "@strapi/strapi": ^4.4.0
-    react: ^17.0.2
-    react-dom: ^17.0.2
-    react-router-dom: ^5.3.4
-    styled-components: ^5.3.3
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    react-router-dom: 5.3.4
+    styled-components: 5.3.3
   languageName: unknown
   linkType: soft
 
@@ -8100,8 +8098,7 @@ __metadata:
     "@strapi/helper-plugin": 4.10.5
     "@strapi/icons": 1.7.5
     "@strapi/utils": 4.10.5
-    "@testing-library/react": 12.1.4
-    "@testing-library/react-hooks": 8.0.1
+    "@testing-library/react": 13.4.0
     fs-extra: 10.0.0
     history: ^4.9.0
     immer: 9.0.19
@@ -8109,8 +8106,8 @@ __metadata:
     pluralize: ^8.0.0
     prop-types: ^15.7.2
     qs: 6.11.1
-    react: ^17.0.2
-    react-dom: ^17.0.2
+    react: ^18.2.0
+    react-dom: ^18.2.0
     react-helmet: ^6.1.0
     react-intl: 6.4.1
     react-redux: 8.0.5
@@ -8120,10 +8117,10 @@ __metadata:
     styled-components: 5.3.3
     yup: ^0.32.9
   peerDependencies:
-    react: ^17.0.2
-    react-dom: ^17.0.2
-    react-router-dom: ^5.3.4
-    styled-components: ^5.3.3
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    react-router-dom: 5.3.4
+    styled-components: 5.3.3
   languageName: unknown
   linkType: soft
 
@@ -8136,7 +8133,7 @@ __metadata:
     "@strapi/helper-plugin": 4.10.5
     "@strapi/icons": 1.7.5
     "@strapi/utils": 4.10.5
-    "@testing-library/react": 12.1.4
+    "@testing-library/react": 13.4.0
     bcryptjs: 2.4.3
     cheerio: ^1.0.0-rc.12
     formik: 2.2.9
@@ -8148,12 +8145,12 @@ __metadata:
     msw: 1.2.1
     path-to-regexp: 6.2.1
     pluralize: 8.0.0
-    react: ^17.0.2
+    react: ^18.2.0
     react-copy-to-clipboard: ^5.1.0
-    react-dom: ^17.0.2
+    react-dom: ^18.2.0
     react-helmet: ^6.1.0
     react-intl: 6.4.1
-    react-query: 3.24.3
+    react-query: 3.39.2
     react-redux: 8.0.5
     react-router-dom: 5.3.4
     redux: ^4.2.1
@@ -8164,10 +8161,10 @@ __metadata:
     yup: ^0.32.9
   peerDependencies:
     "@strapi/strapi": ^4.0.0
-    react: ^17.0.2
-    react-dom: ^17.0.2
-    react-router-dom: ^5.3.4
-    styled-components: ^5.3.3
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    react-router-dom: 5.3.4
+    styled-components: 5.3.3
   languageName: unknown
   linkType: soft
 
@@ -8180,21 +8177,21 @@ __metadata:
     "@strapi/icons": 1.7.5
     "@strapi/provider-email-sendmail": 4.10.5
     "@strapi/utils": 4.10.5
-    "@testing-library/react": 12.1.4
+    "@testing-library/react": 13.4.0
     lodash: 4.17.21
     msw: 1.2.1
     prop-types: ^15.7.2
-    react: ^17.0.2
-    react-dom: ^17.0.2
+    react: ^18.2.0
+    react-dom: ^18.2.0
     react-intl: 6.4.1
     react-router-dom: 5.3.4
     styled-components: 5.3.3
     yup: ^0.32.9
   peerDependencies:
-    react: ^17.0.2
-    react-dom: ^17.0.2
-    react-router-dom: ^5.3.4
-    styled-components: ^5.3.3
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    react-router-dom: 5.3.4
+    styled-components: 5.3.3
   languageName: unknown
   linkType: soft
 
@@ -8222,16 +8219,16 @@ __metadata:
     lodash: 4.17.21
     nexus: 1.3.0
     pluralize: ^8.0.0
-    react: ^17.0.2
-    react-dom: ^17.0.2
+    react: ^18.2.0
+    react-dom: ^18.2.0
     react-router-dom: 5.3.4
     styled-components: 5.3.3
   peerDependencies:
     "@strapi/strapi": ^4.0.0
-    react: ^17.0.2
-    react-dom: ^17.0.2
-    react-router-dom: ^5.3.4
-    styled-components: ^5.3.3
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    react-router-dom: 5.3.4
+    styled-components: 5.3.3
   languageName: unknown
   linkType: soft
 
@@ -8243,27 +8240,27 @@ __metadata:
     "@strapi/helper-plugin": 4.10.5
     "@strapi/icons": 1.7.5
     "@strapi/utils": 4.10.5
-    "@testing-library/react": 12.1.4
+    "@testing-library/react": 13.4.0
     formik: 2.2.9
     immer: 9.0.19
     lodash: 4.17.21
     msw: 1.2.1
     prop-types: ^15.7.2
     qs: 6.11.1
-    react: ^17.0.2
-    react-dom: ^17.0.2
+    react: ^18.2.0
+    react-dom: ^18.2.0
     react-intl: 6.4.1
-    react-query: 3.24.3
+    react-query: 3.39.2
     react-redux: 8.0.5
     react-router-dom: 5.3.4
     redux: ^4.2.1
     styled-components: 5.3.3
     yup: ^0.32.9
   peerDependencies:
-    react: ^17.0.2
-    react-dom: ^17.0.2
-    react-router-dom: ^5.3.4
-    styled-components: ^5.3.3
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    react-router-dom: 5.3.4
+    styled-components: 5.3.3
   languageName: unknown
   linkType: soft
 
@@ -8275,16 +8272,16 @@ __metadata:
     "@strapi/design-system": 1.7.5
     "@strapi/helper-plugin": 4.10.5
     "@strapi/icons": 1.7.5
-    react: ^17.0.2
-    react-dom: ^17.0.2
+    react: ^18.2.0
+    react-dom: ^18.2.0
     react-router-dom: 5.3.4
     styled-components: 5.3.3
   peerDependencies:
     "@strapi/strapi": ^4.0.0
-    react: ^17.0.2
-    react-dom: ^17.0.2
-    react-router-dom: ^5.3.4
-    styled-components: ^5.3.3
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    react-router-dom: 5.3.4
+    styled-components: 5.3.3
   languageName: unknown
   linkType: soft
 
@@ -8297,9 +8294,8 @@ __metadata:
     "@strapi/icons": 1.7.5
     "@strapi/provider-upload-local": 4.10.5
     "@strapi/utils": 4.10.5
-    "@testing-library/dom": 8.19.0
-    "@testing-library/react": 12.1.4
-    "@testing-library/react-hooks": 8.0.1
+    "@testing-library/dom": 8.20.0
+    "@testing-library/react": 13.4.0
     "@testing-library/user-event": 14.4.3
     axios: 1.3.4
     byte-size: 7.0.1
@@ -8315,13 +8311,13 @@ __metadata:
     msw: 1.2.1
     prop-types: ^15.7.2
     qs: 6.11.1
-    react: ^17.0.2
+    react: ^18.2.0
     react-copy-to-clipboard: ^5.1.0
     react-dnd: 15.1.2
-    react-dom: ^17.0.2
+    react-dom: ^18.2.0
     react-helmet: ^6.1.0
     react-intl: 6.4.1
-    react-query: 3.24.3
+    react-query: 3.39.2
     react-redux: 8.0.5
     react-router-dom: 5.3.4
     react-select: 5.7.0
@@ -8329,10 +8325,10 @@ __metadata:
     styled-components: 5.3.3
     yup: ^0.32.9
   peerDependencies:
-    react: ^17.0.2
-    react-dom: ^17.0.2
-    react-router-dom: ^5.3.4
-    styled-components: ^5.3.3
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    react-router-dom: 5.3.4
+    styled-components: 5.3.3
   languageName: unknown
   linkType: soft
 
@@ -8344,9 +8340,8 @@ __metadata:
     "@strapi/helper-plugin": 4.10.5
     "@strapi/icons": 1.7.5
     "@strapi/utils": 4.10.5
-    "@testing-library/dom": 8.19.0
-    "@testing-library/react": 12.1.4
-    "@testing-library/react-hooks": 8.0.1
+    "@testing-library/dom": 8.20.0
+    "@testing-library/react": 13.4.0
     "@testing-library/user-event": 14.4.3
     bcryptjs: 2.4.3
     formik: 2.2.9
@@ -8361,20 +8356,20 @@ __metadata:
     msw: 1.2.1
     prop-types: ^15.7.2
     purest: 4.0.2
-    react: ^17.0.2
-    react-dom: ^17.0.2
+    react: ^18.2.0
+    react-dom: ^18.2.0
     react-intl: 6.4.1
-    react-query: 3.24.3
+    react-query: 3.39.2
     react-redux: 8.0.5
     react-router-dom: 5.3.4
     styled-components: 5.3.3
     url-join: 4.0.1
     yup: ^0.32.9
   peerDependencies:
-    react: ^17.0.2
-    react-dom: ^17.0.2
-    react-router-dom: ^5.3.4
-    styled-components: ^5.3.3
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    react-router-dom: 5.3.4
+    styled-components: 5.3.3
   languageName: unknown
   linkType: soft
 
@@ -8794,35 +8789,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/dom@npm:8.19.0":
-  version: 8.19.0
-  resolution: "@testing-library/dom@npm:8.19.0"
+"@testing-library/dom@npm:8.20.0, @testing-library/dom@npm:^8.5.0":
+  version: 8.20.0
+  resolution: "@testing-library/dom@npm:8.20.0"
   dependencies:
     "@babel/code-frame": ^7.10.4
     "@babel/runtime": ^7.12.5
-    "@types/aria-query": ^4.2.0
+    "@types/aria-query": ^5.0.1
     aria-query: ^5.0.0
     chalk: ^4.1.0
     dom-accessibility-api: ^0.5.9
     lz-string: ^1.4.4
     pretty-format: ^27.0.2
-  checksum: 6bb93fef96703b6c47cf1b7cc8f71d402a9576084a94ba4e9926f51bd7bb1287fbb4f6942d82bd03fc6f3d998ae97e60f6aea4618f3a1ce6139597d2a4ecb7b9
-  languageName: node
-  linkType: hard
-
-"@testing-library/dom@npm:^8.0.0":
-  version: 8.17.1
-  resolution: "@testing-library/dom@npm:8.17.1"
-  dependencies:
-    "@babel/code-frame": ^7.10.4
-    "@babel/runtime": ^7.12.5
-    "@types/aria-query": ^4.2.0
-    aria-query: ^5.0.0
-    chalk: ^4.1.0
-    dom-accessibility-api: ^0.5.9
-    lz-string: ^1.4.4
-    pretty-format: ^27.0.2
-  checksum: e4df091fcf84c9eac4a6ee4c76674c1d562bf98732f0ac8820972d7718ab10397b672b9f082aace3cacd1f610fc77de6e1b6094e67afe1df0443bf22eb9deab2
+  checksum: 1e599129a2fe91959ce80900a0a4897232b89e2a8e22c1f5950c36d39c97629ea86b4986b60b173b5525a05de33fde1e35836ea597b03de78cc51b122835c6f0
   languageName: node
   linkType: hard
 
@@ -8843,39 +8822,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/react-hooks@npm:8.0.1":
-  version: 8.0.1
-  resolution: "@testing-library/react-hooks@npm:8.0.1"
+"@testing-library/react@npm:13.4.0":
+  version: 13.4.0
+  resolution: "@testing-library/react@npm:13.4.0"
   dependencies:
     "@babel/runtime": ^7.12.5
-    react-error-boundary: ^3.1.0
+    "@testing-library/dom": ^8.5.0
+    "@types/react-dom": ^18.0.0
   peerDependencies:
-    "@types/react": ^16.9.0 || ^17.0.0
-    react: ^16.9.0 || ^17.0.0
-    react-dom: ^16.9.0 || ^17.0.0
-    react-test-renderer: ^16.9.0 || ^17.0.0
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-    react-dom:
-      optional: true
-    react-test-renderer:
-      optional: true
-  checksum: 7fe44352e920deb5cb1876f80d64e48615232072c9d5382f1e0284b3aab46bb1c659a040b774c45cdf084a5257b8fe463f7e08695ad8480d8a15635d4d3d1f6d
-  languageName: node
-  linkType: hard
-
-"@testing-library/react@npm:12.1.4":
-  version: 12.1.4
-  resolution: "@testing-library/react@npm:12.1.4"
-  dependencies:
-    "@babel/runtime": ^7.12.5
-    "@testing-library/dom": ^8.0.0
-    "@types/react-dom": "*"
-  peerDependencies:
-    react: "*"
-    react-dom: "*"
-  checksum: 944c5f8d4abb22c0650c25c7ae499651828c37c0e741ff67a4635d4cd99b307d486dabec05b372aba638bd359d29cd2af97393b5055ea294a201d80b4bc384b8
+    react: ^18.0.0
+    react-dom: ^18.0.0
+  checksum: 51ec548c1fdb1271089a5c63e0908f0166f2c7fcd9cacd3108ebbe0ce64cb4351812d885892020dc37608418cfb15698514856502b3cab0e5cc58d6cc1bd4a3e
   languageName: node
   linkType: hard
 
@@ -8932,10 +8889,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/aria-query@npm:^4.2.0":
-  version: 4.2.2
-  resolution: "@types/aria-query@npm:4.2.2"
-  checksum: 6f2ce11d91e2d665f3873258db19da752d91d85d3679eb5efcdf9c711d14492287e1e4eb52613b28e60375841a9e428594e745b68436c963d8bad4bf72188df3
+"@types/aria-query@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "@types/aria-query@npm:5.0.1"
+  checksum: 69fd7cceb6113ed370591aef04b3fd0742e9a1b06dd045c43531448847b85de181495e4566f98e776b37c422a12fd71866e0a1dfd904c5ec3f84d271682901de
   languageName: node
   linkType: hard
 
@@ -9610,12 +9567,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:*":
-  version: 18.0.6
-  resolution: "@types/react-dom@npm:18.0.6"
+"@types/react-dom@npm:^18.0.0":
+  version: 18.0.11
+  resolution: "@types/react-dom@npm:18.0.11"
   dependencies:
     "@types/react": "*"
-  checksum: db571047af1a567631758700b9f7d143e566df939cfe5fbf7535347cc0c726a1cdbb5e3f8566d076e54cf708b6c1166689de194a9ba09ee35efc9e1d45911685
+  checksum: 579691e4d5ec09688087568037c35edf8cfb1ab3e07f6c60029280733ee7b5c06d66df6fcc90786702c93ac8cb13bc7ff16c79ddfc75d082938fbaa36e1cdbf4
   languageName: node
   linkType: hard
 
@@ -27774,16 +27731,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:^17.0.2":
-  version: 17.0.2
-  resolution: "react-dom@npm:17.0.2"
+"react-dom@npm:^18.2.0":
+  version: 18.2.0
+  resolution: "react-dom@npm:18.2.0"
   dependencies:
     loose-envify: ^1.1.0
-    object-assign: ^4.1.1
-    scheduler: ^0.20.2
+    scheduler: ^0.23.0
   peerDependencies:
-    react: 17.0.2
-  checksum: 1c1eaa3bca7c7228d24b70932e3d7c99e70d1d04e13bb0843bbf321582bc25d7961d6b8a6978a58a598af2af496d1cedcfb1bf65f6b0960a0a8161cb8dab743c
+    react: ^18.2.0
+  checksum: 7d323310bea3a91be2965f9468d552f201b1c27891e45ddc2d6b8f717680c95a75ae0bc1e3f5cf41472446a2589a75aed4483aee8169287909fcd59ad149e8cc
   languageName: node
   linkType: hard
 
@@ -27801,7 +27757,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-error-boundary@npm:3.1.4, react-error-boundary@npm:^3.1.0":
+"react-error-boundary@npm:3.1.4":
   version: 3.1.4
   resolution: "react-error-boundary@npm:3.1.4"
   dependencies:
@@ -27877,7 +27833,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-is@npm:17.0.2, react-is@npm:^17.0.1, react-is@npm:^17.0.2":
+"react-is@npm:17.0.2, react-is@npm:^17.0.1":
   version: 17.0.2
   resolution: "react-is@npm:17.0.2"
   checksum: 9d6d111d8990dc98bc5402c1266a808b0459b5d54830bbea24c12d908b536df7883f268a7868cfaedde3dd9d4e0d574db456f84d2e6df9c4526f99bb4b5344d8
@@ -27891,28 +27847,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-is@npm:^18.0.0":
+"react-is@npm:^18.0.0, react-is@npm:^18.2.0":
   version: 18.2.0
   resolution: "react-is@npm:18.2.0"
   checksum: e72d0ba81b5922759e4aff17e0252bd29988f9642ed817f56b25a3e217e13eea8a7f2322af99a06edb779da12d5d636e9fda473d620df9a3da0df2a74141d53e
   languageName: node
   linkType: hard
 
-"react-query@npm:3.24.3":
-  version: 3.24.3
-  resolution: "react-query@npm:3.24.3"
+"react-query@npm:3.39.2":
+  version: 3.39.2
+  resolution: "react-query@npm:3.39.2"
   dependencies:
     "@babel/runtime": ^7.5.5
     broadcast-channel: ^3.4.1
     match-sorter: ^6.0.2
   peerDependencies:
-    react: ^16.8.0 || ^17.0.0
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
   peerDependenciesMeta:
     react-dom:
       optional: true
     react-native:
       optional: true
-  checksum: 0b86a33b860c092d36e269db1331afbf0df5b720ea746c9093cd8241204a076ff404affb8b4dae08904e3714545d4bd8920babe2a6e5ee9660d94bbcdbeb8072
+  checksum: 83b199e66af28ab67ec4d22e51da42f02447186623db926b75d27a1c09a3383da6ddc9e5b83d82578fac7abdba7e6f265aecbffdb91db61981950d3d59409346
   languageName: node
   linkType: hard
 
@@ -28133,6 +28089,15 @@ __metadata:
     loose-envify: ^1.1.0
     object-assign: ^4.1.1
   checksum: b254cc17ce3011788330f7bbf383ab653c6848902d7936a87b09d835d091e3f295f7e9dd1597c6daac5dc80f90e778c8230218ba8ad599f74adcc11e33b9d61b
+  languageName: node
+  linkType: hard
+
+"react@npm:^18.2.0":
+  version: 18.2.0
+  resolution: "react@npm:18.2.0"
+  dependencies:
+    loose-envify: ^1.1.0
+  checksum: 88e38092da8839b830cda6feef2e8505dec8ace60579e46aa5490fc3dc9bba0bd50336507dc166f43e3afc1c42939c09fe33b25fae889d6f402721dcd78fca1b
   languageName: node
   linkType: hard
 
@@ -29234,13 +29199,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"scheduler@npm:^0.20.2":
-  version: 0.20.2
-  resolution: "scheduler@npm:0.20.2"
+"scheduler@npm:^0.23.0":
+  version: 0.23.0
+  resolution: "scheduler@npm:0.23.0"
   dependencies:
     loose-envify: ^1.1.0
-    object-assign: ^4.1.1
-  checksum: c4b35cf967c8f0d3e65753252d0f260271f81a81e427241295c5a7b783abf4ea9e905f22f815ab66676f5313be0a25f47be582254db8f9241b259213e999b8fc
+  checksum: d79192eeaa12abef860c195ea45d37cbf2bbf5f66e3c4dcd16f54a7da53b17788a70d109ee3d3dde1a0fd50e6a8fc171f4300356c5aee4fc0171de526bf35f8a
   languageName: node
   linkType: hard
 

@@ -1,7 +1,7 @@
-import ReactDOM from 'react-dom';
 import { getFetchClient } from '@strapi/helper-plugin';
-import { Components, Fields, Middlewares, Reducers } from './core/apis';
+import { createRoot } from 'react-dom/client';
 import appCustomisations from './app';
+import { Components, Fields, Middlewares, Reducers } from './core/apis';
 // eslint-disable-next-line import/extensions
 import plugins from './plugins';
 import appReducers from './reducers';
@@ -68,7 +68,8 @@ const run = async () => {
 
   await app.loadTrads();
 
-  ReactDOM.render(app.render(), MOUNT_NODE);
+  const root = createRoot(MOUNT_NODE);
+  root.render(app.render());
 };
 
 run();

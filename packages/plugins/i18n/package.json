@@ -40,22 +40,22 @@
     "prop-types": "^15.7.2",
     "qs": "6.11.1",
     "react-intl": "6.4.1",
-    "react-query": "3.24.3",
+    "react-query": "3.39.2",
     "react-redux": "8.0.5",
     "redux": "^4.2.1",
     "yup": "^0.32.9"
   },
   "peerDependencies": {
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-router-dom": "^5.3.4",
-    "styled-components": "^5.3.3"
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0",
+    "react-router-dom": "5.3.4",
+    "styled-components": "5.3.3"
   },
   "devDependencies": {
-    "@testing-library/react": "12.1.4",
+    "@testing-library/react": "13.4.0",
     "msw": "1.2.1",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-router-dom": "5.3.4",
     "styled-components": "5.3.3"
   },

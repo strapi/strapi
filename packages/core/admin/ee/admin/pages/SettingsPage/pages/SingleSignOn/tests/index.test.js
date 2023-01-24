@@ -1,5 +1,4 @@
 import React from 'react';
-import { act } from 'react-dom/test-utils';
 import { getByLabelText, render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
@@ -80,10 +79,8 @@ describe('Admin | ee | SettingsPage | SSO', () => {
     const { container } = render(App);
     let el;
 
-    await act(async () => {
-      await waitFor(() => {
-        el = getByLabelText(container, 'autoRegister');
-      });
+    await waitFor(() => {
+      el = getByLabelText(container, 'autoRegister');
     });
 
     fireEvent.click(el);

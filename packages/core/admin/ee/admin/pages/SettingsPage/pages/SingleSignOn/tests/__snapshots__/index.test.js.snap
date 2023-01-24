@@ -650,7 +650,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                       >
                         <label
                           class="c8 c24 c25"
-                          for="1"
+                          for=":r0:"
                         >
                           Auto-registration
                         </label>
@@ -688,14 +688,14 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                             </span>
                           </div>
                           <input
-                            aria-describedby="1-hint"
+                            aria-describedby=":r0:-hint"
                             aria-disabled="false"
                             aria-label="autoRegister"
                             aria-required="false"
                             checked=""
                             class="c36"
                             data-testid="autoRegister"
-                            id="1"
+                            id=":r0:"
                             name="autoRegister"
                             type="checkbox"
                           />
@@ -703,7 +703,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                       </label>
                       <p
                         class="c8 c37"
-                        id="1-hint"
+                        id=":r0:-hint"
                       >
                         Create new user on SSO login if no account exists
                       </p>
@@ -725,21 +725,21 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                     >
                       <label
                         class="c8 c24 c25"
-                        for="3"
+                        for=":r2:"
                       >
                         Default role
                       </label>
                       <div
                         aria-autocomplete="none"
-                        aria-controls="radix-0"
-                        aria-describedby="3-hint 3-error"
+                        aria-controls="radix-:r4:"
+                        aria-describedby=":r2:-hint :r2:-error"
                         aria-disabled="false"
                         aria-expanded="false"
                         aria-label="Default role"
                         class="c38 c39 c40"
                         data-state="closed"
                         dir="ltr"
-                        id="3"
+                        id=":r2:"
                         overflow="hidden"
                         role="combobox"
                         tabindex="0"
@@ -783,7 +783,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                       </div>
                       <p
                         class="c8 c37"
-                        id="3-hint"
+                        id=":r2:-hint"
                       >
                         It will attach the new authenticated user to the selected role
                       </p>

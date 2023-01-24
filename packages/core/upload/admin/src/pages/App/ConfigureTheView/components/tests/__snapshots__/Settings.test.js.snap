@@ -221,20 +221,20 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
             >
               <label
                 class="c4 c5 c6"
-                for="1"
+                for=":r0:"
               >
                 Entries per page
               </label>
               <div
                 aria-autocomplete="none"
-                aria-controls="radix-0"
-                aria-describedby="1-hint 1-error"
+                aria-controls="radix-:r2:"
+                aria-describedby=":r0:-hint :r0:-error"
                 aria-expanded="false"
                 aria-label="Entries per page"
                 class="c7 c8 c9"
                 data-state="closed"
                 dir="ltr"
-                id="1"
+                id=":r0:"
                 overflow="hidden"
                 role="combobox"
                 tabindex="0"
@@ -278,7 +278,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
               </div>
               <p
                 class="c4 c16"
-                id="1-hint"
+                id=":r0:-hint"
               >
                 Number of assets displayed by default in the Media Library
               </p>
@@ -300,20 +300,20 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
             >
               <label
                 class="c4 c5 c6"
-                for="3"
+                for=":r3:"
               >
                 Default sort order
               </label>
               <div
                 aria-autocomplete="none"
-                aria-controls="radix-1"
-                aria-describedby="3-hint 3-error"
+                aria-controls="radix-:r5:"
+                aria-describedby=":r3:-hint :r3:-error"
                 aria-expanded="false"
                 aria-label="Default sort order"
                 class="c7 c8 c9"
                 data-state="closed"
                 dir="ltr"
-                id="3"
+                id=":r3:"
                 overflow="hidden"
                 role="combobox"
                 tabindex="0"
@@ -357,7 +357,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
               </div>
               <p
                 class="c4 c16"
-                id="3-hint"
+                id=":r3:-hint"
               >
                 Note: You can override this value in the media library.
               </p>

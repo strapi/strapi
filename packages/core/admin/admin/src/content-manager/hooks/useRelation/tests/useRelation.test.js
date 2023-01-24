@@ -1,6 +1,6 @@
 import React from 'react';
 import { QueryClientProvider, QueryClient } from 'react-query';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import { useFetchClient } from '@strapi/helper-plugin';
 import { useRelation } from '../useRelation';
@@ -79,7 +79,7 @@ describe('useRelation', () => {
 
   test('fetch relations and calls onLoadRelationsCallback', async () => {
     const onLoadMock = jest.fn();
-    const { waitFor } = await setup({
+    await setup({
       relation: {
         onLoad: onLoadMock,
       },
@@ -118,7 +118,7 @@ describe('useRelation', () => {
       },
     });
 
-    const { result, waitFor } = await setup({
+    const { result } = await setup({
       relation: {
         onLoad: onLoadMock,
       },
@@ -130,19 +130,19 @@ describe('useRelation', () => {
   });
 
   test('fetch relations with different limit', async () => {
-    const { waitForNextUpdate } = await setup({
+    await setup({
       relation: { pageParams: { limit: 5 } },
     });
 
-    await waitForNextUpdate();
-
     const { get } = useFetchClient();
 
-    expect(get).toBeCalledWith(expect.any(String), {
-      params: {
-        limit: 5,
-        page: expect.any(Number),
-      },
+    await waitFor(() => {
+      expect(get).toBeCalledWith(expect.any(String), {
+        params: {
+          limit: 5,
+          page: expect.any(Number),
+        },
+      });
     });
   });
 
@@ -154,9 +154,11 @@ describe('useRelation', () => {
   });
 
   test('fetch relations', async () => {
-    const { result, waitForNextUpdate } = await setup();
+    const { result } = await setup();
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.relations.isSuccess).toBe(true);
+    });
 
     const { get } = useFetchClient();
 
@@ -183,15 +185,17 @@ describe('useRelation', () => {
 
     const { get } = useFetchClient();
 
-    const { result, waitForNextUpdate } = await setup();
+    const { result } = await setup();
 
-    await waitForNextUpdate();
+    await new Promise(process.nextTick);
 
     act(() => {
       result.current.relations.fetchNextPage();
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(get).toBeCalledTimes(2);
+    });
 
     expect(get).toBeCalledTimes(2);
     expect(get).toHaveBeenNthCalledWith(1, expect.any(String), {
@@ -221,31 +225,33 @@ describe('useRelation', () => {
 
     const { get } = useFetchClient();
 
-    const { result, waitForNextUpdate } = await setup();
+    const { result } = await setup();
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(get).toBeCalledTimes(1);
+    });
 
     act(() => {
       result.current.relations.fetchNextPage();
     });
 
-    await waitForNextUpdate();
+    await new Promise(process.nextTick);
 
     expect(get).toBeCalledTimes(1);
   });
 
   test('does not fetch search by default', async () => {
-    const { result, waitForNextUpdate } = await setup();
+    const { result } = await setup();
 
-    await waitForNextUpdate();
-
-    expect(result.current.search.isLoading).toBe(false);
+    await waitFor(() => {
+      expect(result.current.search.isLoading).toBe(false);
+    });
   });
 
   test('does fetch search results once a term was provided', async () => {
-    const { result, waitForNextUpdate } = await setup();
+    const { result } = await setup();
 
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current).toBeTruthy());
 
     const spy = jest
       .fn()
@@ -256,18 +262,19 @@ describe('useRelation', () => {
       result.current.searchFor('something');
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(spy).toBeCalledTimes(1);
+    });
 
-    expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith('/', { params: { _q: 'something', limit: 10, page: 1 } });
   });
 
   test('does fetch search results with a different limit', async () => {
-    const { result, waitForNextUpdate } = await setup({
+    const { result } = await setup({
       search: { pageParams: { limit: 5 } },
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current).toBeTruthy());
 
     const spy = jest
       .fn()
@@ -278,9 +285,10 @@ describe('useRelation', () => {
       result.current.searchFor('something');
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(spy).toBeCalledTimes(1);
+    });
 
-    expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(expect.any(String), {
       params: {
         _q: 'something',
@@ -291,7 +299,7 @@ describe('useRelation', () => {
   });
 
   test('fetch search next page, if there is one', async () => {
-    const { result, waitForNextUpdate } = await setup();
+    const { result } = await setup();
 
     const spy = jest
       .fn()
@@ -302,15 +310,16 @@ describe('useRelation', () => {
       result.current.searchFor('something');
     });
 
-    await waitForNextUpdate();
+    await new Promise(process.nextTick);
 
     act(() => {
       result.current.search.fetchNextPage();
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(spy).toBeCalledTimes(2);
+    });
 
-    expect(spy).toBeCalledTimes(2);
     expect(spy).toHaveBeenNthCalledWith(1, expect.any(String), {
       params: {
         _q: 'something',
@@ -328,7 +337,7 @@ describe('useRelation', () => {
   });
 
   test("does not fetch search next page, if there isn't one", async () => {
-    const { result, waitForNextUpdate } = await setup();
+    const { result } = await setup();
 
     const spy = jest.fn().mockResolvedValueOnce({
       data: { results: [], pagination: { page: 1, pageCount: 1 } },
@@ -339,14 +348,14 @@ describe('useRelation', () => {
       result.current.searchFor('something');
     });
 
-    await waitForNextUpdate();
+    await new Promise(process.nextTick);
 
     act(() => {
       result.current.search.fetchNextPage();
     });
 
-    await waitForNextUpdate();
-
-    expect(spy).toBeCalledTimes(1);
+    await waitFor(() => {
+      expect(spy).toBeCalledTimes(1);
+    });
   });
 });
