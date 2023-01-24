@@ -53,6 +53,7 @@ describe('Entity service triggers webhooks', () => {
     expect(eventHub.emit).toHaveBeenCalledWith('entry.create', {
       entry: entity,
       model: 'test-model',
+      uid: 'api::test.test',
     });
 
     eventHub.emit.mockClear();
@@ -66,6 +67,7 @@ describe('Entity service triggers webhooks', () => {
     expect(eventHub.emit).toHaveBeenCalledWith('entry.update', {
       entry: entity,
       model: 'test-model',
+      uid: 'api::test.test',
     });
 
     eventHub.emit.mockClear();
@@ -79,6 +81,7 @@ describe('Entity service triggers webhooks', () => {
     expect(eventHub.emit).toHaveBeenCalledWith('entry.delete', {
       entry: entity,
       model: 'test-model',
+      uid: 'api::test.test',
     });
 
     eventHub.emit.mockClear();
@@ -92,6 +95,7 @@ describe('Entity service triggers webhooks', () => {
     expect(eventHub.emit).toHaveBeenCalledWith('entry.delete', {
       entry: entity,
       model: 'test-model',
+      uid: 'api::test.test',
     });
     // One event per each entity deleted
     expect(eventHub.emit).toHaveBeenCalledTimes(2);
