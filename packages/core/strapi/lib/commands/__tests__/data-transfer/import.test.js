@@ -85,8 +85,8 @@ describe('Import', () => {
   it('creates providers with correct options ', async () => {
     const options = {
       file: 'test.tar.gz.enc',
-      encrypt: true,
-      compress: true,
+      decrypt: true,
+      decompress: true,
       exclude: [],
       only: [],
     };
@@ -104,8 +104,8 @@ describe('Import', () => {
     expect(mockDataTransfer.file.providers.createLocalFileSourceProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         file: { path: 'test.tar.gz.enc' },
-        encryption: { enabled: options.encrypt },
-        compression: { enabled: options.compress },
+        encryption: { enabled: options.decrypt },
+        compression: { enabled: options.decompress },
       })
     );
 

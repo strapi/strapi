@@ -43,7 +43,7 @@ module.exports = async (opts) => {
   /**
    * To local Strapi instance
    */
-  const strapiInstance = createStrapiInstance();
+  const strapiInstance = await createStrapiInstance();
 
   const destinationOptions = {
     async getStrapi() {
@@ -134,8 +134,8 @@ const getLocalFileSourceOptions = (opts) => {
    */
   const options = {
     file: { path: opts.file },
-    compression: { enabled: opts.compress },
-    encryption: { enabled: opts.encrypt, key: opts.key },
+    compression: { enabled: !!opts.decompress },
+    encryption: { enabled: !!opts.decrypt, key: opts.key },
   };
 
   return options;
