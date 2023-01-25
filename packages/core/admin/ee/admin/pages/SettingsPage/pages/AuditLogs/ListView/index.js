@@ -13,7 +13,7 @@ import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { useLocation } from 'react-router-dom';
 import { useQuery } from 'react-query';
-import adminPermissions from '../../../../../permissions';
+import adminPermissions from '../../../../../../../admin/src/permissions';
 import TableRows from './TableRows';
 import tableHeaders from './utils/tableHeaders';
 import PaginationFooter from './PaginationFooter';
