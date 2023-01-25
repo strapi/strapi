@@ -9,7 +9,9 @@ export function formatAPIError(error, { formatMessage, intlMessagePrefixCallback
 
   // stringify multiple errors
   if (normalizedError?.errors) {
-    return Object.values(normalizedError.errors).map(formatMessage).join('\n');
+    return normalizedError.errors
+      .map(({ id, defaultMessage, values }) => formatMessage({ id, defaultMessage }, values))
+      .join('\n');
   }
 
   return formatMessage(normalizedError);

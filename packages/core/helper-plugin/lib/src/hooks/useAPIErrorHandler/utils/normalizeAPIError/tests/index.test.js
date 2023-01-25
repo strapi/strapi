@@ -38,25 +38,25 @@ describe('normalizeAPIError', () => {
   test('Handle ValidationError', () => {
     expect(normalizeAPIError(API_VALIDATION_ERROR_FIXTURE)).toStrictEqual({
       name: 'ValidationError',
-      errors: {
-        field: {
-          defaultMessage: 'Field must be unique',
-          id: 'apiError.Field must be unique',
-          name: 'ValidationError',
-          values: {
-            field: 'field',
-          },
-        },
-
-        'field.0.name': {
+      errors: [
+        {
           defaultMessage: 'Field contains errors',
           id: 'apiError.Field contains errors',
           name: 'ValidationError',
           values: {
-            field: 'name',
+            path: 'field.0.name',
           },
         },
-      },
+
+        {
+          defaultMessage: 'Field must be unique',
+          id: 'apiError.Field must be unique',
+          name: 'ValidationError',
+          values: {
+            path: 'field',
+          },
+        },
+      ],
     });
   });
 
@@ -65,25 +65,25 @@ describe('normalizeAPIError', () => {
 
     expect(normalizeAPIError(API_VALIDATION_ERROR_FIXTURE, prefixFunction)).toStrictEqual({
       name: 'ValidationError',
-      errors: {
-        field: {
-          name: 'ValidationError',
-          defaultMessage: 'Field must be unique',
-          id: 'custom.apiError.Field must be unique',
-          values: {
-            field: 'field',
-          },
-        },
-
-        'field.0.name': {
+      errors: [
+        {
           name: 'ValidationError',
           defaultMessage: 'Field contains errors',
           id: 'custom.apiError.Field contains errors',
           values: {
-            field: 'name',
+            path: 'field.0.name',
           },
         },
-      },
+
+        {
+          name: 'ValidationError',
+          defaultMessage: 'Field must be unique',
+          id: 'custom.apiError.Field must be unique',
+          values: {
+            path: 'field',
+          },
+        },
+      ],
     });
   });
 
@@ -92,6 +92,9 @@ describe('normalizeAPIError', () => {
       name: 'ApplicationError',
       defaultMessage: 'Application crashed',
       id: 'apiError.Application crashed',
+      values: {
+        path: undefined,
+      },
     });
   });
 
@@ -102,6 +105,9 @@ describe('normalizeAPIError', () => {
       name: 'ApplicationError',
       defaultMessage: 'Application crashed',
       id: 'custom.apiError.Application crashed',
+      values: {
+        path: undefined,
+      },
     });
   });
 });
