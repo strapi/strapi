@@ -1,6 +1,7 @@
+const ERROR_PREFIX = 'apiError.';
+
 function getPrefixedId(message, callback) {
-  const errorPrefix = 'apiError.';
-  const prefixedMessage = `${errorPrefix}${message}`;
+  const prefixedMessage = `${ERROR_PREFIX}${message}`;
 
   // if a prefix function has been passed in it is used to
   // prefix the id, e.g. to allow an error message to be
@@ -14,30 +15,27 @@ function getPrefixedId(message, callback) {
 
 function normalizeError(error, { name, intlMessagePrefixCallback }) {
   const { message, path } = error;
-  const fullPath = path?.join('.');
 
   return {
     id: getPrefixedId(message, intlMessagePrefixCallback),
     defaultMessage: message,
     name: error?.name ?? name,
     values: {
-      path: fullPath,
+      path: path?.join('.'),
     },
   };
 }
 
-export function normalizeAPIError(resError, intlMessagePrefixCallback) {
-  const { error } = resError.response.data;
+export function normalizeAPIError(apiError, intlMessagePrefixCallback) {
+  const { error } = apiError.response.data;
 
   // some errors carry multiple errors (such as ValidationError)
   if (error?.details?.errors) {
     return {
       name: error.name,
-      errors: error.details.errors.reduce((acc, err) => {
-        acc.push(normalizeError(err, { name: error.name, intlMessagePrefixCallback }));
-
-        return acc;
-      }, []),
+      errors: error.details.errors.map((err) =>
+        normalizeError(err, { name: error.name, intlMessagePrefixCallback })
+      ),
     };
   }
 

@@ -2,7 +2,7 @@ import { normalizeAPIError } from '../normalizeAPIError';
 
 export function formatAPIError(error, { formatMessage, intlMessagePrefixCallback }) {
   if (!formatMessage) {
-    throw new Error('formatMessage() is a mandatory argument.');
+    throw new Error('The formatMessage callback is a mandatory argument.');
   }
 
   const normalizedError = normalizeAPIError(error, intlMessagePrefixCallback);
