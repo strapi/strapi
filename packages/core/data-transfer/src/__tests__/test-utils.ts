@@ -175,6 +175,7 @@ export const extendExpectForDataTransferTests = () => {
       const missing = destinationStages.filter((stage) => {
         if (provider[stage]) {
           try {
+            // TODO: why is mock.calls an empty array? maybe an async function call that doesn't resolve?
             // expect(provider[stage]).toHaveBeenCalledOnce();
             expect(provider[stage].mock.results.length).toEqual(times);
             return false;

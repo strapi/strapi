@@ -149,7 +149,7 @@ export const createTransferHandler =
           const { controller } = state;
 
           // TODO: (re)move this check
-          // It shouldn't be possible to strart a pull transfer for now, so reaching
+          // It shouldn't be possible to start a pull transfer for now, so reaching
           // this code should be impossible too, but this has been added by security
           if (state.transfer?.kind === 'pull') {
             return callback(new ProviderTransferError('Pull transfer not implemented'));

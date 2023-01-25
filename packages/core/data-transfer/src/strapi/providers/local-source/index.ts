@@ -49,17 +49,10 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     const strapiVersion = strapi.config.get('info.strapi');
     const createdAt = new Date().toISOString();
 
-    const plugins = Object.keys(strapi.plugins);
-
     return {
       createdAt,
       strapi: {
         version: strapiVersion,
-        plugins: plugins.map((name) => ({
-          name,
-          // TODO: Get the plugin actual version when it'll be available
-          version: strapiVersion,
-        })),
       },
     };
   }
