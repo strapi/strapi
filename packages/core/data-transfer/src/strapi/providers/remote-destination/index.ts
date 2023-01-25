@@ -16,6 +16,7 @@ import type {
 import type { client, server } from '../../../../types/remote/protocol';
 import type { ILocalStrapiDestinationProviderOptions } from '../local-destination';
 import { TRANSFER_PATH } from '../../remote/constants';
+import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 
 interface ITokenAuth {
   type: 'token';
@@ -66,7 +67,9 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
           const res = (await query) as server.Payload<server.InitMessage>;
 
           if (!res?.transferID) {
-            return reject(new Error('Init failed, invalid response from the server'));
+            return reject(
+              new ProviderTransferError('Init failed, invalid response from the server')
+            );
           }
 
           resolve(res.transferID);
@@ -87,10 +90,10 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
       }
 
       if (typeof e === 'string') {
-        return new Error(e);
+        return new ProviderTransferError(e);
       }
 
-      return new Error('Unexpected error');
+      return new ProviderTransferError('Unexpected error');
     }
 
     return null;
@@ -98,14 +101,22 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
   async bootstrap(): Promise<void> {
     const { url, auth } = this.options;
+    const validProtocols = ['https:', 'http:'];
 
     let ws: WebSocket;
 
-    if (!['https:', 'http:'].includes(url.protocol)) {
-      throw new Error(`Invalid protocol "${url.protocol}"`);
+    if (!validProtocols.includes(url.protocol)) {
+      throw new ProviderValidationError(`Invalid protocol "${url.protocol}"`, {
+        check: 'url',
+        details: {
+          protocol: url.protocol,
+          validProtocols,
+        },
+      });
     }
     const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${wsProtocol}//${url.host}${url.pathname}${TRANSFER_PATH}`;
+    const validAuthMethods = ['token'];
 
     // No auth defined, trying public access for transfer
     if (!auth) {
@@ -120,7 +131,13 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
     // Invalid auth method provided
     else {
-      throw new Error('Auth method not implemented');
+      throw new ProviderValidationError('Auth method not implemented', {
+        check: 'auth.type',
+        details: {
+          auth: auth.type,
+          validAuthMethods,
+        },
+      });
     }
 
     this.ws = ws;

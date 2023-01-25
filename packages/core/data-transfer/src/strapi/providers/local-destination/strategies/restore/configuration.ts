@@ -1,6 +1,7 @@
 import { omit } from 'lodash/fp';
 import { Writable } from 'stream';
 import chalk from 'chalk';
+import { ProviderTransferError } from '../../../../../errors/providers';
 import { IConfiguration, Transaction } from '../../../../../../types';
 
 const omitInvalidCreationAttributes = omit(['id']);
@@ -45,7 +46,13 @@ export const createConfigurationWriteStream = async (
         try {
           await restoreConfigs(strapi, config);
         } catch (error) {
-          return callback(new Error(`Failed to import ${config.type} ${error}`));
+          return callback(
+            new ProviderTransferError(
+              `Failed to import ${chalk.yellowBright(config.type)} (${chalk.greenBright(
+                config.value.id
+              )}`
+            )
+          );
         }
         callback();
       });

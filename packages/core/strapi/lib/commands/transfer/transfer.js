@@ -15,6 +15,7 @@ const {
   buildTransferTable,
   createStrapiInstance,
   DEFAULT_IGNORED_CONTENT_TYPES,
+  formatDiagnostic,
 } = require('./utils');
 
 const logger = console;
@@ -108,6 +109,8 @@ module.exports = async (opts) => {
       ],
     },
   });
+
+  engine.diagnostics.onDiagnostic(formatDiagnostic('transfer'));
 
   try {
     logger.log(`Starting transfer...`);

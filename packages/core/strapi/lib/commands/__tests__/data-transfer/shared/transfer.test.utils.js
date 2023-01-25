@@ -6,7 +6,7 @@ const expectExit = async (code, fn) => {
   });
   await expect(async () => {
     await fn();
-  }).rejects.toThrow();
+  }).rejects.toThrow('process.exit');
   expect(exit).toHaveBeenCalledWith(code);
   exit.mockRestore();
 };

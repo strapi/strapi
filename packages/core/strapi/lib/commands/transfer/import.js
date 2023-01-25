@@ -18,6 +18,7 @@ const {
   buildTransferTable,
   DEFAULT_IGNORED_CONTENT_TYPES,
   createStrapiInstance,
+  formatDiagnostic,
 } = require('./utils');
 
 /**
@@ -85,6 +86,8 @@ module.exports = async (opts) => {
   };
 
   const engine = createTransferEngine(source, destination, engineOptions);
+
+  engine.diagnostics.onDiagnostic(formatDiagnostic('import'));
 
   const progress = engine.progress.stream;
   const getTelemetryPayload = () => {

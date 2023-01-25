@@ -4,6 +4,11 @@ const chalk = require('chalk');
 const Table = require('cli-table3');
 const { Option } = require('commander');
 const { TransferGroupPresets } = require('@strapi/data-transfer/lib/engine');
+
+const {
+  configs: { createOutputFileConfiguration },
+  createLogger,
+} = require('@strapi/logger');
 const { readableBytes, exitWith } = require('../utils/helpers');
 const strapi = require('../../index');
 const { getParseListWithChoices } = require('../utils/commander');
@@ -121,6 +126,55 @@ const validateExcludeOnly = (command) => {
   }
 };
 
+const errorColors = {
+  fatal: chalk.red,
+  error: chalk.red,
+  silly: chalk.yellow,
+};
+
+const formatDiagnostic =
+  (operation) =>
+  ({ details, kind }) => {
+    const logger = createLogger(
+      createOutputFileConfiguration(`${operation}_error_log_${Date.now()}.log`)
+    );
+    try {
+      if (kind === 'error') {
+        const { message, severity = 'fatal', error, details: moreDetails } = details;
+
+        const detailsInfo = error ?? moreDetails;
+        let errorMessage = errorColors[severity](`[${severity.toUpperCase()}] ${message}`);
+        if (detailsInfo && detailsInfo.details) {
+          const {
+            origin,
+            details: { step, details: stepDetails, ...moreInfo },
+          } = detailsInfo;
+          errorMessage = `${errorMessage}. Thrown at ${origin} during ${step}.\n`;
+          if (stepDetails || moreInfo) {
+            const { check, ...info } = stepDetails ?? moreInfo;
+            errorMessage = `${errorMessage} Check ${check ?? ''}: ${JSON.stringify(info, null, 2)}`;
+          }
+        }
+
+        logger.error(new Error(errorMessage, error));
+      }
+      if (kind === 'info') {
+        const { message, params } = details;
+
+        const msg = `${message}\n${params ? JSON.stringify(params, null, 2) : ''}`;
+
+        logger.info(msg);
+      }
+      if (kind === 'warning') {
+        const { origin, message } = details;
+
+        logger.warn(`(${origin ?? 'transfer'}) ${message}`);
+      }
+    } catch (err) {
+      logger.error(err);
+    }
+  };
+
 module.exports = {
   buildTransferTable,
   getDefaultExportName,
@@ -129,4 +183,5 @@ module.exports = {
   excludeOption,
   onlyOption,
   validateExcludeOnly,
+  formatDiagnostic,
 };

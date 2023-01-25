@@ -11,11 +11,13 @@ const { isObject, isString, isFinite, toNumber } = require('lodash/fp');
 const fs = require('fs-extra');
 const chalk = require('chalk');
 
+const { TransferEngineTransferError } = require('@strapi/data-transfer/lib/engine/errors');
 const {
   getDefaultExportName,
   buildTransferTable,
   DEFAULT_IGNORED_CONTENT_TYPES,
   createStrapiInstance,
+  formatDiagnostic,
 } = require('./utils');
 
 /**
@@ -76,6 +78,8 @@ module.exports = async (opts) => {
     },
   });
 
+  engine.diagnostics.onDiagnostic(formatDiagnostic('export'));
+
   const progress = engine.progress.stream;
 
   const getTelemetryPayload = (/* payload */) => {
@@ -101,14 +105,14 @@ module.exports = async (opts) => {
 
     const outFileExists = await fs.pathExists(outFile);
     if (!outFileExists) {
-      throw new Error(`Export file not created "${outFile}"`);
+      throw new TransferEngineTransferError(`Export file not created "${outFile}"`);
     }
 
     logger.log(`${chalk.bold('Export process has been completed successfully!')}`);
     logger.log(`Export archive is in ${chalk.green(outFile)}`);
-  } catch (e) {
+  } catch {
     await strapi.telemetry.send('didDEITSProcessFail', getTelemetryPayload());
-    logger.error('Export process failed unexpectedly:', e.toString());
+    logger.error('Export process failed');
     process.exit(1);
   }
 

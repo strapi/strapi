@@ -23,6 +23,10 @@ const createTransferEngine = jest.fn(() => {
       type: 'destination',
       getMetadata: jest.fn(),
     },
+    diagnostics: {
+      on: jest.fn().mockReturnThis(),
+      onDiagnostic: jest.fn().mockReturnThis(),
+    },
   };
 });
 
@@ -53,6 +57,7 @@ describe('Import', () => {
 
   // mock utils
   const mockUtils = {
+    formatDiagnostic: jest.fn(),
     createStrapiInstance: jest.fn().mockReturnValue({
       telemetry: {
         send: jest.fn(),
@@ -70,10 +75,10 @@ describe('Import', () => {
   );
 
   // other spies
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'info').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  // jest.spyOn(console, 'log').mockImplementation(() => {});
+  // jest.spyOn(console, 'warn').mockImplementation(() => {});
+  // jest.spyOn(console, 'info').mockImplementation(() => {});
+  // jest.spyOn(console, 'error').mockImplementation(() => {});
 
   // Now that everything is mocked, load the 'import' command
   const importCommand = require('../../transfer/import');
