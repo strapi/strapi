@@ -77,7 +77,7 @@ export const EditorLayout = ({ children, isExpandMode, error, previewContent, on
                     shrink={0}
                     width="100%"
                   >
-                    <ExpandButton id="collapse" onClick={onCollapse}>
+                    <ExpandButton onClick={onCollapse}>
                       <Typography>
                         {formatMessage({
                           id: 'components.Wysiwyg.collapse',
