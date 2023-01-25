@@ -17,11 +17,20 @@ jest.mock('../strategies/restore', () => {
   };
 });
 
+const transaction = jest.fn(async (cb) => {
+  const trx = {};
+  const rollback = jest.fn();
+  // eslint-disable-next-line node/no-callback-literal
+  await cb({ trx, rollback });
+});
+
 describe('Local Strapi Source Destination', () => {
   describe('Bootstrap', () => {
     test('Should not have a defined Strapi instance if bootstrap has not been called', () => {
       const provider = createLocalStrapiDestinationProvider({
-        getStrapi: getStrapiFactory(),
+        getStrapi: getStrapiFactory({
+          db: { transaction },
+        }),
         strategy: 'restore',
       });
 
@@ -30,7 +39,9 @@ describe('Local Strapi Source Destination', () => {
 
     test('Should have a defined Strapi instance if bootstrap has been called', async () => {
       const provider = createLocalStrapiDestinationProvider({
-        getStrapi: getStrapiFactory(),
+        getStrapi: getStrapiFactory({
+          db: { transaction },
+        }),
         strategy: 'restore',
       });
       await provider.bootstrap();
@@ -42,14 +53,18 @@ describe('Local Strapi Source Destination', () => {
   describe('Strategy', () => {
     test('requires strategy to be either restore or merge', async () => {
       const restoreProvider = createLocalStrapiDestinationProvider({
-        getStrapi: getStrapiFactory(),
+        getStrapi: getStrapiFactory({
+          db: { transaction },
+        }),
         strategy: 'restore',
       });
       await restoreProvider.bootstrap();
       expect(restoreProvider.strapi).toBeDefined();
 
       const mergeProvider = createLocalStrapiDestinationProvider({
-        getStrapi: getStrapiFactory(),
+        getStrapi: getStrapiFactory({
+          db: { transaction },
+        }),
         strategy: 'merge',
       });
       await mergeProvider.bootstrap();
@@ -58,7 +73,9 @@ describe('Local Strapi Source Destination', () => {
       await expect(
         (async () => {
           const invalidProvider = createLocalStrapiDestinationProvider({
-            getStrapi: getStrapiFactory(),
+            getStrapi: getStrapiFactory({
+              db: { transaction },
+            }),
             /* @ts-ignore: disable-next-line */
             strategy: 'foo',
           });
@@ -121,7 +138,7 @@ describe('Local Strapi Source Destination', () => {
         contentTypes: getContentTypes(),
         query,
         getModel,
-        db: { query },
+        db: { query, transaction },
       })();
 
       setGlobalStrapi(strapi);
@@ -139,7 +156,11 @@ describe('Local Strapi Source Destination', () => {
 
     test('Should not delete if it is a merge strategy', async () => {
       const provider = createLocalStrapiDestinationProvider({
-        getStrapi: getStrapiFactory({}),
+        getStrapi: getStrapiFactory({
+          db: {
+            transaction,
+          },
+        }),
         strategy: 'merge',
       });
       const deleteAllSpy = jest.spyOn(restoreApi, 'deleteRecords');

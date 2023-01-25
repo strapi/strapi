@@ -1,10 +1,9 @@
-import { RelationAttribute } from '@strapi/strapi';
 import { clone, isNil } from 'lodash/fp';
-import { ILink } from '../../../types';
+import { ILink, KnexTransaction } from '../../../types';
 
 // TODO: Remove any types when we'll have types for DB metadata
 
-export const createLinkQuery = (strapi: Strapi.Strapi) => {
+export const createLinkQuery = (strapi: Strapi.Strapi, trx?: KnexTransaction) => {
   const query = () => {
     const { connection } = strapi.db;
 
@@ -32,6 +31,10 @@ export const createLinkQuery = (strapi: Strapi.Strapi) => {
         const joinColumnName: string = attribute.joinColumn.name;
 
         const qb = connection.queryBuilder().select('id', joinColumnName).from(metadata.tableName);
+
+        if (trx) {
+          qb.transacting(trx);
+        }
 
         // TODO: stream the query to improve performances
         const entries = await qb;
@@ -114,6 +117,10 @@ export const createLinkQuery = (strapi: Strapi.Strapi) => {
 
         qb.select(validColumns);
 
+        if (trx) {
+          qb.transacting(trx);
+        }
+
         // TODO: stream the query to improve performances
         const entries = await qb;
 
@@ -180,10 +187,13 @@ export const createLinkQuery = (strapi: Strapi.Strapi) => {
 
       if (attribute.joinColumn) {
         const joinColumnName = attribute.joinColumn.name;
-
-        await connection(metadata.tableName)
+        const qb = connection(metadata.tableName)
           .where('id', left.ref)
           .update({ [joinColumnName]: right.ref });
+        if (trx) {
+          qb.transacting(trx);
+        }
+        await qb;
       }
 
       if (attribute.joinTable) {
@@ -242,7 +252,11 @@ export const createLinkQuery = (strapi: Strapi.Strapi) => {
 
         assignOrderColumns();
 
-        await connection.insert(payload).into(name);
+        const qb = connection.insert(payload).into(name);
+        if (trx) {
+          qb.transacting(trx);
+        }
+        await qb;
       }
     };
 
