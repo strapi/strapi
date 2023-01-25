@@ -250,6 +250,20 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
         )
         .transacting(trx);
       break;
+    /*
+      UPDATE
+        :joinTable: as a,
+        (
+          SELECT
+            id,
+            ROW_NUMBER() OVER ( PARTITION BY :joinColumn: ORDER BY :orderColumn:) AS src_order,
+            ROW_NUMBER() OVER ( PARTITION BY :inverseJoinColumn: ORDER BY :inverseOrderColumn:) AS inv_order
+          FROM :joinTable:
+          WHERE :joinColumn: = :id OR :inverseJoinColumn: IN (:inverseRelIds)
+        ) AS b
+      SET :orderColumn: = b.src_order, :inverseOrderColumn: = b.inv_order
+      WHERE b.id = a.id;
+    */
     default: {
       const joinTableName = addSchema(joinTable.name);
 
@@ -270,17 +284,17 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
         .transacting(trx);
 
       /*
-        `UPDATE :joinTable: as a
-          SET :orderColumn: = b.src_order, :inverseOrderColumn: = b.inv_order
-          FROM (
-            SELECT
-              id,
-              ROW_NUMBER() OVER ( PARTITION BY :joinColumn: ORDER BY :orderColumn:) AS src_order,
-              ROW_NUMBER() OVER ( PARTITION BY :inverseJoinColumn: ORDER BY :inverseOrderColumn:) AS inv_order
-            FROM :joinTable:
-            WHERE :joinColumn: = :id OR :inverseJoinColumn: IN (:inverseRelIds)
-          ) AS b
-          WHERE b.id = a.id`,
+        UPDATE :joinTable: as a
+        SET :orderColumn: = b.src_order, :inverseOrderColumn: = b.inv_order
+        FROM (
+          SELECT
+            id,
+            ROW_NUMBER() OVER ( PARTITION BY :joinColumn: ORDER BY :orderColumn:) AS src_order,
+            ROW_NUMBER() OVER ( PARTITION BY :inverseJoinColumn: ORDER BY :inverseOrderColumn:) AS inv_order
+          FROM :joinTable:
+          WHERE :joinColumn: = :id OR :inverseJoinColumn: IN (:inverseRelIds)
+        ) AS b
+        WHERE b.id = a.id;
       */
     }
   }
