@@ -27,7 +27,7 @@ const SpixlerLeftMenu = ({ shouldUpdateStrapi, plugins, setUpdateMenu }) => {
   const links = [...filteredSingleTypeLinks, ...filteredCollectionTypeLinks];
   const icons = [...generalSectionLinks, ...pluginsSectionLinks];
 
-  links.sort(function(a, b) {
+  links.sort(function (a, b) {
     const nameA = a.label.toUpperCase();
     const nameB = b.label.toUpperCase();
 
@@ -46,18 +46,35 @@ const SpixlerLeftMenu = ({ shouldUpdateStrapi, plugins, setUpdateMenu }) => {
     common: [],
   };
   links.forEach(link => {
-    const matches = link.label.match(/^([a-zA-Z.]+)\s+-\s([a-zA-Z ]+)$/);
+    const matchesOtherlanguage = link.label.match(/^([a-zA-Z.]+)\s+-\s([a-zA-Z. ]+)\s+-\s([a-zA-Z ]+)$/);
 
-    if (matches !== null) {
-      const groupName = matches[1];
-      const itemName = matches[2];
-
+    if (matchesOtherlanguage !== null) {
+      const groupName = matchesOtherlanguage[1];
+      const languageName = matchesOtherlanguage[2];
+      const itemName = matchesOtherlanguage[3];  
       if (typeof groups[groupName] === 'undefined') {
-        groups[groupName] = [];
+        groups[groupName] = {
+          en:[]
+        };
       }
-      groups[groupName].push({ ...link, label: itemName });
+      if (typeof groups[groupName][languageName] === 'undefined') {
+        groups[groupName][languageName] = [];
+      }
+      groups[groupName][languageName].push({ ...link, label: itemName });
     } else {
-      groups.common.push(link);
+      const matchesEnglish = link.label.match(/^([a-zA-Z.]+)\s+-\s([a-zA-Z ]+)$/);
+      if (matchesEnglish !== null) {
+        const groupName = matchesEnglish[1];
+        const itemName = matchesEnglish[2];  
+        if (typeof groups[groupName] === 'undefined') {
+          groups[groupName] = {
+            en:[]
+          };
+        }
+        groups[groupName].en.push({ ...link, label: itemName });
+      }else{
+        groups.common.push(link);
+      }
     }
   });
 

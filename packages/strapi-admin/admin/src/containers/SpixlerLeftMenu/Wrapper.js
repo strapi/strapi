@@ -42,8 +42,7 @@ const Wrapper = styled.div`
 
   .menu {
     height: 80vh;
-    margin-top: 5px;
-
+    margin-top: 5px;  
     .menu-section {
       h5 {
         text-transform: uppercase;
@@ -54,12 +53,23 @@ const Wrapper = styled.div`
         font-weight: bold;
       }
       margin-bottom: 20px;
+      li {
+        padding-left:13px;
+      }
+    }
+    .submenu-section {
+      h5 {       
+        padding-left: 35px;    
+      }    
+      li {
+        padding-left:25px;
+      } 
     }
 
     ul {
       margin: 0;
       padding: 0;
-      list-style: none;
+      list-style: none;     
     }
 
     overflow-y: auto;
