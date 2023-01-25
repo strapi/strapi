@@ -43,6 +43,8 @@ const create = async (attributes) => {
 
   getService('metrics').sendDidInviteUser();
 
+  strapi.eventHub.emit('user.create', { user: sanitizeUser(createdUser) });
+
   return createdUser;
 };
 
@@ -76,7 +78,7 @@ const updateById = async (id, attributes) => {
   if (_.has(attributes, 'password')) {
     const hashedPassword = await getService('auth').hashPassword(attributes.password);
 
-    return strapi.query('admin::user').update({
+    const updatedUser = await strapi.query('admin::user').update({
       where: { id },
       data: {
         ...attributes,
@@ -84,13 +86,23 @@ const updateById = async (id, attributes) => {
       },
       populate: ['roles'],
     });
+
+    strapi.eventHub.emit('user.update', { user: sanitizeUser(updatedUser) });
+
+    return updatedUser;
   }
 
-  return strapi.query('admin::user').update({
+  const updatedUser = await strapi.query('admin::user').update({
     where: { id },
     data: attributes,
     populate: ['roles'],
   });
+
+  if (updatedUser) {
+    strapi.eventHub.emit('user.update', { user: sanitizeUser(updatedUser) });
+  }
+
+  return updatedUser;
 };
 
 /**
@@ -226,7 +238,13 @@ const deleteById = async (id) => {
     }
   }
 
-  return strapi.query('admin::user').delete({ where: { id }, populate: ['roles'] });
+  const deletedUser = await strapi
+    .query('admin::user')
+    .delete({ where: { id }, populate: ['roles'] });
+
+  strapi.eventHub.emit('user.delete', { user: sanitizeUser(deletedUser) });
+
+  return deletedUser;
 };
 
 /** Delete a user
@@ -256,6 +274,10 @@ const deleteByIds = async (ids) => {
 
     deletedUsers.push(deletedUser);
   }
+
+  strapi.eventHub.emit('user.delete', {
+    users: deletedUsers.map((deletedUser) => sanitizeUser(deletedUser)),
+  });
 
   return deletedUsers;
 };

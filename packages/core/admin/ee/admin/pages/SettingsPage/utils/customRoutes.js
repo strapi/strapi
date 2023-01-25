@@ -14,4 +14,18 @@ if (strapi.features.isEnabled(strapi.features.SSO)) {
   });
 }
 
+if (strapi.features.isEnabled(strapi.features.auditLogs)) {
+  routes.push({
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "audit-logs-settings-page" */ '../pages/AuditLogs/ProtectedListPage'
+      );
+
+      return component;
+    },
+    to: '/settings/audit-logs',
+    exact: true,
+  });
+}
+
 export default routes;
