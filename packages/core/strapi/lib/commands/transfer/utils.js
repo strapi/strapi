@@ -146,23 +146,12 @@ const formatDiagnostic =
     );
     try {
       if (kind === 'error') {
-        const { message, severity = 'fatal', error, details: moreDetails } = details;
+        const { message, severity = 'fatal' } = details;
 
-        const detailsInfo = error ?? moreDetails;
-        let errorMessage = errorColors[severity](`[${severity.toUpperCase()}] ${message}`);
-        if (detailsInfo && detailsInfo.details) {
-          const {
-            origin,
-            details: { step, details: stepDetails, ...moreInfo },
-          } = detailsInfo;
-          errorMessage = `${errorMessage}. Thrown at ${origin} during ${step}.\n`;
-          if (stepDetails || moreInfo) {
-            const { check, ...info } = stepDetails ?? moreInfo;
-            errorMessage = `${errorMessage} Check ${check ?? ''}: ${JSON.stringify(info, null, 2)}`;
-          }
-        }
+        const colorizeError = errorColors[severity];
+        const errorMessage = colorizeError(`[${severity.toUpperCase()}] ${message}`);
 
-        logger.error(new Error(errorMessage, error));
+        logger.error(errorMessage);
       }
       if (kind === 'info') {
         const { message, params } = details;
