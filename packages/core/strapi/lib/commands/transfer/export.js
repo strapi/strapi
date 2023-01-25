@@ -112,7 +112,7 @@ module.exports = async (opts) => {
     logger.log(`Export archive is in ${chalk.green(outFile)}`);
   } catch {
     await strapi.telemetry.send('didDEITSProcessFail', getTelemetryPayload());
-    logger.error('Export process failed');
+    logger.error('Export process failed.');
     process.exit(1);
   }
 

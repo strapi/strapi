@@ -112,8 +112,7 @@ module.exports = async (opts) => {
     logger.info('Import process has been completed successfully!');
   } catch (e) {
     await strapiInstance.telemetry.send('didDEITSProcessFail', getTelemetryPayload());
-    logger.error('Import process failed unexpectedly');
-    logger.error(e);
+    logger.error('Import process failed.');
     process.exit(1);
   }
 
