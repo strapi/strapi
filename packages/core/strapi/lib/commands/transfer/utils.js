@@ -82,6 +82,7 @@ const DEFAULT_IGNORED_CONTENT_TYPES = [
   'admin::role',
   'admin::api-token',
   'admin::api-token-permission',
+  'admin::audit-log',
 ];
 
 const createStrapiInstance = async (logLevel = 'error') => {
