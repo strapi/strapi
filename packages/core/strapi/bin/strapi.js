@@ -26,6 +26,10 @@ const {
   validateExcludeOnly,
 } = require('../lib/commands/transfer/utils');
 
+process.on('SIGINT', () => {
+  process.exit();
+});
+
 const checkCwdIsStrapiApp = (name) => {
   const logErrorAndExit = () => {
     console.log(
