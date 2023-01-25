@@ -4,7 +4,7 @@ const Wrapper = styled.div`
   position: absolute;
   top: 0;
   width: 100%;
-  height: 100%;
+  height: calc(100% - 3rem); // ensures the expanded preview is fully displayed.
   overflow: auto;
   padding: ${({ theme }) => `${theme.spaces[3]} ${theme.spaces[4]}`};
   font-size: ${14 / 16}rem;
