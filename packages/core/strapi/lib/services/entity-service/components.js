@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { has, prop, omit, toString } = require('lodash/fp');
+const { has, prop, omit, toString, pipe, assign } = require('lodash/fp');
 
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
@@ -314,10 +314,16 @@ const createComponent = async (uid, data) => {
   const model = strapi.getModel(uid);
 
   const componentData = await createComponents(uid, data);
+  const transform = pipe(
+    // Make sure we don't save the component with a pre-defined ID
+    omit('id'),
+    // Remove the component data from the original data object ...
+    (payload) => omitComponentData(model, payload),
+    // ... and assign the newly created component instead
+    assign(componentData)
+  );
 
-  return strapi.query(uid).create({
-    data: Object.assign(omitComponentData(model, data), componentData),
-  });
+  return strapi.query(uid).create({ data: transform(data) });
 };
 
 // components can have nested compos so this must be recursive

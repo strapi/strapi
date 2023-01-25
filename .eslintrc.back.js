@@ -31,6 +31,7 @@ module.exports = {
     'no-continue': 'warn',
     'no-process-exit': 'off',
     'no-loop-func': 'off',
+    'max-classes-per-file': 'off',
     'no-param-reassign': [
       'error',
       {
