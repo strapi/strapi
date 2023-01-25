@@ -69,11 +69,12 @@ export const EditorLayout = ({ children, isExpandMode, error, previewContent, on
                 <BoxWithBorder flex="1" height="100%">
                   {children}
                 </BoxWithBorder>
-                <Flex alignItems="start" direction="column" flex="1" height="100%" width="100%">
+                <Flex alignItems="start" direction="column" flex={1} height="100%" width="100%">
                   <Flex
                     height={pxToRem(48)}
                     background="neutral100"
                     justifyContent="flex-end"
+                    shrink={0}
                     width="100%"
                   >
                     <ExpandButton id="collapse" onClick={onCollapse}>
