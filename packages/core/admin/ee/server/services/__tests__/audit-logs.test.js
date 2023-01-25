@@ -97,6 +97,7 @@ describe('Audit logs service', () => {
         features: {
           // We only enabled audit logs
           isEnabled: (feature) => feature === 'audit-logs',
+          get: () => ({ name: 'audit-logs', options: { retentionDays: 90 } }),
         },
       }));
 

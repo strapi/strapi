@@ -14,7 +14,7 @@ if (strapi.features.isEnabled(strapi.features.SSO)) {
   });
 }
 
-if (strapi.features.isEnabled(strapi.features.auditLogs)) {
+if (strapi.features.isEnabled(strapi.features.AUDIT_LOGS)) {
   routes.push({
     async Component() {
       const component = await import(

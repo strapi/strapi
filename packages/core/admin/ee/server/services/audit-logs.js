@@ -2,8 +2,9 @@
 
 const localProvider = require('@strapi/provider-audit-logs-local');
 const { scheduleJob } = require('node-schedule');
+const { features } = require('@strapi/strapi/lib/utils/ee');
 
-const RETENTION_DAYS = 90;
+const DEFAULT_RETENTION_DAYS = 90;
 
 const defaultEvents = [
   'entry.create',
@@ -88,10 +89,12 @@ const createAuditLogsService = (strapi) => {
 
   return {
     async register() {
+      const retentionDays =
+        features.get('audit-logs')?.options.retentionDays ?? DEFAULT_RETENTION_DAYS;
       this._provider = await localProvider.register({ strapi });
       this._eventHubUnsubscribe = strapi.eventHub.subscribe(handleEvent.bind(this));
       this._deleteExpiredJob = scheduleJob('0 0 * * *', () => {
-        const expirationDate = new Date(Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000);
+        const expirationDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
         this._provider.deleteExpiredEvents(expirationDate);
       });
 

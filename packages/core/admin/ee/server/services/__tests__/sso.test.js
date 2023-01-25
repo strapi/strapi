@@ -1,21 +1,15 @@
 'use strict';
 
-jest.mock('@strapi/strapi/lib/utils/ee', () => {
-  const eeModule = () => true;
-
-  Object.assign(eeModule, {
-    features: {
-      isEnabled() {
-        return true;
-      },
-      getEnabled() {
-        return ['sso'];
-      },
+jest.mock('@strapi/strapi/ee', () => ({
+  features: {
+    isEnabled() {
+      return true;
     },
-  });
-
-  return eeModule;
-});
+    list() {
+      return [{ name: 'sso' }];
+    },
+  },
+}));
 
 const {
   syncProviderRegistryWithConfig,

@@ -71,7 +71,8 @@
   },
   "directories": {
     "lib": "./lib",
-    "bin": "./bin"
+    "bin": "./bin",
+    "ee": "./ee"
   },
   "scripts": {
     "postinstall": "node lib/utils/success.js",

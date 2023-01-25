@@ -1,6 +1,6 @@
 import adminPermissions from '../../../../../admin/src/permissions';
 
-const auditLogsRoutes = strapi.features.isEnabled(strapi.features.auditLogs)
+const auditLogsRoutes = strapi.features.isEnabled(strapi.features.AUDIT_LOGS)
   ? [
       {
         intlLabel: { id: 'global.auditLogs', defaultMessage: 'Audit Logs' },
