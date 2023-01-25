@@ -98,7 +98,9 @@ const updateById = async (id, attributes) => {
     populate: ['roles'],
   });
 
-  strapi.eventHub.emit('user.update', { user: sanitizeUser(updatedUser) });
+  if (updatedUser) {
+    strapi.eventHub.emit('user.update', { user: sanitizeUser(updatedUser) });
+  }
 
   return updatedUser;
 };
