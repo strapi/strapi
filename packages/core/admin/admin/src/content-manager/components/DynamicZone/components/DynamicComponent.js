@@ -42,6 +42,8 @@ const IconButtonCustom = styled(IconButton)`
   }
 `;
 
+// TODO: Delete once https://github.com/strapi/design-system/pull/858
+// is merged and released.
 const StyledBox = styled(Box)`
   > div:first-child {
     box-shadow: ${({ theme }) => theme.shadows.tableShadow};
