@@ -193,9 +193,9 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
 }
 
 .c11 {
-  margin: 0;
   height: 18px;
   min-width: 18px;
+  margin: 0;
   border-radius: 4px;
   border: 1px solid #c0c0cf;
   -webkit-appearance: none;
@@ -332,6 +332,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
 .c28 canvas,
 .c28 video {
   display: block;
+  pointer-events: none;
   max-width: 100%;
   max-height: 10.25rem;
 }

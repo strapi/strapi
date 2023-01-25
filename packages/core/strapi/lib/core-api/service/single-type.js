@@ -1,6 +1,16 @@
 'use strict';
 
+const { propOr } = require('lodash/fp');
+
 const { ValidationError } = require('@strapi/utils').errors;
+const {
+  hasDraftAndPublish,
+  constants: { PUBLISHED_AT_ATTRIBUTE },
+} = require('@strapi/utils').contentTypes;
+
+const setPublishedAt = (data) => {
+  data[PUBLISHED_AT_ATTRIBUTE] = propOr(new Date(), PUBLISHED_AT_ATTRIBUTE, data);
+};
 
 /**
  * Returns a single type service to handle default core-api actions
@@ -27,7 +37,7 @@ const createSingleTypeService = ({ contentType }) => {
      * @return {Promise}
      */
     async createOrUpdate({ data, ...params } = {}) {
-      const entity = await this.find(params);
+      const entity = await this.find({ ...params, publicationState: 'preview' });
 
       if (!entity) {
         const count = await strapi.query(uid).count();
@@ -35,6 +45,9 @@ const createSingleTypeService = ({ contentType }) => {
           throw new ValidationError('singleType.alreadyExists');
         }
 
+        if (hasDraftAndPublish(contentType)) {
+          setPublishedAt(data);
+        }
         return strapi.entityService.create(uid, { ...params, data });
       }
 
