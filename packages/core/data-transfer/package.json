@@ -30,7 +30,7 @@
     "build": "yarn build:ts",
     "build:ts": "tsc -p tsconfig.json",
     "build:clean": "yarn clean && yarn build",
-    "clean": "rimraf ./dist",
+    "clean": "rimraf ./lib",
     "prepublishOnly": "yarn build:clean",
     "test:unit": "jest --verbose",
     "watch": "yarn build:ts -w --preserveWatchOutput"
