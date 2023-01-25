@@ -1,8 +1,8 @@
 import { test } from '@playwright/test';
 // eslint-disable-next-line import/extensions
-import { resetDatabaseAndImportDataFromPath } from './scripts/data-transfer';
+import { resetDatabaseAndImportDataFromPath } from '../scripts/data-transfer';
 
-test.describe('Authentication', () => {
+test.describe('Sign Up', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('./e2e/data/backup.tar');
     await page.goto('/admin');
