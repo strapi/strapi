@@ -5,24 +5,33 @@ const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 let strapi;
 
 describe('transactions', () => {
+  let original;
   beforeAll(async () => {
     strapi = await createStrapiInstance();
+    original = await strapi.db
+      .queryBuilder('strapi::core-store')
+      .select(['*'])
+      .where({ id: 1 })
+      .execute();
   });
 
   afterAll(async () => {
     await strapi.destroy();
   });
 
+  afterEach(async () => {
+    await strapi.db
+      .queryBuilder('strapi::core-store')
+      .update({
+        key: original[0].key,
+      })
+      .where({ id: 1 })
+      .execute();
+  });
+
   describe('using a transaction method', () => {
     test('commits successfully', async () => {
-      let original;
       await strapi.db.transaction(async () => {
-        original = await strapi.db
-          .queryBuilder('strapi::core-store')
-          .select(['*'])
-          .where({ id: 1 })
-          .execute();
-
         await strapi.db
           .queryBuilder('strapi::core-store')
           .update({
@@ -34,7 +43,7 @@ describe('transactions', () => {
         await strapi.db
           .queryBuilder('strapi::core-store')
           .update({
-            key: original[0].key,
+            key: 'new key',
           })
           .where({ id: 1 })
           .execute();
@@ -46,19 +55,12 @@ describe('transactions', () => {
         .where({ id: 1 })
         .execute();
 
-      expect(end[0].key).toEqual(original[0].key);
+      expect(end[0].key).toEqual('new key');
     });
 
     test('rollback successfully', async () => {
-      let original;
       try {
         await strapi.db.transaction(async () => {
-          original = await strapi.db
-            .queryBuilder('strapi::core-store')
-            .select(['*'])
-            .where({ id: 1 })
-            .execute();
-
           // this is valid
           await strapi.db
             .queryBuilder('strapi::core-store')
@@ -72,7 +74,7 @@ describe('transactions', () => {
           await strapi.db
             .queryBuilder('invalid_uid')
             .update({
-              key: original[0].key,
+              key: 'bad key',
               invalid_key: 'error',
             })
             .where({ id: 1 })
@@ -94,15 +96,8 @@ describe('transactions', () => {
     });
 
     test('nested rollback -> rollback works', async () => {
-      let original;
       try {
         await strapi.db.transaction(async () => {
-          original = await strapi.db
-            .queryBuilder('strapi::core-store')
-            .select(['*'])
-            .where({ id: 1 })
-            .execute();
-
           // this is valid
           await strapi.db
             .queryBuilder('strapi::core-store')
@@ -171,15 +166,8 @@ describe('transactions', () => {
     });
 
     test('nested commit -> rollback works', async () => {
-      let original;
       try {
         await strapi.db.transaction(async () => {
-          original = await strapi.db
-            .queryBuilder('strapi::core-store')
-            .select(['*'])
-            .where({ id: 1 })
-            .execute();
-
           // this is valid
           await strapi.db
             .queryBuilder('strapi::core-store')
@@ -244,13 +232,6 @@ describe('transactions', () => {
       const trx = await strapi.db.transaction();
 
       try {
-        const original = await strapi.db
-          .queryBuilder('strapi::core-store')
-          .select(['*'])
-          .where({ id: 1 })
-          .transacting(trx.get())
-          .execute();
-
         await strapi.db
           .queryBuilder('strapi::core-store')
           .update({
@@ -289,13 +270,6 @@ describe('transactions', () => {
       const trx = await strapi.db.transaction();
 
       try {
-        await strapi.db
-          .queryBuilder('strapi::core-store')
-          .select(['*'])
-          .where({ id: 1 })
-          .transacting(trx.get())
-          .execute();
-
         await strapi.db
           .queryBuilder('strapi::core-store')
           .update({
