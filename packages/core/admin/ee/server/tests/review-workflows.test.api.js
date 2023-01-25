@@ -13,7 +13,10 @@ if (edition === 'CE') {
 }
 
 describe('Review workflows', () => {
-  const requests = {};
+  const requests = {
+    public: null,
+    admin: null,
+  };
   let strapi;
   let hasRW;
   let defaultWorkflow;
@@ -21,12 +24,12 @@ describe('Review workflows', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance();
     // eslint-disable-next-line node/no-extraneous-require
-    hasRW = require('@strapi/strapi/lib/utils/ee').features.isEnabled('review-workflow');
+    hasRW = require('@strapi/strapi/lib/utils/ee').features.isEnabled('review-workflows');
 
     requests.public = createRequest({ strapi });
     requests.admin = await createAuthRequest({ strapi });
 
-    defaultWorkflow = await strapi.query('admin::workflow').create({});
+    defaultWorkflow = await strapi.query('admin::workflow').create({ data: {} });
   });
 
   afterAll(async () => {
@@ -40,7 +43,7 @@ describe('Review workflows', () => {
 
       if (hasRW) {
         expect(res.status).toBe(200);
-        expect(Array.isArray(res.body)).toBeTruthy();
+        expect(Array.isArray(res.body.results)).toBeTruthy();
         expect(res.body.results).toHaveLength(1);
       } else {
         expect(res.status).toBe(404);
@@ -56,11 +59,11 @@ describe('Review workflows', () => {
 
       if (hasRW) {
         expect(res.status).toBe(200);
-        expect(Array.isArray(res.body)).toBeTruthy();
+        expect(res.body.data).toBeInstanceOf(Object);
         expect(res.body.data).toEqual(defaultWorkflow);
       } else {
         expect(res.status).toBe(404);
-        expect(Array.isArray(res.body)).toBeFalsy();
+        expect(res.body.data).toBeUndefined();
       }
     });
   });

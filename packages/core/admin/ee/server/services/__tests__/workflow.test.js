@@ -17,7 +17,7 @@ jest.mock('@strapi/strapi/lib/utils/ee', () => {
   return eeModule;
 });
 
-const workflowServiceFactory = require('../workflow');
+const workflowServiceFactory = require('../workflows');
 const { WORKFLOW_MODEL_UID } = require('../../constants/workflows');
 
 const workflowMock = {
