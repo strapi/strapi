@@ -77,8 +77,8 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     return restore.deleteRecords(this.strapi, this.options.restore);
   }
 
-  async rollback(e: Error): Promise<void> {
-    await this.transaction?.rollback();
+  rollback(): void {
+    this.transaction?.rollback();
   }
 
   async beforeTransfer() {
@@ -101,17 +101,10 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     const strapiVersion = strapi.config.get('info.strapi');
     const createdAt = new Date().toISOString();
 
-    const plugins = Object.keys(strapi.plugins);
-
     return {
       createdAt,
       strapi: {
         version: strapiVersion,
-        plugins: plugins.map((name) => ({
-          name,
-          // TODO: Get the plugin actual version when it'll be available
-          version: strapiVersion,
-        })),
       },
     };
   }

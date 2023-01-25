@@ -476,9 +476,8 @@ class TransferEngine<
       stream
         .pipe(destination)
         .on('error', (e) => {
-          // TODO ?
-          // this.#reportError(e, 'error');
-          // destination.destroy(e);
+          this.#reportError(e, 'error');
+          destination.destroy(e);
           reject(e);
         })
         .on('close', resolve);

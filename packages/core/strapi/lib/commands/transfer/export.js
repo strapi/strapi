@@ -21,7 +21,7 @@ const {
 } = require('./utils');
 
 /**
- * @typedef ImportCommandOptions Options given to the CLI import command
+ * @typedef ExportCommandOptions Options given to the CLI import command
  *
  * @property {string} [file] The file path to import
  * @property {boolean} [encrypt] Used to encrypt the final archive
@@ -34,11 +34,11 @@ const logger = console;
 const BYTES_IN_MB = 1024 * 1024;
 
 /**
- * Import command.
+ * Export command.
  *
- * It transfers data from a local file to a local strapi instance
+ * It transfers data from a local Strapi instance to a file
  *
- * @param {ImportCommandOptions} opts
+ * @param {ExportCommandOptions} opts
  */
 module.exports = async (opts) => {
   // Validate inputs from Commander
@@ -135,7 +135,7 @@ const createSourceProvider = (strapi) => {
 /**
  * It creates a local file destination provider based on the given options
  *
- * @param {ImportCommandOptions} opts
+ * @param {ExportCommandOptions} opts
  */
 const createDestinationProvider = (opts) => {
   const { file, compress, encrypt, key, maxSizeJsonl } = opts;

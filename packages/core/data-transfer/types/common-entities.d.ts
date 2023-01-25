@@ -5,11 +5,6 @@ import type { Readable } from 'stream';
 export interface IMetadata {
   strapi?: {
     version?: string;
-
-    plugins?: {
-      name: string;
-      version: string;
-    }[];
   };
 
   createdAt?: string;

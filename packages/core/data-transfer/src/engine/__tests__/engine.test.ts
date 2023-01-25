@@ -99,16 +99,6 @@ const metadata = {
   createdAt: '2022-11-23T09:26:43.463Z',
   strapi: {
     version: '1.2.3',
-    plugins: [
-      {
-        name: 'content-manager',
-        version: '1.2.3',
-      },
-      {
-        name: 'content-type-builder',
-        version: '1.2.3',
-      },
-    ],
   },
 };
 
