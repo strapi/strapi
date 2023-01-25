@@ -12,6 +12,7 @@ window.strapi = {
   telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED ?? false,
   features: {
     SSO: 'sso',
+    auditLogs: 'audit-logs',
   },
   projectType: 'Community',
 };
