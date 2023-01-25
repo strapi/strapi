@@ -163,6 +163,15 @@ export interface Database {
   connection: Knex;
 
   query<T extends keyof AllTypes>(uid: T): QueryFromContentType<T>;
+  transaction(
+    cb?: (params: {
+      trx: Knex.Transaction;
+      rollback: () => Promise<void>;
+      commit: () => Promise<void>;
+    }) => Promise<unknown>
+  ):
+    | Promise<unknown>
+    | { get: () => Knex.Transaction; rollback: () => Promise<void>; commit: () => Promise<void> };
 }
 export class Database implements Database {
   static transformContentTypes(contentTypes: any[]): ModelConfig[];

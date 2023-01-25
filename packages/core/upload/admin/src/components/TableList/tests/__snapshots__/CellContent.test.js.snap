@@ -218,8 +218,8 @@ exports[`TableList | CellContent should render image cell type when element type
 .c0 {
   background: #eaf5ff;
   border-radius: 50%;
-  width: 26px;
-  height: 26px;
+  width: 32px;
+  height: 32px;
 }
 
 .c1 {
@@ -244,7 +244,6 @@ exports[`TableList | CellContent should render image cell type when element type
   font-size: 0.875rem;
   line-height: 1.43;
   font-weight: 600;
-  font-size: 0.6875rem;
   color: #0c75af;
   text-transform: uppercase;
 }
@@ -256,8 +255,8 @@ exports[`TableList | CellContent should render image cell type when element type
 <div>
   <div
     class="c0 c1 c2"
-    height="26px"
-    width="26px"
+    height="32px"
+    width="32px"
   >
     <span
       class="c3"
@@ -312,8 +311,8 @@ exports[`TableList | CellContent should render image cell type when element type
 
 .c0 {
   position: relative;
-  width: 1.625rem;
-  height: 1.625rem;
+  width: 2rem;
+  height: 2rem;
 }
 
 <div>
@@ -324,9 +323,9 @@ exports[`TableList | CellContent should render image cell type when element type
       <img
         alt="alternative alt"
         class="c1"
-        height="26px"
+        height="32px"
         src="michka-picture-url-thumbnail.jpeg"
-        width="26px"
+        width="32px"
       />
     </div>
   </span>
@@ -371,8 +370,8 @@ exports[`TableList | CellContent should render image cell type when element type
 .c0 {
   background: #eaf5ff;
   border-radius: 50%;
-  width: 26px;
-  height: 26px;
+  width: 32px;
+  height: 32px;
 }
 
 .c4 {
@@ -403,7 +402,6 @@ exports[`TableList | CellContent should render image cell type when element type
   font-size: 0.875rem;
   line-height: 1.43;
   font-weight: 600;
-  font-size: 0.6875rem;
   color: #0c75af;
   text-transform: uppercase;
 }
@@ -419,8 +417,8 @@ exports[`TableList | CellContent should render image cell type when element type
 <div>
   <div
     class="c0 c1 c2"
-    height="26px"
-    width="26px"
+    height="32px"
+    width="32px"
   >
     <span
       class="c3"

@@ -97,7 +97,6 @@ exports[`Application page renders and matches the snapshot 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
-  line-height: 1.14;
   color: #32324d;
 }
 
@@ -358,7 +357,6 @@ exports[`Application page renders and matches the snapshot 1`] = `
 .c23 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
-  gap: 0px;
 }
 
 .c24 {
@@ -486,6 +484,7 @@ exports[`Application page renders and matches the snapshot 1`] = `
                       v
                     </p>
                     <a
+                      aria-disabled="false"
                       class="c27 c28"
                       href="https://support.strapi.io/support/home"
                       rel="noreferrer noopener"
@@ -552,6 +551,7 @@ exports[`Application page renders and matches the snapshot 1`] = `
                     class="c0 "
                   >
                     <a
+                      aria-disabled="false"
                       class="c27 c28"
                       href="https://strapi.io/pricing-self-hosted"
                       rel="noreferrer noopener"

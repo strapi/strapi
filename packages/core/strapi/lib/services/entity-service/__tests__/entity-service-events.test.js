@@ -23,6 +23,7 @@ describe('Entity service triggers webhooks', () => {
         getModel: () => model,
       },
       db: {
+        transaction: (cb) => cb(),
         query: () => ({
           count: () => 0,
           create: ({ data }) => data,
