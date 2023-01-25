@@ -1,17 +1,4 @@
-const routes = [
-  // TODO check if feature enabled
-  {
-    async Component() {
-      const component = await import(
-        /* webpackChunkName: "admin-audit-logs" */ '../pages/AuditLogs/ProtectedListPage'
-      );
-
-      return component;
-    },
-    to: '/settings/audit-logs',
-    exact: true,
-  },
-];
+const routes = [];
 
 if (strapi.features.isEnabled(strapi.features.SSO)) {
   routes.push({
@@ -23,6 +10,20 @@ if (strapi.features.isEnabled(strapi.features.SSO)) {
       return component;
     },
     to: '/settings/single-sign-on',
+    exact: true,
+  });
+}
+
+if (strapi.features.isEnabled(strapi.features.auditLogs)) {
+  routes.push({
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "audit-logs-settings-page" */ '../pages/AuditLogs/ProtectedListPage'
+      );
+
+      return component;
+    },
+    to: '/settings/audit-logs',
     exact: true,
   });
 }
