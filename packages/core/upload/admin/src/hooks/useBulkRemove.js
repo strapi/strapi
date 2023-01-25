@@ -24,8 +24,6 @@ export const useBulkRemove = () => {
       return acc;
     }, {});
 
-    console.log('useBulkRemove new', url);
-
     return post(url, payload);
   };
 
