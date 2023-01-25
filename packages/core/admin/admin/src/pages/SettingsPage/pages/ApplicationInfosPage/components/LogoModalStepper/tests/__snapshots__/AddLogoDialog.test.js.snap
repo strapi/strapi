@@ -40,7 +40,6 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
-  line-height: 1.14;
   color: #32324d;
 }
 
@@ -611,7 +610,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
 `;
 
 exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and match snapshot 1`] = `
-.c26 {
+.c25 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -637,14 +636,6 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   line-height: 1.45;
   text-transform: uppercase;
   color: #666687;
-}
-
-.c24 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 1.14;
-  color: #32324d;
 }
 
 .c14 {
@@ -825,7 +816,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   margin-left: 8px;
 }
 
-.c25 {
+.c24 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -837,7 +828,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   padding-right: 16px;
 }
 
-.c25 .c0 {
+.c24 .c0 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -848,48 +839,48 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   align-items: center;
 }
 
-.c25 .c5 {
+.c24 .c5 {
   color: #ffffff;
 }
 
-.c25[aria-disabled='true'] {
+.c24[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c25[aria-disabled='true'] .c5 {
+.c24[aria-disabled='true'] .c5 {
   color: #666687;
 }
 
-.c25[aria-disabled='true'] svg > g,.c25[aria-disabled='true'] svg path {
+.c24[aria-disabled='true'] svg > g,.c24[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c25[aria-disabled='true']:active {
+.c24[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c25[aria-disabled='true']:active .c5 {
+.c24[aria-disabled='true']:active .c5 {
   color: #666687;
 }
 
-.c25[aria-disabled='true']:active svg > g,.c25[aria-disabled='true']:active svg path {
+.c24[aria-disabled='true']:active svg > g,.c24[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c25:hover {
+.c24:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c25:active {
+.c24:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c25 svg > g,
-.c25 svg path {
+.c24 svg > g,
+.c24 svg path {
   fill: #ffffff;
 }
 
@@ -1138,7 +1129,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
                   type="button"
                 >
                   <span
-                    class="c5 c24"
+                    class="c5 c14"
                   >
                     Cancel
                   </span>
@@ -1149,11 +1140,11 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
               >
                 <button
                   aria-disabled="false"
-                  class="c22 c25"
+                  class="c22 c24"
                   type="submit"
                 >
                   <span
-                    class="c5 c24"
+                    class="c5 c14"
                   >
                     Next
                   </span>
@@ -1166,7 +1157,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
     </div>
   </div>
   <div
-    class="c26"
+    class="c25"
   >
     <p
       aria-live="polite"

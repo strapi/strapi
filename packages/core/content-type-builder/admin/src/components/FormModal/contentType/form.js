@@ -15,19 +15,16 @@ const forms = {
       return {
         sections: [
           {
-            sectionTitle: {
-              id: getTrad('form.contentType.divider.draft-publish'),
-              defaultMessage: 'Draft/Publish',
-            },
             items: [
               {
                 intlLabel: {
                   id: getTrad('contentType.draftAndPublish.label'),
-                  defaultMessage: 'Draft/publish system',
+                  defaultMessage: 'Draft & publish',
                 },
                 description: {
                   id: getTrad('contentType.draftAndPublish.description'),
-                  defaultMessage: 'Write a draft version of each entry before publishing it',
+                  defaultMessage:
+                    'Allows writing a draft version of an entry, before it is published',
                 },
                 name: 'draftAndPublish',
                 type: 'toggle-draft-publish',
