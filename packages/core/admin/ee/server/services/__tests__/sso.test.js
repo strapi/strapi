@@ -5,8 +5,8 @@ jest.mock('@strapi/strapi/ee', () => ({
     isEnabled() {
       return true;
     },
-    getEnabled() {
-      return ['sso'];
+    list() {
+      return [{ name: 'sso' }];
     },
   },
 }));

@@ -146,6 +146,16 @@ const checkLicense = async ({ strapi }) => {
   }
 };
 
+const list = () => {
+  return (
+    ee.licenseInfo.features?.map((feature) =>
+      typeof feature === 'object' ? feature : { name: feature }
+    ) || []
+  );
+};
+
+const get = (featureName) => list().find((feature) => feature.name === featureName);
+
 module.exports = Object.freeze({
   init,
   checkLicense,
@@ -155,7 +165,8 @@ module.exports = Object.freeze({
   },
 
   features: Object.freeze({
-    isEnabled: (feature) => (ee.enabled && ee.licenseInfo.features?.includes(feature)) || false,
-    getEnabled: () => (ee.enabled && ee.licenseInfo.features) || [],
+    list,
+    get,
+    isEnabled: (featureName) => get(featureName) !== undefined,
   }),
 });
