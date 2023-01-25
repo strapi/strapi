@@ -198,38 +198,59 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
     return;
   }
 
+  // Handle databases that don't support window function ROW_NUMBER (here it's MySQL 5)
+  if (!strapi.db.dialect.supportsWindowFunctions()) {
+    await cleanOrderColumnsForOldDatabases({ id, attribute, db, inverseRelIds, transaction: trx });
+    return;
+  }
+
+  const { joinTable } = attribute;
+  const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } = joinTable;
+  const update = [];
+  const updateBinding = [];
+  const select = ['??'];
+  const selectBinding = ['id'];
+  const where = [];
+  const whereBinding = [];
+
+  if (hasOrderColumn(attribute) && id) {
+    update.push('?? = b.src_order');
+    updateBinding.push(orderColumnName);
+    select.push('ROW_NUMBER() OVER (PARTITION BY ?? ORDER BY ??) AS src_order');
+    selectBinding.push(joinColumn.name, orderColumnName);
+    where.push('?? = ?');
+    whereBinding.push(joinColumn.name, id);
+  }
+
+  if (hasInverseOrderColumn(attribute) && !isEmpty(inverseRelIds)) {
+    update.push('?? = b.inv_order');
+    updateBinding.push(inverseOrderColumnName);
+    select.push('ROW_NUMBER() OVER (PARTITION BY ?? ORDER BY ??) AS inv_order');
+    selectBinding.push(inverseJoinColumn.name, inverseOrderColumnName);
+    where.push(`?? IN (${inverseRelIds.map(() => '?').join(', ')})`);
+    whereBinding.push(inverseJoinColumn.name, ...inverseRelIds);
+  }
+
   switch (strapi.db.dialect.client) {
     case 'mysql':
-      await cleanOrderColumnsForInnoDB({ id, attribute, db, inverseRelIds, transaction: trx });
+      // Here it's MariaDB and MySQL 8
+      await db
+        .getConnection()
+        .raw(
+          `UPDATE
+            ?? as a,
+            (
+              SELECT ${select.join(', ')}
+              FROM ??
+              WHERE ${where.join(' OR ')}
+            ) AS b
+          SET ${update.join(', ')}
+          WHERE b.id = a.id`,
+          [joinTable.name, ...selectBinding, joinTable.name, ...whereBinding, ...updateBinding]
+        )
+        .transacting(trx);
       break;
     default: {
-      const { joinTable } = attribute;
-      const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } = joinTable;
-      const update = [];
-      const updateBinding = [];
-      const select = ['??'];
-      const selectBinding = ['id'];
-      const where = [];
-      const whereBinding = [];
-
-      if (hasOrderColumn(attribute) && id) {
-        update.push('?? = b.src_order');
-        updateBinding.push(orderColumnName);
-        select.push('ROW_NUMBER() OVER (PARTITION BY ?? ORDER BY ??) AS src_order');
-        selectBinding.push(joinColumn.name, orderColumnName);
-        where.push('?? = ?');
-        whereBinding.push(joinColumn.name, id);
-      }
-
-      if (hasInverseOrderColumn(attribute) && !isEmpty(inverseRelIds)) {
-        update.push('?? = b.inv_order');
-        updateBinding.push(inverseOrderColumnName);
-        select.push('ROW_NUMBER() OVER (PARTITION BY ?? ORDER BY ??) AS inv_order');
-        selectBinding.push(inverseJoinColumn.name, inverseOrderColumnName);
-        where.push(`?? IN (${inverseRelIds.map(() => '?').join(', ')})`);
-        whereBinding.push(inverseJoinColumn.name, ...inverseRelIds);
-      }
-
       const joinTableName = addSchema(joinTable.name);
 
       // raw query as knex doesn't allow updating from a subquery
@@ -267,9 +288,9 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
 
 /*
  * Ensure that orders are following a 1, 2, 3 sequence, without gap.
- * The use of a temporary table instead of a window function makes the query compatible with MySQL 5 and prevents some deadlocks to happen in innoDB databases
+ * The use of a session variable instead of a window function makes the query compatible with MySQL 5
  */
-const cleanOrderColumnsForInnoDB = async ({
+const cleanOrderColumnsForOldDatabases = async ({
   id,
   attribute,
   db,
