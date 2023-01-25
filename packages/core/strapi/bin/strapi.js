@@ -27,7 +27,7 @@ const {
   validateExcludeOnly,
 } = require('../lib/commands/transfer/utils');
 
-process.on('SIGINT', function () {
+process.on('SIGINT', () => {
   process.exit();
 });
 
