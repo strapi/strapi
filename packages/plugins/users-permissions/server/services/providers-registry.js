@@ -17,8 +17,8 @@ const getCognitoPayload = async ({ idToken, jwksUrl, purest }) => {
   const config = {
     cognito: {
       discovery: {
-        origin: jwksUrl,
-        path: '',
+        origin: jwksUrl.origin,
+        path: jwksUrl.pathname,
       },
     },
   };
@@ -62,7 +62,7 @@ const getInitialProviders = ({ purest }) => ({
       });
   },
   async cognito({ query, providers }) {
-    const jwksUrl = providers.cognito.jwksurl;
+    const jwksUrl = new URL(providers.cognito.jwksurl);
     const idToken = query.id_token;
     const tokenPayload = await getCognitoPayload({ idToken, jwksUrl, purest });
     return {
