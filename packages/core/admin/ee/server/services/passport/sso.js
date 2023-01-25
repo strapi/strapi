@@ -5,10 +5,11 @@ const { authEventsMapper } = require('../../../../server/services/passport');
 const createProviderRegistry = require('./provider-registry');
 
 const providerRegistry = createProviderRegistry();
+const errorMessage = 'SSO is disabled. Its functionnalities cannot be accessed.';
 
 const getStrategyCallbackURL = (providerName) => {
   if (!ee.features.isEnabled('sso')) {
-    throw new Error(`Cannot be executed`);
+    throw new Error(errorMessage);
   }
 
   return `/admin/connect/${providerName}`;
@@ -16,7 +17,7 @@ const getStrategyCallbackURL = (providerName) => {
 
 const syncProviderRegistryWithConfig = () => {
   if (!ee.features.isEnabled('sso')) {
-    throw new Error(`Cannot be executed`);
+    throw new Error(errorMessage);
   }
 
   const { providers = [] } = strapi.config.get('admin.auth', {});
