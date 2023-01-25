@@ -4,9 +4,8 @@ import { QueryClientProvider, QueryClient, useQueryClient } from 'react-query';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
-import { NotificationsProvider, useNotification } from '@strapi/helper-plugin';
+import { NotificationsProvider, useNotification, useFetchClient } from '@strapi/helper-plugin';
 
-import { axiosInstance } from '../../utils';
 import { useBulkRemove } from '../useBulkRemove';
 
 const FIXTURE_ASSETS = [
@@ -33,9 +32,12 @@ const FIXTURE_FOLDERS = [
   },
 ];
 
-jest.mock('../../utils', () => ({
-  ...jest.requireActual('../../utils'),
-  axiosInstance: {
+const notificationStatusMock = jest.fn();
+
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useNotification: () => notificationStatusMock,
+  useFetchClient: jest.fn().mockReturnValue({
     post: jest.fn((url, payload) => {
       const res = { data: { data: {} } };
 
@@ -49,14 +51,7 @@ jest.mock('../../utils', () => ({
 
       return Promise.resolve(res);
     }),
-  },
-}));
-
-const notificationStatusMock = jest.fn();
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: () => notificationStatusMock,
+  }),
 }));
 
 const refetchQueriesMock = jest.fn();
@@ -111,15 +106,13 @@ describe('useBulkRemove', () => {
       result: { current },
     } = await setup();
     const { remove } = current;
+    const { post } = useFetchClient();
 
     await act(async () => {
       await remove(FIXTURE_ASSETS);
     });
 
-    expect(axiosInstance.post).toHaveBeenCalledWith(
-      '/upload/actions/bulk-delete',
-      expect.any(Object)
-    );
+    expect(post).toHaveBeenCalledWith('/upload/actions/bulk-delete', expect.any(Object));
   });
 
   test('does properly collect all asset ids', async () => {
@@ -127,12 +120,13 @@ describe('useBulkRemove', () => {
       result: { current },
     } = await setup();
     const { remove } = current;
+    const { post } = useFetchClient();
 
     await act(async () => {
       await remove(FIXTURE_ASSETS);
     });
 
-    expect(axiosInstance.post).toHaveBeenCalledWith(expect.any(String), {
+    expect(post).toHaveBeenCalledWith(expect.any(String), {
       fileIds: FIXTURE_ASSETS.map(({ id }) => id),
     });
   });
@@ -142,12 +136,13 @@ describe('useBulkRemove', () => {
       result: { current },
     } = await setup();
     const { remove } = current;
+    const { post } = useFetchClient();
 
     await act(async () => {
       await remove(FIXTURE_FOLDERS);
     });
 
-    expect(axiosInstance.post).toHaveBeenCalledWith(expect.any(String), {
+    expect(post).toHaveBeenCalledWith(expect.any(String), {
       folderIds: FIXTURE_FOLDERS.map(({ id }) => id),
     });
   });
@@ -157,12 +152,13 @@ describe('useBulkRemove', () => {
       result: { current },
     } = await setup();
     const { remove } = current;
+    const { post } = useFetchClient();
 
     await act(async () => {
       await remove([...FIXTURE_FOLDERS, ...FIXTURE_ASSETS]);
     });
 
-    expect(axiosInstance.post).toHaveBeenCalledWith(expect.any(String), {
+    expect(post).toHaveBeenCalledWith(expect.any(String), {
       fileIds: FIXTURE_ASSETS.map(({ id }) => id),
       folderIds: FIXTURE_FOLDERS.map(({ id }) => id),
     });
