@@ -165,6 +165,8 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
     await fse.rename(assetsDirectory, backupDirectory);
     await fse.mkdir(assetsDirectory);
+    // Create a .gitkeep file to ensure the directory is not empty
+    await fse.outputFile(path.join(assetsDirectory, '.gitkeep'), '');
 
     return new Writable({
       objectMode: true,
