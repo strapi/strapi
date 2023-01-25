@@ -48,13 +48,6 @@ export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
           addQueryPrefix: true,
         })}`
       );
-      console.log(
-        'getAssets new',
-        `${dataRequestURL}${stringify(params, {
-          encode: false,
-          addQueryPrefix: true,
-        })}`
-      );
 
       notifyStatus(
         formatMessage({
