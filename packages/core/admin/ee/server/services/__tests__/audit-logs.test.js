@@ -8,11 +8,11 @@ jest.mock('../../../../server/register');
 describe('Audit logs service', () => {
   afterEach(() => {
     jest.resetModules();
-    jest.useRealTimers();
   });
 
   afterAll(() => {
     jest.resetAllMocks();
+    jest.useRealTimers();
   });
 
   describe('Init with audit logs disabled', () => {
