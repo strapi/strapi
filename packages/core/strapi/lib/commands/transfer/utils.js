@@ -103,14 +103,12 @@ const transferDataTypes = Object.keys(TransferGroupPresets);
 
 const excludeOption = new Option(
   '--exclude <comma-separated data types>',
-  `Exclude this data. Options used here override --only. Available types: ${transferDataTypes.join(
-    ','
-  )}`
+  `Exclude data using comma-separated types. Available types: ${transferDataTypes.join(',')}`
 ).argParser(getParseListWithChoices(transferDataTypes, 'Invalid options for "exclude"'));
 
 const onlyOption = new Option(
   '--only <command-separated data types>',
-  `Include only this data (plus schemas). Available types: ${transferDataTypes.join(',')}`
+  `Include only these types of data (plus schemas). Available types: ${transferDataTypes.join(',')}`
 ).argParser(getParseListWithChoices(transferDataTypes, 'Invalid options for "only"'));
 
 const validateExcludeOnly = (command) => {
