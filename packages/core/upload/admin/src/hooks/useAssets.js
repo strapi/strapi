@@ -1,16 +1,17 @@
 import { stringify } from 'qs';
 import { useQuery } from 'react-query';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import { useNotification } from '@strapi/helper-plugin';
+import { useNotification, useFetchClient } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import pluginId from '../pluginId';
-import { axiosInstance, getRequestUrl } from '../utils';
+import { getRequestUrl } from '../utils';
 
 export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { notifyStatus } = useNotifyAT();
+  const { get } = useFetchClient();
   const dataRequestURL = getRequestUrl('files');
   const { folder, _q, ...paramsExceptFolderAndQ } = query;
 
@@ -41,7 +42,14 @@ export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
 
   const getAssets = async () => {
     try {
-      const { data } = await axiosInstance.get(
+      const { data } = await get(
+        `${dataRequestURL}${stringify(params, {
+          encode: false,
+          addQueryPrefix: true,
+        })}`
+      );
+      console.log(
+        'getAssets new',
         `${dataRequestURL}${stringify(params, {
           encode: false,
           addQueryPrefix: true,
