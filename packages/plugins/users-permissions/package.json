@@ -31,6 +31,7 @@
     "@strapi/utils": "4.5.6",
     "bcryptjs": "2.4.3",
     "grant-koa": "5.4.8",
+    "jwk-to-pem": "2.0.5",
     "jsonwebtoken": "9.0.0",
     "koa": "^2.13.4",
     "koa2-ratelimit": "^1.1.2",
