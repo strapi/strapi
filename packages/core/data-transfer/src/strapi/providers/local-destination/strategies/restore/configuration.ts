@@ -42,7 +42,7 @@ export const createConfigurationWriteStream = async (
       _encoding: BufferEncoding,
       callback: (error?: Error | null) => void
     ) {
-      return transaction?.attach(async () => {
+      await transaction?.attach(async () => {
         try {
           await restoreConfigs(strapi, config);
         } catch (error) {

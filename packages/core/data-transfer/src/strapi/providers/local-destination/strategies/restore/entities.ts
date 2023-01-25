@@ -22,7 +22,7 @@ const createEntitiesWriteStream = (options: IEntitiesRestoreStreamOptions) => {
     objectMode: true,
 
     async write(entity: IEntity, _encoding, callback) {
-      return transaction?.attach(async () => {
+      await transaction?.attach(async () => {
         const { type, id, data } = entity;
         const { create, getDeepPopulateComponentLikeQuery } = query(type);
         const contentType = strapi.getModel(type);

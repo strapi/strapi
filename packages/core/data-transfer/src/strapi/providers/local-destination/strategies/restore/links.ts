@@ -11,7 +11,7 @@ export const createLinksWriteStream = (
   return new Writable({
     objectMode: true,
     async write(link: ILink, _encoding, callback) {
-      return transaction?.attach(async (trx) => {
+      await transaction?.attach(async (trx) => {
         const { left, right } = link;
         const query = createLinkQuery(strapi, trx);
 

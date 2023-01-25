@@ -187,7 +187,7 @@ class LocalFileSourceProvider implements ISourceProvider {
             return parts[0] === directory;
           },
 
-          onentry(entry) {
+          async onentry(entry) {
             const transforms = [
               // JSONL parser to read the data chunks one by one (line by line)
               parser(),
@@ -195,17 +195,15 @@ class LocalFileSourceProvider implements ISourceProvider {
               (line: { key: string; value: object }) => line.value,
             ];
 
-            entry
-              // Pipe transforms
-              .pipe(chain(transforms))
-              // Pipe the out stream to the whole pipeline
-              // DO NOT send the 'end' event when this entry has finished
-              // emitting data, so that it doesn't close the out stream
-              .pipe(outStream, { end: false });
+            const stream = entry.pipe(chain(transforms));
+
+            for await (const chunk of stream) {
+              outStream.write(chunk);
+            }
           },
         }),
       ],
-      () => {
+      async () => {
         // Manually send the 'end' event to the out stream
         // once every entry has finished streaming its content
         outStream.end();
