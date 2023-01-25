@@ -55,10 +55,8 @@
   "plugin.description.short": "Bu eklenti, hem Yönetim paneli hem de API üzerinden, farklı dillerdeki içeriği oluşturma, okuma ve güncelleme imkanı sağlar.",
   "plugin.name": "Uluslararasılaştırma",
   "plugin.schema.i18n.ensure-unique-localization": "Benzersiz alanlar yerelleştirilmelidir",
-  "plugin.schema.i18n.localized.description": "İçerikleri yerelleştirebilmenize imkan tanır",
   "plugin.schema.i18n.localized.description-content-type": "İçerikleri yerelleştirebilmenize imkan tanır",
   "plugin.schema.i18n.localized.description-field": "Bu alan farklı yerel ayarlarda farklı değer alabilir",
-  "plugin.schema.i18n.localized.label": "Bu İçerik-Tipi için yerelleştirmeyi etkinleştir",
   "plugin.schema.i18n.localized.label-content-type": "Bu İçerik-Tipi için yerelleştirmeyi etkinleştir",
   "plugin.schema.i18n.localized.label-field": "Bu Alan için yerelleştirmeyi etkinleştir"
 }

@@ -55,10 +55,8 @@
   "plugin.description.short": "This plugin enables to create, to read and to update content in different languages, both from the Admin Panel and from the API.",
   "plugin.name": "Internationalization",
   "plugin.schema.i18n.ensure-unique-localization": "Unique fields must be localized",
-  "plugin.schema.i18n.localized.description": "Allow you to have content in different locales",
-  "plugin.schema.i18n.localized.description-content-type": "Allow you to have content in different locales",
-  "plugin.schema.i18n.localized.description-field": "The field can have different values in each locale",
-  "plugin.schema.i18n.localized.label": "Enable localization for this Content-Type",
-  "plugin.schema.i18n.localized.label-content-type": "Enable localization for this Content-Type",
+  "plugin.schema.i18n.localized.description-content-type": "Allows translating an entry into different languages",
+  "plugin.schema.i18n.localized.description-field": "The field can have different values in each language",
+  "plugin.schema.i18n.localized.label-content-type": "Internationalization",
   "plugin.schema.i18n.localized.label-field": "Enable localization for this field"
 }

@@ -1,3 +1,4 @@
+import { Knex } from 'knex';
 import { LifecycleProvider } from './lifecycles';
 import { MigrationProvider } from './migrations';
 import { SchemaProvider } from './schema';
@@ -31,8 +32,7 @@ type AttributeOperators<T, K extends keyof T> = {
 
 export type WhereParams<T> = {
   [K in keyof T]?: T[K] | T[K][] | AttributeOperators<T, K>;
-} &
-  LogicalOperators<T>;
+} & LogicalOperators<T>;
 
 type Sortables<T> = {
   // check sortable
@@ -160,6 +160,15 @@ export interface Database {
   entityManager: EntityManager;
 
   query<T extends keyof AllTypes>(uid: T): QueryFromContentType<T>;
+  transaction(
+    cb?: (params: {
+      trx: Knex.Transaction;
+      rollback: () => Promise<void>;
+      commit: () => Promise<void>;
+    }) => Promise<unknown>
+  ):
+    | Promise<unknown>
+    | { get: () => Knex.Transaction; rollback: () => Promise<void>; commit: () => Promise<void> };
 }
 export class Database implements Database {
   static transformContentTypes(contentTypes: any[]): ModelConfig[];
