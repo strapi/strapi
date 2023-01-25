@@ -1,15 +1,11 @@
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
+import { Field, FieldLabel, FieldError, FieldHint, Stack } from '@strapi/design-system';
 import { prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
 import Editor from './Editor';
 import WysiwygNav from './WysiwygNav';
 import WysiwygFooter from './WysiwygFooter';
-import Hint from '../Hint';
 
 import {
   markdownHandler,
@@ -19,16 +15,6 @@ import {
   quoteAndCodeHandler,
 } from './utils/utils';
 import { EditorLayout } from './EditorLayout';
-
-const LabelAction = styled(Box)`
-  svg path {
-    fill: ${({ theme }) => theme.colors.neutral500};
-  }
-`;
-
-const TypographyAsterisk = styled(Typography)`
-  line-height: 0;
-`;
 
 const Wysiwyg = ({
   hint,
@@ -126,15 +112,9 @@ const Wysiwyg = ({
     : name;
 
   return (
-    <>
+    <Field error={error} hint={hint} required={required}>
       <Stack spacing={1}>
-        <Stack horizontal spacing={1}>
-          <Typography variant="pi" fontWeight="bold" textColor="neutral800">
-            {label}
-            {required && <TypographyAsterisk textColor="danger600">*</TypographyAsterisk>}
-          </Typography>
-          {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
-        </Stack>
+        {label && <FieldLabel action={labelAction}>{label}</FieldLabel>}
 
         <EditorLayout
           isExpandMode={isExpandMode}
@@ -167,21 +147,15 @@ const Wysiwyg = ({
 
           {!isExpandMode && <WysiwygFooter onToggleExpand={handleToggleExpand} />}
         </EditorLayout>
-        <Hint hint={hint} name={name} error={error} />
       </Stack>
 
-      {error && (
-        <Box paddingTop={1}>
-          <Typography variant="pi" textColor="danger600" data-strapi-field-error>
-            {error}
-          </Typography>
-        </Box>
-      )}
+      <FieldError />
+      <FieldHint />
 
       {mediaLibVisible && (
         <MediaLibraryDialog onClose={handleToggleMediaLib} onSelectAssets={handleSelectAssets} />
       )}
-    </>
+    </Field>
   );
 };
 

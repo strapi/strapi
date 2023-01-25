@@ -1,29 +1,32 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import Expand from '@strapi/icons/Expand';
+import { Flex, Typography } from '@strapi/design-system';
+import { Expand } from '@strapi/icons';
+
 import { ExpandButton } from './WysiwygStyles';
 
 const WysiwygFooter = ({ onToggleExpand }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Box padding={2} background="neutral100" hasRadius>
-      <Flex justifyContent="flex-end" alignItems="flex-end">
-        <ExpandButton id="expand" onClick={onToggleExpand}>
-          <Typography>
-            {formatMessage({
-              id: 'components.WysiwygBottomControls.fullscreen',
-              defaultMessage: 'Expand',
-            })}
-          </Typography>
-          <Expand />
-        </ExpandButton>
-      </Flex>
-    </Box>
+    <Flex
+      justifyContent="flex-end"
+      alignItems="flex-end"
+      padding={2}
+      background="neutral100"
+      hasRadius
+    >
+      <ExpandButton onClick={onToggleExpand}>
+        <Typography>
+          {formatMessage({
+            id: 'components.WysiwygBottomControls.fullscreen',
+            defaultMessage: 'Expand',
+          })}
+        </Typography>
+        <Expand />
+      </ExpandButton>
+    </Flex>
   );
 };
 
