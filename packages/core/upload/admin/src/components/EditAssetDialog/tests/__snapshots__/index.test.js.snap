@@ -73,7 +73,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   padding-right: 12px;
 }
 
-.c45 {
+.c44 {
   background: #212134;
   padding: 8px;
   border-radius: 4px;
@@ -177,15 +177,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c42 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 1.14;
-  color: #32324d;
-}
-
-.c47 {
+.c46 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
@@ -349,7 +341,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   fill: #32324d;
 }
 
-.c43 {
+.c42 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -361,6 +353,86 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   padding-right: 16px;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
+}
+
+.c42 .c2 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c42 .c8 {
+  color: #ffffff;
+}
+
+.c42[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c42[aria-disabled='true'] .c8 {
+  color: #666687;
+}
+
+.c42[aria-disabled='true'] svg > g,.c42[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c42[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c42[aria-disabled='true']:active .c8 {
+  color: #666687;
+}
+
+.c42[aria-disabled='true']:active svg > g,.c42[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c42:hover {
+  background-color: #ffffff;
+}
+
+.c42:active {
+  background-color: #ffffff;
+  border: 1px solid #4945ff;
+}
+
+.c42:active .c8 {
+  color: #4945ff;
+}
+
+.c42:active svg > g,
+.c42:active svg path {
+  fill: #4945ff;
+}
+
+.c42 .c8 {
+  color: #271fe0;
+}
+
+.c42 svg > g,
+.c42 svg path {
+  fill: #271fe0;
+}
+
+.c43 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: #4945ff;
+  border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
 .c43 .c2 {
@@ -405,101 +477,21 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 .c43:hover {
-  background-color: #ffffff;
-}
-
-.c43:active {
-  background-color: #ffffff;
-  border: 1px solid #4945ff;
-}
-
-.c43:active .c8 {
-  color: #4945ff;
-}
-
-.c43:active svg > g,
-.c43:active svg path {
-  fill: #4945ff;
-}
-
-.c43 .c8 {
-  color: #271fe0;
-}
-
-.c43 svg > g,
-.c43 svg path {
-  fill: #271fe0;
-}
-
-.c44 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
-  height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
-}
-
-.c44 .c2 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c44 .c8 {
-  color: #ffffff;
-}
-
-.c44[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c44[aria-disabled='true'] .c8 {
-  color: #666687;
-}
-
-.c44[aria-disabled='true'] svg > g,.c44[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c44[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c44[aria-disabled='true']:active .c8 {
-  color: #666687;
-}
-
-.c44[aria-disabled='true']:active svg > g,.c44[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c44:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c44:active {
+.c43:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c44 svg > g,
-.c44 svg path {
+.c43 svg > g,
+.c43 svg path {
   fill: #ffffff;
 }
 
-.c46 {
+.c45 {
   position: absolute;
   z-index: 4;
   display: none;
@@ -1263,9 +1255,9 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                               <div
                                 class=" css-1hb7zxy-IndicatorsContainer"
                               >
-                                <button
+                                <div
+                                  aria-hidden="true"
                                   class="c2 c36 c37 c38"
-                                  type="button"
                                 >
                                   <svg
                                     fill="none"
@@ -1281,7 +1273,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                                       fill-rule="evenodd"
                                     />
                                   </svg>
-                                </button>
+                                </div>
                               </div>
                             </div>
                             <input
@@ -1322,7 +1314,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                     type="button"
                   >
                     <span
-                      class="c8 c42"
+                      class="c8 c32"
                     >
                       Cancel
                     </span>
@@ -1333,11 +1325,11 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                 >
                   <button
                     aria-disabled="false"
-                    class="c10 c43"
+                    class="c10 c42"
                     type="button"
                   >
                     <span
-                      class="c8 c42"
+                      class="c8 c32"
                     >
                       Replace media
                     </span>
@@ -1355,11 +1347,11 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                   </div>
                   <button
                     aria-disabled="false"
-                    class="c10 c44"
+                    class="c10 c43"
                     type="button"
                   >
                     <span
-                      class="c8 c42"
+                      class="c8 c32"
                     >
                       Finish
                     </span>
@@ -1376,12 +1368,12 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
     data-react-portal="true"
   >
     <div
-      class="c2 c45 c46"
+      class="c2 c44 c45"
       id="tooltip-1"
       role="tooltip"
     >
       <p
-        class="c8 c47"
+        class="c8 c46"
       >
         Delete
       </p>
@@ -1391,12 +1383,12 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
     data-react-portal="true"
   >
     <div
-      class="c2 c45 c46"
+      class="c2 c44 c45"
       id="tooltip-3"
       role="tooltip"
     >
       <p
-        class="c8 c47"
+        class="c8 c46"
       >
         Download
       </p>
@@ -1406,12 +1398,12 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
     data-react-portal="true"
   >
     <div
-      class="c2 c45 c46"
+      class="c2 c44 c45"
       id="tooltip-5"
       role="tooltip"
     >
       <p
-        class="c8 c47"
+        class="c8 c46"
       >
         Copy link
       </p>
@@ -1421,12 +1413,12 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
     data-react-portal="true"
   >
     <div
-      class="c2 c45 c46"
+      class="c2 c44 c45"
       id="tooltip-7"
       role="tooltip"
     >
       <p
-        class="c8 c47"
+        class="c8 c46"
       >
         Crop
       </p>

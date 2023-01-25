@@ -33,14 +33,14 @@ const ComponentFixture = ({ children }) => (
   <QueryClientProvider client={client}>{children}</QueryClientProvider>
 );
 
-function setup(args, name = 'test') {
+const cacheKey = 'useRelation-cache-key';
+function setup(args) {
   return new Promise((resolve) => {
     act(() => {
       resolve(
         renderHook(
           () =>
-            useRelation(name, {
-              name,
+            useRelation(cacheKey, {
               relation: {
                 enabled: true,
                 endpoint: '/',
@@ -95,12 +95,10 @@ describe('useRelation', () => {
     });
 
     await waitFor(() =>
-      expect(onLoadMock).toBeCalledWith({
-        target: {
-          name: 'test',
-          value: [expect.objectContaining({ id: 1 }), expect.objectContaining({ id: 2 })],
-        },
-      })
+      expect(onLoadMock).toBeCalledWith([
+        expect.objectContaining({ id: 1 }),
+        expect.objectContaining({ id: 2 }),
+      ])
     );
   });
 
@@ -126,14 +124,7 @@ describe('useRelation', () => {
 
     await waitFor(() => expect(result.current.relations.isSuccess).toBe(true));
 
-    await waitFor(() =>
-      expect(onLoadMock).toBeCalledWith({
-        target: {
-          name: 'test',
-          value: [expect.objectContaining({ id: 1 })],
-        },
-      })
-    );
+    await waitFor(() => expect(onLoadMock).toBeCalledWith([expect.objectContaining({ id: 1 })]));
   });
 
   test('fetch relations with different limit', async () => {

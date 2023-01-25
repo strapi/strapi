@@ -37,6 +37,23 @@ jest.spyOn(axiosInstance, 'get').mockResolvedValue({
 
 jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01T08:00:00.000Z'));
 
+// TO BE REMOVED: we have added this mock to prevent errors in the snapshots caused by the Unicode space character
+// before AM/PM in the dates, after the introduction of node 18.13
+jest.mock('react-intl', () => {
+  const reactIntl = jest.requireActual('react-intl');
+  const intl = reactIntl.createIntl({
+    locale: 'en',
+  });
+
+  intl.formatDate = jest.fn(() => '11/15/2021');
+  intl.formatTime = jest.fn(() => '12:00 AM');
+
+  return {
+    ...reactIntl,
+    useIntl: () => intl,
+  };
+});
+
 const client = new QueryClient({
   defaultOptions: {
     queries: {

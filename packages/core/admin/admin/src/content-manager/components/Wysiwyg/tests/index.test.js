@@ -84,15 +84,7 @@ describe('Wysiwyg render and actions buttons', () => {
         color: #666687;
       }
 
-      .c28 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        line-height: 1.14;
-        color: #32324d;
-      }
-
-      .c34 {
+      .c33 {
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
@@ -119,7 +111,7 @@ describe('Wysiwyg render and actions buttons', () => {
         padding-left: 12px;
       }
 
-      .c31 {
+      .c30 {
         background: #f6f6f9;
         padding: 8px;
         border-radius: 4px;
@@ -171,7 +163,7 @@ describe('Wysiwyg render and actions buttons', () => {
         justify-content: space-between;
       }
 
-      .c32 {
+      .c31 {
         -webkit-align-items: flex-end;
         -webkit-box-align: flex-end;
         -ms-flex-align: flex-end;
@@ -493,16 +485,16 @@ describe('Wysiwyg render and actions buttons', () => {
         width: 100%;
       }
 
-      .c30 {
+      .c29 {
         cursor: auto;
         height: 100%;
       }
 
-      .c30 .CodeMirror-placeholder {
+      .c29 .CodeMirror-placeholder {
         color: #666687 !important;
       }
 
-      .c30 .CodeMirror {
+      .c29 .CodeMirror {
         font-size: 0.875rem;
         height: 290px;
         color: #32324d;
@@ -510,22 +502,22 @@ describe('Wysiwyg render and actions buttons', () => {
         font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell, 'Open Sans','Helvetica Neue',sans-serif;
       }
 
-      .c30 .CodeMirror-lines {
+      .c29 .CodeMirror-lines {
         padding: 12px 16px;
       }
 
-      .c30 .CodeMirror-scrollbar-filler,
-      .c30 .CodeMirror-gutter-filler {
+      .c29 .CodeMirror-scrollbar-filler,
+      .c29 .CodeMirror-gutter-filler {
         background-color: #ffffff;
       }
 
-      .c30 .CodeMirror-gutters {
+      .c29 .CodeMirror-gutters {
         border-right: 1px solid #ddd;
         background-color: #f7f7f7;
         white-space: nowrap;
       }
 
-      .c30 .CodeMirror-linenumber {
+      .c29 .CodeMirror-linenumber {
         padding: 0 3px 0 5px;
         min-width: 20px;
         text-align: right;
@@ -533,31 +525,31 @@ describe('Wysiwyg render and actions buttons', () => {
         white-space: nowrap;
       }
 
-      .c30 .CodeMirror-guttermarker {
+      .c29 .CodeMirror-guttermarker {
         color: black;
       }
 
-      .c30 .CodeMirror-guttermarker-subtle {
+      .c29 .CodeMirror-guttermarker-subtle {
         color: #999;
       }
 
-      .c30 .CodeMirror-cursor {
+      .c29 .CodeMirror-cursor {
         border-left: 1px solid black;
         border-right: none;
         width: 0;
       }
 
-      .c30 .CodeMirror div.CodeMirror-secondarycursor {
+      .c29 .CodeMirror div.CodeMirror-secondarycursor {
         border-left: 1px solid silver;
       }
 
-      .c30 .cm-fat-cursor .CodeMirror-cursor {
+      .c29 .cm-fat-cursor .CodeMirror-cursor {
         width: auto;
         border: 0 !important;
         background: #7e7;
       }
 
-      .c30 .cm-fat-cursor-mark {
+      .c29 .cm-fat-cursor-mark {
         background-color: rgba(20,255,20,0.5);
         -webkit-animation: blink 1.06s steps(1) infinite;
         -moz-animation: blink 1.06s steps(1) infinite;
@@ -565,7 +557,7 @@ describe('Wysiwyg render and actions buttons', () => {
         animation: blink 1.06s steps(1) infinite;
       }
 
-      .c30 .cm-animate-fat-cursor {
+      .c29 .cm-animate-fat-cursor {
         width: auto;
         border: 0;
         -webkit-animation: blink 1.06s steps(1) infinite;
@@ -575,13 +567,13 @@ describe('Wysiwyg render and actions buttons', () => {
         background-color: #7e7;
       }
 
-      .c30 .cm-tab {
+      .c29 .cm-tab {
         display: inline-block;
         -webkit-text-decoration: inherit;
         text-decoration: inherit;
       }
 
-      .c30 .CodeMirror-rulers {
+      .c29 .CodeMirror-rulers {
         position: absolute;
         left: 0;
         right: 0;
@@ -590,59 +582,59 @@ describe('Wysiwyg render and actions buttons', () => {
         overflow: hidden;
       }
 
-      .c30 .CodeMirror-ruler {
+      .c29 .CodeMirror-ruler {
         border-left: 1px solid #ccc;
         top: 0;
         bottom: 0;
         position: absolute;
       }
 
-      .c30 .cm-header,
-      .c30 .cm-strong {
+      .c29 .cm-header,
+      .c29 .cm-strong {
         font-weight: bold;
       }
 
-      .c30 .cm-em {
+      .c29 .cm-em {
         font-style: italic;
       }
 
-      .c30 .cm-link {
+      .c29 .cm-link {
         -webkit-text-decoration: underline;
         text-decoration: underline;
       }
 
-      .c30 .cm-strikethrough {
+      .c29 .cm-strikethrough {
         -webkit-text-decoration: line-through;
         text-decoration: line-through;
       }
 
-      .c30 .CodeMirror-composing {
+      .c29 .CodeMirror-composing {
         border-bottom: 2px solid;
       }
 
-      .c30 div.CodeMirror span.CodeMirror-matchingbracket {
+      .c29 div.CodeMirror span.CodeMirror-matchingbracket {
         color: #0b0;
       }
 
-      .c30 div.CodeMirror span.CodeMirror-nonmatchingbracket {
+      .c29 div.CodeMirror span.CodeMirror-nonmatchingbracket {
         color: #a22;
       }
 
-      .c30 .CodeMirror-matchingtag {
+      .c29 .CodeMirror-matchingtag {
         background: rgba(255,150,0,0.3);
       }
 
-      .c30 .CodeMirror-activeline-background {
+      .c29 .CodeMirror-activeline-background {
         background: #e8f2ff;
       }
 
-      .c30 .CodeMirror {
+      .c29 .CodeMirror {
         position: relative;
         overflow: hidden;
         background: #ffffff;
       }
 
-      .c30 .CodeMirror-scroll {
+      .c29 .CodeMirror-scroll {
         overflow: scroll !important;
         margin-bottom: -50px;
         margin-right: -50px;
@@ -652,47 +644,47 @@ describe('Wysiwyg render and actions buttons', () => {
         position: relative;
       }
 
-      .c30 .CodeMirror-sizer {
+      .c29 .CodeMirror-sizer {
         position: relative;
         border-right: 50px solid transparent;
       }
 
-      .c30 .CodeMirror-vscrollbar,
-      .c30 .CodeMirror-hscrollbar,
-      .c30 .CodeMirror-scrollbar-filler,
-      .c30 .CodeMirror-gutter-filler {
+      .c29 .CodeMirror-vscrollbar,
+      .c29 .CodeMirror-hscrollbar,
+      .c29 .CodeMirror-scrollbar-filler,
+      .c29 .CodeMirror-gutter-filler {
         position: absolute;
         z-index: 1;
         display: none;
         outline: none;
       }
 
-      .c30 .CodeMirror-vscrollbar {
+      .c29 .CodeMirror-vscrollbar {
         right: 0;
         top: 0;
         overflow-x: hidden;
         overflow-y: scroll;
       }
 
-      .c30 .CodeMirror-hscrollbar {
+      .c29 .CodeMirror-hscrollbar {
         bottom: 0;
         left: 0;
         overflow-y: hidden;
         overflow-x: scroll;
       }
 
-      .c30 .CodeMirror-scrollbar-filler {
+      .c29 .CodeMirror-scrollbar-filler {
         right: 0;
         bottom: 0;
       }
 
-      .c30 .CodeMirror-lines {
+      .c29 .CodeMirror-lines {
         cursor: text;
         min-height: 1px;
       }
 
-      .c30 .CodeMirror pre.CodeMirror-line,
-      .c30 .CodeMirror pre.CodeMirror-line-like {
+      .c29 .CodeMirror pre.CodeMirror-line,
+      .c29 .CodeMirror pre.CodeMirror-line-like {
         -moz-border-radius: 0;
         -webkit-border-radius: 0;
         border-radius: 0;
@@ -712,18 +704,18 @@ describe('Wysiwyg render and actions buttons', () => {
         font-variant-ligatures: contextual;
       }
 
-      .c30 .CodeMirror pre.CodeMirror-line-like {
+      .c29 .CodeMirror pre.CodeMirror-line-like {
         z-index: 2;
       }
 
-      .c30 .CodeMirror-wrap pre.CodeMirror-line,
-      .c30 .CodeMirror-wrap pre.CodeMirror-line-like {
+      .c29 .CodeMirror-wrap pre.CodeMirror-line,
+      .c29 .CodeMirror-wrap pre.CodeMirror-line-like {
         word-wrap: break-word;
         white-space: pre-wrap;
         word-break: normal;
       }
 
-      .c30 .CodeMirror-linebackground {
+      .c29 .CodeMirror-linebackground {
         position: absolute;
         left: 0;
         right: 0;
@@ -732,29 +724,29 @@ describe('Wysiwyg render and actions buttons', () => {
         z-index: 0;
       }
 
-      .c30 .CodeMirror-linewidget {
+      .c29 .CodeMirror-linewidget {
         position: relative;
         padding: 0.1px;
       }
 
-      .c30 .CodeMirror-rtl pre {
+      .c29 .CodeMirror-rtl pre {
         direction: rtl;
       }
 
-      .c30 .CodeMirror-code {
+      .c29 .CodeMirror-code {
         outline: none;
       }
 
-      .c30 .CodeMirror-scroll,
-      .c30 .CodeMirror-sizer,
-      .c30 .CodeMirror-gutter,
-      .c30 .CodeMirror-gutters,
-      .c30 .CodeMirror-linenumber {
+      .c29 .CodeMirror-scroll,
+      .c29 .CodeMirror-sizer,
+      .c29 .CodeMirror-gutter,
+      .c29 .CodeMirror-gutters,
+      .c29 .CodeMirror-linenumber {
         -moz-box-sizing: content-box;
         box-sizing: content-box;
       }
 
-      .c30 .CodeMirror-measure {
+      .c29 .CodeMirror-measure {
         position: absolute;
         width: 100%;
         height: 0;
@@ -762,54 +754,54 @@ describe('Wysiwyg render and actions buttons', () => {
         visibility: hidden;
       }
 
-      .c30 .CodeMirror-cursor {
+      .c29 .CodeMirror-cursor {
         position: absolute;
         pointer-events: none;
         border-color: #32324d;
       }
 
-      .c30 .CodeMirror-measure pre {
+      .c29 .CodeMirror-measure pre {
         position: static;
       }
 
-      .c30 div.CodeMirror-cursors {
+      .c29 div.CodeMirror-cursors {
         visibility: hidden;
         position: relative;
       }
 
-      .c30 div.CodeMirror-cursors + div {
+      .c29 div.CodeMirror-cursors + div {
         z-index: 0 !important;
       }
 
-      .c30 div.CodeMirror-dragcursors {
+      .c29 div.CodeMirror-dragcursors {
         visibility: visible;
       }
 
-      .c30 .CodeMirror-focused div.CodeMirror-cursors {
+      .c29 .CodeMirror-focused div.CodeMirror-cursors {
         visibility: visible;
       }
 
-      .c30 .CodeMirror-selected {
+      .c29 .CodeMirror-selected {
         background: #dcdce4;
       }
 
-      .c30 .CodeMirror-crosshair {
+      .c29 .CodeMirror-crosshair {
         cursor: crosshair;
       }
 
-      .c30 .cm-force-border {
+      .c29 .cm-force-border {
         padding-right: 0.1px;
       }
 
-      .c30 .cm-tab-wrap-hack:after {
+      .c29 .cm-tab-wrap-hack:after {
         content: '';
       }
 
-      .c30 span.CodeMirror-selectedtext {
+      .c29 span.CodeMirror-selectedtext {
         background: none;
       }
 
-      .c30 span {
+      .c29 span {
         color: #32324d !important;
       }
 
@@ -837,12 +829,12 @@ describe('Wysiwyg render and actions buttons', () => {
         height: 1.125rem;
       }
 
-      .c29 {
+      .c28 {
         position: relative;
         height: calc(100% - 48px);
       }
 
-      .c33 {
+      .c32 {
         background-color: transparent;
         border: none;
         -webkit-align-items: center;
@@ -851,11 +843,11 @@ describe('Wysiwyg render and actions buttons', () => {
         align-items: center;
       }
 
-      .c33 svg {
+      .c32 svg {
         margin-left: 8px;
       }
 
-      .c33 svg path {
+      .c32 svg path {
         fill: #4a4a6a;
         width: 0.75rem;
         height: 0.75rem;
@@ -898,7 +890,7 @@ describe('Wysiwyg render and actions buttons', () => {
                         aria-disabled="false"
                         aria-expanded="false"
                         aria-haspopup="listbox"
-                        aria-labelledby="selectTitle-label selectTitle-content"
+                        aria-labelledby="selectTitle selectTitle-label selectTitle-content"
                         class="c12"
                         id="selectTitle"
                         type="button"
@@ -973,7 +965,7 @@ describe('Wysiwyg render and actions buttons', () => {
                         fill="none"
                         focusable="false"
                         height="1em"
-                        viewBox="0 0 24"
+                        viewBox="0 0 24 24"
                         width="1em"
                         xmlns="http://www.w3.org/2000/svg"
                       >
@@ -1087,7 +1079,7 @@ describe('Wysiwyg render and actions buttons', () => {
                 type="button"
               >
                 <span
-                  class="c5 c28"
+                  class="c5 c6"
                 >
                   Preview mode
                 </span>
@@ -1095,10 +1087,10 @@ describe('Wysiwyg render and actions buttons', () => {
             </div>
           </div>
           <div
-            class="c29"
+            class="c28"
           >
             <div
-              class="c30"
+              class="c29"
             >
               <textarea
                 style="display: none;"
@@ -1197,19 +1189,18 @@ describe('Wysiwyg render and actions buttons', () => {
             </div>
           </div>
           <div
-            class="c0 c31"
+            class="c0 c30"
           >
             <div
-              class="c0 c32"
+              class="c0 c31"
             >
               <button
-                aria-disabled="false"
-                class="c21 c33"
+                class="c21 c32"
                 id="expand"
                 type="button"
               >
                 <span
-                  class="c5 c34"
+                  class="c5 c33"
                 >
                   Expand
                 </span>

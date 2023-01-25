@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
-import { getFileExtension, onRowClick, stopPropagation } from '@strapi/helper-plugin';
+import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { Flex } from '@strapi/design-system/Flex';
 import { IconButton } from '@strapi/design-system/IconButton';
@@ -35,18 +35,7 @@ export const TableRows = ({
   return (
     <Tbody>
       {rows.map((element) => {
-        const {
-          alternativeText,
-          id,
-          isSelectable,
-          name,
-          ext,
-          url,
-          mime,
-          folderURL,
-          formats,
-          type: elementType,
-        } = element;
+        const { id, isSelectable, name, folderURL, type: contentType } = element;
 
         const isSelected = !!selected.find((currentRow) => currentRow.id === id);
 
@@ -54,16 +43,16 @@ export const TableRows = ({
           <Tr
             key={id}
             {...onRowClick({
-              fn: () => handleRowClickFn(element, elementType, id),
+              fn: () => handleRowClickFn(element, contentType, id),
             })}
           >
             <Td {...stopPropagation}>
               <BaseCheckbox
                 aria-label={formatMessage(
                   {
-                    id: elementType === 'asset' ? 'list-assets-select' : 'list.folder.select',
+                    id: contentType === 'asset' ? 'list-assets-select' : 'list.folder.select',
                     defaultMessage:
-                      elementType === 'asset' ? 'Select {name} asset' : 'Select {name} folder',
+                      contentType === 'asset' ? 'Select {name} asset' : 'Select {name} folder',
                   },
                   { name }
                 )}
@@ -76,14 +65,10 @@ export const TableRows = ({
               return (
                 <Td key={name}>
                   <CellContent
-                    alternativeText={alternativeText}
-                    content={element[name]}
-                    fileExtension={getFileExtension(ext)}
-                    mime={mime}
+                    content={element}
                     cellType={cellType}
-                    elementType={elementType}
-                    thumbnailURL={formats?.thumbnail?.url}
-                    url={url}
+                    contentType={contentType}
+                    name={name}
                   />
                 </Td>
               );
@@ -91,7 +76,7 @@ export const TableRows = ({
 
             <Td {...stopPropagation}>
               <Flex justifyContent="flex-end">
-                {elementType === 'folder' && (
+                {contentType === 'folder' && (
                   <IconButton
                     forwardedAs={folderURL ? Link : undefined}
                     label={formatMessage({
@@ -111,7 +96,7 @@ export const TableRows = ({
                     defaultMessage: 'Edit',
                   })}
                   onClick={() =>
-                    elementType === 'asset' ? onEditAsset(element) : onEditFolder(element)
+                    contentType === 'asset' ? onEditAsset(element) : onEditFolder(element)
                   }
                   noBorder
                 >

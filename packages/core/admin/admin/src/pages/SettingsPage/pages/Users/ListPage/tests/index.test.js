@@ -279,7 +279,6 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
-        line-height: 1.14;
         color: #32324d;
       }
 
@@ -603,9 +602,9 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
       }
 
       .c33 {
-        margin: 0;
         height: 18px;
         min-width: 18px;
+        margin: 0;
         border-radius: 4px;
         border: 1px solid #c0c0cf;
         -webkit-appearance: none;
@@ -1376,7 +1375,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                         aria-expanded="false"
                         aria-haspopup="listbox"
                         aria-label="Entries per page"
-                        aria-labelledby="select-19-label select-19-content"
+                        aria-labelledby="select-19 select-19-label select-19-content"
                         class="c47"
                         id="select-19"
                         type="button"

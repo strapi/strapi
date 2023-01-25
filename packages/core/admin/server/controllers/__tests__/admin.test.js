@@ -32,7 +32,7 @@ describe('Admin Controller', () => {
               exists: jest.fn(() => true),
             },
             'project-settings': {
-              getProjectSettings: jest.fn(() => ({ menuLogo: null })),
+              getProjectSettings: jest.fn(() => ({ menuLogo: null, authLogo: null })),
             },
           },
         },
@@ -53,6 +53,7 @@ describe('Admin Controller', () => {
         uuid: 'foo',
         hasAdmin: true,
         menuLogo: null,
+        authLogo: null,
       });
     });
   });
