@@ -410,9 +410,7 @@ program
       thisCommand.opts().decompress = false;
     }
 
-    if (extname(file) === '.tar') {
-      // proceed as expected
-    } else {
+    if (extname(file) !== '.tar') {
       exitWith(
         1,
         `The file '${opts.file}' does not appear to be a valid Strapi data file. It must have an extension ending in .tar[.gz][.enc]`
