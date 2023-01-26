@@ -15,6 +15,44 @@ test.describe('Authentication', () => {
     });
   });
 
+  test.describe('Name Errors', () => {
+    test('required', async ({ page }) => {
+      expect(
+        await page.getByRole('textbox', { name: 'First name *' }).getAttribute('aria-required')
+      ).toBeTruthy();
+    });
+  });
+
+  test.describe('Email Errors', () => {
+    test('required', async ({ page }) => {
+      expect(
+        await page.getByRole('textbox', { name: 'Email *' }).getAttribute('aria-required')
+      ).toBeTruthy();
+    });
+
+    test('the value must be a lowercase string', async ({ page }) => {
+      await fillValidSignUpForm({ page });
+
+      const emailInput = page.getByRole('textbox', { name: 'Email *' });
+      await emailInput.fill('ADMIN@ADMIN.COM');
+      await page.getByRole('button', { name: "Let's start" }).click();
+
+      await expect(page.getByText('The value must be a lowercase string')).toBeVisible();
+      await expect(emailInput).toBeFocused();
+    });
+
+    test('the value must be a valid email address', async ({ page }) => {
+      await fillValidSignUpForm({ page });
+
+      const emailInput = page.getByRole('textbox', { name: 'Email *' });
+      await emailInput.fill('notanemail');
+      await page.getByRole('button', { name: "Let's start" }).click();
+
+      await expect(page.getByText('Value is an invalid email')).toBeVisible();
+      await expect(emailInput).toBeFocused();
+    });
+  });
+
   test.describe('Password Errors', () => {
     test('required', async ({ page }) => {
       const arePasswordsRequired = [
@@ -39,6 +77,34 @@ test.describe('Authentication', () => {
       await page.getByRole('button', { name: "Let's start" }).click();
 
       await expect(page.getByText('Password must contain at least one number')).toBeVisible();
+      await expect(passwordInput).toBeFocused();
+    });
+
+    test('must contain at least one uppercase character', async ({ page }) => {
+      await fillValidSignUpForm({ page });
+      const passwordInput = page.getByLabel('Password*', {
+        exact: true,
+      });
+      await passwordInput.fill('lowerca5e');
+
+      await page.getByRole('button', { name: "Let's start" }).click();
+
+      await expect(
+        page.getByText('Password must contain at least one uppercase character')
+      ).toBeVisible();
+      await expect(passwordInput).toBeFocused();
+    });
+
+    test('must be at least 8 characters long', async ({ page }) => {
+      await fillValidSignUpForm({ page });
+      const passwordInput = page.getByLabel('Password*', {
+        exact: true,
+      });
+      await passwordInput.fill('S4ort');
+
+      await page.getByRole('button', { name: "Let's start" }).click();
+
+      await expect(page.getByText('Value is shorter than the minimum')).toBeVisible();
       await expect(passwordInput).toBeFocused();
     });
 
