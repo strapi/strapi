@@ -7917,10 +7917,10 @@ better-opn@^2.1.1:
   dependencies:
     open "^7.0.3"
 
-better-sqlite3@7.6.2:
-  version "7.6.2"
-  resolved "https://registry.yarnpkg.com/better-sqlite3/-/better-sqlite3-7.6.2.tgz#47cd8cad5b9573cace535f950ac321166bc31384"
-  integrity sha512-S5zIU1Hink2AH4xPsN0W43T1/AJ5jrPh7Oy07ocuW/AKYYY02GWzz9NH0nbSMn/gw6fDZ5jZ1QsHt1BXAwJ6Lg==
+better-sqlite3@8.0.1:
+  version "8.0.1"
+  resolved "https://registry.yarnpkg.com/better-sqlite3/-/better-sqlite3-8.0.1.tgz#3a596d21fbcefadf36f94e126c5cf24d5697d0b8"
+  integrity sha512-JhTZjpyapA1icCEjIZB4TSSgkGdFgpWZA2Wszg7Cf4JwJwKQmbvuNnJBeR+EYG/Z29OXvR4G//Rbg31BW/Z7Yg==
   dependencies:
     bindings "^1.5.0"
     prebuild-install "^7.1.0"
@@ -17778,6 +17778,8 @@ path-case@^2.1.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/path-case/-/path-case-2.1.1.tgz#94b8037c372d3fe2906e465bb45e25d226e8eea5"
   integrity sha1-lLgDfDctP+KQbkZbtF4l0ibo7qU=
+  dependencies:
+    no-case "^2.2.0"
 
 path-dirname@^1.0.0:
   version "1.0.2"
