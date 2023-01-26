@@ -53,8 +53,6 @@ export const SettingsPage = () => {
           cancelToken: source.token,
         });
 
-        console.log('SettingsPage GET new', getRequestUrl('settings'));
-
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
           data,
@@ -89,7 +87,6 @@ export const SettingsPage = () => {
     dispatch({ type: 'ON_SUBMIT' });
 
     try {
-      console.log('SettingsPage PUT new', getRequestUrl('settings'));
       await put(getRequestUrl('settings'), modifiedData);
 
       dispatch({
