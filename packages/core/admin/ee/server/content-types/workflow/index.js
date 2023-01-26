@@ -10,7 +10,14 @@ module.exports = {
       pluralName: 'workflows',
       displayName: 'Workflow',
     },
-    pluginOptions: {},
+    pluginOptions: {
+      'content-manager': {
+        visible: false,
+      },
+      'content-type-builder': {
+        visible: false,
+      },
+    },
     options: {},
     attributes: {
       uid: {

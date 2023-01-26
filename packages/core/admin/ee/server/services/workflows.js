@@ -9,7 +9,6 @@ module.exports = ({ strapi }) => ({
   },
 
   findOne(id) {
-    const params = {};
-    return strapi.entityService.findOne(WORKFLOW_MODEL_UID, id, params);
+    return strapi.entityService.findOne(WORKFLOW_MODEL_UID, id, {});
   },
 });

@@ -16,7 +16,7 @@ module.exports = {
   async find(ctx) {
     const query = sanitizeWorkflowQuery(ctx.query);
 
-    const workflowService = getService('workflow');
+    const workflowService = getService('workflows');
     const results = await workflowService.find(query);
 
     ctx.body = {
@@ -30,7 +30,7 @@ module.exports = {
   async findOne(ctx) {
     const query = sanitizeWorkflowQuery(ctx.query);
 
-    const workflowService = getService('workflow');
+    const workflowService = getService('workflows');
     const data = await workflowService.findOne(query);
 
     ctx.body = {
