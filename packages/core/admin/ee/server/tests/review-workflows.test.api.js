@@ -2,23 +2,19 @@
 
 const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
 const { createAuthRequest, createRequest } = require('../../../../../../test/helpers/request');
+const { describeOnCondition } = require('../utils/test');
+const { STAGE_MODEL_UID, WORKFLOW_MODEL_UID } = require('../constants/workflows');
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
-if (edition === 'CE') {
-  test('Review-workflows (skipped)', () => {
-    expect(true).toBeTruthy();
-  });
-  return;
-}
-
-describe('Review workflows', () => {
+describeOnCondition(edition === 'EE')('Review workflows', () => {
   const requests = {
     public: null,
     admin: null,
   };
   let strapi;
   let hasRW;
+  let defaultStage;
   let defaultWorkflow;
 
   beforeAll(async () => {
@@ -29,7 +25,15 @@ describe('Review workflows', () => {
     requests.public = createRequest({ strapi });
     requests.admin = await createAuthRequest({ strapi });
 
-    defaultWorkflow = await strapi.query('admin::workflow').create({ data: {} });
+    defaultStage = await strapi.query(STAGE_MODEL_UID).create({
+      data: { name: 'Stage' },
+    });
+    defaultWorkflow = await strapi.query(WORKFLOW_MODEL_UID).create({
+      data: {
+        uid: 'workflow',
+        stages: [defaultStage.id],
+      },
+    });
   });
 
   afterAll(async () => {
@@ -61,6 +65,58 @@ describe('Review workflows', () => {
         expect(res.status).toBe(200);
         expect(res.body.data).toBeInstanceOf(Object);
         expect(res.body.data).toEqual(defaultWorkflow);
+      } else {
+        expect(res.status).toBe(404);
+        expect(res.body.data).toBeUndefined();
+      }
+    });
+  });
+
+  describe('Get workflow stages', () => {
+    test.each(Object.keys(requests))('It should be available for everyone (%s)', async (type) => {
+      const rq = requests[type];
+      const res = await rq.get('/admin/review-workflows/workflows?populate=stages');
+
+      if (hasRW) {
+        expect(res.status).toBe(200);
+        expect(Array.isArray(res.body.results)).toBeTruthy();
+        expect(res.body.results).toHaveLength(1);
+        expect(res.body.results[0].stages).toHaveLength(1);
+        expect(res.body.results[0].stages[0]).toEqual(defaultStage);
+      } else {
+        expect(res.status).toBe(404);
+        expect(Array.isArray(res.body)).toBeFalsy();
+      }
+    });
+  });
+
+  describe('Get stages', () => {
+    test.each(Object.keys(requests))('It should be available for everyone (%s)', async (type) => {
+      const rq = requests[type];
+      const res = await rq.get(`/admin/review-workflows/workflows/${defaultWorkflow.id}/stages`);
+
+      if (hasRW) {
+        expect(res.status).toBe(200);
+        expect(Array.isArray(res.body.results)).toBeTruthy();
+        expect(res.body.results).toHaveLength(1);
+      } else {
+        expect(res.status).toBe(404);
+        expect(Array.isArray(res.body)).toBeFalsy();
+      }
+    });
+  });
+
+  describe('Get stage by id', () => {
+    test.each(Object.keys(requests))('It should be available for everyone (%s)', async (type) => {
+      const rq = requests[type];
+      const res = await rq.get(
+        `/admin/review-workflows/workflows/${defaultWorkflow.id}/stages/${defaultStage.id}`
+      );
+
+      if (hasRW) {
+        expect(res.status).toBe(200);
+        expect(res.body.data).toBeInstanceOf(Object);
+        expect(res.body.data).toEqual(defaultStage);
       } else {
         expect(res.status).toBe(404);
         expect(res.body.data).toBeUndefined();
