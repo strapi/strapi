@@ -7,7 +7,7 @@ fi
 
 export ENV_PATH="$(pwd)/testApp/.env"
 export JWT_SECRET="aSecret"
-
+export NODE_OPTIONS="--max_old_space_size=4096"
 opts=($DB_OPTIONS)
 
 yarn run -s build:ts
