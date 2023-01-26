@@ -1,5 +1,6 @@
 const webpack = require('webpack');
 const { ESBuildMinifyPlugin } = require('esbuild-loader');
+const browserslistToEsbuild = require('browserslist-to-esbuild');
 
 const packageJson = require('./package.json');
 
@@ -30,7 +31,7 @@ const baseConfig = {
           loader: require.resolve('esbuild-loader'),
           options: {
             loader: 'jsx',
-            target: 'es2015',
+            target: browserslistToEsbuild(),
           },
         },
       },

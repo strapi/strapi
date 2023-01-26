@@ -228,6 +228,7 @@ module.exports = ({ strapi }) => ({
       const formats = await generateResponsiveFormats(fileData);
       if (Array.isArray(formats) && formats.length > 0) {
         for (const format of formats) {
+          // eslint-disable-next-line no-continue
           if (!format) continue;
           uploadPromises.push(uploadResponsiveFormat(format));
         }
