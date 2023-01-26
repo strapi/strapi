@@ -1,11 +1,11 @@
-const webpack = require('webpack');
-const { ESBuildMinifyPlugin } = require('esbuild-loader');
-const browserslistToEsbuild = require('browserslist-to-esbuild');
+const webpack = require("webpack");
+const { ESBuildMinifyPlugin } = require("esbuild-loader");
+const browserslistToEsbuild = require("browserslist-to-esbuild");
 
-const packageJson = require('./package.json');
+const packageJson = require("./package.json");
 
 const nodeModules = [];
-Object.keys(packageJson.peerDependencies).forEach((module) => {
+Object.keys(packageJson.dependencies).forEach((module) => {
   nodeModules.push(new RegExp(`^${module}(/.+)?$`));
 });
 
@@ -14,12 +14,12 @@ const baseConfig = {
   entry: `${__dirname}/lib/src/index.js`,
   externals: nodeModules,
   mode: process.env.NODE_ENV,
-  devtool: process.env.NODE_ENV === 'production' ? false : 'eval-source-map',
+  devtool: process.env.NODE_ENV === "production" ? false : "eval-source-map",
   optimization: {
-    minimize: process.env.NODE_ENV === 'production',
+    minimize: process.env.NODE_ENV === "production",
     minimizer: [
       new ESBuildMinifyPlugin({
-        target: 'es2015',
+        target: "es2015",
       }),
     ],
   },
@@ -28,16 +28,16 @@ const baseConfig = {
       {
         test: /\.m?jsx?$/,
         use: {
-          loader: require.resolve('esbuild-loader'),
+          loader: require.resolve("esbuild-loader"),
           options: {
-            loader: 'jsx',
+            loader: "jsx",
             target: browserslistToEsbuild(),
           },
         },
       },
       {
         test: /\.(png|svg|jpg|gif)$/,
-        type: 'asset',
+        type: "asset",
         parser: {
           dataUrlCondition: {
             maxSize: 8192,
@@ -47,12 +47,12 @@ const baseConfig = {
     ],
   },
   resolve: {
-    extensions: ['*', '.js'],
+    extensions: ["*", ".js"],
     cacheWithContext: false,
   },
   plugins: [
     new webpack.EnvironmentPlugin({
-      NODE_ENV: 'production',
+      NODE_ENV: "production",
     }),
   ],
 };
@@ -65,8 +65,8 @@ const config = [
       path: `${__dirname}/build`,
       filename: `helper-plugin.${process.env.NODE_ENV}.js`,
       library: {
-        name: 'helperPlugin',
-        type: 'umd',
+        name: "helperPlugin",
+        type: "umd",
       },
       umdNamedDefine: true,
     },
@@ -77,7 +77,7 @@ const config = [
       path: `${__dirname}/build`,
       filename: `helper-plugin.esm.js`,
       library: {
-        type: 'module',
+        type: "module",
       },
     },
     experiments: {
@@ -90,7 +90,7 @@ const config = [
       path: `${__dirname}/build`,
       filename: `helper-plugin.cjs.js`,
       library: {
-        type: 'commonjs',
+        type: "commonjs",
       },
     },
   },
