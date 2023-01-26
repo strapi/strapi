@@ -56,5 +56,17 @@ module.exports = {
       handler: 'workflows.findOne',
       config: { auth: false },
     },
+    {
+      method: 'GET',
+      path: '/review-workflows/workflows/:workflow_id/stages',
+      handler: 'stages.find',
+      config: { auth: false },
+    },
+    {
+      method: 'GET',
+      path: '/review-workflows/workflows/:workflow_id/stages/:stage_id',
+      handler: 'stages.findOne',
+      config: { auth: false },
+    },
   ],
 };

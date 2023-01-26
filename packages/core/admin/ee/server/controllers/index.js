@@ -6,4 +6,5 @@ module.exports = {
   role: require('./role'),
   user: require('./user'),
   workflows: require('./workflows'),
+  stages: require('./workflows/stages'),
 };
