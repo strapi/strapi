@@ -16,6 +16,18 @@ const user = userEvent.setup();
 
 jest.mock('../hooks/useAuditLogsData', () => jest.fn());
 
+// Codemirror inner dependency, reference: https://github.com/jsdom/jsdom/issues/3002
+// Otherwise it throws: TypeError: range(...).getBoundingClientRect is not a function
+document.createRange = () => {
+  const range = new Range();
+  range.getClientRects = jest.fn(() => ({
+    item: () => null,
+    length: 0,
+  }));
+
+  return range;
+};
+
 const mockUseQuery = jest.fn();
 jest.mock('react-query', () => {
   const actual = jest.requireActual('react-query');
@@ -70,6 +82,11 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
     jest.resetAllMocks();
   });
 
+  afterEach(() => {
+    // Clean up history after each test
+    history.location.search = '';
+  });
+
   it('should render page with right header details', () => {
     useAuditLogsData.mockReturnValue({
       auditLogs: {
@@ -85,7 +102,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
       /logs of all the activities that happened in your environment/i
     );
     expect(subTitle).toBeInTheDocument();
-    expect(screen.getByText(/Filters/i)).toBeInTheDocument();
+    expect(screen.getByText(/filters/i)).toBeInTheDocument();
   });
 
   it('should show a list of audit logs with all actions', async () => {
@@ -222,6 +239,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
     const rows = await waitFor(() => container.querySelector('tbody').querySelectorAll('tr'));
     expect(rows.length).toEqual(20);
   });
+
   it('should show the correct inputs for filtering', async () => {
     useAuditLogsData.mockReturnValue({
       auditLogs: {
@@ -244,6 +262,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
     expect(comboBoxInput).toBeVisible();
     expect(addFilterButton).toBeVisible();
   });
+
   it('should add filters to the query params', async () => {
     useAuditLogsData.mockReturnValue({
       auditLogs: {
@@ -253,16 +272,17 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
     });
 
     render(App);
-
+    // Open the filters popover
     const filtersButton = screen.getByRole('button', { name: /filters/i });
     await user.click(filtersButton);
-
+    // Click the combobox
     await user.click(screen.getByPlaceholderText(/select or enter a value/i));
-    user.selectOptions(screen.getByRole('listbox'), 'entry.create');
-
+    // Select an option
+    await user.click(screen.getByRole('option', { name: /create entry/i }));
+    // Apply the filter
     const addFilterButton = screen.getByRole('button', { name: /add filter/i });
     await user.click(addFilterButton);
 
-    expect(history.location.search).toBe('?filters[$and][0][action][$eq]=entry.create');
+    expect(history.location.search).toBe('?filters[$and][0][action][$eq]=entry.create&page=1');
   });
 });
