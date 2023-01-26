@@ -10,8 +10,6 @@ import type { DiagnosticReporter } from '../src/engine/diagnostic';
 
 export type TransferFilterPreset = 'content' | 'files' | 'config';
 
-export type TransferFilterPreset = 'content' | 'files' | 'config';
-
 /**
  * Defines the capabilities and properties of the transfer engine
  */
