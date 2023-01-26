@@ -28,16 +28,11 @@ function getCountFor(attributeName, entity, model) {
     case 'relation':
       return getCountForRelation(attributeName, entity, model);
     case 'component':
-      if (!entity) {
-        return null;
-      }
-
+      if (!entity) return null;
       if (attribute.repeatable) {
         return entity.map((component) => getDeepRelationsCount(component, attribute.component));
       }
-
       return getDeepRelationsCount(entity, attribute.component);
-
     case 'dynamiczone':
       return getCountForDZ(entity);
     default:
