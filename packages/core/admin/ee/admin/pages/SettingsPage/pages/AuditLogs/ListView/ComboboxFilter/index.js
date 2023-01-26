@@ -1,18 +1,29 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Combobox, ComboboxOption } from '@strapi/design-system/Combobox';
+import { createGlobalStyle } from 'styled-components';
+
+const GlobalOverflowAuto = createGlobalStyle`
+  // Prevent scroll on combobox click when the page has an overflow
+  html, body {
+    overflow: auto;
+  }
+`;
 
 const ComboboxFilter = ({ value, options, onChange }) => {
   return (
-    <Combobox aria-label="combobox input" value={value} onChange={onChange}>
-      {options.map(({ label, customValue }) => {
-        return (
-          <ComboboxOption key={customValue} value={customValue}>
-            {label}
-          </ComboboxOption>
-        );
-      })}
-    </Combobox>
+    <>
+      <GlobalOverflowAuto />
+      <Combobox aria-label="combobox input" value={value} onChange={onChange}>
+        {options.map(({ label, customValue }) => {
+          return (
+            <ComboboxOption key={customValue} value={customValue}>
+              {label}
+            </ComboboxOption>
+          );
+        })}
+      </Combobox>
+    </>
   );
 };
 
