@@ -3,7 +3,6 @@
 const _ = require('lodash');
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
 const dotenv = require('dotenv');
 const Knex = require('knex');
 const strapi = require('../../packages/core/strapi/lib');
@@ -63,7 +62,7 @@ function CreateDB(uuid) {
   }
 }
 
-function copyFolderRecursiveSync(source, target, noSkipBaseName) {
+async function copyFolderRecursiveSync(source, target, noSkipBaseName) {
   let files = [];
 
   // check if folder needs to be created or integrated
@@ -71,27 +70,35 @@ function copyFolderRecursiveSync(source, target, noSkipBaseName) {
   if (noSkipBaseName !== true) {
     targetFolder = target;
   }
-  if (!fs.existsSync(targetFolder)) {
-    fs.mkdirSync(targetFolder);
+  try {
+    await fs.promises.access(targetFolder);
+  } catch (error) {
+    await fs.promises.mkdir(targetFolder);
   }
 
   // copy
-  if (fs.lstatSync(source).isDirectory()) {
-    files = fs.readdirSync(source);
-    files.forEach(function (file) {
+  const sourcePath = await fs.promises.lstat(source);
+  if (sourcePath.isDirectory()) {
+    files = await fs.promises.readdir(source);
+    for (const file of files) {
       const curSource = path.join(source, file);
-      if (fs.lstatSync(curSource).isDirectory()) {
-        copyFolderRecursiveSync(curSource, targetFolder, true);
+      const curSourcePath = await fs.promises.lstat(curSource);
+      if (curSourcePath.isDirectory()) {
+        await copyFolderRecursiveSync(curSource, targetFolder, true);
       } else {
-        fs.copyFileSync(curSource, path.join(targetFolder, file));
+        await fs.promises.copyFile(curSource, path.join(targetFolder, file));
       }
-    });
+    }
   }
 }
-
+const runners = [];
 const createStrapiLoader = async () => {
-  const uuid = `strapi_${crypto.randomUUID().replace(/-/g, '')}`;
-  copyFolderRecursiveSync(`./testApps/testApp`, `./testApps/${uuid}`);
+  if (runners.includes(process.env.JEST_WORKER_ID)) {
+    return;
+  }
+  runners.push(process.env.JEST_WORKER_ID);
+  const uuid = `strapi_${process.env.JEST_WORKER_ID.replace(/-/g, '')}`;
+  await copyFolderRecursiveSync(`./testApps/testApp`, `./testApps/${uuid}`);
   CreateDB(uuid);
   // await generateTestApp({ appName: uuid, database: sqlite, changeDBFile: true });
   // read .env file as it could have been updated
