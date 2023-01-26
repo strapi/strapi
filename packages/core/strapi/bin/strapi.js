@@ -415,7 +415,7 @@ program
     } else {
       exitWith(
         1,
-        'The file does not appear to be a valid Strapi data file. It must have an extension ending in .tar[.gz][.enc]'
+        `The file '${opts.file}' does not appear to be a valid Strapi data file. It must have an extension ending in .tar[.gz][.enc]`
       );
     }
   })
