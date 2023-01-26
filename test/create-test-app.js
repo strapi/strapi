@@ -13,10 +13,10 @@ const databases = {
     connection: {
       host: '127.0.0.1',
       port: 5432,
-      database: 'strapi_test',
+      database: process.env.UUID,
       username: 'strapi',
       password: 'strapi',
-      schema: 'myschema',
+      schema: 'public',
     },
   },
   mysql: {

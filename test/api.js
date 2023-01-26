@@ -20,7 +20,7 @@ const databases = {
       database: 'strapi_test',
       username: 'strapi',
       password: 'strapi',
-      schema: 'myschema',
+      schema: 'public',
     },
   },
   mysql: {
@@ -93,7 +93,7 @@ yargs
     },
     (argv) => {
       const { database, generateApp = true } = argv;
-
+      process.env.DATABASE = database;
       main({ generateApp, database: databases[database] }, argv._);
     }
   )

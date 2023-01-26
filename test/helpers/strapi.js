@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const dotenv = require('dotenv');
+const Knex = require('knex');
 const strapi = require('../../packages/core/strapi/lib');
 const { createUtils } = require('./utils');
 
@@ -16,6 +17,51 @@ const superAdminCredentials = {
 };
 
 const superAdminLoginInfo = _.pick(superAdminCredentials, ['email', 'password']);
+
+const databases = {
+  postgres: {
+    client: 'postgres',
+    connection: {
+      connectionString: 'postgresql://strapi:strapi@127.0.0.1',
+    },
+  },
+  mysql: {
+    client: 'mysql',
+    connection: {
+      host: '127.0.0.1',
+      port: 3306,
+      database: 'strapi_test',
+      username: 'strapi',
+      password: 'strapi',
+    },
+  },
+  sqlite: {
+    client: 'sqlite',
+    connection: {
+      filename: './tmp/data.db',
+    },
+    useNullAsDefault: true,
+  },
+};
+
+function CreateDB(uuid) {
+  // You can dynamically pass the database name
+  // as a command-line argument, or obtain it from
+  // a .env file
+  async function main(uuid) {
+    console.log('Koekjes');
+    console.log(databases[process.env.DATABASE]);
+    const knex = Knex(databases[process.env.DATABASE]);
+
+    // Lets create our database if it does not exist
+    await knex.raw(`CREATE DATABASE ${uuid};`);
+    process.env.DATABASE_NAME = uuid;
+    // knex.destory();
+  }
+  if (process.env.DATABASE !== 'sqlite') {
+    main(uuid).catch(console.log);
+  }
+}
 
 function copyFolderRecursiveSync(source, target, noSkipBaseName) {
   let files = [];
@@ -44,8 +90,9 @@ function copyFolderRecursiveSync(source, target, noSkipBaseName) {
 }
 
 const createStrapiLoader = async () => {
-  const uuid = crypto.randomUUID();
+  const uuid = `strapi_${crypto.randomUUID().replace(/-/g, '')}`;
   copyFolderRecursiveSync(`./testApps/testApp`, `./testApps/${uuid}`);
+  CreateDB(uuid);
   // await generateTestApp({ appName: uuid, database: sqlite, changeDBFile: true });
   // read .env file as it could have been updated
   dotenv.config({ path: process.env.ENV_PATH });
