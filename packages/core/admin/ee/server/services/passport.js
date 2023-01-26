@@ -25,8 +25,5 @@ const getPassportStrategies = () => {
 
 module.exports = {
   getPassportStrategies,
+  ...sso,
 };
-
-if (features.isEnabled('sso')) {
-  Object.assign(module.exports, sso);
-}
