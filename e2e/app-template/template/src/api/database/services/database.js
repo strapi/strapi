@@ -10,7 +10,9 @@ module.exports = createCoreService('api::database.database', ({ strapi }) => {
       metadata.forEach((contentType) => {
         const tableName = contentType.tableName;
 
-        if (tableName.startsWith('strapi_')) return;
+        // We want to keep the core strapi settings as well as admin users +
+        // roles. Otherwise the test specs would require a lot of setup each time
+        if (tableName.startsWith('strapi_') || tableName.startsWith('admin_')) return;
 
         console.log('DUMPING TABLE', tableName);
 

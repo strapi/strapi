@@ -19,6 +19,9 @@ export const resetDatabaseAndImportDataFromPath = async (filePath) => {
   const destination = createRemoteStrapiDestinationProvider({
     url: new URL('http://localhost:1337/admin'),
     strategy: 'restore',
+    restore: {
+      entities: { exclude: ['admin::role'] },
+    },
   });
 
   const transferEngine = createTransferEngine(source, destination, {
