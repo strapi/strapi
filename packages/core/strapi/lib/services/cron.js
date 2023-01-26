@@ -37,6 +37,12 @@ const createCronService = () => {
       }
       return this;
     },
+    remove(name) {
+      const matchingJobsSpecs = jobsSpecs.filter(({ options }) => options.name === name);
+      matchingJobsSpecs.forEach(({ job }) => job.cancel());
+      jobsSpecs = jobsSpecs.filter(({ options }) => options.name !== name);
+      return this;
+    },
     start() {
       jobsSpecs.forEach(({ job, options }) => job.schedule(options));
       running = true;
