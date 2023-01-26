@@ -69,7 +69,6 @@ describe('Relations', () => {
 
   describe('Test manyToMany relation (article - tag) with Content Manager', () => {
     beforeAll(async () => {
-      await createStrapiLoader();
       data = {
         articles: [],
         tags: [],

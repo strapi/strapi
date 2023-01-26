@@ -38,7 +38,6 @@ describe('Create Strapi API End to End', () => {
 
   describe('Test manyToMany relation (article - tag) with Content Manager', () => {
     beforeAll(async () => {
-      await createStrapiLoader();
       data = {
         articles: [],
         tags: [],

@@ -281,7 +281,6 @@ describe('Uploads folder', () => {
 
   describe('Attach to an entity', () => {
     beforeAll(async () => {
-      await createStrapiLoader();
       const res = await rq({
         method: 'POST',
         url: '/dogs',
