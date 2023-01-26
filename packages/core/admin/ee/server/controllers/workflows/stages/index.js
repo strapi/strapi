@@ -1,11 +1,13 @@
 'use strict';
 
-const { pick, merge } = require('lodash/fp');
-const { getService } = require('../../../utils');
+const { merge } = require('lodash/fp');
+const { getService, mapObject } = require('../../../utils');
 
 function sanitizeStageQuery(query = {}) {
-  const picker = pick(['workflow_id', 'stage_id', 'populate']);
-  return picker(query);
+  return mapObject(query, {
+    pick: ['workflow_id', 'stage_id', 'populate'],
+    rename: { workflow_id: 'workflowId', stage_id: 'id' },
+  });
 }
 
 module.exports = {
@@ -19,7 +21,7 @@ module.exports = {
     const stagesService = getService('stages');
 
     const results = await stagesService.find({
-      workflowId: query.workflow_id,
+      workflowId: query.workflowId,
       populate: query.populate,
     });
 
@@ -36,8 +38,8 @@ module.exports = {
 
     const stagesService = getService('stages');
 
-    const data = await stagesService.findOne(query.stage_id, {
-      workflowId: query.workflow_id,
+    const data = await stagesService.findOne(query.id, {
+      workflowId: query.workflowId,
       populate: query.populate,
     });
 
