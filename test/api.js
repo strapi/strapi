@@ -7,7 +7,7 @@ const yargs = require('yargs');
 process.env.NODE_ENV = 'test';
 
 const appName = 'testApp';
-process.env.ENV_PATH = path.resolve(__dirname, '..', appName, '.env');
+process.env.ENV_PATH = path.resolve(__dirname, '../testApps', appName, '.env');
 
 const { cleanTestApp, generateTestApp } = require('./helpers/test-app-generator');
 
@@ -42,10 +42,7 @@ const databases = {
   },
 };
 
-const jestCmd =
-  'jest --config jest.config.api.js --verbose --runInBand --forceExit --detectOpenHandles'.split(
-    ' '
-  );
+const jestCmd = 'jest --config jest.config.api.js --verbose --forceExit'.split(' ');
 
 const runAllTests = async (args) => {
   return execa('yarn', [...jestCmd, ...args], {

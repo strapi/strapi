@@ -1,7 +1,7 @@
 'use strict';
 
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 const modelsUtils = require('../../../../../test/helpers/models');
 
@@ -115,6 +115,7 @@ describe.each([[false], [true]])('Relations, with d&p: %p', (withDraftAndPublish
   const addPublishedAtCheck = (value) => (withDraftAndPublish ? { publishedAt: value } : undefined);
 
   beforeAll(async () => {
+    await createStrapiLoader();
     await builder
       .addComponent(compo(false))
       .addContentTypes([productModel(withDraftAndPublish), shopModel(withDraftAndPublish)])

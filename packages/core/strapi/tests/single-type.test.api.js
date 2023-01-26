@@ -1,7 +1,7 @@
 'use strict';
 
 // Helpers.
-const { createStrapiInstance } = require('../../../../test/helpers/strapi');
+const { createStrapiInstance, createStrapiLoader } = require('../../../../test/helpers/strapi');
 const { createContentAPIRequest } = require('../../../../test/helpers/request');
 const { createTestBuilder } = require('../../../../test/helpers/builder');
 
@@ -26,6 +26,7 @@ const model = {
 
 describe('Content Manager single types', () => {
   beforeAll(async () => {
+    await createStrapiLoader();
     await builder.addContentType(model).build();
 
     strapi = await createStrapiInstance();

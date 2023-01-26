@@ -8,12 +8,11 @@ const generateNew = require('../../packages/generators/app/lib/generate-new');
 /* eslint-disable import/extensions */
 
 /**
- * Delete the testApp folder
- * @param {string} appName - name of the app / folder where the app is located
+ * Delete the testApps folder
  */
-const cleanTestApp = (appName) => {
+const cleanTestApp = () => {
   return new Promise((resolve, reject) => {
-    rimraf(path.resolve(appName), (err) => {
+    rimraf(path.resolve('testApps'), (err) => {
       if (err) reject(err);
       resolve();
     });
@@ -29,7 +28,7 @@ const cleanTestApp = (appName) => {
 const generateTestApp = async ({ appName, database }) => {
   const scope = {
     database,
-    rootPath: path.resolve(appName),
+    rootPath: path.resolve(`testApps/${appName}`),
     name: appName,
     // disable quickstart run app after creation
     runQuickstartApp: false,

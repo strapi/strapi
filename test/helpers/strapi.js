@@ -1,7 +1,8 @@
 'use strict';
 
-const path = require('path');
 const _ = require('lodash');
+const fs = require('fs');
+const crypto = require('crypto');
 const dotenv = require('dotenv');
 const strapi = require('../../packages/core/strapi/lib');
 const { createUtils } = require('./utils');
@@ -15,7 +16,15 @@ const superAdminCredentials = {
 
 const superAdminLoginInfo = _.pick(superAdminCredentials, ['email', 'password']);
 
-const TEST_APP_URL = path.resolve(__dirname, '../../testApp');
+const createStrapiLoader = async () => {
+  const uuid = crypto.randomUUID();
+  fs.cpSync(`./testApps/testApp`, `./testApps/${uuid}`, { recursive: true });
+  // await generateTestApp({ appName: uuid, database: sqlite, changeDBFile: true });
+  // read .env file as it could have been updated
+  dotenv.config({ path: process.env.ENV_PATH });
+  process.env.PORT = 0;
+  process.env.UUID = uuid;
+};
 
 const createStrapiInstance = async ({
   ensureSuperAdmin = true,
@@ -25,8 +34,8 @@ const createStrapiInstance = async ({
   // read .env file as it could have been updated
   dotenv.config({ path: process.env.ENV_PATH });
   const options = {
-    appDir: TEST_APP_URL,
-    distDir: TEST_APP_URL,
+    appDir: `./testApps/${process.env.UUID}`,
+    distDir: `./testApps/${process.env.UUID}`,
   };
   const instance = strapi(options);
 
@@ -56,6 +65,7 @@ const createStrapiInstance = async ({
 
 module.exports = {
   createStrapiInstance,
+  createStrapiLoader,
   superAdmin: {
     loginInfo: superAdminLoginInfo,
     credentials: superAdminCredentials,

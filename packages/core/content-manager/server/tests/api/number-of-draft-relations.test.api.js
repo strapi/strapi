@@ -1,6 +1,9 @@
 'use strict';
 
-const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
+const {
+  createStrapiInstance,
+  createStrapiLoader,
+} = require('../../../../../../test/helpers/strapi');
 const { createTestBuilder } = require('../../../../../../test/helpers/builder');
 const { createAuthRequest } = require('../../../../../../test/helpers/request');
 
@@ -109,6 +112,7 @@ const compoModel = {
 
 describe('CM API - Basic', () => {
   beforeAll(async () => {
+    await createStrapiLoader();
     await builder
       .addContentTypes([categoryDPModel, categoryModel])
       .addComponent(compoModel)

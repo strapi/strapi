@@ -1,7 +1,7 @@
 'use strict';
 
 // Test an API with all the possible filed types and simple filtering (no deep filtering, no relations)
-const { createStrapiInstance } = require('../../../../test/helpers/strapi');
+const { createStrapiInstance, createStrapiLoader } = require('../../../../test/helpers/strapi');
 const { createTestBuilder } = require('../../../../test/helpers/builder');
 const {
   createContentAPIRequest,
@@ -126,6 +126,7 @@ const bedFixtures = [
 
 describe('Search query', () => {
   beforeAll(async () => {
+    await createStrapiLoader();
     await builder.addContentType(bedModel).addFixtures(bedModel.singularName, bedFixtures).build();
 
     strapi = await createStrapiInstance();

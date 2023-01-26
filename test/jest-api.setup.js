@@ -2,7 +2,7 @@
 
 const isoDateRegex = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
 
-jest.setTimeout(60000);
+jest.setTimeout(120000);
 
 jest.mock('@strapi/provider-audit-logs-local', () => {
   return {

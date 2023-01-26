@@ -2,7 +2,7 @@
 
 // Test a simple default API with no relations
 
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
 const { createContentAPIRequest } = require('../../../../../test/helpers/request');
 
 let strapi;
@@ -18,6 +18,7 @@ const data = {};
 
 describe('Users API', () => {
   beforeAll(async () => {
+    await createStrapiLoader();
     strapi = await createStrapiInstance();
     rq = await createContentAPIRequest({ strapi });
   });

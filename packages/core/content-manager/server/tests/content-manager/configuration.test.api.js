@@ -2,7 +2,10 @@
 
 // Helpers.
 const { createTestBuilder } = require('../../../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
+const {
+  createStrapiInstance,
+  createStrapiLoader,
+} = require('../../../../../../test/helpers/strapi');
 const form = require('../../../../../../test/helpers/generators');
 const { createAuthRequest } = require('../../../../../../test/helpers/request');
 
@@ -18,6 +21,7 @@ const restart = async () => {
 
 describe('Content Manager - Configuration', () => {
   beforeAll(async () => {
+    await createStrapiLoader();
     await builder.addContentTypes([form.article]).build();
 
     strapi = await createStrapiInstance();

@@ -1,7 +1,7 @@
 'use strict';
 
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
 const { createContentAPIRequest } = require('../../../../../test/helpers/request');
 
 let builder;
@@ -45,6 +45,7 @@ const productWithCompoFixtures = [
 
 describe('Lifecycle - beforeDelete', () => {
   beforeAll(async () => {
+    await createStrapiLoader();
     builder = createTestBuilder();
 
     await builder

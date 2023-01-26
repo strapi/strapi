@@ -3,7 +3,10 @@
 const { propEq, omit } = require('lodash/fp');
 
 const { createTestBuilder } = require('../../../../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../../../../test/helpers/strapi');
+const {
+  createStrapiInstance,
+  createStrapiLoader,
+} = require('../../../../../../../test/helpers/strapi');
 const { createContentAPIRequest } = require('../../../../../../../test/helpers/request');
 
 const builder = createTestBuilder();
@@ -153,6 +156,7 @@ const fixtures = {
 
 describe('Populate filters', () => {
   beforeAll(async () => {
+    await createStrapiLoader();
     await builder
       .addComponent(schemas.components.foo)
       .addComponent(schemas.components.bar)

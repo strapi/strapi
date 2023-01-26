@@ -2,7 +2,7 @@
 
 // Test a simple default API with no relations
 
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 
 let strapi;
@@ -20,6 +20,7 @@ const internals = {
  **************************** */
 describe('Roles API', () => {
   beforeAll(async () => {
+    await createStrapiLoader();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
   });

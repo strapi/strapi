@@ -1,7 +1,7 @@
 'use strict';
 
 // Helpers.
-const { createStrapiInstance } = require('../../../../test/helpers/strapi');
+const { createStrapiInstance, createStrapiLoader } = require('../../../../test/helpers/strapi');
 const { createContentAPIRequest } = require('../../../../test/helpers/request');
 const { createTestBuilder } = require('../../../../test/helpers/builder');
 const modelsUtils = require('../../../../test/helpers/models');
@@ -20,6 +20,7 @@ let strapi;
 
 describe('Create Strapi API End to End', () => {
   beforeAll(async () => {
+    await createStrapiLoader();
     await builder
       .addContentTypes([form.article, form.tag, form.category, form.reference, form.product], {
         batch: true,
@@ -37,6 +38,7 @@ describe('Create Strapi API End to End', () => {
 
   describe('Test manyToMany relation (article - tag) with Content Manager', () => {
     beforeAll(async () => {
+      await createStrapiLoader();
       data = {
         articles: [],
         tags: [],

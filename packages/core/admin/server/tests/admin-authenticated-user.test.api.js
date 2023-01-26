@@ -1,7 +1,7 @@
 'use strict';
 
 // Helpers.
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest, createRequest } = require('../../../../../test/helpers/request');
 
 describe('Authenticated User', () => {
@@ -9,6 +9,7 @@ describe('Authenticated User', () => {
   let strapi;
 
   beforeAll(async () => {
+    await createStrapiLoader();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
   });

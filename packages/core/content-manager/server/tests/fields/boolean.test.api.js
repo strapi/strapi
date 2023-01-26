@@ -1,7 +1,10 @@
 'use strict';
 
 const { createTestBuilder } = require('../../../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
+const {
+  createStrapiInstance,
+  createStrapiLoader,
+} = require('../../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../../test/helpers/request');
 
 const builder = createTestBuilder();
@@ -21,6 +24,7 @@ const ct = {
 
 describe('Test type boolean', () => {
   beforeAll(async () => {
+    await createStrapiLoader();
     await builder.addContentType(ct).build();
 
     strapi = await createStrapiInstance();

@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
 const { createContentAPIRequest } = require('../../../../../test/helpers/request');
 
 let strapi;
@@ -70,6 +70,7 @@ describe('Not required dynamiczone', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
+    await createStrapiLoader();
     await builder
       .addComponent(components.singleMedia)
       .addComponent(components.multipleMedia)

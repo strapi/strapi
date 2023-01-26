@@ -1,7 +1,7 @@
 'use strict';
 
 const { omit } = require('lodash/fp');
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 const { createUtils } = require('../../../../../test/helpers/utils');
 
@@ -55,6 +55,7 @@ describe('Admin User CRUD (api)', () => {
 
   // Initialization Actions
   beforeAll(async () => {
+    await createStrapiLoader();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
     utils = createUtils(strapi);

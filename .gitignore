@@ -105,7 +105,7 @@ package-lock.json
 # Tests
 ############################
 
-testApp
+testApps
 coverage
 cypress/screenshots
 cypress/videos

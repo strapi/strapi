@@ -3,7 +3,7 @@
 const { isEmpty } = require('lodash/fp');
 
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
 const form = require('../../../../../test/helpers/generators');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 
@@ -50,6 +50,7 @@ const deleteFixtures = async () => {
 
 describe('Relations', () => {
   beforeAll(async () => {
+    await createStrapiLoader();
     await builder
       .addContentTypes(
         [form.article, form.tag, form.category, form.reference, form.articlewithtag],
@@ -68,6 +69,7 @@ describe('Relations', () => {
 
   describe('Test manyToMany relation (article - tag) with Content Manager', () => {
     beforeAll(async () => {
+      await createStrapiLoader();
       data = {
         articles: [],
         tags: [],

@@ -1,7 +1,7 @@
 'use strict';
 
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 const modelsUtils = require('../../../../../test/helpers/models');
 
@@ -45,6 +45,7 @@ const restart = async () => {
 
 describe('Migration - unique attribute', () => {
   beforeAll(async () => {
+    await createStrapiLoader();
     await builder.addContentType(dogModel).addFixtures(dogModel.singularName, dogs).build();
 
     strapi = await createStrapiInstance();

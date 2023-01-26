@@ -1,7 +1,7 @@
 'use strict';
 
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
 const { createContentAPIRequest } = require('../../../../../test/helpers/request');
 
 let strapi;
@@ -56,6 +56,7 @@ describe('Given a content type with a repeatable component and two entities crea
   let entity2;
 
   beforeAll(async () => {
+    await createStrapiLoader();
     await builder.addComponent(component).addContentType(ct).build();
 
     strapi = await createStrapiInstance();

@@ -1,7 +1,7 @@
 'use strict';
 
 // Helpers.
-const { createStrapiInstance } = require('../../../../test/helpers/strapi');
+const { createStrapiInstance, createStrapiLoader } = require('../../../../test/helpers/strapi');
 const { createAuthRequest, createRequest } = require('../../../../test/helpers/request');
 
 let strapi;
@@ -9,6 +9,7 @@ let authReq;
 
 describe('Test Graphql user service', () => {
   beforeAll(async () => {
+    await createStrapiLoader();
     strapi = await createStrapiInstance({ bypassAuth: false });
     authReq = await createAuthRequest({ strapi });
   });

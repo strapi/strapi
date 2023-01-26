@@ -6,7 +6,7 @@ const path = require('path');
 const { pick, map } = require('lodash/fp');
 
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 
 let strapi;
@@ -43,6 +43,7 @@ describe('Folder', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
+    await createStrapiLoader();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
   });

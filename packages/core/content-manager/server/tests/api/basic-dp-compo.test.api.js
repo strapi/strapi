@@ -3,7 +3,10 @@
 // Test a simple default API with no relations
 
 const { createTestBuilder } = require('../../../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
+const {
+  createStrapiInstance,
+  createStrapiLoader,
+} = require('../../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../../test/helpers/request');
 
 const builder = createTestBuilder();
@@ -52,6 +55,7 @@ const productWithCompoAndDP = {
 
 describe('CM API - Basic + compo + draftAndPublish', () => {
   beforeAll(async () => {
+    await createStrapiLoader();
     await builder.addComponent(compo).addContentType(productWithCompoAndDP).build();
 
     strapi = await createStrapiInstance();

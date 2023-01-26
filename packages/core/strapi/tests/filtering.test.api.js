@@ -2,7 +2,7 @@
 
 // Test an API with all the possible filed types and simple filtering (no deep filtering, no relations)
 const _ = require('lodash');
-const { createStrapiInstance } = require('../../../../test/helpers/strapi');
+const { createStrapiInstance, createStrapiLoader } = require('../../../../test/helpers/strapi');
 const { createTestBuilder } = require('../../../../test/helpers/builder');
 const {
   createContentAPIRequest,
@@ -96,6 +96,7 @@ const productFixtures = [
 
 describe('Filtering API', () => {
   beforeAll(async () => {
+    await createStrapiLoader();
     await builder
       .addContentType(product)
       .addFixtures(product.singularName, productFixtures)

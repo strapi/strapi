@@ -1,6 +1,9 @@
 'use strict';
 
-const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
+const {
+  createStrapiInstance,
+  createStrapiLoader,
+} = require('../../../../../../test/helpers/strapi');
 const { createAuthRequest, createRequest } = require('../../../../../../test/helpers/request');
 const { createUtils } = require('../../../../../../test/helpers/utils');
 
@@ -58,6 +61,7 @@ describe('Provider Login', () => {
   let hasSSO;
 
   beforeAll(async () => {
+    await createStrapiLoader();
     strapi = await createStrapiInstance();
     utils = createUtils(strapi);
     // eslint-disable-next-line node/no-extraneous-require
@@ -122,6 +126,7 @@ describe('Provider Login', () => {
     let newOptions;
 
     beforeAll(async () => {
+      await createStrapiLoader();
       const superAdminRole = await utils.getSuperAdminRole();
 
       newOptions = {

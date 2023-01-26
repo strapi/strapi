@@ -2,7 +2,7 @@
 
 // Helpers.
 const { createTestBuilder } = require('../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../test/helpers/strapi');
+const { createStrapiInstance, createStrapiLoader } = require('../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../test/helpers/request');
 
 const builder = createTestBuilder();
@@ -31,6 +31,7 @@ const recipesModel = {
 
 describe('Test Graphql API create localization', () => {
   beforeAll(async () => {
+    await createStrapiLoader();
     await builder.addContentType(recipesModel).build();
 
     strapi = await createStrapiInstance();

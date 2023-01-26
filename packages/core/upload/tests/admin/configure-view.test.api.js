@@ -2,7 +2,7 @@
 
 // Helpers.
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 const { createUtils } = require('../../../../../test/helpers/utils');
 
@@ -66,6 +66,7 @@ const endPoint = '/upload/configuration';
 
 describe('Configure Media Library View', () => {
   beforeAll(async () => {
+    await createStrapiLoader();
     await builder.addContentType(dogModel).build();
 
     strapi = await createStrapiInstance();

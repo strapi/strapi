@@ -1,6 +1,6 @@
 'use strict';
 
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
 const {
   createContentAPIRequest,
   transformToRESTResource,
@@ -93,6 +93,7 @@ describe('i18n - Content API', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
+    await createStrapiLoader();
     await builder
       .addContentTypes([homepageModel, categoryModel])
       .addFixtures('plugin::i18n.locale', [

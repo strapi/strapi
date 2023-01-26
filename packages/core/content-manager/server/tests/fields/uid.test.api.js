@@ -1,7 +1,10 @@
 'use strict';
 
 const { createTestBuilder } = require('../../../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
+const {
+  createStrapiInstance,
+  createStrapiLoader,
+} = require('../../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../../test/helpers/request');
 
 let strapi;
@@ -23,6 +26,7 @@ describe('Test type UID', () => {
     const builder = createTestBuilder();
 
     beforeAll(async () => {
+      await createStrapiLoader();
       await builder.addContentType(model).build();
 
       strapi = await createStrapiInstance();
@@ -99,6 +103,7 @@ describe('Test type UID', () => {
     const builder = createTestBuilder();
 
     beforeAll(async () => {
+      await createStrapiLoader();
       await builder.addContentType(model).build();
 
       strapi = await createStrapiInstance();

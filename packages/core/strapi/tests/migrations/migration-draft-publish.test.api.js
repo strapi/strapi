@@ -3,7 +3,7 @@
 const _ = require('lodash');
 
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 const modelsUtils = require('../../../../../test/helpers/models');
 
@@ -56,6 +56,7 @@ describe('Migration - draft and publish', () => {
     ['with table modifications', { town: { type: 'string' } }, { color: { type: 'string' } }],
   ])('%p', (testName, tableModification1, tableModification2) => {
     beforeAll(async () => {
+      await createStrapiLoader();
       builder = createTestBuilder();
 
       await builder.addContentType(dogModel).addFixtures(dogModel.singularName, dogs).build();
