@@ -4,7 +4,7 @@ const { pick } = require('lodash/fp');
 const { getService } = require('../../utils');
 
 function sanitizeWorkflowQuery(query = {}) {
-  const picker = pick(['id', 'populate']);
+  const picker = pick(['workflow_id', 'populate']);
   return picker(query);
 }
 
@@ -17,7 +17,9 @@ module.exports = {
     const query = sanitizeWorkflowQuery(ctx.query);
 
     const workflowService = getService('workflows');
-    const results = await workflowService.find(query);
+    const results = await workflowService.find({
+      populate: query.populate,
+    });
 
     ctx.body = {
       results,
@@ -31,7 +33,10 @@ module.exports = {
     const query = sanitizeWorkflowQuery(ctx.query);
 
     const workflowService = getService('workflows');
-    const data = await workflowService.findOne(query);
+
+    const data = await workflowService.findOne(query.workflow_id, {
+      populate: query.populate,
+    });
 
     ctx.body = {
       data,

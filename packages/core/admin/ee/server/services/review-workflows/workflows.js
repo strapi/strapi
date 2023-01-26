@@ -3,12 +3,13 @@
 const { WORKFLOW_MODEL_UID } = require('../../constants/workflows');
 
 module.exports = ({ strapi }) => ({
-  find(opts) {
-    const params = { ...opts };
+  find({ populate }) {
+    const params = { populate };
     return strapi.entityService.findMany(WORKFLOW_MODEL_UID, params);
   },
 
-  findOne(id) {
-    return strapi.entityService.findOne(WORKFLOW_MODEL_UID, id, {});
+  findOne(id, { populate }) {
+    const params = { populate };
+    return strapi.entityService.findOne(WORKFLOW_MODEL_UID, id, params);
   },
 });
