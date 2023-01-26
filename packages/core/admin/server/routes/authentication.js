@@ -46,4 +46,12 @@ module.exports = [
     handler: 'authentication.resetPassword',
     config: { auth: false },
   },
+  {
+    method: 'POST',
+    path: '/logout',
+    handler: 'authentication.logout',
+    config: {
+      policies: ['admin::isAuthenticatedAdmin'],
+    },
+  },
 ];

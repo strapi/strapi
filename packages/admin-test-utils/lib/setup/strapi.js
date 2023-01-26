@@ -17,7 +17,6 @@ global.strapi = {
   isEE: false,
   features: {
     SSO: 'sso',
-    allFeatures: [],
     isEnabled: () => false,
   },
   projectType: 'Community',

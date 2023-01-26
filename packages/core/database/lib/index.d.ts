@@ -158,6 +158,9 @@ export interface Database {
   lifecycles: LifecycleProvider;
   migrations: MigrationProvider;
   entityManager: EntityManager;
+  queryBuilder: any;
+  metadata: any;
+  connection: Knex;
 
   query<T extends keyof AllTypes>(uid: T): QueryFromContentType<T>;
   transaction(
