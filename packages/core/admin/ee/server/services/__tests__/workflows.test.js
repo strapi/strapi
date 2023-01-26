@@ -9,7 +9,7 @@ jest.mock('@strapi/strapi/lib/utils/ee', () => {
         return true;
       },
       getEnabled() {
-        return ['review-workflow'];
+        return ['review-workflows'];
       },
     },
   });
@@ -17,7 +17,7 @@ jest.mock('@strapi/strapi/lib/utils/ee', () => {
   return eeModule;
 });
 
-const workflowServiceFactory = require('../workflows');
+const workflowsServiceFactory = require('../review-workflows/workflows');
 const { WORKFLOW_MODEL_UID } = require('../../constants/workflows');
 
 const workflowMock = {
@@ -33,16 +33,16 @@ const strapiMock = {
   entityService: entityServiceMock,
 };
 
-const workflowService = workflowServiceFactory({ strapi: strapiMock });
+const workflowsService = workflowsServiceFactory({ strapi: strapiMock });
 
-describe('Workflow service', () => {
+describe('Workflows service', () => {
   afterEach(() => {
     jest.resetAllMocks();
   });
 
   describe('find', () => {
     test('Should call entityService with the right model UID and ID', async () => {
-      workflowService.find({ opt1: 1 });
+      workflowsService.find({ opt1: 1 });
 
       expect(entityServiceMock.findOne).not.toBeCalled();
       expect(entityServiceMock.findMany).toBeCalled();
@@ -51,7 +51,7 @@ describe('Workflow service', () => {
   });
   describe('findOne', () => {
     test('Should call entityService with the right model UID', async () => {
-      workflowService.findOne(1);
+      workflowsService.findOne(1);
 
       expect(entityServiceMock.findMany).not.toBeCalled();
       expect(entityServiceMock.findOne).toBeCalled();
