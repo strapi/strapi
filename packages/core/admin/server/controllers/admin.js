@@ -37,7 +37,7 @@ module.exports = {
   async getProjectType() {
     // FIXME
     try {
-      return { data: { isEE: strapi.EE, features: ee.features.getEnabled() } };
+      return { data: { isEE: strapi.EE, features: ee.features.list() } };
     } catch (err) {
       return { data: { isEE: false, features: [] } };
     }
