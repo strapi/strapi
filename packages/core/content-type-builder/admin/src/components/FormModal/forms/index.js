@@ -211,19 +211,17 @@ const forms = {
 
         return contentTypeForm.base.edit();
       },
-      advanced({ extensions, ...rest }) {
-        const baseForm = contentTypeForm.advanced.default(rest).sections;
+      advanced({ extensions }) {
+        const baseForm = contentTypeForm.advanced
+          .default()
+          .sections.map((section) => section.items)
+          .flat();
         const itemsToAdd = extensions.getAdvancedForm(['contentType']);
 
         return {
           sections: [
-            ...baseForm,
             {
-              sectionTitle: {
-                id: 'global.settings',
-                defaultMessage: 'Settings',
-              },
-              items: itemsToAdd,
+              items: [...baseForm, ...itemsToAdd],
             },
           ],
         };

@@ -4,6 +4,7 @@ const _ = require('lodash');
 const roleService = require('../role');
 const { SUPER_ADMIN_CODE } = require('../constants');
 const { create: createPermission, toPermission } = require('../../domain/permission');
+const createEventHub = require('../../../../strapi/lib/services/event-hub');
 
 describe('Role', () => {
   describe('create', () => {
@@ -13,6 +14,7 @@ describe('Role', () => {
 
       global.strapi = {
         query: () => ({ create: dbCreate, count: dbCount }),
+        eventHub: createEventHub(),
       };
 
       const input = {
@@ -137,6 +139,7 @@ describe('Role', () => {
 
       global.strapi = {
         query: () => ({ update: dbUpdate, count: dbCount }),
+        eventHub: createEventHub(),
       };
 
       const updatedRole = await roleService.update(
@@ -172,6 +175,7 @@ describe('Role', () => {
         query: () => ({ find: dbFind, findOne: dbFindOne, update: dbUpdate }),
         admin: { config: { superAdminCode: SUPER_ADMIN_CODE } },
         errors: { badRequest },
+        eventHub: createEventHub(),
       };
 
       await roleService.update({ id: 1 }, { code: 'new_code' });
@@ -223,6 +227,7 @@ describe('Role', () => {
           },
           config: { superAdminCode: SUPER_ADMIN_CODE },
         },
+        eventHub: createEventHub(),
       };
 
       const deletedRoles = await roleService.deleteByIds([role.id]);
@@ -275,6 +280,7 @@ describe('Role', () => {
           },
           config: { superAdminCode: SUPER_ADMIN_CODE },
         },
+        eventHub: createEventHub(),
       };
 
       const deletedRoles = await roleService.deleteByIds(rolesIds);
@@ -456,6 +462,7 @@ describe('Role', () => {
             user: { assignARoleToAll },
           },
         },
+        eventHub: createEventHub(),
       };
 
       await roleService.createRolesIfNoneExist();
@@ -656,6 +663,7 @@ describe('Role', () => {
             role: { getSuperAdmin },
           },
         },
+        eventHub: createEventHub(),
       };
 
       await roleService.resetSuperAdminPermissions();
@@ -689,6 +697,7 @@ describe('Role', () => {
             role: { getSuperAdmin },
           },
         },
+        eventHub: createEventHub(),
       };
 
       await roleService.assignPermissions(1, []);
@@ -724,6 +733,7 @@ describe('Role', () => {
             },
           },
         },
+        eventHub: createEventHub(),
       };
 
       const permissionsToAssign = [...permissions];
