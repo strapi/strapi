@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const fs = require('fs');
+const path = require('path');
 const crypto = require('crypto');
 const dotenv = require('dotenv');
 const strapi = require('../../packages/core/strapi/lib');
@@ -16,9 +17,35 @@ const superAdminCredentials = {
 
 const superAdminLoginInfo = _.pick(superAdminCredentials, ['email', 'password']);
 
+function copyFolderRecursiveSync(source, target, noSkipBaseName) {
+  let files = [];
+
+  // check if folder needs to be created or integrated
+  let targetFolder = path.join(target, path.basename(source));
+  if (noSkipBaseName !== true) {
+    targetFolder = target;
+  }
+  if (!fs.existsSync(targetFolder)) {
+    fs.mkdirSync(targetFolder);
+  }
+
+  // copy
+  if (fs.lstatSync(source).isDirectory()) {
+    files = fs.readdirSync(source);
+    files.forEach(function (file) {
+      const curSource = path.join(source, file);
+      if (fs.lstatSync(curSource).isDirectory()) {
+        copyFolderRecursiveSync(curSource, targetFolder, true);
+      } else {
+        fs.copyFileSync(curSource, path.join(targetFolder, file));
+      }
+    });
+  }
+}
+
 const createStrapiLoader = async () => {
   const uuid = crypto.randomUUID();
-  fs.cpSync(`./testApps/testApp`, `./testApps/${uuid}`, { recursive: true });
+  copyFolderRecursiveSync(`./testApps/testApp`, `./testApps/${uuid}`);
   // await generateTestApp({ appName: uuid, database: sqlite, changeDBFile: true });
   // read .env file as it could have been updated
   dotenv.config({ path: process.env.ENV_PATH });
