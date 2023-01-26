@@ -12,6 +12,16 @@ const fakeModels = {
       },
     },
   },
+  repeatableComponent: {
+    modelName: 'Fake repeatable component model',
+    attributes: {
+      repeatableComponentAttrName: {
+        type: 'component',
+        repeatable: true,
+        component: 'relationMTM',
+      },
+    },
+  },
   dynZone: {
     modelName: 'Fake dynamic zone model',
     attributes: {
@@ -49,18 +59,18 @@ const fakeModels = {
   },
 };
 
-describe('Count', () => {
-  describe('getDeepRelationsCount', () => {
-    beforeEach(() => {
-      global.strapi = {
-        getModel: jest.fn((uid) => fakeModels[uid]),
-      };
-    });
+describe('getDeepRelationsCount', () => {
+  beforeEach(() => {
+    global.strapi = {
+      getModel: jest.fn((uid) => fakeModels[uid]),
+    };
+  });
 
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
+  describe('relation fields', () => {
     test('with many to many', () => {
       const count = getDeepRelationsCount(
         {
@@ -102,7 +112,9 @@ describe('Count', () => {
         },
       });
     });
+  });
 
+  describe('media fields', () => {
     test('with media', () => {
       const mediaEntity = {
         mediaAttrName: { id: 1, name: 'img1' },
@@ -111,7 +123,9 @@ describe('Count', () => {
 
       expect(count).toEqual(mediaEntity);
     });
+  });
 
+  describe('component fields', () => {
     test('with component', () => {
       const count = getDeepRelationsCount(
         {
@@ -140,6 +154,53 @@ describe('Count', () => {
       });
     });
 
+    test('with empty component', () => {
+      const count = getDeepRelationsCount(
+        {
+          componentAttrName: null,
+        },
+        'component'
+      );
+
+      expect(count).toEqual({
+        componentAttrName: null,
+      });
+    });
+
+    test('with repeatable component', () => {
+      const count = getDeepRelationsCount(
+        {
+          repeatableComponentAttrName: [
+            {
+              relationAttrName: [
+                {
+                  id: 2,
+                  name: 'rel1',
+                },
+                {
+                  id: 7,
+                  name: 'rel2',
+                },
+              ],
+            },
+          ],
+        },
+        'repeatableComponent'
+      );
+
+      expect(count).toEqual({
+        repeatableComponentAttrName: [
+          {
+            relationAttrName: {
+              count: 2,
+            },
+          },
+        ],
+      });
+    });
+  });
+
+  describe('dynamic zone fields', () => {
     test('with dynamic zone', () => {
       const count = getDeepRelationsCount(
         {
