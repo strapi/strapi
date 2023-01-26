@@ -67,8 +67,6 @@ const isRelationsPopulateEnabled = () => {
   return strapi.config.get('server.webhooks.populateRelations', true);
 };
 
-const getCountDeepPopulate = (uid) => getDeepPopulate(uid, { countMany: true, countOne: true });
-
 /**
  * @type {import('./entity-manager').default}
  */
@@ -135,13 +133,14 @@ module.exports = ({ strapi }) => ({
 
     const params = {
       data: publishData,
-      populate: populateRelations ? getDeepPopulate(uid, {}) : getCountDeepPopulate(uid),
+      populate: populateRelations
+        ? getDeepPopulate(uid, {})
+        : getDeepPopulate(uid, { countMany: true, countOne: true }),
     };
 
     const entity = await strapi.entityService.create(uid, params);
 
-    // If relations were populated, load the entity again without populating them,
-    // to avoid performance issues
+    // If relations were populated, relations count will be returned instead of the array of relations.
     if (populateRelations) {
       return getDeepRelationsCount(entity, uid);
     }
@@ -155,7 +154,9 @@ module.exports = ({ strapi }) => ({
 
     const params = {
       data: publishData,
-      populate: populateRelations ? getDeepPopulate(uid, {}) : getCountDeepPopulate(uid),
+      populate: populateRelations
+        ? getDeepPopulate(uid, {})
+        : getDeepPopulate(uid, { countMany: true, countOne: true }),
     };
 
     const updatedEntity = await strapi.entityService.update(uid, entity.id, params);
@@ -171,7 +172,9 @@ module.exports = ({ strapi }) => ({
     const populateRelations = isRelationsPopulateEnabled(uid);
 
     const params = {
-      populate: populateRelations ? getDeepPopulate(uid, {}) : getCountDeepPopulate(uid),
+      populate: populateRelations
+        ? getDeepPopulate(uid, {})
+        : getDeepPopulate(uid, { countMany: true, countOne: true }),
     };
 
     const deletedEntity = await strapi.entityService.delete(uid, entity.id, params);
@@ -208,7 +211,9 @@ module.exports = ({ strapi }) => ({
 
     const params = {
       data,
-      populate: populateRelations ? getDeepPopulate(uid, {}) : getCountDeepPopulate(uid),
+      populate: populateRelations
+        ? getDeepPopulate(uid, {})
+        : getDeepPopulate(uid, { countMany: true, countOne: true }),
     };
 
     return strapi.entityService.update(uid, entity.id, params);
@@ -224,7 +229,9 @@ module.exports = ({ strapi }) => ({
 
     const params = {
       data,
-      populate: populateRelations ? getDeepPopulate(uid, {}) : getCountDeepPopulate(uid),
+      populate: populateRelations
+        ? getDeepPopulate(uid, {})
+        : getDeepPopulate(uid, { countMany: true, countOne: true }),
     };
 
     return strapi.entityService.update(uid, entity.id, params);
