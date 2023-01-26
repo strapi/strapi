@@ -114,7 +114,7 @@ class Strapi {
     this.eventHub = createEventHub();
     this.startupLogger = createStartupLogger(this);
     this.log = createLogger(this.config.get('logger', {}));
-    this.cron = createCronService();
+    this.cron = createCronService(this);
     this.telemetry = createTelemetry(this);
     this.requestContext = requestContext;
 
@@ -430,10 +430,8 @@ class Strapi {
       entityValidator: this.entityValidator,
     });
 
-    if (strapi.config.get('server.cron.enabled', true)) {
-      const cronTasks = this.config.get('server.cron.tasks', {});
-      this.cron.add(cronTasks);
-    }
+    const cronTasks = this.config.get('server.cron.tasks', {});
+    this.cron.add(cronTasks);
 
     this.telemetry.bootstrap();
 

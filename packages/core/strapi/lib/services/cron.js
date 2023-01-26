@@ -3,12 +3,15 @@
 const { Job } = require('node-schedule');
 const { isFunction } = require('lodash/fp');
 
-const createCronService = () => {
+const createCronService = (strapi) => {
   let jobsSpecs = [];
   let running = false;
 
   return {
     add(tasks = {}) {
+      if (!strapi.config.get('server.cron.enabled', false)) {
+        return this;
+      }
       for (const taskExpression of Object.keys(tasks)) {
         const taskValue = tasks[taskExpression];
 
