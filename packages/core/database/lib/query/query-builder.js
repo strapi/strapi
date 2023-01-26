@@ -2,7 +2,9 @@
 
 const _ = require('lodash/fp');
 
+const { DatabaseError } = require('../errors');
 const helpers = require('./helpers');
+const transactionCtx = require('../transaction-context');
 
 const createQueryBuilder = (uid, db, initialState = {}) => {
   const meta = db.metadata.get(uid);
@@ -472,10 +474,18 @@ const createQueryBuilder = (uid, db, initialState = {}) => {
       try {
         const qb = this.getKnexQuery();
 
+        if (transactionCtx.get()) {
+          qb.transacting(transactionCtx.get());
+        }
+
         const rows = await qb;
 
         if (state.populate && !_.isNil(rows)) {
-          await helpers.applyPopulate(_.castArray(rows), state.populate, { qb: this, uid, db });
+          await helpers.applyPopulate(_.castArray(rows), state.populate, {
+            qb: this,
+            uid,
+            db,
+          });
         }
 
         let results = rows;
@@ -487,6 +497,16 @@ const createQueryBuilder = (uid, db, initialState = {}) => {
       } catch (error) {
         db.dialect.transformErrors(error);
       }
+    },
+
+    stream({ mapResults = true } = {}) {
+      if (state.type === 'select') {
+        return new helpers.ReadableQuery({ qb: this, db, uid, mapResults });
+      }
+
+      throw new DatabaseError(
+        `query-builder.stream() has been called with an unsupported query type: "${state.type}"`
+      );
     },
   };
 };
