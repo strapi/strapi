@@ -10,11 +10,24 @@ module.exports = {
       pluralName: 'workflows',
       displayName: 'Workflow',
     },
-    pluginOptions: {},
     options: {},
+    pluginOptions: {
+      'content-manager': {
+        visible: true,
+      },
+      'content-type-builder': {
+        visible: true,
+      },
+    },
     attributes: {
       uid: {
         type: 'string',
+      },
+      stages: {
+        type: 'relation',
+        target: 'admin::workflow-stage',
+        relation: 'oneToMany',
+        mappedBy: 'workflow',
       },
     },
   },
