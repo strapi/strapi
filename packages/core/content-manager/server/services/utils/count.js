@@ -1,25 +1,22 @@
 'use strict';
 
-const { merge } = require('lodash/fp');
 const { isVisibleAttribute } = require('@strapi/utils').contentTypes;
 
 function getCountForRelation(attributeName, entity, model) {
-  const entityAttribute = entity[attributeName];
-
   // do not count createdBy, updatedBy, localizations etc.
   if (!isVisibleAttribute(model, attributeName)) {
-    return entityAttribute;
+    return entity;
   }
 
-  if (Array.isArray(entityAttribute)) {
-    return { count: entityAttribute.length };
+  if (Array.isArray(entity)) {
+    return { count: entity.length };
   }
 
-  return entityAttribute ? { count: 1 } : { count: 0 };
+  return entity ? { count: 1 } : { count: 0 };
 }
 
-function getCountForDZ(attributeName, entity) {
-  return entity[attributeName].map((component) => {
+function getCountForDZ(entity) {
+  return entity.map((component) => {
     return getDeepRelationsCount(component, component.__component);
   });
 }
@@ -29,19 +26,22 @@ function getCountFor(attributeName, entity, model) {
 
   switch (attribute?.type) {
     case 'relation':
-      return {
-        [attributeName]: getCountForRelation(attributeName, entity, model),
-      };
+      return getCountForRelation(attributeName, entity, model);
     case 'component':
-      return {
-        [attributeName]: getDeepRelationsCount(entity[attributeName], attribute.component),
-      };
+      if (!entity) {
+        return null;
+      }
+
+      if (attribute.repeatable) {
+        return entity.map((component) => getDeepRelationsCount(component, attribute.component));
+      }
+
+      return getDeepRelationsCount(entity, attribute.component);
+
     case 'dynamiczone':
-      return {
-        [attributeName]: getCountForDZ(attributeName, entity),
-      };
+      return getCountForDZ(entity);
     default:
-      return { [attributeName]: entity[attributeName] };
+      return entity;
   }
 }
 
@@ -49,7 +49,10 @@ const getDeepRelationsCount = (entity, uid) => {
   const model = strapi.getModel(uid);
 
   return Object.keys(entity).reduce(
-    (populateAcc, attributeName) => merge(populateAcc, getCountFor(attributeName, entity, model)),
+    (relationCountEntity, attributeName) =>
+      Object.assign(relationCountEntity, {
+        [attributeName]: getCountFor(attributeName, entity[attributeName], model),
+      }),
     {}
   );
 };
