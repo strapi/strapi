@@ -16,6 +16,28 @@ const omitComponentData = (contentType, data) => {
   return omit(componentAttributes, data);
 };
 
+/**
+ * Because of the way mysql works, making parallel requests can cause deadlocks.
+ * This function will run the requests sequentially if mysql is used.
+ */
+const mapAsyncDialects = async (array, func) => {
+  const results = [];
+
+  switch (strapi.db.dialect.client) {
+    case 'mysql': {
+      for (const elm of array) {
+        results.push(await func(elm));
+      }
+      break;
+    }
+    default:
+      results.push(...(await Promise.all(array.map(func))));
+      break;
+  }
+
+  return results;
+};
+
 // NOTE: we could generalize the logic to allow CRUD of relation directly in the DB layer
 const createComponents = async (uid, data) => {
   const { attributes = {} } = strapi.getModel(uid);
@@ -43,10 +65,9 @@ const createComponents = async (uid, data) => {
           throw new Error('Expected an array to create repeatable component');
         }
 
-        const components = [];
-        for (const value of componentValue) {
-          components.push(await createComponent(componentUID, value));
-        }
+        const components = await mapAsyncDialects(componentValue, (value) =>
+          createComponent(componentUID, value)
+        );
 
         componentBody[attributeName] = components.map(({ id }) => {
           return {
@@ -78,19 +99,16 @@ const createComponents = async (uid, data) => {
         throw new Error('Expected an array to create repeatable component');
       }
 
-      const dynamicZoneData = [];
-      for (const value of dynamiczoneValues) {
+      componentBody[attributeName] = await mapAsyncDialects(dynamiczoneValues, async (value) => {
         const { id } = await createComponent(value.__component, value);
-        dynamicZoneData.push({
+        return {
           id,
           __component: value.__component,
           __pivot: {
             field: attributeName,
           },
-        });
-      }
-
-      componentBody[attributeName] = dynamicZoneData;
+        };
+      });
 
       continue;
     }
@@ -139,10 +157,9 @@ const updateComponents = async (uid, entityToUpdate, data) => {
           throw new Error('Expected an array to create repeatable component');
         }
 
-        const components = [];
-        for (const value of componentValue) {
-          components.push(await updateOrCreateComponent(componentUID, value));
-        }
+        const components = await mapAsyncDialects(componentValue, (value) =>
+          updateOrCreateComponent(componentUID, value)
+        );
 
         componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }) => {
           return {
@@ -176,19 +193,17 @@ const updateComponents = async (uid, entityToUpdate, data) => {
         throw new Error('Expected an array to create repeatable component');
       }
 
-      const dynamicZoneData = [];
-      for (const value of dynamiczoneValues) {
+      componentBody[attributeName] = await mapAsyncDialects(dynamiczoneValues, async (value) => {
         const { id } = await updateOrCreateComponent(value.__component, value);
-        dynamicZoneData.push({
+
+        return {
           id,
           __component: value.__component,
           __pivot: {
             field: attributeName,
           },
-        });
-      }
-
-      componentBody[attributeName] = dynamicZoneData;
+        };
+      });
 
       continue;
     }
@@ -290,14 +305,18 @@ const deleteComponents = async (uid, entityToDelete, { loadComponents = true } =
 
       if (attribute.type === 'component') {
         const { component: componentUID } = attribute;
+
+        await mapAsyncDialects(_.castArray(value), (subValue) =>
+          deleteComponent(componentUID, subValue)
+        );
         for (const subValue of _.castArray(value)) {
           await deleteComponent(componentUID, subValue);
         }
       } else {
         // delete dynamic zone components
-        for (const subValue of _.castArray(value)) {
-          await deleteComponent(subValue.__component, subValue);
-        }
+        await mapAsyncDialects(_.castArray(value), (subValue) =>
+          deleteComponent(subValue.__component, subValue)
+        );
       }
 
       continue;
