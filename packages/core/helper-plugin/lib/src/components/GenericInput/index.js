@@ -139,7 +139,6 @@ const GenericInput = ({
     case 'json': {
       return (
         <JSONInput
-          {...rest}
           label={label}
           labelAction={labelAction}
           value={value}
