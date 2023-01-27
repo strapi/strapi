@@ -52,7 +52,7 @@ const getDisplayedFilters = ({ actionOptions, userOptions }) => {
         ],
         customInput: ComboboxFilter,
       },
-      fieldSchema: { type: 'relation', mainField: { name: 'id', schema: { type: 'integer' } } },
+      fieldSchema: { type: 'relation', mainField: { name: 'id' } },
     },
   ];
 };
