@@ -100,11 +100,11 @@ jobs:
   api_ce_pg:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[CE] API Integration (postgres, node: ${{ matrix.node }})'
+    name: '[CE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
         node: [14, 16, 18]
-        shard: [1/3, 2/3, 3/3]
+        shard: [1/2, 2/2]
     services:
       postgres:
         # Docker Hub image
@@ -142,11 +142,11 @@ jobs:
   api_ce_mysql:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[CE] API Integration (mysql, node: ${{ matrix.node }})'
+    name: '[CE] API Integration (mysql, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
         node: [14, 16, 18]
-        shard: [1/3, 2/3, 3/3]
+        shard: [1/2, 2/2]
     services:
       mysql:
         image: bitnami/mysql:latest
@@ -182,11 +182,11 @@ jobs:
   api_ce_mysql_5:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[CE] API Integration (mysql:5 , node: ${{ matrix.node }})'
+    name: '[CE] API Integration (mysql:5 , node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
         node: [14, 16, 18]
-        shard: [1/3, 2/3, 3/3]
+        shard: [1/2, 2/2]
     services:
       mysql:
         image: bitnami/mysql:5.7
@@ -221,11 +221,11 @@ jobs:
   api_ce_sqlite:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[CE] API Integration (sqlite: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }})'
+    name: '[CE] API Integration (sqlite: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
         node: [14, 16, 18]
-        shard: [1/3, 2/3, 3/3]
+        shard: [1/2, 2/2]
         sqlite_pkg: ['better-sqlite3', 'sqlite3', '@vscode/sqlite3']
     steps:
       - uses: actions/checkout@v3
@@ -248,14 +248,14 @@ jobs:
   api_ee_pg:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[EE] API Integration (postgres, node: ${{ matrix.node }})'
+    name: '[EE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     if: github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
         node: [14, 16, 18]
-        shard: [1/3, 2/3, 3/3]
+        shard: [1/2, 2/2]
     services:
       postgres:
         # Docker Hub image
@@ -294,14 +294,14 @@ jobs:
   api_ee_mysql:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[EE] API Integration (mysql, node: ${{ matrix.node }})'
+    name: '[EE] API Integration (mysql, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     if: github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
         node: [14, 16, 18]
-        shard: [1/3, 2/3, 3/3]
+        shard: [1/2, 2/2]
     services:
       mysql:
         image: bitnami/mysql:latest
@@ -338,14 +338,14 @@ jobs:
   api_ee_sqlite:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[EE] API Integration (sqlite: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }})'
+    name: '[EE] API Integration (sqlite: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     if: github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
         node: [14, 16, 18]
-        shard: [1/3, 2/3, 3/3]
+        shard: [1/2, 2/2]
         sqlite_pkg: ['better-sqlite3', 'sqlite3', '@vscode/sqlite3']
     steps:
       - uses: actions/checkout@v3
