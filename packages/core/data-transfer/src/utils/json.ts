@@ -19,12 +19,12 @@ export const diff = (a: unknown, b: unknown, ctx: Context = createContext()): Di
   // Define helpers
 
   const added = () => {
-    diffs.push({ kind: 'added', path, type: bType, value: b });
+    diffs.push({ kind: 'added', path, types: [aType, bType], values: [a, b] });
     return diffs;
   };
 
   const deleted = () => {
-    diffs.push({ kind: 'deleted', path, type: aType, value: a });
+    diffs.push({ kind: 'deleted', path, types: [aType, bType], values: [a, b] });
     return diffs;
   };
 
@@ -38,13 +38,23 @@ export const diff = (a: unknown, b: unknown, ctx: Context = createContext()): Di
     return diffs;
   };
 
-  if (aType === 'undefined') {
-    return added();
-  }
+  const dataType = () => {
+    diffs.push({
+      kind: 'dataType',
+      path,
+      types: [aType, bType],
+      values: [a, b],
+    });
+    return diffs;
+  };
 
-  if (bType === 'undefined') {
-    return deleted();
-  }
+  const isLooselyEqual = () => {
+    // eslint-disable-next-line eqeqeq
+    if (a == b) {
+      return true;
+    }
+    return false;
+  };
 
   if (isArray(a) && isArray(b)) {
     let k = 0;
@@ -77,17 +87,29 @@ export const diff = (a: unknown, b: unknown, ctx: Context = createContext()): Di
   }
 
   if (!isEqual(a, b)) {
+    if (isLooselyEqual()) {
+      return dataType();
+    }
+
+    if (aType === 'undefined') {
+      return added();
+    }
+
+    if (bType === 'undefined') {
+      return deleted();
+    }
+
     return modified();
   }
 
   return diffs;
 };
 
-export interface AddedDiff<T = unknown> {
+export interface AddedDiff<T = unknown, P = unknown> {
   kind: 'added';
   path: string[];
-  type: string;
-  value: T;
+  types: [string, string];
+  values: [T, P];
 }
 
 export interface ModifiedDiff<T = unknown, P = unknown> {
@@ -97,14 +119,21 @@ export interface ModifiedDiff<T = unknown, P = unknown> {
   values: [T, P];
 }
 
-export interface DeletedDiff<T = unknown> {
+export interface DeletedDiff<T = unknown, P = unknown> {
   kind: 'deleted';
   path: string[];
-  type: string;
-  value: T;
+  types: [string, string];
+  values: [T, P];
 }
 
-export type Diff = AddedDiff | ModifiedDiff | DeletedDiff;
+export interface DataTypeDiff<T = unknown, P = unknown> {
+  kind: 'dataType';
+  path: string[];
+  types: [string, string];
+  values: [T, P];
+}
+
+export type Diff = AddedDiff | ModifiedDiff | DeletedDiff | DataTypeDiff;
 
 export interface Context {
   path: string[];

@@ -9,15 +9,18 @@ const strategies = {
 
   // Diffs allowed on specific attributes properties
   strict(diffs: Diff[]) {
-    const isIgnorableDiff = ({ path }: Diff) => {
+    const isIgnorableDiff = (diff: Diff) => {
       return (
-        path.length === 3 &&
-        // Root property must be attributes
-        path[0] === 'attributes' &&
-        // Need a valid string attribute name
-        typeof path[1] === 'string' &&
-        // The diff must be on ignorable attribute properties
-        ['private', 'required', 'configurable'].includes(path[2])
+        // Ignore cases where one field is missing and the other is falsey
+        (diff.kind === 'dataType' && diff.types.includes('undefined')) ||
+        // Ignore cases where...
+        (diff.path.length === 3 &&
+          // Root property must be attributes
+          diff.path[0] === 'attributes' &&
+          // Need a valid string attribute name
+          typeof diff.path[1] === 'string' &&
+          // The diff must be on ignorable attribute properties
+          ['private', 'required', 'configurable'].includes(diff.path[2]))
       );
     };
 
