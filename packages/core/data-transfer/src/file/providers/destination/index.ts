@@ -12,7 +12,6 @@ import type {
   IDestinationProvider,
   IDestinationProviderTransferResults,
   IMetadata,
-  MaybePromise,
   ProviderType,
   Stream,
 } from '../../../../types';

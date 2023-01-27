@@ -154,13 +154,18 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
         chunk.stream
           .pipe(writableStream)
           .on('close', callback)
-          .on('error', async (error: Error) => {
+          .on('error', async (error: NodeJS.ErrnoException) => {
+            const errorMessage =
+              error.code === 'ENOSPC'
+                ? " Your server doesn't have space to proceed with the import. "
+                : ' ';
+
             try {
               await fse.rm(assetsDirectory, { recursive: true, force: true });
               await fse.rename(backupDirectory, assetsDirectory);
               this.destroy(
                 new Error(
-                  `There was an error during the transfer process. The original files have been restored to ${assetsDirectory}`
+                  `There was an error during the transfer process.${errorMessage}The original files have been restored to ${assetsDirectory}`
                 )
               );
             } catch (err) {
