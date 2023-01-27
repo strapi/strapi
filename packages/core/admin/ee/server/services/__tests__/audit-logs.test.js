@@ -32,6 +32,7 @@ describe('Audit logs service', () => {
         container: {
           register: mockRegister,
         },
+        isLoaded: true,
       };
 
       await eeAdminRegister({ strapi });
@@ -86,6 +87,7 @@ describe('Audit logs service', () => {
           };
         },
       },
+      isLoaded: true,
     };
 
     const mockSaveEvent = jest.fn();
