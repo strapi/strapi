@@ -21,12 +21,12 @@ const actionFieldsAreEqual = (a, b) => {
 };
 
 const haveSameFieldsAsOtherActions = (a, i, allActions) =>
-  allActions.slice(i + 1).every(b => actionFieldsAreEqual(a, b));
+  allActions.slice(i + 1).every((b) => actionFieldsAreEqual(a, b));
 
-const checkPermissionsAreBound = role =>
-  function(permissions) {
+const checkPermissionsAreBound = (role) =>
+  function (permissions) {
     const permsBySubject = _.groupBy(
-      permissions.filter(perm => BOUND_ACTIONS.includes(perm.action)),
+      permissions.filter((perm) => BOUND_ACTIONS.includes(perm.action)),
       'subject'
     );
 
@@ -34,12 +34,12 @@ const checkPermissionsAreBound = role =>
       const boundActions = getBoundActionsBySubject(role, subject);
       const missingActions =
         _.xor(
-          perms.map(p => p.action),
+          perms.map((p) => p.action),
           boundActions
         ).length !== 0;
       if (missingActions) return false;
 
-      const permsBoundByFields = perms.filter(p => BOUND_ACTIONS_FOR_FIELDS.includes(p.action));
+      const permsBoundByFields = perms.filter((p) => BOUND_ACTIONS_FOR_FIELDS.includes(p.action));
       const everyActionsHaveSameFields = _.every(permsBoundByFields, haveSameFieldsAsOtherActions);
       if (!everyActionsHaveSameFields) return false;
     }
@@ -47,15 +47,15 @@ const checkPermissionsAreBound = role =>
     return true;
   };
 
-const noPublishPermissionForAuthorRole = role =>
-  function(permissions) {
+const noPublishPermissionForAuthorRole = (role) =>
+  function (permissions) {
     const isAuthor = role.code === AUTHOR_CODE;
-    const hasPublishPermission = permissions.some(perm => perm.action === PUBLISH_ACTION);
+    const hasPublishPermission = permissions.some((perm) => perm.action === PUBLISH_ACTION);
 
     return !(isAuthor && hasPublishPermission);
   };
 
-const getUpdatePermissionsSchemas = role => [
+const getUpdatePermissionsSchemas = (role) => [
   validators.updatePermissions,
   yup.object().shape({ permissions: actionsExistSchema.clone() }),
   yup.object().shape({
@@ -100,12 +100,12 @@ const validatedUpdatePermissionsInput = async (permissions, role) => {
 
 // validatePermissionsExist
 
-const checkPermissionsExist = function(permissions) {
+const checkPermissionsExist = function (permissions) {
   const existingActions = getService('permission').actionProvider.values();
   const failIndex = permissions.findIndex(
-    permission =>
+    (permission) =>
       !existingActions.some(
-        action =>
+        (action) =>
           action.actionId === permission.action &&
           (action.section !== 'contentTypes' || action.subjects.includes(permission.subject))
       )

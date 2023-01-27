@@ -12,7 +12,7 @@ const createComponentSchema = (usedComponentNames, reservedNames, category) => {
       .test({
         name: 'nameAlreadyUsed',
         message: errorsTrads.unique,
-        test: value => {
+        test(value) {
           if (!value) {
             return false;
           }
@@ -25,7 +25,7 @@ const createComponentSchema = (usedComponentNames, reservedNames, category) => {
       .test({
         name: 'nameNotAllowed',
         message: getTrad('error.contentTypeName.reserved-name'),
-        test: value => {
+        test(value) {
           if (!value) {
             return false;
           }

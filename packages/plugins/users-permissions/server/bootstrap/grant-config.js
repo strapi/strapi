@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = baseURL => ({
+module.exports = (baseURL) => ({
   email: {
     enabled: true,
     icon: 'envelope',

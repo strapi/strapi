@@ -13,20 +13,20 @@ import init from './init';
 
 const UsersPermissions = forwardRef(({ permissions, routes }, ref) => {
   const { formatMessage } = useIntl();
-  const [state, dispatch] = useReducer(reducer, initialState, state =>
+  const [state, dispatch] = useReducer(reducer, initialState, (state) =>
     init(state, permissions, routes)
   );
 
   useImperativeHandle(ref, () => ({
-    getPermissions: () => {
+    getPermissions() {
       return {
         permissions: state.modifiedData,
       };
     },
-    resetForm: () => {
+    resetForm() {
       dispatch({ type: 'ON_RESET' });
     },
-    setFormAfterSubmit: () => {
+    setFormAfterSubmit() {
       dispatch({ type: 'ON_SUBMIT_SUCCEEDED' });
     },
   }));
@@ -45,7 +45,7 @@ const UsersPermissions = forwardRef(({ permissions, routes }, ref) => {
       value,
     });
 
-  const handleSelectedAction = actionToSelect =>
+  const handleSelectedAction = (actionToSelect) =>
     dispatch({
       type: 'SELECT_ACTION',
       actionToSelect,

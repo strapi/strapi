@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = destination => {
+module.exports = (destination) => {
   if (destination === 'api') {
     return `api/{{ api }}`;
   }

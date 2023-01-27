@@ -1,10 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTracking } from '@strapi/helper-plugin';
 
 import { stringify } from 'qs';
+import { useConfig } from './useConfig';
 
-const useModalQueryParams = initialState => {
+const useModalQueryParams = (initialState) => {
   const { trackUsage } = useTracking();
+  const {
+    config: { isLoading, isError, data: config },
+  } = useConfig();
+
   const [queryObject, setQueryObject] = useState({
     page: 1,
     sort: 'updatedAt:DESC',
@@ -15,37 +20,48 @@ const useModalQueryParams = initialState => {
     ...initialState,
   });
 
-  const handleChangeFilters = nextFilters => {
+  useEffect(() => {
+    if (isLoading || isError) {
+      return;
+    }
+    setQueryObject((prevQuery) => ({
+      ...prevQuery,
+      sort: config.sort,
+      pageSize: config.pageSize,
+    }));
+  }, [isLoading, isError, config]);
+
+  const handleChangeFilters = (nextFilters) => {
     trackUsage('didFilterMediaLibraryElements', {
       location: 'content-manager',
       filter: Object.keys(nextFilters[nextFilters.length - 1])[0],
     });
-    setQueryObject(prev => ({ ...prev, page: 1, filters: { $and: nextFilters } }));
+    setQueryObject((prev) => ({ ...prev, page: 1, filters: { $and: nextFilters } }));
   };
 
-  const handleChangePageSize = pageSize => {
-    setQueryObject(prev => ({ ...prev, pageSize: parseInt(pageSize, 10), page: 1 }));
+  const handleChangePageSize = (pageSize) => {
+    setQueryObject((prev) => ({ ...prev, pageSize: parseInt(pageSize, 10), page: 1 }));
   };
 
-  const handeChangePage = page => {
-    setQueryObject(prev => ({ ...prev, page }));
+  const handeChangePage = (page) => {
+    setQueryObject((prev) => ({ ...prev, page }));
   };
 
-  const handleChangeSort = sort => {
+  const handleChangeSort = (sort) => {
     trackUsage('didSortMediaLibraryElements', {
       location: 'content-manager',
       sort,
     });
-    setQueryObject(prev => ({ ...prev, sort }));
+    setQueryObject((prev) => ({ ...prev, sort }));
   };
 
-  const handleChangeSearch = _q => {
+  const handleChangeSearch = (_q) => {
     if (_q) {
-      setQueryObject(prev => ({ ...prev, _q, page: 1 }));
+      setQueryObject((prev) => ({ ...prev, _q, page: 1 }));
     } else {
       const newState = { page: 1 };
 
-      Object.keys(queryObject).forEach(key => {
+      Object.keys(queryObject).forEach((key) => {
         if (!['page', '_q'].includes(key)) {
           newState[key] = queryObject[key];
         }
@@ -55,8 +71,8 @@ const useModalQueryParams = initialState => {
     }
   };
 
-  const handleChangeFolder = folder => {
-    setQueryObject(prev => ({ ...prev, folder: folder ?? null }));
+  const handleChangeFolder = (folder) => {
+    setQueryObject((prev) => ({ ...prev, folder: folder ?? null }));
   };
 
   return [

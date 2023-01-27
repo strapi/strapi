@@ -1,8 +1,11 @@
 'use strict';
 
-// needed for regenerator-runtime
-// (ES7 generator support is required by redux-saga)
-require('@babel/polyfill');
+// See https://github.com/swc-project/swc/issues/6460
+// SWC is not able to include the core-js polyfill
+// relieably, which causes flaky tests on node@14.
+// On theory this should be solved by the `env` transform
+// configuration of @swc/jest
+require('core-js/actual');
 
 const noop = () => {};
 // eslint-disable-next-line no-undef

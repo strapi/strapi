@@ -1,15 +1,13 @@
 import { omit, get } from 'lodash';
 
 const formatLayoutToApi = ({ layouts, metadatas, ...rest }) => {
-  const list = layouts.list.map(obj => {
+  const list = layouts.list.map((obj) => {
     if (obj.name) {
       return obj.name;
     }
 
     return obj;
   });
-  const editRelations = layouts.editRelations.map(({ name }) => name);
-
   const formattedMetadatas = Object.keys(metadatas).reduce((acc, current) => {
     const currentMetadatas = get(metadatas, [current], {});
     let editMetadatas = currentMetadatas.edit;
@@ -27,7 +25,7 @@ const formatLayoutToApi = ({ layouts, metadatas, ...rest }) => {
     };
   }, {});
 
-  const edit = layouts.edit.map(row =>
+  const edit = layouts.edit.map((row) =>
     row.map(({ name, size }) => ({
       name,
       size,
@@ -36,7 +34,7 @@ const formatLayoutToApi = ({ layouts, metadatas, ...rest }) => {
 
   return {
     ...rest,
-    layouts: { edit, editRelations, list },
+    layouts: { edit, list },
     metadatas: formattedMetadatas,
   };
 };

@@ -6,7 +6,7 @@ const publicationState = require('./publication-state');
 const filters = require('./filters');
 const error = require('./error');
 
-module.exports = context => () => {
+module.exports = (context) => () => {
   const { strapi } = context;
 
   const { KINDS } = strapi.plugin('graphql').service('constants');

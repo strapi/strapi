@@ -27,7 +27,7 @@ const TimeScalar = new GraphQLScalarType({
       throw new ValidationError('Time cannot represent non string type');
     }
 
-    const value = ast.value;
+    const { value } = ast;
 
     return parseType({ type: 'time', value });
   },

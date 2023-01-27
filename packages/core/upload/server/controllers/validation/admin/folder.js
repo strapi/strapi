@@ -9,8 +9,8 @@ const { folderExists } = require('./utils');
 const NO_SLASH_REGEX = /^[^/]+$/;
 const NO_SPACES_AROUND = /^(?! ).+(?<! )$/;
 
-const isNameUniqueInFolder = id =>
-  async function(name) {
+const isNameUniqueInFolder = (id) =>
+  async function (name) {
     const { exists } = getService('folder');
     const filters = { name, parent: this.parent.parent || null };
     if (id) {
@@ -44,7 +44,7 @@ const validateCreateFolderSchema = yup
   .noUnknown()
   .required();
 
-const validateUpdateFolderSchema = id =>
+const validateUpdateFolderSchema = (id) =>
   yup
     .object()
     .shape({
@@ -62,28 +62,30 @@ const validateUpdateFolderSchema = id =>
         .strapiID()
         .nullable()
         .test('folder-exists', 'parent folder does not exist', folderExists)
-        .test('dont-move-inside-self', 'folder cannot be moved inside itself', async function(
-          parent
-        ) {
-          if (isNil(parent)) return true;
+        .test(
+          'dont-move-inside-self',
+          'folder cannot be moved inside itself',
+          async function (parent) {
+            if (isNil(parent)) return true;
 
-          const destinationFolder = await strapi.entityService.findOne(FOLDER_MODEL_UID, parent, {
-            fields: ['path'],
-          });
+            const destinationFolder = await strapi.entityService.findOne(FOLDER_MODEL_UID, parent, {
+              fields: ['path'],
+            });
 
-          const currentFolder = await strapi.entityService.findOne(FOLDER_MODEL_UID, id, {
-            fields: ['path'],
-          });
+            const currentFolder = await strapi.entityService.findOne(FOLDER_MODEL_UID, id, {
+              fields: ['path'],
+            });
 
-          if (!destinationFolder || !currentFolder) return true;
+            if (!destinationFolder || !currentFolder) return true;
 
-          return !destinationFolder.path.startsWith(currentFolder.path);
-        }),
+            return !destinationFolder.path.startsWith(currentFolder.path);
+          }
+        ),
     })
     .noUnknown()
     .required();
 
 module.exports = {
   validateCreateFolder: validateYupSchema(validateCreateFolderSchema),
-  validateUpdateFolder: id => validateYupSchema(validateUpdateFolderSchema(id)),
+  validateUpdateFolder: (id) => validateYupSchema(validateUpdateFolderSchema(id)),
 };

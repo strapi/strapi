@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 import selectCollectionTypesRelatedPermissions from '../../selectors/selectCollectionTypesRelatedPermissions';
 
-const useContentTypePermissions = slug => {
+const useContentTypePermissions = (slug) => {
   const collectionTypesRelatedPermissions = useSelector(selectCollectionTypesRelatedPermissions);
 
   const currentCTRelatedPermissions = collectionTypesRelatedPermissions[slug];

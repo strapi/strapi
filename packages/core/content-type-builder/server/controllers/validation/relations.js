@@ -7,8 +7,8 @@ const { isValidName } = require('./common');
 
 const STRAPI_USER_RELATIONS = ['oneToOne', 'oneToMany'];
 
-const isValidRelation = validNatures =>
-  function(value) {
+const isValidRelation = (validNatures) =>
+  function (value) {
     if (this.parent.target === coreUids.STRAPI_USER) {
       if (!validNatures.includes(value) || !isUndefined(this.parent.targetAttribute)) {
         return this.createError({
@@ -28,19 +28,13 @@ const isValidRelation = validNatures =>
 
 module.exports = (attribute, allowedRelations) => {
   const contentTypesUIDs = Object.keys(strapi.contentTypes)
-    .filter(key => strapi.contentTypes[key].kind === typeKinds.COLLECTION_TYPE)
-    .filter(key => !key.startsWith(coreUids.PREFIX) || key === coreUids.STRAPI_USER)
+    .filter((key) => strapi.contentTypes[key].kind === typeKinds.COLLECTION_TYPE)
+    .filter((key) => !key.startsWith(coreUids.PREFIX) || key === coreUids.STRAPI_USER)
     .concat(['__self__', '__contentType__']);
 
   const base = {
-    type: yup
-      .string()
-      .oneOf(['relation'])
-      .required(),
-    relation: yup
-      .string()
-      .test('isValidRelation', isValidRelation(allowedRelations))
-      .required(),
+    type: yup.string().oneOf(['relation']).required(),
+    relation: yup.string().test('isValidRelation', isValidRelation(allowedRelations)).required(),
     configurable: yup.boolean().nullable(),
     private: yup.boolean().nullable(),
     pluginOptions: yup.object(),
@@ -55,14 +49,8 @@ module.exports = (attribute, allowedRelations) => {
     case 'morphMany': {
       return yup.object({
         ...base,
-        target: yup
-          .string()
-          .oneOf(contentTypesUIDs)
-          .required(),
-        targetAttribute: yup
-          .string()
-          .test(isValidName)
-          .nullable(),
+        target: yup.string().oneOf(contentTypesUIDs).required(),
+        targetAttribute: yup.string().test(isValidName).nullable(),
       });
     }
     case 'morphToOne':

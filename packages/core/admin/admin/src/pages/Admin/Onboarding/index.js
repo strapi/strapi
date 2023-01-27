@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faQuestion, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { Box } from '@strapi/design-system/Box';
-import { Typography } from '@strapi/design-system/Typography';
-import { FocusTrap } from '@strapi/design-system/FocusTrap';
+import { Box, Flex, FocusTrap, Typography, Icon, Stack } from '@strapi/design-system';
+import { Book, Cross, Information, Question } from '@strapi/icons';
+import { pxToRem } from '@strapi/helper-plugin';
+
 import { useConfigurations } from '../../../hooks';
 
 const OnboardingWrapper = styled(Box)`
@@ -14,51 +13,43 @@ const OnboardingWrapper = styled(Box)`
   right: ${({ theme }) => theme.spaces[2]};
 `;
 
-const Button = styled.button`
+const Button = styled(Box)`
   width: ${({ theme }) => theme.spaces[8]};
   height: ${({ theme }) => theme.spaces[8]};
   background: ${({ theme }) => theme.colors.primary600};
   box-shadow: ${({ theme }) => theme.shadows.tableShadow};
   border-radius: 50%;
-  svg {
-    color: ${({ theme }) => theme.colors.buttonNeutral0};
+
+  svg path {
+    fill: ${({ theme }) => theme.colors.buttonNeutral0};
   }
 `;
 
 const LinksWrapper = styled(Box)`
-  position: absolute;
   bottom: ${({ theme }) => `${theme.spaces[9]}`};
+  min-width: ${200 / 16}rem;
+  position: absolute;
   right: 0;
-  width: ${200 / 16}rem;
 `;
 
-const StyledLink = styled.a`
-  display: flex;
-  align-items: center;
+const StyledLink = styled(Flex)`
   text-decoration: none;
-  padding: ${({ theme }) => theme.spaces[2]};
-  padding-left: ${({ theme }) => theme.spaces[5]};
 
-  svg {
-    color: ${({ theme }) => theme.colors.neutral600};
-    margin-right: ${({ theme }) => theme.spaces[2]};
+  svg path {
+    fill: ${({ theme }) => theme.colors.neutral600};
   }
 
+  &:focus,
   &:hover {
     background: ${({ theme }) => theme.colors.neutral100};
-    color: ${({ theme }) => theme.colors.neutral500};
 
-    svg {
-      color: ${({ theme }) => theme.colors.neutral700};
+    svg path {
+      fill: ${({ theme }) => theme.colors.neutral700};
     }
 
     ${[Typography]} {
       color: ${({ theme }) => theme.colors.neutral700};
     }
-  }
-
-  ${[Typography]} {
-    color: ${({ theme }) => theme.colors.neutral600};
   }
 `;
 
@@ -71,9 +62,9 @@ const Onboarding = () => {
     return null;
   }
 
-  const staticLinks = [
+  const STATIC_LINKS = [
     {
-      icon: 'book',
+      Icon: <Book />,
       label: formatMessage({
         id: 'global.documentation',
         defaultMessage: 'Documentation',
@@ -81,50 +72,57 @@ const Onboarding = () => {
       destination: 'https://docs.strapi.io',
     },
     {
-      icon: 'file',
+      Icon: <Information />,
       label: formatMessage({ id: 'app.static.links.cheatsheet', defaultMessage: 'CheatSheet' }),
       destination: 'https://strapi-showcase.s3-us-west-2.amazonaws.com/CheatSheet.pdf',
     },
   ];
 
   const handleClick = () => {
-    setIsOpen(prev => !prev);
+    setIsOpen((prev) => !prev);
   };
 
   return (
     <OnboardingWrapper as="aside">
       <Button
+        as="button"
         id="onboarding"
-        aria-label={formatMessage({
-          id: 'app.components.Onboarding.help.button',
-          defaultMessage: 'Help button',
-        })}
+        aria-label={formatMessage(
+          isOpen
+            ? {
+                id: 'app.components.Onboarding.help.button-close',
+                defaultMessage: 'Close help menu',
+              }
+            : {
+                id: 'app.components.Onboarding.help.button',
+                defaultMessage: 'Open help menu',
+              }
+        )}
         onClick={handleClick}
       >
-        {!isOpen && <FontAwesomeIcon icon={faQuestion} />}
-        {isOpen && <FontAwesomeIcon icon={faTimes} />}
+        <Icon as={isOpen ? Cross : Question} height={pxToRem(16)} width={pxToRem(16)} />
       </Button>
 
       {/* FIX ME - replace with popover when overflow popover is fixed 
        + when v4 mockups for onboarding component are ready */}
       {isOpen && (
         <FocusTrap onEscape={handleClick}>
-          <LinksWrapper
-            background="neutral0"
-            hasRadius
-            shadow="tableShadow"
-            paddingBottom={2}
-            paddingTop={2}
-          >
-            {staticLinks.map(link => (
+          <LinksWrapper background="neutral0" hasRadius shadow="tableShadow" padding={2}>
+            {STATIC_LINKS.map((link) => (
               <StyledLink
+                as="a"
                 key={link.label}
                 rel="nofollow noreferrer noopener"
                 target="_blank"
                 href={link.destination}
+                padding={2}
+                hasRadius
+                alignItems="center"
               >
-                <FontAwesomeIcon icon={link.icon} />
-                <Typography>{link.label}</Typography>
+                <Stack horizontal spacing={2}>
+                  {link.Icon}
+                  <Typography color="neutral600">{link.label}</Typography>
+                </Stack>
               </StyledLink>
             ))}
           </LinksWrapper>

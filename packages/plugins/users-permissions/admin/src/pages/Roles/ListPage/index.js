@@ -97,8 +97,8 @@ const RoleListPage = () => {
     defaultMessage: 'Roles',
   });
 
-  const deleteMutation = useMutation(id => deleteData(id, toggleNotification), {
-    onSuccess: async () => {
+  const deleteMutation = useMutation((id) => deleteData(id, toggleNotification), {
+    async onSuccess() {
       await queryClient.invalidateQueries('get-roles');
     },
   });
@@ -131,7 +131,7 @@ const RoleListPage = () => {
           })}
           primaryAction={
             <CheckPermissions permissions={permissions.createRole}>
-              <Button onClick={handleNewRoleClick} startIcon={<Plus />} size="L">
+              <Button onClick={handleNewRoleClick} startIcon={<Plus />} size="S">
                 {formatMessage({
                   id: getTrad('List.button.roles'),
                   defaultMessage: 'Add new role',

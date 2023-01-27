@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useIntl } from 'react-intl';
-import { get } from 'lodash';
 import {
   getYupInnerErrors,
   CheckPagePermissions,
@@ -53,7 +52,7 @@ const SettingsPage = () => {
     setIsLoading(true);
 
     fetchEmailSettings()
-      .then(config => {
+      .then((config) => {
         notifyStatus(
           formatMessage({
             id: getTrad('Settings.email.plugin.notification.data.loaded'),
@@ -63,7 +62,7 @@ const SettingsPage = () => {
 
         setConfig(config);
 
-        const testAddressFound = get(config, 'settings.testAddress');
+        const testAddressFound = config?.settings?.testAddress;
 
         if (testAddressFound) {
           setTestAddress(testAddressFound);
@@ -95,11 +94,11 @@ const SettingsPage = () => {
       .catch(() => setIsTestAddressValid(false));
   }, [testAddress]);
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     setTestAddress(() => e.target.value);
   };
 
-  const handleSubmit = async event => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     try {

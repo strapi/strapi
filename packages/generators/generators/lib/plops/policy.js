@@ -6,7 +6,7 @@ const getDestinationPrompts = require('./prompts/get-destination-prompts');
 const validateInput = require('./utils/validate-input');
 const getFilePath = require('./utils/get-file-path');
 
-module.exports = plop => {
+module.exports = (plop) => {
   // Policy generator
   plop.setGenerator('policy', {
     description: 'Generate a policy for an API',
@@ -15,7 +15,7 @@ module.exports = plop => {
         type: 'input',
         name: 'id',
         message: 'Policy name',
-        validate: input => validateInput(input),
+        validate: (input) => validateInput(input),
       },
       ...getDestinationPrompts('policy', plop.getDestBasePath(), { rootFolder: true }),
     ],
@@ -27,7 +27,7 @@ module.exports = plop => {
       return [
         {
           type: 'add',
-          path: `${filePath}/policies/{{id}}.${language}`,
+          path: `${filePath}/policies/{{ id }}.${language}`,
           templateFile: `templates/${language}/policy.${language}.hbs`,
         },
       ];

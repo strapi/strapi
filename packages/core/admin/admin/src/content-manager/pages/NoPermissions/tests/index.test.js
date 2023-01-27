@@ -32,51 +32,6 @@ describe('<NoPermissions />', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c12 {
-        color: #666687;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-      }
-
-      .c7 {
-        background: #ffffff;
-        padding: 64px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c9 {
-        padding-bottom: 24px;
-      }
-
-      .c11 {
-        padding-bottom: 16px;
-      }
-
-      .c8 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        text-align: center;
-      }
-
-      .c10 svg {
-        height: 5.5rem;
-      }
-
-      .c0:focus-visible {
-        outline: none;
-      }
-
       .c1 {
         background: #f6f6f9;
         padding-top: 40px;
@@ -85,9 +40,24 @@ describe('<NoPermissions />', () => {
         padding-left: 56px;
       }
 
-      .c6 {
+      .c5 {
         padding-right: 56px;
         padding-left: 56px;
+      }
+
+      .c6 {
+        background: #ffffff;
+        padding: 64px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c8 {
+        padding-bottom: 24px;
+      }
+
+      .c10 {
+        padding-bottom: 16px;
       }
 
       .c2 {
@@ -123,16 +93,40 @@ describe('<NoPermissions />', () => {
       }
 
       .c4 {
-        color: #32324d;
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
+        color: #32324d;
       }
 
-      .c5 {
-        color: #666687;
+      .c11 {
+        font-weight: 500;
         font-size: 1rem;
-        line-height: 1.5;
+        line-height: 1.25;
+        color: #666687;
+      }
+
+      .c7 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        text-align: center;
+      }
+
+      .c9 svg {
+        height: 5.5rem;
+      }
+
+      .c0:focus-visible {
+        outline: none;
       }
 
       <main
@@ -161,20 +155,17 @@ describe('<NoPermissions />', () => {
                 </h1>
               </div>
             </div>
-            <p
-              class="c5"
-            />
           </div>
         </div>
         <div
-          class="c6"
+          class="c5"
         >
           <div
-            class="c7 c8"
+            class="c6 c7"
           >
             <div
               aria-hidden="true"
-              class="c9 c10"
+              class="c8 c9"
             >
               <svg
                 fill="none"
@@ -250,10 +241,10 @@ describe('<NoPermissions />', () => {
               </svg>
             </div>
             <div
-              class="c11"
+              class="c10"
             >
               <p
-                class="c12"
+                class="c11"
               >
                 You don't have the permissions to access that content
               </p>

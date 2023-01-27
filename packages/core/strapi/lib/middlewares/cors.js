@@ -15,16 +15,9 @@ const defaults = {
 /**
  * @type {import('./').MiddlewareFactory}
  */
-module.exports = config => {
-  const {
-    origin,
-    expose,
-    maxAge,
-    credentials,
-    methods,
-    headers,
-    keepHeadersOnError,
-  } = defaultsDeep(defaults, config);
+module.exports = (config) => {
+  const { origin, expose, maxAge, credentials, methods, headers, keepHeadersOnError } =
+    defaultsDeep(defaults, config);
 
   return cors({
     async origin(ctx) {
@@ -40,7 +33,7 @@ module.exports = config => {
 
       const requestOrigin = ctx.accept.headers.origin;
       if (whitelist.includes('*')) {
-        return '*';
+        return credentials ? requestOrigin : '*';
       }
 
       if (!whitelist.includes(requestOrigin)) {

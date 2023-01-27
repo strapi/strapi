@@ -1,4 +1,4 @@
-import { fixtures } from '../../../../../../admin-test-utils';
+import { fixtures } from '@strapi/admin-test-utils/lib';
 import selectCollectionTypePermissions from '../selectCollectionTypesRelatedPermissions';
 import selectI18NLocales from '../selectI18nLocales';
 

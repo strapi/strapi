@@ -2,7 +2,18 @@ import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { render as renderTL, fireEvent, screen, waitFor } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import axios from 'axios';
+
 import LogoInput from '../index';
+
+const CUSTOM_IMAGE_FIXTURES = {
+  ext: '.jpeg',
+  height: 250,
+  name: 'custom.jpeg',
+  size: 46.26,
+  url: 'uploads/custom.jpeg',
+  width: 340,
+};
 
 const getFakeSize = jest.fn(() => ({
   width: 500,
@@ -21,15 +32,30 @@ global.Image = class extends Image {
   }
 };
 
-const render = props =>
+jest.mock('axios', () => ({
+  ...jest.requireActual('axios'),
+  get: jest.fn().mockResolvedValue({
+    data: new Blob(['my-image'], { type: 'image/png' }),
+    headers: {
+      'content-type': 'image/png',
+    },
+    config: {
+      url: 'some-png',
+    },
+  }),
+}));
+
+const render = (props) =>
   renderTL(
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} textComponent="span">
         <LogoInput
-          {...props}
+          canUpdate
           defaultLogo="/admin/defaultLogo.png"
-          onChangeLogo={() => jest.fn()}
-          onResetMenuLogo={jest.fn()}
+          label="logo input label"
+          onChangeLogo={jest.fn()}
+          onResetLogo={jest.fn()}
+          {...props}
         />
       </IntlProvider>
     </ThemeProvider>
@@ -38,9 +64,49 @@ const render = props =>
 describe('ApplicationsInfosPage || LogoInput', () => {
   describe('logo input', () => {
     it('should match snapshot', () => {
-      render();
+      const { container } = render();
 
-      expect(document.body).toMatchSnapshot();
+      expect(container).toMatchSnapshot();
+    });
+
+    it('should render label', () => {
+      const { getByText } = render();
+
+      expect(getByText('logo input label')).toBeInTheDocument();
+    });
+
+    it('should render reset button if a custom logo exists', () => {
+      const { getByRole } = render({ customLogo: CUSTOM_IMAGE_FIXTURES });
+
+      expect(getByRole('button', { name: 'Reset logo' })).toBeInTheDocument();
+    });
+
+    it('should call onResetMenuLogo callback', () => {
+      const onResetLogoSpy = jest.fn();
+      const { getByRole } = render({
+        customLogo: CUSTOM_IMAGE_FIXTURES,
+        onResetLogo: onResetLogoSpy,
+      });
+
+      fireEvent.click(getByRole('button', { name: 'Reset logo' }));
+
+      expect(onResetLogoSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should render disabled actions if no update permissions', () => {
+      const onResetLogoSpy = jest.fn();
+      const { getByRole } = render({
+        canUpdate: false,
+        customLogo: CUSTOM_IMAGE_FIXTURES,
+        onResetLogo: onResetLogoSpy,
+      });
+
+      expect(getByRole('button', { name: 'Change logo' })).toHaveAttribute('aria-disabled', 'true');
+      expect(getByRole('button', { name: 'Reset logo' })).toHaveAttribute('aria-disabled', 'true');
+
+      fireEvent.click(getByRole('button', { name: 'Reset logo' }));
+
+      expect(onResetLogoSpy).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -171,18 +237,20 @@ describe('ApplicationsInfosPage || LogoInput', () => {
     });
 
     it('should show error message when uploading wrong file format', async () => {
-      render();
-      const changeLogoButton = document.querySelector('button');
-      fireEvent.click(changeLogoButton);
-      fireEvent.click(screen.getByText('From url'));
-
-      const textInput = document.querySelector('input[name="logo-url"]');
-
-      fireEvent.change(textInput, {
-        target: {
-          value: 'https://docs.strapi.io/assets/img/qsg-handson-restaurant_2.28faf048.gif',
+      axios.get.mockResolvedValueOnce({
+        data: new Blob(['my-image'], { type: 'image/gif' }),
+        headers: {
+          'content-type': 'image/gif',
+        },
+        config: {
+          url: 'some-gif',
         },
       });
+
+      render();
+      const changeLogoButton = screen.getByRole('button');
+      fireEvent.click(changeLogoButton);
+      fireEvent.click(screen.getByText('From url'));
 
       fireEvent.click(screen.getByText('Next'));
 
@@ -194,20 +262,15 @@ describe('ApplicationsInfosPage || LogoInput', () => {
     });
 
     it('should show error message when uploading unauthorized width/height', async () => {
+      getFakeSize.mockImplementationOnce(() => ({
+        width: 850,
+        height: 850,
+      }));
+
       render();
       const changeLogoButton = document.querySelector('button');
       fireEvent.click(changeLogoButton);
       fireEvent.click(screen.getByText('From url'));
-
-      const textInput = document.querySelector('input[name="logo-url"]');
-
-      fireEvent.change(textInput, {
-        target: {
-          value:
-            'https://docs.strapi.io/assets/img/qsg-handson-part1-01-admin_panel_2.a1602906.png',
-        },
-      });
-
       fireEvent.click(screen.getByText('Next'));
 
       await waitFor(() =>
@@ -219,21 +282,22 @@ describe('ApplicationsInfosPage || LogoInput', () => {
       );
     });
 
-    it('should show error message when uploading unauthorized size', async () => {
-      render();
-      const changeLogoButton = document.querySelector('button');
-      fireEvent.click(changeLogoButton);
-      fireEvent.click(screen.getByText('From url'));
-
-      const textInput = document.querySelector('input[name="logo-url"]');
-
-      fireEvent.change(textInput, {
-        target: {
-          value:
-            'https://docs.strapi.io/assets/img/qsg-handson-part1-01-admin_panel_2.a1602906.png',
+    it('should show error message when uploading unauthorized file-size', async () => {
+      axios.get.mockResolvedValueOnce({
+        data: new Blob(['1'.repeat(1024 * 1024 + 1)], { type: 'image/png' }),
+        headers: {
+          'content-type': 'image/png',
+        },
+        config: {
+          url: 'some-png',
         },
       });
 
+      render();
+
+      const changeLogoButton = document.querySelector('button');
+      fireEvent.click(changeLogoButton);
+      fireEvent.click(screen.getByText('From url'));
       fireEvent.click(screen.getByText('Next'));
 
       await waitFor(() =>
@@ -247,18 +311,11 @@ describe('ApplicationsInfosPage || LogoInput', () => {
 
     it('should accept upload and lead user to next modal', async () => {
       render();
+
       const changeLogoButton = document.querySelector('button');
+
       fireEvent.click(changeLogoButton);
       fireEvent.click(screen.getByText('From url'));
-
-      const textInput = document.querySelector('input[name="logo-url"]');
-
-      fireEvent.change(textInput, {
-        target: {
-          value: 'https://cdn.pixabay.com/photo/2022/01/18/07/38/cat-6946505__340.jpg',
-        },
-      });
-
       fireEvent.click(screen.getByText('Next'));
 
       await waitFor(() => expect(screen.getByText('Pending logo')).toBeInTheDocument());
@@ -269,15 +326,6 @@ describe('ApplicationsInfosPage || LogoInput', () => {
       const changeLogoButton = document.querySelector('button');
       fireEvent.click(changeLogoButton);
       fireEvent.click(screen.getByText('From url'));
-
-      const textInput = document.querySelector('input[name="logo-url"]');
-
-      fireEvent.change(textInput, {
-        target: {
-          value: 'https://cdn.pixabay.com/photo/2022/01/18/07/38/cat-6946505__340.jpg',
-        },
-      });
-
       fireEvent.click(screen.getByText('Next'));
 
       await waitFor(() => expect(screen.getByText('Pending logo')).toBeInTheDocument());

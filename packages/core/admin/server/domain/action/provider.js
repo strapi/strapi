@@ -14,7 +14,7 @@ const domain = require('./index');
  * Creates a new instance of an action provider
  * @return {Provider & ActionProviderOverride}
  */
-const createActionProvider = options => {
+const createActionProvider = (options) => {
   const provider = providerFactory(options);
   const actionHooks = {
     appliesPropertyToSubject: hooks.createAsyncParallelHook(),
@@ -75,7 +75,7 @@ const createActionProvider = options => {
         subject,
       });
 
-      return results.every(result => result !== false);
+      return results.every((result) => result !== false);
     },
   };
 };

@@ -15,7 +15,7 @@ const UPLOADS_FOLDER_NAME = 'uploads';
 
 module.exports = {
   init({ sizeLimit = 1000000 } = {}) {
-    const verifySize = file => {
+    const verifySize = (file) => {
       if (file.size > sizeLimit) {
         throw new PayloadTooLargeError();
       }
@@ -37,7 +37,7 @@ module.exports = {
           pipeline(
             file.stream,
             fs.createWriteStream(path.join(uploadPath, `${file.hash}${file.ext}`)),
-            err => {
+            (err) => {
               if (err) {
                 return reject(err);
               }
@@ -54,7 +54,7 @@ module.exports = {
 
         return new Promise((resolve, reject) => {
           // write file in public/assets folder
-          fs.writeFile(path.join(uploadPath, `${file.hash}${file.ext}`), file.buffer, err => {
+          fs.writeFile(path.join(uploadPath, `${file.hash}${file.ext}`), file.buffer, (err) => {
             if (err) {
               return reject(err);
             }
@@ -70,11 +70,12 @@ module.exports = {
           const filePath = path.join(uploadPath, `${file.hash}${file.ext}`);
 
           if (!fs.existsSync(filePath)) {
+            // eslint-disable-next-line no-promise-executor-return
             return resolve("File doesn't exist");
           }
 
           // remove file from public/assets folder
-          fs.unlink(filePath, err => {
+          fs.unlink(filePath, (err) => {
             if (err) {
               return reject(err);
             }

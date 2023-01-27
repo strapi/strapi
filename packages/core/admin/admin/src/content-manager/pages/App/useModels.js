@@ -35,7 +35,7 @@ const useModels = () => {
           data: { data: models },
         },
       ] = await Promise.all(
-        ['components', 'content-types'].map(endPoint =>
+        ['components', 'content-types'].map((endPoint) =>
           axiosInstance.get(getRequestUrl(endPoint), { cancelToken: source.token })
         )
       );

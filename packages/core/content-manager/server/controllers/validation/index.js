@@ -11,18 +11,11 @@ const TYPES = ['singleType', 'collectionType'];
 /**
  * Validates type kind
  */
-const kindSchema = yup
-  .string()
-  .oneOf(TYPES)
-  .nullable();
+const kindSchema = yup.string().oneOf(TYPES).nullable();
 
 const bulkDeleteInputSchema = yup
   .object({
-    ids: yup
-      .array()
-      .of(yup.strapiID())
-      .min(1)
-      .required(),
+    ids: yup.array().of(yup.strapiID()).min(1).required(),
   })
   .required();
 
@@ -37,7 +30,7 @@ const checkUIDAvailabilityInputSchema = yup.object({
   field: yup.string().required(),
   value: yup
     .string()
-    .matches(new RegExp('^[A-Za-z0-9-_.~]*$'))
+    .matches(/^[A-Za-z0-9-_.~]*$/)
     .required(),
 });
 
@@ -57,13 +50,13 @@ const validateUIDField = (contentTypeUID, field) => {
 };
 
 const validatePagination = ({ page, pageSize }) => {
-  const pageNumber = parseInt(page);
-  const pageSizeNumber = parseInt(pageSize);
+  const pageNumber = parseInt(page, 10);
+  const pageSizeNumber = parseInt(pageSize, 10);
 
-  if (isNaN(pageNumber) || pageNumber < 1) {
+  if (Number.isNaN(pageNumber) || pageNumber < 1) {
     throw new PaginationError('invalid pageNumber param');
   }
-  if (isNaN(pageSizeNumber) || pageSizeNumber < 1) {
+  if (Number.isNaN(pageSizeNumber) || pageSizeNumber < 1) {
     throw new PaginationError('invalid pageSize param');
   }
 };

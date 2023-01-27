@@ -32,7 +32,7 @@ const TextareaEnum = ({
 
   const inputValue = Array.isArray(value) ? value.join('\n') : '';
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     const arrayValue = e.target.value.split('\n');
 
     onChange({ target: { name, value: arrayValue } });

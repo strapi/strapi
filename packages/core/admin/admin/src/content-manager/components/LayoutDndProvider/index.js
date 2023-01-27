@@ -44,16 +44,16 @@ function LayoutDndProvider({
 LayoutDndProvider.defaultProps = {
   attributes: {},
   buttonData: [],
-  goTo: () => {},
+  goTo() {},
   layout: [],
   metadatas: {},
-  moveItem: () => {},
-  moveRow: () => {},
-  onAddData: () => {},
+  moveItem() {},
+  moveRow() {},
+  onAddData() {},
   relationsLayout: [],
-  removeField: () => {},
+  removeField() {},
   selectedItemName: null,
-  setEditFieldToSelect: () => {},
+  setEditFieldToSelect() {},
 };
 
 LayoutDndProvider.propTypes = {

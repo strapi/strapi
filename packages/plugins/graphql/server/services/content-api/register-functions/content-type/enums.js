@@ -11,7 +11,7 @@ const registerEnumsDefinition = (contentType, { registry, strapi, builders }) =>
 
   const { attributes } = contentType;
 
-  const enumAttributes = Object.keys(attributes).filter(attributeName =>
+  const enumAttributes = Object.keys(attributes).filter((attributeName) =>
     isEnumeration(attributes[attributeName])
   );
 

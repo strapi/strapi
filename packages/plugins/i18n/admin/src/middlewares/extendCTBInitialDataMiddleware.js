@@ -1,7 +1,7 @@
 import { has } from 'lodash';
 
 const extendCTBInitialDataMiddleware = () => {
-  return () => next => action => {
+  return () => (next) => (action) => {
     if (
       action.type === 'ContentTypeBuilder/FormModal/SET_DATA_TO_EDIT' &&
       action.modalType === 'contentType'

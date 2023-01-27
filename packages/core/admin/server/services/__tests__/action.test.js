@@ -91,7 +91,7 @@ describe('Action', () => {
       expect(findOneRoleMock).toHaveBeenCalledWith({ id: roleId });
       expect(actions.length).toBe(fixtures.length - 1);
       expect(actions).toEqual(
-        expect.arrayContaining(fixtures.filter(f => f.actionId !== PUBLISH_ACTION))
+        expect.arrayContaining(fixtures.filter((f) => f.actionId !== PUBLISH_ACTION))
       );
     });
   });

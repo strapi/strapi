@@ -31,8 +31,8 @@ const TableRows = ({
 
   return (
     <Tbody>
-      {rows.map(data => {
-        const isChecked = entriesToDelete.findIndex(id => id === data.id) !== -1;
+      {rows.map((data) => {
+        const isChecked = entriesToDelete.findIndex((id) => id === data.id) !== -1;
 
         return (
           <Tr
@@ -110,8 +110,8 @@ const TableRows = ({
 TableRows.defaultProps = {
   canDelete: false,
   entriesToDelete: [],
-  onClickDelete: () => {},
-  onSelectRow: () => {},
+  onClickDelete() {},
+  onSelectRow() {},
   rows: [],
   withBulkActions: false,
   withMainAction: false,

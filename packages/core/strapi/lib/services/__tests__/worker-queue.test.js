@@ -15,7 +15,9 @@ describe('WorkerQueue', () => {
 
     q.enqueue(input);
 
-    await new Promise(resolve => setTimeout(resolve));
+    await new Promise((resolve) => {
+      setTimeout(resolve);
+    });
 
     expect(fn).toHaveBeenCalledWith(input);
     expect(fn).toHaveBeenCalledTimes(1);
@@ -35,7 +37,9 @@ describe('WorkerQueue', () => {
     q.enqueue(input);
     q.enqueue(input);
 
-    await new Promise(resolve => setTimeout(resolve));
+    await new Promise((resolve) => {
+      setTimeout(resolve);
+    });
 
     expect(fn).toHaveBeenCalledWith(input);
     expect(fn).toHaveBeenCalledTimes(3);

@@ -10,7 +10,7 @@ const useReactQuery = () => {
     fetchDocumentationVersions(toggleNotification)
   );
 
-  const handleError = err => {
+  const handleError = (err) => {
     toggleNotification({
       type: 'warning',
       message: err.response.payload.message,
@@ -27,7 +27,7 @@ const useReactQuery = () => {
 
   const deleteMutation = useMutation(deleteDoc, {
     onSuccess: () => handleSuccess('info', 'notification.delete.success'),
-    onError: error => handleError(error),
+    onError: (error) => handleError(error),
   });
 
   const submitMutation = useMutation(updateSettings, {
@@ -37,7 +37,7 @@ const useReactQuery = () => {
 
   const regenerateDocMutation = useMutation(regenerateDoc, {
     onSuccess: () => handleSuccess('info', 'notification.generate.success'),
-    onError: error => handleError(error),
+    onError: (error) => handleError(error),
   });
 
   return { data, isLoading, deleteMutation, submitMutation, regenerateDocMutation };

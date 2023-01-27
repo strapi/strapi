@@ -23,7 +23,7 @@ import {
 const InputUID = ({
   attribute,
   contentTypeUID,
-  description,
+  hint,
   disabled,
   error,
   intlLabel,
@@ -53,13 +53,6 @@ const InputUID = ({
         { ...intlLabel.values }
       )
     : name;
-
-  const hint = description
-    ? formatMessage(
-        { id: description.id, defaultMessage: description.defaultMessage },
-        { ...description.values }
-      )
-    : '';
 
   const formattedPlaceholder = placeholder
     ? formatMessage(
@@ -174,7 +167,7 @@ const InputUID = ({
     setRegenerateLabel(null);
   };
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     if (e.target.value && isCreation) {
       setIsCustomized(true);
     }
@@ -251,11 +244,6 @@ InputUID.propTypes = {
     required: PropTypes.bool,
   }).isRequired,
   contentTypeUID: PropTypes.string.isRequired,
-  description: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }),
   disabled: PropTypes.bool,
   error: PropTypes.string,
   intlLabel: PropTypes.shape({
@@ -273,16 +261,17 @@ InputUID.propTypes = {
     values: PropTypes.object,
   }),
   required: PropTypes.bool,
+  hint: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
 };
 
 InputUID.defaultProps = {
-  description: undefined,
   disabled: false,
   error: undefined,
   labelAction: undefined,
   placeholder: undefined,
   value: '',
   required: false,
+  hint: '',
 };
 
 export default InputUID;

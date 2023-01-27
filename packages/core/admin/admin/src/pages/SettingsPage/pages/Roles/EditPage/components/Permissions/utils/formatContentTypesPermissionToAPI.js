@@ -71,7 +71,7 @@ const createPermissionWithoutProperties = (action, subject, { conditions }) => {
 const createSubjectPermissions = (subject, actions) => {
   const permissions = Object.entries(actions).reduce((acc, current) => {
     const [actionName, permissions] = current;
-    const shouldCreatePermission = createArrayOfValues(permissions).some(val => val);
+    const shouldCreatePermission = createArrayOfValues(permissions).some((val) => val);
 
     if (!shouldCreatePermission) {
       return acc;
@@ -106,7 +106,7 @@ const createSubjectPermissions = (subject, actions) => {
  * @param {object} contentTypesPermissions
  * @returns {array<object>}
  */
-const formatContentTypesPermissionToAPI = contentTypesPermissions => {
+const formatContentTypesPermissionToAPI = (contentTypesPermissions) => {
   const permissions = Object.entries(contentTypesPermissions).reduce((allPermissions, current) => {
     const [subject, currentSubjectActions] = current;
 

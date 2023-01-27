@@ -8,14 +8,14 @@ const editFolderRequest = ({ attrs, id }) => {
   const method = isEditing ? 'put' : 'post';
   const url = getRequestUrl(`folders/${id ?? ''}`);
 
-  return axiosInstance[method](url, attrs).then(res => res.data);
+  return axiosInstance[method](url, attrs).then((res) => res.data);
 };
 
 export const useEditFolder = () => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation((...args) => editFolderRequest(...args), {
-    onSuccess: () => {
+    onSuccess() {
       queryClient.refetchQueries([pluginId, 'folders'], { active: true });
       queryClient.refetchQueries([pluginId, 'folder', 'structure'], { active: true });
     },

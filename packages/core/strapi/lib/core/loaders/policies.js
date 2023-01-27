@@ -2,8 +2,7 @@
 
 const { join, extname, basename } = require('path');
 const fse = require('fs-extra');
-
-const { importDefault } = require('../../utils');
+const { importDefault } = require('@strapi/utils');
 
 // TODO:: allow folders with index.js inside for bigger policies
 module.exports = async function loadPolicies(strapi) {

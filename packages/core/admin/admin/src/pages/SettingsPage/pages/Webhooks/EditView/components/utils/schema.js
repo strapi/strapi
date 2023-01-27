@@ -11,7 +11,7 @@ const schema = yup.object().shape({
     .string(translatedErrors.string)
     .required(translatedErrors.required)
     .matches(URL_REGEX, translatedErrors.regex),
-  headers: yup.lazy(array => {
+  headers: yup.lazy((array) => {
     let baseSchema = yup.array();
 
     if (array.length === 1) {

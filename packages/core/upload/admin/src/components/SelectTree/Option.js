@@ -29,39 +29,37 @@ const Option = ({ children, data, selectProps, ...props }) => {
   const isOpen = openValues.includes(value);
 
   return (
-    <>
-      <components.Option {...props}>
-        <Flex alignItems="start">
-          <Typography textColor="neutral800" ellipsis>
-            <span style={{ paddingLeft: `${Math.min(depth, maxDisplayDepth) * 14}px` }}>
-              {children}
-            </span>
-          </Typography>
+    <components.Option {...props}>
+      <Flex alignItems="start">
+        <Typography textColor="neutral800" ellipsis>
+          <span style={{ paddingLeft: `${Math.min(depth, maxDisplayDepth) * 14}px` }}>
+            {children}
+          </span>
+        </Typography>
 
-          {options?.length > 0 && (
-            <ToggleButton
-              aria-label={formatMessage({
-                id: 'app.utils.toggle',
-                defaultMessage: 'Toggle',
-              })}
-              as="button"
-              alignItems="center"
-              hasRadius
-              justifyContent="center"
-              marginLeft="auto"
-              onClick={event => {
-                event.preventDefault();
-                event.stopPropagation();
+        {options?.length > 0 && (
+          <ToggleButton
+            aria-label={formatMessage({
+              id: 'app.utils.toggle',
+              defaultMessage: 'Toggle',
+            })}
+            as="button"
+            alignItems="center"
+            hasRadius
+            justifyContent="center"
+            marginLeft="auto"
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
 
-                onOptionToggle(value);
-              }}
-            >
-              <Icon width={pxToRem(14)} color="neutral500" as={isOpen ? ChevronUp : ChevronDown} />
-            </ToggleButton>
-          )}
-        </Flex>
-      </components.Option>
-    </>
+              onOptionToggle(value);
+            }}
+          >
+            <Icon width={pxToRem(14)} color="neutral500" as={isOpen ? ChevronUp : ChevronDown} />
+          </ToggleButton>
+        )}
+      </Flex>
+    </components.Option>
   );
 };
 

@@ -50,7 +50,7 @@ describe('Passport', () => {
           services: {
             auth: {
               checkCredentials: jest.fn(() => {
-                return Promise.reject('Bad credentials');
+                return Promise.reject(new Error('Bad credentials'));
               }),
             },
           },
@@ -62,7 +62,7 @@ describe('Passport', () => {
 
       await strategy.handler('foo', 'bar', done);
 
-      expect(done).toHaveBeenCalledWith('Bad credentials');
+      expect(done).toHaveBeenCalledWith(new Error('Bad credentials'));
     });
 
     test('It should call the callback with the profile if the credentials check succeed', async () => {

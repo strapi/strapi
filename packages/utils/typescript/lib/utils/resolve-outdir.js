@@ -1,4 +1,5 @@
 'use strict';
+
 const path = require('path');
 const resolveConfigOptions = require('./resolve-config-options');
 const isUsingTypescript = require('./is-using-typescript');

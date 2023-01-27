@@ -4,6 +4,7 @@ const _ = require('lodash');
 const roleService = require('../role');
 const { SUPER_ADMIN_CODE } = require('../constants');
 const { create: createPermission, toPermission } = require('../../domain/permission');
+const createEventHub = require('../../../../strapi/lib/services/event-hub');
 
 describe('Role', () => {
   describe('create', () => {
@@ -13,6 +14,7 @@ describe('Role', () => {
 
       global.strapi = {
         query: () => ({ create: dbCreate, count: dbCount }),
+        eventHub: createEventHub(),
       };
 
       const input = {
@@ -103,7 +105,7 @@ describe('Role', () => {
         },
       ];
       const dbFind = jest.fn(() =>
-        Promise.resolve(roles.map(role => _.omit(role, ['usersCount'])))
+        Promise.resolve(roles.map((role) => _.omit(role, ['usersCount'])))
       );
       const dbCount = jest.fn(() => Promise.resolve(0));
 
@@ -137,6 +139,7 @@ describe('Role', () => {
 
       global.strapi = {
         query: () => ({ update: dbUpdate, count: dbCount }),
+        eventHub: createEventHub(),
       };
 
       const updatedRole = await roleService.update(
@@ -172,6 +175,7 @@ describe('Role', () => {
         query: () => ({ find: dbFind, findOne: dbFindOne, update: dbUpdate }),
         admin: { config: { superAdminCode: SUPER_ADMIN_CODE } },
         errors: { badRequest },
+        eventHub: createEventHub(),
       };
 
       await roleService.update({ id: 1 }, { code: 'new_code' });
@@ -223,6 +227,7 @@ describe('Role', () => {
           },
           config: { superAdminCode: SUPER_ADMIN_CODE },
         },
+        eventHub: createEventHub(),
       };
 
       const deletedRoles = await roleService.deleteByIds([role.id]);
@@ -250,7 +255,7 @@ describe('Role', () => {
       ];
       const dbCount = jest.fn(() => Promise.resolve(0));
       const dbFindOne = jest.fn(() => ({ id: 3, code: SUPER_ADMIN_CODE }));
-      const rolesIds = roles.map(r => r.id);
+      const rolesIds = roles.map((r) => r.id);
       const dbDelete = jest
         .fn()
         .mockImplementationOnce(() => Promise.resolve(roles[0]))
@@ -275,6 +280,7 @@ describe('Role', () => {
           },
           config: { superAdminCode: SUPER_ADMIN_CODE },
         },
+        eventHub: createEventHub(),
       };
 
       const deletedRoles = await roleService.deleteByIds(rolesIds);
@@ -399,6 +405,12 @@ describe('Role', () => {
           subject: null,
         },
         {
+          action: 'plugin::upload.configure-view',
+          conditions: [],
+          properties: {},
+          subject: null,
+        },
+        {
           action: 'plugin::upload.assets.create',
           conditions: [],
           properties: {},
@@ -426,7 +438,11 @@ describe('Role', () => {
 
       const count = jest.fn(() => Promise.resolve(0));
       let id = 1;
-      const create = jest.fn(({ data }) => ({ ...data, id: id++ }));
+      const create = jest.fn(({ data }) => {
+        const res = { ...data, id };
+        id += 1;
+        return res;
+      });
       const values = jest.fn(() => actions);
       const createMany = jest.fn();
       const assignARoleToAll = jest.fn();
@@ -446,6 +462,7 @@ describe('Role', () => {
             user: { assignARoleToAll },
           },
         },
+        eventHub: createEventHub(),
       };
 
       await roleService.createRolesIfNoneExist();
@@ -488,19 +505,18 @@ describe('Role', () => {
         1,
         [
           ...permissions,
-          ...defaultPermissions.map(d => ({
+          ...defaultPermissions.map((d) => ({
             ...d,
             conditions: [],
           })),
-        ].map(p => ({ ...p, role: 2 }))
+        ].map((p) => ({ ...p, role: 2 }))
       );
 
       expect(createMany).toHaveBeenNthCalledWith(
         2,
-        [
-          { ...permissions[0], conditions: ['admin::is-creator'] },
-          ...defaultPermissions,
-        ].map(p => ({ ...p, role: 3 }))
+        [{ ...permissions[0], conditions: ['admin::is-creator'] }, ...defaultPermissions].map(
+          (p) => ({ ...p, role: 3 })
+        )
       );
     });
   });
@@ -647,6 +663,7 @@ describe('Role', () => {
             role: { getSuperAdmin },
           },
         },
+        eventHub: createEventHub(),
       };
 
       await roleService.resetSuperAdminPermissions();
@@ -654,7 +671,7 @@ describe('Role', () => {
       expect(deleteByIds).toHaveBeenCalledWith([2]);
       expect(createMany).toHaveBeenCalledWith(
         expect.arrayContaining(
-          permissions.map(perm => ({
+          permissions.map((perm) => ({
             ...perm,
             role: roleId,
           }))
@@ -680,6 +697,7 @@ describe('Role', () => {
             role: { getSuperAdmin },
           },
         },
+        eventHub: createEventHub(),
       };
 
       await roleService.assignPermissions(1, []);
@@ -696,8 +714,8 @@ describe('Role', () => {
       const getSuperAdmin = jest.fn(() => Promise.resolve({ id: 0 }));
       const sendDidUpdateRolePermissions = jest.fn();
       const findMany = jest.fn(() => Promise.resolve([]));
-      const values = jest.fn(() => permissions.map(perm => ({ actionId: perm.action })));
-      const conditionProviderHas = jest.fn(cond => cond === 'cond');
+      const values = jest.fn(() => permissions.map((perm) => ({ actionId: perm.action })));
+      const conditionProviderHas = jest.fn((cond) => cond === 'cond');
 
       global.strapi = {
         admin: {
@@ -715,6 +733,7 @@ describe('Role', () => {
             },
           },
         },
+        eventHub: createEventHub(),
       };
 
       const permissionsToAssign = [...permissions];
@@ -751,7 +770,7 @@ describe('Role', () => {
 
       const input = toPermission(permissions);
 
-      const expected = permissions.map(permission => ({
+      const expected = permissions.map((permission) => ({
         ...permission,
         role: roleId,
       }));

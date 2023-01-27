@@ -1,13 +1,17 @@
-import { axiosInstance, getRequestURL } from '../../../utils';
+import { getFetchClient } from '@strapi/helper-plugin';
+import { getRequestURL } from '../../../utils';
 
 const fetchData = async () => {
-  const { data } = await axiosInstance.get(getRequestURL('advanced'));
+  const { get } = getFetchClient();
+  const { data } = await get(getRequestURL('advanced'));
 
   return data;
 };
 
-const putAdvancedSettings = body => {
-  return axiosInstance.put(getRequestURL('advanced'), body);
+const putAdvancedSettings = (body) => {
+  const { put } = getFetchClient();
+
+  return put(getRequestURL('advanced'), body);
 };
 
 export { fetchData, putAdvancedSettings };

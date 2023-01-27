@@ -7,7 +7,7 @@ const providerOptionsUpdateSchema = yup.object().shape({
   defaultRole: yup
     .strapiID()
     .required()
-    .test('is-valid-role', 'You must submit a valid default role', roleId => {
+    .test('is-valid-role', 'You must submit a valid default role', (roleId) => {
       return strapi.admin.services.role.exists({ id: roleId });
     }),
 });

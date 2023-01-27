@@ -6,7 +6,7 @@ const fs = require('fs-extra');
 const tsUtils = require('@strapi/typescript-utils');
 const getCustomAppConfigFile = require('./get-custom-app-config-file');
 
-const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
+const getPkgPath = (name) => path.dirname(require.resolve(`${name}/package.json`));
 
 async function createPluginsJs(plugins, dest) {
   const pluginsArray = plugins.map(({ pathToPlugin, name }) => {
@@ -77,11 +77,11 @@ async function createCacheDir({ appDir, plugins }) {
   );
 
   const pluginsWithFront = Object.keys(plugins)
-    .filter(pluginName => {
+    .filter((pluginName) => {
       const pluginInfo = plugins[pluginName];
       return fs.existsSync(path.resolve(pluginInfo.pathToPlugin, 'strapi-admin.js'));
     })
-    .map(name => ({ name, ...plugins[name] }));
+    .map((name) => ({ name, ...plugins[name] }));
 
   // create .cache dir
   await fs.emptyDir(cacheDir);

@@ -1,10 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
-import { Divider } from '@strapi/design-system/Divider';
-import { Stack } from '@strapi/design-system/Stack';
-import { ModalFooter, ModalHeader, ModalLayout } from '@strapi/design-system/ModalLayout';
+import {
+  ModalFooter,
+  ModalHeader,
+  ModalLayout,
+  ModalBody,
+} from '@strapi/design-system/ModalLayout';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/Breadcrumbs';
 import { Typography } from '@strapi/design-system/Typography';
 import produce from 'immer';
@@ -41,7 +43,7 @@ const ConditionsModal = ({ actions, headerBreadCrumbs, isFormDisabled, onClosed,
 
   const handleChange = (name, values) => {
     setState(
-      produce(draft => {
+      produce((draft) => {
         if (!draft[name]) {
           draft[name] = {};
         }
@@ -76,7 +78,7 @@ const ConditionsModal = ({ actions, headerBreadCrumbs, isFormDisabled, onClosed,
     <ModalLayout labelledBy="condition-modal-breadcrumbs" onClose={onClosed}>
       <ModalHeader>
         <Breadcrumbs id="condition-modal-breadcrumbs" label={headerBreadCrumbs.join(', ')}>
-          {headerBreadCrumbs.map(label => (
+          {headerBreadCrumbs.map((label) => (
             <Crumb key={label}>
               {upperFirst(
                 formatMessage({
@@ -88,48 +90,35 @@ const ConditionsModal = ({ actions, headerBreadCrumbs, isFormDisabled, onClosed,
           ))}
         </Breadcrumbs>
       </ModalHeader>
-      <Box padding={8}>
-        <Stack spacing={6}>
-          <Typography variant="beta" as="h2">
+      <ModalBody>
+        {actionsToDisplay.length === 0 && (
+          <Typography>
             {formatMessage({
-              id: 'Settings.permissions.conditions.define-conditions',
-              defaultMessage: 'Define conditions',
+              id: 'Settings.permissions.conditions.no-actions',
+              defaultMessage:
+                'You first need to select actions (create, read, update, ...) before defining conditions on them.',
             })}
           </Typography>
-          <Box>
-            <Divider />
-          </Box>
-          <Box>
-            {actionsToDisplay.length === 0 && (
-              <Typography>
-                {formatMessage({
-                  id: 'Settings.permissions.conditions.no-actions',
-                  defaultMessage:
-                    'You first need to select actions (create, read, update, ...) before defining conditions on them.',
-                })}
-              </Typography>
-            )}
-            <ul>
-              {actionsToDisplay.map(({ actionId, label, pathToConditionsObject }, index) => {
-                const name = pathToConditionsObject.join('..');
+        )}
+        <ul>
+          {actionsToDisplay.map(({ actionId, label, pathToConditionsObject }, index) => {
+            const name = pathToConditionsObject.join('..');
 
-                return (
-                  <ActionRow
-                    key={actionId}
-                    arrayOfOptionsGroupedByCategory={arrayOfOptionsGroupedByCategory}
-                    label={label}
-                    isFormDisabled={isFormDisabled}
-                    isGrey={index % 2 === 0}
-                    name={name}
-                    onChange={handleChange}
-                    value={get(state, name, {})}
-                  />
-                );
-              })}
-            </ul>
-          </Box>
-        </Stack>
-      </Box>
+            return (
+              <ActionRow
+                key={actionId}
+                arrayOfOptionsGroupedByCategory={arrayOfOptionsGroupedByCategory}
+                label={label}
+                isFormDisabled={isFormDisabled}
+                isGrey={index % 2 === 0}
+                name={name}
+                onChange={handleChange}
+                value={get(state, name, {})}
+              />
+            );
+          })}
+        </ul>
+      </ModalBody>
       <ModalFooter
         startActions={
           <Button variant="tertiary" onClick={onToggle}>

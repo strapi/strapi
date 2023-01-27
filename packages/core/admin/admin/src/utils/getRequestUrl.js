@@ -1,3 +1,3 @@
-const getRequestUrl = path => `/admin/${path}`;
+const getRequestUrl = (path) => `/admin/${path}`;
 
 export default getRequestUrl;

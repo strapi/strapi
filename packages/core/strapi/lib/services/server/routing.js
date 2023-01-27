@@ -7,7 +7,7 @@ const { yup } = require('@strapi/utils');
 
 const createEndpointComposer = require('./compose-endpoint');
 
-const policyOrMiddlewareSchema = yup.lazy(value => {
+const policyOrMiddlewareSchema = yup.lazy((value) => {
   if (typeof value === 'string') {
     return yup.string().required();
   }
@@ -23,12 +23,9 @@ const policyOrMiddlewareSchema = yup.lazy(value => {
 });
 
 const routeSchema = yup.object({
-  method: yup
-    .string()
-    .oneOf(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'ALL'])
-    .required(),
+  method: yup.string().oneOf(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'ALL']).required(),
   path: yup.string().required(),
-  handler: yup.lazy(value => {
+  handler: yup.lazy((value) => {
     if (typeof value === 'string') {
       return yup.string().required();
     }
@@ -37,38 +34,26 @@ const routeSchema = yup.object({
       return yup.array().required();
     }
 
-    return yup
-      .mixed()
-      .isFunction()
-      .required();
+    return yup.mixed().isFunction().required();
   }),
   config: yup
     .object({
-      auth: yup.lazy(value => {
+      auth: yup.lazy((value) => {
         if (value === false) {
           return yup.boolean().required();
         }
 
         return yup.object({
-          scope: yup
-            .array()
-            .of(yup.string())
-            .required(),
+          scope: yup.array().of(yup.string()).required(),
         });
       }),
-      policies: yup
-        .array()
-        .of(policyOrMiddlewareSchema)
-        .notRequired(),
-      middlewares: yup
-        .array()
-        .of(policyOrMiddlewareSchema)
-        .notRequired(),
+      policies: yup.array().of(policyOrMiddlewareSchema).notRequired(),
+      middlewares: yup.array().of(policyOrMiddlewareSchema).notRequired(),
     })
     .notRequired(),
 });
 
-const validateRouteConfig = routeConfig => {
+const validateRouteConfig = (routeConfig) => {
   try {
     return routeSchema.validateSync(routeConfig, {
       strict: true,
@@ -96,11 +81,11 @@ const createRouteManager = (strapi, opts = {}) => {
 
   const addRoutes = (routes, router) => {
     if (Array.isArray(routes)) {
-      routes.forEach(route => createRoute(route, router));
+      routes.forEach((route) => createRoute(route, router));
     } else if (routes.routes) {
       const subRouter = new Router({ prefix: routes.prefix });
 
-      routes.routes.forEach(route => {
+      routes.routes.forEach((route) => {
         const hasPrefix = has('prefix', route.config);
         createRoute(route, hasPrefix ? router : subRouter);
       });

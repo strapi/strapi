@@ -14,7 +14,7 @@ const FromUrlForm = ({ goTo, next, onClose, setLocalImage }) => {
   const [logoUrl, setLogoUrl] = useState('');
   const [error, setError] = useState(null);
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     setLogoUrl(e.target.value);
   };
 
@@ -36,7 +36,7 @@ const FromUrlForm = ({ goTo, next, onClose, setLocalImage }) => {
 
   return (
     <form
-      onSubmit={e => {
+      onSubmit={(e) => {
         e.preventDefault();
         handleSubmit();
       }}

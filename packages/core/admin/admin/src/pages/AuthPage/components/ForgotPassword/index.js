@@ -103,7 +103,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
 };
 
 ForgotPassword.defaultProps = {
-  onSubmit: e => e.preventDefault(),
+  onSubmit: (e) => e.preventDefault(),
 };
 
 ForgotPassword.propTypes = {

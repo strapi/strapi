@@ -54,10 +54,13 @@ describe('Env helper', () => {
       expect(envHelper.bool('NO_VAR')).toBeUndefined();
     });
 
-    test.each(['', '1', '-1', 'false'])('Returns false if var is not equal to true (%s)', value => {
-      process.env.NOT_TRUE = value;
-      expect(envHelper.bool('NOT_TRUE')).toEqual(false);
-    });
+    test.each(['', '1', '-1', 'false'])(
+      'Returns false if var is not equal to true (%s)',
+      (value) => {
+        process.env.NOT_TRUE = value;
+        expect(envHelper.bool('NOT_TRUE')).toEqual(false);
+      }
+    );
 
     test('Returns true when using "true"', () => {
       process.env.TRUE_VAR = 'true';

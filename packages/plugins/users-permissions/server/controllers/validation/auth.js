@@ -8,19 +8,13 @@ const callbackSchema = yup.object({
 });
 
 const registerSchema = yup.object({
-  email: yup
-    .string()
-    .email()
-    .required(),
+  email: yup.string().email().required(),
   username: yup.string().required(),
   password: yup.string().required(),
 });
 
 const sendEmailConfirmationSchema = yup.object({
-  email: yup
-    .string()
-    .email()
-    .required(),
+  email: yup.string().email().required(),
 });
 
 const validateEmailConfirmationSchema = yup.object({
@@ -29,10 +23,7 @@ const validateEmailConfirmationSchema = yup.object({
 
 const forgotPasswordSchema = yup
   .object({
-    email: yup
-      .string()
-      .email()
-      .required(),
+    email: yup.string().email().required(),
   })
   .noUnknown();
 
@@ -44,6 +35,17 @@ const resetPasswordSchema = yup
   })
   .noUnknown();
 
+const changePasswordSchema = yup
+  .object({
+    password: yup.string().required(),
+    passwordConfirmation: yup
+      .string()
+      .required()
+      .oneOf([yup.ref('password')], 'Passwords do not match'),
+    currentPassword: yup.string().required(),
+  })
+  .noUnknown();
+
 module.exports = {
   validateCallbackBody: validateYupSchema(callbackSchema),
   validateRegisterBody: validateYupSchema(registerSchema),
@@ -51,4 +53,5 @@ module.exports = {
   validateEmailConfirmationBody: validateYupSchema(validateEmailConfirmationSchema),
   validateForgotPasswordBody: validateYupSchema(forgotPasswordSchema),
   validateResetPasswordBody: validateYupSchema(resetPasswordSchema),
+  validateChangePasswordBody: validateYupSchema(changePasswordSchema),
 };

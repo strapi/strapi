@@ -34,7 +34,7 @@ function checkStatus(response, checkToken = true) {
   }
 
   return parseJSON(response)
-    .then(responseFormatted => {
+    .then((responseFormatted) => {
       const error = new Error(response.statusText);
       error.response = response;
       error.response.payload = responseFormatted;
@@ -56,7 +56,7 @@ function checkStatus(response, checkToken = true) {
  */
 function formatQueryParams(params) {
   return Object.keys(params)
-    .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
+    .map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
     .join('&');
 }
 
@@ -66,7 +66,7 @@ function formatQueryParams(params) {
  * @returns {object} the response data
  */
 function serverRestartWatcher(response) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     fetch(`${strapi.backendURL}/_health`, {
       method: 'HEAD',
       mode: 'no-cors',
@@ -75,7 +75,7 @@ function serverRestartWatcher(response) {
         'Keep-Alive': false,
       },
     })
-      .then(res => {
+      .then((res) => {
         if (res.status >= 400) {
           throw new Error('not available');
         }
@@ -145,7 +145,7 @@ export default function request(...args) {
   return fetch(url, options)
     .then(checkStatus)
     .then(parseJSON)
-    .then(response => {
+    .then((response) => {
       if (shouldWatchServerRestart) {
         return serverRestartWatcher(response);
       }

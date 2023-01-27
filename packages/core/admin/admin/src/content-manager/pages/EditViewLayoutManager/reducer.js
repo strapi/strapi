@@ -12,7 +12,7 @@ export const initialState = {
 
 const editViewManagerReducer = (state = initialState, action) =>
   // eslint-disable-next-line consistent-return
-  produce(state, drafState => {
+  produce(state, (drafState) => {
     switch (action.type) {
       case RESET_PROPS: {
         drafState.currentLayout = null;

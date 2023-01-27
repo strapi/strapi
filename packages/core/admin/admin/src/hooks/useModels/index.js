@@ -18,7 +18,7 @@ const useModels = () => {
 
     try {
       const [{ data: components }, { data: contentTypes }] = await Promise.all(
-        ['components', 'content-types'].map(endPoint =>
+        ['components', 'content-types'].map((endPoint) =>
           request(`/content-manager/${endPoint}`, { method: 'GET' })
         )
       );

@@ -13,7 +13,7 @@ import { Typography } from '@strapi/design-system/Typography';
 import useFormModalNavigation from '../../../hooks/useFormModalNavigation';
 import getTrad from '../../../utils/getTrad';
 import AttributeIcon from '../../AttributeIcon';
-import BoxWrapper from './BoxWrapper';
+import OptionBoxWrapper from '../OptionBoxWrapper';
 
 const AttributeOption = ({ type }) => {
   const { formatMessage } = useIntl();
@@ -30,7 +30,7 @@ const AttributeOption = ({ type }) => {
   };
 
   return (
-    <BoxWrapper padding={4} as="button" hasRadius type="button" onClick={handleClick}>
+    <OptionBoxWrapper padding={4} as="button" hasRadius type="button" onClick={handleClick}>
       <Flex>
         <AttributeIcon type={type} />
         <Box paddingLeft={4}>
@@ -42,12 +42,15 @@ const AttributeOption = ({ type }) => {
 
           <Flex>
             <Typography variant="pi" textColor="neutral600">
-              {formatMessage({ id: getTrad(`attribute.${type}.description`) })}
+              {formatMessage({
+                id: getTrad(`attribute.${type}.description`),
+                defaultMessage: 'A type for modeling data',
+              })}
             </Typography>
           </Flex>
         </Box>
       </Flex>
-    </BoxWrapper>
+    </OptionBoxWrapper>
   );
 };
 

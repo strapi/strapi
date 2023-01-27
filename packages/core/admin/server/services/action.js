@@ -12,7 +12,7 @@ const { AUTHOR_CODE, PUBLISH_ACTION } = require('./constants');
  * @param {string|number} roleId
  * @returns {object[]}
  */
-const getAllowedActionsForRole = async roleId => {
+const getAllowedActionsForRole = async (roleId) => {
   const { actionProvider } = getService('permission');
 
   if (!isNil(roleId)) {

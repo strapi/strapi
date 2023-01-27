@@ -13,7 +13,7 @@ const links = {
 describe('Testing build and schema core_store', () => {
   before(() => {
     cy.login()
-      .then(data => {
+      .then((data) => {
         jwt = data.jwt;
 
         return cy.createCTMApis(data.jwt);
@@ -22,15 +22,13 @@ describe('Testing build and schema core_store', () => {
   });
 
   after(() => {
-    cy.deleteApi('tag', jwt)
-      .deleteApi('category', jwt)
-      .deleteApi('product', jwt);
+    cy.deleteApi('tag', jwt).deleteApi('category', jwt).deleteApi('product', jwt);
   });
 
   context('Testing views', () => {
     beforeEach(() => {
       cy.login()
-        .then(data => {
+        .then((data) => {
           jwt = data.jwt;
         })
         .visit('/admin')
@@ -40,19 +38,14 @@ describe('Testing build and schema core_store', () => {
     it('Should visit all list pages without any errors', () => {
       cy.server();
       cy.route(`${backendUrl}/content-manager/models`).as('initCTM');
-      cy.get(`a[href="${links.settings}"]`)
-        .click()
-        .wait('@initCTM');
+      cy.get(`a[href="${links.settings}"]`).click().wait('@initCTM');
 
       // Check all list views are rendered without any error
       for (let i = 0; i < 4; i++) {
-        Object.keys(links).forEach(link => {
+        Object.keys(links).forEach((link) => {
           const name = link === 'settings' ? 'Content Manager' : link;
 
-          cy.get(`a[href="${links[link]}"]`)
-            .click()
-            .get('h1')
-            .should('have', name);
+          cy.get(`a[href="${links[link]}"]`).click().get('h1').should('have', name);
         });
       }
     });
@@ -60,9 +53,7 @@ describe('Testing build and schema core_store', () => {
     it('Should visit all views once without any errors', () => {
       cy.server();
       cy.route(`${backendUrl}/content-manager/models`).as('initCTM');
-      cy.get(`a[href="${links.settings}"]`)
-        .click()
-        .wait('@initCTM');
+      cy.get(`a[href="${links.settings}"]`).click().wait('@initCTM');
 
       // Testing errors related to reactstrap
       cy.get('#cancelChanges')
@@ -73,7 +64,7 @@ describe('Testing build and schema core_store', () => {
         .type('{esc}');
 
       // Test setting view
-      Object.keys(links).forEach(link => {
+      Object.keys(links).forEach((link) => {
         if (link !== 'settings') {
           cy.get(`#${link.toLowerCase()}`)
             .click()
@@ -84,7 +75,7 @@ describe('Testing build and schema core_store', () => {
         }
       });
 
-      Object.keys(links).forEach(link => {
+      Object.keys(links).forEach((link) => {
         if (link !== 'settings') {
           cy.get(`a[href="${links[link]}"]`)
             .click()

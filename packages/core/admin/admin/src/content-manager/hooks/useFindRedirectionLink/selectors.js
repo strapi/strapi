@@ -1,4 +1,4 @@
-const selectMenuLinks = state => {
+const selectMenuLinks = (state) => {
   const cmState = state['content-manager_app'];
 
   return cmState.collectionTypeLinks;

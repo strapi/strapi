@@ -12,7 +12,7 @@ export const Filters = ({ appliedFilters, onChangeFilters }) => {
   const [isVisible, setVisible] = useState(false);
   const { formatMessage } = useIntl();
 
-  const toggleFilter = () => setVisible(prev => !prev);
+  const toggleFilter = () => setVisible((prev) => !prev);
 
   return (
     <>

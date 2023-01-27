@@ -30,7 +30,7 @@ export const replaceText = (markdownName, textToChange) => {
   return editedText;
 };
 
-export const insertText = markdownName => {
+export const insertText = (markdownName) => {
   let editedText;
   // object to calculate text that will be selected after insert of markdown
   let selection = { start: markdownName.length, end: 0 };
@@ -75,7 +75,7 @@ export const insertText = markdownName => {
   return { editedText, selection };
 };
 
-export const insertListOrTitle = markdown => {
+export const insertListOrTitle = (markdown) => {
   let textToInsert;
 
   switch (markdown) {
@@ -140,8 +140,8 @@ export const listHandler = (editor, listType) => {
     const selections = doc.listSelections();
     let remove = null;
 
-    editor.current.operation(function() {
-      selections.forEach(function(selection) {
+    editor.current.operation(function () {
+      selections.forEach(function (selection) {
         const pos = [selection.head.line, selection.anchor.line].sort();
 
         // Remove if the first text starts with it

@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 
-const getAttributesToDisplay = contentType => {
+const getAttributesToDisplay = (contentType) => {
   const timestamps = get(contentType, ['options', 'timestamps']);
 
   // Sometimes timestamps is false

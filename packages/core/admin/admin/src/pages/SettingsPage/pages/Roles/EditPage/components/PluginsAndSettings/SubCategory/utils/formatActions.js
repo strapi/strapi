@@ -10,11 +10,11 @@ import { createArrayOfValues } from '../../../utils';
  * @param {array} pathToData
  */
 const formatActions = (actions, modifiedData, pathToData) => {
-  return actions.map(action => {
+  return actions.map((action) => {
     const checkboxName = [...pathToData, action.action, 'properties', 'enabled'];
     const checkboxValue = get(modifiedData, checkboxName, false);
     const conditionValue = get(modifiedData, [...pathToData, action.action, 'conditions'], {});
-    const hasConditions = createArrayOfValues(conditionValue).some(val => val);
+    const hasConditions = createArrayOfValues(conditionValue).some((val) => val);
 
     return {
       ...action,

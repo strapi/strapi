@@ -36,7 +36,7 @@ const Modal = ({ onClose, onSkip, children, hideSkip }) => {
             spacing={8}
             role="dialog"
             aria-modal
-            onClick={e => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
           >
             <Flex justifyContent="flex-end">
               <IconButton

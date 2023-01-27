@@ -158,7 +158,7 @@ module.exports = ({ strapi }) => {
               const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
 
               const files = await Promise.all(
-                uploads.map(upload =>
+                uploads.map((upload) =>
                   formatFile(
                     upload,
                     { folder: apiUploadFolder.id },
@@ -170,10 +170,10 @@ module.exports = ({ strapi }) => {
               const uploadService = getUploadService('upload');
 
               const uploadedFiles = await Promise.all(
-                files.map(file => uploadService.uploadFileAndPersist(file, {}))
+                files.map((file) => uploadService.uploadFileAndPersist(file, {}))
               );
 
-              sanitizedEntities = uploadedFiles.map(file =>
+              sanitizedEntities = uploadedFiles.map((file) =>
                 toEntityResponse(file, { args, resourceUID: fileTypeName })
               );
             } finally {
@@ -236,11 +236,11 @@ module.exports = ({ strapi }) => {
       types: [fileInfoInputType, mutations],
       resolversConfig: {
         // Use custom scopes for the upload file CRUD operations
-        ['Query.uploadFiles']: { auth: { scope: 'plugin::upload.content-api.find' } },
-        ['Query.uploadFile']: { auth: { scope: 'plugin::upload.content-api.findOne' } },
-        ['Mutation.createUploadFile']: { auth: { scope: 'plugin::upload.content-api.upload' } },
-        ['Mutation.updateUploadFile']: { auth: { scope: 'plugin::upload.content-api.upload' } },
-        ['Mutation.deleteUploadFile']: { auth: { scope: 'plugin::upload.content-api.destroy' } },
+        'Query.uploadFiles': { auth: { scope: 'plugin::upload.content-api.find' } },
+        'Query.uploadFile': { auth: { scope: 'plugin::upload.content-api.findOne' } },
+        'Mutation.createUploadFile': { auth: { scope: 'plugin::upload.content-api.upload' } },
+        'Mutation.updateUploadFile': { auth: { scope: 'plugin::upload.content-api.upload' } },
+        'Mutation.deleteUploadFile': { auth: { scope: 'plugin::upload.content-api.destroy' } },
 
         [`Mutation.${UPLOAD_MUTATION_NAME}`]: {
           auth: { scope: 'plugin::upload.content-api.upload' },

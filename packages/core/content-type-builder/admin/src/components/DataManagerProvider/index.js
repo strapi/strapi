@@ -34,12 +34,14 @@ import validateSchema from './utils/validateSchema';
 
 import {
   ADD_ATTRIBUTE,
+  ADD_CUSTOM_FIELD_ATTRIBUTE,
   ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE,
   CHANGE_DYNAMIC_ZONE_COMPONENTS,
   CREATE_SCHEMA,
   CREATE_COMPONENT_SCHEMA,
   DELETE_NOT_SAVED_TYPE,
   EDIT_ATTRIBUTE,
+  EDIT_CUSTOM_FIELD_ATTRIBUTE,
   GET_DATA_SUCCEEDED,
   RELOAD_PLUGIN,
   REMOVE_FIELD_FROM_DISPLAYED_COMPONENT,
@@ -52,7 +54,6 @@ import makeSelectDataManagerProvider from './selectors';
 import formatSchemas from './utils/formatSchemas';
 
 const DataManagerProvider = ({
-  allIcons,
   children,
   components,
   contentTypes,
@@ -105,7 +106,8 @@ const DataManagerProvider = ({
         },
         { data: reservedNames },
       ] = await Promise.all(
-        ['components', 'content-types', 'reserved-names'].map(endPoint => {
+        ['components', 'content-types', 'reserved-names'].map((endPoint) => {
+          // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from getFetchClient
           return axiosInstance.get(endPoint);
         })
       );
@@ -178,6 +180,26 @@ const DataManagerProvider = ({
     });
   };
 
+  const addCustomFieldAttribute = ({ attributeToSet, forTarget, targetUid, initialAttribute }) => {
+    dispatch({
+      type: ADD_CUSTOM_FIELD_ATTRIBUTE,
+      attributeToSet,
+      forTarget,
+      targetUid,
+      initialAttribute,
+    });
+  };
+
+  const editCustomFieldAttribute = ({ attributeToSet, forTarget, targetUid, initialAttribute }) => {
+    dispatch({
+      type: EDIT_CUSTOM_FIELD_ATTRIBUTE,
+      attributeToSet,
+      forTarget,
+      targetUid,
+      initialAttribute,
+    });
+  };
+
   const addCreatedComponentToDynamicZone = (dynamicZoneTarget, componentsToAdd) => {
     dispatch({
       type: ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE,
@@ -229,7 +251,7 @@ const DataManagerProvider = ({
     });
   };
 
-  const deleteCategory = async categoryUid => {
+  const deleteCategory = async (categoryUid) => {
     try {
       const requestURL = `/component-categories/${categoryUid}`;
       // eslint-disable-next-line no-alert
@@ -243,7 +265,7 @@ const DataManagerProvider = ({
 
       if (userConfirm) {
         lockAppWithAutoreload();
-
+        // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from getFetchClient
         await axiosInstance.delete(requestURL);
 
         // Make sure the server has restarted
@@ -293,7 +315,7 @@ const DataManagerProvider = ({
         }
 
         lockAppWithAutoreload();
-
+        // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from getFetchClient
         await axiosInstance.delete(requestURL);
 
         // Make sure the server has restarted
@@ -327,7 +349,8 @@ const DataManagerProvider = ({
       lockAppWithAutoreload();
 
       // Update the category
-      await axiosInstance({ url: requestURL, method: 'PUT', data: body });
+      // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from getFetchClient
+      await axiosInstance.put(requestURL, body);
 
       // Make sure the server has restarted
       await serverRestartWatcher(true);
@@ -421,7 +444,7 @@ const DataManagerProvider = ({
 
   const redirectEndpoint = useMemo(() => {
     const allowedEndpoints = Object.keys(contentTypes)
-      .filter(uid => get(contentTypes, [uid, 'schema', 'visible'], true))
+      .filter((uid) => get(contentTypes, [uid, 'schema', 'visible'], true))
       .sort();
 
     return get(allowedEndpoints, '0', 'create-content-type');
@@ -431,9 +454,10 @@ const DataManagerProvider = ({
     return <Redirect to={`/plugins/${pluginId}/content-types/${redirectEndpoint}`} />;
   }
 
-  const submitData = async additionalContentTypeData => {
+  const submitData = async (additionalContentTypeData) => {
     try {
       const isCreating = get(modifiedData, [firstKeyToMainSchema, 'isTemporary'], false);
+
       const body = {
         components: getComponentsToPost(
           modifiedData.components,
@@ -476,19 +500,18 @@ const DataManagerProvider = ({
         trackUsage('willSaveComponent');
       }
 
-      const method = isCreating ? 'POST' : 'PUT';
+      // Lock the app
+      lockAppWithAutoreload();
 
       const baseURL = `/${endPoint}`;
       const requestURL = isCreating ? baseURL : `${baseURL}/${currentUid}`;
 
-      // Lock the app
-      lockAppWithAutoreload();
-
-      await axiosInstance({
-        url: requestURL,
-        method,
-        data: body,
-      });
+      // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from getFetchClient
+      if (isCreating) {
+        await axiosInstance.post(requestURL, body);
+      } else {
+        await axiosInstance.put(requestURL, body);
+      }
 
       // Make sure the server has restarted
       await serverRestartWatcher(true);
@@ -552,18 +575,20 @@ const DataManagerProvider = ({
     <DataManagerContext.Provider
       value={{
         addAttribute,
+        addCustomFieldAttribute,
         addCreatedComponentToDynamicZone,
         allComponentsCategories: retrieveSpecificInfoFromComponents(components, ['category']),
-        allIcons,
         changeDynamicZoneComponents,
         components,
         componentsGroupedByCategory: groupBy(components, 'category'),
-        componentsThatHaveOtherComponentInTheirAttributes: getAllComponentsThatHaveAComponentInTheirAttributes(),
+        componentsThatHaveOtherComponentInTheirAttributes:
+          getAllComponentsThatHaveAComponentInTheirAttributes(),
         contentTypes,
         createSchema,
         deleteCategory,
         deleteData,
         editCategory,
+        editCustomFieldAttribute,
         isInDevelopmentMode,
         initialData,
         isInContentTypeView,
@@ -578,16 +603,14 @@ const DataManagerProvider = ({
         updateSchema,
       }}
     >
-      <>
-        {isLoadingForDataToBeSet ? (
-          <LoadingIndicatorPage />
-        ) : (
-          <>
-            {children}
-            {isInDevelopmentMode && <FormModal />}
-          </>
-        )}
-      </>
+      {isLoadingForDataToBeSet ? (
+        <LoadingIndicatorPage />
+      ) : (
+        <>
+          {children}
+          {isInDevelopmentMode && <FormModal />}
+        </>
+      )}
     </DataManagerContext.Provider>
   );
 };
@@ -597,7 +620,6 @@ DataManagerProvider.defaultProps = {
 };
 
 DataManagerProvider.propTypes = {
-  allIcons: PropTypes.array.isRequired,
   children: PropTypes.node.isRequired,
   components: PropTypes.object,
   contentTypes: PropTypes.object.isRequired,

@@ -55,7 +55,7 @@ module.exports = ({ strapi }) => {
 
       const builders = pipe(
         // Create a new instance of every builders
-        map(factory => factory(context)),
+        map((factory) => factory(context)),
         // Merge every builder into the same object
         reduce(merge, {})
       ).call(null, buildersFactories);

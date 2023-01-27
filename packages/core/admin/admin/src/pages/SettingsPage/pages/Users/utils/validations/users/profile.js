@@ -2,13 +2,9 @@ import * as yup from 'yup';
 import { translatedErrors } from '@strapi/helper-plugin';
 
 export const commonUserSchema = {
-  firstname: yup.mixed().required(translatedErrors.required),
-  lastname: yup.mixed(),
-  email: yup
-    .string()
-    .email(translatedErrors.email)
-    .lowercase()
-    .required(translatedErrors.required),
+  firstname: yup.string().trim().required(translatedErrors.required),
+  lastname: yup.string(),
+  email: yup.string().email(translatedErrors.email).lowercase().required(translatedErrors.required),
   username: yup.string().nullable(),
   password: yup
     .string()

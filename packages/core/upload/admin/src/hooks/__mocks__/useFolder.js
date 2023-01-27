@@ -10,7 +10,7 @@ export const useFolder = jest.fn().mockReturnValue({
       count: 1,
     },
     path: '/1',
-    pathId: '1',
+    pathId: 1,
     updatedAt: '',
     parent: {
       id: 2,
@@ -23,7 +23,7 @@ export const useFolder = jest.fn().mockReturnValue({
         count: 1,
       },
       path: '/1',
-      pathId: '1',
+      pathId: 1,
       updatedAt: '',
     },
   },

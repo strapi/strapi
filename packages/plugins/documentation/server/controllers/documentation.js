@@ -43,10 +43,7 @@ module.exports = {
       const version =
         major && minor && patch
           ? `${major}.${minor}.${patch}`
-          : strapi
-              .plugin('documentation')
-              .service('documentation')
-              .getDocumentationVersion();
+          : strapi.plugin('documentation').service('documentation').getDocumentationVersion();
 
       const openAPISpecsPath = path.join(
         strapi.dirs.app.extensions,
@@ -177,7 +174,7 @@ module.exports = {
 
     const service = strapi.service('plugin::documentation.documentation');
 
-    const documentationVersions = service.getDocumentationVersions().map(el => el.version);
+    const documentationVersions = service.getDocumentationVersions().map((el) => el.version);
 
     if (_.isEmpty(version)) {
       return ctx.badRequest('Please provide a version.');
@@ -201,7 +198,7 @@ module.exports = {
 
     const service = strapi.service('plugin::documentation.documentation');
 
-    const documentationVersions = service.getDocumentationVersions().map(el => el.version);
+    const documentationVersions = service.getDocumentationVersions().map((el) => el.version);
 
     if (_.isEmpty(version)) {
       return ctx.badRequest('Please provide a version.');

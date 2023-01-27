@@ -2,6 +2,6 @@
 
 const returnTypes = require('./return-types');
 
-module.exports = context => ({
+module.exports = (context) => ({
   returnTypes: returnTypes(context),
 });

@@ -25,7 +25,9 @@ import { CopyLinkButton } from '../../CopyLinkButton';
 import { UploadProgress } from '../../UploadProgress';
 import { AssetType, AssetDefinition } from '../../../constants';
 import { AssetPreview } from './AssetPreview';
-import { createAssetUrl } from '../../../utils/createAssetUrl';
+import { createAssetUrl } from '../../../utils';
+
+import 'cropperjs/dist/cropper.css';
 
 export const PreviewBox = ({
   asset,
@@ -47,15 +49,8 @@ export const PreviewBox = ({
   const [thumbnailUrl, setThumbnailUrl] = useState(createAssetUrl(asset, true));
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const {
-    crop,
-    produceFile,
-    stopCropping,
-    isCropping,
-    isCropperReady,
-    width,
-    height,
-  } = useCropImg();
+  const { crop, produceFile, stopCropping, isCropping, isCropperReady, width, height } =
+    useCropImg();
   const { editAsset, error, isLoading, progress, cancel } = useEditAsset();
 
   const {
@@ -130,7 +125,7 @@ export const PreviewBox = ({
     const nextAsset = { ...asset, width, height };
     const file = await produceFile(nextAsset.name, nextAsset.mime, nextAsset.updatedAt);
 
-    await upload({ name: file.name, rawFile: file });
+    await upload({ name: file.name, rawFile: file }, asset.folder?.id);
 
     trackUsage('didCropFile', { duplicatedFile: true, location: trackedLocation });
 

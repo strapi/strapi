@@ -16,7 +16,7 @@ const CustomRadioGroup = ({ intlLabel, name, onChange, radios, value }) => {
         {formatMessage(intlLabel)}
       </Typography>
       <Wrapper horizontal spacing={4} style={{ alignItems: 'stretch' }}>
-        {radios.map(radio => {
+        {radios.map((radio) => {
           return (
             <label htmlFor={radio.value.toString()} key={radio.value} className="container">
               <input

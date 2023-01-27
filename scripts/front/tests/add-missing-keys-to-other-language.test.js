@@ -21,12 +21,12 @@ describe('updateMissingKeysToJSON', () => {
     );
 
     // `vi.json` should have all keys from `en.json`
-    Object.keys(mainTranslationFileJSON).forEach(key => {
+    Object.keys(mainTranslationFileJSON).forEach((key) => {
       expect(key in updatedTargetTranslationFileJSON).toBe(true);
     });
 
     // `vi.json` should keep the current translation
-    Object.keys(originalTargetTranslationFileContent).forEach(key => {
+    Object.keys(originalTargetTranslationFileContent).forEach((key) => {
       expect(updatedTargetTranslationFileJSON[key]).toEqual(originalTargetTranslationFileJSON[key]);
     });
   });

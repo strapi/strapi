@@ -8,11 +8,13 @@ import reducer, { initialState } from './reducer';
 const PluginsInitializer = () => {
   const { plugins: appPlugins } = useStrapiApp();
   const [{ plugins }, dispatch] = useReducer(reducer, initialState, () => init(appPlugins));
-  const setPlugin = useRef(pluginId => {
+  const setPlugin = useRef((pluginId) => {
     dispatch({ type: 'SET_PLUGIN_READY', pluginId });
   });
 
-  const hasApluginNotReady = Object.keys(plugins).some(plugin => plugins[plugin].isReady === false);
+  const hasApluginNotReady = Object.keys(plugins).some(
+    (plugin) => plugins[plugin].isReady === false
+  );
 
   if (hasApluginNotReady) {
     const initializers = Object.keys(plugins).reduce((acc, current) => {

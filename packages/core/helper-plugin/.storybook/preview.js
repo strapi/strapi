@@ -13,7 +13,7 @@ export const parameters = {
 };
 
 export const decorators = [
-  Story => (
+  (Story) => (
     <MemoryRouter>
       <ThemeProvider theme={lightTheme}>
         <IntlProvider messages={{}} textComponent="span" locale="en">

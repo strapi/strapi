@@ -60,7 +60,7 @@ describe('Test uid service', () => {
         },
       };
       const uidService = uidServiceLoader({ strapi });
-      uidService.findUniqueUID = jest.fn(v => v);
+      uidService.findUniqueUID = jest.fn((v) => v);
 
       await uidService.generateUIDField({
         contentTypeUID: 'my-model',

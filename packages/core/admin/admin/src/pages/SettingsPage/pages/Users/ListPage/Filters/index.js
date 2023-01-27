@@ -12,7 +12,7 @@ const Filters = ({ displayedFilters }) => {
   const buttonRef = useRef();
 
   const handleToggle = () => {
-    setIsVisible(prev => !prev);
+    setIsVisible((prev) => !prev);
   };
 
   return (

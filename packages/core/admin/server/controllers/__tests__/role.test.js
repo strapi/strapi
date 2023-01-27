@@ -48,7 +48,7 @@ describe('Role controller', () => {
 
       const findOneRole = jest.fn(() => Promise.resolve({ id: 1 }));
       const findPermissions = jest.fn(() => Promise.resolve(permissions));
-      const sanitizePermission = jest.fn(perms => perms);
+      const sanitizePermission = jest.fn((perms) => perms);
 
       const ctx = createContext({
         params: { id: 1 },
@@ -91,7 +91,7 @@ describe('Role controller', () => {
         admin: {
           services: {
             permission: {
-              sanitizePermission: jest.fn(p => p),
+              sanitizePermission: jest.fn((p) => p),
             },
             role: {
               findOne,
@@ -124,7 +124,7 @@ describe('Role controller', () => {
           services: {
             role: { findOne },
             permission: {
-              sanitizePermission: jest.fn(p => p),
+              sanitizePermission: jest.fn((p) => p),
               actionProvider: { get: jest.fn() },
               conditionProvider: { values: jest.fn(() => []) },
             },
@@ -171,7 +171,7 @@ describe('Role controller', () => {
               getSuperAdmin: jest.fn(() => undefined),
             },
             permission: {
-              sanitizePermission: jest.fn(permissions => permissions),
+              sanitizePermission: jest.fn((permissions) => permissions),
               conditionProvider: {
                 values: jest.fn(() => [{ id: 'admin::is-creator' }]),
               },

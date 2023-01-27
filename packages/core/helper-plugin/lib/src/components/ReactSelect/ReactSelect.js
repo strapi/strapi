@@ -15,12 +15,18 @@ const ReactSelect = ({ components, styles, error, ariaErrorMessage, ...props }) 
 
   return (
     <Select
-      {...props}
       menuPosition="fixed"
-      components={{ ClearIndicator, DropdownIndicator, IndicatorSeparator, ...components }}
+      components={{
+        ClearIndicator,
+        DropdownIndicator,
+        IndicatorSeparator,
+        LoadingIndicator: () => null,
+        ...components,
+      }}
       aria-errormessage={error && ariaErrorMessage}
       aria-invalid={!!error}
       styles={{ ...customStyles, ...styles }}
+      {...props}
     />
   );
 };

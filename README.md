@@ -9,7 +9,7 @@
 
 <h3 align="center">API creation made simple, secure and fast.</h3>
 <p align="center">The most advanced open-source headless CMS to build powerful APIs with no effort.</p>
-<p align="center"><a href="https://strapi.io/demo">Try live demo</a></p>
+<p align="center"><a href="https://strapi.io/cloud">Cloud</a> · <a href="https://strapi.io/demo">Try live demo</a></p>
 <br />
 
 <p align="center">
@@ -17,10 +17,13 @@
     <img src="https://img.shields.io/npm/v/@strapi/strapi/latest.svg" alt="NPM Version" />
   </a>
   <a href="https://github.com/strapi/strapi/actions/workflows/tests.yml">
-    <img src="https://github.com/strapi/strapi/actions/workflows/tests.yml/badge.svg?branch=master" alt="Tests" />
+    <img src="https://github.com/strapi/strapi/actions/workflows/tests.yml/badge.svg?branch=main" alt="Tests" />
   </a>
   <a href="https://discord.strapi.io">
     <img src="https://img.shields.io/discord/811989166782021633?label=Discord" alt="Strapi on Discord" />
+  </a>
+  <a href="https://github.com/strapi/strapi/actions/workflows/nightly.yml">
+    <img src="https://github.com/strapi/strapi/actions/workflows/nightly.yml/badge.svg" alt="Strapi Nightly Release Build Status" />
   </a>
 </p>
 
@@ -77,23 +80,29 @@ Complete installation requirements can be found in the documentation under <a hr
 - CentOS/RHEL 8
 - macOS Mojave
 - Windows 10
-- Docker - [Docker-Repo](https://github.com/strapi/strapi-docker)
+- Docker
 
 (Please note that Strapi may work on other operating systems, but these are not tested nor officially supported at this time.)
 
 **Node:**
 
-- NodeJS >= 14 <= 16
-- NPM >= 6.x
+Strapi only supports maintenance and LTS versions of Node.js. Please refer to the <a href="https://nodejs.org/en/about/releases/">Node.js release schedule</a> for more information. NPM versions installed by default with Node.js are supported. Generally it's recommended to use yarn over npm where possible.
+
+| Strapi Version | Recommended | Minimum |
+| -------------- | ----------- | ------- |
+| 4.3.9 and up   | 18.x        | 14.x    |
+| 4.0.x to 4.3.8 | 16.x        | 14.x    |
 
 **Database:**
 
-- MySQL >= 5.7.8
-- MariaDB >= 10.2.7
-- PostgreSQL >= 10
-- SQLite >= 3
+| Database   | Recommended | Minimum |
+| ---------- | ----------- | ------- |
+| MySQL      | 8.0         | 5.7.8   |
+| MariaDB    | 10.6        | 10.3    |
+| PostgreSQL | 14.0        | 11.0    |
+| SQLite     | 3           | 3       |
 
-**We recommend always using the latest version of Strapi to start your new projects**.
+**We recommend always using the latest version of Strapi stable to start your new projects**.
 
 ## Features
 

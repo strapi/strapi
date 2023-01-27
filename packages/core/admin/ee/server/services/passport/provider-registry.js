@@ -6,14 +6,14 @@ module.exports = () => {
   Object.assign(registry, {
     register(provider) {
       if (strapi.isLoaded) {
-        throw new Error(`You can't register new provider after the boostrap`);
+        throw new Error(`You can't register new provider after the bootstrap`);
       }
 
       this.set(provider.uid, provider);
     },
 
     registerMany(providers) {
-      providers.forEach(provider => {
+      providers.forEach((provider) => {
         this.register(provider);
       });
     },

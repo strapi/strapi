@@ -15,7 +15,7 @@ const DeleteLink = ({ isCreatingEntry, onDelete, onDeleteSucceeded, trackerPrope
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
 
-  const toggleWarningDelete = () => setWarningDelete(prevState => !prevState);
+  const toggleWarningDelete = () => setWarningDelete((prevState) => !prevState);
 
   const handleConfirmDelete = async () => {
     try {

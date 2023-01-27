@@ -1,0 +1,220 @@
+---
+title: useDragAndDrop
+slug: /content-manager/hooks/use-drag-and-drop
+description: API reference for the useDragAndDrop hook in Strapi's Content Manager
+tags:
+  - content-manager
+  - hooks
+  - drag-and-drop
+---
+
+An abstraction around `react-dnd`'s `useDrag` and `useDrop` hooks. It provides a simple API to handle drag and drop
+events maintaining the same behaviour across the application e.g. when we consider the item to be above a new drop zone.
+
+This hook also wraps an internal hook `useKeyboardDragAndDrop` which implements keyboard accessibile drag and drop by
+returning an onKeyDown handler to be passed to the component's drag icon button.
+
+## Usage
+
+:::note
+The following examples assume that you have already set up the `DndProvider` with `HTML5Backend` in your application and
+that you are somewhat familiar with `@strapi/design-system` components.
+:::
+
+### Basic usage
+
+Below is a basic example usage where we're not interested in rendering custom previews in the DragLayer. However, we do replace
+the current item with a placeholder.
+
+```jsx
+import { Box, Flex, IconButton } from '@strapi/design-system';
+import { Drag } from '@strapi/icons';
+
+import { useDragAndDrop } from 'path/to/hooks';
+import { composeRefs } from 'path/to/utils';
+
+import { Placeholder } from './Placeholder';
+
+const MyComponent = ({ onMoveItem }) => {
+  const [{ handlerId, isDragging, handleKeyDown }, myRef, dropRef, dragRef] = useDragAndDrop(true, {
+    type: 'my-type',
+    index,
+    onMoveItem,
+  });
+
+  const composedRefs = composeRefs(myRef, dragRef);
+
+  return (
+    <Box ref={dropRef} cursor={'all-scroll'}>
+      {isDragging ? (
+        <Placeholder />
+      ) : (
+        <Flex ref={composedRefs} data-handler-id={handlerId}>
+          <IconButton
+            forwardedAs="div"
+            role="button"
+            tabIndex={0}
+            aria-label="Drag"
+            noBorder
+            onKeyDown={handleKeyDown}
+          >
+            <Drag />
+          </IconButton>
+          {'My item'}
+        </Flex>
+      )}
+    </Box>
+  );
+};
+```
+
+### Using custom previews
+
+The only really difference between the previous example and this one is
+that we're using the `getEmptyImage` function from `react-dnd-html5-backend`.
+
+```jsx
+import { getEmptyImage } from 'react-dnd-html5-backend';
+import { Box, Flex, IconButton } from '@strapi/design-system';
+import { Drag } from '@strapi/icons';
+
+import { useDragAndDrop } from 'path/to/hooks';
+import { composeRefs } from 'path/to/utils';
+
+import { Placeholder } from './Placeholder';
+
+const MyComponent = ({ onMoveItem }) => {
+  const [{ handlerId, isDragging, handleKeyDown }, myRef, dropRef, dragRef, dragPreviewRef] =
+    useDragAndDrop(true, {
+      type: 'my-type',
+      index,
+      onMoveItem,
+    });
+
+  // highlight-start
+  useEffect(() => {
+    dragPreviewRef(getEmptyImage());
+  }, [dragPreviewRef]);
+  // highlight-end
+
+  const composedRefs = composeRefs(myRef, dragRef);
+
+  return (
+    <Box ref={dropRef} cursor={'all-scroll'}>
+      {isDragging ? (
+        <Placeholder />
+      ) : (
+        <Flex ref={composedRefs} data-handler-id={handlerId}>
+          <IconButton
+            forwardedAs="div"
+            role="button"
+            tabIndex={0}
+            aria-label="Drag"
+            noBorder
+            onKeyDown={handleKeyDown}
+          >
+            <Drag />
+          </IconButton>
+          {'My item'}
+        </Flex>
+      )}
+    </Box>
+  );
+};
+```
+
+## Typescript
+
+```ts
+import { Identifier } from 'dnd-core';
+import { ConnectDropTarget, ConnectDragSource, ConnectDragPreview } from 'react-dnd';
+
+interface UseDragAndDropOptions {
+  index: number;
+  onMoveItem: (newIndex: number, currentIndex: number) => void;
+  /**
+   * @default "regular"
+   * Defines whether the change in index should be immediately over another
+   * dropzone or half way over it (regular).
+   */
+  dropSensitivity?: 'immediate' | 'regular';
+  item?: object;
+  /**
+   * @default 'STRAPI_DND'
+   */
+  type?: string;
+  onCancel?: (index: number) => void;
+  onDropItem?: (index: number) => void;
+  onEnd?: () => void;
+  onGrabItem?: (index: number) => void;
+  onStart?: () => void;
+}
+
+type UseDragAndDropReturn = [
+  props: {
+    handlerId: Identifier;
+    isDragging: boolean;
+    handleKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
+  },
+  objectRef: React.RefObject<HTMLElement>,
+  dropRef: ConnectDropTarget,
+  dragRef: ConnectDragSource,
+  dragPreviewRef: ConnectDragPreview
+];
+
+type UseDragAndDrop = (active: boolean, options: UseDragAndDropOptions) => UseDragAndDropReturn;
+```
+
+## Accessibility
+
+Its advised to implement a [live text region](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions) in the
+parent component holding your individual dnd children. This should be done to inform the user of the current state of the drag and drop.
+To implement this, you need to pass the `onDropItem`, `onGrabItem` and `onCancel` callbacks to the `useDragAndDrop` hook which are fired
+only with the purpose of updating the live region, hence why they're optional. You would also update the live region as part of your
+`onMoveItem` callback. There are generic messages that can be used in the `intl` provider, an example of using this may look like:
+
+```js
+setLiveText(
+  formatMessage(
+    {
+      id: getTrad('dnd.drop-item'),
+      defaultMessage: `{item}, dropped. Final position in list: {position}.`,
+    },
+    {
+      item: 'my item',
+      position: 1,
+    }
+  )
+);
+```
+
+## Further Reading
+
+- [react-dnd docs](https://react-dnd.github.io/react-dnd/docs/overview)
+- [useDrag API](https://react-dnd.github.io/react-dnd/docs/api/use-drag)
+- [useDrop API](https://react-dnd.github.io/react-dnd/docs/api/use-drop)
+- [useDragLayer API](https://react-dnd.github.io/react-dnd/docs/api/use-drag-layer)
+
+## Troubleshooting
+
+### Firefox quirks
+
+You might notice in the [basic usage](#basic-usage) section this piece of code:
+
+```jsx
+<IconButton
+  forwardedAs="div"
+  role="button"
+  tabIndex={0}
+  aria-label="Drag"
+  noBorder
+  onKeyDown={handleKeyDown}
+>
+  <Drag />
+</IconButton>
+```
+
+In `firefox` the drag handler will not work if you click and drag when the element is a `button`, this is known [bug in the browser](bugzilla.mozilla.org/show_bug.cgi?id=568313).
+Therefore the workaround is to use the `forwardedAs` prop to render a `div` instead of a `button`
+and add the `role` and `tabIndex` props to make this accessible. The actual `IconButton` component
+adds an accessible lable from the `aria-label` prop. So we don't have to concern ourselves with that.

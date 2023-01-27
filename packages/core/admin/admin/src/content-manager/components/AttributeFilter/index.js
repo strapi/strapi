@@ -1,11 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import useAllowedAttributes from './hooks/useAllowedAttributes';
 import Filters from './Filters';
 
 const AttributeFilter = ({ contentType, slug, metadatas }) => {
+  const { formatMessage } = useIntl();
   const allowedAttributes = useAllowedAttributes(contentType, slug);
-  const displayedFilters = allowedAttributes.map(name => {
+  const displayedFilters = allowedAttributes.map((name) => {
     const attribute = contentType.attributes[name];
     const { type, enum: options } = attribute;
 
@@ -18,7 +20,7 @@ const AttributeFilter = ({ contentType, slug, metadatas }) => {
 
     return {
       name,
-      metadatas: { label },
+      metadatas: { label: formatMessage({ id: label, defaultMessage: label }) },
       fieldSchema: { type, options, mainField },
       trackedEvent,
     };

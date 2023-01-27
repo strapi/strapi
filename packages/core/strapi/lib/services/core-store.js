@@ -30,11 +30,11 @@ const createCoreStore = ({ db }) => {
     };
   };
 
-  const store = function(defaultParams = {}) {
+  const store = function (defaultParams = {}) {
     return {
-      get: params => store.get(mergeParams(defaultParams, params)),
-      set: params => store.set(mergeParams(defaultParams, params)),
-      delete: params => store.delete(mergeParams(defaultParams, params)),
+      get: (params) => store.get(mergeParams(defaultParams, params)),
+      set: (params) => store.set(mergeParams(defaultParams, params)),
+      delete: (params) => store.delete(mergeParams(defaultParams, params)),
     };
   };
 

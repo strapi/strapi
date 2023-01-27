@@ -12,7 +12,7 @@ const initialState = {
 };
 
 const reducer = (state = initialState, action) =>
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case 'SET_LOCAL_IMAGE': {
         draftState.localImage = action.value;

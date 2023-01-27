@@ -54,7 +54,7 @@ const Input = ({
           id: 'app.components.ToggleCheckbox.on-label',
           defaultMessage: 'On',
         })}
-        onChange={e => {
+        onChange={(e) => {
           onChange({ target: { name, value: e.target.checked } });
         }}
       />

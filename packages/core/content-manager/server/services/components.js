@@ -55,7 +55,7 @@ module.exports = ({ strapi }) => ({
   async findComponentsConfigurations(model) {
     const componentsMap = {};
 
-    const getComponentConfigurations = async uid => {
+    const getComponentConfigurations = async (uid) => {
       const component = this.findComponent(uid);
 
       if (has(uid, componentsMap)) return;
@@ -69,7 +69,7 @@ module.exports = ({ strapi }) => ({
       });
     };
 
-    for (const key in model.attributes) {
+    for (const key of Object.keys(model.attributes)) {
       const attribute = model.attributes[key];
 
       if (attribute.type === 'component') {

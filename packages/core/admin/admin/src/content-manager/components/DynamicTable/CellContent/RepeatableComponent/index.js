@@ -36,7 +36,7 @@ const RepeatableComponentCell = ({ value, metadatas }) => {
   return (
     <Box {...stopPropagation}>
       <SimpleMenu label={Label} size="S">
-        {value.map(item => (
+        {value.map((item) => (
           <MenuItem key={item.id} aria-disabled>
             <TypographyMaxWidth ellipsis>
               <CellValue type={mainFieldType} value={item[mainFieldName] || item.id} />
