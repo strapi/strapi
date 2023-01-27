@@ -23,7 +23,6 @@ import PaginationFooter from './PaginationFooter';
 import Modal from './Modal';
 import Filters from '../../../../../../../admin/src/pages/SettingsPage/components/Filters';
 import getDisplayedFilters from './utils/getDisplayedFilters';
-import getDefaultMessage, { actionTypes } from './utils/getActionTypesDefaultMessages';
 import useAuditLogsData from './hooks/useAuditLogsData';
 
 const ListView = () => {
@@ -36,28 +35,7 @@ const ListView = () => {
 
   useFocusWhenNavigate();
 
-  const actionOptions = Object.keys(actionTypes).map((action) => {
-    return {
-      label: formatMessage(
-        {
-          id: `Settings.permissions.auditLogs.${action}`,
-          defaultMessage: getDefaultMessage(action),
-        },
-        { model: '' }
-      ),
-      customValue: action,
-    };
-  });
-
-  const userOptions = users?.results.map((user) => {
-    return {
-      label: `${user.firstname} ${user.lastname}`,
-      // Combobox expects a string value
-      customValue: user.id.toString(),
-    };
-  });
-
-  const displayedFilters = getDisplayedFilters({ actionOptions, userOptions });
+  const displayedFilters = getDisplayedFilters({ formatMessage, users });
 
   const title = formatMessage({
     id: 'global.auditLogs',

@@ -1,4 +1,5 @@
 import ComboboxFilter from '../ComboboxFilter';
+import getDefaultMessage, { actionTypes } from './getActionTypesDefaultMessages';
 
 const customOperators = [
   {
@@ -11,12 +12,36 @@ const customOperators = [
   },
 ];
 
-const getDisplayedFilters = ({ actionOptions, userOptions }) => {
+const getDisplayedFilters = ({ formatMessage, users }) => {
+  const actionOptions = Object.keys(actionTypes).map((action) => {
+    return {
+      label: formatMessage(
+        {
+          id: `Settings.permissions.auditLogs.${action}`,
+          defaultMessage: getDefaultMessage(action),
+        },
+        { model: '' }
+      ),
+      customValue: action,
+    };
+  });
+
+  const userOptions = users?.results.map((user) => {
+    return {
+      label: `${user.firstname} ${user.lastname}`,
+      // Combobox expects a string value
+      customValue: user.id.toString(),
+    };
+  });
+
   return [
     {
       name: 'action',
       metadatas: {
-        label: 'Action',
+        label: formatMessage({
+          id: 'Settings.permissions.auditLogs.action',
+          defaultMessage: 'Action',
+        }),
         options: actionOptions,
         customOperators,
         customInput: ComboboxFilter,
@@ -25,13 +50,21 @@ const getDisplayedFilters = ({ actionOptions, userOptions }) => {
     },
     {
       name: 'date',
-      metadatas: { label: 'Date' },
+      metadatas: {
+        label: formatMessage({
+          id: 'Settings.permissions.auditLogs.date',
+          defaultMessage: 'Date',
+        }),
+      },
       fieldSchema: { type: 'datetime' },
     },
     {
       name: 'user',
       metadatas: {
-        label: 'User',
+        label: formatMessage({
+          id: 'Settings.permissions.auditLogs.user',
+          defaultMessage: 'User',
+        }),
         options: userOptions,
         customOperators: [
           ...customOperators,
