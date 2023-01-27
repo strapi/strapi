@@ -27,12 +27,12 @@ export const diff = (a: unknown, b: unknown, ctx: Context = createContext()): Di
   // Define helpers
 
   const added = () => {
-    diffs.push({ kind: 'added', path, type: aType, value: a });
+    diffs.push({ kind: 'added', path, type: bType, value: b });
     return diffs;
   };
 
   const deleted = () => {
-    diffs.push({ kind: 'deleted', path, type: bType, value: b });
+    diffs.push({ kind: 'deleted', path, type: aType, value: a });
     return diffs;
   };
 
