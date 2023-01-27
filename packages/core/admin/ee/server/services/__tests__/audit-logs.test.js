@@ -87,7 +87,6 @@ describe('Audit logs service', () => {
           };
         },
       },
-      isLoaded: true,
     };
 
     const mockSaveEvent = jest.fn();
@@ -121,6 +120,10 @@ describe('Audit logs service', () => {
       mockSaveEvent.mockClear();
       mockFindMany.mockClear();
       mockEntityServiceCreate.mockClear();
+    });
+
+    beforeEach(() => {
+      strapi.isLoaded = true;
     });
 
     it('should register and init the audit logs service when registered', async () => {
@@ -225,6 +228,17 @@ describe('Audit logs service', () => {
       expect(mockScheduleJob).toHaveBeenCalledTimes(1);
       expect(mockScheduleJob).toHaveBeenCalledWith('0 0 * * *', expect.any(Function));
       expect(mockDeleteExpiredEvents).toHaveBeenCalledWith(expect.any(Date));
+    });
+
+    it('should not emit an event if strapi is not loaded', async () => {
+      strapi.isLoaded = false;
+
+      const auditLogsService = createAuditLogsService(strapi);
+      await auditLogsService.register();
+
+      await strapi.eventHub.emit('entry.create', { meta: 'test' });
+
+      expect(mockSaveEvent).not.toHaveBeenCalled();
     });
   });
 });
