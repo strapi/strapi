@@ -28,7 +28,7 @@ const wrapWithEmitEvent = (event, fn) => async (entity, body, model) => {
   });
 
   if (isRelationsPopulateEnabled(model)) {
-    return getDeepRelationsCount(entity, model);
+    return getDeepRelationsCount(result, model);
   }
 
   return result;
