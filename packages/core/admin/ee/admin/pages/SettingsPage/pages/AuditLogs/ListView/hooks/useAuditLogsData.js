@@ -1,7 +1,6 @@
 import { useQuery } from 'react-query';
 import { useNotification, useFetchClient } from '@strapi/helper-plugin';
 import { useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
 
 const useAuditLogsData = ({ canRead }) => {
   const { get } = useFetchClient();
@@ -26,11 +25,12 @@ const useAuditLogsData = ({ canRead }) => {
     keepPreviousData: true,
     retry: false,
     staleTime: 1000 * 20, // 20 seconds
+    onError: (error) => toggleNotification({ type: 'warning', message: error.message }),
   };
 
   const {
     data: auditLogs,
-    isLoadingAuditLogs,
+    isLoading: isLoadingAuditLogs,
     status: auditLogsStatus,
   } = useQuery(['auditLogs', search], fetchAuditLogsPage, queryOptions);
 
@@ -39,19 +39,9 @@ const useAuditLogsData = ({ canRead }) => {
     staleTime: 2 * (1000 * 60), // 2 minutes
   });
 
-  const isLoading = isLoadingAuditLogs;
   const hasError = [userStatus, auditLogsStatus].includes('error');
 
-  useEffect(() => {
-    if (hasError) {
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
-      });
-    }
-  }, [hasError, toggleNotification]);
-
-  return { auditLogs, users: users?.data, isLoading, hasError };
+  return { auditLogs, users: users?.data, isLoading: isLoadingAuditLogs, hasError };
 };
 
 export default useAuditLogsData;
