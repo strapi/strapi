@@ -33,7 +33,6 @@ const databases = {
       username: 'strapi',
       password: 'strapi',
     },
-    pool: { min: 0, max: 100 },
   },
   sqlite: {
     client: 'sqlite',
