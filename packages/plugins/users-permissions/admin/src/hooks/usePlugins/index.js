@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useReducer } from 'react';
-import { useNotification } from '@strapi/helper-plugin';
+import { useNotification, useFetchClient } from '@strapi/helper-plugin';
 import { get } from 'lodash';
 import init from './init';
 import pluginId from '../../pluginId';
 import { cleanPermissions } from '../../utils';
-import axiosInstance from '../../utils/axiosInstance';
 import reducer, { initialState } from './reducer';
 
 const usePlugins = (shouldFetchData = true) => {
@@ -12,6 +11,7 @@ const usePlugins = (shouldFetchData = true) => {
   const [{ permissions, routes, isLoading }, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, shouldFetchData)
   );
+  const fetchClient = useFetchClient();
 
   const fetchPlugins = useCallback(async () => {
     try {
@@ -21,7 +21,7 @@ const usePlugins = (shouldFetchData = true) => {
 
       const [{ permissions }, { routes }] = await Promise.all(
         [`/${pluginId}/permissions`, `/${pluginId}/routes`].map(async (endpoint) => {
-          const res = await axiosInstance.get(endpoint);
+          const res = await fetchClient.get(endpoint);
 
           return res.data;
         })
@@ -46,6 +46,8 @@ const usePlugins = (shouldFetchData = true) => {
         });
       }
     }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toggleNotification]);
 
   useEffect(() => {
