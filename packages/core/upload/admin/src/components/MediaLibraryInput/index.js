@@ -102,13 +102,11 @@ export const MediaLibraryInput = ({
     });
   };
 
-  const handleAssetDrop = (assets) => {
+  const validateAssetsTypes = (assets, cb) => {
     const allowedAssets = getAllowedFiles(fieldAllowedTypes, assets);
 
-    if (allowedAssets.length > 0) {
-      setDroppedAssets(allowedAssets);
-      setStep(STEPS.AssetUpload);
-    } else {
+    if (allowedAssets.length > 0) cb(allowedAssets);
+    else {
       toggleNotification({
         type: 'warning',
         timeout: 4000,
@@ -121,6 +119,13 @@ export const MediaLibraryInput = ({
         },
       });
     }
+  };
+
+  const handleAssetDrop = (assets) => {
+    validateAssetsTypes(assets, (allowedAssets) => {
+      setDroppedAssets(allowedAssets);
+      setStep(STEPS.AssetUpload);
+    });
   };
 
   let label = intlLabel.id ? formatMessage(intlLabel) : '';
@@ -204,6 +209,7 @@ export const MediaLibraryInput = ({
           addUploadedFiles={handleFilesUploadSucceeded}
           trackedLocation="content-manager"
           folderId={folderId}
+          validateAssetsTypes={validateAssetsTypes}
         />
       )}
 
