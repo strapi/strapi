@@ -37,7 +37,7 @@ describe('Review workflows', () => {
   });
 
   describe('Get workflows', () => {
-    test('It should be available for every connected users (public)', async () => {
+    test("It shouldn't be available for public", async () => {
       const res = await requests.public.get('/admin/review-workflows/workflows');
 
       if (hasRW) {
@@ -62,7 +62,7 @@ describe('Review workflows', () => {
   });
 
   describe('Get one workflow', () => {
-    test('It should be available for every connected users (public)', async () => {
+    test("It shouldn't be available for public", async () => {
       const res = await requests.public.get(
         `/admin/review-workflows/workflows/${defaultWorkflow.id}`
       );
