@@ -8,9 +8,11 @@ const { createMigrationsProvider } = require('./migrations');
 const { createLifecyclesProvider } = require('./lifecycles');
 const createConnection = require('./connection');
 const errors = require('./errors');
+const transactionCtx = require('./transaction-context');
 
 // TODO: move back into strapi
 const { transformContentTypes } = require('./utils/content-types');
+const { validateDatabase } = require('./validations');
 
 class Database {
   constructor(config) {
@@ -49,6 +51,44 @@ class Database {
     return this.entityManager.getRepository(uid);
   }
 
+  async transaction(cb) {
+    const notNestedTransaction = !transactionCtx.get();
+    const trx = notNestedTransaction ? await this.connection.transaction() : transactionCtx.get();
+
+    async function commit() {
+      if (notNestedTransaction) {
+        await trx.commit();
+      }
+    }
+
+    async function rollback() {
+      if (notNestedTransaction) {
+        await trx.rollback();
+      }
+    }
+    if (!cb) {
+      return {
+        commit,
+        rollback,
+        get() {
+          return trx;
+        },
+      };
+    }
+
+    return transactionCtx.run(trx, async () => {
+      try {
+        const callbackParams = { trx, commit, rollback };
+        const res = await cb(callbackParams);
+        await commit();
+        return res;
+      } catch (error) {
+        await rollback();
+        throw error;
+      }
+    });
+  }
+
   getConnection(tableName) {
     const schema = this.connection.getSchemaName();
     const connection = tableName ? this.connection(tableName) : this.connection;
@@ -58,10 +98,6 @@ class Database {
   getSchemaConnection(trx = this.connection) {
     const schema = this.connection.getSchemaName();
     return schema ? trx.schema.withSchema(schema) : trx.schema;
-  }
-
-  transaction() {
-    return this.connection.transaction();
   }
 
   queryBuilder(uid) {
@@ -76,7 +112,11 @@ class Database {
 
 // TODO: move into strapi
 Database.transformContentTypes = transformContentTypes;
-Database.init = async (config) => new Database(config);
+Database.init = async (config) => {
+  const db = new Database(config);
+  await validateDatabase(db);
+  return db;
+};
 
 module.exports = {
   Database,

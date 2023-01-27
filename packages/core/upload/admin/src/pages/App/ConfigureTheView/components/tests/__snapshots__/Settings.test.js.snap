@@ -224,7 +224,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
               class="c3 c4"
               spacing="1"
             >
-              <span
+              <label
                 class="c5"
                 for="select-1"
               >
@@ -233,7 +233,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
                 >
                   Entries per page
                 </div>
-              </span>
+              </label>
               <div
                 class="c6 c7"
               >
@@ -242,7 +242,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
                   aria-disabled="false"
                   aria-expanded="false"
                   aria-haspopup="listbox"
-                  aria-labelledby="select-1-label select-1-content"
+                  aria-labelledby="select-1 select-1-label select-1-content"
                   class="c8"
                   data-testid="pageSize-select"
                   id="select-1"
@@ -315,7 +315,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
               class="c3 c4"
               spacing="1"
             >
-              <span
+              <label
                 class="c5"
                 for="select-2"
               >
@@ -324,7 +324,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
                 >
                   Default sort order
                 </div>
-              </span>
+              </label>
               <div
                 class="c6 c7"
               >
@@ -333,7 +333,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
                   aria-disabled="false"
                   aria-expanded="false"
                   aria-haspopup="listbox"
-                  aria-labelledby="select-2-label select-2-content"
+                  aria-labelledby="select-2 select-2-label select-2-content"
                   class="c8"
                   data-testid="sort-select"
                   id="select-2"

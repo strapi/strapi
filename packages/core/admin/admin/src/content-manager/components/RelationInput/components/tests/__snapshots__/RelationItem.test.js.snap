@@ -3,7 +3,6 @@
 exports[`Content-Manager || RelationInput || RelationItem should render and match snapshot 1`] = `
 .c0 {
   cursor: default;
-  cursor: default;
 }
 
 .c1 {
