@@ -16,7 +16,7 @@ describe('Content-Manager', () => {
     beforeEach(() => {
       global.strapi = {
         entityService: {
-          update: jest.fn(),
+          update: jest.fn().mockReturnValue({ id: 1, publishedAt: new Date() }),
         },
         entityValidator: {
           validateEntityCreation() {},
@@ -51,7 +51,7 @@ describe('Content-Manager', () => {
     beforeEach(() => {
       global.strapi = {
         entityService: {
-          update: jest.fn(),
+          update: jest.fn().mockReturnValue({ id: 1, publishedAt: null }),
         },
         eventHub: { emit: jest.fn(), sanitizeEntity: (entity) => entity },
         getModel: jest.fn(() => fakeModel),
