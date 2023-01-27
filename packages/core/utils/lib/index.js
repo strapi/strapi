@@ -37,7 +37,7 @@ const providerFactory = require('./provider-factory');
 const pagination = require('./pagination');
 const sanitize = require('./sanitize');
 const traverseEntity = require('./traverse-entity');
-const { pipeAsync, mapAsync, reduceAsync } = require('./async');
+const { pipeAsync, mapAsync } = require('./async');
 const convertQueryParams = require('./convert-query-params');
 const importDefault = require('./import-default');
 const template = require('./template');
@@ -82,7 +82,6 @@ module.exports = {
   pagination,
   pipeAsync,
   mapAsync,
-  reduceAsync,
   errors,
   validateYupSchema,
   validateYupSchemaSync,
