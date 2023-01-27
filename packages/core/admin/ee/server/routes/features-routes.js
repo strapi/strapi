@@ -48,13 +48,17 @@ module.exports = {
       method: 'GET',
       path: '/review-workflows/workflows',
       handler: 'workflows.find',
-      config: { auth: false },
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
     },
     {
       method: 'GET',
-      path: '/review-workflows/workflows/:workflow_id',
+      path: '/review-workflows/workflows/:id',
       handler: 'workflows.findOne',
-      config: { auth: false },
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
     },
   ],
 };

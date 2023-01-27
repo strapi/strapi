@@ -37,9 +37,18 @@ describe('Review workflows', () => {
   });
 
   describe('Get workflows', () => {
-    test.each(Object.keys(requests))('It should be available for everyone (%s)', async (type) => {
-      const rq = requests[type];
-      const res = await rq.get('/admin/review-workflows/workflows');
+    test('It should be available for every connected users (public)', async () => {
+      const res = await requests.public.get('/admin/review-workflows/workflows');
+
+      if (hasRW) {
+        expect(res.status).toBe(401);
+      } else {
+        expect(res.status).toBe(404);
+        expect(Array.isArray(res.body)).toBeFalsy();
+      }
+    });
+    test('It should be available for every connected users (admin)', async () => {
+      const res = await requests.admin.get('/admin/review-workflows/workflows');
 
       if (hasRW) {
         expect(res.status).toBe(200);
@@ -53,9 +62,22 @@ describe('Review workflows', () => {
   });
 
   describe('Get one workflow', () => {
-    test.each(Object.keys(requests))('It should be available for everyone (%s)', async (type) => {
-      const rq = requests[type];
-      const res = await rq.get(`/admin/review-workflows/workflows/${defaultWorkflow.id}`);
+    test('It should be available for every connected users (public)', async () => {
+      const res = await requests.public.get(
+        `/admin/review-workflows/workflows/${defaultWorkflow.id}`
+      );
+
+      if (hasRW) {
+        expect(res.status).toBe(401);
+      } else {
+        expect(res.status).toBe(404);
+        expect(res.body.data).toBeUndefined();
+      }
+    });
+    test('It should be available for every connected users (admin)', async () => {
+      const res = await requests.admin.get(
+        `/admin/review-workflows/workflows/${defaultWorkflow.id}`
+      );
 
       if (hasRW) {
         expect(res.status).toBe(200);

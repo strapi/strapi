@@ -1,14 +1,6 @@
 'use strict';
 
-const { merge } = require('lodash/fp');
-const { getService, mapObject } = require('../../utils');
-
-function sanitizeWorkflowQuery(query = {}) {
-  return mapObject(query, {
-    pick: ['workflow_id'],
-    rename: { workflow_id: 'id' },
-  });
-}
+const { getService } = require('../../utils');
 
 module.exports = {
   /**
@@ -16,24 +8,22 @@ module.exports = {
    * @param {import('koa').BaseContext} ctx - koa context
    */
   async find(ctx) {
-    const query = sanitizeWorkflowQuery(merge(ctx.query, ctx.params));
-
     const workflowService = getService('workflows');
-    const results = await workflowService.find(query);
+    const results = await workflowService.find({});
 
     ctx.body = {
       results,
     };
   },
   /**
-   * Get one workflow
+   * Get one workflow based on its id contained in request parameters
    * @param {import('koa').BaseContext} ctx - koa context
    */
   async findOne(ctx) {
-    const query = sanitizeWorkflowQuery(merge(ctx.query, ctx.params));
+    const { id } = ctx.params;
 
     const workflowService = getService('workflows');
-    const data = await workflowService.findOne(query);
+    const data = await workflowService.findById(id);
 
     ctx.body = {
       data,
