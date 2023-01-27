@@ -33,6 +33,7 @@ const databases = {
       username: 'strapi',
       password: 'strapi',
     },
+    pool: { min: 0, max: 20 },
   },
   sqlite: {
     client: 'sqlite',
@@ -48,8 +49,6 @@ function CreateDB(uuid) {
   // as a command-line argument, or obtain it from
   // a .env file
   async function main(uuid) {
-    console.log('Koekjes');
-    console.log(databases[process.env.DATABASE]);
     const knex = Knex(databases[process.env.DATABASE]);
 
     // Lets create our database if it does not exist
