@@ -210,6 +210,7 @@
   "Settings.permissions.auditLogs.permission.create": "Create permission",
   "Settings.permissions.auditLogs.permission.update": "Update permission",
   "Settings.permissions.auditLogs.permission.delete": "Delete permission",
+  "Settings.permissions.auditLogs.filters.combobox.aria-laebl": "Search and select an option to filter",
   "Settings.profile.form.notify.data.loaded": "Your profile data has been loaded",
   "Settings.profile.form.section.experience.clear.select": "Clear the interface language selected",
   "Settings.profile.form.section.experience.here": "here",

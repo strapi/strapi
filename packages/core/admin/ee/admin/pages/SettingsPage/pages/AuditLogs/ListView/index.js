@@ -8,9 +8,14 @@ import {
   useQueryParams,
   AnErrorOccurred,
 } from '@strapi/helper-plugin';
-import { HeaderLayout, ContentLayout, ActionLayout, Layout } from '@strapi/design-system/Layout';
-import { Box } from '@strapi/design-system/Box';
-import { Main } from '@strapi/design-system/Main';
+import {
+  Box,
+  HeaderLayout,
+  ContentLayout,
+  ActionLayout,
+  Layout,
+  Main,
+} from '@strapi/design-system';
 import adminPermissions from '../../../../../../../admin/src/permissions';
 import TableRows from './TableRows';
 import tableHeaders from './utils/tableHeaders';
