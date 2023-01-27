@@ -2,6 +2,14 @@ import { isArray, isObject, zip, isEqual, uniq } from 'lodash/fp';
 
 const createContext = (): Context => ({ path: [] });
 
+const isLooselyEqual = (a: unknown, b: unknown) => {
+  // eslint-disable-next-line eqeqeq
+  if (a == b) {
+    return true;
+  }
+  return false;
+};
+
 /**
  * Compute differences between two JSON objects and returns them
  *
@@ -19,12 +27,12 @@ export const diff = (a: unknown, b: unknown, ctx: Context = createContext()): Di
   // Define helpers
 
   const added = () => {
-    diffs.push({ kind: 'added', path, types: [aType, bType], values: [a, b] });
+    diffs.push({ kind: 'added', path, type: aType, value: a });
     return diffs;
   };
 
   const deleted = () => {
-    diffs.push({ kind: 'deleted', path, types: [aType, bType], values: [a, b] });
+    diffs.push({ kind: 'deleted', path, type: bType, value: b });
     return diffs;
   };
 
@@ -46,14 +54,6 @@ export const diff = (a: unknown, b: unknown, ctx: Context = createContext()): Di
       values: [a, b],
     });
     return diffs;
-  };
-
-  const isLooselyEqual = () => {
-    // eslint-disable-next-line eqeqeq
-    if (a == b) {
-      return true;
-    }
-    return false;
   };
 
   if (isArray(a) && isArray(b)) {
@@ -87,7 +87,7 @@ export const diff = (a: unknown, b: unknown, ctx: Context = createContext()): Di
   }
 
   if (!isEqual(a, b)) {
-    if (isLooselyEqual()) {
+    if (isLooselyEqual(a, b)) {
       return dataType();
     }
 
