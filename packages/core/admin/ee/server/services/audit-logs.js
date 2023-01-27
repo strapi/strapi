@@ -58,6 +58,10 @@ const createAuditLogsService = (strapi) => {
   const eventMap = getEventMap(defaultEvents);
 
   const processEvent = (name, ...args) => {
+    if (!strapi.isLoaded) {
+      return null;
+    }
+
     const getPayload = eventMap[name];
 
     // Ignore the event if it's not in the map
