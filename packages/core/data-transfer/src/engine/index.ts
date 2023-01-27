@@ -375,6 +375,10 @@ class TransferEngine<
                 return `Schema value changed at "${path}": "${diff.values[0]}" (${diff.types[0]}) => "${diff.values[1]}" (${diff.types[1]})`;
               }
 
+              if (diff.kind === 'dataType') {
+                return `Schema has differing data types at "${path}": "${diff.values[0]}" (${diff.types[0]}) => "${diff.values[1]}" (${diff.types[1]})`;
+              }
+
               throw new TransferEngineValidationError(`Invalid diff found for "${uid}"`, {
                 check: `schema on ${uid}`,
               });
