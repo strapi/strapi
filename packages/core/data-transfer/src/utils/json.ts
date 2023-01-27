@@ -105,11 +105,11 @@ export const diff = (a: unknown, b: unknown, ctx: Context = createContext()): Di
   return diffs;
 };
 
-export interface AddedDiff<T = unknown, P = unknown> {
+export interface AddedDiff<T = unknown> {
   kind: 'added';
   path: string[];
-  types: [string, string];
-  values: [T, P];
+  type: string;
+  value: T;
 }
 
 export interface ModifiedDiff<T = unknown, P = unknown> {
@@ -119,11 +119,11 @@ export interface ModifiedDiff<T = unknown, P = unknown> {
   values: [T, P];
 }
 
-export interface DeletedDiff<T = unknown, P = unknown> {
+export interface DeletedDiff<T = unknown> {
   kind: 'deleted';
   path: string[];
-  types: [string, string];
-  values: [T, P];
+  type: string;
+  value: T;
 }
 
 export interface DataTypeDiff<T = unknown, P = unknown> {
