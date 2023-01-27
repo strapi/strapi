@@ -1,19 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Content-Manager || RelationInput || RelationList should render and match snapshot 1`] = `
-.c6 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
+.c1 {
+  cursor: default;
 }
 
-.c3 {
+.c2 {
   background: #ffffff;
   padding-top: 8px;
   padding-right: 16px;
@@ -24,21 +16,7 @@ exports[`Content-Manager || RelationInput || RelationList should render and matc
   border: 1px solid #dcdce4;
 }
 
-.c1 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c4 {
+.c3 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -56,18 +34,53 @@ exports[`Content-Manager || RelationInput || RelationList should render and matc
   justify-content: space-between;
 }
 
-.c5 {
+.c4 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c5 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c5 > * + * {
+  margin-left: 4px;
+}
+
+.c8 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c6 {
   width: 100%;
   min-width: 0;
 }
 
-.c2 > * {
-  margin-top: 0;
-  margin-bottom: 0;
+.c6 > div[role='button'] {
+  cursor: all-scroll;
 }
 
-.c2 > * + * {
-  margin-top: 4px;
+.c7 {
+  width: 100%;
+  min-width: 0;
 }
 
 .c0 {
@@ -85,40 +98,72 @@ exports[`Content-Manager || RelationInput || RelationList should render and matc
 }
 
 .c0:before {
-  background: linear-gradient(rgba(33,33,52,0.1) 0%,rgba(0,0,0,0) 100%);
+  content: '';
+  background: linear-gradient(rgba(3,3,5,0.2) 0%,rgba(0,0,0,0) 100%);
   top: 0;
+  opacity: 0;
+  -webkit-transition: opacity 0.2s ease-in-out;
+  transition: opacity 0.2s ease-in-out;
 }
 
 .c0:after {
-  background: linear-gradient(rgba(0,0,0,0) 0%,rgba(33,33,52,0.1) 100%);
+  content: '';
+  background: linear-gradient(0deg,rgba(3,3,5,0.2) 0%,rgba(0,0,0,0) 100%);
   bottom: 0;
+  opacity: 0;
+  -webkit-transition: opacity 0.2s ease-in-out;
+  transition: opacity 0.2s ease-in-out;
 }
 
 <div>
   <div
     class="c0"
   >
-    <div
-      class="c1 c2"
-      spacing="1"
+    <li
+      aria-describedby="test"
+      class="c1"
+      cursor="default"
     >
-      <li
-        class=""
+      <div
+        class="c2 c3"
+        data-handler-id="T0"
       >
         <div
-          class="c3 c4"
+          class="c4 c5 c6"
+          spacing="1"
         >
           <div
-            class="c4 c5"
+            class="c3 c7"
           >
             First relation
           </div>
         </div>
-      </li>
-    </div>
+      </div>
+    </li>
+    <li
+      aria-describedby="test"
+      class="c1"
+      cursor="default"
+    >
+      <div
+        class="c2 c3"
+        data-handler-id="T2"
+      >
+        <div
+          class="c4 c5 c6"
+          spacing="1"
+        >
+          <div
+            class="c3 c7"
+          >
+            Second relation
+          </div>
+        </div>
+      </div>
+    </li>
   </div>
   <div
-    class="c6"
+    class="c8"
   >
     <p
       aria-live="polite"

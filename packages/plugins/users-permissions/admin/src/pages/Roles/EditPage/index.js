@@ -3,6 +3,7 @@ import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
 import {
+  useFetchClient,
   useOverlayBlocker,
   SettingsPageTitle,
   LoadingIndicatorPage,
@@ -26,7 +27,6 @@ import getTrad from '../../../utils/getTrad';
 import pluginId from '../../../pluginId';
 import { usePlugins, useFetchRole } from '../../../hooks';
 import schema from './utils/schema';
-import axiosInstance from '../../../utils/axiosInstance';
 
 const EditPage = () => {
   const { formatMessage } = useIntl();
@@ -39,6 +39,7 @@ const EditPage = () => {
   const { isLoading: isLoadingPlugins, routes } = usePlugins();
   const { role, onSubmitSucceeded, isLoading: isLoadingRole } = useFetchRole(id);
   const permissionsRef = useRef();
+  const { put } = useFetchClient();
 
   const handleEditRoleSubmit = async (data) => {
     // Set loading state
@@ -47,7 +48,7 @@ const EditPage = () => {
     try {
       const permissions = permissionsRef.current.getPermissions();
       // Update role in Strapi
-      await axiosInstance.put(`/${pluginId}/roles/${id}`, { ...data, ...permissions, users: [] });
+      await put(`/${pluginId}/roles/${id}`, { ...data, ...permissions, users: [] });
       // Notify success
       onSubmitSucceeded({ name: data.name, description: data.description });
       toggleNotification({

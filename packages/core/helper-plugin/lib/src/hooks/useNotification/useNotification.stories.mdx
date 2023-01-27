@@ -20,7 +20,7 @@ const HomePage = () => {
   const handleClick = () => {
     toggleNotification({
         // required
-        type: 'info|success|warning',
+        type: 'info|success|warning|softWarning',
         // required
         message: { id: 'notification.version.update.message', defaultMessage: 'A new version is available' },
         // optional
@@ -35,6 +35,8 @@ const HomePage = () => {
         blockTransition: true,
         // optional
         onClose: () => localStorage.setItem('STRAPI_UPDATE_NOTIF', true),
+        // optional
+        title: { id: 'notification.default.title, defaultMessage: 'Warning: '}
       });
   }
 

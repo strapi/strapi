@@ -107,14 +107,6 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   color: #32324d;
 }
 
-.c27 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 1.14;
-  color: #32324d;
-}
-
 .c18 > * {
   margin-top: 0;
   margin-bottom: 0;
@@ -254,7 +246,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   fill: #32324d;
 }
 
-.c28 {
+.c27 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -266,7 +258,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   padding-right: 16px;
 }
 
-.c28 .c2 {
+.c27 .c2 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -277,48 +269,48 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c28 .c8 {
+.c27 .c8 {
   color: #ffffff;
 }
 
-.c28[aria-disabled='true'] {
+.c27[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c28[aria-disabled='true'] .c8 {
+.c27[aria-disabled='true'] .c8 {
   color: #666687;
 }
 
-.c28[aria-disabled='true'] svg > g,.c28[aria-disabled='true'] svg path {
+.c27[aria-disabled='true'] svg > g,.c27[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c28[aria-disabled='true']:active {
+.c27[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c28[aria-disabled='true']:active .c8 {
+.c27[aria-disabled='true']:active .c8 {
   color: #666687;
 }
 
-.c28[aria-disabled='true']:active svg > g,.c28[aria-disabled='true']:active svg path {
+.c27[aria-disabled='true']:active svg > g,.c27[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c28:hover {
+.c27:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c28:active {
+.c27:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c28 svg > g,
-.c28 svg path {
+.c27 svg > g,
+.c27 svg path {
   fill: #ffffff;
 }
 
@@ -608,9 +600,9 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
                             <div
                               class=" css-1hb7zxy-IndicatorsContainer"
                             >
-                              <button
+                              <div
+                                aria-hidden="true"
                                 class="c2 c21 c22 c23"
-                                type="button"
                               >
                                 <svg
                                   fill="none"
@@ -626,7 +618,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
                                     fill-rule="evenodd"
                                   />
                                 </svg>
-                              </button>
+                              </div>
                             </div>
                           </div>
                           <input
@@ -656,7 +648,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
                       type="button"
                     >
                       <span
-                        class="c8 c27"
+                        class="c8 c19"
                       >
                         Cancel
                       </span>
@@ -667,11 +659,11 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
                   >
                     <button
                       aria-disabled="false"
-                      class="c10 c28"
+                      class="c10 c27"
                       type="submit"
                     >
                       <span
-                        class="c8 c27"
+                        class="c8 c19"
                       >
                         Move
                       </span>
