@@ -115,7 +115,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   padding-bottom: 20px;
 }
 
-.c53 {
+.c52 {
   padding-top: 24px;
 }
 
@@ -177,15 +177,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   color: #32324d;
 }
 
-.c52 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 1.14;
-  color: #32324d;
-}
-
-.c54 {
+.c53 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
@@ -462,12 +454,12 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   border-bottom: 1px solid #eaeaef;
 }
 
-.c55 {
+.c54 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
 
-.c56 > * + * {
+.c55 > * + * {
   margin-left: 8px;
 }
 
@@ -560,7 +552,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   fill: #ffffff;
 }
 
-.c57 {
+.c56 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -574,7 +566,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   background: #ffffff;
 }
 
-.c57 .c0 {
+.c56 .c0 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -585,50 +577,50 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   align-items: center;
 }
 
-.c57 .c3 {
+.c56 .c3 {
   color: #ffffff;
 }
 
-.c57[aria-disabled='true'] {
+.c56[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c57[aria-disabled='true'] .c3 {
+.c56[aria-disabled='true'] .c3 {
   color: #666687;
 }
 
-.c57[aria-disabled='true'] svg > g,.c57[aria-disabled='true'] svg path {
+.c56[aria-disabled='true'] svg > g,.c56[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c57[aria-disabled='true']:active {
+.c56[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c57[aria-disabled='true']:active .c3 {
+.c56[aria-disabled='true']:active .c3 {
   color: #666687;
 }
 
-.c57[aria-disabled='true']:active svg > g,.c57[aria-disabled='true']:active svg path {
+.c56[aria-disabled='true']:active svg > g,.c56[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c57:hover {
+.c56:hover {
   background-color: #f6f6f9;
 }
 
-.c57:active {
+.c56:active {
   background-color: #eaeaef;
 }
 
-.c57 .c3 {
+.c56 .c3 {
   color: #32324d;
 }
 
-.c57 svg > g,
-.c57 svg path {
+.c56 svg > g,
+.c56 svg path {
   fill: #32324d;
 }
 
@@ -972,16 +964,16 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                                 type="button"
                               >
                                 <span
-                                  class="c3 c52"
+                                  class="c3 c4"
                                 >
                                   Browse files
                                 </span>
                               </button>
                               <div
-                                class="c0 c53"
+                                class="c0 c52"
                               >
                                 <span
-                                  class="c3 c54"
+                                  class="c3 c53"
                                 >
                                   Max dimension: 750x750, Max size: 100KB
                                 </span>
@@ -993,28 +985,28 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                     </div>
                   </form>
                   <div
-                    class="c0 c29 c55"
+                    class="c0 c29 c54"
                   >
                     <div
                       class="c0 c31"
                     >
                       <div
-                        class="c0 c5 c56"
+                        class="c0 c5 c55"
                       >
                         <button
                           aria-disabled="false"
-                          class="c17 c57"
+                          class="c17 c56"
                           type="button"
                         >
                           <span
-                            class="c3 c52"
+                            class="c3 c4"
                           >
                             Cancel
                           </span>
                         </button>
                       </div>
                       <div
-                        class="c0 c5 c56"
+                        class="c0 c5 c55"
                       />
                     </div>
                   </div>
@@ -1167,14 +1159,6 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   line-height: 1.45;
   text-transform: uppercase;
   color: #666687;
-}
-
-.c48 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 1.14;
-  color: #32324d;
 }
 
 .c1 {
@@ -1512,7 +1496,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   margin: 0;
 }
 
-.c49 {
+.c48 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1524,7 +1508,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   padding-right: 16px;
 }
 
-.c49 .c0 {
+.c48 .c0 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1535,48 +1519,48 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   align-items: center;
 }
 
-.c49 .c3 {
+.c48 .c3 {
   color: #ffffff;
 }
 
-.c49[aria-disabled='true'] {
+.c48[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c49[aria-disabled='true'] .c3 {
+.c48[aria-disabled='true'] .c3 {
   color: #666687;
 }
 
-.c49[aria-disabled='true'] svg > g,.c49[aria-disabled='true'] svg path {
+.c48[aria-disabled='true'] svg > g,.c48[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c49[aria-disabled='true']:active {
+.c48[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c49[aria-disabled='true']:active .c3 {
+.c48[aria-disabled='true']:active .c3 {
   color: #666687;
 }
 
-.c49[aria-disabled='true']:active svg > g,.c49[aria-disabled='true']:active svg path {
+.c48[aria-disabled='true']:active svg > g,.c48[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c49:hover {
+.c48:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c49:active {
+.c48:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c49 svg > g,
-.c49 svg path {
+.c48 svg > g,
+.c48 svg path {
   fill: #ffffff;
 }
 
@@ -1977,7 +1961,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                             type="button"
                           >
                             <span
-                              class="c3 c48"
+                              class="c3 c4"
                             >
                               Cancel
                             </span>
@@ -1988,11 +1972,11 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                         >
                           <button
                             aria-disabled="false"
-                            class="c17 c49"
+                            class="c17 c48"
                             type="submit"
                           >
                             <span
-                              class="c3 c48"
+                              class="c3 c4"
                             >
                               Next
                             </span>

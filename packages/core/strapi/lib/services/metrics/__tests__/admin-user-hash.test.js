@@ -14,7 +14,7 @@ describe('user email hash', () => {
 
     const ctx = createContext({}, { state });
 
-    global.strapi = {
+    const strapi = {
       requestContext: {
         get: jest.fn(() => ctx),
       },
@@ -22,20 +22,20 @@ describe('user email hash', () => {
 
     const hash = crypto.createHash('sha256').update('testemail@strapi.io').digest('hex');
 
-    const userId = generateAdminUserHash();
+    const userId = generateAdminUserHash(strapi);
     expect(userId).toBe(hash);
   });
 
   test('should return empty string if user is not available on ctx', () => {
     const ctx = createContext({}, {});
 
-    global.strapi = {
+    const strapi = {
       requestContext: {
         get: jest.fn(() => ctx),
       },
     };
 
-    const userId = generateAdminUserHash();
+    const userId = generateAdminUserHash(strapi);
     expect(userId).toBe('');
   });
 });
