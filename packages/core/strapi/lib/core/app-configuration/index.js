@@ -56,6 +56,15 @@ module.exports = (dirs, initialConfig = {}) => {
 
   const envDir = path.resolve(configDir, 'env', process.env.NODE_ENV);
   const envConfig = loadConfigDir(envDir);
-
-  return _.merge(rootConfig, defaultConfig, baseConfig, envConfig);
+  
+  let mergedConfig = {}
+  
+  // apply the environment configuration only if there is one and apply the specific cron configuration of the environement
+  if(_.isEmpty(envConfig)){
+    mergedConfig = _.merge(rootConfig, defaultConfig, baseConfig)
+  } else {
+    mergedConfig = _.merge(rootConfig, defaultConfig, baseConfig, envConfig)
+    mergedConfig.server.cron = envConfig?.server?.cron ? envConfig.server.cron : {}  
+  }
+  return mergedConfig;
 };
