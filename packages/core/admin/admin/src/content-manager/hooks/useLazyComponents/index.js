@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import { useCustomFields } from '@strapi/helper-plugin';
 
 const componentStore = new Map();
@@ -11,13 +11,16 @@ const componentStore = new Map();
  */
 const useLazyComponents = (componentUids = []) => {
   const [lazyComponentStore, setLazyComponentStore] = useState(Object.fromEntries(componentStore));
-  const [loading, setLoading] = useState(() => {
-    if (componentStore.size === 0 && componentUids.length > 0) {
-      return true;
-    }
+  /**
+   * Start loading only if there are any components passed in
+   * and there are some new to load
+   */
+  const newUids = useMemo(
+    () => componentUids.filter((uid) => !componentStore.get(uid)),
+    [componentUids]
+  );
+  const [loading, setLoading] = useState(() => !!newUids.length);
 
-    return false;
-  });
   const customFieldsRegistry = useCustomFields();
 
   useEffect(() => {
@@ -36,23 +39,19 @@ const useLazyComponents = (componentUids = []) => {
       setStore(Object.fromEntries(componentStore));
     };
 
-    if (componentUids.length && loading) {
+    if (loading) {
       /**
        * These uids are not in the component store therefore we need to get the components
        */
-      const newUids = componentUids.filter((uid) => !componentStore.get(uid));
-
       const componentPromises = newUids.map((uid) => {
         const customField = customFieldsRegistry.get(uid);
 
         return customField.components.Input();
       });
 
-      if (componentPromises.length > 0) {
-        lazyLoadComponents(newUids, componentPromises);
-      }
+      lazyLoadComponents(newUids, componentPromises);
     }
-  }, [componentUids, customFieldsRegistry, loading]);
+  }, [newUids, customFieldsRegistry, loading]);
 
   /**
    * Wrap this in a callback so it can be used in
