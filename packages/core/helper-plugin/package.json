@@ -50,7 +50,7 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-helmet": "^6.1.0",
-    "react-intl": "5.25.1",
+    "react-intl": "6.2.7",
     "react-router": "^5.2.0",
     "react-router-dom": "5.3.4",
     "react-select": "5.6.0",
@@ -70,7 +70,7 @@
     "@testing-library/react-hooks": "8.0.1",
     "browserslist-to-esbuild": "1.2.0",
     "cross-env": "^7.0.3",
-    "esbuild-loader": "^2.20.0",
+    "esbuild-loader": "^2.21.0",
     "react-test-renderer": "^17.0.2",
     "require-from-string": "2.0.2",
     "rimraf": "3.0.2",
@@ -90,6 +90,6 @@
     }
   },
   "peerDependencies": {
-    "webpack": "^5.74.0"
+    "webpack": "^5.75.0"
   }
 }
