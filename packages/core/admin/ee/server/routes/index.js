@@ -148,4 +148,24 @@ module.exports = [
       ],
     },
   },
+
+  // Review workflow
+  {
+    method: 'GET',
+    path: '/review-workflows/workflows',
+    handler: 'workflows.find',
+    config: {
+      middlewares: [enableFeatureMiddleware('review-workflows')],
+      policies: ['admin::isAuthenticatedAdmin'],
+    },
+  },
+  {
+    method: 'GET',
+    path: '/review-workflows/workflows/:id',
+    handler: 'workflows.findOne',
+    config: {
+      middlewares: [enableFeatureMiddleware('review-workflows')],
+      policies: ['admin::isAuthenticatedAdmin'],
+    },
+  },
 ];

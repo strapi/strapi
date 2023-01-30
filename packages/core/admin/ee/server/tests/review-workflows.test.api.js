@@ -29,7 +29,9 @@ describe('Review workflows', () => {
     requests.public = createRequest({ strapi });
     requests.admin = await createAuthRequest({ strapi });
 
-    defaultWorkflow = await strapi.query('admin::workflow').create({ data: {} });
+    if (hasRW) {
+      defaultWorkflow = await strapi.query('admin::workflow').create({ data: {} });
+    }
   });
 
   afterAll(async () => {
