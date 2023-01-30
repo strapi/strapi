@@ -30,7 +30,7 @@ const useAuditLogsData = ({ canRead }) => {
 
   const {
     data: auditLogs,
-    isLoading: isLoadingAuditLogs,
+    isLoading,
     status: auditLogsStatus,
   } = useQuery(['auditLogs', search], fetchAuditLogsPage, queryOptions);
 
@@ -41,7 +41,7 @@ const useAuditLogsData = ({ canRead }) => {
 
   const hasError = [userStatus, auditLogsStatus].includes('error');
 
-  return { auditLogs, users: users?.data, isLoading: isLoadingAuditLogs, hasError };
+  return { auditLogs, users: users?.data, isLoading, hasError };
 };
 
 export default useAuditLogsData;
