@@ -45,12 +45,12 @@ describe('useReviewWorkflows', () => {
     get.mockResolvedValue({
       data: [
         {
-          id: 'bdb46de2-9b0d-11ed-a8fc-0242ac120002',
+          id: 1,
           stages: [],
         },
 
         {
-          id: 'c57bc2dc-9b0d-11ed-a8fc-0242ac120002',
+          id: 2,
           stages: [],
         },
       ],
