@@ -113,7 +113,7 @@ module.exports = {
         useTypescriptOnServer,
         useTypescriptOnAdmin,
         isHostedOnStrapiCloud,
-        numberOfAllContentTypes,
+        numberOfAllContentTypes, // TODO: Rename this in Strapi v5
         numberOfComponents,
         numberOfDynamicZones: getNumberOfDynamicZones(),
       },
