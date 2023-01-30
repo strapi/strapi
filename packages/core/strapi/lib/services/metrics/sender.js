@@ -43,12 +43,13 @@ module.exports = (strapi) => {
   const serverRootPath = strapi.dirs.app.root;
   const adminRootPath = path.join(strapi.dirs.app.root, 'src', 'admin');
 
-  const getNumberOfDynamicZones = () =>
-    pipe(
+  const getNumberOfDynamicZones = () => {
+    return pipe(
       map('attributes'),
       flatMap(values),
       sumBy(propEq('type', 'dynamiczone'))
     )(strapi.contentTypes);
+  };
 
   const anonymousUserProperties = {
     environment: strapi.config.environment,
@@ -68,7 +69,7 @@ module.exports = (strapi) => {
     useTypescriptOnAdmin: isUsingTypeScriptSync(adminRootPath),
     projectId: uuid,
     isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
-    numberOfAllContentTypes: _.size(strapi.contentTypes), // TODO: Rename this in Strapi v5
+    numberOfAllContentTypes: _.size(strapi.contentTypes), // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
     numberOfComponents: _.size(strapi.components),
     numberOfDynamicZones: getNumberOfDynamicZones(),
   };

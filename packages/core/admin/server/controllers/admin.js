@@ -101,19 +101,20 @@ module.exports = {
     const numberOfAllContentTypes = _.size(strapi.contentTypes);
     const numberOfComponents = _.size(strapi.components);
 
-    const getNumberOfDynamicZones = () =>
-      pipe(
+    const getNumberOfDynamicZones = () => {
+      return pipe(
         map('attributes'),
         flatMap(values),
         sumBy(propEq('type', 'dynamiczone'))
       )(strapi.contentTypes);
+    };
 
     return {
       data: {
         useTypescriptOnServer,
         useTypescriptOnAdmin,
         isHostedOnStrapiCloud,
-        numberOfAllContentTypes, // TODO: Rename this in Strapi v5
+        numberOfAllContentTypes, // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
         numberOfComponents,
         numberOfDynamicZones: getNumberOfDynamicZones(),
       },

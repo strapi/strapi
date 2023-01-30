@@ -6,7 +6,7 @@ const { getService } = require('../utils');
 const sendDidInitializeEvent = async () => {
   const { isLocalizedContentType } = getService('content-types');
 
-  // TODO:  Rename this in Strapi v5
+  // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
   const numberOfContentTypes = reduce(
     (sum, contentType) => (isLocalizedContentType(contentType) ? sum + 1 : sum),
     0
