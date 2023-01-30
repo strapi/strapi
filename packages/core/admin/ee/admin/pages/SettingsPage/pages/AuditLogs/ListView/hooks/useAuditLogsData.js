@@ -31,15 +31,15 @@ const useAuditLogsData = ({ canRead }) => {
   const {
     data: auditLogs,
     isLoading,
-    status: auditLogsStatus,
+    isError: isAuditLogsError,
   } = useQuery(['auditLogs', search], fetchAuditLogsPage, queryOptions);
 
-  const { data: users, status: userStatus } = useQuery(['auditLogsUsers'], fetchAllUsers, {
+  const { data: users, isError: isUsersError } = useQuery(['auditLogsUsers'], fetchAllUsers, {
     ...queryOptions,
     staleTime: 2 * (1000 * 60), // 2 minutes
   });
 
-  const hasError = [userStatus, auditLogsStatus].includes('error');
+  const hasError = isAuditLogsError || isUsersError;
 
   return { auditLogs, users: users?.data, isLoading, hasError };
 };
