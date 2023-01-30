@@ -190,7 +190,9 @@ class LocalFileSourceProvider implements ISourceProvider {
           async onentry(entry) {
             const transforms = [
               // JSONL parser to read the data chunks one by one (line by line)
-              parser(),
+              parser({
+                checkErrors: true,
+              }),
               // The JSONL parser returns each line as key/value
               (line: { key: string; value: object }) => line.value,
             ];
@@ -213,6 +215,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     return outStream;
   }
 
+  // For collecting an entire JSON file then parsing it, not for streaming JSONL
   async #parseJSONFile<T extends object>(fileStream: Readable, filePath: string): Promise<T> {
     return new Promise<T>((resolve, reject) => {
       pipeline(
