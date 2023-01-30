@@ -22,7 +22,7 @@ const StyledAccordion = styled(Box)`
   }
 `;
 
-function Stage({ uid, name }) {
+function Stage({ id, name }) {
   const { formatMessage } = useIntl();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -34,7 +34,7 @@ function Stage({ uid, name }) {
           <Grid gap={4}>
             <GridItem col={6}>
               <TextInput
-                name={`stage_name[${uid}]`}
+                name={`stage_name[${id}]`}
                 disabled
                 label={formatMessage({
                   id: 'Settings.review-workflows.stage.name.label',

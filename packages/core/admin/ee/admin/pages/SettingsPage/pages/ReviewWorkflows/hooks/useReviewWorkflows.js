@@ -2,12 +2,36 @@ import { useQuery } from 'react-query';
 
 import { useFetchClient } from '@strapi/helper-plugin';
 
-export function useReviewWorkflows(workflowUid) {
+export function useReviewWorkflows(workflowId) {
   const { get } = useFetchClient();
 
   async function fetchWorkflows() {
+    /* TODO: mocked for now until the API is ready */
+    return [
+      {
+        id: 'id-1',
+        name: 'To do',
+      },
+
+      {
+        id: 'id-2',
+        name: 'Ready to review',
+      },
+
+      {
+        id: 'id-3',
+        name: 'In progress',
+      },
+
+      {
+        id: 'id-4',
+        name: 'Reviewed',
+      },
+    ];
+
+    // eslint-disable-next-line no-unreachable
     try {
-      const { data } = await get(`/admin/review-workflows/workflows/${workflowUid ?? ''}`);
+      const { data } = await get(`/admin/review-workflows/workflows/${workflowId ?? ''}`);
 
       return data;
     } catch (err) {
@@ -15,7 +39,7 @@ export function useReviewWorkflows(workflowUid) {
     }
   }
 
-  const workflows = useQuery(['review-workflows', workflowUid ?? 'default'], fetchWorkflows);
+  const workflows = useQuery(['review-workflows', workflowId ?? 'default'], fetchWorkflows);
 
   return {
     workflows,
