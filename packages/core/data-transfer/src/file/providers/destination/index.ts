@@ -101,6 +101,13 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
     const outStream = createWriteStream(this.#archivePath);
 
+    outStream.on('error', (err: NodeJS.ErrnoException) => {
+      if (err.code === 'ENOSPC') {
+        throw new Error("Your server doesn't have space to proceed with the import.");
+      }
+      throw err;
+    });
+
     const archiveTransforms: Stream[] = [];
 
     if (compression.enabled) {
