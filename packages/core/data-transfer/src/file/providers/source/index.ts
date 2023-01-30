@@ -14,6 +14,7 @@ import type { IAsset, IMetadata, ISourceProvider, ProviderType } from '../../../
 
 import { createDecryptionCipher } from '../../../utils/encryption';
 import { collect } from '../../../utils/stream';
+import { ProviderTransferError } from '../../../errors/providers';
 
 type StreamItemArray = Parameters<typeof chain>[0];
 
@@ -200,8 +201,23 @@ class LocalFileSourceProvider implements ISourceProvider {
 
             const stream = entry.pipe(chain(transforms));
 
-            for await (const chunk of stream) {
-              outStream.write(chunk);
+            try {
+              for await (const chunk of stream) {
+                outStream.write(chunk);
+              }
+            } catch (e: unknown) {
+              outStream.destroy(
+                new ProviderTransferError(
+                  `Error parsing backup files from backup file ${entry.path}: ${
+                    (e as Error).message
+                  }`,
+                  {
+                    details: {
+                      error: e,
+                    },
+                  }
+                )
+              );
             }
           },
         }),
