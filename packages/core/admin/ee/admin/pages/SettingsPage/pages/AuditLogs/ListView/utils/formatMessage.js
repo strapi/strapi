@@ -34,9 +34,6 @@ export const getDefaultMessage = (value) => {
 };
 
 export const getActionMessage = (message, action) => {
-  console.log('message', message);
-  console.log('action', action);
-
   if (message.includes('entry')) {
     return `${message} (${action.model})`;
   }

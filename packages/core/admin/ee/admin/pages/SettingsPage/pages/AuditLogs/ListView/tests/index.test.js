@@ -16,18 +16,6 @@ const user = userEvent.setup();
 
 jest.mock('../hooks/useAuditLogsData', () => jest.fn());
 
-// Codemirror inner dependency, reference: https://github.com/jsdom/jsdom/issues/3002
-// Otherwise it throws: TypeError: range(...).getBoundingClientRect is not a function
-document.createRange = () => {
-  const range = new Range();
-  range.getClientRects = jest.fn(() => ({
-    item: () => null,
-    length: 0,
-  }));
-
-  return range;
-};
-
 const mockUseQuery = jest.fn();
 jest.mock('react-query', () => {
   const actual = jest.requireActual('react-query');
