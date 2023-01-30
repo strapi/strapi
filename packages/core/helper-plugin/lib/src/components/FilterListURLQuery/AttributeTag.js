@@ -44,12 +44,13 @@ const AttributeTag = ({ attribute, filter, onClick, operator, value }) => {
 
   // Handle custom input
   if (attribute.metadatas.customInput) {
-    // If options, get the option label
+    // If the custom input has an options array, find the option with a customValue matching the query value
     if (attribute.metadatas.options) {
       const selectedOption = attribute.metadatas.options.find((option) => {
         return option.customValue === value;
       });
-      // Set the provided option label or fallback to the value from query
+      // Expecting option as an object: {label: 'Neat label', customValue: 'some.value'}
+      // return the label or fallback to the query value
       formattedValue = selectedOption?.label || value;
     }
   }
