@@ -107,14 +107,6 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   color: #32324d;
 }
 
-.c29 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 1.14;
-  color: #32324d;
-}
-
 .c18 > * {
   margin-top: 0;
   margin-bottom: 0;
@@ -124,12 +116,12 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   margin-top: 4px;
 }
 
-.c30 > * {
+.c29 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c30 > * + * {
+.c29 > * + * {
   margin-left: 8px;
 }
 
@@ -263,7 +255,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   fill: #32324d;
 }
 
-.c31 {
+.c30 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -275,7 +267,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   padding-right: 16px;
 }
 
-.c31 .c2 {
+.c30 .c2 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -286,48 +278,48 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c31 .c8 {
+.c30 .c8 {
   color: #ffffff;
 }
 
-.c31[aria-disabled='true'] {
+.c30[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c31[aria-disabled='true'] .c8 {
+.c30[aria-disabled='true'] .c8 {
   color: #666687;
 }
 
-.c31[aria-disabled='true'] svg > g,.c31[aria-disabled='true'] svg path {
+.c30[aria-disabled='true'] svg > g,.c30[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c31[aria-disabled='true']:active {
+.c30[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c31[aria-disabled='true']:active .c8 {
+.c30[aria-disabled='true']:active .c8 {
   color: #666687;
 }
 
-.c31[aria-disabled='true']:active svg > g,.c31[aria-disabled='true']:active svg path {
+.c30[aria-disabled='true']:active svg > g,.c30[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c31:hover {
+.c30:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c31:active {
+.c30:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c31 svg > g,
-.c31 svg path {
+.c30 svg > g,
+.c30 svg path {
   fill: #ffffff;
 }
 
@@ -766,7 +758,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                       type="button"
                     >
                       <span
-                        class="c8 c29"
+                        class="c8 c19"
                       >
                         Cancel
                       </span>
@@ -776,17 +768,17 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                     class="c2 c20 c27"
                   >
                     <div
-                      class="c2 c20 c30"
+                      class="c2 c20 c29"
                       spacing="2"
                     >
                       <button
                         aria-disabled="false"
-                        class="c10 c31"
+                        class="c10 c30"
                         name="submit"
                         type="submit"
                       >
                         <span
-                          class="c8 c29"
+                          class="c8 c19"
                         >
                           Create
                         </span>

@@ -1,21 +1,15 @@
 'use strict';
 
-jest.mock('@strapi/strapi/lib/utils/ee', () => {
-  const eeModule = () => true;
-
-  Object.assign(eeModule, {
-    features: {
-      isEnabled() {
-        return true;
-      },
-      getEnabled() {
-        return ['sso'];
-      },
+jest.mock('@strapi/strapi/ee', () => ({
+  features: {
+    isEnabled() {
+      return true;
     },
-  });
-
-  return eeModule;
-});
+    list() {
+      return [{ name: 'sso' }];
+    },
+  },
+}));
 
 const {
   syncProviderRegistryWithConfig,
@@ -71,12 +65,12 @@ describe('SSO', () => {
       jest.clearAllMocks();
     });
 
-    test('Cannot register after boostrap', () => {
+    test('Cannot register after bootstrap', () => {
       global.strapi = { isLoaded: true };
 
       const fn = () => registry.register(fooProvider);
 
-      expect(fn).toThrowError(`You can't register new provider after the boostrap`);
+      expect(fn).toThrowError(`You can't register new provider after the bootstrap`);
       expect(registry.size).toBe(0);
     });
 

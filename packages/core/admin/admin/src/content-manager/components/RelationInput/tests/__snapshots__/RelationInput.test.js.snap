@@ -3,7 +3,6 @@
 exports[`Content-Manager || RelationInput should render and match snapshot 1`] = `
 .c16 {
   cursor: all-scroll;
-  cursor: all-scroll;
 }
 
 .c17 {
@@ -207,7 +206,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   padding-top: 4px;
   padding-right: 16px;
   padding-bottom: 4px;
-  min-width: 0px;
+  min-width: 0;
 }
 
 .c30 {
