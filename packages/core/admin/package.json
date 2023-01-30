@@ -38,11 +38,11 @@
     "test:front:ce:cov": "cross-env IS_EE=false jest --config ./jest.config.front.js --coverage"
   },
   "dependencies": {
-    "@babel/core": "7.18.10",
-    "@babel/plugin-transform-runtime": "7.18.10",
-    "@babel/preset-env": "7.18.10",
-    "@babel/preset-react": "7.18.6",
-    "@babel/runtime": "7.18.9",
+    "@babel/core": "^7.20.12",
+    "@babel/plugin-transform-runtime": "^7.19.6",
+    "@babel/preset-env": "^7.20.2",
+    "@babel/preset-react": "^7.18.6",
+    "@babel/runtime": "^7.20.13",
     "@casl/ability": "^5.4.3",
     "@fingerprintjs/fingerprintjs": "3.3.6",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
