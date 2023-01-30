@@ -70,7 +70,7 @@
     "@testing-library/react-hooks": "8.0.1",
     "browserslist-to-esbuild": "1.2.0",
     "cross-env": "^7.0.3",
-    "esbuild-loader": "^2.20.0",
+    "esbuild-loader": "^2.21.0",
     "react-test-renderer": "^17.0.2",
     "require-from-string": "2.0.2",
     "rimraf": "3.0.2",
