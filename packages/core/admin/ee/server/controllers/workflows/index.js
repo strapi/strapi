@@ -9,10 +9,10 @@ module.exports = {
    */
   async find(ctx) {
     const workflowService = getService('workflows');
-    const results = await workflowService.find({});
+    const data = await workflowService.find({});
 
     ctx.body = {
-      results,
+      data,
     };
   },
   /**

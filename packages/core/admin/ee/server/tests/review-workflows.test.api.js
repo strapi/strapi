@@ -54,8 +54,8 @@ describe('Review workflows', () => {
 
       if (hasRW) {
         expect(res.status).toBe(200);
-        expect(Array.isArray(res.body.results)).toBeTruthy();
-        expect(res.body.results).toHaveLength(1);
+        expect(Array.isArray(res.body.data)).toBeTruthy();
+        expect(res.body.data).toHaveLength(1);
       } else {
         expect(res.status).toBe(404);
         expect(Array.isArray(res.body)).toBeFalsy();
