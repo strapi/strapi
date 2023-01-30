@@ -39,6 +39,12 @@ module.exports = ({ strapi }) => ({
                 after: stages[1].id,
               },
             },
+            {
+              id: stages[3].id,
+              position: {
+                after: stages[2].id,
+              },
+            },
           ],
         },
       };

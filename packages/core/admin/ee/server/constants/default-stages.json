@@ -3,9 +3,12 @@
     "name": "To do"
   },
   {
+    "name": "Ready to review"
+  },
+  {
     "name": "In progress"
   },
   {
-    "name": "Done"
+    "name": "Reviewed"
   }
 ]
