@@ -26,22 +26,24 @@ const getDisplayedFilters = ({ formatMessage, users }) => {
     };
   });
 
-  const userOptions = users?.results.map((user) => {
-    return {
-      label: formatMessage(
-        {
-          id: 'Settings.permissions.auditLogs.user.fullname',
-          defaultMessage: '{firstname} {lastname}',
-        },
-        {
-          firstname: user.firstname,
-          lastname: user.lastname,
-        }
-      ),
-      // Combobox expects a string value
-      customValue: user.id.toString(),
-    };
-  });
+  const userOptions =
+    users &&
+    users.results.map((user) => {
+      return {
+        label: formatMessage(
+          {
+            id: 'Settings.permissions.auditLogs.user.fullname',
+            defaultMessage: '{firstname} {lastname}',
+          },
+          {
+            firstname: user.firstname,
+            lastname: user.lastname,
+          }
+        ),
+        // Combobox expects a string value
+        customValue: user.id.toString(),
+      };
+    });
 
   return [
     {
