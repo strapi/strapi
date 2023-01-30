@@ -64,7 +64,7 @@ export function ReviewWorkflowsPage() {
           )}
         />
         <ContentLayout>
-          {workflows.state === 'loading' ? (
+          {workflows.status === 'loading' ? (
             <Loader>
               {formatMessage({
                 id: 'Settings.review-workflows.page.isLoading',
