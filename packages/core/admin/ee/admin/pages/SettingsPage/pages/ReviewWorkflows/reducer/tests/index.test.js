@@ -25,7 +25,7 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
     expect(reducer(state, {})).toEqual(initialState);
   });
 
-  test('should handle ACTION_SET_LOADING_STATE', () => {
+  test('should handle ACTION_SET_WORKFLOW', () => {
     const action = {
       type: ACTION_SET_WORKFLOW,
       payload: { status: 'loading-state', stages: STAGES_FIXTURE },

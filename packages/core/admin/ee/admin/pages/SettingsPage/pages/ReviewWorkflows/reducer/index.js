@@ -13,7 +13,7 @@ export function reducer(state = initialState, action) {
   return produce(state, (draft) => {
     switch (action.type) {
       case ACTION_SET_WORKFLOW:
-        draft.workflows.state = action.payload.state;
+        draft.workflows.status = action.payload.status;
         draft.workflows.stages = action.payload.stages ?? [];
         break;
 
