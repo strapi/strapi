@@ -120,6 +120,8 @@ const createContentType = async ({ contentType, components = [] }, options = {})
     await builder.writeFiles();
   }
 
+  strapi.eventHub.emit('content-type.create', { contentType: newContentType });
+
   return newContentType;
 };
 
@@ -208,6 +210,9 @@ const editContentType = async (uid, { contentType, components = [] }) => {
   }
 
   await builder.writeFiles();
+
+  strapi.eventHub.emit('content-type.update', { contentType: updatedContentType });
+
   return updatedContentType;
 };
 
@@ -251,6 +256,8 @@ const deleteContentType = async (uid, defaultBuilder = undefined) => {
       await apiHandler.rollback(uid);
     }
   }
+
+  strapi.eventHub.emit('content-type.delete', { contentType });
 
   return contentType;
 };

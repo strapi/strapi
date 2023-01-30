@@ -5,13 +5,30 @@
 // FIXME
 /* eslint-disable import/extensions */
 const _ = require('lodash');
+const path = require('path');
 const resolveCwd = require('resolve-cwd');
 const { yellow } = require('chalk');
-const { Command } = require('commander');
+const { Command, Option } = require('commander');
+const inquirer = require('inquirer');
 
 const program = new Command();
 
 const packageJSON = require('../package.json');
+const {
+  promptEncryptionKey,
+  confirmMessage,
+  forceOption,
+} = require('../lib/commands/utils/commander');
+const { exitWith } = require('../lib/commands/utils/helpers');
+const {
+  excludeOption,
+  onlyOption,
+  validateExcludeOnly,
+} = require('../lib/commands/transfer/utils');
+
+process.on('SIGINT', () => {
+  process.exit();
+});
 
 const checkCwdIsStrapiApp = (name) => {
   const logErrorAndExit = () => {
@@ -254,5 +271,158 @@ program
   .option('--verbose', `Display more information about the types generation`, false)
   .option('-s, --silent', `Run the generation silently, without any output`, false)
   .action(getLocalScript('ts/generate-types'));
+
+// if (process.env.STRAPI_EXPERIMENTAL === 'true') {
+//   // `$ strapi transfer`
+//   program
+//     .command('transfer')
+//     .description('Transfer data from one source to another')
+//     .allowExcessArguments(false)
+//     .addOption(
+//       new Option(
+//         '--from <sourceURL>',
+//         `URL of the remote Strapi instance to get data from`
+//       ).argParser(parseURL)
+//     )
+//     .addOption(
+//       new Option(
+//         '--to <destinationURL>',
+//         `URL of the remote Strapi instance to send data to`
+//       ).argParser(parseURL)
+//     )
+//     .addOption(forceOption)
+//     // Validate URLs
+//     .hook(
+//       'preAction',
+//       ifOptions(
+//         (opts) => opts.from,
+//         (thisCommand) => assertUrlHasProtocol(thisCommand.opts().from, ['https:', 'http:'])
+//       )
+//     )
+//     .hook(
+//       'preAction',
+//       ifOptions(
+//         (opts) => opts.to,
+//         (thisCommand) => assertUrlHasProtocol(thisCommand.opts().to, ['https:', 'http:'])
+//       )
+//     )
+//     .hook(
+//       'preAction',
+//       ifOptions(
+//         (opts) => !opts.from && !opts.to,
+//         () => exitWith(1, 'At least one source (from) or destination (to) option must be provided')
+//       )
+//     )
+//     .addOption(forceOption)
+//     .addOption(excludeOption)
+//     .addOption(onlyOption)
+//     .hook('preAction', validateExcludeOnly)
+//     .hook(
+//       'preAction',
+//       confirmMessage(
+//         'The import will delete all data in the remote database. Are you sure you want to proceed?'
+//       )
+//     )
+//     .action(getLocalScript('transfer/transfer'));
+// }
+
+// `$ strapi export`
+program
+  .command('export')
+  .description('Export data from Strapi to file')
+  .allowExcessArguments(false)
+  .addOption(
+    new Option('--no-encrypt', `Disables 'aes-128-ecb' encryption of the output file`).default(true)
+  )
+  .addOption(new Option('--no-compress', 'Disables gzip compression of output file').default(true))
+  .addOption(
+    new Option(
+      '-k, --key <string>',
+      'Provide encryption key in command instead of using the prompt'
+    )
+  )
+  .addOption(new Option('-f, --file <file>', 'name to use for exported file (without extensions)'))
+  .addOption(excludeOption)
+  .addOption(onlyOption)
+  .hook('preAction', validateExcludeOnly)
+  .hook('preAction', promptEncryptionKey)
+  .action(getLocalScript('transfer/export'));
+
+// `$ strapi import`
+program
+  .command('import')
+  .description('Import data from file to Strapi')
+  .allowExcessArguments(false)
+  .requiredOption(
+    '-f, --file <file>',
+    'path and filename for the Strapi export file you want to import'
+  )
+  .addOption(
+    new Option(
+      '-k, --key <string>',
+      'Provide encryption key in command instead of using the prompt'
+    )
+  )
+  .addOption(forceOption)
+  .addOption(excludeOption)
+  .addOption(onlyOption)
+  .hook('preAction', validateExcludeOnly)
+  .hook('preAction', async (thisCommand) => {
+    const opts = thisCommand.opts();
+    const ext = path.extname(String(opts.file));
+
+    // check extension to guess if we should prompt for key
+    if (ext === '.enc') {
+      if (!opts.key) {
+        const answers = await inquirer.prompt([
+          {
+            type: 'password',
+            message: 'Please enter your decryption key',
+            name: 'key',
+          },
+        ]);
+        if (!answers.key?.length) {
+          exitWith(0, 'No key entered, aborting import.');
+        }
+        opts.key = answers.key;
+      }
+    }
+  })
+  // set decrypt and decompress options based on filename
+  .hook('preAction', (thisCommand) => {
+    const opts = thisCommand.opts();
+
+    const { extname, parse } = path;
+
+    let file = opts.file;
+
+    if (extname(file) === '.enc') {
+      file = parse(file).name; // trim the .enc extension
+      thisCommand.opts().decrypt = true;
+    } else {
+      thisCommand.opts().decrypt = false;
+    }
+
+    if (extname(file) === '.gz') {
+      file = parse(file).name; // trim the .gz extension
+      thisCommand.opts().decompress = true;
+    } else {
+      thisCommand.opts().decompress = false;
+    }
+
+    if (extname(file) !== '.tar') {
+      exitWith(
+        1,
+        `The file '${opts.file}' does not appear to be a valid Strapi data file. It must have an extension ending in .tar[.gz][.enc]`
+      );
+    }
+  })
+  .hook(
+    'preAction',
+    confirmMessage(
+      'The import will delete all data in your database. Are you sure you want to proceed?'
+    )
+  )
+  .action(getLocalScript('transfer/import'));
 
 program.parseAsync(process.argv);

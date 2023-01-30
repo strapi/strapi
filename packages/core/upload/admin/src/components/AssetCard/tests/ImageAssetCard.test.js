@@ -235,9 +235,9 @@ describe('ImageAssetCard', () => {
       }
 
       .c8 {
-        margin: 0;
         height: 18px;
         min-width: 18px;
+        margin: 0;
         border-radius: 4px;
         border: 1px solid #c0c0cf;
         -webkit-appearance: none;
