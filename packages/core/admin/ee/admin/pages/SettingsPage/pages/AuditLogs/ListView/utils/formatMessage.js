@@ -1,7 +1,7 @@
 export const actionTypes = {
-  'entry.create': 'Create entry',
-  'entry.update': 'Update entry',
-  'entry.delete': 'Delete entry',
+  'entry.create': 'Create entry {model, select, undefined {} other {({model})}}',
+  'entry.update': 'Update entry {model, select, undefined {} other {({model})}}',
+  'entry.delete': 'Delete entry {model, select, undefined {} other {({model})}}',
   'entry.publish': 'Publish entry',
   'entry.unpublish': 'Unpublish entry',
   'media.create': 'Create media',
