@@ -10,7 +10,7 @@ import { reducer } from './reducer';
 import { REDUX_NAMESPACE } from './constants';
 import { useInjectReducer } from '../../../../../../admin/src/hooks/useInjectReducer';
 import { useReviewWorkflows } from './hooks/useReviewWorkflows';
-import { setWorkflowLoadingState, setWorkflowStages } from './actions';
+import { setWorkflow } from './actions';
 
 export function ReviewWorkflowsPage() {
   const { formatMessage } = useIntl();
@@ -21,12 +21,8 @@ export function ReviewWorkflowsPage() {
   useInjectReducer(REDUX_NAMESPACE, reducer);
 
   useEffect(() => {
-    dispatch(setWorkflowLoadingState(workflowsData.status));
-
-    if (workflowsData.status === 'success') {
-      dispatch(setWorkflowStages(workflowsData.data));
-    }
-  }, [workflowsData.status, workflowsData.data, dispatch]);
+    dispatch(setWorkflow(workflowsData));
+  }, [workflowsData, dispatch]);
 
   // useInjectReducer() runs on the first rendering after useSelector
   // which will return undefined. This helps to avoid too many optional

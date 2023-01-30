@@ -1,19 +1,11 @@
-import { ACTION_SET_LOADING_STATE, ACTION_SET_STAGES } from '../constants';
+import { ACTION_SET_WORKFLOW } from '../constants';
 
-export function setWorkflowLoadingState(state) {
+export function setWorkflow(reactQueryWorkflowResponse) {
   return {
-    type: ACTION_SET_LOADING_STATE,
+    type: ACTION_SET_WORKFLOW,
     payload: {
-      state,
-    },
-  };
-}
-
-export function setWorkflowStages(stages) {
-  return {
-    type: ACTION_SET_STAGES,
-    payload: {
-      stages,
+      state: reactQueryWorkflowResponse.status,
+      stages: reactQueryWorkflowResponse.data,
     },
   };
 }
