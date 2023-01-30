@@ -32,11 +32,3 @@ export const actionTypes = {
 export const getDefaultMessage = (value) => {
   return actionTypes[value] || value;
 };
-
-export const getActionMessage = (message, action) => {
-  if (message.includes('entry')) {
-    return `${message} (${action.model})`;
-  }
-
-  return message;
-};

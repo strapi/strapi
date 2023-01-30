@@ -49,11 +49,11 @@ const ActionBody = ({ status, data, formattedDate }) => {
             id: 'Settings.permissions.auditLogs.action',
             defaultMessage: 'Action',
           })}
-          actionName={getActionMessage(
-            formatMessage({
+          actionName={formatMessage(
+            {
               id: `Settings.permissions.auditLogs.${action}`,
               defaultMessage: getDefaultMessage(action),
-            }),
+            },
             { model: payload?.model }
           )}
         />

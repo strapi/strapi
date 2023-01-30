@@ -8,7 +8,7 @@ import { Tbody, Td, Tr } from '@strapi/design-system/Table';
 import Eye from '@strapi/icons/Eye';
 import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import useFormatTimeStamp from '../hooks/useFormatTimeStamp';
-import { getActionMessage, getDefaultMessage } from '../utils/formatMessage';
+import { getDefaultMessage } from '../utils/formatMessage';
 
 const TableRows = ({ headers, rows, onOpenModal }) => {
   const { formatMessage } = useIntl();
@@ -20,11 +20,11 @@ const TableRows = ({ headers, rows, onOpenModal }) => {
     }
 
     if (type === 'action') {
-      return getActionMessage(
-        formatMessage({
+      return formatMessage(
+        {
           id: `Settings.permissions.auditLogs.${value}`,
           defaultMessage: getDefaultMessage(value),
-        }),
+        },
         { model }
       );
     }
