@@ -32,7 +32,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
 .c17 {
   padding-right: 8px;
   padding-bottom: 4px;
-  padding-left: 0px;
 }
 
 .c18 {
@@ -45,7 +44,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
 }
 
 .c25 {
-  padding-right: 0px;
   padding-bottom: 4px;
   padding-left: 8px;
 }
@@ -170,7 +168,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
 .c15 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
-  gap: 0px;
 }
 
 .c16 {
