@@ -372,7 +372,6 @@ class TransferEngine<
               }
 
               if (diff.kind === 'modified') {
-                // eslint-disable-next-line eqeqeq
                 if (diff.types[0] === diff.types[1]) {
                   return `Schema value changed at "${path}": "${diff.values[0]}" (${diff.types[0]}) => "${diff.values[1]}" (${diff.types[1]})`;
                 }
