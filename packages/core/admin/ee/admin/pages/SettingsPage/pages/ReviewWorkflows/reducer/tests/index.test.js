@@ -28,14 +28,14 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
   test('should handle ACTION_SET_LOADING_STATE', () => {
     const action = {
       type: ACTION_SET_WORKFLOW,
-      payload: { state: 'loading-state', stages: STAGES_FIXTURE },
+      payload: { status: 'loading-state', stages: STAGES_FIXTURE },
     };
 
     expect(reducer(state, action)).toEqual({
       ...initialState,
       workflows: {
         ...initialState.workflows,
-        state: 'loading-state',
+        status: 'loading-state',
         stages: STAGES_FIXTURE,
       },
     });
