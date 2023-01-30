@@ -14,7 +14,7 @@ const GlobalOverflowAuto = createGlobalStyle`
 const ComboboxFilter = ({ value, options, onChange }) => {
   const { formatMessage } = useIntl();
   const ariaLabel = formatMessage({
-    id: 'Settings.permissions.auditLogs.action',
+    id: 'Settings.permissions.auditLogs.filter.aria-label',
     defaultMessage: 'Search and select an option to filter',
   });
 

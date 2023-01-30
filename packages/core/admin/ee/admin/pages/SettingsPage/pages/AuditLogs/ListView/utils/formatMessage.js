@@ -1,9 +1,9 @@
 export const actionTypes = {
-  'entry.create': 'Create entry {model}',
-  'entry.update': 'Update entry {model}',
-  'entry.delete': 'Delete entry {model}',
-  'entry.publish': 'Publish entry {model}',
-  'entry.unpublish': 'Unpublish entry {model}',
+  'entry.create': 'Create entry',
+  'entry.update': 'Update entry',
+  'entry.delete': 'Delete entry',
+  'entry.publish': 'Publish entry',
+  'entry.unpublish': 'Unpublish entry',
   'media.create': 'Create media',
   'media.update': 'Update media',
   'media.delete': 'Delete media',
@@ -29,8 +29,17 @@ export const actionTypes = {
   'permission.delete': 'Delete permission',
 };
 
-const getDefaultMessage = (value) => {
+export const getDefaultMessage = (value) => {
   return actionTypes[value] || value;
 };
 
-export default getDefaultMessage;
+export const getActionMessage = (message, action) => {
+  console.log('message', message);
+  console.log('action', action);
+
+  if (message.includes('entry')) {
+    return `${message} (${action.model})`;
+  }
+
+  return message;
+};

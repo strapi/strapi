@@ -1,5 +1,5 @@
 import ComboboxFilter from '../ComboboxFilter';
-import getDefaultMessage, { actionTypes } from './getActionTypesDefaultMessages';
+import { getDefaultMessage, actionTypes } from './formatMessage';
 
 const customOperators = [
   {
@@ -15,13 +15,10 @@ const customOperators = [
 const getDisplayedFilters = ({ formatMessage, users }) => {
   const actionOptions = Object.keys(actionTypes).map((action) => {
     return {
-      label: formatMessage(
-        {
-          id: `Settings.permissions.auditLogs.${action}`,
-          defaultMessage: getDefaultMessage(action),
-        },
-        { model: '' }
-      ),
+      label: formatMessage({
+        id: `Settings.permissions.auditLogs.${action}`,
+        defaultMessage: getDefaultMessage(action),
+      }),
       customValue: action,
     };
   });
