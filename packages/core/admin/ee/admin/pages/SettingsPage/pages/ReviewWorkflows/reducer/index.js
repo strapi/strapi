@@ -2,7 +2,7 @@ import produce from 'immer';
 
 import { ACTION_SET_STAGES, ACTION_SET_LOADING_STATE } from '../constants';
 
-const initialState = {
+export const initialState = {
   workflows: {
     state: 'loading',
     stages: [],
