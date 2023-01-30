@@ -15,7 +15,7 @@ import { setWorkflow } from './actions';
 export function ReviewWorkflowsPage() {
   const { formatMessage } = useIntl();
   const { workflows: workflowsData } = useReviewWorkflows();
-  const workflow = useSelector((state) => state?.[REDUX_NAMESPACE]);
+  const state = useSelector((state) => state?.[REDUX_NAMESPACE]);
   const dispatch = useDispatch();
 
   useInjectReducer(REDUX_NAMESPACE, reducer);
@@ -27,9 +27,11 @@ export function ReviewWorkflowsPage() {
   // useInjectReducer() runs on the first rendering after useSelector
   // which will return undefined. This helps to avoid too many optional
   // chaining operators down the component.
-  if (!workflow) {
+  if (!state) {
     return null;
   }
+
+  const { workflows } = state;
 
   return (
     <Layout>
@@ -58,11 +60,11 @@ export function ReviewWorkflowsPage() {
               id: 'Settings.review-workflows.page.subtitle',
               defaultMessage: '{count, plural, one {# stage} other {# stages}}',
             },
-            { count: workflow.workflows.stages.length }
+            { count: workflows.stages.length }
           )}
         />
         <ContentLayout>
-          {workflow.workflows.state === 'loading' ? (
+          {workflows.state === 'loading' ? (
             <Loader>
               {formatMessage({
                 id: 'Settings.review-workflows.page.isLoading',
@@ -70,7 +72,7 @@ export function ReviewWorkflowsPage() {
               })}
             </Loader>
           ) : (
-            <Stages stages={workflow.workflows.stages} />
+            <Stages stages={workflows.stages} />
           )}
         </ContentLayout>
       </Main>
