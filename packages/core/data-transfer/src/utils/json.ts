@@ -2,14 +2,6 @@ import { isArray, isObject, zip, isEqual, uniq } from 'lodash/fp';
 
 const createContext = (): Context => ({ path: [] });
 
-const isLooselyEqual = (a: unknown, b: unknown) => {
-  // eslint-disable-next-line eqeqeq
-  if (a == b) {
-    return true;
-  }
-  return false;
-};
-
 /**
  * Compute differences between two JSON objects and returns them
  *
@@ -39,16 +31,6 @@ export const diff = (a: unknown, b: unknown, ctx: Context = createContext()): Di
   const modified = () => {
     diffs.push({
       kind: 'modified',
-      path,
-      types: [aType, bType],
-      values: [a, b],
-    });
-    return diffs;
-  };
-
-  const dataType = () => {
-    diffs.push({
-      kind: 'dataType',
       path,
       types: [aType, bType],
       values: [a, b],
@@ -87,10 +69,6 @@ export const diff = (a: unknown, b: unknown, ctx: Context = createContext()): Di
   }
 
   if (!isEqual(a, b)) {
-    if (isLooselyEqual(a, b)) {
-      return dataType();
-    }
-
     if (aType === 'undefined') {
       return added();
     }
@@ -126,14 +104,7 @@ export interface DeletedDiff<T = unknown> {
   value: T;
 }
 
-export interface DataTypeDiff<T = unknown, P = unknown> {
-  kind: 'dataType';
-  path: string[];
-  types: [string, string];
-  values: [T, P];
-}
-
-export type Diff = AddedDiff | ModifiedDiff | DeletedDiff | DataTypeDiff;
+export type Diff = AddedDiff | ModifiedDiff | DeletedDiff;
 
 export interface Context {
   path: string[];
