@@ -9,6 +9,7 @@ import { chain } from 'stream-chain';
 import { pipeline, PassThrough } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
 import type { Schema } from '@strapi/strapi';
+
 import type { IAsset, IMetadata, ISourceProvider, ProviderType } from '../../../../types';
 
 import { createDecryptionCipher } from '../../../utils/encryption';
