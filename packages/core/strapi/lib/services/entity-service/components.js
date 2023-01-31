@@ -3,10 +3,9 @@
 const _ = require('lodash');
 const { has, prop, omit, toString, pipe, assign } = require('lodash/fp');
 
-const { contentTypes: contentTypesUtils } = require('@strapi/utils');
+const { contentTypes: contentTypesUtils, mapAsyncDialects } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getComponentAttributes } = require('@strapi/utils').contentTypes;
-const { mapAsyncDialects } = require('@strapi/utils').async;
 
 const omitComponentData = (contentType, data) => {
   const { attributes } = contentType;

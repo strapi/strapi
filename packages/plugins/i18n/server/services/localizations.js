@@ -2,7 +2,7 @@
 
 const { prop, isNil, isEmpty } = require('lodash/fp');
 
-const { mapAsyncDialects } = require('@strapi/utils').async;
+const { mapAsyncDialects } = require('@strapi/utils');
 const { getService } = require('../utils');
 
 /**
