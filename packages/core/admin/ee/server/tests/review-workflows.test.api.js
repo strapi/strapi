@@ -15,6 +15,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   let strapi;
   let hasRW;
   let defaultStage;
+  let secondStage;
   let defaultWorkflow;
 
   beforeAll(async () => {
@@ -28,10 +29,13 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     defaultStage = await strapi.query(STAGE_MODEL_UID).create({
       data: { name: 'Stage' },
     });
+    secondStage = await strapi.query(STAGE_MODEL_UID).create({
+      data: { name: 'Stage 2' },
+    });
     defaultWorkflow = await strapi.query(WORKFLOW_MODEL_UID).create({
       data: {
         uid: 'workflow',
-        stages: [defaultStage.id],
+        stages: [defaultStage.id, secondStage.id],
       },
     });
   });
@@ -112,7 +116,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         expect(res.status).toBe(200);
         expect(Array.isArray(res.body.data)).toBeTruthy();
         expect(res.body.data).toHaveLength(1);
-        expect(res.body.data[0].stages).toHaveLength(1);
+        expect(res.body.data[0].stages).toHaveLength(2);
         expect(res.body.data[0].stages[0]).toEqual(defaultStage);
       } else {
         expect(res.status).toBe(404);
@@ -142,7 +146,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       if (hasRW) {
         expect(res.status).toBe(200);
         expect(Array.isArray(res.body.data)).toBeTruthy();
-        expect(res.body.data).toHaveLength(1);
+        expect(res.body.data).toHaveLength(2);
       } else {
         expect(res.status).toBe(404);
         expect(Array.isArray(res.body)).toBeFalsy();
@@ -153,7 +157,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   describe('Get stage by id', () => {
     test("It shouldn't be available for public", async () => {
       const res = await requests.public.get(
-        `/admin/review-workflows/workflows/${defaultWorkflow.id}/stages/${defaultStage.id}`
+        `/admin/review-workflows/workflows/${defaultWorkflow.id}/stages/${secondStage.id}`
       );
 
       if (hasRW) {
@@ -165,13 +169,13 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
     test('It should be available for every connected users (admin)', async () => {
       const res = await requests.admin.get(
-        `/admin/review-workflows/workflows/${defaultWorkflow.id}/stages/${defaultStage.id}`
+        `/admin/review-workflows/workflows/${defaultWorkflow.id}/stages/${secondStage.id}`
       );
 
       if (hasRW) {
         expect(res.status).toBe(200);
         expect(res.body.data).toBeInstanceOf(Object);
-        expect(res.body.data).toEqual(defaultStage);
+        expect(res.body.data).toEqual(secondStage);
       } else {
         expect(res.status).toBe(404);
         expect(res.body.data).toBeUndefined();
