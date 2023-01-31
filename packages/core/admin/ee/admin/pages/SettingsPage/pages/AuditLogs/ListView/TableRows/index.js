@@ -24,7 +24,7 @@ const TableRows = ({ headers, rows, onOpenModal }) => {
 
       return formatMessage(
         {
-          id: `Settings.permissions.auditLogs.actionsdafadsfs.${actionName}`,
+          id: `Settings.permissions.auditLogs.actions.${actionName}`,
           defaultMessage: getDefaultMessage(actionName),
         },
         { model, action: actionIdentifiers.join('') }

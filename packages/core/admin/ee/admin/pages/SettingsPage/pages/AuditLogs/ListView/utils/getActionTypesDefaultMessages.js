@@ -45,7 +45,7 @@ const defaultMessages = actionTypes.reduce((acc, curr) => {
       acc[actionName] = `${cudSelectString} media folder`;
       break;
     case 'admin':
-      acc[actionName] = `Admin {action, select, auth.success {login} logout {logout} other {}}`;
+      acc[actionName] = `Admin {action, select, authsuccess {login} logout {logout} other {}}`;
       break;
     default:
       acc[actionName] = `${cudSelectString} ${actionName}`;
