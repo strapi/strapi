@@ -6,6 +6,7 @@ const languageNativeNames = {
   dk: 'Dansk',
   en: 'English',
   es: 'Español',
+  eu: 'Euskara',
   fr: 'Français',
   gu: 'Gujarati',
   he: 'עברית',

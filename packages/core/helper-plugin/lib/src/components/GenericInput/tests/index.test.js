@@ -111,4 +111,21 @@ describe('GenericInput', () => {
       });
     });
   });
+  describe('json', () => {
+    test('renders and matches the snapshot', () => {
+      const { container } = render(
+        <ComponentFixture
+          type="json"
+          name="json"
+          intlLabel={{
+            id: 'label.test',
+            defaultMessage: 'Default label',
+          }}
+          value={null}
+          onChange={jest.fn}
+        />
+      );
+      expect(container).toMatchSnapshot();
+    });
+  });
 });
