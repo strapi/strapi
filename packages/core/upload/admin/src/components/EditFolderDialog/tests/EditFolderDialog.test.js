@@ -8,16 +8,15 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 
 import { EditFolderDialog } from '../EditFolderDialog';
 import { useEditFolder } from '../../../hooks/useEditFolder';
-
-jest.mock('../../../utils/axiosInstance', () => ({
-  ...jest.requireActual('../../../utils/axiosInstance'),
-  put: jest.fn().mockImplementation({}),
-}));
+import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useQueryParams: jest.fn().mockReturnValue([{ query: {} }]),
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
+  useFetchClient: jest.fn().mockReturnValue({
+    put: jest.fn().mockImplementation({}),
+  }),
 }));
 
 jest.mock('../../../hooks/useMediaLibraryPermissions');
@@ -215,5 +214,15 @@ describe('EditFolderDialog', () => {
     );
 
     expect(getByText(FIXTURE_ERROR_MESSAGE)).toBeInTheDocument();
+  });
+
+  test('disables inputs and submit action if users do not have permissions to update', () => {
+    useMediaLibraryPermissions.mockReturnValueOnce({ canUpdate: false });
+    const { getByRole } = setup();
+
+    expect(getByRole('textbox', { name: 'Name' })).toHaveAttribute('aria-disabled', 'true');
+    expect(getByRole('combobox', { name: 'Location' })).toBeDisabled();
+
+    expect(getByRole('button', { name: 'Create' })).toBeDisabled();
   });
 });

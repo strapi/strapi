@@ -1,6 +1,6 @@
 {
   "name": "@strapi/helper-plugin",
-  "version": "4.5.1",
+  "version": "4.6.0",
   "description": "Helper for Strapi plugins development",
   "repository": {
     "type": "git",
@@ -39,25 +39,20 @@
     "watch": "yarn create:index && cross-env NODE_ENV=development webpack-cli -w"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^5.15.2",
-    "@fortawesome/fontawesome-svg-core": "6.2.0",
-    "@fortawesome/free-brands-svg-icons": "^5.15.2",
-    "@fortawesome/free-solid-svg-icons": "^5.15.3",
-    "@fortawesome/react-fontawesome": "^0.2.0",
-    "axios": "0.27.2",
-    "date-fns": "2.29.2",
+    "axios": "1.2.2",
+    "date-fns": "2.29.3",
     "formik": "^2.2.6",
-    "immer": "9.0.6",
+    "immer": "9.0.19",
     "invariant": "^2.2.1",
     "lodash": "4.17.21",
     "match-sorter": "^4.0.2",
-    "qs": "6.10.1",
+    "qs": "6.11.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-helmet": "^6.1.0",
-    "react-intl": "5.25.1",
+    "react-intl": "6.2.7",
     "react-router": "^5.2.0",
-    "react-router-dom": "5.2.0",
+    "react-router-dom": "5.3.4",
     "react-select": "5.6.0",
     "styled-components": "5.3.3",
     "whatwg-fetch": "^3.6.2"
@@ -66,15 +61,16 @@
     "@storybook/addon-actions": "6.5.10",
     "@storybook/addon-essentials": "6.5.10",
     "@storybook/addon-links": "6.5.10",
-    "@storybook/builder-webpack5": "6.5.9",
-    "@storybook/manager-webpack5": "6.4.10",
+    "@storybook/builder-webpack5": "6.5.15",
+    "@storybook/manager-webpack5": "6.5.15",
     "@storybook/react": "^6.5.10",
-    "@strapi/design-system": "1.2.8",
-    "@strapi/icons": "1.2.8",
+    "@strapi/design-system": "1.6.1",
+    "@strapi/icons": "1.6.1",
     "@testing-library/react": "12.1.4",
     "@testing-library/react-hooks": "8.0.1",
+    "browserslist-to-esbuild": "1.2.0",
     "cross-env": "^7.0.3",
-    "esbuild-loader": "^2.20.0",
+    "esbuild-loader": "^2.21.0",
     "react-test-renderer": "^17.0.2",
     "require-from-string": "2.0.2",
     "rimraf": "3.0.2",
@@ -94,6 +90,6 @@
     }
   },
   "peerDependencies": {
-    "webpack": "^5.74.0"
+    "webpack": "^5.75.0"
   }
 }

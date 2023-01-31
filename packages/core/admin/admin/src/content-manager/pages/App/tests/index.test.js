@@ -21,10 +21,6 @@ jest.mock('../useModels', () =>
   })
 );
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => null,
-}));
-
 jest.mock('../../NoContentType', () => () => {
   return <div>NoContentType</div>;
 });
@@ -118,7 +114,7 @@ describe('Content manager | App | main', () => {
     expect(screen.getByText('Categories')).toBeVisible();
     expect(history.location.pathname).toEqual('/content-manager/collectionType/category');
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c35 {
+      .c8 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -134,41 +130,6 @@ describe('Content manager | App | main', () => {
         -webkit-animation: gzYjWD 1s infinite linear;
         animation: gzYjWD 1s infinite linear;
         will-change: transform;
-      }
-
-      .c33 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: space-around;
-        -webkit-justify-content: space-around;
-        -ms-flex-pack: space-around;
-        justify-content: space-around;
-      }
-
-      .c34 {
-        height: 100vh;
-      }
-
-      .c31 {
-        padding-bottom: 56px;
-      }
-
-      .c0 {
-        display: grid;
-        grid-template-columns: auto 1fr;
-      }
-
-      .c32 {
-        overflow-x: hidden;
       }
 
       .c2 {
@@ -209,10 +170,10 @@ describe('Content manager | App | main', () => {
 
       .c24 {
         background: #eaeaef;
-        padding: 4px;
-        border-radius: 4px;
+        padding-right: 8px;
+        padding-left: 8px;
         position: absolute;
-        right: 0px;
+        right: 0;
         top: 50%;
         min-width: 20px;
         -webkit-transform: translateY(-50%);
@@ -220,27 +181,19 @@ describe('Content manager | App | main', () => {
         transform: translateY(-50%);
       }
 
-      .c26 {
+      .c27 {
         background: #f6f6f9;
         padding-top: 8px;
         padding-bottom: 8px;
         padding-left: 32px;
       }
 
-      .c29 {
+      .c30 {
         padding-left: 8px;
       }
 
-      .c1 {
-        width: 14.5rem;
-        background: #f6f6f9;
-        position: -webkit-sticky;
-        position: sticky;
-        top: 0;
-        height: 100vh;
-        overflow-y: auto;
-        border-right: 1px solid #dcdce4;
-        z-index: 1;
+      .c32 {
+        padding-bottom: 56px;
       }
 
       .c3 {
@@ -307,37 +260,61 @@ describe('Content manager | App | main', () => {
         justify-content: center;
       }
 
+      .c34 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: space-around;
+        -webkit-justify-content: space-around;
+        -ms-flex-pack: space-around;
+        justify-content: space-around;
+      }
+
       .c5 {
-        color: #32324d;
         font-weight: 600;
         font-size: 1.125rem;
         line-height: 1.22;
+        color: #32324d;
       }
 
       .c23 {
-        color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
+        color: #666687;
       }
 
-      .c30 {
-        color: #32324d;
+      .c31 {
         font-size: 0.875rem;
         line-height: 1.43;
+        color: #32324d;
       }
 
-      .c8 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
+      .c15 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c15 > * + * {
+        margin-top: 8px;
+      }
+
+      .c16 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c16 > * + * {
+        margin-top: 4px;
       }
 
       .c6 {
@@ -398,6 +375,15 @@ describe('Content manager | App | main', () => {
         border: 2px solid #4945ff;
       }
 
+      .c11 {
+        height: 1px;
+        border: none;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
+        margin: 0;
+      }
+
       .c7 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -438,10 +424,34 @@ describe('Content manager | App | main', () => {
         fill: #666687;
       }
 
-      .c11 {
-        height: 1px;
-        border: none;
-        margin: 0;
+      .c35 {
+        height: 100vh;
+      }
+
+      .c0 {
+        display: grid;
+        grid-template-columns: auto 1fr;
+      }
+
+      .c33 {
+        overflow-x: hidden;
+      }
+
+      .c26 {
+        border-radius: 4px;
+        height: 1.5rem;
+      }
+
+      .c1 {
+        width: 14.5rem;
+        background: #f6f6f9;
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        border-right: 1px solid #dcdce4;
+        z-index: 1;
       }
 
       .c12 {
@@ -449,7 +459,7 @@ describe('Content manager | App | main', () => {
         background-color: #dcdce4;
       }
 
-      .c27 {
+      .c28 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -467,53 +477,35 @@ describe('Content manager | App | main', () => {
         color: #32324d;
       }
 
-      .c27 svg > * {
+      .c28 svg > * {
         fill: #666687;
       }
 
-      .c27.active {
+      .c28.active {
         background-color: #f0f0ff;
         border-right: 2px solid #4945ff;
       }
 
-      .c27.active svg > * {
+      .c28.active svg > * {
         fill: #271fe0;
       }
 
-      .c27.active .c4 {
+      .c28.active .c4 {
         color: #271fe0;
         font-weight: 500;
       }
 
-      .c27:focus-visible {
+      .c28:focus-visible {
         outline-offset: -2px;
       }
 
-      .c28 {
+      .c29 {
         width: 0.75rem;
         height: 0.25rem;
       }
 
-      .c28 * {
+      .c29 * {
         fill: #666687;
-      }
-
-      .c15 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c15 > * + * {
-        margin-top: 8px;
-      }
-
-      .c16 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c16 > * + * {
-        margin-top: 4px;
       }
 
       .c21 {
@@ -620,7 +612,7 @@ describe('Content manager | App | main', () => {
                         </div>
                       </div>
                       <div
-                        class="c24 c25"
+                        class="c24 c25 c26"
                         transform="translateY(-50%)"
                       >
                         <span
@@ -637,14 +629,14 @@ describe('Content manager | App | main', () => {
                     <li>
                       <a
                         aria-current="page"
-                        class="c26 c27 active"
+                        class="c27 c28 active"
                         href="/content-manager/collectionType/category"
                       >
                         <div
                           class="c20"
                         >
                           <svg
-                            class="c28"
+                            class="c29"
                             fill="none"
                             height="1em"
                             viewBox="0 0 4 4"
@@ -659,10 +651,10 @@ describe('Content manager | App | main', () => {
                             />
                           </svg>
                           <div
-                            class="c29"
+                            class="c30"
                           >
                             <span
-                              class="c4 c30"
+                              class="c4 c31"
                             >
                               Categories
                             </span>
@@ -698,7 +690,7 @@ describe('Content manager | App | main', () => {
                         </div>
                       </div>
                       <div
-                        class="c24 c25"
+                        class="c24 c25 c26"
                         transform="translateY(-50%)"
                       >
                         <span
@@ -714,14 +706,14 @@ describe('Content manager | App | main', () => {
                   >
                     <li>
                       <a
-                        class="c26 c27"
+                        class="c27 c28"
                         href="/homepage"
                       >
                         <div
                           class="c20"
                         >
                           <svg
-                            class="c28"
+                            class="c29"
                             fill="none"
                             height="1em"
                             viewBox="0 0 4 4"
@@ -736,10 +728,10 @@ describe('Content manager | App | main', () => {
                             />
                           </svg>
                           <div
-                            class="c29"
+                            class="c30"
                           >
                             <span
-                              class="c4 c30"
+                              class="c4 c31"
                             >
                               Home page
                             </span>
@@ -754,10 +746,10 @@ describe('Content manager | App | main', () => {
           </div>
         </nav>
         <div
-          class="c31 c32"
+          class="c32 c33"
         >
           <div
-            class="c33 c34"
+            class="c34 c35"
             data-testid="loader"
           >
             <div
@@ -765,7 +757,7 @@ describe('Content manager | App | main', () => {
               role="alert"
             >
               <div
-                class="c35"
+                class="c8"
               >
                 Loading content.
               </div>

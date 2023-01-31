@@ -20,6 +20,7 @@ const databases = {
       database: 'strapi_test',
       username: 'strapi',
       password: 'strapi',
+      schema: 'myschema',
     },
   },
   mysql: {
@@ -41,10 +42,7 @@ const databases = {
   },
 };
 
-const jestCmd =
-  'jest --config jest.config.api.js --verbose --runInBand --forceExit --detectOpenHandles'.split(
-    ' '
-  );
+const jestCmd = 'jest --config jest.config.api.js --verbose --runInBand --forceExit'.split(' ');
 
 const runAllTests = async (args) => {
   return execa('yarn', [...jestCmd, ...args], {
@@ -68,17 +66,11 @@ const main = async ({ database, generateApp }, args) => {
     }
 
     await runAllTests(args).catch(() => {
-      process.stdout.write('Tests failed\n', () => {
-        process.exit(1);
-      });
-    });
-
-    process.exit(0);
-  } catch (error) {
-    console.error(error);
-    process.stdout.write('Tests failed\n', () => {
       process.exit(1);
     });
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
   }
 };
 

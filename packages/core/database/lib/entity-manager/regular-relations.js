@@ -1,6 +1,8 @@
 'use strict';
 
 const { map, isEmpty } = require('lodash/fp');
+const { randomBytes } = require('crypto');
+
 const {
   isBidirectional,
   isOneToAny,
@@ -10,6 +12,7 @@ const {
   hasInverseOrderColumn,
 } = require('../metadata/relations');
 const { createQueryBuilder } = require('../query');
+const { addSchema } = require('../utils/knex');
 
 /**
  * If some relations currently exist for this oneToX relation, on the one side, this function removes them and update the inverse order if needed.
@@ -195,6 +198,12 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
     return;
   }
 
+  // Handle databases that don't support window function ROW_NUMBER (here it's MySQL 5)
+  if (!strapi.db.dialect.supportsWindowFunctions()) {
+    await cleanOrderColumnsForOldDatabases({ id, attribute, db, inverseRelIds, transaction: trx });
+    return;
+  }
+
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } = joinTable;
   const update = [];
@@ -222,11 +231,11 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
     whereBinding.push(inverseJoinColumn.name, ...inverseRelIds);
   }
 
-  // raw query as knex doesn't allow updating from a subquery
-  // https://github.com/knex/knex/issues/2504
   switch (strapi.db.dialect.client) {
     case 'mysql':
-      await db.connection
+      // Here it's MariaDB and MySQL 8
+      await db
+        .getConnection()
         .raw(
           `UPDATE
             ?? as a,
@@ -241,7 +250,25 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
         )
         .transacting(trx);
       break;
-    default:
+    /*
+      UPDATE
+        :joinTable: as a,
+        (
+          SELECT
+            id,
+            ROW_NUMBER() OVER ( PARTITION BY :joinColumn: ORDER BY :orderColumn:) AS src_order,
+            ROW_NUMBER() OVER ( PARTITION BY :inverseJoinColumn: ORDER BY :inverseOrderColumn:) AS inv_order
+          FROM :joinTable:
+          WHERE :joinColumn: = :id OR :inverseJoinColumn: IN (:inverseRelIds)
+        ) AS b
+      SET :orderColumn: = b.src_order, :inverseOrderColumn: = b.inv_order
+      WHERE b.id = a.id;
+    */
+    default: {
+      const joinTableName = addSchema(joinTable.name);
+
+      // raw query as knex doesn't allow updating from a subquery
+      // https://github.com/knex/knex/issues/2504
       await db.connection
         .raw(
           `UPDATE ?? as a
@@ -252,11 +279,12 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
                 WHERE ${where.join(' OR ')}
               ) AS b
               WHERE b.id = a.id`,
-          [joinTable.name, ...updateBinding, ...selectBinding, joinTable.name, ...whereBinding]
+          [joinTableName, ...updateBinding, ...selectBinding, joinTableName, ...whereBinding]
         )
         .transacting(trx);
-    /*
-      `UPDATE :joinTable: as a
+
+      /*
+        UPDATE :joinTable: as a
         SET :orderColumn: = b.src_order, :inverseOrderColumn: = b.inv_order
         FROM (
           SELECT
@@ -266,8 +294,88 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
           FROM :joinTable:
           WHERE :joinColumn: = :id OR :inverseJoinColumn: IN (:inverseRelIds)
         ) AS b
-        WHERE b.id = a.id`,
-    */
+        WHERE b.id = a.id;
+      */
+    }
+  }
+};
+
+/*
+ * Ensure that orders are following a 1, 2, 3 sequence, without gap.
+ * The use of a session variable instead of a window function makes the query compatible with MySQL 5
+ */
+const cleanOrderColumnsForOldDatabases = async ({
+  id,
+  attribute,
+  db,
+  inverseRelIds,
+  transaction: trx,
+}) => {
+  const { joinTable } = attribute;
+  const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } = joinTable;
+
+  const randomSuffix = `${new Date().valueOf()}_${randomBytes(16).toString('hex')}`;
+
+  if (hasOrderColumn(attribute) && id) {
+    // raw query as knex doesn't allow updating from a subquery
+    // https://github.com/knex/knex/issues/2504
+    const orderVar = `order_${randomSuffix}`;
+    await db.connection.raw(`SET @${orderVar} = 0;`).transacting(trx);
+    await db.connection
+      .raw(
+        `UPDATE :joinTableName: as a, (
+          SELECT id, (@${orderVar}:=@${orderVar} + 1) AS src_order
+          FROM :joinTableName:
+	        WHERE :joinColumnName: = :id
+	        ORDER BY :orderColumnName:
+        ) AS b
+        SET :orderColumnName: = b.src_order
+        WHERE a.id = b.id
+        AND a.:joinColumnName: = :id`,
+        {
+          joinTableName: joinTable.name,
+          orderColumnName,
+          joinColumnName: joinColumn.name,
+          id,
+        }
+      )
+      .transacting(trx);
+  }
+
+  if (hasInverseOrderColumn(attribute) && !isEmpty(inverseRelIds)) {
+    const orderVar = `order_${randomSuffix}`;
+    const columnVar = `col_${randomSuffix}`;
+    await db.connection.raw(`SET @${orderVar} = 0;`).transacting(trx);
+    await db.connection
+      .raw(
+        `UPDATE ?? as a, (
+          SELECT
+          	id,
+            @${orderVar}:=CASE WHEN @${columnVar} = ?? THEN @${orderVar} + 1 ELSE 1 END AS inv_order,
+        	  @${columnVar}:=?? ??
+        	FROM ?? a
+        	WHERE ?? IN(${inverseRelIds.map(() => '?').join(', ')})
+        	ORDER BY ??, ??
+        ) AS b
+        SET ?? = b.inv_order
+        WHERE a.id = b.id
+        AND a.?? IN(${inverseRelIds.map(() => '?').join(', ')})`,
+        [
+          joinTable.name,
+          inverseJoinColumn.name,
+          inverseJoinColumn.name,
+          inverseJoinColumn.name,
+          joinTable.name,
+          inverseJoinColumn.name,
+          ...inverseRelIds,
+          inverseJoinColumn.name,
+          joinColumn.name,
+          inverseOrderColumnName,
+          inverseJoinColumn.name,
+          ...inverseRelIds,
+        ]
+      )
+      .transacting(trx);
   }
 };
 

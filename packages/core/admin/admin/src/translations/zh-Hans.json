@@ -132,7 +132,7 @@
   "Settings.permissions.users.strapi-author": "作者",
   "Settings.profile.form.notify.data.loaded": "你的个人数据已经加载完成",
   "Settings.profile.form.section.experience.clear.select": "清除已选择的界面语言",
-  "Settings.profile.form.section.experience.documentation": "文档",
+  "Settings.profile.form.section.experience.here": "文档",
   "Settings.profile.form.section.experience.interfaceLanguage": "界面语言",
   "Settings.profile.form.section.experience.interfaceLanguage.hint": "将会用所选择的语言显示你的界面",
   "Settings.profile.form.section.experience.interfaceLanguageHelp": "当前的语言选择只会更改你当前帐号界面语言。 请参考此 {here} 为你的团队提供其他语言。",

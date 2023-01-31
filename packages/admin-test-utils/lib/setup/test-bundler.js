@@ -1,10 +1,11 @@
 'use strict';
 
 // See https://github.com/swc-project/swc/issues/6460
-// SWC is not able to include the core-js polyfill for
-// array/at automatically at the moment of writing, which
-// makes some frontend tests fail on node@14.
-require('core-js/actual/array/at');
+// SWC is not able to include the core-js polyfill
+// relieably, which causes flaky tests on node@14.
+// On theory this should be solved by the `env` transform
+// configuration of @swc/jest
+require('core-js/actual');
 
 const noop = () => {};
 // eslint-disable-next-line no-undef

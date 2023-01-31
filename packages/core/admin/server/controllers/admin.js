@@ -37,7 +37,7 @@ module.exports = {
   async getProjectType() {
     // FIXME
     try {
-      return { data: { isEE: strapi.EE, features: ee.features.getEnabled() } };
+      return { data: { isEE: strapi.EE, features: ee.features.list() } };
     } catch (err) {
       return { data: { isEE: false, features: [] } };
     }
@@ -46,7 +46,7 @@ module.exports = {
   async init() {
     let uuid = strapi.config.get('uuid', false);
     const hasAdmin = await getService('user').exists();
-    const { menuLogo } = await getService('project-settings').getProjectSettings();
+    const { menuLogo, authLogo } = await getService('project-settings').getProjectSettings();
     // set to null if telemetryDisabled flag not avaialble in package.json
     const telemetryDisabled = strapi.config.get('packageJsonStrapi.telemetryDisabled', null);
 
@@ -59,6 +59,7 @@ module.exports = {
         uuid,
         hasAdmin,
         menuLogo: menuLogo ? menuLogo.url : null,
+        authLogo: authLogo ? authLogo.url : null,
       },
     };
   },
@@ -110,6 +111,7 @@ module.exports = {
     const autoReload = strapi.config.get('autoReload', false);
     const strapiVersion = strapi.config.get('info.strapi', null);
     const dependencies = strapi.config.get('info.dependencies', {});
+    const projectId = strapi.config.get('uuid', null);
     const nodeVersion = process.version;
     const communityEdition = !strapi.EE;
     const useYarn = await exists(path.join(process.cwd(), 'yarn.lock'));
@@ -120,6 +122,7 @@ module.exports = {
         autoReload,
         strapiVersion,
         dependencies,
+        projectId,
         nodeVersion,
         communityEdition,
         useYarn,

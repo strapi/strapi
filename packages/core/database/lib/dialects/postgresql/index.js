@@ -15,9 +15,17 @@ class PostgresDialect extends Dialect {
     return true;
   }
 
-  initialize() {
-    this.db.connection.client.driver.types.setTypeParser(1082, 'text', (v) => v); // Don't cast DATE string to Date()
-    this.db.connection.client.driver.types.setTypeParser(1700, 'text', parseFloat);
+  async initialize() {
+    this.db.connection.client.driver.types.setTypeParser(
+      this.db.connection.client.driver.types.builtins.DATE,
+      'text',
+      (v) => v
+    ); // Don't cast DATE string to Date()
+    this.db.connection.client.driver.types.setTypeParser(
+      this.db.connection.client.driver.types.builtins.NUMERIC,
+      'text',
+      parseFloat
+    );
   }
 
   usesForeignKeys() {

@@ -6,6 +6,8 @@ import take from 'lodash/take';
 import cloneDeep from 'lodash/cloneDeep';
 import uniqBy from 'lodash/uniqBy';
 import merge from 'lodash/merge';
+import castArray from 'lodash/castArray';
+import isNil from 'lodash/isNil';
 
 import {
   findLeafByPathAndReplace,
@@ -88,6 +90,7 @@ const reducer = (state, action) =>
             ? {
                 ...state.componentsDataStructure[componentLayoutData.uid],
                 __component: componentLayoutData.uid,
+                __temp_key__: getMaxTempKey(currentValue) + 1,
               }
             : {
                 ...state.componentsDataStructure[componentLayoutData.uid],
@@ -104,6 +107,11 @@ const reducer = (state, action) =>
           (value) => value.type === 'component' && value.repeatable
         )(componentLayoutData.attributes);
 
+        const nonRepeatableComponentPaths = recursivelyFindPathsBasedOnCondition(
+          allComponents,
+          (value) => value.type === 'component' && !value.repeatable
+        )(componentLayoutData.attributes);
+
         const componentDataStructure = relationPaths.reduce((acc, current) => {
           const [componentName] = current.split('.');
 
@@ -112,8 +120,21 @@ const reducer = (state, action) =>
            * has another repeatable component inside of it we
            * don't need to attach the array at this point because that will be
            * done again deeper in the nest.
+           *
+           * We also need to handle cases with single components nested within
+           * repeatables by checking that the relation path does not match a
+           * non-repeatable component path. This accounts for component
+           * structures such as:
+           * - outer_single_compo
+           *    - level_one_repeatable
+           *        - level_two_single_component
+           *            - level_three_repeatable
            */
-          if (!repeatableFields.includes(componentName)) {
+
+          if (
+            !repeatableFields.includes(componentName) &&
+            !nonRepeatableComponentPaths.includes(componentName)
+          ) {
             set(acc, current, []);
           }
 
@@ -128,24 +149,34 @@ const reducer = (state, action) =>
 
         break;
       }
-
       case 'LOAD_RELATION': {
-        const initialDataPath = ['initialData', ...action.keys];
-        const modifiedDataPath = ['modifiedData', ...action.keys];
-        const { value } = action;
+        const { initialDataPath, modifiedDataPath, value } = action;
 
         const initialDataRelations = get(state, initialDataPath);
         const modifiedDataRelations = get(state, modifiedDataPath);
 
-        set(draftState, initialDataPath, uniqBy([...value, ...initialDataRelations], 'id'));
+        /**
+         * Check if the values we're loading are already in initial
+         * data if they are then we don't need to load them at all
+         */
+        const valuesToLoad = value.filter((relation) => {
+          return !initialDataRelations.some((initialDataRelation) => {
+            return initialDataRelation.id === relation.id;
+          });
+        });
+
+        set(draftState, initialDataPath, uniqBy([...valuesToLoad, ...initialDataRelations], 'id'));
 
         /**
          * We need to set the value also on modifiedData, because initialData
          * and modifiedData need to stay in sync, so that the CM can compare
          * both states, to render the dirty UI state
          */
-
-        set(draftState, modifiedDataPath, uniqBy([...value, ...modifiedDataRelations], 'id'));
+        set(
+          draftState,
+          modifiedDataPath,
+          uniqBy([...valuesToLoad, ...modifiedDataRelations], 'id')
+        );
 
         break;
       }
@@ -172,10 +203,24 @@ const reducer = (state, action) =>
         const { id } = action;
         const modifiedDataRelation = get(state, [...path]);
 
-        /**
-         * TODO: before merge make this performant (e.g. 1000 relations === long time)
-         */
         const newRelations = modifiedDataRelation.filter((rel) => rel.id !== id);
+
+        set(draftState, path, newRelations);
+
+        break;
+      }
+      case 'MOVE_COMPONENT_FIELD':
+      case 'REORDER_RELATION': {
+        const { oldIndex, newIndex, keys } = action;
+        const path = ['modifiedData', ...keys];
+        const modifiedDataRelations = get(state, [...path]);
+
+        const currentItem = modifiedDataRelations[oldIndex];
+
+        const newRelations = [...modifiedDataRelations];
+
+        newRelations.splice(oldIndex, 1);
+        newRelations.splice(newIndex, 0, currentItem);
 
         set(draftState, path, newRelations);
 
@@ -192,6 +237,7 @@ const reducer = (state, action) =>
           componentPaths = [],
           repeatableComponentPaths = [],
           dynamicZonePaths = [],
+          setModifiedDataOnly,
         } = action;
 
         /**
@@ -213,6 +259,17 @@ const reducer = (state, action) =>
           .map((path) => path.split('.'))
           .reduce((acc, currentPaths) => {
             const [componentName] = currentPaths;
+
+            const existingComponents = castArray(acc[componentName] || []);
+            existingComponents.reduce((result, currentEntry) => {
+              if (!isNil(get(currentEntry, [`__temp_key__`]))) {
+                return result;
+              }
+
+              set(currentEntry, [`__temp_key__`], getMaxTempKey(result) + 1);
+
+              return result;
+            }, existingComponents);
 
             if (state.modifiedData && get(state.modifiedData, componentName)) {
               /**
@@ -243,32 +300,16 @@ const reducer = (state, action) =>
             return acc;
           }, data);
 
-        draftState.initialData = mergeDataWithPreparedRelations;
+        if (!setModifiedDataOnly) {
+          draftState.initialData = mergeDataWithPreparedRelations;
+        }
+
         draftState.modifiedData = mergeDataWithPreparedRelations;
 
         draftState.formErrors = {};
 
         draftState.modifiedDZName = null;
         draftState.shouldCheckErrors = false;
-        break;
-      }
-      case 'MOVE_COMPONENT_FIELD': {
-        const currentValue = get(state, ['modifiedData', ...action.pathToComponent]);
-        const valueToInsert = get(state, [
-          'modifiedData',
-          ...action.pathToComponent,
-          action.dragIndex,
-        ]);
-
-        const updatedValue = moveFields(
-          currentValue,
-          action.dragIndex,
-          action.hoverIndex,
-          valueToInsert
-        );
-
-        set(draftState, ['modifiedData', ...action.pathToComponent], updatedValue);
-
         break;
       }
       case 'MOVE_COMPONENT_UP':
