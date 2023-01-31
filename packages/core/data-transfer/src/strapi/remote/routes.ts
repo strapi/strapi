@@ -32,7 +32,7 @@ export const registerAdminTransferRoute = (strapi: Strapi.Strapi) => {
     path: TRANSFER_PATH,
     handler: createTransferHandler(),
     config: {
-      policies: ['admin::isAuthenticatedAdmin'],
+      auth: false,
     },
   });
 };
