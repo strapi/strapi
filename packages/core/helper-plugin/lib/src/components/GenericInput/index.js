@@ -148,8 +148,8 @@ const GenericInput = ({
           onChange={(json) => {
             onChange({ target: { name, value: json } });
           }}
-          minHeight={pxToRem(253)}
-          maxHeight={pxToRem(506)}
+          minHeight={pxToRem(252)}
+          maxHeight={pxToRem(504)}
         />
       );
     }
