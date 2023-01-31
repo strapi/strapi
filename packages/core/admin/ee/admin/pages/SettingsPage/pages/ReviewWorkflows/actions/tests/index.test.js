@@ -1,14 +1,14 @@
-import { setWorkflow } from '..';
+import { setWorkflows } from '..';
 
-import { ACTION_SET_WORKFLOW } from '../../constants';
+import { ACTION_SET_WORKFLOWS } from '../../constants';
 
 describe('Admin | Settings | Review Workflow | actions', () => {
-  test('setWorkflow()', () => {
-    expect(setWorkflow({ status: 'loading', data: null, something: 'else' })).toStrictEqual({
-      type: ACTION_SET_WORKFLOW,
+  test('setWorkflows()', () => {
+    expect(setWorkflows({ status: 'loading', data: null, something: 'else' })).toStrictEqual({
+      type: ACTION_SET_WORKFLOWS,
       payload: {
         status: 'loading',
-        stages: null,
+        workflows: null,
       },
     });
   });

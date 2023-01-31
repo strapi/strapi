@@ -10,7 +10,7 @@ import { reducer } from './reducer';
 import { REDUX_NAMESPACE } from './constants';
 import { useInjectReducer } from '../../../../../../admin/src/hooks/useInjectReducer';
 import { useReviewWorkflows } from './hooks/useReviewWorkflows';
-import { setWorkflow } from './actions';
+import { setWorkflows } from './actions';
 
 export function ReviewWorkflowsPage() {
   const { formatMessage } = useIntl();
@@ -21,7 +21,7 @@ export function ReviewWorkflowsPage() {
   useInjectReducer(REDUX_NAMESPACE, reducer);
 
   useEffect(() => {
-    dispatch(setWorkflow(workflowsData));
+    dispatch(setWorkflows(workflowsData));
   }, [workflowsData, dispatch]);
 
   // useInjectReducer() runs on the first rendering after useSelector
@@ -31,7 +31,12 @@ export function ReviewWorkflowsPage() {
     return null;
   }
 
-  const { workflows } = state;
+  const {
+    status,
+    serverState: { workflows },
+  } = state;
+
+  const defaultWorkflow = workflows[0] ?? {};
 
   return (
     <Layout>
@@ -60,11 +65,11 @@ export function ReviewWorkflowsPage() {
               id: 'Settings.review-workflows.page.subtitle',
               defaultMessage: '{count, plural, one {# stage} other {# stages}}',
             },
-            { count: workflows.stages.length }
+            { count: defaultWorkflow.stages?.length ?? 0 }
           )}
         />
         <ContentLayout>
-          {workflows.status === 'loading' ? (
+          {status === 'loading' ? (
             <Loader>
               {formatMessage({
                 id: 'Settings.review-workflows.page.isLoading',
@@ -72,7 +77,7 @@ export function ReviewWorkflowsPage() {
               })}
             </Loader>
           ) : (
-            <Stages stages={workflows.stages} />
+            <Stages stages={defaultWorkflow.stages} />
           )}
         </ContentLayout>
       </Main>
