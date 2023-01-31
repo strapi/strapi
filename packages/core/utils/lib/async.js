@@ -29,9 +29,8 @@ const mapAsync = curry(pMap);
  */
 const mapAsyncDialects = async (array, func) => {
   switch (strapi.db.dialect.client) {
-    case 'mysql': {
+    case 'mysql':
       return mapAsync(array, func);
-    }
     default:
       return Promise.all(array.map(func));
   }
