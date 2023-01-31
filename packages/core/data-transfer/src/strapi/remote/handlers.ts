@@ -1,15 +1,15 @@
 import type { Context } from 'koa';
 import type { ServerOptions } from 'ws';
-
 import { randomUUID } from 'crypto';
 import { WebSocket } from 'ws';
+import { isString } from 'lodash/fp';
 
 import type { IPushController } from './controllers/push';
+import type { client, server } from '../../../types/remote/protocol';
 
 import createPushController from './controllers/push';
-import type { client, server } from '../../../types/remote/protocol';
 import { ProviderTransferError, ProviderInitializationError } from '../../errors/providers';
-import { TRANSFER_METHODS } from './constants';
+import { TRANSFER_KEY_HEADER_KEY, TRANSFER_METHODS } from './constants';
 
 interface ITransferState {
   transfer?: { id: string; kind: client.TransferKind };
@@ -21,10 +21,9 @@ interface ITransferState {
  */
 const PULL_PERMISSION = 'data-transfer::pull';
 const PUSH_PERMISSION = 'data-transfer::push';
-const validateTransferKey = (key?: string): string[] => {
-  if (!key) {
-    // TODO: should be a @strapi/utils.error.Unauthorized but we need to add typings for it
-    throw new Error('A valid transfer key is required to access this route');
+const validateTransferKey = (key?: string | string[]): string[] => {
+  if (!isString(key)) {
+    throw new Error('MISSING');
   }
 
   const actions = [];
@@ -37,8 +36,7 @@ const validateTransferKey = (key?: string): string[] => {
   }
 
   if (actions.length <= 0) {
-    // TODO: should be a @strapi/utils.error.ForbiddenError but we need to add typings for it
-    throw new Error('Invalid transfer key');
+    throw new Error('INVALID');
   }
 
   return actions;
@@ -55,7 +53,28 @@ export const createTransferHandler = (options: ServerOptions = {}) => {
       .map((s) => s.trim().toLowerCase());
 
     if (upgradeHeader.includes('websocket')) {
-      const actions = validateTransferKey(ctx.request.headers.authorization);
+      // TODO: handle actions appropriately for how validation is ultimately implemented. The error handling might work fine like this.
+      let actions: string[] = [];
+      try {
+        actions = validateTransferKey(ctx.request.headers[TRANSFER_KEY_HEADER_KEY]);
+      } catch (e: any) {
+        if (!('message' in e)) {
+          ctx.internalServerError('Could not validate transfer key');
+          return;
+        }
+
+        if (e.message === 'MISSING') {
+          ctx.unauthorized('StrapiTransferKey header missing from request');
+        } else if (e.message === 'INVALID') {
+          ctx.forbidden('Transfer key is invalid');
+        } else if (e.message === 'EXPIRED') {
+          ctx.forbidden('Transfer key is expired');
+        } else {
+          ctx.internalServerError('Could not validate transfer key');
+        }
+
+        return;
+      }
 
       wss.handleUpgrade(ctx.req, ctx.request.socket, Buffer.alloc(0), (ws) => {
         // Create a connection between the client & the server
@@ -128,7 +147,7 @@ export const createTransferHandler = (options: ServerOptions = {}) => {
 
           // Push transfer
           if (transfer === 'push') {
-            if (actions.includes(PUSH_PERMISSION)) {
+            if (!actions.includes(PUSH_PERMISSION)) {
               throw new ProviderTransferError('Transfer key does not allow push permission');
             }
             const { options: controllerOptions } = msg.params;
