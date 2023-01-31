@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
 const { createContentAPIRequest } = require('../../../../../test/helpers/request');
 
@@ -50,7 +50,6 @@ const productWithDP = {
 
 describe('Core API - Basic + draftAndPublish', () => {
   beforeAll(async () => {
-    await createStrapiLoader();
     await builder.addComponent(compo).addContentType(productWithDP).build();
 
     strapi = await createStrapiInstance();

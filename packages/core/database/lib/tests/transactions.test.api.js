@@ -1,13 +1,12 @@
 'use strict';
 
-const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 
 let strapi;
 
 describe('transactions', () => {
   let original;
   beforeAll(async () => {
-    await createStrapiLoader();
     strapi = await createStrapiInstance();
     original = await strapi.db
       .queryBuilder('strapi::core-store')

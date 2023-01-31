@@ -13,7 +13,6 @@ const superAdminCredentials = {
 };
 
 const superAdminLoginInfo = _.pick(superAdminCredentials, ['email', 'password']);
-const createStrapiLoader = async () => {};
 
 const createStrapiInstance = async ({
   ensureSuperAdmin = true,
@@ -54,7 +53,6 @@ const createStrapiInstance = async ({
 
 module.exports = {
   createStrapiInstance,
-  createStrapiLoader,
   superAdmin: {
     loginInfo: superAdminLoginInfo,
     credentials: superAdminCredentials,

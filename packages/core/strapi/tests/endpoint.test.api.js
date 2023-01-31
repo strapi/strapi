@@ -1,7 +1,7 @@
 'use strict';
 
 // Helpers.
-const { createStrapiInstance, createStrapiLoader } = require('../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
 const { createContentAPIRequest } = require('../../../../test/helpers/request');
 const { createTestBuilder } = require('../../../../test/helpers/builder');
 const modelsUtils = require('../../../../test/helpers/models');
@@ -20,7 +20,6 @@ let strapi;
 
 describe('Create Strapi API End to End', () => {
   beforeAll(async () => {
-    await createStrapiLoader();
     await builder
       .addContentTypes([form.article, form.tag, form.category, form.reference, form.product], {
         batch: true,

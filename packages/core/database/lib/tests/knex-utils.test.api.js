@@ -1,13 +1,12 @@
 'use strict';
 
-const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { isKnexQuery } = require('../utils/knex');
 
 let strapi;
 
 describe('knex', () => {
   beforeAll(async () => {
-    await createStrapiLoader();
     strapi = await createStrapiInstance();
   });
 

@@ -2,7 +2,7 @@
 
 const { prop } = require('lodash/fp');
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createRequest, createAuthRequest } = require('../../../../../test/helpers/request');
 const { createUtils } = require('../../../../../test/helpers/utils');
 
@@ -116,7 +116,6 @@ if (edition === 'EE') {
     };
 
     beforeAll(async () => {
-      await createStrapiLoader();
       await builder.addContentType(localTestData.models.article).build();
 
       strapi = await createStrapiInstance();

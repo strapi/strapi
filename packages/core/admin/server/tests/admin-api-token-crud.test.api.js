@@ -1,7 +1,7 @@
 'use strict';
 
 const { omit } = require('lodash');
-const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 const constants = require('../services/constants');
 
@@ -20,7 +20,6 @@ describe('Admin API Token v2 CRUD (api)', () => {
 
   // Initialization Actions
   beforeAll(async () => {
-    await createStrapiLoader();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 

@@ -3,7 +3,7 @@
 // Test an API with all the possible filed types and simple filterings (no deep filtering, no relations)
 const { omit } = require('lodash/fp');
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 
 const CREATOR_FIELDS = ['updatedBy', 'createdBy'];
@@ -120,7 +120,6 @@ const bedFixtures = [
 
 describe('Search query', () => {
   beforeAll(async () => {
-    await createStrapiLoader();
     await builder.addContentType(bedModel).addFixtures(bedModel.singularName, bedFixtures).build();
 
     strapi = await createStrapiInstance();

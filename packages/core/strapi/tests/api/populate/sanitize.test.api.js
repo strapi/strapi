@@ -4,10 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const { createTestBuilder } = require('../../../../../../test/helpers/builder');
-const {
-  createStrapiInstance,
-  createStrapiLoader,
-} = require('../../../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
 const {
   createContentAPIRequest,
   createAuthRequest,
@@ -59,7 +56,6 @@ const uploadFile = async () => {
 
 describe('Sanitize populated entries', () => {
   beforeAll(async () => {
-    await createStrapiLoader();
     const file = await uploadFile();
 
     await builder

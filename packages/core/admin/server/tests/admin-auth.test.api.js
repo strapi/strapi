@@ -2,11 +2,7 @@
 
 // Helpers.
 const { createAuthRequest } = require('../../../../../test/helpers/request');
-const {
-  createStrapiInstance,
-  createStrapiLoader,
-  superAdmin,
-} = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance, superAdmin } = require('../../../../../test/helpers/strapi');
 const { createUtils } = require('../../../../../test/helpers/utils');
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
@@ -21,7 +17,6 @@ describe('Admin Auth End to End', () => {
   let utils;
 
   beforeAll(async () => {
-    await createStrapiLoader();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
     utils = createUtils(strapi);
@@ -210,7 +205,6 @@ describe('Admin Auth End to End', () => {
     let user;
 
     beforeAll(async () => {
-      await createStrapiLoader();
       const userInfo = {
         email: 'test@strapi.io',
         firstname: 'test',

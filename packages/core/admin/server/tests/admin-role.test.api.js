@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
@@ -24,7 +24,6 @@ describe('Role CRUD End to End', () => {
   let strapi;
 
   beforeAll(async () => {
-    await createStrapiLoader();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
   });

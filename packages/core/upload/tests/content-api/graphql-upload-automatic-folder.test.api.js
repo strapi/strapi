@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 
 let strapi;
@@ -14,7 +14,6 @@ let uploadFolder;
 
 describe('Uploads folder (GraphQL)', () => {
   beforeAll(async () => {
-    await createStrapiLoader();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
     rqAdmin = await createAuthRequest({ strapi });

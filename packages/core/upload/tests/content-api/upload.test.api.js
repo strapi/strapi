@@ -5,7 +5,7 @@ const path = require('path');
 
 // Helpers.
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createContentAPIRequest } = require('../../../../../test/helpers/request');
 
 const builder = createTestBuilder();
@@ -59,7 +59,6 @@ const todoComponent = {
 
 describe('Upload plugin', () => {
   beforeAll(async () => {
-    await createStrapiLoader();
     await builder
       .addContentType(dogModel)
       .addComponent(todoComponent)

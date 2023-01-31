@@ -2,10 +2,7 @@
 
 const { prop, difference, map, uniq } = require('lodash/fp');
 const { createAuthRequest } = require('../../../../../../test/helpers/request');
-const {
-  createStrapiInstance,
-  createStrapiLoader,
-} = require('../../../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
 const { createTestBuilder } = require('../../../../../../test/helpers/builder');
 
 const toIds = (arr) => uniq(map(prop('id'))(arr));
@@ -117,7 +114,6 @@ describe('x-to-many RF Preview', () => {
   const cmProductUrl = getCMPrefixUrl(productModel.singularName);
 
   beforeAll(async () => {
-    await createStrapiLoader();
     await builder
       .addContentTypes([shopModel, categoryModel, productModel])
       .addFixtures(shopModel.singularName, fixtures.shop)

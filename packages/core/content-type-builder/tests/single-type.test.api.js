@@ -4,7 +4,7 @@
 
 'use strict';
 
-const { createStrapiInstance, createStrapiLoader } = require('../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../test/helpers/request');
 const modelsUtils = require('../../../../test/helpers/models');
 
@@ -19,7 +19,6 @@ const restart = async () => {
 
 describe('Content Type Builder - Content types', () => {
   beforeAll(async () => {
-    await createStrapiLoader();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
   });

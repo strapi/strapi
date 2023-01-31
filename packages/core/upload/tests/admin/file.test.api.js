@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 
 const builder = createTestBuilder();
@@ -25,7 +25,6 @@ const dogModel = {
 
 describe('Upload', () => {
   beforeAll(async () => {
-    await createStrapiLoader();
     await builder.addContentType(dogModel).build();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });

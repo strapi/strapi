@@ -1,6 +1,6 @@
 'use strict';
 
-const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
 
@@ -107,7 +107,6 @@ describe('i18n - Content API', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
-    await createStrapiLoader();
     await builder
       .addComponent(compoModel)
       .addContentTypes([categoryModel, dogSchema])

@@ -3,7 +3,7 @@
 // Helpers.
 const { pick } = require('lodash/fp');
 const { createTestBuilder } = require('../../../../test/helpers/builder');
-const { createStrapiInstance, createStrapiLoader } = require('../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../test/helpers/request');
 
 const builder = createTestBuilder();
@@ -111,7 +111,6 @@ const personModel = {
 
 describe('Test Graphql Relations API End to End', () => {
   beforeAll(async () => {
-    await createStrapiLoader();
     await builder
       .addComponent(rgbColorComponent)
       .addContentTypes([documentModel, labelModel, carModel, personModel])

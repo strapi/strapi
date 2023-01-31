@@ -2,7 +2,7 @@
 
 // Test an API with all the possible filed types and simple filterings (no deep filtering, no relations)
 const _ = require('lodash');
-const { createStrapiInstance, createStrapiLoader } = require('../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
 const { createTestBuilder } = require('../../../../test/helpers/builder');
 const {
   createContentAPIRequest,
@@ -95,7 +95,6 @@ const pagination = {
 
 describe('Deep Filtering API', () => {
   beforeAll(async () => {
-    await createStrapiLoader();
     await builder
       .addContentTypes([card, collector])
       .addFixtures(card.singularName, fixtures.card)

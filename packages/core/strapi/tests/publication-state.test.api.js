@@ -1,6 +1,6 @@
 'use strict';
 
-const { createStrapiInstance, createStrapiLoader } = require('../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
 const { createContentAPIRequest } = require('../../../../test/helpers/request');
 const { createTestBuilder } = require('../../../../test/helpers/builder');
 
@@ -131,7 +131,6 @@ const getQueryFromMode = (mode) => {
 
 describe('Publication State', () => {
   beforeAll(async () => {
-    await createStrapiLoader();
     await builder
       .addContentType(contentTypes.country)
       .addComponent(components.comp)

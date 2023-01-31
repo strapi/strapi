@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 
 const builder = createTestBuilder();
@@ -13,7 +13,6 @@ let rq;
 
 describe('Dimensions are populated when uploading an image', () => {
   beforeAll(async () => {
-    await createStrapiLoader();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
   });

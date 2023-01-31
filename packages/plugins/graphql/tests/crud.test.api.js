@@ -4,7 +4,7 @@ const { omit, prop } = require('lodash/fp');
 
 // Helpers.
 const { createTestBuilder } = require('../../../../test/helpers/builder');
-const { createStrapiInstance, createStrapiLoader } = require('../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../test/helpers/request');
 
 const builder = createTestBuilder();
@@ -37,7 +37,6 @@ const postModel = {
 
 describe('Test Graphql API End to End', () => {
   beforeAll(async () => {
-    await createStrapiLoader();
     await builder.addContentType(postModel).build();
 
     strapi = await createStrapiInstance();

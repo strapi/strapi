@@ -1,6 +1,6 @@
 'use strict';
 
-const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createRequest } = require('../../../../../test/helpers/request');
 const { createAuthenticatedUser } = require('../utils');
 
@@ -22,7 +22,6 @@ const data = {};
 
 describe('Auth API', () => {
   beforeAll(async () => {
-    await createStrapiLoader();
     strapi = await createStrapiInstance({ bypassAuth: false });
 
     const { jwt, user } = await createAuthenticatedUser({ strapi, userInfo: internals.user });

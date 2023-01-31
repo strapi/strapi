@@ -2,10 +2,7 @@
 
 const { omit } = require('lodash/fp');
 
-const {
-  createStrapiInstance,
-  createStrapiLoader,
-} = require('../../../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
 const { createTestBuilder } = require('../../../../../../test/helpers/builder');
 const { createAuthRequest } = require('../../../../../../test/helpers/request');
 
@@ -47,7 +44,6 @@ const product = {
 
 describe('CM API - Basic', () => {
   beforeAll(async () => {
-    await createStrapiLoader();
     await builder.addContentType(product).build();
 
     strapi = await createStrapiInstance();

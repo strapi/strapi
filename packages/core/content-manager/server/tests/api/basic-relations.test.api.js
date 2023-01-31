@@ -1,10 +1,7 @@
 'use strict';
 
 const { createAuthRequest } = require('../../../../../../test/helpers/request');
-const {
-  createStrapiInstance,
-  createStrapiLoader,
-} = require('../../../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
 const { createTestBuilder } = require('../../../../../../test/helpers/builder');
 
 let strapi;
@@ -118,7 +115,6 @@ const getStampByName = (stamps, name) => stamps.find((s) => s.name === name);
 
 describe('CM API', () => {
   beforeAll(async () => {
-    await createStrapiLoader();
     await builder
       .addContentTypes([stamp, collector])
       .addFixtures(stamp.singularName, stampFixtures)

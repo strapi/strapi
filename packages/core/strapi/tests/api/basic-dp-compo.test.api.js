@@ -1,6 +1,6 @@
 'use strict';
 
-const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
 const { createContentAPIRequest } = require('../../../../../test/helpers/request');
 
@@ -50,7 +50,6 @@ const productWithCompoAndDP = {
 
 describe('Core API - Basic + compo + draftAndPublish', () => {
   beforeAll(async () => {
-    await createStrapiLoader();
     await builder.addComponent(compo).addContentType(productWithCompoAndDP).build();
 
     strapi = await createStrapiInstance();

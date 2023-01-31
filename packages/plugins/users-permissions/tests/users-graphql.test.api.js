@@ -1,6 +1,6 @@
 'use strict';
 
-const { createStrapiInstance, createStrapiLoader } = require('../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
 const { createRequest, createAuthRequest } = require('../../../../test/helpers/request');
 const { createTestBuilder } = require('../../../../test/helpers/builder');
 
@@ -17,7 +17,6 @@ describe('Simple Test GraphQL Users API End to End', () => {
   const data = {};
 
   beforeAll(async () => {
-    await createStrapiLoader();
     strapi = await createStrapiInstance();
     rq = await createRequest({ strapi });
 
@@ -231,7 +230,6 @@ describe('Advanced Test GraphQL Users API End to End', () => {
   };
 
   beforeAll(async () => {
-    await createStrapiLoader();
     await builder.addComponent(component).build();
 
     strapi = await createStrapiInstance();

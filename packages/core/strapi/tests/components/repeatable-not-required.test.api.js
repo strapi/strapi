@@ -1,7 +1,7 @@
 'use strict';
 
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createContentAPIRequest } = require('../../../../../test/helpers/request');
 
 let strapi;
@@ -34,7 +34,6 @@ describe('Non repeatable and Not required component', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
-    await createStrapiLoader();
     await builder.addComponent(component).addContentType(ct).build();
 
     strapi = await createStrapiInstance();

@@ -1,10 +1,7 @@
 'use strict';
 
 const { createTestBuilder } = require('../../../../../../test/helpers/builder');
-const {
-  createStrapiInstance,
-  createStrapiLoader,
-} = require('../../../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../../test/helpers/request');
 const modelsUtils = require('../../../../../../test/helpers/models');
 
@@ -148,7 +145,6 @@ describe('Relations', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
-    await createStrapiLoader();
     await builder.addComponent(compo(false)).addContentTypes([productModel, shopModel]).build();
 
     await modelsUtils.modifyComponent(compo(true));

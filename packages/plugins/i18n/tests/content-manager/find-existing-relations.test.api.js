@@ -3,7 +3,7 @@
 const { pick } = require('lodash/fp');
 
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createStrapiInstance, createStrapiLoader } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 
 let strapi;
@@ -85,7 +85,6 @@ describe('i18n - Find existing relations', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
-    await createStrapiLoader();
     await builder
       .addContentTypes([productModel, shopModel])
       .addFixtures('plugin::i18n.locale', [
