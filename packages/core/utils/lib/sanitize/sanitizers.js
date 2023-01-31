@@ -2,7 +2,7 @@
 
 const { curry } = require('lodash/fp');
 
-const pipeAsync = require('../pipe-async');
+const { pipeAsync } = require('../async');
 const traverseEntity = require('../traverse-entity');
 
 const { removePassword, removePrivate } = require('./visitors');
