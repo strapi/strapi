@@ -41,11 +41,6 @@ const defaultMessages = actionTypes.reduce((acc, curr) => {
         actionName
       ] = `{action, select, create {Create} update {Update} delete {Delete} publish {Publish} unpublish {Unpublish} other {}} entry {model, select, undefined {} other {({model})}}`;
       break;
-    case 'content-type':
-      acc[
-        actionName
-      ] = `{action, select, create {Create} update {Update} delete {Delete} other {}} content type {model, select, undefined {} other {({model})}}`;
-      break;
     case 'media-folder':
       acc[actionName] = `${cudSelectString} media folder`;
       break;

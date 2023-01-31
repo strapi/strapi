@@ -24,7 +24,7 @@ const TableRows = ({ headers, rows, onOpenModal }) => {
 
       return formatMessage(
         {
-          id: `Settings.permissions.auditLogs.actions.${actionName}`,
+          id: `Settings.permissions.auditLogs.actionsdafadsfs.${actionName}`,
           defaultMessage: getDefaultMessage(actionName),
         },
         { model, action: actionIdentifiers.join('') }
@@ -51,7 +51,7 @@ const TableRows = ({ headers, rows, onOpenModal }) => {
                     {getCellValue({
                       type: key,
                       value: cellFormatter ? cellFormatter(data[name]) : data[name],
-                      model: data.payload?.modelName,
+                      model: data.payload?.model,
                     })}
                   </Typography>
                 </Td>
