@@ -17,10 +17,7 @@ module.exports = ({ strapi }) => {
     registerAdminPanelRoute({ strapi });
   }
 
-  if (
-    process.env.STRAPI_EXPERIMENTAL === 'true' &&
-    process.env.STRAPI_DISABLE_REMOTE_DATA_TRANSFER !== 'true'
-  ) {
+  if (process.env.STRAPI_DISABLE_REMOTE_DATA_TRANSFER !== 'true') {
     registerDataTransferRoute(strapi);
   }
 };
