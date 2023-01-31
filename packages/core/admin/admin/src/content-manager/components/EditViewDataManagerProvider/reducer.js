@@ -192,7 +192,7 @@ const reducer = (state, action) =>
           set(draftState, path, [value]);
         } else {
           const modifiedDataRelations = get(state, path);
-          const newRelations = modifiedDataRelations ? [...modifiedDataRelations, value] : [value];
+          const newRelations = [...modifiedDataRelations, value];
           set(draftState, path, newRelations);
         }
 
