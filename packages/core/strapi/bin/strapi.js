@@ -273,59 +273,63 @@ program
   .option('-s, --silent', `Run the generation silently, without any output`, false)
   .action(getLocalScript('ts/generate-types'));
 
-if (process.env.STRAPI_EXPERIMENTAL === 'true') {
-  // `$ strapi transfer`
-  program
-    .command('transfer')
-    .description('Transfer data from one source to another')
-    .allowExcessArguments(false)
-    .addOption(
-      new Option(
-        '--from <sourceURL>',
-        `URL of the remote Strapi instance to get data from`
-      ).argParser(parseURL)
+// `$ strapi transfer`
+program
+  .command('transfer')
+  .description('Transfer data from one source to another')
+  .allowExcessArguments(false)
+  .addOption(
+    new Option(
+      '--from <sourceURL>',
+      `URL of the remote Strapi instance to get data from`
+    ).argParser(parseURL)
+  )
+  .addOption(
+    new Option('--fromToken <token>', `transfer token for remote Strapi instance to pull data from`)
+  )
+  .addOption(
+    new Option(
+      '--to <destinationURL>',
+      `URL of the remote Strapi instance to send data to`
+    ).argParser(parseURL)
+  )
+  .addOption(
+    new Option('--toToken <token>', `transfer token for remote Strapi instance to push data to`)
+  )
+  .addOption(forceOption)
+  // Validate URLs
+  .hook(
+    'preAction',
+    ifOptions(
+      (opts) => opts.from,
+      (thisCommand) => assertUrlHasProtocol(thisCommand.opts().from, ['https:', 'http:'])
     )
-    .addOption(
-      new Option(
-        '--to <destinationURL>',
-        `URL of the remote Strapi instance to send data to`
-      ).argParser(parseURL)
+  )
+  .hook(
+    'preAction',
+    ifOptions(
+      (opts) => opts.to,
+      (thisCommand) => assertUrlHasProtocol(thisCommand.opts().to, ['https:', 'http:'])
     )
-    .addOption(forceOption)
-    // Validate URLs
-    .hook(
-      'preAction',
-      ifOptions(
-        (opts) => opts.from,
-        (thisCommand) => assertUrlHasProtocol(thisCommand.opts().from, ['https:', 'http:'])
-      )
+  )
+  .hook(
+    'preAction',
+    ifOptions(
+      (opts) => !opts.from && !opts.to,
+      () => exitWith(1, 'At least one source (from) or destination (to) option must be provided')
     )
-    .hook(
-      'preAction',
-      ifOptions(
-        (opts) => opts.to,
-        (thisCommand) => assertUrlHasProtocol(thisCommand.opts().to, ['https:', 'http:'])
-      )
+  )
+  .addOption(forceOption)
+  .addOption(excludeOption)
+  .addOption(onlyOption)
+  .hook('preAction', validateExcludeOnly)
+  .hook(
+    'preAction',
+    confirmMessage(
+      'The import will delete all data in the remote database. Are you sure you want to proceed?'
     )
-    .hook(
-      'preAction',
-      ifOptions(
-        (opts) => !opts.from && !opts.to,
-        () => exitWith(1, 'At least one source (from) or destination (to) option must be provided')
-      )
-    )
-    .addOption(forceOption)
-    .addOption(excludeOption)
-    .addOption(onlyOption)
-    .hook('preAction', validateExcludeOnly)
-    .hook(
-      'preAction',
-      confirmMessage(
-        'The import will delete all data in the remote database. Are you sure you want to proceed?'
-      )
-    )
-    .action(getLocalScript('transfer/transfer'));
-}
+  )
+  .action(getLocalScript('transfer/transfer'));
 
 // `$ strapi export`
 program
