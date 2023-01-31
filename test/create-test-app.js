@@ -24,7 +24,7 @@ const databases = {
     connection: {
       host: '127.0.0.1',
       port: 3306,
-      database: 'strapi-test',
+      database: `strapi_${process.env.JEST_WORKER_ID}`,
       username: 'root',
       password: 'root',
     },

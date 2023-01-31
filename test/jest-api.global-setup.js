@@ -30,20 +30,20 @@ const databases = {
   },
 };
 
+async function main(uuid) {
+  const knex = Knex(databases[process.env.DATABASE]);
+
+  // Lets create our database if it does not exist
+  await knex.raw(`CREATE DATABASE ${uuid};`);
+  // knex.destory();
+}
+
 async function CreateDB(uuid) {
   // You can dynamically pass the database name
   // as a command-line argument, or obtain it from
   // a .env file
-  async function main(uuid) {
-    const knex = Knex(databases[process.env.DATABASE]);
-
-    // Lets create our database if it does not exist
-    await knex.raw(`CREATE DATABASE ${uuid};`);
-    process.env.DATABASE_NAME = uuid;
-    // knex.destory();
-  }
   if (process.env.DATABASE !== 'sqlite') {
-    main(uuid).catch(console.log);
+    await main(uuid).catch(console.log);
   }
 }
 
@@ -79,8 +79,8 @@ async function copyFolderRecursiveSync(source, target, noSkipBaseName) {
 module.exports = async function (globalConfig) {
   const workerCount = globalConfig.maxWorkers;
   const promiseList = [];
-  for (let step = 1; step < workerCount + 1; step + 1) {
-    const uuid = `strapi_${step}`;
+  for (let i = 1; i < workerCount + 1; i += 1) {
+    const uuid = `strapi_${i}`;
     promiseList.push(copyFolderRecursiveSync(`./testApps/testApp`, `./testApps/${uuid}`));
     promiseList.push(CreateDB(uuid));
   }
