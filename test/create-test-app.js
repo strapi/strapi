@@ -13,7 +13,7 @@ const databases = {
     connection: {
       host: '127.0.0.1',
       port: 5432,
-      database: process.env.UUID,
+      database: `strapi_${process.env.JEST_WORKER_ID}`,
       username: 'strapi',
       password: 'strapi',
       schema: 'public',

@@ -11,6 +11,8 @@ module.exports = {
     '<rootDir>/out-tsc/',
     '<rootDir>/test/',
   ],
+  globalSetup: '<rootDir>/test/jest-api.global-setup.js',
+  globalTeardown: '<rootDir>/test/jest-api.teardown-setup.js',
   transform: {},
   modulePathIgnorePatterns: ['.cache'],
 };
