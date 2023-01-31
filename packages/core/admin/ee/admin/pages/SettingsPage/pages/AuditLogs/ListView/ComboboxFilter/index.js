@@ -2,14 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Combobox, ComboboxOption } from '@strapi/design-system';
-import { createGlobalStyle } from 'styled-components';
-
-const GlobalOverflowAuto = createGlobalStyle`
-  /* Prevent scroll on combobox click when the page has an overflow */
-  html, body {
-    overflow: auto;
-  }
-`;
 
 const ComboboxFilter = ({ value, options, onChange }) => {
   const { formatMessage } = useIntl();
@@ -19,18 +11,15 @@ const ComboboxFilter = ({ value, options, onChange }) => {
   });
 
   return (
-    <>
-      <GlobalOverflowAuto />
-      <Combobox aria-label={ariaLabel} value={value} onChange={onChange}>
-        {options.map(({ label, customValue }) => {
-          return (
-            <ComboboxOption key={customValue} value={customValue}>
-              {label}
-            </ComboboxOption>
-          );
-        })}
-      </Combobox>
-    </>
+    <Combobox aria-label={ariaLabel} value={value} onChange={onChange}>
+      {options.map(({ label, customValue }) => {
+        return (
+          <ComboboxOption key={customValue} value={customValue}>
+            {label}
+          </ComboboxOption>
+        );
+      })}
+    </Combobox>
   );
 };
 
