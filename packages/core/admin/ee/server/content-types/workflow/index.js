@@ -10,6 +10,7 @@ module.exports = {
       pluralName: 'workflows',
       displayName: 'Workflow',
     },
+    options: {},
     pluginOptions: {
       'content-manager': {
         visible: false,
@@ -18,10 +19,15 @@ module.exports = {
         visible: false,
       },
     },
-    options: {},
     attributes: {
       uid: {
         type: 'string',
+      },
+      stages: {
+        type: 'relation',
+        target: 'admin::workflow-stage',
+        relation: 'oneToMany',
+        mappedBy: 'workflow',
       },
     },
   },

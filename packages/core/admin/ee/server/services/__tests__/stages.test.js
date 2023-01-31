@@ -17,45 +17,51 @@ jest.mock('@strapi/strapi/lib/utils/ee', () => {
   return eeModule;
 });
 
-const workflowsServiceFactory = require('../review-workflows/workflows');
-const { WORKFLOW_MODEL_UID } = require('../../constants/workflows');
+const stageFactory = require('../review-workflows/stages');
+const { STAGE_MODEL_UID } = require('../../constants/workflows');
 
-const workflowMock = {
+const stageMock = {
   id: 1,
+  name: 'test',
+  workflow: 1,
 };
 
 const entityServiceMock = {
-  findOne: jest.fn(() => workflowMock),
-  findMany: jest.fn(() => [workflowMock]),
+  findOne: jest.fn(() => stageMock),
+  findMany: jest.fn(() => [stageMock]),
 };
 
 const strapiMock = {
   entityService: entityServiceMock,
 };
 
-const workflowsService = workflowsServiceFactory({ strapi: strapiMock });
+const stagesService = stageFactory({ strapi: strapiMock });
 
-describe('Review workflows - Workflows service', () => {
+describe('Review workflows - Stages service', () => {
   afterEach(() => {
     jest.resetAllMocks();
   });
 
   describe('find', () => {
     test('Should call entityService with the right model UID and ID', async () => {
-      workflowsService.find({ opt1: 1 });
+      stagesService.find({ workflowId: 1 });
 
       expect(entityServiceMock.findOne).not.toBeCalled();
       expect(entityServiceMock.findMany).toBeCalled();
-      expect(entityServiceMock.findMany).toBeCalledWith(WORKFLOW_MODEL_UID, { opt1: 1 });
+      expect(entityServiceMock.findMany).toBeCalledWith(STAGE_MODEL_UID, {
+        filter: { workflow: 1 },
+      });
     });
   });
   describe('findById', () => {
     test('Should call entityService with the right model UID', async () => {
-      workflowsService.findById(1, {});
+      stagesService.findById(1, { workflowId: 1 });
 
       expect(entityServiceMock.findMany).not.toBeCalled();
       expect(entityServiceMock.findOne).toBeCalled();
-      expect(entityServiceMock.findOne).toBeCalledWith(WORKFLOW_MODEL_UID, 1, {});
+      expect(entityServiceMock.findOne).toBeCalledWith(STAGE_MODEL_UID, 1, {
+        filter: { workflow: 1 },
+      });
     });
   });
 });

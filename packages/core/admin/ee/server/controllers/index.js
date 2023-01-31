@@ -7,4 +7,5 @@ module.exports = {
   user: require('./user'),
   auditLogs: require('./audit-logs'),
   workflows: require('./workflows'),
+  stages: require('./workflows/stages'),
 };

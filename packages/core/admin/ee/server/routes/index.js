@@ -162,7 +162,25 @@ module.exports = [
   {
     method: 'GET',
     path: '/review-workflows/workflows/:id',
-    handler: 'workflows.findOne',
+    handler: 'workflows.findById',
+    config: {
+      middlewares: [enableFeatureMiddleware('review-workflows')],
+      policies: ['admin::isAuthenticatedAdmin'],
+    },
+  },
+  {
+    method: 'GET',
+    path: '/review-workflows/workflows/:workflow_id/stages',
+    handler: 'stages.find',
+    config: {
+      middlewares: [enableFeatureMiddleware('review-workflows')],
+      policies: ['admin::isAuthenticatedAdmin'],
+    },
+  },
+  {
+    method: 'GET',
+    path: '/review-workflows/workflows/:workflow_id/stages/:id',
+    handler: 'stages.findById',
     config: {
       middlewares: [enableFeatureMiddleware('review-workflows')],
       policies: ['admin::isAuthenticatedAdmin'],

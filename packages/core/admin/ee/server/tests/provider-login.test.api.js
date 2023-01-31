@@ -3,15 +3,9 @@
 const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
 const { createAuthRequest, createRequest } = require('../../../../../../test/helpers/request');
 const { createUtils } = require('../../../../../../test/helpers/utils');
+const { describeOnCondition } = require('../utils/test');
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
-
-if (edition === 'CE') {
-  test('Provider Login (skipped)', () => {
-    expect(true).toBeTruthy();
-  });
-  return;
-}
 
 let strapi;
 let utils;
@@ -54,7 +48,7 @@ const deleteFixtures = async () => {
   await utils.deleteRolesById([localData.restrictedRole.id]);
 };
 
-describe('Provider Login', () => {
+describeOnCondition(edition === 'EE')('Provider Login', () => {
   let hasSSO;
 
   beforeAll(async () => {

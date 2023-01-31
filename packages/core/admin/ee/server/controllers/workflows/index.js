@@ -8,8 +8,11 @@ module.exports = {
    * @param {import('koa').BaseContext} ctx - koa context
    */
   async find(ctx) {
+    const { populate } = ctx.query;
     const workflowService = getService('workflows');
-    const data = await workflowService.find({});
+    const data = await workflowService.find({
+      populate,
+    });
 
     ctx.body = {
       data,
@@ -19,11 +22,12 @@ module.exports = {
    * Get one workflow based on its id contained in request parameters
    * @param {import('koa').BaseContext} ctx - koa context
    */
-  async findOne(ctx) {
+  async findById(ctx) {
     const { id } = ctx.params;
+    const { populate } = ctx.query;
 
     const workflowService = getService('workflows');
-    const data = await workflowService.findById(id);
+    const data = await workflowService.findById(id, { populate });
 
     ctx.body = {
       data,
