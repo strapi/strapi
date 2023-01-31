@@ -1,0 +1,54 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:1337",
+      "localStorage": [
+        {
+          "name": "userInfo",
+          "value": "{\"id\":1,\"firstname\":\"John\",\"lastname\":\"Smith\",\"username\":null,\"email\":\"test@testing.com\",\"isActive\":true,\"blocked\":false,\"preferedLanguage\":null,\"createdAt\":\"2023-01-31T09:11:58.590Z\",\"updatedAt\":\"2023-01-31T09:11:58.590Z\"}"
+        },
+        {
+          "name": "GUIDED_TOUR_SKIPPED",
+          "value": "false"
+        },
+        {
+          "name": "strapi-admin-language",
+          "value": "en"
+        },
+        {
+          "name": "videos",
+          "value": "null"
+        },
+        {
+          "name": "GUIDED_TOUR_CURRENT_STEP",
+          "value": "null"
+        },
+        {
+          "name": "GUIDED_TOUR_COMPLETED_STEPS",
+          "value": "null"
+        },
+        {
+          "name": "jwtToken",
+          "value": "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjc1MTU2MzIwLCJleHAiOjE2Nzc3NDgzMjB9.jujuHCQwzIh4daMZhEspM9XgKaytbb1QW_-AVuDukKU\""
+        },
+        {
+          "name": "navbar-condensed",
+          "value": "false"
+        },
+        {
+          "name": "STRAPI_THEME",
+          "value": "light"
+        },
+        {
+          "name": "onboarding",
+          "value": "null"
+        },
+        {
+          "name": "STRAPI_UPDATE_NOTIF",
+          "value": "null"
+        }
+      ]
+    }
+  ]
+}

@@ -1,26 +1,13 @@
 import { test, expect } from '@playwright/test';
-import { resetDatabaseAndImportDataFromPath } from '../scripts/data-transfer';
+
+test.use({ storageState: 'storageState.json' });
 
 test.describe('Authentication | Login', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('./e2e/data/backup.tar');
     await page.goto('/admin');
-    // TODO: remove and replace by a util function
-    await page.getByLabel('First name*', { exact: true }).fill('John');
-    await page.getByLabel('Last name').fill('Smith');
-    await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
-    await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
-    await page.getByLabel('Confirm Password*', { exact: true }).fill('myTestPassw0rd');
 
-    await page.getByRole('button', { name: "Let's start" }).click();
     await page.getByText('John Smith').click();
     await page.getByRole('link', { name: 'Logout' }).click();
-  });
-
-  test.afterEach(async ({ page }) => {
-    await page.request.fetch('/api/database/dump', {
-      method: 'POST',
-    });
   });
 
   test.describe('Successful login', () => {
