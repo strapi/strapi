@@ -164,6 +164,7 @@ describe('<FilterListURLQuery />', () => {
 
     expect(container).toMatchSnapshot();
   });
+
   it('displays the label for a custom input providing options with custom values', () => {
     const history = createMemoryHistory();
     const displayedFilters = [
