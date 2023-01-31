@@ -16,6 +16,7 @@ import type {
   Stream,
 } from '../../../../types';
 import { createFilePathFactory, createTarEntryStream } from './utils';
+import { ProviderTransferError } from '../../../errors/providers';
 
 export interface ILocalFileDestinationProviderOptions {
   encryption: {
@@ -103,7 +104,9 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
     outStream.on('error', (err: NodeJS.ErrnoException) => {
       if (err.code === 'ENOSPC') {
-        throw new Error("Your server doesn't have space to proceed with the import.");
+        throw new ProviderTransferError(
+          "Your server doesn't have space to proceed with the import."
+        );
       }
       throw err;
     });
