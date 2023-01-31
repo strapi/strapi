@@ -10,7 +10,7 @@ const machineId = require('../lib/utils/machine-id');
 const DEFAULT_FEATURES = {
   bronze: [],
   silver: [],
-  gold: ['sso', { name: 'audit-logs', options: { retentionDays: 90 } }],
+  gold: ['sso', { name: 'audit-logs', options: { retentionDays: 90 } }, 'review-workflows'],
 };
 
 const publicKey = fs.readFileSync(join(__dirname, 'resources/key.pub'));
