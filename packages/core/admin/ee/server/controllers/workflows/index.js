@@ -22,7 +22,7 @@ module.exports = {
    * Get one workflow based on its id contained in request parameters
    * @param {import('koa').BaseContext} ctx - koa context
    */
-  async findOne(ctx) {
+  async findById(ctx) {
     const { id } = ctx.params;
     const { populate } = ctx.query;
 

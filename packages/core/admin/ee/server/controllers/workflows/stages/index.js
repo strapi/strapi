@@ -25,7 +25,7 @@ module.exports = {
    * Get one stage
    * @param {import('koa').BaseContext} ctx - koa context
    */
-  async findOne(ctx) {
+  async findById(ctx) {
     const { id, workflow_id: workflowId } = ctx.params;
     const { populate } = ctx.query;
     const stagesService = getService('stages');

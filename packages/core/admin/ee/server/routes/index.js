@@ -162,7 +162,7 @@ module.exports = [
   {
     method: 'GET',
     path: '/review-workflows/workflows/:id',
-    handler: 'workflows.findOne',
+    handler: 'workflows.findById',
     config: {
       middlewares: [enableFeatureMiddleware('review-workflows')],
       policies: ['admin::isAuthenticatedAdmin'],
@@ -180,7 +180,7 @@ module.exports = [
   {
     method: 'GET',
     path: '/review-workflows/workflows/:workflow_id/stages/:id',
-    handler: 'stages.findOne',
+    handler: 'stages.findById',
     config: {
       middlewares: [enableFeatureMiddleware('review-workflows')],
       policies: ['admin::isAuthenticatedAdmin'],
