@@ -4,6 +4,11 @@ const chalk = require('chalk');
 const Table = require('cli-table3');
 const { Option } = require('commander');
 const { TransferGroupPresets } = require('@strapi/data-transfer/lib/engine');
+
+const {
+  configs: { createOutputFileConfiguration },
+  createLogger,
+} = require('@strapi/logger');
 const { readableBytes, exitWith } = require('../utils/helpers');
 const strapi = require('../../index');
 const { getParseListWithChoices } = require('../utils/commander');
@@ -77,29 +82,34 @@ const DEFAULT_IGNORED_CONTENT_TYPES = [
   'admin::role',
   'admin::api-token',
   'admin::api-token-permission',
+  'admin::audit-log',
 ];
 
 const createStrapiInstance = async (logLevel = 'error') => {
-  const appContext = await strapi.compile();
-  const app = strapi(appContext);
+  try {
+    const appContext = await strapi.compile();
+    const app = strapi(appContext);
 
-  app.log.level = logLevel;
-
-  return app.load();
+    app.log.level = logLevel;
+    return await app.load();
+  } catch (err) {
+    if (err.code === 'ECONNREFUSED') {
+      throw new Error('Process failed. Check the database connection with your Strapi project.');
+    }
+    throw err;
+  }
 };
 
 const transferDataTypes = Object.keys(TransferGroupPresets);
 
 const excludeOption = new Option(
   '--exclude <comma-separated data types>',
-  `Exclude this data. Options used here override --only. Available types: ${transferDataTypes.join(
-    ','
-  )}`
+  `Exclude data using comma-separated types. Available types: ${transferDataTypes.join(',')}`
 ).argParser(getParseListWithChoices(transferDataTypes, 'Invalid options for "exclude"'));
 
 const onlyOption = new Option(
   '--only <command-separated data types>',
-  `Include only this data (plus schemas). Available types: ${transferDataTypes.join(',')}`
+  `Include only these types of data (plus schemas). Available types: ${transferDataTypes.join(',')}`
 ).argParser(getParseListWithChoices(transferDataTypes, 'Invalid options for "only"'));
 
 const validateExcludeOnly = (command) => {
@@ -121,6 +131,44 @@ const validateExcludeOnly = (command) => {
   }
 };
 
+const errorColors = {
+  fatal: chalk.red,
+  error: chalk.red,
+  silly: chalk.yellow,
+};
+
+const formatDiagnostic =
+  (operation) =>
+  ({ details, kind }) => {
+    const logger = createLogger(
+      createOutputFileConfiguration(`${operation}_error_log_${Date.now()}.log`)
+    );
+    try {
+      if (kind === 'error') {
+        const { message, severity = 'fatal' } = details;
+
+        const colorizeError = errorColors[severity];
+        const errorMessage = colorizeError(`[${severity.toUpperCase()}] ${message}`);
+
+        logger.error(errorMessage);
+      }
+      if (kind === 'info') {
+        const { message, params } = details;
+
+        const msg = `${message}\n${params ? JSON.stringify(params, null, 2) : ''}`;
+
+        logger.info(msg);
+      }
+      if (kind === 'warning') {
+        const { origin, message } = details;
+
+        logger.warn(`(${origin ?? 'transfer'}) ${message}`);
+      }
+    } catch (err) {
+      logger.error(err);
+    }
+  };
+
 module.exports = {
   buildTransferTable,
   getDefaultExportName,
@@ -129,4 +177,5 @@ module.exports = {
   excludeOption,
   onlyOption,
   validateExcludeOnly,
+  formatDiagnostic,
 };

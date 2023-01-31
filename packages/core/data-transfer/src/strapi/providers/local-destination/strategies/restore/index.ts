@@ -1,4 +1,5 @@
 import type { ContentTypeSchema } from '@strapi/strapi';
+import { ProviderTransferError } from '../../../../../errors/providers';
 import * as queries from '../../../../queries';
 
 export interface IRestoreOptions {
@@ -116,7 +117,7 @@ const useResults = (
   const update = (count: number, key?: string) => {
     if (key) {
       if (!(key in results.aggregate)) {
-        throw new Error(`Unknown key "${key}" provided in results update`);
+        throw new ProviderTransferError(`Unknown key "${key}" provided in results update`);
       }
 
       results.aggregate[key].count += count;

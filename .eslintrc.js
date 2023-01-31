@@ -12,8 +12,8 @@ module.exports = {
     ecmaVersion: 2020,
   },
   overrides: [
+    // Backend javascript
     {
-      // Backend javascript
       files: ['packages/**/*.js', 'test/**/*.js', 'scripts/**/*.js', 'jest.*.js'],
       excludedFiles: frontPaths,
       ...require('./.eslintrc.back.js'),

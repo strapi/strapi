@@ -18,6 +18,7 @@ const {
   buildTransferTable,
   DEFAULT_IGNORED_CONTENT_TYPES,
   createStrapiInstance,
+  formatDiagnostic,
 } = require('./utils');
 
 /**
@@ -86,6 +87,8 @@ module.exports = async (opts) => {
 
   const engine = createTransferEngine(source, destination, engineOptions);
 
+  engine.diagnostics.onDiagnostic(formatDiagnostic('import'));
+
   const progress = engine.progress.stream;
   const getTelemetryPayload = () => {
     return {
@@ -109,8 +112,7 @@ module.exports = async (opts) => {
     logger.info('Import process has been completed successfully!');
   } catch (e) {
     await strapiInstance.telemetry.send('didDEITSProcessFail', getTelemetryPayload());
-    logger.error('Import process failed unexpectedly');
-    logger.error(e);
+    logger.error('Import process failed.');
     process.exit(1);
   }
 

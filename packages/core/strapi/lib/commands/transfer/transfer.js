@@ -15,6 +15,7 @@ const {
   buildTransferTable,
   createStrapiInstance,
   DEFAULT_IGNORED_CONTENT_TYPES,
+  formatDiagnostic,
 } = require('./utils');
 
 const logger = console;
@@ -109,6 +110,8 @@ module.exports = async (opts) => {
     },
   });
 
+  engine.diagnostics.onDiagnostic(formatDiagnostic('transfer'));
+
   try {
     logger.log(`Starting transfer...`);
 
@@ -120,8 +123,7 @@ module.exports = async (opts) => {
     logger.log(`${chalk.bold('Transfer process has been completed successfully!')}`);
     process.exit(0);
   } catch (e) {
-    logger.error('Transfer process failed unexpectedly');
-    logger.error(e);
+    logger.error('Transfer process failed.');
     process.exit(1);
   }
 };

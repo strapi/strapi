@@ -10,8 +10,8 @@ module.exports = {
   globals: {
     strapi: false,
   },
-  // Instead of extending (which includes values that interfere with this configuration), only take the rules field
   rules: {
+    // Instead of extending (which includes values that interfere with this configuration), only take the rules field
     ...require('./.eslintrc.back.js').rules,
     'import/no-extraneous-dependencies': ['error', { devDependencies: ['**/*.test.ts'] }],
     // TODO: The following rules from @strapi/eslint-config/typescript are disabled because they're causing problems we need to solve or fix

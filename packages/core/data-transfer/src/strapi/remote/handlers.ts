@@ -8,6 +8,8 @@ import type { IPushController } from './controllers/push';
 
 import createPushController from './controllers/push';
 import type { client, server } from '../../../types/remote/protocol';
+import { ProviderTransferError, ProviderInitializationError } from '../../errors/providers';
+import { TRANSFER_METHODS } from './constants';
 
 interface ITransferState {
   transfer?: { id: string; kind: client.TransferKind };
@@ -68,9 +70,13 @@ export const createTransferHandler =
             if (e instanceof Error) {
               callback(e);
             } else if (typeof e === 'string') {
-              callback(new Error(e));
+              callback(new ProviderTransferError(e));
             } else {
-              callback(new Error('Unexpected error'));
+              callback(
+                new ProviderTransferError('Unexpected error', {
+                  error: e,
+                })
+              );
             }
           }
         };
@@ -83,8 +89,9 @@ export const createTransferHandler =
         };
 
         const init = (msg: client.InitCommand): server.Payload<server.InitMessage> => {
+          // TODO: this only checks for this instance of node: we should consider a database lock
           if (state.controller) {
-            throw new Error('Transfer already in progres');
+            throw new ProviderInitializationError('Transfer already in progres');
           }
 
           const { transfer } = msg.params;
@@ -102,7 +109,10 @@ export const createTransferHandler =
 
           // Pull or any other string
           else {
-            throw new Error(`Transfer not implemented: "${transfer}"`);
+            throw new ProviderTransferError(`Transfer type not implemented: "${transfer}"`, {
+              transfer,
+              validTransfers: TRANSFER_METHODS,
+            });
           }
 
           state.transfer = { id: randomUUID(), kind: transfer };
@@ -125,7 +135,12 @@ export const createTransferHandler =
           }
 
           if (command === 'status') {
-            await callback(new Error('Command not implemented: "status"'));
+            await callback(
+              new ProviderTransferError('Command not implemented: "status"', {
+                command,
+                validCommands: ['init', 'end', 'status'],
+              })
+            );
           }
         };
 
@@ -134,18 +149,18 @@ export const createTransferHandler =
           const { controller } = state;
 
           // TODO: (re)move this check
-          // It shouldn't be possible to strart a pull transfer for now, so reaching
+          // It shouldn't be possible to start a pull transfer for now, so reaching
           // this code should be impossible too, but this has been added by security
           if (state.transfer?.kind === 'pull') {
-            return callback(new Error('Pull transfer not implemented'));
+            return callback(new ProviderTransferError('Pull transfer not implemented'));
           }
 
           if (!controller) {
-            return callback(new Error("The transfer hasn't been initialized"));
+            return callback(new ProviderTransferError("The transfer hasn't been initialized"));
           }
 
           if (!transferID) {
-            return callback(new Error('Missing transfer ID'));
+            return callback(new ProviderTransferError('Missing transfer ID'));
           }
 
           // Action
@@ -153,7 +168,12 @@ export const createTransferHandler =
             const { action } = msg;
 
             if (!(action in controller.actions)) {
-              return callback(new Error(`Invalid action provided: "${action}"`));
+              return callback(
+                new ProviderTransferError(`Invalid action provided: "${action}"`, {
+                  action,
+                  validActions: Object.keys(controller.actions),
+                })
+              );
             }
 
             await answer(() => controller.actions[action as keyof typeof controller.actions]());
@@ -187,6 +207,7 @@ export const createTransferHandler =
 
         ws.on('error', (e) => {
           teardown();
+          // TODO: is logging a console error to the running instance of Strapi ok to do? Should we check for an existing strapi.logger to use?
           console.error(e);
         });
 
@@ -194,7 +215,8 @@ export const createTransferHandler =
           const msg: client.Message = JSON.parse(raw.toString());
 
           if (!msg.uuid) {
-            throw new Error('Missing uuid in message');
+            await callback(new ProviderTransferError('Missing uuid in message'));
+            return;
           }
 
           uuid = msg.uuid;
@@ -211,7 +233,7 @@ export const createTransferHandler =
 
           // Invalid messages
           else {
-            await callback(new Error('Bad request'));
+            await callback(new ProviderTransferError('Bad request'));
           }
         });
       });

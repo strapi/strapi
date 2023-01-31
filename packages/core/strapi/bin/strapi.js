@@ -17,15 +17,19 @@ const packageJSON = require('../package.json');
 const {
   promptEncryptionKey,
   confirmMessage,
-  parseURL,
   forceOption,
+  parseURL,
 } = require('../lib/commands/utils/commander');
-const { ifOptions, assertUrlHasProtocol, exitWith } = require('../lib/commands/utils/helpers');
+const { exitWith, ifOptions, assertUrlHasProtocol } = require('../lib/commands/utils/helpers');
 const {
   excludeOption,
   onlyOption,
   validateExcludeOnly,
 } = require('../lib/commands/transfer/utils');
+
+process.on('SIGINT', () => {
+  process.exit();
+});
 
 const checkCwdIsStrapiApp = (name) => {
   const logErrorAndExit = () => {
