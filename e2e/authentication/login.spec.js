@@ -1,13 +1,18 @@
 import { test, expect } from '@playwright/test';
+import { resetDatabaseAndImportDataFromPath } from '../scripts/dts-import';
 
-test.use({ storageState: 'storageState.json' });
+// test.use({ storageState: 'storageState.json' });
 
 test.describe('Authentication | Login', () => {
   test.beforeEach(async ({ page }) => {
+    await resetDatabaseAndImportDataFromPath({ filePath: './e2e/data/with-admin.tar' });
     await page.goto('/admin');
+  });
 
-    await page.getByText('John Smith').click();
-    await page.getByRole('link', { name: 'Logout' }).click();
+  test.afterEach(async ({ page }) => {
+    await page.request.fetch('/api/database/dump', {
+      method: 'POST',
+    });
   });
 
   test.describe('Successful login', () => {
