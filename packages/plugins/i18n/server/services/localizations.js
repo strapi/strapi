@@ -2,6 +2,7 @@
 
 const { prop, isNil, isEmpty } = require('lodash/fp');
 
+const { mapAsyncDialects } = require('@strapi/utils').async;
 const { getService } = require('../utils');
 
 /**
@@ -32,9 +33,9 @@ const syncLocalizations = async (entry, { model }) => {
       return strapi.query(model.uid).update({ where: { id }, data: { localizations } });
     };
 
-    for (const localization of entry.localizations) {
-      await updateLocalization(localization.id);
-    }
+    await mapAsyncDialects(entry.localizations, (localization) =>
+      updateLocalization(localization.id)
+    );
   }
 };
 
@@ -58,9 +59,9 @@ const syncNonLocalizedAttributes = async (entry, { model }) => {
       return strapi.entityService.update(model.uid, id, { data: nonLocalizedAttributes });
     };
 
-    for (const localization of entry.localizations) {
-      await updateLocalization(localization.id);
-    }
+    await mapAsyncDialects(entry.localizations, (localization) =>
+      updateLocalization(localization.id)
+    );
   }
 };
 

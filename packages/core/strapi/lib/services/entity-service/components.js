@@ -6,6 +6,7 @@ const { has, prop, omit, toString, pipe, assign } = require('lodash/fp');
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getComponentAttributes } = require('@strapi/utils').contentTypes;
+const { mapAsyncDialects } = require('@strapi/utils').async;
 
 const omitComponentData = (contentType, data) => {
   const { attributes } = contentType;
@@ -14,28 +15,6 @@ const omitComponentData = (contentType, data) => {
   );
 
   return omit(componentAttributes, data);
-};
-
-/**
- * Because of the way mysql works, making parallel requests can cause deadlocks.
- * This function will run the requests sequentially if mysql is used.
- */
-const mapAsyncDialects = async (array, func) => {
-  const results = [];
-
-  switch (strapi.db.dialect.client) {
-    case 'mysql': {
-      for (const elm of array) {
-        results.push(await func(elm));
-      }
-      break;
-    }
-    default:
-      results.push(...(await Promise.all(array.map(func))));
-      break;
-  }
-
-  return results;
 };
 
 // NOTE: we could generalize the logic to allow CRUD of relation directly in the DB layer
