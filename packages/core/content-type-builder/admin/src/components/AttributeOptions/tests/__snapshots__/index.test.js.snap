@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
-.c26 {
+.c27 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -39,11 +39,19 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   border-radius: 4px;
 }
 
-.c22 {
+.c21 {
+  width: 2rem;
+  height: 1.5rem;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+}
+
+.c23 {
   padding-left: 16px;
 }
 
-.c25 {
+.c26 {
   padding-bottom: 4px;
   padding-left: 8px;
 }
@@ -117,14 +125,14 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c23 {
+.c24 {
   font-size: 0.875rem;
   line-height: 1.43;
   font-weight: 600;
   color: #32324d;
 }
 
-.c24 {
+.c25 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
@@ -175,9 +183,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   max-width: 100%;
 }
 
-.c21 {
-  width: 2rem;
-  height: 1.5rem;
+.c22 {
   box-sizing: content-box;
 }
 
@@ -307,11 +313,11 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                         >
                           <svg
                             aria-hidden="true"
-                            class="c21"
+                            class="c21 c22"
                             fill="none"
-                            height="1em"
+                            height="1.5rem"
                             viewBox="0 0 32 24"
-                            width="1em"
+                            width="2rem"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <rect
@@ -329,13 +335,13 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             />
                           </svg>
                           <div
-                            class="c22"
+                            class="c23"
                           >
                             <div
                               class="c20"
                             >
                               <span
-                                class="c23"
+                                class="c24"
                               >
                                 text
                               </span>
@@ -344,7 +350,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                               class="c20"
                             >
                               <span
-                                class="c24"
+                                class="c25"
                               >
                                 A type for modeling data
                               </span>
@@ -363,7 +369,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                     style="height: 100%;"
                   >
                     <div
-                      class="c25"
+                      class="c26"
                       style="height: 100%;"
                     >
                       <button
@@ -375,11 +381,11 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                         >
                           <svg
                             aria-hidden="true"
-                            class="c21"
+                            class="c21 c22"
                             fill="none"
-                            height="1em"
+                            height="1.5rem"
                             viewBox="0 0 32 24"
-                            width="1em"
+                            width="2rem"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <rect
@@ -397,13 +403,13 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             />
                           </svg>
                           <div
-                            class="c22"
+                            class="c23"
                           >
                             <div
                               class="c20"
                             >
                               <span
-                                class="c23"
+                                class="c24"
                               >
                                 email
                               </span>
@@ -412,7 +418,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                               class="c20"
                             >
                               <span
-                                class="c24"
+                                class="c25"
                               >
                                 A type for modeling data
                               </span>
@@ -443,11 +449,11 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                         >
                           <svg
                             aria-hidden="true"
-                            class="c21"
+                            class="c21 c22"
                             fill="none"
-                            height="1em"
+                            height="1.5rem"
                             viewBox="0 0 32 24"
-                            width="1em"
+                            width="2rem"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <rect
@@ -467,13 +473,13 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             />
                           </svg>
                           <div
-                            class="c22"
+                            class="c23"
                           >
                             <div
                               class="c20"
                             >
                               <span
-                                class="c23"
+                                class="c24"
                               >
                                 richtext
                               </span>
@@ -482,7 +488,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                               class="c20"
                             >
                               <span
-                                class="c24"
+                                class="c25"
                               >
                                 A type for modeling data
                               </span>
@@ -501,7 +507,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                     style="height: 100%;"
                   >
                     <div
-                      class="c25"
+                      class="c26"
                       style="height: 100%;"
                     >
                       <button
@@ -513,11 +519,11 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                         >
                           <svg
                             aria-hidden="true"
-                            class="c21"
+                            class="c21 c22"
                             fill="none"
-                            height="1em"
+                            height="1.5rem"
                             viewBox="0 0 32 24"
-                            width="1em"
+                            width="2rem"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path
@@ -531,13 +537,13 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             />
                           </svg>
                           <div
-                            class="c22"
+                            class="c23"
                           >
                             <div
                               class="c20"
                             >
                               <span
-                                class="c23"
+                                class="c24"
                               >
                                 password
                               </span>
@@ -546,7 +552,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                               class="c20"
                             >
                               <span
-                                class="c24"
+                                class="c25"
                               >
                                 A type for modeling data
                               </span>
@@ -577,11 +583,11 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                         >
                           <svg
                             aria-hidden="true"
-                            class="c21"
+                            class="c21 c22"
                             fill="none"
-                            height="1em"
+                            height="1.5rem"
                             viewBox="0 0 32 24"
-                            width="1em"
+                            width="2rem"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <rect
@@ -599,13 +605,13 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             />
                           </svg>
                           <div
-                            class="c22"
+                            class="c23"
                           >
                             <div
                               class="c20"
                             >
                               <span
-                                class="c23"
+                                class="c24"
                               >
                                 number
                               </span>
@@ -614,7 +620,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                               class="c20"
                             >
                               <span
-                                class="c24"
+                                class="c25"
                               >
                                 A type for modeling data
                               </span>
@@ -633,7 +639,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                     style="height: 100%;"
                   >
                     <div
-                      class="c25"
+                      class="c26"
                       style="height: 100%;"
                     >
                       <button
@@ -645,11 +651,11 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                         >
                           <svg
                             aria-hidden="true"
-                            class="c21"
+                            class="c21 c22"
                             fill="none"
-                            height="1em"
+                            height="1.5rem"
                             viewBox="0 0 32 24"
-                            width="1em"
+                            width="2rem"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <rect
@@ -669,13 +675,13 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             />
                           </svg>
                           <div
-                            class="c22"
+                            class="c23"
                           >
                             <div
                               class="c20"
                             >
                               <span
-                                class="c23"
+                                class="c24"
                               >
                                 enumeration
                               </span>
@@ -684,7 +690,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                               class="c20"
                             >
                               <span
-                                class="c24"
+                                class="c25"
                               >
                                 A type for modeling data
                               </span>
@@ -715,11 +721,11 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                         >
                           <svg
                             aria-hidden="true"
-                            class="c21"
+                            class="c21 c22"
                             fill="none"
-                            height="1em"
+                            height="1.5rem"
                             viewBox="0 0 32 24"
-                            width="1em"
+                            width="2rem"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path
@@ -735,13 +741,13 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             />
                           </svg>
                           <div
-                            class="c22"
+                            class="c23"
                           >
                             <div
                               class="c20"
                             >
                               <span
-                                class="c23"
+                                class="c24"
                               >
                                 date
                               </span>
@@ -750,7 +756,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                               class="c20"
                             >
                               <span
-                                class="c24"
+                                class="c25"
                               >
                                 A type for modeling data
                               </span>
@@ -769,7 +775,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                     style="height: 100%;"
                   >
                     <div
-                      class="c25"
+                      class="c26"
                       style="height: 100%;"
                     >
                       <button
@@ -781,11 +787,11 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                         >
                           <svg
                             aria-hidden="true"
-                            class="c21"
+                            class="c21 c22"
                             fill="none"
-                            height="1em"
+                            height="1.5rem"
                             viewBox="0 0 32 24"
-                            width="1em"
+                            width="2rem"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <rect
@@ -805,13 +811,13 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             />
                           </svg>
                           <div
-                            class="c22"
+                            class="c23"
                           >
                             <div
                               class="c20"
                             >
                               <span
-                                class="c23"
+                                class="c24"
                               >
                                 media
                               </span>
@@ -820,7 +826,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                               class="c20"
                             >
                               <span
-                                class="c24"
+                                class="c25"
                               >
                                 A type for modeling data
                               </span>
@@ -851,11 +857,11 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                         >
                           <svg
                             aria-hidden="true"
-                            class="c21"
+                            class="c21 c22"
                             fill="none"
-                            height="1em"
+                            height="1.5rem"
                             viewBox="0 0 32 24"
-                            width="1em"
+                            width="2rem"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <rect
@@ -873,13 +879,13 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             />
                           </svg>
                           <div
-                            class="c22"
+                            class="c23"
                           >
                             <div
                               class="c20"
                             >
                               <span
-                                class="c23"
+                                class="c24"
                               >
                                 boolean
                               </span>
@@ -888,7 +894,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                               class="c20"
                             >
                               <span
-                                class="c24"
+                                class="c25"
                               >
                                 A type for modeling data
                               </span>
@@ -907,7 +913,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                     style="height: 100%;"
                   >
                     <div
-                      class="c25"
+                      class="c26"
                       style="height: 100%;"
                     >
                       <button
@@ -919,11 +925,11 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                         >
                           <svg
                             aria-hidden="true"
-                            class="c21"
+                            class="c21 c22"
                             fill="none"
-                            height="1em"
+                            height="1.5rem"
                             viewBox="0 0 32 24"
-                            width="1em"
+                            width="2rem"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <rect
@@ -943,13 +949,13 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             />
                           </svg>
                           <div
-                            class="c22"
+                            class="c23"
                           >
                             <div
                               class="c20"
                             >
                               <span
-                                class="c23"
+                                class="c24"
                               >
                                 json
                               </span>
@@ -958,7 +964,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                               class="c20"
                             >
                               <span
-                                class="c24"
+                                class="c25"
                               >
                                 A type for modeling data
                               </span>
@@ -989,11 +995,11 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                         >
                           <svg
                             aria-hidden="true"
-                            class="c21"
+                            class="c21 c22"
                             fill="none"
-                            height="1em"
+                            height="1.5rem"
                             viewBox="0 0 32 24"
-                            width="1em"
+                            width="2rem"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path
@@ -1009,13 +1015,13 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             />
                           </svg>
                           <div
-                            class="c22"
+                            class="c23"
                           >
                             <div
                               class="c20"
                             >
                               <span
-                                class="c23"
+                                class="c24"
                               >
                                 relation
                               </span>
@@ -1024,7 +1030,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                               class="c20"
                             >
                               <span
-                                class="c24"
+                                class="c25"
                               >
                                 A type for modeling data
                               </span>
@@ -1043,7 +1049,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                     style="height: 100%;"
                   >
                     <div
-                      class="c25"
+                      class="c26"
                       style="height: 100%;"
                     >
                       <button
@@ -1055,11 +1061,11 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                         >
                           <svg
                             aria-hidden="true"
-                            class="c21"
+                            class="c21 c22"
                             fill="none"
-                            height="1em"
+                            height="1.5rem"
                             viewBox="0 0 32 24"
-                            width="1em"
+                            width="2rem"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path
@@ -1073,13 +1079,13 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             />
                           </svg>
                           <div
-                            class="c22"
+                            class="c23"
                           >
                             <div
                               class="c20"
                             >
                               <span
-                                class="c23"
+                                class="c24"
                               >
                                 uid
                               </span>
@@ -1088,7 +1094,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                               class="c20"
                             >
                               <span
-                                class="c24"
+                                class="c25"
                               >
                                 A type for modeling data
                               </span>
@@ -1123,11 +1129,11 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                         >
                           <svg
                             aria-hidden="true"
-                            class="c21"
+                            class="c21 c22"
                             fill="none"
-                            height="1em"
+                            height="1.5rem"
                             viewBox="0 0 32 24"
-                            width="1em"
+                            width="2rem"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <rect
@@ -1151,13 +1157,13 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             />
                           </svg>
                           <div
-                            class="c22"
+                            class="c23"
                           >
                             <div
                               class="c20"
                             >
                               <span
-                                class="c23"
+                                class="c24"
                               >
                                 component
                               </span>
@@ -1166,7 +1172,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                               class="c20"
                             >
                               <span
-                                class="c24"
+                                class="c25"
                               >
                                 A type for modeling data
                               </span>
@@ -1185,7 +1191,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                     style="height: 100%;"
                   >
                     <div
-                      class="c25"
+                      class="c26"
                       style="height: 100%;"
                     >
                       <button
@@ -1197,11 +1203,11 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                         >
                           <svg
                             aria-hidden="true"
-                            class="c21"
+                            class="c21 c22"
                             fill="none"
-                            height="1em"
+                            height="1.5rem"
                             viewBox="0 0 32 24"
-                            width="1em"
+                            width="2rem"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <rect
@@ -1219,13 +1225,13 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             />
                           </svg>
                           <div
-                            class="c22"
+                            class="c23"
                           >
                             <div
                               class="c20"
                             >
                               <span
-                                class="c23"
+                                class="c24"
                               >
                                 dynamiczone
                               </span>
@@ -1234,7 +1240,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                               class="c20"
                             >
                               <span
-                                class="c24"
+                                class="c25"
                               >
                                 A type for modeling data
                               </span>
@@ -1253,7 +1259,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
     </div>
   </div>
   <div
-    class="c26"
+    class="c27"
   >
     <p
       aria-live="polite"

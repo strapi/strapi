@@ -53,10 +53,7 @@ const iconByTypes = {
 };
 
 const IconBox = styled(Box)`
-  width: ${pxToRem(32)};
-  height: ${pxToRem(24)};
   box-sizing: content-box;
-  flex-shrink: 0;
 `;
 
 const AttributeIcon = ({ type, customField, ...rest }) => {
@@ -76,7 +73,9 @@ const AttributeIcon = ({ type, customField, ...rest }) => {
     return null;
   }
 
-  return <IconBox as={Compo} {...rest} aria-hidden />;
+  return (
+    <IconBox height={pxToRem(24)} width={pxToRem(32)} shrink={0} as={Compo} {...rest} aria-hidden />
+  );
 };
 
 AttributeIcon.defaultProps = {
