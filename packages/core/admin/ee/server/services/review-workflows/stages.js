@@ -11,7 +11,7 @@ module.exports = ({ strapi }) => ({
     return strapi.entityService.findMany(STAGE_MODEL_UID, params);
   },
 
-  findOne(id, { workflowId, populate }) {
+  findById(id, { workflowId, populate }) {
     const params = {
       filter: { workflow: workflowId },
       populate,

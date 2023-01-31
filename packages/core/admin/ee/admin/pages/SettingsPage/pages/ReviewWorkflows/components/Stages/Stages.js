@@ -23,9 +23,9 @@ function Stages({ stages }) {
       <Background background="neutral200" height="100%" width={2} zIndex={1} />
 
       <Stack spacing={6} zIndex={2} position="relative" as="ol">
-        {stages.map(({ uid, ...stage }) => (
-          <Box key={`stage-${uid}`} as="li">
-            <Stage {...{ ...stage, uid }} />
+        {stages.map(({ id, ...stage }) => (
+          <Box key={`stage-${id}`} as="li">
+            <Stage {...{ ...stage, id }} />
           </Box>
         ))}
       </Stack>

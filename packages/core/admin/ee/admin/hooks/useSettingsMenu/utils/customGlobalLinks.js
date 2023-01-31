@@ -2,7 +2,7 @@ import adminPermissions from '../../../../../admin/src/permissions';
 
 const items = [];
 
-if (window.strapi.features.isEnabled(strapi.features.SSO)) {
+if (window.strapi.features.isEnabled(window.strapi.features.SSO)) {
   items.push({
     intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
     to: '/settings/single-sign-on',
@@ -12,7 +12,7 @@ if (window.strapi.features.isEnabled(strapi.features.SSO)) {
   });
 }
 
-if (window.strapi.isEE) {
+if (window.strapi.features.isEnabled(window.strapi.features.REVIEW_WORKFLOWS)) {
   items.push({
     intlLabel: { id: 'Settings.review-workflows.title', defaultMessage: 'Review Workflow' },
     to: '/settings/review-workflows',

@@ -35,7 +35,7 @@ const strapiMock = {
 
 const workflowsService = workflowsServiceFactory({ strapi: strapiMock });
 
-describe('Workflows service', () => {
+describe('Review workflows - Workflows service', () => {
   afterEach(() => {
     jest.resetAllMocks();
   });
@@ -49,9 +49,9 @@ describe('Workflows service', () => {
       expect(entityServiceMock.findMany).toBeCalledWith(WORKFLOW_MODEL_UID, { opt1: 1 });
     });
   });
-  describe('findOne', () => {
+  describe('findById', () => {
     test('Should call entityService with the right model UID', async () => {
-      workflowsService.findOne(1);
+      workflowsService.findById(1, {});
 
       expect(entityServiceMock.findMany).not.toBeCalled();
       expect(entityServiceMock.findOne).toBeCalled();

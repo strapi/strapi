@@ -26,10 +26,10 @@ const ComponentFixture = ({ children }) => (
   <QueryClientProvider client={client}>{children}</QueryClientProvider>
 );
 
-function setup(uid) {
+function setup(id) {
   return new Promise((resolve) => {
     act(() => {
-      resolve(renderHook(() => useReviewWorkflows(uid), { wrapper: ComponentFixture }));
+      resolve(renderHook(() => useReviewWorkflows(id), { wrapper: ComponentFixture }));
     });
   });
 }
@@ -39,61 +39,65 @@ describe('useReviewWorkflows', () => {
     jest.clearAllMocks();
   });
 
-  test('fetch all workflows when calling the hook without a workflow uid', async () => {
+  test('fetch all workflows when calling the hook without a workflow id', async () => {
     const { get } = useFetchClient();
 
     get.mockResolvedValue({
-      data: [
-        {
-          uid: 'bdb46de2-9b0d-11ed-a8fc-0242ac120002',
-          stages: [],
-        },
+      data: {
+        data: [
+          {
+            id: 1,
+            stages: [],
+          },
 
-        {
-          uid: 'c57bc2dc-9b0d-11ed-a8fc-0242ac120002',
-          stages: [],
-        },
-      ],
+          {
+            id: 2,
+            stages: [],
+          },
+        ],
+      },
     });
 
     const { result, waitFor } = await setup();
 
     expect(result.current.workflows.isLoading).toBe(true);
-    expect(get).toBeCalledWith('/admin/review-workflows/workflows/');
+    expect(get).toBeCalledWith('/admin/review-workflows/workflows/?populate=stages');
 
     await waitFor(() => expect(result.current.workflows.isLoading).toBe(false));
 
     expect(result.current).toStrictEqual(
       expect.objectContaining({
         workflows: expect.objectContaining({
-          data: expect.arrayContaining([{ uid: expect.any(String), stages: expect.any(Array) }]),
+          data: expect.arrayContaining([{ id: expect.any(Number), stages: expect.any(Array) }]),
         }),
       })
     );
   });
 
-  test('fetch a single workflow when calling the hook with a workflow uid', async () => {
+  test('fetch a single workflow when calling the hook with a workflow id', async () => {
     const { get } = useFetchClient();
-    const uidFixture = 'bdb46de2-9b0d-11ed-a8fc-0242ac120002';
+    const idFixture = 1;
 
     get.mockResolvedValue({
       data: {
-        uid: uidFixture,
-        stages: [],
+        data: {
+          id: idFixture,
+          stages: [],
+        },
       },
     });
 
-    const { result, waitFor } = await setup(uidFixture);
+    const { result, waitFor } = await setup(idFixture);
 
     expect(result.current.workflows.isLoading).toBe(true);
-    expect(get).toBeCalledWith(`/admin/review-workflows/workflows/${uidFixture}`);
+    expect(get).toBeCalledWith(`/admin/review-workflows/workflows/${idFixture}?populate=stages`);
 
     await waitFor(() => expect(result.current.workflows.isLoading).toBe(false));
 
     expect(result.current).toStrictEqual(
       expect.objectContaining({
         workflows: expect.objectContaining({
-          data: expect.objectContaining({ uid: expect.any(String), stages: expect.any(Array) }),
+          data: expect.objectContaining({ id: expect.any(Number), stages: expect.any(Array) }),
         }),
       })
     );

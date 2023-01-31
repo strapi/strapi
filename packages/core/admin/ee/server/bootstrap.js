@@ -4,30 +4,17 @@
 const { features } = require('@strapi/strapi/lib/utils/ee');
 const executeCEBootstrap = require('../../server/bootstrap');
 const { getService } = require('../../server/utils');
-
-const SSO_ACTIONS = [
-  {
-    uid: 'provider-login.read',
-    displayName: 'Read',
-    pluginName: 'admin',
-    section: 'settings',
-    category: 'single sign on',
-    subCategory: 'options',
-  },
-  {
-    uid: 'provider-login.update',
-    displayName: 'Update',
-    pluginName: 'admin',
-    section: 'settings',
-    category: 'single sign on',
-    subCategory: 'options',
-  },
-];
+const actions = require('./config/admin-actions');
 
 module.exports = async () => {
+  const { actionProvider } = getService('permission');
+
   if (features.isEnabled('sso')) {
-    const { actionProvider } = getService('permission');
-    await actionProvider.registerMany(SSO_ACTIONS);
+    await actionProvider.registerMany(actions.sso);
+  }
+
+  if (features.isEnabled('audit-logs')) {
+    await actionProvider.registerMany(actions.auditLogs);
   }
 
   if (features.isEnabled('review-workflows')) {
@@ -36,5 +23,6 @@ module.exports = async () => {
     await rwBootstrap();
   }
 
+  // TODO: check admin seats
   await executeCEBootstrap();
 };
