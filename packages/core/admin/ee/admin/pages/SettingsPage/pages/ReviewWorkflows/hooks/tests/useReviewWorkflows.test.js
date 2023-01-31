@@ -34,7 +34,7 @@ function setup(id) {
   });
 }
 
-describe.skip('useReviewWorkflows', () => {
+describe('useReviewWorkflows', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -43,30 +43,32 @@ describe.skip('useReviewWorkflows', () => {
     const { get } = useFetchClient();
 
     get.mockResolvedValue({
-      data: [
-        {
-          id: 1,
-          stages: [],
-        },
+      data: {
+        data: [
+          {
+            id: 1,
+            stages: [],
+          },
 
-        {
-          id: 2,
-          stages: [],
-        },
-      ],
+          {
+            id: 2,
+            stages: [],
+          },
+        ],
+      },
     });
 
     const { result, waitFor } = await setup();
 
     expect(result.current.workflows.isLoading).toBe(true);
-    expect(get).toBeCalledWith('/admin/review-workflows/workflows/');
+    expect(get).toBeCalledWith('/admin/review-workflows/workflows/?populate=stages');
 
     await waitFor(() => expect(result.current.workflows.isLoading).toBe(false));
 
     expect(result.current).toStrictEqual(
       expect.objectContaining({
         workflows: expect.objectContaining({
-          data: expect.arrayContaining([{ id: expect.any(String), stages: expect.any(Array) }]),
+          data: expect.arrayContaining([{ id: expect.any(Number), stages: expect.any(Array) }]),
         }),
       })
     );
@@ -78,22 +80,24 @@ describe.skip('useReviewWorkflows', () => {
 
     get.mockResolvedValue({
       data: {
-        id: idFixture,
-        stages: [],
+        data: {
+          id: idFixture,
+          stages: [],
+        },
       },
     });
 
     const { result, waitFor } = await setup(idFixture);
 
     expect(result.current.workflows.isLoading).toBe(true);
-    expect(get).toBeCalledWith(`/admin/review-workflows/workflows/${idFixture}`);
+    expect(get).toBeCalledWith(`/admin/review-workflows/workflows/${idFixture}?populate=stages`);
 
     await waitFor(() => expect(result.current.workflows.isLoading).toBe(false));
 
     expect(result.current).toStrictEqual(
       expect.objectContaining({
         workflows: expect.objectContaining({
-          data: expect.objectContaining({ id: expect.any(String), stages: expect.any(Array) }),
+          data: expect.objectContaining({ id: expect.any(Number), stages: expect.any(Array) }),
         }),
       })
     );
