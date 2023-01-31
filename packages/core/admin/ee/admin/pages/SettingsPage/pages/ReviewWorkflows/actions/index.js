@@ -1,13 +1,11 @@
 import { ACTION_SET_WORKFLOWS } from '../constants';
 
-export function setWorkflows(reactQueryWorkflowResponse) {
-  const payload = {
-    status: reactQueryWorkflowResponse.status,
-    workflows: reactQueryWorkflowResponse.data,
-  };
-
+export function setWorkflows({ status, data }) {
   return {
     type: ACTION_SET_WORKFLOWS,
-    payload,
+    payload: {
+      status,
+      workflows: data,
+    },
   };
 }
