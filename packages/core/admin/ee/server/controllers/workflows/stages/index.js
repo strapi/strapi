@@ -8,12 +8,12 @@ module.exports = {
    * @param {import('koa').BaseContext} ctx - koa context
    */
   async find(ctx) {
-    const { id } = ctx.params;
+    const { workflow_id: workflowId } = ctx.params;
     const { populate } = ctx.query;
     const stagesService = getService('stages');
 
     const data = await stagesService.find({
-      workflowId: id,
+      workflowId,
       populate,
     });
 
