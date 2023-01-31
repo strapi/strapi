@@ -15,7 +15,7 @@ module.exports = ({ strapi }) => ({
 
       const stages = await strapi
         .query('admin::workflow-stage')
-        .findMany({ limit: 3, select: ['id'] });
+        .findMany({ limit: 4, select: ['id'] });
 
       const workflow = {
         ...defaultWorkflow,
