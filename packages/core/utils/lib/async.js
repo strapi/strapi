@@ -27,12 +27,12 @@ const mapAsync = curry(pMap);
  *
  * @type { import('./async').MapAsync }
  */
-const mapAsyncDialects = async (array, func) => {
+const mapAsyncDialects = async (array, func, options = {}) => {
   switch (strapi.db.dialect.client) {
     case 'mysql':
-      return mapAsync(array, func);
+      return mapAsync(array, func, { concurrency: 1 });
     default:
-      return Promise.all(array.map(func));
+      return mapAsync(array, func, options);
   }
 };
 
