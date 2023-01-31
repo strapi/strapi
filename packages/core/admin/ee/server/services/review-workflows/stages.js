@@ -5,7 +5,7 @@ const { STAGE_MODEL_UID } = require('../../constants/workflows');
 module.exports = ({ strapi }) => ({
   find({ workflowId, populate }) {
     const params = {
-      filter: { workflow: workflowId },
+      filters: { workflow: workflowId },
       populate,
     };
     return strapi.entityService.findMany(STAGE_MODEL_UID, params);
@@ -13,7 +13,7 @@ module.exports = ({ strapi }) => ({
 
   findById(id, { workflowId, populate }) {
     const params = {
-      filter: { workflow: workflowId },
+      filters: { workflow: workflowId },
       populate,
     };
     return strapi.entityService.findOne(STAGE_MODEL_UID, id, params);
