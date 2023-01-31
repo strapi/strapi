@@ -15,24 +15,18 @@ import type {
 } from '../../../../types';
 import type { client, server } from '../../../../types/remote/protocol';
 import type { ILocalStrapiDestinationProviderOptions } from '../local-destination';
-import { TRANSFER_PATH } from '../../remote/constants';
+import { TRANSFER_KEY_HEADER_KEY, TRANSFER_PATH } from '../../remote/constants';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 
-interface ITokenAuth {
-  type: 'token';
-  token: string;
-}
-
-interface ICredentialsAuth {
-  type: 'credentials';
-  email: string;
-  password: string;
+interface ITransferKeyAuth {
+  type: 'key';
+  key: string;
 }
 
 export interface IRemoteStrapiDestinationProviderOptions
   extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
   url: URL;
-  auth?: ITokenAuth | ICredentialsAuth;
+  auth?: ITransferKeyAuth;
 }
 
 class RemoteStrapiDestinationProvider implements IDestinationProvider {
@@ -116,26 +110,24 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     }
     const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${wsProtocol}//${url.host}${url.pathname}${TRANSFER_PATH}`;
-    const validAuthMethods = ['token'];
 
     // No auth defined, trying public access for transfer
     if (!auth) {
       ws = new WebSocket(wsUrl);
     }
 
-    // Common token auth, this should be the main auth method
-    else if (auth.type === 'token') {
-      const headers = { Authorization: `Bearer ${auth.token}` };
+    // Common key auth, this should be the main auth method
+    else if (auth.type === 'key') {
+      const headers = { [TRANSFER_KEY_HEADER_KEY]: `${auth.key}` };
       ws = new WebSocket(wsUrl, { headers });
     }
 
     // Invalid auth method provided
     else {
-      throw new ProviderValidationError('Auth method not implemented', {
+      throw new ProviderValidationError('Auth method not available', {
         check: 'auth.type',
         details: {
           auth: auth.type,
-          validAuthMethods,
         },
       });
     }

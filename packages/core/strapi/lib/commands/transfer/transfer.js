@@ -73,7 +73,10 @@ module.exports = async (opts) => {
   else {
     destination = createRemoteStrapiDestinationProvider({
       url: opts.to,
-      auth: false,
+      auth: {
+        type: 'key',
+        key: opts.toKey,
+      },
       strategy: 'restore',
       restore: {
         entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },
