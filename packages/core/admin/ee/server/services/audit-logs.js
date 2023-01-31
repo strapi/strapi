@@ -75,6 +75,11 @@ const createAuditLogsService = (strapi) => {
       return null;
     }
 
+    // Ignore events without a user
+    if (!strapi.requestContext.get()?.state?.user) {
+      return null;
+    }
+
     return {
       action: name,
       date: new Date().toISOString(),

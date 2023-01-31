@@ -124,6 +124,17 @@ describe('Audit logs service', () => {
 
     beforeEach(() => {
       strapi.isLoaded = true;
+      strapi.requestContext = {
+        get() {
+          return {
+            state: {
+              user: {
+                id: 1,
+              },
+            },
+          };
+        },
+      };
     });
 
     it('should register and init the audit logs service when registered', async () => {
@@ -232,6 +243,25 @@ describe('Audit logs service', () => {
 
     it('should not emit an event if strapi is not loaded', async () => {
       strapi.isLoaded = false;
+
+      const auditLogsService = createAuditLogsService(strapi);
+      await auditLogsService.register();
+
+      await strapi.eventHub.emit('entry.create', { meta: 'test' });
+
+      expect(mockSaveEvent).not.toHaveBeenCalled();
+    });
+
+    it('should not emit an event if user is null', async () => {
+      strapi.requestContext = {
+        get() {
+          return {
+            state: {
+              user: null,
+            },
+          };
+        },
+      };
 
       const auditLogsService = createAuditLogsService(strapi);
       await auditLogsService.register();
