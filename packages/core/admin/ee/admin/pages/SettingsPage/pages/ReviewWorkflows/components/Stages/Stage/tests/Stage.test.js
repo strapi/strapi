@@ -24,7 +24,7 @@ const setup = (props) => render(<ComponentFixture {...props} />);
 
 const user = userEvent.setup();
 
-describe('Admin | Settings | Revie Workflow | Stage', () => {
+describe('Admin | Settings | Review Workflow | Stage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

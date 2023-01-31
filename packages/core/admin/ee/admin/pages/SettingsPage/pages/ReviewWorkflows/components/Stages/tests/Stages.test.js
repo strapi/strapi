@@ -28,7 +28,7 @@ const ComponentFixture = (props) => (
 
 const setup = (props) => render(<ComponentFixture {...props} />);
 
-describe('Admin | Settings | Revie Workflow | Stages', () => {
+describe('Admin | Settings | Review Workflow | Stages', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
