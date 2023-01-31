@@ -21,8 +21,8 @@ export function ReviewWorkflowsPage() {
   useInjectReducer(REDUX_NAMESPACE, reducer);
 
   useEffect(() => {
-    dispatch(setWorkflows(workflowsData));
-  }, [workflowsData, dispatch]);
+    dispatch(setWorkflows({ status: workflowsData.status, data: workflowsData.data }));
+  }, [workflowsData.status, workflowsData.data, dispatch]);
 
   // useInjectReducer() runs on the first rendering after useSelector
   // which will return undefined. This helps to avoid too many optional
