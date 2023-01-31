@@ -20,12 +20,14 @@ const TableRows = ({ headers, rows, onOpenModal }) => {
     }
 
     if (type === 'action') {
+      const [actionName, ...actionIdentifiers] = value.split('.');
+
       return formatMessage(
         {
-          id: `Settings.permissions.auditLogs.${value}`,
-          defaultMessage: getDefaultMessage(value),
+          id: `Settings.permissions.auditLogs.actions.${actionName}`,
+          defaultMessage: getDefaultMessage(actionName),
         },
-        { model }
+        { model, action: actionIdentifiers.join('') }
       );
     }
 
@@ -49,7 +51,7 @@ const TableRows = ({ headers, rows, onOpenModal }) => {
                     {getCellValue({
                       type: key,
                       value: cellFormatter ? cellFormatter(data[name]) : data[name],
-                      model: data.payload?.model,
+                      model: data.payload?.modelName,
                     })}
                   </Typography>
                 </Td>

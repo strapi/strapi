@@ -1,34 +1,65 @@
-export const actionTypes = {
-  'entry.create': 'Create entry {model, select, undefined {} other {({model})}}',
-  'entry.update': 'Update entry {model, select, undefined {} other {({model})}}',
-  'entry.delete': 'Delete entry {model, select, undefined {} other {({model})}}',
-  'entry.publish': 'Publish entry {model, select, undefined {} other {({model})}}',
-  'entry.unpublish': 'Unpublish entry {model, select, undefined {} other {({model})}}',
-  'media.create': 'Create media',
-  'media.update': 'Update media',
-  'media.delete': 'Delete media',
-  'media-folder.create': 'Create media folder',
-  'media-folder.update': 'Update media folder',
-  'media-folder.delete': 'Delete media folder',
-  'user.create': 'Create user',
-  'user.update': 'Update user',
-  'user.delete': 'Delete user',
-  'admin.auth.success': 'Admin login',
-  'admin.logout': 'Admin logout',
-  'content-type.create': 'Create content type',
-  'content-type.update': 'Update content type',
-  'content-type.delete': 'Delete content type',
-  'component.create': 'Create component',
-  'component.update': 'Update component',
-  'component.delete': 'Delete component',
-  'role.create': 'Create role',
-  'role.update': 'Update role',
-  'role.delete': 'Delete role',
-  'permission.create': 'Create permission',
-  'permission.update': 'Update permission',
-  'permission.delete': 'Delete permission',
-};
+export const actionTypes = [
+  'entry.create',
+  'entry.update',
+  'entry.delete',
+  'entry.publish',
+  'entry.unpublish',
+  'media.create',
+  'media.update',
+  'media.delete',
+  'media-folder.create',
+  'media-folder.update',
+  'media-folder.delete',
+  'user.create',
+  'user.update',
+  'user.delete',
+  'admin.auth.success',
+  'admin.logout',
+  'content-type.create',
+  'content-type.update',
+  'content-type.delete',
+  'component.create',
+  'component.update',
+  'component.delete',
+  'role.create',
+  'role.update',
+  'role.delete',
+  'permission.create',
+  'permission.update',
+  'permission.delete',
+];
+
+const defaultMessages = actionTypes.reduce((acc, curr) => {
+  const actionName = curr.split('.').shift();
+  const cudSelectString = `{action, select, create {Create} update {Update} delete {Delete} other {}}`;
+
+  if (acc[actionName]) return acc;
+
+  switch (actionName) {
+    case 'entry':
+      acc[
+        actionName
+      ] = `{action, select, create {Create} update {Update} delete {Delete} publish {Publish} unpublish {Unpublish} other {}} entry {model, select, undefined {} other {({model})}}`;
+      break;
+    case 'content-type':
+      acc[
+        actionName
+      ] = `{action, select, create {Create} update {Update} delete {Delete} other {}} content type {model, select, undefined {} other {({model})}}`;
+      break;
+    case 'media-folder':
+      acc[actionName] = `${cudSelectString} media folder`;
+      break;
+    case 'admin':
+      acc[actionName] = `Admin {action, select, auth.success {login} logout {logout} other {}}`;
+      break;
+    default:
+      acc[actionName] = `${cudSelectString} ${actionName}`;
+      break;
+  }
+
+  return acc;
+}, {});
 
 export const getDefaultMessage = (value) => {
-  return actionTypes[value] || value;
+  return defaultMessages[value] || value;
 };

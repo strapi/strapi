@@ -13,14 +13,16 @@ const customOperators = [
 ];
 
 const getDisplayedFilters = ({ formatMessage, users }) => {
-  const actionOptions = Object.keys(actionTypes).map((action) => {
+  const actionOptions = actionTypes.map((action) => {
+    const [actionName, ...actionIdentifiers] = action.split('.');
+
     return {
       label: formatMessage(
         {
-          id: `Settings.permissions.auditLogs.${action}`,
-          defaultMessage: getDefaultMessage(action),
+          id: `Settings.permissions.auditLogs.actions.${actionName}`,
+          defaultMessage: getDefaultMessage(actionName),
         },
-        { model: undefined }
+        { model: undefined, action: actionIdentifiers.join('') }
       ),
       customValue: action,
     };
