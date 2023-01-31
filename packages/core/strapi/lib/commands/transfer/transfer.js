@@ -25,12 +25,14 @@ const logger = console;
  *
  * @property {URL|undefined} [to] The url of a remote Strapi to use as remote destination
  * @property {URL|undefined} [from] The url of a remote Strapi to use as remote source
+ * @property {string|undefined} [toKey] The transfer key to use for a remote destination
+ * @property {string|undefined} [fromKey] The transfer key to use for a remote source
  */
 
 /**
  * Transfer command.
  *
- * It transfers data from a local file to a local strapi instance
+ * Transfers data between local Strapi and remote Strapi instances
  *
  * @param {TransferCommandOptions} opts
  */
