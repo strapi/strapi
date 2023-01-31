@@ -31,7 +31,7 @@ describe('Local File Destination Provider', () => {
   (createFilePathFactory as jest.Mock).mockImplementation(jest.fn());
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('Bootstrap', () => {
