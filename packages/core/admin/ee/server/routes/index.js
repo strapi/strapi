@@ -179,7 +179,7 @@ module.exports = [
   },
   {
     method: 'GET',
-    path: '/review-workflows/workflows/:workflow_id/stages/:stage_id',
+    path: '/review-workflows/workflows/:workflow_id/stages/:id',
     handler: 'stages.findOne',
     config: {
       middlewares: [enableFeatureMiddleware('review-workflows')],

@@ -1,14 +1,6 @@
 'use strict';
 
-const { merge } = require('lodash/fp');
-const { getService, mapObject } = require('../../../utils');
-
-function sanitizeStageQuery(query = {}) {
-  return mapObject(query, {
-    pick: ['workflow_id', 'stage_id', 'populate'],
-    rename: { workflow_id: 'workflowId', stage_id: 'id' },
-  });
-}
+const { getService } = require('../../../utils');
 
 module.exports = {
   /**
@@ -16,17 +8,17 @@ module.exports = {
    * @param {import('koa').BaseContext} ctx - koa context
    */
   async find(ctx) {
-    const query = sanitizeStageQuery(merge(ctx.query, ctx.params));
-
+    const { id } = ctx.params;
+    const { populate } = ctx.query;
     const stagesService = getService('stages');
 
-    const results = await stagesService.find({
-      workflowId: query.workflowId,
-      populate: query.populate,
+    const data = await stagesService.find({
+      workflowId: id,
+      populate,
     });
 
     ctx.body = {
-      results,
+      data,
     };
   },
   /**
@@ -34,13 +26,13 @@ module.exports = {
    * @param {import('koa').BaseContext} ctx - koa context
    */
   async findOne(ctx) {
-    const query = sanitizeStageQuery(merge(ctx.query, ctx.params));
-
+    const { id, workflow_id: workflowId } = ctx.params;
+    const { populate } = ctx.query;
     const stagesService = getService('stages');
 
-    const data = await stagesService.findOne(query.id, {
-      workflowId: query.workflowId,
-      populate: query.populate,
+    const data = await stagesService.findById(id, {
+      workflowId,
+      populate,
     });
 
     ctx.body = {

@@ -7,7 +7,7 @@ module.exports = ({ strapi }) => ({
     return strapi.entityService.findMany(WORKFLOW_MODEL_UID, opts);
   },
 
-  findById(id) {
-    return strapi.entityService.findOne(WORKFLOW_MODEL_UID, id, {});
+  findById(id, opts) {
+    return strapi.entityService.findOne(WORKFLOW_MODEL_UID, id, opts);
   },
 });

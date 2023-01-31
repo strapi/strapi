@@ -95,16 +95,25 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   });
 
   describe('Get workflow stages', () => {
-    test.each(Object.keys(requests))('It should be available for everyone (%s)', async (type) => {
-      const rq = requests[type];
-      const res = await rq.get('/admin/review-workflows/workflows?populate=stages');
+    test("It shouldn't be available for public", async () => {
+      const res = await requests.public.get('/admin/review-workflows/workflows?populate=stages');
+
+      if (hasRW) {
+        expect(res.status).toBe(401);
+      } else {
+        expect(res.status).toBe(404);
+        expect(res.body.data).toBeUndefined();
+      }
+    });
+    test('It should be available for every connected users (admin)', async () => {
+      const res = await requests.admin.get('/admin/review-workflows/workflows?populate=stages');
 
       if (hasRW) {
         expect(res.status).toBe(200);
-        expect(Array.isArray(res.body.results)).toBeTruthy();
-        expect(res.body.results).toHaveLength(1);
-        expect(res.body.results[0].stages).toHaveLength(1);
-        expect(res.body.results[0].stages[0]).toEqual(defaultStage);
+        expect(Array.isArray(res.body.data)).toBeTruthy();
+        expect(res.body.data).toHaveLength(1);
+        expect(res.body.data[0].stages).toHaveLength(1);
+        expect(res.body.data[0].stages[0]).toEqual(defaultStage);
       } else {
         expect(res.status).toBe(404);
         expect(Array.isArray(res.body)).toBeFalsy();
@@ -113,14 +122,27 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   });
 
   describe('Get stages', () => {
-    test.each(Object.keys(requests))('It should be available for everyone (%s)', async (type) => {
-      const rq = requests[type];
-      const res = await rq.get(`/admin/review-workflows/workflows/${defaultWorkflow.id}/stages`);
+    test("It shouldn't be available for public", async () => {
+      const res = await requests.public.get(
+        `/admin/review-workflows/workflows/${defaultWorkflow.id}/stages`
+      );
+
+      if (hasRW) {
+        expect(res.status).toBe(401);
+      } else {
+        expect(res.status).toBe(404);
+        expect(res.body.data).toBeUndefined();
+      }
+    });
+    test('It should be available for every connected users (admin)', async () => {
+      const res = await requests.admin.get(
+        `/admin/review-workflows/workflows/${defaultWorkflow.id}/stages`
+      );
 
       if (hasRW) {
         expect(res.status).toBe(200);
-        expect(Array.isArray(res.body.results)).toBeTruthy();
-        expect(res.body.results).toHaveLength(1);
+        expect(Array.isArray(res.body.data)).toBeTruthy();
+        expect(res.body.data).toHaveLength(1);
       } else {
         expect(res.status).toBe(404);
         expect(Array.isArray(res.body)).toBeFalsy();
@@ -129,9 +151,20 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   });
 
   describe('Get stage by id', () => {
-    test.each(Object.keys(requests))('It should be available for everyone (%s)', async (type) => {
-      const rq = requests[type];
-      const res = await rq.get(
+    test("It shouldn't be available for public", async () => {
+      const res = await requests.public.get(
+        `/admin/review-workflows/workflows/${defaultWorkflow.id}/stages/${defaultStage.id}`
+      );
+
+      if (hasRW) {
+        expect(res.status).toBe(401);
+      } else {
+        expect(res.status).toBe(404);
+        expect(res.body.data).toBeUndefined();
+      }
+    });
+    test('It should be available for every connected users (admin)', async () => {
+      const res = await requests.admin.get(
         `/admin/review-workflows/workflows/${defaultWorkflow.id}/stages/${defaultStage.id}`
       );
 

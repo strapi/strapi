@@ -27,7 +27,7 @@ module.exports = {
     const { populate } = ctx.query;
 
     const workflowService = getService('workflows');
-    const data = await workflowService.findOne(id, populate);
+    const data = await workflowService.findById(id, { populate });
 
     ctx.body = {
       data,
