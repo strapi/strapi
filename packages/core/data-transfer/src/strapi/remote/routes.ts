@@ -31,6 +31,8 @@ export const registerAdminTransferRoute = (strapi: Strapi.Strapi) => {
     method: 'GET',
     path: TRANSFER_PATH,
     handler: createTransferHandler(),
-    config: { auth: false },
+    config: {
+      policies: ['admin::isAuthenticatedAdmin'],
+    },
   });
 };
