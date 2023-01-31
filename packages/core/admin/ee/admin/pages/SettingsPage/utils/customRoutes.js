@@ -1,6 +1,6 @@
 const routes = [];
 
-if (window.strapi.features.isEnabled(strapi.features.SSO)) {
+if (window.strapi.features.isEnabled(window.strapi.features.SSO)) {
   routes.push({
     async Component() {
       const component = await import(
@@ -24,6 +24,20 @@ if (window.strapi.isEE) {
       return component;
     },
     to: '/settings/review-workflows',
+    exact: true,
+  });
+}
+
+if (window.strapi.features.isEnabled(strapi.features.AUDIT_LOGS)) {
+  routes.push({
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "audit-logs-settings-page" */ '../pages/AuditLogs/ProtectedListPage'
+      );
+
+      return component;
+    },
+    to: '/settings/audit-logs',
     exact: true,
   });
 }

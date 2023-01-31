@@ -77,10 +77,10 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
 
 .c31 {
   position: absolute;
-  left: 0px;
-  right: 0px;
-  top: 0px;
-  bottom: 0px;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
   z-index: 1;
   width: 100%;
 }
@@ -173,7 +173,6 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
-  line-height: 1.14;
   color: #32324d;
 }
 
@@ -875,14 +874,6 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   color: #666687;
 }
 
-.c34 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 1.14;
-  color: #32324d;
-}
-
 .c27 {
   font-size: 0.75rem;
   line-height: 1.33;
@@ -963,7 +954,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c35 {
+.c34 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -975,7 +966,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   padding-right: 16px;
 }
 
-.c35 .c2 {
+.c34 .c2 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -986,48 +977,48 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   align-items: center;
 }
 
-.c35 .c8 {
+.c34 .c8 {
   color: #ffffff;
 }
 
-.c35[aria-disabled='true'] {
+.c34[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c35[aria-disabled='true'] .c8 {
+.c34[aria-disabled='true'] .c8 {
   color: #666687;
 }
 
-.c35[aria-disabled='true'] svg > g,.c35[aria-disabled='true'] svg path {
+.c34[aria-disabled='true'] svg > g,.c34[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c35[aria-disabled='true']:active {
+.c34[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c35[aria-disabled='true']:active .c8 {
+.c34[aria-disabled='true']:active .c8 {
   color: #666687;
 }
 
-.c35[aria-disabled='true']:active svg > g,.c35[aria-disabled='true']:active svg path {
+.c34[aria-disabled='true']:active svg > g,.c34[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c35:hover {
+.c34:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c35:active {
+.c34:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c35 svg > g,
-.c35 svg path {
+.c34 svg > g,
+.c34 svg path {
   fill: #ffffff;
 }
 
@@ -1500,7 +1491,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                             type="button"
                           >
                             <span
-                              class="c8 c34"
+                              class="c8 c27"
                             >
                               app.components.Button.cancel
                             </span>
@@ -1511,11 +1502,11 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                         >
                           <button
                             aria-disabled="false"
-                            class="c10 c35"
+                            class="c10 c34"
                             type="submit"
                           >
                             <span
-                              class="c8 c34"
+                              class="c8 c27"
                             >
                               Next
                             </span>

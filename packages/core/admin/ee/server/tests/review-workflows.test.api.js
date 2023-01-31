@@ -41,14 +41,23 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   });
 
   describe('Get workflows', () => {
-    test.each(Object.keys(requests))('It should be available for everyone (%s)', async (type) => {
-      const rq = requests[type];
-      const res = await rq.get('/admin/review-workflows/workflows');
+    test("It shouldn't be available for public", async () => {
+      const res = await requests.public.get('/admin/review-workflows/workflows');
+
+      if (hasRW) {
+        expect(res.status).toBe(401);
+      } else {
+        expect(res.status).toBe(404);
+        expect(Array.isArray(res.body)).toBeFalsy();
+      }
+    });
+    test('It should be available for every connected users (admin)', async () => {
+      const res = await requests.admin.get('/admin/review-workflows/workflows');
 
       if (hasRW) {
         expect(res.status).toBe(200);
-        expect(Array.isArray(res.body.results)).toBeTruthy();
-        expect(res.body.results).toHaveLength(1);
+        expect(Array.isArray(res.body.data)).toBeTruthy();
+        expect(res.body.data).toHaveLength(1);
       } else {
         expect(res.status).toBe(404);
         expect(Array.isArray(res.body)).toBeFalsy();
@@ -57,9 +66,22 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   });
 
   describe('Get one workflow', () => {
-    test.each(Object.keys(requests))('It should be available for everyone (%s)', async (type) => {
-      const rq = requests[type];
-      const res = await rq.get(`/admin/review-workflows/workflows/${defaultWorkflow.id}`);
+    test("It shouldn't be available for public", async () => {
+      const res = await requests.public.get(
+        `/admin/review-workflows/workflows/${defaultWorkflow.id}`
+      );
+
+      if (hasRW) {
+        expect(res.status).toBe(401);
+      } else {
+        expect(res.status).toBe(404);
+        expect(res.body.data).toBeUndefined();
+      }
+    });
+    test('It should be available for every connected users (admin)', async () => {
+      const res = await requests.admin.get(
+        `/admin/review-workflows/workflows/${defaultWorkflow.id}`
+      );
 
       if (hasRW) {
         expect(res.status).toBe(200);

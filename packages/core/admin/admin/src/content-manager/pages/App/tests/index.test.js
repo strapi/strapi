@@ -173,7 +173,7 @@ describe('Content manager | App | main', () => {
         padding-right: 8px;
         padding-left: 8px;
         position: absolute;
-        right: 0px;
+        right: 0;
         top: 50%;
         min-width: 20px;
         -webkit-transform: translateY(-50%);

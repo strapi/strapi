@@ -144,7 +144,6 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   font-size: 0.875rem;
   line-height: 1.43;
   font-weight: 600;
-  line-height: 1.14;
   color: #32324d;
 }
 
