@@ -23,7 +23,7 @@ const PULL_PERMISSION = 'data-transfer::pull';
 const PUSH_PERMISSION = 'data-transfer::push';
 const validateTransferKey = (key?: string): string[] => {
   if (!key) {
-    // TODO: should be a @strapi/utils.error.ForbiddenError but we need to add typings for it
+    // TODO: should be a @strapi/utils.error.Unauthorized but we need to add typings for it
     throw new Error('A valid transfer key is required to access this route');
   }
 
