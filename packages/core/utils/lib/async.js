@@ -21,6 +21,17 @@ function pipeAsync(...methods) {
 const mapAsync = curry(pMap);
 
 /**
+ * @type { import('./async').ReduceAsync }
+ */
+const reduceAsync = curry(async (mixedArray, iteratee, initialValue) => {
+  let acc = initialValue;
+  for (let i = 0; i < mixedArray.length; i += 1) {
+    acc = await iteratee(acc, mixedArray[i], i);
+  }
+  return acc;
+});
+
+/**
  * @type { import('./async').ForEachAsync }
  */
 const forEachAsync = curry(async (array, func, options) => {
@@ -29,6 +40,7 @@ const forEachAsync = curry(async (array, func, options) => {
 
 module.exports = {
   mapAsync,
+  reduceAsync,
   forEachAsync,
   pipeAsync,
 };

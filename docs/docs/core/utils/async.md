@@ -16,6 +16,7 @@ Available functions:
 
 - pipeAsync
 - mapAsync
+- reduceAsync
 
 [See API reference](../../api/Utils) (TODO)
 
