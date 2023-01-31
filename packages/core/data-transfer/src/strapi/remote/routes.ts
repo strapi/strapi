@@ -32,7 +32,7 @@ export const registerAdminTransferRoute = (strapi: Strapi.Strapi) => {
     path: TRANSFER_PATH,
     handler: createTransferHandler(),
     config: {
-      auth: false,
+      auth: false, // anyone can access, but if transfer token is not included it will not allow a connection
     },
   });
 };

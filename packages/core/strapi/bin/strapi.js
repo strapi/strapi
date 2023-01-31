@@ -285,7 +285,7 @@ program
     ).argParser(parseURL)
   )
   .addOption(
-    new Option('--fromToken <token>', `transfer token for remote Strapi instance to pull data from`)
+    new Option('--from-key <key>', `transfer key for remote Strapi instance to pull data from`)
   )
   .addOption(
     new Option(
@@ -294,7 +294,7 @@ program
     ).argParser(parseURL)
   )
   .addOption(
-    new Option('--toToken <token>', `transfer token for remote Strapi instance to push data to`)
+    new Option('--to-key <key>', `transfer key for remote Strapi instance to push data to`)
   )
   .addOption(forceOption)
   // Validate URLs
