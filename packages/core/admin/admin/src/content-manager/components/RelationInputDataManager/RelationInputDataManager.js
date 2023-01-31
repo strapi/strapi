@@ -98,6 +98,7 @@ export const RelationInputDataManager = ({
     'oneWay',
     'oneToOne',
     'manyToOne',
+    'oneToMany',
     'oneToManyMorph',
     'oneToOneMorph',
   ].includes(relationType);
