@@ -14,7 +14,7 @@ import type { IAsset, IMetadata, ISourceProvider, ProviderType } from '../../../
 
 import { createDecryptionCipher } from '../../../utils/encryption';
 import { collect } from '../../../utils/stream';
-import { ProviderTransferError } from '../../../errors/providers';
+import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
 
 type StreamItemArray = Parameters<typeof chain>[0];
 
@@ -74,7 +74,12 @@ class LocalFileSourceProvider implements ISourceProvider {
       // Read the metadata to ensure the file can be parsed
       this.#metadata = await this.getMetadata();
     } catch (e) {
-      throw new Error(`Can't read file "${filePath}".`);
+      if (this.options?.encryption?.enabled) {
+        throw new ProviderInitializationError(
+          `Key is incorrect or the file '${filePath}' is not a valid Strapi data file.`
+        );
+      }
+      throw new ProviderInitializationError(`File '${filePath}' is not a valid Strapi data file.`);
     }
   }
 
