@@ -56,6 +56,7 @@ const IconBox = styled(Box)`
   width: ${pxToRem(32)};
   height: ${pxToRem(24)};
   box-sizing: content-box;
+  flex-shrink: 0;
 `;
 
 const AttributeIcon = ({ type, customField, ...rest }) => {
