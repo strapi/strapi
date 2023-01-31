@@ -17,26 +17,28 @@ interface ITransferState {
 }
 
 /**
- * retrieve the token permissions from the database
+ * TODO: This is just a stub until we implement the actual transfer keys
  */
-const validateTransferToken = (token?: string): string[] => {
-  if (!token) {
-    // TODO: should be a @strapi/utils.error.ForbiddenError
-    throw new Error('A valid transfer token is required to access this route');
+const PULL_PERMISSION = 'data-transfer::pull';
+const PUSH_PERMISSION = 'data-transfer::push';
+const validateTransferKey = (key?: string): string[] => {
+  if (!key) {
+    // TODO: should be a @strapi/utils.error.ForbiddenError but we need to add typings for it
+    throw new Error('A valid transfer key is required to access this route');
   }
 
   const actions = [];
-  // TODO: add token validation
-  if (token.includes('push')) {
-    actions.push('data-transfer::push');
+  // TODO: add actual validation
+  if (key.includes('push')) {
+    actions.push(PUSH_PERMISSION);
   }
-  if (token.includes('pull')) {
-    actions.push('data-transfer::pull');
+  if (key.includes('pull')) {
+    actions.push(PULL_PERMISSION);
   }
 
   if (actions.length <= 0) {
-    // TODO: should be a @strapi/utils.error.AuthorizationError
-    throw new Error('Invalid transfer token');
+    // TODO: should be a @strapi/utils.error.ForbiddenError but we need to add typings for it
+    throw new Error('Invalid transfer key');
   }
 
   return actions;
@@ -53,7 +55,7 @@ export const createTransferHandler = (options: ServerOptions = {}) => {
       .map((s) => s.trim().toLowerCase());
 
     if (upgradeHeader.includes('websocket')) {
-      const actions = validateTransferToken(ctx.request.headers.authorization);
+      const actions = validateTransferKey(ctx.request.headers.authorization);
 
       wss.handleUpgrade(ctx.req, ctx.request.socket, Buffer.alloc(0), (ws) => {
         // Create a connection between the client & the server
@@ -126,8 +128,8 @@ export const createTransferHandler = (options: ServerOptions = {}) => {
 
           // Push transfer
           if (transfer === 'push') {
-            if (actions.includes('data-transfer::push')) {
-              throw new ProviderTransferError('Token does not include push permission');
+            if (actions.includes(PUSH_PERMISSION)) {
+              throw new ProviderTransferError('Transfer key does not allow push permission');
             }
             const { options: controllerOptions } = msg.params;
 
