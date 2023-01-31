@@ -16,17 +16,45 @@ interface ITransferState {
   controller?: IPushController;
 }
 
-export const createTransferHandler =
-  (options: ServerOptions = {}) =>
-  async (ctx: Context) => {
+/**
+ * retrieve the token permissions from the database
+ */
+const validateTransferToken = (token?: string): string[] => {
+  if (!token) {
+    // TODO: should be a @strapi/utils.error.ForbiddenError
+    throw new Error('A valid transfer token is required to access this route');
+  }
+
+  const actions = [];
+  // TODO: add token validation
+  if (token.includes('push')) {
+    actions.push('data-transfer::push');
+  }
+  if (token.includes('pull')) {
+    actions.push('data-transfer::pull');
+  }
+
+  if (actions.length <= 0) {
+    // TODO: should be a @strapi/utils.error.AuthorizationError
+    throw new Error('Invalid transfer token');
+  }
+
+  return actions;
+};
+
+export const createTransferHandler = (options: ServerOptions = {}) => {
+  // Create the websocket server
+  const wss = new WebSocket.Server({ ...options, noServer: true });
+
+  // return the connection handler
+  return async (ctx: Context) => {
     const upgradeHeader = (ctx.request.headers.upgrade || '')
       .split(',')
       .map((s) => s.trim().toLowerCase());
 
-    // Create the websocket server
-    const wss = new WebSocket.Server({ ...options, noServer: true });
-
     if (upgradeHeader.includes('websocket')) {
+      const actions = validateTransferToken(ctx.request.headers.authorization);
+
       wss.handleUpgrade(ctx.req, ctx.request.socket, Buffer.alloc(0), (ws) => {
         // Create a connection between the client & the server
         wss.emit('connection', ws, ctx.req);
@@ -89,7 +117,7 @@ export const createTransferHandler =
         };
 
         const init = (msg: client.InitCommand): server.Payload<server.InitMessage> => {
-          // TODO: this only checks for this instance of node: we should consider a database lock
+          // TODO: this only checks for this instance of node: we should consider a database lock in addition to this
           if (state.controller) {
             throw new ProviderInitializationError('Transfer already in progres');
           }
@@ -98,6 +126,9 @@ export const createTransferHandler =
 
           // Push transfer
           if (transfer === 'push') {
+            if (actions.includes('data-transfer::push')) {
+              throw new ProviderTransferError('Token does not include push permission');
+            }
             const { options: controllerOptions } = msg.params;
 
             state.controller = createPushController({
@@ -241,3 +272,4 @@ export const createTransferHandler =
       ctx.respond = false;
     }
   };
+};
