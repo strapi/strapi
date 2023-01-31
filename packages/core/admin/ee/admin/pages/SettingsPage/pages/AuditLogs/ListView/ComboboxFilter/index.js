@@ -33,7 +33,7 @@ ComboboxFilter.propTypes = {
     PropTypes.shape({
       label: PropTypes.string.isRequired,
       customValue: PropTypes.string.isRequired,
-    })
+    }).isRequired
   ).isRequired,
   onChange: PropTypes.func.isRequired,
 };
