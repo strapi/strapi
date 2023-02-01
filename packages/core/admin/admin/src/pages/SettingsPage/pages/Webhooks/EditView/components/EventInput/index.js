@@ -118,7 +118,7 @@ const EventInput = ({ isDraftAndPublish }) => {
                     title={formatMessage({
                       id: 'Settings.webhooks.event.publish-tooltip',
                       defaultMessage:
-                        'This event only exists for contents with Draft/Publish system enabled',
+                        'This event only exists for content with draft & publish enabled',
                     })}
                   >
                     <Typography variant="sigma" textColor="neutral600">

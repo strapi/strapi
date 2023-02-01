@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const delegate = require('delegates');
-const { InvalidTimeError, InvalidDateError, InvalidDateTimeError } =
+const { InvalidTimeError, InvalidDateError, InvalidDateTimeError, InvalidRelationError } =
   require('@strapi/database').errors;
 const {
   webhook: webhookUtils,
@@ -34,7 +34,12 @@ const transformLoadParamsToQuery = (uid, field, params = {}, pagination = {}) =>
 // TODO: those should be strapi events used by the webhooks not the other way arround
 const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
 
-const databaseErrorsToTransform = [InvalidTimeError, InvalidDateTimeError, InvalidDateError];
+const databaseErrorsToTransform = [
+  InvalidTimeError,
+  InvalidDateTimeError,
+  InvalidDateError,
+  InvalidRelationError,
+];
 
 const creationPipeline = (data, context) => {
   return applyTransforms(data, context);
@@ -55,11 +60,17 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
   },
 
   async emitEvent(uid, event, entity) {
+    // Ignore audit log events to prevent infinite loops
+    if (uid === 'admin::audit-log') {
+      return;
+    }
+
     const model = strapi.getModel(uid);
     const sanitizedEntity = await sanitize.sanitizers.defaultSanitizeOutput(model, entity);
 
     eventHub.emit(event, {
       model: model.modelName,
+      uid: model.uid,
       entry: sanitizedEntity,
     });
   },

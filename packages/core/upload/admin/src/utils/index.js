@@ -1,4 +1,3 @@
-export { default as axiosInstance } from './axiosInstance';
 export { default as createAssetUrl } from './createAssetUrl';
 export { default as formatBytes } from './formatBytes';
 export { default as getRequestUrl } from './getRequestUrl';

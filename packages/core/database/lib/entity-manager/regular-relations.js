@@ -198,38 +198,73 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
     return;
   }
 
+  // Handle databases that don't support window function ROW_NUMBER (here it's MySQL 5)
+  if (!strapi.db.dialect.supportsWindowFunctions()) {
+    await cleanOrderColumnsForOldDatabases({ id, attribute, db, inverseRelIds, transaction: trx });
+    return;
+  }
+
+  const { joinTable } = attribute;
+  const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } = joinTable;
+  const update = [];
+  const updateBinding = [];
+  const select = ['??'];
+  const selectBinding = ['id'];
+  const where = [];
+  const whereBinding = [];
+
+  if (hasOrderColumn(attribute) && id) {
+    update.push('?? = b.src_order');
+    updateBinding.push(orderColumnName);
+    select.push('ROW_NUMBER() OVER (PARTITION BY ?? ORDER BY ??) AS src_order');
+    selectBinding.push(joinColumn.name, orderColumnName);
+    where.push('?? = ?');
+    whereBinding.push(joinColumn.name, id);
+  }
+
+  if (hasInverseOrderColumn(attribute) && !isEmpty(inverseRelIds)) {
+    update.push('?? = b.inv_order');
+    updateBinding.push(inverseOrderColumnName);
+    select.push('ROW_NUMBER() OVER (PARTITION BY ?? ORDER BY ??) AS inv_order');
+    selectBinding.push(inverseJoinColumn.name, inverseOrderColumnName);
+    where.push(`?? IN (${inverseRelIds.map(() => '?').join(', ')})`);
+    whereBinding.push(inverseJoinColumn.name, ...inverseRelIds);
+  }
+
   switch (strapi.db.dialect.client) {
     case 'mysql':
-      await cleanOrderColumnsForInnoDB({ id, attribute, db, inverseRelIds, transaction: trx });
+      // Here it's MariaDB and MySQL 8
+      await db
+        .getConnection()
+        .raw(
+          `UPDATE
+            ?? as a,
+            (
+              SELECT ${select.join(', ')}
+              FROM ??
+              WHERE ${where.join(' OR ')}
+            ) AS b
+          SET ${update.join(', ')}
+          WHERE b.id = a.id`,
+          [joinTable.name, ...selectBinding, joinTable.name, ...whereBinding, ...updateBinding]
+        )
+        .transacting(trx);
       break;
+    /*
+      UPDATE
+        :joinTable: as a,
+        (
+          SELECT
+            id,
+            ROW_NUMBER() OVER ( PARTITION BY :joinColumn: ORDER BY :orderColumn:) AS src_order,
+            ROW_NUMBER() OVER ( PARTITION BY :inverseJoinColumn: ORDER BY :inverseOrderColumn:) AS inv_order
+          FROM :joinTable:
+          WHERE :joinColumn: = :id OR :inverseJoinColumn: IN (:inverseRelIds)
+        ) AS b
+      SET :orderColumn: = b.src_order, :inverseOrderColumn: = b.inv_order
+      WHERE b.id = a.id;
+    */
     default: {
-      const { joinTable } = attribute;
-      const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } = joinTable;
-      const update = [];
-      const updateBinding = [];
-      const select = ['??'];
-      const selectBinding = ['id'];
-      const where = [];
-      const whereBinding = [];
-
-      if (hasOrderColumn(attribute) && id) {
-        update.push('?? = b.src_order');
-        updateBinding.push(orderColumnName);
-        select.push('ROW_NUMBER() OVER (PARTITION BY ?? ORDER BY ??) AS src_order');
-        selectBinding.push(joinColumn.name, orderColumnName);
-        where.push('?? = ?');
-        whereBinding.push(joinColumn.name, id);
-      }
-
-      if (hasInverseOrderColumn(attribute) && !isEmpty(inverseRelIds)) {
-        update.push('?? = b.inv_order');
-        updateBinding.push(inverseOrderColumnName);
-        select.push('ROW_NUMBER() OVER (PARTITION BY ?? ORDER BY ??) AS inv_order');
-        selectBinding.push(inverseJoinColumn.name, inverseOrderColumnName);
-        where.push(`?? IN (${inverseRelIds.map(() => '?').join(', ')})`);
-        whereBinding.push(inverseJoinColumn.name, ...inverseRelIds);
-      }
-
       const joinTableName = addSchema(joinTable.name);
 
       // raw query as knex doesn't allow updating from a subquery
@@ -249,17 +284,17 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
         .transacting(trx);
 
       /*
-        `UPDATE :joinTable: as a
-          SET :orderColumn: = b.src_order, :inverseOrderColumn: = b.inv_order
-          FROM (
-            SELECT
-              id,
-              ROW_NUMBER() OVER ( PARTITION BY :joinColumn: ORDER BY :orderColumn:) AS src_order,
-              ROW_NUMBER() OVER ( PARTITION BY :inverseJoinColumn: ORDER BY :inverseOrderColumn:) AS inv_order
-            FROM :joinTable:
-            WHERE :joinColumn: = :id OR :inverseJoinColumn: IN (:inverseRelIds)
-          ) AS b
-          WHERE b.id = a.id`,
+        UPDATE :joinTable: as a
+        SET :orderColumn: = b.src_order, :inverseOrderColumn: = b.inv_order
+        FROM (
+          SELECT
+            id,
+            ROW_NUMBER() OVER ( PARTITION BY :joinColumn: ORDER BY :orderColumn:) AS src_order,
+            ROW_NUMBER() OVER ( PARTITION BY :inverseJoinColumn: ORDER BY :inverseOrderColumn:) AS inv_order
+          FROM :joinTable:
+          WHERE :joinColumn: = :id OR :inverseJoinColumn: IN (:inverseRelIds)
+        ) AS b
+        WHERE b.id = a.id;
       */
     }
   }
@@ -267,9 +302,9 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
 
 /*
  * Ensure that orders are following a 1, 2, 3 sequence, without gap.
- * The use of a temporary table instead of a window function makes the query compatible with MySQL 5 and prevents some deadlocks to happen in innoDB databases
+ * The use of a session variable instead of a window function makes the query compatible with MySQL 5
  */
-const cleanOrderColumnsForInnoDB = async ({
+const cleanOrderColumnsForOldDatabases = async ({
   id,
   attribute,
   db,
@@ -279,90 +314,68 @@ const cleanOrderColumnsForInnoDB = async ({
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } = joinTable;
 
-  const now = new Date().valueOf();
-  const randomHex = randomBytes(16).toString('hex');
+  const randomSuffix = `${new Date().valueOf()}_${randomBytes(16).toString('hex')}`;
 
   if (hasOrderColumn(attribute) && id) {
-    const tempOrderTableName = `orderTable_${now}_${randomHex}`;
-    try {
-      await db.connection
-        .raw(
-          `
-          CREATE TABLE :tempOrderTableName:
-            SELECT
-              id,
-              (
-                SELECT count(*)
-                FROM :joinTableName: b
-                WHERE a.:orderColumnName: >= b.:orderColumnName: AND a.:joinColumnName: = b.:joinColumnName: AND a.:joinColumnName: = :id
-              ) AS src_order
-            FROM :joinTableName: a`,
-          {
-            tempOrderTableName,
-            joinTableName: joinTable.name,
-            orderColumnName,
-            joinColumnName: joinColumn.name,
-            id,
-          }
-        )
-        .transacting(trx);
-
-      // raw query as knex doesn't allow updating from a subquery
-      // https://github.com/knex/knex/issues/2504
-      await db.connection
-        .raw(
-          `UPDATE ?? as a, (SELECT * FROM ??) AS b
-          SET ?? = b.src_order
-          WHERE a.id = b.id`,
-          [joinTable.name, tempOrderTableName, orderColumnName]
-        )
-        .transacting(trx);
-    } finally {
-      await db.connection.raw(`DROP TABLE IF EXISTS ??`, [tempOrderTableName]).transacting(trx);
-    }
+    // raw query as knex doesn't allow updating from a subquery
+    // https://github.com/knex/knex/issues/2504
+    const orderVar = `order_${randomSuffix}`;
+    await db.connection.raw(`SET @${orderVar} = 0;`).transacting(trx);
+    await db.connection
+      .raw(
+        `UPDATE :joinTableName: as a, (
+          SELECT id, (@${orderVar}:=@${orderVar} + 1) AS src_order
+          FROM :joinTableName:
+	        WHERE :joinColumnName: = :id
+	        ORDER BY :orderColumnName:
+        ) AS b
+        SET :orderColumnName: = b.src_order
+        WHERE a.id = b.id
+        AND a.:joinColumnName: = :id`,
+        {
+          joinTableName: joinTable.name,
+          orderColumnName,
+          joinColumnName: joinColumn.name,
+          id,
+        }
+      )
+      .transacting(trx);
   }
 
   if (hasInverseOrderColumn(attribute) && !isEmpty(inverseRelIds)) {
-    const tempInvOrderTableName = `invOrderTable_${now}_${randomHex}`;
-    try {
-      await db.connection
-        .raw(
-          `
-          CREATE TABLE ??
-            SELECT
-              id,
-              (
-                SELECT count(*)
-                FROM ?? b
-                WHERE a.?? >= b.?? AND a.?? = b.?? AND a.?? IN (${inverseRelIds
-                  .map(() => '?')
-                  .join(', ')})
-              ) AS inv_order
-            FROM ?? a`,
-          [
-            tempInvOrderTableName,
-            joinTable.name,
-            inverseOrderColumnName,
-            inverseOrderColumnName,
-            inverseJoinColumn.name,
-            inverseJoinColumn.name,
-            inverseJoinColumn.name,
-            ...inverseRelIds,
-            joinTable.name,
-          ]
-        )
-        .transacting(trx);
-      await db.connection
-        .raw(
-          `UPDATE ?? as a, (SELECT * FROM ??) AS b
-            SET ?? = b.inv_order
-            WHERE a.id = b.id`,
-          [joinTable.name, tempInvOrderTableName, inverseOrderColumnName]
-        )
-        .transacting(trx);
-    } finally {
-      await db.connection.raw(`DROP TABLE IF EXISTS ??`, [tempInvOrderTableName]).transacting(trx);
-    }
+    const orderVar = `order_${randomSuffix}`;
+    const columnVar = `col_${randomSuffix}`;
+    await db.connection.raw(`SET @${orderVar} = 0;`).transacting(trx);
+    await db.connection
+      .raw(
+        `UPDATE ?? as a, (
+          SELECT
+          	id,
+            @${orderVar}:=CASE WHEN @${columnVar} = ?? THEN @${orderVar} + 1 ELSE 1 END AS inv_order,
+        	  @${columnVar}:=?? ??
+        	FROM ?? a
+        	WHERE ?? IN(${inverseRelIds.map(() => '?').join(', ')})
+        	ORDER BY ??, ??
+        ) AS b
+        SET ?? = b.inv_order
+        WHERE a.id = b.id
+        AND a.?? IN(${inverseRelIds.map(() => '?').join(', ')})`,
+        [
+          joinTable.name,
+          inverseJoinColumn.name,
+          inverseJoinColumn.name,
+          inverseJoinColumn.name,
+          joinTable.name,
+          inverseJoinColumn.name,
+          ...inverseRelIds,
+          inverseJoinColumn.name,
+          joinColumn.name,
+          inverseOrderColumnName,
+          inverseJoinColumn.name,
+          ...inverseRelIds,
+        ]
+      )
+      .transacting(trx);
   }
 };
 
