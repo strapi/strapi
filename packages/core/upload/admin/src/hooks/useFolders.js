@@ -1,11 +1,11 @@
 import { stringify } from 'qs';
 import { useQuery } from 'react-query';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import { useNotification } from '@strapi/helper-plugin';
+import { useNotification, useFetchClient } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import pluginId from '../pluginId';
-import { axiosInstance, getRequestUrl } from '../utils';
+import { getRequestUrl } from '../utils';
 
 export const useFolders = ({ enabled = true, query = {} }) => {
   const { formatMessage } = useIntl();
@@ -13,6 +13,7 @@ export const useFolders = ({ enabled = true, query = {} }) => {
   const { notifyStatus } = useNotifyAT();
   const dataRequestURL = getRequestUrl('folders');
   const { folder, _q, ...paramsExceptFolderAndQ } = query;
+  const { get } = useFetchClient();
 
   let params;
 
@@ -47,9 +48,7 @@ export const useFolders = ({ enabled = true, query = {} }) => {
 
   const fetchFolders = async () => {
     try {
-      const { data } = await axiosInstance.get(
-        `${dataRequestURL}?${stringify(params, { encode: false })}`
-      );
+      const { data } = await get(`${dataRequestURL}?${stringify(params, { encode: false })}`);
 
       notifyStatus(
         formatMessage({

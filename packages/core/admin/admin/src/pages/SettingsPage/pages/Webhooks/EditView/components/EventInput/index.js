@@ -114,11 +114,11 @@ const EventInput = ({ isDraftAndPublish }) => {
               if (header === 'app.utils.publish' || header === 'app.utils.unpublish') {
                 return (
                   <td
-                    key={header}
+                    key={header.id}
                     title={formatMessage({
                       id: 'Settings.webhooks.event.publish-tooltip',
                       defaultMessage:
-                        'This event only exists for contents with Draft/Publish system enabled',
+                        'This event only exists for content with draft & publish enabled',
                     })}
                   >
                     <Typography variant="sigma" textColor="neutral600">
@@ -129,7 +129,7 @@ const EventInput = ({ isDraftAndPublish }) => {
               }
 
               return (
-                <td key={header}>
+                <td key={header.id}>
                   <Typography variant="sigma" textColor="neutral600">
                     {formatMessage(header)}
                   </Typography>

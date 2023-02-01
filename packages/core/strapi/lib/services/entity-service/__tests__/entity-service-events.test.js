@@ -4,30 +4,26 @@ const createEntityService = require('..');
 const entityValidator = require('../../entity-validator');
 
 describe('Entity service triggers webhooks', () => {
-  global.strapi = {
-    getModel: () => ({}),
-    config: {
-      get: () => [],
-    },
-  };
-
   let instance;
   const eventHub = { emit: jest.fn() };
   let entity = { attr: 'value' };
 
   beforeAll(() => {
+    const model = {
+      uid: 'api::test.test',
+      kind: 'singleType',
+      modelName: 'test-model',
+      privateAttributes: [],
+      attributes: {
+        attr: { type: 'string' },
+      },
+    };
     instance = createEntityService({
       strapi: {
-        getModel: () => ({
-          kind: 'singleType',
-          modelName: 'test-model',
-          privateAttributes: [],
-          attributes: {
-            attr: { type: 'string' },
-          },
-        }),
+        getModel: () => model,
       },
       db: {
+        transaction: (cb) => cb(),
         query: () => ({
           count: () => 0,
           create: ({ data }) => data,
@@ -41,6 +37,13 @@ describe('Entity service triggers webhooks', () => {
       eventHub,
       entityValidator,
     });
+
+    global.strapi = {
+      getModel: () => model,
+      config: {
+        get: () => [],
+      },
+    };
   });
 
   test('Emit event: Create', async () => {
@@ -51,6 +54,7 @@ describe('Entity service triggers webhooks', () => {
     expect(eventHub.emit).toHaveBeenCalledWith('entry.create', {
       entry: entity,
       model: 'test-model',
+      uid: 'api::test.test',
     });
 
     eventHub.emit.mockClear();
@@ -64,6 +68,7 @@ describe('Entity service triggers webhooks', () => {
     expect(eventHub.emit).toHaveBeenCalledWith('entry.update', {
       entry: entity,
       model: 'test-model',
+      uid: 'api::test.test',
     });
 
     eventHub.emit.mockClear();
@@ -77,6 +82,7 @@ describe('Entity service triggers webhooks', () => {
     expect(eventHub.emit).toHaveBeenCalledWith('entry.delete', {
       entry: entity,
       model: 'test-model',
+      uid: 'api::test.test',
     });
 
     eventHub.emit.mockClear();
@@ -90,6 +96,7 @@ describe('Entity service triggers webhooks', () => {
     expect(eventHub.emit).toHaveBeenCalledWith('entry.delete', {
       entry: entity,
       model: 'test-model',
+      uid: 'api::test.test',
     });
     // One event per each entity deleted
     expect(eventHub.emit).toHaveBeenCalledTimes(2);

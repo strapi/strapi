@@ -9,6 +9,7 @@ const NpmPackagesGrid = ({
   useYarn,
   isInDevelopmentMode,
   npmPackageType,
+  strapiAppVersion,
 }) => {
   // Check if an individual package is in the dependencies
   const isAlreadyInstalled = useCallback(
@@ -26,6 +27,7 @@ const NpmPackagesGrid = ({
             useYarn={useYarn}
             isInDevelopmentMode={isInDevelopmentMode}
             npmPackageType={npmPackageType}
+            strapiAppVersion={strapiAppVersion}
           />
         </GridItem>
       ))}
@@ -35,6 +37,7 @@ const NpmPackagesGrid = ({
 
 NpmPackagesGrid.defaultProps = {
   installedPackageNames: [],
+  strapiAppVersion: null,
 };
 
 NpmPackagesGrid.propTypes = {
@@ -43,6 +46,7 @@ NpmPackagesGrid.propTypes = {
   useYarn: PropTypes.bool.isRequired,
   isInDevelopmentMode: PropTypes.bool.isRequired,
   npmPackageType: PropTypes.string.isRequired,
+  strapiAppVersion: PropTypes.string,
 };
 
 export default NpmPackagesGrid;

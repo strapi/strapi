@@ -1,6 +1,6 @@
 {
   "name": "@strapi/utils",
-  "version": "4.3.9",
+  "version": "4.6.0",
   "description": "Shared utilities for the Strapi packages",
   "keywords": [
     "strapi",
@@ -36,9 +36,10 @@
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "date-fns": "2.29.2",
+    "date-fns": "2.29.3",
     "http-errors": "1.8.1",
     "lodash": "4.17.21",
+    "p-map": "4.0.0",
     "yup": "0.32.9"
   },
   "engines": {

@@ -20,7 +20,7 @@ const getMorphToManyRowsLinkedToMorphOne = (rows, { uid, attributeName, typeColu
 
 const deleteRelatedMorphOneRelationsAfterMorphToManyUpdate = async (
   rows,
-  { uid, attributeName, joinTable, db }
+  { uid, attributeName, joinTable, db, transaction: trx }
 ) => {
   const { morphColumn } = joinTable;
   const { idColumn, typeColumn } = morphColumn;
@@ -50,7 +50,11 @@ const deleteRelatedMorphOneRelationsAfterMorphToManyUpdate = async (
   }
 
   if (!isEmpty(orWhere)) {
-    await createQueryBuilder(joinTable.name, db).delete().where({ $or: orWhere }).execute();
+    await createQueryBuilder(joinTable.name, db)
+      .delete()
+      .where({ $or: orWhere })
+      .transacting(trx)
+      .execute();
   }
 };
 

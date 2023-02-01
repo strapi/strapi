@@ -15,6 +15,7 @@ import { useIntl } from 'react-intl';
 import {
   useOverlayBlocker,
   SettingsPageTitle,
+  useFetchClient,
   useTracking,
   Form,
   useNotification,
@@ -24,7 +25,6 @@ import getTrad from '../../../utils/getTrad';
 import pluginId from '../../../pluginId';
 import { usePlugins } from '../../../hooks';
 import schema from './utils/schema';
-import axiosInstance from '../../../utils/axiosInstance';
 
 const EditPage = () => {
   const { formatMessage } = useIntl();
@@ -35,6 +35,7 @@ const EditPage = () => {
   const { isLoading: isLoadingPlugins, permissions, routes } = usePlugins();
   const { trackUsage } = useTracking();
   const permissionsRef = useRef();
+  const { post } = useFetchClient();
 
   const handleCreateRoleSubmit = async (data) => {
     // Set loading state
@@ -43,7 +44,7 @@ const EditPage = () => {
     try {
       const permissions = permissionsRef.current.getPermissions();
       // Update role in Strapi
-      await axiosInstance.post(`/${pluginId}/roles`, { ...data, ...permissions, users: [] });
+      await post(`/${pluginId}/roles`, { ...data, ...permissions, users: [] });
       // Notify success
       trackUsage('didCreateRole');
       toggleNotification({

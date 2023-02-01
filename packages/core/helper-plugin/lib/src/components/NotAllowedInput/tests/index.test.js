@@ -79,10 +79,10 @@ describe('<NotAllowedInput />', () => {
       }
 
       .c2 {
-        font-weight: 600;
-        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
       }
 
       .c8 {
@@ -202,6 +202,7 @@ describe('<NotAllowedInput />', () => {
               <input
                 aria-disabled="true"
                 aria-invalid="false"
+                aria-required="false"
                 class="c8"
                 id="test"
                 name="test"

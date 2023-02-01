@@ -77,8 +77,8 @@ module.exports = ({ strapi }) => ({
     if (!ext) {
       ext = `.${extension(type)}`;
     }
-    const basename = path.basename(fileInfo.name || filename, ext);
-    const usedName = fileInfo.name || filename;
+    const usedName = (fileInfo.name || filename).normalize();
+    const basename = path.basename(usedName, ext);
 
     const entity = {
       name: usedName,
@@ -227,10 +227,11 @@ module.exports = ({ strapi }) => ({
 
       const formats = await generateResponsiveFormats(fileData);
       if (Array.isArray(formats) && formats.length > 0) {
-        formats.forEach((format) => {
-          if (!format) return;
+        for (const format of formats) {
+          // eslint-disable-next-line no-continue
+          if (!format) continue;
           uploadPromises.push(uploadResponsiveFormat(format));
-        });
+        }
       }
     }
     // Wait for all uploads to finish
@@ -341,6 +342,7 @@ module.exports = ({ strapi }) => ({
     if (user) {
       fileValues[UPDATED_BY_ATTRIBUTE] = user.id;
     }
+
     sendMediaMetrics(fileValues);
 
     const res = await strapi.entityService.update(FILE_MODEL_UID, id, { data: fileValues });
@@ -356,6 +358,7 @@ module.exports = ({ strapi }) => ({
       fileValues[UPDATED_BY_ATTRIBUTE] = user.id;
       fileValues[CREATED_BY_ATTRIBUTE] = user.id;
     }
+
     sendMediaMetrics(fileValues);
 
     const res = await strapi.query(FILE_MODEL_UID).create({ data: fileValues });
@@ -448,5 +451,15 @@ module.exports = ({ strapi }) => ({
     }
 
     return strapi.store({ type: 'plugin', name: 'upload', key: 'settings' }).set({ value });
+  },
+
+  getConfiguration() {
+    return strapi.store({ type: 'plugin', name: 'upload', key: 'view_configuration' }).get();
+  },
+
+  setConfiguration(value) {
+    return strapi
+      .store({ type: 'plugin', name: 'upload', key: 'view_configuration' })
+      .set({ value });
   },
 });

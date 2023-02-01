@@ -22,23 +22,23 @@ const tableHeaders = [
     },
   },
   {
-    name: 'type',
-    key: 'type',
-    metadatas: {
-      label: {
-        id: 'Settings.apiTokens.ListView.headers.type',
-        defaultMessage: 'Token type',
-      },
-      sortable: false,
-    },
-  },
-  {
     name: 'createdAt',
     key: 'createdAt',
     metadatas: {
       label: {
         id: 'Settings.apiTokens.ListView.headers.createdAt',
         defaultMessage: 'Created at',
+      },
+      sortable: false,
+    },
+  },
+  {
+    name: 'lastUsedAt',
+    key: 'lastUsedAt',
+    metadatas: {
+      label: {
+        id: 'Settings.apiTokens.ListView.headers.lastUsedAt',
+        defaultMessage: 'Last used',
       },
       sortable: false,
     },

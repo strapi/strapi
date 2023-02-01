@@ -10,9 +10,11 @@ const { ESBuildMinifyPlugin } = require('esbuild-loader');
 const WebpackBar = require('webpackbar');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+const browserslistToEsbuild = require('browserslist-to-esbuild');
 
 const alias = require('./webpack.alias');
 const getClientEnvironment = require('./env');
+const createPluginsExcludePath = require('./utils/create-plugins-exclude-path');
 
 const EE_REGEX = /from.* ['"]ee_else_ce\//;
 
@@ -49,6 +51,10 @@ module.exports = ({
       ]
     : [];
 
+  const excludeRegex = createPluginsExcludePath(pluginsPath);
+
+  const buildTarget = browserslistToEsbuild();
+
   return {
     mode: isProduction ? 'production' : 'development',
     bail: !!isProduction,
@@ -69,7 +75,7 @@ module.exports = ({
       minimize: optimize,
       minimizer: [
         new ESBuildMinifyPlugin({
-          target: 'es2015',
+          target: buildTarget,
           css: true, // Apply minification to CSS assets
         }),
       ],
@@ -82,10 +88,10 @@ module.exports = ({
           test: /\.tsx?$/,
           loader: require.resolve('esbuild-loader'),
           include: [cacheDir, ...pluginsPath],
-          exclude: /node_modules/,
+          exclude: excludeRegex,
           options: {
             loader: 'tsx',
-            target: 'es2015',
+            target: buildTarget,
           },
         },
         {
@@ -149,7 +155,7 @@ module.exports = ({
                 loader: require.resolve('esbuild-loader'),
                 options: {
                   loader: 'jsx',
-                  target: 'es2015',
+                  target: buildTarget,
                 },
               },
             },
@@ -162,11 +168,23 @@ module.exports = ({
             loader: require.resolve('esbuild-loader'),
             options: {
               loader: 'jsx',
-              target: 'es2015',
+              target: buildTarget,
             },
           },
         },
-
+        /**
+         * This is used to avoid webpack import errors where
+         * the origin is strict EcmaScript Module.
+         *
+         * e. g. a module with javascript mimetype, a '.mjs' file,
+         * or a '.js' file where the package.json contains '"type": "module"'
+         */
+        {
+          test: /\.m?jsx?$/,
+          resolve: {
+            fullySpecified: false,
+          },
+        },
         {
           test: /\.css$/i,
           use: ['style-loader', 'css-loader'],

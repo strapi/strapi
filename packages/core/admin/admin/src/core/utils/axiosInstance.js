@@ -1,16 +1,18 @@
 import axios from 'axios';
-import { auth } from '@strapi/helper-plugin';
+import { auth, wrapAxiosInstance } from '@strapi/helper-plugin';
 
 const instance = axios.create({
   baseURL: process.env.STRAPI_ADMIN_BACKEND_URL,
+  headers: {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  },
 });
 
 instance.interceptors.request.use(
   async (config) => {
     config.headers = {
       Authorization: `Bearer ${auth.getToken()}`,
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
     };
 
     return config;
@@ -33,4 +35,6 @@ instance.interceptors.response.use(
   }
 );
 
-export default instance;
+const wrapper = wrapAxiosInstance(instance);
+
+export default wrapper;

@@ -40,7 +40,7 @@ const SearchURLQuery = ({ label, placeholder, trackedEvent, trackedEventDetails 
       if (trackedEvent) {
         trackUsage(trackedEvent, trackedEventDetails);
       }
-      setQuery({ _q: value, page: 1 });
+      setQuery({ _q: encodeURIComponent(value), page: 1 });
     } else {
       handleToggle();
       setQuery({ _q: '' }, 'remove');
