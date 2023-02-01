@@ -61,7 +61,7 @@ const ReviewWorkflowsToggle = ({
         bodyText={{
           id: getTrad('popUpWarning.review-workflows.message'),
           defaultMessage:
-            'If you disable review workflow, the associated workflow-data with this content-type will be deleted.',
+            'If you disable the review workflows feature, all stage-related information will be removed for this content-type. Are you sure you want to disable it?',
         }}
         leftButtonText={{
           id: 'components.popUpWarning.button.cancel',

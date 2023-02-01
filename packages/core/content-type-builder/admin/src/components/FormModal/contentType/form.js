@@ -32,7 +32,7 @@ const forms = {
         items.push({
           intlLabel: {
             id: getTrad('contentType.reviewWorkflows.label'),
-            defaultMessage: 'Review Workflow',
+            defaultMessage: 'Review Workflows',
           },
           description: {
             id: getTrad('contentType.reviewWorkflows.description'),
