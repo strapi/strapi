@@ -43,7 +43,7 @@ export function ReviewWorkflowsPage() {
       <SettingsPageTitle
         name={formatMessage({
           id: 'Settings.review-workflows.page.title',
-          defaultMessage: 'Review Workflow',
+          defaultMessage: 'Review Workflows',
         })}
       />
       <Main tabIndex={-1}>
@@ -58,7 +58,7 @@ export function ReviewWorkflowsPage() {
           }
           title={formatMessage({
             id: 'Settings.review-workflows.page.title',
-            defaultMessage: 'Review Workflow',
+            defaultMessage: 'Review Workflows',
           })}
           subtitle={formatMessage(
             {
