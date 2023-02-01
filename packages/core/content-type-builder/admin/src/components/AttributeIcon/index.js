@@ -53,7 +53,10 @@ const iconByTypes = {
 };
 
 const IconBox = styled(Box)`
-  box-sizing: content-box;
+  svg {
+    height: 100%;
+    width: 100%;
+  }
 `;
 
 const AttributeIcon = ({ type, customField, ...rest }) => {
@@ -74,7 +77,9 @@ const AttributeIcon = ({ type, customField, ...rest }) => {
   }
 
   return (
-    <IconBox height={pxToRem(24)} width={pxToRem(32)} shrink={0} as={Compo} {...rest} aria-hidden />
+    <IconBox height={pxToRem(24)} width={pxToRem(32)} shrink={0} {...rest} aria-hidden>
+      <Box as={Compo} />
+    </IconBox>
   );
 };
 
