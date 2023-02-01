@@ -5,7 +5,7 @@
   "dependencies": {
     "@strapi/generate-new": "4.6.0",
     "commander": "8.3.0",
-    "inquirer": "8.2.4"
+    "inquirer": "8.2.5"
   },
   "keywords": [
     "create-strapi-app",
