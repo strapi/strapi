@@ -4,11 +4,14 @@ const Field = require('./field');
 
 class JSONField extends Field {
   toDB(value) {
-    try {
-      JSON.parse(value);
-    } catch (e) {
-      throw new Error(`Invalid JSON value`);
+    if (typeof value !== 'object') {
+      try {
+        JSON.parse(value);
+      } catch (e) {
+        throw new Error(`Invalid JSON value`);
+      }
     }
+
     return JSON.stringify(value);
   }
 
