@@ -1,12 +1,14 @@
 {
-  "color-picker.label": "Renk",
   "color-picker.description": "Herhangi bir renk seç",
-  "color-picker.settings": "Ayarlar",
-  "color-picket.input.format": "HEX",
+  "color-picker.input.aria-label": "Renk seçici girişi",
+  "color-picker.input.format": "HEX",
+  "color-picker.label": "Renk",
   "color-picker.options.advanced.regex": "RegExp ifadesi",
   "color-picker.options.advanced.regex.description": "HEX değerini doğrulamak için bir RegExp ifadesi sağla",
   "color-picker.options.advanced.requiredField": "Zorunlu alan",
   "color-picker.options.advanced.requiredField.description": "Bu alan boş olursa yeni bir girdi oluşturamazsın",
+  "color-picker.settings": "Ayarlar",
   "color-picker.toggle.aria-label": "Renk seçici anahtarı",
-  "color-picker.input.aria-label": "Renk seçici girişi"
+  "plugin.description.long": "A Strapi-maintained color picker custom field. Use saturation and hue sliders to select a color and save the value as a HEX string.",
+  "plugin.description.short": "A Strapi-maintained color picker custom field."
 }

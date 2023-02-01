@@ -51,6 +51,9 @@ const createComponent = async ({ component, components = [] }) => {
   });
 
   await builder.writeFiles();
+
+  strapi.eventHub.emit('component.create', { component: newComponent });
+
   return newComponent;
 };
 
@@ -80,6 +83,9 @@ const editComponent = async (uid, { component, components = [] }) => {
   });
 
   await builder.writeFiles();
+
+  strapi.eventHub.emit('component.update', { component: updatedComponent });
+
   return updatedComponent;
 };
 
@@ -89,6 +95,9 @@ const deleteComponent = async (uid) => {
   const deletedComponent = builder.deleteComponent(uid);
 
   await builder.writeFiles();
+
+  strapi.eventHub.emit('component.delete', { component: deletedComponent });
+
   return deletedComponent;
 };
 

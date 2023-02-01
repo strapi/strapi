@@ -39,7 +39,7 @@ module.exports = {
   async getProjectType() {
     // FIXME
     try {
-      return { data: { isEE: strapi.EE, features: ee.features.getEnabled() } };
+      return { data: { isEE: strapi.EE, features: ee.features.list() } };
     } catch (err) {
       return { data: { isEE: false, features: [] } };
     }
@@ -48,7 +48,7 @@ module.exports = {
   async init() {
     let uuid = strapi.config.get('uuid', false);
     const hasAdmin = await getService('user').exists();
-    const { menuLogo } = await getService('project-settings').getProjectSettings();
+    const { menuLogo, authLogo } = await getService('project-settings').getProjectSettings();
     // set to null if telemetryDisabled flag not avaialble in package.json
     const telemetryDisabled = strapi.config.get('packageJsonStrapi.telemetryDisabled', null);
 
@@ -61,6 +61,7 @@ module.exports = {
         uuid,
         hasAdmin,
         menuLogo: menuLogo ? menuLogo.url : null,
+        authLogo: authLogo ? authLogo.url : null,
       },
     };
   },

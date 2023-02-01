@@ -9,7 +9,6 @@ const fetch = require('node-fetch');
 const ciEnv = require('ci-info');
 const { isUsingTypeScriptSync } = require('@strapi/typescript-utils');
 const { env } = require('@strapi/utils');
-const ee = require('../../utils/ee');
 const machineID = require('../../utils/machine-id');
 const { generateAdminUserHash } = require('./admin-user-hash');
 
@@ -38,7 +37,6 @@ const addPackageJsonStrapiMetadata = (metadata, strapi) => {
 module.exports = (strapi) => {
   const { uuid } = strapi.config;
   const deviceId = machineID();
-  const isEE = strapi.EE === true && ee.isEE === true;
 
   const serverRootPath = strapi.dirs.app.root;
   const adminRootPath = path.join(strapi.dirs.app.root, 'src', 'admin');
@@ -64,7 +62,6 @@ module.exports = (strapi) => {
     docker: process.env.DOCKER || isDocker(),
     isCI: ciEnv.isCI,
     version: strapi.config.get('info.strapi'),
-    projectType: isEE ? 'Enterprise' : 'Community',
     useTypescriptOnServer: isUsingTypeScriptSync(serverRootPath),
     useTypescriptOnAdmin: isUsingTypeScriptSync(adminRootPath),
     projectId: uuid,
@@ -77,7 +74,7 @@ module.exports = (strapi) => {
   addPackageJsonStrapiMetadata(anonymousGroupProperties, strapi);
 
   return async (event, payload = {}, opts = {}) => {
-    const userId = generateAdminUserHash();
+    const userId = generateAdminUserHash(strapi);
 
     const reqParams = {
       method: 'POST',
@@ -89,6 +86,7 @@ module.exports = (strapi) => {
         userProperties: userId ? { ...anonymousUserProperties, ...payload.userProperties } : {},
         groupProperties: {
           ...anonymousGroupProperties,
+          projectType: strapi.EE ? 'Enterprise' : 'Community',
           ...payload.groupProperties,
         },
       }),

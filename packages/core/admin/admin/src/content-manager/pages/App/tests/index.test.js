@@ -173,7 +173,7 @@ describe('Content manager | App | main', () => {
         padding-right: 8px;
         padding-left: 8px;
         position: absolute;
-        right: 0px;
+        right: 0;
         top: 50%;
         min-width: 20px;
         -webkit-transform: translateY(-50%);
@@ -378,6 +378,9 @@ describe('Content manager | App | main', () => {
       .c11 {
         height: 1px;
         border: none;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
         margin: 0;
       }
 
