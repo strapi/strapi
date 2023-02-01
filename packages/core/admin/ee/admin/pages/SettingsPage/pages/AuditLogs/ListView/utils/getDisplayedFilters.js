@@ -49,12 +49,12 @@ const getDisplayedFilters = ({ formatMessage, users }) => {
     {
       name: 'action',
       metadatas: {
+        customOperators,
         label: formatMessage({
           id: 'Settings.permissions.auditLogs.action',
           defaultMessage: 'Action',
         }),
         options: actionOptions,
-        customOperators,
         customInput: ComboboxFilter,
       },
       fieldSchema: { type: 'enumeration' },
@@ -72,28 +72,12 @@ const getDisplayedFilters = ({ formatMessage, users }) => {
     {
       name: 'user',
       metadatas: {
+        customOperators,
         label: formatMessage({
           id: 'Settings.permissions.auditLogs.user',
           defaultMessage: 'User',
         }),
         options: userOptions,
-        customOperators: [
-          ...customOperators,
-          {
-            intlLabel: {
-              id: 'components.FilterOptions.FILTER_TYPES.$null',
-              defaultMessage: 'is null',
-            },
-            value: '$null',
-          },
-          {
-            intlLabel: {
-              id: 'components.FilterOptions.FILTER_TYPES.$notNull',
-              defaultMessage: 'is not null',
-            },
-            value: '$notNull',
-          },
-        ],
         customInput: ComboboxFilter,
       },
       fieldSchema: { type: 'relation', mainField: { name: 'id' } },
