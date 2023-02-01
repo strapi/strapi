@@ -1,30 +1,109 @@
-import produce from 'immer';
+import { current, produce } from 'immer';
+import isEqual from 'lodash/isEqual';
 
-import { ACTION_SET_WORKFLOWS } from '../constants';
+import {
+  ACTION_SET_WORKFLOWS,
+  ACTION_DELETE_STAGE,
+  ACTION_ADD_STAGE,
+  ACTION_UPDATE_STAGE,
+} from '../constants';
 
 export const initialState = {
   status: 'loading',
   serverState: {
+    currentWorkflow: null,
     workflows: [],
   },
   clientState: {
-    workflows: [],
+    currentWorkflow: { data: null, isDirty: false },
   },
 };
 
 export function reducer(state = initialState, action) {
   return produce(state, (draft) => {
-    switch (action.type) {
-      case ACTION_SET_WORKFLOWS:
-        draft.status = action.payload.status;
+    const { payload } = action;
 
-        if (action.payload.workflows) {
-          draft.serverState.workflows = [
-            ...state.serverState.workflows,
-            ...action.payload.workflows,
-          ];
+    switch (action.type) {
+      case ACTION_SET_WORKFLOWS: {
+        const { status, workflows } = payload;
+
+        draft.status = status;
+
+        if (workflows) {
+          draft.serverState.workflows = workflows;
+          draft.serverState.currentWorkflow = workflows[0];
+          draft.clientState.currentWorkflow.data = workflows[0];
         }
         break;
+      }
+
+      case ACTION_DELETE_STAGE: {
+        const { stageId } = payload;
+        const { currentWorkflow } = state.clientState;
+
+        draft.clientState.currentWorkflow.data = {
+          ...currentWorkflow.data,
+          stages: currentWorkflow.data.stages.filter(
+            (stage) => stage?.id ?? stage.__temp_key__ !== stageId
+          ),
+        };
+
+        draft.clientState.currentWorkflow.isDirty = !isEqual(
+          current(draft.clientState.currentWorkflow).data,
+          state.clientState.currentWorkflow.data
+        );
+
+        break;
+      }
+
+      case ACTION_ADD_STAGE: {
+        const { currentWorkflow } = state.clientState;
+
+        draft.clientState.currentWorkflow.data = {
+          ...currentWorkflow.data,
+          stages: [
+            ...currentWorkflow.data.stages,
+            {
+              ...payload,
+              __temp_key__: state.clientState.currentWorkflow.data.stages.length + 1,
+            },
+          ],
+        };
+
+        draft.clientState.currentWorkflow.isDirty = !isEqual(
+          current(draft.clientState.currentWorkflow).data,
+          state.clientState.currentWorkflow.data
+        );
+
+        break;
+      }
+
+      case ACTION_UPDATE_STAGE: {
+        const { currentWorkflow } = state.clientState;
+
+        draft.clientState.currentWorkflow.data = {
+          ...currentWorkflow.data,
+          stages: currentWorkflow.data.stages.map((stage) => {
+            if ((stage.id ?? stage.__temp_key__) === payload.stageId) {
+              const { stageId, ...modified } = payload;
+
+              return {
+                ...stage,
+                ...modified,
+              };
+            }
+
+            return stage;
+          }),
+        };
+
+        draft.clientState.currentWorkflow.isDirty = !isEqual(
+          current(draft.clientState.currentWorkflow).data,
+          state.clientState.currentWorkflow.data
+        );
+
+        break;
+      }
 
       default:
         break;

@@ -59,7 +59,7 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
     expect(getByText('Workflow is loading')).toBeInTheDocument();
   });
 
-  test('handle loaded stage', () => {
+  test('display stages', () => {
     useReviewWorkflows.mockReturnValue({
       workflows: {
         status: 'success',

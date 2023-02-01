@@ -1,22 +1,33 @@
 import React, { useEffect } from 'react';
+import { FormikProvider, useFormik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { useSelector, useDispatch } from 'react-redux';
+
 import { SettingsPageTitle } from '@strapi/helper-plugin';
 import { Button, ContentLayout, HeaderLayout, Layout, Loader, Main } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 
 import { Stages } from './components/Stages';
-import { reducer } from './reducer';
-import { REDUX_NAMESPACE } from './constants';
+import { reducer, initialState } from './reducer';
+import { REDUX_NAMESPACE, stagesSchema } from './constants';
 import { useInjectReducer } from '../../../../../../admin/src/hooks/useInjectReducer';
 import { useReviewWorkflows } from './hooks/useReviewWorkflows';
 import { setWorkflows } from './actions';
 
 export function ReviewWorkflowsPage() {
   const { formatMessage } = useIntl();
-  const { workflows: workflowsData } = useReviewWorkflows();
-  const state = useSelector((state) => state?.[REDUX_NAMESPACE]);
+  const { workflows: workflowsData, updateWorkflow } = useReviewWorkflows();
+  const {
+    status,
+    clientState: {
+      currentWorkflow: { data: currentWorkflow, isDirty: currentWorkflowIsDirty },
+    },
+  } = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
   const dispatch = useDispatch();
+
+  const onSubmit = async () => {
+    await updateWorkflow(currentWorkflow);
+  };
 
   useInjectReducer(REDUX_NAMESPACE, reducer);
 
@@ -24,19 +35,23 @@ export function ReviewWorkflowsPage() {
     dispatch(setWorkflows({ status: workflowsData.status, data: workflowsData.data }));
   }, [workflowsData.status, workflowsData.data, dispatch]);
 
-  // useInjectReducer() runs on the first rendering after useSelector
-  // which will return undefined. This helps to avoid too many optional
-  // chaining operators down the component.
-  if (!state) {
+  const formik = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      stages: currentWorkflow
+        ? currentWorkflow.stages.map((stage) => ({
+            name: stage.name,
+          }))
+        : null,
+    },
+    onSubmit,
+    validationSchema: stagesSchema,
+    validateOnChange: false,
+  });
+
+  if (!currentWorkflow) {
     return null;
   }
-
-  const {
-    status,
-    serverState: { workflows },
-  } = state;
-
-  const defaultWorkflow = workflows[0] ?? {};
 
   return (
     <Layout>
@@ -47,39 +62,48 @@ export function ReviewWorkflowsPage() {
         })}
       />
       <Main tabIndex={-1}>
-        <HeaderLayout
-          primaryAction={
-            <Button startIcon={<Check />} type="submit" size="L" disabled>
-              {formatMessage({
-                id: 'global.save',
-                defaultMessage: 'Save',
+        <FormikProvider value={formik}>
+          <Form onSubmit={formik.handleSubmit}>
+            <HeaderLayout
+              primaryAction={
+                <Button
+                  startIcon={<Check />}
+                  type="submit"
+                  size="M"
+                  disabled={!currentWorkflowIsDirty}
+                >
+                  {formatMessage({
+                    id: 'global.save',
+                    defaultMessage: 'Save',
+                  })}
+                </Button>
+              }
+              title={formatMessage({
+                id: 'Settings.review-workflows.page.title',
+                defaultMessage: 'Review Workflows',
               })}
-            </Button>
-          }
-          title={formatMessage({
-            id: 'Settings.review-workflows.page.title',
-            defaultMessage: 'Review Workflows',
-          })}
-          subtitle={formatMessage(
-            {
-              id: 'Settings.review-workflows.page.subtitle',
-              defaultMessage: '{count, plural, one {# stage} other {# stages}}',
-            },
-            { count: defaultWorkflow.stages?.length ?? 0 }
-          )}
-        />
-        <ContentLayout>
-          {status === 'loading' ? (
-            <Loader>
-              {formatMessage({
-                id: 'Settings.review-workflows.page.isLoading',
-                defaultMessage: 'Workflow is loading',
-              })}
-            </Loader>
-          ) : (
-            <Stages stages={defaultWorkflow.stages} />
-          )}
-        </ContentLayout>
+              subtitle={formatMessage(
+                {
+                  id: 'Settings.review-workflows.page.subtitle',
+                  defaultMessage: '{count, plural, one {# stage} other {# stages}}',
+                },
+                { count: currentWorkflow.stages?.length ?? 0 }
+              )}
+            />
+            <ContentLayout>
+              {status === 'loading' ? (
+                <Loader>
+                  {formatMessage({
+                    id: 'Settings.review-workflows.page.isLoading',
+                    defaultMessage: 'Workflow is loading',
+                  })}
+                </Loader>
+              ) : (
+                <Stages stages={currentWorkflow.stages} />
+              )}
+            </ContentLayout>
+          </Form>
+        </FormikProvider>
       </Main>
     </Layout>
   );
