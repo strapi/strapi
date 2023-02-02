@@ -284,9 +284,7 @@ program
       .hideHelp() // Hidden until pull feature is released
   )
   .addOption(
-    new Option('--from-token <token>', `Transfer token for the remote Strapi source`)
-      .argParser(parseURL)
-      .hideHelp() // Hidden until pull feature is released
+    new Option('--from-token <token>', `Transfer token for the remote Strapi source`).hideHelp() // Hidden until pull feature is released
   )
   .addOption(
     new Option(
@@ -294,25 +292,37 @@ program
       `URL of the remote Strapi instance to send data to`
     ).argParser(parseURL)
   )
-  .addOption(
-    new Option('--to-token <token>', `Transfer token for the remote Strapi destination`).argParser(
-      parseURL
-    )
-  )
+  .addOption(new Option('--to-token <token>', `Transfer token for the remote Strapi destination`))
   .addOption(forceOption)
   // Validate URLs
   .hook(
     'preAction',
     ifOptions(
       (opts) => opts.from,
-      (thisCommand) => assertUrlHasProtocol(thisCommand.opts().from, ['https:', 'http:'])
+      (thisCommand) => {
+        assertUrlHasProtocol(thisCommand.opts().from, ['https:', 'http:']);
+        if (!thisCommand.opts().fromToken) {
+          exitWith(
+            1,
+            'A transfer token is required to initiate a transfer from a remote Strapi source.'
+          );
+        }
+      }
     )
   )
   .hook(
     'preAction',
     ifOptions(
       (opts) => opts.to,
-      (thisCommand) => assertUrlHasProtocol(thisCommand.opts().to, ['https:', 'http:'])
+      (thisCommand) => {
+        assertUrlHasProtocol(thisCommand.opts().to, ['https:', 'http:']);
+        if (!thisCommand.opts().toToken) {
+          exitWith(
+            1,
+            'A transfer token is required to initiate a transfer to a remote Strapi destination.'
+          );
+        }
+      }
     )
   )
   .hook(
