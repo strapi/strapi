@@ -1,0 +1,20 @@
+---
+title: How they work
+tags:
+  - permissions
+  - RBAC
+---
+
+Talk about this stuff and what it means (probably needs Pierre to give me a 10min recap)
+
+```ts
+const permissions = {
+  create: [{ action: 'plugin::content-manager.explorer.create', subject: null }],
+  delete: [{ action: 'plugin::content-manager.explorer.delete', subject: null }],
+  publish: [{ action: 'plugin::content-manager.explorer.publish', subject: null }],
+  read: [{ action: 'plugin::content-manager.explorer.read', subject: null }],
+  update: [{ action: 'plugin::content-manager.explorer.update', subject: null }],
+};
+```
+
+## Setting up permissions for a plugin

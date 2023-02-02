@@ -1,0 +1,28 @@
+---
+title: Using Permissions
+tags:
+  - permissions
+  - RBAC
+  - useRBAC
+---
+
+- API reference for useRBACProvider hook (which is just a wrapper around useContext) & methods
+
+---
+
+- There's two helper components
+
+  - CheckPagePermissions this is for views
+  - CheckPermissions this is for components/fields etc.
+
+---
+
+- useRBAC hook which is more of an actual hook
+
+  - how does it work with REDUX?
+
+---
+
+- useSyncRBAC hook (only in content manager LOL) (write about it here cause it's important but then add a doc in the CM documentation linking back to this)
+  - it gets the permissions specific to a content-type and then a particular view of that content-type e.g. ADDRESSES and just the list-view
+  - then passes "allowedActions" to `EditViewDataManagerProvider` so then write something on permissions in the content-manager cause that's obvs unique nice.

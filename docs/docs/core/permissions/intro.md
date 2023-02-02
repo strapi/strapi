@@ -1,0 +1,29 @@
+---
+title: Introduction
+slug: /permissions
+tags:
+  - permissions
+  - RBAC
+---
+
+# Permissions (RBAC)
+
+:::caution
+This is not about the `user-permissions` plugin which is API orientated, this is about roles based access control commonly known as RBAC.
+:::
+
+This section is an overview of all the features realted to the Permissions core plugin:
+
+```mdx-code-block
+import DocCardList from '@theme/DocCardList';
+import { useCurrentSidebarCategory } from '@docusaurus/theme-common';
+
+<DocCardList items={useCurrentSidebarCategory().items} />
+```
+
+---
+
+## ⚠️ To document ⚠️
+
+- RBAC in the settings page of the admin app
+- How RBAC works serverside

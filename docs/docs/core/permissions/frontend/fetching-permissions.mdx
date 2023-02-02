@@ -1,0 +1,15 @@
+---
+title: Fetching Permissions
+tags:
+  - permissions
+  - RBAC
+---
+
+- permissions are fetched from the API in `admin/admin/src/AuthenticatedApp` the cache key is `admin-users-permission`.
+- Permission route is `/admin/users/me/permissions` because we're focussed on me as a user on the FE.
+- ADD EXAMPLE RESPONSE
+
+- the data is then passed to an `RBACProvider` which the src for this is situated in the `helper-plugin` package.
+- it's in the highest point of the actual application alongside the route where you login.
+- the context also has a refetch functionality so we can check again at any time.
+- You access all this via the `useRBACProvider` hook (separate doc).
