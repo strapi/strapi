@@ -10,4 +10,12 @@ module.exports = ({ strapi }) => ({
   findById(id, opts) {
     return strapi.entityService.findOne(WORKFLOW_MODEL_UID, id, opts);
   },
+
+  create(workflowData) {
+    return strapi.entityService.create(WORKFLOW_MODEL_UID, { data: workflowData });
+  },
+
+  count() {
+    return strapi.entityService.count(WORKFLOW_MODEL_UID);
+  },
 });
