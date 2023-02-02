@@ -109,7 +109,7 @@
     "fs-extra": "10.0.0",
     "glob": "7.2.0",
     "http-errors": "1.8.1",
-    "inquirer": "8.2.4",
+    "inquirer": "8.2.5",
     "is-docker": "2.2.1",
     "koa": "2.13.4",
     "koa-body": "4.2.0",

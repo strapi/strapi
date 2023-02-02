@@ -5,7 +5,14 @@
  */
 const { Writable } = require('stream');
 
+const kbytesToBytes = (kbytes) => kbytes * 1000;
 const bytesToKbytes = (bytes) => Math.round((bytes / 1000) * 100) / 100;
+const bytesToHumanReadable = (bytes) => {
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB'];
+  if (bytes === 0) return '0 Bytes';
+  const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1000)), 10);
+  return `${Math.round(bytes / 1000 ** i, 2)} ${sizes[i]}`;
+};
 
 const streamToBuffer = (stream) =>
   new Promise((resolve, reject) => {
@@ -45,7 +52,9 @@ function writableDiscardStream(options) {
 
 module.exports = {
   streamToBuffer,
+  bytesToHumanReadable,
   bytesToKbytes,
+  kbytesToBytes,
   getStreamSize,
   writableDiscardStream,
 };
