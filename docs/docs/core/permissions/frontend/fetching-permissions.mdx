@@ -5,11 +5,92 @@ tags:
   - RBAC
 ---
 
-- permissions are fetched from the API in `admin/admin/src/AuthenticatedApp` the cache key is `admin-users-permission`.
-- Permission route is `/admin/users/me/permissions` because we're focussed on me as a user on the FE.
-- ADD EXAMPLE RESPONSE
+This document lays out the code-flow of fetching the permissions in the CMS and how the data is then injected in to the app
+to be used by components.
 
-- the data is then passed to an `RBACProvider` which the src for this is situated in the `helper-plugin` package.
-- it's in the highest point of the actual application alongside the route where you login.
-- the context also has a refetch functionality so we can check again at any time.
-- You access all this via the `useRBACProvider` hook (separate doc).
+## Where do we fetch them?
+
+At the very root of the entire admin panel we handle 4 routes:
+
+- Signing into the app
+- Not Found
+- Collecting information from a first time user
+- The actual app
+
+Permissions, along with other vital application information is fetched in in the AuthenticatedApp component, located
+in the `packages/core/admin/admin/src/AuthenticatedApp` folder. The cache key (used with `react-query`'s `useQueries` hook)
+for the particular call is `admin-users-permission`.
+
+## What do we fetch?
+
+Because permissions are based on users in this case the individual logged in, we fetch their permissions from the route:
+`/admin/users/me/permissions`. An example can be seen below:
+
+```json
+{
+  "data": [
+    {
+      "id": 426,
+      "action": "admin::api-tokens.access",
+      "subject": null,
+      "properties": {},
+      "conditions": []
+    },
+    {
+      "id": 427,
+      "action": "admin::api-tokens.regenerate",
+      "subject": null,
+      "properties": {},
+      "conditions": []
+    },
+    {
+      "id": 763,
+      "action": "plugin::content-manager.explorer.create",
+      "subject": "api::homepage.homepage",
+      "properties": {
+        "fields": ["title", "slug", "single", "multiple"],
+        "locales": ["en", "fr"]
+      },
+      "conditions": []
+    },
+    {
+      "id": 765,
+      "action": "plugin::content-manager.explorer.read",
+      "subject": "api::homepage.homepage",
+      "properties": {
+        "fields": ["title", "slug", "single", "multiple"],
+        "locales": ["en", "fr"]
+      },
+      "conditions": []
+    },
+    {
+      "id": 767,
+      "action": "plugin::content-manager.explorer.update",
+      "subject": "api::homepage.homepage",
+      "properties": {
+        "fields": ["title", "slug", "single", "multiple"],
+        "locales": ["en", "fr"]
+      },
+      "conditions": []
+    }
+  ]
+}
+```
+
+An explanation on how these work can be found [here](/core/permissions/how-they-work). But as a quick overview we can see that permissions
+typically associate to actions and in the case of the content manager they have subjects to be more granular and then fields & locales to
+be even more granular. These actions are defined by domains of the application registered via the application as they also have effect
+when calling APIs.
+
+## What do we do with the data?
+
+The data is then passed to the `RBACProvider` comoponent which passes it to a public facing [React Context](https://beta.reactjs.org/learn/passing-data-deeply-with-context)
+as well as injecting the information into the global `redux` store – see diagram below:
+
+<img
+  src="/img/permissions/permissions-into-app.png"
+  alt="diagram of how permissions get from the server to the application"
+/>
+
+Inside the `RBACProviderContext` we also pass the ability to refetch the permissions. These two inconjunction with one another are accessed
+via the `useRBACProvider` hook.
