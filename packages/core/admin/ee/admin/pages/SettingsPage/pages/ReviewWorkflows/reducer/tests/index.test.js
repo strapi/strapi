@@ -41,20 +41,21 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
       payload: { status: 'loading-state', workflows: WORKFLOWS_FIXTURE },
     };
 
-    expect(reducer(state, action)).toStrictEqual({
-      ...initialState,
-      status: 'loading-state',
-      serverState: {
-        currentWorkflow: WORKFLOWS_FIXTURE[0],
-        workflows: WORKFLOWS_FIXTURE,
-      },
-      clientState: {
-        currentWorkflow: {
-          data: WORKFLOWS_FIXTURE[0],
-          isDirty: false,
+    expect(reducer(state, action)).toStrictEqual(
+      expect.objectContaining({
+        status: 'loading-state',
+        serverState: {
+          currentWorkflow: WORKFLOWS_FIXTURE[0],
+          workflows: WORKFLOWS_FIXTURE,
         },
-      },
-    });
+        clientState: {
+          currentWorkflow: {
+            data: WORKFLOWS_FIXTURE[0],
+            isDirty: false,
+          },
+        },
+      })
+    );
   });
 
   test('ACTION_SET_WORKFLOWS without workflows', () => {
@@ -79,19 +80,25 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
 
     state = {
       status: expect.any(String),
-      serverState: expect.any(Object),
+      serverState: {
+        currentWorkflow: WORKFLOWS_FIXTURE[0],
+      },
       clientState: {
         currentWorkflow: { data: WORKFLOWS_FIXTURE[0], isDirty: false },
       },
     };
 
-    expect(reducer(state, action)).toStrictEqual({
-      status: expect.any(String),
-      serverState: expect.any(Object),
-      clientState: {
-        currentWorkflow: { data: WORKFLOWS_FIXTURE[0], isDirty: false },
-      },
-    });
+    expect(reducer(state, action)).toStrictEqual(
+      expect.objectContaining({
+        clientState: expect.objectContaining({
+          currentWorkflow: expect.objectContaining({
+            data: expect.objectContaining({
+              stages: expect.arrayContaining([WORKFLOWS_FIXTURE[0].stages[1]]),
+            }),
+          }),
+        }),
+      })
+    );
   });
 
   test('ACTION_ADD_STAGE', () => {
@@ -108,24 +115,22 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
       },
     };
 
-    expect(reducer(state, action)).toStrictEqual({
-      status: expect.any(String),
-      serverState: expect.any(Object),
-      clientState: {
-        currentWorkflow: {
-          data: {
-            ...WORKFLOWS_FIXTURE[0],
-            stages: expect.arrayContaining([
-              {
-                __temp_key__: 3,
-                name: 'something',
-              },
-            ]),
-          },
-          isDirty: true,
-        },
-      },
-    });
+    expect(reducer(state, action)).toStrictEqual(
+      expect.objectContaining({
+        clientState: expect.objectContaining({
+          currentWorkflow: expect.objectContaining({
+            data: expect.objectContaining({
+              stages: expect.arrayContaining([
+                {
+                  __temp_key__: 3,
+                  name: 'something',
+                },
+              ]),
+            }),
+          }),
+        }),
+      })
+    );
   });
 
   test('ACTION_UPDATE_STAGE', () => {
@@ -142,23 +147,67 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
       },
     };
 
-    expect(reducer(state, action)).toStrictEqual({
+    expect(reducer(state, action)).toStrictEqual(
+      expect.objectContaining({
+        clientState: expect.objectContaining({
+          currentWorkflow: expect.objectContaining({
+            data: expect.objectContaining({
+              stages: expect.arrayContaining([
+                {
+                  id: 1,
+                  name: 'stage-1-modified',
+                },
+              ]),
+            }),
+          }),
+        }),
+      })
+    );
+  });
+
+  test('properly compare serverState and clientState and set isDirty accordingly', () => {
+    const actionAddStage = {
+      type: ACTION_ADD_STAGE,
+      payload: { name: 'something' },
+    };
+
+    state = {
       status: expect.any(String),
-      serverState: expect.any(Object),
-      clientState: {
-        currentWorkflow: {
-          data: {
-            ...WORKFLOWS_FIXTURE[0],
-            stages: expect.arrayContaining([
-              {
-                id: 1,
-                name: 'stage-1-modified',
-              },
-            ]),
-          },
-          isDirty: true,
-        },
+      serverState: {
+        currentWorkflow: WORKFLOWS_FIXTURE[0],
       },
-    });
+      clientState: {
+        currentWorkflow: { data: WORKFLOWS_FIXTURE[0], isDirty: false },
+      },
+    };
+
+    state = reducer(state, actionAddStage);
+
+    expect(state).toStrictEqual(
+      expect.objectContaining({
+        clientState: expect.objectContaining({
+          currentWorkflow: expect.objectContaining({
+            isDirty: true,
+          }),
+        }),
+      })
+    );
+
+    const actionDeleteStage = {
+      type: ACTION_DELETE_STAGE,
+      payload: { stageId: 3 },
+    };
+
+    state = reducer(state, actionDeleteStage);
+
+    expect(state).toStrictEqual(
+      expect.objectContaining({
+        clientState: expect.objectContaining({
+          currentWorkflow: expect.objectContaining({
+            isDirty: false,
+          }),
+        }),
+      })
+    );
   });
 });

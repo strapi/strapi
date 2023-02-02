@@ -46,14 +46,9 @@ export function reducer(state = initialState, action) {
         draft.clientState.currentWorkflow.data = {
           ...currentWorkflow.data,
           stages: currentWorkflow.data.stages.filter(
-            (stage) => stage?.id ?? stage.__temp_key__ !== stageId
+            (stage) => (stage?.id ?? stage.__temp_key__) !== stageId
           ),
         };
-
-        draft.clientState.currentWorkflow.isDirty = !isEqual(
-          current(draft.clientState.currentWorkflow).data,
-          state.clientState.currentWorkflow.data
-        );
 
         break;
       }
@@ -68,11 +63,6 @@ export function reducer(state = initialState, action) {
             __temp_key__: state.clientState.currentWorkflow.data.stages.length + 1,
           },
         ];
-
-        draft.clientState.currentWorkflow.isDirty = !isEqual(
-          current(draft.clientState.currentWorkflow).data,
-          state.clientState.currentWorkflow.data
-        );
 
         break;
       }
@@ -93,16 +83,18 @@ export function reducer(state = initialState, action) {
           return stage;
         });
 
-        draft.clientState.currentWorkflow.isDirty = !isEqual(
-          current(draft.clientState.currentWorkflow).data,
-          state.clientState.currentWorkflow.data
-        );
-
         break;
       }
 
       default:
         break;
+    }
+
+    if (state.clientState.currentWorkflow.data) {
+      draft.clientState.currentWorkflow.isDirty = !isEqual(
+        current(draft.clientState.currentWorkflow).data,
+        state.serverState.currentWorkflow
+      );
     }
   });
 }
