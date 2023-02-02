@@ -196,7 +196,7 @@ jobs:
         with:
           project-url: https://github.com/orgs/strapi/projects/13
           github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
-          labeled: 'source: core:content-type-builder, source: core:database, source: core:email, source: core:strapi, source: core:utils, source: plugin:graphql, source: plugin:users-permissions, source: typescript'
+          labeled: 'source: core:content-type-builder, source: core:database, source: core:email, source: core:strapi, source: core:utils, source: plugin:graphql, source: plugin:users-permissions, source: typescript, source: core:deits'
           label-operator: OR
       - name: assign issues to Expansions squad project
         uses: actions/add-to-project@v0.3.0
