@@ -13,9 +13,7 @@ const LANGUAGES = {
 
 const logInstructions = (pluginName, { language }) => {
   const maxLength = `    resolve: './src/plugins/${pluginName}'`.length;
-  const separator = Array(maxLength)
-    .fill('─')
-    .join('');
+  const separator = Array(maxLength).fill('─').join('');
 
   const exportInstruction = language === 'js' ? 'module.exports =' : 'export default';
 
@@ -36,7 +34,7 @@ ${separator}
 `;
 };
 
-module.exports = plop => {
+module.exports = (plop) => {
   // Plugin generator
   plop.setGenerator('plugin', {
     description: 'Generate a basic plugin',
@@ -45,7 +43,7 @@ module.exports = plop => {
         type: 'input',
         name: 'pluginName',
         message: 'Plugin name',
-        validate: input => validateInput(input),
+        validate: (input) => validateInput(input),
       },
       {
         type: 'list',

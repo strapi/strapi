@@ -4,11 +4,7 @@ const { yup } = require('@strapi/utils');
 const { isValidName } = require('../common');
 
 function runTest(test, value) {
-  return () =>
-    yup
-      .string()
-      .test(test)
-      .validateSync(value);
+  return () => yup.string().test(test).validateSync(value);
 }
 
 describe('isValidName', () => {

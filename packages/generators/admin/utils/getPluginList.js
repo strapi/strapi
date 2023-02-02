@@ -19,7 +19,7 @@ const getPluginList = () => {
           reject(err);
         }
 
-        const extendsAdmin = match => fileExistsInPackages(`${match}/admin/src`);
+        const extendsAdmin = (match) => fileExistsInPackages(`${match}/admin/src`);
 
         resolve(await asyncFilter(matches, extendsAdmin));
       }

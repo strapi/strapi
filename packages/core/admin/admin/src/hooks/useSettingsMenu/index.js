@@ -21,9 +21,9 @@ const useSettingsMenu = (noCheck = false) => {
         return { hasPermission, path };
       };
 
-      const generateArrayOfPromises = array => {
+      const generateArrayOfPromises = (array) => {
         return array.reduce((acc, current, sectionIndex) => {
-          const generateArrayOfPromises = array =>
+          const generateArrayOfPromises = (array) =>
             array.map((link, index) =>
               checkPermissions(array[index].permissions, `${sectionIndex}.links.${index}`)
             );

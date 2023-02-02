@@ -20,7 +20,7 @@ const PrivateRoute = ({ component: Component, path, ...rest }) => {
   return (
     <Route
       path={path}
-      render={props =>
+      render={(props) =>
         auth.getToken() !== null ? (
           <Component {...rest} {...props} />
         ) : (

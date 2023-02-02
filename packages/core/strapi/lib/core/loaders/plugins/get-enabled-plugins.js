@@ -7,7 +7,7 @@ const { get, has, pick, pickBy, defaultsDeep, map, prop, pipe } = require('lodas
 const { isKebabCase } = require('@strapi/utils');
 const getUserPluginsConfig = require('./get-user-plugins-config');
 
-const isStrapiPlugin = info => get('strapi.kind', info) === 'plugin';
+const isStrapiPlugin = (info) => get('strapi.kind', info) === 'plugin';
 const INTERNAL_PLUGINS = [
   '@strapi/plugin-content-manager',
   '@strapi/plugin-content-type-builder',
@@ -15,18 +15,18 @@ const INTERNAL_PLUGINS = [
   '@strapi/plugin-upload',
 ];
 
-const validatePluginName = pluginName => {
+const validatePluginName = (pluginName) => {
   if (!isKebabCase(pluginName)) {
     throw new Error(`Plugin name "${pluginName}" is not in kebab (an-example-of-kebab-case)`);
   }
 };
 
-const toDetailedDeclaration = declaration => {
+const toDetailedDeclaration = (declaration) => {
   if (typeof declaration === 'boolean') {
     return { enabled: declaration };
   }
 
-  let detailedDeclaration = pick(['enabled'], declaration);
+  const detailedDeclaration = pick(['enabled'], declaration);
   if (has('resolve', declaration)) {
     let pathToPlugin = '';
 
@@ -45,7 +45,7 @@ const toDetailedDeclaration = declaration => {
   return detailedDeclaration;
 };
 
-const getEnabledPlugins = async strapi => {
+const getEnabledPlugins = async (strapi) => {
   const internalPlugins = {};
   for (const dep of INTERNAL_PLUGINS) {
     const packagePath = join(dep, 'package.json');
@@ -59,7 +59,9 @@ const getEnabledPlugins = async strapi => {
   }
 
   const installedPlugins = {};
-  for (const dep in strapi.config.get('info.dependencies', {})) {
+  const dependencies = strapi.config.get('info.dependencies', {});
+
+  for (const dep of Object.keys(dependencies)) {
     const packagePath = join(dep, 'package.json');
     let packageInfo;
     try {
@@ -106,14 +108,14 @@ const getEnabledPlugins = async strapi => {
 
   const declaredPluginsResolves = map(prop('pathToPlugin'), declaredPlugins);
   const installedPluginsNotAlreadyUsed = pickBy(
-    p => !declaredPluginsResolves.includes(p.pathToPlugin),
+    (p) => !declaredPluginsResolves.includes(p.pathToPlugin),
     installedPlugins
   );
 
   const enabledPlugins = pipe(
     defaultsDeep(declaredPlugins),
     defaultsDeep(installedPluginsNotAlreadyUsed),
-    pickBy(p => p.enabled)
+    pickBy((p) => p.enabled)
   )(internalPlugins);
 
   return enabledPlugins;

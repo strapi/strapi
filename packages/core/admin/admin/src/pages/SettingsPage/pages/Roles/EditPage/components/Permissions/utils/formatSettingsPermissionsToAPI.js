@@ -3,7 +3,7 @@
  * @param {object} conditions
  * @config {boolean}
  */
-const createConditionsArray = conditions => {
+const createConditionsArray = (conditions) => {
   return Object.entries(conditions)
     .filter(([, conditionValue]) => {
       return conditionValue;
@@ -11,7 +11,7 @@ const createConditionsArray = conditions => {
     .map(([conditionName]) => conditionName);
 };
 
-const createPermission = array => {
+const createPermission = (array) => {
   const [actionName, { conditions }] = array;
 
   return {
@@ -22,7 +22,7 @@ const createPermission = array => {
   };
 };
 
-const createPermissionsArrayFromCategory = categoryPermissions => {
+const createPermissionsArrayFromCategory = (categoryPermissions) => {
   return Object.values(categoryPermissions).reduce((acc, current) => {
     const permissions = Object.entries(current).reduce((acc1, current1) => {
       const [
@@ -47,7 +47,7 @@ const createPermissionsArrayFromCategory = categoryPermissions => {
   }, []);
 };
 
-const formatSettingsPermissionsToAPI = settingsPermissionsObject => {
+const formatSettingsPermissionsToAPI = (settingsPermissionsObject) => {
   return Object.values(settingsPermissionsObject).reduce((acc, current) => {
     const currentCategoryPermissions = createPermissionsArrayFromCategory(current);
 

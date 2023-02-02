@@ -51,7 +51,7 @@ const useUserForm = (endPoint, permissions) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoadingForPermissions, endPoint]);
 
-  const dispatchSubmitSucceeded = useCallback(data => {
+  const dispatchSubmitSucceeded = useCallback((data) => {
     dispatch({
       type: 'ON_SUBMIT_SUCCEEDED',
       data,

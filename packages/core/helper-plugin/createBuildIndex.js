@@ -11,7 +11,7 @@ if (process.env.NODE_ENV === "production") {
 }
 `;
 
-const createIndexFile = async dest => {
+const createIndexFile = async (dest) => {
   await fs.ensureDir(path.resolve(dest, 'build'));
   fs.writeFile(path.resolve(dest, 'build', 'index.js'), content);
 };

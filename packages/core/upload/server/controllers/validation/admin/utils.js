@@ -3,7 +3,7 @@
 const { isNil } = require('lodash/fp');
 const { getService } = require('../../../utils');
 
-const folderExists = async folderId => {
+const folderExists = async (folderId) => {
   if (isNil(folderId)) {
     return true;
   }

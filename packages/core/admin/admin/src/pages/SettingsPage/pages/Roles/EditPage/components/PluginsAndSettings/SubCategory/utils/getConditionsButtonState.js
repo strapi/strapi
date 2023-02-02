@@ -1,6 +1,6 @@
 import { createArrayOfValues } from '../../../utils';
 
-const getConditionsButtonState = valueObj => {
+const getConditionsButtonState = (valueObj) => {
   const relatedData = Object.entries(valueObj).reduce((acc, current) => {
     const [catName, { conditions }] = current;
 
@@ -11,7 +11,7 @@ const getConditionsButtonState = valueObj => {
 
   const arrayOfValues = createArrayOfValues(relatedData);
 
-  return arrayOfValues.some(val => val);
+  return arrayOfValues.some((val) => val);
 };
 
 export default getConditionsButtonState;

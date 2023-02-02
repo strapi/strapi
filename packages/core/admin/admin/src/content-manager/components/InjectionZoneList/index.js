@@ -13,7 +13,7 @@ const InjectionZoneList = ({ area, ...props }) => {
   // TODO
   return (
     <ul>
-      {compos.map(compo => {
+      {compos.map((compo) => {
         const component = compo.Component(props);
 
         if (component) {

@@ -7,7 +7,7 @@ const fetchUser = async () => {
   return data.data;
 };
 
-const putUser = async body => {
+const putUser = async (body) => {
   const dataToSend = omit(body, ['confirmPassword', 'currentTheme']);
   const { data } = await axiosInstance.put('/admin/users/me', dataToSend);
 

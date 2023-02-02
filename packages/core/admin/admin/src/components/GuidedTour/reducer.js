@@ -22,7 +22,7 @@ export const initialState = {
 };
 
 const reducer = (state = initialState, action) =>
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case 'SET_CURRENT_STEP': {
         draftState.currentStep = action.step;

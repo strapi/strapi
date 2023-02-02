@@ -3,7 +3,7 @@
 const { getConfigUrls } = require('@strapi/utils');
 const fse = require('fs-extra');
 
-module.exports = async function({ strapi }) {
+module.exports = async function ({ strapi }) {
   strapi.config.port = strapi.config.get('server.port') || strapi.config.port;
   strapi.config.host = strapi.config.get('server.host') || strapi.config.host;
 

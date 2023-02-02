@@ -15,7 +15,7 @@ const GenericInput = ({ type, options, onChange, value, name, ...inputProps }) =
     case 'bool': {
       return (
         <ToggleInput
-          onChange={e => {
+          onChange={(e) => {
             onChange({ target: { name, value: e.target.checked } });
           }}
           checked={value}
@@ -37,10 +37,10 @@ const GenericInput = ({ type, options, onChange, value, name, ...inputProps }) =
         <Select
           value={value}
           name={name}
-          onChange={value => onChange({ target: { name, value } })}
+          onChange={(value) => onChange({ target: { name, value } })}
           {...inputProps}
         >
-          {options.map(option => (
+          {options.map((option) => (
             <Option key={option} value={option}>
               {option}
             </Option>

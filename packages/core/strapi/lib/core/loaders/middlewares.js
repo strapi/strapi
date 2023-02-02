@@ -2,8 +2,7 @@
 
 const { join, extname, basename } = require('path');
 const fse = require('fs-extra');
-
-const { importDefault } = require('../../utils');
+const { importDefault } = require('@strapi/utils');
 
 // TODO:: allow folders with index.js inside for bigger policies
 module.exports = async function loadMiddlewares(strapi) {
@@ -14,7 +13,7 @@ module.exports = async function loadMiddlewares(strapi) {
   strapi.container.get('middlewares').add(`strapi::`, internalMiddlewares);
 };
 
-const loadLocalMiddlewares = async strapi => {
+const loadLocalMiddlewares = async (strapi) => {
   const dir = strapi.dirs.dist.middlewares;
 
   if (!(await fse.pathExists(dir))) {

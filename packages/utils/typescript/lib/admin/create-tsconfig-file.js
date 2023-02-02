@@ -3,7 +3,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 
-module.exports = async dest => {
+module.exports = async (dest) => {
   const tsConfig = {
     compilerOptions: {
       lib: ['es2019', 'es2020.promise', 'es2020.bigint', 'es2020.string', 'DOM'],

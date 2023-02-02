@@ -12,8 +12,8 @@ async function run() {
   console.log('Linking all packages');
 
   const packages = packageDirs
-    .filter(dir => fs.pathExistsSync(join(dir, 'package.json')))
-    .map(dir => {
+    .filter((dir) => fs.pathExistsSync(join(dir, 'package.json')))
+    .map((dir) => {
       return {
         dir,
         pkgJSON: fs.readJSONSync(join(dir, 'package.json')),
@@ -22,8 +22,8 @@ async function run() {
 
   await Promise.all(packages.map(({ dir }) => execa('yarn', ['link'], { cwd: dir })));
 
-  const packageNames = packages.map(p => p.pkgJSON.name).join(' ');
+  const packageNames = packages.map((p) => p.pkgJSON.name).join(' ');
   console.log(`Package names: \n ${packageNames}\n`);
 }
 
-run().catch(err => console.error(err));
+run().catch((err) => console.error(err));

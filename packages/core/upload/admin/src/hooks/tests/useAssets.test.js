@@ -5,10 +5,9 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
-import { NotificationsProvider, useNotification } from '@strapi/helper-plugin';
+import { NotificationsProvider, useNotification, useFetchClient } from '@strapi/helper-plugin';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 
-import { axiosInstance } from '../../utils';
 import { useAssets } from '../useAssets';
 
 const notifyStatusMock = jest.fn();
@@ -20,22 +19,18 @@ jest.mock('@strapi/design-system/LiveRegions', () => ({
   }),
 }));
 
-jest.mock('../../utils', () => ({
-  ...jest.requireActual('../../utils'),
-  axiosInstance: {
-    get: jest.fn().mockResolvedValue({
-      data: {
-        id: 1,
-      },
-    }),
-  },
-}));
-
 const notificationStatusMock = jest.fn();
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: () => notificationStatusMock,
+  useFetchClient: jest.fn().mockReturnValue({
+    get: jest.fn().mockResolvedValue({
+      data: {
+        id: 1,
+      },
+    }),
+  }),
 }));
 
 const client = new QueryClient({
@@ -64,7 +59,7 @@ function ComponentFixture({ children }) {
 }
 
 function setup(...args) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     act(() => {
       resolve(renderHook(() => useAssets(...args), { wrapper: ComponentFixture }));
     });
@@ -82,6 +77,8 @@ describe('useAssets', () => {
     await waitFor(() => result.current.isSuccess);
     await waitForNextUpdate();
 
+    const { get } = useFetchClient();
+
     const expected = {
       filters: {
         $and: [
@@ -96,8 +93,8 @@ describe('useAssets', () => {
       },
     };
 
-    expect(axiosInstance.get).toBeCalledWith(
-      `/upload/files?${stringify(expected, { encode: false })}`
+    expect(get).toBeCalledWith(
+      `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
     );
   });
 
@@ -106,6 +103,7 @@ describe('useAssets', () => {
 
     await waitFor(() => result.current.isSuccess);
     await waitForNextUpdate();
+    const { get } = useFetchClient();
 
     const expected = {
       filters: {
@@ -119,8 +117,8 @@ describe('useAssets', () => {
       },
     };
 
-    expect(axiosInstance.get).toBeCalledWith(
-      `/upload/files?${stringify(expected, { encode: false })}`
+    expect(get).toBeCalledWith(
+      `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
     );
   });
 
@@ -131,6 +129,7 @@ describe('useAssets', () => {
 
     await waitFor(() => result.current.isSuccess);
     await waitForNextUpdate();
+    const { get } = useFetchClient();
 
     const expected = {
       filters: {
@@ -147,8 +146,8 @@ describe('useAssets', () => {
       },
     };
 
-    expect(axiosInstance.get).toBeCalledWith(
-      `/upload/files?${stringify(expected, { encode: false })}`
+    expect(get).toBeCalledWith(
+      `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
     );
   });
 
@@ -159,6 +158,7 @@ describe('useAssets', () => {
 
     await waitFor(() => result.current.isSuccess);
     await waitForNextUpdate();
+    const { get } = useFetchClient();
 
     const expected = {
       filters: {
@@ -171,8 +171,34 @@ describe('useAssets', () => {
       _q: 'something',
     };
 
-    expect(axiosInstance.get).toBeCalledWith(
-      `/upload/files?${stringify(expected, { encode: false })}`
+    expect(get).toBeCalledWith(
+      `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
+    );
+  });
+
+  test('correctly encodes the search query _q', async () => {
+    const _q = 'something&else';
+    const { result, waitFor, waitForNextUpdate } = await setup({
+      query: { folder: 5, _q, filters: { $and: [{ something: 'true' }] } },
+    });
+
+    await waitFor(() => result.current.isSuccess);
+    await waitForNextUpdate();
+    const { get } = useFetchClient();
+
+    const expected = {
+      filters: {
+        $and: [
+          {
+            something: true,
+          },
+        ],
+      },
+      _q: encodeURIComponent(_q),
+    };
+
+    expect(get).toBeCalledWith(
+      `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
     );
   });
 
@@ -181,7 +207,9 @@ describe('useAssets', () => {
 
     await waitFor(() => result.current.isSuccess);
 
-    expect(axiosInstance.get).toBeCalledTimes(0);
+    const { get } = useFetchClient();
+
+    expect(get).toBeCalledTimes(0);
   });
 
   test('calls notifyStatus in case of success', async () => {
@@ -199,8 +227,9 @@ describe('useAssets', () => {
   test('calls toggleNotification in case of error', async () => {
     const originalConsoleError = console.error;
     console.error = jest.fn();
+    const { get } = useFetchClient();
 
-    axiosInstance.get.mockRejectedValueOnce(new Error('Jest mock error'));
+    get.mockRejectedValueOnce(new Error('Jest mock error'));
 
     const { notifyStatus } = useNotifyAT();
     const toggleNotification = useNotification();

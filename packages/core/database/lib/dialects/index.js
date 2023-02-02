@@ -1,6 +1,6 @@
 'use strict';
 
-const getDialectClass = client => {
+const getDialectClass = (client) => {
   switch (client) {
     case 'postgres':
       return require('./postgresql');
@@ -13,7 +13,7 @@ const getDialectClass = client => {
   }
 };
 
-const getDialect = db => {
+const getDialect = (db) => {
   const { client } = db.config.connection;
 
   const constructor = getDialectClass(client);

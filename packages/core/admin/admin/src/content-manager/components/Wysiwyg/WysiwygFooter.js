@@ -28,7 +28,7 @@ const WysiwygFooter = ({ onToggleExpand }) => {
 };
 
 WysiwygFooter.defaultProps = {
-  onToggleExpand: () => {},
+  onToggleExpand() {},
 };
 
 WysiwygFooter.propTypes = {

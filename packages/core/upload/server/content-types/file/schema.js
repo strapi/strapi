@@ -108,5 +108,30 @@ module.exports = {
       columns: ['folder_path'],
       type: null,
     },
+    {
+      name: `upload_files_created_at_index`,
+      columns: ['created_at'],
+      type: null,
+    },
+    {
+      name: `upload_files_updated_at_index`,
+      columns: ['updated_at'],
+      type: null,
+    },
+    {
+      name: `upload_files_name_index`,
+      columns: ['name'],
+      type: null,
+    },
+    {
+      name: `upload_files_size_index`,
+      columns: ['size'],
+      type: null,
+    },
+    {
+      name: `upload_files_ext_index`,
+      columns: ['ext'],
+      type: null,
+    },
   ],
 };

@@ -1,4 +1,5 @@
 'use strict';
+
 const { join } = require('path');
 const fs = require('fs-extra');
 
@@ -27,7 +28,7 @@ module.exports = (action, basePath, { rootFolder = false } = {}) => {
       ],
     },
     {
-      when: answers => answers.destination === 'api',
+      when: (answers) => answers.destination === 'api',
       type: 'list',
       message: 'Which API is this for?',
       name: 'api',
@@ -40,7 +41,7 @@ module.exports = (action, basePath, { rootFolder = false } = {}) => {
         }
 
         const apiDir = await fs.readdir(apiPath, { withFileTypes: true });
-        const apiDirContent = apiDir.filter(fd => fd.isDirectory());
+        const apiDirContent = apiDir.filter((fd) => fd.isDirectory());
 
         if (apiDirContent.length === 0) {
           throw Error('The "api" directory is empty');
@@ -50,7 +51,7 @@ module.exports = (action, basePath, { rootFolder = false } = {}) => {
       },
     },
     {
-      when: answers => answers.destination === 'plugin',
+      when: (answers) => answers.destination === 'plugin',
       type: 'list',
       message: 'Which plugin is this for?',
       name: 'plugin',
@@ -63,7 +64,7 @@ module.exports = (action, basePath, { rootFolder = false } = {}) => {
         }
 
         const pluginsDir = await fs.readdir(pluginsPath);
-        const pluginsDirContent = pluginsDir.filter(api =>
+        const pluginsDirContent = pluginsDir.filter((api) =>
           fs.lstatSync(join(pluginsPath, api)).isDirectory()
         );
 

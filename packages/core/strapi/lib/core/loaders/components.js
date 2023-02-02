@@ -5,7 +5,7 @@ const _ = require('lodash');
 const { pathExists } = require('fs-extra');
 const loadFiles = require('../../load/load-files');
 
-module.exports = async strapi => {
+module.exports = async (strapi) => {
   if (!(await pathExists(strapi.dirs.dist.components))) {
     return {};
   }
@@ -13,7 +13,7 @@ module.exports = async strapi => {
   const map = await loadFiles(strapi.dirs.dist.components, '*/*.*(js|json)');
 
   return Object.keys(map).reduce((acc, category) => {
-    Object.keys(map[category]).forEach(key => {
+    Object.keys(map[category]).forEach((key) => {
       const schema = map[category][key];
 
       if (!schema.collectionName) {

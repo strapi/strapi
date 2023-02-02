@@ -5,8 +5,8 @@ import {
   useAppInfos,
   SettingsPageTitle,
   useFocusWhenNavigate,
-  CheckPermissions,
   useNotification,
+  useRBAC,
   useTracking,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, Layout, ContentLayout } from '@strapi/design-system/Layout';
@@ -19,12 +19,11 @@ import { Button } from '@strapi/design-system/Button';
 import { Link } from '@strapi/design-system/v2/Link';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import Check from '@strapi/icons/Check';
+import adminPermissions from '../../../../permissions';
 import { useConfigurations } from '../../../../hooks';
-import Form from './components/Form';
+import CustomizationInfos from './components/CustomizationInfos';
 import { fetchProjectSettings, postProjectSettings } from './utils/api';
 import getFormData from './utils/getFormData';
-
-const permissions = [{ action: 'admin::project-settings.update', subject: null }];
 
 const ApplicationInfosPage = () => {
   const inputsRef = useRef();
@@ -37,32 +36,54 @@ const ApplicationInfosPage = () => {
   const { shouldUpdateStrapi, latestStrapiReleaseTag, strapiVersion } = appInfos;
   const { updateProjectSettings } = useConfigurations();
 
-  const { data } = useQuery('project-settings', fetchProjectSettings);
+  const {
+    allowedActions: { canRead, canUpdate },
+  } = useRBAC(adminPermissions.settings['project-settings']);
+  const canSubmit = canRead && canUpdate;
+
+  const { data } = useQuery('project-settings', fetchProjectSettings, { enabled: canRead });
 
   const currentPlan = appInfos.communityEdition
     ? 'app.components.UpgradePlanModal.text-ce'
     : 'app.components.UpgradePlanModal.text-ee';
 
-  const submitMutation = useMutation(body => postProjectSettings(body), {
-    onSuccess: async ({ menuLogo }) => {
+  const submitMutation = useMutation((body) => postProjectSettings(body), {
+    async onSuccess({ menuLogo, authLogo }) {
       await queryClient.invalidateQueries('project-settings', { refetchActive: true });
-      updateProjectSettings({ menuLogo: menuLogo?.url });
+      updateProjectSettings({ menuLogo: menuLogo?.url, authLogo: authLogo?.url });
     },
   });
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!canUpdate) return;
+
     const inputValues = inputsRef.current.getValues();
     const formData = getFormData(inputValues);
 
     submitMutation.mutate(formData, {
-      onSuccess: () => {
-        const { menuLogo } = inputValues;
+      onSuccess() {
+        const { menuLogo, authLogo } = inputValues;
 
         if (menuLogo.rawFile) {
-          trackUsage('didChangeLogo');
+          trackUsage('didChangeLogo', {
+            logo: 'menu',
+          });
         }
+
+        if (authLogo.rawFile) {
+          trackUsage('didChangeLogo', {
+            logo: 'auth',
+          });
+        }
+
+        toggleNotification({
+          type: 'success',
+          message: formatMessage({ id: 'app', defaultMessage: 'Saved' }),
+        });
       },
-      onError: () => {
+      onError() {
         toggleNotification({
           type: 'warning',
           message: { id: 'notification.error', defaultMessage: 'An error occurred' },
@@ -75,30 +96,33 @@ const ApplicationInfosPage = () => {
     <Layout>
       <SettingsPageTitle name="Application" />
       <Main>
-        <HeaderLayout
-          title={formatMessage({ id: 'Settings.application.title', defaultMessage: 'Overview' })}
-          subtitle={formatMessage({
-            id: 'Settings.application.description',
-            defaultMessage: 'Administration panel’s global information',
-          })}
-          primaryAction={
-            <Button onClick={handleSubmit} startIcon={<Check />}>
-              {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
-            </Button>
-          }
-        />
-        <ContentLayout>
-          <Stack spacing={6}>
-            <Box
-              hasRadius
-              background="neutral0"
-              shadow="tableShadow"
-              paddingTop={6}
-              paddingBottom={6}
-              paddingRight={7}
-              paddingLeft={7}
-            >
-              <Stack spacing={5}>
+        <form onSubmit={handleSubmit}>
+          <HeaderLayout
+            title={formatMessage({ id: 'Settings.application.title', defaultMessage: 'Overview' })}
+            subtitle={formatMessage({
+              id: 'Settings.application.description',
+              defaultMessage: 'Administration panel’s global information',
+            })}
+            primaryAction={
+              canSubmit && (
+                <Button type="submit" startIcon={<Check />}>
+                  {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
+                </Button>
+              )
+            }
+          />
+          <ContentLayout>
+            <Stack spacing={6}>
+              <Stack
+                spacing={5}
+                hasRadius
+                background="neutral0"
+                shadow="tableShadow"
+                paddingTop={6}
+                paddingBottom={6}
+                paddingRight={7}
+                paddingLeft={7}
+              >
                 <Typography variant="delta" as="h3">
                   {formatMessage({
                     id: 'global.details',
@@ -187,14 +211,16 @@ const ApplicationInfosPage = () => {
                   <Typography as="p">{appInfos.nodeVersion}</Typography>
                 </Box>
               </Stack>
-            </Box>
-            {data && (
-              <CheckPermissions permissions={permissions}>
-                <Form ref={inputsRef} projectSettingsStored={data} />
-              </CheckPermissions>
-            )}
-          </Stack>
-        </ContentLayout>
+              {canRead && data && (
+                <CustomizationInfos
+                  canUpdate={canUpdate}
+                  ref={inputsRef}
+                  projectSettingsStored={data}
+                />
+              )}
+            </Stack>
+          </ContentLayout>
+        </form>
       </Main>
     </Layout>
   );

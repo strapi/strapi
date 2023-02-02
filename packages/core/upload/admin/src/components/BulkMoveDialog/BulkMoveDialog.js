@@ -62,7 +62,7 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
           <Flex justifyContent="center" paddingTop={4} paddingBottom={4}>
             <Loader>
               {formatMessage({
-                id: getTrad('list.asset.load'),
+                id: getTrad('content.isLoading'),
                 defaultMessage: 'Content is loading.',
               })}
             </Loader>
@@ -106,7 +106,7 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
 
                     <SelectTree
                       options={folderStructure}
-                      onChange={value => {
+                      onChange={(value) => {
                         setFieldValue('destination', value);
                       }}
                       defaultValue={values.destination}

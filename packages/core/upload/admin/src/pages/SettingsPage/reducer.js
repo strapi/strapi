@@ -20,7 +20,7 @@ const initialState = {
 
 const reducer = (state, action) =>
   // eslint-disable-next-line consistent-return
-  produce(state, drafState => {
+  produce(state, (drafState) => {
     switch (action.type) {
       case 'CANCEL_CHANGES': {
         drafState.modifiedData = state.initialData;

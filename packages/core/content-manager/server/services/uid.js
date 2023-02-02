@@ -33,7 +33,7 @@ module.exports = ({ strapi }) => ({
       .findMany({
         where: { [field]: { $contains: value } },
       })
-      .then(results => results.map(result => result[field]));
+      .then((results) => results.map((result) => result[field]));
 
     if (possibleColisions.length === 0) {
       return value;

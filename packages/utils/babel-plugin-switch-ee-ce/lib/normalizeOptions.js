@@ -19,7 +19,7 @@ const normalizeRoots = (optsRoot, cwd) => {
 
 const normalizeOptions = createSelector(
   // TODO check if needed
-  currentFile => (currentFile.includes('.') ? path.dirname(currentFile) : currentFile),
+  (currentFile) => (currentFile.includes('.') ? path.dirname(currentFile) : currentFile),
   (_, opts) => opts,
   (_, opts) => {
     const cwd = process.cwd();

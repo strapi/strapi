@@ -1,6 +1,6 @@
 'use strict';
 
-const formatLocale = locale => {
+const formatLocale = (locale) => {
   return {
     ...locale,
     name: locale.name || null,

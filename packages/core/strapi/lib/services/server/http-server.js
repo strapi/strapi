@@ -17,7 +17,7 @@ const createHTTPServer = (strapi, koaApp) => {
 
   const server = http.createServer(listener);
 
-  server.on('connection', connection => {
+  server.on('connection', (connection) => {
     connections.add(connection);
 
     connection.on('close', () => {
@@ -26,7 +26,7 @@ const createHTTPServer = (strapi, koaApp) => {
   });
 
   // handle port in use cleanly
-  server.on('error', err => {
+  server.on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
       return strapi.stopWithError(`The port ${err.port} is already used by another application.`);
     }
@@ -45,15 +45,15 @@ const createHTTPServer = (strapi, koaApp) => {
       return;
     }
 
-    return new Promise((resolve, reject) =>
-      server.close(error => {
+    return new Promise((resolve, reject) => {
+      server.close((error) => {
         if (error) {
-          return reject(error);
+          reject(error);
+        } else {
+          resolve();
         }
-
-        resolve();
-      })
-    );
+      });
+    });
   };
 
   return server;

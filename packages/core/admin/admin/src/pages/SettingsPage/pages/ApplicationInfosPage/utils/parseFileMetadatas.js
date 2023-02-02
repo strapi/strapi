@@ -11,12 +11,12 @@ const FILE_SIZING_ERROR_MESSAGE = {
     'The file uploaded is too large (max dimension: {dimension}x{dimension}, max file size: {size}KB)',
 };
 
-const getFileDimensions = file => {
-  return new Promise(resolve => {
+const getFileDimensions = (file) => {
+  return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = () => {
       const img = new Image();
-      img.onload = function() {
+      img.onload = function () {
         resolve({ width: img.width, height: img.height });
       };
       img.src = reader.result;
@@ -37,7 +37,7 @@ const rawFileToAsset = (rawFile, fileDimensions) => {
   };
 };
 
-export const parseFileMetadatas = async file => {
+export const parseFileMetadatas = async (file) => {
   let error;
 
   const isFormatAuthorized = ACCEPTED_FORMAT.includes(file.type);

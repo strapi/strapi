@@ -31,7 +31,7 @@ const useDeleteLocale = () => {
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
 
-  const removeLocale = async id => {
+  const removeLocale = async (id) => {
     setLoading(true);
 
     await deleteLocale(id, toggleNotification);

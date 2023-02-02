@@ -6,7 +6,7 @@ const chalk = require('chalk');
 const fetch = require('node-fetch');
 const machineID = require('../utils/machine-id');
 
-const readPackageJSON = async path => {
+const readPackageJSON = async (path) => {
   try {
     const packageObj = await fse.readJson(path);
     const uuid = packageObj.strapi ? packageObj.strapi.uuid : null;
@@ -26,19 +26,19 @@ const writePackageJSON = async (path, file, spacing) => {
   }
 };
 
-const sendEvent = async uuid => {
+const sendEvent = async (uuid) => {
   try {
-    await fetch('https://analytics.strapi.io/track', {
+    await fetch('https://analytics.strapi.io/api/v2/track', {
       method: 'POST',
       body: JSON.stringify({
         event: 'didOptOutTelemetry',
-        uuid,
         deviceId: machineID(),
+        groupProperties: { projectId: uuid },
       }),
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (e) {
-    //...
+    // ...
   }
 };
 

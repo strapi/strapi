@@ -1,8 +1,6 @@
 'use strict';
 
-const GraphQLJSON = require('graphql-type-json');
-const GraphQLLong = require('graphql-type-long');
-const { GraphQLDateTime } = require('graphql-iso-date/dist');
+const { GraphQLDateTime, GraphQLLong, GraphQLJSON } = require('graphql-scalars');
 const { GraphQLUpload } = require('graphql-upload');
 const { asNexusMethod } = require('nexus');
 

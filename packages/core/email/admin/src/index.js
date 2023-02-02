@@ -29,7 +29,7 @@ export default {
           },
           id: 'settings',
           to: `/settings/${pluginId}`,
-          Component: async () => {
+          async Component() {
             const component = await import(
               /* webpackChunkName: "email-settings-page" */ './pages/Settings'
             );
@@ -48,7 +48,7 @@ export default {
   bootstrap() {},
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
-      locales.map(locale => {
+      locales.map((locale) => {
         return import(
           /* webpackChunkName: "email-translation-[request]" */ `./translations/${locale}.json`
         )

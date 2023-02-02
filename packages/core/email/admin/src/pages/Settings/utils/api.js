@@ -6,7 +6,7 @@ const fetchEmailSettings = async () => {
   return data.config;
 };
 
-const postEmailTest = async body => {
+const postEmailTest = async (body) => {
   await axiosInstance.post('/email/test', body);
 };
 

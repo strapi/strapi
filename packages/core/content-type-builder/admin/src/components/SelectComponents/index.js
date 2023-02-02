@@ -61,7 +61,7 @@ const SelectComponents = ({ dynamicZoneTarget, intlLabel, name, onChange, value 
       label={formatMessage(intlLabel)}
       customizeContent={() => displayedValue}
       name={name}
-      onChange={values => {
+      onChange={(values) => {
         onChange({ target: { name, value: values, type: 'select-components' } });
       }}
       options={options}

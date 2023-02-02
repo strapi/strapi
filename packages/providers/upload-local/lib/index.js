@@ -9,17 +9,19 @@ const { pipeline } = require('stream');
 const fs = require('fs');
 const path = require('path');
 const fse = require('fs-extra');
-const { PayloadTooLargeError } = require('@strapi/utils').errors;
+const { PayloadTooLargeError } = require('@strapi/utils/lib/errors');
+const { kbytesToBytes, bytesToHumanReadable } = require('../../../core/upload/server/utils/file');
 
 const UPLOADS_FOLDER_NAME = 'uploads';
 
 module.exports = {
-  init({ sizeLimit = 1000000 } = {}) {
-    const verifySize = file => {
-      if (file.size > sizeLimit) {
-        throw new PayloadTooLargeError();
-      }
-    };
+  init({ sizeLimit: providerOptionsSizeLimit } = {}) {
+    // TODO V5: remove providerOptions sizeLimit
+    if (providerOptionsSizeLimit) {
+      process.emitWarning(
+        `[deprecated] In future versions, "sizeLimit" argument will be ignored from upload.config.providerOptions. Move it to upload.config`
+      );
+    }
 
     // Ensure uploads folder exists
     const uploadPath = path.resolve(strapi.dirs.static.public, UPLOADS_FOLDER_NAME);
@@ -30,14 +32,28 @@ module.exports = {
     }
 
     return {
+      checkFileSize(file, { sizeLimit } = {}) {
+        // TODO V5: remove providerOptions sizeLimit
+        if (providerOptionsSizeLimit) {
+          if (kbytesToBytes(file.size) > providerOptionsSizeLimit)
+            throw new PayloadTooLargeError(
+              `${file.name} exceeds size limit of ${bytesToHumanReadable(
+                providerOptionsSizeLimit
+              )}.`
+            );
+        } else if (sizeLimit) {
+          if (kbytesToBytes(file.size) > sizeLimit)
+            throw new PayloadTooLargeError(
+              `${file.name} exceeds size limit of ${bytesToHumanReadable(sizeLimit)}.`
+            );
+        }
+      },
       uploadStream(file) {
-        verifySize(file);
-
         return new Promise((resolve, reject) => {
           pipeline(
             file.stream,
             fs.createWriteStream(path.join(uploadPath, `${file.hash}${file.ext}`)),
-            err => {
+            (err) => {
               if (err) {
                 return reject(err);
               }
@@ -50,11 +66,9 @@ module.exports = {
         });
       },
       upload(file) {
-        verifySize(file);
-
         return new Promise((resolve, reject) => {
           // write file in public/assets folder
-          fs.writeFile(path.join(uploadPath, `${file.hash}${file.ext}`), file.buffer, err => {
+          fs.writeFile(path.join(uploadPath, `${file.hash}${file.ext}`), file.buffer, (err) => {
             if (err) {
               return reject(err);
             }
@@ -70,11 +84,12 @@ module.exports = {
           const filePath = path.join(uploadPath, `${file.hash}${file.ext}`);
 
           if (!fs.existsSync(filePath)) {
+            // eslint-disable-next-line no-promise-executor-return
             return resolve("File doesn't exist");
           }
 
           // remove file from public/assets folder
-          fs.unlink(filePath, err => {
+          fs.unlink(filePath, (err) => {
             if (err) {
               return reject(err);
             }

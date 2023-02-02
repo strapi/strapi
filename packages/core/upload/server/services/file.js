@@ -4,7 +4,7 @@ const { FOLDER_MODEL_UID, FILE_MODEL_UID } = require('../constants');
 
 const { getService } = require('../utils');
 
-const getFolderPath = async folderId => {
+const getFolderPath = async (folderId) => {
   if (!folderId) return '/';
 
   const parentFolder = await strapi.entityService.findOne(FOLDER_MODEL_UID, folderId);
@@ -17,7 +17,7 @@ const deleteByIds = async (ids = []) => {
     .query(FILE_MODEL_UID)
     .findMany({ where: { id: { $in: ids } } });
 
-  await Promise.all(filesToDelete.map(file => getService('upload').remove(file)));
+  await Promise.all(filesToDelete.map((file) => getService('upload').remove(file)));
 
   return filesToDelete;
 };

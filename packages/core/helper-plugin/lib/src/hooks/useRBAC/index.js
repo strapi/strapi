@@ -31,7 +31,7 @@ const useRBAC = (pluginPermissions, permissions) => {
   };
 
   generateArrayOfPromisesRef.current = (array, permissions) =>
-    array.map(permissionName => checkPermissionsRef.current(permissionName, permissions));
+    array.map((permissionName) => checkPermissionsRef.current(permissionName, permissions));
 
   useEffect(() => {
     isMounted.current = true;

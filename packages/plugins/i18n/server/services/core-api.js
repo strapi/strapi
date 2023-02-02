@@ -15,7 +15,7 @@ const { getContentTypeRoutePrefix, isSingleType, getWritableAttributes } = conte
  * @param {object} entry
  * @returns {string[]}
  */
-const getAllLocales = entry => {
+const getAllLocales = (entry) => {
   return [entry.locale, ...map(prop('locale'), entry.localizations)];
 };
 
@@ -24,7 +24,7 @@ const getAllLocales = entry => {
  * @param {object} entry
  * @returns {any[]}
  */
-const getAllLocalizationsIds = entry => {
+const getAllLocalizationsIds = (entry) => {
   return [entry.id, ...map(prop('id'), entry.localizations)];
 };
 
@@ -36,14 +36,14 @@ const getAllLocalizationsIds = entry => {
  *    sanitizeInputFiles(files: object): object
  * }}
  */
-const createSanitizer = contentType => {
+const createSanitizer = (contentType) => {
   /**
    * Returns the writable attributes of a content type in the localization routes
    * @returns {string[]}
    */
   const getAllowedAttributes = () => {
     return getWritableAttributes(contentType).filter(
-      attributeName => !['locale', 'localizations'].includes(attributeName)
+      (attributeName) => !['locale', 'localizations'].includes(attributeName)
     );
   };
 
@@ -52,7 +52,7 @@ const createSanitizer = contentType => {
    * @param {object} files - input files to sanitize
    * @returns {object}
    */
-  const sanitizeInputFiles = files => {
+  const sanitizeInputFiles = (files) => {
     const allowedFields = getAllowedAttributes();
     return reduce(
       (acc, keyPath) => {
@@ -73,7 +73,7 @@ const createSanitizer = contentType => {
    * @param {object} data - input data to sanitize
    * @returns {object}
    */
-  const sanitizeInput = data => {
+  const sanitizeInput = (data) => {
     return pick(getAllowedAttributes(), data);
   };
 
@@ -85,7 +85,7 @@ const createSanitizer = contentType => {
  * @param {object} contentType
  * @returns {(object) => void}
  */
-const createLocalizationHandler = contentType => {
+const createLocalizationHandler = (contentType) => {
   const handler = createCreateLocalizationHandler(contentType);
 
   return (ctx = {}) => {
@@ -96,63 +96,65 @@ const createLocalizationHandler = contentType => {
   };
 };
 
-const createCreateLocalizationHandler = contentType => async (args = {}) => {
-  const { copyNonLocalizedAttributes } = getService('content-types');
+const createCreateLocalizationHandler =
+  (contentType) =>
+  async (args = {}) => {
+    const { copyNonLocalizedAttributes } = getService('content-types');
 
-  const { sanitizeInput, sanitizeInputFiles } = createSanitizer(contentType);
+    const { sanitizeInput, sanitizeInputFiles } = createSanitizer(contentType);
 
-  const entry = isSingleType(contentType)
-    ? await strapi.query(contentType.uid).findOne({ populate: ['localizations'] })
-    : await strapi
-        .query(contentType.uid)
-        .findOne({ where: { id: args.id }, populate: ['localizations'] });
+    const entry = isSingleType(contentType)
+      ? await strapi.query(contentType.uid).findOne({ populate: ['localizations'] })
+      : await strapi
+          .query(contentType.uid)
+          .findOne({ where: { id: args.id }, populate: ['localizations'] });
 
-  if (!entry) {
-    throw new NotFoundError();
-  }
+    if (!entry) {
+      throw new NotFoundError();
+    }
 
-  const { data, files } = args;
+    const { data, files } = args;
 
-  const { findByCode } = getService('locales');
+    const { findByCode } = getService('locales');
 
-  if (isNil(data.locale)) {
-    throw new ApplicationError('locale is missing');
-  }
+    if (isNil(data.locale)) {
+      throw new ApplicationError('locale is missing');
+    }
 
-  const matchingLocale = await findByCode(data.locale);
-  if (!matchingLocale) {
-    throw new ApplicationError('locale is invalid');
-  }
+    const matchingLocale = await findByCode(data.locale);
+    if (!matchingLocale) {
+      throw new ApplicationError('locale is invalid');
+    }
 
-  const usedLocales = getAllLocales(entry);
-  if (usedLocales.includes(data.locale)) {
-    throw new ApplicationError('locale is already used');
-  }
+    const usedLocales = getAllLocales(entry);
+    if (usedLocales.includes(data.locale)) {
+      throw new ApplicationError('locale is already used');
+    }
 
-  const sanitizedData = {
-    ...copyNonLocalizedAttributes(contentType, entry),
-    ...sanitizeInput(data),
-    locale: data.locale,
-    localizations: getAllLocalizationsIds(entry),
+    const sanitizedData = {
+      ...copyNonLocalizedAttributes(contentType, entry),
+      ...sanitizeInput(data),
+      locale: data.locale,
+      localizations: getAllLocalizationsIds(entry),
+    };
+
+    const sanitizedFiles = sanitizeInputFiles(files);
+
+    const newEntry = await strapi.entityService.create(contentType.uid, {
+      data: sanitizedData,
+      files: sanitizedFiles,
+      populate: ['localizations'],
+    });
+
+    return sanitize.contentAPI.output(newEntry, strapi.getModel(contentType.uid));
   };
-
-  const sanitizedFiles = sanitizeInputFiles(files);
-
-  const newEntry = await strapi.entityService.create(contentType.uid, {
-    data: sanitizedData,
-    files: sanitizedFiles,
-    populate: ['localizations'],
-  });
-
-  return sanitize.contentAPI.output(newEntry, strapi.getModel(contentType.uid));
-};
 
 /**
  * Returns a route config to handle localizations creation in the core api
  * @param {object} contentType
  * @returns {{ method: string, path: string, handler: string, config: { policies: string[] }}}
  */
-const createLocalizationRoute = contentType => {
+const createLocalizationRoute = (contentType) => {
   const { modelName } = contentType;
 
   const routePrefix = getContentTypeRoutePrefix(contentType);
@@ -174,14 +176,14 @@ const createLocalizationRoute = contentType => {
  * Adds a route & an action to the core api controller of a content type to allow creating new localizations
  * @param {object} contentType
  */
-const addCreateLocalizationAction = contentType => {
+const addCreateLocalizationAction = (contentType) => {
   const { modelName, apiName } = contentType;
 
   const localizationRoute = createLocalizationRoute(contentType);
 
   strapi.api[apiName].routes[modelName].routes.push(localizationRoute);
 
-  strapi.container.get('controllers').extend(`api::${apiName}.${modelName}`, controller => {
+  strapi.container.get('controllers').extend(`api::${apiName}.${modelName}`, (controller) => {
     return Object.assign(controller, {
       createLocalization: createLocalizationHandler(contentType),
     });
@@ -198,7 +200,7 @@ const mergeCustomizer = (dest, src) => {
  * Add a graphql schema to the plugin's global graphl schema to be processed
  * @param {object} schema
  */
-const addGraphqlSchema = schema => {
+const addGraphqlSchema = (schema) => {
   _.mergeWith(strapi.config.get('plugin.i18n.schema.graphql'), schema, mergeCustomizer);
 };
 
@@ -206,7 +208,7 @@ const addGraphqlSchema = schema => {
  * Add localization mutation & filters to use with the graphql plugin
  * @param {object} contentType
  */
-const addGraphqlLocalizationAction = contentType => {
+const addGraphqlLocalizationAction = (contentType) => {
   const { globalId, modelName } = contentType;
 
   if (!strapi.plugins.graphql) {

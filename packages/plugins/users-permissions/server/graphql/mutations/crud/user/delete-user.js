@@ -26,10 +26,7 @@ module.exports = ({ nexus, strapi }) => {
 
       koaContext.params = { id: args.id };
 
-      await strapi
-        .plugin('users-permissions')
-        .controller('user')
-        .destroy(koaContext);
+      await strapi.plugin('users-permissions').controller('user').destroy(koaContext);
 
       checkBadRequest(koaContext.body);
 

@@ -1,4 +1,4 @@
-const formatPolicies = policies =>
+const formatPolicies = (policies) =>
   policies.reduce((acc, current) => {
     acc.push({ label: current, value: current });
 

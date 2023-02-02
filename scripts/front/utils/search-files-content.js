@@ -22,9 +22,9 @@ const findFilesInDirectories = async (
   return files;
 };
 
-const loadFilesInMemory = async files => {
+const loadFilesInMemory = async (files) => {
   return Promise.all(
-    files.map(async file => ({
+    files.map(async (file) => ({
       path: file,
       content: (await readFile(file)).toString(),
     }))
@@ -38,10 +38,7 @@ const getMatches = (content, matchedString) => {
   for (const line of lines) {
     if (line.includes(matchedString)) {
       highlightedLines.push(
-        line
-          .split(matchedString)
-          .join(chalk.bgMagentaBright(matchedString))
-          .trim()
+        line.split(matchedString).join(chalk.bgMagentaBright(matchedString)).trim()
       );
     }
   }
@@ -79,7 +76,7 @@ class FilesContentSearch {
 
       if (matchedString) {
         file.matches = getMatches(file.content, matchedString);
-        file.replaceAll = replaceValue => {
+        file.replaceAll = (replaceValue) => {
           let fileContent = readFileSync(file.path, { encoding: 'utf-8' });
           fileContent = fileContent.replaceAll(matchedString, replaceValue);
           writeFileSync(file.path, fileContent, { encoding: 'utf-8' });
@@ -91,7 +88,7 @@ class FilesContentSearch {
   }
 
   searchString(string) {
-    return this.search(fileContent => {
+    return this.search((fileContent) => {
       if (fileContent.includes(string)) return string;
       return null;
     });

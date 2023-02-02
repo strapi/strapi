@@ -1,8 +1,8 @@
 import { useQuery } from 'react-query';
 import { useIntl } from 'react-intl';
-
+import { useFetchClient } from '@strapi/helper-plugin';
 import pluginId from '../pluginId';
-import { axiosInstance, getRequestUrl, getTrad } from '../utils';
+import { getRequestUrl, getTrad } from '../utils';
 import { recursiveRenameKeys } from './utils/rename-keys';
 
 const FIELD_MAPPING = {
@@ -13,13 +13,14 @@ const FIELD_MAPPING = {
 export const useFolderStructure = ({ enabled = true } = {}) => {
   const { formatMessage } = useIntl();
   const dataRequestURL = getRequestUrl('folder-structure');
+  const { get } = useFetchClient();
 
   const fetchFolderStructure = async () => {
     const {
       data: { data },
-    } = await axiosInstance.get(dataRequestURL);
+    } = await get(dataRequestURL);
 
-    const children = data.map(f => recursiveRenameKeys(f, key => FIELD_MAPPING?.[key] ?? key));
+    const children = data.map((f) => recursiveRenameKeys(f, (key) => FIELD_MAPPING?.[key] ?? key));
 
     return [
       {

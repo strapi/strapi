@@ -5,7 +5,7 @@ const { promisify } = require('util');
 const fs = require('fs-extra');
 const glob = promisify(require('glob').glob);
 
-const cleanFile = async filePath => {
+const cleanFile = async (filePath) => {
   try {
     const mainTranslationFileArray = filePath.split('/');
     mainTranslationFileArray.splice(-1, 1);
@@ -30,7 +30,7 @@ const cleanFile = async filePath => {
   }
 };
 
-const reorderTrads = async filePath => {
+const reorderTrads = async (filePath) => {
   try {
     const data = await fs.readJSON(filePath);
 
@@ -57,16 +57,16 @@ async function run() {
   const pathToTranslationsFolder = ['admin', 'src', 'translations'];
 
   const translationFiles = packageDirs
-    .filter(dir => {
+    .filter((dir) => {
       return fs.existsSync(join(dir, ...pathToTranslationsFolder, 'en.json'));
     })
     .reduce((acc, dir) => {
       const files = fs.readdirSync(join(dir, ...pathToTranslationsFolder));
       const filePaths = files
-        .map(file => {
+        .map((file) => {
           return join(dir, ...pathToTranslationsFolder, file);
         })
-        .filter(file => {
+        .filter((file) => {
           return file.split('.')[1] !== 'js' && !fs.lstatSync(file).isDirectory();
         });
 
@@ -80,4 +80,4 @@ async function run() {
   await Promise.all(translationFiles.map(cleanFile));
 }
 
-run().catch(err => console.error(err));
+run().catch((err) => console.error(err));

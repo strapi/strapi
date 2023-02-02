@@ -19,12 +19,8 @@ const {
 
 const { contentTypes, traverseEntity, sanitize, pipeAsync } = require('@strapi/utils');
 
-const {
-  constants,
-  getNonVisibleAttributes,
-  getNonWritableAttributes,
-  getWritableAttributes,
-} = contentTypes;
+const { constants, getNonVisibleAttributes, getNonWritableAttributes, getWritableAttributes } =
+  contentTypes;
 const {
   ID_ATTRIBUTE,
   CREATED_AT_ATTRIBUTE,
@@ -73,20 +69,20 @@ module.exports = ({ action, ability, model }) => {
     );
   };
 
-  const wrapSanitize = createSanitizeFunction => {
+  const wrapSanitize = (createSanitizeFunction) => {
     const wrappedSanitize = async (data, options = {}) => {
       if (isArray(data)) {
-        return Promise.all(data.map(entity => wrappedSanitize(entity, options)));
+        return Promise.all(data.map((entity) => wrappedSanitize(entity, options)));
       }
 
       const { subject, action: actionOverride } = getDefaultOptions(data, options);
 
       const permittedFields = permittedFieldsOf(ability, actionOverride, subject, {
-        fieldsFrom: rule => rule.fields || [],
+        fieldsFrom: (rule) => rule.fields || [],
       });
 
       const hasAtLeastOneRegistered = some(
-        fields => !isNil(fields),
+        (fields) => !isNil(fields),
         flatMap(prop('fields'), ability.rulesFor(actionOverride, detectSubjectType(subject)))
       );
       const shouldIncludeAllFields = isEmpty(permittedFields) && !hasAtLeastOneRegistered;

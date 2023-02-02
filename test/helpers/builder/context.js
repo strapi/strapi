@@ -4,7 +4,7 @@ const { merge } = require('lodash/fp');
 
 const getDefaultState = () => ({ actions: [], models: [], fixtures: {} });
 
-const createContext = initialState => {
+const createContext = (initialState) => {
   let state;
 
   const contextApi = {

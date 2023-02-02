@@ -2,12 +2,12 @@ import axios from 'axios';
 import { useRef, useState } from 'react';
 import { useMutation, useQueryClient } from 'react-query';
 import { useIntl } from 'react-intl';
-import { useNotification } from '@strapi/helper-plugin';
+import { useNotification, useFetchClient } from '@strapi/helper-plugin';
 
-import { axiosInstance, getTrad } from '../utils';
+import { getTrad } from '../utils';
 import pluginId from '../pluginId';
 
-const editAssetRequest = (asset, file, cancelToken, onProgress) => {
+const editAssetRequest = (asset, file, cancelToken, onProgress, post) => {
   const endpoint = `/${pluginId}?id=${asset.id}`;
 
   const formData = new FormData();
@@ -21,20 +21,17 @@ const editAssetRequest = (asset, file, cancelToken, onProgress) => {
     JSON.stringify({
       alternativeText: asset.alternativeText,
       caption: asset.caption,
-      folder: asset.folder,
+      folder: asset.folder?.id,
       name: asset.name,
     })
   );
 
-  return axiosInstance({
-    method: 'post',
-    url: endpoint,
-    data: formData,
+  return post(endpoint, formData, {
     cancelToken: cancelToken.token,
     onUploadProgress({ total, loaded }) {
       onProgress((loaded / total) * 100);
     },
-  }).then(res => res.data);
+  }).then((res) => res.data);
 };
 
 export const useEditAsset = () => {
@@ -43,16 +40,17 @@ export const useEditAsset = () => {
   const toggleNotification = useNotification();
   const queryClient = useQueryClient();
   const tokenRef = useRef(axios.CancelToken.source());
+  const { post } = useFetchClient();
 
   const mutation = useMutation(
-    ({ asset, file }) => editAssetRequest(asset, file, tokenRef.current, setProgress),
+    ({ asset, file }) => editAssetRequest(asset, file, tokenRef.current, setProgress, post),
     {
-      onSuccess: () => {
+      onSuccess() {
         queryClient.refetchQueries([pluginId, 'assets'], { active: true });
         queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
         queryClient.refetchQueries([pluginId, 'folders'], { active: true });
       },
-      onError: reason => {
+      onError(reason) {
         if (reason.response.status === 403) {
           toggleNotification({
             type: 'info',

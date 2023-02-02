@@ -1,6 +1,6 @@
 'use strict';
 
-const { isNil, pick } = require('lodash/fp');
+const { pick } = require('lodash/fp');
 const { ApplicationError } = require('@strapi/utils').errors;
 
 /**
@@ -10,13 +10,10 @@ const { ApplicationError } = require('@strapi/utils').errors;
  */
 module.exports = {
   async send(ctx) {
-    let options = ctx.request.body;
+    const options = ctx.request.body;
 
     try {
-      await strapi
-        .plugin('email')
-        .service('email')
-        .send(options);
+      await strapi.plugin('email').service('email').send(options);
     } catch (e) {
       if (e.statusCode === 400) {
         throw new ApplicationError(e.message);
@@ -32,7 +29,7 @@ module.exports = {
   async test(ctx) {
     const { to } = ctx.request.body;
 
-    if (isNil(to)) {
+    if (!to) {
       throw new ApplicationError('No recipient(s) are given');
     }
 
@@ -45,10 +42,7 @@ module.exports = {
     };
 
     try {
-      await strapi
-        .plugin('email')
-        .service('email')
-        .send(email);
+      await strapi.plugin('email').service('email').send(email);
     } catch (e) {
       if (e.statusCode === 400) {
         throw new ApplicationError(e.message);
@@ -62,10 +56,7 @@ module.exports = {
   },
 
   async getSettings(ctx) {
-    const config = strapi
-      .plugin('email')
-      .service('email')
-      .getProviderSettings();
+    const config = strapi.plugin('email').service('email').getProviderSettings();
 
     ctx.send({
       config: pick(

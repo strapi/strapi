@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin-test-utils",
-  "version": "4.3.0",
+  "version": "4.6.0",
   "private": true,
   "description": "Test utilities for the Strapi administration panel",
   "license": "MIT",
@@ -17,17 +17,23 @@
     }
   ],
   "main": "lib/index.js",
-  "dependencies": {
-    "@babel/polyfill": "7.12.1"
-  },
   "devDependencies": {
-    "@testing-library/jest-dom": "5.16.4",
-    "jest-styled-components": "7.0.2"
+    "@testing-library/jest-dom": "5.16.5",
+    "core-js": "3.27.1",
+    "jest-styled-components": "7.1.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-is": "^17.0.2",
+    "redux": "^4.0.1",
+    "styled-components": "5.3.3"
+  },
+  "peerDependencies": {
+    "redux": "^4.0.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
-    "node": ">=14.19.1 <=16.x.x"
+    "node": ">=14.19.1 <=18.x.x"
   }
 }

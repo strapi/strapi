@@ -14,7 +14,7 @@ const generateCheckboxesActions = (availableActions, modifiedData, pathToData) =
     const checkboxName = checkboxNameArray.join('..');
     const conditionsValue = get(modifiedData, [...baseCheckboxNameArray, 'conditions'], null);
 
-    const hasConditions = createArrayOfValues(conditionsValue).some(val => val);
+    const hasConditions = createArrayOfValues(conditionsValue).some((val) => val);
 
     if (isEmpty(applyToProperties)) {
       const value = get(modifiedData, checkboxNameArray, false);

@@ -1,14 +1,14 @@
 import omit from 'lodash/omit';
 import sortLinks from './utils/sortLinks';
-import adminPermissions from '../../permissions';
 import formatLinks from './utils/formatLinks';
+import adminLinks from './utils/adminLinks';
 import globalLinks from './utils/globalLinks';
 
 const init = (initialState, { settings, shouldUpdateStrapi }) => {
   // Retrieve the links that will be injected into the global section
   const pluginsGlobalLinks = settings.global.links;
   // Sort the links by name
-  const sortedGlobalLinks = sortLinks([...pluginsGlobalLinks, ...globalLinks]).map(link => ({
+  const sortedGlobalLinks = sortLinks([...pluginsGlobalLinks, ...globalLinks]).map((link) => ({
     ...link,
     hasNotification: link.id === '000-application-infos' && shouldUpdateStrapi,
   }));
@@ -23,23 +23,7 @@ const init = (initialState, { settings, shouldUpdateStrapi }) => {
     {
       id: 'permissions',
       intlLabel: { id: 'Settings.permissions', defaultMessage: 'Administration Panel' },
-      links: [
-        {
-          intlLabel: { id: 'global.roles', defaultMessage: 'Roles' },
-          to: '/settings/roles',
-          id: 'roles',
-          isDisplayed: false,
-          permissions: adminPermissions.settings.roles.main,
-        },
-        {
-          intlLabel: { id: 'global.users' },
-          // Init the search params directly
-          to: '/settings/users?pageSize=10&page=1&sort=firstname',
-          id: 'users',
-          isDisplayed: false,
-          permissions: adminPermissions.settings.users.main,
-        },
-      ],
+      links: adminLinks,
     },
     ...otherSections,
   ];

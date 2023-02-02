@@ -1,4 +1,4 @@
-const removeConditionKeyFromData = obj => {
+const removeConditionKeyFromData = (obj) => {
   if (!obj) {
     return null;
   }

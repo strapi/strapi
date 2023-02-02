@@ -16,7 +16,7 @@ const ContentBlocks = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
-  const handleClick = eventName => {
+  const handleClick = (eventName) => {
     trackUsage(eventName);
   };
 

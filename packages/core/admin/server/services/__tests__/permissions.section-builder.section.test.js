@@ -56,23 +56,23 @@ describe('Section', () => {
 
     test(`If there is at least one matcher returning true, it should return true`, async () => {
       const action = { foo: 'bar' };
-      const matchers = [jest.fn(a => a.foo === 'bar'), jest.fn(a => a.bar === 'foo')];
+      const matchers = [jest.fn((a) => a.foo === 'bar'), jest.fn((a) => a.bar === 'foo')];
       const section = createSection({ matchers });
 
       const applies = await section.appliesToAction(action);
 
-      matchers.forEach(matcher => expect(matcher).toHaveBeenCalledWith(action));
+      matchers.forEach((matcher) => expect(matcher).toHaveBeenCalledWith(action));
       expect(applies).toBe(true);
     });
 
     test('If every matcher returns other results than true, it should return false', async () => {
       const action = { foo: 'bar' };
-      const matchers = [jest.fn(a => a.foo === 'foo'), jest.fn(a => a.bar === 'foo')];
+      const matchers = [jest.fn((a) => a.foo === 'foo'), jest.fn((a) => a.bar === 'foo')];
       const section = createSection({ matchers });
 
       const applies = await section.appliesToAction(action);
 
-      matchers.forEach(matcher => expect(matcher).toHaveBeenCalledWith(action));
+      matchers.forEach((matcher) => expect(matcher).toHaveBeenCalledWith(action));
       expect(applies).toBe(false);
     });
   });

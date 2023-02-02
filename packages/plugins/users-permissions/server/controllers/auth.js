@@ -18,6 +18,7 @@ const {
   validateForgotPasswordBody,
   validateResetPasswordBody,
   validateEmailConfirmationBody,
+  validateChangePasswordBody,
 } = require('./validation/auth');
 
 const { getAbsoluteAdminUrl, getAbsoluteServerUrl, sanitize } = utils;
@@ -102,6 +103,36 @@ module.exports = {
     } catch (error) {
       throw new ApplicationError(error.message);
     }
+  },
+
+  async changePassword(ctx) {
+    if (!ctx.state.user) {
+      throw new ApplicationError('You must be authenticated to reset your password');
+    }
+
+    const { currentPassword, password } = await validateChangePasswordBody(ctx.request.body);
+
+    const user = await strapi.entityService.findOne(
+      'plugin::users-permissions.user',
+      ctx.state.user.id
+    );
+
+    const validPassword = await getService('user').validatePassword(currentPassword, user.password);
+
+    if (!validPassword) {
+      throw new ValidationError('The provided current password is invalid');
+    }
+
+    if (currentPassword === password) {
+      throw new ValidationError('Your new password must be different than your current password');
+    }
+
+    await getService('user').edit(user.id, { password });
+
+    ctx.send({
+      jwt: getService('jwt').issue({ id: user.id }),
+      user: await sanitizeUser(user, ctx),
+    });
   },
 
   async resetPassword(ctx) {
@@ -228,10 +259,7 @@ module.exports = {
     await getService('user').edit(user.id, { resetPasswordToken });
 
     // Send an email to the user.
-    await strapi
-      .plugin('email')
-      .service('email')
-      .send(emailToSend);
+    await strapi.plugin('email').service('email').send(emailToSend);
 
     ctx.send({ ok: true });
   },
@@ -295,7 +323,7 @@ module.exports = {
       }
     }
 
-    let newUser = {
+    const newUser = {
       ...params,
       role: role.id,
       email: email.toLowerCase(),

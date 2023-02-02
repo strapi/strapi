@@ -8,10 +8,10 @@ const initialState = {
 
 const reducer = (state, action) =>
   // eslint-disable-next-line consistent-return
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case 'CHECK_PERMISSIONS_SUCCEEDED': {
-        action.data.forEach(checkedPermissions => {
+        action.data.forEach((checkedPermissions) => {
           if (checkedPermissions.hasPermission) {
             set(
               draftState,
@@ -24,7 +24,7 @@ const reducer = (state, action) =>
         // Remove the not needed links in each section
         draftState.menu.forEach((section, sectionIndex) => {
           draftState.menu[sectionIndex].links = section.links.filter(
-            link => link.isDisplayed === true
+            (link) => link.isDisplayed === true
           );
         });
 

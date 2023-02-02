@@ -12,6 +12,6 @@ module.exports = [
       { name: 'Collection Type', value: 'collectionType' },
       { name: 'Single Type', value: 'singleType' },
     ],
-    validate: input => validateInput(input),
+    validate: (input) => validateInput(input),
   },
 ];

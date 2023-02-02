@@ -51,7 +51,6 @@ module.exports = function createComponentBuilder() {
         .setUID(uid)
         .set('collectionName', collectionName)
         .set(['info', 'displayName'], infos.displayName)
-        .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)
         .set('pluginOptions', infos.pluginOptions)
         .set('config', infos.config)
@@ -101,17 +100,16 @@ module.exports = function createComponentBuilder() {
         .setUID(newUID)
         .setDir(newDir)
         .set(['info', 'displayName'], infos.displayName)
-        .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)
         .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(newAttributes));
 
       if (newUID !== uid) {
-        this.components.forEach(compo => {
+        this.components.forEach((compo) => {
           compo.updateComponent(uid, newUID);
         });
 
-        this.contentTypes.forEach(ct => {
+        this.contentTypes.forEach((ct) => {
           ct.updateComponent(uid, newUID);
         });
       }
@@ -124,11 +122,11 @@ module.exports = function createComponentBuilder() {
         throw new ApplicationError('component.notFound');
       }
 
-      this.components.forEach(compo => {
+      this.components.forEach((compo) => {
         compo.removeComponent(uid);
       });
 
-      this.contentTypes.forEach(ct => {
+      this.contentTypes.forEach((ct) => {
         ct.removeComponent(uid);
       });
 

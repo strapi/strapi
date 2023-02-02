@@ -65,239 +65,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c22 {
-        color: #666687;
-      }
-
-      .c23 path {
-        fill: #666687;
-      }
-
-      .c25 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
-      }
-
-      .c25 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c25 svg > g,
-      .c25 svg path {
-        fill: #ffffff;
-      }
-
-      .c25[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c25:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c25:focus-visible {
-        outline: none;
-      }
-
-      .c25:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c26 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        height: 2rem;
-        width: 2rem;
-        border: none;
-      }
-
-      .c26 svg > g,
-      .c26 svg path {
-        fill: #8e8ea9;
-      }
-
-      .c26:hover svg > g,
-      .c26:hover svg path {
-        fill: #666687;
-      }
-
-      .c26:active svg > g,
-      .c26:active svg path {
-        fill: #a5a5ba;
-      }
-
-      .c26[aria-disabled='true'] {
-        background-color: #eaeaef;
-      }
-
-      .c26[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c7 {
-        background: #ffffff;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c10 {
-        padding-right: 24px;
-        padding-left: 24px;
-      }
-
-      .c15 {
-        width: 1%;
-      }
-
-      .c8 {
-        overflow: hidden;
-        border: 1px solid #eaeaef;
-      }
-
-      .c12 {
-        width: 100%;
-        white-space: nowrap;
-      }
-
-      .c9 {
-        position: relative;
-      }
-
-      .c9:before {
-        background: linear-gradient(90deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
-        opacity: 0.2;
-        position: absolute;
-        height: 100%;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-        width: 8px;
-        left: 0;
-      }
-
-      .c9:after {
-        background: linear-gradient(270deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
-        opacity: 0.2;
-        position: absolute;
-        height: 100%;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-        width: 8px;
-        right: 0;
-        top: 0;
-      }
-
-      .c11 {
-        overflow-x: auto;
-      }
-
-      .c21 tr:last-of-type {
-        border-bottom: none;
-      }
-
-      .c13 {
-        border-bottom: 1px solid #eaeaef;
-      }
-
-      .c14 {
-        border-bottom: 1px solid #eaeaef;
-      }
-
-      .c14 td,
-      .c14 th {
-        padding: 16px;
-      }
-
-      .c14 td:first-of-type,
-      .c14 th:first-of-type {
-        padding: 0 4px;
-      }
-
-      .c14 th {
-        padding-top: 0;
-        padding-bottom: 0;
-        height: 3.5rem;
-      }
-
-      .c17 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
       .c16 {
-        vertical-align: middle;
-        text-align: left;
-        color: #666687;
-        outline-offset: -4px;
-      }
-
-      .c16 input {
-        vertical-align: sub;
-      }
-
-      .c19 svg {
-        height: 0.25rem;
-      }
-
-      .c20 {
-        color: #666687;
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-      }
-
-      .c24 {
-        color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c18 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -309,10 +77,6 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         width: 1px;
       }
 
-      .c0:focus-visible {
-        outline: none;
-      }
-
       .c1 {
         background: #f6f6f9;
         padding-top: 40px;
@@ -321,9 +85,28 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         padding-left: 56px;
       }
 
-      .c6 {
+      .c5 {
         padding-right: 56px;
         padding-left: 56px;
+      }
+
+      .c6 {
+        background: #ffffff;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c9 {
+        padding-right: 24px;
+        padding-left: 24px;
+      }
+
+      .c14 {
+        width: 1%;
+      }
+
+      .c20 {
+        color: #666687;
       }
 
       .c2 {
@@ -359,16 +142,213 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
       }
 
       .c4 {
-        color: #32324d;
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
+        color: #32324d;
       }
 
-      .c5 {
+      .c18 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
         color: #666687;
-        font-size: 1rem;
-        line-height: 1.5;
+      }
+
+      .c22 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
+      .c23 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
+      }
+
+      .c23 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c23 svg > g,
+      .c23 svg path {
+        fill: #ffffff;
+      }
+
+      .c23[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c23:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c23:focus-visible {
+        outline: none;
+      }
+
+      .c23:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c7 {
+        overflow: hidden;
+        border: 1px solid #eaeaef;
+      }
+
+      .c11 {
+        width: 100%;
+        white-space: nowrap;
+      }
+
+      .c8 {
+        position: relative;
+      }
+
+      .c8:before {
+        background: linear-gradient(90deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
+        opacity: 0.2;
+        position: absolute;
+        height: 100%;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+        width: 8px;
+        left: 0;
+      }
+
+      .c8:after {
+        background: linear-gradient(270deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
+        opacity: 0.2;
+        position: absolute;
+        height: 100%;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+        width: 8px;
+        right: 0;
+        top: 0;
+      }
+
+      .c10 {
+        overflow-x: auto;
+      }
+
+      .c19 tr:last-of-type {
+        border-bottom: none;
+      }
+
+      .c12 {
+        border-bottom: 1px solid #eaeaef;
+      }
+
+      .c13 {
+        border-bottom: 1px solid #eaeaef;
+      }
+
+      .c13 td,
+      .c13 th {
+        padding: 16px;
+      }
+
+      .c13 td:first-of-type,
+      .c13 th:first-of-type {
+        padding: 0 4px;
+      }
+
+      .c13 th {
+        padding-top: 0;
+        padding-bottom: 0;
+        height: 3.5rem;
+      }
+
+      .c15 {
+        vertical-align: middle;
+        text-align: left;
+        color: #666687;
+        outline-offset: -4px;
+      }
+
+      .c15 input {
+        vertical-align: sub;
+      }
+
+      .c17 svg {
+        height: 0.25rem;
+      }
+
+      .c24 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        height: 2rem;
+        width: 2rem;
+        border: none;
+      }
+
+      .c24 svg > g,
+      .c24 svg path {
+        fill: #8e8ea9;
+      }
+
+      .c24:hover svg > g,
+      .c24:hover svg path {
+        fill: #666687;
+      }
+
+      .c24:active svg > g,
+      .c24:active svg path {
+        fill: #a5a5ba;
+      }
+
+      .c24[aria-disabled='true'] {
+        background-color: #eaeaef;
+      }
+
+      .c24[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c21 path {
+        fill: #666687;
+      }
+
+      .c0:focus-visible {
+        outline: none;
       }
 
       <main
@@ -398,108 +378,110 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                 </h1>
               </div>
             </div>
-            <p
-              class="c5"
-            />
           </div>
         </div>
         <div
-          class="c6"
+          class="c5"
         >
           <div
-            class="c7 c8"
+            class="c6 c7"
           >
             <div
-              class="c9"
+              class="c8"
             >
               <div
-                class="c10 c11"
+                class="c9 c10"
               >
                 <table
                   aria-colcount="3"
                   aria-rowcount="3"
-                  class="c12"
+                  class="c11"
+                  role="grid"
                 >
                   <thead
-                    class="c13"
+                    class="c12"
                   >
                     <tr
                       aria-rowindex="1"
-                      class="c14"
+                      class="c13"
                     >
                       <th
                         aria-colindex="1"
-                        class="c15 c16"
+                        class="c14 c15"
+                        role="gridcell"
                         tabindex="0"
                         width="1%"
                       >
                         <div
-                          class="c17"
+                          class="c3"
                         >
                           <div
-                            class="c18"
+                            class="c16"
                           >
                             icon
                           </div>
                           <span
-                            class="c19"
+                            class="c17"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="2"
-                        class="c16"
+                        class="c15"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <div
-                          class="c17"
+                          class="c3"
                         >
                           <span
-                            class="c20"
+                            class="c18"
                           >
                             name
                           </span>
                           <span
-                            class="c19"
+                            class="c17"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="3"
-                        class="c15 c16"
+                        class="c14 c15"
+                        role="gridcell"
                         tabindex="-1"
                         width="1%"
                       >
                         <div
-                          class="c17"
+                          class="c3"
                         >
                           <div
-                            class="c18"
+                            class="c16"
                           >
                             action
                           </div>
                           <span
-                            class="c19"
+                            class="c17"
                           />
                         </div>
                       </th>
                     </tr>
                   </thead>
                   <tbody
-                    class="c21"
+                    class="c19"
                   >
                     <tr
                       aria-rowindex="2"
-                      class="c14"
+                      class="c13"
                       style="cursor: pointer;"
                     >
                       <td
                         aria-colindex="1"
-                        class="c16"
+                        class="c15"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <div
-                          class="c22 c23"
+                          class="c20 c21"
                         >
                           <svg
                             aria-label="Reset password"
@@ -520,11 +502,12 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                       </td>
                       <td
                         aria-colindex="2"
-                        class="c16"
+                        class="c15"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <span
-                          class="c24"
+                          class="c22"
                         >
                           Reset password
                         </span>
@@ -532,19 +515,26 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                       <td
                         aria-colindex="3"
                         aria-hidden="true"
-                        class="c16"
+                        class="c15"
                         role="button"
                       >
                         <span>
                           <button
                             aria-disabled="false"
                             aria-labelledby="tooltip-1"
-                            class="c25 c26"
+                            class="c23 c24"
                             tabindex="-1"
                             type="button"
                           >
+                            <span
+                              class="c16"
+                            >
+                              Edit a template
+                            </span>
                             <svg
+                              aria-hidden="true"
                               fill="none"
+                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"
@@ -563,16 +553,17 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                     </tr>
                     <tr
                       aria-rowindex="3"
-                      class="c14"
+                      class="c13"
                       style="cursor: pointer;"
                     >
                       <td
                         aria-colindex="1"
-                        class="c16"
+                        class="c15"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <div
-                          class="c22 c23"
+                          class="c20 c21"
                         >
                           <svg
                             aria-label="Email address confirmation"
@@ -591,11 +582,12 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                       </td>
                       <td
                         aria-colindex="2"
-                        class="c16"
+                        class="c15"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <span
-                          class="c24"
+                          class="c22"
                         >
                           Email address confirmation
                         </span>
@@ -603,19 +595,26 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                       <td
                         aria-colindex="3"
                         aria-hidden="true"
-                        class="c16"
+                        class="c15"
                         role="button"
                       >
                         <span>
                           <button
                             aria-disabled="false"
                             aria-labelledby="tooltip-3"
-                            class="c25 c26"
+                            class="c23 c24"
                             tabindex="-1"
                             type="button"
                           >
+                            <span
+                              class="c16"
+                            >
+                              Edit a template
+                            </span>
                             <svg
+                              aria-hidden="true"
                               fill="none"
+                              focusable="false"
                               height="1em"
                               viewBox="0 0 24 24"
                               width="1em"

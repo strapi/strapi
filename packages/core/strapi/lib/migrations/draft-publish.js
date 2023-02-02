@@ -42,11 +42,7 @@ const disableDraftAndPublish = async ({ oldContentTypes, contentTypes }) => {
 
     // if d&p was disabled remove unpublish content before sync
     if (hasDraftAndPublish(oldContentType) && !hasDraftAndPublish(contentType)) {
-      await strapi.db
-        .queryBuilder(uid)
-        .delete()
-        .where({ published_at: null })
-        .execute();
+      await strapi.db.queryBuilder(uid).delete().where({ published_at: null }).execute();
     }
   }
 };

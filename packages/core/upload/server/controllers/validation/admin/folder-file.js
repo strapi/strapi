@@ -30,7 +30,7 @@ const validateStructureMoveManyFoldersFilesSchema = yup
 
 const validateDuplicatesMoveManyFoldersFilesSchema = yup
   .object()
-  .test('are-folders-unique', 'some folders already exist', async function(value) {
+  .test('are-folders-unique', 'some folders already exist', async function (value) {
     const { folderIds, destinationFolderId } = value;
     if (isEmpty(folderIds)) return true;
 
@@ -58,7 +58,7 @@ const validateMoveFoldersNotInsideThemselvesSchema = yup
   .test(
     'dont-move-inside-self',
     'folders cannot be moved inside themselves or one of its children',
-    async function(value) {
+    async function (value) {
       const { folderIds, destinationFolderId } = value;
       if (destinationFolderId === null || isEmpty(folderIds)) return true;
 
@@ -75,8 +75,8 @@ const validateMoveFoldersNotInsideThemselvesSchema = yup
       });
 
       const unmovableFoldersNames = folders
-        .filter(folder => destinationFolder.path.startsWith(folder.path))
-        .map(f => f.name);
+        .filter((folder) => destinationFolder.path.startsWith(folder.path))
+        .map((f) => f.name);
       if (unmovableFoldersNames.length > 0) {
         return this.createError({
           message: `folders cannot be moved inside themselves or one of its children: ${unmovableFoldersNames.join(

@@ -57,7 +57,7 @@ export default {
       id: 'internationalization',
       to: '/settings/internationalization',
 
-      Component: async () => {
+      async Component() {
         const component = await import(
           /* webpackChunkName: "i18n-settings-page" */ './pages/SettingsPage'
         );
@@ -102,12 +102,12 @@ export default {
                 name: 'pluginOptions.i18n.localized',
                 description: {
                   id: getTrad('plugin.schema.i18n.localized.description-content-type'),
-                  defaultMessage: 'Allow you to have content in different locales',
+                  defaultMessage: 'Allows translating an entry into different languages',
                 },
                 type: 'checkboxConfirmation',
                 intlLabel: {
                   id: getTrad('plugin.schema.i18n.localized.label-content-type'),
-                  defaultMessage: 'Enable localization for this Content-Type',
+                  defaultMessage: 'Localization',
                 },
               },
             ];
@@ -116,7 +116,7 @@ export default {
       });
 
       ctbFormsAPI.extendFields(LOCALIZED_FIELDS, {
-        validator: args => ({
+        validator: (args) => ({
           i18n: yup.object().shape({
             localized: yup.bool().test({
               name: 'ensure-unique-localization',
@@ -179,7 +179,7 @@ export default {
   },
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
-      locales.map(locale => {
+      locales.map((locale) => {
         return import(
           /* webpackChunkName: "i18n-translation-[request]" */ `./translations/${locale}.json`
         )

@@ -11,6 +11,6 @@ const options = {
   },
 };
 
-const clean = dirty => sanitizeHtml(dirty, options);
+const clean = (dirty) => sanitizeHtml(dirty, options);
 
 export default clean;

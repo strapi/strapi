@@ -9,7 +9,7 @@ import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
 import Theme from '../../../components/Theme';
 
 jest.mock('../../../components/LocalesProvider/useLocalesProvider', () => () => ({
-  changeLocale: () => {},
+  changeLocale() {},
   localeNames: ['en'],
   messages: ['test'],
 }));

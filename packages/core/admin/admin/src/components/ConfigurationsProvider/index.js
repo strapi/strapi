@@ -1,40 +1,52 @@
-import React, { useReducer, useRef } from 'react';
+import React, { useCallback, useMemo, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { ConfigurationsContext } from '../../contexts';
 import reducer, { initialState } from './reducer';
 
 const ConfigurationsProvider = ({
   children,
-  authLogo,
+  authLogo: defaultAuthLogo,
   menuLogo: defaultMenuLogo,
   showReleaseNotification,
   showTutorials,
 }) => {
-  const [{ menuLogo }, dispatch] = useReducer(reducer, initialState);
+  const [{ menuLogo, authLogo }, dispatch] = useReducer(reducer, initialState);
 
-  const updateProjectSettings = ({ menuLogo }) => {
-    return dispatch({
-      type: 'UPDATE_PROJECT_SETTINGS',
-      values: {
-        menuLogo: menuLogo || defaultMenuLogo,
+  const updateProjectSettings = useCallback(
+    ({ menuLogo, authLogo }) => {
+      return dispatch({
+        type: 'UPDATE_PROJECT_SETTINGS',
+        values: {
+          menuLogo: menuLogo || defaultMenuLogo,
+          authLogo: authLogo || defaultAuthLogo,
+        },
+      });
+    },
+    [defaultAuthLogo, defaultMenuLogo]
+  );
+
+  const configurationValue = useMemo(() => {
+    return {
+      logos: {
+        menu: { custom: menuLogo, default: defaultMenuLogo },
+        auth: { custom: authLogo, default: defaultAuthLogo },
       },
-    });
-  };
-
-  const updateProjectSettingsRef = useRef(updateProjectSettings);
+      updateProjectSettings,
+      showReleaseNotification,
+      showTutorials,
+    };
+  }, [
+    menuLogo,
+    defaultMenuLogo,
+    authLogo,
+    defaultAuthLogo,
+    updateProjectSettings,
+    showReleaseNotification,
+    showTutorials,
+  ]);
 
   return (
-    <ConfigurationsContext.Provider
-      value={{
-        logos: {
-          menu: { custom: menuLogo, default: defaultMenuLogo },
-          auth: { custom: null, default: authLogo },
-        },
-        updateProjectSettings: updateProjectSettingsRef.current,
-        showReleaseNotification,
-        showTutorials,
-      }}
-    >
+    <ConfigurationsContext.Provider value={configurationValue}>
       {children}
     </ConfigurationsContext.Provider>
   );

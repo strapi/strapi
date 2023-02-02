@@ -10,14 +10,8 @@ const allowedLocaleCodes = isoLocales.map(prop('code'));
 const createLocaleSchema = yup
   .object()
   .shape({
-    name: yup
-      .string()
-      .max(50)
-      .nullable(),
-    code: yup
-      .string()
-      .oneOf(allowedLocaleCodes)
-      .required(),
+    name: yup.string().max(50).nullable(),
+    code: yup.string().oneOf(allowedLocaleCodes).required(),
     isDefault: yup.boolean().required(),
   })
   .noUnknown();
@@ -25,11 +19,7 @@ const createLocaleSchema = yup
 const updateLocaleSchema = yup
   .object()
   .shape({
-    name: yup
-      .string()
-      .min(1)
-      .max(50)
-      .nullable(),
+    name: yup.string().min(1).max(50).nullable(),
     isDefault: yup.boolean(),
   })
   .noUnknown();

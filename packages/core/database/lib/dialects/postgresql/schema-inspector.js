@@ -51,7 +51,7 @@ const SQL_QUERIES = {
     SELECT
       kcu."constraint_name" as constraint_name,
       kcu."column_name" as column_name
-     
+
     FROM information_schema.key_column_usage kcu
     WHERE kcu.constraint_name=ANY(?)
     AND kcu.table_schema = ?
@@ -77,7 +77,7 @@ const SQL_QUERIES = {
 `,
 };
 
-const toStrapiType = column => {
+const toStrapiType = (column) => {
   const rootType = column.data_type.toLowerCase().match(/[^(), ]+/)[0];
 
   switch (rootType) {
@@ -122,6 +122,18 @@ const toStrapiType = column => {
   }
 };
 
+const getIndexType = (index) => {
+  if (index.is_primary) {
+    return 'primary';
+  }
+
+  if (index.is_unique) {
+    return 'unique';
+  }
+
+  return null;
+};
+
 class PostgresqlSchemaInspector {
   constructor(db) {
     this.db = db;
@@ -133,7 +145,7 @@ class PostgresqlSchemaInspector {
     const tables = await this.getTables();
 
     schema.tables = await Promise.all(
-      tables.map(async tableName => {
+      tables.map(async (tableName) => {
         const columns = await this.getColumns(tableName);
         const indexes = await this.getIndexes(tableName);
         const foreignKeys = await this.getForeignKeys(tableName);
@@ -159,7 +171,7 @@ class PostgresqlSchemaInspector {
       this.getDatabaseSchema(),
     ]);
 
-    return rows.map(row => row.table_name);
+    return rows.map((row) => row.table_name);
   }
 
   async getColumns(tableName) {
@@ -168,7 +180,7 @@ class PostgresqlSchemaInspector {
       tableName,
     ]);
 
-    return rows.map(row => {
+    return rows.map((row) => {
       const { type, args = [], ...rest } = toStrapiType(row);
 
       const defaultTo =
@@ -203,7 +215,7 @@ class PostgresqlSchemaInspector {
         ret[index.indexrelid] = {
           columns: [index.column_name],
           name: index.index_name,
-          type: index.is_primary ? 'primary' : index.is_unique ? 'unique' : null,
+          type: getIndexType(index),
         };
       } else {
         ret[index.indexrelid].columns.push(index.column_name);
@@ -234,31 +246,24 @@ class PostgresqlSchemaInspector {
     const constraintNames = Object.keys(ret);
     const dbSchema = this.getDatabaseSchema();
     if (constraintNames.length > 0) {
-      const {
-        rows: fkReferences,
-      } = await this.db.connection.raw(SQL_QUERIES.FOREIGN_KEY_REFERENCES, [
-        [constraintNames],
-        dbSchema,
-        tableName,
-      ]);
+      const { rows: fkReferences } = await this.db.connection.raw(
+        SQL_QUERIES.FOREIGN_KEY_REFERENCES,
+        [[constraintNames], dbSchema, tableName]
+      );
 
       for (const fkReference of fkReferences) {
         ret[fkReference.constraint_name].columns.push(fkReference.column_name);
 
-        const {
-          rows: fkReferencesConstraint,
-        } = await this.db.connection.raw(SQL_QUERIES.FOREIGN_KEY_REFERENCES_CONSTRAIN, [
-          [fkReference.constraint_name],
-          dbSchema,
-        ]);
+        const { rows: fkReferencesConstraint } = await this.db.connection.raw(
+          SQL_QUERIES.FOREIGN_KEY_REFERENCES_CONSTRAIN,
+          [[fkReference.constraint_name], dbSchema]
+        );
 
         for (const fkReferenceC of fkReferencesConstraint) {
-          const {
-            rows: fkReferencesConstraintReferece,
-          } = await this.db.connection.raw(SQL_QUERIES.FOREIGN_KEY_REFERENCES_CONSTRAIN_RFERENCE, [
-            fkReferenceC.unique_constraint_name,
-            dbSchema,
-          ]);
+          const { rows: fkReferencesConstraintReferece } = await this.db.connection.raw(
+            SQL_QUERIES.FOREIGN_KEY_REFERENCES_CONSTRAIN_RFERENCE,
+            [fkReferenceC.unique_constraint_name, dbSchema]
+          );
           for (const fkReferenceConst of fkReferencesConstraintReferece) {
             ret[fkReference.constraint_name].referencedTable = fkReferenceConst.foreign_table;
             ret[fkReference.constraint_name].referencedColumns.push(

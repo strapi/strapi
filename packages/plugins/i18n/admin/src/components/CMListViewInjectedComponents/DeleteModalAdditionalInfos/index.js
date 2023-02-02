@@ -21,7 +21,7 @@ const DeleteModalAdditionalInfos = () => {
             'This will delete the active locale versions <em>(from Internationalization)</em>',
         },
         {
-          em: chunks => (
+          em: (chunks) => (
             <Typography fontWeight="semiBold" textColor="danger500">
               {chunks}
             </Typography>

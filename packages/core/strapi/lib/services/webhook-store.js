@@ -1,6 +1,7 @@
 /**
  * Webhook store is the implementation of webhook storage over the core_store
  */
+
 'use strict';
 
 const webhookModel = {
@@ -25,7 +26,7 @@ const webhookModel = {
   },
 };
 
-const toDBObject = data => {
+const toDBObject = (data) => {
   return {
     name: data.name,
     url: data.url,
@@ -35,7 +36,7 @@ const toDBObject = data => {
   };
 };
 
-const fromDBObject = row => {
+const fromDBObject = (row) => {
   return {
     id: row.id,
     name: row.name,

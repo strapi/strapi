@@ -5,3 +5,6 @@ export { default as useLayoutDnd } from './useLayoutDnd';
 export { default as usePluginsQueryParams } from './usePluginsQueryParams';
 export { default as useSyncRbac } from './useSyncRbac';
 export { default as useWysiwyg } from './useWysiwyg';
+export { usePrev } from './usePrev';
+export { useDragAndDrop } from './useDragAndDrop';
+export { useKeyboardDragAndDrop } from './useKeyboardDragAndDrop';

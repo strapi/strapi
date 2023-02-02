@@ -7,20 +7,20 @@ async function main() {
   try {
     const labels = github.context.payload.pull_request?.labels ?? [];
 
-    const blockingLabels = labels.filter(label => BLOCKING_LABELS.includes(label.name));
+    const blockingLabels = labels.filter((label) => BLOCKING_LABELS.includes(label.name));
 
     if (blockingLabels.length > 0) {
       core.setFailed(
         `The PR has been labelled with a blocking label (${blockingLabels
-          .map(label => label.name)
+          .map((label) => label.name)
           .join(', ')}).`
       );
 
       return;
     }
 
-    const sourceLabelCount = labels.filter(label => label.name.startsWith('source: ')).length;
-    const issueLabelCount = labels.filter(label => label.name.startsWith('pr: ')).length;
+    const sourceLabelCount = labels.filter((label) => label.name.startsWith('source: ')).length;
+    const issueLabelCount = labels.filter((label) => label.name.startsWith('pr: ')).length;
 
     if (sourceLabelCount !== 1) {
       core.setFailed(`The PR must have one and only one 'source:' label.`);

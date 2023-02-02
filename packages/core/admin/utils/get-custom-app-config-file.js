@@ -9,14 +9,19 @@ const { isUsingTypeScript } = require('@strapi/typescript-utils');
  * @param {String} dir - Directory of the admin panel
  * @returns String
  */
-const getCustomAppConfigFile = async dir => {
+const getCustomAppConfigFile = async (dir) => {
   const adminSrcPath = join(dir, 'src', 'admin');
+
+  if (!fse.pathExistsSync(adminSrcPath)) {
+    return undefined;
+  }
+
   const useTypeScript = await isUsingTypeScript(adminSrcPath, 'tsconfig.json');
 
   const files = await fse.readdir(adminSrcPath);
 
-  const appJsx = files.find(file => /^app.jsx?$/.test(file));
-  const appTsx = files.find(file => /^app.tsx?$/.test(file));
+  const appJsx = files.find((file) => /^app.jsx?$/.test(file));
+  const appTsx = files.find((file) => /^app.tsx?$/.test(file));
 
   if (useTypeScript) {
     return appTsx || appJsx;

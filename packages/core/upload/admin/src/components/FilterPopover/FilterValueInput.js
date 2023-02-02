@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { DateTimePicker } from '@strapi/helper-plugin';
-import { Select, Option } from '@strapi/design-system/Select';
+import { DateTimePicker, Select } from '@strapi/design-system';
+import { Option } from '@strapi/design-system/Select';
 import { useIntl } from 'react-intl';
 
 const FilterValueInput = ({ label, onChange, options, type, value }) => {
@@ -13,21 +13,22 @@ const FilterValueInput = ({ label, onChange, options, type, value }) => {
         clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
         ariaLabel={label}
         name="datetimepicker"
-        onChange={date => {
+        onChange={(date) => {
           const formattedDate = new Date(date).toISOString();
 
           onChange(formattedDate);
         }}
         onClear={() => onChange('')}
         value={value ? new Date(value) : null}
-        selectedDateLabel={formattedDate => `Date picker, current is ${formattedDate}`}
+        selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}
+        selectButtonTitle={formatMessage({ id: 'selectButtonTitle', defaultMessage: 'Select' })}
       />
     );
   }
 
   return (
     <Select aria-label={label} onChange={onChange} value={value}>
-      {options.map(option => {
+      {options.map((option) => {
         return (
           <Option key={option.value} value={option.value}>
             {option.label}

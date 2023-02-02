@@ -31,7 +31,7 @@ const TypographyAsterisk = styled(Typography)`
 `;
 
 const Wysiwyg = ({
-  description,
+  hint,
   disabled,
   error,
   intlLabel,
@@ -52,11 +52,11 @@ const Wysiwyg = ({
 
   const MediaLibraryDialog = components['media-library'];
 
-  const handleToggleMediaLib = () => setMediaLibVisible(prev => !prev);
-  const handleTogglePreviewMode = () => setIsPreviewMode(prev => !prev);
+  const handleToggleMediaLib = () => setMediaLibVisible((prev) => !prev);
+  const handleTogglePreviewMode = () => setIsPreviewMode((prev) => !prev);
   const handleToggleExpand = () => {
     setIsPreviewMode(false);
-    setIsExpandMode(prev => !prev);
+    setIsExpandMode((prev) => !prev);
   };
 
   const handleActionClick = (value, currentEditorRef, togglePopover) => {
@@ -100,8 +100,8 @@ const Wysiwyg = ({
     }
   };
 
-  const handleSelectAssets = files => {
-    const formattedFiles = files.map(f => ({
+  const handleSelectAssets = (files) => {
+    const formattedFiles = files.map((f) => ({
       alt: f.alternativeText || f.name,
       url: prefixFileUrlWithBackendUrl(f.url),
       mime: f.mime,
@@ -167,7 +167,7 @@ const Wysiwyg = ({
 
           {!isExpandMode && <WysiwygFooter onToggleExpand={handleToggleExpand} />}
         </EditorLayout>
-        <Hint description={description} name={name} error={error} />
+        <Hint hint={hint} name={name} error={error} />
       </Stack>
 
       {error && (
@@ -186,21 +186,17 @@ const Wysiwyg = ({
 };
 
 Wysiwyg.defaultProps = {
-  description: null,
   disabled: false,
   error: '',
   labelAction: undefined,
   placeholder: null,
   required: false,
   value: '',
+  hint: '',
 };
 
 Wysiwyg.propTypes = {
-  description: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }),
+  hint: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
   disabled: PropTypes.bool,
   error: PropTypes.string,
   intlLabel: PropTypes.shape({

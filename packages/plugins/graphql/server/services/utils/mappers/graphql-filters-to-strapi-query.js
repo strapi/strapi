@@ -8,7 +8,7 @@ const virtualScalarAttributes = ['id'];
 module.exports = ({ strapi }) => {
   const { service: getService } = strapi.plugin('graphql');
 
-  const recursivelyReplaceScalarOperators = data => {
+  const recursivelyReplaceScalarOperators = (data) => {
     const { operators } = getService('builders').filters;
 
     if (Array.isArray(data)) {
@@ -54,7 +54,7 @@ module.exports = ({ strapi }) => {
 
       // If filters is a collection, then apply the transformation to every item of the list
       if (Array.isArray(filters)) {
-        return filters.map(filtersItem =>
+        return filters.map((filtersItem) =>
           this.graphQLFiltersToStrapiQuery(filtersItem, contentType)
         );
       }
@@ -62,7 +62,7 @@ module.exports = ({ strapi }) => {
       const resultMap = {};
       const { attributes } = contentType;
 
-      const isAttribute = attributeName => {
+      const isAttribute = (attributeName) => {
         return virtualScalarAttributes.includes(attributeName) || has(attributeName, attributes);
       };
 

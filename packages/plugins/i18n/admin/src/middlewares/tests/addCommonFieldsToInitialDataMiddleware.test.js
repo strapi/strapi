@@ -1,4 +1,4 @@
-import { fixtures } from '../../../../../../admin-test-utils';
+import { fixtures } from '@strapi/admin-test-utils/lib';
 import addCommonFieldsToInitialDataMiddleware from '../addCommonFieldsToInitialDataMiddleware';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -6,8 +6,8 @@ jest.mock('@strapi/helper-plugin', () => ({
     nonLocalizedFields: { common: 'test' },
     localizations: ['test'],
   }),
-  formatContentTypeData: data => data,
-  contentManagementUtilRemoveFieldsFromData: data => data,
+  formatContentTypeData: (data) => data,
+  contentManagementUtilRemoveFieldsFromData: (data) => data,
 }));
 
 describe('i18n | middlewares | addCommonFieldsToInitialDataMiddleware', () => {
@@ -79,7 +79,7 @@ describe('i18n | middlewares | addCommonFieldsToInitialDataMiddleware', () => {
       rawQuery: '?plugins[i18n][relatedEntityId]=1',
     };
 
-    const next = jest.fn(x => x);
+    const next = jest.fn((x) => x);
     const middleware = addCommonFieldsToInitialDataMiddleware()({ getState, dispatch });
 
     const nextAction = await middleware(next)(action);

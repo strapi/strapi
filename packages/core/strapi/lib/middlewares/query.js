@@ -21,8 +21,14 @@ const addQsParser = (app, settings) => {
      */
     get() {
       const qstr = this.querystring;
-      const cache = (this._querycache = this._querycache || {});
-      return cache[qstr] || (cache[qstr] = qs.parse(qstr, settings));
+      this._querycache = this._querycache || {};
+      const cache = this._querycache;
+
+      if (!cache[qstr]) {
+        cache[qstr] = qs.parse(qstr, settings);
+      }
+
+      return cache[qstr];
     },
 
     /*

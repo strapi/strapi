@@ -2,12 +2,8 @@
 
 const _ = require('lodash');
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
-const {
-  ApplicationError,
-  ValidationError,
-  NotFoundError,
-  ForbiddenError,
-} = require('@strapi/utils').errors;
+const { ApplicationError, ValidationError, NotFoundError, ForbiddenError } =
+  require('@strapi/utils').errors;
 const { validateCreateUserBody, validateUpdateUserBody } = require('./validation/user');
 
 const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
@@ -132,17 +128,13 @@ module.exports = {
 
     const { email, username, password } = body;
 
-    let pm;
-    let user;
-
-    const { pm: permissionManager, entity } = await findEntityAndCheckPermissions(
+    const { pm, entity } = await findEntityAndCheckPermissions(
       userAbility,
       ACTIONS.edit,
       userModel,
       id
     );
-    pm = permissionManager;
-    user = entity;
+    const user = entity;
 
     await validateUpdateUserBody(ctx.request.body);
 
@@ -155,7 +147,7 @@ module.exports = {
         .query('plugin::users-permissions.user')
         .findOne({ where: { username } });
 
-      if (userWithSameUsername && userWithSameUsername.id != id) {
+      if (userWithSameUsername && _.toString(userWithSameUsername.id) !== _.toString(id)) {
         throw new ApplicationError('Username already taken');
       }
     }
@@ -165,7 +157,7 @@ module.exports = {
         .query('plugin::users-permissions.user')
         .findOne({ where: { email: _.toLower(email) } });
 
-      if (userWithSameEmail && userWithSameEmail.id != id) {
+      if (userWithSameEmail && _.toString(userWithSameEmail.id) !== _.toString(id)) {
         throw new ApplicationError('Email already taken');
       }
       body.email = _.toLower(body.email);

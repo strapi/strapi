@@ -8,7 +8,7 @@ const initialState = {
 
 const notificationReducer = (state = initialState, action) =>
   // eslint-disable-next-line consistent-return
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case 'SHOW_NOTIFICATION': {
         draftState.notifications.push({
@@ -23,12 +23,13 @@ const notificationReducer = (state = initialState, action) =>
           timeout: get(action, ['config', 'timeout'], 2500),
           blockTransition: get(action, ['config', 'blockTransition'], false),
           onClose: get(action, ['config', 'onClose'], null),
+          title: get(action, ['config', 'title'], null),
         });
         draftState.notifId = state.notifId + 1;
         break;
       }
       case 'HIDE_NOTIFICATION': {
-        const indexToRemove = state.notifications.findIndex(notif => notif.id === action.id);
+        const indexToRemove = state.notifications.findIndex((notif) => notif.id === action.id);
 
         if (indexToRemove !== -1) {
           draftState.notifications.splice(indexToRemove, 1);

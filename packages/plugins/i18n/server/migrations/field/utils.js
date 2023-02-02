@@ -4,7 +4,7 @@ const { isScalarAttribute } = require('@strapi/utils').contentTypes;
 const { pick, prop, map, intersection, isEmpty, orderBy, pipe, every } = require('lodash/fp');
 const { getService } = require('../../utils');
 
-const shouldBeProcessed = processedLocaleCodes => entry => {
+const shouldBeProcessed = (processedLocaleCodes) => (entry) => {
   return (
     entry.localizations.length > 0 &&
     intersection(entry.localizations.map(prop('locale')), processedLocaleCodes).length === 0
@@ -41,7 +41,7 @@ const getSortedLocales = async ({ transacting } = {}) => {
 
   // Put default locale first
   return pipe(
-    map(locale => ({ code: locale.code, isDefault: locale.code === defaultLocale })),
+    map((locale) => ({ code: locale.code, isDefault: locale.code === defaultLocale })),
     orderBy(['isDefault', 'code'], ['desc', 'asc']),
     map(prop('code'))
   )(locales);

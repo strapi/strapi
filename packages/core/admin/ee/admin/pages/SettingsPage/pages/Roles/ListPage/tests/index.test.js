@@ -9,7 +9,7 @@ import { render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
-import { useRBAC, TrackingContext } from '@strapi/helper-plugin';
+import { useRBAC, TrackingProvider } from '@strapi/helper-plugin';
 import { lightTheme, darkTheme } from '@strapi/design-system';
 import { useRolesList } from '../../../../../../../../admin/src/hooks';
 
@@ -31,9 +31,9 @@ jest.mock('../../../../../../../../admin/src/hooks', () => ({
   useRolesList: jest.fn(),
 }));
 
-const makeApp = history => (
+const makeApp = (history) => (
   <IntlProvider messages={{}} textComponent="span" locale="en">
-    <TrackingContext.Provider value={{ uuid: null, telemetryProperties: undefined }}>
+    <TrackingProvider>
       <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
         <Theme>
           <Router history={history}>
@@ -41,7 +41,7 @@ const makeApp = history => (
           </Router>
         </Theme>
       </ThemeToggleProvider>
-    </TrackingContext.Provider>
+    </TrackingProvider>
   </IntlProvider>
 );
 
@@ -60,6 +60,24 @@ describe('<ListPage />', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c3 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c4 {
+        -webkit-animation: gzYjWD 1s infinite linear;
+        animation: gzYjWD 1s infinite linear;
+        will-change: transform;
+      }
+
       .c1 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -76,23 +94,6 @@ describe('<ListPage />', () => {
         -webkit-justify-content: space-around;
         -ms-flex-pack: space-around;
         justify-content: space-around;
-      }
-
-      .c3 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
-      .c4 {
-        -webkit-animation: gzYjWD 1s infinite linear;
-        animation: gzYjWD 1s infinite linear;
       }
 
       .c2 {

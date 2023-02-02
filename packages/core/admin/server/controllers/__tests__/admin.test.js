@@ -8,7 +8,7 @@ jest.mock('@strapi/strapi/lib/utils/ee', () => {
       isEnabled() {
         return false;
       },
-      getEnabled() {
+      list() {
         return [];
       },
     },
@@ -32,7 +32,7 @@ describe('Admin Controller', () => {
               exists: jest.fn(() => true),
             },
             'project-settings': {
-              getProjectSettings: jest.fn(() => ({ menuLogo: null })),
+              getProjectSettings: jest.fn(() => ({ menuLogo: null, authLogo: null })),
             },
           },
         },
@@ -53,6 +53,7 @@ describe('Admin Controller', () => {
         uuid: 'foo',
         hasAdmin: true,
         menuLogo: null,
+        authLogo: null,
       });
     });
   });
@@ -69,6 +70,7 @@ describe('Admin Controller', () => {
                 'info.dependencies': {
                   dependency: '1.0.0',
                 },
+                uuid: 'testuuid',
                 environment: 'development',
               }[key] || value)
           ),
@@ -85,12 +87,14 @@ describe('Admin Controller', () => {
         ['autoReload', false],
         ['info.strapi', null],
         ['info.dependencies', {}],
+        ['uuid', null],
       ]);
       expect(result.data).toBeDefined();
       expect(result.data).toStrictEqual({
         currentEnvironment: 'development',
         autoReload: false,
         strapiVersion: '1.0.0',
+        projectId: 'testuuid',
         dependencies: {
           dependency: '1.0.0',
         },

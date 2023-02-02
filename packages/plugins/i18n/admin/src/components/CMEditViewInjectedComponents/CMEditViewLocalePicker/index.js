@@ -33,12 +33,12 @@ const CMEditViewLocalePicker = ({
 
   const { push } = useHistory();
 
-  const handleChange = value => {
+  const handleChange = (value) => {
     if (value === currentLocale) {
       return;
     }
 
-    const nextLocale = options.find(option => {
+    const nextLocale = options.find((option) => {
       return option.value === value;
     });
 
@@ -121,7 +121,7 @@ const CMEditViewLocalePicker = ({
             >
               {value?.label}
             </Option>
-            {filteredOptions.map(option => {
+            {filteredOptions.map((option) => {
               return (
                 <Option
                   key={option.value}

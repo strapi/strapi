@@ -53,19 +53,19 @@ It has the following structure
 
 ```
 {
-  "openapi": "3.0.0" // do not change this version
+  "openapi": "3.0.0", // do not change this version
   "info": {
     "version": "1.0.0" // change this line to create a new version
     ...
-  }
+  },
   "x-strapi-config": {
     "path": "/documentation", // Change this line to change to url of the doc
     "showGeneratedFiles": true // Do not change this line at the moment...
   },
-  "servers" {} // Your servers config (it will be automated),
+  "servers": {}, // Your servers config (it will be automated)
   "externalDocs": {},
-  "paths": {} // All your Api routes,
-  "tags": [] // Group of route
+  "paths": {}, // All your Api routes
+  "tags": [], // Group of route
   "components": {} // Default generated components and custom ones
 }
 ```

@@ -23,8 +23,8 @@ module.exports = {
     const contentTypeService = getService('content-types');
 
     const contentTypes = Object.keys(strapi.contentTypes)
-      .filter(uid => !kind || _.get(strapi.contentTypes[uid], 'kind', 'collectionType') === kind)
-      .map(uid => contentTypeService.formatContentType(strapi.contentTypes[uid]));
+      .filter((uid) => !kind || _.get(strapi.contentTypes[uid], 'kind', 'collectionType') === kind)
+      .map((uid) => contentTypeService.formatContentType(strapi.contentTypes[uid]));
 
     ctx.send({
       data: contentTypes,
@@ -64,15 +64,17 @@ module.exports = {
         components: body.components,
       });
 
-      const metricsProperties = {
-        kind: contentType.kind,
-        hasDraftAndPublish: hasDraftAndPublish(contentType.schema),
+      const metricsPayload = {
+        eventProperties: {
+          kind: contentType.kind,
+          hasDraftAndPublish: hasDraftAndPublish(contentType.schema),
+        },
       };
 
       if (_.isEmpty(strapi.api)) {
-        await strapi.telemetry.send('didCreateFirstContentType', metricsProperties);
+        await strapi.telemetry.send('didCreateFirstContentType', metricsPayload);
       } else {
-        await strapi.telemetry.send('didCreateContentType', metricsProperties);
+        await strapi.telemetry.send('didCreateContentType', metricsPayload);
       }
 
       setImmediate(() => strapi.reload());
@@ -80,7 +82,9 @@ module.exports = {
       ctx.send({ data: { uid: contentType.uid } }, 201);
     } catch (error) {
       strapi.log.error(error);
-      await strapi.telemetry.send('didNotCreateContentType', { error: error.message });
+      await strapi.telemetry.send('didNotCreateContentType', {
+        eventProperties: { error: error.message },
+      });
       ctx.send({ error: error.message }, 400);
     }
   },

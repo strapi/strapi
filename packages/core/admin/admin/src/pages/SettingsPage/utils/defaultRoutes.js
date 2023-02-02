@@ -3,7 +3,7 @@ import ProtectedRolesListPage from 'ee_else_ce/pages/SettingsPage/pages/Roles/Pr
 
 const defaultRoutes = [
   {
-    Component: () => {
+    Component() {
       return { default: ProtectedRolesListPage };
     },
 
@@ -11,21 +11,21 @@ const defaultRoutes = [
     exact: true,
   },
   {
-    Component: () => {
+    Component() {
       return { default: RolesCreatePage };
     },
     to: '/settings/roles/duplicate/:id',
     exact: true,
   },
   {
-    Component: () => {
+    Component() {
       return { default: RolesCreatePage };
     },
     to: '/settings/roles/new',
     exact: true,
   },
   {
-    Component: async () => {
+    async Component() {
       const component = await import(
         /* webpackChunkName: "admin-edit-roles-page" */ '../pages/Roles/ProtectedEditPage'
       );
@@ -36,7 +36,7 @@ const defaultRoutes = [
     exact: true,
   },
   {
-    Component: async () => {
+    async Component() {
       const component = await import(
         /* webpackChunkName: "admin-users" */ '../pages/Users/ProtectedListPage'
       );
@@ -47,7 +47,7 @@ const defaultRoutes = [
     exact: true,
   },
   {
-    Component: async () => {
+    async Component() {
       const component = await import(
         /* webpackChunkName: "admin-edit-users" */ '../pages/Users/ProtectedEditPage'
       );
@@ -58,7 +58,7 @@ const defaultRoutes = [
     exact: true,
   },
   {
-    Component: async () => {
+    async Component() {
       const component = await import(
         /* webpackChunkName: "webhook-edit-page" */ '../pages/Webhooks/ProtectedCreateView'
       );
@@ -69,7 +69,7 @@ const defaultRoutes = [
     exact: true,
   },
   {
-    Component: async () => {
+    async Component() {
       const component = await import(
         /* webpackChunkName: "webhook-edit-page" */ '../pages/Webhooks/ProtectedEditView'
       );
@@ -80,7 +80,7 @@ const defaultRoutes = [
     exact: true,
   },
   {
-    Component: async () => {
+    async Component() {
       const component = await import(
         /* webpackChunkName: "webhook-list-page" */ '../pages/Webhooks/ProtectedListView'
       );
@@ -91,7 +91,7 @@ const defaultRoutes = [
     exact: true,
   },
   {
-    Component: async () => {
+    async Component() {
       const component = await import(
         /* webpackChunkName: "api-tokens-list-page" */ '../pages/ApiTokens/ProtectedListView'
       );
@@ -102,7 +102,7 @@ const defaultRoutes = [
     exact: true,
   },
   {
-    Component: async () => {
+    async Component() {
       const component = await import(
         /* webpackChunkName: "api-tokens-create-page" */ '../pages/ApiTokens/ProtectedCreateView'
       );
@@ -113,7 +113,7 @@ const defaultRoutes = [
     exact: true,
   },
   {
-    Component: async () => {
+    async Component() {
       const component = await import(
         /* webpackChunkName: "api-tokens-edit-page" */ '../pages/ApiTokens/ProtectedEditView'
       );

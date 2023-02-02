@@ -1,13 +1,11 @@
-import { hasPermissions } from '@strapi/helper-plugin';
 import getPluginSectionLinks from '../getPluginSectionLinks';
 
-jest.mock('@strapi/helper-plugin');
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  hasPermissions: jest.fn().mockResolvedValue(true),
+}));
 
 describe('getPluginSectionLinks', () => {
-  beforeEach(() => {
-    hasPermissions.mockImplementation(() => Promise.resolve(true));
-  });
-
   afterEach(() => {
     jest.resetAllMocks();
   });

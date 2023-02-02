@@ -8,8 +8,6 @@ import { request, useRBAC } from '@strapi/helper-plugin';
 // import { ThemeProvider } from 'styled-components';
 // import { QueryClient, QueryClientProvider } from 'react-query';
 // import LocaleSettingsPage from '..';
-// eslint-disable-next-line import/extensions
-import '@fortawesome/fontawesome-free/js/all.min.js';
 // TODO: move to @strapi/helper-plugin
 // import themes from '../../../../../../../core/admin/admin/src/themes';
 // import i18nReducers, { initialState } from '../../../hooks/reducers';
@@ -72,7 +70,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 jest.mock('../../../utils', () => ({
-  getTrad: x => x,
+  getTrad: (x) => x,
 }));
 
 jest.mock('react-intl', () => ({
@@ -585,7 +583,7 @@ describe('i18n settings page', () => {
 
   describe('create', () => {
     beforeEach(() => {
-      request.mockImplementation(url =>
+      request.mockImplementation((url) =>
         url.includes('/i18n/locales')
           ? Promise.resolve([])
           : Promise.resolve([

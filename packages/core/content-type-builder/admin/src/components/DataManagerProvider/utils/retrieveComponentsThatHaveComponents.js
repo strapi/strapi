@@ -1,7 +1,7 @@
 import get from 'lodash/get';
 import makeUnique from '../../../utils/makeUnique';
 
-const retrieveComponentsThatHaveComponents = allComponents => {
+const retrieveComponentsThatHaveComponents = (allComponents) => {
   const componentsThatHaveNestedComponents = Object.keys(allComponents).reduce((acc, current) => {
     const currentComponent = get(allComponents, [current], {});
     const uid = currentComponent.uid;
@@ -16,10 +16,10 @@ const retrieveComponentsThatHaveComponents = allComponents => {
   return makeUnique(componentsThatHaveNestedComponents);
 };
 
-const doesComponentHaveAComponentField = component => {
+const doesComponentHaveAComponentField = (component) => {
   const attributes = get(component, ['schema', 'attributes'], []);
 
-  return attributes.some(attribute => {
+  return attributes.some((attribute) => {
     const { type } = attribute;
 
     return type === 'component';

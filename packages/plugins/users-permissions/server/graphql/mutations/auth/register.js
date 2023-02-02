@@ -21,10 +21,7 @@ module.exports = ({ nexus, strapi }) => {
 
       koaContext.request.body = toPlainObject(args.input);
 
-      await strapi
-        .plugin('users-permissions')
-        .controller('auth')
-        .register(koaContext);
+      await strapi.plugin('users-permissions').controller('auth').register(koaContext);
 
       const output = koaContext.body;
 

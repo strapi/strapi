@@ -1,3 +1,3 @@
-module.exports = plugin => {
+module.exports = (plugin) => {
   return plugin;
 };

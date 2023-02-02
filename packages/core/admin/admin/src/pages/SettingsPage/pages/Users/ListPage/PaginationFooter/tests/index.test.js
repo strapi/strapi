@@ -4,14 +4,14 @@ import { IntlProvider } from 'react-intl';
 import { createMemoryHistory } from 'history';
 import { Router, Route } from 'react-router-dom';
 import { lightTheme, darkTheme } from '@strapi/design-system';
-import { TrackingContext } from '@strapi/helper-plugin';
+import { TrackingProvider } from '@strapi/helper-plugin';
 import Theme from '../../../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../../../components/ThemeToggleProvider';
 import PaginationFooter from '../index';
 
 const makeApp = (history, pagination) => {
   return (
-    <TrackingContext.Provider value={{ uuid: null, telemetryProperties: undefined }}>
+    <TrackingProvider>
       <IntlProvider messages={{}} textComponent="span" locale="en" defaultLocale="en">
         <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
           <Theme>
@@ -23,7 +23,7 @@ const makeApp = (history, pagination) => {
           </Theme>
         </ThemeToggleProvider>
       </IntlProvider>
-    </TrackingContext.Provider>
+    </TrackingProvider>
   );
 };
 

@@ -7,6 +7,7 @@ import {
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
+  useFetchClient,
 } from '@strapi/helper-plugin';
 import Check from '@strapi/icons/Check';
 import { Box } from '@strapi/design-system/Box';
@@ -20,7 +21,7 @@ import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { ContentLayout, HeaderLayout, Layout } from '@strapi/design-system/Layout';
 import axios from 'axios';
 import isEqual from 'lodash/isEqual';
-import { axiosInstance, getRequestUrl, getTrad } from '../../utils';
+import { getRequestUrl, getTrad } from '../../utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
 import pluginPermissions from '../../permissions';
@@ -29,6 +30,7 @@ export const SettingsPage = () => {
   const { formatMessage } = useIntl();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
+  const { get, put } = useFetchClient();
   useFocusWhenNavigate();
 
   const [{ initialData, isLoading, isSubmiting, modifiedData }, dispatch] = useReducer(
@@ -47,7 +49,7 @@ export const SettingsPage = () => {
       try {
         const {
           data: { data },
-        } = await axiosInstance.get(getRequestUrl('settings'), {
+        } = await get(getRequestUrl('settings'), {
           cancelToken: source.token,
         });
 
@@ -73,7 +75,7 @@ export const SettingsPage = () => {
 
   const isSaveButtonDisabled = isEqual(initialData, modifiedData);
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (isSaveButtonDisabled) {
@@ -85,7 +87,7 @@ export const SettingsPage = () => {
     dispatch({ type: 'ON_SUBMIT' });
 
     try {
-      await axiosInstance.put(getRequestUrl('settings'), modifiedData);
+      await put(getRequestUrl('settings'), modifiedData);
 
       dispatch({
         type: 'SUBMIT_SUCCEEDED',
@@ -133,7 +135,7 @@ export const SettingsPage = () => {
               loading={isSubmiting}
               type="submit"
               startIcon={<Check />}
-              size="L"
+              size="S"
             >
               {formatMessage({
                 id: 'global.save',
@@ -186,7 +188,7 @@ export const SettingsPage = () => {
                             id: 'app.components.ToggleCheckbox.on-label',
                             defaultMessage: 'On',
                           })}
-                          onChange={e => {
+                          onChange={(e) => {
                             handleChange({
                               target: { name: 'responsiveDimensions', value: e.target.checked },
                             });
@@ -216,7 +218,7 @@ export const SettingsPage = () => {
                             id: 'app.components.ToggleCheckbox.on-label',
                             defaultMessage: 'On',
                           })}
-                          onChange={e => {
+                          onChange={(e) => {
                             handleChange({
                               target: { name: 'sizeOptimization', value: e.target.checked },
                             });
@@ -246,7 +248,7 @@ export const SettingsPage = () => {
                             id: 'app.components.ToggleCheckbox.on-label',
                             defaultMessage: 'On',
                           })}
-                          onChange={e => {
+                          onChange={(e) => {
                             handleChange({
                               target: { name: 'autoOrientation', value: e.target.checked },
                             });

@@ -1,10 +1,7 @@
 'use strict';
 
-const {
-  assignDefaultLocale,
-  syncLocalizations,
-  syncNonLocalizedAttributes,
-} = require('../localizations')();
+const { assignDefaultLocale, syncLocalizations, syncNonLocalizedAttributes } =
+  require('../localizations')();
 
 const locales = require('../locales')();
 const contentTypes = require('../content-types')();
