@@ -287,13 +287,11 @@ program
     new Option('--from-token <token>', `Transfer token for the remote Strapi source`).hideHelp() // Hidden until pull feature is released
   )
   .addOption(
-    new Option(
-      '--to <destinationURL>',
-      `URL of the remote Strapi instance to send data to`
-    ).argParser(parseURL)
+    new Option('--to <destinationURL>', `URL of the remote Strapi instance to send data to`)
+      .argParser(parseURL)
+      .required()
   )
   .addOption(new Option('--to-token <token>', `Transfer token for the remote Strapi destination`))
-  .addOption(forceOption)
   .addOption(forceOption)
   .addOption(excludeOption)
   .addOption(onlyOption)
@@ -303,13 +301,20 @@ program
     'preAction',
     ifOptions(
       (opts) => opts.from,
-      (thisCommand) => {
+      async (thisCommand) => {
         assertUrlHasProtocol(thisCommand.opts().from, ['https:', 'http:']);
         if (!thisCommand.opts().fromToken) {
-          exitWith(
-            1,
-            'A transfer token is required to initiate a transfer from a remote Strapi source.'
-          );
+          const answers = await inquirer.prompt([
+            {
+              type: 'password',
+              message: 'Please enter your transfer token for the remote Strapi source',
+              name: 'fromToken',
+            },
+          ]);
+          if (!answers.fromToken?.length) {
+            exitWith(0, 'No token entered, aborting transfer.');
+          }
+          thisCommand.opts().fromToken = answers.fromToken;
         }
       }
     )
@@ -341,13 +346,13 @@ program
       }
     )
   )
-  .hook(
-    'preAction',
-    ifOptions(
-      (opts) => !opts.from && !opts.to,
-      () => exitWith(1, 'At least one source (from) or destination (to) option must be provided')
-    )
-  )
+  // .hook(
+  //   'preAction',
+  //   ifOptions(
+  //     (opts) => !opts.from && !opts.to,
+  //     () => exitWith(1, 'At least one source (from) or destination (to) option must be provided')
+  //   )
+  // )
   .action(getLocalScript('transfer/transfer'));
 
 // `$ strapi export`
