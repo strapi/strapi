@@ -16,7 +16,7 @@ import { setWorkflows } from './actions';
 
 export function ReviewWorkflowsPage() {
   const { formatMessage } = useIntl();
-  const { workflows: workflowsData, updateWorkflow } = useReviewWorkflows();
+  const { workflows: workflowsData, updateWorkflowStages } = useReviewWorkflows();
   const {
     status,
     clientState: {
@@ -26,7 +26,7 @@ export function ReviewWorkflowsPage() {
   const dispatch = useDispatch();
 
   const onSubmit = async () => {
-    await updateWorkflow(currentWorkflow);
+    await updateWorkflowStages(currentWorkflow.id, currentWorkflow.stages);
   };
 
   useInjectReducer(REDUX_NAMESPACE, reducer);

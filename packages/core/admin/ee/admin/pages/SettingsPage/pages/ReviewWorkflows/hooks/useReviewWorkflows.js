@@ -3,8 +3,6 @@ import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 
 const QUERY_BASE_KEY = 'review-workflows';
 
-/* eslint-disable no-unreachable */
-
 export function useReviewWorkflows(workflowId) {
   const { get, put } = useFetchClient();
   const toggleNotification = useNotification();
@@ -12,19 +10,6 @@ export function useReviewWorkflows(workflowId) {
 
   async function fetchWorkflows() {
     try {
-      return [
-        {
-          id: 1,
-          stages: [
-            {
-              id: 1,
-              name: `Something ${Math.random()}`,
-            },
-          ],
-        },
-      ];
-
-      // TODO
       const {
         data: { data },
       } = await get(`/admin/review-workflows/workflows/${workflowId ?? ''}?populate=stages`);
@@ -35,22 +20,13 @@ export function useReviewWorkflows(workflowId) {
     }
   }
 
-  async function updateRemoteWorkflow(payload) {
-    return {
-      id: 1,
-      stages: [
-        {
-          id: 1,
-          name: 'Something',
-        },
-      ],
-    };
-
-    // TODO
+  async function updateRemoteWorkflowStages({ workflowId, stages }) {
     try {
       const {
         data: { data },
-      } = await put(`/admin/review-workflows/workflows/${payload.id}`, payload);
+      } = await put(`/admin/review-workflows/workflows/${workflowId}/stages`, {
+        data: stages,
+      });
 
       return data;
     } catch (err) {
@@ -58,13 +34,13 @@ export function useReviewWorkflows(workflowId) {
     }
   }
 
-  function updateWorkflow(payload) {
-    return workflowUpdateMutation.mutateAsync(payload);
+  function updateWorkflowStages(workflowId, stages) {
+    return workflowUpdateMutation.mutateAsync({ workflowId, stages });
   }
 
   const workflows = useQuery([QUERY_BASE_KEY, workflowId ?? 'default'], fetchWorkflows);
 
-  const workflowUpdateMutation = useMutation(updateRemoteWorkflow, {
+  const workflowUpdateMutation = useMutation(updateRemoteWorkflowStages, {
     async onError() {
       toggleNotification({
         type: 'error',
@@ -84,6 +60,6 @@ export function useReviewWorkflows(workflowId) {
 
   return {
     workflows,
-    updateWorkflow,
+    updateWorkflowStages,
   };
 }
