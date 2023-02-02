@@ -15,13 +15,13 @@ import {
   useTracking,
   useGuidedTour,
   LinkButton,
+  useFetchClient,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Button } from '@strapi/design-system/Button';
 import Plus from '@strapi/icons/Plus';
 
-import { axiosInstance } from '../../../../../core/utils';
 import adminPermissions from '../../../../../permissions';
 import tableHeaders from './utils/tableHeaders';
 import TableRows from './DynamicTable';
@@ -38,6 +38,7 @@ const TransferTokenListView = () => {
   const { trackUsage } = useTracking();
   const { startSection } = useGuidedTour();
   const startSectionRef = useRef(startSection);
+  const { get, del } = useFetchClient();
 
   useEffect(() => {
     if (startSectionRef.current) {
@@ -67,7 +68,7 @@ const TransferTokenListView = () => {
       trackUsage('willAccessTokenList');
       const {
         data: { data },
-      } = await axiosInstance.get(`/admin/transfer/tokens`);
+      } = await get(`/admin/transfer/tokens`);
 
       // trackUsage('didAccessTokenList', { number: data.length }); // TODO What should we track?
 
@@ -90,7 +91,7 @@ const TransferTokenListView = () => {
 
   const deleteMutation = useMutation(
     async (id) => {
-      await axiosInstance.delete(`/admin/transfer/tokens/${id}`); // TODO change this
+      await del(`/admin/transfer/tokens/${id}`);
     },
     {
       async onSuccess() {

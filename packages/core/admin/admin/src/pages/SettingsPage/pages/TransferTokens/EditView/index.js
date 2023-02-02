@@ -9,13 +9,13 @@ import {
   useTracking,
   useGuidedTour,
   useRBAC,
+  useFetchClient,
 } from '@strapi/helper-plugin';
 import { Main } from '@strapi/design-system/Main';
 import { Formik } from 'formik';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { formatAPIErrors } from '../../../../../utils';
-import { axiosInstance } from '../../../../../core/utils';
 import { schema } from './utils';
 import LoadingView from './components/LoadingView';
 import FormHead from './components/FormHead';
@@ -47,6 +47,7 @@ const TransferTokenCreateView = () => {
   const {
     params: { id },
   } = useRouteMatch('/settings/transfer-tokens/:id');
+  const { get, post, put } = useFetchClient();
 
   const isCreating = id === 'create';
 
@@ -59,7 +60,7 @@ const TransferTokenCreateView = () => {
     async () => {
       const {
         data: { data },
-      } = await axiosInstance.get(`/admin/transfer/tokens/${id}`);
+      } = await get(`/admin/transfer/tokens/${id}`);
 
       setTransferToken({
         ...data,
@@ -90,12 +91,12 @@ const TransferTokenCreateView = () => {
       const {
         data: { data: response },
       } = isCreating
-        ? await axiosInstance.post(`/admin/transfer/tokens`, {
+        ? await post(`/admin/transfer/tokens`, {
             ...body,
             lifespan: lifespanVal,
             permissions: ['push'],
           })
-        : await axiosInstance.put(`/admin/transfer/tokens/${id}`, {
+        : await put(`/admin/transfer/tokens/${id}`, {
             name: body.name,
             description: body.description,
             type: body.type,
