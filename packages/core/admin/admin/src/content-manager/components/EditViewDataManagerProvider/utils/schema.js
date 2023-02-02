@@ -212,8 +212,6 @@ const createYupSchemaAttribute = (type, validations, options) => {
     schema = yup.string();
   }
 
-  console.log({ type, validations, options });
-
   if (type === 'json') {
     if (validations.required) {
       schema = yup.mixed(errorsTrads.required).test('required', errorsTrads.required, (value) => {
