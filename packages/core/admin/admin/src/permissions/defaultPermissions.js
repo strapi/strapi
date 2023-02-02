@@ -93,7 +93,7 @@ const permissions = {
       delete: [{ action: 'admin::transfer.tokens.delete', subject: null }],
       read: [{ action: 'admin::transfer.tokens.read', subject: null }],
       update: [{ action: 'admin::transfer.tokens.update', subject: null }],
-      regenerate: [{ action: 'admin::transfer-tokens.regenerate', subject: null }],
+      regenerate: [{ action: 'admin::transfer.tokens.regenerate', subject: null }],
     },
     'project-settings': {
       read: [{ action: 'admin::project-settings.read', subject: null }],

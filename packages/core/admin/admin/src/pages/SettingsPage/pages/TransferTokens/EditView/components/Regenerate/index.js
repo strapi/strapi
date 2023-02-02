@@ -10,7 +10,7 @@ export const Regenerate = ({ onRegenerate, idToRegenerate }) => {
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const { regenerateData, isLoadingConfirmation } = useRegenerate(
-    '/admin/transfer-tokens/',
+    '/admin/transfer/tokens/',
     idToRegenerate,
     onRegenerate
   );
