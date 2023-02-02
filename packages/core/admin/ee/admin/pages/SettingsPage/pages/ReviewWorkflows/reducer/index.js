@@ -60,7 +60,7 @@ export function reducer(state = initialState, action) {
           ...currentWorkflow.data.stages,
           {
             ...payload,
-            __temp_key__: state.clientState.currentWorkflow.data.stages.length + 1,
+            __temp_key__: currentWorkflow.data.stages.length + 1,
           },
         ];
 
@@ -69,19 +69,16 @@ export function reducer(state = initialState, action) {
 
       case ACTION_UPDATE_STAGE: {
         const { currentWorkflow } = state.clientState;
+        const { stageId, ...modified } = payload;
 
-        draft.clientState.currentWorkflow.data.stages = currentWorkflow.data.stages.map((stage) => {
-          if ((stage.id ?? stage.__temp_key__) === payload.stageId) {
-            const { stageId, ...modified } = payload;
-
-            return {
-              ...stage,
-              ...modified,
-            };
-          }
-
-          return stage;
-        });
+        draft.clientState.currentWorkflow.data.stages = currentWorkflow.data.stages.map((stage) =>
+          (stage.id ?? stage.__temp_key__) === stageId
+            ? {
+                ...stage,
+                ...modified,
+              }
+            : stage
+        );
 
         break;
       }
