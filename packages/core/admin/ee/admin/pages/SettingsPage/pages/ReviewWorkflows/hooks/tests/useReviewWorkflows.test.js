@@ -10,7 +10,9 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useFetchClient: jest.fn().mockReturnValue({
     get: jest.fn(),
+    put: jest.fn(),
   }),
+  useNotification: jest.fn().mockReturnValue(() => {}),
 }));
 
 const client = new QueryClient({
@@ -101,5 +103,25 @@ describe('useReviewWorkflows', () => {
         }),
       })
     );
+  });
+
+  test('send put request on the updateWorkflowStages mutation', async () => {
+    const { put } = useFetchClient();
+    const idFixture = 1;
+    const stagesFixture = [{ id: 2, name: 'stage' }];
+
+    put.mockResolvedValue({});
+
+    const { result, waitFor } = await setup(idFixture);
+
+    await act(async () => {
+      await result.current.updateWorkflowStages(idFixture, stagesFixture);
+    });
+
+    await waitFor(() => expect(result.current.workflows.isLoading).toBe(false));
+
+    expect(put).toBeCalledWith(`/admin/review-workflows/workflows/${idFixture}/stages`, {
+      data: stagesFixture,
+    });
   });
 });
