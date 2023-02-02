@@ -61,8 +61,7 @@ module.exports = {
         );
 
         if (file.stream) {
-          file.stream.pipe(
-          );
+          file.stream.pipe(uploadStream);
         } else {
           intoStream(file.buffer).pipe(uploadStream);
         }
