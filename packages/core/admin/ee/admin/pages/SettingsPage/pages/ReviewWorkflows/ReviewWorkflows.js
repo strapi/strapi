@@ -9,10 +9,11 @@ import { Check } from '@strapi/icons';
 
 import { Stages } from './components/Stages';
 import { reducer, initialState } from './reducer';
-import { REDUX_NAMESPACE, stagesSchema } from './constants';
+import { REDUX_NAMESPACE } from './constants';
 import { useInjectReducer } from '../../../../../../admin/src/hooks/useInjectReducer';
 import { useReviewWorkflows } from './hooks/useReviewWorkflows';
 import { setWorkflows } from './actions';
+import { getWorkflowValidationSchema } from './utils/getWorkflowValidationSchema';
 
 export function ReviewWorkflowsPage() {
   const { formatMessage } = useIntl();
@@ -27,18 +28,12 @@ export function ReviewWorkflowsPage() {
 
   const formik = useFormik({
     enableReinitialize: true,
-    initialValues: {
-      stages: currentWorkflow
-        ? currentWorkflow.stages.map((stage) => ({
-            name: stage.name,
-          }))
-        : null,
-    },
+    initialValues: currentWorkflow,
     async onSubmit() {
       await updateWorkflowStages(currentWorkflow.id, currentWorkflow.stages);
       refetchWorkflow();
     },
-    validationSchema: stagesSchema,
+    validationSchema: getWorkflowValidationSchema({ formatMessage }),
     validateOnChange: false,
   });
 
@@ -48,7 +43,7 @@ export function ReviewWorkflowsPage() {
     dispatch(setWorkflows({ status: workflowsData.status, data: workflowsData.data }));
   }, [workflowsData.status, workflowsData.data, dispatch]);
 
-  if (!currentWorkflow) {
+  if (!formik.values?.stages) {
     return null;
   }
 
@@ -98,7 +93,7 @@ export function ReviewWorkflowsPage() {
                   })}
                 </Loader>
               ) : (
-                <Stages stages={currentWorkflow.stages} />
+                <Stages stages={formik.values.stages} />
               )}
             </ContentLayout>
           </Form>

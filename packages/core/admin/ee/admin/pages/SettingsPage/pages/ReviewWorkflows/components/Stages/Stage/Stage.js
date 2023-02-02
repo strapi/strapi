@@ -71,10 +71,7 @@ function Stage({ id, name, index, canDelete, isOpen: isOpenDefault = false }) {
                   defaultMessage: 'Stage name',
                 })}
                 error={meta.error ?? false}
-                onChange={(event) => {
-                  dispatch(updateStage(id, { name: event.target.value }));
-                  field.onChange(event);
-                }}
+                onBlur={(event) => dispatch(updateStage(id, { name: event.target.value }))}
               />
             </GridItem>
           </Grid>

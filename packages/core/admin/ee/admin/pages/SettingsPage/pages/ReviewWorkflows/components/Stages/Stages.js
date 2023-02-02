@@ -31,13 +31,13 @@ function Stages({ stages }) {
 
         <Stack spacing={6} zIndex={2} position="relative" as="ol">
           {stages.map((stage, index) => {
-            const stableStageId = stage?.id ?? stage.__temp_key__;
+            const id = stage?.id ?? stage.__temp_key__;
 
             return (
-              <Box key={`stage-${stableStageId}`} as="li">
+              <Box key={`stage-${id}`} as="li">
                 <Stage
                   {...stage}
-                  id={stableStageId}
+                  id={id}
                   index={index}
                   canDelete={stages.length > 1}
                   isOpen={!stage.id}
