@@ -294,6 +294,9 @@ program
   )
   .addOption(new Option('--to-token <token>', `Transfer token for the remote Strapi destination`))
   .addOption(forceOption)
+  .addOption(forceOption)
+  .addOption(excludeOption)
+  .addOption(onlyOption)
   // Validate URLs
   .hook(
     'preAction',
@@ -310,11 +313,12 @@ program
       }
     )
   )
+  .hook('preAction', validateExcludeOnly)
   .hook(
     'preAction',
     ifOptions(
       (opts) => opts.to,
-      (thisCommand) => {
+      async (thisCommand) => {
         assertUrlHasProtocol(thisCommand.opts().to, ['https:', 'http:']);
         if (!thisCommand.opts().toToken) {
           exitWith(
@@ -322,6 +326,9 @@ program
             'A transfer token is required to initiate a transfer to a remote Strapi destination.'
           );
         }
+        await confirmMessage(
+          'The transfer will delete all data in the remote database and media files. Are you sure you want to proceed?'
+        )(thisCommand);
       }
     )
   )
@@ -330,16 +337,6 @@ program
     ifOptions(
       (opts) => !opts.from && !opts.to,
       () => exitWith(1, 'At least one source (from) or destination (to) option must be provided')
-    )
-  )
-  .addOption(forceOption)
-  .addOption(excludeOption)
-  .addOption(onlyOption)
-  .hook('preAction', validateExcludeOnly)
-  .hook(
-    'preAction',
-    confirmMessage(
-      'The import will delete all data in the remote database. Are you sure you want to proceed?'
     )
   )
   .action(getLocalScript('transfer/transfer'));
@@ -438,7 +435,7 @@ program
   .hook(
     'preAction',
     confirmMessage(
-      'The import will delete all data in your database. Are you sure you want to proceed?'
+      'The import will delete all data in your database and media files. Are you sure you want to proceed?'
     )
   )
   .action(getLocalScript('transfer/import'));
