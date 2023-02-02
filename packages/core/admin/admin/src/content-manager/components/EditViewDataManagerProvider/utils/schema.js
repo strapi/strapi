@@ -212,23 +212,31 @@ const createYupSchemaAttribute = (type, validations, options) => {
     schema = yup.string();
   }
 
+  console.log({ type, validations, options });
+
   if (type === 'json') {
-    schema = yup
-      .mixed(errorsTrads.json)
-      .test('isJSON', errorsTrads.json, (value) => {
-        if (value === undefined) {
-          return true;
-        }
+    if (validations.required) {
+      schema = yup.mixed(errorsTrads.required).test('required', errorsTrads.required, (value) => {
+        return value === undefined;
+      });
+    } else {
+      schema = yup
+        .mixed(errorsTrads.json)
+        .test('isJSON', errorsTrads.json, (value) => {
+          if (value === undefined) {
+            return true;
+          }
 
-        try {
-          JSON.parse(value);
+          try {
+            JSON.parse(value);
 
-          return true;
-        } catch (err) {
-          return false;
-        }
-      })
-      .nullable();
+            return true;
+          } catch (err) {
+            return false;
+          }
+        })
+        .nullable();
+    }
   }
 
   if (type === 'email') {
