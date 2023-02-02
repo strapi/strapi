@@ -86,6 +86,17 @@ const sidebars = {
           },
           items: ['example'],
         },
+        {
+          type: 'category',
+          label: 'Utils',
+          items: [
+            {
+              type: 'doc',
+              label: 'Event Hub',
+              id: 'core/utils/event-hub',
+            },
+          ],
+        },
       ],
     },
     {
