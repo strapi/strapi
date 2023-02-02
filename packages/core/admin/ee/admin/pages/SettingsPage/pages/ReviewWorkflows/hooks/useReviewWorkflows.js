@@ -2,46 +2,46 @@ import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 
 const QUERY_BASE_KEY = 'review-workflows';
+const API_BASE_URL = '/admin/review-workflows';
 
 export function useReviewWorkflows(workflowId) {
   const { get, put } = useFetchClient();
   const toggleNotification = useNotification();
-  const queryClient = useQueryClient();
+  const client = useQueryClient();
+  const workflowQueryKey = [QUERY_BASE_KEY, workflowId ?? 'default'];
 
-  async function fetchWorkflows() {
-    try {
-      const {
-        data: { data },
-      } = await get(`/admin/review-workflows/workflows/${workflowId ?? ''}?populate=stages`);
+  async function fetchWorkflows({ params = { populate: 'stages' } }) {
+    const {
+      data: { data },
+    } = await get(`${API_BASE_URL}/workflows/${workflowId ?? ''}`, { params });
 
-      return data;
-    } catch (err) {
-      return null;
-    }
+    return data;
   }
 
   async function updateRemoteWorkflowStages({ workflowId, stages }) {
-    try {
-      const {
-        data: { data },
-      } = await put(`/admin/review-workflows/workflows/${workflowId}/stages`, {
-        data: stages,
-      });
+    const {
+      data: { data },
+    } = await put(`${API_BASE_URL}/workflows/${workflowId}/stages`, {
+      data: stages,
+    });
 
-      return data;
-    } catch (err) {
-      return null;
-    }
+    return data;
   }
 
   function updateWorkflowStages(workflowId, stages) {
     return workflowUpdateMutation.mutateAsync({ workflowId, stages });
   }
 
-  const workflows = useQuery([QUERY_BASE_KEY, workflowId ?? 'default'], fetchWorkflows);
+  // TODO needs testing
+  function refetchWorkflow() {
+    client.refetchQueries(workflowQueryKey);
+  }
+
+  const workflows = useQuery(workflowQueryKey, fetchWorkflows);
 
   const workflowUpdateMutation = useMutation(updateRemoteWorkflowStages, {
     async onError() {
+      // TODO: this should return the proper error thrown by the API
       toggleNotification({
         type: 'error',
         message: { id: 'notification.error', defaultMessage: 'An error occured' },
@@ -49,8 +49,6 @@ export function useReviewWorkflows(workflowId) {
     },
 
     async onSuccess() {
-      queryClient.refetchQueries([QUERY_BASE_KEY]);
-
       toggleNotification({
         type: 'success',
         message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
@@ -61,5 +59,6 @@ export function useReviewWorkflows(workflowId) {
   return {
     workflows,
     updateWorkflowStages,
+    refetchWorkflow,
   };
 }
