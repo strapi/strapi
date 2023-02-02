@@ -6,13 +6,17 @@ tags:
   - public
   - global
 
-toc_min_heading_level: 1
+toc_min_heading_level: 2
 toc_max_heading_level: 5
 ---
 
 # Name of Module
 
-> Current state: Stable | Legacy | Deprecated
+:::info
+
+Current state: **Stable** | **Legacy** | **Deprecated**
+
+:::
 
 _**Stable** - can be use as is_
 
@@ -38,9 +42,9 @@ const myClass = new Class();
 
 ### `class.method(param1, param2)`
 
-- `param1`: \<String> (can be linked to other API doc page).
-- `param2`: \<Object>
-  - `options1`: \<Number>
+- `param1`: &lt; String &gt; (can be linked to other API doc page).
+- `param2`: &lt; Object &gt;
+  - `options1`: &lt; Number &gt;
 
 The `class.method()` method display the `param1` and then skip `param2` lines.
 
@@ -63,9 +67,9 @@ for (const text of textLines) {
 
 ## Function: `name_of_the_function(param1, param2)`
 
-- `param1`: \<String> (can be linked to other API doc page)
-- `param2`: \<Object>
-  - `options1`: \<Number>
+- `param1`: &lt; String &gt; (can be linked to other API doc page)
+- `param2`: &lt; Object &gt;
+  - `options1`: &lt; Number &gt;
 
 The `name_of_the_function()` method display the `param1` and then skip `param2` lines.
 
