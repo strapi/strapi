@@ -191,7 +191,7 @@ const reducer = (state, action) =>
         if (toOneRelation) {
           set(draftState, path, [value]);
         } else {
-          const modifiedDataRelations = get(state, path);
+          const modifiedDataRelations = get(state, path) || [];
           const newRelations = [...modifiedDataRelations, value];
           set(draftState, path, newRelations);
         }
