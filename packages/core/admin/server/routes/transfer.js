@@ -1,19 +1,27 @@
 'use strict';
 
+const dataTransferAuthStrategy = require('../strategies/data-transfer');
+
 module.exports = [
-  // // Transfer route
+  // Transfer route
   {
     method: 'GET',
     path: '/transfer/runner/connect',
     handler: 'transfer.runner-connect',
     config: {
-      auth: {
-        strategy: '',
-        scope: ['push', 'pull'],
-      },
+      middlewares: [
+        (ctx, next) => {
+          if (process.env.STRAPI_DISABLE_REMOTE_DATA_TRANSFER === 'true') {
+            return ctx.notFound();
+          }
+
+          return next();
+        },
+      ],
+      auth: { strategies: [dataTransferAuthStrategy] },
     },
   },
-  // // Transfer Tokens
+  // Transfer Tokens
   {
     method: 'POST',
     path: '/transfer/tokens',

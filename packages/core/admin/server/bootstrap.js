@@ -96,4 +96,6 @@ module.exports = async () => {
   apiTokenService.checkSaltIsDefined();
   transferService.token.checkSaltIsDefined();
   tokenService.checkSecretIsDefined();
+
+  transferService.permission.init();
 };

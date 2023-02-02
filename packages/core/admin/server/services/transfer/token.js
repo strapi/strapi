@@ -307,4 +307,15 @@ const flattenTokenPermissions = (token) => {
   };
 };
 
-module.exports = { create, list, exists, getById, update, revoke, regenerate, checkSaltIsDefined };
+module.exports = {
+  create,
+  list,
+  exists,
+  getBy,
+  getById,
+  update,
+  revoke,
+  regenerate,
+  hash,
+  checkSaltIsDefined,
+};

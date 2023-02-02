@@ -82,6 +82,8 @@ const DEFAULT_IGNORED_CONTENT_TYPES = [
   'admin::role',
   'admin::api-token',
   'admin::api-token-permission',
+  'admin::transfer-token',
+  'admin::transfer-token-permission',
   'admin::audit-log',
 ];
 
