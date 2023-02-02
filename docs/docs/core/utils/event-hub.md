@@ -35,7 +35,7 @@ Dispatches a new event into the hub. It returns a promise that resolves when all
 
 ```ts
 // Types
-type Emit = (name: string, payload?: Object) => Promise<void>;
+type Emit = (name: string, ...args: any[]) => Promise<void>;
 
 // Usage
 strapi.eventHub.emit('some.event', { meta: 'data' });
@@ -49,12 +49,12 @@ Adds a subscriber function that will be called for each event emitted to the hub
 
 ```ts
 // Types
-type Subscriber = (name: string, payload?: Object) => void | Promise<void>;
+type Subscriber = (name: string, ...args: Object) => void | Promise<void>;
 type UnsubscribeCallback = () => void;
 type Subscribe = (subscriber: Subscriber) => UnsubscribeCallback;
 
 // Add a subscriber
-const unsubcribe = strapi.eventHub.subscribe((name: string, payload?: Object) => {
+const unsubcribe = strapi.eventHub.subscribe((name: string, ...args: any[]) => {
   // Write your subscriber logic here
 });
 
@@ -68,11 +68,11 @@ Removes a subscriber function. You need to give it the reference of the subscrib
 
 ```ts
 // Types
-type Subscriber = (name: string, payload?: Object) => void | Promise<void>;
+type Subscriber = (name: string, ...args: any[]) => void | Promise<void>;
 type Unsubscribe = (subscriber: Subscriber) => void;
 
 // After a subscriber has been added
-const subscriber: Subscriber = (name, payload) => {};
+const subscriber: Subscriber = (name, ...args) => {};
 strapi.eventHub.subscribe(subscriber);
 
 // Use its reference to remove it
@@ -89,7 +89,7 @@ Registers a listener function that is called every time a _specific_ event is em
 
 ```ts
 // Types
-type Listener = (payload?: Object) => void | Promise<void>;
+type Listener = (args: any[]) => void | Promise<void>;
 type RemoveListenerCallback = () => void;
 type On = (eventName: string, listener: Listener) => RemoveListenerCallback;
 
@@ -108,11 +108,11 @@ Removes a listener function. You need to give it the name of the event it's list
 
 ```ts
 // Types
-type Listener = (payload?: Object) => void | Promise<void>;
+type Listener = (args: any[]) => void | Promise<void>;
 type Off = (listener: Listener) => void;
 
 // After a listener has been added
-const listener: Listener = (payload) => {};
+const listener: Listener = (...args) => {};
 strapi.eventHub.on('some.event', listener);
 
 // Use its reference to remove it
@@ -125,7 +125,7 @@ Registers a listener function that will only be called the first time an event i
 
 ```ts
 // Types
-type Listener = (payload?: Object) => void | Promise<void>;
+type Listener = (args: any[]) => void | Promise<void>;
 type RemoveListenerCallback = () => void;
 type Once = (eventName: string, listener: Listener) => RemoveListenerCallback;
 
