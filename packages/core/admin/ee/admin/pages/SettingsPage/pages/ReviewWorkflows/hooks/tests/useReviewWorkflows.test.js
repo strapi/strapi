@@ -9,8 +9,8 @@ import { useReviewWorkflows } from '../useReviewWorkflows';
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useFetchClient: jest.fn().mockReturnValue({
-    get: jest.fn(),
-    put: jest.fn(),
+    get: jest.fn().mockResolvedValue({ data: {} }),
+    put: jest.fn().mockResolvedValue({ data: {} }),
   }),
   useNotification: jest.fn().mockReturnValue(() => {}),
 }));
@@ -94,7 +94,10 @@ describe('useReviewWorkflows', () => {
     const { result, waitFor } = await setup(idFixture);
 
     expect(result.current.workflows.isLoading).toBe(true);
-    expect(get).toBeCalledWith(`/admin/review-workflows/workflows/${idFixture}?populate=stages`);
+    expect(get).toBeCalledWith(
+      `/admin/review-workflows/workflows/${idFixture}`,
+      expect.any(Object)
+    );
 
     await waitFor(() => expect(result.current.workflows.isLoading).toBe(false));
 
@@ -112,7 +115,9 @@ describe('useReviewWorkflows', () => {
     const idFixture = 1;
     const stagesFixture = [{ id: 2, name: 'stage' }];
 
-    put.mockResolvedValue({});
+    put.mockResolvedValue({
+      data: {},
+    });
 
     const { result, waitFor } = await setup(idFixture);
 
