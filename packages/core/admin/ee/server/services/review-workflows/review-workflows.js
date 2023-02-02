@@ -2,7 +2,12 @@
 
 const { getService } = require('../../utils');
 
-// Map every stage in the array to be ordered in the relation
+/**
+ * Map every stage in the array to be ordered in the relation
+ * @param {Object[]} stages
+ * @param {number} stages.id
+ * @return {Object[]}
+ */
 function buildStagesConnectArray(stages) {
   return stages.map((stage, index) => {
     const connect = {
