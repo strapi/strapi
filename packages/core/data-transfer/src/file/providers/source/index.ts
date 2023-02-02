@@ -9,11 +9,12 @@ import { chain } from 'stream-chain';
 import { pipeline, PassThrough } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
 import type { Schema } from '@strapi/strapi';
+
 import type { IAsset, IMetadata, ISourceProvider, ProviderType } from '../../../../types';
 
 import { createDecryptionCipher } from '../../../utils/encryption';
 import { collect } from '../../../utils/stream';
-import { ProviderInitializationError } from '../../../errors/providers';
+import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
 
 type StreamItemArray = Parameters<typeof chain>[0];
 
@@ -196,15 +197,32 @@ class LocalFileSourceProvider implements ISourceProvider {
           async onentry(entry) {
             const transforms = [
               // JSONL parser to read the data chunks one by one (line by line)
-              parser(),
+              parser({
+                checkErrors: true,
+              }),
               // The JSONL parser returns each line as key/value
               (line: { key: string; value: object }) => line.value,
             ];
 
             const stream = entry.pipe(chain(transforms));
 
-            for await (const chunk of stream) {
-              outStream.write(chunk);
+            try {
+              for await (const chunk of stream) {
+                outStream.write(chunk);
+              }
+            } catch (e: unknown) {
+              outStream.destroy(
+                new ProviderTransferError(
+                  `Error parsing backup files from backup file ${entry.path}: ${
+                    (e as Error).message
+                  }`,
+                  {
+                    details: {
+                      error: e,
+                    },
+                  }
+                )
+              );
             }
           },
         }),
@@ -219,6 +237,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     return outStream;
   }
 
+  // For collecting an entire JSON file then parsing it, not for streaming JSONL
   async #parseJSONFile<T extends object>(fileStream: Readable, filePath: string): Promise<T> {
     return new Promise<T>((resolve, reject) => {
       pipeline(
