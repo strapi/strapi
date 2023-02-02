@@ -10,20 +10,20 @@ tags:
 
 ## Summary
 
-The event hub is a central system that processes a variety of events in a Strapi application. These events can emitted from a variety of sources, and can be used using subscriber functions.
+The event hub is a central system that processes a variety of events in a Strapi application. These events can be emitted from a variety of sources to trigger associated subscriber functions.
 
 <img
   src="/img/utils/event-hub-diagram.png"
   alt="A diagram showing how the event hub processes events with multiple sources with multiple subscribers"
 />
 
-_above: A diagram showing how the event hub processes events with multiple sources with multiple subscribers_
+_above: A diagram showing how the event hub processes events from different sources with multiple subscribers_
 
-Events are used in Strapi to power the webhooks and audit logs features, among other things. But the event hub can also be used in plugins. Using the plugin API, it is possible to listen to events emitted by Strapi, and to emit new events into the hub.
+Events are mainly used in Strapi to power the webhooks and audit logs features. However, plugin developers can also access the event-hub using the plugin API. This means plugins can listen to events emitted by Strapi and emit new events to the event hub.
 
 ## Detailed design
 
-The event hub is a store of subscriber functions. These subscribers get called for all emitted events, and receive the name and payload for each event.
+The event hub is a store of subscriber functions. When an event is emitted to the hub, each subscriber function in the store will be called with the event's name and a variable number of arguments.
 
 This design was inspired by the way Strapi handles [lifecycle hooks](https://docs.strapi.io/developer-docs/latest/development/backend-customization/models.html#lifecycle-hooks). It was chosen over the [Node.js event emitter](https://nodejs.org/api/events.html#class-eventemitter) because it provides the ability to have a single subscriber function per feature, and does not cause [memory leak concerns](https://stackoverflow.com/questions/9768444/possible-eventemitter-memory-leak-detected).
 
@@ -35,7 +35,7 @@ Dispatches a new event into the hub. It returns a promise that resolves when all
 
 ```ts
 // Types
-type Emit = (name: string, payload?: Object): Promise<void>;
+type Emit = (name: string, payload?: Object) => Promise<void>;
 
 // Usage
 strapi.eventHub.emit('some.event', { meta: 'data' });
@@ -45,7 +45,7 @@ strapi.eventHub.emit('some.event', { meta: 'data' });
 
 #### `subscribe`
 
-Adds a subscriber function that will be called for each event emitted into the hub. It returns a function that can be called to remove the subscriber.
+Adds a subscriber function that will be called for each event emitted to the hub. It returns a function that can be called to remove the subscriber.
 
 ```ts
 // Types
@@ -85,7 +85,7 @@ If you only need to run a function for one specific event, then creating a subsc
 
 #### `on`
 
-Registers a listener function that gets called every time a specific event is emitted. It returns a function that can be called to remove the listener.
+Registers a listener function that is called every time a _specific_ event is emitted. It returns a function that can be called to remove the listener.
 
 ```ts
 // Types
@@ -121,7 +121,7 @@ strapi.eventHub.off('some.event', listener);
 
 #### `once`
 
-Registers a listener function that will only be called the first time that an event is called. Once the event has been emitted, the listener will be removed automatically. It also returns a function that can be used to remove the listener before it was called.
+Registers a listener function that will only be called the first time an event is emitted. Once the event has been emitted, the listener will be removed automatically. It also returns a function that can be used to remove the listener before it was called.
 
 ```ts
 // Types
@@ -140,7 +140,7 @@ removeListener();
 
 ## Tradeoffs
 
-- Potential breaking changes: a change to an event's name or payload may affect other features or plugins listening to the same event. Backwards compatibility needs to be a concern when managing these events.
+- Potential breaking changes: a change to an event's name or payload may affect other features or plugins listening to the same event. Backwards compatibility is a concern when managing these events.
 - Performance: Strapi emits a lot of events, so you need to make sure your subscriber functions aren't too expensive to run.
 
 ## Alternatives
