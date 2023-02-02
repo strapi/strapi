@@ -297,7 +297,8 @@ program
   .addOption(forceOption)
   .addOption(excludeOption)
   .addOption(onlyOption)
-  // Validate URLs
+  .hook('preAction', validateExcludeOnly)
+  // If --from is used, valudate the URL and token
   .hook(
     'preAction',
     ifOptions(
@@ -313,7 +314,7 @@ program
       }
     )
   )
-  .hook('preAction', validateExcludeOnly)
+  // If --to is used, valudate the URL, token, and confirm restore
   .hook(
     'preAction',
     ifOptions(
