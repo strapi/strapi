@@ -42,7 +42,7 @@ const TransferTokenCreateView = () => {
   const trackUsageRef = useRef(trackUsage);
   const { setCurrentStep } = useGuidedTour();
   const {
-    allowedActions: { canCreate, canUpdate },
+    allowedActions: { canCreate, canUpdate, canRegenerate },
   } = useRBAC(adminPermissions.settings['transfer-tokens']);
   const {
     params: { id },
@@ -177,7 +177,9 @@ const TransferTokenCreateView = () => {
               <Form>
                 <FormHead
                   transferToken={transferToken}
+                  setTransferToken={setTransferToken}
                   canEditInputs={canEditInputs}
+                  canRegenerate={canRegenerate}
                   isSubmitting={isSubmitting}
                 />
                 <FormBody

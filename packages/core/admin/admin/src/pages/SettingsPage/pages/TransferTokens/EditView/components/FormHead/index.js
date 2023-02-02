@@ -7,9 +7,23 @@ import Check from '@strapi/icons/Check';
 import { Button } from '@strapi/design-system/Button';
 import { HeaderLayout } from '@strapi/design-system/Layout';
 import { Stack } from '@strapi/design-system/Stack';
+import Regenerate from '../Regenerate';
 
-const FormHead = ({ transferToken, canEditInputs, isSubmitting }) => {
+const FormHead = ({
+  transferToken,
+  setTransferToken,
+  canEditInputs,
+  canRegenerate,
+  isSubmitting,
+}) => {
   const { formatMessage } = useIntl();
+
+  const handleRegenerate = (newKey) => {
+    setTransferToken({
+      ...transferToken,
+      accessKey: newKey,
+    });
+  };
 
   return (
     <HeaderLayout
@@ -21,8 +35,11 @@ const FormHead = ({ transferToken, canEditInputs, isSubmitting }) => {
         })
       }
       primaryAction={
-        canEditInputs && (
+        canEditInputs ? (
           <Stack horizontal spacing={2}>
+            {canRegenerate && transferToken?.id && (
+              <Regenerate onRegenerate={handleRegenerate} idToRegenerate={transferToken?.id} />
+            )}
             <Button
               disabled={isSubmitting}
               loading={isSubmitting}
@@ -36,6 +53,11 @@ const FormHead = ({ transferToken, canEditInputs, isSubmitting }) => {
               })}
             </Button>
           </Stack>
+        ) : (
+          canRegenerate &&
+          transferToken?.id && (
+            <Regenerate onRegenerate={handleRegenerate} idToRegenerate={transferToken?.id} />
+          )
         )
       }
       navigationAction={
@@ -62,6 +84,8 @@ FormHead.propTypes = {
     createdAt: PropTypes.string,
   }),
   canEditInputs: PropTypes.bool.isRequired,
+  canRegenerate: PropTypes.bool.isRequired,
+  setTransferToken: PropTypes.func.isRequired,
   isSubmitting: PropTypes.bool.isRequired,
 };
 

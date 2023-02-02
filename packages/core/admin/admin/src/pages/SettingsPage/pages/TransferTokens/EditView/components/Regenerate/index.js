@@ -9,7 +9,11 @@ import { useRegenerate } from '../../../../../../../hooks';
 export const Regenerate = ({ onRegenerate, idToRegenerate }) => {
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const { regenerateData, isLoadingConfirmation } = useRegenerate(idToRegenerate, onRegenerate);
+  const { regenerateData, isLoadingConfirmation } = useRegenerate(
+    '/admin/transfer-tokens/',
+    idToRegenerate,
+    onRegenerate
+  );
   const handleConfirmRegeneration = async () => {
     regenerateData();
     setShowConfirmDialog(false);
