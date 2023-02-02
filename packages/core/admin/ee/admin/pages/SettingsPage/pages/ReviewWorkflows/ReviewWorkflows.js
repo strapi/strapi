@@ -16,24 +16,14 @@ import { setWorkflows } from './actions';
 
 export function ReviewWorkflowsPage() {
   const { formatMessage } = useIntl();
-  const { workflows: workflowsData, updateWorkflowStages } = useReviewWorkflows();
+  const dispatch = useDispatch();
+  const { workflows: workflowsData, updateWorkflowStages, refetchWorkflow } = useReviewWorkflows();
   const {
     status,
     clientState: {
       currentWorkflow: { data: currentWorkflow, isDirty: currentWorkflowIsDirty },
     },
   } = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
-  const dispatch = useDispatch();
-
-  const onSubmit = async () => {
-    await updateWorkflowStages(currentWorkflow.id, currentWorkflow.stages);
-  };
-
-  useInjectReducer(REDUX_NAMESPACE, reducer);
-
-  useEffect(() => {
-    dispatch(setWorkflows({ status: workflowsData.status, data: workflowsData.data }));
-  }, [workflowsData.status, workflowsData.data, dispatch]);
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -44,10 +34,19 @@ export function ReviewWorkflowsPage() {
           }))
         : null,
     },
-    onSubmit,
+    async onSubmit() {
+      await updateWorkflowStages(currentWorkflow.id, currentWorkflow.stages);
+      refetchWorkflow();
+    },
     validationSchema: stagesSchema,
     validateOnChange: false,
   });
+
+  useInjectReducer(REDUX_NAMESPACE, reducer);
+
+  useEffect(() => {
+    dispatch(setWorkflows({ status: workflowsData.status, data: workflowsData.data }));
+  }, [workflowsData.status, workflowsData.data, dispatch]);
 
   if (!currentWorkflow) {
     return null;
