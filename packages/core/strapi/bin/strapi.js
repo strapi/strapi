@@ -322,11 +322,19 @@ program
       async (thisCommand) => {
         assertUrlHasProtocol(thisCommand.opts().to, ['https:', 'http:']);
         if (!thisCommand.opts().toToken) {
-          exitWith(
-            1,
-            'A transfer token is required to initiate a transfer to a remote Strapi destination.'
-          );
+          const answers = await inquirer.prompt([
+            {
+              type: 'password',
+              message: 'Please enter your transfer token for the remote Strapi destination',
+              name: 'toToken',
+            },
+          ]);
+          if (!answers.toToken?.length) {
+            exitWith(0, 'No token entered, aborting transfer.');
+          }
+          thisCommand.opts().toToken = answers.toToken;
         }
+
         await confirmMessage(
           'The transfer will delete all data in the remote database and media files. Are you sure you want to proceed?'
         )(thisCommand);
