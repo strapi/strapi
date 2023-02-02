@@ -182,7 +182,7 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * When uploading an image, an additional thubmnail is generated.
+   * When uploading an image, an additional thumbnail is generated.
    * Also, if there are responsive formats defined, another set of images will be generated too.
    *
    * @param {*} fileData
@@ -228,6 +228,7 @@ module.exports = ({ strapi }) => ({
       const formats = await generateResponsiveFormats(fileData);
       if (Array.isArray(formats) && formats.length > 0) {
         for (const format of formats) {
+          // eslint-disable-next-line no-continue
           if (!format) continue;
           uploadPromises.push(uploadResponsiveFormat(format));
         }
@@ -243,8 +244,9 @@ module.exports = ({ strapi }) => ({
    */
   async uploadFileAndPersist(fileData, { user } = {}) {
     const config = strapi.config.get('plugin.upload');
-
     const { isImage } = getService('image-manipulation');
+
+    await getService('provider').checkFileSize(fileData);
 
     if (await isImage(fileData)) {
       await this.uploadImage(fileData);

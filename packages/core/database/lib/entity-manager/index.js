@@ -227,7 +227,7 @@ const createEntityManager = (db) => {
 
       const trx = await strapi.db.transaction();
       try {
-        await this.attachRelations(uid, id, data, { transaction: trx });
+        await this.attachRelations(uid, id, data, { transaction: trx.get() });
 
         await trx.commit();
       } catch (e) {
@@ -311,7 +311,7 @@ const createEntityManager = (db) => {
 
       const trx = await strapi.db.transaction();
       try {
-        await this.updateRelations(uid, id, data, { transaction: trx });
+        await this.updateRelations(uid, id, data, { transaction: trx.get() });
         await trx.commit();
       } catch (e) {
         await trx.rollback();
@@ -382,7 +382,7 @@ const createEntityManager = (db) => {
 
       const trx = await strapi.db.transaction();
       try {
-        await this.deleteRelations(uid, id, { transaction: trx });
+        await this.deleteRelations(uid, id, { transaction: trx.get() });
 
         await trx.commit();
       } catch (e) {

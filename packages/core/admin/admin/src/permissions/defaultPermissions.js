@@ -34,6 +34,10 @@ const permissions = {
     uninstall: [{ action: 'admin::marketplace.plugins.uninstall', subject: null }],
   },
   settings: {
+    auditLogs: {
+      main: [{ action: 'admin::audit-logs.read', subject: null }],
+      read: [{ action: 'admin::audit-logs.read', subject: null }],
+    },
     roles: {
       main: [
         { action: 'admin::roles.create', subject: null },
@@ -82,6 +86,10 @@ const permissions = {
       read: [{ action: 'admin::api-tokens.read', subject: null }],
       update: [{ action: 'admin::api-tokens.update', subject: null }],
       regenerate: [{ action: 'admin::api-tokens.regenerate', subject: null }],
+    },
+    'project-settings': {
+      read: [{ action: 'admin::project-settings.read', subject: null }],
+      update: [{ action: 'admin::project-settings.update', subject: null }],
     },
   },
 };

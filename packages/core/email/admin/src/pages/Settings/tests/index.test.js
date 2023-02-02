@@ -171,14 +171,6 @@ describe('Email | Pages | Settings', () => {
         color: #666687;
       }
 
-      .c37 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        line-height: 1.14;
-        color: #32324d;
-      }
-
       .c10 > * {
         margin-top: 0;
         margin-bottom: 0;
@@ -757,7 +749,7 @@ describe('Email | Pages | Settings', () => {
                             class="c1 c9 c13"
                             spacing="1"
                           >
-                            <span
+                            <label
                               class="c5 c19"
                               for="select-6"
                             >
@@ -766,7 +758,7 @@ describe('Email | Pages | Settings', () => {
                               >
                                 Email provider
                               </div>
-                            </span>
+                            </label>
                             <div
                               class="c1 c4 c22"
                               disabled=""
@@ -775,7 +767,7 @@ describe('Email | Pages | Settings', () => {
                                 aria-disabled="true"
                                 aria-expanded="false"
                                 aria-haspopup="listbox"
-                                aria-labelledby="select-6-label select-6-content"
+                                aria-labelledby="select-6 select-6-label select-6-content"
                                 class="c23"
                                 id="select-6"
                                 name="email-provider"
@@ -929,7 +921,7 @@ describe('Email | Pages | Settings', () => {
                             </svg>
                           </div>
                           <span
-                            class="c5 c37"
+                            class="c5 c19"
                           >
                             Send test email
                           </span>

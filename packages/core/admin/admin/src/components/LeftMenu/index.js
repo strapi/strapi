@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { NavLink as RouterNavLink, useLocation } from 'react-router-dom';
+import { NavLink as RouterNavLink, useLocation, useHistory } from 'react-router-dom';
 import { Divider } from '@strapi/design-system/Divider';
 import {
   MainNav,
@@ -12,6 +12,7 @@ import {
   NavSection,
   NavUser,
   NavCondense,
+  NavFooter,
 } from '@strapi/design-system/v2/MainNav';
 import { FocusTrap } from '@strapi/design-system/FocusTrap';
 import { Box } from '@strapi/design-system/Box';
@@ -20,7 +21,8 @@ import { Stack } from '@strapi/design-system/Stack';
 import Write from '@strapi/icons/Write';
 import Exit from '@strapi/icons/Exit';
 import { auth, usePersistentState, useAppInfos, useTracking } from '@strapi/helper-plugin';
-import useConfigurations from '../../hooks/useConfigurations';
+import { useConfigurations } from '../../hooks';
+import { axiosInstance } from '../../core/utils';
 
 const LinkUserWrapper = styled(Box)`
   width: ${150 / 16}rem;
@@ -61,6 +63,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
+  const history = useHistory();
 
   const initials = userDisplayName
     .split(' ')
@@ -70,9 +73,11 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
 
   const handleToggleUserLinks = () => setUserLinksVisible((prev) => !prev);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await axiosInstance.post('/admin/logout');
     auth.clearAppStorage();
     handleToggleUserLinks();
+    history.push('/auth/login');
   };
 
   const handleBlur = (e) => {
@@ -179,57 +184,59 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
         ) : null}
       </NavSections>
 
-      <NavUser
-        id="main-nav-user-button"
-        ref={buttonRef}
-        onClick={handleToggleUserLinks}
-        initials={initials}
-      >
-        {userDisplayName}
-      </NavUser>
-      {userLinksVisible && (
-        <LinkUserWrapper
-          onBlur={handleBlur}
-          padding={1}
-          shadow="tableShadow"
-          background="neutral0"
-          hasRadius
+      <NavFooter>
+        <NavUser
+          id="main-nav-user-button"
+          ref={buttonRef}
+          onClick={handleToggleUserLinks}
+          initials={initials}
         >
-          <FocusTrap onEscape={handleToggleUserLinks}>
-            <Stack spacing={0}>
-              <LinkUser tabIndex={0} onClick={handleToggleUserLinks} to="/me">
-                <Typography>
-                  {formatMessage({
-                    id: 'global.profile',
-                    defaultMessage: 'Profile',
-                  })}
-                </Typography>
-              </LinkUser>
-              <LinkUser tabIndex={0} onClick={handleLogout} logout="logout" to="/auth/login">
-                <Typography textColor="danger600">
-                  {formatMessage({
-                    id: 'app.components.LeftMenu.logout',
-                    defaultMessage: 'Logout',
-                  })}
-                </Typography>
-                <Exit />
-              </LinkUser>
-            </Stack>
-          </FocusTrap>
-        </LinkUserWrapper>
-      )}
+          {userDisplayName}
+        </NavUser>
+        {userLinksVisible && (
+          <LinkUserWrapper
+            onBlur={handleBlur}
+            padding={1}
+            shadow="tableShadow"
+            background="neutral0"
+            hasRadius
+          >
+            <FocusTrap onEscape={handleToggleUserLinks}>
+              <Stack spacing={0}>
+                <LinkUser tabIndex={0} onClick={handleToggleUserLinks} to="/me">
+                  <Typography>
+                    {formatMessage({
+                      id: 'global.profile',
+                      defaultMessage: 'Profile',
+                    })}
+                  </Typography>
+                </LinkUser>
+                <LinkUser tabIndex={0} onClick={handleLogout} logout="logout" to="/auth/login">
+                  <Typography textColor="danger600">
+                    {formatMessage({
+                      id: 'app.components.LeftMenu.logout',
+                      defaultMessage: 'Logout',
+                    })}
+                  </Typography>
+                  <Exit />
+                </LinkUser>
+              </Stack>
+            </FocusTrap>
+          </LinkUserWrapper>
+        )}
 
-      <NavCondense onClick={() => setCondensed((s) => !s)}>
-        {condensed
-          ? formatMessage({
-              id: 'app.components.LeftMenu.expand',
-              defaultMessage: 'Expand the navbar',
-            })
-          : formatMessage({
-              id: 'app.components.LeftMenu.collapse',
-              defaultMessage: 'Collapse the navbar',
-            })}
-      </NavCondense>
+        <NavCondense onClick={() => setCondensed((s) => !s)}>
+          {condensed
+            ? formatMessage({
+                id: 'app.components.LeftMenu.expand',
+                defaultMessage: 'Expand the navbar',
+              })
+            : formatMessage({
+                id: 'app.components.LeftMenu.collapse',
+                defaultMessage: 'Collapse the navbar',
+              })}
+        </NavCondense>
+      </NavFooter>
     </MainNav>
   );
 };

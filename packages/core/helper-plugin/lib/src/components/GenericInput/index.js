@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import parseISO from 'date-fns/parseISO';
 import formatISO from 'date-fns/formatISO';
 import { useIntl } from 'react-intl';
+
 import {
   Checkbox,
   DatePicker,
@@ -20,11 +21,15 @@ import {
   TextInput,
   TimePicker,
   ToggleInput,
+  JSONInput,
 } from '@strapi/design-system';
 import { Option } from '@strapi/design-system/Select';
 import EyeStriked from '@strapi/icons/EyeStriked';
 import Eye from '@strapi/icons/Eye';
+
 import NotSupported from './NotSupported';
+import useFieldHint from '../../hooks/useFieldHint';
+import pxToRem from '../../utils/pxToRem';
 
 const GenericInput = ({
   autoComplete,
@@ -43,9 +48,16 @@ const GenericInput = ({
   type,
   value: defaultValue,
   isNullable,
+  attribute,
   ...rest
 }) => {
   const { formatMessage } = useIntl();
+
+  const { hint } = useFieldHint({
+    description,
+    fieldSchema: attribute,
+    type: attribute?.type || type,
+  });
   const [showPassword, setShowPassword] = useState(false);
 
   const CustomInput = customInputs ? customInputs[type] : null;
@@ -91,7 +103,9 @@ const GenericInput = ({
     return (
       <CustomInput
         {...rest}
+        attribute={attribute}
         description={description}
+        hint={hint}
         disabled={disabled}
         intlLabel={intlLabel}
         labelAction={labelAction}
@@ -114,13 +128,6 @@ const GenericInput = ({
       )
     : name;
 
-  const hint = description
-    ? formatMessage(
-        { id: description.id, defaultMessage: description.defaultMessage },
-        { ...description.values }
-      )
-    : '';
-
   const formattedPlaceholder = placeholder
     ? formatMessage(
         { id: placeholder.id, defaultMessage: placeholder.defaultMessage },
@@ -129,6 +136,23 @@ const GenericInput = ({
     : '';
 
   switch (type) {
+    case 'json': {
+      return (
+        <JSONInput
+          label={label}
+          labelAction={labelAction}
+          value={value}
+          error={errorMessage}
+          hint={hint}
+          required={required}
+          onChange={(json) => {
+            onChange({ target: { name, value: json } });
+          }}
+          minHeight={pxToRem(252)}
+          maxHeight={pxToRem(504)}
+        />
+      );
+    }
     case 'bool': {
       const clearProps = {
         clearLabel:
@@ -210,7 +234,10 @@ const GenericInput = ({
           required={required}
           value={value && new Date(value)}
           selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}
-          selectButtonTitle={formatMessage({ id: 'selectButtonTitle', defaultMessage: 'Select' })}
+          selectButtonTitle={formatMessage({
+            id: 'selectButtonTitle',
+            defaultMessage: 'Select',
+          })}
         />
       );
     }
@@ -451,6 +478,7 @@ GenericInput.defaultProps = {
   options: [],
   step: 1,
   value: undefined,
+  attribute: null,
 };
 
 GenericInput.propTypes = {
@@ -461,6 +489,7 @@ GenericInput.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }),
+  attribute: PropTypes.object,
   disabled: PropTypes.bool,
   error: PropTypes.oneOfType([
     PropTypes.string,

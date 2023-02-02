@@ -57,6 +57,7 @@ describe('Entity service', () => {
 
       const fakeDB = {
         query: jest.fn(() => fakeQuery),
+        transaction: (cb) => cb(),
       };
 
       const fakeStrapi = {
@@ -185,6 +186,7 @@ describe('Entity service', () => {
         });
 
         const fakeDB = {
+          transaction: (cb) => cb(),
           query: jest.fn((uid) => fakeQuery(uid)),
         };
 
