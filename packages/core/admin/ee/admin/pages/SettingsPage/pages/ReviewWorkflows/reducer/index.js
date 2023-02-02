@@ -30,9 +30,11 @@ export function reducer(state = initialState, action) {
         draft.status = status;
 
         if (workflows) {
+          const defaultWorkflow = workflows[0];
+
           draft.serverState.workflows = workflows;
-          draft.serverState.currentWorkflow = workflows[0];
-          draft.clientState.currentWorkflow.data = workflows[0];
+          draft.serverState.currentWorkflow = defaultWorkflow;
+          draft.clientState.currentWorkflow.data = defaultWorkflow;
         }
         break;
       }
@@ -59,16 +61,13 @@ export function reducer(state = initialState, action) {
       case ACTION_ADD_STAGE: {
         const { currentWorkflow } = state.clientState;
 
-        draft.clientState.currentWorkflow.data = {
-          ...currentWorkflow.data,
-          stages: [
-            ...currentWorkflow.data.stages,
-            {
-              ...payload,
-              __temp_key__: state.clientState.currentWorkflow.data.stages.length + 1,
-            },
-          ],
-        };
+        draft.clientState.currentWorkflow.data.stages = [
+          ...currentWorkflow.data.stages,
+          {
+            ...payload,
+            __temp_key__: state.clientState.currentWorkflow.data.stages.length + 1,
+          },
+        ];
 
         draft.clientState.currentWorkflow.isDirty = !isEqual(
           current(draft.clientState.currentWorkflow).data,
@@ -81,21 +80,18 @@ export function reducer(state = initialState, action) {
       case ACTION_UPDATE_STAGE: {
         const { currentWorkflow } = state.clientState;
 
-        draft.clientState.currentWorkflow.data = {
-          ...currentWorkflow.data,
-          stages: currentWorkflow.data.stages.map((stage) => {
-            if ((stage.id ?? stage.__temp_key__) === payload.stageId) {
-              const { stageId, ...modified } = payload;
+        draft.clientState.currentWorkflow.data.stages = currentWorkflow.data.stages.map((stage) => {
+          if ((stage.id ?? stage.__temp_key__) === payload.stageId) {
+            const { stageId, ...modified } = payload;
 
-              return {
-                ...stage,
-                ...modified,
-              };
-            }
+            return {
+              ...stage,
+              ...modified,
+            };
+          }
 
-            return stage;
-          }),
-        };
+          return stage;
+        });
 
         draft.clientState.currentWorkflow.isDirty = !isEqual(
           current(draft.clientState.currentWorkflow).data,
