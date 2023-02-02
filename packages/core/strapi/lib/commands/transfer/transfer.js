@@ -25,12 +25,14 @@ const logger = console;
  *
  * @property {URL|undefined} [to] The url of a remote Strapi to use as remote destination
  * @property {URL|undefined} [from] The url of a remote Strapi to use as remote source
+ * @property {string|undefined} [toToken] The transfer token for the remote destination
+ * @property {string|undefined} [fromToken] The transfer token for the remote source
  */
 
 /**
  * Transfer command.
  *
- * It transfers data from a local file to a local strapi instance
+ * Transfers data between local Strapi and remote Strapi instances
  *
  * @param {TransferCommandOptions} opts
  */
@@ -73,7 +75,10 @@ module.exports = async (opts) => {
   else {
     destination = createRemoteStrapiDestinationProvider({
       url: opts.to,
-      auth: false,
+      auth: {
+        type: 'token',
+        token: opts.toToken,
+      },
       strategy: 'restore',
       restore: {
         entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },

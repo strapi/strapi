@@ -87,6 +87,13 @@ const permissions = {
       update: [{ action: 'admin::api-tokens.update', subject: null }],
       regenerate: [{ action: 'admin::api-tokens.regenerate', subject: null }],
     },
+    'transfer-tokens': {
+      main: [{ action: 'admin::transfer.tokens.access', subject: null }],
+      create: [{ action: 'admin::transfer.tokens.create', subject: null }],
+      delete: [{ action: 'admin::transfer.tokens.delete', subject: null }],
+      read: [{ action: 'admin::transfer.tokens.read', subject: null }],
+      update: [{ action: 'admin::transfer.tokens.update', subject: null }],
+    },
     'project-settings': {
       read: [{ action: 'admin::project-settings.read', subject: null }],
       update: [{ action: 'admin::project-settings.update', subject: null }],

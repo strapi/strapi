@@ -123,6 +123,39 @@ const defaultRoutes = [
     to: '/settings/api-tokens/:id',
     exact: true,
   },
+  {
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "api-tokens-create-page" */ '../pages/TransferTokens/ProtectedCreateView'
+      );
+
+      return component;
+    },
+    to: '/settings/transfer-tokens/create',
+    exact: true,
+  },
+  {
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "api-tokens-list-page" */ '../pages/TransferTokens/ProtectedListView'
+      );
+
+      return component;
+    },
+    to: '/settings/transfer-tokens',
+    exact: true,
+  },
+  {
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "api-tokens-edit-page" */ '../pages/TransferTokens/ProtectedEditView'
+      );
+
+      return component;
+    },
+    to: '/settings/transfer-tokens/:id',
+    exact: true,
+  },
 ];
 
 export default defaultRoutes;

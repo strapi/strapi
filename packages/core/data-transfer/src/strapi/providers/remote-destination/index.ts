@@ -18,21 +18,15 @@ import type { ILocalStrapiDestinationProviderOptions } from '../local-destinatio
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 
-interface ITokenAuth {
+interface ITransferTokenAuth {
   type: 'token';
   token: string;
-}
-
-interface ICredentialsAuth {
-  type: 'credentials';
-  email: string;
-  password: string;
 }
 
 export interface IRemoteStrapiDestinationProviderOptions
   extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
   url: URL;
-  auth?: ITokenAuth | ICredentialsAuth;
+  auth?: ITransferTokenAuth;
 }
 
 class RemoteStrapiDestinationProvider implements IDestinationProvider {
@@ -116,7 +110,6 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     }
     const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${wsProtocol}//${url.host}${url.pathname}${TRANSFER_PATH}`;
-    const validAuthMethods = ['token'];
 
     // No auth defined, trying public access for transfer
     if (!auth) {
@@ -131,11 +124,10 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
     // Invalid auth method provided
     else {
-      throw new ProviderValidationError('Auth method not implemented', {
+      throw new ProviderValidationError('Auth method not available', {
         check: 'auth.type',
         details: {
           auth: auth.type,
-          validAuthMethods,
         },
       });
     }
