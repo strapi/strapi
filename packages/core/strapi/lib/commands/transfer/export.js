@@ -97,9 +97,7 @@ module.exports = async (opts) => {
   let results;
   let outFile;
   try {
-    console.log('before transfer');
     results = await engine.transfer();
-    console.log('after transfer');
     outFile = results.destination.file.path;
     const outFileExists = await fs.pathExists(outFile);
     if (!outFileExists) {
@@ -119,9 +117,7 @@ module.exports = async (opts) => {
   }
 
   console.log(`${chalk.bold('Export process has been completed successfully!')}`);
-  console.log(`Export archive is in ${chalk.green(outFile)}`);
-  console.log('ABout to exit');
-  exitWith(0);
+  exitWith(0, `Export archive is in ${chalk.green(outFile)}`);
 };
 
 /**
