@@ -17,8 +17,7 @@ const {
   DEFAULT_IGNORED_CONTENT_TYPES,
   formatDiagnostic,
 } = require('./utils');
-
-const logger = console;
+const { exitWith } = require('../utils/helpers');
 
 /**
  * @typedef TransferCommandOptions Options given to the CLI transfer command
@@ -39,8 +38,7 @@ const logger = console;
 module.exports = async (opts) => {
   // Validate inputs from Commander
   if (!isObject(opts)) {
-    logger.error('Could not parse command arguments');
-    process.exit(1);
+    exitWith(1, 'Could not parse command arguments');
   }
 
   const strapi = await createStrapiInstance();
@@ -49,8 +47,7 @@ module.exports = async (opts) => {
   let destination;
 
   if (!opts.from && !opts.to) {
-    logger.error('At least one source (from) or destination (to) option must be provided');
-    process.exit(1);
+    exitWith(1, 'At least one source (from) or destination (to) option must be provided');
   }
 
   // if no URL provided, use local Strapi
@@ -61,8 +58,7 @@ module.exports = async (opts) => {
   }
   // if URL provided, set up a remote source provider
   else {
-    logger.error(`Remote Strapi source provider not yet implemented`);
-    process.exit(1);
+    exitWith(1, `Remote Strapi source provider not yet implemented`);
   }
 
   // if no URL provided, use local Strapi
@@ -73,6 +69,10 @@ module.exports = async (opts) => {
   }
   // if URL provided, set up a remote destination provider
   else {
+    if (!opts.toToken) {
+      exitWith(1, 'Missing token for remote destination');
+    }
+
     destination = createRemoteStrapiDestinationProvider({
       url: opts.to,
       auth: {
@@ -87,8 +87,7 @@ module.exports = async (opts) => {
   }
 
   if (!source || !destination) {
-    logger.error('Could not create providers');
-    process.exit(1);
+    exitWith(1, 'Could not create providers');
   }
 
   const engine = createTransferEngine(source, destination, {
@@ -117,18 +116,15 @@ module.exports = async (opts) => {
 
   engine.diagnostics.onDiagnostic(formatDiagnostic('transfer'));
 
+  let results;
   try {
-    logger.log(`Starting transfer...`);
-
-    const results = await engine.transfer();
-
-    const table = buildTransferTable(results.engine);
-    logger.log(table.toString());
-
-    logger.log(`${chalk.bold('Transfer process has been completed successfully!')}`);
-    process.exit(0);
+    console.log(`Starting transfer...`);
+    results = await engine.transfer();
   } catch (e) {
-    logger.error('Transfer process failed.');
-    process.exit(1);
+    exitWith(1, 'Transfer process failed.');
   }
+
+  const table = buildTransferTable(results.engine);
+  console.log(table.toString());
+  exitWith(0, `${chalk.bold('Transfer process has been completed successfully!')}`);
 };
