@@ -11,7 +11,6 @@ import {
   NoPermissions,
   useRBAC,
   NoContent,
-  DynamicTable,
   useTracking,
   useGuidedTour,
   LinkButton,
@@ -24,7 +23,7 @@ import Plus from '@strapi/icons/Plus';
 
 import adminPermissions from '../../../../../permissions';
 import tableHeaders from './utils/tableHeaders';
-import TableRows from './DynamicTable';
+import Table from '../../../components/Tokens/Table';
 
 const TransferTokenListView = () => {
   useFocusWhenNavigate();
@@ -147,22 +146,15 @@ const TransferTokenListView = () => {
       <ContentLayout>
         {!canRead && <NoPermissions />}
         {shouldDisplayDynamicTable && (
-          <DynamicTable
+          <Table
+            permissions={{ canRead, canDelete, canUpdate }}
             headers={headers}
             contentType="trasfer-tokens"
             rows={transferTokens}
-            withBulkActions={canDelete || canUpdate || canRead}
             isLoading={isLoading}
             onConfirmDelete={(id) => deleteMutation.mutateAsync(id)}
-          >
-            <TableRows
-              canRead={canRead}
-              canDelete={canDelete}
-              canUpdate={canUpdate}
-              rows={transferTokens}
-              withBulkActions={canDelete || canUpdate || canRead}
-            />
-          </DynamicTable>
+            tokens={transferTokens}
+          />
         )}
         {shouldDisplayNoContentWithCreationButton && (
           <NoContent
