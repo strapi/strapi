@@ -18,21 +18,15 @@ import type { ILocalStrapiDestinationProviderOptions } from '../local-destinatio
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 
-interface ITokenAuth {
+interface ITransferTokenAuth {
   type: 'token';
   token: string;
-}
-
-interface ICredentialsAuth {
-  type: 'credentials';
-  email: string;
-  password: string;
 }
 
 export interface IRemoteStrapiDestinationProviderOptions
   extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
   url: URL;
-  auth?: ITokenAuth | ICredentialsAuth;
+  auth?: ITransferTokenAuth;
 }
 
 class RemoteStrapiDestinationProvider implements IDestinationProvider {
