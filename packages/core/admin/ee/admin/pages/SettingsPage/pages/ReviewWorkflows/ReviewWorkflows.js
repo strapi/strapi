@@ -90,7 +90,7 @@ export function ReviewWorkflowsPage() {
                 </Loader>
               )}
 
-              {formik.values?.stages && <Stages stages={formik.values.stages} />}
+              <Stages stages={formik.values?.stages} />
             </ContentLayout>
           </Form>
         </FormikProvider>

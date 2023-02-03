@@ -70,6 +70,7 @@ Stages.propTypes = {
   stages: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.number,
+      __temp_key__: PropTypes.number,
       name: PropTypes.string.isRequired,
     })
   ),

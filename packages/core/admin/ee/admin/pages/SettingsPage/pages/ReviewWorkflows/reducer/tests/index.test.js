@@ -133,6 +133,38 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
     );
   });
 
+  test('ACTION_ADD_STAGE when there are not stages yet', () => {
+    const action = {
+      type: ACTION_ADD_STAGE,
+      payload: { name: 'something' },
+    };
+
+    state = {
+      status: expect.any(String),
+      serverState: expect.any(Object),
+      clientState: {
+        currentWorkflow: { data: null, isDirty: false },
+      },
+    };
+
+    expect(reducer(state, action)).toStrictEqual(
+      expect.objectContaining({
+        clientState: expect.objectContaining({
+          currentWorkflow: expect.objectContaining({
+            data: expect.objectContaining({
+              stages: expect.arrayContaining([
+                {
+                  __temp_key__: 1,
+                  name: 'something',
+                },
+              ]),
+            }),
+          }),
+        }),
+      })
+    );
+  });
+
   test('ACTION_UPDATE_STAGE', () => {
     const action = {
       type: ACTION_UPDATE_STAGE,

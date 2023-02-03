@@ -56,13 +56,16 @@ export function reducer(state = initialState, action) {
       case ACTION_ADD_STAGE: {
         const { currentWorkflow } = state.clientState;
 
-        draft.clientState.currentWorkflow.data.stages = [
-          ...currentWorkflow.data.stages,
-          {
-            ...payload,
-            __temp_key__: currentWorkflow.data.stages.length + 1,
-          },
-        ];
+        if (!currentWorkflow.data) {
+          draft.clientState.currentWorkflow.data = {
+            stages: [],
+          };
+        }
+
+        draft.clientState.currentWorkflow.data.stages.push({
+          ...payload,
+          __temp_key__: (currentWorkflow.data?.stages?.length ?? 0) + 1,
+        });
 
         break;
       }
