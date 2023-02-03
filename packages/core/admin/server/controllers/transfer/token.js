@@ -51,10 +51,10 @@ module.exports = {
 
     await validateTransferTokenCreationInput(attributes);
 
-    // const alreadyExists = await tokenService.exists({ name: attributes.name });
-    // if (alreadyExists) {
-    //   throw new ApplicationError('Name already taken');
-    // }
+    const alreadyExists = await tokenService.exists({ name: attributes.name });
+    if (alreadyExists) {
+      throw new ApplicationError('Name already taken');
+    }
 
     const transferTokens = await tokenService.create(attributes);
 
@@ -72,11 +72,11 @@ module.exports = {
      * - having a space at the end or start of the value.
      * - having only spaces as value;
      */
-    if (has(attributes, 'name')) {
+    if (has('name', attributes)) {
       attributes.name = trim(body.name);
     }
 
-    if (has(attributes, 'description') || attributes.description === null) {
+    if (has('description', attributes) || attributes.description === null) {
       attributes.description = trim(body.description);
     }
 
@@ -87,7 +87,8 @@ module.exports = {
       return ctx.notFound('Transfer token not found');
     }
 
-    if (has(attributes, 'name')) {
+    if (has('name', attributes)) {
+      console.log('??');
       const nameAlreadyTaken = await tokenService.getByName(attributes.name);
 
       /**
