@@ -32,7 +32,6 @@ const Table = ({ permissions, headers, contentType, isLoading, tokens, onConfirm
 
     return sortOrder === 'DESC' ? -comparaison : comparaison;
   });
-  console.log('isLoading', isLoading);
 
   return (
     <DynamicTable

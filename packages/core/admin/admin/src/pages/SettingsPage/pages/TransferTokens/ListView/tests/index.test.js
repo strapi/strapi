@@ -77,7 +77,7 @@ const makeApp = (history) => {
           <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
             <Theme>
               <Router history={history}>
-                <Route path="/settings/api-tokens">
+                <Route path="/settings/transfer-tokens">
                   <ListView />
                 </Route>
               </Router>
@@ -89,12 +89,12 @@ const makeApp = (history) => {
   );
 };
 
-describe('ADMIN | Pages | API TOKENS | ListPage', () => {
+describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
   afterAll(() => {
     jest.resetAllMocks();
   });
 
-  it('should show a list of api tokens', async () => {
+  it('should show a list of transfer tokens', async () => {
     useRBAC.mockImplementation(() => ({
       allowedActions: {
         canCreate: true,
@@ -105,7 +105,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       },
     }));
     const history = createMemoryHistory();
-    history.push('/settings/api-tokens');
+    history.push('/settings/transfer-tokens');
     const app = makeApp(history);
 
     const { container, getByText } = render(app);
@@ -647,14 +647,14 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                 <h1
                   class="c5 c6"
                 >
-                  API Tokens
+                  Transfer Tokens
                 </h1>
               </div>
               <a
                 aria-disabled="false"
                 class="c7 c8"
-                data-testid="create-api-token-button"
-                href="/settings/api-tokens/create"
+                data-testid="create-transfer-token-button"
+                href="/settings/transfer-tokens/create"
                 variant="default"
               >
                 <div
@@ -677,14 +677,14 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                 <span
                   class="c5 c10"
                 >
-                  Create new API Token
+                  Create new Transfer Token
                 </span>
               </a>
             </div>
             <p
               class="c5 c11"
             >
-              List of generated tokens to consume the API
+              "List of generated transfer tokens"
             </p>
           </div>
         </div>
@@ -928,7 +928,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                         >
                           <a
                             class="c33 c34"
-                            href="/settings/api-tokens/1"
+                            href="/settings/transfer-tokens/1"
                             tabindex="-1"
                             title="Edit My super token"
                           >
@@ -1016,7 +1016,9 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
 
     const { queryByTestId } = render(app);
 
-    await waitFor(() => expect(queryByTestId('create-api-token-button')).not.toBeInTheDocument());
+    await waitFor(() =>
+      expect(queryByTestId('create-transfer-token-button')).not.toBeInTheDocument()
+    );
   });
 
   it('should show the delete button when the user have the rights to delete', async () => {
@@ -1030,7 +1032,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       },
     }));
     const history = createMemoryHistory();
-    history.push('/settings/api-tokens');
+    history.push('/settings/transfer-tokens');
     const app = makeApp(history);
 
     const { container } = render(app);
@@ -1051,7 +1053,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       },
     }));
     const history = createMemoryHistory();
-    history.push('/settings/api-tokens');
+    history.push('/settings/transfer-tokens');
     const app = makeApp(history);
 
     const { container } = render(app);
