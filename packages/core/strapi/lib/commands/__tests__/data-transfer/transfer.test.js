@@ -88,7 +88,7 @@ describe('Transfer', () => {
       await transferCommand({ from: undefined, to: undefined });
     });
 
-    expect(console.error).toHaveBeenCalledWith(expect.stringMatching(/source/i));
+    expect(console.error).toHaveBeenCalledWith(expect.stringMatching(/at least one source/i));
 
     expect(
       mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
@@ -101,7 +101,7 @@ describe('Transfer', () => {
         await transferCommand({ from: undefined, to: destinationUrl });
       });
 
-      expect(console.error).toHaveBeenCalledWith(expect.stringMatching(/missing/i));
+      expect(console.error).toHaveBeenCalledWith(expect.stringMatching(/missing token/i));
 
       expect(
         mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
