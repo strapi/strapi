@@ -15,9 +15,9 @@ At the very root of the entire admin panel we handle 4 routes:
 - Signing into the app
 - Not Found
 - Collecting information from a first time user
-- The actual app
+- The authenticated application (where you use the CMS)
 
-Permissions, along with other vital application information is fetched in in the AuthenticatedApp component, located
+Permissions, along with other vital application information is fetched in in the `AuthenticatedApp` component, located
 in the `packages/core/admin/admin/src/AuthenticatedApp` folder. The cache key (used with `react-query`'s `useQueries` hook)
 for the particular call is `admin-users-permission`.
 
@@ -84,7 +84,7 @@ when calling APIs.
 
 ## What do we do with the data?
 
-The data is then passed to the `RBACProvider` comoponent which passes it to a public facing [React Context](https://beta.reactjs.org/learn/passing-data-deeply-with-context)
+The data is then passed to the `RBACProvider` component which passes it to a public facing [React Context](https://beta.reactjs.org/learn/passing-data-deeply-with-context)
 as well as injecting the information into the global `redux` store – see diagram below:
 
 <img
@@ -93,4 +93,4 @@ as well as injecting the information into the global `redux` store – see diagr
 />
 
 Inside the `RBACProviderContext` we also pass the ability to refetch the permissions. These two inconjunction with one another are accessed
-via the `useRBACProvider` hook.
+via the `useRBACProvider` hook. You can see the API for this hook [here](/core/permissions/frontend/using-permissions#typescript)
