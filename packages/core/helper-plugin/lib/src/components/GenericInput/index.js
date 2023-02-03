@@ -146,7 +146,9 @@ const GenericInput = ({
           hint={hint}
           required={required}
           onChange={(json) => {
-            onChange({ target: { name, value: json } });
+            // Default to null when the field is required and there is no input value
+            const value = !attribute.required && !json.length ? 'null' : json;
+            onChange({ target: { name, value } });
           }}
           minHeight={pxToRem(252)}
           maxHeight={pxToRem(504)}

@@ -213,28 +213,23 @@ const createYupSchemaAttribute = (type, validations, options) => {
   }
 
   if (type === 'json') {
-    if (validations.required) {
-      schema = yup.mixed(errorsTrads.required).test('required', errorsTrads.required, (value) => {
-        return value === undefined;
+    schema = yup
+      .mixed(errorsTrads.json)
+      .test('isJSON', errorsTrads.json, (value) => {
+        try {
+          JSON.parse(value);
+
+          return true;
+        } catch (err) {
+          return false;
+        }
+      })
+      .nullable()
+      .test('required', errorsTrads.required, (value) => {
+        if (validations.required && !value.length) return false;
+
+        return true;
       });
-    } else {
-      schema = yup
-        .mixed(errorsTrads.json)
-        .test('isJSON', errorsTrads.json, (value) => {
-          if (value === undefined) {
-            return true;
-          }
-
-          try {
-            JSON.parse(value);
-
-            return true;
-          } catch (err) {
-            return false;
-          }
-        })
-        .nullable();
-    }
   }
 
   if (type === 'email') {
