@@ -88,7 +88,6 @@ module.exports = {
     }
 
     if (has('name', attributes)) {
-      console.log('??');
       const nameAlreadyTaken = await tokenService.getByName(attributes.name);
 
       /**

@@ -9,6 +9,7 @@ import {
   useTracking,
   useGuidedTour,
   useRBAC,
+  useFetchClient,
 } from '@strapi/helper-plugin';
 import { Main } from '@strapi/design-system/Main';
 import { Formik } from 'formik';
@@ -17,7 +18,6 @@ import { useQuery } from 'react-query';
 import { ContentLayout } from '@strapi/design-system/Layout';
 import { Stack } from '@strapi/design-system/Stack';
 import { formatAPIErrors } from '../../../../../utils';
-import { axiosInstance } from '../../../../../core/utils';
 import { schema } from './utils';
 import LoadingView from './components/LoadingView';
 import adminPermissions from '../../../../../permissions';
@@ -54,6 +54,7 @@ const ApiTokenCreateView = () => {
   const {
     params: { id },
   } = useRouteMatch('/settings/api-tokens/:id');
+  const { get, post, put } = useFetchClient();
 
   const isCreating = id === 'create';
 
@@ -62,7 +63,7 @@ const ApiTokenCreateView = () => {
     async () => {
       const [permissions, routes] = await Promise.all(
         ['/admin/content-api/permissions', '/admin/content-api/routes'].map(async (url) => {
-          const { data } = await axiosInstance.get(url);
+          const { data } = await get(url);
 
           return data.data;
         })
@@ -116,7 +117,7 @@ const ApiTokenCreateView = () => {
     async () => {
       const {
         data: { data },
-      } = await axiosInstance.get(`/admin/api-tokens/${id}`);
+      } = await get(`/admin/api-tokens/${id}`);
 
       setApiToken({
         ...data,
@@ -164,12 +165,12 @@ const ApiTokenCreateView = () => {
       const {
         data: { data: response },
       } = isCreating
-        ? await axiosInstance.post(`/admin/api-tokens`, {
+        ? await post(`/admin/api-tokens`, {
             ...body,
             lifespan: lifespanVal,
             permissions: body.type === 'custom' ? state.selectedActions : null,
           })
-        : await axiosInstance.put(`/admin/api-tokens/${id}`, {
+        : await put(`/admin/api-tokens/${id}`, {
             name: body.name,
             description: body.description,
             type: body.type,

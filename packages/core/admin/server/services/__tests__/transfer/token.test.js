@@ -3,26 +3,30 @@
 const { NotFoundError, ApplicationError } = require('@strapi/utils/lib/errors');
 const crypto = require('crypto');
 const { omit, uniq } = require('lodash/fp');
-const apiTokenService = require('../api-token');
-const constants = require('../constants');
+const transferTokenService = require('../../transfer/token');
+const constants = require('../../constants');
 
 const getActionProvider = (actions = []) => {
   return {
-    contentAPI: { permissions: { providers: { action: { keys: jest.fn(() => actions) } } } },
+    admin: {
+      services: {
+        transfer: { permission: { providers: { action: { keys: jest.fn(() => actions) } } } },
+      },
+    },
   };
 };
 
-describe('API Token', () => {
-  const mockedApiToken = {
-    randomBytes: 'api-token_test-random-bytes',
-    hexedString: '6170692d746f6b656e5f746573742d72616e646f6d2d6279746573',
+describe('Transfer Token', () => {
+  const mockedTransferToken = {
+    randomBytes: 'transfer-token_test-random-bytes',
+    hexedString: '7472616e736665722d746f6b656e5f746573742d72616e646f6d2d6279746573',
   };
 
   const now = Date.now();
   beforeAll(() => {
     jest
       .spyOn(crypto, 'randomBytes')
-      .mockImplementation(() => Buffer.from(mockedApiToken.randomBytes));
+      .mockImplementation(() => Buffer.from(mockedTransferToken.randomBytes));
 
     jest.useFakeTimers('modern').setSystemTime(now);
   });
@@ -34,116 +38,11 @@ describe('API Token', () => {
   });
 
   describe('create', () => {
-    test('Creates a new read-only token', async () => {
-      const create = jest.fn(({ data }) => Promise.resolve(data));
-
-      global.strapi = {
-        query() {
-          return { create };
-        },
-        config: {
-          get: jest.fn(() => ''),
-        },
-      };
-
+    test('Creates a token', async () => {
       const attributes = {
-        name: 'api-token_tests-name',
-        description: 'api-token_tests-description',
-        type: 'read-only',
-      };
-
-      const res = await apiTokenService.create(attributes);
-
-      expect(create).toHaveBeenCalledWith({
-        select: expect.arrayContaining([expect.any(String)]),
-        data: {
-          ...attributes,
-          accessKey: apiTokenService.hash(mockedApiToken.hexedString),
-          expiresAt: null,
-          lifespan: null,
-        },
-        populate: ['permissions'],
-      });
-      expect(res).toEqual({
-        ...attributes,
-        accessKey: mockedApiToken.hexedString,
-        expiresAt: null,
-        lifespan: null,
-      });
-    });
-
-    test('Creates a new token with lifespan', async () => {
-      const attributes = {
-        name: 'api-token_tests-name',
-        description: 'api-token_tests-description',
-        type: 'read-only',
-        lifespan: constants.API_TOKEN_LIFESPANS.DAYS_90,
-      };
-
-      const expectedExpires = Date.now() + attributes.lifespan;
-
-      const create = jest.fn(({ data }) => Promise.resolve(data));
-      global.strapi = {
-        query() {
-          return { create };
-        },
-        config: {
-          get: jest.fn(() => ''),
-        },
-      };
-
-      const res = await apiTokenService.create(attributes);
-
-      expect(create).toHaveBeenCalledWith({
-        select: expect.arrayContaining([expect.any(String)]),
-        data: {
-          ...attributes,
-          accessKey: apiTokenService.hash(mockedApiToken.hexedString),
-          expiresAt: expectedExpires,
-          lifespan: attributes.lifespan,
-        },
-        populate: ['permissions'],
-      });
-      expect(res).toEqual({
-        ...attributes,
-        accessKey: mockedApiToken.hexedString,
-        expiresAt: expectedExpires,
-        lifespan: attributes.lifespan,
-      });
-      expect(res.expiresAt).toBe(expectedExpires);
-    });
-
-    test('It throws when creating a token with invalid lifespan', async () => {
-      const attributes = {
-        name: 'api-token_tests-name',
-        description: 'api-token_tests-description',
-        type: 'read-only',
-        lifespan: 12345,
-      };
-
-      const create = jest.fn(({ data }) => Promise.resolve(data));
-      global.strapi = {
-        query() {
-          return { create };
-        },
-        config: {
-          get: jest.fn(() => ''),
-        },
-      };
-
-      expect(async () => {
-        await apiTokenService.create(attributes);
-      }).rejects.toThrow(/lifespan/);
-
-      expect(create).not.toHaveBeenCalled();
-    });
-
-    test('Creates a custom token', async () => {
-      const attributes = {
-        name: 'api-token_tests-name',
-        description: 'api-token_tests-description',
-        type: 'custom',
-        permissions: ['admin::content.content.read'],
+        name: 'transfer-token_tests-name',
+        description: 'transfer-token_tests-description',
+        permissions: ['push'],
       };
       const createTokenResult = {
         ...attributes,
@@ -152,7 +51,6 @@ describe('API Token', () => {
         id: 1,
       };
 
-      const findOne = jest.fn().mockResolvedValue(omit('permissions', createTokenResult));
       const create = jest.fn().mockResolvedValue(createTokenResult);
       const load = jest.fn().mockResolvedValueOnce(
         Promise.resolve(
@@ -165,13 +63,11 @@ describe('API Token', () => {
       );
 
       global.strapi = {
-        ...getActionProvider(['admin::content.content.read']),
+        ...getActionProvider(['push']),
         query() {
-          return {
-            findOne,
-            create,
-          };
+          return { create };
         },
+        db: { transaction: jest.fn((cb) => cb()) },
         config: {
           get: jest.fn(() => ''),
         },
@@ -180,10 +76,10 @@ describe('API Token', () => {
         },
       };
 
-      const res = await apiTokenService.create(attributes);
+      const res = await transferTokenService.create(attributes);
 
       expect(load).toHaveBeenCalledWith(
-        'admin::api-token',
+        'admin::transfer-token',
         {
           ...createTokenResult,
         },
@@ -195,7 +91,7 @@ describe('API Token', () => {
         select: expect.arrayContaining([expect.any(String)]),
         data: {
           ...omit('permissions', attributes),
-          accessKey: apiTokenService.hash(mockedApiToken.hexedString),
+          accessKey: transferTokenService.hash(mockedTransferToken.hexedString),
           expiresAt: null,
           lifespan: null,
         },
@@ -204,7 +100,7 @@ describe('API Token', () => {
       // call to create permission
       expect(create).toHaveBeenNthCalledWith(2, {
         data: {
-          action: 'admin::content.content.read',
+          action: 'push',
           token: {
             ...createTokenResult,
             expiresAt: null,
@@ -215,17 +111,97 @@ describe('API Token', () => {
 
       expect(res).toEqual({
         ...createTokenResult,
-        accessKey: mockedApiToken.hexedString,
+        accessKey: mockedTransferToken.hexedString,
         expiresAt: null,
         lifespan: null,
       });
     });
 
-    test('Creates a custom token with no permissions', async () => {
+    test('Creates a new token with lifespan', async () => {
       const attributes = {
-        name: 'api-token_tests-name',
-        description: 'api-token_tests-description',
-        type: 'custom',
+        name: 'transfer-token_tests-name',
+        description: 'transfer-token_tests-description',
+        lifespan: constants.TRANSFER_TOKEN_LIFESPANS.DAYS_90,
+        permissions: ['push'],
+      };
+
+      const expectedExpires = Date.now() + attributes.lifespan;
+
+      const create = jest.fn(({ data }) => Promise.resolve(data));
+      const load = jest.fn().mockResolvedValueOnce(
+        Promise.resolve(
+          uniq(attributes.permissions).map((p) => {
+            return {
+              action: p,
+            };
+          })
+        )
+      );
+
+      global.strapi = {
+        ...getActionProvider(['push']),
+        query() {
+          return { create };
+        },
+        entityService: { load },
+        db: { transaction: jest.fn((cb) => cb()) },
+        config: {
+          get: jest.fn(() => ''),
+        },
+      };
+
+      const res = await transferTokenService.create(attributes);
+
+      expect(create).toHaveBeenCalledWith({
+        select: expect.arrayContaining([expect.any(String)]),
+        data: {
+          ...attributes,
+          accessKey: transferTokenService.hash(mockedTransferToken.hexedString),
+          expiresAt: expectedExpires,
+          lifespan: attributes.lifespan,
+        },
+        populate: ['permissions'],
+      });
+      expect(res).toEqual({
+        ...attributes,
+        accessKey: mockedTransferToken.hexedString,
+        expiresAt: expectedExpires,
+        lifespan: attributes.lifespan,
+      });
+      expect(res.expiresAt).toBe(expectedExpires);
+    });
+
+    test('It throws when creating a token with invalid lifespan', async () => {
+      const attributes = {
+        name: 'transfer-token_tests-name',
+        description: 'transfer-token_tests-description',
+        permissions: ['push'],
+        lifespan: 12345,
+      };
+
+      const create = jest.fn(({ data }) => Promise.resolve(data));
+      global.strapi = {
+        ...getActionProvider(['push']),
+        query() {
+          return { create };
+        },
+        db: { transaction: jest.fn((cb) => cb()) },
+        config: {
+          get: jest.fn(() => ''),
+        },
+      };
+
+      expect(async () => {
+        await transferTokenService.create(attributes);
+      }).rejects.toThrow(/lifespan/);
+
+      expect(create).not.toHaveBeenCalled();
+    });
+
+    test('Creates a token with no permissions', async () => {
+      const attributes = {
+        name: 'transfer-token_tests-name',
+        description: 'transfer-token_tests-description',
         permissions: [],
       };
       const createTokenResult = {
@@ -248,13 +224,14 @@ describe('API Token', () => {
       );
 
       global.strapi = {
-        ...getActionProvider(['admin::content.content.read']),
+        ...getActionProvider(['push']),
         query() {
           return {
             findOne,
             create,
           };
         },
+        db: { transaction: jest.fn((cb) => cb()) },
         config: {
           get: jest.fn(() => ''),
         },
@@ -263,10 +240,10 @@ describe('API Token', () => {
         },
       };
 
-      const res = await apiTokenService.create(attributes);
+      const res = await transferTokenService.create(attributes);
 
       expect(load).toHaveBeenCalledWith(
-        'admin::api-token',
+        'admin::transfer-token',
         {
           ...createTokenResult,
         },
@@ -279,7 +256,7 @@ describe('API Token', () => {
         select: expect.arrayContaining([expect.any(String)]),
         data: {
           ...omit('permissions', attributes),
-          accessKey: apiTokenService.hash(mockedApiToken.hexedString),
+          accessKey: transferTokenService.hash(mockedTransferToken.hexedString),
           expiresAt: null,
           lifespan: null,
         },
@@ -288,18 +265,18 @@ describe('API Token', () => {
 
       expect(res).toEqual({
         ...createTokenResult,
-        accessKey: mockedApiToken.hexedString,
+        accessKey: mockedTransferToken.hexedString,
         expiresAt: null,
         lifespan: null,
       });
     });
 
-    test('Creates a custom token with duplicate permissions should ignore duplicates', async () => {
+    test('Creates a token with duplicate permissions should ignore duplicates', async () => {
       const attributes = {
-        name: 'api-token_tests-name',
-        description: 'api-token_tests-description',
+        name: 'transfer-token_tests-name',
+        description: 'transfer-token_tests-description',
         type: 'custom',
-        permissions: ['api::foo.foo.find', 'api::foo.foo.find', 'api::foo.foo.create'],
+        permissions: ['push', 'push', 'push'],
       };
       const createTokenResult = {
         ...attributes,
@@ -321,13 +298,14 @@ describe('API Token', () => {
       );
 
       global.strapi = {
-        ...getActionProvider(['api::foo.foo.find', 'api::foo.foo.create']),
+        ...getActionProvider(['push']),
         query() {
           return {
             findOne,
             create,
           };
         },
+        db: { transaction: jest.fn((cb) => cb()) },
         config: {
           get: jest.fn(() => ''),
         },
@@ -336,18 +314,18 @@ describe('API Token', () => {
         },
       };
 
-      const res = await apiTokenService.create(attributes);
+      const res = await transferTokenService.create(attributes);
 
-      expect(res.permissions).toHaveLength(2);
-      expect(res.permissions).toEqual(['api::foo.foo.find', 'api::foo.foo.create']);
+      expect(res.permissions).toHaveLength(1);
+      expect(res.permissions).toEqual(['push']);
     });
 
-    test('Creates a custom token with invalid permissions should throw', async () => {
+    test('Creates a token with invalid permissions should throw', async () => {
       const attributes = {
-        name: 'api-token_tests-name',
-        description: 'api-token_tests-description',
+        name: 'transfer-token_tests-name',
+        description: 'transfer-token_tests-description',
         type: 'custom',
-        permissions: ['valid-permission', 'unknown-permission-A', 'unknown-permission-B'],
+        permissions: ['foo', 'bar'],
       };
       const createTokenResult = {
         ...attributes,
@@ -368,12 +346,13 @@ describe('API Token', () => {
       );
 
       global.strapi = {
-        ...getActionProvider(['valid-permission']),
+        ...getActionProvider(['push']),
         query() {
           return {
             create,
           };
         },
+        db: { transaction: jest.fn((cb) => cb()) },
         config: {
           get: jest.fn(() => ''),
         },
@@ -382,10 +361,8 @@ describe('API Token', () => {
         },
       };
 
-      await expect(() => apiTokenService.create(attributes)).rejects.toThrowError(
-        new ApplicationError(
-          `Unknown permissions provided: unknown-permission-A, unknown-permission-B`
-        )
+      await expect(() => transferTokenService.create(attributes)).rejects.toThrowError(
+        new ApplicationError(`Unknown permissions provided: foo, bar`)
       );
 
       expect(load).not.toHaveBeenCalled();
@@ -401,13 +378,13 @@ describe('API Token', () => {
       global.strapi = {
         config: {
           get: jest.fn(() => ({
-            admin: { apiToken: { salt: 'api-token_tests-salt' } },
+            admin: { transfer: { token: { salt: 'transfer-token_tests-salt' } } },
           })),
           set: mockedConfigSet,
         },
       };
 
-      apiTokenService.checkSaltIsDefined();
+      transferTokenService.checkSaltIsDefined();
 
       expect(mockedAppendFile).not.toHaveBeenCalled();
       expect(mockedConfigSet).not.toHaveBeenCalled();
@@ -421,9 +398,9 @@ describe('API Token', () => {
       };
 
       try {
-        apiTokenService.checkSaltIsDefined();
+        transferTokenService.checkSaltIsDefined();
       } catch (e) {
-        expect(e.message.includes('Missing apiToken.salt.')).toBe(true);
+        expect(e.message.includes('Missing transfer.token.salt.')).toBe(true);
       }
 
       expect.assertions(1);
@@ -431,7 +408,7 @@ describe('API Token', () => {
 
     test('It throws an error if the env variable used in the config file has been changed and is empty', () => {
       expect.assertions(1);
-      process.env.API_TOKEN_SALT = 'api-token_tests-salt';
+      process.env.TRANSFER_TOKEN_SALT = 'transfer-token_tests-salt';
 
       global.strapi = {
         config: {
@@ -440,7 +417,7 @@ describe('API Token', () => {
       };
 
       try {
-        apiTokenService.createSaltIfNotDefined();
+        transferTokenService.createSaltIfNotDefined();
       } catch (err) {
         expect(err).toBeInstanceOf(Error);
       }
@@ -451,15 +428,15 @@ describe('API Token', () => {
     const tokens = [
       {
         id: 1,
-        name: 'api-token_tests-name',
-        description: 'api-token_tests-description',
-        type: 'read-only',
+        name: 'transfer-token_tests-name',
+        description: 'transfer-token_tests-description',
+        permissions: [{ action: 'push' }],
       },
       {
         id: 2,
-        name: 'api-token_tests-name-2',
-        description: 'api-token_tests-description-2',
-        type: 'full-access',
+        name: 'transfer-token_tests-name-2',
+        description: 'transfer-token_tests-description-2',
+        permissions: [{ action: 'push' }],
       },
     ];
 
@@ -472,23 +449,29 @@ describe('API Token', () => {
         },
       };
 
-      const res = await apiTokenService.list();
+      const res = await transferTokenService.list();
 
       expect(findMany).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
         orderBy: { name: 'ASC' },
         populate: ['permissions'],
       });
-      expect(res).toEqual(tokens);
+
+      expect(res).toEqual(
+        tokens.map((token) => ({
+          ...token,
+          permissions: token.permissions.map(({ action }) => action),
+        }))
+      );
     });
   });
 
   describe('revoke', () => {
     const token = {
       id: 1,
-      name: 'api-token_tests-name',
-      description: 'api-token_tests-description',
-      type: 'read-only',
+      name: 'transfer-token_tests-name',
+      description: 'transfer-token_tests-description',
+      permissions: ['push'],
     };
 
     test('It deletes the token', async () => {
@@ -498,9 +481,10 @@ describe('API Token', () => {
         query() {
           return { delete: mockedDelete };
         },
+        db: { transaction: jest.fn((cb) => cb()) },
       };
 
-      const res = await apiTokenService.revoke(token.id);
+      const res = await transferTokenService.revoke(token.id);
 
       expect(mockedDelete).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
@@ -517,9 +501,10 @@ describe('API Token', () => {
         query() {
           return { delete: mockedDelete };
         },
+        db: { transaction: jest.fn((cb) => cb()) },
       };
 
-      const res = await apiTokenService.revoke(42);
+      const res = await transferTokenService.revoke(42);
 
       expect(mockedDelete).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
@@ -533,9 +518,9 @@ describe('API Token', () => {
   describe('getById', () => {
     const token = {
       id: 1,
-      name: 'api-token_tests-name',
-      description: 'api-token_tests-description',
-      type: 'read-only',
+      name: 'transfer-token_tests-name',
+      description: 'transfer-token_tests-description',
+      permissions: [{ actions: 'push' }],
     };
 
     test('It retrieves the token', async () => {
@@ -547,14 +532,18 @@ describe('API Token', () => {
         },
       };
 
-      const res = await apiTokenService.getById(token.id);
+      const res = await transferTokenService.getById(token.id);
 
       expect(findOne).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
         where: { id: token.id },
         populate: ['permissions'],
       });
-      expect(res).toEqual(token);
+
+      expect(res).toEqual({
+        ...token,
+        permissions: token.permissions.map(({ action }) => action),
+      });
     });
 
     test('It returns `null` if the resource does not exist', async () => {
@@ -566,7 +555,7 @@ describe('API Token', () => {
         },
       };
 
-      const res = await apiTokenService.getById(42);
+      const res = await transferTokenService.getById(42);
 
       expect(findOne).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
@@ -585,22 +574,23 @@ describe('API Token', () => {
         query() {
           return { update };
         },
+        db: { transaction: jest.fn((cb) => cb()) },
         config: {
           get: jest.fn(() => ''),
         },
       };
 
       const id = 1;
-      const res = await apiTokenService.regenerate(id);
+      const res = await transferTokenService.regenerate(id);
 
       expect(update).toHaveBeenCalledWith({
         where: { id },
         select: ['id', 'accessKey'],
         data: {
-          accessKey: apiTokenService.hash(mockedApiToken.hexedString),
+          accessKey: transferTokenService.hash(mockedTransferToken.hexedString),
         },
       });
-      expect(res).toEqual({ accessKey: mockedApiToken.hexedString });
+      expect(res).toEqual({ accessKey: mockedTransferToken.hexedString });
     });
 
     test('It throws a NotFound if the id is not found', async () => {
@@ -610,6 +600,7 @@ describe('API Token', () => {
         query() {
           return { update };
         },
+        db: { transaction: jest.fn((cb) => cb()) },
         config: {
           get: jest.fn(() => ''),
         },
@@ -617,216 +608,36 @@ describe('API Token', () => {
 
       const id = 1;
       await expect(async () => {
-        await apiTokenService.regenerate(id);
+        await transferTokenService.regenerate(id);
       }).rejects.toThrowError(NotFoundError);
 
       expect(update).toHaveBeenCalledWith({
         where: { id },
         select: ['id', 'accessKey'],
         data: {
-          accessKey: apiTokenService.hash(mockedApiToken.hexedString),
+          accessKey: transferTokenService.hash(mockedTransferToken.hexedString),
         },
       });
     });
   });
 
   describe('update', () => {
-    test('Updates a non-custom token', async () => {
-      const token = {
-        id: 1,
-        name: 'api-token_tests-name',
-        description: 'api-token_tests-description',
-        type: 'read-only',
-      };
-
-      const update = jest.fn(({ data }) => Promise.resolve(data));
-      const deleteFn = jest.fn(({ data }) => Promise.resolve(data));
-      const findOne = jest.fn().mockResolvedValue(token);
-      const load = jest.fn();
-
-      global.strapi = {
-        query() {
-          return {
-            update,
-            findOne,
-            delete: deleteFn,
-          };
-        },
-        config: {
-          get: jest.fn(() => ''),
-        },
-        entityService: {
-          load,
-        },
-      };
-
-      const id = 1;
-      const attributes = {
-        name: 'api-token_tests-updated-name',
-        description: 'api-token_tests-description',
-        type: 'read-only',
-      };
-
-      const res = await apiTokenService.update(id, attributes);
-      // ensure any existing permissions have been deleted
-      expect(deleteFn).toHaveBeenCalledWith({
-        where: {
-          token: id,
-        },
-      });
-      expect(update).toHaveBeenCalledWith({
-        select: expect.arrayContaining([expect.any(String)]),
-        where: { id },
-        data: attributes,
-      });
-      expect(res).toEqual(attributes);
-    });
-
-    test('Updates permissions field of a custom token with unknown permissions', async () => {
+    test('Updates a token', async () => {
       const id = 1;
 
       const originalToken = {
         id,
-        name: 'api-token_tests-name',
-        description: 'api-token_tests-description',
-        type: 'custom',
-        permissions: ['valid-permission-A'],
+        name: 'transfer-token_tests-name',
+        description: 'transfer-token_tests-description',
+        permissions: ['push'],
       };
 
       const updatedAttributes = {
-        permissions: ['valid-permission-A', 'unknown-permission'],
-      };
-
-      const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
-      const update = jest.fn(({ data }) => Promise.resolve(data));
-      const deleteFn = jest.fn();
-      const create = jest.fn();
-      const load = jest.fn();
-
-      global.strapi = {
-        ...getActionProvider(['valid-permission-A']),
-        query() {
-          return {
-            update,
-            findOne,
-            delete: deleteFn,
-            create,
-          };
-        },
-        config: {
-          get: jest.fn(() => ''),
-        },
-        entityService: {
-          load,
-        },
-      };
-
-      expect(() => apiTokenService.update(id, updatedAttributes)).rejects.toThrowError(
-        new ApplicationError(`Unknown permissions provided: unknown-permission`)
-      );
-
-      expect(update).not.toHaveBeenCalled();
-      expect(deleteFn).not.toHaveBeenCalled();
-      expect(create).not.toHaveBeenCalled();
-      expect(load).not.toHaveBeenCalled();
-    });
-
-    test('Updates a non-permissions field of a custom token', async () => {
-      const id = 1;
-
-      const originalToken = {
-        id,
-        name: 'api-token_tests-name',
-        description: 'api-token_tests-description',
-        type: 'custom',
-        permissions: ['admin::subject.keepThisAction', 'admin::subject.oldAction'],
-      };
-
-      const updatedAttributes = {
-        name: 'api-token_tests-updated-name',
-        type: 'custom',
-      };
-
-      const update = jest.fn(({ data }) => Promise.resolve(data));
-      const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
-      const deleteFn = jest.fn();
-      const create = jest.fn();
-      const load = jest
-        .fn()
-        // first call to load original permissions
-        .mockResolvedValueOnce(
-          Promise.resolve(
-            originalToken.permissions.map((p) => {
-              return {
-                action: p,
-              };
-            })
-          )
-        )
-        // second call to check new permissions
-        .mockResolvedValueOnce(
-          Promise.resolve(
-            originalToken.permissions.map((p) => {
-              return {
-                action: p,
-              };
-            })
-          )
-        );
-
-      global.strapi = {
-        query() {
-          return {
-            update,
-            findOne,
-            delete: deleteFn,
-            create,
-          };
-        },
-        config: {
-          get: jest.fn(() => ''),
-        },
-        entityService: {
-          load,
-        },
-      };
-
-      const res = await apiTokenService.update(id, updatedAttributes);
-
-      expect(update).toHaveBeenCalledWith({
-        select: expect.arrayContaining([expect.any(String)]),
-        where: { id },
-        data: omit(['permissions'], updatedAttributes),
-      });
-
-      expect(res).toEqual({
-        permissions: originalToken.permissions,
-        ...updatedAttributes,
-      });
-    });
-
-    test('Updates a custom token', async () => {
-      const id = 1;
-
-      const originalToken = {
-        id,
-        name: 'api-token_tests-name',
-        description: 'api-token_tests-description',
-        type: 'custom',
-        permissions: ['admin::subject.keepThisAction', 'admin::subject.oldAction'],
-      };
-
-      const updatedAttributes = {
-        name: 'api-token_tests-updated-name',
-        description: 'api-token_tests-description',
-        type: 'custom',
+        name: 'transfer-token_tests-updated-name',
+        description: 'transfer-token_tests-description',
         permissions: [
-          // It should not recreate this action
-          'admin::subject.keepThisAction',
-          'admin::subject.newAction',
-          // It should ignore the duplicate and not call create on the second occurence
-          'admin::subject.newAction',
-          'admin::subject.otherAction',
+          // It should ignore the duplicate and not call create
+          'push',
         ],
       };
 
@@ -858,12 +669,133 @@ describe('API Token', () => {
         );
 
       global.strapi = {
-        ...getActionProvider([
-          'admin::subject.keepThisAction',
-          'admin::subject.newAction',
-          'admin::subject.newAction',
-          'admin::subject.otherAction',
-        ]),
+        ...getActionProvider(['push']),
+        query() {
+          return {
+            update,
+            findOne,
+            delete: deleteFn,
+            create,
+          };
+        },
+        db: { transaction: jest.fn((cb) => cb()) },
+        config: {
+          get: jest.fn(() => ''),
+        },
+        entityService: {
+          load,
+        },
+      };
+
+      const res = await transferTokenService.update(id, updatedAttributes);
+
+      expect(deleteFn).toHaveBeenCalledTimes(1);
+
+      expect(update).toHaveBeenCalledWith({
+        select: expect.arrayContaining([expect.any(String)]),
+        where: { id },
+        data: omit(['permissions'], updatedAttributes),
+      });
+
+      expect(res).toEqual(updatedAttributes);
+    });
+
+    test('Updates a non-permissions field of a token', async () => {
+      const id = 1;
+
+      const originalToken = {
+        id,
+        name: 'transfer-token_tests-name',
+        description: 'transfer-token_tests-description',
+        permissions: ['push'],
+      };
+
+      const updatedAttributes = {
+        name: 'transfer-token_tests-updated-name',
+      };
+
+      const update = jest.fn(({ data }) => Promise.resolve(data));
+      const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
+      const deleteFn = jest.fn();
+      const create = jest.fn();
+      const load = jest
+        .fn()
+        // first call to load original permissions
+        .mockResolvedValueOnce(
+          Promise.resolve(
+            originalToken.permissions.map((p) => {
+              return {
+                action: p,
+              };
+            })
+          )
+        )
+        // second call to check new permissions
+        .mockResolvedValueOnce(
+          Promise.resolve(
+            originalToken.permissions.map((p) => {
+              return {
+                action: p,
+              };
+            })
+          )
+        );
+
+      global.strapi = {
+        ...getActionProvider(['push']),
+        query() {
+          return {
+            update,
+            findOne,
+            delete: deleteFn,
+            create,
+          };
+        },
+        db: { transaction: jest.fn((cb) => cb()) },
+        config: {
+          get: jest.fn(() => ''),
+        },
+        entityService: {
+          load,
+        },
+      };
+
+      const res = await transferTokenService.update(id, updatedAttributes);
+
+      expect(update).toHaveBeenCalledWith({
+        select: expect.arrayContaining([expect.any(String)]),
+        where: { id },
+        data: omit(['permissions'], updatedAttributes),
+      });
+
+      expect(res).toEqual({
+        permissions: originalToken.permissions,
+        ...updatedAttributes,
+      });
+    });
+
+    test('Updates permissions field of a token with unknown permissions', async () => {
+      const id = 1;
+
+      const originalToken = {
+        id,
+        name: 'transfer-token_tests-name',
+        description: 'transfer-token_tests-description',
+        permissions: ['push'],
+      };
+
+      const updatedAttributes = {
+        permissions: ['push', 'unknown-permission'],
+      };
+
+      const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
+      const update = jest.fn(({ data }) => Promise.resolve(data));
+      const deleteFn = jest.fn();
+      const create = jest.fn();
+      const load = jest.fn();
+
+      global.strapi = {
+        ...getActionProvider(['push']),
         query() {
           return {
             update,
@@ -880,58 +812,23 @@ describe('API Token', () => {
         },
       };
 
-      const res = await apiTokenService.update(id, updatedAttributes);
+      expect(() => transferTokenService.update(id, updatedAttributes)).rejects.toThrowError(
+        new ApplicationError(`Unknown permissions provided: unknown-permission`)
+      );
 
-      expect(deleteFn).toHaveBeenCalledTimes(1);
-      // expect(deleteFn).toHaveBeenCalledWith({
-      //   where: {
-      //     action: { $in: ['admin::subject.oldAction'] },
-      //     token: id,
-      //   },
-      // });
-      expect(deleteFn).toHaveBeenCalledWith({
-        where: {
-          action: 'admin::subject.oldAction',
-          token: id,
-        },
-      });
-
-      expect(create).toHaveBeenCalledTimes(2);
-      expect(create).not.toHaveBeenCalledWith({
-        data: {
-          action: 'admin::subject.keepAction',
-          token: id,
-        },
-      });
-      expect(create).toHaveBeenCalledWith({
-        data: {
-          action: 'admin::subject.newAction',
-          token: id,
-        },
-      });
-      expect(create).toHaveBeenCalledWith({
-        data: {
-          action: 'admin::subject.otherAction',
-          token: id,
-        },
-      });
-
-      expect(update).toHaveBeenCalledWith({
-        select: expect.arrayContaining([expect.any(String)]),
-        where: { id },
-        data: omit(['permissions'], updatedAttributes),
-      });
-
-      expect(res).toEqual(updatedAttributes);
+      expect(update).not.toHaveBeenCalled();
+      expect(deleteFn).not.toHaveBeenCalled();
+      expect(create).not.toHaveBeenCalled();
+      expect(load).not.toHaveBeenCalled();
     });
   });
 
   describe('getByName', () => {
     const token = {
       id: 1,
-      name: 'api-token_tests-name',
-      description: 'api-token_tests-description',
-      type: 'read-only',
+      name: 'transfer-token_tests-name',
+      description: 'transfer-token_tests-description',
+      permissions: [{ action: 'push' }],
     };
 
     test('It retrieves the token', async () => {
@@ -943,14 +840,17 @@ describe('API Token', () => {
         },
       };
 
-      const res = await apiTokenService.getByName(token.name);
+      const res = await transferTokenService.getByName(token.name);
 
       expect(findOne).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
         where: { name: token.name },
         populate: ['permissions'],
       });
-      expect(res).toEqual(token);
+      expect(res).toEqual({
+        ...token,
+        permissions: token.permissions.map(({ action }) => action),
+      });
     });
 
     test('It returns `null` if the resource does not exist', async () => {
@@ -962,7 +862,7 @@ describe('API Token', () => {
         },
       };
 
-      const res = await apiTokenService.getByName('unexistant-name');
+      const res = await transferTokenService.getByName('unexistant-name');
 
       expect(findOne).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),

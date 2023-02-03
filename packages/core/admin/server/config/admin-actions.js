@@ -186,7 +186,7 @@ module.exports = {
       pluginName: 'admin',
       section: 'settings',
       category: 'transfer tokens',
-      subCategory: 'transfer Tokens',
+      subCategory: 'transfer tokens',
     },
     {
       uid: 'transfer.tokens.create',

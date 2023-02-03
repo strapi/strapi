@@ -44,7 +44,7 @@ const createAuthentication = () => {
       }
 
       const routeStrategies = strategies[route.info.type];
-      const configStrategies = config.strategies ?? routeStrategies;
+      const configStrategies = config?.strategies ?? routeStrategies ?? [];
 
       const strategiesToUse = configStrategies.reduce((acc, strategy) => {
         // Resolve by strategy name

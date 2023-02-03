@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useInfiniteQuery } from 'react-query';
 
-import { axiosInstance } from '../../../core/utils';
+import { useFetchClient } from '@strapi/helper-plugin';
 
 import { normalizeRelations } from '../../components/RelationInputDataManager/utils';
 
@@ -10,13 +10,13 @@ import { useCallbackRef } from '../useCallbackRef';
 export const useRelation = (cacheKey, { relation, search }) => {
   const [searchParams, setSearchParams] = useState({});
   const [currentPage, setCurrentPage] = useState(0);
-
+  const { get } = useFetchClient();
   /**
    * This runs in `useInfiniteQuery` to actually fetch the data
    */
   const fetchRelations = async ({ pageParam = 1 }) => {
     try {
-      const { data } = await axiosInstance.get(relation?.endpoint, {
+      const { data } = await get(relation?.endpoint, {
         params: {
           ...(relation.pageParams ?? {}),
           page: pageParam,
@@ -33,7 +33,7 @@ export const useRelation = (cacheKey, { relation, search }) => {
 
   const fetchSearch = async ({ pageParam = 1 }) => {
     try {
-      const { data } = await axiosInstance.get(search.endpoint, {
+      const { data } = await get(search.endpoint, {
         params: {
           ...(search.pageParams ?? {}),
           ...searchParams,

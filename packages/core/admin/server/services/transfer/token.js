@@ -1,11 +1,13 @@
 'use strict';
 
-const { map, isArray, omit, uniq, isNil } = require('lodash/fp');
+const { map, isArray, omit, uniq, isNil, difference, isEmpty } = require('lodash/fp');
 const crypto = require('crypto');
 
 const {
   errors: { ValidationError, NotFoundError },
 } = require('@strapi/utils');
+
+const constants = require('../constants');
 
 const TRANSFER_TOKEN_UID = 'admin::transfer-token';
 const TRANSFER_TOKEN_PERMISSION_UID = 'admin::transfer-token-permission';
@@ -76,6 +78,9 @@ const list = async () => {
 const create = async (attributes) => {
   const accessKey = crypto.randomBytes(128).toString('hex');
 
+  assertTokenPermissionsValidity(attributes);
+  assertValidLifespan(attributes);
+
   const result = await strapi.db.transaction(async () => {
     const transferToken = await strapi.query(TRANSFER_TOKEN_UID).create({
       select: SELECT_FIELDS,
@@ -131,14 +136,23 @@ const update = async (id, attributes) => {
     throw new NotFoundError('Token not found');
   }
 
-  const updatedToken = await strapi.query(TRANSFER_TOKEN_UID).update({
-    select: SELECT_FIELDS,
-    where: { id },
-    data: omit('permissions', attributes),
-  });
+  assertTokenPermissionsValidity(attributes);
+  assertValidLifespan(attributes);
 
-  await strapi.query(TRANSFER_TOKEN_PERMISSION_UID).delete({
-    where: { token: id },
+  const updatedToken = await strapi.db.transaction(async () => {
+    const updatedToken = await strapi.query(TRANSFER_TOKEN_UID).update({
+      select: SELECT_FIELDS,
+      where: { id },
+      data: {
+        ...omit('permissions', attributes),
+      },
+    });
+
+    await strapi.query(TRANSFER_TOKEN_PERMISSION_UID).delete({
+      where: { token: id },
+    });
+
+    return updatedToken;
   });
 
   // retrieve permissions
@@ -162,9 +176,11 @@ const update = async (id, attributes) => {
  * @returns {Promise<Omit<TransferToken, 'accessKey'>>}
  */
 const revoke = async (id) => {
-  return strapi
-    .query(TRANSFER_TOKEN_UID)
-    .delete({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: { id } });
+  return strapi.db.transaction(async () =>
+    strapi
+      .query(TRANSFER_TOKEN_UID)
+      .delete({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: { id } })
+  );
 };
 
 /**
@@ -239,14 +255,15 @@ const exists = async (whereParams = {}) => {
  */
 const regenerate = async (id) => {
   const accessKey = crypto.randomBytes(128).toString('hex');
-
-  const transferToken = await strapi.query(TRANSFER_TOKEN_UID).update({
-    select: ['id', 'accessKey'],
-    where: { id },
-    data: {
-      accessKey: hash(accessKey),
-    },
-  });
+  const transferToken = await strapi.db.transaction(async () =>
+    strapi.query(TRANSFER_TOKEN_UID).update({
+      select: ['id', 'accessKey'],
+      where: { id },
+      data: {
+        accessKey: hash(accessKey),
+      },
+    })
+  );
 
   if (!transferToken) {
     throw new NotFoundError('The provided token id does not exist');
@@ -316,6 +333,39 @@ const flattenTokenPermissions = (token) => {
     ...token,
     permissions: isArray(token.permissions) ? map('action', token.permissions) : token.permissions,
   };
+};
+
+/**
+ * Assert that a token's permissions are valid
+ *
+ * @param {TransferToken} token
+ */
+const assertTokenPermissionsValidity = (attributes) => {
+  const { permission: permissionService } = strapi.admin.services.transfer;
+  const validPermissions = permissionService.providers.action.keys();
+  const invalidPermissions = difference(attributes.permissions, validPermissions);
+
+  if (!isEmpty(invalidPermissions)) {
+    throw new ValidationError(`Unknown permissions provided: ${invalidPermissions.join(', ')}`);
+  }
+};
+
+/**
+ * Assert that a token's lifespan is valid
+ *
+ * @param {TransferToken} token
+ */
+const assertValidLifespan = ({ lifespan }) => {
+  if (isNil(lifespan)) {
+    return;
+  }
+
+  if (!Object.values(constants.TRANSFER_TOKEN_LIFESPANS).includes(lifespan)) {
+    throw new ValidationError(
+      `lifespan must be one of the following values: 
+      ${Object.values(constants.TRANSFER_TOKEN_LIFESPANS).join(', ')}`
+    );
+  }
 };
 
 module.exports = {
