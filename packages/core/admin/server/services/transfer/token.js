@@ -1,11 +1,13 @@
 'use strict';
 
-const { map, isArray, omit, uniq, isNil } = require('lodash/fp');
+const { map, isArray, omit, uniq, isNil, difference, isEmpty } = require('lodash/fp');
 const crypto = require('crypto');
 
 const {
   errors: { ValidationError, NotFoundError },
 } = require('@strapi/utils');
+
+const constants = require('../constants');
 
 const TRANSFER_TOKEN_UID = 'admin::transfer-token';
 const TRANSFER_TOKEN_PERMISSION_UID = 'admin::transfer-token-permission';
@@ -76,6 +78,9 @@ const list = async () => {
 const create = async (attributes) => {
   const accessKey = crypto.randomBytes(128).toString('hex');
 
+  assertTokenPermissionsValidity(attributes);
+  assertValidLifespan(attributes);
+
   const result = await strapi.db.transaction(async () => {
     const transferToken = await strapi.query(TRANSFER_TOKEN_UID).create({
       select: SELECT_FIELDS,
@@ -130,6 +135,9 @@ const update = async (id, attributes) => {
   if (!originalToken) {
     throw new NotFoundError('Token not found');
   }
+
+  assertTokenPermissionsValidity(attributes);
+  assertValidLifespan(attributes);
 
   const updatedToken = await strapi.query(TRANSFER_TOKEN_UID).update({
     select: SELECT_FIELDS,
@@ -316,6 +324,39 @@ const flattenTokenPermissions = (token) => {
     ...token,
     permissions: isArray(token.permissions) ? map('action', token.permissions) : token.permissions,
   };
+};
+
+/**
+ * Assert that a token's permissions are valid
+ *
+ * @param {TransferToken} token
+ */
+const assertTokenPermissionsValidity = (attributes) => {
+  const { permission: permissionService } = strapi.admin.services.transfer;
+  const validPermissions = permissionService.providers.action.keys();
+  const invalidPermissions = difference(attributes.permissions, validPermissions);
+
+  if (!isEmpty(invalidPermissions)) {
+    throw new ValidationError(`Unknown permissions provided: ${invalidPermissions.join(', ')}`);
+  }
+};
+
+/**
+ * Assert that a token's lifespan is valid
+ *
+ * @param {TransferToken} token
+ */
+const assertValidLifespan = ({ lifespan }) => {
+  if (isNil(lifespan)) {
+    return;
+  }
+
+  if (!Object.values(constants.TRANSFER_TOKEN_LIFESPANS).includes(lifespan)) {
+    throw new ValidationError(
+      `lifespan must be one of the following values: 
+      ${Object.values(constants.TRANSFER_TOKEN_LIFESPANS).join(', ')}`
+    );
+  }
 };
 
 module.exports = {

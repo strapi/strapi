@@ -413,7 +413,7 @@ describe('API Token', () => {
       expect(mockedConfigSet).not.toHaveBeenCalled();
     });
 
-    test('It throws if the salt if the salt is not defined', () => {
+    test('It throws if the salt is not defined', () => {
       global.strapi = {
         config: {
           get: jest.fn(() => null),
@@ -680,250 +680,250 @@ describe('API Token', () => {
         data: attributes,
       });
       expect(res).toEqual(attributes);
-    });
-  });
 
-  test('Updates a custom token', async () => {
-    const id = 1;
+      test('Updates a custom token', async () => {
+        const id = 1;
 
-    const originalToken = {
-      id,
-      name: 'api-token_tests-name',
-      description: 'api-token_tests-description',
-      type: 'custom',
-      permissions: ['admin::subject.keepThisAction', 'admin::subject.oldAction'],
-    };
-
-    const updatedAttributes = {
-      name: 'api-token_tests-updated-name',
-      description: 'api-token_tests-description',
-      type: 'custom',
-      permissions: [
-        // It should not recreate this action
-        'admin::subject.keepThisAction',
-        'admin::subject.newAction',
-        // It should ignore the duplicate and not call create on the second occurence
-        'admin::subject.newAction',
-        'admin::subject.otherAction',
-      ],
-    };
-
-    const update = jest.fn(({ data }) => Promise.resolve(data));
-    const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
-    const deleteFn = jest.fn();
-    const create = jest.fn();
-    const load = jest
-      .fn()
-      // first call to load original permissions
-      .mockResolvedValueOnce(
-        Promise.resolve(
-          originalToken.permissions.map((p) => {
-            return {
-              action: p,
-            };
-          })
-        )
-      )
-      // second call to check new permissions
-      .mockResolvedValueOnce(
-        Promise.resolve(
-          updatedAttributes.permissions.map((p) => {
-            return {
-              action: p,
-            };
-          })
-        )
-      );
-
-    global.strapi = {
-      ...getActionProvider([
-        'admin::subject.keepThisAction',
-        'admin::subject.newAction',
-        'admin::subject.newAction',
-        'admin::subject.otherAction',
-      ]),
-      query() {
-        return {
-          update,
-          findOne,
-          delete: deleteFn,
-          create,
+        const originalToken = {
+          id,
+          name: 'api-token_tests-name',
+          description: 'api-token_tests-description',
+          type: 'custom',
+          permissions: ['admin::subject.keepThisAction', 'admin::subject.oldAction'],
         };
-      },
-      config: {
-        get: jest.fn(() => ''),
-      },
-      entityService: {
-        load,
-      },
-    };
 
-    const res = await apiTokenService.update(id, updatedAttributes);
-
-    expect(deleteFn).toHaveBeenCalledTimes(1);
-    // expect(deleteFn).toHaveBeenCalledWith({
-    //   where: {
-    //     action: { $in: ['admin::subject.oldAction'] },
-    //     token: id,
-    //   },
-    // });
-    expect(deleteFn).toHaveBeenCalledWith({
-      where: {
-        action: 'admin::subject.oldAction',
-        token: id,
-      },
-    });
-
-    expect(create).toHaveBeenCalledTimes(2);
-    expect(create).not.toHaveBeenCalledWith({
-      data: {
-        action: 'admin::subject.keepAction',
-        token: id,
-      },
-    });
-    expect(create).toHaveBeenCalledWith({
-      data: {
-        action: 'admin::subject.newAction',
-        token: id,
-      },
-    });
-    expect(create).toHaveBeenCalledWith({
-      data: {
-        action: 'admin::subject.otherAction',
-        token: id,
-      },
-    });
-
-    expect(update).toHaveBeenCalledWith({
-      select: expect.arrayContaining([expect.any(String)]),
-      where: { id },
-      data: omit(['permissions'], updatedAttributes),
-    });
-
-    expect(res).toEqual(updatedAttributes);
-  });
-
-  test('Updates a non-permissions field of a custom token', async () => {
-    const id = 1;
-
-    const originalToken = {
-      id,
-      name: 'api-token_tests-name',
-      description: 'api-token_tests-description',
-      type: 'custom',
-      permissions: ['admin::subject.keepThisAction', 'admin::subject.oldAction'],
-    };
-
-    const updatedAttributes = {
-      name: 'api-token_tests-updated-name',
-      type: 'custom',
-    };
-
-    const update = jest.fn(({ data }) => Promise.resolve(data));
-    const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
-    const deleteFn = jest.fn();
-    const create = jest.fn();
-    const load = jest
-      .fn()
-      // first call to load original permissions
-      .mockResolvedValueOnce(
-        Promise.resolve(
-          originalToken.permissions.map((p) => {
-            return {
-              action: p,
-            };
-          })
-        )
-      )
-      // second call to check new permissions
-      .mockResolvedValueOnce(
-        Promise.resolve(
-          originalToken.permissions.map((p) => {
-            return {
-              action: p,
-            };
-          })
-        )
-      );
-
-    global.strapi = {
-      query() {
-        return {
-          update,
-          findOne,
-          delete: deleteFn,
-          create,
+        const updatedAttributes = {
+          name: 'api-token_tests-updated-name',
+          description: 'api-token_tests-description',
+          type: 'custom',
+          permissions: [
+            // It should not recreate this action
+            'admin::subject.keepThisAction',
+            'admin::subject.newAction',
+            // It should ignore the duplicate and not call create on the second occurence
+            'admin::subject.newAction',
+            'admin::subject.otherAction',
+          ],
         };
-      },
-      config: {
-        get: jest.fn(() => ''),
-      },
-      entityService: {
-        load,
-      },
-    };
 
-    const res = await apiTokenService.update(id, updatedAttributes);
+        const update = jest.fn(({ data }) => Promise.resolve(data));
+        const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
+        const deleteFn = jest.fn();
+        const create = jest.fn();
+        const load = jest
+          .fn()
+          // first call to load original permissions
+          .mockResolvedValueOnce(
+            Promise.resolve(
+              originalToken.permissions.map((p) => {
+                return {
+                  action: p,
+                };
+              })
+            )
+          )
+          // second call to check new permissions
+          .mockResolvedValueOnce(
+            Promise.resolve(
+              updatedAttributes.permissions.map((p) => {
+                return {
+                  action: p,
+                };
+              })
+            )
+          );
 
-    expect(update).toHaveBeenCalledWith({
-      select: expect.arrayContaining([expect.any(String)]),
-      where: { id },
-      data: omit(['permissions'], updatedAttributes),
-    });
-
-    expect(res).toEqual({
-      permissions: originalToken.permissions,
-      ...updatedAttributes,
-    });
-  });
-
-  test('Updates permissions field of a custom token with unknown permissions', async () => {
-    const id = 1;
-
-    const originalToken = {
-      id,
-      name: 'api-token_tests-name',
-      description: 'api-token_tests-description',
-      type: 'custom',
-      permissions: ['valid-permission-A'],
-    };
-
-    const updatedAttributes = {
-      permissions: ['valid-permission-A', 'unknown-permission'],
-    };
-
-    const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
-    const update = jest.fn(({ data }) => Promise.resolve(data));
-    const deleteFn = jest.fn();
-    const create = jest.fn();
-    const load = jest.fn();
-
-    global.strapi = {
-      ...getActionProvider(['valid-permission-A']),
-      query() {
-        return {
-          update,
-          findOne,
-          delete: deleteFn,
-          create,
+        global.strapi = {
+          ...getActionProvider([
+            'admin::subject.keepThisAction',
+            'admin::subject.newAction',
+            'admin::subject.newAction',
+            'admin::subject.otherAction',
+          ]),
+          query() {
+            return {
+              update,
+              findOne,
+              delete: deleteFn,
+              create,
+            };
+          },
+          config: {
+            get: jest.fn(() => ''),
+          },
+          entityService: {
+            load,
+          },
         };
-      },
-      config: {
-        get: jest.fn(() => ''),
-      },
-      entityService: {
-        load,
-      },
-    };
 
-    expect(() => apiTokenService.update(id, updatedAttributes)).rejects.toThrowError(
-      new ApplicationError(`Unknown permissions provided: unknown-permission`)
-    );
+        const res = await apiTokenService.update(id, updatedAttributes);
 
-    expect(update).not.toHaveBeenCalled();
-    expect(deleteFn).not.toHaveBeenCalled();
-    expect(create).not.toHaveBeenCalled();
-    expect(load).not.toHaveBeenCalled();
+        expect(deleteFn).toHaveBeenCalledTimes(1);
+        // expect(deleteFn).toHaveBeenCalledWith({
+        //   where: {
+        //     action: { $in: ['admin::subject.oldAction'] },
+        //     token: id,
+        //   },
+        // });
+        expect(deleteFn).toHaveBeenCalledWith({
+          where: {
+            action: 'admin::subject.oldAction',
+            token: id,
+          },
+        });
+
+        expect(create).toHaveBeenCalledTimes(2);
+        expect(create).not.toHaveBeenCalledWith({
+          data: {
+            action: 'admin::subject.keepAction',
+            token: id,
+          },
+        });
+        expect(create).toHaveBeenCalledWith({
+          data: {
+            action: 'admin::subject.newAction',
+            token: id,
+          },
+        });
+        expect(create).toHaveBeenCalledWith({
+          data: {
+            action: 'admin::subject.otherAction',
+            token: id,
+          },
+        });
+
+        expect(update).toHaveBeenCalledWith({
+          select: expect.arrayContaining([expect.any(String)]),
+          where: { id },
+          data: omit(['permissions'], updatedAttributes),
+        });
+
+        expect(res).toEqual(updatedAttributes);
+      });
+
+      test('Updates a non-permissions field of a custom token', async () => {
+        const id = 1;
+
+        const originalToken = {
+          id,
+          name: 'api-token_tests-name',
+          description: 'api-token_tests-description',
+          type: 'custom',
+          permissions: ['admin::subject.keepThisAction', 'admin::subject.oldAction'],
+        };
+
+        const updatedAttributes = {
+          name: 'api-token_tests-updated-name',
+          type: 'custom',
+        };
+
+        const update = jest.fn(({ data }) => Promise.resolve(data));
+        const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
+        const deleteFn = jest.fn();
+        const create = jest.fn();
+        const load = jest
+          .fn()
+          // first call to load original permissions
+          .mockResolvedValueOnce(
+            Promise.resolve(
+              originalToken.permissions.map((p) => {
+                return {
+                  action: p,
+                };
+              })
+            )
+          )
+          // second call to check new permissions
+          .mockResolvedValueOnce(
+            Promise.resolve(
+              originalToken.permissions.map((p) => {
+                return {
+                  action: p,
+                };
+              })
+            )
+          );
+
+        global.strapi = {
+          query() {
+            return {
+              update,
+              findOne,
+              delete: deleteFn,
+              create,
+            };
+          },
+          config: {
+            get: jest.fn(() => ''),
+          },
+          entityService: {
+            load,
+          },
+        };
+
+        const res = await apiTokenService.update(id, updatedAttributes);
+
+        expect(update).toHaveBeenCalledWith({
+          select: expect.arrayContaining([expect.any(String)]),
+          where: { id },
+          data: omit(['permissions'], updatedAttributes),
+        });
+
+        expect(res).toEqual({
+          permissions: originalToken.permissions,
+          ...updatedAttributes,
+        });
+      });
+
+      test('Updates permissions field of a custom token with unknown permissions', async () => {
+        const id = 1;
+
+        const originalToken = {
+          id,
+          name: 'api-token_tests-name',
+          description: 'api-token_tests-description',
+          type: 'custom',
+          permissions: ['valid-permission-A'],
+        };
+
+        const updatedAttributes = {
+          permissions: ['valid-permission-A', 'unknown-permission'],
+        };
+
+        const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
+        const update = jest.fn(({ data }) => Promise.resolve(data));
+        const deleteFn = jest.fn();
+        const create = jest.fn();
+        const load = jest.fn();
+
+        global.strapi = {
+          ...getActionProvider(['valid-permission-A']),
+          query() {
+            return {
+              update,
+              findOne,
+              delete: deleteFn,
+              create,
+            };
+          },
+          config: {
+            get: jest.fn(() => ''),
+          },
+          entityService: {
+            load,
+          },
+        };
+
+        expect(() => apiTokenService.update(id, updatedAttributes)).rejects.toThrowError(
+          new ApplicationError(`Unknown permissions provided: unknown-permission`)
+        );
+
+        expect(update).not.toHaveBeenCalled();
+        expect(deleteFn).not.toHaveBeenCalled();
+        expect(create).not.toHaveBeenCalled();
+        expect(load).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('getByName', () => {
