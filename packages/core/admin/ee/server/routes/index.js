@@ -178,6 +178,15 @@ module.exports = [
     },
   },
   {
+    method: 'PUT',
+    path: '/review-workflows/workflows/:workflow_id/stages',
+    handler: 'stages.replace',
+    config: {
+      middlewares: [enableFeatureMiddleware('review-workflows')],
+      policies: ['admin::isAuthenticatedAdmin'],
+    },
+  },
+  {
     method: 'GET',
     path: '/review-workflows/workflows/:workflow_id/stages/:id',
     handler: 'stages.findById',

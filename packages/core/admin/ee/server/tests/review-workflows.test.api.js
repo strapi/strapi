@@ -182,4 +182,45 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       }
     });
   });
+
+  describe('Replace stages of a workflow', () => {
+    let stagesUpdateData;
+
+    beforeEach(() => {
+      stagesUpdateData = [
+        defaultStage,
+        { id: secondStage.id, name: 'new_name' },
+        { name: 'new stage' },
+      ];
+    });
+
+    test("It shouldn't be available for public", async () => {
+      const res = await requests.public.put(
+        `/admin/review-workflows/workflows/${testWorkflow.id}/stages`,
+        stagesUpdateData
+      );
+
+      if (hasRW) {
+        expect(res.status).toBe(401);
+      } else {
+        expect(res.status).toBe(404);
+        expect(res.body.data).toBeUndefined();
+      }
+    });
+    test('It should be available for every connected users (admin)', async () => {
+      const res = await requests.admin.put(
+        `/admin/review-workflows/workflows/${testWorkflow.id}/stages`,
+        { body: stagesUpdateData }
+      );
+
+      if (hasRW) {
+        expect(res.status).toBe(200);
+        expect(res.body.data).toBeInstanceOf(Object);
+        expect(res.body.data.id).toEqual(testWorkflow.id);
+      } else {
+        expect(res.status).toBe(404);
+        expect(res.body.data).toBeUndefined();
+      }
+    });
+  });
 });
