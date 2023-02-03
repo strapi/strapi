@@ -1,7 +1,9 @@
 'use strict';
 
+const { PayloadTooLargeError } = require('@strapi/utils/lib/errors');
 const _ = require('lodash');
 const registerUploadMiddleware = require('./middlewares/upload');
+const { kbytesToBytes, bytesToHumanReadable } = require('./utils/file');
 
 /**
  * Register upload plugin
@@ -61,9 +63,8 @@ const createProvider = (config) => {
   }
 
   const wrappedProvider = _.mapValues(providerInstance, (method, methodName) => {
-    return async function (file, options = actionOptions[methodName]) {
-      return providerInstance[methodName](file, options);
-    };
+    return async (file, options = actionOptions[methodName]) =>
+      providerInstance[methodName](file, options);
   });
 
   return Object.assign(Object.create(baseProvider), wrappedProvider);
@@ -72,5 +73,12 @@ const createProvider = (config) => {
 const baseProvider = {
   extend(obj) {
     Object.assign(this, obj);
+  },
+  checkFileSize(file, { sizeLimit }) {
+    if (sizeLimit && kbytesToBytes(file.size) > sizeLimit) {
+      throw new PayloadTooLargeError(
+        `${file.name} exceeds size limit of ${bytesToHumanReadable(sizeLimit)}.`
+      );
+    }
   },
 };
