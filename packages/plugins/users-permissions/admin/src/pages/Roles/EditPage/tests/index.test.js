@@ -947,14 +947,12 @@ describe('Admin | containers | RoleEditPage', () => {
           >
             <div
               class="c1 c9 c19 c20"
-              spacing="7"
             >
               <div
                 class="c1 c21"
               >
                 <div
                   class="c1 c9 c19 c22"
-                  spacing="4"
                 >
                   <h2
                     class="c7 c23"
@@ -974,11 +972,10 @@ describe('Admin | containers | RoleEditPage', () => {
                           <div>
                             <div
                               class="c1 c9 c19 c26"
-                              spacing="1"
                             >
                               <label
                                 class="c7 c16"
-                                for="textinput-1"
+                                for="1"
                               >
                                 <div
                                   class="c1 c9 c11"
@@ -994,7 +991,7 @@ describe('Admin | containers | RoleEditPage', () => {
                                   aria-invalid="false"
                                   aria-required="false"
                                   class="c28"
-                                  id="textinput-1"
+                                  id="1"
                                   name="name"
                                   value="Authenticated"
                                 />
@@ -1016,14 +1013,13 @@ describe('Admin | containers | RoleEditPage', () => {
                           <div>
                             <div
                               class="c1 c9 c19 c26"
-                              spacing="1"
                             >
                               <div
                                 class="c1 c9 c11"
                               >
                                 <label
                                   class="c7 c16"
-                                  for="textarea-2"
+                                  for="3"
                                 >
                                   <div
                                     class="c1 c9 c11"
@@ -1039,7 +1035,7 @@ describe('Admin | containers | RoleEditPage', () => {
                                   aria-invalid="false"
                                   aria-required="false"
                                   class="c31"
-                                  id="textarea-2"
+                                  id="3"
                                   name="description"
                                 >
                                   Default role given to authenticated user.
@@ -1064,11 +1060,9 @@ describe('Admin | containers | RoleEditPage', () => {
                   >
                     <div
                       class="c1 c9 c19 c36"
-                      spacing="6"
                     >
                       <div
                         class="c1 c9 c19 c37"
-                        spacing="2"
                       >
                         <h2
                           class="c7 c23"
@@ -1083,7 +1077,6 @@ describe('Admin | containers | RoleEditPage', () => {
                       </div>
                       <div
                         class="c1 c9 c19 c26"
-                        spacing="1"
                       >
                         <div
                           aria-disabled="false"
@@ -1096,13 +1089,12 @@ describe('Admin | containers | RoleEditPage', () => {
                           >
                             <div
                               class="c1 c9 c43 c11 c44"
-                              spacing="3"
                             >
                               <button
-                                aria-controls="accordion-content-accordion-3"
+                                aria-controls="accordion-content-4"
                                 aria-disabled="false"
                                 aria-expanded="false"
-                                aria-labelledby="accordion-label-accordion-3"
+                                aria-labelledby="accordion-label-4"
                                 class="c1 c9 c45 c11 c46 c47"
                                 data-strapi-accordion-toggle="true"
                                 type="button"
@@ -1112,13 +1104,13 @@ describe('Admin | containers | RoleEditPage', () => {
                                 >
                                   <span
                                     class="c7 c49"
-                                    id="accordion-label-accordion-3"
+                                    id="accordion-label-4"
                                   >
                                     Address
                                   </span>
                                   <p
                                     class="c7 c38"
-                                    id="accordion-desc-accordion-3"
+                                    id="accordion-desc-4"
                                   >
                                     Define all allowed actions for the api::address plugin.
                                   </p>
@@ -1126,7 +1118,6 @@ describe('Admin | containers | RoleEditPage', () => {
                               </button>
                               <div
                                 class="c1 c9 c11 c44"
-                                spacing="3"
                               >
                                 <span
                                   aria-hidden="true"
@@ -1169,7 +1160,6 @@ describe('Admin | containers | RoleEditPage', () => {
                   >
                     <div
                       class="c1 c9 c19 c37"
-                      spacing="2"
                     >
                       <h3
                         class="c7 c23"

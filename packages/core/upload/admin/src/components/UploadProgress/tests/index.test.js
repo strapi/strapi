@@ -160,7 +160,6 @@ describe('<UploadProgress />', () => {
       >
         <div
           class="c3 c4 c5"
-          spacing="2"
           width="100%"
         >
           <div
@@ -180,7 +179,6 @@ describe('<UploadProgress />', () => {
           >
             <div
               class="c1 c9"
-              spacing="2"
             >
               <span
                 class="c10"

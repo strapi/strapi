@@ -86,6 +86,9 @@ exports[`GenericInput json renders and matches the snapshot 1`] = `
   background-color: #32324d;
   width: 100%;
   outline: none;
+}
+
+.c6 .cm-scroller {
   border: 1px solid #dcdce4;
   outline: none;
   box-shadow: 0;
@@ -95,7 +98,7 @@ exports[`GenericInput json renders and matches the snapshot 1`] = `
   transition-duration: 0.2s;
 }
 
-.c6 .cm-editor:focus-within {
+.c6 .cm-scroller:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
@@ -114,11 +117,10 @@ exports[`GenericInput json renders and matches the snapshot 1`] = `
   <div>
     <div
       class="c0 c1"
-      spacing="1"
     >
       <label
         class="c2"
-        for="field-1"
+        for="0"
       >
         <div
           class="c3"
@@ -446,7 +448,6 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
   <div>
     <div
       class="c0 c1"
-      spacing="1"
     >
       <label
         class="c2"

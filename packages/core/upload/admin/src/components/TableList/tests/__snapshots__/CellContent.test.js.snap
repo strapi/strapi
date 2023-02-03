@@ -302,6 +302,12 @@ exports[`TableList | CellContent should render image cell type when element type
   width: 1px;
 }
 
+.c0 {
+  position: relative;
+  width: 32px;
+  height: 32px;
+}
+
 .c1 {
   border-radius: 50%;
   object-fit: cover;
@@ -309,16 +315,12 @@ exports[`TableList | CellContent should render image cell type when element type
   position: relative;
 }
 
-.c0 {
-  position: relative;
-  width: 2rem;
-  height: 2rem;
-}
-
 <div>
   <span>
     <div
       class="c0"
+      height="32px"
+      width="32px"
     >
       <img
         alt="alternative alt"

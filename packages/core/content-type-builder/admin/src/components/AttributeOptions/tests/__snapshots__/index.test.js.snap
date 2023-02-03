@@ -289,7 +289,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
           >
             <div
               class="c13 c14"
-              spacing="8"
             >
               <div
                 class="c15"

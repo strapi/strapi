@@ -1003,7 +1003,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
               >
                 <label
                   class="c8 c14"
-                  for="field-1"
+                  for="0"
                 >
                   <div
                     class="c0 c7"
@@ -1043,7 +1043,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                   aria-invalid="false"
                   aria-required="false"
                   class="c25"
-                  id="field-1"
+                  id="0"
                   name="searchbar"
                   placeholder="Search"
                   value=""
@@ -1252,7 +1252,6 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           />
                           <div
                             class="c0 c7 c55"
-                            spacing="1"
                           >
                             <svg
                               aria-hidden="true"
@@ -1291,7 +1290,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               Amazon Ses
                               <span>
                                 <div
-                                  aria-describedby="tooltip-6"
+                                  aria-describedby="5"
                                   class="c0 c7"
                                   tabindex="0"
                                 >
@@ -1319,7 +1318,6 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                       </div>
                       <div
                         class="c0 c65 c7 c66"
-                        spacing="2"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1416,7 +1414,6 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           />
                           <div
                             class="c0 c7 c55"
-                            spacing="1"
                           >
                             <svg
                               aria-hidden="true"
@@ -1455,7 +1452,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               AWS S3
                               <span>
                                 <div
-                                  aria-describedby="tooltip-8"
+                                  aria-describedby="6"
                                   class="c0 c7"
                                   tabindex="0"
                                 >
@@ -1483,7 +1480,6 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                       </div>
                       <div
                         class="c0 c65 c7 c66"
-                        spacing="2"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1580,7 +1576,6 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           />
                           <div
                             class="c0 c7 c55"
-                            spacing="1"
                           >
                             <svg
                               aria-hidden="true"
@@ -1655,7 +1650,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               Cloudinary
                               <span>
                                 <div
-                                  aria-describedby="tooltip-10"
+                                  aria-describedby="7"
                                   class="c0 c7"
                                   tabindex="0"
                                 >
@@ -1683,7 +1678,6 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                       </div>
                       <div
                         class="c0 c65 c7 c66"
-                        spacing="2"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1770,7 +1764,6 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           />
                           <div
                             class="c0 c7 c55"
-                            spacing="1"
                           >
                             <svg
                               aria-hidden="true"
@@ -1845,7 +1838,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               Local Upload
                               <span>
                                 <div
-                                  aria-describedby="tooltip-12"
+                                  aria-describedby="8"
                                   class="c0 c7"
                                   tabindex="0"
                                 >
@@ -1873,7 +1866,6 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                       </div>
                       <div
                         class="c0 c65 c7 c66"
-                        spacing="2"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1970,7 +1962,6 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           />
                           <div
                             class="c0 c7 c55"
-                            spacing="1"
                           >
                             <svg
                               aria-hidden="true"
@@ -2009,7 +2000,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               Mailgun
                               <span>
                                 <div
-                                  aria-describedby="tooltip-14"
+                                  aria-describedby="9"
                                   class="c0 c7"
                                   tabindex="0"
                                 >
@@ -2037,7 +2028,6 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                       </div>
                       <div
                         class="c0 c65 c7 c66"
-                        spacing="2"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -2134,7 +2124,6 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           />
                           <div
                             class="c0 c7 c55"
-                            spacing="1"
                           >
                             <svg
                               aria-hidden="true"
@@ -2173,7 +2162,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               Nodemailer
                               <span>
                                 <div
-                                  aria-describedby="tooltip-16"
+                                  aria-describedby="10"
                                   class="c0 c7"
                                   tabindex="0"
                                 >
@@ -2201,7 +2190,6 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                       </div>
                       <div
                         class="c0 c65 c7 c66"
-                        spacing="2"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -2298,7 +2286,6 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           />
                           <div
                             class="c0 c7 c55"
-                            spacing="1"
                           >
                             <svg
                               aria-hidden="true"
@@ -2337,7 +2324,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               Rackspace
                               <span>
                                 <div
-                                  aria-describedby="tooltip-18"
+                                  aria-describedby="11"
                                   class="c0 c7"
                                   tabindex="0"
                                 >
@@ -2365,7 +2352,6 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                       </div>
                       <div
                         class="c0 c65 c7 c66"
-                        spacing="2"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -2462,7 +2448,6 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           />
                           <div
                             class="c0 c7 c55"
-                            spacing="1"
                           >
                             <svg
                               aria-hidden="true"
@@ -2501,7 +2486,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               SendGrid
                               <span>
                                 <div
-                                  aria-describedby="tooltip-20"
+                                  aria-describedby="12"
                                   class="c0 c7"
                                   tabindex="0"
                                 >
@@ -2529,7 +2514,6 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                       </div>
                       <div
                         class="c0 c65 c7 c66"
-                        spacing="2"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -2626,7 +2610,6 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           />
                           <div
                             class="c0 c7 c55"
-                            spacing="1"
                           >
                             <svg
                               aria-hidden="true"
@@ -2665,7 +2648,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               Sendmail
                               <span>
                                 <div
-                                  aria-describedby="tooltip-22"
+                                  aria-describedby="13"
                                   class="c0 c7"
                                   tabindex="0"
                                 >
@@ -2693,7 +2676,6 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                       </div>
                       <div
                         class="c0 c65 c7 c66"
-                        spacing="2"
                         style="align-self: flex-end;"
                       >
                         <a

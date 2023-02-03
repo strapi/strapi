@@ -67,7 +67,6 @@ describe('<Notifications />', () => {
 
       <div
         class="c0 c1 c2"
-        spacing="2"
         width="31.25rem"
       />
     `);

@@ -428,11 +428,11 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
         role="tablist"
       >
         <button
-          aria-controls="tabgroup-1-0-tabpanel"
+          aria-controls="1-0-tabpanel"
           aria-disabled="false"
           aria-selected="true"
           class="c2"
-          id="tabgroup-1-0-tab"
+          id="1-0-tab"
           role="tab"
           tabindex="0"
           type="button"
@@ -451,7 +451,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
           aria-disabled="false"
           aria-selected="false"
           class="c2"
-          id="tabgroup-1-1-tab"
+          id="1-1-tab"
           role="tab"
           tabindex="-1"
           type="button"
@@ -473,8 +473,8 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
     </div>
     <div>
       <div
-        aria-labelledby="tabgroup-1-0-tab"
-        id="tabgroup-1-0-tabpanel"
+        aria-labelledby="1-0-tab"
+        id="1-0-tabpanel"
         role="tabpanel"
         tabindex="0"
       >
@@ -488,7 +488,6 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
               >
                 <div
                   class="c0 c12 c13"
-                  spacing="2"
                 >
                   <div
                     class="c0 c14 c15"
@@ -1030,7 +1029,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
           aria-disabled="false"
           aria-selected="false"
           class="c2"
-          id="tabgroup-3-0-tab"
+          id="3-0-tab"
           role="tab"
           tabindex="-1"
           type="button"
@@ -1046,11 +1045,11 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
           </div>
         </button>
         <button
-          aria-controls="tabgroup-3-1-tabpanel"
+          aria-controls="3-1-tabpanel"
           aria-disabled="false"
           aria-selected="true"
           class="c2"
-          id="tabgroup-3-1-tab"
+          id="3-1-tab"
           role="tab"
           tabindex="0"
           type="button"
@@ -1072,8 +1071,8 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
     </div>
     <div>
       <div
-        aria-labelledby="tabgroup-3-1-tab"
-        id="tabgroup-3-1-tabpanel"
+        aria-labelledby="3-1-tab"
+        id="3-1-tabpanel"
         role="tabpanel"
         tabindex="0"
       >
@@ -1085,11 +1084,10 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
               <div>
                 <div
                   class="c0 c12 c13"
-                  spacing="1"
                 >
                   <label
                     class="c5 c14"
-                    for="textinput-6"
+                    for="5"
                   >
                     <div
                       class="c0 c15"
@@ -1105,7 +1103,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
                       aria-invalid="false"
                       aria-required="false"
                       class="c18"
-                      id="textinput-6"
+                      id="5"
                       name="logo-url"
                       value=""
                     />

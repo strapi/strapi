@@ -156,7 +156,7 @@ describe('<SearchURLQuery />', () => {
         <span>
           <button
             aria-disabled="false"
-            aria-labelledby="tooltip-1"
+            aria-labelledby="0"
             class="c0 c1"
             tabindex="0"
             type="button"

@@ -917,7 +917,6 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
         >
           <div
             class="c1 c19 c20"
-            spacing="4"
           >
             <h2
               class="c7 c21"
@@ -936,11 +935,10 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                   <div>
                     <div
                       class="c1 c19 c24"
-                      spacing="1"
                     >
                       <label
                         class="c7 c15"
-                        for="select-1"
+                        for="1"
                       >
                         <div
                           class="c1 c10"
@@ -952,13 +950,13 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                         class="c1 c10 c25"
                       >
                         <button
-                          aria-describedby="select-1-hint"
+                          aria-describedby="1-hint"
                           aria-disabled="false"
                           aria-expanded="false"
                           aria-haspopup="listbox"
-                          aria-labelledby="select-1 select-1-label select-1-content"
+                          aria-labelledby="1 1-label 1-content"
                           class="c26"
-                          id="select-1"
+                          id="1"
                           type="button"
                         />
                         <div
@@ -972,7 +970,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                             >
                               <span
                                 class="c7 c29"
-                                id="select-1-content"
+                                id="1-content"
                               >
                                 postal_code
                               </span>
@@ -1008,7 +1006,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                       </div>
                       <p
                         class="c7 c33"
-                        id="select-1-hint"
+                        id="1-hint"
                       >
                         Set the display field of your entry
                       </p>
@@ -1031,7 +1029,6 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
             </h3>
             <div
               class="c1 c19 c20"
-              spacing="4"
             >
               <div
                 class="c1 c9"
@@ -1095,7 +1092,6 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
               >
                 <div
                   class="c1 c19 c40"
-                  spacing="2"
                 >
                   <div
                     class="c1 c22"
@@ -1176,7 +1172,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                                   <span>
                                     <button
                                       aria-disabled="false"
-                                      aria-labelledby="tooltip-2"
+                                      aria-labelledby="2"
                                       class="c12 c51 c52"
                                       tabindex="0"
                                       type="button"
@@ -1207,7 +1203,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                                   <span>
                                     <button
                                       aria-disabled="false"
-                                      aria-labelledby="tooltip-4"
+                                      aria-labelledby="3"
                                       class="c12 c51 c52"
                                       data-testid="delete-field"
                                       tabindex="0"
@@ -1317,7 +1313,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                                   <span>
                                     <button
                                       aria-disabled="false"
-                                      aria-labelledby="tooltip-6"
+                                      aria-labelledby="4"
                                       class="c12 c51 c52"
                                       tabindex="0"
                                       type="button"
@@ -1348,7 +1344,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                                   <span>
                                     <button
                                       aria-disabled="false"
-                                      aria-labelledby="tooltip-8"
+                                      aria-labelledby="5"
                                       class="c12 c51 c52"
                                       data-testid="delete-field"
                                       tabindex="0"
@@ -2369,7 +2365,6 @@ exports[`EditSettingsView should add field 1`] = `
         >
           <div
             class="c1 c19 c20"
-            spacing="4"
           >
             <h2
               class="c7 c21"
@@ -2388,11 +2383,10 @@ exports[`EditSettingsView should add field 1`] = `
                   <div>
                     <div
                       class="c1 c19 c24"
-                      spacing="1"
                     >
                       <label
                         class="c7 c15"
-                        for="select-11"
+                        for="12"
                       >
                         <div
                           class="c1 c10"
@@ -2404,13 +2398,13 @@ exports[`EditSettingsView should add field 1`] = `
                         class="c1 c10 c25"
                       >
                         <button
-                          aria-describedby="select-11-hint"
+                          aria-describedby="12-hint"
                           aria-disabled="false"
                           aria-expanded="false"
                           aria-haspopup="listbox"
-                          aria-labelledby="select-11 select-11-label select-11-content"
+                          aria-labelledby="12 12-label 12-content"
                           class="c26"
-                          id="select-11"
+                          id="12"
                           type="button"
                         />
                         <div
@@ -2424,7 +2418,7 @@ exports[`EditSettingsView should add field 1`] = `
                             >
                               <span
                                 class="c7 c29"
-                                id="select-11-content"
+                                id="12-content"
                               >
                                 postal_code
                               </span>
@@ -2460,7 +2454,7 @@ exports[`EditSettingsView should add field 1`] = `
                       </div>
                       <p
                         class="c7 c33"
-                        id="select-11-hint"
+                        id="12-hint"
                       >
                         Set the display field of your entry
                       </p>
@@ -2483,7 +2477,6 @@ exports[`EditSettingsView should add field 1`] = `
             </h3>
             <div
               class="c1 c19 c20"
-              spacing="4"
             >
               <div
                 class="c1 c9"
@@ -2547,7 +2540,6 @@ exports[`EditSettingsView should add field 1`] = `
               >
                 <div
                   class="c1 c19 c40"
-                  spacing="2"
                 >
                   <div
                     class="c1 c22"
@@ -2628,7 +2620,7 @@ exports[`EditSettingsView should add field 1`] = `
                                   <span>
                                     <button
                                       aria-disabled="false"
-                                      aria-labelledby="tooltip-12"
+                                      aria-labelledby="13"
                                       class="c12 c51 c52"
                                       tabindex="0"
                                       type="button"
@@ -2659,7 +2651,7 @@ exports[`EditSettingsView should add field 1`] = `
                                   <span>
                                     <button
                                       aria-disabled="false"
-                                      aria-labelledby="tooltip-14"
+                                      aria-labelledby="14"
                                       class="c12 c51 c52"
                                       data-testid="delete-field"
                                       tabindex="0"
@@ -2769,7 +2761,7 @@ exports[`EditSettingsView should add field 1`] = `
                                   <span>
                                     <button
                                       aria-disabled="false"
-                                      aria-labelledby="tooltip-16"
+                                      aria-labelledby="15"
                                       class="c12 c51 c52"
                                       tabindex="0"
                                       type="button"
@@ -2800,7 +2792,7 @@ exports[`EditSettingsView should add field 1`] = `
                                   <span>
                                     <button
                                       aria-disabled="false"
-                                      aria-labelledby="tooltip-18"
+                                      aria-labelledby="16"
                                       class="c12 c51 c52"
                                       data-testid="delete-field"
                                       tabindex="0"

@@ -95,7 +95,6 @@ exports[`Content-Manager || RelationInput || RelationItem should render and matc
     >
       <div
         class="c3 c4 c5"
-        spacing="1"
       >
         <div
           class="c2 c6"

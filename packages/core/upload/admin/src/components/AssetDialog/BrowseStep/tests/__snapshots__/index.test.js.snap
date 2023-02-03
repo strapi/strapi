@@ -831,7 +831,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
         >
           <div>
             <button
-              aria-controls="simplemenu-1"
+              aria-controls="0"
               aria-disabled="false"
               aria-expanded="false"
               aria-haspopup="true"
@@ -910,7 +910,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
             <span>
               <button
                 aria-disabled="false"
-                aria-labelledby="tooltip-2"
+                aria-labelledby="1"
                 class="c5 c18"
                 tabindex="0"
                 type="button"
@@ -940,7 +940,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
           <span>
             <button
               aria-disabled="false"
-              aria-labelledby="tooltip-4"
+              aria-labelledby="2"
               class="c5 c18"
               tabindex="0"
               type="button"
@@ -1073,7 +1073,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
               <div
                 class="c0 c35 c13 c36"
                 cursor="pointer"
-                spacing="2"
               >
                 <div
                   class="c0 c37"
@@ -1127,7 +1126,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                 >
                   <div
                     class="c0 c51 c13 c36 c52"
-                    spacing="2"
                   >
                     <button
                       aria-disabled="false"
@@ -1182,9 +1180,9 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                 aria-expanded="false"
                 aria-haspopup="listbox"
                 aria-label="Entries per page"
-                aria-labelledby="select-6 select-6-label select-6-content"
+                aria-labelledby="4 4-label 4-content"
                 class="c58"
-                id="select-6"
+                id="4"
                 type="button"
               />
               <div
@@ -1198,7 +1196,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                   >
                     <span
                       class="c7 c61"
-                      id="select-6-content"
+                      id="4-content"
                     >
                       10
                     </span>

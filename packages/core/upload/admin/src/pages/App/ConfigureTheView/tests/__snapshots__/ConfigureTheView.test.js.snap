@@ -573,11 +573,10 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                     <div>
                       <div
                         class="c0 c24 c25"
-                        spacing="1"
                       >
                         <label
                           class="c10 c18"
-                          for="select-1"
+                          for="1"
                         >
                           <div
                             class="c0 c13"
@@ -589,14 +588,14 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                           class="c0 c13 c26"
                         >
                           <button
-                            aria-describedby="select-1-hint"
+                            aria-describedby="1-hint"
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-1 select-1-label select-1-content"
+                            aria-labelledby="1 1-label 1-content"
                             class="c27"
                             data-testid="pageSize-select"
-                            id="select-1"
+                            id="1"
                             name="pageSize"
                             type="button"
                           />
@@ -611,7 +610,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                               >
                                 <span
                                   class="c10 c30"
-                                  id="select-1-content"
+                                  id="1-content"
                                 >
                                   10
                                 </span>
@@ -647,7 +646,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                         </div>
                         <p
                           class="c10 c34"
-                          id="select-1-hint"
+                          id="1-hint"
                         >
                           Number of assets displayed by default in the Media Library
                         </p>
@@ -664,11 +663,10 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                     <div>
                       <div
                         class="c0 c24 c25"
-                        spacing="1"
                       >
                         <label
                           class="c10 c18"
-                          for="select-2"
+                          for="3"
                         >
                           <div
                             class="c0 c13"
@@ -680,14 +678,14 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                           class="c0 c13 c26"
                         >
                           <button
-                            aria-describedby="select-2-hint"
+                            aria-describedby="3-hint"
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-2 select-2-label select-2-content"
+                            aria-labelledby="3 3-label 3-content"
                             class="c27"
                             data-testid="sort-select"
-                            id="select-2"
+                            id="3"
                             name="sort"
                             type="button"
                           />
@@ -702,7 +700,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                               >
                                 <span
                                   class="c10 c30"
-                                  id="select-2-content"
+                                  id="3-content"
                                 >
                                   createdAt:DESC
                                 </span>
@@ -738,7 +736,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                         </div>
                         <p
                           class="c10 c34"
-                          id="select-2-hint"
+                          id="3-hint"
                         >
                           Note: You can override this value in the media library.
                         </p>

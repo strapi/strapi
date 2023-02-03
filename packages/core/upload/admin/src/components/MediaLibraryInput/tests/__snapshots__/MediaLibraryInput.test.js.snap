@@ -168,11 +168,10 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
     <div>
       <div
         class="c0 c1"
-        spacing="1"
       >
         <label
           class="c2"
-          for="carouselinput-1"
+          for="1"
         >
           <div
             class="c3"
@@ -182,7 +181,7 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
         </label>
         <div
           class=""
-          id="carouselinput-1"
+          id="1"
         >
           <div
             class="c4"

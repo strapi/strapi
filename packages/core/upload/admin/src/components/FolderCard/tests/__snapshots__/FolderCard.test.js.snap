@@ -225,7 +225,6 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
     <div
       class="c2 c3 c4"
       cursor="pointer"
-      spacing="2"
     >
       <div
         class="c5"
@@ -282,7 +281,6 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
       >
         <div
           class="c16 c3 c4 c17"
-          spacing="2"
         />
       </div>
     </div>
@@ -464,7 +462,6 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
     <div
       class="c2 c3 c4"
       cursor="pointer"
-      spacing="2"
     >
       <div
         class="c5"
@@ -508,7 +505,6 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
       >
         <div
           class="c14 c3 c4 c15"
-          spacing="2"
         />
       </div>
     </div>

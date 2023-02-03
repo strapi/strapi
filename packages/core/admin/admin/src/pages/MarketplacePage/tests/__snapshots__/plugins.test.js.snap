@@ -1008,7 +1008,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
               >
                 <label
                   class="c8 c14"
-                  for="field-1"
+                  for="0"
                 >
                   <div
                     class="c0 c7"
@@ -1048,7 +1048,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                   aria-invalid="false"
                   aria-required="false"
                   class="c25"
-                  id="field-1"
+                  id="0"
                   name="searchbar"
                   placeholder="Search"
                   value=""
@@ -1257,7 +1257,6 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           />
                           <div
                             class="c0 c7 c55"
-                            spacing="1"
                           >
                             <svg
                               aria-hidden="true"
@@ -1345,7 +1344,6 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                       </div>
                       <div
                         class="c0 c69 c7 c70"
-                        spacing="2"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1442,7 +1440,6 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           />
                           <div
                             class="c0 c7 c55"
-                            spacing="1"
                           >
                             <svg
                               aria-hidden="true"
@@ -1481,7 +1478,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                               Config Sync
                               <span>
                                 <div
-                                  aria-describedby="tooltip-2"
+                                  aria-describedby="1"
                                   class="c0 c7"
                                   tabindex="0"
                                 >
@@ -1517,7 +1514,6 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                       </div>
                       <div
                         class="c0 c69 c7 c70"
-                        spacing="2"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1614,7 +1610,6 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           />
                           <div
                             class="c0 c7 c55"
-                            spacing="1"
                           >
                             <svg
                               aria-hidden="true"
@@ -1666,7 +1661,6 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                       </div>
                       <div
                         class="c0 c69 c7 c70"
-                        spacing="2"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1763,7 +1757,6 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           />
                           <div
                             class="c0 c7 c55"
-                            spacing="1"
                           >
                             <svg
                               aria-hidden="true"
@@ -1838,7 +1831,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                               Documentation
                               <span>
                                 <div
-                                  aria-describedby="tooltip-4"
+                                  aria-describedby="2"
                                   class="c0 c7"
                                   tabindex="0"
                                 >
@@ -1866,7 +1859,6 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                       </div>
                       <div
                         class="c0 c69 c7 c70"
-                        spacing="2"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1953,7 +1945,6 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           />
                           <div
                             class="c0 c7 c55"
-                            spacing="1"
                           >
                             <svg
                               aria-hidden="true"
@@ -2005,7 +1996,6 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                       </div>
                       <div
                         class="c0 c69 c7 c70"
-                        spacing="2"
                         style="align-self: flex-end;"
                       >
                         <a

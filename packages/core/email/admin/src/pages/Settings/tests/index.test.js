@@ -618,18 +618,15 @@ describe('Email | Pages | Settings', () => {
           <form>
             <div
               class="c1 c9 c10"
-              spacing="7"
             >
               <div
                 class="c1 c11"
               >
                 <div
                   class="c1 c9 c12"
-                  spacing="4"
                 >
                   <div
                     class="c1 c9 c13"
-                    spacing="1"
                   >
                     <h2
                       class="c5 c14"
@@ -664,11 +661,10 @@ describe('Email | Pages | Settings', () => {
                           <div>
                             <div
                               class="c1 c9 c13"
-                              spacing="1"
                             >
                               <label
                                 class="c5 c19"
-                                for="textinput-4"
+                                for="7"
                               >
                                 <div
                                   class="c1 c4"
@@ -685,7 +681,7 @@ describe('Email | Pages | Settings', () => {
                                   aria-invalid="false"
                                   aria-required="false"
                                   class="c21"
-                                  id="textinput-4"
+                                  id="7"
                                   name="shipper-email"
                                   placeholder="ex: Strapi No-Reply <no-reply@strapi.io>"
                                   value=""
@@ -706,11 +702,10 @@ describe('Email | Pages | Settings', () => {
                           <div>
                             <div
                               class="c1 c9 c13"
-                              spacing="1"
                             >
                               <label
                                 class="c5 c19"
-                                for="textinput-5"
+                                for="9"
                               >
                                 <div
                                   class="c1 c4"
@@ -727,7 +722,7 @@ describe('Email | Pages | Settings', () => {
                                   aria-invalid="false"
                                   aria-required="false"
                                   class="c21"
-                                  id="textinput-5"
+                                  id="9"
                                   name="response-email"
                                   placeholder="ex: Strapi <example@strapi.io>"
                                   value=""
@@ -747,11 +742,10 @@ describe('Email | Pages | Settings', () => {
                         <div>
                           <div
                             class="c1 c9 c13"
-                            spacing="1"
                           >
                             <label
                               class="c5 c19"
-                              for="select-6"
+                              for="11"
                             >
                               <div
                                 class="c1 c4"
@@ -767,9 +761,9 @@ describe('Email | Pages | Settings', () => {
                                 aria-disabled="true"
                                 aria-expanded="false"
                                 aria-haspopup="listbox"
-                                aria-labelledby="select-6 select-6-label select-6-content"
+                                aria-labelledby="11 11-label 11-content"
                                 class="c23"
-                                id="select-6"
+                                id="11"
                                 name="email-provider"
                                 type="button"
                               />
@@ -784,7 +778,7 @@ describe('Email | Pages | Settings', () => {
                                   >
                                     <span
                                       class="c5 c26"
-                                      id="select-6-content"
+                                      id="11-content"
                                     >
                                       Select...
                                     </span>
@@ -832,7 +826,6 @@ describe('Email | Pages | Settings', () => {
               >
                 <div
                   class="c1 c9 c12"
-                  spacing="4"
                 >
                   <h2
                     class="c5 c14"
@@ -852,7 +845,6 @@ describe('Email | Pages | Settings', () => {
                           <div>
                             <div
                               class="c1 c9 c13"
-                              spacing="1"
                             >
                               <label
                                 class="c5 c19"

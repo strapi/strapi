@@ -542,7 +542,6 @@ describe('<GuidedTourModal />', () => {
                 aria-modal="true"
                 class="c1 c5 c6 c7"
                 role="dialog"
-                spacing="8"
                 width="41.25rem"
               >
                 <div
@@ -635,7 +634,6 @@ describe('<GuidedTourModal />', () => {
                     >
                       <div
                         class="c1 c23 c6 c24"
-                        spacing="4"
                       >
                         <span
                           class="c15 c25"

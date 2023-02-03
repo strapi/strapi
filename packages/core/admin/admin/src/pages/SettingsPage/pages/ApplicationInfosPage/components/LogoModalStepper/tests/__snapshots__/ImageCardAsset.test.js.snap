@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 1`] = `
-.c16 {
+.c17 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -22,21 +22,25 @@ exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c5 {
+.c1 {
+  position: relative;
+}
+
+.c6 {
   padding-top: 8px;
   padding-right: 12px;
   padding-bottom: 8px;
   padding-left: 12px;
 }
 
-.c11 {
+.c12 {
   background: #eaeaef;
   padding-right: 8px;
   padding-left: 8px;
   min-width: 20px;
 }
 
-.c1 {
+.c2 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -54,7 +58,7 @@ exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 
   justify-content: center;
 }
 
-.c6 {
+.c7 {
   -webkit-align-items: flex-start;
   -webkit-box-align: flex-start;
   -ms-flex-align: flex-start;
@@ -68,7 +72,7 @@ exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 
   flex-direction: row;
 }
 
-.c12 {
+.c13 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -86,7 +90,7 @@ exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 
   justify-content: center;
 }
 
-.c4 {
+.c5 {
   margin: 0;
   padding: 0;
   max-height: 100%;
@@ -94,7 +98,7 @@ exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 
   object-fit: contain;
 }
 
-.c3 {
+.c4 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -110,20 +114,20 @@ exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 
   border-top-right-radius: 4px;
 }
 
-.c8 {
+.c9 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
   color: #32324d;
 }
 
-.c9 {
+.c10 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
 }
 
-.c15 {
+.c16 {
   font-weight: 600;
   font-size: 0.6875rem;
   line-height: 1.45;
@@ -131,79 +135,78 @@ exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 
   color: #666687;
 }
 
-.c13 {
+.c14 {
   border-radius: 4px;
   height: 1.5rem;
 }
 
-.c10 {
+.c11 {
   margin-left: auto;
   -webkit-flex-shrink: 0;
   -ms-flex-negative: 0;
   flex-shrink: 0;
 }
 
-.c14 {
+.c15 {
   margin-left: 4px;
 }
 
-.c7 {
+.c8 {
   word-break: break-all;
 }
 
-.c2 {
-  position: relative;
+.c3 {
   border-bottom: 1px solid #eaeaef;
 }
 
 <div>
   <article
-    aria-labelledby="card-1-title"
+    aria-labelledby="0-title"
     class="c0"
     tabindex="0"
   >
     <div
-      class="c1 c2"
+      class="c1 c2 c3"
     >
       <div
-        class="c3"
+        class="c4"
       >
         <img
           aria-hidden="true"
-          class="c4"
+          class="c5"
           src="uploads/asset.jpeg"
         />
       </div>
     </div>
     <div
-      class="c5"
+      class="c6"
     >
       <div
-        class="c6"
+        class="c7"
       >
         <div
-          class="c7"
+          class="c8"
         >
           <div
-            class="c8"
-            id="card-1-title"
+            class="c9"
+            id="0-title"
           >
             asset.jpeg
           </div>
           <div
-            class="c9"
+            class="c10"
           >
             .JPEG - 340✕250
           </div>
         </div>
         <div
-          class="c10"
+          class="c11"
         >
           <div
-            class="c11 c12 c13 c14"
+            class="c12 c13 c14 c15"
           >
             <span
-              class="c15"
+              class="c16"
             >
               image
             </span>
@@ -213,7 +216,7 @@ exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 
     </div>
   </article>
   <div
-    class="c16"
+    class="c17"
   >
     <p
       aria-live="polite"

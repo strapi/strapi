@@ -439,7 +439,6 @@ describe('GuidedTour Homepage', () => {
       >
         <div
           class="c0 c2 c3"
-          spacing="6"
         >
           <h2
             class="c4 c5"
