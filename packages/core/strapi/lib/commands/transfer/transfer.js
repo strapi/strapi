@@ -25,6 +25,8 @@ const logger = console;
  *
  * @property {URL|undefined} [to] The url of a remote Strapi to use as remote destination
  * @property {URL|undefined} [from] The url of a remote Strapi to use as remote source
+ * @property {string|undefined} [toToken] The transfer token for the remote Strapi destination
+ * @property {string|undefined} [fromToken] The transfer token for the remote Strapi source
  */
 
 /**
@@ -90,7 +92,7 @@ module.exports = async (opts) => {
   }
 
   const engine = createTransferEngine(source, destination, {
-    versionStrategy: 'strict',
+    versionStrategy: 'exact',
     schemaStrategy: 'strict',
     transforms: {
       links: [
