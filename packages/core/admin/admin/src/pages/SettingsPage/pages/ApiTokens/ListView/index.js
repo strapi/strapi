@@ -148,7 +148,6 @@ const ApiTokenListView = () => {
             headers={headers}
             contentType="api-tokens"
             rows={apiTokens}
-            withBulkActions={canDelete || canUpdate || canRead}
             isLoading={isLoading}
             onConfirmDelete={(id) => deleteMutation.mutateAsync(id)}
             tokens={apiTokens}

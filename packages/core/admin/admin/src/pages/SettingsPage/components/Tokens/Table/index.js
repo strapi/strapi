@@ -16,7 +16,7 @@ import DeleteButton from './DeleteButton';
 import UpdateButton from './UpdateButton';
 import ReadButton from './ReadButton';
 
-const Table = ({ headers, onConfirmDelete, isLoading, tokens, permissions }) => {
+const Table = ({ permissions, headers, contentType, isLoading, tokens, onConfirmDelete }) => {
   const { canDelete, canUpdate, canRead } = permissions;
   const withBulkActions = canDelete || canUpdate || canRead;
   const [{ query }] = useQueryParams();
@@ -37,7 +37,7 @@ const Table = ({ headers, onConfirmDelete, isLoading, tokens, permissions }) => 
   return (
     <DynamicTable
       headers={headers}
-      contentType="api-tokens"
+      contentType={contentType}
       rows={tokens}
       withBulkActions={withBulkActions}
       isLoading={isLoading}
@@ -103,8 +103,6 @@ const Table = ({ headers, onConfirmDelete, isLoading, tokens, permissions }) => 
   );
 };
 
-export default Table;
-
 Table.propTypes = {
   tokens: PropTypes.array,
   permissions: PropTypes.shape({
@@ -112,8 +110,27 @@ Table.propTypes = {
     canDelete: PropTypes.bool,
     canUpdate: PropTypes.bool,
   }).isRequired,
+  headers: PropTypes.arrayOf(
+    PropTypes.shape({
+      cellFormatter: PropTypes.func,
+      key: PropTypes.string.isRequired,
+      metadatas: PropTypes.shape({
+        label: PropTypes.string.isRequired,
+        sortable: PropTypes.bool,
+      }).isRequired,
+      name: PropTypes.string.isRequired,
+    })
+  ),
+  contentType: PropTypes.string.isRequired,
+  isLoading: PropTypes.bool,
+  onConfirmDelete: PropTypes.func,
 };
 
 Table.defaultProps = {
   tokens: [],
+  headers: [],
+  isLoading: false,
+  onConfirmDelete() {},
 };
+
+export default Table;
