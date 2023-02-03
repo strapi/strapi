@@ -10,19 +10,18 @@ import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
 import { Loader } from '@strapi/design-system/Loader';
 import styled from 'styled-components';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import { stopPropagation } from '@strapi/helper-plugin';
+import { stopPropagation, useFetchClient } from '@strapi/helper-plugin';
 import CellValue from '../CellValue';
-import { axiosInstance } from '../../../../../core/utils';
 import { getRequestUrl, getTrad } from '../../../../utils';
 
 const TypographyMaxWidth = styled(Typography)`
   max-width: 500px;
 `;
 
-const fetchRelation = async (endPoint, notifyStatus) => {
+const fetchRelation = async (endPoint, notifyStatus, get) => {
   const {
     data: { results, pagination },
-  } = await axiosInstance.get(endPoint);
+  } = await get(endPoint);
 
   notifyStatus();
 
@@ -37,6 +36,7 @@ const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, conte
     [entityId, name, contentType]
   );
   const [isOpen, setIsOpen] = useState(false);
+  const { get } = useFetchClient();
 
   const Label = (
     <Flex gap={1} wrap="nowrap">
@@ -61,7 +61,7 @@ const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, conte
 
   const { data, status } = useQuery(
     [fieldSchema.targetModel, entityId],
-    () => fetchRelation(relationFetchEndpoint, notify),
+    () => fetchRelation(relationFetchEndpoint, notify, get),
     {
       enabled: isOpen,
       staleTime: 0,
