@@ -9,13 +9,13 @@ import {
   NoPermissions,
 } from '@strapi/helper-plugin';
 import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { Button } from '@strapi/design-system/Button';
 import { Main } from '@strapi/design-system/Main';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import Envelop from '@strapi/icons/Envelop';
 import { useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
+import EENotification from 'ee_else_ce/components/EENotification';
+import CreateAction from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/CreateAction';
 import adminPermissions from '../../../../../permissions';
 import TableRows from './DynamicTable/TableRows';
 import Filters from './Filters';
@@ -100,22 +100,11 @@ const ListPage = () => {
   const isLoading =
     (status !== 'success' && status !== 'error') || (status === 'success' && isFetching);
 
-  const createAction = canCreate ? (
-    <Button
-      data-testid="create-user-button"
-      onClick={handleToggle}
-      startIcon={<Envelop />}
-      size="S"
-    >
-      {formatMessage({
-        id: 'Settings.permissions.users.create',
-        defaultMessage: 'Invite new user',
-      })}
-    </Button>
-  ) : undefined;
+  const createAction = canCreate ? <CreateAction onClick={handleToggle} /> : undefined;
 
   return (
     <Main aria-busy={isLoading}>
+      <EENotification />
       <SettingsPageTitle name="Users" />
       <HeaderLayout
         primaryAction={createAction}

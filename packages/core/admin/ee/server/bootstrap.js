@@ -31,7 +31,12 @@ const enableUsersToLicenseLimit = async (numberOfUsersToEnable) => {
     });
   });
 
-  // TODO: sync new list of disabled users with ee_store in case some are left
+  const remainingDisabledUsers = _.drop(disabledUsers, numberOfUsersToEnable);
+
+  return strapi.db.query('strapi::ee-store').update({
+    where: { id: data.id },
+    data: { value: JSON.stringify(remainingDisabledUsers) },
+  });
 };
 
 const calculateAdminSeatDifference = async (seatsAllowedByLicense) => {
@@ -52,8 +57,6 @@ const disableUsersAboveLicenseLimit = async (numberOfUsersToDisable) => {
 
   const usersToDisable = _.take(users, numberOfUsersToDisable);
 
-  console.log(usersToDisable);
-
   usersToDisable.forEach(async (user) => {
     user.isActive = false;
     await strapi.db.query('admin::user').update({
@@ -67,8 +70,6 @@ const disableUsersAboveLicenseLimit = async (numberOfUsersToDisable) => {
   const data = await strapi.db.query('strapi::ee-store').findOne({
     where: { key: 'ee_disabled_users' },
   });
-
-  console.log('data run done', data);
 
   if (data) {
     return strapi.db.query('strapi::ee-store').update({
@@ -92,8 +93,6 @@ const syncdDisabledUserRecords = async () => {
 
   if (!data || !data.value || data.value.length === 0) return;
 
-  console.log(data);
-
   const disabledUsers = JSON.parse(data.value);
   disabledUsers.forEach(async (user) => {
     const data = await strapi.db.query('admin::user').findOne({
@@ -102,9 +101,9 @@ const syncdDisabledUserRecords = async () => {
 
     if (!data) return;
 
-    await strapi.db.query('admin::user').update({
+    return strapi.db.query('admin::user').update({
       where: { id: user.id },
-      data: { isActive: user.isActive },
+      data: { isActive: user.isActive }, // TODO: should this value be hardcoded to 'false' or no?
     });
   });
 };
@@ -123,20 +122,17 @@ module.exports = async () => {
   // TODO: check admin seats
   await syncdDisabledUserRecords();
 
-  const permittedAdminSeats = 15;
+  const permittedAdminSeats = 5;
 
   const adminSeatDifference = await calculateAdminSeatDifference(permittedAdminSeats);
 
   switch (true) {
     case adminSeatDifference === 0:
-      console.log('Breaking out early');
       break;
     case adminSeatDifference > 0:
-      console.log('Disabling users');
       await disableUsersAboveLicenseLimit(adminSeatDifference);
       break;
     case adminSeatDifference < 0:
-      console.log('Enabling users');
       await enableUsersToLicenseLimit(Math.abs(adminSeatDifference));
       break;
     default:

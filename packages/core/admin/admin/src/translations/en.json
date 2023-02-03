@@ -843,6 +843,8 @@
   "notification.version.update.message": "A new version of Strapi is available!",
   "notification.warning.title": "Warning:",
   "notification.warning.404": "404 - Not found",
+  "notification.ee.warning.over-seat-limit": "Add seats to re-enable Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
+  "notification.ee.warning.at-seat-limit": "Add seats to invite more Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
   "or": "OR",
   "request.error.model.unknown": "This model doesn't exist",
   "skipToContent": "Skip to content",

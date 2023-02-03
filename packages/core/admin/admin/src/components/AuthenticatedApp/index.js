@@ -9,6 +9,7 @@ import {
 } from '@strapi/helper-plugin';
 import { useQueries } from 'react-query';
 import get from 'lodash/get';
+import LicenseContextWrapper from 'ee_else_ce/components/AuthenticatedApp/LicenseContextWrapper';
 import packageJSON from '../../../../package.json';
 import { useConfigurations } from '../../hooks';
 import PluginsInitializer from '../PluginsInitializer';
@@ -109,11 +110,13 @@ const AuthenticatedApp = () => {
   }
 
   return (
-    <AppInfosContext.Provider value={appInfosValue}>
-      <RBACProvider permissions={permissions} refetchPermissions={refetch}>
-        <PluginsInitializer />
-      </RBACProvider>
-    </AppInfosContext.Provider>
+    <LicenseContextWrapper>
+      <AppInfosContext.Provider value={appInfosValue}>
+        <RBACProvider permissions={permissions} refetchPermissions={refetch}>
+          <PluginsInitializer />
+        </RBACProvider>
+      </AppInfosContext.Provider>
+    </LicenseContextWrapper>
   );
 };
 

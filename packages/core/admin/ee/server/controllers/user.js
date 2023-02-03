@@ -1,9 +1,10 @@
 'use strict';
 
-const { get } = require('lodash');
+const { _, get } = require('lodash');
 const { pick } = require('lodash/fp');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { validateUserCreationInput } = require('../validation/user');
+const { validateUserUpdateInput } = require('../../../server/validation/user');
 const { getService } = require('../../../server/utils');
 
 const pickUserCreationAttributes = pick(['firstname', 'lastname', 'email', 'roles']);
@@ -36,5 +37,35 @@ module.exports = {
     Object.assign(userInfo, { registrationToken: createdUser.registrationToken });
 
     ctx.created({ data: userInfo });
+  },
+
+  async update(ctx) {
+    const { id } = ctx.params;
+    const { body: input } = ctx.request;
+    console.log('ee update controller');
+    await validateUserUpdateInput(input);
+
+    if (_.has(input, 'email')) {
+      const uniqueEmailCheck = await getService('user').exists({
+        id: { $ne: id },
+        email: input.email,
+      });
+
+      if (uniqueEmailCheck) {
+        throw new ApplicationError('A user with this email address already exists');
+      }
+    }
+
+    const updatedUser = await getService('user').updateById(id, input);
+
+    if (!updatedUser) {
+      return ctx.notFound('User does not exist');
+    }
+
+    await getService('user').shouldUpdateEEDisabledUsersList(id, input);
+
+    ctx.body = {
+      data: getService('user').sanitizeUser(updatedUser),
+    };
   },
 };

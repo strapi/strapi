@@ -11,7 +11,6 @@ import {
 } from '@strapi/helper-plugin';
 import { HeaderLayout, Layout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
-import { Box } from '@strapi/design-system/Box';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
@@ -19,6 +18,8 @@ import { Button } from '@strapi/design-system/Button';
 import { Link } from '@strapi/design-system/v2/Link';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import Check from '@strapi/icons/Check';
+import EENotification from 'ee_else_ce/components/EENotification';
+import AdminSeatInfo from 'ee_else_ce/pages/SettingsPage/pages/ApplicationInfosPage/components/AdminSeatInfo';
 import adminPermissions from '../../../../permissions';
 import { useConfigurations } from '../../../../hooks';
 import CustomizationInfos from './components/CustomizationInfos';
@@ -94,6 +95,7 @@ const ApplicationInfosPage = () => {
 
   return (
     <Layout>
+      <EENotification />
       <SettingsPageTitle name="Application" />
       <Main>
         <form onSubmit={handleSubmit}>
@@ -201,15 +203,18 @@ const ApplicationInfosPage = () => {
                   </GridItem>
                 </Grid>
 
-                <Box paddingTop={1}>
-                  <Typography variant="sigma" textColor="neutral600">
-                    {formatMessage({
-                      id: 'Settings.application.node-version',
-                      defaultMessage: 'node version',
-                    })}
-                  </Typography>
-                  <Typography as="p">{appInfos.nodeVersion}</Typography>
-                </Box>
+                <Grid paddingTop={1}>
+                  <GridItem col={6} s={12}>
+                    <Typography variant="sigma" textColor="neutral600">
+                      {formatMessage({
+                        id: 'Settings.application.node-version',
+                        defaultMessage: 'node version',
+                      })}
+                    </Typography>
+                    <Typography as="p">{appInfos.nodeVersion}</Typography>
+                  </GridItem>
+                  <AdminSeatInfo />
+                </Grid>
               </Stack>
               {canRead && data && (
                 <CustomizationInfos
