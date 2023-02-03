@@ -204,6 +204,17 @@ const getById = async (id) => {
 };
 
 /**
+ * Retrieve a token by name
+ *
+ * @param {string} name
+ *
+ * ^@returns {Promise<Omit<TransferToken, 'accessKey'>>}
+ */
+const getByName = async (name) => {
+  return getBy({ name });
+};
+
+/**
  * Check if token exists
  *
  * @param {Object} whereParams
@@ -313,6 +324,7 @@ module.exports = {
   exists,
   getBy,
   getById,
+  getByName,
   update,
   revoke,
   regenerate,
