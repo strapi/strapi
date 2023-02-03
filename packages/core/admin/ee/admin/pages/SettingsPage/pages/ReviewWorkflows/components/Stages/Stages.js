@@ -69,7 +69,7 @@ Stages.defaultProps = {
 Stages.propTypes = {
   stages: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.number.isRequired,
+      id: PropTypes.number,
       name: PropTypes.string.isRequired,
     })
   ),

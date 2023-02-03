@@ -43,10 +43,6 @@ export function ReviewWorkflowsPage() {
     dispatch(setWorkflows({ status: workflowsData.status, data: workflowsData.data }));
   }, [workflowsData.status, workflowsData.data, dispatch]);
 
-  if (!formik.values?.stages) {
-    return null;
-  }
-
   return (
     <Layout>
       <SettingsPageTitle
@@ -81,20 +77,20 @@ export function ReviewWorkflowsPage() {
                   id: 'Settings.review-workflows.page.subtitle',
                   defaultMessage: '{count, plural, one {# stage} other {# stages}}',
                 },
-                { count: currentWorkflow.stages?.length ?? 0 }
+                { count: currentWorkflow?.stages?.length ?? 0 }
               )}
             />
             <ContentLayout>
-              {status === 'loading' ? (
+              {status === 'loading' && (
                 <Loader>
                   {formatMessage({
                     id: 'Settings.review-workflows.page.isLoading',
                     defaultMessage: 'Workflow is loading',
                   })}
                 </Loader>
-              ) : (
-                <Stages stages={formik.values.stages} />
               )}
+
+              {formik.values?.stages && <Stages stages={formik.values.stages} />}
             </ContentLayout>
           </Form>
         </FormikProvider>
