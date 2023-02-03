@@ -116,7 +116,6 @@ module.exports = {
        * as a string. This way we avoid issues with integers in the db.
        */
       if (!!nameAlreadyTaken && !stringEquals(nameAlreadyTaken.id, id)) {
-        console.log('here');
         throw new ApplicationError('Name already taken');
       }
     }
