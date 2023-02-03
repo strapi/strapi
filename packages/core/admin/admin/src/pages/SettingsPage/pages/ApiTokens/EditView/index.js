@@ -14,16 +14,20 @@ import { Main } from '@strapi/design-system/Main';
 import { Formik } from 'formik';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { useQuery } from 'react-query';
+import { ContentLayout } from '@strapi/design-system/Layout';
+import { Stack } from '@strapi/design-system/Stack';
 import { formatAPIErrors } from '../../../../../utils';
 import { axiosInstance } from '../../../../../core/utils';
 import { schema } from './utils';
 import LoadingView from './components/LoadingView';
-import FormHead from './components/FormHead';
-import FormBody from './components/FormBody';
 import adminPermissions from '../../../../../permissions';
 import { ApiTokenPermissionsContextProvider } from '../../../../../contexts/ApiTokenPermissions';
 import init from './init';
 import reducer, { initialState } from './reducer';
+import Permissions from './components/Permissions';
+import FormApiTokenContainer from './components/FormApiTokenContainer';
+import TokenBox from '../../../components/Tokens/TokenBox';
+import FormHead from '../../../components/Tokens/FormHead';
 
 const MSG_ERROR_NAME_TAKEN = 'Name already taken';
 
@@ -279,22 +283,41 @@ const ApiTokenCreateView = () => {
             return (
               <Form>
                 <FormHead
-                  apiToken={apiToken}
-                  setApiToken={setApiToken}
+                  backUrl="/settings/api-tokens"
+                  title={{
+                    id: 'Settings.apiTokens.createPage.title',
+                    defaultMessage: 'Create API Token',
+                  }}
+                  token={apiToken}
+                  setToken={setApiToken}
                   canEditInputs={canEditInputs}
                   canRegenerate={canRegenerate}
                   isSubmitting={isSubmitting}
+                  regenerateBackUrl="/admin/api-tokens/"
                 />
-                <FormBody
-                  apiToken={apiToken}
-                  errors={errors}
-                  onChange={handleChange}
-                  canEditInputs={canEditInputs}
-                  isCreating={isCreating}
-                  values={values}
-                  onDispatch={dispatch}
-                  setHasChangedPermissions={setHasChangedPermissions}
-                />
+
+                <ContentLayout>
+                  <Stack spacing={6}>
+                    {Boolean(apiToken?.name) && <TokenBox token={apiToken?.accessKey} />}
+                    <FormApiTokenContainer
+                      errors={errors}
+                      onChange={handleChange}
+                      canEditInputs={canEditInputs}
+                      isCreating={isCreating}
+                      values={values}
+                      apiToken={apiToken}
+                      onDispatch={dispatch}
+                      setHasChangedPermissions={setHasChangedPermissions}
+                    />
+                    <Permissions
+                      disabled={
+                        !canEditInputs ||
+                        values?.type === 'read-only' ||
+                        values?.type === 'full-access'
+                      }
+                    />
+                  </Stack>
+                </ContentLayout>
               </Form>
             );
           }}

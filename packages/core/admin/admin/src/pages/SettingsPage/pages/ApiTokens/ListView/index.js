@@ -11,7 +11,6 @@ import {
   NoPermissions,
   useRBAC,
   NoContent,
-  DynamicTable,
   useTracking,
   useGuidedTour,
   LinkButton,
@@ -24,7 +23,7 @@ import Plus from '@strapi/icons/Plus';
 import { axiosInstance } from '../../../../../core/utils';
 import adminPermissions from '../../../../../permissions';
 import tableHeaders from './utils/tableHeaders';
-import TableRows from './DynamicTable';
+import Table from '../../../components/Tokens/Table';
 
 const ApiTokenListView = () => {
   useFocusWhenNavigate();
@@ -143,22 +142,16 @@ const ApiTokenListView = () => {
       <ContentLayout>
         {!canRead && <NoPermissions />}
         {shouldDisplayDynamicTable && (
-          <DynamicTable
+          <Table
+            permissions={{ canRead, canDelete, canUpdate }}
             headers={headers}
             contentType="api-tokens"
             rows={apiTokens}
             withBulkActions={canDelete || canUpdate || canRead}
             isLoading={isLoading}
             onConfirmDelete={(id) => deleteMutation.mutateAsync(id)}
-          >
-            <TableRows
-              canRead={canRead}
-              canDelete={canDelete}
-              canUpdate={canUpdate}
-              rows={apiTokens}
-              withBulkActions={canDelete || canUpdate || canRead}
-            />
-          </DynamicTable>
+            tokens={apiTokens}
+          />
         )}
         {shouldDisplayNoContentWithCreationButton && (
           <NoContent

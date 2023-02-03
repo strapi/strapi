@@ -15,13 +15,16 @@ import { Main } from '@strapi/design-system/Main';
 import { Formik } from 'formik';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { useQuery } from 'react-query';
+import { Stack } from '@strapi/design-system/Stack';
+import { ContentLayout } from '@strapi/design-system/Layout';
 import { formatAPIErrors } from '../../../../../utils';
 import { schema } from './utils';
 import LoadingView from './components/LoadingView';
-import FormHead from './components/FormHead';
-import FormBody from './components/FormBody';
 import adminPermissions from '../../../../../permissions';
 import { TransferTokenPermissionsContextProvider } from '../../../../../contexts/TransferTokenPermissions';
+import FormTransferTokenContainer from './components/FormTransferTokenContainer';
+import TokenBox from '../../../components/Tokens/TokenBox';
+import FormHead from '../../../components/Tokens/FormHead';
 
 const MSG_ERROR_NAME_TAKEN = 'Name already taken';
 
@@ -176,20 +179,31 @@ const TransferTokenCreateView = () => {
             return (
               <Form>
                 <FormHead
-                  transferToken={transferToken}
-                  setTransferToken={setTransferToken}
+                  backUrl="/settings/api-tokens"
+                  title={{
+                    id: 'Settings.apiTokens.createPage.title',
+                    defaultMessage: 'Create API Token',
+                  }}
+                  token={transferToken}
+                  setToken={setTransferToken}
                   canEditInputs={canEditInputs}
                   canRegenerate={canRegenerate}
                   isSubmitting={isSubmitting}
+                  regenerateBackUrl="/admin/transfer/tokens/"
                 />
-                <FormBody
-                  transferToken={transferToken}
-                  errors={errors}
-                  onChange={handleChange}
-                  canEditInputs={canEditInputs}
-                  isCreating={isCreating}
-                  values={values}
-                />
+                <ContentLayout>
+                  <Stack spacing={6}>
+                    {Boolean(transferToken?.name) && <TokenBox token={transferToken?.accessKey} />}
+                    <FormTransferTokenContainer
+                      errors={errors}
+                      onChange={handleChange}
+                      canEditInputs={canEditInputs}
+                      isCreating={isCreating}
+                      values={values}
+                      transferToken={transferToken}
+                    />
+                  </Stack>
+                </ContentLayout>
               </Form>
             );
           }}

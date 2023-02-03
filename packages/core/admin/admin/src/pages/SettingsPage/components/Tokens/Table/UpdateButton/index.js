@@ -1,7 +1,7 @@
 import React from 'react';
 import Pencil from '@strapi/icons/Pencil';
 import PropTypes from 'prop-types';
-import DefaultButton from '../DefaultButton';
+import DefaultButton from '../../../../pages/ApiTokens/ListView/DynamicTable/DefaultButton';
 
 const UpdateButton = ({ tokenName, tokenId }) => {
   return (

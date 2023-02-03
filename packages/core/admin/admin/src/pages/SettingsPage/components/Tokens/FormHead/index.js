@@ -9,29 +9,36 @@ import { HeaderLayout } from '@strapi/design-system/Layout';
 import { Stack } from '@strapi/design-system/Stack';
 import Regenerate from '../Regenerate';
 
-const FormHead = ({ apiToken, setApiToken, canEditInputs, canRegenerate, isSubmitting }) => {
+const FormHead = ({
+  title,
+  token,
+  setToken,
+  canEditInputs,
+  canRegenerate,
+  isSubmitting,
+  backUrl,
+  regenerateBackUrl,
+}) => {
   const { formatMessage } = useIntl();
   const handleRegenerate = (newKey) => {
-    setApiToken({
-      ...apiToken,
+    setToken({
+      ...token,
       accessKey: newKey,
     });
   };
 
   return (
     <HeaderLayout
-      title={
-        apiToken?.name ||
-        formatMessage({
-          id: 'Settings.apiTokens.createPage.title',
-          defaultMessage: 'Create API Token',
-        })
-      }
+      title={token?.name || formatMessage(title)}
       primaryAction={
         canEditInputs ? (
           <Stack horizontal spacing={2}>
-            {canRegenerate && apiToken?.id && (
-              <Regenerate onRegenerate={handleRegenerate} idToRegenerate={apiToken?.id} />
+            {canRegenerate && token?.id && (
+              <Regenerate
+                backUrl={regenerateBackUrl}
+                onRegenerate={handleRegenerate}
+                idToRegenerate={token?.id}
+              />
             )}
             <Button
               disabled={isSubmitting}
@@ -48,13 +55,17 @@ const FormHead = ({ apiToken, setApiToken, canEditInputs, canRegenerate, isSubmi
           </Stack>
         ) : (
           canRegenerate &&
-          apiToken?.id && (
-            <Regenerate onRegenerate={handleRegenerate} idToRegenerate={apiToken?.id} />
+          token?.id && (
+            <Regenerate
+              onRegenerate={handleRegenerate}
+              idToRegenerate={token?.id}
+              backUrl={regenerateBackUrl}
+            />
           )
         )
       }
       navigationAction={
-        <Link startIcon={<ArrowLeft />} to="/settings/api-tokens">
+        <Link startIcon={<ArrowLeft />} to={backUrl}>
           {formatMessage({
             id: 'global.back',
             defaultMessage: 'Back',
@@ -66,7 +77,7 @@ const FormHead = ({ apiToken, setApiToken, canEditInputs, canRegenerate, isSubmi
 };
 
 FormHead.propTypes = {
-  apiToken: PropTypes.shape({
+  token: PropTypes.shape({
     id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     type: PropTypes.string,
     lifespan: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
@@ -78,12 +89,18 @@ FormHead.propTypes = {
   }),
   canEditInputs: PropTypes.bool.isRequired,
   canRegenerate: PropTypes.bool.isRequired,
-  setApiToken: PropTypes.func.isRequired,
+  setToken: PropTypes.func.isRequired,
   isSubmitting: PropTypes.bool.isRequired,
+  backUrl: PropTypes.string.isRequired,
+  title: PropTypes.shape({
+    id: PropTypes.string,
+    label: PropTypes.string,
+  }).isRequired,
+  regenerateBackUrl: PropTypes.string.isRequired,
 };
 
 FormHead.defaultProps = {
-  apiToken: undefined,
+  token: undefined,
 };
 
 export default FormHead;

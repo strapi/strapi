@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import Key from '@strapi/icons/Key';
 
-const HeaderContentBox = ({ apiToken }) => {
+const TokenBox = ({ token }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
@@ -16,17 +16,17 @@ const HeaderContentBox = ({ apiToken }) => {
   return (
     <ContentBox
       endAction={
-        apiToken && (
+        token && (
           <span style={{ alignSelf: 'start' }}>
             <CopyToClipboard
               onCopy={() => {
-                trackUsageRef.current('didCopyTokenKey');
+                trackUsageRef.current('didCopyTokenKey'); // TODO: track different event?
                 toggleNotification({
                   type: 'success',
-                  message: { id: 'Settings.apiTokens.notification.copied' },
+                  message: { id: 'Settings.tokens.notification.copied' },
                 });
               }}
-              text={apiToken}
+              text={token}
             >
               <IconButton
                 label={formatMessage({
@@ -42,20 +42,20 @@ const HeaderContentBox = ({ apiToken }) => {
         )
       }
       title={
-        apiToken ||
+        token ||
         formatMessage({
-          id: 'Settings.apiTokens.copy.editTitle',
+          id: 'Settings.tokens.copy.editTitle',
           defaultMessage: 'This token isn’t accessible anymore.',
         })
       }
       subtitle={
-        apiToken
+        token
           ? formatMessage({
-              id: 'Settings.apiTokens.copy.lastWarning',
+              id: 'Settings.tokens.copy.lastWarning',
               defaultMessage: 'Make sure to copy this token, you won’t be able to see it again!',
             })
           : formatMessage({
-              id: 'Settings.apiTokens.copy.editMessage',
+              id: 'Settings.tokens.copy.editMessage',
               defaultMessage: 'For security reasons, you can only see your token once.',
             })
       }
@@ -65,12 +65,12 @@ const HeaderContentBox = ({ apiToken }) => {
   );
 };
 
-HeaderContentBox.defaultProps = {
-  apiToken: null,
+TokenBox.defaultProps = {
+  token: null,
 };
 
-HeaderContentBox.propTypes = {
-  apiToken: PropTypes.string,
+TokenBox.propTypes = {
+  token: PropTypes.string,
 };
 
-export default HeaderContentBox;
+export default TokenBox;
