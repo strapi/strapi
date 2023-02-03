@@ -1,103 +1,127 @@
 'use strict';
 
-const utils = require('../../transfer/utils');
-
-jest.mock('../../transfer/utils');
+const { expectExit } = require('./shared/transfer.test.utils');
 
 describe('Transfer', () => {
-  const createRemoteStrapiDestinationProvider = jest.fn();
-  const createLocalStrapiSourceProvider = jest.fn();
-  const cteTransfer = jest.fn().mockReturnValue(Promise.resolve({}));
-  const createTransferEngine = jest.fn().mockReturnValue({
-    transfer: cteTransfer,
-  });
+  // mock utils
+  const mockUtils = {
+    formatDiagnostic: jest.fn(),
+    createStrapiInstance() {
+      return {
+        telemetry: {
+          send: jest.fn(),
+        },
+      };
+    },
+    getDefaultExportName: jest.fn(() => 'default'),
+    buildTransferTable: jest.fn(() => {
+      return {
+        toString() {
+          return 'table';
+        },
+      };
+    }),
+  };
+  jest.mock(
+    '../../transfer/utils',
+    () => {
+      return mockUtils;
+    },
+    { virtual: true }
+  );
 
   const mockDataTransfer = {
     strapi: {
       providers: {
-        createRemoteStrapiDestinationProvider,
-        createLocalStrapiSourceProvider,
+        createLocalStrapiSourceProvider: jest.fn().mockReturnValue({ name: 'testLocalSource' }),
+        createRemoteStrapiDestinationProvider: jest
+          .fn()
+          .mockReturnValue({ name: 'testRemoteDest' }),
       },
     },
     engine: {
-      createTransferEngine,
+      createTransferEngine() {
+        return {
+          transfer: jest.fn(() => {
+            return {
+              engine: {},
+            };
+          }),
+          progress: {
+            on: jest.fn(),
+            stream: {
+              on: jest.fn(),
+            },
+          },
+          sourceProvider: { name: 'testSource' },
+          destinationProvider: { name: 'testDestination' },
+          diagnostics: {
+            on: jest.fn().mockReturnThis(),
+            onDiagnostic: jest.fn().mockReturnThis(),
+          },
+        };
+      },
     },
   };
 
   jest.mock('@strapi/data-transfer/lib/engine', () => mockDataTransfer.engine, { virtual: true });
   jest.mock('@strapi/data-transfer/lib/strapi', () => mockDataTransfer.strapi, { virtual: true });
-
-  const expectExit = async (code, fn) => {
-    const exit = jest.spyOn(process, 'exit').mockImplementation((number) => {
-      throw new Error(`process.exit: ${number}`);
-    });
-    await expect(async () => {
-      await fn();
-    }).rejects.toThrow();
-    expect(exit).toHaveBeenCalledWith(code);
-    exit.mockRestore();
-  };
+  jest.mock('@strapi/data-transfer/lib/file', () => mockDataTransfer.file, { virtual: true });
 
   const transferCommand = require('../../transfer/transfer');
 
-  jest.spyOn(console, 'error').mockImplementation(() => {});
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  // console spies
   jest.spyOn(console, 'log').mockImplementation(() => {});
+  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  jest.spyOn(console, 'info').mockImplementation(() => {});
+  jest.spyOn(console, 'error').mockImplementation(() => {});
 
   const destinationUrl = new URL('http://strapi.com/admin');
+  const destinationToken = 'test-token';
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
-  it('uses destination url provided by user without authentication', async () => {
-    await expectExit(1, async () => {
-      await transferCommand({ from: undefined, to: destinationUrl });
+  describe('--to', () => {
+    it('exits with error when auth is not provided', async () => {
+      await expectExit(1, async () => {
+        await transferCommand({ from: undefined, to: destinationUrl });
+      });
+
+      expect(console.error).toHaveBeenCalledWith(expect.stringMatching(/missing/i));
+
+      expect(
+        mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
+      ).not.toHaveBeenCalled();
     });
 
-    expect(
-      mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
-    ).toHaveBeenCalledWith(
-      expect.objectContaining({
-        url: destinationUrl,
-      })
-    );
-  });
+    it('uses destination url and token provided by user', async () => {
+      await expectExit(0, async () => {
+        await transferCommand({ from: undefined, to: destinationUrl, toToken: destinationToken });
+      });
 
-  it.todo('uses destination url provided by user with authentication');
-
-  it('uses restore as the default strategy', async () => {
-    await expectExit(1, async () => {
-      await transferCommand({ from: undefined, to: destinationUrl });
+      expect(console.error).not.toHaveBeenCalled();
+      expect(
+        mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: destinationUrl,
+          auth: {
+            type: 'token',
+            token: destinationToken,
+          },
+        })
+      );
     });
-
-    expect(
-      mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
-    ).toHaveBeenCalledWith(
-      expect.objectContaining({
-        strategy: 'restore',
-      })
-    );
-  });
-  it('uses destination url provided by user without authentication', async () => {
-    await expectExit(1, async () => {
-      await transferCommand({ from: undefined, to: destinationUrl });
-    });
-
-    expect(
-      mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
-    ).toHaveBeenCalledWith(
-      expect.objectContaining({
-        url: destinationUrl,
-      })
-    );
   });
 
   it('uses restore as the default strategy', async () => {
-    await expectExit(1, async () => {
-      await transferCommand({ from: undefined, to: destinationUrl });
+    await expectExit(0, async () => {
+      await transferCommand({ from: undefined, to: destinationUrl, toToken: destinationToken });
     });
 
+    expect(console.error).not.toHaveBeenCalled();
     expect(
       mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
     ).toHaveBeenCalledWith(
@@ -107,12 +131,15 @@ describe('Transfer', () => {
     );
   });
 
-  it('uses local strapi instance when local specified', async () => {
-    await expectExit(1, async () => {
-      await transferCommand({ from: undefined, to: destinationUrl });
+  it('uses local Strapi source when from is not specified', async () => {
+    await expectExit(0, async () => {
+      await transferCommand({ from: undefined, to: destinationUrl, toToken: destinationToken });
     });
 
+    expect(console.error).not.toHaveBeenCalled();
     expect(mockDataTransfer.strapi.providers.createLocalStrapiSourceProvider).toHaveBeenCalled();
-    expect(utils.createStrapiInstance).toHaveBeenCalled();
+    expect(
+      mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
+    ).toHaveBeenCalled();
   });
 });
