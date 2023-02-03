@@ -30,6 +30,10 @@ const createPermissionService = () => {
       return state.engine;
     },
 
+    get providers() {
+      return state.providers;
+    },
+
     init() {
       state.providers.action = providerFactory();
       state.providers.condition = providerFactory();
