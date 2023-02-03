@@ -481,6 +481,7 @@ describe('Transfer Token', () => {
         query() {
           return { delete: mockedDelete };
         },
+        db: { transaction: jest.fn((cb) => cb()) },
       };
 
       const res = await transferTokenService.revoke(token.id);
@@ -500,6 +501,7 @@ describe('Transfer Token', () => {
         query() {
           return { delete: mockedDelete };
         },
+        db: { transaction: jest.fn((cb) => cb()) },
       };
 
       const res = await transferTokenService.revoke(42);
@@ -572,6 +574,7 @@ describe('Transfer Token', () => {
         query() {
           return { update };
         },
+        db: { transaction: jest.fn((cb) => cb()) },
         config: {
           get: jest.fn(() => ''),
         },
@@ -597,6 +600,7 @@ describe('Transfer Token', () => {
         query() {
           return { update };
         },
+        db: { transaction: jest.fn((cb) => cb()) },
         config: {
           get: jest.fn(() => ''),
         },
@@ -674,6 +678,7 @@ describe('Transfer Token', () => {
             create,
           };
         },
+        db: { transaction: jest.fn((cb) => cb()) },
         config: {
           get: jest.fn(() => ''),
         },
@@ -746,6 +751,7 @@ describe('Transfer Token', () => {
             create,
           };
         },
+        db: { transaction: jest.fn((cb) => cb()) },
         config: {
           get: jest.fn(() => ''),
         },

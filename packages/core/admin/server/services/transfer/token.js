@@ -139,14 +139,20 @@ const update = async (id, attributes) => {
   assertTokenPermissionsValidity(attributes);
   assertValidLifespan(attributes);
 
-  const updatedToken = await strapi.query(TRANSFER_TOKEN_UID).update({
-    select: SELECT_FIELDS,
-    where: { id },
-    data: omit('permissions', attributes),
-  });
+  const updatedToken = await strapi.db.transaction(async () => {
+    const updatedToken = await strapi.query(TRANSFER_TOKEN_UID).update({
+      select: SELECT_FIELDS,
+      where: { id },
+      data: {
+        ...omit('permissions', attributes),
+      },
+    });
 
-  await strapi.query(TRANSFER_TOKEN_PERMISSION_UID).delete({
-    where: { token: id },
+    await strapi.query(TRANSFER_TOKEN_PERMISSION_UID).delete({
+      where: { token: id },
+    });
+
+    return updatedToken;
   });
 
   // retrieve permissions
@@ -170,9 +176,11 @@ const update = async (id, attributes) => {
  * @returns {Promise<Omit<TransferToken, 'accessKey'>>}
  */
 const revoke = async (id) => {
-  return strapi
-    .query(TRANSFER_TOKEN_UID)
-    .delete({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: { id } });
+  return strapi.db.transaction(async () =>
+    strapi
+      .query(TRANSFER_TOKEN_UID)
+      .delete({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: { id } })
+  );
 };
 
 /**
@@ -247,14 +255,15 @@ const exists = async (whereParams = {}) => {
  */
 const regenerate = async (id) => {
   const accessKey = crypto.randomBytes(128).toString('hex');
-
-  const transferToken = await strapi.query(TRANSFER_TOKEN_UID).update({
-    select: ['id', 'accessKey'],
-    where: { id },
-    data: {
-      accessKey: hash(accessKey),
-    },
-  });
+  const transferToken = await strapi.db.transaction(async () =>
+    strapi.query(TRANSFER_TOKEN_UID).update({
+      select: ['id', 'accessKey'],
+      where: { id },
+      data: {
+        accessKey: hash(accessKey),
+      },
+    })
+  );
 
   if (!transferToken) {
     throw new NotFoundError('The provided token id does not exist');
