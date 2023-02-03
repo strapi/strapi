@@ -32,7 +32,6 @@ export function useReviewWorkflows(workflowId) {
     return workflowUpdateMutation.mutateAsync({ workflowId, stages });
   }
 
-  // TODO needs testing
   function refetchWorkflow() {
     client.refetchQueries(workflowQueryKey);
   }

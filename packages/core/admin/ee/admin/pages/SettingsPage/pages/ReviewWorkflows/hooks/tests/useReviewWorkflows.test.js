@@ -1,5 +1,5 @@
 import React from 'react';
-import { QueryClientProvider, QueryClient } from 'react-query';
+import { QueryClientProvider, QueryClient, useQueryClient } from 'react-query';
 import { renderHook, act } from '@testing-library/react-hooks';
 
 import { useFetchClient } from '@strapi/helper-plugin';
@@ -31,7 +31,15 @@ const ComponentFixture = ({ children }) => (
 function setup(id) {
   return new Promise((resolve) => {
     act(() => {
-      resolve(renderHook(() => useReviewWorkflows(id), { wrapper: ComponentFixture }));
+      resolve(
+        renderHook(
+          () => ({
+            ...useReviewWorkflows(id),
+            queryClient: useQueryClient(),
+          }),
+          { wrapper: ComponentFixture }
+        )
+      );
     });
   });
 }
@@ -130,5 +138,29 @@ describe('useReviewWorkflows', () => {
     expect(put).toBeCalledWith(`/admin/review-workflows/workflows/${idFixture}/stages`, {
       data: stagesFixture,
     });
+  });
+
+  test('refetchWorkflow() re-fetches the loaded default workflow', async () => {
+    const { result } = await setup();
+
+    const spy = jest.spyOn(client, 'refetchQueries');
+
+    await act(async () => {
+      result.current.refetchWorkflow();
+    });
+
+    expect(spy).toBeCalledWith(['review-workflows', 'default']);
+  });
+
+  test('refetchWorkflow() re-fetches the loaded workflow id', async () => {
+    const { result } = await setup(1);
+
+    const spy = jest.spyOn(client, 'refetchQueries');
+
+    await act(async () => {
+      result.current.refetchWorkflow();
+    });
+
+    expect(spy).toBeCalledWith(['review-workflows', 1]);
   });
 });
