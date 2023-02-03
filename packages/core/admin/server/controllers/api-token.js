@@ -2,8 +2,7 @@
 
 const { stringEquals } = require('@strapi/utils/lib');
 const { ApplicationError } = require('@strapi/utils').errors;
-const { trim } = require('lodash/fp');
-const has = require('lodash/has');
+const { trim, has } = require('lodash/fp');
 const { getService } = require('../utils');
 const {
   validateApiTokenCreationInput,
@@ -93,11 +92,11 @@ module.exports = {
      * - having a space at the end or start of the value.
      * - having only spaces as value;
      */
-    if (has(attributes, 'name')) {
+    if (has('name', attributes)) {
       attributes.name = trim(body.name);
     }
 
-    if (has(attributes, 'description') || attributes.description === null) {
+    if (has('description', attributes) || attributes.description === null) {
       attributes.description = trim(body.description);
     }
 
@@ -108,7 +107,7 @@ module.exports = {
       return ctx.notFound('API Token not found');
     }
 
-    if (has(attributes, 'name')) {
+    if (has('name', attributes)) {
       const nameAlreadyTaken = await apiTokenService.getByName(attributes.name);
 
       /**
@@ -117,6 +116,7 @@ module.exports = {
        * as a string. This way we avoid issues with integers in the db.
        */
       if (!!nameAlreadyTaken && !stringEquals(nameAlreadyTaken.id, id)) {
+        console.log('here');
         throw new ApplicationError('Name already taken');
       }
     }
