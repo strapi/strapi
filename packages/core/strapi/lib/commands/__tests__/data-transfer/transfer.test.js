@@ -83,6 +83,18 @@ describe('Transfer', () => {
     jest.clearAllMocks();
   });
 
+  it('exits with error when no --to or --from is provided', async () => {
+    await expectExit(1, async () => {
+      await transferCommand({ from: undefined, to: undefined });
+    });
+
+    expect(console.error).toHaveBeenCalledWith(expect.stringMatching(/source/i));
+
+    expect(
+      mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
+    ).not.toHaveBeenCalled();
+  });
+
   describe('--to', () => {
     it('exits with error when auth is not provided', async () => {
       await expectExit(1, async () => {
@@ -114,6 +126,18 @@ describe('Transfer', () => {
         })
       );
     });
+
+    it('uses local Strapi source when from is not specified', async () => {
+      await expectExit(0, async () => {
+        await transferCommand({ from: undefined, to: destinationUrl, toToken: destinationToken });
+      });
+
+      expect(console.error).not.toHaveBeenCalled();
+      expect(mockDataTransfer.strapi.providers.createLocalStrapiSourceProvider).toHaveBeenCalled();
+      expect(
+        mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
+      ).toHaveBeenCalled();
+    });
   });
 
   it('uses restore as the default strategy', async () => {
@@ -129,17 +153,5 @@ describe('Transfer', () => {
         strategy: 'restore',
       })
     );
-  });
-
-  it('uses local Strapi source when from is not specified', async () => {
-    await expectExit(0, async () => {
-      await transferCommand({ from: undefined, to: destinationUrl, toToken: destinationToken });
-    });
-
-    expect(console.error).not.toHaveBeenCalled();
-    expect(mockDataTransfer.strapi.providers.createLocalStrapiSourceProvider).toHaveBeenCalled();
-    expect(
-      mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
-    ).toHaveBeenCalled();
   });
 });
