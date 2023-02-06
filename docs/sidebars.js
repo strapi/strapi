@@ -101,6 +101,11 @@ const sidebars = {
               label: 'Async',
               id: 'core/utils/async',
             },
+            {
+              type: 'doc',
+              label: 'Event Hub',
+              id: 'core/utils/event-hub',
+            },
           ],
         },
       ],
