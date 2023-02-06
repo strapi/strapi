@@ -25,7 +25,7 @@ const mapAsync = curry(pMap);
  * This function will run the requests sequentially if mysql is used. Else,
  * it will encapsulate them in a Promise.all.
  *
- * @type { import('./async').MapAsync }
+ * @type { import('./async').MapAsyncDialects }
  */
 const mapAsyncDialects = async (array, func, options = {}) => {
   switch (strapi.db.dialect.client) {
