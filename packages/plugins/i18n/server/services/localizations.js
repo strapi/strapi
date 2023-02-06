@@ -2,7 +2,7 @@
 
 const { prop, isNil, isEmpty } = require('lodash/fp');
 
-const { mapAsync } = require('@strapi/utils');
+const { forEachAsync } = require('@strapi/utils');
 const { getService } = require('../utils');
 
 const isDialectMySQL = () => strapi.db.dialect.client === 'mysql';
@@ -36,7 +36,7 @@ const syncLocalizations = async (entry, { model }) => {
     };
 
     // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-    await mapAsync(entry.localizations, (localization) => updateLocalization(localization.id), {
+    await forEachAsync(entry.localizations, (localization) => updateLocalization(localization.id), {
       concurrency: isDialectMySQL() ? 1 : undefined,
     });
   }
@@ -63,7 +63,7 @@ const syncNonLocalizedAttributes = async (entry, { model }) => {
     };
 
     // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-    await mapAsync(entry.localizations, (localization) => updateLocalization(localization.id), {
+    await forEachAsync(entry.localizations, (localization) => updateLocalization(localization.id), {
       concurrency: isDialectMySQL() ? 1 : undefined,
     });
   }
