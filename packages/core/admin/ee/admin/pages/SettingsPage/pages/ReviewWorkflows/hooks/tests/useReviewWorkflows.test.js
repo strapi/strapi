@@ -9,8 +9,10 @@ import { useReviewWorkflows } from '../useReviewWorkflows';
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useFetchClient: jest.fn().mockReturnValue({
-    get: jest.fn(),
+    get: jest.fn().mockResolvedValue({ data: {} }),
+    put: jest.fn().mockResolvedValue({ data: {} }),
   }),
+  useNotification: jest.fn().mockReturnValue(() => {}),
 }));
 
 const client = new QueryClient({
@@ -61,7 +63,9 @@ describe('useReviewWorkflows', () => {
     const { result, waitFor } = await setup();
 
     expect(result.current.workflows.isLoading).toBe(true);
-    expect(get).toBeCalledWith('/admin/review-workflows/workflows/?populate=stages');
+    expect(get).toBeCalledWith('/admin/review-workflows/workflows/', {
+      params: { populate: 'stages' },
+    });
 
     await waitFor(() => expect(result.current.workflows.isLoading).toBe(false));
 
@@ -90,7 +94,10 @@ describe('useReviewWorkflows', () => {
     const { result, waitFor } = await setup(idFixture);
 
     expect(result.current.workflows.isLoading).toBe(true);
-    expect(get).toBeCalledWith(`/admin/review-workflows/workflows/${idFixture}?populate=stages`);
+    expect(get).toBeCalledWith(
+      `/admin/review-workflows/workflows/${idFixture}`,
+      expect.any(Object)
+    );
 
     await waitFor(() => expect(result.current.workflows.isLoading).toBe(false));
 
@@ -101,5 +108,51 @@ describe('useReviewWorkflows', () => {
         }),
       })
     );
+  });
+
+  test('send put request on the updateWorkflowStages mutation', async () => {
+    const { put } = useFetchClient();
+    const idFixture = 1;
+    const stagesFixture = [{ id: 2, name: 'stage' }];
+
+    put.mockResolvedValue({
+      data: {},
+    });
+
+    const { result, waitFor } = await setup(idFixture);
+
+    await act(async () => {
+      await result.current.updateWorkflowStages(idFixture, stagesFixture);
+    });
+
+    await waitFor(() => expect(result.current.workflows.isLoading).toBe(false));
+
+    expect(put).toBeCalledWith(`/admin/review-workflows/workflows/${idFixture}/stages`, {
+      data: stagesFixture,
+    });
+  });
+
+  test('refetchWorkflow() re-fetches the loaded default workflow', async () => {
+    const { result } = await setup();
+
+    const spy = jest.spyOn(client, 'refetchQueries');
+
+    await act(async () => {
+      result.current.refetchWorkflow();
+    });
+
+    expect(spy).toBeCalledWith(['review-workflows', 'default']);
+  });
+
+  test('refetchWorkflow() re-fetches the loaded workflow id', async () => {
+    const { result } = await setup(1);
+
+    const spy = jest.spyOn(client, 'refetchQueries');
+
+    await act(async () => {
+      result.current.refetchWorkflow();
+    });
+
+    expect(spy).toBeCalledWith(['review-workflows', 1]);
   });
 });

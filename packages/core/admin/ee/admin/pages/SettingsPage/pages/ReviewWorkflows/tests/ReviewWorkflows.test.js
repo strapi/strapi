@@ -3,6 +3,7 @@ import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Provider } from 'react-redux';
 import { QueryClientProvider, QueryClient } from 'react-query';
+import userEvent from '@testing-library/user-event';
 
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 
@@ -13,12 +14,7 @@ import { useReviewWorkflows } from '../hooks/useReviewWorkflows';
 
 jest.mock('../hooks/useReviewWorkflows', () => ({
   ...jest.requireActual('../hooks/useReviewWorkflows'),
-  useReviewWorkflows: jest.fn().mockReturnValue({
-    workflows: {
-      status: 'loading',
-      data: null,
-    },
-  }),
+  useReviewWorkflows: jest.fn().mockReturnValue(),
 }));
 
 const client = new QueryClient({
@@ -47,19 +43,12 @@ const ComponentFixture = () => {
 
 const setup = (props) => render(<ComponentFixture {...props} />);
 
+const user = userEvent.setup();
+
 describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-  });
+    jest.restoreAllMocks();
 
-  test('handle initial loading state', () => {
-    const { getByText } = setup();
-
-    expect(getByText('0 stages')).toBeInTheDocument();
-    expect(getByText('Workflow is loading')).toBeInTheDocument();
-  });
-
-  test('handle loaded stage', () => {
     useReviewWorkflows.mockReturnValue({
       workflows: {
         status: 'success',
@@ -76,11 +65,56 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
         ],
       },
     });
+  });
 
-    const { getByText, queryByText } = setup();
+  test('handle initial loading state', () => {
+    useReviewWorkflows.mockReturnValue({
+      workflows: {
+        status: 'loading',
+        data: [],
+      },
+    });
+
+    const { getByText } = setup();
+
+    expect(getByText('0 stages')).toBeInTheDocument();
+    expect(getByText('Workflow is loading')).toBeInTheDocument();
+  });
+
+  test('loading state is not present', () => {
+    const { queryByText } = setup();
+
+    expect(queryByText('Workflow is loading')).not.toBeInTheDocument();
+  });
+
+  test('display stages', () => {
+    const { getByText } = setup();
 
     expect(getByText('1 stage')).toBeInTheDocument();
-    expect(queryByText('Workflow is loading')).not.toBeInTheDocument();
     expect(getByText('stage-1')).toBeInTheDocument();
+  });
+
+  test('Save button is disabled by default', async () => {
+    const { getByRole } = setup();
+
+    const saveButton = getByRole('button', { name: /save/i });
+
+    expect(saveButton).toBeInTheDocument();
+    expect(saveButton.getAttribute('disabled')).toBeDefined();
+  });
+
+  test('Save button is enabled after a stage has been added', async () => {
+    const { getByText, getByRole } = setup();
+
+    await user.click(
+      getByRole('button', {
+        name: /add new stage/i,
+      })
+    );
+
+    const saveButton = getByRole('button', { name: /save/i });
+
+    expect(getByText('2 stages')).toBeInTheDocument();
+    expect(saveButton.hasAttribute('disabled')).toBeFalsy();
   });
 });
