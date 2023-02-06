@@ -652,8 +652,9 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
             class="c1 c3"
           >
             <a
-              class="c4"
-              href="/settings/api-tokens"
+              aria-current="page"
+              class="c4 active"
+              href="/settings/transfer-tokens"
             >
               <span
                 aria-hidden="true"
@@ -688,7 +689,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
               <h1
                 class="c7 c11"
               >
-                Create API Token
+                Create Transfer Token
               </h1>
             </div>
             <div
@@ -1752,8 +1753,9 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
             class="c1 c3"
           >
             <a
-              class="c4"
-              href="/settings/api-tokens"
+              aria-current="page"
+              class="c4 active"
+              href="/settings/transfer-tokens"
             >
               <span
                 aria-hidden="true"
