@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the snapshot 1`] = `
+exports[`DynamicTable / Cellcontent / RelationMultiple renders and matches the snapshot 1`] = `
 .c13 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -64,7 +64,6 @@ exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the sn
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
-  line-height: 1.14;
   color: #32324d;
 }
 
@@ -207,6 +206,11 @@ exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the sn
   fill: #8e8ea9;
 }
 
+.c9 {
+  border-radius: 4px;
+  height: 1.5rem;
+}
+
 .c12 {
   display: -webkit-box;
   display: -webkit-flex;
@@ -225,11 +229,6 @@ exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the sn
 
 .c3 {
   padding: 4px 12px;
-}
-
-.c9 {
-  border-radius: 4px;
-  height: 1.5rem;
 }
 
 <div>

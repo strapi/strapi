@@ -3,6 +3,8 @@ import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import { RelationInput } from '../index';
 
@@ -49,31 +51,37 @@ const Component = (props) => (
   <MemoryRouter>
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en">
-        <RelationInput
-          description="this is a description"
-          id="1"
-          name="some-relation-1"
-          label="Some Relation"
-          labelLoadMore="Load more"
-          loadingMessage="Relations are loading"
-          labelDisconnectRelation="Remove"
-          numberOfRelationsToDisplay={5}
-          noRelationsMessage="No relations available"
-          onRelationConnect={() => jest.fn()}
-          onRelationDisconnect={() => jest.fn()}
-          onRelationLoadMore={() => jest.fn()}
-          onSearch={() => jest.fn()}
-          onSearchNextPage={() => jest.fn()}
-          placeholder="Select..."
-          publicationStateTranslations={{
-            draft: 'Draft',
-            published: 'Published',
-          }}
-          relations={FIXTURES_RELATIONS}
-          searchResults={FIXTURES_SEARCH}
-          size={8}
-          {...props}
-        />
+        <DndProvider backend={HTML5Backend}>
+          <RelationInput
+            canReorder
+            description="this is a description"
+            iconButtonAriaLabel="Drag"
+            id="1"
+            name="some-relation-1"
+            label="Some Relation"
+            labelLoadMore="Load more"
+            listAriaDescription="Press spacebar to grab and re-order"
+            loadingMessage="Relations are loading"
+            labelDisconnectRelation="Remove"
+            numberOfRelationsToDisplay={5}
+            noRelationsMessage="No relations available"
+            onRelationConnect={() => jest.fn()}
+            onRelationDisconnect={() => jest.fn()}
+            onRelationLoadMore={() => jest.fn()}
+            onRelationReorder={() => jest.fn()}
+            onSearch={() => jest.fn()}
+            onSearchNextPage={() => jest.fn()}
+            placeholder="Select..."
+            publicationStateTranslations={{
+              draft: 'Draft',
+              published: 'Published',
+            }}
+            relations={FIXTURES_RELATIONS}
+            searchResults={FIXTURES_SEARCH}
+            size={8}
+            {...props}
+          />
+        </DndProvider>
       </IntlProvider>
     </ThemeProvider>
   </MemoryRouter>
@@ -128,12 +136,12 @@ describe('Content-Manager || RelationInput', () => {
     });
 
     test('should call onRelationLoadMore', () => {
-      const spy = jest.fn();
-      setup({ onRelationLoadMore: spy });
+      const onRelationLoadMoreSpy = jest.fn();
+      setup({ onRelationLoadMore: onRelationLoadMoreSpy });
 
       fireEvent.click(screen.getByText('Load more'));
 
-      expect(spy).toHaveBeenCalled();
+      expect(onRelationLoadMoreSpy).toHaveBeenCalled();
     });
 
     test('should call onSearch', () => {
@@ -145,6 +153,32 @@ describe('Content-Manager || RelationInput', () => {
       });
 
       expect(spy).toHaveBeenCalled();
+    });
+
+    test('should call onRelationReorder', () => {
+      const spy = jest.fn();
+      setup({ onRelationReorder: spy });
+
+      const [draggedItem, dropZone] = screen.getAllByText('Drag');
+
+      fireEvent.dragStart(draggedItem);
+      fireEvent.dragEnter(dropZone);
+      fireEvent.dragOver(dropZone);
+      fireEvent.drop(dropZone);
+
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it('should not call onRelationReorder when the indices are the same', () => {
+      const spy = jest.fn();
+      setup({ onRelationReorder: spy });
+
+      const [draggedItem] = screen.getAllByText('Drag');
+
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'ArrowUp', code: 'ArrowUp' });
+
+      expect(spy).not.toHaveBeenCalled();
     });
 
     test('should scroll to the bottom when a new relation has been added & scroll to the top when load more is clicked', async () => {
@@ -272,7 +306,7 @@ describe('Content-Manager || RelationInput', () => {
         },
       });
 
-      expect(screen.getByRole('button', { name: /load more/i })).toHaveAttribute(
+      expect(screen.getByRole('button', { name: 'Load more' })).toHaveAttribute(
         'aria-disabled',
         'true'
       );
@@ -284,12 +318,21 @@ describe('Content-Manager || RelationInput', () => {
       expect(screen.getByText('This is an error')).toBeInTheDocument();
     });
 
-    test('should apply disabled state', () => {
-      const { queryByText, getByTestId, container } = setup({ disabled: true });
+    test('should display disabled state with only read permission', () => {
+      const onRelationLoadMoreSpy = jest.fn();
+      const { getAllByRole, getByRole, getByTestId, getByText, container } = setup({
+        disabled: true,
+        onRelationLoadMore: onRelationLoadMoreSpy,
+      });
 
-      expect(queryByText('Load more')).not.toBeInTheDocument();
+      fireEvent.click(getByText('Load more'));
+      expect(onRelationLoadMoreSpy).toHaveBeenCalledTimes(1);
+
       expect(container.querySelector('input')).toBeDisabled();
       expect(getByTestId('remove-relation-1')).toBeDisabled();
+      const [dragButton] = getAllByRole('button', { name: 'Drag' });
+      expect(dragButton).toHaveAttribute('aria-disabled', 'true');
+      expect(getByRole('link', { name: 'Relation 1' })).toBeInTheDocument();
     });
   });
 });

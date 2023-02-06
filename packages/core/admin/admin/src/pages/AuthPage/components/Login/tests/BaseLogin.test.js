@@ -56,7 +56,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         padding-left: 8px;
       }
 
-      .c34 {
+      .c33 {
         padding-top: 16px;
       }
 
@@ -106,7 +106,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         justify-content: space-between;
       }
 
-      .c33 {
+      .c32 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -156,15 +156,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         color: #32324d;
       }
 
-      .c32 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        line-height: 1.14;
-        color: #32324d;
-      }
-
-      .c36 {
+      .c35 {
         font-size: 0.875rem;
         line-height: 1.43;
         color: #4945ff;
@@ -324,9 +316,9 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
       }
 
       .c28 {
-        margin: 0;
         height: 18px;
         min-width: 18px;
+        margin: 0;
         border-radius: 4px;
         border: 1px solid #c0c0cf;
         -webkit-appearance: none;
@@ -516,22 +508,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         align-items: center;
       }
 
-      .c27 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: flex-start;
-        -webkit-box-align: flex-start;
-        -ms-flex-align: flex-start;
-        align-items: flex-start;
-      }
-
-      .c27 * {
-        cursor: pointer;
-      }
-
-      .c35 {
+      .c34 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -546,15 +523,15 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         outline: none;
       }
 
-      .c35 svg path {
+      .c34 svg path {
         fill: #4945ff;
       }
 
-      .c35 svg {
+      .c34 svg {
         font-size: 0.625rem;
       }
 
-      .c35:after {
+      .c34:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -569,11 +546,11 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         border: 2px solid transparent;
       }
 
-      .c35:focus-visible {
+      .c34:focus-visible {
         outline: none;
       }
 
-      .c35:focus-visible:after {
+      .c34:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -586,6 +563,21 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
 
       .c0:focus-visible {
         outline: none;
+      }
+
+      .c27 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: flex-start;
+        -webkit-box-align: flex-start;
+        -ms-flex-align: flex-start;
+        align-items: flex-start;
+      }
+
+      .c27 * {
+        cursor: pointer;
       }
 
       .c3 {
@@ -636,7 +628,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                 alt=""
                 aria-hidden="true"
                 class="c6"
-                src="defaultAuthLogo.png"
+                src="customAuthLogo.png"
               />
               <div
                 class="c1 c7"
@@ -670,7 +662,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                     <label
                       class="c8 c15"
                       for="textinput-1"
-                      required=""
                     >
                       <div
                         class="c1 c4"
@@ -689,6 +680,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                       <input
                         aria-disabled="false"
                         aria-invalid="false"
+                        aria-required="true"
                         class="c20"
                         id="textinput-1"
                         name="email"
@@ -708,7 +700,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                     <label
                       class="c8 c15"
                       for="textinput-2"
-                      required=""
                     >
                       <div
                         class="c1 c4"
@@ -727,6 +718,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                       <input
                         aria-disabled="false"
                         aria-invalid="false"
+                        aria-required="true"
                         class="c21 c22"
                         id="textinput-2"
                         name="password"
@@ -792,7 +784,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                 type="submit"
               >
                 <span
-                  class="c8 c32"
+                  class="c8 c15"
                 >
                   Login
                 </span>
@@ -801,17 +793,17 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
           </form>
         </div>
         <div
-          class="c1 c33"
+          class="c1 c32"
         >
           <div
-            class="c1 c34"
+            class="c1 c33"
           >
             <a
-              class="c35"
+              class="c34"
               href="/auth/forgot-password"
             >
               <span
-                class="c8 c36"
+                class="c8 c35"
               >
                 Forgot your password?
               </span>

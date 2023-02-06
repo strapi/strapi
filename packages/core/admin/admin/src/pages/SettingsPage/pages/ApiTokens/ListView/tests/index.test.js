@@ -6,7 +6,6 @@ import { createMemoryHistory } from 'history';
 import { useRBAC, TrackingProvider } from '@strapi/helper-plugin';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { lightTheme, darkTheme } from '@strapi/design-system';
-import { axiosInstance } from '../../../../../../core/utils';
 import Theme from '../../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
 import ListView from '../index';
@@ -19,23 +18,41 @@ jest.mock('@strapi/helper-plugin', () => ({
   useGuidedTour: jest.fn(() => ({
     startSection: jest.fn(),
   })),
+  useFetchClient: jest.fn().mockReturnValue({
+    get: jest.fn().mockResolvedValue({
+      data: {
+        data: [
+          {
+            id: 1,
+            name: 'My super token',
+            description: 'This describe my super token',
+            type: 'read-only',
+            createdAt: '2021-11-15T00:00:00.000Z',
+          },
+        ],
+      },
+    }),
+  }),
 }));
 
-jest.spyOn(axiosInstance, 'get').mockResolvedValue({
-  data: {
-    data: [
-      {
-        id: 1,
-        name: 'My super token',
-        description: 'This describe my super token',
-        type: 'read-only',
-        createdAt: '2021-11-15T00:00:00.000Z',
-      },
-    ],
-  },
-});
-
 jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01T08:00:00.000Z'));
+
+// TO BE REMOVED: we have added this mock to prevent errors in the snapshots caused by the Unicode space character
+// before AM/PM in the dates, after the introduction of node 18.13
+jest.mock('react-intl', () => {
+  const reactIntl = jest.requireActual('react-intl');
+  const intl = reactIntl.createIntl({
+    locale: 'en',
+  });
+
+  intl.formatDate = jest.fn(() => '11/15/2021');
+  intl.formatTime = jest.fn(() => '12:00 AM');
+
+  return {
+    ...reactIntl,
+    useIntl: () => intl,
+  };
+});
 
 const client = new QueryClient({
   defaultOptions: {

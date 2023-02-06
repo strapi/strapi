@@ -7,10 +7,8 @@
 import React, { useMemo, useState } from 'react';
 import { useSelector, shallowEqual } from 'react-redux';
 import { useIntl } from 'react-intl';
-import matchSorter from 'match-sorter';
-import sortBy from 'lodash/sortBy';
-import toLower from 'lodash/toLower';
 import { NavLink } from 'react-router-dom';
+
 import {
   SubNav,
   SubNavHeader,
@@ -18,11 +16,10 @@ import {
   SubNavSections,
   SubNavLink,
 } from '@strapi/design-system/v2/SubNav';
+
+import { matchByTitle } from './utils';
 import getTrad from '../../../utils/getTrad';
 import { makeSelectModelLinks } from '../selectors';
-
-const matchByTitle = (links, search) =>
-  matchSorter(links, toLower(search), { keys: [(item) => toLower(item.title)] });
 
 const LeftMenu = () => {
   const [search, setSearch] = useState('');
@@ -52,9 +49,7 @@ const LeftMenu = () => {
         defaultMessage: 'Collection Types',
       },
       searchable: true,
-      links: sortBy(matchByTitle(intlCollectionTypeLinks, search), (object) =>
-        object.title.toLowerCase()
-      ),
+      links: matchByTitle(intlCollectionTypeLinks, search),
     },
     {
       id: 'singleTypes',
@@ -63,9 +58,7 @@ const LeftMenu = () => {
         defaultMessage: 'Single Types',
       },
       searchable: true,
-      links: sortBy(matchByTitle(intlSingleTypeLinks, search), (object) =>
-        object.title.toLowerCase()
-      ),
+      links: matchByTitle(intlSingleTypeLinks, search),
     },
   ];
 

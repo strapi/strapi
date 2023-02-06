@@ -171,14 +171,6 @@ describe('Email | Pages | Settings', () => {
         color: #666687;
       }
 
-      .c37 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        line-height: 1.14;
-        color: #32324d;
-      }
-
       .c10 > * {
         margin-top: 0;
         margin-bottom: 0;
@@ -336,6 +328,25 @@ describe('Email | Pages | Settings', () => {
         fill: #ffffff;
       }
 
+      .c23 {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
+        width: 100%;
+        background: transparent;
+        border: none;
+      }
+
+      .c23:focus {
+        outline: none;
+      }
+
+      .c23[aria-disabled='true'] {
+        cursor: not-allowed;
+      }
+
       .c21 {
         border: none;
         border-radius: 4px;
@@ -459,25 +470,6 @@ describe('Email | Pages | Settings', () => {
       .c30:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
-      }
-
-      .c23 {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        top: 0;
-        width: 100%;
-        background: transparent;
-        border: none;
-      }
-
-      .c23:focus {
-        outline: none;
-      }
-
-      .c23[aria-disabled='true'] {
-        cursor: not-allowed;
       }
 
       .c22 {
@@ -691,6 +683,7 @@ describe('Email | Pages | Settings', () => {
                                 <input
                                   aria-disabled="true"
                                   aria-invalid="false"
+                                  aria-required="false"
                                   class="c21"
                                   id="textinput-4"
                                   name="shipper-email"
@@ -732,6 +725,7 @@ describe('Email | Pages | Settings', () => {
                                 <input
                                   aria-disabled="true"
                                   aria-invalid="false"
+                                  aria-required="false"
                                   class="c21"
                                   id="textinput-5"
                                   name="response-email"
@@ -755,17 +749,16 @@ describe('Email | Pages | Settings', () => {
                             class="c1 c9 c13"
                             spacing="1"
                           >
-                            <span
+                            <label
                               class="c5 c19"
                               for="select-6"
-                              id="select-6-label"
                             >
                               <div
                                 class="c1 c4"
                               >
                                 Email provider
                               </div>
-                            </span>
+                            </label>
                             <div
                               class="c1 c4 c22"
                               disabled=""
@@ -774,7 +767,7 @@ describe('Email | Pages | Settings', () => {
                                 aria-disabled="true"
                                 aria-expanded="false"
                                 aria-haspopup="listbox"
-                                aria-labelledby="select-6-label select-6-content"
+                                aria-labelledby="select-6 select-6-label select-6-content"
                                 class="c23"
                                 id="select-6"
                                 name="email-provider"
@@ -877,6 +870,7 @@ describe('Email | Pages | Settings', () => {
                                 <input
                                   aria-disabled="false"
                                   aria-invalid="false"
+                                  aria-required="false"
                                   class="c31"
                                   id="test-address-input"
                                   name="test-address"
@@ -927,7 +921,7 @@ describe('Email | Pages | Settings', () => {
                             </svg>
                           </div>
                           <span
-                            class="c5 c37"
+                            class="c5 c19"
                           >
                             Send test email
                           </span>

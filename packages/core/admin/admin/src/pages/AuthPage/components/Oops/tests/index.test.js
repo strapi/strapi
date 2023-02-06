@@ -119,7 +119,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
-        line-height: 1.14;
         color: #32324d;
       }
 
@@ -273,22 +272,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         fill: #8e8ea9;
       }
 
-      .c8 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c8 svg {
-        height: 4px;
-        width: 6px;
-      }
-
       .c21 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
@@ -344,6 +327,22 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
 
       .c10:focus-visible {
         outline: none;
+      }
+
+      .c8 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c8 svg {
+        height: 4px;
+        width: 6px;
       }
 
       .c12 {
@@ -430,7 +429,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
                   alt=""
                   aria-hidden="true"
                   class="c15"
-                  src="defaultAuthLogo.png"
+                  src="customAuthLogo.png"
                 />
                 <div
                   class="c0 c16"
