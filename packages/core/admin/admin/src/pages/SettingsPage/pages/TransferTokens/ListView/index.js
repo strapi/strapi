@@ -11,7 +11,6 @@ import {
   NoPermissions,
   useRBAC,
   NoContent,
-  useTracking,
   useGuidedTour,
   LinkButton,
   useFetchClient,
@@ -34,7 +33,7 @@ const TransferTokenListView = () => {
     allowedActions: { canCreate, canDelete, canUpdate, canRead },
   } = useRBAC(adminPermissions.settings['transfer-tokens']);
   const { push } = useHistory();
-  const { trackUsage } = useTracking();
+
   const { startSection } = useGuidedTour();
   const startSectionRef = useRef(startSection);
   const { get, del } = useFetchClient();
@@ -64,12 +63,9 @@ const TransferTokenListView = () => {
   } = useQuery(
     ['transfer-tokens'],
     async () => {
-      trackUsage('willAccessTokenList');
       const {
         data: { data },
       } = await get(`/admin/transfer/tokens`);
-
-      // trackUsage('didAccessTokenList', { number: data.length }); // TODO What should we track?
 
       return data;
     },
@@ -94,8 +90,7 @@ const TransferTokenListView = () => {
     },
     {
       async onSuccess() {
-        await queryClient.invalidateQueries(['transfer-tokens']); // TODO change this
-        trackUsage('didDeleteToken');
+        await queryClient.invalidateQueries(['transfer-tokens']);
       },
       onError(err) {
         if (err?.response?.data?.data) {
@@ -132,7 +127,6 @@ const TransferTokenListView = () => {
               data-testid="create-transfer-token-button"
               startIcon={<Plus />}
               size="S"
-              // onClick={() => trackUsage('willAddTokenFromList')}
               to="/settings/transfer-tokens/create"
             >
               {formatMessage({

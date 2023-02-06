@@ -14,7 +14,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(),
   useFocusWhenNavigate: jest.fn(),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useRBAC: jest.fn(() => ({
     allowedActions: {
       canCreate: true,

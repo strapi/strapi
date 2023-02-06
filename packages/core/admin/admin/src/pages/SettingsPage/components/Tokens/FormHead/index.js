@@ -17,7 +17,7 @@ const FormHead = ({
   canRegenerate,
   isSubmitting,
   backUrl,
-  regenerateBackUrl,
+  regenerateUrl,
 }) => {
   const { formatMessage } = useIntl();
   const handleRegenerate = (newKey) => {
@@ -35,7 +35,7 @@ const FormHead = ({
           <Stack horizontal spacing={2}>
             {canRegenerate && token?.id && (
               <Regenerate
-                backUrl={regenerateBackUrl}
+                backUrl={regenerateUrl}
                 onRegenerate={handleRegenerate}
                 idToRegenerate={token?.id}
               />
@@ -59,7 +59,7 @@ const FormHead = ({
             <Regenerate
               onRegenerate={handleRegenerate}
               idToRegenerate={token?.id}
-              backUrl={regenerateBackUrl}
+              backUrl={regenerateUrl}
             />
           )
         )
@@ -96,7 +96,7 @@ FormHead.propTypes = {
     id: PropTypes.string,
     label: PropTypes.string,
   }).isRequired,
-  regenerateBackUrl: PropTypes.string.isRequired,
+  regenerateUrl: PropTypes.string.isRequired,
 };
 
 FormHead.defaultProps = {

@@ -25,12 +25,12 @@ const Table = ({ permissions, headers, contentType, isLoading, tokens, onConfirm
     push,
     location: { pathname },
   } = useHistory();
-  const { trackUsage } = useTracking();
+  const { trackUsage } = useTracking(); // TODO: Track different types of tokens
 
   const sortedTokens = tokens.sort((a, b) => {
-    const comparaison = a.name.localeCompare(b.name);
+    const comparison = a.name.localeCompare(b.name);
 
-    return sortOrder === 'DESC' ? -comparaison : comparaison;
+    return sortOrder === 'DESC' ? -comparison : comparison;
   });
 
   return (

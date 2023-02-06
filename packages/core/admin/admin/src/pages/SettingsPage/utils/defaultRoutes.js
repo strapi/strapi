@@ -126,7 +126,7 @@ const defaultRoutes = [
   {
     async Component() {
       const component = await import(
-        /* webpackChunkName: "api-tokens-create-page" */ '../pages/TransferTokens/ProtectedCreateView'
+        /* webpackChunkName: "transfer-tokens-create-page" */ '../pages/TransferTokens/ProtectedCreateView'
       );
 
       return component;
@@ -137,7 +137,7 @@ const defaultRoutes = [
   {
     async Component() {
       const component = await import(
-        /* webpackChunkName: "api-tokens-list-page" */ '../pages/TransferTokens/ProtectedListView'
+        /* webpackChunkName: "transfer-tokens-list-page" */ '../pages/TransferTokens/ProtectedListView'
       );
 
       return component;
@@ -148,7 +148,7 @@ const defaultRoutes = [
   {
     async Component() {
       const component = await import(
-        /* webpackChunkName: "api-tokens-edit-page" */ '../pages/TransferTokens/ProtectedEditView'
+        /* webpackChunkName: "transfer-tokens-edit-page" */ '../pages/TransferTokens/ProtectedEditView'
       );
 
       return component;

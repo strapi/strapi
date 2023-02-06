@@ -294,7 +294,7 @@ const ApiTokenCreateView = () => {
                   canEditInputs={canEditInputs}
                   canRegenerate={canRegenerate}
                   isSubmitting={isSubmitting}
-                  regenerateBackUrl="/admin/api-tokens/"
+                  regenerateUrl="/admin/api-tokens/"
                 />
 
                 <ContentLayout>

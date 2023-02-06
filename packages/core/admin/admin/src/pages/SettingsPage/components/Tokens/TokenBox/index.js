@@ -10,7 +10,7 @@ import Key from '@strapi/icons/Key';
 const TokenBox = ({ token }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
-  const { trackUsage } = useTracking();
+  const { trackUsage } = useTracking(); // TODO: Track different types of tokens
   const trackUsageRef = useRef(trackUsage);
 
   return (
@@ -20,7 +20,7 @@ const TokenBox = ({ token }) => {
           <span style={{ alignSelf: 'start' }}>
             <CopyToClipboard
               onCopy={() => {
-                trackUsageRef.current('didCopyTokenKey'); // TODO: track different event?
+                trackUsageRef.current('didCopyTokenKey');
                 toggleNotification({
                   type: 'success',
                   message: { id: 'Settings.tokens.notification.copied' },

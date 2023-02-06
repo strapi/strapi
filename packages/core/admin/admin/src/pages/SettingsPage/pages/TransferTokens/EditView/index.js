@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
 import { useRouteMatch, useHistory } from 'react-router-dom';
@@ -9,7 +9,6 @@ import {
   Form,
   useOverlayBlocker,
   useNotification,
-  useTracking,
   useGuidedTour,
   useRBAC,
   useFetchClient,
@@ -40,8 +39,6 @@ const TransferTokenCreateView = () => {
         }
       : null
   );
-  const { trackUsage } = useTracking();
-  const trackUsageRef = useRef(trackUsage);
   const { setCurrentStep } = useGuidedTour();
   const {
     allowedActions: { canCreate, canUpdate, canRegenerate },
@@ -52,10 +49,6 @@ const TransferTokenCreateView = () => {
   const { get, post, put } = useFetchClient();
 
   const isCreating = id === 'create';
-
-  useEffect(() => {
-    trackUsageRef.current(isCreating ? 'didAddTokenFromList' : 'didEditTokenFromList');
-  }, [isCreating]);
 
   const { status } = useQuery(
     ['transfer-token', id],
@@ -82,7 +75,6 @@ const TransferTokenCreateView = () => {
   );
 
   const handleSubmit = async (body, actions) => {
-    trackUsageRef.current(isCreating ? 'willCreateToken' : 'willEditToken'); // TODO what do we do with analytics?
     lockApp();
     const lifespanVal =
       body.lifespan && parseInt(body.lifespan, 10) && body.lifespan !== '0'
@@ -126,10 +118,6 @@ const TransferTokenCreateView = () => {
               id: 'notification.success.transfertokenedited',
               defaultMessage: 'Transfer Token successfully edited',
             }),
-      });
-
-      trackUsageRef.current(isCreating ? 'didCreateToken' : 'didEditToken', {
-        type: transferToken.type,
       });
     } catch (err) {
       const errors = formatAPIErrors(err.response.data);
@@ -187,7 +175,7 @@ const TransferTokenCreateView = () => {
                 canEditInputs={canEditInputs}
                 canRegenerate={canRegenerate}
                 isSubmitting={isSubmitting}
-                regenerateBackUrl="/admin/transfer/tokens/"
+                regenerateUrl="/admin/transfer/tokens/"
               />
               <ContentLayout>
                 <Stack spacing={6}>
