@@ -15,10 +15,8 @@ const useLazyComponents = (componentUids = []) => {
    * Start loading only if there are any components passed in
    * and there are some new to load
    */
-
-  const [loading, setLoading] = useState(
-    () => !!componentUids.filter((uid) => !componentStore.get(uid)).length
-  );
+  const [newUids] = useState(() => componentUids.filter((uid) => !componentStore.get(uid)));
+  const [loading, setLoading] = useState(() => !!newUids.length);
 
   const customFieldsRegistry = useCustomFields();
 
@@ -38,8 +36,6 @@ const useLazyComponents = (componentUids = []) => {
       setStore(Object.fromEntries(componentStore));
     };
 
-    const newUids = componentUids.filter((uid) => !componentStore.get(uid));
-
     if (loading) {
       /**
        * These uids are not in the component store therefore we need to get the components
@@ -52,7 +48,7 @@ const useLazyComponents = (componentUids = []) => {
 
       lazyLoadComponents(newUids, componentPromises);
     }
-  }, [componentUids, customFieldsRegistry, loading]);
+  }, [newUids, customFieldsRegistry, loading]);
 
   /**
    * Wrap this in a callback so it can be used in
