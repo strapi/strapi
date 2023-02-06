@@ -1,0 +1,32 @@
+import { Book, PaperPlane } from '@strapi/icons';
+
+export const VIDEO_LINKS = [
+  {
+    label: { id: 'app', defaultMessage: 'Build a content architecture' },
+    href: 'https://www.youtube.com/watch?v=G9GjN0RxhkE',
+    duration: '5:48',
+  },
+  {
+    label: { id: 'app', defaultMessage: 'Add & manage content' },
+    href: 'https://www.youtube.com/watch?v=DEZw4KbybAI',
+    duration: '3:18',
+  },
+  {
+    label: { id: 'app', defaultMessage: 'Manage media' },
+    href: 'https://www.youtube.com/watch?v=-61MuiMQb38',
+    duration: '3:41',
+  },
+];
+
+export const DOCUMENTATION_LINKS = [
+  {
+    label: { id: 'global.documentation', defaultMessage: 'documentation' },
+    href: 'https://docs.strapi.io',
+    icon: Book,
+  },
+  {
+    label: { id: 'app.static.links.cheatsheet', defaultMessage: 'cheatsheet' },
+    href: 'https://strapi-showcase.s3-us-west-2.amazonaws.com/CheatSheet.pdf',
+    icon: PaperPlane,
+  },
+];

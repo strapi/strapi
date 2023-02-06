@@ -1,11 +1,22 @@
 import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { pxToRem } from '@strapi/helper-plugin';
-import { Box, Button, Divider, Icon, Popover, Stack, Typography } from '@strapi/design-system';
-import { Cross, Question } from '@strapi/icons';
+import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  FocusTrap,
+  Icon,
+  Popover,
+  Stack,
+  Typography,
+} from '@strapi/design-system';
+import { Cross, Play, Question } from '@strapi/icons';
 
 import { useConfigurations } from '../../../hooks';
+import OnboardingPreview from '../../../assets/images/onboarding-preview.png';
+import { VIDEO_LINKS, DOCUMENTATION_LINKS } from './constants';
 
 // TODO: use new Button props derived from Box props with next DS release
 const HelperButton = styled(Button)`
@@ -13,6 +24,40 @@ const HelperButton = styled(Button)`
   padding: ${({ theme }) => theme.spaces[3]};
   // Resetting 2rem height defined by Button component
   height: 100%;
+`;
+
+const IconWrapper = styled(Flex)`
+  transform: translate(-50%, -50%);
+`;
+
+const VideoLinkWrapper = styled(Flex)`
+  text-decoration: none;
+
+  :focus-visible {
+    outline-offset: ${({ theme }) => `-${theme.spaces[1]}`};
+  }
+
+  :hover {
+    background: ${({ theme }) => theme.colors.primary100};
+    div:first-child span {
+      color: ${({ theme }) => theme.colors.primary500};
+    }
+    span:nth-child(1) {
+      color: ${({ theme }) => theme.colors.primary600};
+    }
+  }
+`;
+
+const Preview = styled.img`
+  width: 56px;
+  height: 40px;
+  // Same overlay used in ModalLayout
+  background: ${({ theme }) => `${theme.colors.neutral800}1F`};
+  border-radius: ${({ theme }) => theme.borderRadius};
+`;
+
+const TextLink = styled(Typography)`
+  text-decoration: none;
 `;
 
 const Onboarding = () => {
@@ -24,22 +69,6 @@ const Onboarding = () => {
   if (!showTutorials) {
     return null;
   }
-
-  // const STATIC_LINKS = [
-  //   {
-  //     Icon: <Book />,
-  //     label: formatMessage({
-  //       id: 'global.documentation',
-  //       defaultMessage: 'Documentation',
-  //     }),
-  //     destination: 'https://docs.strapi.io',
-  //   },
-  //   {
-  //     Icon: <Information />,
-  //     label: formatMessage({ id: 'app.static.links.cheatsheet', defaultMessage: 'CheatSheet' }),
-  //     destination: 'https://strapi-showcase.s3-us-west-2.amazonaws.com/CheatSheet.pdf',
-  //   },
-  // ];
 
   const handleClick = () => {
     setIsOpen((prev) => !prev);
@@ -65,13 +94,10 @@ const Onboarding = () => {
         <Icon as={isOpen ? Cross : Question} color="buttonNeutral0" />
       </HelperButton>
 
-      {/* FIX ME - replace with popover when overflow popover is fixed 
-       + when v4 mockups for onboarding component are ready */}
       {isOpen && (
         <Popover placement="top-end" source={buttonRef} spacing={12}>
-          <Box width={pxToRem(400)}>
-            <Stack
-              horizontal
+          <FocusTrap>
+            <Flex
               alignItems="end"
               justifyContent="space-between"
               paddingBottom={4}
@@ -80,21 +106,78 @@ const Onboarding = () => {
               paddingTop={5}
             >
               <Typography fontWeight="bold">Get started videos</Typography>
-              <Typography variant="pi" textColor="primary600">
-                Watch more videos
-              </Typography>
-            </Stack>
+              <TextLink
+                as="a"
+                href="https://www.youtube.com/playlist?list=PL7Q0DQYATmvidz6lEmwE5nIcOAYagxWqq"
+                target="_blank"
+                rel="noreferrer noopener"
+                variant="pi"
+                textColor="primary600"
+              >
+                {formatMessage({ id: 'app', defaultMessage: 'Watch more videos' })}
+              </TextLink>
+            </Flex>
             <Divider />
-            <Box>
-              <Typography textColor="neutral200" variant="alpha">
-                1
-              </Typography>
-              <Typography fontWeight="bold">Build a content architecture</Typography>
-              <Typography textColor="neutral600" variant="pi">
-                5:48
-              </Typography>
-            </Box>
-          </Box>
+            {VIDEO_LINKS.map(({ href, duration, label }, index) => (
+              <VideoLinkWrapper
+                as="a"
+                href={href}
+                target="_blank"
+                rel="noreferrer noopener"
+                hasRadius
+                paddingTop={4}
+                paddingBottom={4}
+                paddingLeft={6}
+                paddingRight={11}
+              >
+                <Box paddingRight={5}>
+                  <Typography textColor="neutral200" variant="alpha">
+                    {index + 1}
+                  </Typography>
+                </Box>
+                <Box position="relative">
+                  <Preview src={OnboardingPreview} alt="onboarding preview" />
+                  <IconWrapper
+                    position="absolute"
+                    top="50%"
+                    left="50%"
+                    background="primary600"
+                    borderRadius="50%"
+                    justifyContent="center"
+                    width={6}
+                    height={6}
+                    // Allows to visually center the Play icon
+                    paddingLeft="2px"
+                  >
+                    <Icon as={Play} color="buttonNeutral0" width={3} height={3} />
+                  </IconWrapper>
+                </Box>
+                <Flex direction="column" alignItems="start" paddingLeft={4}>
+                  <Typography fontWeight="bold">{formatMessage(label)}</Typography>
+                  <Typography textColor="neutral600" variant="pi">
+                    {duration}
+                  </Typography>
+                </Flex>
+              </VideoLinkWrapper>
+            ))}
+            <Stack spacing={2} paddingLeft={5} paddingTop={2} paddingBottom={5}>
+              {DOCUMENTATION_LINKS.map(({ label, href, icon }) => (
+                <Stack horizontal spacing={3}>
+                  <Icon as={icon} color="primary600" />
+                  <TextLink
+                    as="a"
+                    href={href}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    variant="sigma"
+                    textColor="primary700"
+                  >
+                    {formatMessage(label)}
+                  </TextLink>
+                </Stack>
+              ))}
+            </Stack>
+          </FocusTrap>
         </Popover>
       )}
     </Box>
