@@ -38,9 +38,9 @@ module.exports = {
     const { token: tokenService } = getService('transfer');
 
     /**
-     * We trim both field to avoid having issues with either:
-     * - having a space at the end or start of the value.
-     * - having only spaces as value;
+     * We trim fields to avoid having issues with either:
+     * - having a space at the end or start of the value
+     * - having only spaces as value (so that an empty field can be caught in validation)
      */
     const attributes = {
       name: trim(body.name),
@@ -68,9 +68,9 @@ module.exports = {
 
     const attributes = body;
     /**
-     * We trim both field to avoid having issues with either:
-     * - having a space at the end or start of the value.
-     * - having only spaces as value;
+     * We trim fields to avoid having issues with either:
+     * - having a space at the end or start of the value
+     * - having only spaces as value (so that an empty field can be caught in validation)
      */
     if (has('name', attributes)) {
       attributes.name = trim(body.name);
