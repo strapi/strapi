@@ -5,7 +5,6 @@ import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { useAppInfos, useRBAC, TrackingProvider } from '@strapi/helper-plugin';
 import ApplicationInfosPage from '../index';
-import { axiosInstance } from '../../../../../core/utils';
 import server from './server';
 
 const updateProjectSettingsSpy = jest.fn();
@@ -17,6 +16,20 @@ jest.mock('@strapi/helper-plugin', () => ({
   useAppInfos: jest.fn(() => ({ shouldUpdateStrapi: false, latestStrapiReleaseTag: 'v3.6.8' })),
   useNotification: jest.fn(() => jest.fn()),
   useRBAC: jest.fn(() => ({ allowedActions: { canRead: true, canUpdate: true } })),
+  useFetchClient: jest.fn().mockReturnValue({
+    get: jest.fn().mockResolvedValue({
+      data: {
+        menuLogo: {
+          ext: 'png',
+          height: 256,
+          name: 'image.png',
+          size: 27.4,
+          url: 'uploads/image_fe95c5abb9.png',
+          width: 246,
+        },
+      },
+    }),
+  }),
 }));
 jest.mock('../../../../../hooks', () => ({
   useConfigurations: jest.fn(() => ({
@@ -27,19 +40,6 @@ jest.mock('../../../../../hooks', () => ({
     updateProjectSettings: updateProjectSettingsSpy,
   })),
 }));
-
-jest.spyOn(axiosInstance, 'get').mockResolvedValue({
-  data: {
-    menuLogo: {
-      ext: 'png',
-      height: 256,
-      name: 'image.png',
-      size: 27.4,
-      url: 'uploads/image_fe95c5abb9.png',
-      width: 246,
-    },
-  },
-});
 
 const client = new QueryClient();
 

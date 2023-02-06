@@ -38,14 +38,6 @@ export const diff = (a: unknown, b: unknown, ctx: Context = createContext()): Di
     return diffs;
   };
 
-  if (aType === 'undefined') {
-    return added();
-  }
-
-  if (bType === 'undefined') {
-    return deleted();
-  }
-
   if (isArray(a) && isArray(b)) {
     let k = 0;
 
@@ -77,6 +69,14 @@ export const diff = (a: unknown, b: unknown, ctx: Context = createContext()): Di
   }
 
   if (!isEqual(a, b)) {
+    if (aType === 'undefined') {
+      return added();
+    }
+
+    if (bType === 'undefined') {
+      return deleted();
+    }
+
     return modified();
   }
 

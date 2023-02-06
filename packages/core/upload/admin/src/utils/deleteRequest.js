@@ -1,8 +1,9 @@
-import axiosInstance from './axiosInstance';
+import { getFetchClient } from '@strapi/helper-plugin';
 import getRequestUrl from './getRequestUrl';
 
 export const deleteRequest = (type, id) => {
+  const { del } = getFetchClient();
   const url = getRequestUrl(`/${type}/${id}`);
 
-  return axiosInstance.delete(url);
+  return del(url);
 };

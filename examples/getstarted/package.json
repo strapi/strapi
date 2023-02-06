@@ -23,7 +23,7 @@
     "@strapi/provider-upload-cloudinary": "4.6.0",
     "@strapi/strapi": "4.6.0",
     "@vscode/sqlite3": "5.0.8",
-    "better-sqlite3": "7.4.6",
+    "better-sqlite3": "8.0.1",
     "lodash": "4.17.21",
     "mysql": "2.18.1",
     "passport-google-oauth2": "0.2.0",
