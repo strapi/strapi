@@ -3,9 +3,11 @@
 const _ = require('lodash');
 const { has, prop, omit, toString, pipe, assign } = require('lodash/fp');
 
-const { contentTypes: contentTypesUtils, mapAsyncDialects } = require('@strapi/utils');
+const { contentTypes: contentTypesUtils, mapAsync } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getComponentAttributes } = require('@strapi/utils').contentTypes;
+
+const isDialectMySQL = () => strapi.db.dialect.client === 'mysql';
 
 const omitComponentData = (contentType, data) => {
   const { attributes } = contentType;
@@ -43,8 +45,11 @@ const createComponents = async (uid, data) => {
           throw new Error('Expected an array to create repeatable component');
         }
 
-        const components = await mapAsyncDialects(componentValue, (value) =>
-          createComponent(componentUID, value)
+        // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+        const components = await mapAsync(
+          componentValue,
+          (value) => createComponent(componentUID, value),
+          { concurrency: isDialectMySQL() ? 1 : Infinity }
         );
 
         componentBody[attributeName] = components.map(({ id }) => {
@@ -77,16 +82,21 @@ const createComponents = async (uid, data) => {
         throw new Error('Expected an array to create repeatable component');
       }
 
-      componentBody[attributeName] = await mapAsyncDialects(dynamiczoneValues, async (value) => {
-        const { id } = await createComponent(value.__component, value);
-        return {
-          id,
-          __component: value.__component,
-          __pivot: {
-            field: attributeName,
-          },
-        };
-      });
+      // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+      componentBody[attributeName] = await mapAsync(
+        dynamiczoneValues,
+        async (value) => {
+          const { id } = await createComponent(value.__component, value);
+          return {
+            id,
+            __component: value.__component,
+            __pivot: {
+              field: attributeName,
+            },
+          };
+        },
+        { concurrency: isDialectMySQL() ? 1 : Infinity }
+      );
 
       continue;
     }
@@ -135,8 +145,11 @@ const updateComponents = async (uid, entityToUpdate, data) => {
           throw new Error('Expected an array to create repeatable component');
         }
 
-        const components = await mapAsyncDialects(componentValue, (value) =>
-          updateOrCreateComponent(componentUID, value)
+        // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+        const components = await mapAsync(
+          componentValue,
+          (value) => updateOrCreateComponent(componentUID, value),
+          { concurrency: isDialectMySQL() ? 1 : Infinity }
         );
 
         componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }) => {
@@ -171,17 +184,22 @@ const updateComponents = async (uid, entityToUpdate, data) => {
         throw new Error('Expected an array to create repeatable component');
       }
 
-      componentBody[attributeName] = await mapAsyncDialects(dynamiczoneValues, async (value) => {
-        const { id } = await updateOrCreateComponent(value.__component, value);
+      // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+      componentBody[attributeName] = await mapAsync(
+        dynamiczoneValues,
+        async (value) => {
+          const { id } = await updateOrCreateComponent(value.__component, value);
 
-        return {
-          id,
-          __component: value.__component,
-          __pivot: {
-            field: attributeName,
-          },
-        };
-      });
+          return {
+            id,
+            __component: value.__component,
+            __pivot: {
+              field: attributeName,
+            },
+          };
+        },
+        { concurrency: isDialectMySQL() ? 1 : Infinity }
+      );
 
       continue;
     }
@@ -283,17 +301,17 @@ const deleteComponents = async (uid, entityToDelete, { loadComponents = true } =
 
       if (attribute.type === 'component') {
         const { component: componentUID } = attribute;
-
-        await mapAsyncDialects(_.castArray(value), (subValue) =>
-          deleteComponent(componentUID, subValue)
-        );
-        for (const subValue of _.castArray(value)) {
-          await deleteComponent(componentUID, subValue);
-        }
+        // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+        await mapAsync(_.castArray(value), (subValue) => deleteComponent(componentUID, subValue), {
+          concurrency: isDialectMySQL() ? 1 : Infinity,
+        });
       } else {
         // delete dynamic zone components
-        await mapAsyncDialects(_.castArray(value), (subValue) =>
-          deleteComponent(subValue.__component, subValue)
+        // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+        await mapAsync(
+          _.castArray(value),
+          (subValue) => deleteComponent(subValue.__component, subValue),
+          { concurrency: isDialectMySQL() ? 1 : Infinity }
         );
       }
 
