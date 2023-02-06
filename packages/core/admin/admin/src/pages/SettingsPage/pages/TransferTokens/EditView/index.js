@@ -1,5 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useIntl } from 'react-intl';
+import { Formik } from 'formik';
+import { useRouteMatch, useHistory } from 'react-router-dom';
+import { useQuery } from 'react-query';
 import {
   SettingsPageTitle,
   useFocusWhenNavigate,
@@ -12,16 +15,12 @@ import {
   useFetchClient,
 } from '@strapi/helper-plugin';
 import { Main } from '@strapi/design-system/Main';
-import { Formik } from 'formik';
-import { useRouteMatch, useHistory } from 'react-router-dom';
-import { useQuery } from 'react-query';
 import { Stack } from '@strapi/design-system/Stack';
 import { ContentLayout } from '@strapi/design-system/Layout';
 import { formatAPIErrors } from '../../../../../utils';
 import { schema } from './utils';
 import LoadingView from './components/LoadingView';
 import adminPermissions from '../../../../../permissions';
-import { TransferTokenPermissionsContextProvider } from '../../../../../contexts/TransferTokenPermissions';
 import FormTransferTokenContainer from './components/FormTransferTokenContainer';
 import TokenBox from '../../../components/Tokens/TokenBox';
 import FormHead from '../../../components/Tokens/FormHead';
@@ -159,57 +158,55 @@ const TransferTokenCreateView = () => {
   }
 
   return (
-    <TransferTokenPermissionsContextProvider>
-      <Main>
-        <SettingsPageTitle name="Transfer Tokens" />
-        <Formik
-          validationSchema={schema}
-          validateOnChange={false}
-          initialValues={{
-            name: transferToken?.name || '',
-            description: transferToken?.description || '',
-            lifespan: transferToken?.lifespan
-              ? transferToken.lifespan.toString()
-              : transferToken?.lifespan,
-          }}
-          enableReinitialize
-          onSubmit={(body, actions) => handleSubmit(body, actions)}
-        >
-          {({ errors, handleChange, isSubmitting, values }) => {
-            return (
-              <Form>
-                <FormHead
-                  backUrl="/settings/api-tokens"
-                  title={{
-                    id: 'Settings.apiTokens.createPage.title',
-                    defaultMessage: 'Create API Token',
-                  }}
-                  token={transferToken}
-                  setToken={setTransferToken}
-                  canEditInputs={canEditInputs}
-                  canRegenerate={canRegenerate}
-                  isSubmitting={isSubmitting}
-                  regenerateBackUrl="/admin/transfer/tokens/"
-                />
-                <ContentLayout>
-                  <Stack spacing={6}>
-                    {Boolean(transferToken?.name) && <TokenBox token={transferToken?.accessKey} />}
-                    <FormTransferTokenContainer
-                      errors={errors}
-                      onChange={handleChange}
-                      canEditInputs={canEditInputs}
-                      isCreating={isCreating}
-                      values={values}
-                      transferToken={transferToken}
-                    />
-                  </Stack>
-                </ContentLayout>
-              </Form>
-            );
-          }}
-        </Formik>
-      </Main>
-    </TransferTokenPermissionsContextProvider>
+    <Main>
+      <SettingsPageTitle name="Transfer Tokens" />
+      <Formik
+        validationSchema={schema}
+        validateOnChange={false}
+        initialValues={{
+          name: transferToken?.name || '',
+          description: transferToken?.description || '',
+          lifespan: transferToken?.lifespan
+            ? transferToken.lifespan.toString()
+            : transferToken?.lifespan,
+        }}
+        enableReinitialize
+        onSubmit={(body, actions) => handleSubmit(body, actions)}
+      >
+        {({ errors, handleChange, isSubmitting, values }) => {
+          return (
+            <Form>
+              <FormHead
+                backUrl="/settings/transfer-tokens"
+                title={{
+                  id: 'Settings.transferTokens.createPage.title',
+                  defaultMessage: 'Create Transfer Token',
+                }}
+                token={transferToken}
+                setToken={setTransferToken}
+                canEditInputs={canEditInputs}
+                canRegenerate={canRegenerate}
+                isSubmitting={isSubmitting}
+                regenerateBackUrl="/admin/transfer/tokens/"
+              />
+              <ContentLayout>
+                <Stack spacing={6}>
+                  {Boolean(transferToken?.name) && <TokenBox token={transferToken?.accessKey} />}
+                  <FormTransferTokenContainer
+                    errors={errors}
+                    onChange={handleChange}
+                    canEditInputs={canEditInputs}
+                    isCreating={isCreating}
+                    values={values}
+                    transferToken={transferToken}
+                  />
+                </Stack>
+              </ContentLayout>
+            </Form>
+          );
+        }}
+      </Formik>
+    </Main>
   );
 };
 

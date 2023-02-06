@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { TextInput } from '@strapi/design-system/TextInput';
 import { useIntl } from 'react-intl';
+import { TextInput } from '@strapi/design-system/TextInput';
 
 const TokenName = ({ errors, values, onChange, canEditInputs }) => {
   const { formatMessage } = useIntl();

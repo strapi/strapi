@@ -1,7 +1,7 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { Link } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
+import { Link } from '@strapi/helper-plugin';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Check from '@strapi/icons/Check';
 import { Button } from '@strapi/design-system/Button';

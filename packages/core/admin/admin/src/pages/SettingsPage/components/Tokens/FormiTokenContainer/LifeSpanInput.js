@@ -7,7 +7,6 @@ import { Typography } from '@strapi/design-system/Typography';
 import { getDateOfExpiration } from '../../../pages/ApiTokens/EditView/utils';
 
 const LifeSpanInput = ({ token, errors, values, onChange, disabled }) => {
-  console.log('token', token);
   const { formatMessage } = useIntl();
   const [lang] = usePersistentState('strapi-admin-language', 'en');
 

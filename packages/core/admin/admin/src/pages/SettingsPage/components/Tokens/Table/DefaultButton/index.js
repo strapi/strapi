@@ -1,9 +1,9 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Link } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import { Link } from '@strapi/helper-plugin';
 
 const MESSAGES_MAP = {
   edit: {

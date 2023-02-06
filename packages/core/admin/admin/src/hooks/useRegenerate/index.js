@@ -13,7 +13,7 @@ const useRegenerate = (url, id, onRegenerate) => {
         data: {
           data: { accessKey },
         },
-      } = await post(`/admin/api-tokens/${id}/regenerate`);
+      } = await post(`${url}${id}/regenerate`);
       setIsLoadingConfirmation(false);
       onRegenerate(accessKey);
     } catch (error) {

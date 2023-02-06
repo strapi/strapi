@@ -20,7 +20,7 @@ const Table = ({ permissions, headers, contentType, isLoading, tokens, onConfirm
   const { canDelete, canUpdate, canRead } = permissions;
   const withBulkActions = canDelete || canUpdate || canRead;
   const [{ query }] = useQueryParams();
-  const [, sortOrder] = query.sort.split(':');
+  const [, sortOrder] = query ? query.sort.split(':') : 'ASC';
   const {
     push,
     location: { pathname },
