@@ -48,7 +48,7 @@ const generateTestApp = async ({ appPath, database, template }) => {
       '@strapi/plugin-i18n',
     ],
     additionalsDependencies: {},
-    template,
+    template: template ? path.resolve(template) : template,
   };
 
   await generateNew(scope);
