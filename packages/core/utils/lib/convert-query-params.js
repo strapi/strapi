@@ -315,7 +315,6 @@ const convertNestedPopulate = (subPopulate, schema) => {
     throw new Error(`Invalid nested populate. Expected '*' or an object`);
   }
 
-  // TODO: We will need to consider a way to add limitation / pagination
   const { sort, filters, fields, populate, count, ordering, page, pageSize, start, limit } =
     subPopulate;
 
