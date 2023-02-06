@@ -82,19 +82,21 @@ const createComponents = async (uid, data) => {
         throw new Error('Expected an array to create repeatable component');
       }
 
+      const createDynamicZoneComponents = async (value) => {
+        const { id } = await createComponent(value.__component, value);
+        return {
+          id,
+          __component: value.__component,
+          __pivot: {
+            field: attributeName,
+          },
+        };
+      };
+
       // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
       componentBody[attributeName] = await mapAsync(
         dynamiczoneValues,
-        async (value) => {
-          const { id } = await createComponent(value.__component, value);
-          return {
-            id,
-            __component: value.__component,
-            __pivot: {
-              field: attributeName,
-            },
-          };
-        },
+        createDynamicZoneComponents,
         { concurrency: isDialectMySQL() ? 1 : Infinity }
       );
 
