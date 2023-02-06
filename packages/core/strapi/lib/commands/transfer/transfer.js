@@ -31,7 +31,7 @@ const { exitWith } = require('../utils/helpers');
 /**
  * Transfer command.
  *
- * It transfers data from a local file to a local strapi instance
+ * Transfers data between local Strapi and remote Strapi instances
  *
  * @param {TransferCommandOptions} opts
  */

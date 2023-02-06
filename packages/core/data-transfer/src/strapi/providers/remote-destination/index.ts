@@ -110,7 +110,6 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     }
     const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${wsProtocol}//${url.host}${url.pathname}${TRANSFER_PATH}`;
-    const validAuthMethods = ['token'];
 
     // No auth defined, trying public access for transfer
     if (!auth) {
@@ -125,11 +124,10 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
     // Invalid auth method provided
     else {
-      throw new ProviderValidationError('Auth method not implemented', {
+      throw new ProviderValidationError('Auth method not available', {
         check: 'auth.type',
         details: {
           auth: auth.type,
-          validAuthMethods,
         },
       });
     }

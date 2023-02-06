@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { capitalize } from 'lodash';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+import PropTypes from 'prop-types';
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
 import { Checkbox } from '@strapi/design-system/Checkbox';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
@@ -7,8 +10,6 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import CogIcon from '@strapi/icons/Cog';
-import styled from 'styled-components';
-import PropTypes from 'prop-types';
 import { useApiTokenPermissionsContext } from '../../../../../../../contexts/ApiTokenPermissions';
 import CheckboxWrapper from './CheckBoxWrapper';
 
@@ -30,6 +31,7 @@ const CollapsableContentType = ({
     value: { onChangeSelectAll, onChange, selectedActions, setSelectedAction, selectedAction },
   } = useApiTokenPermissionsContext();
   const [expanded, setExpanded] = useState(false);
+  const { formatMessage } = useIntl();
 
   const handleExpandedAccordion = () => {
     setExpanded((s) => !s);
@@ -83,7 +85,7 @@ const CollapsableContentType = ({
                     }}
                     disabled={disabled}
                   >
-                    Select all
+                    {formatMessage({ id: 'app.utils.select-all', defaultMessage: 'Select all' })}
                   </Checkbox>
                 </Box>
               </Flex>

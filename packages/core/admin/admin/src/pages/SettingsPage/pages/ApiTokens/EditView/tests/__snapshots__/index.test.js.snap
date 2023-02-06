@@ -684,99 +684,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   max-width: 100%;
 }
 
-.c32 {
-  border: 1px solid #dcdce4;
-  border-radius: 4px;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 12px;
-  padding-bottom: 12px;
-  background: #ffffff;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c32:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c33 {
-  display: block;
-  width: 100%;
-  font-weight: 400;
-  font-size: 0.875rem;
-  border: none;
-  color: #32324d;
-  resize: none;
-  background: inherit;
-}
-
-.c33::-webkit-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c33::-moz-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c33:-ms-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c33::placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c33:focus-within {
-  outline: none;
-}
-
-.c31 textarea {
-  height: 5rem;
-  line-height: 1.25rem;
-}
-
-.c31 textarea::-webkit-input-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c31 textarea::-moz-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c31 textarea:-ms-input-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c31 textarea::placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
 .c51 {
   border: 1px solid #f6f6f9;
 }
@@ -898,6 +805,99 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
 
 .c53:hover svg path {
   fill: #4945ff;
+}
+
+.c32 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c32:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c33 {
+  display: block;
+  width: 100%;
+  font-weight: 400;
+  font-size: 0.875rem;
+  border: none;
+  color: #32324d;
+  resize: none;
+  background: inherit;
+}
+
+.c33::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c33::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c33:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c33::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c33:focus-within {
+  outline: none;
+}
+
+.c31 textarea {
+  height: 5rem;
+  line-height: 1.25rem;
+}
+
+.c31 textarea::-webkit-input-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c31 textarea::-moz-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c31 textarea:-ms-input-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c31 textarea::placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
 }
 
 @media (max-width:68.75rem) {
@@ -2400,99 +2400,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   max-width: 100%;
 }
 
-.c39 {
-  border: 1px solid #dcdce4;
-  border-radius: 4px;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 12px;
-  padding-bottom: 12px;
-  background: #ffffff;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c39:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c40 {
-  display: block;
-  width: 100%;
-  font-weight: 400;
-  font-size: 0.875rem;
-  border: none;
-  color: #32324d;
-  resize: none;
-  background: inherit;
-}
-
-.c40::-webkit-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c40::-moz-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c40:-ms-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c40::placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c40:focus-within {
-  outline: none;
-}
-
-.c38 textarea {
-  height: 5rem;
-  line-height: 1.25rem;
-}
-
-.c38 textarea::-webkit-input-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c38 textarea::-moz-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c38 textarea:-ms-input-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c38 textarea::placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
 .c60 {
   border: 1px solid #f6f6f9;
 }
@@ -2614,6 +2521,99 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
 
 .c62:hover svg path {
   fill: #4945ff;
+}
+
+.c39 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c39:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c40 {
+  display: block;
+  width: 100%;
+  font-weight: 400;
+  font-size: 0.875rem;
+  border: none;
+  color: #32324d;
+  resize: none;
+  background: inherit;
+}
+
+.c40::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c40::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c40:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c40::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c40:focus-within {
+  outline: none;
+}
+
+.c38 textarea {
+  height: 5rem;
+  line-height: 1.25rem;
+}
+
+.c38 textarea::-webkit-input-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c38 textarea::-moz-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c38 textarea:-ms-input-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c38 textarea::placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
 }
 
 @media (max-width:68.75rem) {

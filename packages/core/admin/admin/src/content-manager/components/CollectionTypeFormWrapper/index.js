@@ -220,8 +220,6 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
   const onDelete = useCallback(
     async (trackerProperty) => {
-      console.log('onDelete');
-
       try {
         trackUsageRef.current('willDeleteEntry', trackerProperty);
 
