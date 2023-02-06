@@ -42,7 +42,7 @@ export function useReviewWorkflows(workflowId) {
     async onError() {
       // TODO: this should return the proper error thrown by the API
       toggleNotification({
-        type: 'error',
+        type: 'warning',
         message: { id: 'notification.error', defaultMessage: 'An error occured' },
       });
     },
