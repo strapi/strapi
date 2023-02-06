@@ -689,7 +689,7 @@ describe('Transfer Token', () => {
 
       const res = await transferTokenService.update(id, updatedAttributes);
 
-      expect(deleteFn).toHaveBeenCalledTimes(1);
+      expect(deleteFn).not.toHaveBeenCalled();
 
       expect(update).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
