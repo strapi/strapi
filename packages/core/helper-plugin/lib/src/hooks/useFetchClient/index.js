@@ -3,7 +3,7 @@
  * useFetchClient
  *
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import getFetchClient from '../../utils/getFetchClient';
 
 const useFetchClient = () => {
@@ -19,11 +19,13 @@ const useFetchClient = () => {
     };
   }, []);
 
-  const defaultOptions = {
-    signal: controller.current.signal,
-  };
-
-  return getFetchClient(defaultOptions);
+  return useMemo(
+    () =>
+      getFetchClient({
+        signal: controller.current.signal,
+      }),
+    []
+  );
 };
 
 export default useFetchClient;
