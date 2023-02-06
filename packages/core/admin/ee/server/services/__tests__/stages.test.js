@@ -49,7 +49,7 @@ describe('Review workflows - Stages service', () => {
       expect(entityServiceMock.findOne).not.toBeCalled();
       expect(entityServiceMock.findMany).toBeCalled();
       expect(entityServiceMock.findMany).toBeCalledWith(STAGE_MODEL_UID, {
-        filter: { workflow: 1 },
+        filters: { workflow: 1 },
       });
     });
   });
@@ -60,7 +60,7 @@ describe('Review workflows - Stages service', () => {
       expect(entityServiceMock.findMany).not.toBeCalled();
       expect(entityServiceMock.findOne).toBeCalled();
       expect(entityServiceMock.findOne).toBeCalledWith(STAGE_MODEL_UID, 1, {
-        filter: { workflow: 1 },
+        filters: { workflow: 1 },
       });
     });
   });
