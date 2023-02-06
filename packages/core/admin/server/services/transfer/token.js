@@ -22,7 +22,7 @@ const TRANSFER_TOKEN_PERMISSION_UID = 'admin::transfer-token-permission';
  * @property {number} lastUsedAt
  * @property {number} lifespan
  * @property {number} expiresAt
- * @property {(number|TransferTokenPermission)[]} permissions
+ * @property {(number[]|TransferTokenPermission[])} permissions
  */
 
 /**
