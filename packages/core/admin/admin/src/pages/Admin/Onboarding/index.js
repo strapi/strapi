@@ -39,9 +39,13 @@ const VideoLinkWrapper = styled(Flex)`
 
   :hover {
     background: ${({ theme }) => theme.colors.primary100};
+
+    // Hover style for the number displayed
     div:first-child span {
       color: ${({ theme }) => theme.colors.primary500};
     }
+
+    // Hover style for the label
     span:nth-child(1) {
       color: ${({ theme }) => theme.colors.primary600};
     }
@@ -105,7 +109,12 @@ const Onboarding = () => {
               paddingLeft={5}
               paddingTop={5}
             >
-              <Typography fontWeight="bold">Get started videos</Typography>
+              <Typography fontWeight="bold">
+                {formatMessage({
+                  id: 'app.components.Onboarding.title',
+                  defaultMessage: 'Get started videos',
+                })}
+              </Typography>
               <TextLink
                 as="a"
                 href="https://www.youtube.com/playlist?list=PL7Q0DQYATmvidz6lEmwE5nIcOAYagxWqq"
@@ -114,7 +123,10 @@ const Onboarding = () => {
                 variant="pi"
                 textColor="primary600"
               >
-                {formatMessage({ id: 'app', defaultMessage: 'Watch more videos' })}
+                {formatMessage({
+                  id: 'app.components.Onboarding.link.more-videos',
+                  defaultMessage: 'Watch more videos',
+                })}
               </TextLink>
             </Flex>
             <Divider />
@@ -124,6 +136,7 @@ const Onboarding = () => {
                 href={href}
                 target="_blank"
                 rel="noreferrer noopener"
+                key={href}
                 hasRadius
                 paddingTop={4}
                 paddingBottom={4}
@@ -162,7 +175,7 @@ const Onboarding = () => {
             ))}
             <Stack spacing={2} paddingLeft={5} paddingTop={2} paddingBottom={5}>
               {DOCUMENTATION_LINKS.map(({ label, href, icon }) => (
-                <Stack horizontal spacing={3}>
+                <Stack horizontal spacing={3} key={href}>
                   <Icon as={icon} color="primary600" />
                   <TextLink
                     as="a"
