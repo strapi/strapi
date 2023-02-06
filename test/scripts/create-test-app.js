@@ -72,11 +72,11 @@ yargs
 
       yarg.positional('template', {
         type: 'string',
-        default: '../e2e/app-template',
+        default: undefined,
       });
     },
     (argv) => {
-      const { database, run, appPath = 'test-apps/base', template = '../e2e/app-template' } = argv;
+      const { database, run, appPath = 'test-apps/base', template } = argv;
 
       return main(
         argv.dbclient

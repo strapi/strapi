@@ -11,5 +11,5 @@ export JWT_SECRET="aSecret"
 opts=($DB_OPTIONS)
 
 yarn run -s build:ts
-yarn run -s test:generate-app "${opts[@]}"
+yarn run -s test:generate-app --appPath=test-apps/api "${opts[@]}"
 yarn run -s test:api --no-generate-app
