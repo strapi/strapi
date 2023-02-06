@@ -1,8 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../scripts/dts-import';
 
-// test.use({ storageState: 'storageState.json' });
-
 test.describe('Authentication | Login', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath({ filePath: './e2e/data/with-admin.tar' });
@@ -60,6 +58,51 @@ test.describe('Authentication | Login', () => {
       await expect(page).toHaveTitle('Strapi Admin');
     });
   });
+
+  // test.describe('Rate limit on login', () => {
+  //   test.only('Should display a rate limit error message after 5 attempts to login', async ({
+  //     page,
+  //   }) => {
+  //     await page.request.fetch('/api/config/ratelimit/enable', {
+  //       method: 'POST',
+  //       data: true,
+  //     });
+
+  //     await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
+  //     await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
+  //     await page.getByRole('button', { name: 'Login' }).click();
+  //     await page.getByText('John Smith').click();
+  //     await page.getByText('Logout').click();
+
+  //     await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
+  //     await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
+  //     await page.getByRole('button', { name: 'Login' }).click();
+  //     await page.getByText('John Smith').click();
+  //     await page.getByText('Logout').click();
+
+  //     await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
+  //     await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
+  //     await page.getByRole('button', { name: 'Login' }).click();
+  //     await page.getByText('John Smith').click();
+  //     await page.getByText('Logout').click();
+
+  //     await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
+  //     await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
+  //     await page.getByRole('button', { name: 'Login' }).click();
+  //     await page.getByText('John Smith').click();
+  //     await page.getByText('Logout').click();
+
+  //     await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
+  //     await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
+  //     await page.getByRole('button', { name: 'Login' }).click();
+  //     await page.getByText('John Smith').click();
+  //     await page.getByText('Logout').click();
+
+  //     await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
+  //     await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
+  //     await page.getByRole('button', { name: 'Login' }).click();
+  //   });
+  // });
 
   test.describe('Validation checks', () => {
     test('A user should see a validation error when not passing in an email', async ({ page }) => {
