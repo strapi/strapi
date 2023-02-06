@@ -370,12 +370,10 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
       >
         <div
           class="c2"
-          height="100%"
         >
           <article
             aria-labelledby="0-title"
             class="c3 c4"
-            height="100%"
             role="button"
             tabindex="-1"
           >
@@ -465,12 +463,10 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
       >
         <div
           class="c2"
-          height="100%"
         >
           <article
             aria-labelledby="1-title"
             class="c3 c4"
-            height="100%"
             role="button"
             tabindex="-1"
           >
@@ -588,12 +584,10 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
       >
         <div
           class="c2"
-          height="100%"
         >
           <article
             aria-labelledby="2-title"
             class="c3 c4"
-            height="100%"
             role="button"
             tabindex="-1"
           >
@@ -617,8 +611,6 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
               </div>
               <div
                 class="c33 c6 c34"
-                height="10.25rem"
-                width="100%"
               >
                 <span
                   class="c35"

@@ -677,7 +677,6 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
                                 name="files"
                                 tabindex="-1"
                                 type="file"
-                                width="100%"
                               />
                               <div
                                 class="c1 c34"

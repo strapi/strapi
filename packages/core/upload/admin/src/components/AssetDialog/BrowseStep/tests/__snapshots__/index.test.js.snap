@@ -1072,7 +1072,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
               />
               <div
                 class="c0 c35 c13 c36"
-                cursor="pointer"
               >
                 <div
                   class="c0 c37"

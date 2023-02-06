@@ -1107,7 +1107,6 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                         >
                           <div
                             class="c1 c43 c44 c45"
-                            width="100%"
                           >
                             <span
                               class="c1 c46 c10 c47"
@@ -1156,7 +1155,6 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                             <div
                               class="c1 c49"
                               overflow="hidden"
-                              width="100%"
                             >
                               <div
                                 class="c1 c30 c9"
@@ -1248,7 +1246,6 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                         >
                           <div
                             class="c1 c43 c44 c45"
-                            width="100%"
                           >
                             <span
                               class="c1 c46 c10 c47"
@@ -1297,7 +1294,6 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                             <div
                               class="c1 c49"
                               overflow="hidden"
-                              width="100%"
                             >
                               <div
                                 class="c1 c30 c9"
@@ -2555,7 +2551,6 @@ exports[`EditSettingsView should add field 1`] = `
                         >
                           <div
                             class="c1 c43 c44 c45"
-                            width="100%"
                           >
                             <span
                               class="c1 c46 c10 c47"
@@ -2604,7 +2599,6 @@ exports[`EditSettingsView should add field 1`] = `
                             <div
                               class="c1 c49"
                               overflow="hidden"
-                              width="100%"
                             >
                               <div
                                 class="c1 c30 c9"
@@ -2696,7 +2690,6 @@ exports[`EditSettingsView should add field 1`] = `
                         >
                           <div
                             class="c1 c43 c44 c45"
-                            width="100%"
                           >
                             <span
                               class="c1 c46 c10 c47"
@@ -2745,7 +2738,6 @@ exports[`EditSettingsView should add field 1`] = `
                             <div
                               class="c1 c49"
                               overflow="hidden"
-                              width="100%"
                             >
                               <div
                                 class="c1 c30 c9"

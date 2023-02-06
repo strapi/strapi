@@ -701,7 +701,6 @@ describe('Admin | UseCasePage', () => {
                     />
                     <div
                       class="c0 c16"
-                      width="15.625rem"
                     >
                       <h1
                         class="c5 c17 c18"

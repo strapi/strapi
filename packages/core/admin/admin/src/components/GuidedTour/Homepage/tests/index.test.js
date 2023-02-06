@@ -459,8 +459,6 @@ describe('GuidedTour Homepage', () => {
                 >
                   <div
                     class="c0 c8 c9"
-                    height="1.875rem"
-                    width="1.875rem"
                   >
                     <span
                       class="c4 c10"
@@ -483,8 +481,6 @@ describe('GuidedTour Homepage', () => {
                 >
                   <div
                     class="c0 c14"
-                    height="100%"
-                    width="0.125rem"
                   />
                 </div>
                 <div
@@ -533,8 +529,6 @@ describe('GuidedTour Homepage', () => {
                 >
                   <div
                     class="c0 c20 c9"
-                    height="1.875rem"
-                    width="1.875rem"
                   >
                     <span
                       class="c4 c21"
@@ -557,8 +551,6 @@ describe('GuidedTour Homepage', () => {
                 >
                   <div
                     class="c0 c22"
-                    height="100%"
-                    width="0.125rem"
                   />
                 </div>
                 <div
@@ -577,8 +569,6 @@ describe('GuidedTour Homepage', () => {
                 >
                   <div
                     class="c0 c20 c9"
-                    height="1.875rem"
-                    width="1.875rem"
                   >
                     <span
                       class="c4 c21"

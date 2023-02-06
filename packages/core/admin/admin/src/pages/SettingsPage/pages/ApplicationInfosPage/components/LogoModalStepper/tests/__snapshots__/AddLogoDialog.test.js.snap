@@ -496,9 +496,9 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
                       aria-hidden="true"
                       class="c0 c16 c17"
                       fill="none"
-                      height="3.75rem"
+                      height="1em"
                       viewBox="0 0 24 20"
-                      width="3.75rem"
+                      width="1em"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path

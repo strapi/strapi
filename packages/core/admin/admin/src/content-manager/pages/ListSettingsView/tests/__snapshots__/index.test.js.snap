@@ -943,7 +943,6 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                 >
                   <div
                     class="c0 c26"
-                    width="100%"
                   >
                     <div
                       class="c27"
@@ -1013,7 +1012,6 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                   </div>
                   <div
                     class="c0 c26"
-                    width="100%"
                   >
                     <div
                       class="c27"
@@ -1083,7 +1081,6 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                   </div>
                   <div
                     class="c0 c26"
-                    width="100%"
                   >
                     <div
                       class="c27"
@@ -2656,7 +2653,6 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                 >
                   <div
                     class="c0 c26"
-                    width="100%"
                   >
                     <div
                       class="c27"
@@ -2726,7 +2722,6 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                   </div>
                   <div
                     class="c0 c26"
-                    width="100%"
                   >
                     <div
                       class="c27"
@@ -2796,7 +2791,6 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                   </div>
                   <div
                     class="c0 c26"
-                    width="100%"
                   >
                     <div
                       class="c27"

@@ -435,7 +435,6 @@ describe('DocAssetCard', () => {
         <article
           aria-labelledby="1-title"
           class="c0 c1"
-          height="100%"
           role="button"
           tabindex="-1"
         >
@@ -494,8 +493,6 @@ describe('DocAssetCard', () => {
             </div>
             <div
               class="c17 c3 c18"
-              height="5.5rem"
-              width="100%"
             >
               <span
                 class="c19"

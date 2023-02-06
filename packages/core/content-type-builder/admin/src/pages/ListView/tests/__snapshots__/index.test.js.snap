@@ -1342,8 +1342,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       <div
                         aria-hidden="true"
                         class="c0 c31 c32"
-                        height="1.5rem"
-                        width="2rem"
                       >
                         <svg
                           class="c0 "
@@ -1469,8 +1467,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       <div
                         aria-hidden="true"
                         class="c0 c31 c32"
-                        height="1.5rem"
-                        width="2rem"
                       >
                         <svg
                           class="c0 "
@@ -1600,8 +1596,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       <div
                         aria-hidden="true"
                         class="c0 c31 c32"
-                        height="1.5rem"
-                        width="2rem"
                       >
                         <svg
                           class="c0 "
@@ -1729,8 +1723,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       <div
                         aria-hidden="true"
                         class="c0 c31 c32"
-                        height="1.5rem"
-                        width="2rem"
                       >
                         <svg
                           class="c0 "
@@ -1858,8 +1850,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       <div
                         aria-hidden="true"
                         class="c0 c31 c32"
-                        height="1.5rem"
-                        width="2rem"
                       >
                         <svg
                           class="c0 "
@@ -1985,8 +1975,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       <div
                         aria-hidden="true"
                         class="c0 c31 c32"
-                        height="1.5rem"
-                        width="2rem"
                       >
                         <svg
                           class="c0 "
@@ -2114,8 +2102,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       <div
                         aria-hidden="true"
                         class="c0 c31 c32"
-                        height="1.5rem"
-                        width="2rem"
                       >
                         <svg
                           class="c0 "
@@ -2237,8 +2223,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       <div
                         aria-hidden="true"
                         class="c0 c31 c32"
-                        height="1.5rem"
-                        width="2rem"
                       >
                         <svg
                           class="c0 "
@@ -2403,8 +2387,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   <div
                                     aria-hidden="true"
                                     class="c0 c31 c32"
-                                    height="1.5rem"
-                                    width="2rem"
                                   >
                                     <svg
                                       class="c0 "
@@ -2549,8 +2531,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   <div
                                     aria-hidden="true"
                                     class="c0 c31 c32"
-                                    height="1.5rem"
-                                    width="2rem"
                                   >
                                     <svg
                                       class="c0 "
@@ -2695,8 +2675,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   <div
                                     aria-hidden="true"
                                     class="c0 c31 c32"
-                                    height="1.5rem"
-                                    width="2rem"
                                   >
                                     <svg
                                       class="c0 "
@@ -2863,8 +2841,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       <div
                         aria-hidden="true"
                         class="c0 c31 c32"
-                        height="1.5rem"
-                        width="2rem"
                       >
                         <svg
                           class="c0 "
@@ -3029,8 +3005,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   <div
                                     aria-hidden="true"
                                     class="c0 c31 c32"
-                                    height="1.5rem"
-                                    width="2rem"
                                   >
                                     <svg
                                       class="c0 "
@@ -3175,8 +3149,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   <div
                                     aria-hidden="true"
                                     class="c0 c31 c32"
-                                    height="1.5rem"
-                                    width="2rem"
                                   >
                                     <svg
                                       class="c0 "
@@ -3321,8 +3293,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   <div
                                     aria-hidden="true"
                                     class="c0 c31 c32"
-                                    height="1.5rem"
-                                    width="2rem"
                                   >
                                     <svg
                                       class="c0 "
@@ -3489,8 +3459,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       <div
                         aria-hidden="true"
                         class="c0 c31 c32"
-                        height="1.5rem"
-                        width="2rem"
                       >
                         <svg
                           class="c0 "
@@ -3866,8 +3834,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <div
                                                 aria-hidden="true"
                                                 class="c0 c31 c32"
-                                                height="1.5rem"
-                                                width="2rem"
                                               >
                                                 <svg
                                                   class="c0 "
@@ -4012,8 +3978,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <div
                                                 aria-hidden="true"
                                                 class="c0 c31 c32"
-                                                height="1.5rem"
-                                                width="2rem"
                                               >
                                                 <svg
                                                   class="c0 "
@@ -4158,8 +4122,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <div
                                                 aria-hidden="true"
                                                 class="c0 c31 c32"
-                                                height="1.5rem"
-                                                width="2rem"
                                               >
                                                 <svg
                                                   class="c0 "
@@ -4368,8 +4330,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <div
                                                 aria-hidden="true"
                                                 class="c0 c31 c32"
-                                                height="1.5rem"
-                                                width="2rem"
                                               >
                                                 <svg
                                                   class="c0 "
@@ -4514,8 +4474,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <div
                                                 aria-hidden="true"
                                                 class="c0 c31 c32"
-                                                height="1.5rem"
-                                                width="2rem"
                                               >
                                                 <svg
                                                   class="c0 "
@@ -4660,8 +4618,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <div
                                                 aria-hidden="true"
                                                 class="c0 c31 c32"
-                                                height="1.5rem"
-                                                width="2rem"
                                               >
                                                 <svg
                                                   class="c0 "
@@ -4806,8 +4762,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <div
                                                 aria-hidden="true"
                                                 class="c0 c31 c32"
-                                                height="1.5rem"
-                                                width="2rem"
                                               >
                                                 <svg
                                                   class="c0 "
@@ -4954,8 +4908,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <div
                                                 aria-hidden="true"
                                                 class="c0 c31 c32"
-                                                height="1.5rem"
-                                                width="2rem"
                                               >
                                                 <svg
                                                   class="c0 "
@@ -5102,8 +5054,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <div
                                                 aria-hidden="true"
                                                 class="c0 c31 c32"
-                                                height="1.5rem"
-                                                width="2rem"
                                               >
                                                 <svg
                                                   class="c0 "
@@ -5316,8 +5266,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <div
                                                 aria-hidden="true"
                                                 class="c0 c31 c32"
-                                                height="1.5rem"
-                                                width="2rem"
                                               >
                                                 <svg
                                                   class="c0 "
@@ -5462,8 +5410,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <div
                                                 aria-hidden="true"
                                                 class="c0 c31 c32"
-                                                height="1.5rem"
-                                                width="2rem"
                                               >
                                                 <svg
                                                   class="c0 "
@@ -5608,8 +5554,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <div
                                                 aria-hidden="true"
                                                 class="c0 c31 c32"
-                                                height="1.5rem"
-                                                width="2rem"
                                               >
                                                 <svg
                                                   class="c0 "
@@ -5775,8 +5719,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                           <div
                                                             aria-hidden="true"
                                                             class="c0 c31 c32"
-                                                            height="1.5rem"
-                                                            width="2rem"
                                                           >
                                                             <svg
                                                               class="c0 "
@@ -5921,8 +5863,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                           <div
                                                             aria-hidden="true"
                                                             class="c0 c31 c32"
-                                                            height="1.5rem"
-                                                            width="2rem"
                                                           >
                                                             <svg
                                                               class="c0 "
@@ -6067,8 +6007,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                           <div
                                                             aria-hidden="true"
                                                             class="c0 c31 c32"
-                                                            height="1.5rem"
-                                                            width="2rem"
                                                           >
                                                             <svg
                                                               class="c0 "
@@ -6213,8 +6151,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                           <div
                                                             aria-hidden="true"
                                                             class="c0 c31 c32"
-                                                            height="1.5rem"
-                                                            width="2rem"
                                                           >
                                                             <svg
                                                               class="c0 "
@@ -6361,8 +6297,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                           <div
                                                             aria-hidden="true"
                                                             class="c0 c31 c32"
-                                                            height="1.5rem"
-                                                            width="2rem"
                                                           >
                                                             <svg
                                                               class="c0 "
@@ -6509,8 +6443,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                           <div
                                                             aria-hidden="true"
                                                             class="c0 c31 c32"
-                                                            height="1.5rem"
-                                                            width="2rem"
                                                           >
                                                             <svg
                                                               class="c0 "
@@ -6764,8 +6696,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <div
                                                 aria-hidden="true"
                                                 class="c0 c31 c32"
-                                                height="1.5rem"
-                                                width="2rem"
                                               >
                                                 <svg
                                                   class="c0 "
@@ -6910,8 +6840,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <div
                                                 aria-hidden="true"
                                                 class="c0 c31 c32"
-                                                height="1.5rem"
-                                                width="2rem"
                                               >
                                                 <svg
                                                   class="c0 "
@@ -7058,8 +6986,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <div
                                                 aria-hidden="true"
                                                 class="c0 c31 c32"
-                                                height="1.5rem"
-                                                width="2rem"
                                               >
                                                 <svg
                                                   class="c0 "

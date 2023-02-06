@@ -789,7 +789,6 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                 <article
                   aria-labelledby="2-title"
                   class="c0 c19 c20"
-                  height="100%"
                   role="button"
                   tabindex="-1"
                 >
@@ -947,7 +946,6 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                 <article
                   aria-labelledby="5-title"
                   class="c0 c19 c20"
-                  height="100%"
                   role="button"
                   tabindex="-1"
                 >
@@ -1035,8 +1033,6 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                     </div>
                     <div
                       class="c0 c47 c22 c48"
-                      height="5.5rem"
-                      width="100%"
                     >
                       <span
                         class="c49"
@@ -1124,7 +1120,6 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                 <article
                   aria-labelledby="8-title"
                   class="c0 c19 c20"
-                  height="100%"
                   role="button"
                   tabindex="-1"
                 >

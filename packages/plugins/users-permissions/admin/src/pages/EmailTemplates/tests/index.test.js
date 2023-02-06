@@ -410,7 +410,6 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                         class="c15 c16"
                         role="gridcell"
                         tabindex="0"
-                        width="1%"
                       >
                         <div
                           class="c3"
@@ -449,7 +448,6 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                         class="c15 c16"
                         role="gridcell"
                         tabindex="-1"
-                        width="1%"
                       >
                         <div
                           class="c3"

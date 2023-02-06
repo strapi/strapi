@@ -987,7 +987,6 @@ describe('Admin | containers | RoleCreatePage', () => {
                         >
                           <div
                             class="c1 c3 c37 c4 c38"
-                            cursor=""
                           >
                             <div
                               class="c1 c3 c39 c5 c40"
@@ -1024,17 +1023,14 @@ describe('Admin | containers | RoleCreatePage', () => {
                                 <span
                                   aria-hidden="true"
                                   class="c1 c3 c46 c47"
-                                  cursor="pointer"
                                   data-strapi-dropdown="true"
-                                  height="2rem"
-                                  width="2rem"
                                 >
                                   <svg
                                     class="c1 c48 c49"
                                     fill="none"
                                     height="1em"
                                     viewBox="0 0 14 8"
-                                    width="0.6875rem"
+                                    width="1em"
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path

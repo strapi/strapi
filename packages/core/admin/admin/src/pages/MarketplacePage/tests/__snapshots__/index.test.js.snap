@@ -997,7 +997,6 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
       >
         <div
           class="c0 c17"
-          width="25%"
         >
           <div
             class="c18"
@@ -1240,7 +1239,6 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                     <div
                       class="c0 c51 c52"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
                         class="c0 "
@@ -1251,9 +1249,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           <img
                             alt="Comments logo"
                             class="c0 c54"
-                            height="11"
                             src="https://dl.airtable.com/.attachments/eb4cd59876565af77c9c3e5966b59f10/2111bfc8/vl_strapi-comments.png"
-                            width="11"
                           />
                           <div
                             class="c0 c7 c55"
@@ -1262,7 +1258,9 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               aria-hidden="true"
                               class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 24"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1274,7 +1272,9 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               aria-hidden="true"
                               class="c0 c58 c59"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 24"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1298,7 +1298,9 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               aria-hidden="true"
                               class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 25"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1423,7 +1425,6 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                     <div
                       class="c0 c51 c52"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
                         class="c0 "
@@ -1434,9 +1435,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           <img
                             alt="Config Sync logo"
                             class="c0 c54"
-                            height="11"
                             src="https://dl.airtable.com/.attachments/e23a7231d12cce89cb4b05cbfe759d45/96f5f496/Screenshot2021-12-09at22.15.37.png"
-                            width="11"
                           />
                           <div
                             class="c0 c7 c55"
@@ -1445,7 +1444,9 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               aria-hidden="true"
                               class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 25"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1601,7 +1602,6 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                     <div
                       class="c0 c51 c52"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
                         class="c0 "
@@ -1612,9 +1612,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           <img
                             alt="Content Versioning logo"
                             class="c0 c54"
-                            height="11"
                             src="https://dl.airtable.com/.attachments/0b86f18e2606ed7f53bd54d536a1bea5/13a87f30/Artboard7copy.png"
-                            width="11"
                           />
                           <div
                             class="c0 c7 c55"
@@ -1623,7 +1621,9 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               aria-hidden="true"
                               class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 25"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1757,7 +1757,6 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                     <div
                       class="c0 c51 c52"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
                         class="c0 "
@@ -1768,9 +1767,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           <img
                             alt="Documentation logo"
                             class="c0 c54"
-                            height="11"
                             src="https://dl.airtable.com/.attachments/b6998ac52e8b0460b8a14ced8074b788/2a4d4a90/swagger.png"
-                            width="11"
                           />
                           <div
                             class="c0 c7 c55"
@@ -1779,7 +1776,9 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               aria-hidden="true"
                               class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 24"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1791,7 +1790,9 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               aria-hidden="true"
                               class="c0 c58 c59"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 24"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1815,7 +1816,9 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               aria-hidden="true"
                               class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 25"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1855,9 +1858,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                                   <img
                                     alt="Made by Strapi"
                                     class="c0 c75"
-                                    height="auto"
                                     src="IMAGE_MOCK"
-                                    width="6"
                                   />
                                 </div>
                               </span>
@@ -1915,9 +1916,9 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           <svg
                             class="c0 c77 c74"
                             fill="none"
-                            height="12"
+                            height="1em"
                             viewBox="0 0 24 24"
-                            width="12"
+                            width="1em"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path
@@ -1945,7 +1946,6 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                     <div
                       class="c0 c51 c52"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
                         class="c0 "
@@ -1956,9 +1956,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           <img
                             alt="Transformer logo"
                             class="c0 c54"
-                            height="11"
                             src="https://dl.airtable.com/.attachments/5ffd1782a2fabf423ccd6f56c562f31a/b8f8598f/transformer-logo.png"
-                            width="11"
                           />
                           <div
                             class="c0 c7 c55"
@@ -1967,7 +1965,9 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               aria-hidden="true"
                               class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 25"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -2143,9 +2143,9 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                   <svg
                     class="c0 c85 c57"
                     fill="none"
-                    height="3"
+                    height="1em"
                     viewBox="0 0 24 24"
-                    width="3"
+                    width="1em"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path

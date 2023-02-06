@@ -1353,7 +1353,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   >
                     <div
                       class="c1 c9 c52 c10 c53"
-                      cursor=""
                     >
                       <div
                         class="c1 c9 c54 c11 c55"
@@ -1384,17 +1383,14 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           <span
                             aria-hidden="true"
                             class="c1 c9 c61 c62"
-                            cursor="pointer"
                             data-strapi-dropdown="true"
-                            height="2rem"
-                            width="2rem"
                           >
                             <svg
                               class="c1 c63 c64"
                               fill="none"
                               height="1em"
                               viewBox="0 0 14 8"
-                              width="0.6875rem"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1416,7 +1412,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   >
                     <div
                       class="c1 c9 c66 c10 c53"
-                      cursor=""
                     >
                       <div
                         class="c1 c9 c54 c11 c55"
@@ -1447,17 +1442,14 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           <span
                             aria-hidden="true"
                             class="c1 c9 c61 c62"
-                            cursor="pointer"
                             data-strapi-dropdown="true"
-                            height="2rem"
-                            width="2rem"
                           >
                             <svg
                               class="c1 c63 c64"
                               fill="none"
                               height="1em"
                               viewBox="0 0 14 8"
-                              width="0.6875rem"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -3131,7 +3123,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   >
                     <div
                       class="c1 c9 c61 c10 c62"
-                      cursor=""
                     >
                       <div
                         class="c1 c9 c63 c11 c64"
@@ -3162,17 +3153,14 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           <span
                             aria-hidden="true"
                             class="c1 c9 c70 c71"
-                            cursor="pointer"
                             data-strapi-dropdown="true"
-                            height="2rem"
-                            width="2rem"
                           >
                             <svg
                               class="c1 c72 c73"
                               fill="none"
                               height="1em"
                               viewBox="0 0 14 8"
-                              width="0.6875rem"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -3194,7 +3182,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   >
                     <div
                       class="c1 c9 c75 c10 c62"
-                      cursor=""
                     >
                       <div
                         class="c1 c9 c63 c11 c64"
@@ -3225,17 +3212,14 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           <span
                             aria-hidden="true"
                             class="c1 c9 c70 c71"
-                            cursor="pointer"
                             data-strapi-dropdown="true"
-                            height="2rem"
-                            width="2rem"
                           >
                             <svg
                               class="c1 c72 c73"
                               fill="none"
                               height="1em"
                               viewBox="0 0 14 8"
-                              width="0.6875rem"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path

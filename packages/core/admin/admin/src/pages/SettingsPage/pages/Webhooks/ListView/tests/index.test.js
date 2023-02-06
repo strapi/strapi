@@ -766,7 +766,6 @@ describe('Admin | containers | ListView', () => {
                             class="c0 c28 c25"
                             role="gridcell"
                             tabindex="-1"
-                            width="20%"
                           >
                             <div
                               class="c0 c7"
@@ -786,7 +785,6 @@ describe('Admin | containers | ListView', () => {
                             class="c0 c30 c25"
                             role="gridcell"
                             tabindex="-1"
-                            width="60%"
                           >
                             <div
                               class="c0 c7"
@@ -806,7 +804,6 @@ describe('Admin | containers | ListView', () => {
                             class="c0 c28 c25"
                             role="gridcell"
                             tabindex="-1"
-                            width="20%"
                           >
                             <div
                               class="c0 c7"

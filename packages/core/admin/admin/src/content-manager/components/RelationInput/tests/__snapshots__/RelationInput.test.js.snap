@@ -734,7 +734,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
           <li
             aria-describedby="some-relation-1-item-instructions"
             class="c16"
-            cursor="all-scroll"
             style="position: absolute; left: 0px; top: 0px; height: 54px; width: 100%; bottom: 4px;"
           >
             <div
@@ -843,7 +842,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                     fill="none"
                     height="1em"
                     viewBox="0 0 24 24"
-                    width="12px"
+                    width="1em"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
@@ -858,7 +857,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
           <li
             aria-describedby="some-relation-1-item-instructions"
             class="c16"
-            cursor="all-scroll"
             style="position: absolute; left: 0px; top: 54px; height: 54px; width: 100%; bottom: 4px;"
           >
             <div
@@ -961,7 +959,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                     fill="none"
                     height="1em"
                     viewBox="0 0 24 24"
-                    width="12px"
+                    width="1em"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
@@ -976,7 +974,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
           <li
             aria-describedby="some-relation-1-item-instructions"
             class="c16"
-            cursor="all-scroll"
             style="position: absolute; left: 0px; top: 108px; height: 54px; width: 100%; bottom: 4px;"
           >
             <div
@@ -1070,7 +1067,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                     fill="none"
                     height="1em"
                     viewBox="0 0 24 24"
-                    width="12px"
+                    width="1em"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
