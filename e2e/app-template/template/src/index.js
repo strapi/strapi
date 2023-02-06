@@ -14,5 +14,8 @@ module.exports = {
    * This gives you an opportunity to set up your data model,
    * run jobs, or perform some special logic.
    */
-  bootstrap(/* { strapi } */) {},
+  bootstrap({ strapi }) {
+    strapi.service('api::config.config').rateLimitEnable(false);
+    strapi.service('api::config.config').adminAutoOpenEnable(false);
+  },
 };
