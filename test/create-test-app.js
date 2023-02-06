@@ -13,7 +13,7 @@ const databases = {
     connection: {
       host: '127.0.0.1',
       port: 5432,
-      database: `strapi_${process.env.JEST_WORKER_ID}`,
+      database: `strapi_test`,
       username: 'strapi',
       password: 'strapi',
       schema: 'public',
@@ -24,7 +24,7 @@ const databases = {
     connection: {
       host: '127.0.0.1',
       port: 3306,
-      database: `strapi_${process.env.JEST_WORKER_ID}`,
+      database: `strapi_test`,
       username: 'root',
       password: 'root',
     },
@@ -63,7 +63,6 @@ yargs
       if (databaseName) {
         return main(databases[databaseName]);
       }
-
       return main({
         client: argv.dbclient,
         connection: {

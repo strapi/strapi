@@ -31,17 +31,19 @@ const databases = {
 };
 
 async function main(uuid) {
+  console.log('main');
   const knex = Knex(databases[process.env.DATABASE]);
 
   // Lets create our database if it does not exist
-  await knex.raw(`CREATE DATABASE ${uuid};`);
-  // knex.destory();
+  const response = await knex.raw(`CREATE DATABASE ${uuid};`);
+  console.log(response);
 }
 
 async function CreateDB(uuid) {
   // You can dynamically pass the database name
   // as a command-line argument, or obtain it from
   // a .env file
+  console.log(process.env.DATABASE);
   if (process.env.DATABASE !== 'sqlite') {
     await main(uuid).catch(console.log);
   }
