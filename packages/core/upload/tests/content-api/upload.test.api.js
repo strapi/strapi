@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const get = require('lodash/get');
 
 // Helpers.
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
@@ -163,6 +164,34 @@ describe('Upload plugin', () => {
         ])
       );
     });
+    test('Get one file', async () => {
+      const dogEntity = await strapi.entityService.create('api::dog.dog', {
+        data: {},
+        files: {
+          profilePicture: {
+            path: path.join(__dirname, '../utils/rec.jpg'),
+            name: 'rec',
+            type: 'jpg',
+            size: 0,
+          },
+        },
+        populate: 'profilePicture',
+      });
+      const getRes = await rq({
+        method: 'GET',
+        url: `/upload/files/${dogEntity.profilePicture.id}`,
+      });
+
+      expect(getRes.statusCode).toBe(200);
+      expect(getRes.body).toEqual(
+        expect.objectContaining({
+          id: expect.anything(),
+          url: expect.any(String),
+        })
+      );
+      await strapi.entityService.delete('api::dog.dog', dogEntity.id);
+      await strapi.entityService.delete('plugin::upload.file', dogEntity.profilePicture.id);
+    });
   });
 
   describe('Create an entity with a file', () => {
@@ -223,6 +252,25 @@ describe('Upload plugin', () => {
         },
       });
       data.dogs.push(res.body);
+    });
+    test('File should have related field', async () => {
+      const fileId = get(data, 'dogs[0].data.attributes.profilePicture.data.id');
+
+      expect(fileId).toBeDefined();
+
+      const getRes = await rq({
+        method: 'GET',
+        url: `/upload/files/${fileId}`,
+        qs: { populate: '*' },
+      });
+
+      expect(getRes.statusCode).toBe(200);
+      expect(getRes.body).toEqual(
+        expect.objectContaining({
+          id: fileId,
+          related: [expect.any(Object)],
+        })
+      );
     });
   });
 

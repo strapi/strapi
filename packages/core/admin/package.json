@@ -99,7 +99,7 @@
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "1.0.0",
     "match-sorter": "^4.0.2",
-    "mini-css-extract-plugin": "2.4.4",
+    "mini-css-extract-plugin": "2.7.2",
     "msw": "0.49.1",
     "node-polyfill-webpack-plugin": "2.0.1",
     "node-schedule": "2.1.0",

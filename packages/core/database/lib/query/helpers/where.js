@@ -25,6 +25,8 @@ const OPERATORS = [
   '$between',
   '$startsWith',
   '$endsWith',
+  '$startsWithi',
+  '$endsWithi',
   '$contains',
   '$notContains',
   '$containsi',
@@ -283,8 +285,16 @@ const applyOperator = (qb, column, operator, value) => {
       qb.where(column, 'like', `${value}%`);
       break;
     }
+    case '$startsWithi': {
+      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `${value}%`]);
+      break;
+    }
     case '$endsWith': {
       qb.where(column, 'like', `%${value}`);
+      break;
+    }
+    case '$endsWithi': {
+      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `%${value}`]);
       break;
     }
     case '$contains': {
