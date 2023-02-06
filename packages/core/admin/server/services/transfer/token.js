@@ -139,7 +139,7 @@ const update = async (id, attributes) => {
   assertTokenPermissionsValidity(attributes);
   assertValidLifespan(attributes);
 
-  const updatedToken = await strapi.db.transaction(async () => {
+  return strapi.db.transaction(async () => {
     const updatedToken = await strapi.query(TRANSFER_TOKEN_UID).update({
       select: SELECT_FIELDS,
       where: { id },
@@ -148,24 +148,50 @@ const update = async (id, attributes) => {
       },
     });
 
-    await strapi.query(TRANSFER_TOKEN_PERMISSION_UID).delete({
-      where: { token: id },
-    });
+    const currentPermissionsResult = await strapi.entityService.load(
+      TRANSFER_TOKEN_UID,
+      updatedToken,
+      'permissions'
+    );
 
-    return updatedToken;
+    const currentPermissions = map('action', currentPermissionsResult || []);
+    const newPermissions = uniq(attributes.permissions);
+
+    const actionsToDelete = difference(currentPermissions, newPermissions);
+    const actionsToAdd = difference(newPermissions, currentPermissions);
+
+    // TODO: improve efficiency here
+    // method using a loop -- works but very inefficient
+    await Promise.all(
+      actionsToDelete.map((action) =>
+        strapi.query(TRANSFER_TOKEN_PERMISSION_UID).delete({
+          where: { action, token: id },
+        })
+      )
+    );
+
+    // TODO: improve efficiency here
+    // using a loop -- works but very inefficient
+    await Promise.all(
+      actionsToAdd.map((action) =>
+        strapi.query(TRANSFER_TOKEN_PERMISSION_UID).create({
+          data: { action, token: id },
+        })
+      )
+    );
+
+    // retrieve permissions
+    const permissionsFromDb = await strapi.entityService.load(
+      TRANSFER_TOKEN_UID,
+      updatedToken,
+      'permissions'
+    );
+
+    return {
+      ...updatedToken,
+      permissions: permissionsFromDb ? permissionsFromDb.map((p) => p.action) : undefined,
+    };
   });
-
-  // retrieve permissions
-  const permissionsFromDb = await strapi.entityService.load(
-    'admin::transfer-token',
-    updatedToken,
-    'permissions'
-  );
-
-  return {
-    ...updatedToken,
-    permissions: permissionsFromDb ? permissionsFromDb.map((p) => p.action) : undefined,
-  };
 };
 
 /**
@@ -341,7 +367,7 @@ const flattenTokenPermissions = (token) => {
  * @param {TransferToken} token
  */
 const assertTokenPermissionsValidity = (attributes) => {
-  const { permission: permissionService } = strapi.admin.services.transfer;
+  const permissionService = strapi.admin.services.transfer.permission;
   const validPermissions = permissionService.providers.action.keys();
   const invalidPermissions = difference(attributes.permissions, validPermissions);
 

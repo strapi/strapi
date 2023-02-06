@@ -1,4 +1,3 @@
-import { set } from 'lodash/fp';
 import { v4 } from 'uuid';
 import { RawData, WebSocket } from 'ws';
 

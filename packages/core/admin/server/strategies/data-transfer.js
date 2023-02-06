@@ -59,7 +59,7 @@ const authenticate = async (ctx) => {
   });
 
   // Generate an ability based on the token permissions
-  const ability = getService('transfer').permission.engine.generateAbility(
+  const ability = await getService('transfer').permission.engine.generateAbility(
     transferToken.permissions.map((action) => ({ action }))
   );
 

@@ -18,7 +18,8 @@ module.exports = [
           return next();
         },
       ],
-      auth: { strategies: [dataTransferAuthStrategy] },
+      // TODO: Allow not passing any scope <> Add a way to prevent assigning one by default
+      auth: { strategies: [dataTransferAuthStrategy], scope: ['push'] },
     },
   },
   // Transfer Tokens
