@@ -287,9 +287,10 @@ program
     new Option('--from-token <token>', `Transfer token for the remote Strapi source`).hideHelp() // Hidden until pull feature is released
   )
   .addOption(
-    new Option('--to <destinationURL>', `URL of the remote Strapi instance to send data to`)
-      .argParser(parseURL)
-      .required()
+    new Option(
+      '--to <destinationURL>',
+      `URL of the remote Strapi instance to send data to`
+    ).argParser(parseURL)
   )
   .addOption(new Option('--to-token <token>', `Transfer token for the remote Strapi destination`))
   .addOption(forceOption)
