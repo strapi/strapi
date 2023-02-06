@@ -8,7 +8,7 @@ const databases = {
   postgres: {
     client: 'postgres',
     connection: {
-      connectionString: 'postgresql://strapi:strapi@127.0.0.1',
+      connectionString: 'postgresql://strapi:strapi@127.0.0.1/strapi_test',
     },
   },
   mysql: {
