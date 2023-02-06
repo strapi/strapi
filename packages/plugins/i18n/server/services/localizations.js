@@ -37,7 +37,7 @@ const syncLocalizations = async (entry, { model }) => {
 
     // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
     await forEachAsync(entry.localizations, (localization) => updateLocalization(localization.id), {
-      concurrency: isDialectMySQL() ? 1 : undefined,
+      concurrency: isDialectMySQL() ? 1 : Infinity,
     });
   }
 };
@@ -64,7 +64,7 @@ const syncNonLocalizedAttributes = async (entry, { model }) => {
 
     // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
     await forEachAsync(entry.localizations, (localization) => updateLocalization(localization.id), {
-      concurrency: isDialectMySQL() ? 1 : undefined,
+      concurrency: isDialectMySQL() ? 1 : Infinity,
     });
   }
 };
