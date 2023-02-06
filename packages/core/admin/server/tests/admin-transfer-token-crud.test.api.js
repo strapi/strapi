@@ -5,7 +5,7 @@ const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 const constants = require('../services/constants');
 
-describe('Admin API Token v2 CRUD (api)', () => {
+describe('Admin Transfer Token CRUD (api)', () => {
   let rq;
   let strapi;
 
@@ -347,7 +347,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
     tokens.push(await createValidToken());
     tokens.push(await createValidToken());
     tokens.push(await createValidToken());
-    tokens.push(await createValidToken({ lifespan: constants.API_TOKEN_LIFESPANS.DAYS_7 }));
+    tokens.push(await createValidToken({ lifespan: constants.TRANSFER_TOKEN_LIFESPANS.DAYS_7 }));
     tokens.push(await createValidToken());
 
     const res = await rq({
