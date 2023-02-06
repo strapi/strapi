@@ -1,59 +1,22 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Box, Flex, FocusTrap, Typography, Icon, Stack } from '@strapi/design-system';
-import { Book, Cross, Information, Question } from '@strapi/icons';
 import { pxToRem } from '@strapi/helper-plugin';
+import { Box, Button, Divider, Icon, Popover, Stack, Typography } from '@strapi/design-system';
+import { Cross, Question } from '@strapi/icons';
 
 import { useConfigurations } from '../../../hooks';
 
-const OnboardingWrapper = styled(Box)`
-  position: fixed;
-  bottom: ${({ theme }) => theme.spaces[2]};
-  right: ${({ theme }) => theme.spaces[2]};
-`;
-
-const Button = styled(Box)`
-  width: ${({ theme }) => theme.spaces[8]};
-  height: ${({ theme }) => theme.spaces[8]};
-  background: ${({ theme }) => theme.colors.primary600};
-  box-shadow: ${({ theme }) => theme.shadows.tableShadow};
+// TODO: use new Button props derived from Box props with next DS release
+const HelperButton = styled(Button)`
   border-radius: 50%;
-
-  svg path {
-    fill: ${({ theme }) => theme.colors.buttonNeutral0};
-  }
-`;
-
-const LinksWrapper = styled(Box)`
-  bottom: ${({ theme }) => `${theme.spaces[9]}`};
-  min-width: ${200 / 16}rem;
-  position: absolute;
-  right: 0;
-`;
-
-const StyledLink = styled(Flex)`
-  text-decoration: none;
-
-  svg path {
-    fill: ${({ theme }) => theme.colors.neutral600};
-  }
-
-  &:focus,
-  &:hover {
-    background: ${({ theme }) => theme.colors.neutral100};
-
-    svg path {
-      fill: ${({ theme }) => theme.colors.neutral700};
-    }
-
-    ${[Typography]} {
-      color: ${({ theme }) => theme.colors.neutral700};
-    }
-  }
+  padding: ${({ theme }) => theme.spaces[3]};
+  // Resetting 2rem height defined by Button component
+  height: 100%;
 `;
 
 const Onboarding = () => {
+  const buttonRef = useRef();
   const [isOpen, setIsOpen] = useState(false);
   const { formatMessage } = useIntl();
   const { showTutorials } = useConfigurations();
@@ -62,31 +25,29 @@ const Onboarding = () => {
     return null;
   }
 
-  const STATIC_LINKS = [
-    {
-      Icon: <Book />,
-      label: formatMessage({
-        id: 'global.documentation',
-        defaultMessage: 'Documentation',
-      }),
-      destination: 'https://docs.strapi.io',
-    },
-    {
-      Icon: <Information />,
-      label: formatMessage({ id: 'app.static.links.cheatsheet', defaultMessage: 'CheatSheet' }),
-      destination: 'https://strapi-showcase.s3-us-west-2.amazonaws.com/CheatSheet.pdf',
-    },
-  ];
+  // const STATIC_LINKS = [
+  //   {
+  //     Icon: <Book />,
+  //     label: formatMessage({
+  //       id: 'global.documentation',
+  //       defaultMessage: 'Documentation',
+  //     }),
+  //     destination: 'https://docs.strapi.io',
+  //   },
+  //   {
+  //     Icon: <Information />,
+  //     label: formatMessage({ id: 'app.static.links.cheatsheet', defaultMessage: 'CheatSheet' }),
+  //     destination: 'https://strapi-showcase.s3-us-west-2.amazonaws.com/CheatSheet.pdf',
+  //   },
+  // ];
 
   const handleClick = () => {
     setIsOpen((prev) => !prev);
   };
 
   return (
-    <OnboardingWrapper as="aside">
-      <Button
-        as="button"
-        id="onboarding"
+    <Box as="aside" position="fixed" bottom={2} right={2}>
+      <HelperButton
         aria-label={formatMessage(
           isOpen
             ? {
@@ -99,36 +60,44 @@ const Onboarding = () => {
               }
         )}
         onClick={handleClick}
+        ref={buttonRef}
       >
-        <Icon as={isOpen ? Cross : Question} height={pxToRem(16)} width={pxToRem(16)} />
-      </Button>
+        <Icon as={isOpen ? Cross : Question} color="buttonNeutral0" />
+      </HelperButton>
 
       {/* FIX ME - replace with popover when overflow popover is fixed 
        + when v4 mockups for onboarding component are ready */}
       {isOpen && (
-        <FocusTrap onEscape={handleClick}>
-          <LinksWrapper background="neutral0" hasRadius shadow="tableShadow" padding={2}>
-            {STATIC_LINKS.map((link) => (
-              <StyledLink
-                as="a"
-                key={link.label}
-                rel="nofollow noreferrer noopener"
-                target="_blank"
-                href={link.destination}
-                padding={2}
-                hasRadius
-                alignItems="center"
-              >
-                <Stack horizontal spacing={2}>
-                  {link.Icon}
-                  <Typography color="neutral600">{link.label}</Typography>
-                </Stack>
-              </StyledLink>
-            ))}
-          </LinksWrapper>
-        </FocusTrap>
+        <Popover placement="top-end" source={buttonRef} spacing={12}>
+          <Box width={pxToRem(400)}>
+            <Stack
+              horizontal
+              alignItems="end"
+              justifyContent="space-between"
+              paddingBottom={4}
+              paddingRight={5}
+              paddingLeft={5}
+              paddingTop={5}
+            >
+              <Typography fontWeight="bold">Get started videos</Typography>
+              <Typography variant="pi" textColor="primary600">
+                Watch more videos
+              </Typography>
+            </Stack>
+            <Divider />
+            <Box>
+              <Typography textColor="neutral200" variant="alpha">
+                1
+              </Typography>
+              <Typography fontWeight="bold">Build a content architecture</Typography>
+              <Typography textColor="neutral600" variant="pi">
+                5:48
+              </Typography>
+            </Box>
+          </Box>
+        </Popover>
       )}
-    </OnboardingWrapper>
+    </Box>
   );
 };
 
