@@ -1,5 +1,5 @@
 import React from 'react';
-import { QueryClientProvider, QueryClient, useQueryClient } from 'react-query';
+import { QueryClientProvider, QueryClient } from 'react-query';
 import { renderHook, act } from '@testing-library/react-hooks';
 
 import { useFetchClient } from '@strapi/helper-plugin';
@@ -31,15 +31,7 @@ const ComponentFixture = ({ children }) => (
 function setup(id) {
   return new Promise((resolve) => {
     act(() => {
-      resolve(
-        renderHook(
-          () => ({
-            ...useReviewWorkflows(id),
-            queryClient: useQueryClient(),
-          }),
-          { wrapper: ComponentFixture }
-        )
-      );
+      resolve(renderHook(() => useReviewWorkflows(id), { wrapper: ComponentFixture }));
     });
   });
 }
