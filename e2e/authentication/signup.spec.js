@@ -3,14 +3,14 @@ import { test, expect } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../scripts/dts-import';
 import { fillValidSignUpForm } from './utils';
 
-test.describe('Authentication', () => {
+test.describe('Sign Up', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath({ filePath: './e2e/data/without-admin.tar' });
     await page.goto('/admin');
   });
 
   test.describe('Name Errors', () => {
-    test('required', async ({ page }) => {
+    test('first name is required', async ({ page }) => {
       expect(
         await page.getByRole('textbox', { name: 'First name *' }).getAttribute('aria-required')
       ).toBeTruthy();
@@ -102,7 +102,7 @@ test.describe('Authentication', () => {
       await expect(passwordInput).toBeFocused();
     });
 
-    test('passwords must match', async ({ page }) => {
+    test('must match', async ({ page }) => {
       await fillValidSignUpForm({ page });
       const passwordInput = page.getByLabel('Confirm Password*', {
         exact: true,
