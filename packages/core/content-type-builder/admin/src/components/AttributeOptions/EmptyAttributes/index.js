@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
+import qs from 'qs';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
@@ -62,7 +63,11 @@ const EmptyAttributes = () => {
               </Box>
             </Box>
           </Box>
-          <LinkButton to="/marketplace" variant="secondary" startIcon={<Plus />}>
+          <LinkButton
+            to={`/marketplace?${qs.stringify({ categories: ['Custom fields'] })}`}
+            variant="secondary"
+            startIcon={<Plus />}
+          >
             {formatMessage({
               id: getTrad('modalForm.empty.button'),
               defaultMessage: 'Add custom fields',
