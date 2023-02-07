@@ -209,7 +209,6 @@ describe('ADMIN | pages | SettingsPage', () => {
           >
             <ol
               class="c10 c11"
-              spacing="2"
             />
           </div>
         </nav>

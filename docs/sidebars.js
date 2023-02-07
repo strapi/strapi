@@ -18,6 +18,17 @@ const sidebars = {
     'index',
     {
       type: 'category',
+      label: 'Admin',
+      items: [
+        {
+          type: 'doc',
+          label: 'Link Strapi Design System',
+          id: 'core/admin/link-strapi-design-system',
+        },
+      ],
+    },
+    {
+      type: 'category',
       label: 'Core',
       link: {
         type: 'generated-index',
@@ -57,34 +68,45 @@ const sidebars = {
         },
         {
           type: 'category',
-          label: 'Hooks',
-          items: [
-            {
-              type: 'doc',
-              label: 'useFetchClient',
-              id: 'core/hooks/use-fetch-client',
-            },
-          ],
-        },
-        {
-          type: 'category',
-          label: 'Admin',
-          items: [
-            {
-              type: 'doc',
-              label: 'Link Strapi Design System',
-              id: 'core/admin/link-strapi-design-system',
-            },
-          ],
-        },
-        {
-          type: 'category',
           label: 'Content Type Builder',
           link: {
             type: 'doc',
             id: 'core/content-type-builder/intro',
           },
           items: ['example'],
+        },
+        {
+          type: 'category',
+          label: 'Helper Plugin',
+          items: [
+            {
+              type: 'category',
+              label: 'Hooks',
+              items: [
+                {
+                  type: 'doc',
+                  label: 'useFetchClient',
+                  id: 'core/helper-plugin/hooks/use-fetch-client',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Utils',
+          items: [
+            {
+              type: 'doc',
+              label: 'Async',
+              id: 'core/utils/async',
+            },
+            {
+              type: 'doc',
+              label: 'Event Hub',
+              id: 'core/utils/event-hub',
+            },
+          ],
         },
       ],
     },

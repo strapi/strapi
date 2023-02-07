@@ -715,7 +715,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
           >
             <div>
               <button
-                aria-controls="simplemenu-1"
+                aria-controls="0"
                 aria-disabled="false"
                 aria-expanded="false"
                 aria-haspopup="true"
@@ -802,7 +802,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                 </div>
                 <div
                   class="c0 c21 c22"
-                  spacing="6"
                 >
                   <div
                     class="c0 c23"
@@ -817,11 +816,10 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                           <div>
                             <div
                               class="c0 c21 c25"
-                              spacing="1"
                             >
                               <label
                                 class="c5 c6"
-                                for="textinput-2"
+                                for="2"
                               >
                                 <div
                                   class="c0 c13"
@@ -842,7 +840,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                                   aria-invalid="false"
                                   aria-required="true"
                                   class="c30"
-                                  id="textinput-2"
+                                  id="2"
                                   name="firstname"
                                   value=""
                                 />
@@ -862,11 +860,10 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                           <div>
                             <div
                               class="c0 c21 c25"
-                              spacing="1"
                             >
                               <label
                                 class="c5 c6"
-                                for="textinput-3"
+                                for="4"
                               >
                                 <div
                                   class="c0 c13"
@@ -882,7 +879,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                                   aria-invalid="false"
                                   aria-required="false"
                                   class="c30"
-                                  id="textinput-3"
+                                  id="4"
                                   name="lastname"
                                   value=""
                                 />
@@ -897,11 +894,10 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                     <div>
                       <div
                         class="c0 c21 c25"
-                        spacing="1"
                       >
                         <label
                           class="c5 c6"
-                          for="textinput-4"
+                          for="6"
                         >
                           <div
                             class="c0 c13"
@@ -922,7 +918,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                             aria-invalid="false"
                             aria-required="true"
                             class="c30"
-                            id="textinput-4"
+                            id="6"
                             name="email"
                             type="email"
                             value=""
@@ -935,11 +931,10 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                     <div>
                       <div
                         class="c0 c21 c25"
-                        spacing="1"
                       >
                         <label
                           class="c5 c6"
-                          for="textinput-5"
+                          for="8"
                         >
                           <div
                             class="c0 c13"
@@ -956,12 +951,12 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                           class="c0 c28 c29"
                         >
                           <input
-                            aria-describedby="textinput-5-hint"
+                            aria-describedby="8-hint"
                             aria-disabled="false"
                             aria-invalid="false"
                             aria-required="true"
                             class="c31 c32"
-                            id="textinput-5"
+                            id="8"
                             name="password"
                             type="password"
                             value=""
@@ -991,7 +986,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                         </div>
                         <p
                           class="c5 c36"
-                          id="textinput-5-hint"
+                          id="8-hint"
                         >
                           Must be at least 8 characters, 1 uppercase, 1 lowercase & 1 number
                         </p>
@@ -1002,11 +997,10 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                     <div>
                       <div
                         class="c0 c21 c25"
-                        spacing="1"
                       >
                         <label
                           class="c5 c6"
-                          for="textinput-6"
+                          for="10"
                         >
                           <div
                             class="c0 c13"
@@ -1027,7 +1021,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                             aria-invalid="false"
                             aria-required="true"
                             class="c31 c32"
-                            id="textinput-6"
+                            id="10"
                             name="confirmPassword"
                             type="password"
                             value=""
@@ -1061,7 +1055,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                   <div>
                     <div
                       class="c0 c21 c25"
-                      spacing="1"
                     >
                       <label
                         class="c5 c37 c38"
@@ -1072,7 +1065,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                           <input
                             aria-label="news"
                             class="c39"
-                            id="checkbox-7"
+                            id="12"
                             name="news"
                             type="checkbox"
                           />

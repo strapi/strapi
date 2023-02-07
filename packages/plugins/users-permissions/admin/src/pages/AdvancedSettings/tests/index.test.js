@@ -861,7 +861,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
             >
               <div
                 class="c1 c14 c15"
-                spacing="4"
               >
                 <h2
                   class="c5 c16"
@@ -880,11 +879,10 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                       <div>
                         <div
                           class="c1 c14 c19"
-                          spacing="1"
                         >
                           <label
                             class="c5 c11"
-                            for="select-1"
+                            for="1"
                           >
                             <div
                               class="c1 c4"
@@ -896,13 +894,13 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                             class="c1 c4 c20"
                           >
                             <button
-                              aria-describedby="select-1-hint"
+                              aria-describedby="1-hint"
                               aria-disabled="false"
                               aria-expanded="false"
                               aria-haspopup="listbox"
-                              aria-labelledby="select-1 select-1-label select-1-content"
+                              aria-labelledby="1 1-label 1-content"
                               class="c21"
-                              id="select-1"
+                              id="1"
                               type="button"
                             />
                             <div
@@ -916,7 +914,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 >
                                   <span
                                     class="c5 c24"
-                                    id="select-1-content"
+                                    id="1-content"
                                   >
                                     Authenticated
                                   </span>
@@ -952,7 +950,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                           </div>
                           <p
                             class="c5 c28"
-                            id="select-1-hint"
+                            id="1-hint"
                           >
                             It will attach the new authenticated user to the selected role.
                           </p>
@@ -971,14 +969,13 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                       >
                         <div
                           class="c31 c32"
-                          spacing="1"
                         >
                           <div
                             class="c33"
                           >
                             <label
                               class="c34"
-                              for="toggleinput-1"
+                              for="1"
                             >
                               <div
                                 class="c33"
@@ -1020,10 +1017,11 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 </span>
                               </div>
                               <input
+                                aria-describedby="1-hint"
                                 aria-disabled="false"
                                 aria-required="false"
                                 class="c45"
-                                id="toggleinput-1"
+                                id="1"
                                 name="unique_email"
                                 type="checkbox"
                               />
@@ -1031,7 +1029,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                           </label>
                           <p
                             class="c46"
-                            id="toggleinput-1-hint"
+                            id="1-hint"
                           >
                             Disallow the user to create multiple accounts using the same email address with different authentication providers.
                           </p>
@@ -1050,14 +1048,13 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                       >
                         <div
                           class="c31 c32"
-                          spacing="1"
                         >
                           <div
                             class="c33"
                           >
                             <label
                               class="c34"
-                              for="toggleinput-2"
+                              for="3"
                             >
                               <div
                                 class="c33"
@@ -1099,10 +1096,11 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 </span>
                               </div>
                               <input
+                                aria-describedby="3-hint"
                                 aria-disabled="false"
                                 aria-required="false"
                                 class="c45"
-                                id="toggleinput-2"
+                                id="3"
                                 name="allow_register"
                                 type="checkbox"
                               />
@@ -1110,7 +1108,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                           </label>
                           <p
                             class="c46"
-                            id="toggleinput-2-hint"
+                            id="3-hint"
                           >
                             When disabled (OFF), the registration process is forbidden. No one can subscribe anymore no matter the used provider.
                           </p>
@@ -1128,7 +1126,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                         <div>
                           <div
                             class="c31 c32"
-                            spacing="1"
                           >
                             <label
                               class="c34"
@@ -1178,14 +1175,13 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                       >
                         <div
                           class="c31 c32"
-                          spacing="1"
                         >
                           <div
                             class="c33"
                           >
                             <label
                               class="c34"
-                              for="toggleinput-3"
+                              for="5"
                             >
                               <div
                                 class="c33"
@@ -1227,10 +1223,11 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 </span>
                               </div>
                               <input
+                                aria-describedby="5-hint"
                                 aria-disabled="false"
                                 aria-required="false"
                                 class="c45"
-                                id="toggleinput-3"
+                                id="5"
                                 name="email_confirmation"
                                 type="checkbox"
                               />
@@ -1238,7 +1235,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                           </label>
                           <p
                             class="c46"
-                            id="toggleinput-3-hint"
+                            id="5-hint"
                           >
                             When enabled (ON), new registered users receive a confirmation email.
                           </p>
@@ -1256,7 +1253,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                         <div>
                           <div
                             class="c31 c32"
-                            spacing="1"
                           >
                             <label
                               class="c34"
