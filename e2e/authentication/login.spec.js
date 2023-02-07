@@ -22,6 +22,23 @@ test.describe('Authentication | Login', () => {
       await expect(page).toHaveTitle('Homepage');
     });
 
+    test('A user should be able to log in without making his authentication persistent', async ({
+      page,
+      context,
+    }) => {
+      await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
+      await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
+
+      await page.getByRole('button', { name: 'Login' }).click();
+      await expect(page).toHaveTitle('Homepage');
+
+      await page.close();
+
+      page = await context.newPage();
+      await page.goto('/admin');
+      await expect(page).toHaveTitle('Strapi Admin');
+    });
+
     test('A user should be able to log in and make his authentication persistent', async ({
       page,
       context,
@@ -40,69 +57,35 @@ test.describe('Authentication | Login', () => {
       await page.goto('/admin');
       await expect(page).toHaveTitle('Homepage');
     });
-
-    test('A user should be able to log in without making his authentication persistent', async ({
-      page,
-      context,
-    }) => {
-      await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
-      await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
-
-      await page.getByRole('button', { name: 'Login' }).click();
-      await expect(page).toHaveTitle('Homepage');
-
-      await page.close();
-
-      page = await context.newPage();
-      await page.goto('/admin');
-      await expect(page).toHaveTitle('Strapi Admin');
-    });
   });
 
-  // test.describe('Rate limit on login', () => {
-  //   test.only('Should display a rate limit error message after 5 attempts to login', async ({
-  //     page,
-  //   }) => {
-  //     await page.request.fetch('/api/config/ratelimit/enable', {
-  //       method: 'POST',
-  //       data: true,
-  //     });
+  test.describe('Rate limit on login', () => {
+    test('Should display a rate limit error message after 5 attempts to login', async ({
+      page,
+      browserName,
+    }) => {
+      await page.request.fetch('/api/config/ratelimit/enable', {
+        method: 'POST',
+        data: { value: true },
+      });
 
-  //     await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
-  //     await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
-  //     await page.getByRole('button', { name: 'Login' }).click();
-  //     await page.getByText('John Smith').click();
-  //     await page.getByText('Logout').click();
+      await page.getByLabel('Email*', { exact: true }).fill(`test@${browserName}.com`);
+      await page.getByLabel('Password*', { exact: true }).fill('wrongPassword');
+      await page.getByRole('button', { name: 'Login' }).click();
+      await page.getByRole('button', { name: 'Login' }).click();
+      await page.getByRole('button', { name: 'Login' }).click();
+      await page.getByRole('button', { name: 'Login' }).click();
+      await page.getByRole('button', { name: 'Login' }).click();
+      await page.getByRole('button', { name: 'Login' }).click();
 
-  //     await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
-  //     await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
-  //     await page.getByRole('button', { name: 'Login' }).click();
-  //     await page.getByText('John Smith').click();
-  //     await page.getByText('Logout').click();
+      await expect(page.getByText('Too many requests, please try again later.')).toBeVisible();
 
-  //     await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
-  //     await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
-  //     await page.getByRole('button', { name: 'Login' }).click();
-  //     await page.getByText('John Smith').click();
-  //     await page.getByText('Logout').click();
-
-  //     await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
-  //     await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
-  //     await page.getByRole('button', { name: 'Login' }).click();
-  //     await page.getByText('John Smith').click();
-  //     await page.getByText('Logout').click();
-
-  //     await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
-  //     await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
-  //     await page.getByRole('button', { name: 'Login' }).click();
-  //     await page.getByText('John Smith').click();
-  //     await page.getByText('Logout').click();
-
-  //     await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
-  //     await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
-  //     await page.getByRole('button', { name: 'Login' }).click();
-  //   });
-  // });
+      await page.request.fetch('/api/config/ratelimit/enable', {
+        method: 'POST',
+        data: { value: false },
+      });
+    });
+  });
 
   test.describe('Validation checks', () => {
     test('A user should see a validation error when not passing in an email', async ({ page }) => {
