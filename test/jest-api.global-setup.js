@@ -8,7 +8,11 @@ const databases = {
   postgres: {
     client: 'postgres',
     connection: {
-      connectionString: 'postgresql://strapi:strapi@127.0.0.1/strapi_test',
+      host: '127.0.0.1',
+      port: 5432,
+      database: 'strapi_test',
+      user: 'strapi',
+      password: 'strapi',
     },
   },
   mysql: {
@@ -17,7 +21,7 @@ const databases = {
       host: '127.0.0.1',
       port: 3306,
       database: 'strapi_test',
-      username: 'strapi',
+      user: 'strapi',
       password: 'strapi',
     },
   },
