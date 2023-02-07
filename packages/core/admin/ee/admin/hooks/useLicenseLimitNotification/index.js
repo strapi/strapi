@@ -3,7 +3,8 @@
  * useLicenseLimitNotification
  *
  */
-// import { useRef } from 'react';
+import { useEffect } from 'react';
+import { useLocation } from 'react-router';
 import { useNotification } from '@strapi/helper-plugin';
 import useLicenseLimitInfos from '../useLicenseLimitInfos';
 
@@ -18,7 +19,12 @@ const notificationBody = (currentUserCount, permittedSeats, licenseLimitStatus) 
         defaultMessage:
           "Add seats to re-enable users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
       },
-      title: `Over seat limit (${currentUserCount}/${permittedSeats})`,
+      // Title is translated in the Notification component
+      title: {
+        id: 'notification.ee.warning.over-seat-limit.title',
+        defaultMessage: 'Over seat limit ({currentUserCount}/{permittedSeats})',
+        values: { currentUserCount, permittedSeats },
+      },
       link: {
         url: 'test url',
         label: 'ADD SEATS',
@@ -37,7 +43,11 @@ const notificationBody = (currentUserCount, permittedSeats, licenseLimitStatus) 
         defaultMessage:
           "Add seats to re-enable users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
       },
-      title: `At seat limit (${currentUserCount}/${permittedSeats})`,
+      title: {
+        id: 'notification.ee.warning.at-seat-limit.title',
+        defaultMessage: 'At seat limit ({currentUserCount}/{permittedSeats})',
+        values: { currentUserCount, permittedSeats },
+      },
       link: {
         url: 'test url',
         label: 'ADD SEATS',
@@ -51,21 +61,38 @@ const notificationBody = (currentUserCount, permittedSeats, licenseLimitStatus) 
   return notification;
 };
 
+const shouldDisplayNotification = (pathname) => {
+  const isLocation = (string) => pathname.includes(string);
+  const shownInSession = window.sessionStorage.getItem(`notification-${pathname}`);
+
+  if (isLocation('/') && shownInSession) {
+    return false;
+  }
+
+  if (isLocation('users') && shownInSession) {
+    return false;
+  }
+
+  return true;
+};
+
 const useLicenseLimitNotification = () => {
-  const licenseLimitInfos = useLicenseLimitInfos();
+  let licenseLimitInfos = useLicenseLimitInfos();
   const toggleNotification = useNotification();
-  const { currentUserCount, permittedSeats, licenseLimitStatus } = licenseLimitInfos;
-
-  if (!licenseLimitInfos) return;
-
-  // Won't notify if license user and seat info is not present
-
-  const notification = notificationBody(currentUserCount, permittedSeats, licenseLimitStatus);
+  const location = useLocation();
 
   // eslint-disable-next-line consistent-return
-  return (onClose) => {
+  useEffect(() => {
+    if (!licenseLimitInfos) return;
+
+    if (!shouldDisplayNotification(location.pathname)) return;
+
+    const { currentUserCount, permittedSeats, licenseLimitStatus } = licenseLimitInfos;
+    const notification = notificationBody(currentUserCount, permittedSeats, licenseLimitStatus);
+    const onClose = () => window.sessionStorage.setItem(`notification-${location.pathname}`, true);
     toggleNotification({ ...notification, onClose });
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 };
 
 export default useLicenseLimitNotification;

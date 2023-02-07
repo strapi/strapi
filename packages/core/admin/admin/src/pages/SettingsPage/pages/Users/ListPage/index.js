@@ -14,8 +14,8 @@ import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import EENotification from 'ee_else_ce/components/EENotification';
 import CreateAction from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/CreateAction';
+import useLicenseLimitNotification from 'ee_else_ce/hooks/useLicenseLimitNotification';
 import adminPermissions from '../../../../../permissions';
 import TableRows from './DynamicTable/TableRows';
 import Filters from './Filters';
@@ -35,6 +35,7 @@ const ListPage = () => {
   const { formatMessage } = useIntl();
   const { search } = useLocation();
   useFocusWhenNavigate();
+  useLicenseLimitNotification();
   const { notifyStatus } = useNotifyAT();
   const queryName = ['users', search];
 
@@ -104,7 +105,6 @@ const ListPage = () => {
 
   return (
     <Main aria-busy={isLoading}>
-      <EENotification />
       <SettingsPageTitle name="Users" />
       <HeaderLayout
         primaryAction={createAction}

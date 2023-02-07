@@ -18,7 +18,6 @@ import { Button } from '@strapi/design-system/Button';
 import { Link } from '@strapi/design-system/v2/Link';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import Check from '@strapi/icons/Check';
-import EENotification from 'ee_else_ce/components/EENotification';
 import AdminSeatInfo from 'ee_else_ce/pages/SettingsPage/pages/ApplicationInfosPage/components/AdminSeatInfo';
 import adminPermissions from '../../../../permissions';
 import { useConfigurations } from '../../../../hooks';
@@ -95,7 +94,6 @@ const ApplicationInfosPage = () => {
 
   return (
     <Layout>
-      <EENotification />
       <SettingsPageTitle name="Application" />
       <Main>
         <form onSubmit={handleSubmit}>

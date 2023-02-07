@@ -7,7 +7,6 @@ const _ = require('lodash');
  * @param {object} input
  */
 const shouldUpdateEEDisabledUsersList = async (id, input) => {
-  console.log('update service');
   const data = await strapi.db.query('strapi::ee-store').findOne({
     where: { key: 'ee_disabled_users' },
   });
@@ -19,7 +18,6 @@ const shouldUpdateEEDisabledUsersList = async (id, input) => {
 
   if (user.isActive !== input.isActive) {
     const newDisabledUsersList = _.filter(disabledUsers, (user) => user.id !== Number(id));
-    console.log(newDisabledUsersList);
     await strapi.db.query('strapi::ee-store').update({
       where: { id: data.id },
       data: { value: JSON.stringify(newDisabledUsersList) },
@@ -27,6 +25,29 @@ const shouldUpdateEEDisabledUsersList = async (id, input) => {
   }
 };
 
+const shouldRemoveFromEEDisabledUsersList = async (ids) => {
+  let idsToCheck;
+  if (typeof ids === 'object') {
+    idsToCheck = [...ids];
+  } else {
+    idsToCheck = [Number(ids)];
+  }
+
+  const data = await strapi.db.query('strapi::ee-store').findOne({
+    where: { key: 'ee_disabled_users' },
+  });
+
+  if (!data || !data.value || data.value.length === 0) return;
+  const disabledUsers = JSON.parse(data.value);
+
+  const newDisabledUsersList = _.filter(disabledUsers, (user) => !idsToCheck.includes(user.id));
+  await strapi.db.query('strapi::ee-store').update({
+    where: { id: data.id },
+    data: { value: JSON.stringify(newDisabledUsersList) },
+  });
+};
+
 module.exports = {
   shouldUpdateEEDisabledUsersList,
+  shouldRemoveFromEEDisabledUsersList,
 };

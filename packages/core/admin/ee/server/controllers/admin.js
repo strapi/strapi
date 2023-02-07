@@ -2,14 +2,25 @@
 
 module.exports = {
   async licenseLimitInformation() {
-    const currentUserCount = await strapi.db
+    let shouldNotify = false;
+    let licenseLimitStatus = null;
+    let currentUserCount;
+    const permittedSeats = 5;
+
+    const currentActiveUserCount = await strapi.db
       .query('admin::user')
       .count({ where: { isActive: true } });
 
-    const permittedSeats = 5;
+    const data = await strapi.db.query('strapi::ee-store').findOne({
+      where: { key: 'ee_disabled_users' },
+    });
 
-    let shouldNotify = false;
-    let licenseLimitStatus = null;
+    if (data.value) {
+      const eeDisabledUsers = JSON.parse(data.value);
+      currentUserCount = currentActiveUserCount + eeDisabledUsers.length;
+    } else {
+      currentUserCount = currentActiveUserCount;
+    }
 
     if (currentUserCount > permittedSeats) {
       shouldNotify = true;

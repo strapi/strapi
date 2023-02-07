@@ -13,7 +13,7 @@ import { Layout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Box } from '@strapi/design-system/Box';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
-import EENotification from 'ee_else_ce/components/EENotification';
+import useLicenseLimitNotification from 'ee_else_ce/hooks/useLicenseLimitNotification';
 import cornerOrnamentPath from './assets/corner-ornament.svg';
 import { useModels } from '../../hooks';
 import isGuidedTourCompleted from '../../components/GuidedTour/utils/isGuidedTourCompleted';
@@ -36,6 +36,7 @@ const HomePage = () => {
   // Temporary until we develop the menu API
   const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useModels();
   const { guidedTourState, isGuidedTourVisible, isSkipped } = useGuidedTour();
+  useLicenseLimitNotification();
 
   const showGuidedTour =
     !isGuidedTourCompleted(guidedTourState) && isGuidedTourVisible && !isSkipped;
@@ -61,7 +62,6 @@ const HomePage = () => {
 
   return (
     <Layout>
-      <EENotification />
       <FormattedMessage id="HomePage.helmet.title" defaultMessage="Homepage">
         {(title) => <Helmet title={title[0]} />}
       </FormattedMessage>

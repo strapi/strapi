@@ -6,12 +6,12 @@ const { ApplicationError } = require('@strapi/utils/lib/errors');
 const { PolicyError } = utils.errors;
 
 module.exports = async (policyCtx, config = {}) => {
-  if (!strapi.EE) return true;
+  if (!strapi.isEE) return true;
+  if (userCount < permittedSeats) return true;
 
   const userCount = await strapi.db.query('admin::user').count({
     where: { isActive: true },
   });
-
   const permittedSeats = 5;
 
   if (userCount >= permittedSeats && config.isCreating) {

@@ -9,7 +9,7 @@ import {
 } from '@strapi/helper-plugin';
 import { useQueries } from 'react-query';
 import get from 'lodash/get';
-import LicenseContextWrapper from 'ee_else_ce/components/AuthenticatedApp/LicenseContextWrapper';
+import useLicenseLimitInfos from 'ee_else_ce/hooks/useLicenseLimitInfos';
 import packageJSON from '../../../../package.json';
 import { useConfigurations } from '../../hooks';
 import PluginsInitializer from '../PluginsInitializer';
@@ -73,6 +73,10 @@ const AuthenticatedApp = () => {
     }
   }, [userRoles, appInfos]);
 
+  // This hook fetches license allowances in 'ee' mode and stores data in redux for global access.
+  // It does nothing in 'ce'.
+  useLicenseLimitInfos();
+
   useEffect(() => {
     const getUserId = async () => {
       const userId = await hashAdminUserEmail(userInfo);
@@ -110,13 +114,11 @@ const AuthenticatedApp = () => {
   }
 
   return (
-    <LicenseContextWrapper>
-      <AppInfosContext.Provider value={appInfosValue}>
-        <RBACProvider permissions={permissions} refetchPermissions={refetch}>
-          <PluginsInitializer />
-        </RBACProvider>
-      </AppInfosContext.Provider>
-    </LicenseContextWrapper>
+    <AppInfosContext.Provider value={appInfosValue}>
+      <RBACProvider permissions={permissions} refetchPermissions={refetch}>
+        <PluginsInitializer />
+      </RBACProvider>
+    </AppInfosContext.Provider>
   );
 };
 
