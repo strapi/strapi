@@ -117,7 +117,7 @@ class Strapi {
     this.cron = createCronService();
     this.telemetry = createTelemetry(this);
     this.requestContext = requestContext;
-
+    this.ee = ee;
     this.customFields = createCustomFields(this);
 
     createUpdateNotifier(this).notify();

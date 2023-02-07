@@ -165,6 +165,10 @@ module.exports = Object.freeze({
     return ee.enabled;
   },
 
+  get licenseInfo() {
+    return ee.licenseInfo;
+  },
+
   features: Object.freeze({
     list,
     get,

@@ -15,6 +15,8 @@ const initalState = {
     permittedSeats: null,
     shouldNotify: false,
     licenseLimitStatus: null,
+    isHostedOnStrapiCloud: false,
+    licenseType: null,
   },
 };
 
@@ -57,7 +59,7 @@ const useLicenseLimitInfos = () => {
   useInjectReducer(NS, reducer);
 
   useEffect(() => {
-    if (status === 'success') {
+    if (status === 'success' && data) {
       dispatch(actionSetData(data));
     }
   }, [data, status, dispatch]);

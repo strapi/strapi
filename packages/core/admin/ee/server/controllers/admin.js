@@ -1,11 +1,15 @@
 'use strict';
 
+const { env } = require('@strapi/utils');
+
 module.exports = {
   async licenseLimitInformation() {
     let shouldNotify = false;
     let licenseLimitStatus = null;
     let currentUserCount;
-    const permittedSeats = 5;
+    const permittedSeats = strapi.ee.licenseInfo.seats;
+
+    if (!permittedSeats) return;
 
     const currentActiveUserCount = await strapi.db
       .query('admin::user')
@@ -38,6 +42,8 @@ module.exports = {
         permittedSeats,
         shouldNotify,
         licenseLimitStatus,
+        isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
+        licenseType: strapi.ee.licenseInfo.type,
       },
     };
   },

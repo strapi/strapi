@@ -52,6 +52,11 @@ jest.mock('../../RBACProvider', () => {
   return Compo;
 });
 
+jest.mock('ee_else_ce/hooks/useLicenseLimitInfos', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

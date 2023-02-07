@@ -8,8 +8,17 @@ import { useLocation } from 'react-router';
 import { useNotification } from '@strapi/helper-plugin';
 import useLicenseLimitInfos from '../useLicenseLimitInfos';
 
-const notificationBody = (currentUserCount, permittedSeats, licenseLimitStatus) => {
+const notificationBody = (
+  currentUserCount,
+  permittedSeats,
+  licenseLimitStatus,
+  isHostedOnStrapiCloud
+) => {
   let notification = {};
+  const linkURL = isHostedOnStrapiCloud
+    ? 'https://cloud.strapi.io/profile/billing'
+    : 'https://strapi.chargebeeportal.com/portal/v2/login?forward=portal_main';
+  const linkLabel = isHostedOnStrapiCloud ? 'ADD SEATS' : 'CONTACT SALES';
 
   if (licenseLimitStatus === 'OVER_LIMIT') {
     notification = {
@@ -26,8 +35,8 @@ const notificationBody = (currentUserCount, permittedSeats, licenseLimitStatus) 
         values: { currentUserCount, permittedSeats },
       },
       link: {
-        url: 'test url',
-        label: 'ADD SEATS',
+        url: linkURL,
+        label: linkLabel,
       },
       blockTransition: true,
     };
@@ -49,8 +58,8 @@ const notificationBody = (currentUserCount, permittedSeats, licenseLimitStatus) 
         values: { currentUserCount, permittedSeats },
       },
       link: {
-        url: 'test url',
-        label: 'ADD SEATS',
+        url: linkURL,
+        label: linkLabel,
       },
       blockTransition: true,
     };
@@ -83,12 +92,18 @@ const useLicenseLimitNotification = () => {
 
   // eslint-disable-next-line consistent-return
   useEffect(() => {
-    if (!licenseLimitInfos) return;
+    if (!licenseLimitInfos || !licenseLimitInfos.permittedSeats) return;
 
     if (!shouldDisplayNotification(location.pathname)) return;
 
-    const { currentUserCount, permittedSeats, licenseLimitStatus } = licenseLimitInfos;
-    const notification = notificationBody(currentUserCount, permittedSeats, licenseLimitStatus);
+    const { currentUserCount, permittedSeats, licenseLimitStatus, isHostedOnStrapiCloud } =
+      licenseLimitInfos;
+    const notification = notificationBody(
+      currentUserCount,
+      permittedSeats,
+      licenseLimitStatus,
+      isHostedOnStrapiCloud
+    );
     const onClose = () => window.sessionStorage.setItem(`notification-${location.pathname}`, true);
     toggleNotification({ ...notification, onClose });
     // eslint-disable-next-line react-hooks/exhaustive-deps

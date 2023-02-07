@@ -14,7 +14,15 @@ import { useLicenseLimitInfos } from '../../../../../../hooks';
 const AdminSeatInfo = () => {
   const { formatMessage } = useIntl();
   const licenseLimitInfos = useLicenseLimitInfos();
-  const { licenseLimitStatus, currentUserCount, permittedSeats } = licenseLimitInfos;
+  const { licenseLimitStatus, currentUserCount, permittedSeats, isHostedOnStrapiCloud } =
+    licenseLimitInfos;
+  const linkURL = isHostedOnStrapiCloud
+    ? 'https://cloud.strapi.io/profile/billing'
+    : 'https://share.hsforms.com/1WhxtbTkJSUmfqqEuv4pwuA43qp4';
+
+  if (!permittedSeats) {
+    return <></>;
+  }
 
   return (
     <GridItem col={6} s={12}>
@@ -52,10 +60,12 @@ const AdminSeatInfo = () => {
           </Tooltip>
         )}
       </Stack>
-      <Link href="https://strapi.io" isExternal endIcon={<ExternalLink />}>
+      <Link href={linkURL} isExternal endIcon={<ExternalLink />}>
         {formatMessage({
-          id: 'Settings.application.link-add-seats',
-          defaultMessage: 'Add seats',
+          id: isHostedOnStrapiCloud
+            ? 'Settings.application.ee.link-add-seats'
+            : 'Settings.application.ee.link-contact-sales',
+          defaultMessage: isHostedOnStrapiCloud ? 'Add seats' : 'Contact sales',
         })}
       </Link>
     </GridItem>

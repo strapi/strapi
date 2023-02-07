@@ -584,16 +584,24 @@ exports[`Application page renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <div
-                class="c0 c22"
+                class="c0 c22 c23"
               >
-                <span
-                  class="c8 c25"
+                <div
+                  class="c24"
                 >
-                  node version
-                </span>
-                <p
-                  class="c8 c26"
-                />
+                  <div
+                    class="c0 "
+                  >
+                    <span
+                      class="c8 c25"
+                    >
+                      node version
+                    </span>
+                    <p
+                      class="c8 c26"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
