@@ -851,14 +851,12 @@ describe('Admin | containers | RoleCreatePage', () => {
           >
             <div
               class="c1 c3 c15 c16"
-              spacing="7"
             >
               <div
                 class="c1 c17"
               >
                 <div
                   class="c1 c3 c15 c18"
-                  spacing="4"
                 >
                   <h2
                     class="c6 c19"
@@ -878,11 +876,10 @@ describe('Admin | containers | RoleCreatePage', () => {
                           <div>
                             <div
                               class="c1 c3 c15 c22"
-                              spacing="1"
                             >
                               <label
                                 class="c6 c12"
-                                for="textinput-1"
+                                for="1"
                               >
                                 <div
                                   class="c1 c3 c5"
@@ -898,7 +895,7 @@ describe('Admin | containers | RoleCreatePage', () => {
                                   aria-invalid="false"
                                   aria-required="false"
                                   class="c24"
-                                  id="textinput-1"
+                                  id="1"
                                   name="name"
                                   value=""
                                 />
@@ -920,14 +917,13 @@ describe('Admin | containers | RoleCreatePage', () => {
                           <div>
                             <div
                               class="c1 c3 c15 c22"
-                              spacing="1"
                             >
                               <div
                                 class="c1 c3 c5"
                               >
                                 <label
                                   class="c6 c12"
-                                  for="textarea-2"
+                                  for="3"
                                 >
                                   <div
                                     class="c1 c3 c5"
@@ -943,7 +939,7 @@ describe('Admin | containers | RoleCreatePage', () => {
                                   aria-invalid="false"
                                   aria-required="false"
                                   class="c27"
-                                  id="textarea-2"
+                                  id="3"
                                   name="description"
                                 />
                               </div>
@@ -966,11 +962,9 @@ describe('Admin | containers | RoleCreatePage', () => {
                   >
                     <div
                       class="c1 c3 c15 c32"
-                      spacing="6"
                     >
                       <div
                         class="c1 c3 c15 c33"
-                        spacing="2"
                       >
                         <h2
                           class="c6 c19"
@@ -985,7 +979,6 @@ describe('Admin | containers | RoleCreatePage', () => {
                       </div>
                       <div
                         class="c1 c3 c15 c22"
-                        spacing="1"
                       >
                         <div
                           aria-disabled="false"
@@ -994,17 +987,15 @@ describe('Admin | containers | RoleCreatePage', () => {
                         >
                           <div
                             class="c1 c3 c37 c4 c38"
-                            cursor=""
                           >
                             <div
                               class="c1 c3 c39 c5 c40"
-                              spacing="3"
                             >
                               <button
-                                aria-controls="accordion-content-accordion-7"
+                                aria-controls="accordion-content-4"
                                 aria-disabled="false"
                                 aria-expanded="false"
-                                aria-labelledby="accordion-label-accordion-7"
+                                aria-labelledby="accordion-label-4"
                                 class="c1 c3 c41 c5 c42 c43"
                                 data-strapi-accordion-toggle="true"
                                 type="button"
@@ -1014,13 +1005,13 @@ describe('Admin | containers | RoleCreatePage', () => {
                                 >
                                   <span
                                     class="c6 c45"
-                                    id="accordion-label-accordion-7"
+                                    id="accordion-label-4"
                                   >
                                     Address
                                   </span>
                                   <p
                                     class="c6 c34"
-                                    id="accordion-desc-accordion-7"
+                                    id="accordion-desc-4"
                                   >
                                     Define all allowed actions for the api::address plugin.
                                   </p>
@@ -1028,22 +1019,18 @@ describe('Admin | containers | RoleCreatePage', () => {
                               </button>
                               <div
                                 class="c1 c3 c5 c40"
-                                spacing="3"
                               >
                                 <span
                                   aria-hidden="true"
                                   class="c1 c3 c46 c47"
-                                  cursor="pointer"
                                   data-strapi-dropdown="true"
-                                  height="2rem"
-                                  width="2rem"
                                 >
                                   <svg
                                     class="c1 c48 c49"
                                     fill="none"
                                     height="1em"
                                     viewBox="0 0 14 8"
-                                    width="0.6875rem"
+                                    width="1em"
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path
@@ -1071,7 +1058,6 @@ describe('Admin | containers | RoleCreatePage', () => {
                   >
                     <div
                       class="c1 c3 c15 c33"
-                      spacing="2"
                     >
                       <h3
                         class="c6 c19"

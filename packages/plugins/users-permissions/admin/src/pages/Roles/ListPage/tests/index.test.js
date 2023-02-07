@@ -529,7 +529,7 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
                     <span>
                       <button
                         aria-disabled="false"
-                        aria-labelledby="tooltip-1"
+                        aria-labelledby="0"
                         class="c10 c21"
                         tabindex="0"
                         type="button"
