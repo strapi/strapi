@@ -12,8 +12,8 @@ import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
 import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import Duplicate from '@strapi/icons/Duplicate';
-import { useCMEditViewDataManager, useNotification } from '@strapi/helper-plugin';
-import { axiosInstance, getTrad } from '../../../utils';
+import { useCMEditViewDataManager, useNotification, useFetchClient } from '@strapi/helper-plugin';
+import { getTrad } from '../../../utils';
 import { cleanData, generateOptions } from './utils';
 
 const StyledTypography = styled(Typography)`
@@ -49,6 +49,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [value, setValue] = useState(options[0]?.value || '');
+  const { get } = useFetchClient();
 
   const handleConfirmCopyLocale = async () => {
     if (!value) {
@@ -61,7 +62,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
 
     setIsLoading(true);
     try {
-      const { data: response } = await axiosInstance.get(requestURL);
+      const { data: response } = await get(requestURL);
 
       const cleanedData = cleanData(response, allLayoutData, localizations);
       ['createdBy', 'updatedBy', 'publishedAt', 'id', 'createdAt'].forEach((key) => {
