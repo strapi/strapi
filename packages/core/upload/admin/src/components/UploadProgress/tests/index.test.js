@@ -160,8 +160,6 @@ describe('<UploadProgress />', () => {
       >
         <div
           class="c3 c4 c5"
-          spacing="2"
-          width="100%"
         >
           <div
             aria-label="0/100%"
@@ -169,10 +167,8 @@ describe('<UploadProgress />', () => {
             aria-valuemin="0"
             aria-valuenow="0"
             class="c6 c7"
-            height="2"
             role="progressbar"
             value="0"
-            width="102px"
           />
           <button
             class="c8"
@@ -180,7 +176,6 @@ describe('<UploadProgress />', () => {
           >
             <div
               class="c1 c9"
-              spacing="2"
             >
               <span
                 class="c10"

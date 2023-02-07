@@ -651,17 +651,15 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
             </div>
             <div
               class="c1 c12 c13"
-              spacing="6"
             >
               <div>
                 <div>
                   <div
                     class="c1 c12 c14"
-                    spacing="1"
                   >
                     <label
                       class="c8 c15"
-                      for="textinput-1"
+                      for="1"
                     >
                       <div
                         class="c1 c4"
@@ -682,7 +680,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                         aria-invalid="false"
                         aria-required="true"
                         class="c20"
-                        id="textinput-1"
+                        id="1"
                         name="email"
                         placeholder="kai@doe.com"
                         value=""
@@ -695,11 +693,10 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                 <div>
                   <div
                     class="c1 c12 c14"
-                    spacing="1"
                   >
                     <label
                       class="c8 c15"
-                      for="textinput-2"
+                      for="3"
                     >
                       <div
                         class="c1 c4"
@@ -720,7 +717,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                         aria-invalid="false"
                         aria-required="true"
                         class="c21 c22"
-                        id="textinput-2"
+                        id="3"
                         name="password"
                         type="password"
                         value=""
@@ -754,7 +751,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
               <div>
                 <div
                   class="c1 c12 c14"
-                  spacing="1"
                 >
                   <label
                     class="c8 c26 c27"
@@ -765,7 +761,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                       <input
                         aria-label="rememberMe"
                         class="c28"
-                        id="checkbox-3"
+                        id="5"
                         name="rememberMe"
                         type="checkbox"
                       />
