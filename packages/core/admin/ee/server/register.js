@@ -12,7 +12,7 @@ const migrateAuditLogsTable = async ({ oldContentTypes, contentTypes }) => {
   const shouldMigrate = oldName === 'audit_logs' && newName === 'strapi_audit_logs';
 
   if (shouldMigrate) {
-    // Migrate the name audit logs table
+    // Migrate the main audit logs table
     if (await strapi.db.getSchemaConnection().hasTable('audit_logs')) {
       await strapi.db.getSchemaConnection().renameTable('audit_logs', 'strapi_audit_logs');
     }
