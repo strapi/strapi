@@ -195,31 +195,51 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
 
     test("It shouldn't be available for public", async () => {
-      const res = await requests.public.put(
+      const stagesRes = await requests.public.put(
         `/admin/review-workflows/workflows/${testWorkflow.id}/stages`,
         stagesUpdateData
       );
-
-      if (hasRW) {
-        expect(res.status).toBe(401);
-      } else {
-        expect(res.status).toBe(404);
-        expect(res.body.data).toBeUndefined();
-      }
-    });
-    test('It should be available for every connected users (admin)', async () => {
-      const res = await requests.admin.put(
-        `/admin/review-workflows/workflows/${testWorkflow.id}/stages`,
-        { body: stagesUpdateData }
+      const workflowRes = await requests.public.get(
+        `/admin/review-workflows/workflows/${testWorkflow.id}`
       );
 
       if (hasRW) {
-        expect(res.status).toBe(200);
-        expect(res.body.data).toBeInstanceOf(Object);
-        expect(res.body.data.id).toEqual(testWorkflow.id);
+        expect(stagesRes.status).toBe(401);
+        expect(workflowRes.status).toBe(401);
       } else {
-        expect(res.status).toBe(404);
-        expect(res.body.data).toBeUndefined();
+        expect(stagesRes.status).toBe(404);
+        expect(stagesRes.body.data).toBeUndefined();
+        expect(workflowRes.status).toBe(404);
+        expect(workflowRes.body.data).toBeUndefined();
+      }
+    });
+    test('It should be available for every connected users (admin)', async () => {
+      const stagesRes = await requests.admin.put(
+        `/admin/review-workflows/workflows/${testWorkflow.id}/stages`,
+        { body: stagesUpdateData }
+      );
+      const workflowRes = await requests.admin.get(
+        `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`
+      );
+
+      if (hasRW) {
+        expect(stagesRes.status).toBe(200);
+        expect(stagesRes.body.data).toBeInstanceOf(Object);
+        expect(stagesRes.body.data.id).toEqual(testWorkflow.id);
+        expect(workflowRes.status).toBe(200);
+        expect(workflowRes.body.data).toBeInstanceOf(Object);
+        expect(workflowRes.body.data.stages).toBeInstanceOf(Array);
+        expect(workflowRes.body.data.stages[0]).toMatchObject(stagesUpdateData[0]);
+        expect(workflowRes.body.data.stages[1]).toMatchObject(stagesUpdateData[1]);
+        expect(workflowRes.body.data.stages[2]).toMatchObject({
+          id: expect.any(Number),
+          ...stagesUpdateData[2],
+        });
+      } else {
+        expect(stagesRes.status).toBe(404);
+        expect(stagesRes.body.data).toBeUndefined();
+        expect(workflowRes.status).toBe(404);
+        expect(workflowRes.body.data).toBeUndefined();
       }
     });
   });
