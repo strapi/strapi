@@ -2,6 +2,9 @@
 
 const isoDateRegex = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
 process.env.DATABASE_NAME = `strapi_${process.env.JEST_WORKER_ID}`;
+if (process.env.DATABASE === 'mysql') {
+  process.env.DATABASE_USERNAME = 'root';
+}
 jest.setTimeout(120000);
 
 jest.mock('@strapi/provider-audit-logs-local', () => {
