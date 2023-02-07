@@ -1,13 +1,14 @@
-import { axiosInstance } from '../../../../core/utils';
+import { getFetchClient } from '@strapi/helper-plugin';
 import generateModelsLinks from './generateModelsLinks';
 import checkPermissions from './checkPermissions';
 import { getRequestUrl } from '../../../utils';
 
 const getContentTypeLinks = async (models, userPermissions, toggleNotification) => {
+  const { get } = getFetchClient();
   try {
     const {
       data: { data: contentTypeConfigurations },
-    } = await axiosInstance.get(getRequestUrl('content-types-settings'));
+    } = await get(getRequestUrl('content-types-settings'));
 
     const { collectionTypesSectionLinks, singleTypesSectionLinks } = generateModelsLinks(
       models,

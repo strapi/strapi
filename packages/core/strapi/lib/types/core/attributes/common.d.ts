@@ -30,7 +30,10 @@ export type ConfigurableAttribute = { configurable: true };
 export type NonConfigurableAttribute = { configurable: false };
 
 // custom field
-export type CustomField<T extends string, P extends object = undefined> = { customField: T, options?: P };
+export type CustomField<T extends string, P extends object = undefined> = {
+  customField: T;
+  options?: P;
+};
 
 // min/max
 export type SetMinMax<T extends MinMaxOption<U>, U = number> = T;

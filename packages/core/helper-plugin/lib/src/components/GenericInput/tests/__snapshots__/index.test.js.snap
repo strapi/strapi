@@ -1,5 +1,245 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`GenericInput json renders and matches the snapshot 1`] = `
+.c2 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c4 {
+  font-size: 0.875rem;
+  border-radius: 4px;
+  max-height: 31.5rem;
+  min-height: 15.75rem;
+}
+
+.c0 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c3 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c5 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c1 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c1 > * + * {
+  margin-top: 4px;
+}
+
+.c7 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c6 {
+  line-height: 1.25;
+}
+
+.c6 .cm-editor {
+  background-color: #32324d;
+  width: 100%;
+  outline: none;
+  border: 1px solid #dcdce4;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c6 .cm-editor:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c6 .cm-editor,
+.c6 .cm-scroller {
+  border-radius: 4px;
+}
+
+.c6 .cm-gutters,
+.c6 .cm-activeLineGutter {
+  background-color: #4a4a6a;
+}
+
+<div>
+  <div>
+    <div
+      class="c0 c1"
+      spacing="1"
+    >
+      <label
+        class="c2"
+        for="field-1"
+      >
+        <div
+          class="c3"
+        >
+          Default label
+        </div>
+      </label>
+      <div
+        class="c4 c5 c6"
+        font-size="2"
+      >
+        <div
+          class="cm-editor ͼ1 ͼ3 ͼ4 ͼ1a ͼo"
+        >
+          <div
+            aria-live="polite"
+            style="position: fixed; top: -10000px;"
+          />
+          <div
+            class="cm-scroller"
+            tabindex="-1"
+          >
+            <div
+              aria-hidden="true"
+              class="cm-gutters"
+              style="min-height: 14px; position: sticky;"
+            >
+              <div
+                class="cm-gutter cm-lineNumbers"
+              >
+                <div
+                  class="cm-gutterElement"
+                  style="height: 0px; visibility: hidden; pointer-events: none;"
+                >
+                  9
+                </div>
+                <div
+                  class="cm-gutterElement cm-activeLineGutter"
+                  style="height: 14px;"
+                >
+                  1
+                </div>
+              </div>
+              <div
+                class="cm-gutter cm-foldGutter"
+              >
+                <div
+                  class="cm-gutterElement"
+                  style="height: 0px; visibility: hidden; pointer-events: none;"
+                >
+                  <span
+                    title="Unfold line"
+                  >
+                    ›
+                  </span>
+                </div>
+                <div
+                  class="cm-gutterElement cm-activeLineGutter"
+                  style="height: 14px;"
+                />
+              </div>
+            </div>
+            <div
+              aria-autocomplete="list"
+              aria-multiline="true"
+              autocapitalize="off"
+              autocorrect="off"
+              class="cm-content"
+              contenteditable="true"
+              data-language="json"
+              role="textbox"
+              spellcheck="false"
+              style="tab-size: 4"
+              translate="no"
+            >
+              <div
+                class="cm-activeLine cm-line"
+              >
+                <br />
+              </div>
+            </div>
+            <div
+              aria-hidden="true"
+              class="cm-layer cm-layer-above cm-cursorLayer"
+              style="z-index: 150; animation-duration: 1200ms;"
+            />
+            <div
+              aria-hidden="true"
+              class="cm-layer cm-selectionLayer"
+              style="z-index: -2;"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="c7"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </div>
+</div>
+`;
+
 exports[`GenericInput number renders and matches the snapshot 1`] = `
 .c2 {
   font-size: 0.75rem;

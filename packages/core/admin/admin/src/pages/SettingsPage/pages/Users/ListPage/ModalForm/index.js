@@ -15,12 +15,17 @@ import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
 
 import { Formik } from 'formik';
-import { Form, GenericInput, useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
+import {
+  Form,
+  GenericInput,
+  useNotification,
+  useOverlayBlocker,
+  useFetchClient,
+} from '@strapi/helper-plugin';
 import { useQueryClient, useMutation } from 'react-query';
 import formDataModel from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/ModalForm/utils/formDataModel';
 import roleSettingsForm from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/ModalForm/utils/roleSettingsForm';
 import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
-import { axiosInstance } from '../../../../../../core/utils';
 import SelectRoles from '../../components/SelectRoles';
 import layout from './utils/layout';
 import schema from './utils/schema';
@@ -34,9 +39,10 @@ const ModalForm = ({ queryName, onToggle }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
+  const { post } = useFetchClient();
   const postMutation = useMutation(
     (body) => {
-      return axiosInstance.post('/admin/users', body);
+      return post('/admin/users', body);
     },
     {
       async onSuccess({ data }) {

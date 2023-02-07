@@ -6,7 +6,6 @@ import { createMemoryHistory } from 'history';
 import { useRBAC, TrackingProvider } from '@strapi/helper-plugin';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { lightTheme, darkTheme } from '@strapi/design-system';
-import { axiosInstance } from '../../../../../../core/utils';
 import Theme from '../../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
 import ListView from '../index';
@@ -19,21 +18,22 @@ jest.mock('@strapi/helper-plugin', () => ({
   useGuidedTour: jest.fn(() => ({
     startSection: jest.fn(),
   })),
-}));
-
-jest.spyOn(axiosInstance, 'get').mockResolvedValue({
-  data: {
-    data: [
-      {
-        id: 1,
-        name: 'My super token',
-        description: 'This describe my super token',
-        type: 'read-only',
-        createdAt: '2021-11-15T00:00:00.000Z',
+  useFetchClient: jest.fn().mockReturnValue({
+    get: jest.fn().mockResolvedValue({
+      data: {
+        data: [
+          {
+            id: 1,
+            name: 'My super token',
+            description: 'This describe my super token',
+            type: 'read-only',
+            createdAt: '2021-11-15T00:00:00.000Z',
+          },
+        ],
       },
-    ],
-  },
-});
+    }),
+  }),
+}));
 
 jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01T08:00:00.000Z'));
 

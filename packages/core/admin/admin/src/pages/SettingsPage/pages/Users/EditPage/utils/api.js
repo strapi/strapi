@@ -1,13 +1,16 @@
-import { axiosInstance } from '../../../../../../core/utils';
+import { getFetchClient } from '@strapi/helper-plugin';
 
 const fetchUser = async (id) => {
-  const { data } = await axiosInstance.get(`/admin/users/${id}`);
+  const { get } = getFetchClient();
+  const { data } = await get(`/admin/users/${id}`);
 
   return data.data;
 };
 
 const putUser = async (id, body) => {
-  const { data } = await axiosInstance.put(`/admin/users/${id}`, body);
+  const { put } = getFetchClient();
+
+  const { data } = await put(`/admin/users/${id}`, body);
 
   return data.data;
 };
