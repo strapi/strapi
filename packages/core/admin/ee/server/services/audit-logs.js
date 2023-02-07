@@ -58,6 +58,16 @@ const createAuditLogsService = (strapi) => {
   const eventMap = getEventMap(defaultEvents);
 
   const processEvent = (name, ...args) => {
+    const state = strapi.requestContext.get()?.state;
+
+    // Ignore events with auth strategies different from admin
+    const isUsingAdminAuth = state?.auth?.strategy.name === 'admin';
+    const user = state?.user;
+
+    if (!isUsingAdminAuth || !user) {
+      return null;
+    }
+
     const getPayload = eventMap[name];
 
     // Ignore the event if it's not in the map
@@ -75,7 +85,7 @@ const createAuditLogsService = (strapi) => {
       action: name,
       date: new Date().toISOString(),
       payload: getPayload(...args) || {},
-      userId: strapi.requestContext.get()?.state?.user?.id,
+      userId: user.id,
     };
   };
 
