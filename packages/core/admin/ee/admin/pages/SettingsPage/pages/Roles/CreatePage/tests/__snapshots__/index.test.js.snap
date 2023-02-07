@@ -660,7 +660,9 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
       action="#"
       novalidate=""
     >
-      <div>
+      <div
+        style="height: 0px;"
+      >
         <div
           class="c1 c2"
           data-strapi-header="true"
@@ -711,7 +713,6 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
             </div>
             <div
               class="c1 c10 c12"
-              spacing="2"
             >
               <button
                 aria-disabled="false"
@@ -749,14 +750,12 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
       >
         <div
           class="c1 c19 c20"
-          spacing="6"
         >
           <div
             class="c1 c21"
           >
             <div
               class="c1 c19 c22"
-              spacing="4"
             >
               <div
                 class="c1 c9"
@@ -802,11 +801,10 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
                       <div>
                         <div
                           class="c1 c19 c27"
-                          spacing="1"
                         >
                           <label
                             class="c7 c28"
-                            for="textinput-1"
+                            for="1"
                           >
                             <div
                               class="c1 c10"
@@ -822,7 +820,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
                               aria-invalid="false"
                               aria-required="false"
                               class="c30"
-                              id="textinput-1"
+                              id="1"
                               name="name"
                               value=""
                             />
@@ -844,14 +842,13 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
                       <div>
                         <div
                           class="c1 c19 c27"
-                          spacing="1"
                         >
                           <div
                             class="c1 c10"
                           >
                             <label
                               class="c7 c28"
-                              for="textarea-2"
+                              for="3"
                             >
                               <div
                                 class="c1 c10"
@@ -867,7 +864,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
                               aria-invalid="false"
                               aria-required="false"
                               class="c33"
-                              id="textarea-2"
+                              id="3"
                               name="description"
                             >
                               Created April 1st, 2020

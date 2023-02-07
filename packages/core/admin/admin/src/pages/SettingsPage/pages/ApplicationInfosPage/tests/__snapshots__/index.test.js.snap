@@ -453,11 +453,9 @@ exports[`Application page renders and matches the snapshot 1`] = `
         >
           <div
             class="c0 c17 c18"
-            spacing="6"
           >
             <div
               class="c0 c19 c17 c20"
-              spacing="5"
             >
               <h3
                 class="c8 c21"

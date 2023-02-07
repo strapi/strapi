@@ -577,14 +577,12 @@ describe('Upload | SettingsPage', () => {
                 >
                   <div
                     class="c1 c17 c18"
-                    spacing="12"
                   >
                     <div
                       class="c1 c19"
                     >
                       <div
                         class="c1 c17 c20"
-                        spacing="4"
                       >
                         <div
                           class="c1 c4"
@@ -609,14 +607,13 @@ describe('Upload | SettingsPage', () => {
                               >
                                 <div
                                   class="c1 c17 c25"
-                                  spacing="1"
                                 >
                                   <div
                                     class="c1 c4"
                                   >
                                     <label
                                       class="c5 c11"
-                                      for="toggleinput-1"
+                                      for="1"
                                     >
                                       <div
                                         class="c1 c4"
@@ -658,13 +655,14 @@ describe('Upload | SettingsPage', () => {
                                         </span>
                                       </div>
                                       <input
+                                        aria-describedby="1-hint"
                                         aria-disabled="false"
                                         aria-label="responsiveDimensions"
                                         aria-required="false"
                                         checked=""
                                         class="c36"
                                         data-testid="responsiveDimensions"
-                                        id="toggleinput-1"
+                                        id="1"
                                         name="responsiveDimensions"
                                         type="checkbox"
                                       />
@@ -672,7 +670,7 @@ describe('Upload | SettingsPage', () => {
                                   </label>
                                   <p
                                     class="c5 c37"
-                                    id="toggleinput-1-hint"
+                                    id="1-hint"
                                   >
                                     Enabling this option will generate multiple formats (small, medium and large) of the uploaded asset.
                                   </p>
@@ -691,14 +689,13 @@ describe('Upload | SettingsPage', () => {
                               >
                                 <div
                                   class="c1 c17 c25"
-                                  spacing="1"
                                 >
                                   <div
                                     class="c1 c4"
                                   >
                                     <label
                                       class="c5 c11"
-                                      for="toggleinput-2"
+                                      for="3"
                                     >
                                       <div
                                         class="c1 c4"
@@ -740,12 +737,13 @@ describe('Upload | SettingsPage', () => {
                                         </span>
                                       </div>
                                       <input
+                                        aria-describedby="3-hint"
                                         aria-disabled="false"
                                         aria-label="sizeOptimization"
                                         aria-required="false"
                                         class="c36"
                                         data-testid="sizeOptimization"
-                                        id="toggleinput-2"
+                                        id="3"
                                         name="sizeOptimization"
                                         type="checkbox"
                                       />
@@ -753,7 +751,7 @@ describe('Upload | SettingsPage', () => {
                                   </label>
                                   <p
                                     class="c5 c37"
-                                    id="toggleinput-2-hint"
+                                    id="3-hint"
                                   >
                                     Enabling this option will reduce the image size and slightly reduce its quality.
                                   </p>
@@ -772,14 +770,13 @@ describe('Upload | SettingsPage', () => {
                               >
                                 <div
                                   class="c1 c17 c25"
-                                  spacing="1"
                                 >
                                   <div
                                     class="c1 c4"
                                   >
                                     <label
                                       class="c5 c11"
-                                      for="toggleinput-3"
+                                      for="5"
                                     >
                                       <div
                                         class="c1 c4"
@@ -821,13 +818,14 @@ describe('Upload | SettingsPage', () => {
                                         </span>
                                       </div>
                                       <input
+                                        aria-describedby="5-hint"
                                         aria-disabled="false"
                                         aria-label="autoOrientation"
                                         aria-required="false"
                                         checked=""
                                         class="c36"
                                         data-testid="autoOrientation"
-                                        id="toggleinput-3"
+                                        id="5"
                                         name="autoOrientation"
                                         type="checkbox"
                                       />
@@ -835,7 +833,7 @@ describe('Upload | SettingsPage', () => {
                                   </label>
                                   <p
                                     class="c5 c37"
-                                    id="toggleinput-3-hint"
+                                    id="5-hint"
                                   >
                                     Enabling this option will automatically rotate the image according to EXIF orientation tag.
                                   </p>

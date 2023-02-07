@@ -602,7 +602,6 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
         >
           <div
             class="c0 c17 c18 c19"
-            spacing="4"
           >
             <h2
               class="c8 c20"
@@ -623,14 +622,13 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                   >
                     <div
                       class="c0 c18 c24"
-                      spacing="1"
                     >
                       <div
                         class="c0 c7"
                       >
                         <label
                           class="c8 c25"
-                          for="toggleinput-1"
+                          for="1"
                         >
                           <div
                             class="c0 c7"
@@ -672,13 +670,14 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                             </span>
                           </div>
                           <input
+                            aria-describedby="1-hint"
                             aria-disabled="false"
                             aria-label="autoRegister"
                             aria-required="false"
                             checked=""
                             class="c36"
                             data-testid="autoRegister"
-                            id="toggleinput-1"
+                            id="1"
                             name="autoRegister"
                             type="checkbox"
                           />
@@ -686,7 +685,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                       </label>
                       <p
                         class="c8 c37"
-                        id="toggleinput-1-hint"
+                        id="1-hint"
                       >
                         Create new user on SSO login if no account exists
                       </p>
@@ -703,11 +702,10 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                   <div>
                     <div
                       class="c0 c18 c24"
-                      spacing="1"
                     >
                       <label
                         class="c8 c25"
-                        for="select-2"
+                        for="3"
                       >
                         <div
                           class="c0 c7"
@@ -719,13 +717,13 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                         class="c0 c7 c38"
                       >
                         <button
-                          aria-describedby="select-2-error"
+                          aria-describedby="3-hint"
                           aria-disabled="false"
                           aria-expanded="false"
                           aria-haspopup="listbox"
-                          aria-labelledby="select-2 select-2-label select-2-content"
+                          aria-labelledby="3 3-label 3-content"
                           class="c39"
-                          id="select-2"
+                          id="3"
                           name="defaultRole"
                           type="button"
                         />
@@ -740,7 +738,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                             >
                               <span
                                 class="c8 c42"
-                                id="select-2-content"
+                                id="3-content"
                               >
                                 Editor
                               </span>
@@ -776,7 +774,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                       </div>
                       <p
                         class="c8 c37"
-                        id="select-2-hint"
+                        id="3-hint"
                       >
                         It will attach the new authenticated user to the selected role
                       </p>
