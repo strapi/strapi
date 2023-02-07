@@ -1,6 +1,5 @@
 'use strict';
 
-const { omit, isEqual } = require('lodash/fp');
 const { features } = require('@strapi/strapi/lib/utils/ee');
 const executeCERegister = require('../../server/register');
 const createAuditLogsService = require('./services/audit-logs');
@@ -10,33 +9,39 @@ const migrateAuditLogsTable = async ({ oldContentTypes, contentTypes }) => {
   // Check if the audit logs table name was changed
   const oldName = oldContentTypes?.['admin::audit-log']?.collectionName;
   const newName = contentTypes['admin::audit-log']?.collectionName;
-  const isMigratingTable = oldName === 'audit_logs' && newName === 'strapi_audit_logs';
+  const hasRenamedAuditLogsTable = oldName === 'audit_logs' && newName === 'strapi_audit_logs';
 
-  if (!isMigratingTable) {
+  if (!hasRenamedAuditLogsTable) {
     return;
   }
 
-  // Make sure the schemas are equal to avoid potential collisions
-  const schemasAreEqual = isEqual(
-    omit(['collectionName'], oldContentTypes['admin::audit-log'].__schema__),
-    omit(['collectionName'], contentTypes['admin::audit-log'].__schema__)
-  );
+  // Check if the previous audit log tables exist
+  const hasAuditLogsTable = await strapi.db.getSchemaConnection().hasTable('audit_logs');
+  const hasLinkTable = await strapi.db.getSchemaConnection().hasTable('audit_logs_user_links');
 
-  if (!schemasAreEqual) {
+  if (!hasAuditLogsTable || !hasLinkTable) {
     return;
   }
 
-  // Migrate the main audit logs table
-  if (await strapi.db.getSchemaConnection().hasTable('audit_logs')) {
-    await strapi.db.getSchemaConnection().renameTable('audit_logs', 'strapi_audit_logs');
+  // Check if the existing tables match the expected schema
+  const auditLogsColumnInfo = await strapi.db.connection('audit_logs').columnInfo();
+  const linkColumnInfo = await strapi.db.connection('audit_logs_user_links').columnInfo();
+
+  if (
+    !auditLogsColumnInfo.action ||
+    !auditLogsColumnInfo.date ||
+    !auditLogsColumnInfo.payload ||
+    !linkColumnInfo.audit_log_id ||
+    !linkColumnInfo.user_id
+  ) {
+    return;
   }
 
-  // Migrate the link table
-  if (await strapi.db.getSchemaConnection().hasTable('audit_logs_user_links')) {
-    await strapi.db
-      .getSchemaConnection()
-      .renameTable('audit_logs_user_links', 'strapi_audit_logs_user_links');
-  }
+  // Do the actual migrations
+  await strapi.db.getSchemaConnection().renameTable('audit_logs', 'strapi_audit_logs');
+  await strapi.db
+    .getSchemaConnection()
+    .renameTable('audit_logs_user_links', 'strapi_audit_logs_user_links');
 };
 
 module.exports = async ({ strapi }) => {
