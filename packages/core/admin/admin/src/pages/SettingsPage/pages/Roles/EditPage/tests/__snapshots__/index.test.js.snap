@@ -647,7 +647,9 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
     tabindex="-1"
   >
     <form>
-      <div>
+      <div
+        style="height: 0px;"
+      >
         <div
           class="c1 c2"
           data-strapi-header="true"
@@ -698,7 +700,6 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
             </div>
             <div
               class="c1 c10 c12"
-              spacing="2"
             >
               <button
                 aria-disabled="false"
@@ -725,14 +726,12 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
       >
         <div
           class="c1 c18 c19"
-          spacing="6"
         >
           <div
             class="c1 c20"
           >
             <div
               class="c1 c18 c21"
-              spacing="4"
             >
               <div
                 class="c1 c9"
@@ -781,11 +780,10 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
                       <div>
                         <div
                           class="c1 c18 c27"
-                          spacing="1"
                         >
                           <label
                             class="c7 c24"
-                            for="textinput-1"
+                            for="1"
                           >
                             <div
                               class="c1 c10"
@@ -801,7 +799,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
                               aria-invalid="false"
                               aria-required="false"
                               class="c29"
-                              id="textinput-1"
+                              id="1"
                               name="name"
                               value=""
                             />
@@ -823,14 +821,13 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
                       <div>
                         <div
                           class="c1 c18 c27"
-                          spacing="1"
                         >
                           <div
                             class="c1 c10"
                           >
                             <label
                               class="c7 c24"
-                              for="textarea-2"
+                              for="3"
                             >
                               <div
                                 class="c1 c10"
@@ -846,7 +843,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
                               aria-invalid="false"
                               aria-required="false"
                               class="c32"
-                              id="textarea-2"
+                              id="3"
                               name="description"
                             />
                           </div>
