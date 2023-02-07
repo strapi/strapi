@@ -56,7 +56,7 @@ const transformEntry = (entry, type) => {
 
   const attributeValues = {};
 
-  for (const key in properties) {
+  for (const key of Object.keys(properties)) {
     const property = properties[key];
     const attribute = type && type.attributes[key];
 

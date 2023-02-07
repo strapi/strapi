@@ -28,20 +28,23 @@
     ".github/actions/*"
   ],
   "scripts": {
-    "setup": "yarn && yarn build",
-    "watch": "lerna run --stream watch --no-private",
+    "prepare": "husky install",
+    "setup": "yarn && yarn clean && yarn build",
+    "clean": "lerna run --stream clean --no-private",
+    "watch": "lerna run --stream watch --no-private --parallel",
     "build": "lerna run --stream build --no-private",
+    "build:ts": "lerna run --stream build:ts --no-private",
     "generate": "plop --plopfile ./packages/generators/admin/plopfile.js",
     "lint": "npm-run-all -p lint:code lint:css",
-    "lint:code": "eslint .",
+    "lint:code": "eslint --cache --cache-strategy content --cache-location ./node_modules/.cache/eslint .",
     "lint:css": "stylelint packages/**/admin/src/**/*.js",
     "lint:fix": "eslint --fix .",
     "lint:other": "npm run prettier:other -- --check",
     "format": "npm-run-all -p format:*",
     "format:code": "npm run prettier:code -- --write",
     "format:other": "npm run prettier:other -- --write",
-    "prettier:code": "prettier \"**/*.js\"",
-    "prettier:other": "prettier \"**/*.{md,css,scss,yaml,yml}\"",
+    "prettier:code": "prettier --cache --cache-strategy content \"**/*.{js,ts}\"",
+    "prettier:other": "prettier --cache --cache-strategy content \"**/*.{md,css,scss,yaml,yml}\"",
     "test:clean": "rimraf ./coverage",
     "test:front": "npm run test:clean && cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:watch": "cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
@@ -50,52 +53,48 @@
     "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
     "test:front:update:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --u",
     "test:unit": "jest --verbose",
-    "test:e2e": "FORCE_COLOR=true jest --config jest.config.e2e.js --verbose --runInBand --testRunner=jest-circus/runner --forceExit --detectOpenHandles",
+    "test:api": "node test/api.js",
     "test:generate-app": "node test/create-test-app.js",
     "doc:api": "node scripts/open-api/serve.js"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "lint-staged": {
-    "*.{js,md,css,scss,yaml,yml}": [
-      "prettier --write"
+    "*.{js,ts,md,css,scss,yaml,yml}": [
+      "prettier --cache --cache-strategy content --write"
     ],
-    "*.js": [
-      "eslint --fix"
+    "*.{js,ts}": [
+      "eslint --cache --cache-strategy content --cache-location ./node_modules/.cache/eslint --fix"
     ]
   },
   "devDependencies": {
-    "@babel/core": "7.18.10",
-    "@babel/eslint-parser": "7.18.9",
+    "@babel/core": "^7.20.12",
+    "@babel/eslint-parser": "^7.19.1",
     "@babel/preset-react": "7.18.6",
     "@strapi/eslint-config": "0.1.2",
-    "@swc/core": "1.2.224",
-    "@swc/jest": "0.2.22",
+    "@swc/core": "1.3.18",
+    "@swc/jest": "0.2.23",
+    "@typescript-eslint/parser": "5.43.0",
     "babel-eslint": "10.1.0",
     "chalk": "4.1.2",
     "chokidar": "3.5.3",
     "cross-env": "7.0.3",
     "dotenv": "14.2.0",
-    "eslint": "8.21.0",
+    "eslint": "8.27.0",
     "execa": "1.0.0",
     "fs-extra": "10.1.0",
     "get-port": "5.1.1",
     "glob": "7.2.3",
-    "husky": "3.1.0",
-    "inquirer": "8.2.4",
-    "istanbul": "~0.4.2",
-    "jest": "26.6.3",
-    "jest-circus": "26.6.3",
-    "jest-cli": "26.6.3",
-    "jest-watch-typeahead": "0.6.5",
+    "husky": "8.0.2",
+    "inquirer": "8.2.5",
+    "jest": "29.0.3",
+    "jest-circus": "29.0.3",
+    "jest-cli": "29.0.3",
+    "jest-environment-jsdom": "29.0.3",
+    "jest-watch-typeahead": "2.2.2",
     "lerna": "5.4.3",
-    "lint-staged": "10.5.4",
+    "lint-staged": "13.0.3",
     "lodash": "4.17.21",
     "npm-run-all": "4.1.5",
-    "nx": "14.4.2",
+    "nx": "14.8.6",
     "plop": "2.7.6",
     "prettier": "2.7.1",
     "qs": "6.11.0",
@@ -107,10 +106,12 @@
     "stylelint-config-styled-components": "0.1.1",
     "stylelint-processor-styled-components": "1.10.0",
     "supertest": "6.2.4",
-    "yargs": "13.3.2"
+    "ts-jest": "29.0.3",
+    "typescript": "4.6.2",
+    "yargs": "17.6.0"
   },
   "engines": {
-    "node": ">=14.19.1 <=16.x.x",
+    "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"
   }
 }

@@ -2,11 +2,6 @@
 
 const metricsService = require('../metrics');
 
-// TODO: the matcher exists in jest@28
-const closeTo = (expected, precision = 2) => ({
-  asymmetricMatch: (actual) => Math.abs(expected - actual) < 10 ** -precision / 2,
-});
-
 describe('metrics', () => {
   describe('computeMetrics', () => {
     test.each([
@@ -46,7 +41,7 @@ describe('metrics', () => {
           metadata: {
             get: () => ({ attributes: { path: { columnName: 'path' } } }),
           },
-          connection() {
+          getConnection() {
             return {
               select() {
                 return {
@@ -58,7 +53,7 @@ describe('metrics', () => {
           },
         },
       };
-      strapi.db.connection.raw = raw;
+      strapi.db.connection = { raw };
 
       const { computeMetrics } = metricsService({ strapi });
 
@@ -95,9 +90,9 @@ describe('metrics', () => {
       expect(results).toMatchObject({
         assetNumber,
         folderNumber,
-        averageDepth: closeTo(averageDepth, 3),
+        averageDepth: expect.closeTo(averageDepth, 3),
         maxDepth,
-        averageDeviationDepth: closeTo(averageDeviationDepth, 3),
+        averageDeviationDepth: expect.closeTo(averageDeviationDepth, 3),
       });
     });
   });

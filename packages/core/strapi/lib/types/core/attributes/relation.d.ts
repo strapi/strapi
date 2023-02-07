@@ -3,7 +3,7 @@ import { Attribute, ConfigurableOption, PrivateOption } from './base';
 import { GetAttributesByType, GetAttributesValues } from './utils';
 
 export type BasicRelationsType = 'oneToOne' | 'oneToMany' | 'manyToOne' | 'manyToMany';
-export type PolymorphicRelationsType =  'morphToOne' | 'morphToMany' | 'morphOne' | 'morphMany';
+export type PolymorphicRelationsType = 'morphToOne' | 'morphToMany' | 'morphOne' | 'morphMany';
 export type RelationsType = BasicRelationsType | PolymorphicRelationsType;
 
 export interface BasicRelationAttributeProperties<
@@ -17,16 +17,14 @@ export interface BasicRelationAttributeProperties<
   mappedBy?: RelationsKeysFromTo<T, S>;
 }
 
-export interface PolymorphicRelationAttributeProperties<
-  R extends RelationsType,
-> {
+export interface PolymorphicRelationAttributeProperties<R extends RelationsType> {
   relation: R;
 }
 
 export type RelationAttribute<
   S extends SchemaUID,
   R extends RelationsType,
-  T extends R extends PolymorphicRelationsType ? never: SchemaUID = never
+  T extends R extends PolymorphicRelationsType ? never : SchemaUID = never
 > = Attribute<'relation'> &
   // Properties
   (R extends BasicRelationsType
@@ -34,22 +32,21 @@ export type RelationAttribute<
     : PolymorphicRelationAttributeProperties<R>) &
   // Options
   ConfigurableOption &
-  PrivateOption
+  PrivateOption;
 
 export type RelationsKeysFromTo<
   TTarget extends SchemaUID,
   TSource extends SchemaUID
 > = keyof PickRelationsFromTo<TTarget, TSource>;
 
-export type PickRelationsFromTo<TTarget extends SchemaUID, TSource extends SchemaUID> = GetAttributesByType<
-  TTarget,
-  'relation',
-  { target: TSource }
->;
+export type PickRelationsFromTo<
+  TTarget extends SchemaUID,
+  TSource extends SchemaUID
+> = GetAttributesByType<TTarget, 'relation', { target: TSource }>;
 
 export type RelationPluralityModifier<
   TRelation extends RelationsType,
-  TValue extends Object
+  TValue extends Record<string, unknown>
 > = TRelation extends `${string}Many` ? TValue[] : TValue;
 
 export type RelationValue<

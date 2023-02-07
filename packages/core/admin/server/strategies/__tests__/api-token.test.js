@@ -1,5 +1,6 @@
 'use strict';
 
+const { UnauthorizedError } = require('@strapi/utils/lib/errors');
 const createContext = require('../../../../../../test/helpers/create-context');
 const apiTokenStrategy = require('../api-token');
 
@@ -22,6 +23,7 @@ describe('API Token Auth Strategy', () => {
 
     test('Authenticates a valid hashed access key', async () => {
       const getBy = jest.fn(() => apiToken);
+      const update = jest.fn(() => apiToken);
       const ctx = createContext({}, { request });
 
       global.strapi = {
@@ -33,11 +35,18 @@ describe('API Token Auth Strategy', () => {
             },
           },
         },
+        query() {
+          return { update };
+        },
       };
 
       const response = await apiTokenStrategy.authenticate(ctx);
 
       expect(getBy).toHaveBeenCalledWith({ accessKey: 'api-token_tests-hashed-access-key' });
+      expect(update).toHaveBeenCalledWith({
+        data: { lastUsedAt: expect.any(Date) },
+        where: { id: apiToken.id },
+      });
       expect(response).toStrictEqual({ authenticated: true, credentials: apiToken });
     });
 
@@ -80,6 +89,39 @@ describe('API Token Auth Strategy', () => {
       expect(getBy).toHaveBeenCalledWith({ accessKey: 'api-token_tests-hashed-access-key' });
       expect(response).toStrictEqual({ authenticated: false });
     });
+
+    test('Expired token throws on authorize', async () => {
+      const pastDate = new Date(Date.now() - 1).toISOString();
+
+      const getBy = jest.fn(() => {
+        return {
+          ...apiToken,
+          expiresAt: pastDate,
+        };
+      });
+      const update = jest.fn(() => apiToken);
+      const ctx = createContext({}, { request });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              getBy,
+              hash,
+              update,
+            },
+          },
+        },
+      };
+
+      const { authenticated, error } = await apiTokenStrategy.authenticate(ctx);
+
+      expect(authenticated).toBe(false);
+      expect(error).toBeInstanceOf(UnauthorizedError);
+      expect(error.message).toBe('Token expired');
+
+      expect(getBy).toHaveBeenCalledWith({ accessKey: 'api-token_tests-hashed-access-key' });
+    });
   });
 
   describe('Verify an access key', () => {
@@ -95,6 +137,12 @@ describe('API Token Auth Strategy', () => {
       type: 'full-access',
     };
 
+    const customApiToken = {
+      ...readOnlyApiToken,
+      type: 'custom',
+      permissions: ['api::model.model.update', 'api::model.model.read'],
+    };
+
     const container = {
       get: jest.fn(() => ({
         errors: {
@@ -104,7 +152,15 @@ describe('API Token Auth Strategy', () => {
       })),
     };
 
-    test('Verify read only access', () => {
+    // mock ability.can (since normally it only gets added to credentials in authenticate)
+    const ability = {
+      can: jest.fn((ability) => {
+        if (customApiToken.permissions.includes(ability)) return true;
+        return false;
+      }),
+    };
+
+    test('Verify read-only access', () => {
       global.strapi = {
         container,
       };
@@ -117,7 +173,7 @@ describe('API Token Auth Strategy', () => {
       ).toBeUndefined();
     });
 
-    test('Verify full access', () => {
+    test('Verify full-access access', () => {
       global.strapi = {
         container,
       };
@@ -130,6 +186,55 @@ describe('API Token Auth Strategy', () => {
       ).toBeUndefined();
     });
 
+    test('Verify custom access', async () => {
+      global.strapi = {
+        container,
+      };
+
+      expect(
+        apiTokenStrategy.verify(
+          { credentials: customApiToken, ability },
+          { scope: ['api::model.model.update'] }
+        )
+      ).toBeUndefined();
+    });
+
+    test('Verify with expiration in future', () => {
+      global.strapi = {
+        container,
+      };
+
+      expect(
+        apiTokenStrategy.verify(
+          {
+            credentials: {
+              ...readOnlyApiToken,
+              expiresAt: Date.now() + 99999,
+            },
+          },
+          { scope: ['api::model.model.find'] }
+        )
+      ).toBeUndefined();
+    });
+
+    test('Throws with expired token', () => {
+      global.strapi = {
+        container,
+      };
+
+      expect(() => {
+        apiTokenStrategy.verify(
+          {
+            credentials: {
+              ...readOnlyApiToken,
+              expiresAt: Date.now() - 1,
+            },
+          },
+          { scope: ['api::model.model.find'] }
+        );
+      }).toThrow(new UnauthorizedError('Token expired'));
+    });
+
     test('Throws an error if trying to access a `full-access` action with a read only access key', () => {
       global.strapi = {
         container,
@@ -140,6 +245,23 @@ describe('API Token Auth Strategy', () => {
       try {
         apiTokenStrategy.verify(
           { credentials: { readOnlyApiToken } },
+          { scope: ['api::model.model.create'] }
+        );
+      } catch (err) {
+        expect(err).toBeInstanceOf(Error);
+      }
+    });
+
+    test('Throws an error if trying to access an action with a custom access key without the permission', () => {
+      global.strapi = {
+        container,
+      };
+
+      expect.assertions(1);
+
+      try {
+        apiTokenStrategy.verify(
+          { credentials: { customApiToken, ability } },
           { scope: ['api::model.model.create'] }
         );
       } catch (err) {
@@ -178,6 +300,20 @@ describe('API Token Auth Strategy', () => {
 
       try {
         apiTokenStrategy.verify({ credentials: readOnlyApiToken }, {});
+      } catch (err) {
+        expect(err).toBeInstanceOf(Error);
+      }
+    });
+
+    test('Throws an error if no scope is passed with a `custom` token', () => {
+      global.strapi = {
+        container,
+      };
+
+      expect.assertions(1);
+
+      try {
+        apiTokenStrategy.verify({ credentials: customApiToken }, {});
       } catch (err) {
         expect(err).toBeInstanceOf(Error);
       }

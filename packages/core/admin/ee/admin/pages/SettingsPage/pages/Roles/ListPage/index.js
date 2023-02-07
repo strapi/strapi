@@ -4,6 +4,7 @@ import {
   LoadingIndicatorPage,
   SearchURLQuery,
   SettingsPageTitle,
+  getFetchClient,
   useNotification,
   useQueryParams,
   useRBAC,
@@ -23,7 +24,6 @@ import { get } from 'lodash';
 import matchSorter from 'match-sorter';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
-import { axiosInstance } from '../../../../../../../admin/src/core/utils';
 import { useRolesList } from '../../../../../../../admin/src/hooks';
 import adminPermissions from '../../../../../../../admin/src/permissions';
 import EmptyRole from '../../../../../../../admin/src/pages/SettingsPage/pages/Roles/ListPage/components/EmptyRole';
@@ -72,13 +72,15 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate }) => {
     initialState
   );
 
+  const { post } = getFetchClient();
+
   const handleDeleteData = async () => {
     try {
       dispatch({
         type: 'ON_REMOVE_ROLES',
       });
 
-      await axiosInstance.post('/admin/roles/batch-delete', {
+      await post('/admin/roles/batch-delete', {
         ids: [roleToDelete],
       });
 
@@ -259,7 +261,7 @@ const RoleListPage = () => {
       <HeaderLayout
         primaryAction={
           canCreate ? (
-            <Button onClick={handleNewRoleClick} startIcon={<Plus />} size="L">
+            <Button onClick={handleNewRoleClick} startIcon={<Plus />} size="S">
               {formatMessage({
                 id: 'Settings.roles.list.button.add',
                 defaultMessage: 'Add new role',
@@ -303,7 +305,7 @@ const RoleListPage = () => {
             }
           >
             <Thead>
-              <Tr>
+              <Tr aria-rowindex={1}>
                 <Th>
                   <Typography variant="sigma" textColor="neutral600">
                     {formatMessage({
@@ -339,7 +341,7 @@ const RoleListPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {sortedRoles?.map((role) => (
+              {sortedRoles?.map((role, index) => (
                 <BaseRoleRow
                   key={role.id}
                   id={role.id}
@@ -347,6 +349,7 @@ const RoleListPage = () => {
                   description={role.description}
                   usersCount={role.usersCount}
                   icons={getIcons(role)}
+                  rowIndex={index + 2}
                 />
               ))}
             </Tbody>

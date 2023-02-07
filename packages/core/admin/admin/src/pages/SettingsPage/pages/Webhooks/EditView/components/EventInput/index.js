@@ -29,16 +29,16 @@ const StyledTable = styled.table`
 const displayedData = {
   headers: {
     default: [
-      'Settings.webhooks.events.create',
-      'Settings.webhooks.events.update',
-      'app.utils.delete',
+      { id: 'Settings.webhooks.events.create', defaultMessage: 'Create' },
+      { id: 'Settings.webhooks.events.update', defaultMessage: 'Update' },
+      { id: 'app.utils.delete', defaultMessage: 'Delete' },
     ],
     draftAndPublish: [
-      'Settings.webhooks.events.create',
-      'Settings.webhooks.events.update',
-      'app.utils.delete',
-      'app.utils.publish',
-      'app.utils.unpublish',
+      { id: 'Settings.webhooks.events.create', defaultMessage: 'Create' },
+      { id: 'Settings.webhooks.events.update', defaultMessage: 'Update' },
+      { id: 'app.utils.delete', defaultMessage: 'Delete' },
+      { id: 'app.utils.publish', defaultMessage: 'Publish' },
+      { id: 'app.utils.unpublish', defaultMessage: 'Unpublish' },
     ],
   },
   events: {
@@ -114,24 +114,24 @@ const EventInput = ({ isDraftAndPublish }) => {
               if (header === 'app.utils.publish' || header === 'app.utils.unpublish') {
                 return (
                   <td
-                    key={header}
+                    key={header.id}
                     title={formatMessage({
                       id: 'Settings.webhooks.event.publish-tooltip',
                       defaultMessage:
-                        'This event only exists for contents with Draft/Publish system enabled',
+                        'This event only exists for content with draft & publish enabled',
                     })}
                   >
                     <Typography variant="sigma" textColor="neutral600">
-                      {formatMessage({ id: header, defaultMessage: header })}
+                      {formatMessage(header)}
                     </Typography>
                   </td>
                 );
               }
 
               return (
-                <td key={header}>
+                <td key={header.id}>
                   <Typography variant="sigma" textColor="neutral600">
-                    {formatMessage({ id: header, defaultMessage: header })}
+                    {formatMessage(header)}
                   </Typography>
                 </td>
               );

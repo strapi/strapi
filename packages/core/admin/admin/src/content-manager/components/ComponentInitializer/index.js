@@ -57,13 +57,7 @@ const ComponentInitializer = ({ error, isReadOnly, onClick }) => {
       </Box>
       {error?.id && (
         <Typography textColor="danger600" variant="pi">
-          {formatMessage(
-            {
-              id: error.id,
-              defaultMessage: error.id,
-            },
-            { ...error.values }
-          )}
+          {formatMessage(error, { ...error.values })}
         </Typography>
       )}
     </>

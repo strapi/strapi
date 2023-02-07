@@ -102,7 +102,7 @@ const RoleListPage = () => {
       <SettingsPageTitle name="Roles" />
       <HeaderLayout
         primaryAction={
-          <Button onClick={handleToggleModalForCreatingRole} startIcon={<Plus />} size="L">
+          <Button onClick={handleToggleModalForCreatingRole} startIcon={<Plus />} size="S">
             {formatMessage({
               id: 'Settings.roles.list.button.add',
               defaultMessage: 'Add new role',
@@ -168,7 +168,7 @@ const RoleListPage = () => {
             </Tr>
           </Thead>
           <Tbody>
-            {sortedRoles?.map((role) => (
+            {sortedRoles?.map((role, rowIndex) => (
               <RoleRow
                 key={role.id}
                 id={role.id}
@@ -176,6 +176,7 @@ const RoleListPage = () => {
                 description={role.description}
                 usersCount={role.usersCount}
                 icons={getIcons(role)}
+                rowIndex={rowIndex + 2}
               />
             ))}
           </Tbody>

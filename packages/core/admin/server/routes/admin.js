@@ -54,7 +54,7 @@ module.exports = [
     path: '/telemetry-properties',
     handler: 'admin.telemetryProperties',
     config: {
-      auth: false,
+      policies: ['admin::isAuthenticatedAdmin'],
     },
   },
   {

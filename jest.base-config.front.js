@@ -30,6 +30,7 @@ module.exports = {
   moduleNameMapper,
   collectCoverageFrom: [
     '<rootDir>/packages/core/*/admin/src/**/*.js',
+    '<rootDir>/packages/core/admin/ee/admin/**/*.js',
     '<rootDir>/packages/plugins/*/admin/src/**/*.js',
   ],
   testPathIgnorePatterns: [
@@ -50,13 +51,31 @@ module.exports = {
   setupFilesAfterEnv: [
     '<rootDir>/packages/admin-test-utils/lib/setup/styled-components.js',
     '<rootDir>/packages/admin-test-utils/lib/setup/strapi.js',
+    '<rootDir>/packages/admin-test-utils/lib/setup/prop-types.js',
   ],
+  testEnvironment: 'jsdom',
   transform: {
-    '^.+\\.js$': ['@swc/jest', { jsc: { parser: { jsx: true, dynamicImport: true } } }],
+    '^.+\\.js$': [
+      '@swc/jest',
+      {
+        env: {
+          mode: 'usage',
+        },
+
+        jsc: {
+          parser: {
+            jsx: true,
+            dynamicImport: true,
+          },
+        },
+      },
+    ],
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
       '<rootDir>/fileTransformer.js',
   },
-  transformIgnorePatterns: ['node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend)/)'],
+  transformIgnorePatterns: [
+    'node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend|@strapi/design-system|@strapi/icons)/)',
+  ],
   testMatch: ['/**/tests/**/?(*.)+(spec|test).[jt]s?(x)'],
   testEnvironmentOptions: {
     url: 'http://localhost:1337/admin',

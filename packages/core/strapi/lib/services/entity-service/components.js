@@ -1,10 +1,11 @@
 'use strict';
 
 const _ = require('lodash');
-const { has, prop, omit, toString } = require('lodash/fp');
+const { has, prop, omit, toString, pipe, assign } = require('lodash/fp');
 
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
+const { getComponentAttributes } = require('@strapi/utils').contentTypes;
 
 const omitComponentData = (contentType, data) => {
   const { attributes } = contentType;
@@ -17,11 +18,11 @@ const omitComponentData = (contentType, data) => {
 
 // NOTE: we could generalize the logic to allow CRUD of relation directly in the DB layer
 const createComponents = async (uid, data) => {
-  const { attributes } = strapi.getModel(uid);
+  const { attributes = {} } = strapi.getModel(uid);
 
   const componentBody = {};
 
-  for (const attributeName in attributes) {
+  for (const attributeName of Object.keys(attributes)) {
     const attribute = attributes[attributeName];
 
     if (!has(attributeName, data) || !contentTypesUtils.isComponentAttribute(attribute)) {
@@ -42,16 +43,15 @@ const createComponents = async (uid, data) => {
           throw new Error('Expected an array to create repeatable component');
         }
 
-        const components = await Promise.all(
-          componentValue.map((value) => createComponent(componentUID, value))
-        );
+        const components = [];
+        for (const value of componentValue) {
+          components.push(await createComponent(componentUID, value));
+        }
 
-        // TODO: add order
-        componentBody[attributeName] = components.map(({ id }, idx) => {
+        componentBody[attributeName] = components.map(({ id }) => {
           return {
             id,
             __pivot: {
-              order: idx + 1,
               field: attributeName,
               component_type: componentUID,
             },
@@ -62,7 +62,6 @@ const createComponents = async (uid, data) => {
         componentBody[attributeName] = {
           id: component.id,
           __pivot: {
-            order: 1,
             field: attributeName,
             component_type: componentUID,
           },
@@ -79,19 +78,19 @@ const createComponents = async (uid, data) => {
         throw new Error('Expected an array to create repeatable component');
       }
 
-      componentBody[attributeName] = await Promise.all(
-        dynamiczoneValues.map(async (value, idx) => {
-          const { id } = await createComponent(value.__component, value);
-          return {
-            id,
-            __component: value.__component,
-            __pivot: {
-              order: idx + 1,
-              field: attributeName,
-            },
-          };
-        })
-      );
+      const dynamicZoneData = [];
+      for (const value of dynamiczoneValues) {
+        const { id } = await createComponent(value.__component, value);
+        dynamicZoneData.push({
+          id,
+          __component: value.__component,
+          __pivot: {
+            field: attributeName,
+          },
+        });
+      }
+
+      componentBody[attributeName] = dynamicZoneData;
 
       continue;
     }
@@ -100,16 +99,28 @@ const createComponents = async (uid, data) => {
   return componentBody;
 };
 
+/**
+ * @param {str} uid
+ * @param {object} entity
+ * @return {Promise<{uid: string, entity: object}>}
+ */
+const getComponents = async (uid, entity) => {
+  const componentAttributes = getComponentAttributes(strapi.getModel(uid));
+
+  if (_.isEmpty(componentAttributes)) return {};
+  return strapi.query(uid).load(entity, componentAttributes);
+};
+
 /*
   delete old components
   create or update
 */
 const updateComponents = async (uid, entityToUpdate, data) => {
-  const { attributes } = strapi.getModel(uid);
+  const { attributes = {} } = strapi.getModel(uid);
 
   const componentBody = {};
 
-  for (const attributeName in attributes) {
+  for (const attributeName of Object.keys(attributes)) {
     const attribute = attributes[attributeName];
 
     if (!has(attributeName, data)) {
@@ -128,15 +139,15 @@ const updateComponents = async (uid, entityToUpdate, data) => {
           throw new Error('Expected an array to create repeatable component');
         }
 
-        const components = await Promise.all(
-          componentValue.map((value) => updateOrCreateComponent(componentUID, value))
-        );
+        const components = [];
+        for (const value of componentValue) {
+          components.push(await updateOrCreateComponent(componentUID, value));
+        }
 
-        componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }, idx) => {
+        componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }) => {
           return {
             id,
             __pivot: {
-              order: idx + 1,
               field: attributeName,
               component_type: componentUID,
             },
@@ -147,7 +158,6 @@ const updateComponents = async (uid, entityToUpdate, data) => {
         componentBody[attributeName] = component && {
           id: component.id,
           __pivot: {
-            order: 1,
             field: attributeName,
             component_type: componentUID,
           },
@@ -166,20 +176,19 @@ const updateComponents = async (uid, entityToUpdate, data) => {
         throw new Error('Expected an array to create repeatable component');
       }
 
-      componentBody[attributeName] = await Promise.all(
-        dynamiczoneValues.map(async (value, idx) => {
-          const { id } = await updateOrCreateComponent(value.__component, value);
+      const dynamicZoneData = [];
+      for (const value of dynamiczoneValues) {
+        const { id } = await updateOrCreateComponent(value.__component, value);
+        dynamicZoneData.push({
+          id,
+          __component: value.__component,
+          __pivot: {
+            field: attributeName,
+          },
+        });
+      }
 
-          return {
-            id,
-            __component: value.__component,
-            __pivot: {
-              order: idx + 1,
-              field: attributeName,
-            },
-          };
-        })
-      );
+      componentBody[attributeName] = dynamicZoneData;
 
       continue;
     }
@@ -261,39 +270,34 @@ const deleteOldDZComponents = async (uid, entityToUpdate, attributeName, dynamic
   }
 };
 
-const deleteComponents = async (uid, entityToDelete) => {
-  const { attributes } = strapi.getModel(uid);
+const deleteComponents = async (uid, entityToDelete, { loadComponents = true } = {}) => {
+  const { attributes = {} } = strapi.getModel(uid);
 
-  for (const attributeName in attributes) {
+  for (const attributeName of Object.keys(attributes)) {
     const attribute = attributes[attributeName];
 
-    if (attribute.type === 'component') {
-      const { component: componentUID } = attribute;
-
-      const value = await strapi.query(uid).load(entityToDelete, attributeName);
-
-      if (!value) {
-        continue;
-      }
-
-      if (Array.isArray(value)) {
-        await Promise.all(value.map((subValue) => deleteComponent(componentUID, subValue)));
+    if (attribute.type === 'component' || attribute.type === 'dynamiczone') {
+      let value;
+      if (loadComponents) {
+        value = await strapi.query(uid).load(entityToDelete, attributeName);
       } else {
-        await deleteComponent(componentUID, value);
+        value = entityToDelete[attributeName];
       }
-
-      continue;
-    }
-
-    if (attribute.type === 'dynamiczone') {
-      const value = await strapi.query(uid).load(entityToDelete, attributeName);
 
       if (!value) {
         continue;
       }
 
-      if (Array.isArray(value)) {
-        await Promise.all(value.map((subValue) => deleteComponent(subValue.__component, subValue)));
+      if (attribute.type === 'component') {
+        const { component: componentUID } = attribute;
+        for (const subValue of _.castArray(value)) {
+          await deleteComponent(componentUID, subValue);
+        }
+      } else {
+        // delete dynamic zone components
+        for (const subValue of _.castArray(value)) {
+          await deleteComponent(subValue.__component, subValue);
+        }
       }
 
       continue;
@@ -310,10 +314,16 @@ const createComponent = async (uid, data) => {
   const model = strapi.getModel(uid);
 
   const componentData = await createComponents(uid, data);
+  const transform = pipe(
+    // Make sure we don't save the component with a pre-defined ID
+    omit('id'),
+    // Remove the component data from the original data object ...
+    (payload) => omitComponentData(model, payload),
+    // ... and assign the newly created component instead
+    assign(componentData)
+  );
 
-  return strapi.query(uid).create({
-    data: Object.assign(omitComponentData(model, data), componentData),
-  });
+  return strapi.query(uid).create({ data: transform(data) });
 };
 
 // components can have nested compos so this must be recursive
@@ -352,7 +362,9 @@ const deleteComponent = async (uid, componentToDelete) => {
 
 module.exports = {
   omitComponentData,
+  getComponents,
   createComponents,
   updateComponents,
   deleteComponents,
+  deleteComponent,
 };

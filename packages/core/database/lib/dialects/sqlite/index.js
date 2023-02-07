@@ -5,13 +5,13 @@ const fse = require('fs-extra');
 
 const errors = require('../../errors');
 const { Dialect } = require('../dialect');
-const SqliteSchmeaInspector = require('./schema-inspector');
+const SqliteSchemaInspector = require('./schema-inspector');
 
 class SqliteDialect extends Dialect {
   constructor(db) {
     super(db);
 
-    this.schemaInspector = new SqliteSchmeaInspector(db);
+    this.schemaInspector = new SqliteSchemaInspector(db);
   }
 
   configure() {
@@ -22,6 +22,10 @@ class SqliteDialect extends Dialect {
     const dbDir = path.dirname(this.db.config.connection.connection.filename);
 
     fse.ensureDirSync(dbDir);
+  }
+
+  useReturning() {
+    return true;
   }
 
   async initialize() {
@@ -67,6 +71,10 @@ class SqliteDialect extends Dialect {
         super.transformErrors(error);
       }
     }
+  }
+
+  canAddIncrements() {
+    return false;
   }
 }
 

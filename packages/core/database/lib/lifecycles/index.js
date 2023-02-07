@@ -54,7 +54,7 @@ const createLifecyclesProvider = (db) => {
      * @param {Map<any, any>} states
      */
     async run(action, uid, properties, states = new Map()) {
-      for (let i = 0; i < subscribers.length; i++) {
+      for (let i = 0; i < subscribers.length; i += 1) {
         const subscriber = subscribers[i];
         if (typeof subscriber === 'function') {
           const state = states.get(subscriber) || {};
