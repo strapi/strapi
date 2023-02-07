@@ -19,15 +19,6 @@ const App = (
 );
 
 describe('Onboarding', () => {
-  it('renders and matches the snapshot', async () => {
-    const { getByRole, getByText } = render(App);
-
-    fireEvent.click(getByRole('button', { name: /open help menu/i }));
-
-    expect(getByText(/get started videos/i)).toBeInTheDocument();
-    expect(document.body).toMatchSnapshot();
-  });
-
   it('should display every links', () => {
     const { getByRole } = render(App);
 

@@ -12,18 +12,19 @@ import {
   PopoverPrimitives,
   Stack,
   Typography,
+  VisuallyHidden,
 } from '@strapi/design-system';
 import { Cross, Play, Question } from '@strapi/icons';
 
 import { useConfigurations } from '../../../hooks';
-import OnboardingPreview from '../../../assets/images/onboarding-preview.png';
+import onboardingPreview from '../../../assets/images/onboarding-preview.png';
 import { VIDEO_LINKS, DOCUMENTATION_LINKS } from './constants';
 
 // TODO: use new Button props derived from Box props with next DS release
 const HelperButton = styled(Button)`
   border-radius: 50%;
   padding: ${({ theme }) => theme.spaces[3]};
-  // Resetting 2rem height defined by Button component
+  /* Resetting 2rem height defined by Button component */
   height: 100%;
 `;
 
@@ -41,12 +42,12 @@ const VideoLinkWrapper = styled(Flex)`
   :hover {
     background: ${({ theme }) => theme.colors.primary100};
 
-    // Hover style for the number displayed
+    /* Hover style for the number displayed */
     div:first-child span {
       color: ${({ theme }) => theme.colors.primary500};
     }
 
-    // Hover style for the label
+    /* Hover style for the label */
     span:nth-child(1) {
       color: ${({ theme }) => theme.colors.primary600};
     }
@@ -54,15 +55,24 @@ const VideoLinkWrapper = styled(Flex)`
 `;
 
 const Preview = styled.img`
-  width: 56px;
-  height: 40px;
-  // Same overlay used in ModalLayout
+  width: ${({ theme }) => theme.spaces[10]};
+  height: ${({ theme }) => theme.spaces[8]};
+  /* Same overlay used in ModalLayout */
   background: ${({ theme }) => `${theme.colors.neutral800}1F`};
   border-radius: ${({ theme }) => theme.borderRadius};
 `;
 
-const TextLink = styled(Typography)`
+const TypographyLineHeight = styled(Typography)`
+  /* line height of label and watch more to 1 so they can be better aligned visually */
+  line-height: 1;
+`;
+
+const TextLink = styled(TypographyLineHeight)`
   text-decoration: none;
+
+  :hover {
+    text-decoration: underline;
+  }
 `;
 
 const Onboarding = () => {
@@ -109,19 +119,18 @@ const Onboarding = () => {
           >
             <FocusTrap onEscape={handlePopoverVisibility}>
               <Flex
-                alignItems="end"
                 justifyContent="space-between"
-                paddingBottom={4}
-                paddingRight={5}
-                paddingLeft={5}
-                paddingTop={5}
+                paddingBottom={5}
+                paddingRight={6}
+                paddingLeft={6}
+                paddingTop={6}
               >
-                <Typography fontWeight="bold">
+                <TypographyLineHeight fontWeight="bold">
                   {formatMessage({
                     id: 'app.components.Onboarding.title',
                     defaultMessage: 'Get started videos',
                   })}
-                </Typography>
+                </TypographyLineHeight>
                 <TextLink
                   as="a"
                   href="https://www.youtube.com/playlist?list=PL7Q0DQYATmvidz6lEmwE5nIcOAYagxWqq"
@@ -156,7 +165,7 @@ const Onboarding = () => {
                     </Typography>
                   </Box>
                   <Box position="relative">
-                    <Preview src={OnboardingPreview} alt="onboarding preview" />
+                    <Preview src={onboardingPreview} alt="" />
                     <IconWrapper
                       position="absolute"
                       top="50%"
@@ -172,6 +181,7 @@ const Onboarding = () => {
                   </Box>
                   <Flex direction="column" alignItems="start" paddingLeft={4}>
                     <Typography fontWeight="bold">{formatMessage(label)}</Typography>
+                    <VisuallyHidden>:</VisuallyHidden>
                     <Typography textColor="neutral600" variant="pi">
                       {duration}
                     </Typography>
