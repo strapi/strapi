@@ -375,7 +375,6 @@ describe('CONTENT MANAGER | EditView | Header', () => {
             </div>
             <div
               class="c0 c9 c11"
-              spacing="2"
             >
               <button
                 aria-disabled="true"

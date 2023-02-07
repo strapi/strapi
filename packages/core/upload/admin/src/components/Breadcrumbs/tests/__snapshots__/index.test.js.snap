@@ -280,7 +280,7 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
       >
         <div>
           <button
-            aria-controls="simplemenu-1"
+            aria-controls="0"
             aria-disabled="false"
             aria-expanded="false"
             aria-haspopup="true"

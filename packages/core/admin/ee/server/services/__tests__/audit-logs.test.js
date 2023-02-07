@@ -76,17 +76,6 @@ describe('Audit logs service', () => {
       },
       eventHub: createEventHub(),
       hook: () => ({ register: jest.fn() }),
-      requestContext: {
-        get() {
-          return {
-            state: {
-              user: {
-                id: 1,
-              },
-            },
-          };
-        },
-      },
     };
 
     const mockSaveEvent = jest.fn();
@@ -120,6 +109,25 @@ describe('Audit logs service', () => {
       mockSaveEvent.mockClear();
       mockFindMany.mockClear();
       mockEntityServiceCreate.mockClear();
+    });
+
+    beforeEach(() => {
+      strapi.requestContext = {
+        get() {
+          return {
+            state: {
+              user: {
+                id: 1,
+              },
+              auth: {
+                strategy: {
+                  name: 'admin',
+                },
+              },
+            },
+          };
+        },
+      };
     });
 
     it('should register and init the audit logs service when registered', async () => {
@@ -224,6 +232,29 @@ describe('Audit logs service', () => {
       expect(mockScheduleJob).toHaveBeenCalledTimes(1);
       expect(mockScheduleJob).toHaveBeenCalledWith('0 0 * * *', expect.any(Function));
       expect(mockDeleteExpiredEvents).toHaveBeenCalledWith(expect.any(Date));
+    });
+
+    it('should not log event if strategy is not admin', async () => {
+      strapi.requestContext = {
+        get() {
+          return {
+            state: {
+              auth: {
+                strategy: {
+                  name: 'content-api',
+                },
+              },
+            },
+          };
+        },
+      };
+
+      const auditLogsService = createAuditLogsService(strapi);
+      await auditLogsService.register();
+
+      await strapi.eventHub.emit('entry.create', { meta: 'test' });
+
+      expect(mockSaveEvent).not.toHaveBeenCalled();
     });
   });
 });

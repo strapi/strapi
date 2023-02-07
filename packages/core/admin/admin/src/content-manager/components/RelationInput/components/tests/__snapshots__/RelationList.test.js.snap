@@ -122,7 +122,6 @@ exports[`Content-Manager || RelationInput || RelationList should render and matc
     <li
       aria-describedby="test"
       class="c1"
-      cursor="default"
     >
       <div
         class="c2 c3"
@@ -130,7 +129,6 @@ exports[`Content-Manager || RelationInput || RelationList should render and matc
       >
         <div
           class="c4 c5 c6"
-          spacing="1"
         >
           <div
             class="c3 c7"
@@ -143,7 +141,6 @@ exports[`Content-Manager || RelationInput || RelationList should render and matc
     <li
       aria-describedby="test"
       class="c1"
-      cursor="default"
     >
       <div
         class="c2 c3"
@@ -151,7 +148,6 @@ exports[`Content-Manager || RelationInput || RelationList should render and matc
       >
         <div
           class="c4 c5 c6"
-          spacing="1"
         >
           <div
             class="c3 c7"

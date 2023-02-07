@@ -30,6 +30,7 @@ module.exports = {
   moduleNameMapper,
   collectCoverageFrom: [
     '<rootDir>/packages/core/*/admin/src/**/*.js',
+    '<rootDir>/packages/core/admin/ee/admin/**/*.js',
     '<rootDir>/packages/plugins/*/admin/src/**/*.js',
   ],
   testPathIgnorePatterns: [
