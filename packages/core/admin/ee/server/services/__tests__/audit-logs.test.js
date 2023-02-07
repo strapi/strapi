@@ -75,6 +75,7 @@ describe('Audit logs service', () => {
         deleteMany: mockEntityServiceDeleteMany,
       },
       eventHub: createEventHub(),
+      hook: () => ({ register: jest.fn() }),
       requestContext: {
         get() {
           return {
