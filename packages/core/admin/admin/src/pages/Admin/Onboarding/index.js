@@ -8,7 +8,8 @@ import {
   Flex,
   FocusTrap,
   Icon,
-  Popover,
+  Portal,
+  PopoverPrimitives,
   Stack,
   Typography,
 } from '@strapi/design-system';
@@ -74,7 +75,7 @@ const Onboarding = () => {
     return null;
   }
 
-  const handleClick = () => {
+  const handlePopoverVisibility = () => {
     setIsOpen((prev) => !prev);
   };
 
@@ -92,106 +93,111 @@ const Onboarding = () => {
                 defaultMessage: 'Open help menu',
               }
         )}
-        onClick={handleClick}
+        onClick={handlePopoverVisibility}
         ref={buttonRef}
       >
         <Icon as={isOpen ? Cross : Question} color="buttonNeutral0" />
       </HelperButton>
 
       {isOpen && (
-        <Popover placement="top-end" source={buttonRef} spacing={12}>
-          <FocusTrap>
-            <Flex
-              alignItems="end"
-              justifyContent="space-between"
-              paddingBottom={4}
-              paddingRight={5}
-              paddingLeft={5}
-              paddingTop={5}
-            >
-              <Typography fontWeight="bold">
-                {formatMessage({
-                  id: 'app.components.Onboarding.title',
-                  defaultMessage: 'Get started videos',
-                })}
-              </Typography>
-              <TextLink
-                as="a"
-                href="https://www.youtube.com/playlist?list=PL7Q0DQYATmvidz6lEmwE5nIcOAYagxWqq"
-                target="_blank"
-                rel="noreferrer noopener"
-                variant="pi"
-                textColor="primary600"
-              >
-                {formatMessage({
-                  id: 'app.components.Onboarding.link.more-videos',
-                  defaultMessage: 'Watch more videos',
-                })}
-              </TextLink>
-            </Flex>
-            <Divider />
-            {VIDEO_LINKS.map(({ href, duration, label }, index) => (
-              <VideoLinkWrapper
-                as="a"
-                href={href}
-                target="_blank"
-                rel="noreferrer noopener"
-                key={href}
-                hasRadius
-                paddingTop={4}
+        <Portal>
+          <PopoverPrimitives.Content
+            padding={0}
+            source={buttonRef}
+            placement="top-end"
+            spacing={12}
+          >
+            <FocusTrap onEscape={handlePopoverVisibility}>
+              <Flex
+                alignItems="end"
+                justifyContent="space-between"
                 paddingBottom={4}
-                paddingLeft={6}
-                paddingRight={11}
+                paddingRight={5}
+                paddingLeft={5}
+                paddingTop={5}
               >
-                <Box paddingRight={5}>
-                  <Typography textColor="neutral200" variant="alpha">
-                    {index + 1}
-                  </Typography>
-                </Box>
-                <Box position="relative">
-                  <Preview src={OnboardingPreview} alt="onboarding preview" />
-                  <IconWrapper
-                    position="absolute"
-                    top="50%"
-                    left="50%"
-                    background="primary600"
-                    borderRadius="50%"
-                    justifyContent="center"
-                    width={6}
-                    height={6}
-                    // Allows to visually center the Play icon
-                    paddingLeft="2px"
-                  >
-                    <Icon as={Play} color="buttonNeutral0" width={3} height={3} />
-                  </IconWrapper>
-                </Box>
-                <Flex direction="column" alignItems="start" paddingLeft={4}>
-                  <Typography fontWeight="bold">{formatMessage(label)}</Typography>
-                  <Typography textColor="neutral600" variant="pi">
-                    {duration}
-                  </Typography>
-                </Flex>
-              </VideoLinkWrapper>
-            ))}
-            <Stack spacing={2} paddingLeft={5} paddingTop={2} paddingBottom={5}>
-              {DOCUMENTATION_LINKS.map(({ label, href, icon }) => (
-                <Stack horizontal spacing={3} key={href}>
-                  <Icon as={icon} color="primary600" />
-                  <TextLink
-                    as="a"
-                    href={href}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    variant="sigma"
-                    textColor="primary700"
-                  >
-                    {formatMessage(label)}
-                  </TextLink>
-                </Stack>
+                <Typography fontWeight="bold">
+                  {formatMessage({
+                    id: 'app.components.Onboarding.title',
+                    defaultMessage: 'Get started videos',
+                  })}
+                </Typography>
+                <TextLink
+                  as="a"
+                  href="https://www.youtube.com/playlist?list=PL7Q0DQYATmvidz6lEmwE5nIcOAYagxWqq"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  variant="pi"
+                  textColor="primary600"
+                >
+                  {formatMessage({
+                    id: 'app.components.Onboarding.link.more-videos',
+                    defaultMessage: 'Watch more videos',
+                  })}
+                </TextLink>
+              </Flex>
+              <Divider />
+              {VIDEO_LINKS.map(({ href, duration, label }, index) => (
+                <VideoLinkWrapper
+                  as="a"
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  key={href}
+                  hasRadius
+                  paddingTop={4}
+                  paddingBottom={4}
+                  paddingLeft={6}
+                  paddingRight={11}
+                >
+                  <Box paddingRight={5}>
+                    <Typography textColor="neutral200" variant="alpha">
+                      {index + 1}
+                    </Typography>
+                  </Box>
+                  <Box position="relative">
+                    <Preview src={OnboardingPreview} alt="onboarding preview" />
+                    <IconWrapper
+                      position="absolute"
+                      top="50%"
+                      left="50%"
+                      background="primary600"
+                      borderRadius="50%"
+                      justifyContent="center"
+                      width={6}
+                      height={6}
+                    >
+                      <Icon as={Play} color="buttonNeutral0" width={3} height={3} />
+                    </IconWrapper>
+                  </Box>
+                  <Flex direction="column" alignItems="start" paddingLeft={4}>
+                    <Typography fontWeight="bold">{formatMessage(label)}</Typography>
+                    <Typography textColor="neutral600" variant="pi">
+                      {duration}
+                    </Typography>
+                  </Flex>
+                </VideoLinkWrapper>
               ))}
-            </Stack>
-          </FocusTrap>
-        </Popover>
+              <Stack spacing={2} paddingLeft={5} paddingTop={2} paddingBottom={5}>
+                {DOCUMENTATION_LINKS.map(({ label, href, icon }) => (
+                  <Stack horizontal spacing={3} key={href}>
+                    <Icon as={icon} color="primary600" />
+                    <TextLink
+                      as="a"
+                      href={href}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      variant="sigma"
+                      textColor="primary700"
+                    >
+                      {formatMessage(label)}
+                    </TextLink>
+                  </Stack>
+                ))}
+              </Stack>
+            </FocusTrap>
+          </PopoverPrimitives.Content>
+        </Portal>
       )}
     </Box>
   );

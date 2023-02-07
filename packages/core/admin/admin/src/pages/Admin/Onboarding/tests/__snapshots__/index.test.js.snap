@@ -8,33 +8,33 @@ exports[`Onboarding renders and matches the snapshot 1`] = `
   color: #32324d;
 }
 
-.c15 {
+.c14 {
   font-size: 0.875rem;
   line-height: 1.43;
   font-weight: 600;
   color: #32324d;
 }
 
-.c16 {
+.c15 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #4945ff;
 }
 
-.c24 {
+.c23 {
   font-weight: 600;
   font-size: 2rem;
   line-height: 1.25;
   color: #dcdce4;
 }
 
-.c33 {
+.c32 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
 }
 
-.c40 {
+.c39 {
   font-weight: 600;
   font-size: 0.6875rem;
   line-height: 1.45;
@@ -54,22 +54,21 @@ exports[`Onboarding renders and matches the snapshot 1`] = `
 
 .c10 {
   background: #ffffff;
-  padding: 4px;
   border-radius: 4px;
 }
 
-.c13 {
+.c12 {
   padding-top: 20px;
   padding-right: 20px;
   padding-bottom: 16px;
   padding-left: 20px;
 }
 
-.c18 {
+.c17 {
   background: #eaeaef;
 }
 
-.c20 {
+.c19 {
   padding-top: 16px;
   padding-right: 64px;
   padding-bottom: 16px;
@@ -77,17 +76,16 @@ exports[`Onboarding renders and matches the snapshot 1`] = `
   border-radius: 4px;
 }
 
-.c23 {
+.c22 {
   padding-right: 20px;
 }
 
-.c25 {
+.c24 {
   position: relative;
 }
 
-.c27 {
+.c26 {
   background: #4945ff;
-  padding-left: 2px;
   border-radius: 50%;
   position: absolute;
   left: 50%;
@@ -96,27 +94,27 @@ exports[`Onboarding renders and matches the snapshot 1`] = `
   height: 24px;
 }
 
-.c30 {
+.c29 {
   color: #ffffff;
   width: 12px;
   height: 12px;
 }
 
-.c31 {
+.c30 {
   padding-left: 16px;
 }
 
-.c34 {
+.c33 {
   padding-top: 8px;
   padding-bottom: 20px;
   padding-left: 20px;
 }
 
-.c38 {
+.c37 {
   color: #4945ff;
 }
 
-.c14 {
+.c13 {
   -webkit-align-items: end;
   -webkit-box-align: end;
   -ms-flex-align: end;
@@ -134,7 +132,7 @@ exports[`Onboarding renders and matches the snapshot 1`] = `
   justify-content: space-between;
 }
 
-.c21 {
+.c20 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -148,7 +146,7 @@ exports[`Onboarding renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
-.c28 {
+.c27 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -166,7 +164,7 @@ exports[`Onboarding renders and matches the snapshot 1`] = `
   justify-content: center;
 }
 
-.c32 {
+.c31 {
   -webkit-align-items: start;
   -webkit-box-align: start;
   -ms-flex-align: start;
@@ -180,7 +178,7 @@ exports[`Onboarding renders and matches the snapshot 1`] = `
   flex-direction: column;
 }
 
-.c35 {
+.c34 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -194,21 +192,21 @@ exports[`Onboarding renders and matches the snapshot 1`] = `
   flex-direction: column;
 }
 
-.c36 > * {
+.c35 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c36 > * + * {
+.c35 > * + * {
   margin-top: 8px;
 }
 
-.c37 > * {
+.c36 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c37 > * + * {
+.c36 > * + * {
   margin-left: 12px;
 }
 
@@ -216,7 +214,7 @@ exports[`Onboarding renders and matches the snapshot 1`] = `
   fill: #ffffff;
 }
 
-.c39 path {
+.c38 path {
   fill: #4945ff;
 }
 
@@ -365,28 +363,7 @@ exports[`Onboarding renders and matches the snapshot 1`] = `
   background: #ffffff;
 }
 
-.c12 {
-  max-height: 15rem;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.c12::-webkit-scrollbar {
-  -webkit-appearance: none;
-  width: 4px;
-}
-
-.c12::-webkit-scrollbar-track {
-  background: #ffffff;
-}
-
-.c12::-webkit-scrollbar-thumb {
-  background: #eaeaef;
-  border-radius: 4px;
-  margin-right: 10px;
-}
-
-.c19 {
+.c18 {
   height: 1px;
   border: none;
   -webkit-flex-shrink: 0;
@@ -401,41 +378,41 @@ exports[`Onboarding renders and matches the snapshot 1`] = `
   height: 100%;
 }
 
-.c29 {
+.c28 {
   -webkit-transform: translate(-50%,-50%);
   -ms-transform: translate(-50%,-50%);
   transform: translate(-50%,-50%);
 }
 
-.c22 {
+.c21 {
   -webkit-text-decoration: none;
   text-decoration: none;
 }
 
-.c22:focus-visible {
+.c21:focus-visible {
   outline-offset: -4px;
 }
 
-.c22:hover {
+.c21:hover {
   background: #f0f0ff;
 }
 
-.c22:hover div:first-child span {
+.c21:hover div:first-child span {
   color: #7b79ff;
 }
 
-.c22:hover span:nth-child(1) {
+.c21:hover span:nth-child(1) {
   color: #4945ff;
 }
 
-.c26 {
+.c25 {
   width: 56px;
   height: 40px;
   background: #32324d1F;
   border-radius: 4px;
 }
 
-.c17 {
+.c16 {
   -webkit-text-decoration: none;
   text-decoration: none;
 }
@@ -500,260 +477,247 @@ exports[`Onboarding renders and matches the snapshot 1`] = `
       class="c0 c10 c11"
       style="position: fixed;"
     >
-      <div
-        class="c0 c12"
-      >
-        <div>
+      <div>
+        <div
+          class="c0 c12 c13"
+        >
+          <span
+            class="c5 c14"
+          >
+            Get started videos
+          </span>
+          <a
+            class="c5 c15 c16"
+            href="https://www.youtube.com/playlist?list=PL7Q0DQYATmvidz6lEmwE5nIcOAYagxWqq"
+            rel="noreferrer noopener"
+            target="_blank"
+          >
+            Watch more videos
+          </a>
+        </div>
+        <hr
+          class="c0 c17 c18"
+        />
+        <a
+          class="c0 c19 c20 c21"
+          href="https://www.youtube.com/watch?v=G9GjN0RxhkE"
+          rel="noreferrer noopener"
+          target="_blank"
+        >
           <div
-            class="c0 c13 c14"
+            class="c0 c22"
           >
             <span
-              class="c5 c15"
+              class="c5 c23"
             >
-              Get started videos
+              1
             </span>
+          </div>
+          <div
+            class="c0 c24"
+          >
+            <img
+              alt="onboarding preview"
+              class="c25"
+              src="IMAGE_MOCK"
+            />
+            <div
+              class="c0 c26 c27 c28"
+            >
+              <svg
+                class="c0 c29 c8"
+                fill="none"
+                height="1em"
+                viewBox="0 0 8 8"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M2 .93c0-.4.45-.63.78-.41l4.6 3.06c.3.2.3.64 0 .84l-4.6 3.06A.5.5 0 012 7.07V.93z"
+                  fill="#212134"
+                />
+              </svg>
+            </div>
+          </div>
+          <div
+            class="c0 c30 c31"
+          >
+            <span
+              class="c5 c14"
+            >
+              Build a content architecture
+            </span>
+            <span
+              class="c5 c32"
+            >
+              5:48
+            </span>
+          </div>
+        </a>
+        <a
+          class="c0 c19 c20 c21"
+          href="https://www.youtube.com/watch?v=DEZw4KbybAI"
+          rel="noreferrer noopener"
+          target="_blank"
+        >
+          <div
+            class="c0 c22"
+          >
+            <span
+              class="c5 c23"
+            >
+              2
+            </span>
+          </div>
+          <div
+            class="c0 c24"
+          >
+            <img
+              alt="onboarding preview"
+              class="c25"
+              src="IMAGE_MOCK"
+            />
+            <div
+              class="c0 c26 c27 c28"
+            >
+              <svg
+                class="c0 c29 c8"
+                fill="none"
+                height="1em"
+                viewBox="0 0 8 8"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M2 .93c0-.4.45-.63.78-.41l4.6 3.06c.3.2.3.64 0 .84l-4.6 3.06A.5.5 0 012 7.07V.93z"
+                  fill="#212134"
+                />
+              </svg>
+            </div>
+          </div>
+          <div
+            class="c0 c30 c31"
+          >
+            <span
+              class="c5 c14"
+            >
+              Add & manage content
+            </span>
+            <span
+              class="c5 c32"
+            >
+              3:18
+            </span>
+          </div>
+        </a>
+        <a
+          class="c0 c19 c20 c21"
+          href="https://www.youtube.com/watch?v=-61MuiMQb38"
+          rel="noreferrer noopener"
+          target="_blank"
+        >
+          <div
+            class="c0 c22"
+          >
+            <span
+              class="c5 c23"
+            >
+              3
+            </span>
+          </div>
+          <div
+            class="c0 c24"
+          >
+            <img
+              alt="onboarding preview"
+              class="c25"
+              src="IMAGE_MOCK"
+            />
+            <div
+              class="c0 c26 c27 c28"
+            >
+              <svg
+                class="c0 c29 c8"
+                fill="none"
+                height="1em"
+                viewBox="0 0 8 8"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M2 .93c0-.4.45-.63.78-.41l4.6 3.06c.3.2.3.64 0 .84l-4.6 3.06A.5.5 0 012 7.07V.93z"
+                  fill="#212134"
+                />
+              </svg>
+            </div>
+          </div>
+          <div
+            class="c0 c30 c31"
+          >
+            <span
+              class="c5 c14"
+            >
+              Manage media
+            </span>
+            <span
+              class="c5 c32"
+            >
+              3:41
+            </span>
+          </div>
+        </a>
+        <div
+          class="c0 c33 c34 c35"
+        >
+          <div
+            class="c0 c20 c36"
+          >
+            <svg
+              class="c0 c37 c38"
+              fill="none"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M13 21v2.5l-3-2-3 2V21h-.5A3.5 3.5 0 013 17.5V5a3 3 0 013-3h14a1 1 0 011 1v17a1 1 0 01-1 1h-7zm-6-2v-2h6v2h6v-3H6.5a1.5 1.5 0 100 3H7zM7 5v2h2V5H7zm0 3v2h2V8H7zm0 3v2h2v-2H7z"
+                fill="#212134"
+              />
+            </svg>
             <a
-              class="c5 c16 c17"
-              href="https://www.youtube.com/playlist?list=PL7Q0DQYATmvidz6lEmwE5nIcOAYagxWqq"
+              class="c5 c39 c16"
+              href="https://docs.strapi.io"
               rel="noreferrer noopener"
               target="_blank"
             >
-              Watch more videos
+              documentation
             </a>
           </div>
-          <hr
-            class="c0 c18 c19"
-          />
-          <a
-            class="c0 c20 c21 c22"
-            href="https://www.youtube.com/watch?v=G9GjN0RxhkE"
-            rel="noreferrer noopener"
-            target="_blank"
-          >
-            <div
-              class="c0 c23"
-            >
-              <span
-                class="c5 c24"
-              >
-                1
-              </span>
-            </div>
-            <div
-              class="c0 c25"
-            >
-              <img
-                alt="onboarding preview"
-                class="c26"
-                src="IMAGE_MOCK"
-              />
-              <div
-                class="c0 c27 c28 c29"
-                height="6"
-                width="6"
-              >
-                <svg
-                  class="c0 c30 c8"
-                  fill="none"
-                  height="3"
-                  viewBox="0 0 24 24"
-                  width="3"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M4 20.252V3.748a1 1 0 011.507-.862l14.028 8.252a1 1 0 010 1.724L5.507 21.113A1 1 0 014 20.252z"
-                    fill="#212134"
-                  />
-                </svg>
-              </div>
-            </div>
-            <div
-              class="c0 c31 c32"
-            >
-              <span
-                class="c5 c15"
-              >
-                Build a content architecture
-              </span>
-              <span
-                class="c5 c33"
-              >
-                5:48
-              </span>
-            </div>
-          </a>
-          <a
-            class="c0 c20 c21 c22"
-            href="https://www.youtube.com/watch?v=DEZw4KbybAI"
-            rel="noreferrer noopener"
-            target="_blank"
-          >
-            <div
-              class="c0 c23"
-            >
-              <span
-                class="c5 c24"
-              >
-                2
-              </span>
-            </div>
-            <div
-              class="c0 c25"
-            >
-              <img
-                alt="onboarding preview"
-                class="c26"
-                src="IMAGE_MOCK"
-              />
-              <div
-                class="c0 c27 c28 c29"
-                height="6"
-                width="6"
-              >
-                <svg
-                  class="c0 c30 c8"
-                  fill="none"
-                  height="3"
-                  viewBox="0 0 24 24"
-                  width="3"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M4 20.252V3.748a1 1 0 011.507-.862l14.028 8.252a1 1 0 010 1.724L5.507 21.113A1 1 0 014 20.252z"
-                    fill="#212134"
-                  />
-                </svg>
-              </div>
-            </div>
-            <div
-              class="c0 c31 c32"
-            >
-              <span
-                class="c5 c15"
-              >
-                Add & manage content
-              </span>
-              <span
-                class="c5 c33"
-              >
-                3:18
-              </span>
-            </div>
-          </a>
-          <a
-            class="c0 c20 c21 c22"
-            href="https://www.youtube.com/watch?v=-61MuiMQb38"
-            rel="noreferrer noopener"
-            target="_blank"
-          >
-            <div
-              class="c0 c23"
-            >
-              <span
-                class="c5 c24"
-              >
-                3
-              </span>
-            </div>
-            <div
-              class="c0 c25"
-            >
-              <img
-                alt="onboarding preview"
-                class="c26"
-                src="IMAGE_MOCK"
-              />
-              <div
-                class="c0 c27 c28 c29"
-                height="6"
-                width="6"
-              >
-                <svg
-                  class="c0 c30 c8"
-                  fill="none"
-                  height="3"
-                  viewBox="0 0 24 24"
-                  width="3"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M4 20.252V3.748a1 1 0 011.507-.862l14.028 8.252a1 1 0 010 1.724L5.507 21.113A1 1 0 014 20.252z"
-                    fill="#212134"
-                  />
-                </svg>
-              </div>
-            </div>
-            <div
-              class="c0 c31 c32"
-            >
-              <span
-                class="c5 c15"
-              >
-                Manage media
-              </span>
-              <span
-                class="c5 c33"
-              >
-                3:41
-              </span>
-            </div>
-          </a>
           <div
-            class="c0 c34 c35 c36"
-            spacing="2"
+            class="c0 c20 c36"
           >
-            <div
-              class="c0 c21 c37"
-              spacing="3"
+            <svg
+              class="c0 c37 c38"
+              fill="none"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <svg
-                class="c0 c38 c39"
-                fill="none"
-                height="1em"
-                viewBox="0 0 24 24"
-                width="1em"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M13 21v2.5l-3-2-3 2V21h-.5A3.5 3.5 0 013 17.5V5a3 3 0 013-3h14a1 1 0 011 1v17a1 1 0 01-1 1h-7zm-6-2v-2h6v2h6v-3H6.5a1.5 1.5 0 100 3H7zM7 5v2h2V5H7zm0 3v2h2V8H7zm0 3v2h2v-2H7z"
-                  fill="#212134"
-                />
-              </svg>
-              <a
-                class="c5 c40 c17"
-                href="https://docs.strapi.io"
-                rel="noreferrer noopener"
-                target="_blank"
-              >
-                documentation
-              </a>
-            </div>
-            <div
-              class="c0 c21 c37"
-              spacing="3"
+              <path
+                d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.53-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z"
+                fill="#212134"
+              />
+            </svg>
+            <a
+              class="c5 c39 c16"
+              href="https://strapi-showcase.s3-us-west-2.amazonaws.com/CheatSheet.pdf"
+              rel="noreferrer noopener"
+              target="_blank"
             >
-              <svg
-                class="c0 c38 c39"
-                fill="none"
-                height="1em"
-                viewBox="0 0 24 24"
-                width="1em"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.53-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z"
-                  fill="#212134"
-                />
-              </svg>
-              <a
-                class="c5 c40 c17"
-                href="https://strapi-showcase.s3-us-west-2.amazonaws.com/CheatSheet.pdf"
-                rel="noreferrer noopener"
-                target="_blank"
-              >
-                cheatsheet
-              </a>
-            </div>
+              cheatsheet
+            </a>
           </div>
         </div>
       </div>
