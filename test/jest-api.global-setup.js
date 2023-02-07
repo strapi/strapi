@@ -19,8 +19,9 @@ const databases = {
     client: 'mysql',
     connection: {
       host: '127.0.0.1',
-      port: 3306,
-      user: 'strapi',
+      port: 3307,
+      database: 'strapi_test',
+      user: 'root',
       password: 'strapi',
     },
   },
@@ -34,12 +35,9 @@ const databases = {
 };
 
 async function main(uuid) {
-  console.log('main');
   const knex = Knex(databases[process.env.DATABASE]);
-
   // Lets create our database if it does not exist
-  const response = await knex.raw(`CREATE DATABASE ${uuid};`);
-  console.log(response);
+  await knex.raw(`CREATE DATABASE ${uuid};`);
 }
 
 async function CreateDB(uuid) {
