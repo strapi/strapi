@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormikProvider, useFormik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { SettingsPageTitle } from '@strapi/helper-plugin';
+import { ConfirmDialog, SettingsPageTitle } from '@strapi/helper-plugin';
 import { Button, ContentLayout, HeaderLayout, Layout, Loader, Main } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 
@@ -22,16 +22,39 @@ export function ReviewWorkflowsPage() {
   const {
     status,
     clientState: {
-      currentWorkflow: { data: currentWorkflow, isDirty: currentWorkflowIsDirty },
+      currentWorkflow: {
+        data: currentWorkflow,
+        isDirty: currentWorkflowIsDirty,
+        hasDeletedServerStages: currentWorkflowHasDeletedServerStages,
+      },
     },
   } = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
+  const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = useState(false);
+
+  const submitForm = async () => {
+    setIsConfirmDeleteDialogOpen(false);
+
+    await updateWorkflowStages(currentWorkflow.id, currentWorkflow.stages);
+    refetchWorkflow();
+  };
+
+  const handleConfirmDeleteDialog = async () => {
+    await submitForm();
+  };
+
+  const toggleConfirmDeleteDialog = () => {
+    setIsConfirmDeleteDialogOpen((prev) => !prev);
+  };
 
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: currentWorkflow,
     async onSubmit() {
-      await updateWorkflowStages(currentWorkflow.id, currentWorkflow.stages);
-      refetchWorkflow();
+      if (currentWorkflowHasDeletedServerStages) {
+        setIsConfirmDeleteDialogOpen(true);
+      } else {
+        submitForm();
+      }
     },
     validationSchema: getWorkflowValidationSchema({ formatMessage }),
     validateOnChange: false,
@@ -94,6 +117,17 @@ export function ReviewWorkflowsPage() {
             </ContentLayout>
           </Form>
         </FormikProvider>
+
+        <ConfirmDialog
+          bodyText={{
+            id: 'Settings.review-workflows.page.delete.confirm.body',
+            defaultMessage:
+              'All entries assigned to deleted stages will be moved to the first stage. Are you sure you want to save this?',
+          }}
+          isOpen={isConfirmDeleteDialogOpen}
+          onToggleDialog={toggleConfirmDeleteDialog}
+          onConfirm={handleConfirmDeleteDialog}
+        />
       </Main>
     </Layout>
   );

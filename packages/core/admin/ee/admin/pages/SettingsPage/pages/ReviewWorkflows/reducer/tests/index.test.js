@@ -44,16 +44,16 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
     expect(reducer(state, action)).toStrictEqual(
       expect.objectContaining({
         status: 'loading-state',
-        serverState: {
+        serverState: expect.objectContaining({
           currentWorkflow: WORKFLOWS_FIXTURE[0],
           workflows: WORKFLOWS_FIXTURE,
-        },
-        clientState: {
-          currentWorkflow: {
+        }),
+        clientState: expect.objectContaining({
+          currentWorkflow: expect.objectContaining({
             data: WORKFLOWS_FIXTURE[0],
             isDirty: false,
-          },
-        },
+          }),
+        }),
       })
     );
   });
@@ -95,6 +95,69 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
             data: expect.objectContaining({
               stages: expect.arrayContaining([WORKFLOWS_FIXTURE[0].stages[1]]),
             }),
+          }),
+        }),
+      })
+    );
+  });
+
+  test('ACTION_DELETE_STAGE - set hasDeletedServerStages to true if stageId exists on the server', () => {
+    const action = {
+      type: ACTION_DELETE_STAGE,
+      payload: { stageId: 1 },
+    };
+
+    state = {
+      status: expect.any(String),
+      serverState: {
+        currentWorkflow: WORKFLOWS_FIXTURE[0],
+      },
+      clientState: {
+        currentWorkflow: {
+          data: WORKFLOWS_FIXTURE[0],
+          isDirty: false,
+        },
+      },
+    };
+
+    expect(reducer(state, action)).toStrictEqual(
+      expect.objectContaining({
+        clientState: expect.objectContaining({
+          currentWorkflow: expect.objectContaining({
+            hasDeletedServerStages: true,
+          }),
+        }),
+      })
+    );
+  });
+
+  test('ACTION_DELETE_STAGE - set hasDeletedServerStages to false if stageId does not exist on the server', () => {
+    const action = {
+      type: ACTION_DELETE_STAGE,
+      payload: { stageId: 3 },
+    };
+
+    state = {
+      status: expect.any(String),
+      serverState: {
+        currentWorkflow: WORKFLOWS_FIXTURE[0],
+      },
+      clientState: {
+        currentWorkflow: {
+          data: {
+            ...WORKFLOWS_FIXTURE[0],
+            stages: [...WORKFLOWS_FIXTURE[0].stages, { __temp_key__: 3, name: 'something' }],
+          },
+          isDirty: false,
+        },
+      },
+    };
+
+    expect(reducer(state, action)).toStrictEqual(
+      expect.objectContaining({
+        clientState: expect.objectContaining({
+          currentWorkflow: expect.objectContaining({
+            hasDeletedServerStages: false,
           }),
         }),
       })
