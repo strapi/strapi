@@ -1,11 +1,6 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { Flex } from '@strapi/design-system/Flex';
-import { Tooltip } from '@strapi/design-system/Tooltip';
-import { Icon } from '@strapi/design-system/Icon';
-import { GridItem } from '@strapi/design-system/Grid';
-import { Typography } from '@strapi/design-system/Typography';
-import { Stack } from '@strapi/design-system/Stack';
+import { Flex, Tooltip, Icon, GridItem, Typography, Stack } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2/Link';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
