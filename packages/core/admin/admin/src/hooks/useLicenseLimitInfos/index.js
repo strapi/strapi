@@ -1,5 +1,5 @@
 const useLicenseLimitInfos = () => {
-  return null;
+  return {};
 };
 
 export default useLicenseLimitInfos;
