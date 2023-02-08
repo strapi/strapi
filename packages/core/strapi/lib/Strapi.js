@@ -100,37 +100,6 @@ class Strapi {
     this.container.register('sanitizers', sanitizersRegistry(this));
 
     // Create a mapping of every useful directory (for the app, dist and static directories)
-    // TODO put this in /docs/docs/API/Strapi
-    /*
-        Javascript Object
-        Stored paths of file system
-
-        dist -> Link to StrapiPathObject
-          Builded folder
-        app -> Link to StrapiPathObject
-          Source folder
-        StrapiPathObject:
-          root:
-            Root path to (app|dist)
-          src:
-            Source root path to project files
-          api:
-            Path to the folder where user API files are stored (content-types, controllers, services, routes, etc..)
-          components:
-            Path to the folder where the Strapi user components are stored
-          policies:
-            Path to the folder where the Strapi user policies are stored
-            Function that check state of the data and prevent access to the API if falsy returned
-          middlewares:
-            Path to the folder where the Strapi user middleware are stored
-            Function that wrap around a route
-          config:
-            Path to the folder containing user config files
-        static:
-          Define path to directories involving client display
-          public:
-            Path to the folder to serve publicly (like files, images, etc..)
-     */
     this.dirs = utils.getDirs(rootDirs, { strapi: this });
 
     // Strapi state management variables

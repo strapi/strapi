@@ -7,7 +7,7 @@ tags:
   - global
 
 toc_min_heading_level: 2
-toc_max_heading_level: 5
+toc_max_heading_level: 3
 ---
 
 import Type from '@site/docs/api/components/Type';

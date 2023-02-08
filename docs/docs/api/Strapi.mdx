@@ -7,7 +7,7 @@ tags:
 - global
 
 toc_min_heading_level: 2
-toc_max_heading_level: 5
+toc_max_heading_level: 3
 ---
 import Type from '@site/docs/api/components/Type';
 
@@ -50,4 +50,26 @@ const strapiInstance = new Strapi();
 This is where all registries are stored.
 
 See [Container](./container).
+
+### `strapi.dirs`
+
+Stored paths of file system.
+
+- `dirs.dist`: <Type>[StrapiPathObject](#strapipathobject)</Type>
+  - Build folder
+- `dirs.app`: <Type>[StrapiPathObject](#strapipathobject)</Type>
+  - Sources folder
+- `dirs.static`: <Type>Object</Type> Define path to directories involving web client display
+  - `public`:  <Type>String</Type> Path to the folder to serve publicly (like files, images, etc..)
+
+#### StrapiPathObject
+- `root`: <Type>String</Type> Root path
+- `src`: <Type>String</Type> Sources route path to project files
+- `api`:  <Type>String</Type> Path to the folder containing project developers' API files (content-types, controllers, services, routes, etc..)
+- `components`:  <Type>String</Type> Path to the folder containing project developers' components
+- `policies`:  <Type>String</Type> Path to the folder where the Strapi project developers' policies are stored
+  - A set of functions that check the state of the data and prevent the access to the API accordingly
+- `middlewares`:  <Type>String</Type> Path to the folder where the Strapi project developers' middlewares are stored
+  - A set of function that wrap around routes and requests
+- `config`:  <Type>String</Type> Path to the folder containing project developers' config files
 
