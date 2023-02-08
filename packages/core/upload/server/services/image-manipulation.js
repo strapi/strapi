@@ -7,8 +7,8 @@ const fs = require('fs');
 const { join } = require('path');
 const sharp = require('sharp');
 
+const { bytesToKbytes, writableDiscardStream } = require('@strapi/utils/lib/file');
 const { getService } = require('../utils');
-const { bytesToKbytes, writableDiscardStream } = require('../utils/file');
 
 const FORMATS_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff', 'svg', 'gif', 'avif'];
 const FORMATS_TO_OPTIMIZE = ['jpeg', 'png', 'webp', 'tiff', 'avif'];

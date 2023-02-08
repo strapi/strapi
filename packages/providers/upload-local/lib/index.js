@@ -10,7 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const fse = require('fs-extra');
 const { PayloadTooLargeError } = require('@strapi/utils/lib/errors');
-const { kbytesToBytes, bytesToHumanReadable } = require('../../../core/upload/server/utils/file');
+const { kbytesToBytes, bytesToHumanReadable } = require('@strapi/utils/lib/file');
 
 const UPLOADS_FOLDER_NAME = 'uploads';
 

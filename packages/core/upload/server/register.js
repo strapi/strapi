@@ -1,9 +1,9 @@
 'use strict';
 
 const { PayloadTooLargeError } = require('@strapi/utils/lib/errors');
+const { kbytesToBytes, bytesToHumanReadable } = require('@strapi/utils/lib/file');
 const _ = require('lodash');
 const registerUploadMiddleware = require('./middlewares/upload');
-const { kbytesToBytes, bytesToHumanReadable } = require('./utils/file');
 
 /**
  * Register upload plugin
