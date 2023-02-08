@@ -18,13 +18,12 @@ const {
   nameToSlug,
   contentTypes: contentTypesUtils,
   webhook: webhookUtils,
+  errors: { ApplicationError, NotFoundError },
+  file: { bytesToKbytes },
 } = require('@strapi/utils');
-const { NotFoundError } = require('@strapi/utils').errors;
 
 const { MEDIA_UPDATE, MEDIA_CREATE, MEDIA_DELETE } = webhookUtils.webhookEvents;
 
-const { ApplicationError } = require('@strapi/utils/lib/errors');
-const { bytesToKbytes } = require('@strapi/utils/lib/file');
 const { FILE_MODEL_UID } = require('../constants');
 const { getService } = require('../utils');
 

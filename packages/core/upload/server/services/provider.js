@@ -1,7 +1,9 @@
 'use strict';
 
 const { isFunction } = require('lodash/fp');
-const { streamToBuffer } = require('@strapi/utils/lib/file');
+const {
+  file: { streamToBuffer },
+} = require('@strapi/utils');
 
 module.exports = ({ strapi }) => ({
   async checkFileSize(file) {
