@@ -46,12 +46,14 @@ const strapiInstance = new Strapi();
 ```
 
 ### `strapi.container`
+- [<Type>Container</Type>](./container)
 
 This is where all registries are stored.
 
 See [Container](./container).
 
 ### `strapi.dirs`
+- <Type>Object</Type>
 
 Stored paths of file system.
 
@@ -63,6 +65,10 @@ Stored paths of file system.
   - `public`:  <Type>String</Type> Path to the folder to serve publicly (like files, images, etc..)
 
 #### StrapiPathObject
+- <Type>Object</Type>
+
+A set of path to specific Strapi project parts.
+
 - `root`: <Type>String</Type> Root path
 - `src`: <Type>String</Type> Sources route path to project files
 - `api`:  <Type>String</Type> Path to the folder containing project developers' API files (content-types, controllers, services, routes, etc..)
@@ -74,15 +80,20 @@ Stored paths of file system.
 - `config`:  <Type>String</Type> Path to the folder containing project developers' config files
 
 ### `strapi.isLoaded`
+- <Type>Boolean</Type>
 
-<Type>Boolean</Type>
-
-- `true`: Everything have been loaded
-- `false`: There is something loading
+  - `true`: Everything have been loaded
+  - `false`: There is something loading
 
 ### `strapi.reload`
+- <Type>Function</Type>
 
 Function to reload the app.
 
 This function defines itself at the construction of the Strapi class.
+
+### `strapi.server`
+- [<Type>StrapiServer</Type>](./strapi-server)
+
+Strapi server object.
 

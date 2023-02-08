@@ -1,0 +1,46 @@
+---
+title: Strapi server
+slug: /api/strapi-server
+tags:
+- module
+- public
+
+toc_min_heading_level: 2
+toc_max_heading_level: 5
+---
+import Type from '@site/docs/api/components/Type';
+
+# Strapi Server
+
+:::info
+
+Current state: **Stable**
+
+:::
+
+The Strapi server module permits to generate a Strapi http server.
+
+## Module: Strapi server
+
+### `createServer(strapi)`
+
+- `strapi`: [<Type>Strapi</Type>](Strapi)
+- Returns: <Type>StrapiServer</Type>
+
+```javascript
+const server = createServer(strapi);
+
+server.listRoutes();
+```
+
+### `StrapiServer.app`
+### `StrapiServer.router`
+### `StrapiServer.httpServer`
+### `StrapiServer.api(name)`
+### `StrapiServer.use(...args)`
+### `StrapiServer.routes(routes)`
+### `StrapiServer.mount()`
+### `StrapiServer.initRouting()`
+### `StrapiServer.initMiddlewares()`
+### `StrapiServer.listRoutes()`
+### `StrapiServer.listen(...args)`
