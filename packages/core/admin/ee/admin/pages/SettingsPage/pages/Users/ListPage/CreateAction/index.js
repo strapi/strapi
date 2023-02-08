@@ -2,8 +2,7 @@ import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Stack, Button, Tooltip, Icon } from '@strapi/design-system';
-import Envelop from '@strapi/icons/Envelop';
-import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
+import { Envelop, ExclamationMarkCircle } from '@strapi/icons';
 import { useLicenseLimits } from '../../../../../../hooks';
 
 const CreateAction = ({ onClick }) => {
