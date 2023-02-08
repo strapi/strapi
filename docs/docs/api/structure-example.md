@@ -10,6 +10,8 @@ toc_min_heading_level: 2
 toc_max_heading_level: 5
 ---
 
+import Type from '@site/docs/api/components/Type';
+
 # Name of Module
 
 :::info
@@ -42,9 +44,9 @@ const myClass = new Class();
 
 ### `class.method(param1, param2)`
 
-- `param1`: &lt; String &gt; (can be linked to other API doc page).
-- `param2`: &lt; Object &gt;
-  - `options1`: &lt; Number &gt;
+- `param1`: <Type>String</Type> (can be linked to other API doc page).
+- `param2`: <Type>Object</Type>
+  - `options1`: <Type>Number</Type>
 
 The `class.method()` method display the `param1` and then skip `param2` lines.
 
@@ -67,9 +69,9 @@ for (const text of textLines) {
 
 ## Function: `name_of_the_function(param1, param2)`
 
-- `param1`: &lt; String &gt; (can be linked to other API doc page)
-- `param2`: &lt; Object &gt;
-  - `options1`: &lt; Number &gt;
+- `param1`: <Type>String</Type> (can be linked to other API doc page)
+- `param2`: <Type>Object</Type>
+  - `options1`: <Type>Number</Type>
 
 The `name_of_the_function()` method display the `param1` and then skip `param2` lines.
 

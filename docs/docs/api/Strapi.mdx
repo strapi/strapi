@@ -1,0 +1,50 @@
+---
+title: Strapi
+slug: /api/Strapi
+tags:
+- class
+- public
+- global
+
+toc_min_heading_level: 2
+toc_max_heading_level: 5
+---
+import Type from '@site/docs/api/components/Type';
+
+# Strapi
+
+:::info
+
+Current state: **Stable**
+
+:::
+
+The Strapi class is the main object used in Strapi projects.
+An instance of Strapi class is available as a global in any Strapi project: `global.strapi`.
+
+## Class: Strapi
+
+### `new Strapi(opts)`
+
+- `opts`: <Type>Object</Type> Options that can be used on Strapi startup
+  - `autoReload`: <Type>Boolean</Type> **Default:** true
+    - If false, deactivate auto reload
+    - If you modify any file in your Strapi project, it reloads your nodejs app
+    - If any content-type is changed, it will reload the nodejs app
+  - `serveAdminPanel`: <Type>Boolean</Type> **Default:** true
+    - Should the admin panel be loaded and serve as a web client
+    - The admin panel build will not be delivered if false
+  - `appDir`: <Type>String</Type>  **Default:** `process.cwd()`
+    - The directory relative or absolute path where Strapi will write every file (schemas, generated APIs, controllers or services)
+  - `distDir`: <Type>String</Type>  **Default:** appDir value
+    - The directory relative or absolute path where Strapi will read configurations, schemas and any compiled code
+
+Instances of the Strapi class can be created using the new keyword.
+
+```javascript
+const strapiInstance = new Strapi();
+```
+
+### `strapi.container`
+
+This is where all registries are stored.
