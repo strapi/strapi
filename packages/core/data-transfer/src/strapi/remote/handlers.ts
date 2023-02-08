@@ -11,20 +11,30 @@ import type { client, server } from '../../../types/remote/protocol';
 import { ProviderTransferError, ProviderInitializationError } from '../../errors/providers';
 import { TRANSFER_METHODS } from './constants';
 
+type TransferMethod = typeof TRANSFER_METHODS[number];
+
 interface ITransferState {
   transfer?: { id: string; kind: client.TransferKind };
   controller?: IPushController;
 }
 
-export const createTransferHandler =
-  (options: ServerOptions = {}) =>
-  async (ctx: Context) => {
+interface IHandlerOptions {
+  verify: (ctx: Context, scope?: TransferMethod) => Promise<void>;
+  server?: ServerOptions;
+}
+
+export const createTransferHandler = (options: IHandlerOptions) => {
+  const { verify, server: serverOptions } = options;
+
+  // Create the websocket server
+  const wss = new WebSocket.Server({ ...serverOptions, noServer: true });
+
+  return async (ctx: Context) => {
+    const verifyAuth = (scope?: TransferMethod) => verify(ctx, scope);
+
     const upgradeHeader = (ctx.request.headers.upgrade || '')
       .split(',')
       .map((s) => s.trim().toLowerCase());
-
-    // Create the websocket server
-    const wss = new WebSocket.Server({ ...options, noServer: true });
 
     if (upgradeHeader.includes('websocket')) {
       wss.handleUpgrade(ctx.req, ctx.request.socket, Buffer.alloc(0), (ws) => {
@@ -81,20 +91,26 @@ export const createTransferHandler =
           }
         };
 
-        const teardown = (): server.Payload<server.EndMessage> => {
+        const teardown = async (): Promise<server.Payload<server.EndMessage>> => {
+          await verifyAuth(state.transfer?.kind);
+
           delete state.controller;
           delete state.transfer;
 
           return { ok: true };
         };
 
-        const init = (msg: client.InitCommand): server.Payload<server.InitMessage> => {
+        const init = async (
+          msg: client.InitCommand
+        ): Promise<server.Payload<server.InitMessage>> => {
           // TODO: this only checks for this instance of node: we should consider a database lock
           if (state.controller) {
             throw new ProviderInitializationError('Transfer already in progres');
           }
 
           const { transfer } = msg.params;
+
+          await verifyAuth(transfer);
 
           // Push transfer
           if (transfer === 'push') {
@@ -147,6 +163,8 @@ export const createTransferHandler =
         const onTransferCommand = async (msg: client.TransferMessage) => {
           const { transferID, kind } = msg;
           const { controller } = state;
+
+          await verifyAuth(state.transfer?.kind);
 
           // TODO: (re)move this check
           // It shouldn't be possible to start a pull transfer for now, so reaching
@@ -207,8 +225,7 @@ export const createTransferHandler =
 
         ws.on('error', (e) => {
           teardown();
-          // TODO: is logging a console error to the running instance of Strapi ok to do? Should we check for an existing strapi.logger to use?
-          console.error(e);
+          strapi.log.error(e);
         });
 
         ws.on('message', async (raw) => {
@@ -241,3 +258,4 @@ export const createTransferHandler =
       ctx.respond = false;
     }
   };
+};

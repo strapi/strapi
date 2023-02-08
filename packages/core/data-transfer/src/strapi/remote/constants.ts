@@ -1,2 +1,2 @@
-export const TRANSFER_PATH = '/transfer/runner/connect';
-export const TRANSFER_METHODS = ['push', 'pull'];
+export const TRANSFER_PATH = '/transfer/runner/connect' as const;
+export const TRANSFER_METHODS = ['push', 'pull'] as const;
