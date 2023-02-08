@@ -7,25 +7,12 @@ test.describe('Authentication | Login', () => {
     await page.goto('/admin');
   });
 
-  test.afterEach(async ({ page }) => {
-    await page.request.fetch('/api/database/dump', {
-      method: 'POST',
-    });
-  });
-
   test.describe('Successful login', () => {
-    test('A user should be able to log in', async ({ page }) => {
-      await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
-      await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
-
-      await page.getByRole('button', { name: 'Login' }).click();
-      await expect(page).toHaveTitle('Homepage');
-    });
-
-    test('A user should be able to log in without making his authentication persistent', async ({
+    test('A user should be able to log in with or without making their authentication persistent', async ({
       page,
       context,
     }) => {
+      // Test without making user authentication persistent
       await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
       await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
 
@@ -37,12 +24,8 @@ test.describe('Authentication | Login', () => {
       page = await context.newPage();
       await page.goto('/admin');
       await expect(page).toHaveTitle('Strapi Admin');
-    });
 
-    test('A user should be able to log in and make his authentication persistent', async ({
-      page,
-      context,
-    }) => {
+      // Test with making user authentication persistent
       await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
       await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
 
@@ -88,59 +71,50 @@ test.describe('Authentication | Login', () => {
   });
 
   test.describe('Validation checks', () => {
-    test('A user should see a validation error when not passing in an email', async ({ page }) => {
+    test('A user should see a validation errors when not passing in an email, a wrong email, not passing a password or a wrong password', async ({
+      page,
+    }) => {
+      // Test without email value
       await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
-
       await page.getByRole('button', { name: 'Login' }).click();
-
       await expect(page.getByText('Value is required')).toBeVisible();
       await expect(await page.getByLabel('Email*', { exact: true })).toBeFocused();
-    });
 
-    test('A user should see a validation error when not passing in a password', async ({
-      page,
-    }) => {
+      // Test without password value
       await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
-
+      await page.getByLabel('Password*', { exact: true }).fill('');
       await page.getByRole('button', { name: 'Login' }).click();
-
       await expect(page.getByText('Value is required')).toBeVisible();
       await expect(await page.getByLabel('Password*')).toBeFocused();
-    });
 
-    test('A user should see a validation error when entering a wrong email', async ({ page }) => {
+      // Test with a wrong email value
       await page.getByLabel('Email*', { exact: true }).fill('wrongEmail@testing.com');
       await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
-
       await page.getByRole('button', { name: 'Login' }).click();
-
       await expect(page.getByText('Invalid credentials')).toBeVisible();
-    });
 
-    test('A user should see a validation error when entering a wrong password', async ({
-      page,
-    }) => {
+      // Test with a wrong password value
       await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
       await page.getByLabel('Password*', { exact: true }).fill('wrongPassword');
-
       await page.getByRole('button', { name: 'Login' }).click();
-
       await expect(page.getByText('Invalid credentials')).toBeVisible();
     });
   });
 
   test.describe('Other actions than logging in', () => {
-    test('A user should be able to acces the forgot password page', async ({ page }) => {
+    test('A user should be able to acces the forgot password page and change the application language', async ({
+      page,
+    }) => {
+      // Test forgot password redirection
       await page.getByRole('link', { name: 'Forgot your password?' }).click();
-
       await expect(page.getByText('Password Recovery')).toBeVisible();
-    });
 
-    test('A user should be able to change language', async ({ page }) => {
+      await page.getByRole('link', { name: 'Ready to sign in?' }).click();
+
+      // Test changing application language
       await page.getByRole('button', { name: 'English' }).click();
       await page.keyboard.press('ArrowDown');
       await page.keyboard.press('Space');
-
       await expect(page.getByText('Bienvenue !')).toBeVisible();
     });
   });
