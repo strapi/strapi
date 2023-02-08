@@ -1,10 +1,7 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Button } from '@strapi/design-system/Button';
-import { Tooltip } from '@strapi/design-system/Tooltip';
-import { Icon } from '@strapi/design-system/Icon';
-import { Stack } from '@strapi/design-system';
+import { Stack, Button, Tooltip, Icon } from '@strapi/design-system';
 import Envelop from '@strapi/icons/Envelop';
 import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import { useLicenseLimits } from '../../../../../../hooks';
