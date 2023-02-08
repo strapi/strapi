@@ -1,6 +1,6 @@
 /**
  *
- * useLicenseLimitNotification
+ * useLicenseLimitsNotification
  *
  */
 import { useEffect } from 'react';
@@ -15,7 +15,7 @@ const BILLING_STRAPI_CLOUD_URL = 'https://cloud.strapi.io/profile/billing';
 const BILLING_SELF_HOSTED_URL =
   'https://strapi.chargebeeportal.com/portal/v2/login?forward=portal_main';
 
-const useLicenseLimitNotification = () => {
+export const useLicenseLimitsNotification = () => {
   const { formatMessage } = useIntl();
   let { license } = useLicenseLimits();
   const toggleNotification = useNotification();
@@ -75,5 +75,3 @@ const useLicenseLimitNotification = () => {
     }
   }, [toggleNotification, license.data, pathname, formatMessage]);
 };
-
-export default useLicenseLimitNotification;

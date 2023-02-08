@@ -10,14 +10,14 @@ import { Link } from '@strapi/design-system/v2/Link';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import { pxToRem } from '@strapi/helper-plugin';
-import { useLicenseLimitInfos } from '../../../../../../hooks';
+import { useLicenseLimits } from '../../../../../../hooks';
 
 const BILLING_STRAPI_CLOUD_URL = 'https://cloud.strapi.io/profile/billing';
 const BILLING_SELF_HOSTED_URL = 'https://share.hsforms.com/1WhxtbTkJSUmfqqEuv4pwuA43qp4';
 
 const AdminSeatInfo = () => {
   const { formatMessage } = useIntl();
-  const { license } = useLicenseLimitInfos();
+  const { license } = useLicenseLimits();
   const { licenseLimitStatus, currentUserCount, permittedSeats, isHostedOnStrapiCloud } =
     license?.data ?? {};
 

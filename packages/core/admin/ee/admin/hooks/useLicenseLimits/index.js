@@ -1,7 +1,7 @@
 import { useFetchClient } from '@strapi/helper-plugin';
 import { useQuery } from 'react-query';
 
-export const useLicenseLimitInfos = () => {
+const useLicenseLimits = () => {
   const { get } = useFetchClient();
   const fetchLicenseLimitInfo = async () => {
     const {
@@ -15,3 +15,5 @@ export const useLicenseLimitInfos = () => {
 
   return { license };
 };
+
+export default useLicenseLimits;
