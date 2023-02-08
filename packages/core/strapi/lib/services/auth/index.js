@@ -58,6 +58,8 @@ const createAuthentication = () => {
 
         // Use the given strategy as is
         else if (typeof strategy === 'object') {
+          validStrategy(strategy);
+
           acc.push(strategy);
         }
 

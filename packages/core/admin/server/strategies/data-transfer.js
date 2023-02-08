@@ -32,9 +32,7 @@ const authenticate = async (ctx) => {
     return { authenticated: false };
   }
 
-  const transferToken = await tokenService.getBy({
-    accessKey: tokenService.hash(token),
-  });
+  const transferToken = await tokenService.getBy({ accessKey: tokenService.hash(token) });
 
   // Check if the token exists
   if (!transferToken) {
