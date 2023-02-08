@@ -7,120 +7,75 @@ test.describe('Sign Up', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath({ filePath: './e2e/data/without-admin.tar' });
     await page.goto('/admin');
+    await fillValidSignUpForm({ page });
   });
 
-  test.describe('Name Errors', () => {
-    test('first name is required', async ({ page }) => {
-      expect(
-        await page.getByRole('textbox', { name: 'First name *' }).getAttribute('aria-required')
-      ).toBeTruthy();
-    });
+  test('a user cannot submit the form if the first name field is not filled', async ({ page }) => {
+    expect(
+      await page.getByRole('textbox', { name: 'First name *' }).getAttribute('aria-required')
+    ).toBeTruthy();
   });
 
-  test.describe('Email Errors', () => {
-    test('required', async ({ page }) => {
-      expect(
-        await page.getByRole('textbox', { name: 'Email *' }).getAttribute('aria-required')
-      ).toBeTruthy();
-    });
+  test('a user cannot submit the form if the email is: not provided, not lowercase or not a valid email address', async ({
+    page,
+  }) => {
+    const emailInput = page.getByRole('textbox', { name: 'Email *' });
+    const letsStartButton = page.getByRole('button', { name: "Let's start" });
 
-    test('the value must be a lowercase string', async ({ page }) => {
-      await fillValidSignUpForm({ page });
-
-      const emailInput = page.getByRole('textbox', { name: 'Email *' });
-      await emailInput.fill('ADMIN@ADMIN.COM');
-      await page.getByRole('button', { name: "Let's start" }).click();
-
-      await expect(page.getByText('The value must be a lowercase string')).toBeVisible();
+    const fillEmailAndSubmit = async (emailValue) => {
+      await emailInput.fill(emailValue);
+      await letsStartButton.click();
       await expect(emailInput).toBeFocused();
-    });
+    };
 
-    test('the value must be a valid email address', async ({ page }) => {
-      await fillValidSignUpForm({ page });
+    expect(await emailInput.getAttribute('aria-required')).toBeTruthy();
 
-      const emailInput = page.getByRole('textbox', { name: 'Email *' });
-      await emailInput.fill('notanemail');
-      await page.getByRole('button', { name: "Let's start" }).click();
+    await fillEmailAndSubmit('ADMIN@ADMIN.COM');
+    await expect(page.getByText('The value must be a lowercase string')).toBeVisible();
 
-      await expect(page.getByText('Value is an invalid email')).toBeVisible();
-      await expect(emailInput).toBeFocused();
-    });
+    await fillEmailAndSubmit('notanemail');
+    await expect(page.getByText('Value is an invalid email')).toBeVisible();
   });
 
-  test.describe('Password Errors', () => {
-    test('required', async ({ page }) => {
-      const arePasswordsRequired = [
-        await page.getByRole('textbox', { name: 'Password *' }).getAttribute('aria-required'),
-        await page
-          .getByRole('textbox', { name: 'Confirm Password *' })
-          .getAttribute('aria-required'),
-      ];
+  test("a user cannot submit the form if a password isn't provided or doesn't meet the password validation requirements", async ({
+    page,
+  }) => {
+    const passwordInput = page.getByRole('textbox', { name: 'Password *' });
+    const confirmPasswordInput = page.getByRole('textbox', { name: 'Confirm Password *' });
+    const letsStartButton = page.getByRole('button', { name: "Let's start" });
 
-      arePasswordsRequired.forEach((required) => {
-        expect(required).toBeTruthy();
-      });
-    });
-
-    test('must contain a number', async ({ page }) => {
-      await fillValidSignUpForm({ page });
-      const passwordInput = page.getByLabel('Password*', {
-        exact: true,
-      });
-      await passwordInput.fill('noNumberInHere');
-
-      await page.getByRole('button', { name: "Let's start" }).click();
-
-      await expect(page.getByText('Password must contain at least one number')).toBeVisible();
+    const fillPasswordAndSubmit = async (passwordValue) => {
+      await passwordInput.fill(passwordValue);
+      await letsStartButton.click();
       await expect(passwordInput).toBeFocused();
+    };
+
+    const arePasswordsRequired = [
+      await passwordInput.getAttribute('aria-required'),
+      await confirmPasswordInput.getAttribute('aria-required'),
+    ];
+    arePasswordsRequired.forEach((required) => {
+      expect(required).toBeTruthy();
     });
 
-    test('must contain at least one uppercase character', async ({ page }) => {
-      await fillValidSignUpForm({ page });
-      const passwordInput = page.getByLabel('Password*', {
-        exact: true,
-      });
-      await passwordInput.fill('lowerca5e');
+    await fillPasswordAndSubmit('noNumberInHere');
+    await expect(page.getByText('Password must contain at least one number')).toBeVisible();
 
-      await page.getByRole('button', { name: "Let's start" }).click();
+    await fillPasswordAndSubmit('lowerca5e');
+    await expect(
+      page.getByText('Password must contain at least one uppercase character')
+    ).toBeVisible();
 
-      await expect(
-        page.getByText('Password must contain at least one uppercase character')
-      ).toBeVisible();
-      await expect(passwordInput).toBeFocused();
-    });
+    await fillPasswordAndSubmit('S4ort');
+    await expect(page.getByText('Value is shorter than the minimum')).toBeVisible();
 
-    test('must be at least 8 characters long', async ({ page }) => {
-      await fillValidSignUpForm({ page });
-      const passwordInput = page.getByLabel('Password*', {
-        exact: true,
-      });
-      await passwordInput.fill('S4ort');
-
-      await page.getByRole('button', { name: "Let's start" }).click();
-
-      await expect(page.getByText('Value is shorter than the minimum')).toBeVisible();
-      await expect(passwordInput).toBeFocused();
-    });
-
-    test('must match', async ({ page }) => {
-      await fillValidSignUpForm({ page });
-      const passwordInput = page.getByLabel('Confirm Password*', {
-        exact: true,
-      });
-      await passwordInput.fill('doesNotMatch');
-
-      await page.getByRole('button', { name: "Let's start" }).click();
-
-      await expect(page.getByText('Passwords do not match')).toBeVisible();
-      await expect(passwordInput).toBeFocused();
-    });
+    await fillPasswordAndSubmit('doesNotMatch');
+    await expect(page.getByText('Passwords do not match')).toBeVisible();
   });
 
   test('a user should be able to signup when the strapi instance starts fresh', async ({
     page,
   }) => {
-    await fillValidSignUpForm({ page });
-
     await page.getByRole('button', { name: "Let's start" }).click();
 
     await page.waitForURL('**/admin/');
