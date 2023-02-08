@@ -94,7 +94,7 @@ describe('useLazyComponents', () => {
     expect(actualResult.current.lazyComponentStore['plugin::test.color']).toBeDefined();
   });
 
-  test('if the argument for component uids change and it contains new ones, these should be added to store', async () => {
+  test('if the argument for component uids change and it contains new ones, these should be added to the store', async () => {
     const {
       result: initialResult,
       waitFor,
