@@ -1,6 +1,6 @@
 'use strict';
 
-const { prop, isNil, isEmpty } = require('lodash/fp');
+const { prop, isNil, isEmpty, isArray } = require('lodash/fp');
 
 const { getService } = require('../utils');
 
@@ -11,7 +11,14 @@ const { getService } = require('../utils');
 const assignDefaultLocale = async (data) => {
   const { getDefaultLocale } = getService('locales');
 
-  if (isNil(data.locale)) {
+  if (isArray(data) && data.some((entry) => !entry.locale)) {
+    const defaultLocale = await getDefaultLocale();
+    data.forEach((entry) => {
+      if (isNil(entry.locale)) {
+        entry.locale = defaultLocale;
+      }
+    });
+  } else if (isNil(data.locale)) {
     data.locale = await getDefaultLocale();
   }
 };

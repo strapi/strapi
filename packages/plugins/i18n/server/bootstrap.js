@@ -13,6 +13,9 @@ const registerModelsHooks = () => {
       async beforeCreate(event) {
         await getService('localizations').assignDefaultLocale(event.params.data);
       },
+      async beforeCreateMany(event) {
+        await getService('localizations').assignDefaultLocale(event.params.data);
+      },
     });
   }
 
