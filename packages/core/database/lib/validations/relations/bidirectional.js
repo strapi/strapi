@@ -32,7 +32,7 @@ const getLinksWithoutMappedBy = (db) => {
 
 const isLinkTableEmpty = async (db, linkTableName) => {
   // If the table doesn't exist, it's empty
-  const exists = await db.getConnection().schema.hasTable(linkTableName);
+  const exists = await db.getSchemaConnection().hasTable(linkTableName);
   if (!exists) return true;
 
   const result = await db.getConnection().count('* as count').from(linkTableName);

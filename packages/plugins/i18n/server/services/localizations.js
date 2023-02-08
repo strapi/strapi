@@ -2,7 +2,10 @@
 
 const { prop, isNil, isEmpty } = require('lodash/fp');
 
+const { forEachAsync } = require('@strapi/utils');
 const { getService } = require('../utils');
+
+const isDialectMySQL = () => strapi.db.dialect.client === 'mysql';
 
 /**
  * Adds the default locale to an object if it isn't defined yet
@@ -32,9 +35,10 @@ const syncLocalizations = async (entry, { model }) => {
       return strapi.query(model.uid).update({ where: { id }, data: { localizations } });
     };
 
-    for (const localization of entry.localizations) {
-      await updateLocalization(localization.id);
-    }
+    // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+    await forEachAsync(entry.localizations, (localization) => updateLocalization(localization.id), {
+      concurrency: isDialectMySQL() ? 1 : Infinity,
+    });
   }
 };
 
@@ -58,9 +62,10 @@ const syncNonLocalizedAttributes = async (entry, { model }) => {
       return strapi.entityService.update(model.uid, id, { data: nonLocalizedAttributes });
     };
 
-    for (const localization of entry.localizations) {
-      await updateLocalization(localization.id);
-    }
+    // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+    await forEachAsync(entry.localizations, (localization) => updateLocalization(localization.id), {
+      concurrency: isDialectMySQL() ? 1 : Infinity,
+    });
   }
 };
 

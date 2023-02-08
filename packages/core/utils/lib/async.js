@@ -20,7 +20,15 @@ function pipeAsync(...methods) {
  */
 const mapAsync = curry(pMap);
 
+/**
+ * @type { import('./async').ForEachAsync }
+ */
+const forEachAsync = curry(async (array, func, options) => {
+  await mapAsync(array, func, options);
+});
+
 module.exports = {
   mapAsync,
+  forEachAsync,
   pipeAsync,
 };

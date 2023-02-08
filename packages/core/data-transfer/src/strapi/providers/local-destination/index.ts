@@ -156,7 +156,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       `uploads_backup_${Date.now()}`
     );
 
-    await fse.rename(assetsDirectory, backupDirectory);
+    await fse.move(assetsDirectory, backupDirectory);
     await fse.mkdir(assetsDirectory);
     // Create a .gitkeep file to ensure the directory is not empty
     await fse.outputFile(path.join(assetsDirectory, '.gitkeep'), '');
@@ -182,7 +182,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
             try {
               await fse.rm(assetsDirectory, { recursive: true, force: true });
-              await fse.rename(backupDirectory, assetsDirectory);
+              await fse.move(backupDirectory, assetsDirectory);
               this.destroy(
                 new ProviderTransferError(
                   `There was an error during the transfer process.${errorMessage}The original files have been restored to ${assetsDirectory}`

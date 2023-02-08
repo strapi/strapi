@@ -116,7 +116,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c25 {
+      .c26 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -151,16 +151,20 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c16 {
+      .c15 {
+        position: relative;
+      }
+
+      .c17 {
         padding-right: 24px;
         padding-left: 24px;
       }
 
-      .c29 {
+      .c30 {
         max-width: 15.625rem;
       }
 
-      .c36 {
+      .c37 {
         padding-left: 4px;
       }
 
@@ -196,7 +200,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         flex-direction: row;
       }
 
-      .c32 {
+      .c33 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -234,7 +238,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         color: #666687;
       }
 
-      .c22 {
+      .c23 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
@@ -242,14 +246,14 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         color: #666687;
       }
 
-      .c28 {
+      .c29 {
         font-size: 0.875rem;
         line-height: 1.43;
         font-weight: 600;
         color: #32324d;
       }
 
-      .c30 {
+      .c31 {
         font-size: 0.875rem;
         line-height: 1.43;
         display: block;
@@ -259,13 +263,13 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         color: #32324d;
       }
 
-      .c31 {
+      .c32 {
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c35 {
+      .c36 {
         font-size: 0.875rem;
         line-height: 1.43;
         color: #4945ff;
@@ -329,7 +333,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c37 .c1 {
+      .c38 .c1 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -340,23 +344,23 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         align-items: center;
       }
 
-      .c37 .c5 {
+      .c38 .c5 {
         color: #ffffff;
       }
 
-      .c37[aria-disabled='true'] .c5 {
+      .c38[aria-disabled='true'] .c5 {
         color: #666687;
       }
 
-      .c37[aria-disabled='true']:active .c5 {
+      .c38[aria-disabled='true']:active .c5 {
         color: #666687;
       }
 
-      .c37:active .c5 {
+      .c38:active .c5 {
         color: #4945ff;
       }
 
-      .c37 .c5 {
+      .c38 .c5 {
         color: #271fe0;
       }
 
@@ -365,16 +369,12 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         border: 1px solid #eaeaef;
       }
 
-      .c18 {
+      .c19 {
         width: 100%;
         white-space: nowrap;
       }
 
-      .c15 {
-        position: relative;
-      }
-
-      .c15:before {
+      .c16:before {
         background: linear-gradient(90deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
@@ -384,7 +384,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         left: 0;
       }
 
-      .c15:after {
+      .c16:after {
         background: linear-gradient(270deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
@@ -395,54 +395,54 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         top: 0;
       }
 
-      .c17 {
+      .c18 {
         overflow-x: auto;
       }
 
-      .c27 tr:last-of-type {
+      .c28 tr:last-of-type {
         border-bottom: none;
-      }
-
-      .c19 {
-        border-bottom: 1px solid #eaeaef;
       }
 
       .c20 {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c20 td,
-      .c20 th {
+      .c21 {
+        border-bottom: 1px solid #eaeaef;
+      }
+
+      .c21 td,
+      .c21 th {
         padding: 16px;
       }
 
-      .c20 td:first-of-type,
-      .c20 th:first-of-type {
+      .c21 td:first-of-type,
+      .c21 th:first-of-type {
         padding: 0 4px;
       }
 
-      .c20 th {
+      .c21 th {
         padding-top: 0;
         padding-bottom: 0;
         height: 3.5rem;
       }
 
-      .c21 {
+      .c22 {
         vertical-align: middle;
         text-align: left;
         color: #666687;
         outline-offset: -4px;
       }
 
-      .c21 input {
+      .c22 input {
         vertical-align: sub;
       }
 
-      .c23 svg {
+      .c24 svg {
         height: 0.25rem;
       }
 
-      .c24 {
+      .c25 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -460,30 +460,30 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         border: none;
       }
 
-      .c24 svg > g,
-      .c24 svg path {
+      .c25 svg > g,
+      .c25 svg path {
         fill: #8e8ea9;
       }
 
-      .c24:hover svg > g,
-      .c24:hover svg path {
+      .c25:hover svg > g,
+      .c25:hover svg path {
         fill: #666687;
       }
 
-      .c24:active svg > g,
-      .c24:active svg path {
+      .c25:active svg > g,
+      .c25:active svg path {
         fill: #a5a5ba;
       }
 
-      .c24[aria-disabled='true'] {
+      .c25[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c24[aria-disabled='true'] svg path {
+      .c25[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c33 {
+      .c34 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -498,15 +498,15 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         outline: none;
       }
 
-      .c33 svg path {
+      .c34 svg path {
         fill: #4945ff;
       }
 
-      .c33 svg {
+      .c34 svg {
         font-size: 0.625rem;
       }
 
-      .c33:after {
+      .c34:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -521,11 +521,11 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         border: 2px solid transparent;
       }
 
-      .c33:focus-visible {
+      .c34:focus-visible {
         outline: none;
       }
 
-      .c33:focus-visible:after {
+      .c34:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -605,7 +605,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         fill: #ffffff;
       }
 
-      .c26 {
+      .c27 {
         -webkit-transform: rotate(180deg);
         -ms-transform: rotate(180deg);
         transform: rotate(180deg);
@@ -615,12 +615,12 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         outline: none;
       }
 
-      .c34 svg path {
+      .c35 svg path {
         fill: #8e8ea9;
       }
 
-      .c34:hover svg path,
-      .c34:focus svg path {
+      .c35:hover svg path,
+      .c35:focus svg path {
         fill: #32324d;
       }
 
@@ -695,27 +695,27 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
             class="c1 c13 c14"
           >
             <div
-              class="c1 c15"
+              class="c1 c15 c16"
             >
               <div
-                class="c1 c16 c17"
+                class="c1 c17 c18"
               >
                 <table
                   aria-colcount="5"
                   aria-rowcount="2"
-                  class="c18"
+                  class="c19"
                   role="grid"
                 >
                   <thead
-                    class="c19"
+                    class="c20"
                   >
                     <tr
                       aria-rowindex="1"
-                      class="c1 c20"
+                      class="c1 c21"
                     >
                       <th
                         aria-colindex="1"
-                        class="c1 c21"
+                        class="c1 c22"
                         role="gridcell"
                         tabindex="0"
                       >
@@ -724,8 +724,8 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                         >
                           <span>
                             <span
-                              aria-labelledby="tooltip-1"
-                              class="c5 c22"
+                              aria-labelledby="0"
+                              class="c5 c23"
                               label="Name"
                               tabindex="-1"
                             >
@@ -733,24 +733,24 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                             </span>
                           </span>
                           <span
-                            class="c23"
+                            class="c24"
                           >
                             <span>
                               <button
                                 aria-disabled="false"
-                                aria-labelledby="tooltip-3"
-                                class="c7 c24"
+                                aria-labelledby="1"
+                                class="c7 c25"
                                 tabindex="-1"
                                 type="button"
                               >
                                 <span
-                                  class="c25"
+                                  class="c26"
                                 >
                                   Sort on Name
                                 </span>
                                 <svg
                                   aria-hidden="true"
-                                  class="c26"
+                                  class="c27"
                                   fill="none"
                                   focusable="false"
                                   height="1em"
@@ -772,7 +772,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                       </th>
                       <th
                         aria-colindex="2"
-                        class="c1 c21"
+                        class="c1 c22"
                         role="gridcell"
                       >
                         <div
@@ -780,8 +780,8 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                         >
                           <span>
                             <span
-                              aria-labelledby="tooltip-5"
-                              class="c5 c22"
+                              aria-labelledby="2"
+                              class="c5 c23"
                               label="Description"
                               tabindex="-1"
                             >
@@ -789,13 +789,13 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                             </span>
                           </span>
                           <span
-                            class="c23"
+                            class="c24"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="3"
-                        class="c1 c21"
+                        class="c1 c22"
                         role="gridcell"
                       >
                         <div
@@ -803,8 +803,8 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                         >
                           <span>
                             <span
-                              aria-labelledby="tooltip-7"
-                              class="c5 c22"
+                              aria-labelledby="3"
+                              class="c5 c23"
                               label="Created at"
                               tabindex="-1"
                             >
@@ -812,13 +812,13 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                             </span>
                           </span>
                           <span
-                            class="c23"
+                            class="c24"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="4"
-                        class="c1 c21"
+                        class="c1 c22"
                         role="gridcell"
                       >
                         <div
@@ -826,8 +826,8 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                         >
                           <span>
                             <span
-                              aria-labelledby="tooltip-9"
-                              class="c5 c22"
+                              aria-labelledby="4"
+                              class="c5 c23"
                               label="Last used"
                               tabindex="-1"
                             >
@@ -835,13 +835,13 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                             </span>
                           </span>
                           <span
-                            class="c23"
+                            class="c24"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="5"
-                        class="c1 c21"
+                        class="c1 c22"
                         role="gridcell"
                         tabindex="-1"
                       >
@@ -849,12 +849,12 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                           class="c1 c4"
                         >
                           <div
-                            class="c25"
+                            class="c26"
                           >
                             Actions
                           </div>
                           <span
-                            class="c23"
+                            class="c24"
                           />
                         </div>
                       </th>
@@ -867,41 +867,41 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                   >
                     <tr
                       aria-rowindex="2"
-                      class="c1 c20"
+                      class="c1 c21"
                       style="cursor: pointer;"
                     >
                       <td
                         aria-colindex="1"
-                        class="c1 c21"
+                        class="c1 c22"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <span
-                          class="c5 c28"
+                          class="c5 c29"
                         >
                           My super token
                         </span>
                       </td>
                       <td
                         aria-colindex="2"
-                        class="c1 c29 c21"
+                        class="c1 c30 c22"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <span
-                          class="c5 c30"
+                          class="c5 c31"
                         >
                           This describe my super token
                         </span>
                       </td>
                       <td
                         aria-colindex="3"
-                        class="c1 c21"
+                        class="c1 c22"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <span
-                          class="c5 c31"
+                          class="c5 c32"
                         >
                           <time
                             datetime="2021-11-15T00:00:00.000Z"
@@ -913,27 +913,27 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                       </td>
                       <td
                         aria-colindex="4"
-                        class="c1 c21"
+                        class="c1 c22"
                         role="gridcell"
                         tabindex="-1"
                       />
                       <td
                         aria-colindex="5"
-                        class="c1 c21"
+                        class="c1 c22"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <div
-                          class="c1 c32"
+                          class="c1 c33"
                         >
                           <a
-                            class="c33 c34"
+                            class="c34 c35"
                             href="/settings/api-tokens/1"
                             tabindex="-1"
                             title="Edit My super token"
                           >
                             <span
-                              class="c5 c35"
+                              class="c5 c36"
                             >
                               <svg
                                 fill="none"
@@ -953,20 +953,20 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                           </a>
                           <div
                             aria-hidden="true"
-                            class="c1 c36"
+                            class="c1 c37"
                             role="button"
                           >
                             <span>
                               <button
                                 aria-disabled="false"
-                                aria-labelledby="tooltip-11"
-                                class="c7 c24"
+                                aria-labelledby="5"
+                                class="c7 c25"
                                 name="delete"
                                 tabindex="-1"
                                 type="button"
                               >
                                 <span
-                                  class="c25"
+                                  class="c26"
                                 >
                                   Delete My super token
                                 </span>

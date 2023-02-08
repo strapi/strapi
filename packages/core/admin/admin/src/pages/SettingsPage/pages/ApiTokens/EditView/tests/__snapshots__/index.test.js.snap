@@ -1000,7 +1000,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
             </div>
             <div
               class="c1 c9 c11 c13"
-              spacing="2"
             >
               <button
                 aria-disabled="false"
@@ -1039,14 +1038,12 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
       >
         <div
           class="c1 c9 c19 c20"
-          spacing="6"
         >
           <div
             class="c1 c21"
           >
             <div
               class="c1 c9 c19 c22"
-              spacing="4"
             >
               <h2
                 class="c7 c23"
@@ -1066,11 +1063,10 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                       <div>
                         <div
                           class="c1 c9 c19 c26"
-                          spacing="1"
                         >
                           <label
                             class="c7 c17"
-                            for="textinput-1"
+                            for="1"
                           >
                             <div
                               class="c1 c9 c11"
@@ -1091,7 +1087,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                               aria-invalid="false"
                               aria-required="true"
                               class="c30"
-                              id="textinput-1"
+                              id="1"
                               name="name"
                               value=""
                             />
@@ -1113,14 +1109,13 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                       <div>
                         <div
                           class="c1 c9 c19 c26"
-                          spacing="1"
                         >
                           <div
                             class="c1 c9 c11"
                           >
                             <label
                               class="c7 c17"
-                              for="textarea-2"
+                              for="3"
                             >
                               <div
                                 class="c1 c9 c11"
@@ -1136,7 +1131,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                               aria-invalid="false"
                               aria-required="false"
                               class="c33"
-                              id="textarea-2"
+                              id="3"
                               name="description"
                             />
                           </div>
@@ -1154,11 +1149,10 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                     <div>
                       <div
                         class="c1 c9 c19 c26"
-                        spacing="1"
                       >
                         <label
                           class="c7 c17"
-                          for="select-3"
+                          for="5"
                         >
                           <div
                             class="c1 c9 c11"
@@ -1178,9 +1172,9 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-3 select-3-label select-3-content"
+                            aria-labelledby="5 5-label 5-content"
                             class="c35"
-                            id="select-3"
+                            id="5"
                             name="lifespan"
                             type="button"
                           />
@@ -1195,7 +1189,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                               >
                                 <span
                                   class="c7 c38"
-                                  id="select-3-content"
+                                  id="5-content"
                                 >
                                   Select
                                 </span>
@@ -1245,11 +1239,10 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                     <div>
                       <div
                         class="c1 c9 c19 c26"
-                        spacing="1"
                       >
                         <label
                           class="c7 c17"
-                          for="select-4"
+                          for="7"
                         >
                           <div
                             class="c1 c9 c11"
@@ -1269,9 +1262,9 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-4 select-4-label select-4-content"
+                            aria-labelledby="7 7-label 7-content"
                             class="c35"
-                            id="select-4"
+                            id="7"
                             name="type"
                             type="button"
                           />
@@ -1286,7 +1279,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                               >
                                 <span
                                   class="c7 c38"
-                                  id="select-4-content"
+                                  id="7-content"
                                 >
                                   Select
                                 </span>
@@ -1338,7 +1331,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
               >
                 <div
                   class="c1 c9 c19 c47"
-                  spacing="2"
                 >
                   <h2
                     class="c7 c23"
@@ -1361,17 +1353,15 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   >
                     <div
                       class="c1 c9 c52 c10 c53"
-                      cursor=""
                     >
                       <div
                         class="c1 c9 c54 c11 c55"
-                        spacing="3"
                       >
                         <button
-                          aria-controls="accordion-content-accordion-13"
+                          aria-controls="accordion-content-8"
                           aria-disabled="false"
                           aria-expanded="false"
-                          aria-labelledby="accordion-label-accordion-13"
+                          aria-labelledby="accordion-label-8"
                           class="c1 c9 c56 c11 c57 c58"
                           data-strapi-accordion-toggle="true"
                           type="button"
@@ -1381,7 +1371,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           >
                             <span
                               class="c7 c60"
-                              id="accordion-label-accordion-13"
+                              id="accordion-label-8"
                             >
                               Address
                             </span>
@@ -1389,22 +1379,18 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         </button>
                         <div
                           class="c1 c9 c11 c55"
-                          spacing="3"
                         >
                           <span
                             aria-hidden="true"
                             class="c1 c9 c61 c62"
-                            cursor="pointer"
                             data-strapi-dropdown="true"
-                            height="2rem"
-                            width="2rem"
                           >
                             <svg
                               class="c1 c63 c64"
                               fill="none"
                               height="1em"
                               viewBox="0 0 14 8"
-                              width="0.6875rem"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1426,17 +1412,15 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   >
                     <div
                       class="c1 c9 c66 c10 c53"
-                      cursor=""
                     >
                       <div
                         class="c1 c9 c54 c11 c55"
-                        spacing="3"
                       >
                         <button
-                          aria-controls="accordion-content-accordion-14"
+                          aria-controls="accordion-content-9"
                           aria-disabled="false"
                           aria-expanded="false"
-                          aria-labelledby="accordion-label-accordion-14"
+                          aria-labelledby="accordion-label-9"
                           class="c1 c9 c56 c11 c57 c58"
                           data-strapi-accordion-toggle="true"
                           type="button"
@@ -1446,7 +1430,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           >
                             <span
                               class="c7 c60"
-                              id="accordion-label-accordion-14"
+                              id="accordion-label-9"
                             >
                               Category
                             </span>
@@ -1454,22 +1438,18 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         </button>
                         <div
                           class="c1 c9 c11 c55"
-                          spacing="3"
                         >
                           <span
                             aria-hidden="true"
                             class="c1 c9 c61 c62"
-                            cursor="pointer"
                             data-strapi-dropdown="true"
-                            height="2rem"
-                            width="2rem"
                           >
                             <svg
                               class="c1 c63 c64"
                               fill="none"
                               height="1em"
                               viewBox="0 0 14 8"
-                              width="0.6875rem"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1496,7 +1476,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
               >
                 <div
                   class="c1 c9 c19 c47"
-                  spacing="2"
                 >
                   <h3
                     class="c7 c23"
@@ -2716,7 +2695,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
             </div>
             <div
               class="c1 c9 c11 c13"
-              spacing="2"
             >
               <button
                 aria-disabled="false"
@@ -2786,7 +2764,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
       >
         <div
           class="c1 c9 c20 c21"
-          spacing="6"
         >
           <div
             class="c1 c9 c22 c11"
@@ -2809,7 +2786,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
             </div>
             <div
               class="c1 c9 c20 c25"
-              spacing="1"
             >
               <div
                 class="c1 c9 c11"
@@ -2832,7 +2808,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
           >
             <div
               class="c1 c9 c20 c30"
-              spacing="4"
             >
               <h2
                 class="c7 c31"
@@ -2852,11 +2827,10 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                       <div>
                         <div
                           class="c1 c9 c20 c25"
-                          spacing="1"
                         >
                           <label
                             class="c7 c17"
-                            for="textinput-28"
+                            for="12"
                           >
                             <div
                               class="c1 c9 c11"
@@ -2877,7 +2851,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                               aria-invalid="false"
                               aria-required="true"
                               class="c37"
-                              id="textinput-28"
+                              id="12"
                               name="name"
                               value="My super token"
                             />
@@ -2899,14 +2873,13 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                       <div>
                         <div
                           class="c1 c9 c20 c25"
-                          spacing="1"
                         >
                           <div
                             class="c1 c9 c11"
                           >
                             <label
                               class="c7 c17"
-                              for="textarea-29"
+                              for="14"
                             >
                               <div
                                 class="c1 c9 c11"
@@ -2922,7 +2895,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                               aria-invalid="false"
                               aria-required="false"
                               class="c40"
-                              id="textarea-29"
+                              id="14"
                               name="description"
                             >
                               This describe my super token
@@ -2942,11 +2915,10 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                     <div>
                       <div
                         class="c1 c9 c20 c25"
-                        spacing="1"
                       >
                         <label
                           class="c7 c17"
-                          for="select-30"
+                          for="16"
                         >
                           <div
                             class="c1 c9 c11"
@@ -2967,9 +2939,9 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             aria-disabled="true"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-30 select-30-label select-30-content"
+                            aria-labelledby="16 16-label 16-content"
                             class="c42"
-                            id="select-30"
+                            id="16"
                             name="lifespan"
                             type="button"
                           />
@@ -2984,7 +2956,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                               >
                                 <span
                                   class="c7 c45"
-                                  id="select-30-content"
+                                  id="16-content"
                                 >
                                   Select
                                 </span>
@@ -3037,11 +3009,10 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                     <div>
                       <div
                         class="c1 c9 c20 c25"
-                        spacing="1"
                       >
                         <label
                           class="c7 c17"
-                          for="select-31"
+                          for="18"
                         >
                           <div
                             class="c1 c9 c11"
@@ -3061,9 +3032,9 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-31 select-31-label select-31-content"
+                            aria-labelledby="18 18-label 18-content"
                             class="c42"
-                            id="select-31"
+                            id="18"
                             name="type"
                             type="button"
                           />
@@ -3078,7 +3049,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                               >
                                 <span
                                   class="c7 c51"
-                                  id="select-31-content"
+                                  id="18-content"
                                 >
                                   Read-only
                                 </span>
@@ -3130,7 +3101,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
               >
                 <div
                   class="c1 c9 c20 c57"
-                  spacing="2"
                 >
                   <h2
                     class="c7 c31"
@@ -3153,17 +3123,15 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   >
                     <div
                       class="c1 c9 c61 c10 c62"
-                      cursor=""
                     >
                       <div
                         class="c1 c9 c63 c11 c64"
-                        spacing="3"
                       >
                         <button
-                          aria-controls="accordion-content-accordion-42"
+                          aria-controls="accordion-content-19"
                           aria-disabled="false"
                           aria-expanded="false"
-                          aria-labelledby="accordion-label-accordion-42"
+                          aria-labelledby="accordion-label-19"
                           class="c1 c9 c65 c11 c66 c67"
                           data-strapi-accordion-toggle="true"
                           type="button"
@@ -3173,7 +3141,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           >
                             <span
                               class="c7 c69"
-                              id="accordion-label-accordion-42"
+                              id="accordion-label-19"
                             >
                               Address
                             </span>
@@ -3181,22 +3149,18 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         </button>
                         <div
                           class="c1 c9 c11 c64"
-                          spacing="3"
                         >
                           <span
                             aria-hidden="true"
                             class="c1 c9 c70 c71"
-                            cursor="pointer"
                             data-strapi-dropdown="true"
-                            height="2rem"
-                            width="2rem"
                           >
                             <svg
                               class="c1 c72 c73"
                               fill="none"
                               height="1em"
                               viewBox="0 0 14 8"
-                              width="0.6875rem"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -3218,17 +3182,15 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   >
                     <div
                       class="c1 c9 c75 c10 c62"
-                      cursor=""
                     >
                       <div
                         class="c1 c9 c63 c11 c64"
-                        spacing="3"
                       >
                         <button
-                          aria-controls="accordion-content-accordion-43"
+                          aria-controls="accordion-content-20"
                           aria-disabled="false"
                           aria-expanded="false"
-                          aria-labelledby="accordion-label-accordion-43"
+                          aria-labelledby="accordion-label-20"
                           class="c1 c9 c65 c11 c66 c67"
                           data-strapi-accordion-toggle="true"
                           type="button"
@@ -3238,7 +3200,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           >
                             <span
                               class="c7 c69"
-                              id="accordion-label-accordion-43"
+                              id="accordion-label-20"
                             >
                               Category
                             </span>
@@ -3246,22 +3208,18 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         </button>
                         <div
                           class="c1 c9 c11 c64"
-                          spacing="3"
                         >
                           <span
                             aria-hidden="true"
                             class="c1 c9 c70 c71"
-                            cursor="pointer"
                             data-strapi-dropdown="true"
-                            height="2rem"
-                            width="2rem"
                           >
                             <svg
                               class="c1 c72 c73"
                               fill="none"
                               height="1em"
                               viewBox="0 0 14 8"
-                              width="0.6875rem"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -3288,7 +3246,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
               >
                 <div
                   class="c1 c9 c20 c57"
-                  spacing="2"
                 >
                   <h3
                     class="c7 c31"

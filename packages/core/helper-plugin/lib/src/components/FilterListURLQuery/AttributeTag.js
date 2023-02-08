@@ -14,7 +14,7 @@ const AttributeTag = ({ attribute, filter, onClick, operator, value }) => {
 
   const { fieldSchema } = attribute;
 
-  const type = fieldSchema?.mainField?.schema.type || fieldSchema.type;
+  const type = fieldSchema?.mainField?.schema?.type || fieldSchema.type;
 
   let formattedValue = value;
 
@@ -42,6 +42,19 @@ const AttributeTag = ({ attribute, filter, onClick, operator, value }) => {
     formattedValue = formatNumber(value);
   }
 
+  // Handle custom input
+  if (attribute.metadatas.customInput) {
+    // If the custom input has an options array, find the option with a customValue matching the query value
+    if (attribute.metadatas.options) {
+      const selectedOption = attribute.metadatas.options.find((option) => {
+        return option.customValue === value;
+      });
+      // Expecting option as an object: {label: 'Neat label', customValue: 'some.value'}
+      // return the label or fallback to the query value
+      formattedValue = selectedOption?.label || value;
+    }
+  }
+
   const content = `${attribute.metadatas.label || attribute.name} ${formatMessage({
     id: `components.FilterOptions.FILTER_TYPES.${operator}`,
     defaultMessage: operator,
@@ -60,7 +73,11 @@ AttributeTag.propTypes = {
   attribute: PropTypes.shape({
     name: PropTypes.string.isRequired,
     fieldSchema: PropTypes.object.isRequired,
-    metadatas: PropTypes.shape({ label: PropTypes.string.isRequired }).isRequired,
+    metadatas: PropTypes.shape({
+      label: PropTypes.string.isRequired,
+      options: PropTypes.array,
+      customInput: PropTypes.func,
+    }).isRequired,
   }).isRequired,
   filter: PropTypes.object.isRequired,
   onClick: PropTypes.func.isRequired,
