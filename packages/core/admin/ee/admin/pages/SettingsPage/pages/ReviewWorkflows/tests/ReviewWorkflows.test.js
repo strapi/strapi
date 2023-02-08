@@ -17,6 +17,12 @@ jest.mock('../hooks/useReviewWorkflows', () => ({
   useReviewWorkflows: jest.fn().mockReturnValue(),
 }));
 
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  // eslint-disable-next-line react/prop-types
+  CheckPagePermissions: ({ children }) => <>{children}</>,
+}));
+
 const client = new QueryClient({
   defaultOptions: {
     queries: {
