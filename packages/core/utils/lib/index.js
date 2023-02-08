@@ -41,6 +41,7 @@ const { pipeAsync, mapAsync, forEachAsync } = require('./async');
 const convertQueryParams = require('./convert-query-params');
 const importDefault = require('./import-default');
 const template = require('./template');
+const file = require('./file');
 
 module.exports = {
   yup,
@@ -88,4 +89,5 @@ module.exports = {
   validateYupSchemaSync,
   convertQueryParams,
   importDefault,
+  file,
 };
