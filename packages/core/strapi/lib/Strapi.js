@@ -70,49 +70,8 @@ const resolveWorkingDirectories = (opts) => {
   return { app: appDir, dist: distDir };
 };
 
-// TODO put this in /docs/docs/API/Strapi
-/*
-
-The Strapi class is the main class of a Strapi project
-
-The instance of Strapi class is used to manipulate everything related to strapi content management system.
-
-> Example
-
-
- */
 /** @implements {import('@strapi/strapi').Strapi} */
 class Strapi {
-  // TODO put this in /docs/docs/API/Strapi
-  /*
-   What is opts?
-   opts is a JS Object
-    {
-      autoReload: true,
-      serveAdminPanel: true,
-      distDir: '',
-      appDir: '',
-    }
-
-    autoReload:
-      If false -> Deactivate auto reload
-      If you modify any file in your Strapi project, it reloads your nodejs app
-      If any content-type is changed, it will reload the nodejs app
-
-    serveAdminPanel:
-      Should the admin panel be loaded and serve as a FE
-      FE build wont be delivered if false
-      Is the content-manager controller loaded if false?
-
- * Behavior:
- * - `appDir` is the directory where Strapi will write every file (schemas, generated APIs, controllers or services)
- * - `distDir` is the directory where Strapi will read configurations, schemas and any compiled code
- *
- * Default values:
- * - If `appDir` is `undefined`, it'll be set to `process.cwd()`
- * - If `distDir` is `undefined`, it'll be set to `appDir`
-
-   */
   constructor(opts = {}) {
     destroyOnSignal(this);
 
@@ -121,31 +80,6 @@ class Strapi {
     // Load the app configuration from the dist directory
     const appConfig = loadConfiguration({ appDir: rootDirs.app, distDir: rootDirs.dist }, opts);
 
-    // TODO put this in /docs/docs/API/Strapi
-    /*
-      Where all registries are stored
-      Object
-        register(name, resolver):
-          Add an attribute 'name' to the container and assign 'resolver'
-          name:
-            String
-          resolver:
-            Can be any type.
-            If Function, call function at first get (link to get) occurrence
-              Parameters of the function:
-                { strapi: current Strapi instance }
-                args -> any
-        get(name, args):
-          Get the content of the mapped attribute 'name'.
-          name:
-            String
-
-          args:
-            If resolver was a Function, send args to the resolver function on first used of get on this attribute
-
-        extend():
-          TODO
-     */
     // Instantiate the Strapi container
     this.container = createContainer(this);
 
