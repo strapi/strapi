@@ -103,12 +103,6 @@ class Strapi {
     this.dirs = utils.getDirs(rootDirs, { strapi: this });
 
     // Strapi state management variables
-    // TODO put this in /docs/docs/API/Strapi
-    /*
-      Boolean
-        false if there is still something to load (registers / bootstrap)
-        true if everything have been loaded
-     */
     this.isLoaded = false;
     // TODO put this in /docs/docs/API/Strapi
     /*
