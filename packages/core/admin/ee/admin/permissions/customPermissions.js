@@ -1,7 +1,7 @@
 const customPermissions = {
   settings: {
-    reviewWorkflows: {
-      main: [{ action: 'admin::roles.create', subject: null }],
+    'review-workflows': {
+      main: [{ action: 'admin::review-workflows.read', subject: null }],
     },
 
     sso: {

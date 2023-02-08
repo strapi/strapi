@@ -3,7 +3,7 @@ import { FormikProvider, useFormik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { SettingsPageTitle } from '@strapi/helper-plugin';
+import { CheckPagePermissions, SettingsPageTitle } from '@strapi/helper-plugin';
 import { Button, ContentLayout, HeaderLayout, Layout, Loader, Main } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 
@@ -14,6 +14,7 @@ import { useInjectReducer } from '../../../../../../admin/src/hooks/useInjectRed
 import { useReviewWorkflows } from './hooks/useReviewWorkflows';
 import { setWorkflows } from './actions';
 import { getWorkflowValidationSchema } from './utils/getWorkflowValidationSchema';
+import adminPermissions from '../../../../../../admin/src/permissions';
 
 export function ReviewWorkflowsPage() {
   const { formatMessage } = useIntl();
@@ -44,57 +45,59 @@ export function ReviewWorkflowsPage() {
   }, [workflowsData.status, workflowsData.data, dispatch]);
 
   return (
-    <Layout>
-      <SettingsPageTitle
-        name={formatMessage({
-          id: 'Settings.review-workflows.page.title',
-          defaultMessage: 'Review Workflows',
-        })}
-      />
-      <Main tabIndex={-1}>
-        <FormikProvider value={formik}>
-          <Form onSubmit={formik.handleSubmit}>
-            <HeaderLayout
-              primaryAction={
-                <Button
-                  startIcon={<Check />}
-                  type="submit"
-                  size="M"
-                  disabled={!currentWorkflowIsDirty}
-                >
-                  {formatMessage({
-                    id: 'global.save',
-                    defaultMessage: 'Save',
-                  })}
-                </Button>
-              }
-              title={formatMessage({
-                id: 'Settings.review-workflows.page.title',
-                defaultMessage: 'Review Workflows',
-              })}
-              subtitle={formatMessage(
-                {
-                  id: 'Settings.review-workflows.page.subtitle',
-                  defaultMessage: '{count, plural, one {# stage} other {# stages}}',
-                },
-                { count: currentWorkflow?.stages?.length ?? 0 }
-              )}
-            />
-            <ContentLayout>
-              {status === 'loading' && (
-                <Loader>
-                  {formatMessage({
-                    id: 'Settings.review-workflows.page.isLoading',
-                    defaultMessage: 'Workflow is loading',
-                  })}
-                </Loader>
-              )}
+    <CheckPagePermissions permissions={adminPermissions.settings['review-workflows'].main}>
+      <Layout>
+        <SettingsPageTitle
+          name={formatMessage({
+            id: 'Settings.review-workflows.page.title',
+            defaultMessage: 'Review Workflows',
+          })}
+        />
+        <Main tabIndex={-1}>
+          <FormikProvider value={formik}>
+            <Form onSubmit={formik.handleSubmit}>
+              <HeaderLayout
+                primaryAction={
+                  <Button
+                    startIcon={<Check />}
+                    type="submit"
+                    size="M"
+                    disabled={!currentWorkflowIsDirty}
+                  >
+                    {formatMessage({
+                      id: 'global.save',
+                      defaultMessage: 'Save',
+                    })}
+                  </Button>
+                }
+                title={formatMessage({
+                  id: 'Settings.review-workflows.page.title',
+                  defaultMessage: 'Review Workflows',
+                })}
+                subtitle={formatMessage(
+                  {
+                    id: 'Settings.review-workflows.page.subtitle',
+                    defaultMessage: '{count, plural, one {# stage} other {# stages}}',
+                  },
+                  { count: currentWorkflow?.stages?.length ?? 0 }
+                )}
+              />
+              <ContentLayout>
+                {status === 'loading' && (
+                  <Loader>
+                    {formatMessage({
+                      id: 'Settings.review-workflows.page.isLoading',
+                      defaultMessage: 'Workflow is loading',
+                    })}
+                  </Loader>
+                )}
 
-              <Stages stages={formik.values?.stages} />
-            </ContentLayout>
-          </Form>
-        </FormikProvider>
-      </Main>
-    </Layout>
+                <Stages stages={formik.values?.stages} />
+              </ContentLayout>
+            </Form>
+          </FormikProvider>
+        </Main>
+      </Layout>
+    </CheckPagePermissions>
   );
 }
