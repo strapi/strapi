@@ -104,12 +104,6 @@ class Strapi {
 
     // Strapi state management variables
     this.isLoaded = false;
-    // TODO put this in /docs/docs/API/Strapi
-    /*
-        function to reload the app
-
-        To define
-     */
     this.reload = this.reload();
 
     // Instantiate the Koa app & the HTTP server
