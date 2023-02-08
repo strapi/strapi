@@ -14,7 +14,7 @@ import { TRANSFER_METHODS } from './constants';
 type TransferMethod = typeof TRANSFER_METHODS[number];
 
 interface ITransferState {
-  transfer?: { id: string; kind: client.TransferKind };
+  transfer?: { id: string; kind: client.TransferKind; startedAt: number };
   controller?: IPushController;
 }
 
@@ -91,11 +91,19 @@ export const createTransferHandler = (options: IHandlerOptions) => {
           }
         };
 
-        const teardown = async (): Promise<server.Payload<server.EndMessage>> => {
-          await verifyAuth(state.transfer?.kind);
-
+        const teardown = (): void => {
           delete state.controller;
           delete state.transfer;
+        };
+
+        const end = async (msg: client.EndCommand): Promise<server.Payload<server.EndMessage>> => {
+          await verifyAuth(state.transfer?.kind);
+
+          if (msg.params.transferID !== state.transfer?.id) {
+            throw new ProviderTransferError('Bad transfer ID provided');
+          }
+
+          teardown();
 
           return { ok: true };
         };
@@ -103,8 +111,9 @@ export const createTransferHandler = (options: IHandlerOptions) => {
         const init = async (
           msg: client.InitCommand
         ): Promise<server.Payload<server.InitMessage>> => {
-          // TODO: this only checks for this instance of node: we should consider a database lock
-          if (state.controller) {
+          // TODO: For push transfer, we'll probably have to trigger a
+          // maintenance mode to prevent other transfer at the same time.
+          if (state.transfer && state.controller) {
             throw new ProviderInitializationError('Transfer already in progres');
           }
 
@@ -131,9 +140,25 @@ export const createTransferHandler = (options: IHandlerOptions) => {
             });
           }
 
-          state.transfer = { id: randomUUID(), kind: transfer };
+          state.transfer = { id: randomUUID(), kind: transfer, startedAt: Date.now() };
 
           return { transferID: state.transfer.id };
+        };
+
+        const status = (): server.Payload<server.StatusMessage> => {
+          if (state.transfer) {
+            const { transfer } = state;
+            const elapsed = Date.now() - transfer.startedAt;
+
+            return {
+              active: true,
+              kind: transfer.kind,
+              startedAt: transfer.startedAt,
+              elapsed,
+            };
+          }
+
+          return { active: false, kind: null, elapsed: null, startedAt: null };
         };
 
         /**
@@ -147,16 +172,11 @@ export const createTransferHandler = (options: IHandlerOptions) => {
           }
 
           if (command === 'end') {
-            await answer(teardown);
+            await answer(() => end(msg));
           }
 
           if (command === 'status') {
-            await callback(
-              new ProviderTransferError('Command not implemented: "status"', {
-                command,
-                validCommands: ['init', 'end', 'status'],
-              })
-            );
+            await answer(status);
           }
         };
 
