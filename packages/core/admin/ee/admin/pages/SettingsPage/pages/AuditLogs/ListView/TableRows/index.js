@@ -8,7 +8,7 @@ import { Tbody, Td, Tr } from '@strapi/design-system/Table';
 import Eye from '@strapi/icons/Eye';
 import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import useFormatTimeStamp from '../hooks/useFormatTimeStamp';
-import getDefaultMessage from '../utils/getActionTypesDefaultMessages';
+import { getDefaultMessage } from '../utils/getActionTypesDefaultMessages';
 
 const TableRows = ({ headers, rows, onOpenModal }) => {
   const { formatMessage } = useIntl();

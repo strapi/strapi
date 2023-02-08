@@ -47,6 +47,7 @@ module.exports = {
     '<rootDir>/packages/admin-test-utils/lib/mocks/IntersectionObserver.js',
     '<rootDir>/packages/admin-test-utils/lib/mocks/ResizeObserver.js',
     '<rootDir>/packages/admin-test-utils/lib/mocks/windowMatchMedia.js',
+    '<rootDir>/packages/admin-test-utils/lib/mocks/mockRangeApi.js',
   ],
   setupFilesAfterEnv: [
     '<rootDir>/packages/admin-test-utils/lib/setup/styled-components.js',
