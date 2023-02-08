@@ -9,19 +9,20 @@ import { Stack } from '@strapi/design-system/Stack';
 import { Link } from '@strapi/design-system/v2/Link';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
-import { useLicenseLimitInfos } from '../../../../../../hooks';
+import { pxToRem } from '@strapi/helper-plugin';
+import { useLicenseLimits } from '../../../../../../hooks';
+
+const BILLING_STRAPI_CLOUD_URL = 'https://cloud.strapi.io/profile/billing';
+const BILLING_SELF_HOSTED_URL = 'https://share.hsforms.com/1WhxtbTkJSUmfqqEuv4pwuA43qp4';
 
 const AdminSeatInfo = () => {
   const { formatMessage } = useIntl();
-  const licenseLimitInfos = useLicenseLimitInfos();
+  const { license } = useLicenseLimits();
   const { licenseLimitStatus, currentUserCount, permittedSeats, isHostedOnStrapiCloud } =
-    licenseLimitInfos;
-  const linkURL = isHostedOnStrapiCloud
-    ? 'https://cloud.strapi.io/profile/billing'
-    : 'https://share.hsforms.com/1WhxtbTkJSUmfqqEuv4pwuA43qp4';
+    license?.data ?? {};
 
   if (!permittedSeats) {
-    return <></>;
+    return null;
   }
 
   return (
@@ -39,34 +40,44 @@ const AdminSeatInfo = () => {
             textColor={licenseLimitStatus === 'OVER_LIMIT' ? 'danger500' : ''}
             fontWeight={licenseLimitStatus === 'OVER_LIMIT' ? 'bold' : ''}
           >
-            {currentUserCount || 'NA'}
+            {formatMessage(
+              {
+                id: 'Settings.application.ee.admin-seats.count',
+                defaultMessage: '{currentUserCount}/{permittedSeats}',
+              },
+              { permittedSeats, currentUserCount }
+            )}
           </Typography>
-          <Typography as="p">/</Typography>
-          <Typography as="p">{permittedSeats || 'NA'}</Typography>
         </Flex>
         {licenseLimitStatus === 'AT_LIMIT' && (
           <Tooltip
             description={formatMessage({
-              id: 'Settings.application.admin-seats.at-limit-tooltip',
+              id: 'Settings.application.ee.admin-seats.at-limit-tooltip',
               defaultMessage: 'At limit: add seats to invite more users',
             })}
           >
             <Icon
-              width={`${14 / 16}rem`}
-              height={`${14 / 16}rem`}
+              width={`${pxToRem(14)}rem`}
+              height={`${pxToRem(14)}rem`}
               color="danger500"
               as={ExclamationMarkCircle}
             />
           </Tooltip>
         )}
       </Stack>
-      <Link href={linkURL} isExternal endIcon={<ExternalLink />}>
-        {formatMessage({
-          id: isHostedOnStrapiCloud
-            ? 'Settings.application.ee.link-add-seats'
-            : 'Settings.application.ee.link-contact-sales',
-          defaultMessage: isHostedOnStrapiCloud ? 'Add seats' : 'Contact sales',
-        })}
+      <Link
+        href={isHostedOnStrapiCloud ? BILLING_STRAPI_CLOUD_URL : BILLING_SELF_HOSTED_URL}
+        isExternal
+        endIcon={<ExternalLink />}
+      >
+        {formatMessage(
+          {
+            id: 'Settings.application.ee.admin-seats.add-seats',
+            defaultMessage:
+              '{isHostedOnStrapiCloud, select, true {Add seats} false {Contact sales}}',
+          },
+          { isHostedOnStrapiCloud }
+        )}
       </Link>
     </GridItem>
   );

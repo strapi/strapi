@@ -101,13 +101,11 @@ const ListPage = () => {
   const isLoading =
     (status !== 'success' && status !== 'error') || (status === 'success' && isFetching);
 
-  const createAction = canCreate ? <CreateAction onClick={handleToggle} /> : undefined;
-
   return (
     <Main aria-busy={isLoading}>
       <SettingsPageTitle name="Users" />
       <HeaderLayout
-        primaryAction={createAction}
+        primaryAction={canCreate && <CreateAction onClick={handleToggle} />}
         title={title}
         subtitle={formatMessage({
           id: 'Settings.permissions.users.listview.header.subtitle',

@@ -7,11 +7,11 @@ import { Icon } from '@strapi/design-system/Icon';
 import { Stack } from '@strapi/design-system';
 import Envelop from '@strapi/icons/Envelop';
 import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
-import { useLicenseLimitInfos } from '../../../../../../hooks';
+import { useLicenseLimits } from '../../../../../../hooks';
 
 const CreateAction = ({ onClick }) => {
   const { formatMessage } = useIntl();
-  const licenseLimitInfos = useLicenseLimitInfos();
+  const licenseLimitInfos = useLicenseLimits();
   const { licenseLimitStatus, permittedSeats } = licenseLimitInfos;
 
   return (
