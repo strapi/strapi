@@ -164,6 +164,44 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
     );
   });
 
+  test('ACTION_DELETE_STAGE - keep hasDeletedServerStages true as soon as one server stage has been deleted', () => {
+    const actionDeleteServerStage = {
+      type: ACTION_DELETE_STAGE,
+      payload: { stageId: 1 },
+    };
+
+    const actionDeleteClientStage = {
+      type: ACTION_DELETE_STAGE,
+      payload: { stageId: 3 },
+    };
+
+    state = {
+      status: expect.any(String),
+      serverState: {
+        currentWorkflow: WORKFLOWS_FIXTURE[0],
+      },
+      clientState: {
+        currentWorkflow: {
+          data: WORKFLOWS_FIXTURE[0],
+          isDirty: false,
+        },
+      },
+    };
+
+    state = reducer(state, actionDeleteServerStage);
+    state = reducer(state, actionDeleteClientStage);
+
+    expect(state).toStrictEqual(
+      expect.objectContaining({
+        clientState: expect.objectContaining({
+          currentWorkflow: expect.objectContaining({
+            hasDeletedServerStages: true,
+          }),
+        }),
+      })
+    );
+  });
+
   test('ACTION_ADD_STAGE', () => {
     const action = {
       type: ACTION_ADD_STAGE,
