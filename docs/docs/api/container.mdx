@@ -38,6 +38,26 @@ container.register('config', {
 const dbConfig = container.get('config').get('database');
 ```
 
+### `container.register(name, resolver)`
+
+- `name`: <Type>String</Type> UID of the content
+- `resolver`: <Type>Function</Type> | <Type>Any</Type>
+  - As a function, the function will be executed when the first get method is called on this content. The result of this function will define the content of this UID.
+  - `resolver(context, args)`
+    - `context`: <Type>{ Strapi }</Type> [See Strapi class documentation](Strapi.mdx)
+    - `args`: <Type>Any</Type> Anything to be used by the resolver function
+  - As anything else, this value will be resolved when getting this specified content through its UID.
+
+Register a new content to be accessed inside the container. If the name is already used, it will throw an error.
+
+```javascript
+const container = createContainer(strapi);
+
+container.register('config', ({ strapi }, args) => {});
+// or
+container.register('services', {});
+```
+
 ### `container.get(name, args)`
 
 - `name`: <Type>String</Type> UID of the content
@@ -56,6 +76,8 @@ const config = container.get('config');
 
 ⚠️ If the **resolver**, used in the [register function](#containerregistername-resolver), is a **function**, the value will be the result of this resolver function with `args` as parameter on the first call to `get`.
 
+Please pay attention that the resolver result value isn't awaited. So if resolver returns a promise, the value stored will be a promise.
+
 ```javascript
 const container = createContainer(strapi);
 
@@ -73,27 +95,6 @@ container.get('boolean');
 container.get('boolean', false);
 // true
 ```
-
-### `container.register(name, resolver)`
-
-- `name`: <Type>String</Type> UID of the content
-- `resolver`: <Type>Function</Type> | <Type>Any</Type>
-    - As a function, the function will be executed when the first get method is called on this content. The result of this function will define the content of this UID.
-        - `resolver(context, args)`
-            - `context`: <Type>{ Strapi }</Type> [See Strapi class documentation](Strapi.mdx)
-            - `args`: <Type>Any</Type> Anything to be used by the resolver function
-    - As anything else, this value will be resolved when getting this specified content through its UID.
-
-Register a new content to be accessed inside the container. If the name is already used, it will throw an error.
-
-```javascript
-const container = createContainer(strapi);
-
-container.register('config', () => {});
-// or
-container.register('services', {});
-```
-
 ### `container.extend()`
 
 To be developed
