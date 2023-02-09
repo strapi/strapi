@@ -15,7 +15,7 @@ export const initialState = {
     workflows: [],
   },
   clientState: {
-    currentWorkflow: { data: null, isDirty: false },
+    currentWorkflow: { data: null, isDirty: false, hasDeletedServerStages: false },
   },
 };
 
@@ -43,12 +43,14 @@ export function reducer(state = initialState, action) {
         const { stageId } = payload;
         const { currentWorkflow } = state.clientState;
 
-        draft.clientState.currentWorkflow.data = {
-          ...currentWorkflow.data,
-          stages: currentWorkflow.data.stages.filter(
-            (stage) => (stage?.id ?? stage.__temp_key__) !== stageId
-          ),
-        };
+        draft.clientState.currentWorkflow.data.stages = currentWorkflow.data.stages.filter(
+          (stage) => (stage?.id ?? stage.__temp_key__) !== stageId
+        );
+
+        if (!currentWorkflow.hasDeletedServerStages) {
+          draft.clientState.currentWorkflow.hasDeletedServerStages =
+            !!state.serverState.currentWorkflow.stages.find((stage) => stage.id === stageId);
+        }
 
         break;
       }
