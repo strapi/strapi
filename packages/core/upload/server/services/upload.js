@@ -182,7 +182,6 @@ module.exports = ({ strapi }) => ({
   },
 
   async uploadBuffer({ file, fileName, folder, mime, ext, alternativeText, caption }) {
-    const bytesToKbytes = (bytes) => Math.round((bytes / 1000) * 100) / 100;
     if (!mime) {
       return strapi.log.error('mime type is undefined');
     }
