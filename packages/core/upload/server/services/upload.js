@@ -181,6 +181,22 @@ module.exports = ({ strapi }) => ({
     return uploadedFiles;
   },
 
+  /**
+   * Asynchronously upload a buffer to the media library.
+   *
+   * @param {Object} params - The parameters for uploading the buffer.
+   * @param {Buffer} params.file - The buffer to be uploaded.
+   * @param {string} params.fileName - The name of the file to be uploaded.
+   * @param {string} [params.folder] - The folder to upload the file to.
+   * @param {string} params.mime - The MIME type of the file.
+   * @param {string} params.ext - The file extension.
+   * @param {string} [params.alternativeText] - The alternative text for the file.
+   * @param {string} [params.caption] - The caption for the file.
+   *
+   * @throws {ApplicationError} If `mime`, `ext`, `file`, or `fileName` is undefined.
+   *
+   * @returns {Promise<Object>} The uploaded file entity.
+   */
   async uploadBuffer({ file, fileName, folder, mime, ext, alternativeText, caption }) {
     if (!mime) {
       throw new ApplicationError('mime type is undefined');
