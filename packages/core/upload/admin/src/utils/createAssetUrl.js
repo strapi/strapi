@@ -16,7 +16,7 @@ const createAssetUrl = (asset, forThumbnail = true) => {
   const backendUrl = new URL(prefixFileUrlWithBackendUrl(assetUrl));
 
   // TODO: This gives problems with presigned URLs
-  backendUrl.searchParams.set('updated_at', asset.updatedAt);
+  // backendUrl.searchParams.set('updated_at', asset.updatedAt);
 
   return backendUrl.toString();
 };

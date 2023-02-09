@@ -32,9 +32,10 @@ const signFileUrl = async (fileIdentifier) => {
 
 const signFileUrls = async (file) => {
   const { provider } = strapi.plugins.upload;
+  const { provider: providerConfig } = strapi.config.get('plugin.upload');
 
   // Check file provider and if provider is private
-  if (file.provider === provider.name && provider.isPrivate()) {
+  if (file.provider === providerConfig && provider.isPrivate()) {
     file.url = (await provider.getSignedUrl(file)).url;
 
     // Sign each file format
@@ -54,26 +55,76 @@ const signFileUrls = async (file) => {
   return file;
 };
 
+/**
+ *
+ * Iterate through an entity manager result
+ * Check which modelAttributes are media and pre sign the image URLs
+ * if they are from the current upload provider
+ * @param {Object} entity
+ * @param {Object} modelAttributes
+ * @param {String} providerConfig
+ * @returns
+ */
+const signEntityMedia = async (entity, modelAttributes, providerConfig) => {
+  if (!modelAttributes) {
+    return entity;
+  }
+
+  for (const [key, value] of Object.entries(entity)) {
+    if (!value) continue;
+
+    const isMedia = modelAttributes[key]?.type === 'media';
+    if (!isMedia || value.provider !== providerConfig) continue;
+
+    await signFileUrls(value);
+  }
+
+  return entity;
+};
+
 const addSignedFileUrlsToAdmin = () => {
   const { provider } = strapi.plugins.upload;
+  const { provider: providerConfig } = strapi.config.get('plugin.upload');
 
-  // Only if provider is private, we need to sign the file urls
-  if (provider.isPrivate()) {
-    strapi.container
-      .get('services')
-      .extend(`plugin::content-manager.entity-manager`, (entityManager) => {
-        const find = (opts, uid) => {
-          return entityManager.find(opts, uid).then((results) => {
-            return results;
-          });
-        };
-
-        return {
-          ...entityManager,
-          find,
-        };
-      });
+  // We only need to sign the file urls if the provider is private
+  if (!provider.isPrivate()) {
+    return;
   }
+
+  strapi.container
+    .get('services')
+    .extend(`plugin::content-manager.entity-manager`, (entityManager) => {
+      const findWithRelationCountsPage = async (opts, uid) => {
+        const entityManagerResults = await entityManager.findWithRelationCountsPage(opts, uid);
+        const attributes = strapi.getModel(uid)?.attributes;
+
+        await Promise.all(
+          entityManagerResults.results.map(async (entity) =>
+            signEntityMedia(entity, attributes, providerConfig)
+          )
+        );
+
+        return entityManagerResults;
+      };
+
+      const findOneWithCreatorRolesAndCount = async (id, uid) => {
+        const entityManagerResult = await entityManager.findOneWithCreatorRolesAndCount(id, uid);
+
+        await signEntityMedia(
+          entityManagerResult,
+          strapi.getModel(uid)?.attributes,
+          providerConfig
+        );
+
+        return entityManagerResult;
+      };
+
+      return {
+        ...entityManager,
+        findOneWithCreatorRolesAndCount,
+        findWithRelationCountsPage,
+      };
+    });
 };
 
 module.exports = {
