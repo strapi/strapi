@@ -39,7 +39,7 @@
     "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "^17.0.2",
     "react-intl": "6.2.7",
-    "react-redux": "7.2.8",
+    "react-redux": "8.0.5",
     "react-router": "^5.2.0",
     "react-router-dom": "5.3.4",
     "sharp": "0.31.1"
