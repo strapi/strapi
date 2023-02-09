@@ -65,6 +65,9 @@ const strapiMock = {
   service: jest.fn((serviceName) => {
     return servicesMock[serviceName];
   }),
+  db: {
+    transaction: jest.fn((func) => func()),
+  },
 };
 
 const stagesService = stageFactory({ strapi: strapiMock });
