@@ -69,6 +69,12 @@ module.exports = ({ strapi }) => {
 
 /**
  * Compares two arrays of stages and returns an object indicating the differences.
+ *
+ * The function compares the `id` properties of each stage in `sourceStages` and `comparisonStages` to determine if the stage is present in both arrays.
+ * If a stage with the same `id` is found in both arrays but the `name` property is different, the stage is considered updated.
+ * If a stage with a particular `id` is only found in `comparisonStages`, it is considered created.
+ * If a stage with a particular `id` is only found in `sourceStages`, it is considered deleted.
+ *
  * @typedef {{id: Number, name: String, workflow: Number}} Stage
  * @typedef {{created: Stage[], updated: Stage[], deleted: Stage[]}} DiffStages
  *
