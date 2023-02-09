@@ -18,7 +18,7 @@ import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import adminPermissions from '../../../../../permissions';
 import TableRows from './DynamicTable/TableRows';
-import Filters from './Filters';
+import Filters from '../../../components/Filters';
 import ModalForm from './ModalForm';
 import PaginationFooter from './PaginationFooter';
 import { deleteData, fetchData } from './utils/api';

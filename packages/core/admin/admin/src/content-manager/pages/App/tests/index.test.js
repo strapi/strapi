@@ -543,7 +543,7 @@ describe('Content manager | App | main', () => {
               <span>
                 <button
                   aria-disabled="false"
-                  aria-labelledby="tooltip-2"
+                  aria-labelledby="0"
                   class="c6 c7"
                   tabindex="0"
                   type="button"
@@ -585,12 +585,10 @@ describe('Content manager | App | main', () => {
           >
             <ol
               class="c14 c15"
-              spacing="2"
             >
               <li>
                 <div
                   class="c14 c16"
-                  spacing="1"
                 >
                   <div
                     class="c17 c18"
@@ -624,7 +622,7 @@ describe('Content manager | App | main', () => {
                     </div>
                   </div>
                   <ol
-                    id="subnav-list-4"
+                    id="2"
                   >
                     <li>
                       <a
@@ -668,7 +666,6 @@ describe('Content manager | App | main', () => {
               <li>
                 <div
                   class="c14 c16"
-                  spacing="1"
                 >
                   <div
                     class="c17 c18"
@@ -702,7 +699,7 @@ describe('Content manager | App | main', () => {
                     </div>
                   </div>
                   <ol
-                    id="subnav-list-5"
+                    id="3"
                   >
                     <li>
                       <a

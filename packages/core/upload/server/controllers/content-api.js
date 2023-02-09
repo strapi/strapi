@@ -26,9 +26,10 @@ module.exports = {
   async findOne(ctx) {
     const {
       params: { id },
+      query: { populate },
     } = ctx;
 
-    const file = await getService('upload').findOne(id);
+    const file = await getService('upload').findOne(id, populate);
 
     if (!file) {
       return ctx.notFound('file.notFound');

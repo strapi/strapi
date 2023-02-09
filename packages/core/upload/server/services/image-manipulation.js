@@ -7,11 +7,13 @@ const fs = require('fs');
 const { join } = require('path');
 const sharp = require('sharp');
 
+const {
+  file: { bytesToKbytes, writableDiscardStream },
+} = require('@strapi/utils');
 const { getService } = require('../utils');
-const { bytesToKbytes, writableDiscardStream } = require('../utils/file');
 
-const FORMATS_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff', 'svg', 'gif'];
-const FORMATS_TO_OPTIMIZE = ['jpeg', 'png', 'webp', 'tiff'];
+const FORMATS_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff', 'svg', 'gif', 'avif'];
+const FORMATS_TO_OPTIMIZE = ['jpeg', 'png', 'webp', 'tiff', 'avif'];
 
 const writeStreamToFile = (stream, path) =>
   new Promise((resolve, reject) => {

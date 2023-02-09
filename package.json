@@ -89,7 +89,7 @@
     "jest-circus": "29.0.3",
     "jest-cli": "29.0.3",
     "jest-environment-jsdom": "29.0.3",
-    "jest-watch-typeahead": "2.2.0",
+    "jest-watch-typeahead": "2.2.2",
     "lerna": "5.4.3",
     "lint-staged": "13.0.3",
     "lodash": "4.17.21",

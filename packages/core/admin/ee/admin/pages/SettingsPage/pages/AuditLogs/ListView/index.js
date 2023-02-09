@@ -4,52 +4,38 @@ import {
   SettingsPageTitle,
   DynamicTable,
   useRBAC,
-  useNotification,
   useFocusWhenNavigate,
-  useFetchClient,
   useQueryParams,
+  AnErrorOccurred,
 } from '@strapi/helper-plugin';
-import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { useLocation } from 'react-router-dom';
-import { useQuery } from 'react-query';
+import {
+  Box,
+  HeaderLayout,
+  ContentLayout,
+  ActionLayout,
+  Layout,
+  Main,
+} from '@strapi/design-system';
 import adminPermissions from '../../../../../../../admin/src/permissions';
 import TableRows from './TableRows';
 import tableHeaders from './utils/tableHeaders';
 import PaginationFooter from './PaginationFooter';
 import Modal from './Modal';
+import Filters from '../../../../../../../admin/src/pages/SettingsPage/components/Filters';
+import getDisplayedFilters from './utils/getDisplayedFilters';
+import useAuditLogsData from './hooks/useAuditLogsData';
 
 const ListView = () => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
   const {
     allowedActions: { canRead },
   } = useRBAC(adminPermissions.settings.auditLogs);
-  const { get } = useFetchClient();
-  const { search } = useLocation();
   const [{ query }, setQuery] = useQueryParams();
+  const { auditLogs, users, isLoading, hasError } = useAuditLogsData({ canRead });
 
   useFocusWhenNavigate();
 
-  const fetchAuditLogsPage = async ({ queryKey }) => {
-    const search = queryKey[1];
-    const { data } = await get(`/admin/audit-logs${search}`);
-
-    return data;
-  };
-
-  const { data, isLoading } = useQuery(['auditLogs', search], fetchAuditLogsPage, {
-    enabled: canRead,
-    keepPreviousData: true,
-    retry: false,
-    staleTime: 1000 * 10,
-    onError() {
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
-      });
-    },
-  });
+  const displayedFilters = getDisplayedFilters({ formatMessage, users });
 
   const title = formatMessage({
     id: 'global.auditLogs',
@@ -64,6 +50,18 @@ const ListView = () => {
     },
   }));
 
+  if (hasError) {
+    return (
+      <Layout>
+        <ContentLayout>
+          <Box paddingTop={8}>
+            <AnErrorOccurred />
+          </Box>
+        </ContentLayout>
+      </Layout>
+    );
+  }
+
   return (
     <Main aria-busy={isLoading}>
       <SettingsPageTitle name={title} />
@@ -74,21 +72,22 @@ const ListView = () => {
           defaultMessage: 'Logs of all the activities that happened in your environment',
         })}
       />
+      <ActionLayout startActions={<Filters displayedFilters={displayedFilters} />} />
       <ContentLayout canRead={canRead}>
         <DynamicTable
           contentType="Audit logs"
           headers={headers}
-          rows={data?.results || []}
+          rows={auditLogs?.results || []}
           withBulkActions
           isLoading={isLoading}
         >
           <TableRows
             headers={headers}
-            rows={data?.results || []}
+            rows={auditLogs?.results || []}
             onOpenModal={(id) => setQuery({ id })}
           />
         </DynamicTable>
-        <PaginationFooter pagination={data?.pagination} />
+        <PaginationFooter pagination={auditLogs?.pagination} />
       </ContentLayout>
       {query?.id && <Modal handleClose={() => setQuery({ id: null }, 'remove')} logId={query.id} />}
     </Main>

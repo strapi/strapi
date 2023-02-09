@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Router } from 'react-router-dom';
@@ -163,5 +163,42 @@ describe('<FilterListURLQuery />', () => {
     const { container } = render(makeApp(history, filtersSchema));
 
     expect(container).toMatchSnapshot();
+  });
+
+  it('displays the label for a custom input providing options with custom values', () => {
+    const history = createMemoryHistory();
+    const displayedFilters = [
+      {
+        name: 'action',
+        metadatas: {
+          label: 'Action',
+          options: [
+            { label: 'Create entry', customValue: 'entry.create' },
+            { label: 'Update entry', customValue: 'entry.update' },
+            { label: 'Delete entry', customValue: 'entry.delete' },
+          ],
+          customInput: jest.fn(),
+        },
+        fieldSchema: { type: 'enumeration' },
+      },
+    ];
+    const search = {
+      filters: {
+        $and: [
+          {
+            action: {
+              $eq: 'entry.create',
+            },
+          },
+        ],
+      },
+    };
+    history.push({
+      pathname: '/',
+      search: qs.stringify(search),
+    });
+
+    render(makeApp(history, displayedFilters));
+    expect(screen.getByRole('button', { name: /action is create entry/i })).toBeVisible();
   });
 });
