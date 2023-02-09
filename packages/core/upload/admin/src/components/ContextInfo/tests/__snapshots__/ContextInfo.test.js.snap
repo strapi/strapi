@@ -97,7 +97,6 @@ exports[`ContextInfo renders 1`] = `
         >
           <div
             class="c3 c4"
-            spacing="1"
           >
             <span
               class="c5"
@@ -120,7 +119,6 @@ exports[`ContextInfo renders 1`] = `
         >
           <div
             class="c3 c4"
-            spacing="1"
           >
             <span
               class="c5"
@@ -143,7 +141,6 @@ exports[`ContextInfo renders 1`] = `
         >
           <div
             class="c3 c4"
-            spacing="1"
           >
             <span
               class="c5"

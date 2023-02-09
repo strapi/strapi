@@ -177,8 +177,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c2 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <span
                   class="c4"
@@ -201,8 +199,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c8"
-                height="100%"
-                width="0.125rem"
               />
             </div>
             <div
@@ -225,8 +221,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c10 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <span
                   class="c11"
@@ -249,8 +243,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c12"
-                height="100%"
-                width="0.125rem"
               />
             </div>
             <div
@@ -269,8 +261,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c10 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <span
                   class="c11"
@@ -446,8 +436,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c2 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <svg
                   aria-hidden="true"
@@ -455,7 +443,7 @@ describe('GuidedTour Stepper', () => {
                   fill="none"
                   height="1em"
                   viewBox="0 0 24 24"
-                  width="1rem"
+                  width="1em"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
@@ -479,8 +467,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c9"
-                height="100%"
-                width="0.125rem"
               />
             </div>
             <div
@@ -499,8 +485,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c2 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <span
                   class="c11"
@@ -523,8 +507,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c12"
-                height="100%"
-                width="0.125rem"
               />
             </div>
             <div
@@ -547,8 +529,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c13 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <span
                   class="c14"
@@ -692,8 +672,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c2 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <svg
                   aria-hidden="true"
@@ -701,7 +679,7 @@ describe('GuidedTour Stepper', () => {
                   fill="none"
                   height="1em"
                   viewBox="0 0 24 24"
-                  width="1rem"
+                  width="1em"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
@@ -725,8 +703,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c9"
-                height="100%"
-                width="0.125rem"
               />
             </div>
             <div
@@ -745,8 +721,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c2 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <svg
                   aria-hidden="true"
@@ -754,7 +728,7 @@ describe('GuidedTour Stepper', () => {
                   fill="none"
                   height="1em"
                   viewBox="0 0 24 24"
-                  width="1rem"
+                  width="1em"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
@@ -778,8 +752,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c9"
-                height="100%"
-                width="0.125rem"
               />
             </div>
             <div
@@ -798,8 +770,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c2 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <svg
                   aria-hidden="true"
@@ -807,7 +777,7 @@ describe('GuidedTour Stepper', () => {
                   fill="none"
                   height="1em"
                   viewBox="0 0 24 24"
-                  width="1rem"
+                  width="1em"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path

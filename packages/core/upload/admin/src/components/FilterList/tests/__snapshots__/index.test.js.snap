@@ -76,7 +76,6 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -115,7 +114,6 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -154,7 +152,6 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -193,7 +190,6 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -232,7 +228,6 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -271,7 +266,6 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"

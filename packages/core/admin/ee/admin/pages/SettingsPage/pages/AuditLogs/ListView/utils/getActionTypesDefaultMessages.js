@@ -1,9 +1,9 @@
-const actionTypes = {
-  'entry.create': 'Create entry ({model})',
-  'entry.update': 'Update entry ({model})',
-  'entry.delete': 'Delete entry ({model})',
-  'entry.publish': 'Publish entry ({model})',
-  'entry.unpublish': 'Unpublish entry ({model})',
+export const actionTypes = {
+  'entry.create': 'Create entry{model, select, undefined {} other { ({model})}}',
+  'entry.update': 'Update entry{model, select, undefined {} other { ({model})}}',
+  'entry.delete': 'Delete entry{model, select, undefined {} other { ({model})}}',
+  'entry.publish': 'Publish entry{model, select, undefined {} other { ({model})}}',
+  'entry.unpublish': 'Unpublish entry{model, select, undefined {} other { ({model})}}',
   'media.create': 'Create media',
   'media.update': 'Update media',
   'media.delete': 'Delete media',
@@ -29,8 +29,6 @@ const actionTypes = {
   'permission.delete': 'Delete permission',
 };
 
-const getDefaultMessage = (value) => {
+export const getDefaultMessage = (value) => {
   return actionTypes[value] || value;
 };
-
-export default getDefaultMessage;
