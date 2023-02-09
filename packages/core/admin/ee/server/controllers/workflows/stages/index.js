@@ -1,6 +1,7 @@
 'use strict';
 
 const { getService } = require('../../../utils');
+const { validateUpdateStages } = require('../../../validation/review-workflows');
 
 module.exports = {
   /**
@@ -38,5 +39,17 @@ module.exports = {
     ctx.body = {
       data,
     };
+  },
+
+  async replace(ctx) {
+    const { workflow_id: workflowId } = ctx.params;
+    const stagesService = getService('stages');
+    const { body: stages } = ctx.request;
+
+    const stagesValidated = await validateUpdateStages(stages);
+
+    const data = await stagesService.replaceWorkflowStages(workflowId, stagesValidated);
+
+    ctx.body = { data };
   },
 };

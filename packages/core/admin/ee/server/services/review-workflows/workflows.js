@@ -18,4 +18,8 @@ module.exports = ({ strapi }) => ({
   count() {
     return strapi.entityService.count(WORKFLOW_MODEL_UID);
   },
+
+  update(id, workflowData) {
+    return strapi.entityService.update(WORKFLOW_MODEL_UID, id, { data: workflowData });
+  },
 });
