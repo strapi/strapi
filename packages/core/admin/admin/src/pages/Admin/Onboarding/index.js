@@ -16,9 +16,8 @@ import {
 } from '@strapi/design-system';
 import { Cross, Play, Question } from '@strapi/icons';
 
-import { useConfigurations } from '../../../hooks';
 import onboardingPreview from '../../../assets/images/onboarding-preview.png';
-import { VIDEO_LINKS, DOCUMENTATION_LINKS } from './constants';
+import { VIDEO_LINKS, DOCUMENTATION_LINKS, WATCH_MORE } from './constants';
 
 // TODO: use new Button props derived from Box props with next DS release
 const HelperButton = styled(Button)`
@@ -43,12 +42,12 @@ const VideoLinkWrapper = styled(Flex)`
     background: ${({ theme }) => theme.colors.primary100};
 
     /* Hover style for the number displayed */
-    div:first-child span {
+    ${Typography}:first-child {
       color: ${({ theme }) => theme.colors.primary500};
     }
 
     /* Hover style for the label */
-    span:nth-child(1) {
+    ${Typography}:nth-child(1) {
       color: ${({ theme }) => theme.colors.primary600};
     }
   }
@@ -76,14 +75,9 @@ const TextLink = styled(TypographyLineHeight)`
 `;
 
 const Onboarding = () => {
-  const buttonRef = useRef();
+  const triggerRef = useRef();
   const [isOpen, setIsOpen] = useState(false);
   const { formatMessage } = useIntl();
-  const { showTutorials } = useConfigurations();
-
-  if (!showTutorials) {
-    return null;
-  }
 
   const handlePopoverVisibility = () => {
     setIsOpen((prev) => !prev);
@@ -104,7 +98,7 @@ const Onboarding = () => {
               }
         )}
         onClick={handlePopoverVisibility}
-        ref={buttonRef}
+        ref={triggerRef}
       >
         <Icon as={isOpen ? Cross : Question} color="buttonNeutral0" />
       </HelperButton>
@@ -113,7 +107,7 @@ const Onboarding = () => {
         <Portal>
           <PopoverPrimitives.Content
             padding={0}
-            source={buttonRef}
+            source={triggerRef}
             placement="top-end"
             spacing={12}
           >
@@ -133,16 +127,13 @@ const Onboarding = () => {
                 </TypographyLineHeight>
                 <TextLink
                   as="a"
-                  href="https://www.youtube.com/playlist?list=PL7Q0DQYATmvidz6lEmwE5nIcOAYagxWqq"
+                  href={WATCH_MORE.href}
                   target="_blank"
                   rel="noreferrer noopener"
                   variant="pi"
                   textColor="primary600"
                 >
-                  {formatMessage({
-                    id: 'app.components.Onboarding.link.more-videos',
-                    defaultMessage: 'Watch more videos',
-                  })}
+                  {formatMessage(WATCH_MORE.label)}
                 </TextLink>
               </Flex>
               <Divider />

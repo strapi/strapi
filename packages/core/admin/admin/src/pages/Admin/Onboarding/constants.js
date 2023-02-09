@@ -24,6 +24,14 @@ export const VIDEO_LINKS = [
   },
 ];
 
+export const WATCH_MORE = {
+  href: 'https://www.youtube.com/playlist?list=PL7Q0DQYATmvidz6lEmwE5nIcOAYagxWqq',
+  label: {
+    id: 'app.components.Onboarding.link.more-videos',
+    defaultMessage: 'Watch more videos',
+  },
+};
+
 export const DOCUMENTATION_LINKS = [
   {
     label: { id: 'global.documentation', defaultMessage: 'documentation' },
