@@ -6,7 +6,7 @@ const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const ForkTsCheckerPlugin = require('fork-ts-checker-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { ESBuildMinifyPlugin } = require('esbuild-loader');
+const { EsbuildPlugin } = require('esbuild-loader');
 const WebpackBar = require('webpackbar');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
@@ -74,7 +74,7 @@ module.exports = ({
     optimization: {
       minimize: optimize,
       minimizer: [
-        new ESBuildMinifyPlugin({
+        new EsbuildPlugin({
           target: buildTarget,
           css: true, // Apply minification to CSS assets
         }),
