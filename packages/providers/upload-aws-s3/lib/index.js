@@ -6,7 +6,7 @@
 
 /* eslint-disable no-unused-vars */
 // Public node modules.
-const _ = require('lodash');
+const get = require('lodash/get');
 const AWS = require('aws-sdk');
 
 function assertUrlProtocol(url) {
@@ -53,7 +53,7 @@ module.exports = {
 
     return {
       isPrivate() {
-        return true;
+        return get(config, ['params', 'isPrivate'], false);
       },
       /**
        *
