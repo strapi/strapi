@@ -9,7 +9,7 @@ import { useLocation } from 'react-router';
 import { useNotification } from '@strapi/helper-plugin';
 import useLicenseLimits from '../useLicenseLimits';
 
-const STORAGE_KEY_PREFIX = 'strapi-notification-seat-limit-disabled';
+const STORAGE_KEY_PREFIX = 'strapi-notification-seat-limit';
 
 const BILLING_STRAPI_CLOUD_URL = 'https://cloud.strapi.io/profile/billing';
 const BILLING_SELF_HOSTED_URL =
@@ -31,12 +31,20 @@ const useLicenseLimitNotification = () => {
 
     const shouldDisplayNotification =
       permittedSeats &&
-      window.sessionStorage.getItem(`${STORAGE_KEY_PREFIX}-${pathname}`) &&
-      ['/', '/users'].every(pathname.includes);
+      !window.sessionStorage.getItem(`${STORAGE_KEY_PREFIX}-${pathname}`) &&
+      (licenseLimitStatus === 'AT_LIMIT' || licenseLimitStatus === 'OVER_LIMIT');
+
+    let notificationType;
+
+    if (licenseLimitStatus === 'OVER_LIMIT') {
+      notificationType = 'warning';
+    } else if (licenseLimitStatus === 'AT_LIMIT') {
+      notificationType = 'softWarning';
+    }
 
     if (shouldDisplayNotification) {
       toggleNotification({
-        type: licenseLimitStatus === 'OVER_LIMIT' ? 'warning' : 'softWarning',
+        type: notificationType,
         message: formatMessage(
           {
             id: 'notification.ee.warning.seat-limit.message',
@@ -51,7 +59,6 @@ const useLicenseLimitNotification = () => {
             defaultMessage: 'Over seat limit ({currentUserCount}/{permittedSeats})',
           },
           {
-            licenseLimitStatus,
             currentUserCount,
             permittedSeats,
           }

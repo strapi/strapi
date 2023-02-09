@@ -7,8 +7,8 @@ import { useLicenseLimits } from '../../../../../../hooks';
 
 const CreateAction = ({ onClick }) => {
   const { formatMessage } = useIntl();
-  const licenseLimitInfos = useLicenseLimits();
-  const { licenseLimitStatus, permittedSeats } = licenseLimitInfos;
+  const { license } = useLicenseLimits();
+  const { licenseLimitStatus, permittedSeats } = license?.data ?? {};
 
   return (
     <Stack spacing={2} horizontal>
