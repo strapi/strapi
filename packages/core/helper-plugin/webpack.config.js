@@ -5,9 +5,11 @@ const browserslistToEsbuild = require('browserslist-to-esbuild');
 const packageJson = require('./package.json');
 
 const nodeModules = [];
-Object.keys(packageJson.dependencies).forEach((module) => {
-  nodeModules.push(new RegExp(`^${module}(/.+)?$`));
-});
+[...Object.keys(packageJson.dependencies), ...Object.keys(packageJson.peerDependencies)].forEach(
+  (module) => {
+    nodeModules.push(new RegExp(`^${module}(/.+)?$`));
+  }
+);
 
 /** @type {Omit<import('webpack').Configuration, 'output'>} */
 const baseConfig = {
@@ -63,22 +65,11 @@ const config = [
     ...baseConfig,
     output: {
       path: `${__dirname}/build`,
-      filename: `helper-plugin.${process.env.NODE_ENV}.js`,
-      library: {
-        name: 'helperPlugin',
-        type: 'umd',
-      },
-      umdNamedDefine: true,
-    },
-  },
-  {
-    ...baseConfig,
-    output: {
-      path: `${__dirname}/build`,
       filename: `helper-plugin.esm.js`,
       library: {
         type: 'module',
       },
+      environment: { module: true },
     },
     experiments: {
       outputModule: true,
@@ -88,7 +79,7 @@ const config = [
     ...baseConfig,
     output: {
       path: `${__dirname}/build`,
-      filename: `helper-plugin.cjs.js`,
+      filename: `helper-plugin.js`,
       library: {
         type: 'commonjs',
       },
