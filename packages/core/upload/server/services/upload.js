@@ -183,16 +183,16 @@ module.exports = ({ strapi }) => ({
 
   async uploadBuffer({ file, fileName, folder, mime, ext, alternativeText, caption }) {
     if (!mime) {
-      return strapi.log.error('mime type is undefined');
+      throw new ApplicationError('mime type is undefined');
     }
     if (!ext) {
-      return strapi.log.error('ext is undefined');
+      throw new ApplicationError('ext is undefined');
     }
     if (!file) {
-      return strapi.log.error('file is undefined');
+      throw new ApplicationError('file is undefined');
     }
     if (!fileName) {
-      return strapi.log.error('fileName is undefined');
+      throw new ApplicationError('fileName is undefined');
     }
     const config = strapi.config.get('plugin.upload');
     const entity = {
