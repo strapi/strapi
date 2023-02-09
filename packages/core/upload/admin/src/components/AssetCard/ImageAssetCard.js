@@ -7,12 +7,14 @@ import { AssetCardBase } from './AssetCardBase';
 export const ImageAssetCard = ({ height, width, thumbnail, size, alt, ...props }) => {
   // Prevents the browser from caching the URL for all sizes and allow react-query to make a smooth update
   // instead of a full refresh
-  const optimizedCachingThumbnail =
-    width && height ? `${thumbnail}?width=${width}&height=${height}` : thumbnail;
+  const optimizedCachingThumbnail = new URL(thumbnail);
+  // TODO: This gives problems with presigned URLs
+  // optimizedCachingThumbnail.searchParams.set('width', width);
+  // optimizedCachingThumbnail.searchParams.set('height', height);
 
   return (
     <AssetCardBase {...props} subtitle={height && width && ` - ${width}✕${height}`} variant="Image">
-      <CardAsset src={optimizedCachingThumbnail} size={size} alt={alt} />
+      <CardAsset src={optimizedCachingThumbnail.toString()} size={size} alt={alt} />
     </AssetCardBase>
   );
 };

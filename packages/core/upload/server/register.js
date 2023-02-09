@@ -6,6 +6,7 @@ const {
 } = require('@strapi/utils');
 const _ = require('lodash');
 const registerUploadMiddleware = require('./middlewares/upload');
+const { getService } = require('./utils');
 
 /**
  * Register upload plugin
@@ -15,6 +16,8 @@ module.exports = async ({ strapi }) => {
   strapi.plugin('upload').provider = createProvider(strapi.config.get('plugin.upload', {}));
 
   await registerUploadMiddleware({ strapi });
+
+  getService('file').addSignedFileUrlsToAdmin();
 
   if (strapi.plugin('graphql')) {
     require('./graphql')({ strapi });
@@ -82,5 +85,11 @@ const baseProvider = {
         `${file.name} exceeds size limit of ${bytesToHumanReadable(sizeLimit)}.`
       );
     }
+  },
+  getSignedUrl(file) {
+    return file;
+  },
+  isPrivate() {
+    return false;
   },
 };

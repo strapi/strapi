@@ -27,6 +27,9 @@ module.exports = {
 
     const { results, pagination } = await getService('upload').findPage(query);
 
+    const fileService = await getService('file');
+    await Promise.all(results.map((file) => fileService.signFileUrls(file)));
+
     const sanitizedResults = await pm.sanitizeOutput(results);
 
     return { results: sanitizedResults, pagination };
@@ -44,6 +47,9 @@ module.exports = {
       FILE_MODEL_UID,
       id
     );
+
+    const fileService = await getService('file');
+    await fileService.signFileUrls(file);
 
     ctx.body = await pm.sanitizeOutput(file);
   },

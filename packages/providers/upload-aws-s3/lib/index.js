@@ -25,11 +25,12 @@ module.exports = {
       new Promise((resolve, reject) => {
         // upload file on S3 bucket
         const path = file.path ? `${file.path}/` : '';
+        const fileKey = `${path}${file.hash}${file.ext}`;
         S3.upload(
           {
-            Key: `${path}${file.hash}${file.ext}`,
+            Key: fileKey,
             Body: file.stream || Buffer.from(file.buffer, 'binary'),
-            ACL: 'public-read',
+            ACL: 'private',
             ContentType: file.mime,
             ...customParams,
           },
@@ -45,13 +46,41 @@ module.exports = {
               // Default protocol to https protocol
               file.url = `https://${data.Location}`;
             }
-
             resolve();
           }
         );
       });
 
     return {
+      isPrivate() {
+        return true;
+      },
+      /**
+       *
+       * @param {string} fileIdentifier
+       * @param {*} customParams
+       * @returns
+       */
+      getSignedUrl(file, customParams = {}) {
+        return new Promise((resolve, reject) => {
+          const path = file.path ? `${file.path}/` : '';
+          const fileKey = `${path}${file.hash}${file.ext}`;
+          S3.getSignedUrl(
+            'getObject',
+            {
+              Bucket: config.params.Bucket,
+              Key: fileKey,
+              Expires: 60 * 60 * 24 * 7, // TODO: Make this configurable.
+            },
+            (err, url) => {
+              if (err) {
+                return reject(err);
+              }
+              resolve({ url });
+            }
+          );
+        });
+      },
       uploadStream(file, customParams = {}) {
         return upload(file, customParams);
       },

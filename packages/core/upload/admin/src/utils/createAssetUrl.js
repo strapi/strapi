@@ -13,9 +13,12 @@ const createAssetUrl = (asset, forThumbnail = true) => {
   }
 
   const assetUrl = forThumbnail ? asset?.formats?.thumbnail?.url || asset.url : asset.url;
-  const backendUrl = prefixFileUrlWithBackendUrl(assetUrl);
+  const backendUrl = new URL(prefixFileUrlWithBackendUrl(assetUrl));
 
-  return `${backendUrl}?updated_at=${asset.updatedAt}`;
+  // TODO: This gives problems with presigned URLs
+  backendUrl.searchParams.set('updated_at', asset.updatedAt);
+
+  return backendUrl.toString();
 };
 
 export default createAssetUrl;
