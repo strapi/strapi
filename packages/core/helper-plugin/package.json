@@ -54,7 +54,7 @@
     "react-router": "^5.2.0",
     "react-router-dom": "5.3.4",
     "react-select": "5.6.0",
-    "styled-components": "5.3.3",
+    "styled-components": "5.3.6",
     "whatwg-fetch": "^3.6.2"
   },
   "devDependencies": {
