@@ -98,8 +98,6 @@
     "plop": "2.7.6",
     "prettier": "2.7.1",
     "qs": "6.11.0",
-    "request": "2.88.2",
-    "request-promise-native": "1.0.9",
     "rimraf": "3.0.2",
     "stylelint": "13.13.1",
     "stylelint-config-recommended": "3.0.0",
