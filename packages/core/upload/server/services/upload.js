@@ -21,6 +21,7 @@ const {
   errors: { ApplicationError, NotFoundError },
   file: { bytesToKbytes },
 } = require('@strapi/utils');
+const stream = require('stream');
 
 const { MEDIA_UPDATE, MEDIA_CREATE, MEDIA_DELETE } = webhookUtils.webhookEvents;
 
@@ -178,6 +179,41 @@ module.exports = ({ strapi }) => ({
     }
 
     return uploadedFiles;
+  },
+
+  async uploadBuffer({ file, fileName, folder, mime, ext, alternativeText, caption }) {
+    const bytesToKbytes = (bytes) => Math.round((bytes / 1000) * 100) / 100;
+    if (!mime) {
+      return strapi.log.error('mime type is undefined');
+    }
+    if (!ext) {
+      return strapi.log.error('ext is undefined');
+    }
+    if (!file) {
+      return strapi.log.error('file is undefined');
+    }
+    if (!fileName) {
+      return strapi.log.error('fileName is undefined');
+    }
+    const config = strapi.config.get('plugin.upload');
+    const entity = {
+      name: `${fileName}.${ext}`,
+      hash: generateFileName(fileName),
+      ext,
+      mime,
+      size: bytesToKbytes(Number(file.length)),
+      provider: config.provider,
+      folder,
+      caption,
+      alternativeText,
+      tmpWorkingDirectory: await createAndAssignTmpWorkingDirectoryToFiles({}),
+      getStream() {
+        // eslint-disable-next-line new-cap
+        return new stream.Readable.from(file);
+      },
+    };
+    await this.uploadImage(entity);
+    return strapi.query('plugin::upload.file').create({ data: entity });
   },
 
   /**
