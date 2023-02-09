@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../scripts/dts-import';
+import { toggleRateLimiting } from '../scripts/rate-limit';
+import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../scripts/constants';
 
 test.describe('Authentication | Login', () => {
   test.beforeEach(async ({ page }) => {
@@ -13,8 +15,8 @@ test.describe('Authentication | Login', () => {
       context,
     }) => {
       // Test without making user authentication persistent
-      await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
-      await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
+      await page.getByLabel('Email*', { exact: true }).fill(ADMIN_EMAIL_ADDRESS);
+      await page.getByLabel('Password*', { exact: true }).fill(ADMIN_PASSWORD);
 
       await page.getByRole('button', { name: 'Login' }).click();
       await expect(page).toHaveTitle('Homepage');
@@ -26,8 +28,8 @@ test.describe('Authentication | Login', () => {
       await expect(page).toHaveTitle('Strapi Admin');
 
       // Test with making user authentication persistent
-      await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
-      await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
+      await page.getByLabel('Email*', { exact: true }).fill(ADMIN_EMAIL_ADDRESS);
+      await page.getByLabel('Password*', { exact: true }).fill(ADMIN_PASSWORD);
 
       await page.getByLabel('Remember me').click();
 
@@ -42,76 +44,75 @@ test.describe('Authentication | Login', () => {
     });
   });
 
-  test.describe('Rate limit on login', () => {
+  test.describe('Rate limit', () => {
     test('Should display a rate limit error message after 5 attempts to login', async ({
       page,
       browserName,
     }) => {
-      await page.request.fetch('/api/config/ratelimit/enable', {
-        method: 'POST',
-        data: { value: true },
-      });
+      async function clickLoginTimes(n) {
+        for (let i = 0; i < n; i++) {
+          // eslint-disable-next-line no-await-in-loop
+          await page.getByRole('button', { name: 'Login' }).click();
+        }
+      }
 
-      await page.getByLabel('Email*', { exact: true }).fill(`test@${browserName}.com`);
-      await page.getByLabel('Password*', { exact: true }).fill('wrongPassword');
-      await page.getByRole('button', { name: 'Login' }).click();
-      await page.getByRole('button', { name: 'Login' }).click();
-      await page.getByRole('button', { name: 'Login' }).click();
-      await page.getByRole('button', { name: 'Login' }).click();
-      await page.getByRole('button', { name: 'Login' }).click();
-      await page.getByRole('button', { name: 'Login' }).click();
+      await toggleRateLimiting(page, true);
+
+      await page
+        .getByLabel('Email*', { exact: true })
+        .fill(ADMIN_EMAIL_ADDRESS.replace('@', `+${browserName}@`));
+      await page.getByLabel('Password*', { exact: true }).fill(ADMIN_PASSWORD);
+      clickLoginTimes(6);
 
       await expect(page.getByText('Too many requests, please try again later.')).toBeVisible();
 
-      await page.request.fetch('/api/config/ratelimit/enable', {
-        method: 'POST',
-        data: { value: false },
-      });
+      await toggleRateLimiting(page, false);
     });
   });
 
-  test.describe('Validation checks', () => {
+  test.describe('Validations', () => {
     test('A user should see a validation errors when not passing in an email, a wrong email, not passing a password or a wrong password', async ({
       page,
     }) => {
       // Test without email value
-      await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
+      await page.getByLabel('Password*', { exact: true }).fill(ADMIN_PASSWORD);
       await page.getByRole('button', { name: 'Login' }).click();
       await expect(page.getByText('Value is required')).toBeVisible();
       await expect(await page.getByLabel('Email*', { exact: true })).toBeFocused();
 
       // Test without password value
-      await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
+      await page.getByLabel('Email*', { exact: true }).fill(ADMIN_EMAIL_ADDRESS);
       await page.getByLabel('Password*', { exact: true }).fill('');
       await page.getByRole('button', { name: 'Login' }).click();
       await expect(page.getByText('Value is required')).toBeVisible();
       await expect(await page.getByLabel('Password*')).toBeFocused();
 
       // Test with a wrong email value
-      await page.getByLabel('Email*', { exact: true }).fill('wrongEmail@testing.com');
-      await page.getByLabel('Password*', { exact: true }).fill('myTestPassw0rd');
+      await page.getByLabel('Email*', { exact: true }).fill('e2e+wrong-email@strapi.io');
+      await page.getByLabel('Password*', { exact: true }).fill(ADMIN_PASSWORD);
       await page.getByRole('button', { name: 'Login' }).click();
       await expect(page.getByText('Invalid credentials')).toBeVisible();
 
       // Test with a wrong password value
-      await page.getByLabel('Email*', { exact: true }).fill('test@testing.com');
+      await page.getByLabel('Email*', { exact: true }).fill(ADMIN_EMAIL_ADDRESS);
       await page.getByLabel('Password*', { exact: true }).fill('wrongPassword');
       await page.getByRole('button', { name: 'Login' }).click();
       await expect(page.getByText('Invalid credentials')).toBeVisible();
     });
   });
 
-  test.describe('Other actions than logging in', () => {
-    test('A user should be able to acces the forgot password page and change the application language', async ({
-      page,
-    }) => {
+  test.describe('Forgot password', () => {
+    test('A user should be able to access the forgot password page', async ({ page }) => {
       // Test forgot password redirection
       await page.getByRole('link', { name: 'Forgot your password?' }).click();
       await expect(page.getByText('Password Recovery')).toBeVisible();
 
       await page.getByRole('link', { name: 'Ready to sign in?' }).click();
+    });
+  });
 
-      // Test changing application language
+  test.describe('Forgot password', () => {
+    test('A user should be able to change the application language', async ({ page }) => {
       await page.getByRole('button', { name: 'English' }).click();
       await page.keyboard.press('ArrowDown');
       await page.keyboard.press('Space');
