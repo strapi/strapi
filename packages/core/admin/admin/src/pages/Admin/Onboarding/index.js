@@ -1,92 +1,91 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Box, Flex, FocusTrap, Typography, Icon, Stack } from '@strapi/design-system';
-import { Book, Cross, Information, Question } from '@strapi/icons';
-import { pxToRem } from '@strapi/helper-plugin';
+import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  FocusTrap,
+  Icon,
+  Portal,
+  PopoverPrimitives,
+  Stack,
+  Typography,
+  VisuallyHidden,
+} from '@strapi/design-system';
+import { Cross, Play, Question } from '@strapi/icons';
 
-import { useConfigurations } from '../../../hooks';
+import onboardingPreview from '../../../assets/images/onboarding-preview.png';
+import { VIDEO_LINKS, DOCUMENTATION_LINKS, WATCH_MORE } from './constants';
 
-const OnboardingWrapper = styled(Box)`
-  position: fixed;
-  bottom: ${({ theme }) => theme.spaces[2]};
-  right: ${({ theme }) => theme.spaces[2]};
-`;
-
-const Button = styled(Box)`
-  width: ${({ theme }) => theme.spaces[8]};
-  height: ${({ theme }) => theme.spaces[8]};
-  background: ${({ theme }) => theme.colors.primary600};
-  box-shadow: ${({ theme }) => theme.shadows.tableShadow};
+// TODO: use new Button props derived from Box props with next DS release
+const HelperButton = styled(Button)`
   border-radius: 50%;
-
-  svg path {
-    fill: ${({ theme }) => theme.colors.buttonNeutral0};
-  }
+  padding: ${({ theme }) => theme.spaces[3]};
+  /* Resetting 2rem height defined by Button component */
+  height: 100%;
 `;
 
-const LinksWrapper = styled(Box)`
-  bottom: ${({ theme }) => `${theme.spaces[9]}`};
-  min-width: ${200 / 16}rem;
-  position: absolute;
-  right: 0;
+const IconWrapper = styled(Flex)`
+  transform: translate(-50%, -50%);
 `;
 
-const StyledLink = styled(Flex)`
+const VideoLinkWrapper = styled(Flex)`
   text-decoration: none;
 
-  svg path {
-    fill: ${({ theme }) => theme.colors.neutral600};
+  :focus-visible {
+    outline-offset: ${({ theme }) => `-${theme.spaces[1]}`};
   }
 
-  &:focus,
-  &:hover {
-    background: ${({ theme }) => theme.colors.neutral100};
+  :hover {
+    background: ${({ theme }) => theme.colors.primary100};
 
-    svg path {
-      fill: ${({ theme }) => theme.colors.neutral700};
+    /* Hover style for the number displayed */
+    ${Typography}:first-child {
+      color: ${({ theme }) => theme.colors.primary500};
     }
 
-    ${[Typography]} {
-      color: ${({ theme }) => theme.colors.neutral700};
+    /* Hover style for the label */
+    ${Typography}:nth-child(1) {
+      color: ${({ theme }) => theme.colors.primary600};
     }
+  }
+`;
+
+const Preview = styled.img`
+  width: ${({ theme }) => theme.spaces[10]};
+  height: ${({ theme }) => theme.spaces[8]};
+  /* Same overlay used in ModalLayout */
+  background: ${({ theme }) => `${theme.colors.neutral800}1F`};
+  border-radius: ${({ theme }) => theme.borderRadius};
+`;
+
+const TypographyLineHeight = styled(Typography)`
+  /* line height of label and watch more to 1 so they can be better aligned visually */
+  line-height: 1;
+`;
+
+const TextLink = styled(TypographyLineHeight)`
+  text-decoration: none;
+
+  :hover {
+    text-decoration: underline;
   }
 `;
 
 const Onboarding = () => {
+  const triggerRef = useRef();
   const [isOpen, setIsOpen] = useState(false);
   const { formatMessage } = useIntl();
-  const { showTutorials } = useConfigurations();
 
-  if (!showTutorials) {
-    return null;
-  }
-
-  const STATIC_LINKS = [
-    {
-      Icon: <Book />,
-      label: formatMessage({
-        id: 'global.documentation',
-        defaultMessage: 'Documentation',
-      }),
-      destination: 'https://docs.strapi.io',
-    },
-    {
-      Icon: <Information />,
-      label: formatMessage({ id: 'app.static.links.cheatsheet', defaultMessage: 'CheatSheet' }),
-      destination: 'https://strapi-showcase.s3-us-west-2.amazonaws.com/CheatSheet.pdf',
-    },
-  ];
-
-  const handleClick = () => {
+  const handlePopoverVisibility = () => {
     setIsOpen((prev) => !prev);
   };
 
   return (
-    <OnboardingWrapper as="aside">
-      <Button
-        as="button"
-        id="onboarding"
+    <Box as="aside" position="fixed" bottom={2} right={2}>
+      <HelperButton
         aria-label={formatMessage(
           isOpen
             ? {
@@ -98,37 +97,110 @@ const Onboarding = () => {
                 defaultMessage: 'Open help menu',
               }
         )}
-        onClick={handleClick}
+        onClick={handlePopoverVisibility}
+        ref={triggerRef}
       >
-        <Icon as={isOpen ? Cross : Question} height={pxToRem(16)} width={pxToRem(16)} />
-      </Button>
+        <Icon as={isOpen ? Cross : Question} color="buttonNeutral0" />
+      </HelperButton>
 
-      {/* FIX ME - replace with popover when overflow popover is fixed 
-       + when v4 mockups for onboarding component are ready */}
       {isOpen && (
-        <FocusTrap onEscape={handleClick}>
-          <LinksWrapper background="neutral0" hasRadius shadow="tableShadow" padding={2}>
-            {STATIC_LINKS.map((link) => (
-              <StyledLink
-                as="a"
-                key={link.label}
-                rel="nofollow noreferrer noopener"
-                target="_blank"
-                href={link.destination}
-                padding={2}
-                hasRadius
-                alignItems="center"
+        <Portal>
+          <PopoverPrimitives.Content
+            padding={0}
+            source={triggerRef}
+            placement="top-end"
+            spacing={12}
+          >
+            <FocusTrap onEscape={handlePopoverVisibility}>
+              <Flex
+                justifyContent="space-between"
+                paddingBottom={5}
+                paddingRight={6}
+                paddingLeft={6}
+                paddingTop={6}
               >
-                <Stack horizontal spacing={2}>
-                  {link.Icon}
-                  <Typography color="neutral600">{link.label}</Typography>
-                </Stack>
-              </StyledLink>
-            ))}
-          </LinksWrapper>
-        </FocusTrap>
+                <TypographyLineHeight fontWeight="bold">
+                  {formatMessage({
+                    id: 'app.components.Onboarding.title',
+                    defaultMessage: 'Get started videos',
+                  })}
+                </TypographyLineHeight>
+                <TextLink
+                  as="a"
+                  href={WATCH_MORE.href}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  variant="pi"
+                  textColor="primary600"
+                >
+                  {formatMessage(WATCH_MORE.label)}
+                </TextLink>
+              </Flex>
+              <Divider />
+              {VIDEO_LINKS.map(({ href, duration, label }, index) => (
+                <VideoLinkWrapper
+                  as="a"
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  key={href}
+                  hasRadius
+                  paddingTop={4}
+                  paddingBottom={4}
+                  paddingLeft={6}
+                  paddingRight={11}
+                >
+                  <Box paddingRight={5}>
+                    <Typography textColor="neutral200" variant="alpha">
+                      {index + 1}
+                    </Typography>
+                  </Box>
+                  <Box position="relative">
+                    <Preview src={onboardingPreview} alt="" />
+                    <IconWrapper
+                      position="absolute"
+                      top="50%"
+                      left="50%"
+                      background="primary600"
+                      borderRadius="50%"
+                      justifyContent="center"
+                      width={6}
+                      height={6}
+                    >
+                      <Icon as={Play} color="buttonNeutral0" width={3} height={3} />
+                    </IconWrapper>
+                  </Box>
+                  <Flex direction="column" alignItems="start" paddingLeft={4}>
+                    <Typography fontWeight="bold">{formatMessage(label)}</Typography>
+                    <VisuallyHidden>:</VisuallyHidden>
+                    <Typography textColor="neutral600" variant="pi">
+                      {duration}
+                    </Typography>
+                  </Flex>
+                </VideoLinkWrapper>
+              ))}
+              <Stack spacing={2} paddingLeft={5} paddingTop={2} paddingBottom={5}>
+                {DOCUMENTATION_LINKS.map(({ label, href, icon }) => (
+                  <Stack horizontal spacing={3} key={href}>
+                    <Icon as={icon} color="primary600" />
+                    <TextLink
+                      as="a"
+                      href={href}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      variant="sigma"
+                      textColor="primary700"
+                    >
+                      {formatMessage(label)}
+                    </TextLink>
+                  </Stack>
+                ))}
+              </Stack>
+            </FocusTrap>
+          </PopoverPrimitives.Content>
+        </Portal>
       )}
-    </OnboardingWrapper>
+    </Box>
   );
 };
 

@@ -1,14 +1,8 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import Onboarding from '../index';
-
-jest.mock('../../../../hooks', () => ({
-  useConfigurations: jest.fn(() => {
-    return { showTutorials: true };
-  }),
-}));
 
 const App = (
   <ThemeProvider theme={lightTheme}>
@@ -19,18 +13,18 @@ const App = (
 );
 
 describe('Onboarding', () => {
-  it('renders and matches the snapshot', async () => {
-    const {
-      container: { firstChild },
-    } = render(App);
+  test.each([
+    'watch more videos',
+    'build a content architecture',
+    'add & manage content',
+    'manage media',
+    'documentation',
+    'cheatsheet',
+  ])('should display %s link', (link) => {
+    const { getByRole } = render(App);
 
-    expect(firstChild).toMatchSnapshot();
-  });
+    fireEvent.click(getByRole('button', { name: /open help menu/i }));
 
-  it('should open links when button is clicked', () => {
-    render(App);
-
-    fireEvent.click(document.querySelector('#onboarding'));
-    expect(screen.getByText('Documentation')).toBeInTheDocument();
+    expect(getByRole('link', { name: new RegExp(link, 'i') })).toBeInTheDocument();
   });
 });
