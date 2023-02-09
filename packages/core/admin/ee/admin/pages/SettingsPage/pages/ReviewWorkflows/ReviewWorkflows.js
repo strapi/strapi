@@ -115,23 +115,23 @@ export function ReviewWorkflowsPage() {
                   </Loader>
                 )}
 
-              <Stages stages={formik.values?.stages} />
-            </ContentLayout>
-          </Form>
-        </FormikProvider>
+                <Stages stages={formik.values?.stages} />
+              </ContentLayout>
+            </Form>
+          </FormikProvider>
 
-        <ConfirmDialog
-          bodyText={{
-            id: 'Settings.review-workflows.page.delete.confirm.body',
-            defaultMessage:
-              'All entries assigned to deleted stages will be moved to the first stage. Are you sure you want to save this?',
-          }}
-          isOpen={isConfirmDeleteDialogOpen}
-          onToggleDialog={toggleConfirmDeleteDialog}
-          onConfirm={handleConfirmDeleteDialog}
-        />
-      </Main>
-    </Layout>
-  </CheckPagePermissions>
-);
+          <ConfirmDialog
+            bodyText={{
+              id: 'Settings.review-workflows.page.delete.confirm.body',
+              defaultMessage:
+                'All entries assigned to deleted stages will be moved to the first stage. Are you sure you want to save this?',
+            }}
+            isOpen={isConfirmDeleteDialogOpen}
+            onToggleDialog={toggleConfirmDeleteDialog}
+            onConfirm={handleConfirmDeleteDialog}
+          />
+        </Main>
+      </Layout>
+    </CheckPagePermissions>
+  );
 }
