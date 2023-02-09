@@ -187,7 +187,7 @@ module.exports = ({ strapi }) => ({
    * @param {Object} params - The parameters for uploading the buffer.
    * @param {Buffer} params.file - The buffer to be uploaded.
    * @param {string} params.fileName - The name of the file to be uploaded.
-   * @param {string} [params.folder] - The folder to upload the file to.
+   * @param {number} [params.folder] - The folder to upload the file to.
    * @param {string} params.mime - The MIME type of the file.
    * @param {string} params.ext - The file extension.
    * @param {string} [params.alternativeText] - The alternative text for the file.
