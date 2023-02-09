@@ -33,17 +33,14 @@
   ],
   "scripts": {
     "prebuild": "rimraf build",
-    "build": "yarn build:development && yarn build:production && yarn create:index",
+    "build": "cross-env NODE_ENV=production webpack-cli",
     "build-storybook": "build-storybook",
-    "build:development": "cross-env NODE_ENV=development webpack-cli",
-    "build:production": "cross-env NODE_ENV=production webpack-cli",
-    "create:index": "node ./createBuildIndex.js",
     "prepublishOnly": "npm run build",
     "storybook": "start-storybook -p 6006",
     "test:front": "jest --config ./jest.config.front.js",
     "test:front:cov": "jest --config ./jest.config.front.js --coverage",
     "test:front:watch": "jest --config ./jest.config.front.js --watchAll",
-    "watch": "yarn create:index && cross-env NODE_ENV=development webpack-cli -w"
+    "watch": "cross-env NODE_ENV=development webpack-cli -w"
   },
   "dependencies": {
     "axios": "1.2.2",
