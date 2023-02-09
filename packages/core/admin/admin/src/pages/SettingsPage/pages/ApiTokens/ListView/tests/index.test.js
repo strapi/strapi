@@ -861,7 +861,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                     </tr>
                   </thead>
                   <tbody
-                    class="c27"
+                    class="c28"
                     entriestodelete=""
                     headers="[object Object],[object Object],[object Object],[object Object]"
                   >

@@ -643,7 +643,9 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
       action="#"
       novalidate=""
     >
-      <div>
+      <div
+        style="height: 0px;"
+      >
         <div
           class="c1 c2"
           data-strapi-header="true"
@@ -694,7 +696,6 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
             </div>
             <div
               class="c1 c10 c12"
-              spacing="2"
             >
               <button
                 aria-disabled="false"
@@ -733,14 +734,12 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
       >
         <div
           class="c1 c18 c19"
-          spacing="6"
         >
           <div
             class="c1 c20"
           >
             <div
               class="c1 c18 c21"
-              spacing="4"
             >
               <h2
                 class="c7 c22"
@@ -760,11 +759,10 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                       <div>
                         <div
                           class="c1 c18 c25"
-                          spacing="1"
                         >
                           <label
                             class="c7 c16"
-                            for="textinput-1"
+                            for="1"
                           >
                             <div
                               class="c1 c10"
@@ -785,7 +783,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                               aria-invalid="false"
                               aria-required="true"
                               class="c29"
-                              id="textinput-1"
+                              id="1"
                               name="name"
                               value=""
                             />
@@ -807,14 +805,13 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                       <div>
                         <div
                           class="c1 c18 c25"
-                          spacing="1"
                         >
                           <div
                             class="c1 c10"
                           >
                             <label
                               class="c7 c16"
-                              for="textarea-2"
+                              for="3"
                             >
                               <div
                                 class="c1 c10"
@@ -830,7 +827,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                               aria-invalid="false"
                               aria-required="false"
                               class="c32"
-                              id="textarea-2"
+                              id="3"
                               name="description"
                             />
                           </div>
@@ -848,11 +845,10 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                     <div>
                       <div
                         class="c1 c18 c25"
-                        spacing="1"
                       >
                         <label
                           class="c7 c16"
-                          for="select-3"
+                          for="5"
                         >
                           <div
                             class="c1 c10"
@@ -872,9 +868,9 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-3 select-3-label select-3-content"
+                            aria-labelledby="5 5-label 5-content"
                             class="c34"
-                            id="select-3"
+                            id="5"
                             name="lifespan"
                             type="button"
                           />
@@ -889,7 +885,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                               >
                                 <span
                                   class="c7 c37"
-                                  id="select-3-content"
+                                  id="5-content"
                                 >
                                   Select
                                 </span>
@@ -1795,7 +1791,6 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
             </div>
             <div
               class="c1 c10 c12"
-              spacing="2"
             >
               <button
                 aria-disabled="false"
@@ -1865,7 +1860,6 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
       >
         <div
           class="c1 c19 c20"
-          spacing="6"
         >
           <div
             class="c1 c21 c10"
@@ -1888,7 +1882,6 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
             </div>
             <div
               class="c1 c19 c24"
-              spacing="1"
             >
               <div
                 class="c1 c10"
@@ -1911,7 +1904,6 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
           >
             <div
               class="c1 c19 c29"
-              spacing="4"
             >
               <h2
                 class="c7 c30"
@@ -1931,11 +1923,10 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                       <div>
                         <div
                           class="c1 c19 c24"
-                          spacing="1"
                         >
                           <label
                             class="c7 c16"
-                            for="textinput-5"
+                            for="8"
                           >
                             <div
                               class="c1 c10"
@@ -1956,7 +1947,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                               aria-invalid="false"
                               aria-required="true"
                               class="c36"
-                              id="textinput-5"
+                              id="8"
                               name="name"
                               value="My super token"
                             />
@@ -1978,14 +1969,13 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                       <div>
                         <div
                           class="c1 c19 c24"
-                          spacing="1"
                         >
                           <div
                             class="c1 c10"
                           >
                             <label
                               class="c7 c16"
-                              for="textarea-6"
+                              for="10"
                             >
                               <div
                                 class="c1 c10"
@@ -2001,7 +1991,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                               aria-invalid="false"
                               aria-required="false"
                               class="c39"
-                              id="textarea-6"
+                              id="10"
                               name="description"
                             >
                               This describe my super token
@@ -2021,11 +2011,10 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                     <div>
                       <div
                         class="c1 c19 c24"
-                        spacing="1"
                       >
                         <label
                           class="c7 c16"
-                          for="select-7"
+                          for="12"
                         >
                           <div
                             class="c1 c10"
@@ -2046,9 +2035,9 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                             aria-disabled="true"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-7 select-7-label select-7-content"
+                            aria-labelledby="12 12-label 12-content"
                             class="c41"
-                            id="select-7"
+                            id="12"
                             name="lifespan"
                             type="button"
                           />
@@ -2063,7 +2052,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                               >
                                 <span
                                   class="c7 c44"
-                                  id="select-7-content"
+                                  id="12-content"
                                 >
                                   Select
                                 </span>
