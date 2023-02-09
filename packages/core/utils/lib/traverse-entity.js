@@ -3,7 +3,7 @@
 const { cloneDeep, isObject, isArray, isNil, curry } = require('lodash/fp');
 
 const traverseEntity = async (visitor, options, entity) => {
-  const { path = null, schema } = options;
+  const { path = { raw: null, attribute: null }, schema } = options;
 
   // End recursion
   if (!isObject(entity) || isNil(schema)) {
@@ -22,7 +22,13 @@ const traverseEntity = async (visitor, options, entity) => {
       continue;
     }
 
-    const newPath = path ? `${path}.${key}` : key;
+    const newPath = { ...path };
+
+    newPath.raw = isNil(path.raw) ? key : `${path.raw}.${key}`;
+
+    if (!isNil(attribute)) {
+      newPath.attribute = isNil(path.attribute) ? key : `${path.attribute}.${key}`;
+    }
 
     // Visit the current attribute
     const visitorOptions = { data: copy, schema, key, value: copy[key], attribute, path: newPath };

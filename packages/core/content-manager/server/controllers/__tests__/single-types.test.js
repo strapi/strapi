@@ -434,8 +434,8 @@ describe('Single Types', () => {
               find() {
                 return Promise.resolve(entity);
               },
-              assocCreatorRoles(enitty) {
-                return enitty;
+              assocCreatorRoles(entity) {
+                return entity;
               },
               unpublish: unpublishFn,
             },
