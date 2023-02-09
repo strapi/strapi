@@ -24,7 +24,7 @@ module.exports = (plop) => {
       return [
         {
           type: 'add',
-          path: `${currentDir}/database/migrations/${timestamp}_{{ name }}.${language}`,
+          path: `${currentDir}/database/migrations/${timestamp}.{{ name }}.${language}`,
           templateFile: `templates/${language}/migration.${language}.hbs`,
         },
       ];
