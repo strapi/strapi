@@ -67,7 +67,7 @@ const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, conte
       staleTime: 0,
       select: (data) => ({
         ...data,
-        results: data.results.reverse(),
+        results: [...data.results].reverse(),
       }),
     }
   );
