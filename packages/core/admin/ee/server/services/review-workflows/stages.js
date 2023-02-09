@@ -54,12 +54,12 @@ module.exports = ({ strapi }) => {
       const { created, updated, deleted } = getDiffBetweenStages(workflow.stages, stages);
 
       const newStages = await this.createMany(created, { fields: ['id'] });
-      const assignedStagesToWorkflow = stages.map((stage) => stage.id ?? newStages.shift().id);
+      const stagesIds = stages.map((stage) => stage.id ?? newStages.shift().id);
 
       await mapAsync(updated, (stage) => this.update(stage.id, stage));
       await mapAsync(deleted, (stage) => this.delete(stage.id));
       return workflowsService.update(workflowId, {
-        stages: assignedStagesToWorkflow,
+        stages: stagesIds,
       });
     },
   };
