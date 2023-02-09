@@ -597,7 +597,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
           >
             <div>
               <button
-                aria-controls="simplemenu-1"
+                aria-controls="0"
                 aria-disabled="false"
                 aria-expanded="false"
                 aria-haspopup="true"
@@ -675,17 +675,15 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                 </div>
                 <div
                   class="c0 c18 c19"
-                  spacing="6"
                 >
                   <div>
                     <div>
                       <div
                         class="c0 c18 c20"
-                        spacing="1"
                       >
                         <label
                           class="c5 c6"
-                          for="textinput-2"
+                          for="2"
                         >
                           <div
                             class="c0 c13"
@@ -702,12 +700,12 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                           class="c0 c23 c24"
                         >
                           <input
-                            aria-describedby="textinput-2-hint"
+                            aria-describedby="2-hint"
                             aria-disabled="false"
                             aria-invalid="false"
                             aria-required="true"
                             class="c25 c26"
-                            id="textinput-2"
+                            id="2"
                             name="password"
                             type="password"
                             value=""
@@ -737,7 +735,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                         </div>
                         <p
                           class="c5 c30"
-                          id="textinput-2-hint"
+                          id="2-hint"
                         >
                           Password must contain at least 8 characters, 1 uppercase, 1 lowercase and 1 number
                         </p>
@@ -748,11 +746,10 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                     <div>
                       <div
                         class="c0 c18 c20"
-                        spacing="1"
                       >
                         <label
                           class="c5 c6"
-                          for="textinput-3"
+                          for="4"
                         >
                           <div
                             class="c0 c13"
@@ -773,7 +770,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                             aria-invalid="false"
                             aria-required="true"
                             class="c25 c26"
-                            id="textinput-3"
+                            id="4"
                             name="confirmPassword"
                             type="password"
                             value=""

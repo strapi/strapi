@@ -11,13 +11,12 @@ const componentStore = new Map();
  */
 const useLazyComponents = (componentUids = []) => {
   const [lazyComponentStore, setLazyComponentStore] = useState(Object.fromEntries(componentStore));
-  const [loading, setLoading] = useState(() => {
-    if (componentStore.size === 0 && componentUids.length > 0) {
-      return true;
-    }
-
-    return false;
-  });
+  /**
+   * Start loading only if there are any components passed in
+   * and there are some new to load
+   */
+  const newUids = componentUids.filter((uid) => !componentStore.get(uid));
+  const [loading, setLoading] = useState(() => !!newUids.length);
   const customFieldsRegistry = useCustomFields();
 
   useEffect(() => {
@@ -36,11 +35,8 @@ const useLazyComponents = (componentUids = []) => {
       setStore(Object.fromEntries(componentStore));
     };
 
-    if (componentUids.length && loading) {
-      /**
-       * These uids are not in the component store therefore we need to get the components
-       */
-      const newUids = componentUids.filter((uid) => !componentStore.get(uid));
+    if (newUids.length > 0) {
+      setLoading(true);
 
       const componentPromises = newUids.map((uid) => {
         const customField = customFieldsRegistry.get(uid);
@@ -52,7 +48,7 @@ const useLazyComponents = (componentUids = []) => {
         lazyLoadComponents(newUids, componentPromises);
       }
     }
-  }, [componentUids, customFieldsRegistry, loading]);
+  }, [newUids, customFieldsRegistry]);
 
   /**
    * Wrap this in a callback so it can be used in

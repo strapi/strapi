@@ -35,7 +35,5 @@ exports[`ADMIN | StrapiApp should render the app without plugins 1`] = `
 
 <div
   class="c0 c1 c2"
-  spacing="2"
-  width="31.25rem"
 />
 `;
