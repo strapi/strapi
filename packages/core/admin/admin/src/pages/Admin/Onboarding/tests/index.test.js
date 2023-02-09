@@ -4,12 +4,6 @@ import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import Onboarding from '../index';
 
-jest.mock('../../../../hooks', () => ({
-  useConfigurations: jest.fn(() => {
-    return { showTutorials: true };
-  }),
-}));
-
 const App = (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
@@ -19,16 +13,18 @@ const App = (
 );
 
 describe('Onboarding', () => {
-  it('should display every links', () => {
+  test.each([
+    'watch more videos',
+    'build a content architecture',
+    'add & manage content',
+    'manage media',
+    'documentation',
+    'cheatsheet',
+  ])('should display %s link', (link) => {
     const { getByRole } = render(App);
 
     fireEvent.click(getByRole('button', { name: /open help menu/i }));
 
-    expect(getByRole('link', { name: /watch more videos/i })).toBeInTheDocument();
-    expect(getByRole('link', { name: /build a content architecture/i })).toBeInTheDocument();
-    expect(getByRole('link', { name: /add & manage content/i })).toBeInTheDocument();
-    expect(getByRole('link', { name: /manage media/i })).toBeInTheDocument();
-    expect(getByRole('link', { name: /documentation/i })).toBeInTheDocument();
-    expect(getByRole('link', { name: /cheatsheet/i })).toBeInTheDocument();
+    expect(getByRole('link', { name: new RegExp(link, 'i') })).toBeInTheDocument();
   });
 });
