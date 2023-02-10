@@ -1,5 +1,5 @@
 import { resolve } from 'path';
-import { ALLOWED_CONTENT_TYPES } from './constants';
+import { ALLOWED_CONTENT_TYPES } from '../constants';
 
 const {
   file: {

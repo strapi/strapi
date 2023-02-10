@@ -8,7 +8,7 @@ const {
   engine: { createTransferEngine },
 } = require('@strapi/data-transfer');
 const strapi = require('@strapi/strapi');
-const { ALLOWED_CONTENT_TYPES } = require('./constants');
+const { ALLOWED_CONTENT_TYPES } = require('../constants');
 
 /**
  * Export the data from a strapi project.
