@@ -135,15 +135,15 @@ describe('Admin | containers | ProvidersPage', () => {
         justify-content: space-around;
       }
 
+      .c9 {
+        height: 100vh;
+      }
+
       .c7 {
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
         color: #32324d;
-      }
-
-      .c9 {
-        height: 100vh;
       }
 
       .c0 {

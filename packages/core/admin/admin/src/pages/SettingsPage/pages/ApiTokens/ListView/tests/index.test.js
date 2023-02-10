@@ -476,6 +476,12 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         fill: #666687;
       }
 
+      .c27 {
+        -webkit-transform: rotate(180deg);
+        -ms-transform: rotate(180deg);
+        transform: rotate(180deg);
+      }
+
       .c34 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
@@ -596,12 +602,6 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       .c8 svg > g,
       .c8 svg path {
         fill: #ffffff;
-      }
-
-      .c27 {
-        -webkit-transform: rotate(180deg);
-        -ms-transform: rotate(180deg);
-        transform: rotate(180deg);
       }
 
       .c0:focus-visible {
