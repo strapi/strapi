@@ -10,15 +10,13 @@ import { EditFolderDialog } from '../EditFolderDialog';
 import { useEditFolder } from '../../../hooks/useEditFolder';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 
-jest.mock('../../../utils/axiosInstance', () => ({
-  ...jest.requireActual('../../../utils/axiosInstance'),
-  put: jest.fn().mockImplementation({}),
-}));
-
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useQueryParams: jest.fn().mockReturnValue([{ query: {} }]),
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
+  useFetchClient: jest.fn().mockReturnValue({
+    put: jest.fn().mockImplementation({}),
+  }),
 }));
 
 jest.mock('../../../hooks/useMediaLibraryPermissions');

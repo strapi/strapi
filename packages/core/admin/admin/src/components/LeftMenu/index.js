@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { NavLink as RouterNavLink, useLocation } from 'react-router-dom';
+import { NavLink as RouterNavLink, useLocation, useHistory } from 'react-router-dom';
 import { Divider } from '@strapi/design-system/Divider';
 import {
   MainNav,
@@ -20,8 +20,14 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import Write from '@strapi/icons/Write';
 import Exit from '@strapi/icons/Exit';
-import { auth, usePersistentState, useAppInfos, useTracking } from '@strapi/helper-plugin';
-import useConfigurations from '../../hooks/useConfigurations';
+import {
+  auth,
+  usePersistentState,
+  useAppInfos,
+  useTracking,
+  getFetchClient,
+} from '@strapi/helper-plugin';
+import { useConfigurations } from '../../hooks';
 
 const LinkUserWrapper = styled(Box)`
   width: ${150 / 16}rem;
@@ -62,6 +68,8 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
+  const history = useHistory();
+  const { post } = getFetchClient();
 
   const initials = userDisplayName
     .split(' ')
@@ -71,9 +79,11 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
 
   const handleToggleUserLinks = () => setUserLinksVisible((prev) => !prev);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await post('/admin/logout');
     auth.clearAppStorage();
     handleToggleUserLinks();
+    history.push('/auth/login');
   };
 
   const handleBlur = (e) => {

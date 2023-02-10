@@ -204,6 +204,10 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         justify-content: space-around;
       }
 
+      .c26 {
+        height: 100vh;
+      }
+
       .c9 {
         font-weight: 600;
         font-size: 2rem;
@@ -424,10 +428,6 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         fill: #32324d;
       }
 
-      .c26 {
-        height: 100vh;
-      }
-
       .c1 {
         display: grid;
         grid-template-columns: 1fr;
@@ -529,7 +529,7 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
                     <span>
                       <button
                         aria-disabled="false"
-                        aria-labelledby="tooltip-1"
+                        aria-labelledby="0"
                         class="c10 c21"
                         tabindex="0"
                         type="button"

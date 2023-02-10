@@ -105,7 +105,6 @@ describe('ContentBox', () => {
         />
         <div
           class="c4 c5"
-          spacing="1"
         >
           <div
             class="c1"

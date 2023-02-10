@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-upload",
-  "version": "4.5.6",
+  "version": "4.6.1",
   "description": "Makes it easy to upload images and files to your Strapi Application.",
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -23,14 +23,14 @@
     "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
   },
   "dependencies": {
-    "@strapi/helper-plugin": "4.5.6",
-    "@strapi/provider-upload-local": "4.5.6",
-    "@strapi/utils": "4.5.6",
+    "@strapi/helper-plugin": "4.6.1",
+    "@strapi/provider-upload-local": "4.6.1",
+    "@strapi/utils": "4.6.1",
     "byte-size": "7.0.1",
     "cropperjs": "1.5.12",
     "date-fns": "2.29.3",
     "fs-extra": "10.0.0",
-    "immer": "9.0.15",
+    "immer": "9.0.19",
     "koa-range": "0.3.0",
     "koa-static": "5.0.0",
     "lodash": "4.17.21",
@@ -38,18 +38,18 @@
     "react": "^17.0.2",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "^17.0.2",
-    "react-intl": "5.25.1",
-    "react-redux": "7.2.8",
+    "react-intl": "6.2.7",
+    "react-redux": "8.0.5",
     "react-router": "^5.2.0",
     "react-router-dom": "5.3.4",
-    "sharp": "0.31.2"
+    "sharp": "0.31.1"
   },
   "devDependencies": {
     "@testing-library/dom": "8.19.0",
     "@testing-library/react": "12.1.4",
     "@testing-library/react-hooks": "8.0.1",
     "@testing-library/user-event": "14.4.3",
-    "msw": "0.49.1",
+    "msw": "1.0.0",
     "react-test-renderer": "^17.0.2"
   },
   "engines": {

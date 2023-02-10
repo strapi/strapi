@@ -1,6 +1,8 @@
 'use strict';
 
 const path = require('path');
+
+const { map, values, sumBy, pipe, flatMap, propEq } = require('lodash/fp');
 const execa = require('execa');
 const _ = require('lodash');
 const { exists } = require('fs-extra');
@@ -37,7 +39,7 @@ module.exports = {
   async getProjectType() {
     // FIXME
     try {
-      return { data: { isEE: strapi.EE, features: ee.features.getEnabled() } };
+      return { data: { isEE: strapi.EE, features: ee.features.list() } };
     } catch (err) {
       return { data: { isEE: false, features: [] } };
     }
@@ -97,11 +99,25 @@ module.exports = {
     );
     const isHostedOnStrapiCloud = env('STRAPI_HOSTING', null) === 'strapi.cloud';
 
+    const numberOfAllContentTypes = _.size(strapi.contentTypes);
+    const numberOfComponents = _.size(strapi.components);
+
+    const getNumberOfDynamicZones = () => {
+      return pipe(
+        map('attributes'),
+        flatMap(values),
+        sumBy(propEq('type', 'dynamiczone'))
+      )(strapi.contentTypes);
+    };
+
     return {
       data: {
         useTypescriptOnServer,
         useTypescriptOnAdmin,
         isHostedOnStrapiCloud,
+        numberOfAllContentTypes, // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
+        numberOfComponents,
+        numberOfDynamicZones: getNumberOfDynamicZones(),
       },
     };
   },
