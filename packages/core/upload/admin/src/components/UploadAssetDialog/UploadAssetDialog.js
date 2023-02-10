@@ -19,7 +19,7 @@ export const UploadAssetDialog = ({
   onClose,
   addUploadedFiles,
   trackedLocation,
-  validateAssetsTypes,
+  validateAssetsTypes = (_, cb) => cb(),
 }) => {
   const { formatMessage } = useIntl();
   const [step, setStep] = useState(initialAssetsToAdd ? Steps.PendingAsset : Steps.AddAsset);

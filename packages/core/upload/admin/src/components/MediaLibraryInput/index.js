@@ -102,11 +102,12 @@ export const MediaLibraryInput = ({
     });
   };
 
-  const validateAssetsTypes = (assets, cb) => {
+  const validateAssetsTypes = (assets, callback) => {
     const allowedAssets = getAllowedFiles(fieldAllowedTypes, assets);
 
-    if (allowedAssets.length > 0) cb(allowedAssets);
-    else {
+    if (allowedAssets.length > 0) {
+      callback(allowedAssets);
+    } else {
       toggleNotification({
         type: 'warning',
         timeout: 4000,
