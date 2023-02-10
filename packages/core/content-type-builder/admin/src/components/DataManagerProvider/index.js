@@ -18,7 +18,6 @@ import { connect, useDispatch } from 'react-redux';
 import { compose } from 'redux';
 import DataManagerContext from '../../contexts/DataManagerContext';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
-import axiosInstance from '../../utils/axiosInstance';
 import getTrad from '../../utils/getTrad';
 import makeUnique from '../../utils/makeUnique';
 import pluginId from '../../pluginId';
@@ -83,7 +82,7 @@ const DataManagerProvider = ({
     `/plugins/${pluginId}/component-categories/:categoryUid/:componentUid`
   );
   const fetchClient = useFetchClient();
-  const { post, del } = fetchClient;
+  const { put, post, del } = fetchClient;
 
   const formatMessageRef = useRef();
   formatMessageRef.current = formatMessage;
@@ -255,7 +254,7 @@ const DataManagerProvider = ({
 
   const deleteCategory = async (categoryUid) => {
     try {
-      const requestURL = `/component-categories/${categoryUid}`;
+      const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
       // eslint-disable-next-line no-alert
       const userConfirm = window.confirm(
         formatMessage({
@@ -267,10 +266,8 @@ const DataManagerProvider = ({
 
       if (userConfirm) {
         lockAppWithAutoreload();
-        console.log('deleteCategory', requestURL);
 
-        // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from getFetchClient
-        await axiosInstance.delete(requestURL);
+        await del(requestURL);
 
         // Make sure the server has restarted
         await serverRestartWatcher(true);
@@ -344,18 +341,16 @@ const DataManagerProvider = ({
 
   const editCategory = async (categoryUid, body) => {
     try {
-      const requestURL = `/component-categories/${categoryUid}`;
+      const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
 
       // Close the modal
       onCloseModal();
 
       // Lock the app
       lockAppWithAutoreload();
-      console.log('editCategory', requestURL);
 
       // Update the category
-      // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from getFetchClient
-      await axiosInstance.put(requestURL, body);
+      await put(requestURL, body);
 
       // Make sure the server has restarted
       await serverRestartWatcher(true);
@@ -511,12 +506,10 @@ const DataManagerProvider = ({
       const baseURL = `/${pluginId}/${endPoint}`;
       const requestURL = isCreating ? baseURL : `${baseURL}/${currentUid}`;
 
-      // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from getFetchClient
       if (isCreating) {
         await post(requestURL, body);
       } else {
-        console.log('submitData Edit', requestURL);
-        await axiosInstance.put(requestURL, body);
+        await put(requestURL, body);
       }
 
       // Make sure the server has restarted
