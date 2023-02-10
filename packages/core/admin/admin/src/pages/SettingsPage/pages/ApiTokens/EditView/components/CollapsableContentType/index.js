@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { capitalize } from 'lodash';
+import capitalize from 'lodash/capitalize';
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
 import { Checkbox } from '@strapi/design-system/Checkbox';
 import { Grid, GridItem } from '@strapi/design-system/Grid';

@@ -1,5 +1,6 @@
 import * as yup from 'yup';
-import { toLower, trim } from 'lodash';
+import toLower from 'lodash/toLower';
+import trim from 'lodash/trim';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 import getTrad from '../../../utils/getTrad';
 import { createComponentUid } from '../utils/createUid';

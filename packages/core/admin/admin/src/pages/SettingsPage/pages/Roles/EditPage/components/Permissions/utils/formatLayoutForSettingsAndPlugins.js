@@ -1,4 +1,4 @@
-import { chain } from 'lodash';
+import chain from 'lodash/chain';
 
 const replaceName = (name) => name.split(' ').join('-');
 

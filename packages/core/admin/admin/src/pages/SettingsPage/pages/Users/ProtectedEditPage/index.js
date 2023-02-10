@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { useRBAC, LoadingIndicatorPage, useNotification } from '@strapi/helper-plugin';
 import { Redirect, useLocation } from 'react-router-dom';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import adminPermissions from '../../../../../permissions';
 import EditPage from '../EditPage';
 

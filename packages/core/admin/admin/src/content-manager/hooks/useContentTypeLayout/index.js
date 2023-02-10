@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { useSelector } from 'react-redux';
 import selectLayout from '../../pages/EditViewLayoutManager/selectors';
 

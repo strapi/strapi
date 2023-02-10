@@ -1,4 +1,5 @@
-import { get } from 'lodash';
+import get from 'lodash/get';
+
 import { createDefaultConditionsForm } from './createDefaultCTFormFromLayout';
 import findMatchingPermission from './findMatchingPermissions';
 

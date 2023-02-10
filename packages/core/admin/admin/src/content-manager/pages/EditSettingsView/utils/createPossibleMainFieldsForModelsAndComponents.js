@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import get from 'lodash/get';
 
 const createPossibleMainFieldsForModelsAndComponents = (array) => {
   return array.reduce((acc, current) => {

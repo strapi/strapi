@@ -1,4 +1,6 @@
-import { chain, get } from 'lodash';
+import chain from 'lodash/chain';
+import get from 'lodash/get';
+
 import { stringify } from 'qs';
 
 const generateLinks = (links, type, configurations = []) => {
