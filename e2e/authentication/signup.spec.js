@@ -1,7 +1,27 @@
 import { test, expect } from '@playwright/test';
-// eslint-disable-next-line import/extensions
+
 import { resetDatabaseAndImportDataFromPath } from '../scripts/dts-import';
-import { fillValidSignUpForm } from './utils';
+import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../constants';
+
+/**
+ * Fill in the sign up form with valid values
+ * @param {EventEmitter} page - playwright page
+ */
+export const fillValidSignUpForm = async ({ page }) => {
+  await page.getByLabel('First name').fill('John');
+  await page.getByLabel('Last name').fill('Smith');
+  await page.getByLabel('Email').fill(ADMIN_EMAIL_ADDRESS);
+  await page
+    .getByLabel('Password*', {
+      exact: true,
+    })
+    .fill(ADMIN_PASSWORD);
+  await page
+    .getByLabel('Confirm Password*', {
+      exact: true,
+    })
+    .fill(ADMIN_PASSWORD);
+};
 
 test.describe('Sign Up', () => {
   test.beforeEach(async ({ page }) => {
@@ -11,9 +31,12 @@ test.describe('Sign Up', () => {
   });
 
   test('a user cannot submit the form if the first name field is not filled', async ({ page }) => {
-    expect(
-      await page.getByRole('textbox', { name: 'First name *' }).getAttribute('aria-required')
-    ).toBeTruthy();
+    const nameInput = page.getByRole('textbox', { name: 'First name *' });
+
+    await nameInput.fill('');
+    await page.getByRole('button', { name: "Let's start" }).click();
+    await expect(nameInput).toBeFocused();
+    await expect(page.getByText('Value is required')).toBeVisible();
   });
 
   test('a user cannot submit the form if the email is: not provided, not lowercase or not a valid email address', async ({
@@ -28,9 +51,10 @@ test.describe('Sign Up', () => {
       await expect(emailInput).toBeFocused();
     };
 
-    expect(await emailInput.getAttribute('aria-required')).toBeTruthy();
+    await fillEmailAndSubmit('');
+    await expect(page.getByText('Value is required')).toBeVisible();
 
-    await fillEmailAndSubmit('ADMIN@ADMIN.COM');
+    await fillEmailAndSubmit(ADMIN_EMAIL_ADDRESS.toUpperCase());
     await expect(page.getByText('The value must be a lowercase string')).toBeVisible();
 
     await fillEmailAndSubmit('notanemail');
@@ -41,7 +65,6 @@ test.describe('Sign Up', () => {
     page,
   }) => {
     const passwordInput = page.getByRole('textbox', { name: 'Password *' });
-    const confirmPasswordInput = page.getByRole('textbox', { name: 'Confirm Password *' });
     const letsStartButton = page.getByRole('button', { name: "Let's start" });
 
     const fillPasswordAndSubmit = async (passwordValue) => {
@@ -50,13 +73,8 @@ test.describe('Sign Up', () => {
       await expect(passwordInput).toBeFocused();
     };
 
-    const arePasswordsRequired = [
-      await passwordInput.getAttribute('aria-required'),
-      await confirmPasswordInput.getAttribute('aria-required'),
-    ];
-    arePasswordsRequired.forEach((required) => {
-      expect(required).toBeTruthy();
-    });
+    await fillPasswordAndSubmit('');
+    await expect(page.getByText('Value is required')).toBeVisible();
 
     await fillPasswordAndSubmit('noNumberInHere');
     await expect(page.getByText('Password must contain at least one number')).toBeVisible();
