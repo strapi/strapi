@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
+import { useTracking } from '@strapi/helper-plugin';
 import {
   SubNav,
   SubNavHeader,
@@ -13,6 +14,7 @@ import { getSectionsToDisplay } from '../../utils';
 
 const SettingsNav = ({ menu }) => {
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
 
   const filteredMenu = getSectionsToDisplay(menu);
 
@@ -35,6 +37,12 @@ const SettingsNav = ({ menu }) => {
     defaultMessage: 'Settings',
   });
 
+  const handleClick = (link) => {
+    if (link.to.startsWith('/settings/audit-logs')) {
+      trackUsage('didGoToAuditLogs');
+    }
+  };
+
   return (
     <SubNav ariaLabel={label}>
       <SubNavHeader label={label} />
@@ -42,7 +50,13 @@ const SettingsNav = ({ menu }) => {
         {sections.map((section) => (
           <SubNavSection key={section.id} label={formatMessage(section.intlLabel)}>
             {section.links.map((link) => (
-              <SubNavLink as={NavLink} withBullet={link.hasNotification} to={link.to} key={link.id}>
+              <SubNavLink
+                as={NavLink}
+                withBullet={link.hasNotification}
+                to={link.to}
+                onClick={() => handleClick(link)}
+                key={link.id}
+              >
                 {formatMessage(link.intlLabel)}
               </SubNavLink>
             ))}
