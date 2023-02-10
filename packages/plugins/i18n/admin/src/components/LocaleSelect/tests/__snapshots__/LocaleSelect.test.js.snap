@@ -171,12 +171,10 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
   />
   <div
     class="c1 c2"
-    spacing="1"
   >
     <label
       class="c3"
-      for="combobox-1"
-      id="combobox-1-label"
+      for="1"
     >
       <div
         class="c4"
@@ -195,15 +193,14 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
         <input
           aria-activedescendant=""
           aria-autocomplete="list"
-          aria-controls="combobox-1-listbox"
+          aria-controls="1-listbox"
           aria-disabled="false"
           aria-expanded="false"
           aria-haspopup="listbox"
-          aria-labelledby="combobox-1-label"
           autocomplete="off"
           autocorrect="off"
           class="c8"
-          id="combobox-1"
+          id="1"
           placeholder="Select"
           role="combobox"
           spellcheck="off"

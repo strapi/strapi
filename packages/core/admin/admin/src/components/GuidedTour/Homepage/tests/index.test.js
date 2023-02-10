@@ -226,14 +226,6 @@ describe('GuidedTour Homepage', () => {
         color: #666687;
       }
 
-      .c25 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        line-height: 1.14;
-        color: #32324d;
-      }
-
       .c3 > * {
         margin-top: 0;
         margin-bottom: 0;
@@ -339,8 +331,7 @@ describe('GuidedTour Homepage', () => {
         color: #666687;
       }
 
-      .c24[aria-disabled='true'] svg > g,
-      .c24[aria-disabled='true'] svg path {
+      .c24[aria-disabled='true'] svg > g,.c24[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -353,8 +344,7 @@ describe('GuidedTour Homepage', () => {
         color: #666687;
       }
 
-      .c24[aria-disabled='true']:active svg > g,
-      .c24[aria-disabled='true']:active svg path {
+      .c24[aria-disabled='true']:active svg > g,.c24[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -412,8 +402,7 @@ describe('GuidedTour Homepage', () => {
         color: #666687;
       }
 
-      .c17[aria-disabled='true'] svg > g,
-      .c17[aria-disabled='true'] svg path {
+      .c17[aria-disabled='true'] svg > g,.c17[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -426,8 +415,7 @@ describe('GuidedTour Homepage', () => {
         color: #666687;
       }
 
-      .c17[aria-disabled='true']:active svg > g,
-      .c17[aria-disabled='true']:active svg path {
+      .c17[aria-disabled='true']:active svg > g,.c17[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -451,7 +439,6 @@ describe('GuidedTour Homepage', () => {
       >
         <div
           class="c0 c2 c3"
-          spacing="6"
         >
           <h2
             class="c4 c5"
@@ -472,8 +459,6 @@ describe('GuidedTour Homepage', () => {
                 >
                   <div
                     class="c0 c8 c9"
-                    height="1.875rem"
-                    width="1.875rem"
                   >
                     <span
                       class="c4 c10"
@@ -496,8 +481,6 @@ describe('GuidedTour Homepage', () => {
                 >
                   <div
                     class="c0 c14"
-                    height="100%"
-                    width="0.125rem"
                   />
                 </div>
                 <div
@@ -546,8 +529,6 @@ describe('GuidedTour Homepage', () => {
                 >
                   <div
                     class="c0 c20 c9"
-                    height="1.875rem"
-                    width="1.875rem"
                   >
                     <span
                       class="c4 c21"
@@ -570,8 +551,6 @@ describe('GuidedTour Homepage', () => {
                 >
                   <div
                     class="c0 c22"
-                    height="100%"
-                    width="0.125rem"
                   />
                 </div>
                 <div
@@ -590,8 +569,6 @@ describe('GuidedTour Homepage', () => {
                 >
                   <div
                     class="c0 c20 c9"
-                    height="1.875rem"
-                    width="1.875rem"
                   >
                     <span
                       class="c4 c21"
@@ -628,7 +605,7 @@ describe('GuidedTour Homepage', () => {
             type="button"
           >
             <span
-              class="c4 c25"
+              class="c4 c18"
             >
               Skip the tour
             </span>

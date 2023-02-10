@@ -16,10 +16,6 @@ jest.mock('../../../hooks', () => ({
   useThemeToggle: jest.fn(() => ({ currentTheme: 'light', themes: { light: lightTheme } })),
 }));
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => null,
-}));
-
 jest.mock('react-intl', () => ({
   FormattedMessage: ({ id }) => id,
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => id) }),
@@ -149,6 +145,9 @@ describe('ADMIN | pages | SettingsPage', () => {
       .c7 {
         height: 1px;
         border: none;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
         margin: 0;
       }
 
@@ -210,7 +209,6 @@ describe('ADMIN | pages | SettingsPage', () => {
           >
             <ol
               class="c10 c11"
-              spacing="2"
             />
           </div>
         </nav>

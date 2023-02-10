@@ -4,13 +4,8 @@ import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { useRBAC } from '@strapi/helper-plugin';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faDiscord } from '@fortawesome/free-brands-svg-icons';
-import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import server from './server';
 import { ProvidersPage } from '../index';
-
-library.add(faDiscord, faEnvelope);
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -140,15 +135,15 @@ describe('Admin | containers | ProvidersPage', () => {
         justify-content: space-around;
       }
 
+      .c9 {
+        height: 100vh;
+      }
+
       .c7 {
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
         color: #32324d;
-      }
-
-      .c9 {
-        height: 100vh;
       }
 
       .c0 {

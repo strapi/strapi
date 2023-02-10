@@ -13,36 +13,42 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   width: 1px;
 }
 
-.c3 {
+.c2 {
+  padding: 40px;
+  position: fixed;
+  z-index: 4;
+}
+
+.c4 {
   background: #ffffff;
   border-radius: 4px;
   box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
 }
 
-.c5 {
+.c6 {
   padding: 24px;
 }
 
-.c10 {
+.c11 {
   padding-top: 40px;
   padding-right: 24px;
   padding-bottom: 40px;
   padding-left: 24px;
 }
 
-.c11 {
+.c12 {
   padding-bottom: 8px;
 }
 
-.c16 {
+.c17 {
   padding: 16px;
 }
 
-.c24 {
+.c25 {
   padding-right: 8px;
 }
 
-.c6 {
+.c7 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -60,7 +66,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   justify-content: center;
 }
 
-.c13 {
+.c14 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -74,7 +80,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   flex-direction: column;
 }
 
-.c18 {
+.c19 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -88,78 +94,74 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   flex-direction: row;
 }
 
-.c9 {
+.c10 {
   font-weight: 600;
   font-size: 1.125rem;
   line-height: 1.22;
   color: #32324d;
 }
 
-.c15 {
+.c16 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #32324d;
 }
 
-.c22 {
+.c23 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
-  line-height: 1.14;
   color: #32324d;
 }
 
-.c1 {
-  position: fixed;
-  z-index: 4;
+.c3 {
   inset: 0;
   background: #32324d33;
-  padding: 0 40px;
 }
 
-.c4 {
+.c5 {
   max-width: 25.75rem;
   margin: 0 auto;
   overflow: hidden;
   margin-top: 10%;
 }
 
-.c7 {
+.c8 {
   border-bottom: 1px solid #eaeaef;
 }
 
-.c12 svg {
+.c13 svg {
   width: 24px;
   height: 24px;
 }
 
-.c12 svg path {
+.c13 svg path {
   fill: #d02b20;
 }
 
-.c14 > * {
+.c15 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c14 > * + * {
+.c15 > * + * {
   margin-top: 8px;
 }
 
-.c19 > * {
+.c20 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c19 > * + * {
+.c20 > * + * {
   margin-left: 8px;
 }
 
-.c17 {
+.c18 {
   border-top: 1px solid #eaeaef;
 }
 
-.c17 button {
+.c18 button {
   width: 100%;
   display: -webkit-inline-box;
   display: -webkit-inline-flex;
@@ -171,7 +173,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   justify-content: center;
 }
 
-.c20 {
+.c21 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -185,21 +187,21 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   outline: none;
 }
 
-.c20 svg {
+.c21 svg {
   height: 12px;
   width: 12px;
 }
 
-.c20 svg > g,
-.c20 svg path {
+.c21 svg > g,
+.c21 svg path {
   fill: #ffffff;
 }
 
-.c20[aria-disabled='true'] {
+.c21[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c20:after {
+.c21:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -214,11 +216,11 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   border: 2px solid transparent;
 }
 
-.c20:focus-visible {
+.c21:focus-visible {
   outline: none;
 }
 
-.c20:focus-visible:after {
+.c21:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -229,11 +231,11 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c25 {
+.c26 {
   height: 100%;
 }
 
-.c21 {
+.c22 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -247,7 +249,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   background: #ffffff;
 }
 
-.c21 .c2 {
+.c22 .c1 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -258,56 +260,54 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   align-items: center;
 }
 
-.c21 .c8 {
+.c22 .c9 {
   color: #ffffff;
 }
 
-.c21[aria-disabled='true'] {
+.c22[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c21[aria-disabled='true'] .c8 {
+.c22[aria-disabled='true'] .c9 {
   color: #666687;
 }
 
-.c21[aria-disabled='true'] svg > g,
-.c21[aria-disabled='true'] svg path {
+.c22[aria-disabled='true'] svg > g,.c22[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c21[aria-disabled='true']:active {
+.c22[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c21[aria-disabled='true']:active .c8 {
+.c22[aria-disabled='true']:active .c9 {
   color: #666687;
 }
 
-.c21[aria-disabled='true']:active svg > g,
-.c21[aria-disabled='true']:active svg path {
+.c22[aria-disabled='true']:active svg > g,.c22[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c21:hover {
+.c22:hover {
   background-color: #f6f6f9;
 }
 
-.c21:active {
+.c22:active {
   background-color: #eaeaef;
 }
 
-.c21 .c8 {
+.c22 .c9 {
   color: #32324d;
 }
 
-.c21 svg > g,
-.c21 svg path {
+.c22 svg > g,
+.c22 svg path {
   fill: #32324d;
 }
 
-.c23 {
+.c24 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -321,7 +321,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   background: #fcecea;
 }
 
-.c23 .c2 {
+.c24 .c1 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -332,62 +332,60 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   align-items: center;
 }
 
-.c23 .c8 {
+.c24 .c9 {
   color: #ffffff;
 }
 
-.c23[aria-disabled='true'] {
+.c24[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c23[aria-disabled='true'] .c8 {
+.c24[aria-disabled='true'] .c9 {
   color: #666687;
 }
 
-.c23[aria-disabled='true'] svg > g,
-.c23[aria-disabled='true'] svg path {
+.c24[aria-disabled='true'] svg > g,.c24[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c23[aria-disabled='true']:active {
+.c24[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c23[aria-disabled='true']:active .c8 {
+.c24[aria-disabled='true']:active .c9 {
   color: #666687;
 }
 
-.c23[aria-disabled='true']:active svg > g,
-.c23[aria-disabled='true']:active svg path {
+.c24[aria-disabled='true']:active svg > g,.c24[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c23:hover {
+.c24:hover {
   background-color: #ffffff;
 }
 
-.c23:active {
+.c24:active {
   background-color: #ffffff;
   border: 1px solid #d02b20;
 }
 
-.c23:active .c8 {
+.c24:active .c9 {
   color: #d02b20;
 }
 
-.c23:active svg > g,
-.c23:active svg path {
+.c24:active svg > g,
+.c24:active svg path {
   fill: #d02b20;
 }
 
-.c23 .c8 {
+.c24 .c9 {
   color: #b72b1a;
 }
 
-.c23 svg > g,
-.c23 svg path {
+.c24 svg > g,
+.c24 svg path {
   fill: #b72b1a;
 }
 
@@ -422,37 +420,37 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
     data-react-portal="true"
   >
     <div
-      class="c1"
+      class="c1 c2 c3"
     >
       <div>
         <div>
           <div
-            aria-labelledby="dialog-1-label"
+            aria-labelledby="0-label"
             aria-modal="true"
-            class="c2 c3 c4"
+            class="c1 c4 c5"
             role="dialog"
           >
             <div
-              class="c2 c5 c6 c7"
+              class="c1 c6 c7 c8"
             >
               <h2
-                class="c8 c9"
-                id="dialog-1-label"
+                class="c9 c10"
+                id="0-label"
               >
                 Confirmation
               </h2>
             </div>
             <div
-              class="c2 "
+              class="c1 "
             >
               <div
-                class="c2 c10"
+                class="c1 c11"
               >
                 <div
-                  class="c2 c11 c12"
+                  class="c1 c12 c13"
                 >
                   <div
-                    class="c2 c6"
+                    class="c1 c7"
                   >
                     <svg
                       fill="none"
@@ -469,14 +467,13 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c2 c13 c14"
-                  spacing="2"
+                  class="c1 c14 c15"
                 >
                   <div
-                    class="c2 c6"
+                    class="c1 c7"
                   >
                     <span
-                      class="c8 c15"
+                      class="c9 c16"
                       id="confirm-description"
                     >
                       Are you sure you want to delete this?
@@ -485,32 +482,31 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
                 </div>
               </div>
               <div
-                class="c2 c16 c17"
+                class="c1 c17 c18"
               >
                 <div
-                  class="c2 c18 c19"
-                  spacing="2"
+                  class="c1 c19 c20"
                 >
                   <button
                     aria-disabled="false"
-                    class="c20 c21"
+                    class="c21 c22"
                     type="button"
                   >
                     <span
-                      class="c8 c22"
+                      class="c9 c23"
                     >
                       Cancel
                     </span>
                   </button>
                   <button
                     aria-disabled="false"
-                    class="c20 c23"
+                    class="c21 c24"
                     id="confirm-delete"
                     type="button"
                   >
                     <div
                       aria-hidden="true"
-                      class="c2 c24 c25"
+                      class="c1 c25 c26"
                     >
                       <svg
                         fill="none"
@@ -526,7 +522,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
                       </svg>
                     </div>
                     <span
-                      class="c8 c22"
+                      class="c9 c23"
                     >
                       Confirm
                     </span>

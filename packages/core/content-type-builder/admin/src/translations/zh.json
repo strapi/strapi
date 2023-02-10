@@ -1,5 +1,4 @@
 {
-  "ComponentIconPicker.search.placeholder": "搜尋圖示",
   "attribute.boolean": "布林值",
   "attribute.boolean.description": "好或不好、1 或 0、是或否",
   "attribute.component": "元件",
@@ -130,7 +129,6 @@
   "form.button.select-component": "選擇一個元件",
   "form.button.single-type.description": "適用於單一實例，如首頁、關於 ...... 等",
   "form.button.single-type.name": "單一型別",
-  "form.contentType.divider.draft-publish": "草稿/發佈",
   "from": "從",
   "listView.headerLayout.description": "建立您的內容的資料結構",
   "menu.section.components.name": "元件",

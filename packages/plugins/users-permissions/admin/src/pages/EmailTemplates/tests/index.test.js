@@ -65,7 +65,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c16 {
+      .c17 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -96,16 +96,20 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c9 {
+      .c8 {
+        position: relative;
+      }
+
+      .c10 {
         padding-right: 24px;
         padding-left: 24px;
       }
 
-      .c14 {
+      .c15 {
         width: 1%;
       }
 
-      .c20 {
+      .c21 {
         color: #666687;
       }
 
@@ -148,7 +152,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         color: #32324d;
       }
 
-      .c18 {
+      .c19 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
@@ -156,13 +160,13 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         color: #666687;
       }
 
-      .c22 {
+      .c23 {
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c23 {
+      .c24 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -176,21 +180,21 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         outline: none;
       }
 
-      .c23 svg {
+      .c24 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c23 svg > g,
-      .c23 svg path {
+      .c24 svg > g,
+      .c24 svg path {
         fill: #ffffff;
       }
 
-      .c23[aria-disabled='true'] {
+      .c24[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c23:after {
+      .c24:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -205,11 +209,11 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         border: 2px solid transparent;
       }
 
-      .c23:focus-visible {
+      .c24:focus-visible {
         outline: none;
       }
 
-      .c23:focus-visible:after {
+      .c24:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -225,16 +229,12 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         border: 1px solid #eaeaef;
       }
 
-      .c11 {
+      .c12 {
         width: 100%;
         white-space: nowrap;
       }
 
-      .c8 {
-        position: relative;
-      }
-
-      .c8:before {
+      .c9:before {
         background: linear-gradient(90deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
@@ -244,7 +244,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         left: 0;
       }
 
-      .c8:after {
+      .c9:after {
         background: linear-gradient(270deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
@@ -255,54 +255,54 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         top: 0;
       }
 
-      .c10 {
+      .c11 {
         overflow-x: auto;
       }
 
-      .c19 tr:last-of-type {
+      .c20 tr:last-of-type {
         border-bottom: none;
-      }
-
-      .c12 {
-        border-bottom: 1px solid #eaeaef;
       }
 
       .c13 {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c13 td,
-      .c13 th {
+      .c14 {
+        border-bottom: 1px solid #eaeaef;
+      }
+
+      .c14 td,
+      .c14 th {
         padding: 16px;
       }
 
-      .c13 td:first-of-type,
-      .c13 th:first-of-type {
+      .c14 td:first-of-type,
+      .c14 th:first-of-type {
         padding: 0 4px;
       }
 
-      .c13 th {
+      .c14 th {
         padding-top: 0;
         padding-bottom: 0;
         height: 3.5rem;
       }
 
-      .c15 {
+      .c16 {
         vertical-align: middle;
         text-align: left;
         color: #666687;
         outline-offset: -4px;
       }
 
-      .c15 input {
+      .c16 input {
         vertical-align: sub;
       }
 
-      .c17 svg {
+      .c18 svg {
         height: 0.25rem;
       }
 
-      .c24 {
+      .c25 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -320,30 +320,30 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         border: none;
       }
 
-      .c24 svg > g,
-      .c24 svg path {
+      .c25 svg > g,
+      .c25 svg path {
         fill: #8e8ea9;
       }
 
-      .c24:hover svg > g,
-      .c24:hover svg path {
+      .c25:hover svg > g,
+      .c25:hover svg path {
         fill: #666687;
       }
 
-      .c24:active svg > g,
-      .c24:active svg path {
+      .c25:active svg > g,
+      .c25:active svg path {
         fill: #a5a5ba;
       }
 
-      .c24[aria-disabled='true'] {
+      .c25[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c24[aria-disabled='true'] svg path {
+      .c25[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c21 path {
+      .c22 path {
         fill: #666687;
       }
 
@@ -387,96 +387,99 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
             class="c6 c7"
           >
             <div
-              class="c8"
+              class="c8 c9"
             >
               <div
-                class="c9 c10"
+                class="c10 c11"
               >
                 <table
                   aria-colcount="3"
                   aria-rowcount="3"
-                  class="c11"
+                  class="c12"
+                  role="grid"
                 >
                   <thead
-                    class="c12"
+                    class="c13"
                   >
                     <tr
                       aria-rowindex="1"
-                      class="c13"
+                      class="c14"
                     >
                       <th
                         aria-colindex="1"
-                        class="c14 c15"
+                        class="c15 c16"
+                        role="gridcell"
                         tabindex="0"
-                        width="1%"
                       >
                         <div
                           class="c3"
                         >
                           <div
-                            class="c16"
+                            class="c17"
                           >
                             icon
                           </div>
                           <span
-                            class="c17"
+                            class="c18"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="2"
-                        class="c15"
+                        class="c16"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <div
                           class="c3"
                         >
                           <span
-                            class="c18"
+                            class="c19"
                           >
                             name
                           </span>
                           <span
-                            class="c17"
+                            class="c18"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="3"
-                        class="c14 c15"
+                        class="c15 c16"
+                        role="gridcell"
                         tabindex="-1"
-                        width="1%"
                       >
                         <div
                           class="c3"
                         >
                           <div
-                            class="c16"
+                            class="c17"
                           >
                             action
                           </div>
                           <span
-                            class="c17"
+                            class="c18"
                           />
                         </div>
                       </th>
                     </tr>
                   </thead>
                   <tbody
-                    class="c19"
+                    class="c20"
                   >
                     <tr
                       aria-rowindex="2"
-                      class="c13"
+                      class="c14"
                       style="cursor: pointer;"
                     >
                       <td
                         aria-colindex="1"
-                        class="c15"
+                        class="c16"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <div
-                          class="c20 c21"
+                          class="c21 c22"
                         >
                           <svg
                             aria-label="Reset password"
@@ -497,11 +500,12 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                       </td>
                       <td
                         aria-colindex="2"
-                        class="c15"
+                        class="c16"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <span
-                          class="c22"
+                          class="c23"
                         >
                           Reset password
                         </span>
@@ -509,19 +513,19 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                       <td
                         aria-colindex="3"
                         aria-hidden="true"
-                        class="c15"
+                        class="c16"
                         role="button"
                       >
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="tooltip-1"
-                            class="c23 c24"
+                            aria-labelledby="0"
+                            class="c24 c25"
                             tabindex="-1"
                             type="button"
                           >
                             <span
-                              class="c16"
+                              class="c17"
                             >
                               Edit a template
                             </span>
@@ -547,16 +551,17 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                     </tr>
                     <tr
                       aria-rowindex="3"
-                      class="c13"
+                      class="c14"
                       style="cursor: pointer;"
                     >
                       <td
                         aria-colindex="1"
-                        class="c15"
+                        class="c16"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <div
-                          class="c20 c21"
+                          class="c21 c22"
                         >
                           <svg
                             aria-label="Email address confirmation"
@@ -575,11 +580,12 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                       </td>
                       <td
                         aria-colindex="2"
-                        class="c15"
+                        class="c16"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <span
-                          class="c22"
+                          class="c23"
                         >
                           Email address confirmation
                         </span>
@@ -587,19 +593,19 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                       <td
                         aria-colindex="3"
                         aria-hidden="true"
-                        class="c15"
+                        class="c16"
                         role="button"
                       >
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="tooltip-3"
-                            class="c23 c24"
+                            aria-labelledby="1"
+                            class="c24 c25"
                             tabindex="-1"
                             type="button"
                           >
                             <span
-                              class="c16"
+                              class="c17"
                             >
                               Edit a template
                             </span>

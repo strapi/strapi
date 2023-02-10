@@ -4,7 +4,7 @@
  * @returns {Object[]}
  */
 const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }) => {
-  const type = mainField?.schema.type ? mainField.schema.type : fieldType;
+  const type = mainField?.schema?.type ?? fieldType;
 
   switch (type) {
     case 'email':

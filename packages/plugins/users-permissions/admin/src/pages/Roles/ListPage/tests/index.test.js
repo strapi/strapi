@@ -204,6 +204,10 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         justify-content: space-around;
       }
 
+      .c26 {
+        height: 100vh;
+      }
+
       .c9 {
         font-weight: 600;
         font-size: 2rem;
@@ -215,7 +219,6 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
-        line-height: 1.14;
         color: #32324d;
       }
 
@@ -330,8 +333,7 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         color: #666687;
       }
 
-      .c11[aria-disabled='true'] svg > g,
-      .c11[aria-disabled='true'] svg path {
+      .c11[aria-disabled='true'] svg > g,.c11[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -344,8 +346,7 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         color: #666687;
       }
 
-      .c11[aria-disabled='true']:active svg > g,
-      .c11[aria-disabled='true']:active svg path {
+      .c11[aria-disabled='true']:active svg > g,.c11[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -425,10 +426,6 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
 
       .c24 path {
         fill: #32324d;
-      }
-
-      .c26 {
-        height: 100vh;
       }
 
       .c1 {
@@ -532,7 +529,7 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
                     <span>
                       <button
                         aria-disabled="false"
-                        aria-labelledby="tooltip-1"
+                        aria-labelledby="0"
                         class="c10 c21"
                         tabindex="0"
                         type="button"

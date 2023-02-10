@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useCustomFields } from '@strapi/helper-plugin';
+
+const componentStore = new Map();
 
 /**
  * @description
@@ -7,38 +9,57 @@ import { useCustomFields } from '@strapi/helper-plugin';
  * @param {Array.<string>} componentUids - The uids to look up components
  * @returns object
  */
-const useLazyComponents = (componentUids) => {
-  const [lazyComponentStore, setLazyComponentStore] = useState({});
-  const [loading, setLoading] = useState(true);
+const useLazyComponents = (componentUids = []) => {
+  const [lazyComponentStore, setLazyComponentStore] = useState(Object.fromEntries(componentStore));
+  /**
+   * Start loading only if there are any components passed in
+   * and there are some new to load
+   */
+  const newUids = componentUids.filter((uid) => !componentStore.get(uid));
+  const [loading, setLoading] = useState(() => !!newUids.length);
   const customFieldsRegistry = useCustomFields();
 
   useEffect(() => {
+    const setStore = (store) => {
+      setLazyComponentStore(store);
+      setLoading(false);
+    };
+
     const lazyLoadComponents = async (uids, components) => {
       const modules = await Promise.all(components);
 
       uids.forEach((uid, index) => {
-        if (!Object.keys(lazyComponentStore).includes(uid)) {
-          setLazyComponentStore({ ...lazyComponentStore, [uid]: modules[index].default });
-        }
+        componentStore.set(uid, modules[index].default);
       });
+
+      setStore(Object.fromEntries(componentStore));
     };
 
-    if (componentUids.length) {
-      const componentPromises = componentUids.map((uid) => {
+    if (newUids.length > 0) {
+      setLoading(true);
+
+      const componentPromises = newUids.map((uid) => {
         const customField = customFieldsRegistry.get(uid);
 
         return customField.components.Input();
       });
 
-      lazyLoadComponents(componentUids, componentPromises);
+      if (componentPromises.length > 0) {
+        lazyLoadComponents(newUids, componentPromises);
+      }
     }
+  }, [newUids, customFieldsRegistry]);
 
-    if (componentUids.length === Object.keys(lazyComponentStore).length) {
-      setLoading(false);
-    }
-  }, [componentUids, customFieldsRegistry, loading, lazyComponentStore]);
+  /**
+   * Wrap this in a callback so it can be used in
+   * effects to cleanup the cached store if required
+   */
+  const cleanup = useCallback(() => {
+    componentStore.clear();
+    setLazyComponentStore({});
+  }, []);
 
-  return { isLazyLoading: loading, lazyComponentStore };
+  return { isLazyLoading: loading, lazyComponentStore, cleanup };
 };
 
 export default useLazyComponents;

@@ -37,10 +37,10 @@ exports[`FromComputerForm snapshots the component 1`] = `
 
 .c11 {
   position: absolute;
-  left: 0px;
-  right: 0px;
-  top: 0px;
-  bottom: 0px;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
   z-index: 1;
   width: 100%;
 }
@@ -118,7 +118,6 @@ exports[`FromComputerForm snapshots the component 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
-  line-height: 1.14;
   color: #32324d;
 }
 
@@ -216,8 +215,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
   color: #666687;
 }
 
-.c15[aria-disabled='true'] svg > g,
-.c15[aria-disabled='true'] svg path {
+.c15[aria-disabled='true'] svg > g,.c15[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -230,8 +228,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
   color: #666687;
 }
 
-.c15[aria-disabled='true']:active svg > g,
-.c15[aria-disabled='true']:active svg path {
+.c15[aria-disabled='true']:active svg > g,.c15[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -288,8 +285,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
   color: #666687;
 }
 
-.c21[aria-disabled='true'] svg > g,
-.c21[aria-disabled='true'] svg path {
+.c21[aria-disabled='true'] svg > g,.c21[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -302,8 +298,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
   color: #666687;
 }
 
-.c21[aria-disabled='true']:active svg > g,
-.c21[aria-disabled='true']:active svg path {
+.c21[aria-disabled='true']:active svg > g,.c21[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -407,7 +402,6 @@ exports[`FromComputerForm snapshots the component 1`] = `
                 name="files"
                 tabindex="-1"
                 type="file"
-                width="100%"
               />
               <div
                 class="c0 c13"

@@ -42,7 +42,6 @@
   "form.button.add.field.to.singleType": "Ajouter un nouveau champ à ce single type",
   "form.button.cancel": "Annuler",
   "form.button.configure-view": "Configurer la vue",
-  "form.contentType.divider.draft-publish": "BROUILLON/PUBLIER",
   "from": "de",
   "modalForm.attribute.form.base.name.placeholder": "ex : Slug, URL SEO, URL Canonique",
   "modalForm.attribute.target-field": "Champ associé",

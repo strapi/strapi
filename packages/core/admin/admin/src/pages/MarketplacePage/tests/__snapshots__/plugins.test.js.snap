@@ -66,7 +66,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   padding-bottom: 4px;
 }
 
-.c52 {
+.c51 {
   background: #ffffff;
   padding-top: 16px;
   padding-right: 16px;
@@ -77,80 +77,80 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   height: 100%;
 }
 
-.c55 {
+.c54 {
   border-radius: 4px;
   width: 64px;
   height: 64px;
 }
 
-.c57 {
+.c56 {
   color: #666687;
 }
 
-.c59 {
+.c58 {
   color: #f29d41;
 }
 
-.c62 {
+.c61 {
   background: #dcdce4;
 }
 
-.c65 {
+.c64 {
   padding-top: 16px;
 }
 
-.c67 {
+.c66 {
   padding-top: 8px;
 }
 
-.c70 {
+.c69 {
   padding-top: 24px;
 }
 
-.c72 {
+.c71 {
   padding-left: 8px;
 }
 
-.c74 {
+.c73 {
   color: #328048;
   margin-left: 8px;
 }
 
-.c76 {
+.c75 {
   margin-left: 4px;
   width: 24px;
   height: auto;
 }
 
-.c77 {
+.c76 {
   padding-left: 16px;
 }
 
-.c78 {
+.c77 {
   color: #328048;
   margin-right: 8px;
   width: 12;
   height: 12;
 }
 
-.c80 {
+.c79 {
   padding-top: 32px;
 }
 
-.c81 {
+.c80 {
   background: #ffffff;
   padding: 24px;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c82 {
+.c81 {
   background: #f6ecfc;
   padding: 12px;
   border-radius: 4px;
 }
 
-.c86 {
+.c85 {
   color: #666687;
   margin-left: 8px;
   width: 12px;
@@ -218,7 +218,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   flex-direction: column;
 }
 
-.c53 {
+.c52 {
   -webkit-align-items: normal;
   -webkit-box-align: normal;
   -ms-flex-align: normal;
@@ -236,7 +236,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   justify-content: space-between;
 }
 
-.c54 {
+.c53 {
   -webkit-align-items: flex-start;
   -webkit-box-align: flex-start;
   -ms-flex-align: flex-start;
@@ -300,41 +300,33 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   color: #32324d;
 }
 
-.c49 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 1.14;
-  color: #32324d;
-}
-
-.c61 {
+.c60 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #32324d;
 }
 
-.c66 {
+.c65 {
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
   color: #32324d;
 }
 
-.c68 {
+.c67 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #666687;
 }
 
-.c79 {
+.c78 {
   font-size: 0.875rem;
   line-height: 1.43;
   font-weight: 600;
   color: #328048;
 }
 
-.c84 {
+.c83 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 500;
@@ -346,21 +338,21 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   margin-bottom: 0;
 }
 
-.c56 > * {
+.c55 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c56 > * + * {
+.c55 > * + * {
   margin-left: 4px;
 }
 
-.c71 > * {
+.c70 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c71 > * + * {
+.c70 > * + * {
   margin-left: 8px;
 }
 
@@ -464,8 +456,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   color: #666687;
 }
 
-.c46[aria-disabled='true'] svg > g,
-.c46[aria-disabled='true'] svg path {
+.c46[aria-disabled='true'] svg > g,.c46[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -478,8 +469,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   color: #666687;
 }
 
-.c46[aria-disabled='true']:active svg > g,
-.c46[aria-disabled='true']:active svg path {
+.c46[aria-disabled='true']:active svg > g,.c46[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -500,7 +490,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   fill: #32324d;
 }
 
-.c73 {
+.c72 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -514,7 +504,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   background: #f0f0ff;
 }
 
-.c73 .c0 {
+.c72 .c0 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -525,68 +515,101 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   align-items: center;
 }
 
-.c73 .c8 {
+.c72 .c8 {
   color: #ffffff;
 }
 
-.c73[aria-disabled='true'] {
+.c72[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c73[aria-disabled='true'] .c8 {
+.c72[aria-disabled='true'] .c8 {
   color: #666687;
 }
 
-.c73[aria-disabled='true'] svg > g,
-.c73[aria-disabled='true'] svg path {
+.c72[aria-disabled='true'] svg > g,.c72[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c73[aria-disabled='true']:active {
+.c72[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c73[aria-disabled='true']:active .c8 {
+.c72[aria-disabled='true']:active .c8 {
   color: #666687;
 }
 
-.c73[aria-disabled='true']:active svg > g,
-.c73[aria-disabled='true']:active svg path {
+.c72[aria-disabled='true']:active svg > g,.c72[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c73:hover {
+.c72:hover {
   background-color: #ffffff;
 }
 
-.c73:active {
+.c72:active {
   background-color: #ffffff;
   border: 1px solid #4945ff;
 }
 
-.c73:active .c8 {
+.c72:active .c8 {
   color: #4945ff;
 }
 
-.c73:active svg > g,
-.c73:active svg path {
+.c72:active svg > g,
+.c72:active svg path {
   fill: #4945ff;
 }
 
-.c73 .c8 {
+.c72 .c8 {
   color: #271fe0;
 }
 
-.c73 svg > g,
-.c73 svg path {
+.c72 svg > g,
+.c72 svg path {
   fill: #271fe0;
 }
 
-.c63 {
+.c82 {
+  margin-right: 24px;
+}
+
+.c82 svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.c84 {
+  word-break: break-all;
+}
+
+.c62 {
   height: 1px;
   border: none;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+}
+
+.c38 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c38:focus {
+  outline: none;
+}
+
+.c38[aria-disabled='true'] {
+  cursor: not-allowed;
 }
 
 .c25 {
@@ -648,37 +671,6 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
 .c21:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c58 path {
-  fill: #666687;
-}
-
-.c60 path {
-  fill: #f29d41;
-}
-
-.c75 path {
-  fill: #328048;
-}
-
-.c38 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c38:focus {
-  outline: none;
-}
-
-.c38[aria-disabled='true'] {
-  cursor: not-allowed;
 }
 
 .c37 {
@@ -767,6 +759,18 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
+.c57 path {
+  fill: #666687;
+}
+
+.c59 path {
+  fill: #f29d41;
+}
+
+.c74 path {
+  fill: #328048;
+}
+
 .c10 {
   cursor: pointer;
 }
@@ -810,8 +814,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   color: #666687;
 }
 
-.c12[aria-disabled='true'] svg > g,
-.c12[aria-disabled='true'] svg path {
+.c12[aria-disabled='true'] svg > g,.c12[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -824,8 +827,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   color: #666687;
 }
 
-.c12[aria-disabled='true']:active svg > g,
-.c12[aria-disabled='true']:active svg path {
+.c12[aria-disabled='true']:active svg > g,.c12[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -846,19 +848,6 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   fill: #32324d;
 }
 
-.c83 {
-  margin-right: 24px;
-}
-
-.c83 svg {
-  width: 2rem;
-  height: 2rem;
-}
-
-.c85 {
-  word-break: break-all;
-}
-
 .c1 {
   display: grid;
   grid-template-columns: 1fr;
@@ -868,13 +857,13 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   overflow-x: hidden;
 }
 
-.c50 {
+.c49 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
   gap: 16px;
 }
 
-.c51 {
+.c50 {
   grid-column: span 4;
   max-width: 100%;
 }
@@ -895,13 +884,13 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   cursor: not-allowed;
 }
 
-.c64 {
+.c63 {
   -webkit-transform: rotate(90deg);
   -ms-transform: rotate(90deg);
   transform: rotate(90deg);
 }
 
-.c69 {
+.c68 {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -921,13 +910,13 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
 }
 
 @media (max-width:68.75rem) {
-  .c51 {
+  .c50 {
     grid-column: span 6;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c51 {
+  .c50 {
     grid-column: span 12;
   }
 }
@@ -1008,7 +997,6 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
       >
         <div
           class="c0 c17"
-          width="25%"
         >
           <div
             class="c18"
@@ -1019,7 +1007,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
               >
                 <label
                   class="c8 c14"
-                  for="field-1"
+                  for="0"
                 >
                   <div
                     class="c0 c7"
@@ -1057,8 +1045,9 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                 <input
                   aria-disabled="false"
                   aria-invalid="false"
+                  aria-required="false"
                   class="c25"
-                  id="field-1"
+                  id="0"
                   name="searchbar"
                   placeholder="Search"
                   value=""
@@ -1141,7 +1130,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                       aria-disabled="false"
                       aria-expanded="false"
                       aria-haspopup="listbox"
-                      aria-labelledby="sort-by-select-label sort-by-select-content"
+                      aria-labelledby="sort-by-select sort-by-select-label sort-by-select-content"
                       class="c38"
                       id="sort-by-select"
                       type="button"
@@ -1170,6 +1159,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           aria-hidden="true"
                           class="c0 c42 c43 c44"
                           tabindex="-1"
+                          title="Carret Down Button"
                           type="button"
                         >
                           <svg
@@ -1222,7 +1212,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                   </svg>
                 </div>
                 <span
-                  class="c8 c49"
+                  class="c8 c14"
                 >
                   Filters
                 </span>
@@ -1237,42 +1227,40 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
               tabindex="0"
             >
               <div
-                class="c0 c50"
+                class="c0 c49"
               >
                 <div
-                  class="c51"
+                  class="c50"
                 >
                   <div
                     class="c0 "
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c52 c53"
+                      class="c0 c51 c52"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
                         class="c0 "
                       >
                         <div
-                          class="c0 c54"
+                          class="c0 c53"
                         >
                           <img
                             alt="Comments logo"
-                            class="c0 c55"
-                            height="11"
+                            class="c0 c54"
                             src="https://dl.airtable.com/.attachments/eb4cd59876565af77c9c3e5966b59f10/2111bfc8/vl_strapi-comments.png"
-                            width="11"
                           />
                           <div
-                            class="c0 c7 c56"
-                            spacing="1"
+                            class="c0 c7 c55"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 24"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1282,9 +1270,11 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                             </svg>
                             <svg
                               aria-hidden="true"
-                              class="c0 c59 c60"
+                              class="c0 c58 c59"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 24"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1296,19 +1286,21 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                               aria-label="This plugin was starred 323 on GitHub"
                             >
                               <span
-                                class="c8 c61"
+                                class="c8 c60"
                               >
                                 323
                               </span>
                             </p>
                             <hr
-                              class="c0 c62 c63 c64"
+                              class="c0 c61 c62 c63"
                             />
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 25"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1322,7 +1314,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                               aria-label="This plugin has 1123 weekly downloads"
                             >
                               <span
-                                class="c8 c61"
+                                class="c8 c60"
                               >
                                 1123
                               </span>
@@ -1330,10 +1322,10 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </div>
                         </div>
                         <div
-                          class="c0 c65"
+                          class="c0 c64"
                         >
                           <h3
-                            class="c8 c66"
+                            class="c8 c65"
                           >
                             <div
                               class="c0 c7"
@@ -1343,18 +1335,17 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </h3>
                         </div>
                         <div
-                          class="c0 c67"
+                          class="c0 c66"
                         >
                           <p
-                            class="c8 c68 c69"
+                            class="c8 c67 c68"
                           >
                             Powerful Strapi based comments moderation tool for you and your users
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c70 c7 c71"
-                        spacing="2"
+                        class="c0 c69 c7 c70"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1372,7 +1363,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c72"
+                            class="c0 c71"
                           >
                             <svg
                               fill="none"
@@ -1390,7 +1381,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c11 c73"
+                          class="c11 c72"
                           type="button"
                         >
                           <div
@@ -1415,7 +1406,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                             </svg>
                           </div>
                           <span
-                            class="c8 c49"
+                            class="c8 c14"
                           >
                             Copy install command
                           </span>
@@ -1425,39 +1416,37 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                   </div>
                 </div>
                 <div
-                  class="c51"
+                  class="c50"
                 >
                   <div
                     class="c0 "
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c52 c53"
+                      class="c0 c51 c52"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
                         class="c0 "
                       >
                         <div
-                          class="c0 c54"
+                          class="c0 c53"
                         >
                           <img
                             alt="Config Sync logo"
-                            class="c0 c55"
-                            height="11"
+                            class="c0 c54"
                             src="https://dl.airtable.com/.attachments/e23a7231d12cce89cb4b05cbfe759d45/96f5f496/Screenshot2021-12-09at22.15.37.png"
-                            width="11"
                           />
                           <div
-                            class="c0 c7 c56"
-                            spacing="1"
+                            class="c0 c7 c55"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 25"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1471,7 +1460,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                               aria-label="This plugin has 0 weekly downloads"
                             >
                               <span
-                                class="c8 c61"
+                                class="c8 c60"
                               >
                                 0
                               </span>
@@ -1479,10 +1468,10 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </div>
                         </div>
                         <div
-                          class="c0 c65"
+                          class="c0 c64"
                         >
                           <h3
-                            class="c8 c66"
+                            class="c8 c65"
                           >
                             <div
                               class="c0 c7"
@@ -1490,12 +1479,12 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                               Config Sync
                               <span>
                                 <div
-                                  aria-describedby="tooltip-2"
+                                  aria-describedby="1"
                                   class="c0 c7"
                                   tabindex="0"
                                 >
                                   <svg
-                                    class="c0 c74 c75"
+                                    class="c0 c73 c74"
                                     fill="none"
                                     height="1em"
                                     viewBox="0 0 24 24"
@@ -1515,18 +1504,17 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </h3>
                         </div>
                         <div
-                          class="c0 c67"
+                          class="c0 c66"
                         >
                           <p
-                            class="c8 c68 c69"
+                            class="c8 c67 c68"
                           >
                             Migrate your config data across environments using the CLI or Strapi admin panel.
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c70 c7 c71"
-                        spacing="2"
+                        class="c0 c69 c7 c70"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1544,7 +1532,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c72"
+                            class="c0 c71"
                           >
                             <svg
                               fill="none"
@@ -1562,7 +1550,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c11 c73"
+                          class="c11 c72"
                           type="button"
                         >
                           <div
@@ -1587,7 +1575,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                             </svg>
                           </div>
                           <span
-                            class="c8 c49"
+                            class="c8 c14"
                           >
                             Copy install command
                           </span>
@@ -1597,39 +1585,37 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                   </div>
                 </div>
                 <div
-                  class="c51"
+                  class="c50"
                 >
                   <div
                     class="c0 "
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c52 c53"
+                      class="c0 c51 c52"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
                         class="c0 "
                       >
                         <div
-                          class="c0 c54"
+                          class="c0 c53"
                         >
                           <img
                             alt="Content Versioning logo"
-                            class="c0 c55"
-                            height="11"
+                            class="c0 c54"
                             src="https://dl.airtable.com/.attachments/0b86f18e2606ed7f53bd54d536a1bea5/13a87f30/Artboard7copy.png"
-                            width="11"
                           />
                           <div
-                            class="c0 c7 c56"
-                            spacing="1"
+                            class="c0 c7 c55"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 25"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1643,7 +1629,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                               aria-label="This plugin has 0 weekly downloads"
                             >
                               <span
-                                class="c8 c61"
+                                class="c8 c60"
                               >
                                 0
                               </span>
@@ -1651,10 +1637,10 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </div>
                         </div>
                         <div
-                          class="c0 c65"
+                          class="c0 c64"
                         >
                           <h3
-                            class="c8 c66"
+                            class="c8 c65"
                           >
                             <div
                               class="c0 c7"
@@ -1664,18 +1650,17 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </h3>
                         </div>
                         <div
-                          class="c0 c67"
+                          class="c0 c66"
                         >
                           <p
-                            class="c8 c68 c69"
+                            class="c8 c67 c68"
                           >
                             This plugin enables you to versioning Content Types. It allows multiple draft versions✅ Keeps history of all changes (with time travel) ✅ 
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c70 c7 c71"
-                        spacing="2"
+                        class="c0 c69 c7 c70"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1693,7 +1678,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c72"
+                            class="c0 c71"
                           >
                             <svg
                               fill="none"
@@ -1711,7 +1696,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c11 c73"
+                          class="c11 c72"
                           type="button"
                         >
                           <div
@@ -1736,7 +1721,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                             </svg>
                           </div>
                           <span
-                            class="c8 c49"
+                            class="c8 c14"
                           >
                             Copy install command
                           </span>
@@ -1746,39 +1731,37 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                   </div>
                 </div>
                 <div
-                  class="c51"
+                  class="c50"
                 >
                   <div
                     class="c0 "
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c52 c53"
+                      class="c0 c51 c52"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
                         class="c0 "
                       >
                         <div
-                          class="c0 c54"
+                          class="c0 c53"
                         >
                           <img
                             alt="Documentation logo"
-                            class="c0 c55"
-                            height="11"
+                            class="c0 c54"
                             src="https://dl.airtable.com/.attachments/b6998ac52e8b0460b8a14ced8074b788/2a4d4a90/swagger.png"
-                            width="11"
                           />
                           <div
-                            class="c0 c7 c56"
-                            spacing="1"
+                            class="c0 c7 c55"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 24"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1788,9 +1771,11 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                             </svg>
                             <svg
                               aria-hidden="true"
-                              class="c0 c59 c60"
+                              class="c0 c58 c59"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 24"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1802,19 +1787,21 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                               aria-label="This plugin was starred 49130 on GitHub"
                             >
                               <span
-                                class="c8 c61"
+                                class="c8 c60"
                               >
                                 49130
                               </span>
                             </p>
                             <hr
-                              class="c0 c62 c63 c64"
+                              class="c0 c61 c62 c63"
                             />
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 25"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1828,7 +1815,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                               aria-label="This plugin has 7492 weekly downloads"
                             >
                               <span
-                                class="c8 c61"
+                                class="c8 c60"
                               >
                                 7492
                               </span>
@@ -1836,10 +1823,10 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </div>
                         </div>
                         <div
-                          class="c0 c65"
+                          class="c0 c64"
                         >
                           <h3
-                            class="c8 c66"
+                            class="c8 c65"
                           >
                             <div
                               class="c0 c7"
@@ -1847,16 +1834,14 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                               Documentation
                               <span>
                                 <div
-                                  aria-describedby="tooltip-4"
+                                  aria-describedby="2"
                                   class="c0 c7"
                                   tabindex="0"
                                 >
                                   <img
                                     alt="Made by Strapi"
-                                    class="c0 c76"
-                                    height="auto"
+                                    class="c0 c75"
                                     src="IMAGE_MOCK"
-                                    width="6"
                                   />
                                 </div>
                               </span>
@@ -1864,18 +1849,17 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </h3>
                         </div>
                         <div
-                          class="c0 c67"
+                          class="c0 c66"
                         >
                           <p
-                            class="c8 c68 c69"
+                            class="c8 c67 c68"
                           >
                             Create an OpenAPI Document and visualize your API with SWAGGER UI
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c70 c7 c71"
-                        spacing="2"
+                        class="c0 c69 c7 c70"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1893,7 +1877,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c72"
+                            class="c0 c71"
                           >
                             <svg
                               fill="none"
@@ -1910,14 +1894,14 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </div>
                         </a>
                         <div
-                          class="c0 c77"
+                          class="c0 c76"
                         >
                           <svg
-                            class="c0 c78 c75"
+                            class="c0 c77 c74"
                             fill="none"
-                            height="12"
+                            height="1em"
                             viewBox="0 0 24 24"
-                            width="12"
+                            width="1em"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path
@@ -1926,7 +1910,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                             />
                           </svg>
                           <span
-                            class="c8 c79"
+                            class="c8 c78"
                           >
                             Installed
                           </span>
@@ -1936,39 +1920,37 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                   </div>
                 </div>
                 <div
-                  class="c51"
+                  class="c50"
                 >
                   <div
                     class="c0 "
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c52 c53"
+                      class="c0 c51 c52"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
                         class="c0 "
                       >
                         <div
-                          class="c0 c54"
+                          class="c0 c53"
                         >
                           <img
                             alt="Transformer logo"
-                            class="c0 c55"
-                            height="11"
+                            class="c0 c54"
                             src="https://dl.airtable.com/.attachments/5ffd1782a2fabf423ccd6f56c562f31a/b8f8598f/transformer-logo.png"
-                            width="11"
                           />
                           <div
-                            class="c0 c7 c56"
-                            spacing="1"
+                            class="c0 c7 c55"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 25"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1982,7 +1964,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                               aria-label="This plugin has 0 weekly downloads"
                             >
                               <span
-                                class="c8 c61"
+                                class="c8 c60"
                               >
                                 0
                               </span>
@@ -1990,10 +1972,10 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </div>
                         </div>
                         <div
-                          class="c0 c65"
+                          class="c0 c64"
                         >
                           <h3
-                            class="c8 c66"
+                            class="c8 c65"
                           >
                             <div
                               class="c0 c7"
@@ -2003,18 +1985,17 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </h3>
                         </div>
                         <div
-                          class="c0 c67"
+                          class="c0 c66"
                         >
                           <p
-                            class="c8 c68 c69"
+                            class="c8 c67 c68"
                           >
                             A plugin for Strapi Headless CMS that provides the ability to transform the API response. 
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c70 c7 c71"
-                        spacing="2"
+                        class="c0 c69 c7 c70"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -2032,7 +2013,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c72"
+                            class="c0 c71"
                           >
                             <svg
                               fill="none"
@@ -2050,7 +2031,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c11 c73"
+                          class="c11 c72"
                           type="button"
                         >
                           <div
@@ -2075,7 +2056,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                             </svg>
                           </div>
                           <span
-                            class="c8 c49"
+                            class="c8 c14"
                           >
                             Copy install command
                           </span>
@@ -2089,7 +2070,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
           </div>
         </div>
         <div
-          class="c0 c80"
+          class="c0 c79"
         >
           <a
             href="https://strapi.canny.io/plugin-requests"
@@ -2098,10 +2079,10 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
             target="_blank"
           >
             <div
-              class="c0 c81 c7"
+              class="c0 c80 c7"
             >
               <div
-                class="c0 c82 c7 c83"
+                class="c0 c81 c7 c82"
               >
                 <svg
                   fill="none"
@@ -2129,16 +2110,16 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                   class="c0 c7"
                 >
                   <span
-                    class="c8 c84 c85"
+                    class="c8 c83 c84"
                   >
                     Documentation
                   </span>
                   <svg
-                    class="c0 c86 c58"
+                    class="c0 c85 c57"
                     fill="none"
-                    height="3"
+                    height="1em"
                     viewBox="0 0 24 24"
-                    width="3"
+                    width="1em"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
@@ -2148,7 +2129,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                   </svg>
                 </div>
                 <span
-                  class="c8 c68"
+                  class="c8 c67"
                 >
                   Tell us what plugin you are looking for and we'll let our community plugin developers know in case they are in search for inspiration!
                 </span>

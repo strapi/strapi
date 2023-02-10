@@ -166,7 +166,6 @@ describe('<NotAllowedInput />', () => {
         <div>
           <div
             class="c0 c1"
-            spacing="1"
           >
             <label
               class="c2"
@@ -202,6 +201,7 @@ describe('<NotAllowedInput />', () => {
               <input
                 aria-disabled="true"
                 aria-invalid="false"
+                aria-required="false"
                 class="c8"
                 id="test"
                 name="test"

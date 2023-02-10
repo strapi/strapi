@@ -61,7 +61,7 @@ describe('<ListPage />', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c25 {
+      .c26 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -96,25 +96,29 @@ describe('<ListPage />', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c17 {
+      .c16 {
+        position: relative;
+      }
+
+      .c18 {
         padding-right: 24px;
         padding-left: 24px;
       }
 
-      .c27 {
+      .c28 {
         background: #eaeaef;
       }
 
-      .c29 {
+      .c30 {
         background: #f0f0ff;
         padding: 20px;
       }
 
-      .c31 {
+      .c32 {
         background: #d9d8ff;
       }
 
-      .c33 {
+      .c34 {
         padding-left: 12px;
       }
 
@@ -161,7 +165,6 @@ describe('<ListPage />', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
-        line-height: 1.14;
         color: #32324d;
       }
 
@@ -171,7 +174,7 @@ describe('<ListPage />', () => {
         color: #666687;
       }
 
-      .c23 {
+      .c24 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
@@ -179,7 +182,7 @@ describe('<ListPage />', () => {
         color: #666687;
       }
 
-      .c34 {
+      .c35 {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
@@ -284,8 +287,7 @@ describe('<ListPage />', () => {
         color: #666687;
       }
 
-      .c8[aria-disabled='true'] svg > g,
-      .c8[aria-disabled='true'] svg path {
+      .c8[aria-disabled='true'] svg > g,.c8[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -298,8 +300,7 @@ describe('<ListPage />', () => {
         color: #666687;
       }
 
-      .c8[aria-disabled='true']:active svg > g,
-      .c8[aria-disabled='true']:active svg path {
+      .c8[aria-disabled='true']:active svg > g,.c8[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -323,16 +324,12 @@ describe('<ListPage />', () => {
         border: 1px solid #eaeaef;
       }
 
-      .c19 {
+      .c20 {
         width: 100%;
         white-space: nowrap;
       }
 
-      .c16 {
-        position: relative;
-      }
-
-      .c16:before {
+      .c17:before {
         background: linear-gradient(90deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
@@ -342,7 +339,7 @@ describe('<ListPage />', () => {
         left: 0;
       }
 
-      .c16:after {
+      .c17:after {
         background: linear-gradient(270deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
@@ -353,60 +350,63 @@ describe('<ListPage />', () => {
         top: 0;
       }
 
-      .c18 {
+      .c19 {
         overflow-x: auto;
       }
 
-      .c26 tr:last-of-type {
+      .c27 tr:last-of-type {
         border-bottom: none;
-      }
-
-      .c20 {
-        border-bottom: 1px solid #eaeaef;
       }
 
       .c21 {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c21 td,
-      .c21 th {
+      .c22 {
+        border-bottom: 1px solid #eaeaef;
+      }
+
+      .c22 td,
+      .c22 th {
         padding: 16px;
       }
 
-      .c21 td:first-of-type,
-      .c21 th:first-of-type {
+      .c22 td:first-of-type,
+      .c22 th:first-of-type {
         padding: 0 4px;
       }
 
-      .c21 th {
+      .c22 th {
         padding-top: 0;
         padding-bottom: 0;
         height: 3.5rem;
       }
 
-      .c22 {
+      .c23 {
         vertical-align: middle;
         text-align: left;
         color: #666687;
         outline-offset: -4px;
       }
 
-      .c22 input {
+      .c23 input {
         vertical-align: sub;
       }
 
-      .c24 svg {
+      .c25 svg {
         height: 0.25rem;
       }
 
-      .c28 {
+      .c29 {
         height: 1px;
         border: none;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
         margin: 0;
       }
 
-      .c32 {
+      .c33 {
         height: 1.5rem;
         width: 1.5rem;
         border-radius: 50%;
@@ -424,16 +424,16 @@ describe('<ListPage />', () => {
         align-items: center;
       }
 
-      .c32 svg {
+      .c33 svg {
         height: 0.625rem;
         width: 0.625rem;
       }
 
-      .c32 svg path {
+      .c33 svg path {
         fill: #4945ff;
       }
 
-      .c30 {
+      .c31 {
         border-radius: 0 0 4px 4px;
         display: block;
         width: 100%;
@@ -512,116 +512,121 @@ describe('<ListPage />', () => {
             class="c1 c14 c15"
           >
             <div
-              class="c1 c16"
+              class="c1 c16 c17"
             >
               <div
-                class="c1 c17 c18"
+                class="c1 c18 c19"
               >
                 <table
                   aria-colcount="5"
                   aria-rowcount="1"
-                  class="c19"
+                  class="c20"
+                  role="grid"
                 >
                   <thead
-                    class="c20"
+                    class="c21"
                   >
                     <tr
                       aria-rowindex="1"
-                      class="c1 c21"
+                      class="c1 c22"
                     >
                       <th
                         aria-colindex="1"
-                        class="c1 c22"
+                        class="c1 c23"
+                        role="gridcell"
                         tabindex="0"
                       >
                         <div
                           class="c1 c4"
                         >
                           <span
-                            class="c5 c23"
+                            class="c5 c24"
                           >
                             Name
                           </span>
                           <span
-                            class="c24"
+                            class="c25"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="2"
-                        class="c1 c22"
+                        class="c1 c23"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <div
                           class="c1 c4"
                         >
                           <span
-                            class="c5 c23"
+                            class="c5 c24"
                           >
                             Description
                           </span>
                           <span
-                            class="c24"
+                            class="c25"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="3"
-                        class="c1 c22"
+                        class="c1 c23"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <div
                           class="c1 c4"
                         >
                           <span
-                            class="c5 c23"
+                            class="c5 c24"
                           >
                             Users
                           </span>
                           <span
-                            class="c24"
+                            class="c25"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="4"
-                        class="c1 c22"
+                        class="c1 c23"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <div
                           class="c1 c4"
                         >
                           <div
-                            class="c25"
+                            class="c26"
                           >
                             Actions
                           </div>
                           <span
-                            class="c24"
+                            class="c25"
                           />
                         </div>
                       </th>
                     </tr>
                   </thead>
                   <tbody
-                    class="c26"
+                    class="c27"
                   />
                 </table>
               </div>
             </div>
             <div>
               <hr
-                class="c1 c27 c28"
+                class="c1 c28 c29"
               />
               <button
-                class="c1 c29 c30"
+                class="c1 c30 c31"
               >
                 <div
                   class="c1 c4"
                 >
                   <div
                     aria-hidden="true"
-                    class="c1 c31 c32"
+                    class="c1 c32 c33"
                   >
                     <svg
                       fill="none"
@@ -637,10 +642,10 @@ describe('<ListPage />', () => {
                     </svg>
                   </div>
                   <div
-                    class="c1 c33"
+                    class="c1 c34"
                   >
                     <span
-                      class="c5 c34"
+                      class="c5 c35"
                     >
                       Add new role
                     </span>

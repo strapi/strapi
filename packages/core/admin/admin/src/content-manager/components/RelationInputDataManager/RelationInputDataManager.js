@@ -1,6 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import PropTypes from 'prop-types';
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 import pick from 'lodash/pick';
@@ -15,6 +15,7 @@ import { getTrad } from '../../utils';
 
 import { PUBLICATION_STATES, RELATIONS_TO_DISPLAY, SEARCH_RESULTS_TO_DISPLAY } from './constants';
 import { connect, select, normalizeSearchResults, diffRelations, normalizeRelation } from './utils';
+import { getInitialDataPathUsingTempKeys } from '../../utils/paths';
 
 export const RelationInputDataManager = ({
   error,
@@ -36,16 +37,28 @@ export const RelationInputDataManager = ({
   size,
   targetModel,
 }) => {
+  const [liveText, setLiveText] = useState('');
   const { formatMessage } = useIntl();
-  const { connectRelation, disconnectRelation, loadRelation, modifiedData, slug, initialData } =
-    useCMEditViewDataManager();
+  const {
+    slug,
+    initialData,
+    modifiedData,
+    relationConnect,
+    relationDisconnect,
+    relationLoad,
+    relationReorder,
+  } = useCMEditViewDataManager();
 
-  const relationsFromModifiedData = get(modifiedData, name) ?? [];
+  const nameSplit = name.split('.');
+
+  const initialDataPath = getInitialDataPathUsingTempKeys(initialData, modifiedData)(name);
+
+  const relationsFromModifiedData = get(modifiedData, name, []);
 
   const currentLastPage = Math.ceil(get(initialData, name, []).length / RELATIONS_TO_DISPLAY);
 
-  const { relations, search, searchFor } = useRelation(`${slug}-${name}-${initialData?.id ?? ''}`, {
-    name,
+  const cacheKey = `${slug}-${initialDataPath.join('.')}`;
+  const { relations, search, searchFor } = useRelation(cacheKey, {
     relation: {
       enabled: !!endpoints.relation,
       endpoint: endpoints.relation,
@@ -54,14 +67,21 @@ export const RelationInputDataManager = ({
         ...defaultParams,
         pageSize: RELATIONS_TO_DISPLAY,
       },
-      onLoad: loadRelation,
+      onLoad(value) {
+        relationLoad({
+          target: {
+            initialDataPath: ['initialData', ...initialDataPath],
+            modifiedDataPath: ['modifiedData', ...nameSplit],
+            value,
+          },
+        });
+      },
       normalizeArguments: {
         mainFieldName: mainField.name,
         shouldAddLink: shouldDisplayRelationLink,
         targetModel,
       },
     },
-
     search: {
       endpoint: endpoints.search,
       pageParams: {
@@ -104,11 +124,11 @@ export const RelationInputDataManager = ({
       targetModel,
     });
 
-    connectRelation({ name, value: normalizedRelation, toOneRelation });
+    relationConnect({ name, value: normalizedRelation, toOneRelation });
   };
 
   const handleRelationDisconnect = (relation) => {
-    disconnectRelation({ name, id: relation.id });
+    relationDisconnect({ name, id: relation.id });
   };
 
   const handleRelationLoadMore = () => {
@@ -130,6 +150,105 @@ export const RelationInputDataManager = ({
   const handleSearchMore = () => {
     search.fetchNextPage();
   };
+  /**
+   *
+   * @param {number} index
+   * @returns {string}
+   */
+  const getItemPos = (index) => `${index + 1} of ${relationsFromModifiedData.length}`;
+
+  /**
+   *
+   * @param {number} currentIndex
+   * @param {number} oldIndex
+   */
+  const handleRelationReorder = (oldIndex, newIndex) => {
+    const item = relationsFromModifiedData[oldIndex];
+
+    setLiveText(
+      formatMessage(
+        {
+          id: getTrad('dnd.reorder'),
+          defaultMessage: '{item}, moved. New position in list: {position}.',
+        },
+        {
+          item: item.mainField ?? item.id,
+          position: getItemPos(newIndex),
+        }
+      )
+    );
+
+    relationReorder({
+      name,
+      newIndex,
+      oldIndex,
+    });
+  };
+
+  /**
+   *
+   * @param {number} index
+   * @returns {void}
+   */
+  const handleGrabItem = (index) => {
+    const item = relationsFromModifiedData[index];
+
+    setLiveText(
+      formatMessage(
+        {
+          id: getTrad('dnd.grab-item'),
+          defaultMessage: `{item}, grabbed. Current position in list: {position}. Press up and down arrow to change position, Spacebar to drop, Escape to cancel.`,
+        },
+        {
+          item: item.mainField ?? item.id,
+          position: getItemPos(index),
+        }
+      )
+    );
+  };
+
+  /**
+   *
+   * @param {number} index
+   * @returns {void}
+   */
+  const handleDropItem = (index) => {
+    const item = relationsFromModifiedData[index];
+
+    setLiveText(
+      formatMessage(
+        {
+          id: getTrad('dnd.drop-item'),
+          defaultMessage: `{item}, dropped. Final position in list: {position}.`,
+        },
+        {
+          item: item.mainField ?? item.id,
+          position: getItemPos(index),
+        }
+      )
+    );
+  };
+
+  /**
+   *
+   * @param {number} index
+   * @returns {void}
+   */
+  const handleCancel = (index) => {
+    const item = relationsFromModifiedData[index];
+
+    setLiveText(
+      formatMessage(
+        {
+          id: getTrad('dnd.cancel-item'),
+          defaultMessage: '{item}, dropped. Re-order cancelled.',
+        },
+        {
+          item: item.mainField ?? item.id,
+        }
+      )
+    );
+  };
 
   if (
     (!isFieldAllowed && isCreatingEntry) ||
@@ -149,7 +268,7 @@ export const RelationInputDataManager = ({
    * actually subtract from the total number on the server (regardless of how many you fetched).
    */
   const browserRelationsCount = relationsFromModifiedData.length;
-  const serverRelationsCount = (get(initialData, name) ?? []).length;
+  const serverRelationsCount = (get(initialData, initialDataPath) ?? []).length;
   const realServerRelationsCount = relations.data?.pages[0]?.pagination?.total ?? 0;
   /**
    * _IF_ theres no relations data and the browserCount is the same as serverCount you can therefore assume
@@ -163,8 +282,13 @@ export const RelationInputDataManager = ({
   return (
     <RelationInput
       error={error}
+      canReorder={!toOneRelation}
       description={description}
       disabled={isDisabled}
+      iconButtonAriaLabel={formatMessage({
+        id: getTrad('components.RelationInput.icon-button-aria-label'),
+        defaultMessage: 'Drag',
+      })}
       id={name}
       label={`${formatMessage({
         id: intlLabel.id,
@@ -183,7 +307,12 @@ export const RelationInputDataManager = ({
         id: getTrad('relation.disconnect'),
         defaultMessage: 'Remove',
       })}
+      listAriaDescription={formatMessage({
+        id: getTrad('dnd.instructions'),
+        defaultMessage: `Press spacebar to grab and re-order`,
+      })}
       listHeight={320}
+      liveText={liveText}
       loadingMessage={formatMessage({
         id: getTrad('relation.isLoading'),
         defaultMessage: 'Relations are loading',
@@ -194,9 +323,13 @@ export const RelationInputDataManager = ({
         defaultMessage: 'No relations available',
       })}
       numberOfRelationsToDisplay={RELATIONS_TO_DISPLAY}
-      onRelationConnect={(relation) => handleRelationConnect(relation)}
-      onRelationDisconnect={(relation) => handleRelationDisconnect(relation)}
-      onRelationLoadMore={() => handleRelationLoadMore()}
+      onDropItem={handleDropItem}
+      onGrabItem={handleGrabItem}
+      onCancel={handleCancel}
+      onRelationConnect={handleRelationConnect}
+      onRelationDisconnect={handleRelationDisconnect}
+      onRelationLoadMore={handleRelationLoadMore}
+      onRelationReorder={handleRelationReorder}
       onSearch={(term) => handleSearch(term)}
       onSearchNextPage={() => handleSearchMore()}
       placeholder={formatMessage(

@@ -85,7 +85,9 @@ module.exports = {
     ctx.body = await permissionChecker.sanitizeOutput(entity);
 
     if (totalEntries === 0) {
-      strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
+      strapi.telemetry.send('didCreateFirstContentTypeEntry', {
+        eventProperties: { model },
+      });
     }
   },
 

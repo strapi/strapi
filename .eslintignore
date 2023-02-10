@@ -12,6 +12,7 @@ packages/core/helper-plugin/build/**
 packages/core/helper-plugin/lib/src/old/components/**
 packages/core/helper-plugin/lib/src/testUtils/**
 packages/core/helper-plugin/lib/src/utils/**
+packages/core/data-transfer/lib
 .eslintrc.js
 .eslintrc.front.js
 .eslintrc.back.js

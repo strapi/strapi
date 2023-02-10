@@ -6,12 +6,19 @@ import { IconButton } from '@strapi/design-system/IconButton';
 import { Box } from '@strapi/design-system/Box';
 import Plus from '@strapi/icons/Plus';
 import Refresh from '@strapi/icons/Refresh';
-import reducer, { initialState } from './reducer';
 import LogoModalStepper from '../LogoModalStepper';
-import { SIZE, DIMENSION } from '../../utils/constants';
+import reducer, { initialState } from './reducer';
 import stepper from './stepper';
 
-const LogoInput = ({ customLogo, defaultLogo, onChangeLogo, onResetMenuLogo }) => {
+const LogoInput = ({
+  canUpdate,
+  customLogo,
+  defaultLogo,
+  hint,
+  label,
+  onChangeLogo,
+  onResetLogo,
+}) => {
   const [{ currentStep }, dispatch] = useReducer(reducer, initialState);
   const { Component, next, prev, modalTitle } = stepper[currentStep] || {};
   const { formatMessage } = useIntl();
@@ -26,19 +33,9 @@ const LogoInput = ({ customLogo, defaultLogo, onChangeLogo, onResetMenuLogo }) =
   return (
     <>
       <CarouselInput
-        label={formatMessage({
-          id: 'Settings.application.customization.carousel.title',
-          defaultMessage: 'Logo',
-        })}
+        label={label}
         selectedSlide={0}
-        hint={formatMessage(
-          {
-            id: 'Settings.application.customization.carousel-hint',
-            defaultMessage:
-              'Change the admin panel logo (Max dimension: {dimension}x{dimension}, Max file size: {size}KB)',
-          },
-          { size: SIZE, dimension: DIMENSION }
-        )}
+        hint={hint}
         // Carousel is used here for a single media,
         // we don't need previous and next labels but these props are required
         previousLabel=""
@@ -49,6 +46,7 @@ const LogoInput = ({ customLogo, defaultLogo, onChangeLogo, onResetMenuLogo }) =
         actions={
           <CarouselActions>
             <IconButton
+              disabled={!canUpdate}
               onClick={() => goTo(customLogo ? 'pending' : 'upload')}
               label={formatMessage({
                 id: 'Settings.application.customization.carousel.change-action',
@@ -58,7 +56,8 @@ const LogoInput = ({ customLogo, defaultLogo, onChangeLogo, onResetMenuLogo }) =
             />
             {customLogo && (
               <IconButton
-                onClick={onResetMenuLogo}
+                disabled={!canUpdate}
+                onClick={onResetLogo}
                 label={formatMessage({
                   id: 'Settings.application.customization.carousel.reset-action',
                   defaultMessage: 'Reset logo',
@@ -102,17 +101,22 @@ const LogoInput = ({ customLogo, defaultLogo, onChangeLogo, onResetMenuLogo }) =
 };
 
 LogoInput.defaultProps = {
+  canUpdate: false,
   customLogo: null,
+  hint: null,
 };
 
 LogoInput.propTypes = {
+  canUpdate: PropTypes.bool,
   customLogo: PropTypes.shape({
     url: PropTypes.string,
     name: PropTypes.string,
   }),
+  label: PropTypes.string.isRequired,
+  hint: PropTypes.string,
   defaultLogo: PropTypes.string.isRequired,
   onChangeLogo: PropTypes.func.isRequired,
-  onResetMenuLogo: PropTypes.func.isRequired,
+  onResetLogo: PropTypes.func.isRequired,
 };
 
 export default LogoInput;

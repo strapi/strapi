@@ -119,7 +119,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
-        line-height: 1.14;
         color: #32324d;
       }
 
@@ -238,8 +237,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         color: #666687;
       }
 
-      .c4[aria-disabled='true'] svg > g,
-      .c4[aria-disabled='true'] svg path {
+      .c4[aria-disabled='true'] svg > g,.c4[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -252,8 +250,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         color: #666687;
       }
 
-      .c4[aria-disabled='true']:active svg > g,
-      .c4[aria-disabled='true']:active svg path {
+      .c4[aria-disabled='true']:active svg > g,.c4[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -273,22 +270,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
       .c4 svg > g,
       .c4 svg path {
         fill: #8e8ea9;
-      }
-
-      .c8 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c8 svg {
-        height: 4px;
-        width: 6px;
       }
 
       .c21 {
@@ -348,6 +329,22 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         outline: none;
       }
 
+      .c8 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c8 svg {
+        height: 4px;
+        width: 6px;
+      }
+
       .c12 {
         margin: 0 auto;
         width: 552px;
@@ -372,7 +369,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
           >
             <div>
               <button
-                aria-controls="simplemenu-1"
+                aria-controls="0"
                 aria-disabled="false"
                 aria-expanded="false"
                 aria-haspopup="true"
@@ -432,7 +429,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
                   alt=""
                   aria-hidden="true"
                   class="c15"
-                  src="defaultAuthLogo.png"
+                  src="customAuthLogo.png"
                 />
                 <div
                   class="c0 c16"
