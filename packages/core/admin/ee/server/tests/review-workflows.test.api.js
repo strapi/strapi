@@ -242,5 +242,31 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         expect(workflowRes.body.data).toBeUndefined();
       }
     });
+    test('It should throw an error if trying to delete all stages in a workflow', async () => {
+      const stagesRes = await requests.admin.put(
+        `/admin/review-workflows/workflows/${testWorkflow.id}/stages`,
+        { body: { data: [] } }
+      );
+      const workflowRes = await requests.admin.get(
+        `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`
+      );
+
+      if (hasRW) {
+        expect(stagesRes.status).toBe(400);
+        expect(stagesRes.body.error).toBeDefined();
+        expect(stagesRes.body.error.name).toEqual('ApplicationError');
+        expect(stagesRes.body.error.message).toBeDefined();
+        expect(workflowRes.status).toBe(200);
+        expect(workflowRes.body.data).toBeInstanceOf(Object);
+        expect(workflowRes.body.data.stages).toBeInstanceOf(Array);
+        expect(workflowRes.body.data.stages[0]).toMatchObject({ id: defaultStage.id });
+        expect(workflowRes.body.data.stages[1]).toMatchObject({ id: secondStage.id });
+      } else {
+        expect(stagesRes.status).toBe(404);
+        expect(stagesRes.body.data).toBeUndefined();
+        expect(workflowRes.status).toBe(404);
+        expect(workflowRes.body.data).toBeUndefined();
+      }
+    });
   });
 });
