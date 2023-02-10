@@ -43,7 +43,6 @@
     "react-redux": "8.0.5",
     "react-router": "^5.2.0",
     "react-router-dom": "5.3.4",
-    "request": "^2.83.0",
     "url-join": "4.0.1"
   },
   "devDependencies": {
