@@ -48,7 +48,7 @@ module.exports = {
       throw new ApplicationError('Cannot replace a file with multiple ones');
     }
 
-    const data = await validateUploadBody(body);
+    const data = await validateUploadBody(body, { isBufferData: Buffer.isBuffer(files) });
     const replacedFiles = await uploadService.replace(id, { data, file: files }, { user });
 
     ctx.body = await pm.sanitizeOutput(replacedFiles, { action: ACTIONS.read });
@@ -71,7 +71,8 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const data = await validateUploadBody(body);
+    const data = await validateUploadBody(body, { isBufferData: Buffer.isBuffer(files) });
+
     const uploadedFiles = await uploadService.upload({ data, files }, { user });
 
     ctx.body = await pm.sanitizeOutput(uploadedFiles, { action: ACTIONS.read });

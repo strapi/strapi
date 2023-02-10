@@ -78,7 +78,7 @@ module.exports = {
     }
 
     const replacedFiles = await getService('upload').replace(id, {
-      data: await validateUploadBody(body),
+      data: await validateUploadBody(body, { isBufferData: Buffer.isBuffer(files) }),
       file: files,
     });
 
@@ -90,7 +90,10 @@ module.exports = {
       request: { body, files: { files } = {} },
     } = ctx;
 
-    const data = await validateUploadBody(body, Array.isArray(files));
+    const data = await validateUploadBody(body, {
+      isMulti: Array.isArray(files),
+      isBufferData: Buffer.isBuffer(files),
+    });
 
     const apiUploadFolderService = getService('api-upload-folder');
 

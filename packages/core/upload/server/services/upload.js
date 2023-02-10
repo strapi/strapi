@@ -115,6 +115,38 @@ module.exports = ({ strapi }) => ({
     return entity;
   },
 
+  async enhanceAndValidateBuffer(buffer, fileInfo = {}, metas = {}) {
+    const currentFile = await this.formatFileInfo(
+      {
+        filename: fileInfo.name,
+        type: fileInfo.type,
+        size: Number(buffer.length),
+      },
+      fileInfo,
+      {
+        ...metas,
+      }
+    );
+
+    // eslint-disable-next-line new-cap
+    currentFile.getStream = () => new stream.Readable.from(buffer);
+
+    const { optimize, isImage, isFaultyImage, isOptimizableImage } = strapi
+      .plugin('upload')
+      .service('image-manipulation');
+
+    if (await isImage(currentFile)) {
+      if (await isFaultyImage(currentFile)) {
+        throw new ApplicationError('File is not a valid image');
+      }
+      if (await isOptimizableImage(currentFile)) {
+        return optimize(currentFile);
+      }
+    }
+
+    return currentFile;
+  },
+
   async enhanceAndValidateFile(file, fileInfo = {}, metas = {}) {
     const currentFile = await this.formatFileInfo(
       {
@@ -128,6 +160,7 @@ module.exports = ({ strapi }) => ({
         tmpWorkingDirectory: file.tmpWorkingDirectory,
       }
     );
+
     currentFile.getStream = () => fs.createReadStream(file.path);
 
     const { optimize, isImage, isFaultyImage, isOptimizableImage } = strapi
@@ -155,18 +188,39 @@ module.exports = ({ strapi }) => ({
 
   async upload({ data, files }, { user } = {}) {
     // create temporary folder to store files for stream manipulation
-    const tmpWorkingDirectory = await createAndAssignTmpWorkingDirectoryToFiles(files);
+    const fileArray = Array.isArray(files) ? files : [files];
+
+    const hasSomeBuffers = fileArray.some((file) => Buffer.isBuffer(file));
+
+    /**
+     * Don't append the tmp directory if it's a Buffer
+     */
+    const tmpWorkingDirectory = await createAndAssignTmpWorkingDirectoryToFiles(
+      hasSomeBuffers ? [] : files
+    );
 
     let uploadedFiles = [];
 
     try {
       const { fileInfo, ...metas } = data;
 
-      const fileArray = Array.isArray(files) ? files : [files];
       const fileInfoArray = Array.isArray(fileInfo) ? fileInfo : [fileInfo];
 
       const doUpload = async (file, fileInfo) => {
-        const fileData = await this.enhanceAndValidateFile(file, fileInfo, metas);
+        let fileData;
+        if (Buffer.isBuffer(file)) {
+          fileData = await this.enhanceAndValidateBuffer(file, fileInfo, {
+            ...metas,
+            tmpWorkingDirectory,
+          });
+        } else {
+          if (!file.tmpWorkingDirectory) {
+            file.tmpWorkingDirectory = tmpWorkingDirectory;
+          }
+
+          fileData = await this.enhanceAndValidateFile(file, fileInfo, metas);
+        }
+
         return this.uploadFileAndPersist(fileData, { user });
       };
 
@@ -179,56 +233,6 @@ module.exports = ({ strapi }) => ({
     }
 
     return uploadedFiles;
-  },
-
-  /**
-   * Asynchronously upload a buffer to the media library.
-   *
-   * @param {Object} params - The parameters for uploading the buffer.
-   * @param {Buffer} params.file - The buffer to be uploaded.
-   * @param {string} params.fileName - The name of the file to be uploaded.
-   * @param {number} [params.folder] - The folder to upload the file to.
-   * @param {string} params.mime - The MIME type of the file.
-   * @param {string} params.ext - The file extension.
-   * @param {string} [params.alternativeText] - The alternative text for the file.
-   * @param {string} [params.caption] - The caption for the file.
-   *
-   * @throws {ApplicationError} If `mime`, `ext`, `file`, or `fileName` is undefined.
-   *
-   * @returns {Promise<Object>} The uploaded file entity.
-   */
-  async uploadBuffer({ file, fileName, folder, mime, ext, alternativeText, caption }) {
-    if (!mime) {
-      throw new ApplicationError('mime type is undefined');
-    }
-    if (!ext) {
-      throw new ApplicationError('ext is undefined');
-    }
-    if (!file) {
-      throw new ApplicationError('file is undefined');
-    }
-    if (!fileName) {
-      throw new ApplicationError('fileName is undefined');
-    }
-    const config = strapi.config.get('plugin.upload');
-    const entity = {
-      name: `${fileName}.${ext}`,
-      hash: generateFileName(fileName),
-      ext,
-      mime,
-      size: bytesToKbytes(Number(file.length)),
-      provider: config.provider,
-      folder,
-      caption,
-      alternativeText,
-      tmpWorkingDirectory: await createAndAssignTmpWorkingDirectoryToFiles({}),
-      getStream() {
-        // eslint-disable-next-line new-cap
-        return new stream.Readable.from(file);
-      },
-    };
-    await this.uploadImage(entity);
-    return strapi.query('plugin::upload.file').create({ data: entity });
   },
 
   /**
