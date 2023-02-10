@@ -21,6 +21,7 @@ module.exports = async () => {
     const { bootstrap: rwBootstrap } = getService('review-workflows');
 
     await rwBootstrap();
+    await actionProvider.registerMany(actions.reviewWorkflows);
   }
 
   // TODO: check admin seats
