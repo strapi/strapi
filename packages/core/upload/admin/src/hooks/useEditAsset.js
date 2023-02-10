@@ -21,7 +21,7 @@ const editAssetRequest = (asset, file, cancelToken, onProgress, post) => {
     JSON.stringify({
       alternativeText: asset.alternativeText,
       caption: asset.caption,
-      folder: asset.folder?.id,
+      folder: asset.folder,
       name: asset.name,
     })
   );
