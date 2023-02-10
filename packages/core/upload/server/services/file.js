@@ -1,7 +1,7 @@
 'use strict';
 
+const { mapAsync } = require('@strapi/utils');
 const { FOLDER_MODEL_UID, FILE_MODEL_UID } = require('../constants');
-
 const { getService } = require('../utils');
 
 const getFolderPath = async (folderId) => {
@@ -30,29 +30,26 @@ const signFileUrl = async (fileIdentifier) => {
   return url;
 };
 
+// TODO: Make this non mutating?
 const signFileUrls = async (file) => {
   const { provider } = strapi.plugins.upload;
   const { provider: providerConfig } = strapi.config.get('plugin.upload');
 
   // Check file provider and if provider is private
-  if (file.provider === providerConfig && provider.isPrivate()) {
-    file.url = (await provider.getSignedUrl(file)).url;
-
-    // Sign each file format
-    if (file.formats) {
-      // File formats is an object with keys as format name and values the file object defintion
-      // We need to sign each file format
-      file.formats = await Promise.all(
-        Object.keys(file.formats).map(async (format) => {
-          const formatFile = file.formats[format];
-          const signedURL = await provider.getSignedUrl(formatFile);
-          formatFile.url = signedURL.url;
-          return formatFile;
-        })
-      );
-    }
+  if (file.provider !== providerConfig || !provider.isPrivate()) {
+    return;
   }
-  return file;
+
+  const signUrl = async (file) => {
+    const signedUrl = await provider.getSignedUrl(file);
+    file.url = signedUrl.url;
+  };
+
+  // Sign each file format
+  await signUrl(file);
+  if (file.formats) {
+    await mapAsync(Object.values(file.formats), signUrl);
+  }
 };
 
 /**
@@ -65,18 +62,36 @@ const signFileUrls = async (file) => {
  * @param {String} providerConfig
  * @returns
  */
-const signEntityMedia = async (entity, modelAttributes, providerConfig) => {
-  if (!modelAttributes) {
-    return entity;
-  }
+const signEntityMedia = async (entity, uid) => {
+  const model = strapi.getModel(uid);
 
   for (const [key, value] of Object.entries(entity)) {
+    // eslint-disable-next-line no-continue
     if (!value) continue;
 
-    const isMedia = modelAttributes[key]?.type === 'media';
-    if (!isMedia || value.provider !== providerConfig) continue;
+    const attribute = model.attributes[key];
 
-    await signFileUrls(value);
+    switch (attribute?.type) {
+      case 'media':
+        await signFileUrls(value);
+        break;
+      case 'component':
+        if (attribute.repeatable) {
+          await Promise.all(
+            value.map((component) => signEntityMedia(component, attribute.component))
+          );
+        } else {
+          await signEntityMedia(value, attribute.component);
+        }
+        break;
+      case 'dynamiczone':
+        await Promise.all(
+          value.map((component) => signEntityMedia(component, component.__component))
+        );
+        break;
+      default:
+        break;
+    }
   }
 
   return entity;
@@ -84,39 +99,30 @@ const signEntityMedia = async (entity, modelAttributes, providerConfig) => {
 
 const addSignedFileUrlsToAdmin = () => {
   const { provider } = strapi.plugins.upload;
-  const { provider: providerConfig } = strapi.config.get('plugin.upload');
 
   // We only need to sign the file urls if the provider is private
   if (!provider.isPrivate()) {
     return;
   }
 
+  // TOPICS:
+  // What about the webhooks emitted by the entity manager?
+  //   Do we want to sign the file urls in the event payload?
+  // We need to do this for create/update/delete/publish/unpublish too no?
   strapi.container
     .get('services')
     .extend(`plugin::content-manager.entity-manager`, (entityManager) => {
       const findWithRelationCountsPage = async (opts, uid) => {
-        const entityManagerResults = await entityManager.findWithRelationCountsPage(opts, uid);
-        const attributes = strapi.getModel(uid)?.attributes;
-
-        await Promise.all(
-          entityManagerResults.results.map(async (entity) =>
-            signEntityMedia(entity, attributes, providerConfig)
-          )
-        );
-
-        return entityManagerResults;
+        const entities = await entityManager.findWithRelationCountsPage(opts, uid);
+        await mapAsync(entities.results, async (entity) => signEntityMedia(entity, uid));
+        return entities;
       };
 
       const findOneWithCreatorRolesAndCount = async (id, uid) => {
-        const entityManagerResult = await entityManager.findOneWithCreatorRolesAndCount(id, uid);
-
-        await signEntityMedia(
-          entityManagerResult,
-          strapi.getModel(uid)?.attributes,
-          providerConfig
-        );
-
-        return entityManagerResult;
+        // TODO: What if the entity is not found?
+        const entity = await entityManager.findOneWithCreatorRolesAndCount(id, uid);
+        await signEntityMedia(entity, uid);
+        return entity;
       };
 
       return {
