@@ -14,10 +14,10 @@ const registerModelsHooks = () => {
     strapi.db.lifecycles.subscribe({
       models: i18nModelUIDs,
       async beforeCreate(event) {
-        await getService('localizations').assignDefaultLocale(event.params.data);
+        await getService('localizations').assignDefaultLocaleToEntries(event.params.data);
       },
       async beforeCreateMany(event) {
-        await getService('localizations').assignDefaultLocale(event.params.data);
+        await getService('localizations').assignDefaultLocaleToEntries(event.params.data);
       },
     });
   }

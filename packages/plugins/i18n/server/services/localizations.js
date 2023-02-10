@@ -8,17 +8,15 @@ const { getService } = require('../utils');
  * Adds the default locale to an object if it isn't defined yet
  * @param {Object} data a data object before being persisted into db
  */
-const assignDefaultLocale = async (data) => {
+const assignDefaultLocaleToEntries = async (data) => {
   const { getDefaultLocale } = getService('locales');
 
   if (isArray(data) && data.some((entry) => !entry.locale)) {
     const defaultLocale = await getDefaultLocale();
     data.forEach((entry) => {
-      if (isNil(entry.locale)) {
-        entry.locale = defaultLocale;
-      }
+      entry.locale = entry.locale || defaultLocale;
     });
-  } else if (isNil(data.locale)) {
+  } else if (!isArray(data) && isNil(data.locale)) {
     data.locale = await getDefaultLocale();
   }
 };
@@ -72,7 +70,7 @@ const syncNonLocalizedAttributes = async (entry, { model }) => {
 };
 
 module.exports = () => ({
-  assignDefaultLocale,
+  assignDefaultLocaleToEntries,
   syncLocalizations,
   syncNonLocalizedAttributes,
 });
