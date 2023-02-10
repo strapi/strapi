@@ -2097,6 +2097,19 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   fill: #ffffff;
 }
 
+.c24 {
+  margin-right: 24px;
+}
+
+.c24 svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.c27 {
+  word-break: break-all;
+}
+
 .c42 {
   position: absolute;
   left: 0;
@@ -2334,19 +2347,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-}
-
-.c24 {
-  margin-right: 24px;
-}
-
-.c24 svg {
-  width: 2rem;
-  height: 2rem;
-}
-
-.c27 {
-  word-break: break-all;
 }
 
 .c0:focus-visible {

@@ -572,6 +572,19 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   fill: #271fe0;
 }
 
+.c82 {
+  margin-right: 24px;
+}
+
+.c82 svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.c84 {
+  word-break: break-all;
+}
+
 .c62 {
   height: 1px;
   border: none;
@@ -833,19 +846,6 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
 .c12 svg > g,
 .c12 svg path {
   fill: #32324d;
-}
-
-.c82 {
-  margin-right: 24px;
-}
-
-.c82 svg {
-  width: 2rem;
-  height: 2rem;
-}
-
-.c84 {
-  word-break: break-all;
 }
 
 .c1 {

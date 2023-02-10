@@ -8,7 +8,6 @@ const ForkTsCheckerPlugin = require('fork-ts-checker-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { ESBuildMinifyPlugin } = require('esbuild-loader');
 const WebpackBar = require('webpackbar');
-const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const browserslistToEsbuild = require('browserslist-to-esbuild');
 
@@ -231,8 +230,6 @@ module.exports = ({
         template: path.resolve(__dirname, 'index.html'),
       }),
       new webpack.DefinePlugin(envVariables),
-
-      new NodePolyfillPlugin(),
 
       new ForkTsCheckerPlugin({
         typescript: {
