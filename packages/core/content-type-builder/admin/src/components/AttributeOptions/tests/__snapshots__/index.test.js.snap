@@ -289,7 +289,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
           >
             <div
               class="c13 c14"
-              spacing="8"
             >
               <div
                 class="c15"
@@ -315,8 +314,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           <div
                             aria-hidden="true"
                             class="c21 c22"
-                            height="1.5rem"
-                            width="2rem"
                           >
                             <svg
                               class=""
@@ -389,8 +386,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           <div
                             aria-hidden="true"
                             class="c21 c22"
-                            height="1.5rem"
-                            width="2rem"
                           >
                             <svg
                               class=""
@@ -463,8 +458,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           <div
                             aria-hidden="true"
                             class="c21 c22"
-                            height="1.5rem"
-                            width="2rem"
                           >
                             <svg
                               class=""
@@ -539,8 +532,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           <div
                             aria-hidden="true"
                             class="c21 c22"
-                            height="1.5rem"
-                            width="2rem"
                           >
                             <svg
                               class=""
@@ -609,8 +600,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           <div
                             aria-hidden="true"
                             class="c21 c22"
-                            height="1.5rem"
-                            width="2rem"
                           >
                             <svg
                               class=""
@@ -683,8 +672,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           <div
                             aria-hidden="true"
                             class="c21 c22"
-                            height="1.5rem"
-                            width="2rem"
                           >
                             <svg
                               class=""
@@ -759,8 +746,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           <div
                             aria-hidden="true"
                             class="c21 c22"
-                            height="1.5rem"
-                            width="2rem"
                           >
                             <svg
                               class=""
@@ -831,8 +816,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           <div
                             aria-hidden="true"
                             class="c21 c22"
-                            height="1.5rem"
-                            width="2rem"
                           >
                             <svg
                               class=""
@@ -907,8 +890,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           <div
                             aria-hidden="true"
                             class="c21 c22"
-                            height="1.5rem"
-                            width="2rem"
                           >
                             <svg
                               class=""
@@ -981,8 +962,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           <div
                             aria-hidden="true"
                             class="c21 c22"
-                            height="1.5rem"
-                            width="2rem"
                           >
                             <svg
                               class=""
@@ -1057,8 +1036,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           <div
                             aria-hidden="true"
                             class="c21 c22"
-                            height="1.5rem"
-                            width="2rem"
                           >
                             <svg
                               class=""
@@ -1129,8 +1106,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           <div
                             aria-hidden="true"
                             class="c21 c22"
-                            height="1.5rem"
-                            width="2rem"
                           >
                             <svg
                               class=""
@@ -1203,8 +1178,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           <div
                             aria-hidden="true"
                             class="c21 c22"
-                            height="1.5rem"
-                            width="2rem"
                           >
                             <svg
                               class=""
@@ -1283,8 +1256,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           <div
                             aria-hidden="true"
                             class="c21 c22"
-                            height="1.5rem"
-                            width="2rem"
                           >
                             <svg
                               class=""

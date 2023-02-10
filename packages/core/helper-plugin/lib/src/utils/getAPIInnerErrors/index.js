@@ -1,16 +1,28 @@
+import { normalizeAPIError } from '../../hooks/useAPIErrorHandler';
+
+/**
+ *
+ * Returns a normalized error message
+ *
+ * @deprecated
+ * @export
+ * @param {error} error - API error response object
+ * @param {{ getTrad }} - Error message prefix callback
+ * @return {{ id: string, defaultMessage: string }}}
+ */
 export default function getAPIInnerErrors(error, { getTrad }) {
-  const errorPayload = error.response.data.error.details.errors;
-  const validationErrors = errorPayload.reduce((acc, err) => {
-    acc[err.path.join('.')] = {
-      id: getTrad(`apiError.${err.message}`),
-      defaultMessage: err.message,
-      values: {
-        field: err.path[err.path.length - 1],
-      },
-    };
+  const normalizedError = normalizeAPIError(error, getTrad);
 
-    return acc;
-  }, {});
+  if (normalizedError?.errors) {
+    return normalizedError.errors.reduce((acc, error) => {
+      acc[error.values.path] = {
+        id: error.id,
+        defaultMessage: error.defaultMessage,
+      };
 
-  return validationErrors;
+      return acc;
+    }, {});
+  }
+
+  return normalizedError.defaultMessage;
 }
