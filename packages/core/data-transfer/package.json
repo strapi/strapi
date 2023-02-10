@@ -48,7 +48,7 @@
     "semver": "7.3.8",
     "stream-chain": "2.2.5",
     "stream-json": "1.7.4",
-    "tar": "6.1.12",
+    "tar": "6.1.13",
     "tar-stream": "2.2.0",
     "uuid": "9.0.0",
     "ws": "8.11.0"
