@@ -7,7 +7,7 @@ import { formatAPIError } from './utils/formatAPIError';
  *
  * @export
  * @param {function=} - Error message prefix function (usually getTrad())
- * @return {object} - Object containing an formatting function
+ * @return {{ formatAPIError }} - Object containing an formatting function
  */
 
 export function useAPIErrorHandler(intlMessagePrefixCallback) {

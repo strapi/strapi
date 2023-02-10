@@ -7,8 +7,8 @@ import { normalizeAPIError } from '../../hooks/useAPIErrorHandler';
  * @deprecated
  * @export
  * @param {error} error - API error response object
- * @param {object<{ getTrad }>} - Error message prefix callback
- * @return {object}
+ * @param {{ getTrad }} - Error message prefix callback
+ * @return {{ id: string, defaultMessage: string }}}
  */
 export default function getAPIInnerErrors(error, { getTrad }) {
   const normalizedError = normalizeAPIError(error, getTrad);
