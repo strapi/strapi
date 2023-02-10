@@ -88,6 +88,12 @@ const sidebars = {
                   label: 'useFetchClient',
                   id: 'core/helper-plugin/hooks/use-fetch-client',
                 },
+
+                {
+                  type: 'doc',
+                  label: 'useAPIErrorHandler',
+                  id: 'core/hooks/use-api-error-handler',
+                },
               ],
             },
           ],
