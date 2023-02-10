@@ -92,7 +92,7 @@ const sidebars = {
                 {
                   type: 'doc',
                   label: 'useAPIErrorHandler',
-                  id: 'core/hooks/use-api-error-handler',
+                  id: 'core/helper-plugin/hooks/use-api-error-handler',
                 },
               ],
             },
