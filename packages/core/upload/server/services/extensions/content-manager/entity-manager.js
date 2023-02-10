@@ -53,6 +53,19 @@ const signEntityMedia = async (entity, uid) => {
   return entity;
 };
 
+/**
+ * Sign media urls from entity manager results
+ * @param {Array|Object} result from the entity manager
+ * @param {string} uid of the model
+ */
+const fileSigningExtension = async (result, uid) => {
+  if (Array.isArray(result?.results)) {
+    await mapAsync(result.results, async (entity) => signEntityMedia(entity, uid));
+  } else {
+    await signEntityMedia(result, uid);
+  }
+};
+
 const addSignedFileUrlsToAdmin = () => {
   const { provider } = strapi.plugins.upload;
 
@@ -77,46 +90,28 @@ const addSignedFileUrlsToAdmin = () => {
   // We need to do this for create/update/delete/publish/unpublish too no?
   strapi.container
     .get('services')
-    .extend(`plugin::content-manager.entity-manager`, (entityManager) => {
-      const update = async (entity, body, uid) => {
-        const updatedEntity = await entityManager.update(entity, body, uid);
-        await signEntityMedia(updatedEntity, uid);
-        return updatedEntity;
-      };
+    .extend('plugin::content-manager.entity-manager', (entityManager) => {
+      const functionsToExtend = [
+        'update',
+        'publish',
+        'unpublish',
+        'findOneWithCreatorRolesAndCount',
+        'findWithRelationCountsPage',
+      ];
 
-      const publish = async (entity, body, uid) => {
-        const publishedEntity = await entityManager.publish(entity, body, uid);
-        await signEntityMedia(publishedEntity, uid);
-        return publishedEntity;
-      };
+      const extendedFunctions = {};
+      functionsToExtend.reduce((acc, functionName) => {
+        acc[functionName] = async (...args) => {
+          const result = await entityManager[functionName](...args);
+          await fileSigningExtension(result, args.at(-1));
 
-      const unpublish = async (entity, body, uid) => {
-        const unpublishedEntity = await entityManager.unpublish(entity, body, uid);
-        await signEntityMedia(unpublishedEntity, uid);
-        return unpublishedEntity;
-      };
+          return result;
+        };
 
-      const findOneWithCreatorRolesAndCount = async (id, uid) => {
-        // TODO: What if the entity is not found?
-        const entity = await entityManager.findOneWithCreatorRolesAndCount(id, uid);
-        await signEntityMedia(entity, uid);
-        return entity;
-      };
+        return acc;
+      }, extendedFunctions);
 
-      const findWithRelationCountsPage = async (opts, uid) => {
-        const entities = await entityManager.findWithRelationCountsPage(opts, uid);
-        await mapAsync(entities.results, async (entity) => signEntityMedia(entity, uid));
-        return entities;
-      };
-
-      return {
-        ...entityManager,
-        findOneWithCreatorRolesAndCount,
-        findWithRelationCountsPage,
-        update,
-        publish,
-        unpublish,
-      };
+      return { ...entityManager, ...extendedFunctions };
     });
 };
 
