@@ -7,6 +7,7 @@ const folder = require('./folder');
 const file = require('./file');
 const metrics = require('./metrics');
 const apiUploadFolder = require('./api-upload-folder');
+const extensions = require('./extensions');
 
 module.exports = {
   provider,
@@ -16,4 +17,5 @@ module.exports = {
   metrics,
   'image-manipulation': imageManipulation,
   'api-upload-folder': apiUploadFolder,
+  extensions,
 };
