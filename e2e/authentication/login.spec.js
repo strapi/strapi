@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../scripts/dts-import';
 import { toggleRateLimiting } from '../scripts/rate-limit';
-import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../scripts/constants';
+import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../constants';
 
 test.describe('Authentication | Login', () => {
   test.beforeEach(async ({ page }) => {
