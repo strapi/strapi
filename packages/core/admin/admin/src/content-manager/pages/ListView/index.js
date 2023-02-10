@@ -198,7 +198,7 @@ function ListView({
         });
       }
     },
-    [slug, params, fetchData, toggleNotification, formatMessage, formatAPIError, del]
+    [slug, params, fetchData, toggleNotification, formatAPIError, del]
   );
 
   useEffect(() => {

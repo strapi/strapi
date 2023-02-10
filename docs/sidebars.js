@@ -68,6 +68,17 @@ const sidebars = {
         },
         {
           type: 'category',
+          label: 'Admin',
+          items: [
+            {
+              type: 'doc',
+              label: 'Link Strapi Design System',
+              id: 'core/admin/link-strapi-design-system',
+            },
+          ],
+        },
+        {
+          type: 'category',
           label: 'Content Type Builder',
           link: {
             type: 'doc',
@@ -87,6 +98,12 @@ const sidebars = {
                   type: 'doc',
                   label: 'useFetchClient',
                   id: 'core/helper-plugin/hooks/use-fetch-client',
+                },
+
+                {
+                  type: 'doc',
+                  label: 'useAPIErrorHandler',
+                  id: 'core/hooks/use-api-error-handler',
                 },
               ],
             },
