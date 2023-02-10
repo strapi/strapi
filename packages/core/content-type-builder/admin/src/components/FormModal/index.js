@@ -20,7 +20,7 @@ import { ModalLayout, ModalBody, ModalFooter } from '@strapi/design-system/Modal
 import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';

@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import { toLower } from 'lodash';
+import toLower from 'lodash/toLower';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 import CATEGORY_NAME_REGEX from './regex';
 

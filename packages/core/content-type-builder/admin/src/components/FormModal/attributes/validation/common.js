@@ -1,5 +1,6 @@
 import * as yup from 'yup';
-import { get, toNumber } from 'lodash';
+import get from 'lodash/get';
+import toNumber from 'lodash/toNumber';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 import getTrad from '../../../../utils/getTrad';
 

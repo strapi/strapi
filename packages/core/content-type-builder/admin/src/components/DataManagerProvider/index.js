@@ -1,6 +1,9 @@
 import React, { memo, useEffect, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { get, groupBy, set, size } from 'lodash';
+import get from 'lodash/get';
+import groupBy from 'lodash/groupBy';
+import set from 'lodash/set';
+import size from 'lodash/size';
 import {
   LoadingIndicatorPage,
   useTracking,

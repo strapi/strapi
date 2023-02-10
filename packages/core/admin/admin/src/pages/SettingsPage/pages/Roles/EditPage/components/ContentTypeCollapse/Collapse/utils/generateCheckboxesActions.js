@@ -1,4 +1,6 @@
-import { get, isEmpty } from 'lodash';
+import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
+
 import { createArrayOfValues, getCheckboxState } from '../../../utils';
 
 const generateCheckboxesActions = (availableActions, modifiedData, pathToData) => {

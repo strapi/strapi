@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import get from 'lodash/get';
 
 const getAttributesToDisplay = (contentType) => {
   const timestamps = get(contentType, ['options', 'timestamps']);

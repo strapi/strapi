@@ -1,4 +1,6 @@
-import { has, isObject } from 'lodash';
+import has from 'lodash/has';
+import isObject from 'lodash/isObject';
+
 import { createArrayOfValues } from '../../utils';
 import { createConditionsArray } from './formatSettingsPermissionsToAPI';
 

@@ -3,7 +3,9 @@ import { useIntl } from 'react-intl';
 import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import { GridItem } from '@strapi/design-system/Grid';
-import { get, isEmpty, without } from 'lodash';
+import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
+import without from 'lodash/without';
 import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
 import BoundRoute from '../BoundRoute';
 

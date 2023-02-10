@@ -1,4 +1,4 @@
-import { has } from 'lodash';
+import has from 'lodash/has';
 
 const extendCTBInitialDataMiddleware = () => {
   return () => (next) => (action) => {
