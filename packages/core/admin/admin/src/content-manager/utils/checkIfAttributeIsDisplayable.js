@@ -1,6 +1,10 @@
 import { toLower } from 'lodash';
 
 const checkIfAttributeIsDisplayable = (attribute) => {
+  if (attribute.private) {
+    return false;
+  }
+
   const type = attribute.type;
 
   if (type === 'relation') {
