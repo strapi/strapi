@@ -30,13 +30,16 @@
   "main": "lib/index.js",
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
+    "@strapi/icons": "1.6.3",
     "@strapi/typescript-utils": "4.6.1",
     "@strapi/utils": "4.6.1",
     "chalk": "4.1.2",
     "fs-extra": "10.0.0",
     "node-plop": "0.26.3",
     "plop": "2.7.6",
-    "pluralize": "8.0.0"
+    "pluralize": "8.0.0",
+    "react": "^17.0.2",
+    "react-router-dom": "5.3.4"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",

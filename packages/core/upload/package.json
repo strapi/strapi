@@ -23,12 +23,15 @@
     "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
   },
   "dependencies": {
+    "@strapi/design-system": "1.6.3",
     "@strapi/helper-plugin": "4.6.1",
+    "@strapi/icons": "1.6.3",
     "@strapi/provider-upload-local": "4.6.1",
     "@strapi/utils": "4.6.1",
     "byte-size": "7.0.1",
     "cropperjs": "1.5.12",
     "date-fns": "2.29.3",
+    "formik": "2.2.9",
     "fs-extra": "10.0.0",
     "immer": "9.0.19",
     "koa-range": "0.3.0",
@@ -37,12 +40,17 @@
     "mime-types": "2.1.35",
     "react": "^17.0.2",
     "react-copy-to-clipboard": "^5.1.0",
+    "react-dnd": "15.1.2",
     "react-dom": "^17.0.2",
+    "react-helmet": "^6.1.0",
     "react-intl": "6.2.8",
+    "react-query": "3.24.3",
     "react-redux": "8.0.5",
     "react-router": "^5.2.0",
     "react-router-dom": "5.3.4",
-    "sharp": "0.31.1"
+    "react-select": "5.6.0",
+    "sharp": "0.31.1",
+    "styled-components": "5.3.3"
   },
   "devDependencies": {
     "@testing-library/dom": "8.19.0",
