@@ -3,54 +3,59 @@
 const { mapAsync } = require('@strapi/utils');
 const { getService } = require('../../../utils');
 
+const getSignedAttribute = (attributeName, entity, model) => {
+  const { signFileUrls } = getService('file');
+
+  if (!entity) return entity;
+
+  const attribute = model.attributes[attributeName];
+
+  switch (attribute?.type) {
+    case 'media':
+      if (attribute.multiple) {
+        return mapAsync(entity, signFileUrls);
+      }
+      return signFileUrls(entity);
+    case 'component':
+      if (attribute.repeatable) {
+        return mapAsync(entity, (component) => signEntityMedia(component, attribute.component));
+      }
+      return signEntityMedia(entity, attribute.component);
+    case 'dynamiczone':
+      return mapAsync(entity, (component) => signEntityMedia(component, component.__component));
+    default:
+      return entity;
+  }
+};
+
 /**
  *
  * Iterate through an entity manager result
  * Check which modelAttributes are media and pre sign the image URLs
  * if they are from the current upload provider
+ *
+ * TODO: Create a strapi-utils function to iterate through an entity
+ * and apply a function on each attribute type
+ *
  * @param {Object} entity
  * @param {Object} modelAttributes
- * @param {String} providerConfig
  * @returns
  */
 const signEntityMedia = async (entity, uid) => {
   const model = strapi.getModel(uid);
-  const { signFileUrls } = getService('file');
 
-  for (const [key, value] of Object.entries(entity)) {
-    // eslint-disable-next-line no-continue
-    if (!value) continue;
+  const signedEntity = {};
 
-    const attribute = model.attributes[key];
-
-    switch (attribute?.type) {
-      case 'media':
-        if (attribute.multiple) {
-          await mapAsync(value, signFileUrls);
-        } else {
-          await signFileUrls(value);
-        }
-        break;
-      case 'component':
-        if (attribute.repeatable) {
-          await Promise.all(
-            value.map((component) => signEntityMedia(component, attribute.component))
-          );
-        } else {
-          await signEntityMedia(value, attribute.component);
-        }
-        break;
-      case 'dynamiczone':
-        await Promise.all(
-          value.map((component) => signEntityMedia(component, component.__component))
-        );
-        break;
-      default:
-        break;
-    }
+  // TODO: Use asyncReduce
+  for (const attributeName of Object.keys(entity)) {
+    signedEntity[attributeName] = await getSignedAttribute(
+      attributeName,
+      entity[attributeName],
+      model
+    );
   }
 
-  return entity;
+  return signedEntity;
 };
 
 const addSignedFileUrlsToAdmin = () => {
@@ -67,46 +72,39 @@ const addSignedFileUrlsToAdmin = () => {
   //  - What about the webhooks emitted by the entity manager?
   //  - Do we want to sign the file urls in the event payload?
   // Test for every case in the Content manager so we don't miss any
-  // Make entity file signing non mutating
-  // Move this extend into a folder called /extensions
   // Can we simplify the way to extend the content manager?
-
-  // TOPICS:
-  // What about the webhooks emitted by the entity manager?
-  //   Do we want to sign the file urls in the event payload?
-  // We need to do this for create/update/delete/publish/unpublish too no?
+  // Documentation
   strapi.container
     .get('services')
     .extend(`plugin::content-manager.entity-manager`, (entityManager) => {
       const update = async (entity, body, uid) => {
         const updatedEntity = await entityManager.update(entity, body, uid);
-        await signEntityMedia(updatedEntity, uid);
-        return updatedEntity;
+        return signEntityMedia(updatedEntity, uid);
       };
 
       const publish = async (entity, body, uid) => {
         const publishedEntity = await entityManager.publish(entity, body, uid);
-        await signEntityMedia(publishedEntity, uid);
-        return publishedEntity;
+        return signEntityMedia(publishedEntity, uid);
       };
 
       const unpublish = async (entity, body, uid) => {
         const unpublishedEntity = await entityManager.unpublish(entity, body, uid);
-        await signEntityMedia(unpublishedEntity, uid);
-        return unpublishedEntity;
+        return signEntityMedia(unpublishedEntity, uid);
       };
 
       const findOneWithCreatorRolesAndCount = async (id, uid) => {
         // TODO: What if the entity is not found?
         const entity = await entityManager.findOneWithCreatorRolesAndCount(id, uid);
-        await signEntityMedia(entity, uid);
-        return entity;
+        return signEntityMedia(entity, uid);
       };
 
       const findWithRelationCountsPage = async (opts, uid) => {
         const entities = await entityManager.findWithRelationCountsPage(opts, uid);
-        await mapAsync(entities.results, async (entity) => signEntityMedia(entity, uid));
-        return entities;
+        const results = await mapAsync(entities.results, async (entity) =>
+          signEntityMedia(entity, uid)
+        );
+
+        return { ...entities, results };
       };
 
       return {

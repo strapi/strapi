@@ -1,5 +1,6 @@
 'use strict';
 
+const { cloneDeep } = require('lodash/fp');
 const { mapAsync } = require('@strapi/utils');
 const { FOLDER_MODEL_UID, FILE_MODEL_UID } = require('../constants');
 const { getService } = require('../utils');
@@ -24,20 +25,17 @@ const deleteByIds = async (ids = []) => {
 
 const signFileUrl = async (fileIdentifier) => {
   const { provider } = strapi.plugins.upload;
-
   const { url } = await provider.getSignedUrl(fileIdentifier);
-
   return url;
 };
 
-// TODO: Make this non mutating?
 const signFileUrls = async (file) => {
   const { provider } = strapi.plugins.upload;
   const { provider: providerConfig } = strapi.config.get('plugin.upload');
 
   // Check file provider and if provider is private
   if (file.provider !== providerConfig || !provider.isPrivate()) {
-    return;
+    return file;
   }
 
   const signUrl = async (file) => {
@@ -45,11 +43,15 @@ const signFileUrls = async (file) => {
     file.url = signedUrl.url;
   };
 
+  const signedFile = cloneDeep(file);
+
   // Sign each file format
-  await signUrl(file);
+  await signUrl(signedFile);
   if (file.formats) {
-    await mapAsync(Object.values(file.formats), signUrl);
+    await mapAsync(Object.values(signedFile.formats), signUrl);
   }
+
+  return signedFile;
 };
 
 module.exports = {
