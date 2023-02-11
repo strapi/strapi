@@ -552,7 +552,7 @@ const createEntityManager = (db) => {
         if (attribute.joinTable) {
           // need to set the column on the target
 
-          const { joinTable } = attribute;
+          const { joinTable, component: component_type } = attribute;
           const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } =
             joinTable;
 
@@ -576,6 +576,7 @@ const createEntityManager = (db) => {
               [inverseJoinColumn.name]: data.id,
               ...(joinTable.on || {}),
               ...(data.__pivot || {}),
+              ...(component_type ? { component_type } : {}),
             };
           });
 
