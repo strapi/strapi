@@ -27,10 +27,14 @@
     "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
   },
   "dependencies": {
+    "@strapi/design-system": "1.6.3",
     "@strapi/helper-plugin": "4.6.1",
+    "@strapi/icons": "1.6.3",
     "@strapi/utils": "4.6.1",
     "bcryptjs": "2.4.3",
+    "formik": "2.2.9",
     "grant-koa": "5.4.8",
+    "immer": "9.0.19",
     "jsonwebtoken": "9.0.0",
     "jwk-to-pem": "2.0.5",
     "koa": "^2.13.4",
@@ -40,9 +44,11 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-intl": "6.2.8",
+    "react-query": "3.24.3",
     "react-redux": "8.0.5",
     "react-router": "^5.2.0",
     "react-router-dom": "5.3.4",
+    "styled-components": "5.3.3",
     "url-join": "4.0.1"
   },
   "devDependencies": {
@@ -50,6 +56,7 @@
     "@testing-library/react": "12.1.4",
     "@testing-library/react-hooks": "8.0.1",
     "@testing-library/user-event": "14.4.3",
+    "history": "^4.9.0",
     "msw": "1.0.1",
     "react-test-renderer": "^17.0.2"
   },

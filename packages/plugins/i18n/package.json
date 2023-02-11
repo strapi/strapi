@@ -24,8 +24,18 @@
     "test:unit": "jest --verbose"
   },
   "dependencies": {
+    "@strapi/design-system": "1.6.3",
+    "@strapi/icons": "1.6.3",
     "@strapi/utils": "4.6.1",
-    "lodash": "4.17.21"
+    "formik": "2.2.9",
+    "immer": "9.0.19",
+    "lodash": "4.17.21",
+    "react": "^17.0.2",
+    "react-intl": "6.2.7",
+    "react-query": "3.24.3",
+    "react-redux": "8.0.5",
+    "react-router-dom": "5.3.4",
+    "styled-components": "5.3.3"
   },
   "devDependencies": {
     "@testing-library/react": "12.1.4",
