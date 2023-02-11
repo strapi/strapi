@@ -252,9 +252,6 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
           },
         },
       });
-
-      // assign for later use
-      data.labels = res.body.data.labels.data;
     });
 
     test('List labels with preview documents', async () => {
@@ -307,9 +304,6 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
           },
         },
       });
-
-      // assign for later use
-      data.labels = res.body.data.labels.data;
     });
   });
 });
