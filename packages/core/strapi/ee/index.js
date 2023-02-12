@@ -166,7 +166,7 @@ module.exports = Object.freeze({
   },
 
   get licenseInfo() {
-    return ee.licenseInfo;
+    return Object.freeze(ee.licenseInfo);
   },
 
   features: Object.freeze({

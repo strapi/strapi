@@ -8,11 +8,11 @@ import { useLicenseLimits } from '../../../../../../hooks';
 const CreateAction = ({ onClick }) => {
   const { formatMessage } = useIntl();
   const { license } = useLicenseLimits();
-  const { licenseLimitStatus, permittedSeats } = license?.data ?? {};
+  const { permittedSeats, shouldStopCreate } = license?.data ?? {};
 
   return (
     <Stack spacing={2} horizontal>
-      {permittedSeats && (
+      {permittedSeats && shouldStopCreate && (
         <Tooltip
           description={formatMessage({
             id: 'Settings.application.admin-seats.at-limit-tooltip',
@@ -33,7 +33,7 @@ const CreateAction = ({ onClick }) => {
         onClick={onClick}
         startIcon={<Envelop />}
         size="S"
-        disabled={!!licenseLimitStatus}
+        disabled={shouldStopCreate}
       >
         {formatMessage({
           id: 'Settings.permissions.users.create',

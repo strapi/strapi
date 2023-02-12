@@ -227,7 +227,6 @@ class Strapi {
 
   async destroy() {
     await this.server.destroy();
-
     await this.runLifecyclesFunctions(LIFECYCLES.DESTROY);
 
     this.eventHub.destroy();

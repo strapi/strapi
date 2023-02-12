@@ -4,12 +4,12 @@ const { env } = require('@strapi/utils');
 
 module.exports = {
   async licenseLimitInformation() {
+    const permittedSeats = strapi.ee.licenseInfo.seats;
+    if (!permittedSeats) return;
+
     let shouldNotify = false;
     let licenseLimitStatus = null;
-    let currentUserCount;
-    const permittedSeats = strapi.ee.licenseInfo.seats;
-
-    if (!permittedSeats) return;
+    let enforcementUserCount;
 
     const currentActiveUserCount = await strapi.db
       .query('admin::user')
@@ -21,26 +21,28 @@ module.exports = {
 
     if (data.value) {
       const eeDisabledUsers = JSON.parse(data.value);
-      currentUserCount = currentActiveUserCount + eeDisabledUsers.length;
+      enforcementUserCount = currentActiveUserCount + eeDisabledUsers.length;
     } else {
-      currentUserCount = currentActiveUserCount;
+      enforcementUserCount = currentActiveUserCount;
     }
 
-    if (currentUserCount > permittedSeats) {
+    if (enforcementUserCount > permittedSeats) {
       shouldNotify = true;
       licenseLimitStatus = 'OVER_LIMIT';
     }
 
-    if (currentUserCount === permittedSeats) {
+    if (enforcementUserCount === permittedSeats) {
       shouldNotify = true;
       licenseLimitStatus = 'AT_LIMIT';
     }
 
     return {
       data: {
-        currentUserCount,
+        enforcementUserCount,
+        currentActiveUserCount,
         permittedSeats,
         shouldNotify,
+        shouldStopCreate: currentActiveUserCount >= permittedSeats,
         licenseLimitStatus,
         isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
         licenseType: strapi.ee.licenseInfo.type,

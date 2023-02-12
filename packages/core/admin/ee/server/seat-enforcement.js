@@ -28,7 +28,7 @@ const enableUsersToLicenseLimit = async (numberOfUsersToEnable) => {
 
   const remainingDisabledUsers = _.drop(disabledUsers, numberOfUsersToEnable);
 
-  return strapi.db.query('strapi::ee-store').update({
+  await strapi.db.query('strapi::ee-store').update({
     where: { id: data.id },
     data: { value: JSON.stringify(remainingDisabledUsers) },
   });
@@ -73,7 +73,7 @@ const disableUsersAboveLicenseLimit = async (numberOfUsersToDisable) => {
     });
   }
 
-  return strapi.db.query('strapi::ee-store').create({
+  await strapi.db.query('strapi::ee-store').create({
     data: {
       key: 'ee_disabled_users',
       value: JSON.stringify(usersToDisable),
@@ -96,9 +96,32 @@ const syncdDisabledUserRecords = async () => {
 
     if (!data) return;
 
-    return strapi.db.query('admin::user').update({
+    await strapi.db.query('admin::user').update({
       where: { id: user.id },
       data: { isActive: user.isActive }, // TODO: should this value be hardcoded to 'false' or no?
+    });
+  });
+};
+
+const revertSeatEnforcementWorkflow = async () => {
+  const data = await strapi.db.query('strapi::ee-store').findOne({
+    where: { key: 'ee_disabled_users' },
+  });
+
+  if (!data || !data.value || data.value.length === 0) return;
+
+  const disabledUsers = JSON.parse(data.value);
+  disabledUsers.forEach(async (user) => {
+    const data = await strapi.db.query('admin::user').findOne({
+      where: { id: user.id },
+    });
+
+    if (!data) return;
+    if (data.isActive !== user.isActive) return;
+
+    await strapi.db.query('admin::user').update({
+      where: { id: user.id },
+      data: { isActive: true },
     });
   });
 };
@@ -126,4 +149,5 @@ const seatEnforcementWorkflow = async () => {
 
 module.exports = {
   seatEnforcementWorkflow,
+  revertSeatEnforcementWorkflow,
 };

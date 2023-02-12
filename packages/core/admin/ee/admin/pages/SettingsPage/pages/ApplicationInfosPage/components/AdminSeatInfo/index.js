@@ -12,7 +12,7 @@ const BILLING_SELF_HOSTED_URL = 'https://share.hsforms.com/1WhxtbTkJSUmfqqEuv4pw
 const AdminSeatInfo = () => {
   const { formatMessage } = useIntl();
   const { license } = useLicenseLimits();
-  const { licenseLimitStatus, currentUserCount, permittedSeats, isHostedOnStrapiCloud } =
+  const { licenseLimitStatus, enforcementUserCount, permittedSeats, isHostedOnStrapiCloud } =
     license?.data ?? {};
 
   if (!permittedSeats) {
@@ -29,17 +29,22 @@ const AdminSeatInfo = () => {
       </Typography>
       <Stack spacing={2} horizontal>
         <Flex>
-          <Typography
-            as="p"
-            textColor={licenseLimitStatus === 'OVER_LIMIT' ? 'danger500' : ''}
-            fontWeight={licenseLimitStatus === 'OVER_LIMIT' ? 'bold' : ''}
-          >
+          <Typography as="p">
             {formatMessage(
               {
                 id: 'Settings.application.ee.admin-seats.count',
-                defaultMessage: '{currentUserCount}/{permittedSeats}',
+                defaultMessage: '<text>{enforcementUserCount}</text>/{permittedSeats}',
               },
-              { permittedSeats, currentUserCount }
+              {
+                permittedSeats,
+                enforcementUserCount,
+                // eslint-disable-next-line react/no-unstable-nested-components
+                text: (chunks) => (
+                  <Typography fontWeight="semiBold" textColor="danger500">
+                    {chunks}
+                  </Typography>
+                ),
+              }
             )}
           </Typography>
         </Flex>

@@ -10,12 +10,12 @@ module.exports = async (policyCtx, config = {}) => {
 
   const permittedSeats = strapi.ee.licenseInfo.seats;
   if (!permittedSeats) return true;
-  if (userCount < permittedSeats) return true;
 
   const userCount = await strapi.db.query('admin::user').count({
     where: { isActive: true },
   });
 
+  if (userCount < permittedSeats) return true;
   if (userCount >= permittedSeats && config.isCreating) {
     throw new PolicyError("License seat limit reached, can't create new user", {
       policy: 'license-limit-allowance',
