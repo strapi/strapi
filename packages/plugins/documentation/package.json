@@ -49,7 +49,8 @@
     "reselect": "^4.0.0",
     "styled-components": "5.3.3",
     "swagger-ui-dist": "4.15.5",
-    "yaml": "1.10.2"
+    "yaml": "1.10.2",
+    "yup": "^0.32.9"
   },
   "peerDependencies": {
     "@strapi/strapi": "^4.0.0"
