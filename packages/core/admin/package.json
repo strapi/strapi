@@ -104,6 +104,7 @@
     "node-schedule": "2.1.0",
     "p-map": "4.0.0",
     "passport-local": "1.0.0",
+    "pluralize": "8.0.0",
     "prop-types": "^15.7.2",
     "qs": "6.11.0",
     "react": "^17.0.2",
