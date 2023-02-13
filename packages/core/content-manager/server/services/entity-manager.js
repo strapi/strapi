@@ -87,16 +87,18 @@ module.exports = ({ strapi }) => ({
     const params = { ...opts, populate: getDeepPopulate(uid) };
 
     const entities = await strapi.entityService.findMany(uid, params);
-    await mapAsync(entities.results, async (entity) => this.mapEntity(entity, uid));
-    return entities;
+
+    const mappedResults = await mapAsync(entities.results, (entity) => this.mapEntity(entity, uid));
+    return { ...entities, results: mappedResults };
   },
 
   async findPage(opts, uid) {
     const params = { ...opts, populate: getDeepPopulate(uid, { maxLevel: 1 }) };
 
     const entities = await strapi.entityService.findPage(uid, params);
-    await mapAsync(entities.results, async (entity) => this.mapEntity(entity, uid));
-    return entities;
+
+    const mappedResults = await mapAsync(entities.results, (entity) => this.mapEntity(entity, uid));
+    return { ...entities, results: mappedResults };
   },
 
   async findWithRelationCountsPage(opts, uid) {
@@ -104,19 +106,17 @@ module.exports = ({ strapi }) => ({
     const params = { ...opts, populate: addCreatedByRolesPopulate(counterPopulate) };
 
     const entities = await strapi.entityService.findWithRelationCountsPage(uid, params);
-    await mapAsync(entities.results, async (entity) => this.mapEntity(entity, uid));
 
-    return entities;
+    const mappedResults = await mapAsync(entities.results, (entity) => this.mapEntity(entity, uid));
+    return { ...entities, results: mappedResults };
   },
 
   async findOneWithCreatorRolesAndCount(id, uid) {
     const counterPopulate = getDeepPopulate(uid, { countMany: true, countOne: true });
     const params = { populate: addCreatedByRolesPopulate(counterPopulate) };
 
-    const entities = await strapi.entityService.findOne(uid, id, params);
-    await mapAsync(entities.results, async (entity) => this.mapEntity(entity, uid));
-
-    return entities;
+    const entity = await strapi.entityService.findOne(uid, id, params);
+    return this.mapEntity(entity, uid);
   },
 
   async findOne(id, uid) {

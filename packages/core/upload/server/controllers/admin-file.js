@@ -1,6 +1,7 @@
 'use strict';
 
 const { merge } = require('lodash/fp');
+const { mapAsync } = require('@strapi/utils');
 const { getService } = require('../utils');
 const { ACTIONS, FILE_MODEL_UID } = require('../constants');
 const { findEntityAndCheckPermissions } = require('./utils/find-entity-and-check-permissions');
@@ -25,14 +26,14 @@ module.exports = {
 
     const query = pm.addPermissionsQueryTo(merge(defaultQuery, ctx.query));
 
-    const { results, pagination } = await getService('upload').findPage(query);
+    const { results: files, pagination } = await getService('upload').findPage(query);
 
-    const fileService = await getService('file');
-    await Promise.all(results.map((file) => fileService.signFileUrls(file)));
+    // Sign file urls for private providers
+    const signedFiles = await mapAsync(files, getService('file').signFileUrls);
 
-    const sanitizedResults = await pm.sanitizeOutput(results);
+    const sanitizedFiles = await pm.sanitizeOutput(signedFiles);
 
-    return { results: sanitizedResults, pagination };
+    return { results: sanitizedFiles, pagination };
   },
 
   async findOne(ctx) {
