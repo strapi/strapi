@@ -119,7 +119,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
-        line-height: 1.14;
         color: #32324d;
       }
 
@@ -370,7 +369,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
           >
             <div>
               <button
-                aria-controls="simplemenu-1"
+                aria-controls="0"
                 aria-disabled="false"
                 aria-expanded="false"
                 aria-haspopup="true"
@@ -430,7 +429,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
                   alt=""
                   aria-hidden="true"
                   class="c15"
-                  src="defaultAuthLogo.png"
+                  src="customAuthLogo.png"
                 />
                 <div
                   class="c0 c16"

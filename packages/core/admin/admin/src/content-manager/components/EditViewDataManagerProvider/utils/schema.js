@@ -216,10 +216,6 @@ const createYupSchemaAttribute = (type, validations, options) => {
     schema = yup
       .mixed(errorsTrads.json)
       .test('isJSON', errorsTrads.json, (value) => {
-        if (value === undefined) {
-          return true;
-        }
-
         try {
           JSON.parse(value);
 
@@ -228,7 +224,12 @@ const createYupSchemaAttribute = (type, validations, options) => {
           return false;
         }
       })
-      .nullable();
+      .nullable()
+      .test('required', errorsTrads.required, (value) => {
+        if (validations.required && !value.length) return false;
+
+        return true;
+      });
   }
 
   if (type === 'email') {

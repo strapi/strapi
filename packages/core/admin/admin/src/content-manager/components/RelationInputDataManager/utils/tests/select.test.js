@@ -16,7 +16,7 @@ const CM_DATA_FIXTURE = {
   readActionAllowedFields: true,
   updateActionAllowedFields: ['test'],
   slug: 'slug',
-  initialData: {
+  modifiedData: {
     id: 2,
   },
 };
@@ -37,7 +37,7 @@ jest.mock('@strapi/helper-plugin', () => ({
     readActionAllowedFields: true,
     updateActionAllowedFields: ['test'],
     slug: 'slug',
-    initialData: {
+    modifiedData: {
       id: 2,
     },
   }),
@@ -187,7 +187,7 @@ describe('RelationInputDataManager | select', () => {
     useCMEditViewDataManager.mockReturnValueOnce({
       ...CM_DATA_FIXTURE,
       isCreatingEntry: false,
-      initialData: {
+      modifiedData: {
         singleComp: {
           id: 1,
         },
@@ -212,7 +212,7 @@ describe('RelationInputDataManager | select', () => {
     useCMEditViewDataManager.mockReturnValueOnce({
       ...CM_DATA_FIXTURE,
       isCreatingEntry: false,
-      initialData: {
+      modifiedData: {
         repComp: [
           {
             id: 1,
@@ -239,7 +239,7 @@ describe('RelationInputDataManager | select', () => {
     useCMEditViewDataManager.mockReturnValueOnce({
       ...CM_DATA_FIXTURE,
       isCreatingEntry: false,
-      initialData: {
+      modifiedData: {
         repComp: [
           {
             id: 1,
@@ -261,7 +261,7 @@ describe('RelationInputDataManager | select', () => {
     useCMEditViewDataManager.mockReturnValueOnce({
       ...CM_DATA_FIXTURE,
       isCreatingEntry: false,
-      initialData: {
+      modifiedData: {
         repComp: [
           {
             id: 1,

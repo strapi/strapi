@@ -54,7 +54,6 @@ exports[`BulkActions renders 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
-  line-height: 1.14;
   color: #32324d;
 }
 
@@ -287,7 +286,6 @@ exports[`BulkActions renders 1`] = `
 <div>
   <div
     class="c0 c1 c2 c3"
-    spacing="2"
   >
     <span
       class="c4 c5"

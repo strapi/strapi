@@ -66,7 +66,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   padding-bottom: 4px;
 }
 
-.c52 {
+.c51 {
   background: #ffffff;
   padding-top: 16px;
   padding-right: 16px;
@@ -77,75 +77,75 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   height: 100%;
 }
 
-.c55 {
+.c54 {
   border-radius: 4px;
   width: 64px;
   height: 64px;
 }
 
-.c57 {
+.c56 {
   color: #666687;
 }
 
-.c70 {
+.c69 {
   color: #f29d41;
 }
 
-.c72 {
+.c71 {
   background: #dcdce4;
 }
 
-.c60 {
+.c59 {
   padding-top: 16px;
 }
 
-.c63 {
+.c62 {
   padding-top: 8px;
 }
 
-.c66 {
+.c65 {
   padding-top: 24px;
 }
 
-.c68 {
+.c67 {
   padding-left: 8px;
 }
 
-.c62 {
+.c61 {
   margin-left: 4px;
   width: 24px;
   height: auto;
 }
 
-.c75 {
+.c74 {
   padding-left: 16px;
 }
 
-.c76 {
+.c75 {
   color: #328048;
   margin-right: 8px;
   width: 12;
   height: 12;
 }
 
-.c79 {
+.c78 {
   padding-top: 32px;
 }
 
-.c80 {
+.c79 {
   background: #ffffff;
   padding: 24px;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c81 {
+.c80 {
   background: #f6ecfc;
   padding: 12px;
   border-radius: 4px;
 }
 
-.c85 {
+.c84 {
   color: #666687;
   margin-left: 8px;
   width: 12px;
@@ -213,7 +213,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   flex-direction: column;
 }
 
-.c53 {
+.c52 {
   -webkit-align-items: normal;
   -webkit-box-align: normal;
   -ms-flex-align: normal;
@@ -231,7 +231,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   justify-content: space-between;
 }
 
-.c54 {
+.c53 {
   -webkit-align-items: flex-start;
   -webkit-box-align: flex-start;
   -ms-flex-align: flex-start;
@@ -295,41 +295,33 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   color: #32324d;
 }
 
-.c49 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 1.14;
-  color: #32324d;
-}
-
-.c59 {
+.c58 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #32324d;
 }
 
-.c61 {
+.c60 {
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
   color: #32324d;
 }
 
-.c64 {
+.c63 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #666687;
 }
 
-.c78 {
+.c77 {
   font-size: 0.875rem;
   line-height: 1.43;
   font-weight: 600;
   color: #328048;
 }
 
-.c83 {
+.c82 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 500;
@@ -341,21 +333,21 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   margin-bottom: 0;
 }
 
-.c56 > * {
+.c55 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c56 > * + * {
+.c55 > * + * {
   margin-left: 4px;
 }
 
-.c67 > * {
+.c66 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c67 > * + * {
+.c66 > * + * {
   margin-left: 8px;
 }
 
@@ -493,7 +485,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   fill: #32324d;
 }
 
-.c69 {
+.c68 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -507,7 +499,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   background: #f0f0ff;
 }
 
-.c69 .c0 {
+.c68 .c0 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -518,66 +510,82 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   align-items: center;
 }
 
-.c69 .c8 {
+.c68 .c8 {
   color: #ffffff;
 }
 
-.c69[aria-disabled='true'] {
+.c68[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c69[aria-disabled='true'] .c8 {
+.c68[aria-disabled='true'] .c8 {
   color: #666687;
 }
 
-.c69[aria-disabled='true'] svg > g,.c69[aria-disabled='true'] svg path {
+.c68[aria-disabled='true'] svg > g,.c68[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c69[aria-disabled='true']:active {
+.c68[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c69[aria-disabled='true']:active .c8 {
+.c68[aria-disabled='true']:active .c8 {
   color: #666687;
 }
 
-.c69[aria-disabled='true']:active svg > g,.c69[aria-disabled='true']:active svg path {
+.c68[aria-disabled='true']:active svg > g,.c68[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c69:hover {
+.c68:hover {
   background-color: #ffffff;
 }
 
-.c69:active {
+.c68:active {
   background-color: #ffffff;
   border: 1px solid #4945ff;
 }
 
-.c69:active .c8 {
+.c68:active .c8 {
   color: #4945ff;
 }
 
-.c69:active svg > g,
-.c69:active svg path {
+.c68:active svg > g,
+.c68:active svg path {
   fill: #4945ff;
 }
 
-.c69 .c8 {
+.c68 .c8 {
   color: #271fe0;
 }
 
-.c69 svg > g,
-.c69 svg path {
+.c68 svg > g,
+.c68 svg path {
   fill: #271fe0;
 }
 
-.c73 {
+.c81 {
+  margin-right: 24px;
+}
+
+.c81 svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.c83 {
+  word-break: break-all;
+}
+
+.c72 {
   height: 1px;
   border: none;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
 }
 
 .c38 {
@@ -746,15 +754,15 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c58 path {
+.c57 path {
   fill: #666687;
 }
 
-.c71 path {
+.c70 path {
   fill: #f29d41;
 }
 
-.c77 path {
+.c76 path {
   fill: #328048;
 }
 
@@ -835,19 +843,6 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   fill: #32324d;
 }
 
-.c82 {
-  margin-right: 24px;
-}
-
-.c82 svg {
-  width: 2rem;
-  height: 2rem;
-}
-
-.c84 {
-  word-break: break-all;
-}
-
 .c1 {
   display: grid;
   grid-template-columns: 1fr;
@@ -857,13 +852,13 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   overflow-x: hidden;
 }
 
-.c50 {
+.c49 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
   gap: 16px;
 }
 
-.c51 {
+.c50 {
   grid-column: span 4;
   max-width: 100%;
 }
@@ -884,13 +879,13 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   cursor: not-allowed;
 }
 
-.c74 {
+.c73 {
   -webkit-transform: rotate(90deg);
   -ms-transform: rotate(90deg);
   transform: rotate(90deg);
 }
 
-.c65 {
+.c64 {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -910,13 +905,13 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
 }
 
 @media (max-width:68.75rem) {
-  .c51 {
+  .c50 {
     grid-column: span 6;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c51 {
+  .c50 {
     grid-column: span 12;
   }
 }
@@ -997,7 +992,6 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
       >
         <div
           class="c0 c17"
-          width="25%"
         >
           <div
             class="c18"
@@ -1008,7 +1002,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
               >
                 <label
                   class="c8 c14"
-                  for="field-1"
+                  for="0"
                 >
                   <div
                     class="c0 c7"
@@ -1048,7 +1042,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                   aria-invalid="false"
                   aria-required="false"
                   class="c25"
-                  id="field-1"
+                  id="0"
                   name="searchbar"
                   placeholder="Search"
                   value=""
@@ -1131,7 +1125,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                       aria-disabled="false"
                       aria-expanded="false"
                       aria-haspopup="listbox"
-                      aria-labelledby="sort-by-select-label sort-by-select-content"
+                      aria-labelledby="sort-by-select sort-by-select-label sort-by-select-content"
                       class="c38"
                       id="sort-by-select"
                       type="button"
@@ -1213,7 +1207,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                   </svg>
                 </div>
                 <span
-                  class="c8 c49"
+                  class="c8 c14"
                 >
                   Filters
                 </span>
@@ -1228,42 +1222,40 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
               tabindex="0"
             >
               <div
-                class="c0 c50"
+                class="c0 c49"
               >
                 <div
-                  class="c51"
+                  class="c50"
                 >
                   <div
                     class="c0 "
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c52 c53"
+                      class="c0 c51 c52"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
                         class="c0 "
                       >
                         <div
-                          class="c0 c54"
+                          class="c0 c53"
                         >
                           <img
                             alt="Amazon Ses logo"
-                            class="c0 c55"
-                            height="11"
+                            class="c0 c54"
                             src="https://dl.airtable.com/.attachments/04be9ade6077d029a9d4108cd2f47c8e/f5fe8d67/amazonSES.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=0561c26f91b25e21"
-                            width="11"
                           />
                           <div
-                            class="c0 c7 c56"
-                            spacing="1"
+                            class="c0 c7 c55"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 25"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1277,7 +1269,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               aria-label="This provider has 0 weekly downloads"
                             >
                               <span
-                                class="c8 c59"
+                                class="c8 c58"
                               >
                                 0
                               </span>
@@ -1285,10 +1277,10 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </div>
                         </div>
                         <div
-                          class="c0 c60"
+                          class="c0 c59"
                         >
                           <h3
-                            class="c8 c61"
+                            class="c8 c60"
                           >
                             <div
                               class="c0 c7"
@@ -1296,16 +1288,14 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               Amazon Ses
                               <span>
                                 <div
-                                  aria-describedby="tooltip-6"
+                                  aria-describedby="5"
                                   class="c0 c7"
                                   tabindex="0"
                                 >
                                   <img
                                     alt="Made by Strapi"
-                                    class="c0 c62"
-                                    height="auto"
+                                    class="c0 c61"
                                     src="IMAGE_MOCK"
-                                    width="6"
                                   />
                                 </div>
                               </span>
@@ -1313,18 +1303,17 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </h3>
                         </div>
                         <div
-                          class="c0 c63"
+                          class="c0 c62"
                         >
                           <p
-                            class="c8 c64 c65"
+                            class="c8 c63 c64"
                           >
                             Amazon Ses provider for Strapi
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c66 c7 c67"
-                        spacing="2"
+                        class="c0 c65 c7 c66"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1342,7 +1331,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c68"
+                            class="c0 c67"
                           >
                             <svg
                               fill="none"
@@ -1360,7 +1349,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c11 c69"
+                          class="c11 c68"
                           type="button"
                         >
                           <div
@@ -1385,7 +1374,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                             </svg>
                           </div>
                           <span
-                            class="c8 c49"
+                            class="c8 c14"
                           >
                             Copy install command
                           </span>
@@ -1395,39 +1384,37 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                   </div>
                 </div>
                 <div
-                  class="c51"
+                  class="c50"
                 >
                   <div
                     class="c0 "
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c52 c53"
+                      class="c0 c51 c52"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
                         class="c0 "
                       >
                         <div
-                          class="c0 c54"
+                          class="c0 c53"
                         >
                           <img
                             alt="AWS S3 logo"
-                            class="c0 c55"
-                            height="11"
+                            class="c0 c54"
                             src="https://dl.airtable.com/.attachments/e24c0ef99b1e952cbf0c8cbeed8cc24f/da30ba27/Amazon-S3-Logo.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=953eaf833eba09a2"
-                            width="11"
                           />
                           <div
-                            class="c0 c7 c56"
-                            spacing="1"
+                            class="c0 c7 c55"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 25"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1441,7 +1428,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               aria-label="This provider has 0 weekly downloads"
                             >
                               <span
-                                class="c8 c59"
+                                class="c8 c58"
                               >
                                 0
                               </span>
@@ -1449,10 +1436,10 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </div>
                         </div>
                         <div
-                          class="c0 c60"
+                          class="c0 c59"
                         >
                           <h3
-                            class="c8 c61"
+                            class="c8 c60"
                           >
                             <div
                               class="c0 c7"
@@ -1460,16 +1447,14 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               AWS S3
                               <span>
                                 <div
-                                  aria-describedby="tooltip-8"
+                                  aria-describedby="6"
                                   class="c0 c7"
                                   tabindex="0"
                                 >
                                   <img
                                     alt="Made by Strapi"
-                                    class="c0 c62"
-                                    height="auto"
+                                    class="c0 c61"
                                     src="IMAGE_MOCK"
-                                    width="6"
                                   />
                                 </div>
                               </span>
@@ -1477,18 +1462,17 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </h3>
                         </div>
                         <div
-                          class="c0 c63"
+                          class="c0 c62"
                         >
                           <p
-                            class="c8 c64 c65"
+                            class="c8 c63 c64"
                           >
                             AWS S3 provider for Strapi uploads
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c66 c7 c67"
-                        spacing="2"
+                        class="c0 c65 c7 c66"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1506,7 +1490,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c68"
+                            class="c0 c67"
                           >
                             <svg
                               fill="none"
@@ -1524,7 +1508,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c11 c69"
+                          class="c11 c68"
                           type="button"
                         >
                           <div
@@ -1549,7 +1533,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                             </svg>
                           </div>
                           <span
-                            class="c8 c49"
+                            class="c8 c14"
                           >
                             Copy install command
                           </span>
@@ -1559,39 +1543,37 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                   </div>
                 </div>
                 <div
-                  class="c51"
+                  class="c50"
                 >
                   <div
                     class="c0 "
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c52 c53"
+                      class="c0 c51 c52"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
                         class="c0 "
                       >
                         <div
-                          class="c0 c54"
+                          class="c0 c53"
                         >
                           <img
                             alt="Cloudinary logo"
-                            class="c0 c55"
-                            height="11"
+                            class="c0 c54"
                             src="https://dl.airtable.com/.attachments/74df39c3715a78589be1cbff69009dc2/14734e59/cloudinary.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=d82f74e2c1563864"
-                            width="11"
                           />
                           <div
-                            class="c0 c7 c56"
-                            spacing="1"
+                            class="c0 c7 c55"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 24"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1601,9 +1583,11 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                             </svg>
                             <svg
                               aria-hidden="true"
-                              class="c0 c70 c71"
+                              class="c0 c69 c70"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 24"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1615,19 +1599,21 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               aria-label="This provider was starred 49130 on GitHub"
                             >
                               <span
-                                class="c8 c59"
+                                class="c8 c58"
                               >
                                 49130
                               </span>
                             </p>
                             <hr
-                              class="c0 c72 c73 c74"
+                              class="c0 c71 c72 c73"
                             />
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 25"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1641,7 +1627,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               aria-label="This provider has 7492 weekly downloads"
                             >
                               <span
-                                class="c8 c59"
+                                class="c8 c58"
                               >
                                 7492
                               </span>
@@ -1649,10 +1635,10 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </div>
                         </div>
                         <div
-                          class="c0 c60"
+                          class="c0 c59"
                         >
                           <h3
-                            class="c8 c61"
+                            class="c8 c60"
                           >
                             <div
                               class="c0 c7"
@@ -1660,16 +1646,14 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               Cloudinary
                               <span>
                                 <div
-                                  aria-describedby="tooltip-10"
+                                  aria-describedby="7"
                                   class="c0 c7"
                                   tabindex="0"
                                 >
                                   <img
                                     alt="Made by Strapi"
-                                    class="c0 c62"
-                                    height="auto"
+                                    class="c0 c61"
                                     src="IMAGE_MOCK"
-                                    width="6"
                                   />
                                 </div>
                               </span>
@@ -1677,18 +1661,17 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </h3>
                         </div>
                         <div
-                          class="c0 c63"
+                          class="c0 c62"
                         >
                           <p
-                            class="c8 c64 c65"
+                            class="c8 c63 c64"
                           >
                             Cloudinary provider for Strapi uploads
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c66 c7 c67"
-                        spacing="2"
+                        class="c0 c65 c7 c66"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1706,7 +1689,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c68"
+                            class="c0 c67"
                           >
                             <svg
                               fill="none"
@@ -1723,14 +1706,14 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </div>
                         </a>
                         <div
-                          class="c0 c75"
+                          class="c0 c74"
                         >
                           <svg
-                            class="c0 c76 c77"
+                            class="c0 c75 c76"
                             fill="none"
-                            height="12"
+                            height="1em"
                             viewBox="0 0 24 24"
-                            width="12"
+                            width="1em"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path
@@ -1739,7 +1722,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                             />
                           </svg>
                           <span
-                            class="c8 c78"
+                            class="c8 c77"
                           >
                             Installed
                           </span>
@@ -1749,39 +1732,37 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                   </div>
                 </div>
                 <div
-                  class="c51"
+                  class="c50"
                 >
                   <div
                     class="c0 "
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c52 c53"
+                      class="c0 c51 c52"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
                         class="c0 "
                       >
                         <div
-                          class="c0 c54"
+                          class="c0 c53"
                         >
                           <img
                             alt="Local Upload logo"
-                            class="c0 c55"
-                            height="11"
+                            class="c0 c54"
                             src="https://dl.airtable.com/.attachments/6707fcab8f5530214160bacf6f4369ec/9ed22aaf/typeplaceholderversion1.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=35d9e0bb75e4528a"
-                            width="11"
                           />
                           <div
-                            class="c0 c7 c56"
-                            spacing="1"
+                            class="c0 c7 c55"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 24"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1791,9 +1772,11 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                             </svg>
                             <svg
                               aria-hidden="true"
-                              class="c0 c70 c71"
+                              class="c0 c69 c70"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 24"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1805,19 +1788,21 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               aria-label="This provider was starred 30 on GitHub"
                             >
                               <span
-                                class="c8 c59"
+                                class="c8 c58"
                               >
                                 30
                               </span>
                             </p>
                             <hr
-                              class="c0 c72 c73 c74"
+                              class="c0 c71 c72 c73"
                             />
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 25"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1831,7 +1816,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               aria-label="This provider has 2492 weekly downloads"
                             >
                               <span
-                                class="c8 c59"
+                                class="c8 c58"
                               >
                                 2492
                               </span>
@@ -1839,10 +1824,10 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </div>
                         </div>
                         <div
-                          class="c0 c60"
+                          class="c0 c59"
                         >
                           <h3
-                            class="c8 c61"
+                            class="c8 c60"
                           >
                             <div
                               class="c0 c7"
@@ -1850,16 +1835,14 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               Local Upload
                               <span>
                                 <div
-                                  aria-describedby="tooltip-12"
+                                  aria-describedby="8"
                                   class="c0 c7"
                                   tabindex="0"
                                 >
                                   <img
                                     alt="Made by Strapi"
-                                    class="c0 c62"
-                                    height="auto"
+                                    class="c0 c61"
                                     src="IMAGE_MOCK"
-                                    width="6"
                                   />
                                 </div>
                               </span>
@@ -1867,18 +1850,17 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </h3>
                         </div>
                         <div
-                          class="c0 c63"
+                          class="c0 c62"
                         >
                           <p
-                            class="c8 c64 c65"
+                            class="c8 c63 c64"
                           >
                             Local upload provider for Strapi
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c66 c7 c67"
-                        spacing="2"
+                        class="c0 c65 c7 c66"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1896,7 +1878,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c68"
+                            class="c0 c67"
                           >
                             <svg
                               fill="none"
@@ -1914,7 +1896,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c11 c69"
+                          class="c11 c68"
                           type="button"
                         >
                           <div
@@ -1939,7 +1921,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                             </svg>
                           </div>
                           <span
-                            class="c8 c49"
+                            class="c8 c14"
                           >
                             Copy install command
                           </span>
@@ -1949,39 +1931,37 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                   </div>
                 </div>
                 <div
-                  class="c51"
+                  class="c50"
                 >
                   <div
                     class="c0 "
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c52 c53"
+                      class="c0 c51 c52"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
                         class="c0 "
                       >
                         <div
-                          class="c0 c54"
+                          class="c0 c53"
                         >
                           <img
                             alt="Mailgun logo"
-                            class="c0 c55"
-                            height="11"
+                            class="c0 c54"
                             src="https://dl.airtable.com/.attachments/73118ab0aea4d9eae66edc18a1db4982/808842ba/mailgun-logo-5388F66106-seeklogo_com.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=2e2e9ecb19e752ca"
-                            width="11"
                           />
                           <div
-                            class="c0 c7 c56"
-                            spacing="1"
+                            class="c0 c7 c55"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 25"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -1995,7 +1975,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               aria-label="This provider has 0 weekly downloads"
                             >
                               <span
-                                class="c8 c59"
+                                class="c8 c58"
                               >
                                 0
                               </span>
@@ -2003,10 +1983,10 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </div>
                         </div>
                         <div
-                          class="c0 c60"
+                          class="c0 c59"
                         >
                           <h3
-                            class="c8 c61"
+                            class="c8 c60"
                           >
                             <div
                               class="c0 c7"
@@ -2014,16 +1994,14 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               Mailgun
                               <span>
                                 <div
-                                  aria-describedby="tooltip-14"
+                                  aria-describedby="9"
                                   class="c0 c7"
                                   tabindex="0"
                                 >
                                   <img
                                     alt="Made by Strapi"
-                                    class="c0 c62"
-                                    height="auto"
+                                    class="c0 c61"
                                     src="IMAGE_MOCK"
-                                    width="6"
                                   />
                                 </div>
                               </span>
@@ -2031,18 +2009,17 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </h3>
                         </div>
                         <div
-                          class="c0 c63"
+                          class="c0 c62"
                         >
                           <p
-                            class="c8 c64 c65"
+                            class="c8 c63 c64"
                           >
                             Mailgun provider for Strapi
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c66 c7 c67"
-                        spacing="2"
+                        class="c0 c65 c7 c66"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -2060,7 +2037,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c68"
+                            class="c0 c67"
                           >
                             <svg
                               fill="none"
@@ -2078,7 +2055,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c11 c69"
+                          class="c11 c68"
                           type="button"
                         >
                           <div
@@ -2103,7 +2080,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                             </svg>
                           </div>
                           <span
-                            class="c8 c49"
+                            class="c8 c14"
                           >
                             Copy install command
                           </span>
@@ -2113,39 +2090,37 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                   </div>
                 </div>
                 <div
-                  class="c51"
+                  class="c50"
                 >
                   <div
                     class="c0 "
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c52 c53"
+                      class="c0 c51 c52"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
                         class="c0 "
                       >
                         <div
-                          class="c0 c54"
+                          class="c0 c53"
                         >
                           <img
                             alt="Nodemailer logo"
-                            class="c0 c55"
-                            height="11"
+                            class="c0 c54"
                             src="https://dl.airtable.com/.attachments/73bea518f68fc312ec15a4a988da3bbc/4c024fea/Nodemailer.jpeg?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=a5dec98be44fa4e6"
-                            width="11"
                           />
                           <div
-                            class="c0 c7 c56"
-                            spacing="1"
+                            class="c0 c7 c55"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 25"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -2159,7 +2134,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               aria-label="This provider has 0 weekly downloads"
                             >
                               <span
-                                class="c8 c59"
+                                class="c8 c58"
                               >
                                 0
                               </span>
@@ -2167,10 +2142,10 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </div>
                         </div>
                         <div
-                          class="c0 c60"
+                          class="c0 c59"
                         >
                           <h3
-                            class="c8 c61"
+                            class="c8 c60"
                           >
                             <div
                               class="c0 c7"
@@ -2178,16 +2153,14 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               Nodemailer
                               <span>
                                 <div
-                                  aria-describedby="tooltip-16"
+                                  aria-describedby="10"
                                   class="c0 c7"
                                   tabindex="0"
                                 >
                                   <img
                                     alt="Made by Strapi"
-                                    class="c0 c62"
-                                    height="auto"
+                                    class="c0 c61"
                                     src="IMAGE_MOCK"
-                                    width="6"
                                   />
                                 </div>
                               </span>
@@ -2195,18 +2168,17 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </h3>
                         </div>
                         <div
-                          class="c0 c63"
+                          class="c0 c62"
                         >
                           <p
-                            class="c8 c64 c65"
+                            class="c8 c63 c64"
                           >
                             Nodemailer provider for Strapi
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c66 c7 c67"
-                        spacing="2"
+                        class="c0 c65 c7 c66"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -2224,7 +2196,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c68"
+                            class="c0 c67"
                           >
                             <svg
                               fill="none"
@@ -2242,7 +2214,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c11 c69"
+                          class="c11 c68"
                           type="button"
                         >
                           <div
@@ -2267,7 +2239,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                             </svg>
                           </div>
                           <span
-                            class="c8 c49"
+                            class="c8 c14"
                           >
                             Copy install command
                           </span>
@@ -2277,39 +2249,37 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                   </div>
                 </div>
                 <div
-                  class="c51"
+                  class="c50"
                 >
                   <div
                     class="c0 "
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c52 c53"
+                      class="c0 c51 c52"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
                         class="c0 "
                       >
                         <div
-                          class="c0 c54"
+                          class="c0 c53"
                         >
                           <img
                             alt="Rackspace logo"
-                            class="c0 c55"
-                            height="11"
+                            class="c0 c54"
                             src="https://dl.airtable.com/.attachments/f1e20497044cc6035f43b94f46bd5381/c78cbd9f/rackspace-logo.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=641682ec9adc2d1c"
-                            width="11"
                           />
                           <div
-                            class="c0 c7 c56"
-                            spacing="1"
+                            class="c0 c7 c55"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 25"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -2323,7 +2293,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               aria-label="This provider has 0 weekly downloads"
                             >
                               <span
-                                class="c8 c59"
+                                class="c8 c58"
                               >
                                 0
                               </span>
@@ -2331,10 +2301,10 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </div>
                         </div>
                         <div
-                          class="c0 c60"
+                          class="c0 c59"
                         >
                           <h3
-                            class="c8 c61"
+                            class="c8 c60"
                           >
                             <div
                               class="c0 c7"
@@ -2342,16 +2312,14 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               Rackspace
                               <span>
                                 <div
-                                  aria-describedby="tooltip-18"
+                                  aria-describedby="11"
                                   class="c0 c7"
                                   tabindex="0"
                                 >
                                   <img
                                     alt="Made by Strapi"
-                                    class="c0 c62"
-                                    height="auto"
+                                    class="c0 c61"
                                     src="IMAGE_MOCK"
-                                    width="6"
                                   />
                                 </div>
                               </span>
@@ -2359,18 +2327,17 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </h3>
                         </div>
                         <div
-                          class="c0 c63"
+                          class="c0 c62"
                         >
                           <p
-                            class="c8 c64 c65"
+                            class="c8 c63 c64"
                           >
                             Rackspace provider for Strapi uploads
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c66 c7 c67"
-                        spacing="2"
+                        class="c0 c65 c7 c66"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -2388,7 +2355,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c68"
+                            class="c0 c67"
                           >
                             <svg
                               fill="none"
@@ -2406,7 +2373,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c11 c69"
+                          class="c11 c68"
                           type="button"
                         >
                           <div
@@ -2431,7 +2398,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                             </svg>
                           </div>
                           <span
-                            class="c8 c49"
+                            class="c8 c14"
                           >
                             Copy install command
                           </span>
@@ -2441,39 +2408,37 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                   </div>
                 </div>
                 <div
-                  class="c51"
+                  class="c50"
                 >
                   <div
                     class="c0 "
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c52 c53"
+                      class="c0 c51 c52"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
                         class="c0 "
                       >
                         <div
-                          class="c0 c54"
+                          class="c0 c53"
                         >
                           <img
                             alt="SendGrid logo"
-                            class="c0 c55"
-                            height="11"
+                            class="c0 c54"
                             src="https://dl.airtable.com/.attachments/c09bfc173321ee79a972a10735ed6cf7/4e0a5321/sendgrid-logo-7574E52082-seeklogo_com.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=1ff0a128488e143f"
-                            width="11"
                           />
                           <div
-                            class="c0 c7 c56"
-                            spacing="1"
+                            class="c0 c7 c55"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 25"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -2487,7 +2452,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               aria-label="This provider has 0 weekly downloads"
                             >
                               <span
-                                class="c8 c59"
+                                class="c8 c58"
                               >
                                 0
                               </span>
@@ -2495,10 +2460,10 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </div>
                         </div>
                         <div
-                          class="c0 c60"
+                          class="c0 c59"
                         >
                           <h3
-                            class="c8 c61"
+                            class="c8 c60"
                           >
                             <div
                               class="c0 c7"
@@ -2506,16 +2471,14 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               SendGrid
                               <span>
                                 <div
-                                  aria-describedby="tooltip-20"
+                                  aria-describedby="12"
                                   class="c0 c7"
                                   tabindex="0"
                                 >
                                   <img
                                     alt="Made by Strapi"
-                                    class="c0 c62"
-                                    height="auto"
+                                    class="c0 c61"
                                     src="IMAGE_MOCK"
-                                    width="6"
                                   />
                                 </div>
                               </span>
@@ -2523,18 +2486,17 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </h3>
                         </div>
                         <div
-                          class="c0 c63"
+                          class="c0 c62"
                         >
                           <p
-                            class="c8 c64 c65"
+                            class="c8 c63 c64"
                           >
                             SendGrid provider for Strapi
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c66 c7 c67"
-                        spacing="2"
+                        class="c0 c65 c7 c66"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -2552,7 +2514,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c68"
+                            class="c0 c67"
                           >
                             <svg
                               fill="none"
@@ -2570,7 +2532,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c11 c69"
+                          class="c11 c68"
                           type="button"
                         >
                           <div
@@ -2595,7 +2557,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                             </svg>
                           </div>
                           <span
-                            class="c8 c49"
+                            class="c8 c14"
                           >
                             Copy install command
                           </span>
@@ -2605,39 +2567,37 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                   </div>
                 </div>
                 <div
-                  class="c51"
+                  class="c50"
                 >
                   <div
                     class="c0 "
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c52 c53"
+                      class="c0 c51 c52"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
                         class="c0 "
                       >
                         <div
-                          class="c0 c54"
+                          class="c0 c53"
                         >
                           <img
                             alt="Sendmail logo"
-                            class="c0 c55"
-                            height="11"
+                            class="c0 c54"
                             src="https://dl.airtable.com/.attachments/0f14c78742105dffd36d6e253612f992/2f0e8605/sendmail-logo-png-transparent.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=65d4bd3786c6b0a2"
-                            width="11"
                           />
                           <div
-                            class="c0 c7 c56"
-                            spacing="1"
+                            class="c0 c7 c55"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c0 c56 c57"
                               fill="none"
+                              height="1em"
                               viewBox="0 0 24 25"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
@@ -2651,7 +2611,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               aria-label="This provider has 0 weekly downloads"
                             >
                               <span
-                                class="c8 c59"
+                                class="c8 c58"
                               >
                                 0
                               </span>
@@ -2659,10 +2619,10 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </div>
                         </div>
                         <div
-                          class="c0 c60"
+                          class="c0 c59"
                         >
                           <h3
-                            class="c8 c61"
+                            class="c8 c60"
                           >
                             <div
                               class="c0 c7"
@@ -2670,16 +2630,14 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                               Sendmail
                               <span>
                                 <div
-                                  aria-describedby="tooltip-22"
+                                  aria-describedby="13"
                                   class="c0 c7"
                                   tabindex="0"
                                 >
                                   <img
                                     alt="Made by Strapi"
-                                    class="c0 c62"
-                                    height="auto"
+                                    class="c0 c61"
                                     src="IMAGE_MOCK"
-                                    width="6"
                                   />
                                 </div>
                               </span>
@@ -2687,18 +2645,17 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </h3>
                         </div>
                         <div
-                          class="c0 c63"
+                          class="c0 c62"
                         >
                           <p
-                            class="c8 c64 c65"
+                            class="c8 c63 c64"
                           >
                             Sendmail provider for Strapi
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c66 c7 c67"
-                        spacing="2"
+                        class="c0 c65 c7 c66"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -2716,7 +2673,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c68"
+                            class="c0 c67"
                           >
                             <svg
                               fill="none"
@@ -2734,7 +2691,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c11 c69"
+                          class="c11 c68"
                           type="button"
                         >
                           <div
@@ -2759,7 +2716,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                             </svg>
                           </div>
                           <span
-                            class="c8 c49"
+                            class="c8 c14"
                           >
                             Copy install command
                           </span>
@@ -2773,7 +2730,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
           </div>
         </div>
         <div
-          class="c0 c79"
+          class="c0 c78"
         >
           <a
             href="https://strapi.canny.io/plugin-requests"
@@ -2782,10 +2739,10 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
             target="_blank"
           >
             <div
-              class="c0 c80 c7"
+              class="c0 c79 c7"
             >
               <div
-                class="c0 c81 c7 c82"
+                class="c0 c80 c7 c81"
               >
                 <svg
                   fill="none"
@@ -2813,16 +2770,16 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                   class="c0 c7"
                 >
                   <span
-                    class="c8 c83 c84"
+                    class="c8 c82 c83"
                   >
                     Documentation
                   </span>
                   <svg
-                    class="c0 c85 c58"
+                    class="c0 c84 c57"
                     fill="none"
-                    height="3"
+                    height="1em"
                     viewBox="0 0 24 24"
-                    width="3"
+                    width="1em"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
@@ -2832,7 +2789,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                   </svg>
                 </div>
                 <span
-                  class="c8 c64"
+                  class="c8 c63"
                 >
                   Tell us what plugin you are looking for and we'll let our community plugin developers know in case they are in search for inspiration!
                 </span>

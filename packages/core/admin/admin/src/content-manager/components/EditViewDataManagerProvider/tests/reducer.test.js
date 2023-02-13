@@ -697,7 +697,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
         modifiedData: {
           name: 'name',
-          dz: [{ name: 'test', __component: 'blog.simple' }],
+          dz: [{ name: 'test', __component: 'blog.simple', __temp_key__: 0 }],
         },
         modifiedDZName: 'dz',
       };
@@ -745,11 +745,11 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
         initialData: {
           name: 'name',
-          dz: [{ name: 'test', __component: 'blog.simple' }],
+          dz: [{ name: 'test', __component: 'blog.simple', id: 0 }],
         },
         modifiedData: {
           name: 'name',
-          dz: [{ name: 'test', __component: 'blog.simple' }],
+          dz: [{ name: 'test', __component: 'blog.simple', id: 0 }],
         },
       };
 
@@ -760,13 +760,13 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
         initialData: {
           name: 'name',
-          dz: [{ name: 'test', __component: 'blog.simple' }],
+          dz: [{ name: 'test', __component: 'blog.simple', id: 0 }],
         },
         modifiedData: {
           name: 'name',
           dz: [
-            { name: 'test', __component: 'blog.simple' },
-            { name: 'test', __component: 'blog.simple' },
+            { name: 'test', __component: 'blog.simple', id: 0 },
+            { name: 'test', __component: 'blog.simple', __temp_key__: 1 },
           ],
         },
         modifiedDZName: 'dz',
@@ -826,7 +826,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
         modifiedData: {
           name: 'name',
-          dz: [{ relation: [], __component: 'blog.relation' }],
+          dz: [{ relation: [], __component: 'blog.relation', __temp_key__: 0 }],
         },
         modifiedDZName: 'dz',
       };
@@ -940,9 +940,13 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
       };
 
+      const initialDataPath = ['initialData', 'relation'];
+      const modifiedDataPath = ['modifiedData', 'relation'];
+
       let nextState = reducer(state, {
         type: 'LOAD_RELATION',
-        keys: ['relation'],
+        initialDataPath,
+        modifiedDataPath,
         value: [{ id: 1 }],
       });
 
@@ -959,7 +963,8 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       expect(
         reducer(nextState, {
           type: 'LOAD_RELATION',
-          keys: ['relation'],
+          initialDataPath,
+          modifiedDataPath,
           value: [{ id: 2 }],
         })
       ).toStrictEqual({
@@ -984,9 +989,13 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
       };
 
+      const initialDataPath = ['initialData', 'relation'];
+      const modifiedDataPath = ['modifiedData', 'relation'];
+
       let nextState = reducer(state, {
         type: 'LOAD_RELATION',
-        keys: ['relation'],
+        initialDataPath,
+        modifiedDataPath,
         value: [{ id: 1 }],
       });
 
@@ -1003,7 +1012,8 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       expect(
         reducer(nextState, {
           type: 'LOAD_RELATION',
-          keys: ['relation'],
+          initialDataPath,
+          modifiedDataPath,
           value: [{ id: 1 }],
         })
       ).toStrictEqual({
@@ -1084,14 +1094,6 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           modifiedDZName: true,
           shouldCheckErrors: true,
         };
-        const expected = {
-          ...initialState,
-          formErrors: {},
-          initialData: { ok: true, relation: [] },
-          modifiedData: { ok: true, relation: [] },
-          modifiedDZName: null,
-          shouldCheckErrors: false,
-        };
 
         const action = {
           type: 'INIT_FORM',
@@ -1099,7 +1101,27 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           relationalFieldPaths: ['relation'],
         };
 
-        expect(reducer(state, action)).toEqual(expected);
+        expect(reducer(state, action)).toMatchInlineSnapshot(`
+          {
+            "componentsDataStructure": {},
+            "contentTypeDataStructure": {},
+            "formErrors": {},
+            "initialData": {
+              "ok": true,
+              "relation": [],
+            },
+            "modifiedDZName": null,
+            "modifiedData": {
+              "ok": true,
+              "relation": [],
+            },
+            "publishConfirmation": {
+              "draftCount": 0,
+              "show": false,
+            },
+            "shouldCheckErrors": false,
+          }
+        `);
       });
 
       it('should create an array per relational field even when the relationalFieldPaths path is nested', () => {
@@ -1110,26 +1132,6 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           modifiedData: {},
           modifiedDZName: true,
           shouldCheckErrors: true,
-        };
-        const expected = {
-          ...initialState,
-          formErrors: {},
-          initialData: {
-            ok: true,
-            relation: [],
-            component: {
-              relation: [],
-            },
-          },
-          modifiedData: {
-            ok: true,
-            relation: [],
-            component: {
-              relation: [],
-            },
-          },
-          modifiedDZName: null,
-          shouldCheckErrors: false,
         };
 
         const action = {
@@ -1143,7 +1145,35 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           componentPaths: ['component'],
         };
 
-        expect(reducer(state, action)).toEqual(expected);
+        expect(reducer(state, action)).toMatchInlineSnapshot(`
+          {
+            "componentsDataStructure": {},
+            "contentTypeDataStructure": {},
+            "formErrors": {},
+            "initialData": {
+              "component": {
+                "__temp_key__": 1,
+                "relation": [],
+              },
+              "ok": true,
+              "relation": [],
+            },
+            "modifiedDZName": null,
+            "modifiedData": {
+              "component": {
+                "__temp_key__": 1,
+                "relation": [],
+              },
+              "ok": true,
+              "relation": [],
+            },
+            "publishConfirmation": {
+              "draftCount": 0,
+              "show": false,
+            },
+            "shouldCheckErrors": false,
+          }
+        `);
       });
 
       it('should create an array per relational field even when the relationalFieldPaths path is nested', () => {
@@ -1154,30 +1184,6 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           modifiedData: {},
           modifiedDZName: true,
           shouldCheckErrors: true,
-        };
-        const expected = {
-          ...initialState,
-          formErrors: {},
-          initialData: {
-            ok: true,
-            relation: [],
-            component: {
-              field1: {
-                field2: [],
-              },
-            },
-          },
-          modifiedData: {
-            ok: true,
-            relation: [],
-            component: {
-              field1: {
-                field2: [],
-              },
-            },
-          },
-          modifiedDZName: null,
-          shouldCheckErrors: false,
         };
 
         const action = {
@@ -1197,7 +1203,39 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           componentPaths: ['component', 'component.field1'],
         };
 
-        expect(reducer(state, action)).toEqual(expected);
+        expect(reducer(state, action)).toMatchInlineSnapshot(`
+          {
+            "componentsDataStructure": {},
+            "contentTypeDataStructure": {},
+            "formErrors": {},
+            "initialData": {
+              "component": {
+                "__temp_key__": 1,
+                "field1": {
+                  "field2": [],
+                },
+              },
+              "ok": true,
+              "relation": [],
+            },
+            "modifiedDZName": null,
+            "modifiedData": {
+              "component": {
+                "__temp_key__": 1,
+                "field1": {
+                  "field2": [],
+                },
+              },
+              "ok": true,
+              "relation": [],
+            },
+            "publishConfirmation": {
+              "draftCount": 0,
+              "show": false,
+            },
+            "shouldCheckErrors": false,
+          }
+        `);
       });
     });
 
@@ -1226,35 +1264,6 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           shouldCheckErrors: true,
         };
 
-        const expected = {
-          ...initialState,
-          formErrors: {},
-          initialData: {
-            categories: 'my_category',
-            repeatable_single_component_relation: [
-              {
-                id: 15,
-                my_name: null,
-                categories: [],
-                __temp_key__: 0,
-              },
-            ],
-          },
-          modifiedData: {
-            categories: 'my_category',
-            repeatable_single_component_relation: [
-              {
-                id: 15,
-                my_name: null,
-                categories: [],
-                __temp_key__: 0,
-              },
-            ],
-          },
-          modifiedDZName: null,
-          shouldCheckErrors: false,
-        };
-
         const action = {
           type: 'INIT_FORM',
           initialValues,
@@ -1262,7 +1271,41 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           repeatableComponentPaths: ['repeatable_single_component_relation'],
         };
 
-        expect(reducer(state, action)).toEqual(expected);
+        expect(reducer(state, action)).toMatchInlineSnapshot(`
+          {
+            "componentsDataStructure": {},
+            "contentTypeDataStructure": {},
+            "formErrors": {},
+            "initialData": {
+              "categories": "my_category",
+              "repeatable_single_component_relation": [
+                {
+                  "__temp_key__": 0,
+                  "categories": [],
+                  "id": 15,
+                  "my_name": null,
+                },
+              ],
+            },
+            "modifiedDZName": null,
+            "modifiedData": {
+              "categories": "my_category",
+              "repeatable_single_component_relation": [
+                {
+                  "__temp_key__": 0,
+                  "categories": [],
+                  "id": 15,
+                  "my_name": null,
+                },
+              ],
+            },
+            "publishConfirmation": {
+              "draftCount": 0,
+              "show": false,
+            },
+            "shouldCheckErrors": false,
+          }
+        `);
       });
 
       it('should create an array for a relational field inside a component', () => {
@@ -1292,41 +1335,6 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           shouldCheckErrors: true,
         };
 
-        const expected = {
-          ...initialState,
-          formErrors: {},
-          initialData: {
-            categories: 'my_category',
-            repeatable_nested_component_relation: [
-              {
-                id: 2,
-                simple: {
-                  id: 16,
-                  my_name: null,
-                  categories: [],
-                },
-                __temp_key__: 0,
-              },
-            ],
-          },
-          modifiedData: {
-            categories: 'my_category',
-            repeatable_nested_component_relation: [
-              {
-                id: 2,
-                simple: {
-                  id: 16,
-                  my_name: null,
-                  categories: [],
-                },
-                __temp_key__: 0,
-              },
-            ],
-          },
-          modifiedDZName: null,
-          shouldCheckErrors: false,
-        };
-
         const action = {
           type: 'INIT_FORM',
           initialValues,
@@ -1334,7 +1342,47 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           repeatableComponentPaths: ['repeatable_nested_component_relation'],
         };
 
-        expect(reducer(state, action)).toEqual(expected);
+        expect(reducer(state, action)).toMatchInlineSnapshot(`
+          {
+            "componentsDataStructure": {},
+            "contentTypeDataStructure": {},
+            "formErrors": {},
+            "initialData": {
+              "categories": "my_category",
+              "repeatable_nested_component_relation": [
+                {
+                  "__temp_key__": 0,
+                  "id": 2,
+                  "simple": {
+                    "categories": [],
+                    "id": 16,
+                    "my_name": null,
+                  },
+                },
+              ],
+            },
+            "modifiedDZName": null,
+            "modifiedData": {
+              "categories": "my_category",
+              "repeatable_nested_component_relation": [
+                {
+                  "__temp_key__": 0,
+                  "id": 2,
+                  "simple": {
+                    "categories": [],
+                    "id": 16,
+                    "my_name": null,
+                  },
+                },
+              ],
+            },
+            "publishConfirmation": {
+              "draftCount": 0,
+              "show": false,
+            },
+            "shouldCheckErrors": false,
+          }
+        `);
       });
 
       it('should create an array for a relational field inside a repeatable component which is inside a repeatable component', () => {
@@ -1367,47 +1415,6 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           shouldCheckErrors: true,
         };
 
-        const expected = {
-          ...initialState,
-          formErrors: {},
-          initialData: {
-            categories: 'my_category',
-            repeatable_repeatable_nested_component: [
-              {
-                id: 1,
-                repeatable_simple: [
-                  {
-                    id: 17,
-                    my_name: null,
-                    categories: [],
-                    __temp_key__: 0,
-                  },
-                ],
-                __temp_key__: 0,
-              },
-            ],
-          },
-          modifiedData: {
-            categories: 'my_category',
-            repeatable_repeatable_nested_component: [
-              {
-                id: 1,
-                repeatable_simple: [
-                  {
-                    id: 17,
-                    my_name: null,
-                    categories: [],
-                    __temp_key__: 0,
-                  },
-                ],
-                __temp_key__: 0,
-              },
-            ],
-          },
-          modifiedDZName: null,
-          shouldCheckErrors: false,
-        };
-
         const action = {
           type: 'INIT_FORM',
           initialValues,
@@ -1417,7 +1424,53 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           repeatableComponentPaths: ['repeatable_repeatable_nested_component'],
         };
 
-        expect(reducer(state, action)).toEqual(expected);
+        expect(reducer(state, action)).toMatchInlineSnapshot(`
+          {
+            "componentsDataStructure": {},
+            "contentTypeDataStructure": {},
+            "formErrors": {},
+            "initialData": {
+              "categories": "my_category",
+              "repeatable_repeatable_nested_component": [
+                {
+                  "__temp_key__": 0,
+                  "id": 1,
+                  "repeatable_simple": [
+                    {
+                      "__temp_key__": 0,
+                      "categories": [],
+                      "id": 17,
+                      "my_name": null,
+                    },
+                  ],
+                },
+              ],
+            },
+            "modifiedDZName": null,
+            "modifiedData": {
+              "categories": "my_category",
+              "repeatable_repeatable_nested_component": [
+                {
+                  "__temp_key__": 0,
+                  "id": 1,
+                  "repeatable_simple": [
+                    {
+                      "__temp_key__": 0,
+                      "categories": [],
+                      "id": 17,
+                      "my_name": null,
+                    },
+                  ],
+                },
+              ],
+            },
+            "publishConfirmation": {
+              "draftCount": 0,
+              "show": false,
+            },
+            "shouldCheckErrors": false,
+          }
+        `);
       });
 
       it('should create an array for a relational field inside a repeatable component which is inside a regular component', () => {
@@ -1425,6 +1478,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           categories: 'my_category',
           component: {
             id: 2,
+            __temp_key__: 2,
             repeatable_simple: [
               {
                 id: 18,
@@ -1447,41 +1501,6 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           shouldCheckErrors: true,
         };
 
-        const expected = {
-          ...initialState,
-          formErrors: {},
-          initialData: {
-            categories: 'my_category',
-            component: {
-              id: 2,
-              repeatable_simple: [
-                {
-                  id: 18,
-                  my_name: null,
-                  categories: [],
-                  __temp_key__: 0,
-                },
-              ],
-            },
-          },
-          modifiedData: {
-            categories: 'my_category',
-            component: {
-              id: 2,
-              repeatable_simple: [
-                {
-                  id: 18,
-                  my_name: null,
-                  categories: [],
-                  __temp_key__: 0,
-                },
-              ],
-            },
-          },
-          modifiedDZName: null,
-          shouldCheckErrors: false,
-        };
-
         const action = {
           type: 'INIT_FORM',
           initialValues,
@@ -1490,7 +1509,49 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           componentPaths: ['component'],
         };
 
-        expect(reducer(state, action)).toEqual(expected);
+        expect(reducer(state, action)).toMatchInlineSnapshot(`
+          {
+            "componentsDataStructure": {},
+            "contentTypeDataStructure": {},
+            "formErrors": {},
+            "initialData": {
+              "categories": "my_category",
+              "component": {
+                "__temp_key__": 2,
+                "id": 2,
+                "repeatable_simple": [
+                  {
+                    "__temp_key__": 0,
+                    "categories": [],
+                    "id": 18,
+                    "my_name": null,
+                  },
+                ],
+              },
+            },
+            "modifiedDZName": null,
+            "modifiedData": {
+              "categories": "my_category",
+              "component": {
+                "__temp_key__": 2,
+                "id": 2,
+                "repeatable_simple": [
+                  {
+                    "__temp_key__": 0,
+                    "categories": [],
+                    "id": 18,
+                    "my_name": null,
+                  },
+                ],
+              },
+            },
+            "publishConfirmation": {
+              "draftCount": 0,
+              "show": false,
+            },
+            "shouldCheckErrors": false,
+          }
+        `);
       });
     });
 
@@ -1503,35 +1564,6 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           modifiedData: {},
           modifiedDZName: true,
           shouldCheckErrors: true,
-        };
-
-        const expected = {
-          ...initialState,
-          formErrors: {},
-          initialData: {
-            ok: true,
-            dynamic_relations: [
-              {
-                __component: 'basic.simple',
-                id: 36,
-                my_name: null,
-                categories: [],
-              },
-            ],
-          },
-          modifiedData: {
-            ok: true,
-            dynamic_relations: [
-              {
-                __component: 'basic.simple',
-                id: 36,
-                my_name: null,
-                categories: [],
-              },
-            ],
-          },
-          modifiedDZName: null,
-          shouldCheckErrors: false,
         };
 
         const action = {
@@ -1553,7 +1585,43 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           dynamicZonePaths: ['dynamic_relations'],
         };
 
-        expect(reducer(state, action)).toEqual(expected);
+        expect(reducer(state, action)).toMatchInlineSnapshot(`
+          {
+            "componentsDataStructure": {},
+            "contentTypeDataStructure": {},
+            "formErrors": {},
+            "initialData": {
+              "dynamic_relations": [
+                {
+                  "__component": "basic.simple",
+                  "__temp_key__": 1,
+                  "categories": [],
+                  "id": 36,
+                  "my_name": null,
+                },
+              ],
+              "ok": true,
+            },
+            "modifiedDZName": null,
+            "modifiedData": {
+              "dynamic_relations": [
+                {
+                  "__component": "basic.simple",
+                  "__temp_key__": 1,
+                  "categories": [],
+                  "id": 36,
+                  "my_name": null,
+                },
+              ],
+              "ok": true,
+            },
+            "publishConfirmation": {
+              "draftCount": 0,
+              "show": false,
+            },
+            "shouldCheckErrors": false,
+          }
+        `);
       });
 
       it('should create an array for a relational field inside a nested component', () => {
@@ -1565,42 +1633,6 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           modifiedDZName: true,
           shouldCheckErrors: true,
         };
-
-        const expected = {
-          ...initialState,
-          formErrors: {},
-          initialData: {
-            ok: true,
-            dynamic_relations: [
-              {
-                __component: 'basic.nested-simple',
-                id: 7,
-                simple: {
-                  id: 47,
-                  my_name: null,
-                  categories: [],
-                },
-              },
-            ],
-          },
-          modifiedData: {
-            ok: true,
-            dynamic_relations: [
-              {
-                __component: 'basic.nested-simple',
-                id: 7,
-                simple: {
-                  id: 47,
-                  my_name: null,
-                  categories: [],
-                },
-              },
-            ],
-          },
-          modifiedDZName: null,
-          shouldCheckErrors: false,
-        };
-
         const action = {
           type: 'INIT_FORM',
           initialValues: {
@@ -1623,7 +1655,49 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           dynamicZonePaths: ['dynamic_relations'],
         };
 
-        expect(reducer(state, action)).toEqual(expected);
+        expect(reducer(state, action)).toMatchInlineSnapshot(`
+          {
+            "componentsDataStructure": {},
+            "contentTypeDataStructure": {},
+            "formErrors": {},
+            "initialData": {
+              "dynamic_relations": [
+                {
+                  "__component": "basic.nested-simple",
+                  "__temp_key__": 1,
+                  "id": 7,
+                  "simple": {
+                    "categories": [],
+                    "id": 47,
+                    "my_name": null,
+                  },
+                },
+              ],
+              "ok": true,
+            },
+            "modifiedDZName": null,
+            "modifiedData": {
+              "dynamic_relations": [
+                {
+                  "__component": "basic.nested-simple",
+                  "__temp_key__": 1,
+                  "id": 7,
+                  "simple": {
+                    "categories": [],
+                    "id": 47,
+                    "my_name": null,
+                  },
+                },
+              ],
+              "ok": true,
+            },
+            "publishConfirmation": {
+              "draftCount": 0,
+              "show": false,
+            },
+            "shouldCheckErrors": false,
+          }
+        `);
       });
 
       it('should create an array for a relational field inside a repeatable field', () => {
@@ -1636,59 +1710,6 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           shouldCheckErrors: true,
         };
 
-        const expected = {
-          ...initialState,
-          formErrors: {},
-          initialData: {
-            ok: true,
-            dynamic_relations: [
-              {
-                __component: 'basic.repeatable-repeatble-relation',
-                id: 5,
-                repeatable_simple: [
-                  {
-                    id: 48,
-                    my_name: null,
-                    categories: [],
-                    __temp_key__: 0,
-                  },
-                  {
-                    id: 49,
-                    my_name: null,
-                    categories: [],
-                    __temp_key__: 1,
-                  },
-                ],
-              },
-            ],
-          },
-          modifiedData: {
-            ok: true,
-            dynamic_relations: [
-              {
-                __component: 'basic.repeatable-repeatble-relation',
-                id: 5,
-                repeatable_simple: [
-                  {
-                    id: 48,
-                    my_name: null,
-                    categories: [],
-                    __temp_key__: 0,
-                  },
-                  {
-                    id: 49,
-                    my_name: null,
-                    categories: [],
-                    __temp_key__: 1,
-                  },
-                ],
-              },
-            ],
-          },
-          modifiedDZName: null,
-          shouldCheckErrors: false,
-        };
-
         const action = {
           type: 'INIT_FORM',
           initialValues: {
@@ -1697,6 +1718,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
               {
                 __component: 'basic.repeatable-repeatble-relation',
                 id: 5,
+                __temp_key__: 0,
                 repeatable_simple: [
                   {
                     id: 48,
@@ -1722,7 +1744,160 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           dynamicZonePaths: ['dynamic_relations'],
         };
 
-        expect(reducer(state, action)).toEqual(expected);
+        expect(reducer(state, action)).toMatchInlineSnapshot(`
+          {
+            "componentsDataStructure": {},
+            "contentTypeDataStructure": {},
+            "formErrors": {},
+            "initialData": {
+              "dynamic_relations": [
+                {
+                  "__component": "basic.repeatable-repeatble-relation",
+                  "__temp_key__": 0,
+                  "id": 5,
+                  "repeatable_simple": [
+                    {
+                      "__temp_key__": 0,
+                      "categories": [],
+                      "id": 48,
+                      "my_name": null,
+                    },
+                    {
+                      "__temp_key__": 1,
+                      "categories": [],
+                      "id": 49,
+                      "my_name": null,
+                    },
+                  ],
+                },
+              ],
+              "ok": true,
+            },
+            "modifiedDZName": null,
+            "modifiedData": {
+              "dynamic_relations": [
+                {
+                  "__component": "basic.repeatable-repeatble-relation",
+                  "__temp_key__": 0,
+                  "id": 5,
+                  "repeatable_simple": [
+                    {
+                      "__temp_key__": 0,
+                      "categories": [],
+                      "id": 48,
+                      "my_name": null,
+                    },
+                    {
+                      "__temp_key__": 1,
+                      "categories": [],
+                      "id": 49,
+                      "my_name": null,
+                    },
+                  ],
+                },
+              ],
+              "ok": true,
+            },
+            "publishConfirmation": {
+              "draftCount": 0,
+              "show": false,
+            },
+            "shouldCheckErrors": false,
+          }
+        `);
+      });
+
+      it('should assign __temp_key__ to components when not in initialData', () => {
+        const state = {
+          ...initialState,
+          formErrors: true,
+          initialData: {},
+          modifiedData: {},
+          modifiedDZName: true,
+          shouldCheckErrors: true,
+        };
+        const action = {
+          type: 'INIT_FORM',
+          initialValues: {
+            ok: true,
+            dynamic_relations: [
+              {
+                __component: 'basic.repeatable-repeatble-relation',
+                id: 5,
+                repeatable_simple: [
+                  {
+                    id: 48,
+                    my_name: null,
+                  },
+                  {
+                    id: 49,
+                    my_name: null,
+                  },
+                ],
+              },
+            ],
+          },
+          relationalFieldPaths: ['dynamic_relations.repeatable_simple.categories'],
+          dynamicZonePaths: ['dynamic_relations'],
+        };
+
+        expect(reducer(state, action)).toMatchInlineSnapshot(`
+          {
+            "componentsDataStructure": {},
+            "contentTypeDataStructure": {},
+            "formErrors": {},
+            "initialData": {
+              "dynamic_relations": [
+                {
+                  "__component": "basic.repeatable-repeatble-relation",
+                  "__temp_key__": 1,
+                  "id": 5,
+                  "repeatable_simple": [
+                    {
+                      "categories": [],
+                      "id": 48,
+                      "my_name": null,
+                    },
+                    {
+                      "categories": [],
+                      "id": 49,
+                      "my_name": null,
+                    },
+                  ],
+                },
+              ],
+              "ok": true,
+            },
+            "modifiedDZName": null,
+            "modifiedData": {
+              "dynamic_relations": [
+                {
+                  "__component": "basic.repeatable-repeatble-relation",
+                  "__temp_key__": 1,
+                  "id": 5,
+                  "repeatable_simple": [
+                    {
+                      "categories": [],
+                      "id": 48,
+                      "my_name": null,
+                    },
+                    {
+                      "categories": [],
+                      "id": 49,
+                      "my_name": null,
+                    },
+                  ],
+                },
+              ],
+              "ok": true,
+            },
+            "publishConfirmation": {
+              "draftCount": 0,
+              "show": false,
+            },
+            "shouldCheckErrors": false,
+          }
+        `);
       });
     });
 
@@ -1800,9 +1975,9 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
 
       const action = {
         type: 'MOVE_COMPONENT_FIELD',
-        dragIndex: 3,
-        hoverIndex: 1,
-        pathToComponent: ['test', 'component_field'],
+        newIndex: 1,
+        oldIndex: 3,
+        keys: ['test', 'component_field'],
       };
 
       const expected = {
@@ -2207,6 +2382,53 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           },
         },
         shouldCheckErrors: true,
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
+  describe('REORDER_RELATION', () => {
+    it('should move a component correctly', () => {
+      const state = {
+        ...initialState,
+        modifiedData: {
+          name: 'name',
+          field1: {
+            field2: {
+              relation: [
+                { name: 'first' },
+                { name: 'second' },
+                { name: 'third' },
+                { name: 'fourth' },
+              ],
+            },
+          },
+        },
+      };
+
+      const action = {
+        type: 'REORDER_RELATION',
+        newIndex: 1,
+        oldIndex: 3,
+        keys: ['field1', 'field2', 'relation'],
+      };
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          name: 'name',
+          field1: {
+            field2: {
+              relation: [
+                { name: 'first' },
+                { name: 'fourth' },
+                { name: 'second' },
+                { name: 'third' },
+              ],
+            },
+          },
+        },
       };
 
       expect(reducer(state, action)).toEqual(expected);

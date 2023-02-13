@@ -118,7 +118,6 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
-        line-height: 1.14;
         color: #32324d;
       }
 
@@ -376,7 +375,6 @@ describe('CONTENT MANAGER | EditView | Header', () => {
             </div>
             <div
               class="c0 c9 c11"
-              spacing="2"
             >
               <button
                 aria-disabled="true"

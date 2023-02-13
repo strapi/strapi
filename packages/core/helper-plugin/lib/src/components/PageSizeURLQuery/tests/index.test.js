@@ -207,9 +207,9 @@ describe('<PageSizeURLQuery />', () => {
                 aria-expanded="false"
                 aria-haspopup="listbox"
                 aria-label="Entries per page"
-                aria-labelledby="select-1-label select-1-content"
+                aria-labelledby="1 1-label 1-content"
                 class="c4"
-                id="select-1"
+                id="1"
                 type="button"
               />
               <div
@@ -223,7 +223,7 @@ describe('<PageSizeURLQuery />', () => {
                   >
                     <span
                       class="c8"
-                      id="select-1-content"
+                      id="1-content"
                     >
                       10
                     </span>

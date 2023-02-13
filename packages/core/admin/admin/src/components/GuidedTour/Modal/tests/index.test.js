@@ -74,7 +74,6 @@ describe('<GuidedTourModal />', () => {
 
       .c11 {
         padding-right: 32px;
-        padding-bottom: 0px;
         padding-left: 32px;
       }
 
@@ -241,7 +240,6 @@ describe('<GuidedTourModal />', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
-        line-height: 1.14;
         color: #32324d;
       }
 
@@ -544,8 +542,6 @@ describe('<GuidedTourModal />', () => {
                 aria-modal="true"
                 class="c1 c5 c6 c7"
                 role="dialog"
-                spacing="8"
-                width="41.25rem"
               >
                 <div
                   class="c1 c8"
@@ -587,8 +583,6 @@ describe('<GuidedTourModal />', () => {
                     >
                       <div
                         class="c1 c14"
-                        height="100%"
-                        width="0.125rem"
                       />
                     </div>
                     <span
@@ -608,8 +602,6 @@ describe('<GuidedTourModal />', () => {
                       >
                         <div
                           class="c1 c19 c3"
-                          height="1.875rem"
-                          width="1.875rem"
                         >
                           <span
                             class="c15 c20"
@@ -637,7 +629,6 @@ describe('<GuidedTourModal />', () => {
                     >
                       <div
                         class="c1 c23 c6 c24"
-                        spacing="4"
                       >
                         <span
                           class="c15 c25"

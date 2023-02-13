@@ -24,7 +24,7 @@ const {
   joinBy,
   toKebabCase,
 } = require('./string-formatting');
-const { removeUndefined } = require('./object-formatting');
+const { removeUndefined, keysDeep } = require('./object-formatting');
 const { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('./config');
 const { generateTimestampCode } = require('./code-generator');
 const contentTypes = require('./content-types');
@@ -37,9 +37,11 @@ const providerFactory = require('./provider-factory');
 const pagination = require('./pagination');
 const sanitize = require('./sanitize');
 const traverseEntity = require('./traverse-entity');
-const pipeAsync = require('./pipe-async');
+const { pipeAsync, mapAsync, forEachAsync } = require('./async');
 const convertQueryParams = require('./convert-query-params');
 const importDefault = require('./import-default');
+const template = require('./template');
+const file = require('./file');
 
 module.exports = {
   yup,
@@ -61,11 +63,13 @@ module.exports = {
   getConfigUrls,
   escapeQuery,
   removeUndefined,
+  keysDeep,
   getAbsoluteAdminUrl,
   getAbsoluteServerUrl,
   generateTimestampCode,
   stringIncludes,
   stringEquals,
+  template,
   isKebabCase,
   isCamelCase,
   toKebabCase,
@@ -78,9 +82,12 @@ module.exports = {
   providerFactory,
   pagination,
   pipeAsync,
+  mapAsync,
+  forEachAsync,
   errors,
   validateYupSchema,
   validateYupSchemaSync,
   convertQueryParams,
   importDefault,
+  file,
 };

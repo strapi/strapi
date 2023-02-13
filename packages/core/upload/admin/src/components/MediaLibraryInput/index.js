@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import { useNotification } from '@strapi/helper-plugin';
 
 import { AssetDialog } from '../AssetDialog';
 import { AssetDefinition } from '../../constants';
@@ -8,6 +9,7 @@ import { CarouselAssets } from './Carousel/CarouselAssets';
 import { EditFolderDialog } from '../EditFolderDialog';
 import { UploadAssetDialog } from '../UploadAssetDialog/UploadAssetDialog';
 import getAllowedFiles from '../../utils/getAllowedFiles';
+import getTrad from '../../utils/getTrad';
 
 const STEPS = {
   AssetSelect: 'SelectAsset',
@@ -35,6 +37,7 @@ export const MediaLibraryInput = ({
   const [droppedAssets, setDroppedAssets] = useState();
   const [folderId, setFolderId] = useState(null);
   const { formatMessage } = useIntl();
+  const toggleNotification = useNotification();
 
   useEffect(() => {
     // Clear the uploaded files on close
@@ -99,9 +102,31 @@ export const MediaLibraryInput = ({
     });
   };
 
+  const validateAssetsTypes = (assets, callback) => {
+    const allowedAssets = getAllowedFiles(fieldAllowedTypes, assets);
+
+    if (allowedAssets.length > 0) {
+      callback(allowedAssets);
+    } else {
+      toggleNotification({
+        type: 'warning',
+        timeout: 4000,
+        message: {
+          id: getTrad('input.notification.not-supported'),
+          defaultMessage: `You can't upload this type of file.`,
+          values: {
+            fileTypes: fieldAllowedTypes.join(','),
+          },
+        },
+      });
+    }
+  };
+
   const handleAssetDrop = (assets) => {
-    setDroppedAssets(assets);
-    setStep(STEPS.AssetUpload);
+    validateAssetsTypes(assets, (allowedAssets) => {
+      setDroppedAssets(allowedAssets);
+      setStep(STEPS.AssetUpload);
+    });
   };
 
   let label = intlLabel.id ? formatMessage(intlLabel) : '';
@@ -185,6 +210,7 @@ export const MediaLibraryInput = ({
           addUploadedFiles={handleFilesUploadSucceeded}
           trackedLocation="content-manager"
           folderId={folderId}
+          validateAssetsTypes={validateAssetsTypes}
         />
       )}
 

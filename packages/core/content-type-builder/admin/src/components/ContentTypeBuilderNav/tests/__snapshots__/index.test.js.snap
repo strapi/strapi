@@ -71,7 +71,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   padding-right: 8px;
   padding-left: 8px;
   position: absolute;
-  right: 0px;
+  right: 0;
   top: 50%;
   min-width: 20px;
   -webkit-transform: translateY(-50%);
@@ -311,6 +311,9 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 .c11 {
   height: 1px;
   border: none;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
   margin: 0;
 }
 
@@ -569,7 +572,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
           <span>
             <button
               aria-disabled="false"
-              aria-labelledby="tooltip-2"
+              aria-labelledby="0"
               class="c6 c7"
               tabindex="0"
               type="button"
@@ -611,12 +614,10 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
       >
         <ol
           class="c14 c15"
-          spacing="2"
         >
           <li>
             <div
               class="c14 c16"
-              spacing="1"
             >
               <div
                 class="c17 c18"
@@ -625,7 +626,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                   class="c19"
                 >
                   <button
-                    aria-controls="subnav-list-4"
+                    aria-controls="2"
                     aria-expanded="true"
                     class="c20 c21 c22"
                   >
@@ -671,7 +672,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <ol
-                id="subnav-list-4"
+                id="2"
               >
                 <li>
                   <a
@@ -781,7 +782,6 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
           <li>
             <div
               class="c14 c16"
-              spacing="1"
             >
               <div
                 class="c17 c18"
@@ -790,7 +790,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                   class="c19"
                 >
                   <button
-                    aria-controls="subnav-list-5"
+                    aria-controls="3"
                     aria-expanded="true"
                     class="c20 c21 c22"
                   >
@@ -836,7 +836,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <ol
-                id="subnav-list-5"
+                id="3"
               >
                 <li>
                   <a
@@ -911,7 +911,6 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
           <li>
             <div
               class="c14 c16"
-              spacing="1"
             >
               <div
                 class="c17 c18"
@@ -920,7 +919,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                   class="c19"
                 >
                   <button
-                    aria-controls="subnav-list-6"
+                    aria-controls="6"
                     aria-expanded="true"
                     class="c20 c21 c22"
                   >
@@ -966,7 +965,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <ol
-                id="subnav-list-6"
+                id="6"
               >
                 <li>
                   <div
@@ -979,7 +978,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                         class="c41"
                       >
                         <button
-                          aria-controls="subnav-list-7"
+                          aria-controls="4"
                           aria-expanded="true"
                           class="c42"
                         >
@@ -1015,7 +1014,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                       </div>
                     </div>
                     <ul
-                      id="subnav-list-7"
+                      id="4"
                     >
                       <li>
                         <a
@@ -1066,7 +1065,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                         class="c41"
                       >
                         <button
-                          aria-controls="subnav-list-8"
+                          aria-controls="5"
                           aria-expanded="true"
                           class="c42"
                         >
@@ -1102,7 +1101,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                       </div>
                     </div>
                     <ul
-                      id="subnav-list-8"
+                      id="5"
                     >
                       <li>
                         <a
