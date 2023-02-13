@@ -78,7 +78,7 @@ describe('Async utils', () => {
     });
   });
   describe('reduceAsync', () => {
-    test('Should return a incremented number', async () => {
+    test('Should return an incremented number', async () => {
       const numberPromiseArray = [Promise.resolve(1), Promise.resolve(2)];
 
       const reduceFunc = reduceAsync(numberPromiseArray);
