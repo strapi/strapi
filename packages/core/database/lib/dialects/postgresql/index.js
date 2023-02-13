@@ -16,11 +16,18 @@ class PostgresDialect extends Dialect {
   }
 
   async initialize() {
+    // Don't cast DATE string to Date()
     this.db.connection.client.driver.types.setTypeParser(
       this.db.connection.client.driver.types.builtins.DATE,
       'text',
       (v) => v
-    ); // Don't cast DATE string to Date()
+    );
+    // Don't parse JSONB automatically
+    this.db.connection.client.driver.types.setTypeParser(
+      this.db.connection.client.driver.types.builtins.JSONB,
+      'text',
+      (v) => v
+    );
     this.db.connection.client.driver.types.setTypeParser(
       this.db.connection.client.driver.types.builtins.NUMERIC,
       'text',
