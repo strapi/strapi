@@ -309,6 +309,8 @@ const convertNestedPopulate = (subPopulate, schema) => {
     query.ordering = convertOrderingQueryParams(ordering);
   }
 
+  convertPublicationStateParams(schema, subPopulate, query);
+
   return query;
 };
 
