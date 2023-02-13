@@ -1,6 +1,9 @@
 'use strict';
 
-const { mapAsync } = require('@strapi/utils');
+const {
+  mapAsync,
+  errors: { ApplicationError },
+} = require('@strapi/utils');
 
 const { STAGE_MODEL_UID } = require('../../constants/workflows');
 const { getService } = require('../../utils');
@@ -52,6 +55,8 @@ module.exports = ({ strapi }) => {
       const workflow = await workflowsService.findById(workflowId, { populate: ['stages'] });
 
       const { created, updated, deleted } = getDiffBetweenStages(workflow.stages, stages);
+
+      assertAtLeastOneStageRemain(workflow.stages, { created, deleted });
 
       return strapi.db.transaction(async () => {
         const newStages = await this.createMany(created, { fields: ['id'] });
@@ -107,4 +112,22 @@ function getDiffBetweenStages(sourceStages, comparisonStages) {
   );
 
   return result;
+}
+
+/**
+ * Asserts that at least one stage remains in the workflow after applying deletions and additions.
+ *
+ * @param {Array} workflowStages - An array of stages in the current workflow.
+ * @param {Object} diffStages - An object containing the stages to be deleted and created.
+ * @param {Array} diffStages.deleted - An array of stages that are planned to be deleted from the workflow.
+ * @param {Array} diffStages.created - An array of stages that are planned to be created in the workflow.
+ *
+ * @throws {ApplicationError} If the number of remaining stages in the workflow after applying deletions and additions is less than 1.
+ */
+function assertAtLeastOneStageRemain(workflowStages, diffStages) {
+  const remainingStagesCount =
+    workflowStages.length - diffStages.deleted.length + diffStages.created.length;
+  if (remainingStagesCount < 1) {
+    throw new ApplicationError('At least one stage must remain in the workflow.');
+  }
 }
