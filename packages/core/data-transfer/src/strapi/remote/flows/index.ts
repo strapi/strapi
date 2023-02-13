@@ -43,14 +43,14 @@ export const createFlow = (flow: readonly Step[]) => {
         return true;
       }
 
-      const delta = findStepIndex(step) - findStepIndex(state.step);
+      const indexesDifference = findStepIndex(step) - findStepIndex(state.step);
 
       // It's possible to send multiple time the same transfer step in a row
-      if (delta === 0 && step.kind === 'transfer') {
+      if (indexesDifference === 0 && step.kind === 'transfer') {
         return true;
       }
 
-      return delta > 0;
+      return indexesDifference > 0;
     },
 
     cannot(step: Step) {

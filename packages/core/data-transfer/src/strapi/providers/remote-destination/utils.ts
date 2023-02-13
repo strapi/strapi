@@ -2,6 +2,7 @@ import { v4 } from 'uuid';
 import { RawData, WebSocket } from 'ws';
 
 import type { client, server } from '../../../../types/remote/protocol';
+import { ProviderError } from '../../../errors/providers';
 
 interface IDispatcherState {
   transfer?: { kind: client.TransferKind; id: string };
@@ -46,7 +47,7 @@ const createDispatcher = (ws: WebSocket) => {
         const response: server.Message<U> = JSON.parse(raw.toString());
         if (response.uuid === uuid) {
           if (response.error) {
-            return reject(new Error(response.error.message));
+            return reject(new ProviderError('error', response.error.message));
           }
 
           resolve(response.data ?? null);
