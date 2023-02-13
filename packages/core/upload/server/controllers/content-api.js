@@ -90,16 +90,18 @@ module.exports = {
       request: { body, files: { files } = {} },
     } = ctx;
 
+    const bodyHasFiles = 'file' in body;
+
     const data = await validateUploadBody(body, {
-      isMulti: Array.isArray(files),
-      isBufferData: Buffer.isBuffer(files),
+      isMulti: bodyHasFiles ? Array.isArray(body.file) : Array.isArray(files),
+      isBufferData: bodyHasFiles,
     });
 
     const apiUploadFolderService = getService('api-upload-folder');
 
     const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
 
-    if (Array.isArray(files)) {
+    if (Array.isArray(files) || (bodyHasFiles && Array.isArray(body.file))) {
       data.fileInfo = data.fileInfo || [];
       data.fileInfo = files.map((_f, i) => ({ ...data.fileInfo[i], folder: apiUploadFolder.id }));
     } else {
@@ -108,7 +110,7 @@ module.exports = {
 
     const uploadedFiles = await getService('upload').upload({
       data,
-      files,
+      files: bodyHasFiles ? body.file : files,
     });
 
     ctx.body = await sanitizeOutput(uploadedFiles, ctx);
