@@ -76,45 +76,16 @@ const addSignedFileUrlsToAdmin = () => {
   // Documentation
   strapi.container
     .get('services')
-    .extend(`plugin::content-manager.entity-manager`, (entityManager) => {
-      const update = async (entity, body, uid) => {
-        const updatedEntity = await entityManager.update(entity, body, uid);
-        return signEntityMedia(updatedEntity, uid);
-      };
+    .extend('plugin::content-manager.entity-manager', (entityManager) => {
+      /**
+       * Map entity manager responses to sign private media URLs
+       * @param {Object} entity
+       * @param {string} uid
+       * @returns
+       */
+      const mapEntity = async (entity, uid) => signEntityMedia(entity, uid);
 
-      const publish = async (entity, body, uid) => {
-        const publishedEntity = await entityManager.publish(entity, body, uid);
-        return signEntityMedia(publishedEntity, uid);
-      };
-
-      const unpublish = async (entity, body, uid) => {
-        const unpublishedEntity = await entityManager.unpublish(entity, body, uid);
-        return signEntityMedia(unpublishedEntity, uid);
-      };
-
-      const findOneWithCreatorRolesAndCount = async (id, uid) => {
-        // TODO: What if the entity is not found?
-        const entity = await entityManager.findOneWithCreatorRolesAndCount(id, uid);
-        return signEntityMedia(entity, uid);
-      };
-
-      const findWithRelationCountsPage = async (opts, uid) => {
-        const entities = await entityManager.findWithRelationCountsPage(opts, uid);
-        const results = await mapAsync(entities.results, async (entity) =>
-          signEntityMedia(entity, uid)
-        );
-
-        return { ...entities, results };
-      };
-
-      return {
-        ...entityManager,
-        findOneWithCreatorRolesAndCount,
-        findWithRelationCountsPage,
-        update,
-        publish,
-        unpublish,
-      };
+      return { ...entityManager, mapEntity };
     });
 };
 
