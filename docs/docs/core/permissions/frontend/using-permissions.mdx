@@ -161,7 +161,7 @@ list of permissions to assertain if a user can do a specific action. This hook i
 global permissions object generated from the [`useRBACProvider`](#userbacprovider) hook which can either be passed or will be accessed internally.
 
 Because it's fetching, we also provide a `isLoading` state which can be used to show a loading state while the permissions are being fetched.
-If the hook is unmouted befor the fetch request completes, the request will be cancelled via an [`AbortController`](https://developer.mozilla.org/en-US/docs/Web/API/AbortController).
+If the hook is unmouted before the fetch request completes, the request will be cancelled via an [`AbortController`](https://developer.mozilla.org/en-US/docs/Web/API/AbortController).
 
 ### Usage
 
