@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../scripts/dts-import';
 import { toggleRateLimiting } from '../scripts/rate-limit';
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../constants';
+import { login } from './utils';
 
 test.describe('Authentication | Login', () => {
   test.beforeEach(async ({ page }) => {
@@ -15,10 +16,7 @@ test.describe('Authentication | Login', () => {
       context,
     }) => {
       // Test without making user authentication persistent
-      await page.getByLabel('Email*', { exact: true }).fill(ADMIN_EMAIL_ADDRESS);
-      await page.getByLabel('Password*', { exact: true }).fill(ADMIN_PASSWORD);
-
-      await page.getByRole('button', { name: 'Login' }).click();
+      await login({ page });
       await expect(page).toHaveTitle('Homepage');
 
       await page.close();
@@ -28,12 +26,7 @@ test.describe('Authentication | Login', () => {
       await expect(page).toHaveTitle('Strapi Admin');
 
       // Test with making user authentication persistent
-      await page.getByLabel('Email*', { exact: true }).fill(ADMIN_EMAIL_ADDRESS);
-      await page.getByLabel('Password*', { exact: true }).fill(ADMIN_PASSWORD);
-
-      await page.getByLabel('Remember me').click();
-
-      await page.getByRole('button', { name: 'Login' }).click();
+      await login({ page, rememberMe: true });
       await expect(page).toHaveTitle('Homepage');
 
       await page.close();
