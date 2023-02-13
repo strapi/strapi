@@ -8,9 +8,9 @@ export type MapAsync<T = any, R = any> = CurriedFunction3<
 >;
 
 export type ForEachAsync<T = any, R = any> = (
-    array: T[],
-    func: (element: T, index: number) => R | Promise<R>,
-    options?: { concurrency?: number }
+  array: T[],
+  func: (element: T, index: number) => R | Promise<R>,
+  options?: { concurrency?: number }
 ) => Promise<R[]>;
 
 export type ReduceAsync<T = any, V = T, R = V> = CurriedFunction3<
