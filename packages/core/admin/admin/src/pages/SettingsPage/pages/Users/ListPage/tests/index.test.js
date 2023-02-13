@@ -691,13 +691,13 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         fill: #666687;
       }
 
-      .c38 {
+      .c37 {
         -webkit-transform: rotate(0deg);
         -ms-transform: rotate(0deg);
         transform: rotate(0deg);
       }
 
-      .c48 {
+      .c47 {
         position: absolute;
         left: 0;
         right: 0;
