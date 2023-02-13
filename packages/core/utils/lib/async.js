@@ -26,10 +26,10 @@ const mapAsync = curry(pMap);
 const reduceAsync = curry(async (mixedArray, iteratee, initialValue) => {
   let acc = initialValue;
   for (let i = 0; i < mixedArray.length; i += 1) {
-    acc = await iteratee(acc, mixedArray[i], i);
+    acc = await iteratee(acc, await mixedArray[i], i);
   }
   return acc;
-});
+}, 2);
 
 /**
  * @type { import('./async').ForEachAsync }

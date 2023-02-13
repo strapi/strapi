@@ -108,7 +108,7 @@ describe('Async utils', () => {
       await expect(async () => {
         await reduceFunc(() => {
           throw new Error('test');
-        });
+        }, null);
       }).rejects.toThrow('test');
     });
     test('Should throw an error 2', async () => {
@@ -117,7 +117,7 @@ describe('Async utils', () => {
       const reduceFunc = reduceAsync(numberPromiseArray);
 
       await expect(async () => {
-        await reduceFunc(() => true);
+        await reduceFunc(() => true, null);
       }).rejects.toThrow('input');
     });
   });
