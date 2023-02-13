@@ -22,30 +22,34 @@ const fileInfoSchema = yup.object({
     }),
 });
 
-const bufferFileInfoSchema = yup.object({
-  name: yup.string().required(),
-  type: yup.string().required(),
-  alternativeText: yup.string().nullable(),
-  caption: yup.string().nullable(),
-  folder: yup
-    .strapiID()
-    .nullable()
-    .test('folder-exists', 'the folder does not exist', async (folderId) => {
-      if (isNil(folderId)) {
-        return true;
-      }
+const bufferFileInfoSchema = yup
+  .object({
+    name: yup.string().required(),
+    type: yup.string().required(),
+    alternativeText: yup.string().nullable(),
+    caption: yup.string().nullable(),
+    folder: yup
+      .strapiID()
+      .nullable()
+      .test('folder-exists', 'the folder does not exist', async (folderId) => {
+        if (isNil(folderId)) {
+          return true;
+        }
 
-      const exists = await getService('folder').exists({ id: folderId });
+        const exists = await getService('folder').exists({ id: folderId });
 
-      return exists;
-    }),
-});
+        return exists;
+      }),
+  })
+  .required();
 
 const bufferUploadSchema = yup.object({
+  file: yup.mixed().required(),
   fileInfo: bufferFileInfoSchema,
 });
 
 const multiBufferUploadSchema = yup.object({
+  file: yup.array().of(yup.mixed().required()).required(),
   fileInfo: yup.array().of(bufferFileInfoSchema),
 });
 

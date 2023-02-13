@@ -71,9 +71,16 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const data = await validateUploadBody(body, { isBufferData: Buffer.isBuffer(files) });
+    const bodyHasFiles = 'file' in body;
 
-    const uploadedFiles = await uploadService.upload({ data, files }, { user });
+    const data = await validateUploadBody(body, {
+      isBufferData: bodyHasFiles,
+    });
+
+    const uploadedFiles = await uploadService.upload(
+      { data, files: bodyHasFiles ? body.file : files },
+      { user }
+    );
 
     ctx.body = await pm.sanitizeOutput(uploadedFiles, { action: ACTIONS.read });
   },
@@ -81,10 +88,10 @@ module.exports = {
   async upload(ctx) {
     const {
       query: { id },
-      request: { files: { files } = {} },
+      request: { body, files: { files } = {} },
     } = ctx;
 
-    if (_.isEmpty(files) || files.size === 0) {
+    if (!body.file || body.file.length === 0 || _.isEmpty(files) || files.size === 0) {
       if (id) {
         return this.updateFileInfo(ctx);
       }
