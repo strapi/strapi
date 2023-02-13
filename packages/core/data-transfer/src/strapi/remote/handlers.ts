@@ -5,16 +5,23 @@ import { randomUUID } from 'crypto';
 import { WebSocket } from 'ws';
 
 import type { IPushController } from './controllers/push';
+import type { TransferFlow, Step } from './flows';
+import type { client, server } from '../../../types/remote/protocol';
 
 import createPushController from './controllers/push';
-import type { client, server } from '../../../types/remote/protocol';
 import { ProviderTransferError, ProviderInitializationError } from '../../errors/providers';
 import { TRANSFER_METHODS } from './constants';
+import { createFlow, DEFAULT_TRANSFER_FLOW } from './flows';
 
 type TransferMethod = typeof TRANSFER_METHODS[number];
 
 interface ITransferState {
-  transfer?: { id: string; kind: client.TransferKind; startedAt: number };
+  transfer?: {
+    id: string;
+    kind: client.TransferKind;
+    startedAt: number;
+    flow: TransferFlow;
+  };
   controller?: IPushController;
 }
 
@@ -43,6 +50,16 @@ export const createTransferHandler = (options: IHandlerOptions) => {
 
         const state: ITransferState = {};
         let uuid: string | undefined;
+
+        function assertValidTransfer(
+          transferState: ITransferState
+        ): asserts transferState is Required<ITransferState> {
+          const { transfer, controller } = transferState;
+
+          if (!controller || !transfer) {
+            throw new ProviderTransferError('Invalid transfer process');
+          }
+        }
 
         /**
          * Format error & message to follow the remote transfer protocol
@@ -140,7 +157,12 @@ export const createTransferHandler = (options: IHandlerOptions) => {
             });
           }
 
-          state.transfer = { id: randomUUID(), kind: transfer, startedAt: Date.now() };
+          state.transfer = {
+            id: randomUUID(),
+            kind: transfer,
+            startedAt: Date.now(),
+            flow: createFlow(DEFAULT_TRANSFER_FLOW),
+          };
 
           return { transferID: state.transfer.id };
         };
@@ -172,6 +194,7 @@ export const createTransferHandler = (options: IHandlerOptions) => {
           }
 
           if (command === 'end') {
+            assertValidTransfer(state);
             await answer(() => end(msg));
           }
 
@@ -181,15 +204,17 @@ export const createTransferHandler = (options: IHandlerOptions) => {
         };
 
         const onTransferCommand = async (msg: client.TransferMessage) => {
-          const { transferID, kind } = msg;
-          const { controller } = state;
+          assertValidTransfer(state);
 
-          await verifyAuth(state.transfer?.kind);
+          const { transferID, kind } = msg;
+          const { controller, transfer } = state;
+
+          await verifyAuth(transfer.kind);
 
           // TODO: (re)move this check
           // It shouldn't be possible to start a pull transfer for now, so reaching
           // this code should be impossible too, but this has been added by security
-          if (state.transfer?.kind === 'pull') {
+          if (transfer.kind === 'pull') {
             return callback(new ProviderTransferError('Pull transfer not implemented'));
           }
 
@@ -214,6 +239,24 @@ export const createTransferHandler = (options: IHandlerOptions) => {
               );
             }
 
+            const step: Step = { kind: 'action', action };
+            const isStepRegistered = transfer.flow.has(step);
+
+            if (isStepRegistered) {
+              if (transfer.flow.cannot(step)) {
+                return callback(
+                  new ProviderTransferError(
+                    `Invalid action "${action}" found for the current flow `,
+                    {
+                      action,
+                    }
+                  )
+                );
+              }
+
+              transfer.flow.set(step);
+            }
+
             await answer(() => controller.actions[action as keyof typeof controller.actions]());
           }
 
@@ -222,19 +265,78 @@ export const createTransferHandler = (options: IHandlerOptions) => {
             // We can only have push transfer message for the moment
             const message = msg as client.TransferPushMessage;
 
-            // TODO: lock transfer process
+            const currentStep = transfer.flow.get();
+            const step: Step = { kind: 'transfer', stage: message.step };
+
+            // Lock the current transfer stage
             if (message.action === 'start') {
-              // console.log('Starting transfer for ', message.step);
+              if (currentStep?.kind === 'transfer' && currentStep.locked) {
+                return callback(
+                  new ProviderTransferError(
+                    `It's not possible to start a new transfer stage (${message.step}) while another one is in progress (${currentStep.stage})`
+                  )
+                );
+              }
+
+              if (transfer.flow.cannot(step)) {
+                return callback(
+                  new ProviderTransferError(
+                    `Invalid stage (${message.step}) provided for the current flow`,
+                    { step }
+                  )
+                );
+              }
+
+              transfer?.flow.set({ ...step, locked: true });
+
+              return callback(null, { ok: true });
             }
 
-            // Stream step
-            else if (message.action === 'stream') {
+            // Stream operation on the current transfer stage
+            if (message.action === 'stream') {
+              if (currentStep?.kind === 'transfer' && !currentStep.locked) {
+                return callback(
+                  new ProviderTransferError(
+                    `You need to initialize the transfer stage (${message.step}) before starting to stream data`
+                  )
+                );
+              }
+              if (transfer?.flow.cannot(step)) {
+                return callback(
+                  new ProviderTransferError(
+                    `Invalid stage (${message.step}) provided for the current flow`,
+                    { step }
+                  )
+                );
+              }
+
               await answer(() => controller.transfer[message.step]?.(message.data as never));
             }
 
-            // TODO: unlock transfer process
-            else if (message.action === 'end') {
-              // console.log('Ending transfer for ', message.step);
+            // Unlock the current transfer stage
+            if (message.action === 'end') {
+              // Cannot unlock if not locked (aka: started)
+              if (currentStep?.kind === 'transfer' && !currentStep.locked) {
+                return callback(
+                  new ProviderTransferError(
+                    `You need to initialize the transfer stage (${message.step}) before ending it`
+                  )
+                );
+              }
+
+              // Cannot unlock if invalid step provided
+              if (transfer?.flow.cannot(step)) {
+                return callback(
+                  new ProviderTransferError(
+                    `Invalid stage (${message.step}) provided for the current flow`,
+                    { step }
+                  )
+                );
+              }
+
+              transfer?.flow.set({ ...step, locked: false });
+
+              return callback(null, { ok: true });
             }
           }
         };
