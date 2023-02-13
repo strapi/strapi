@@ -111,6 +111,10 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   justify-content: space-around;
 }
 
+.c34 {
+  height: 100vh;
+}
+
 .c8 {
   font-size: 0.875rem;
   line-height: 1.43;
@@ -513,10 +517,6 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-}
-
-.c34 {
-  height: 100vh;
 }
 
 .c25 {

@@ -567,6 +567,19 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   fill: #271fe0;
 }
 
+.c81 {
+  margin-right: 24px;
+}
+
+.c81 svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.c83 {
+  word-break: break-all;
+}
+
 .c72 {
   height: 1px;
   border: none;
@@ -828,19 +841,6 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
 .c12 svg > g,
 .c12 svg path {
   fill: #32324d;
-}
-
-.c81 {
-  margin-right: 24px;
-}
-
-.c81 svg {
-  width: 2rem;
-  height: 2rem;
-}
-
-.c83 {
-  word-break: break-all;
 }
 
 .c1 {

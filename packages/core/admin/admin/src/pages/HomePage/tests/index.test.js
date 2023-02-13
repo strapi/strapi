@@ -356,6 +356,19 @@ describe('Homepage', () => {
         fill: #ffffff;
       }
 
+      .c26 {
+        margin-right: 24px;
+      }
+
+      .c26 svg {
+        width: 2rem;
+        height: 2rem;
+      }
+
+      .c29 {
+        word-break: break-all;
+      }
+
       .c39 {
         cursor: pointer;
       }
@@ -491,19 +504,6 @@ describe('Homepage', () => {
       .c45 svg > g,
       .c45 svg path {
         fill: #32324d;
-      }
-
-      .c26 {
-        margin-right: 24px;
-      }
-
-      .c26 svg {
-        width: 2rem;
-        height: 2rem;
-      }
-
-      .c29 {
-        word-break: break-all;
       }
 
       .c1 {

@@ -278,6 +278,10 @@ describe('Content manager | App | main', () => {
         justify-content: space-around;
       }
 
+      .c35 {
+        height: 100vh;
+      }
+
       .c5 {
         font-weight: 600;
         font-size: 1.125rem;
@@ -422,10 +426,6 @@ describe('Content manager | App | main', () => {
 
       .c7[aria-disabled='true'] svg path {
         fill: #666687;
-      }
-
-      .c35 {
-        height: 100vh;
       }
 
       .c0 {

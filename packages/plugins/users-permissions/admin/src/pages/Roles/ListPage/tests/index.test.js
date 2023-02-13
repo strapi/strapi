@@ -204,6 +204,10 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         justify-content: space-around;
       }
 
+      .c26 {
+        height: 100vh;
+      }
+
       .c9 {
         font-weight: 600;
         font-size: 2rem;
@@ -422,10 +426,6 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
 
       .c24 path {
         fill: #32324d;
-      }
-
-      .c26 {
-        height: 100vh;
       }
 
       .c1 {

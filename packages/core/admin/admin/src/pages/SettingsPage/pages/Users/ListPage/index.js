@@ -18,7 +18,7 @@ import CreateAction from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/Cre
 import useLicenseLimitNotification from 'ee_else_ce/hooks/useLicenseLimitNotification';
 import adminPermissions from '../../../../../permissions';
 import TableRows from './DynamicTable/TableRows';
-import Filters from './Filters';
+import Filters from '../../../components/Filters';
 import ModalForm from './ModalForm';
 import PaginationFooter from './PaginationFooter';
 import { deleteData, fetchData } from './utils/api';

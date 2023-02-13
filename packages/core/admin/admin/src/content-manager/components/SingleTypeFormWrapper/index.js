@@ -8,6 +8,7 @@ import {
   useQueryParams,
   useNotification,
   useGuidedTour,
+  useAPIErrorHandler,
   useFetchClient,
 } from '@strapi/helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
@@ -39,6 +40,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   const searchToSend = buildQueryString(query);
   const toggleNotification = useNotification();
   const dispatch = useDispatch();
+  const { formatAPIError } = useAPIErrorHandler(getTrad);
   const fetchClient = useFetchClient();
   const { post, put, del } = fetchClient;
 
@@ -151,19 +153,9 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
   const displayErrors = useCallback(
     (err) => {
-      const errorPayload = err.response.data;
-      let errorMessage = get(errorPayload, ['error', 'message'], 'Bad Request');
-
-      // TODO handle errors correctly when back-end ready
-      if (Array.isArray(errorMessage)) {
-        errorMessage = get(errorMessage, ['0', 'messages', '0', 'id']);
-      }
-
-      if (typeof errorMessage === 'string') {
-        toggleNotification({ type: 'warning', message: errorMessage });
-      }
+      toggleNotification({ type: 'warning', message: formatAPIError(err) });
     },
-    [toggleNotification]
+    [toggleNotification, formatAPIError]
   );
 
   const onDelete = useCallback(

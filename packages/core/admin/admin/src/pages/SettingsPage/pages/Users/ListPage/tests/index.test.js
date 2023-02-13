@@ -691,7 +691,13 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         fill: #666687;
       }
 
-      .c47 {
+      .c38 {
+        -webkit-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+
+      .c48 {
         position: absolute;
         left: 0;
         right: 0;
@@ -840,12 +846,6 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
       .c59:focus svg path,
       .c59:hover svg path {
         fill: #4a4a6a;
-      }
-
-      .c37 {
-        -webkit-transform: rotate(0deg);
-        -ms-transform: rotate(0deg);
-        transform: rotate(0deg);
       }
 
       .c12 > * + * {
