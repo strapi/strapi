@@ -11,7 +11,6 @@ jest.mock('react-redux', () => ({
 
 jest.mock('@strapi/helper-plugin', () => ({
   useTracking: jest.fn(() => ({ trackUsage: trackUsageMock })),
-  wrapAxiosInstance: jest.fn(() => {}),
 }));
 
 describe('Admin | pages | Admin | useTrackUsage', () => {

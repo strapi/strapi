@@ -16,7 +16,7 @@ import {
 import { FieldLabel } from '@strapi/design-system/Field';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
-import { Form, getAPIInnerErrors } from '@strapi/helper-plugin';
+import { Form, normalizeAPIError } from '@strapi/helper-plugin';
 
 import { useBulkMove } from '../../hooks/useBulkMove';
 import { getTrad } from '../../utils';
@@ -38,9 +38,10 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
       await move(values.destination.value, selected);
       onClose();
     } catch (error) {
-      const errors = getAPIInnerErrors(error, { getTrad });
-      const formikErrors = Object.entries(errors).reduce((acc, [key, error]) => {
-        acc[key || 'destination'] = error.defaultMessage;
+      const normalizedError = normalizeAPIError(error);
+
+      const formikErrors = normalizedError.errors.reduce((acc, error) => {
+        acc[error.values?.path?.length || 'destination'] = error.defaultMessage;
 
         return acc;
       }, {});

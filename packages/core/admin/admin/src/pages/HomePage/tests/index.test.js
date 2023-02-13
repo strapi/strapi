@@ -351,6 +351,19 @@ describe('Homepage', () => {
         fill: #ffffff;
       }
 
+      .c26 {
+        margin-right: 24px;
+      }
+
+      .c26 svg {
+        width: 2rem;
+        height: 2rem;
+      }
+
+      .c29 {
+        word-break: break-all;
+      }
+
       .c39 {
         cursor: pointer;
       }
@@ -486,19 +499,6 @@ describe('Homepage', () => {
       .c45 svg > g,
       .c45 svg path {
         fill: #32324d;
-      }
-
-      .c26 {
-        margin-right: 24px;
-      }
-
-      .c26 svg {
-        width: 2rem;
-        height: 2rem;
-      }
-
-      .c29 {
-        word-break: break-all;
       }
 
       .c1 {
@@ -716,7 +716,6 @@ describe('Homepage', () => {
                       >
                         <div
                           class="c0 c10 c11 c12"
-                          spacing="5"
                         >
                           <h1
                             class="c13 c14"
@@ -773,7 +772,6 @@ describe('Homepage', () => {
                   >
                     <div
                       class="c0 c10 c11"
-                      spacing="5"
                     >
                       <a
                         class="c22"
@@ -806,7 +804,6 @@ describe('Homepage', () => {
                           </div>
                           <div
                             class="c0 c10 c27"
-                            spacing="1"
                           >
                             <div
                               class="c0 c24"
@@ -858,7 +855,6 @@ describe('Homepage', () => {
                           </div>
                           <div
                             class="c0 c10 c27"
-                            spacing="1"
                           >
                             <div
                               class="c0 c24"
@@ -910,7 +906,6 @@ describe('Homepage', () => {
                           </div>
                           <div
                             class="c0 c10 c27"
-                            spacing="1"
                           >
                             <div
                               class="c0 c24"
@@ -960,7 +955,6 @@ describe('Homepage', () => {
                           </div>
                           <div
                             class="c0 c10 c27"
-                            spacing="1"
                           >
                             <div
                               class="c0 c24"
@@ -997,11 +991,9 @@ describe('Homepage', () => {
                       >
                         <div
                           class="c0 c10 c11"
-                          spacing="5"
                         >
                           <div
                             class="c0 c10 c37"
-                            spacing="3"
                           >
                             <h2
                               class="c13 c38"

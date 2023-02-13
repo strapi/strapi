@@ -65,6 +65,11 @@ const setGlobalStrapi = () => {
         },
       },
     },
+    db: {
+      dialect: {
+        client: 'sqlite',
+      },
+    },
   };
 };
 
