@@ -91,7 +91,7 @@ module.exports = {
       request: { body, files: { files } = {} },
     } = ctx;
 
-    if (!body.file || body.file.length === 0 || _.isEmpty(files) || files.size === 0) {
+    if ((!body.file || body.file.length === 0) && (_.isEmpty(files) || files.size === 0)) {
       if (id) {
         return this.updateFileInfo(ctx);
       }
