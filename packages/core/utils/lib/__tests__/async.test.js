@@ -100,7 +100,7 @@ describe('Async utils', () => {
 
       expect(result).toEqual(13);
     });
-    test('Should throw an error', async () => {
+    test('Should throw an error with proper message when the provided callback throws an error', async () => {
       const numberPromiseArray = [Promise.resolve(1), Promise.resolve(2)];
 
       const reduceFunc = reduceAsync(numberPromiseArray);
@@ -111,7 +111,7 @@ describe('Async utils', () => {
         }, null);
       }).rejects.toThrow('test');
     });
-    test('Should throw an error 2', async () => {
+    test('Should throw an error with proper message when the input array contains a rejected Promise', async () => {
       const numberPromiseArray = [Promise.reject(new Error('input')), Promise.resolve(2)];
 
       const reduceFunc = reduceAsync(numberPromiseArray);
