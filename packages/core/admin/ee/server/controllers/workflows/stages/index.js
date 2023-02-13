@@ -44,7 +44,9 @@ module.exports = {
   async replace(ctx) {
     const { workflow_id: workflowId } = ctx.params;
     const stagesService = getService('stages');
-    const { body: stages } = ctx.request;
+    const {
+      body: { data: stages },
+    } = ctx.request;
 
     const stagesValidated = await validateUpdateStages(stages);
 

@@ -216,7 +216,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     test('It should be available for every connected users (admin)', async () => {
       const stagesRes = await requests.admin.put(
         `/admin/review-workflows/workflows/${testWorkflow.id}/stages`,
-        { body: stagesUpdateData }
+        { body: { data: stagesUpdateData } }
       );
       const workflowRes = await requests.admin.get(
         `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`
