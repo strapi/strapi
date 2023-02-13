@@ -71,8 +71,6 @@ const addSignedFileUrlsToAdmin = () => {
   // Make an impact analysis of this feature
   //  - What about the webhooks emitted by the entity manager?
   //  - Do we want to sign the file urls in the event payload?
-  // Test for every case in the Content manager so we don't miss any
-  // Can we simplify the way to extend the content manager?
   // Documentation
   strapi.container
     .get('services')
@@ -83,7 +81,7 @@ const addSignedFileUrlsToAdmin = () => {
        * @param {string} uid
        * @returns
        */
-      const mapEntity = async (entity, uid) => signEntityMedia(entity, uid);
+      const mapEntity = (entity, uid) => signEntityMedia(entity, uid);
 
       return { ...entityManager, mapEntity };
     });
