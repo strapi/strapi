@@ -53,19 +53,6 @@ const signEntityMedia = async (entity, uid) => {
   return entity;
 };
 
-/**
- * Sign media urls from entity manager results
- * @param {Array|Object} result from the entity manager
- * @param {string} uid of the model
- */
-const fileSigningExtension = async (result, uid) => {
-  if (Array.isArray(result?.results)) {
-    await mapAsync(result.results, async (entity) => signEntityMedia(entity, uid));
-  } else {
-    await signEntityMedia(result, uid);
-  }
-};
-
 const addSignedFileUrlsToAdmin = () => {
   const { provider } = strapi.plugins.upload;
 
@@ -82,7 +69,6 @@ const addSignedFileUrlsToAdmin = () => {
   // Test for every case in the Content manager so we don't miss any
   // Make entity file signing non mutating
   // Move this extend into a folder called /extensions
-  // Can we simplify the way to extend the content manager?
 
   // TOPICS:
   // What about the webhooks emitted by the entity manager?
@@ -91,27 +77,18 @@ const addSignedFileUrlsToAdmin = () => {
   strapi.container
     .get('services')
     .extend('plugin::content-manager.entity-manager', (entityManager) => {
-      const functionsToExtend = [
-        'update',
-        'publish',
-        'unpublish',
-        'findOneWithCreatorRolesAndCount',
-        'findWithRelationCountsPage',
-      ];
+      /**
+       * Map entity manager responses to sign private media URLs
+       * @param {Object} entity
+       * @param {string} uid
+       * @returns
+       */
+      const mapEntity = async (entity, uid) => {
+        await signEntityMedia(entity, uid);
+        return entity;
+      };
 
-      const extendedFunctions = {};
-      functionsToExtend.reduce((acc, functionName) => {
-        acc[functionName] = async (...args) => {
-          const result = await entityManager[functionName](...args);
-          await fileSigningExtension(result, args.at(-1));
-
-          return result;
-        };
-
-        return acc;
-      }, extendedFunctions);
-
-      return { ...entityManager, ...extendedFunctions };
+      return { ...entityManager, mapEntity };
     });
 };
 
