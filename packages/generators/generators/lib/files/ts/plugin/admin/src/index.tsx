@@ -1,4 +1,3 @@
-import React from 'react';
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
@@ -44,7 +43,7 @@ export default {
     const { locales } = app;
 
     const importedTrads = await Promise.all(
-      locales.map(locale => {
+      locales.map((locale) => {
         return import(`./translations/${locale}.json`)
           .then(({ default: data }) => {
             return {
