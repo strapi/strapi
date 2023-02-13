@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { useTracking } from '@strapi/helper-plugin';
@@ -15,6 +15,7 @@ import { getSectionsToDisplay } from '../../utils';
 const SettingsNav = ({ menu }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
+  const { pathname } = useLocation();
 
   const filteredMenu = getSectionsToDisplay(menu);
 
@@ -38,9 +39,7 @@ const SettingsNav = ({ menu }) => {
   });
 
   const handleClick = (link) => {
-    if (link.to.startsWith('/settings/audit-logs')) {
-      trackUsage('didGoToAuditLogs');
-    }
+    trackUsage('willNavigate', { from: pathname, to: link.to });
   };
 
   return (
