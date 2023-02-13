@@ -17,7 +17,7 @@ module.exports = async ({ strapi }) => {
 
   await registerUploadMiddleware({ strapi });
 
-  getService('file').addSignedFileUrlsToAdmin();
+  getService('extensions').contentManager.entityManager.addSignedFileUrlsToAdmin();
 
   if (strapi.plugin('graphql')) {
     require('./graphql')({ strapi });

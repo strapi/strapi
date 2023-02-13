@@ -69,7 +69,6 @@ const addSignedFileUrlsToAdmin = () => {
   // Test for every case in the Content manager so we don't miss any
   // Make entity file signing non mutating
   // Move this extend into a folder called /extensions
-  // Can we simplify the way to extend the content manager?
 
   // TOPICS:
   // What about the webhooks emitted by the entity manager?
@@ -77,46 +76,19 @@ const addSignedFileUrlsToAdmin = () => {
   // We need to do this for create/update/delete/publish/unpublish too no?
   strapi.container
     .get('services')
-    .extend(`plugin::content-manager.entity-manager`, (entityManager) => {
-      const update = async (entity, body, uid) => {
-        const updatedEntity = await entityManager.update(entity, body, uid);
-        await signEntityMedia(updatedEntity, uid);
-        return updatedEntity;
-      };
-
-      const publish = async (entity, body, uid) => {
-        const publishedEntity = await entityManager.publish(entity, body, uid);
-        await signEntityMedia(publishedEntity, uid);
-        return publishedEntity;
-      };
-
-      const unpublish = async (entity, body, uid) => {
-        const unpublishedEntity = await entityManager.unpublish(entity, body, uid);
-        await signEntityMedia(unpublishedEntity, uid);
-        return unpublishedEntity;
-      };
-
-      const findOneWithCreatorRolesAndCount = async (id, uid) => {
-        // TODO: What if the entity is not found?
-        const entity = await entityManager.findOneWithCreatorRolesAndCount(id, uid);
+    .extend('plugin::content-manager.entity-manager', (entityManager) => {
+      /**
+       * Map entity manager responses to sign private media URLs
+       * @param {Object} entity
+       * @param {string} uid
+       * @returns
+       */
+      const mapEntity = async (entity, uid) => {
         await signEntityMedia(entity, uid);
         return entity;
       };
 
-      const findWithRelationCountsPage = async (opts, uid) => {
-        const entities = await entityManager.findWithRelationCountsPage(opts, uid);
-        await mapAsync(entities.results, async (entity) => signEntityMedia(entity, uid));
-        return entities;
-      };
-
-      return {
-        ...entityManager,
-        findOneWithCreatorRolesAndCount,
-        findWithRelationCountsPage,
-        update,
-        publish,
-        unpublish,
-      };
+      return { ...entityManager, mapEntity };
     });
 };
 
