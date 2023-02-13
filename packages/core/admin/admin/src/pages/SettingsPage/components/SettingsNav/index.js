@@ -38,8 +38,8 @@ const SettingsNav = ({ menu }) => {
     defaultMessage: 'Settings',
   });
 
-  const handleClick = (link) => {
-    trackUsage('willNavigate', { from: pathname, to: link.to });
+  const handleClickOnLink = (destination = null) => {
+    trackUsage('willNavigate', { from: pathname, to: destination });
   };
 
   return (
@@ -53,7 +53,7 @@ const SettingsNav = ({ menu }) => {
                 as={NavLink}
                 withBullet={link.hasNotification}
                 to={link.to}
-                onClick={() => handleClick(link)}
+                onClick={() => handleClickOnLink(link.to)}
                 key={link.id}
               >
                 {formatMessage(link.intlLabel)}
