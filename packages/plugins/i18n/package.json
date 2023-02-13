@@ -38,13 +38,13 @@
     "react-query": "3.24.3",
     "react-redux": "8.0.5",
     "react-router-dom": "5.3.4",
+    "redux": "^4.2.1",
     "styled-components": "5.3.3",
     "yup": "^0.32.9"
   },
   "devDependencies": {
     "@testing-library/react": "12.1.4",
-    "msw": "1.0.1",
-    "redux": "^4.2.1"
+    "msw": "1.0.1"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",
