@@ -139,6 +139,41 @@ const convertLimitQueryParams = (limitQuery) => {
   return limitAsANumber;
 };
 
+const convertPageQueryParams = (page) => {
+  const pageVal = toNumber(page);
+
+  if (!isInteger(pageVal) || pageVal <= 0) {
+    throw new PaginationError(
+      `Invalid 'page' parameter. Expected an integer > 0, received: ${page}`
+    );
+  }
+
+  return pageVal;
+};
+
+const convertPageSizeQueryParams = (pageSize, page) => {
+  const pageSizeVal = toNumber(pageSize);
+
+  if (!isInteger(pageSizeVal) || pageSizeVal <= 0) {
+    throw new PaginationError(
+      `Invalid 'pageSize' parameter. Expected an integer > 0, received: ${page}`
+    );
+  }
+
+  return pageSizeVal;
+};
+
+const validatePaginationParams = (page, pageSize, start, limit) => {
+  const isPagePagination = !isNil(page) || !isNil(pageSize);
+  const isOffsetPagination = !isNil(start) || !isNil(limit);
+
+  if (isPagePagination && isOffsetPagination) {
+    throw new PaginationError(
+      'Invalid pagination attributes. You cannot use page and offset pagination in the same query'
+    );
+  }
+};
+
 class InvalidPopulateError extends Error {
   constructor() {
     super();
@@ -280,8 +315,8 @@ const convertNestedPopulate = (subPopulate, schema) => {
     throw new Error(`Invalid nested populate. Expected '*' or an object`);
   }
 
-  // TODO: We will need to consider a way to add limitation / pagination
-  const { sort, filters, fields, populate, count, ordering } = subPopulate;
+  const { sort, filters, fields, populate, count, ordering, page, pageSize, start, limit } =
+    subPopulate;
 
   const query = {};
 
@@ -307,6 +342,24 @@ const convertNestedPopulate = (subPopulate, schema) => {
 
   if (ordering) {
     query.ordering = convertOrderingQueryParams(ordering);
+  }
+
+  validatePaginationParams(page, pageSize, start, limit);
+
+  if (!isNil(page)) {
+    query.page = convertPageQueryParams(page);
+  }
+
+  if (!isNil(pageSize)) {
+    query.pageSize = convertPageSizeQueryParams(pageSize, page);
+  }
+
+  if (!isNil(start)) {
+    query.offset = convertStartQueryParams(start);
+  }
+
+  if (!isNil(limit)) {
+    query.limit = convertLimitQueryParams(limit);
   }
 
   convertPublicationStateParams(schema, subPopulate, query);
@@ -468,37 +521,14 @@ const transformParamsToQuery = (uid, params) => {
     query.populate = convertPopulateQueryParams(populate, schema);
   }
 
-  const isPagePagination = !isNil(page) || !isNil(pageSize);
-  const isOffsetPagination = !isNil(start) || !isNil(limit);
-
-  if (isPagePagination && isOffsetPagination) {
-    throw new PaginationError(
-      'Invalid pagination attributes. You cannot use page and offset pagination in the same query'
-    );
-  }
+  validatePaginationParams(page, pageSize, start, limit);
 
   if (!isNil(page)) {
-    const pageVal = toNumber(page);
-
-    if (!isInteger(pageVal) || pageVal <= 0) {
-      throw new PaginationError(
-        `Invalid 'page' parameter. Expected an integer > 0, received: ${page}`
-      );
-    }
-
-    query.page = pageVal;
+    query.page = convertPageQueryParams(page);
   }
 
   if (!isNil(pageSize)) {
-    const pageSizeVal = toNumber(pageSize);
-
-    if (!isInteger(pageSizeVal) || pageSizeVal <= 0) {
-      throw new PaginationError(
-        `Invalid 'pageSize' parameter. Expected an integer > 0, received: ${page}`
-      );
-    }
-
-    query.pageSize = pageSizeVal;
+    query.pageSize = convertPageSizeQueryParams(pageSize, page);
   }
 
   if (!isNil(start)) {
