@@ -163,7 +163,7 @@ module.exports = ({ strapi }) => ({
       return getDeepRelationsCount(entity, uid);
     }
 
-    return this.mapEntity(entity, uid);
+    return entity;
   },
 
   async update(entity, body, uid) {
