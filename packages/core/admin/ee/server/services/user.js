@@ -46,7 +46,7 @@ const shouldRemoveFromEEDisabledUsersList = async (ids) => {
   }
   const disabledUsers = JSON.parse(data.value);
 
-  const newDisabledUsersList = _.filter(disabledUsers, (user) => !idsToCheck.includes(user.id));
+  const newDisabledUsersList = disabledUsers.filter((user) => !idsToCheck.includes(user.id));
   await strapi.db.query('strapi::ee-store').update({
     where: { id: data.id },
     data: { value: JSON.stringify(newDisabledUsersList) },
