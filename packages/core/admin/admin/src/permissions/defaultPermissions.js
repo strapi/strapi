@@ -34,10 +34,6 @@ const permissions = {
     uninstall: [{ action: 'admin::marketplace.plugins.uninstall', subject: null }],
   },
   settings: {
-    auditLogs: {
-      main: [{ action: 'admin::audit-logs.read', subject: null }],
-      read: [{ action: 'admin::audit-logs.read', subject: null }],
-    },
     roles: {
       main: [
         { action: 'admin::roles.create', subject: null },
