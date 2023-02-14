@@ -19,7 +19,10 @@ module.exports = async (policyCtx, config = {}) => {
     where: { isActive: true },
   });
 
-  if (userCount < permittedSeats) return true;
+  if (userCount < permittedSeats) {
+    return true;
+  }
+
   if (userCount >= permittedSeats && config.isCreating) {
     throw new PolicyError("License seat limit reached, can't create new user", {
       policy: 'license-limit-allowance',
