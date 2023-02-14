@@ -1,6 +1,6 @@
 'use strict';
 
-const { prop, isNil, isEmpty } = require('lodash/fp');
+const { prop, isNil, isEmpty, isArray } = require('lodash/fp');
 
 const { forEachAsync } = require('@strapi/utils');
 const { getService } = require('../utils');
@@ -11,10 +11,15 @@ const isDialectMySQL = () => strapi.db.dialect.client === 'mysql';
  * Adds the default locale to an object if it isn't defined yet
  * @param {Object} data a data object before being persisted into db
  */
-const assignDefaultLocale = async (data) => {
+const assignDefaultLocaleToEntries = async (data) => {
   const { getDefaultLocale } = getService('locales');
 
-  if (isNil(data.locale)) {
+  if (isArray(data) && data.some((entry) => !entry.locale)) {
+    const defaultLocale = await getDefaultLocale();
+    data.forEach((entry) => {
+      entry.locale = entry.locale || defaultLocale;
+    });
+  } else if (!isArray(data) && isNil(data.locale)) {
     data.locale = await getDefaultLocale();
   }
 };
@@ -70,7 +75,7 @@ const syncNonLocalizedAttributes = async (entry, { model }) => {
 };
 
 module.exports = () => ({
-  assignDefaultLocale,
+  assignDefaultLocaleToEntries,
   syncLocalizations,
   syncNonLocalizedAttributes,
 });

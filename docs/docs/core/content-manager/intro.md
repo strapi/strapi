@@ -7,7 +7,7 @@ tags:
 
 # Content Manager
 
-This section is an overview of all the features realted to the Content Manager:
+This section is an overview of all the features related to the Content Manager:
 
 ```mdx-code-block
 import DocCardList from '@theme/DocCardList';
