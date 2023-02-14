@@ -42,10 +42,7 @@ const databases = {
   },
 };
 
-const jestCmd =
-  'jest --config jest.config.api.js --verbose --runInBand --forceExit --detectOpenHandles'.split(
-    ' '
-  );
+const jestCmd = 'jest --config jest.config.api.js --verbose --runInBand --forceExit'.split(' ');
 
 const runAllTests = async (args) => {
   return execa('yarn', [...jestCmd, ...args], {

@@ -590,7 +590,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
     >
       <div
         class="c2 c3 c4"
-        spacing="1"
       >
         <label
           class="c5 c6"
@@ -735,7 +734,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
           <li
             aria-describedby="some-relation-1-item-instructions"
             class="c16"
-            cursor="all-scroll"
             style="position: absolute; left: 0px; top: 0px; height: 54px; width: 100%; bottom: 4px;"
           >
             <div
@@ -745,7 +743,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
             >
               <div
                 class="c19 c20 c21"
-                spacing="1"
               >
                 <div
                   aria-disabled="false"
@@ -807,7 +804,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                     <span>
                       <a
                         aria-current="page"
-                        aria-describedby="tooltip-1"
+                        aria-describedby="0"
                         class="c27 c28 active"
                         href="/"
                         tabindex="0"
@@ -845,7 +842,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                     fill="none"
                     height="1em"
                     viewBox="0 0 24 24"
-                    width="12px"
+                    width="1em"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
@@ -860,7 +857,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
           <li
             aria-describedby="some-relation-1-item-instructions"
             class="c16"
-            cursor="all-scroll"
             style="position: absolute; left: 0px; top: 54px; height: 54px; width: 100%; bottom: 4px;"
           >
             <div
@@ -870,7 +866,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
             >
               <div
                 class="c19 c20 c21"
-                spacing="1"
               >
                 <div
                   aria-disabled="false"
@@ -931,7 +926,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                   >
                     <span>
                       <span
-                        aria-describedby="tooltip-3"
+                        aria-describedby="1"
                         class="c5 c37"
                         tabindex="0"
                       >
@@ -964,7 +959,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                     fill="none"
                     height="1em"
                     viewBox="0 0 24 24"
-                    width="12px"
+                    width="1em"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
@@ -979,7 +974,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
           <li
             aria-describedby="some-relation-1-item-instructions"
             class="c16"
-            cursor="all-scroll"
             style="position: absolute; left: 0px; top: 108px; height: 54px; width: 100%; bottom: 4px;"
           >
             <div
@@ -989,7 +983,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
             >
               <div
                 class="c19 c20 c21"
-                spacing="1"
               >
                 <div
                   aria-disabled="false"
@@ -1050,7 +1043,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                   >
                     <span>
                       <span
-                        aria-describedby="tooltip-5"
+                        aria-describedby="2"
                         class="c5 c37"
                         tabindex="0"
                       >
@@ -1074,7 +1067,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                     fill="none"
                     height="1em"
                     viewBox="0 0 24 24"
-                    width="12px"
+                    width="1em"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path

@@ -4,7 +4,7 @@ const { isArray } = require('lodash/fp');
 
 const traverseEntity = require('../traverse-entity');
 const { getNonWritableAttributes } = require('../content-types');
-const pipeAsync = require('../pipe-async');
+const { pipeAsync } = require('../async');
 
 const visitors = require('./visitors');
 const sanitizers = require('./sanitizers');

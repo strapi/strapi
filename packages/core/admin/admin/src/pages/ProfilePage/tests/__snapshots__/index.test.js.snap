@@ -688,14 +688,12 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
       >
         <div
           class="c1 c14 c15"
-          spacing="6"
         >
           <div
             class="c1 c16"
           >
             <div
               class="c1 c14 c17"
-              spacing="4"
             >
               <h2
                 class="c5 c18"
@@ -715,7 +713,6 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                       <div>
                         <div
                           class="c21 c22"
-                          spacing="1"
                         >
                           <label
                             class="c23"
@@ -762,7 +759,6 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                       <div>
                         <div
                           class="c21 c22"
-                          spacing="1"
                         >
                           <label
                             class="c23"
@@ -804,7 +800,6 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                       <div>
                         <div
                           class="c21 c22"
-                          spacing="1"
                         >
                           <label
                             class="c23"
@@ -851,7 +846,6 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                       <div>
                         <div
                           class="c21 c22"
-                          spacing="1"
                         >
                           <label
                             class="c23"
@@ -891,7 +885,6 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
           >
             <div
               class="c1 c14 c17"
-              spacing="4"
             >
               <h2
                 class="c5 c18"
@@ -911,11 +904,10 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                       <div>
                         <div
                           class="c1 c14 c30"
-                          spacing="1"
                         >
                           <label
                             class="c5 c11"
-                            for="textinput-1"
+                            for="1"
                           >
                             <div
                               class="c1 c4"
@@ -931,7 +923,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                               aria-invalid="false"
                               aria-required="false"
                               class="c32 c33"
-                              id="textinput-1"
+                              id="1"
                               name="currentPassword"
                               type="password"
                               value=""
@@ -978,11 +970,10 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                       <div>
                         <div
                           class="c1 c14 c30"
-                          spacing="1"
                         >
                           <label
                             class="c5 c11"
-                            for="textinput-2"
+                            for="3"
                           >
                             <div
                               class="c1 c4"
@@ -999,7 +990,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                               aria-required="false"
                               autocomplete="new-password"
                               class="c32 c33"
-                              id="textinput-2"
+                              id="3"
                               name="password"
                               type="password"
                               value=""
@@ -1042,11 +1033,10 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                       <div>
                         <div
                           class="c1 c14 c30"
-                          spacing="1"
                         >
                           <label
                             class="c5 c11"
-                            for="textinput-3"
+                            for="5"
                           >
                             <div
                               class="c1 c4"
@@ -1063,7 +1053,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                               aria-required="false"
                               autocomplete="new-password"
                               class="c32 c33"
-                              id="textinput-3"
+                              id="5"
                               name="confirmPassword"
                               type="password"
                               value=""
@@ -1104,11 +1094,9 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
           >
             <div
               class="c1 c14 c17"
-              spacing="4"
             >
               <div
                 class="c1 c14 c30"
-                spacing="1"
               >
                 <h2
                   class="c5 c18"
@@ -1142,11 +1130,10 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                     <div>
                       <div
                         class="c1 c14 c30"
-                        spacing="1"
                       >
                         <label
                           class="c5 c11"
-                          for="select-4"
+                          for="7"
                         >
                           <div
                             class="c1 c4"
@@ -1158,13 +1145,13 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           class="c1 c4 c39"
                         >
                           <button
-                            aria-describedby="select-4-hint"
+                            aria-describedby="7-hint"
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-4 select-4-label select-4-content"
+                            aria-labelledby="7 7-label 7-content"
                             class="c40"
-                            id="select-4"
+                            id="7"
                             type="button"
                           />
                           <div
@@ -1178,7 +1165,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                               >
                                 <span
                                   class="c5 c43"
-                                  id="select-4-content"
+                                  id="7-content"
                                 >
                                   Select
                                 </span>
@@ -1234,7 +1221,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                         </div>
                         <p
                           class="c5 c47"
-                          id="select-4-hint"
+                          id="7-hint"
                         >
                           This will only display your own interface in the chosen language.
                         </p>
@@ -1251,11 +1238,10 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                     <div>
                       <div
                         class="c1 c14 c30"
-                        spacing="1"
                       >
                         <label
                           class="c5 c11"
-                          for="select-5"
+                          for="9"
                         >
                           <div
                             class="c1 c4"
@@ -1267,13 +1253,13 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           class="c1 c4 c39"
                         >
                           <button
-                            aria-describedby="select-5-hint"
+                            aria-describedby="9-hint"
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-5 select-5-label select-5-content"
+                            aria-labelledby="9 9-label 9-content"
                             class="c40"
-                            id="select-5"
+                            id="9"
                             type="button"
                           />
                           <div
@@ -1287,7 +1273,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                               >
                                 <span
                                   class="c5 c43"
-                                  id="select-5-content"
+                                  id="9-content"
                                 >
                                   Light mode
                                 </span>
@@ -1323,7 +1309,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                         </div>
                         <p
                           class="c5 c47"
-                          id="select-5-hint"
+                          id="9-hint"
                         >
                           Displays your interface in the chosen mode.
                         </p>
