@@ -11,7 +11,9 @@ const shouldUpdateEEDisabledUsersList = async (id, input) => {
     where: { key: 'ee_disabled_users' },
   });
 
-  if (!data || !data.value || data.value.length === 0) return;
+  if (!data?.value || data.value.length === 0) {
+    return;
+  }
   const disabledUsers = JSON.parse(data.value);
   const user = disabledUsers.find((user) => user.id === Number(id));
   if (!user) return;
