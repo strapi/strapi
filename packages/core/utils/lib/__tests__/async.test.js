@@ -89,6 +89,16 @@ describe('Async utils', () => {
 
       expect(result).toEqual(13);
     });
+    test('Should work without initial value', async () => {
+      const numberPromiseArray = [Promise.resolve(1), Promise.resolve(2)];
+
+      const reduceFunc = reduceAsync(numberPromiseArray);
+      const result = await reduceFunc(
+        (previousValue, currentValue) => (previousValue || 10) + currentValue
+      );
+
+      expect(result).toEqual(13);
+    });
     test('Should work with mix of promises and values', async () => {
       const numberMixArray = [1, Promise.resolve(2)];
 
@@ -108,7 +118,7 @@ describe('Async utils', () => {
       await expect(async () => {
         await reduceFunc(() => {
           throw new Error('test');
-        }, null);
+        });
       }).rejects.toThrow('test');
     });
     test('Should throw an error with proper message when the input array contains a rejected Promise', async () => {

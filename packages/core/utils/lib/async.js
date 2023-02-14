@@ -1,7 +1,7 @@
 'use strict';
 
 const pMap = require('p-map');
-const { curry } = require('lodash/fp');
+const { curry, curryN } = require('lodash/fp');
 
 function pipeAsync(...methods) {
   return async (data) => {
@@ -23,13 +23,13 @@ const mapAsync = curry(pMap);
 /**
  * @type { import('./async').ReduceAsync }
  */
-const reduceAsync = curry(async (mixedArray, iteratee, initialValue) => {
+const reduceAsync = curryN(2, async (mixedArray, iteratee, initialValue) => {
   let acc = initialValue;
   for (let i = 0; i < mixedArray.length; i += 1) {
     acc = await iteratee(acc, await mixedArray[i], i);
   }
   return acc;
-}, 2);
+});
 
 /**
  * @type { import('./async').ForEachAsync }
