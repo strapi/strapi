@@ -130,7 +130,7 @@ export const createTransferHandler = (options: IHandlerOptions) => {
         ): Promise<server.Payload<server.InitMessage>> => {
           // TODO: For push transfer, we'll probably have to trigger a
           // maintenance mode to prevent other transfer at the same time.
-          if (state.transfer && state.controller) {
+          if (state.transfer || state.controller) {
             throw new ProviderInitializationError('Transfer already in progres');
           }
 
