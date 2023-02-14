@@ -6,7 +6,9 @@ const { ApplicationError } = require('@strapi/utils/lib/errors');
 const { PolicyError } = utils.errors;
 
 module.exports = async (policyCtx, config = {}) => {
-  if (!strapi.EE) return true;
+  if (!strapi.EE) {
+    return true;
+  }
 
   const permittedSeats = strapi.ee.licenseInfo.seats;
   if (!permittedSeats) return true;
