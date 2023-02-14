@@ -115,19 +115,21 @@ module.exports = ({ strapi }) => ({
     const counterPopulate = getDeepPopulate(uid, { countMany: true, countOne: true });
     const params = { populate: addCreatedByRolesPopulate(counterPopulate) };
 
-    const entity = await strapi.entityService.findOne(uid, id, params);
-    return this.mapEntity(entity, uid);
+    return strapi.entityService
+      .findOne(uid, id, params)
+      .then((entity) => this.mapEntity(entity, uid));
   },
 
   async findOne(id, uid) {
     const params = { populate: getDeepPopulate(uid) };
 
-    const entity = await strapi.entityService.findOne(uid, id, params);
-    return this.mapEntity(entity, uid);
+    return strapi.entityService
+      .findOne(uid, id, params)
+      .then((entity) => this.mapEntity(entity, uid));
   },
 
   async findOneWithCreatorRoles(id, uid) {
-    const entity = await this.findOne(id, uid);
+    const entity = await this.findOne(id, uid).then((entity) => this.mapEntity(entity, uid));
 
     if (!entity) {
       return entity;
@@ -152,7 +154,9 @@ module.exports = ({ strapi }) => ({
         : getDeepPopulate(uid, { countMany: true, countOne: true }),
     };
 
-    const entity = await strapi.entityService.create(uid, params);
+    const entity = await strapi.entityService
+      .create(uid, params)
+      .then((entity) => this.mapEntity(entity, uid));
 
     // If relations were populated, relations count will be returned instead of the array of relations.
     if (populateRelations) {
@@ -173,14 +177,16 @@ module.exports = ({ strapi }) => ({
         : getDeepPopulate(uid, { countMany: true, countOne: true }),
     };
 
-    const updatedEntity = await strapi.entityService.update(uid, entity.id, params);
+    const updatedEntity = await strapi.entityService
+      .update(uid, entity.id, params)
+      .then((entity) => this.mapEntity(entity, uid));
 
     // If relations were populated, relations count will be returned instead of the array of relations.
     if (populateRelations) {
       return getDeepRelationsCount(updatedEntity, uid);
     }
 
-    return this.mapEntity(updatedEntity, uid);
+    return updatedEntity;
   },
 
   async delete(entity, uid) {
@@ -236,12 +242,14 @@ module.exports = ({ strapi }) => ({
 
     await emitEvent(ENTRY_PUBLISH, entity, uid);
 
+    const mappedEntity = await this.mapEntity(updatedEntity, uid);
+
     // If relations were populated, relations count will be returned instead of the array of relations.
     if (isRelationsPopulateEnabled(uid)) {
-      return getDeepRelationsCount(updatedEntity, uid);
+      return getDeepRelationsCount(mappedEntity, uid);
     }
 
-    return this.mapEntity(updatedEntity, uid);
+    return mappedEntity;
   },
 
   async unpublish(entity, body = {}, uid) {
@@ -263,12 +271,14 @@ module.exports = ({ strapi }) => ({
 
     await emitEvent(ENTRY_UNPUBLISH, entity, uid);
 
+    const mappedEntity = await this.mapEntity(updatedEntity, uid);
+
     // If relations were populated, relations count will be returned instead of the array of relations.
     if (isRelationsPopulateEnabled(uid)) {
-      return getDeepRelationsCount(updatedEntity, uid);
+      return getDeepRelationsCount(mappedEntity, uid);
     }
 
-    return this.mapEntity(updatedEntity, uid);
+    return mappedEntity;
   },
 
   async getNumberOfDraftRelations(id, uid) {
