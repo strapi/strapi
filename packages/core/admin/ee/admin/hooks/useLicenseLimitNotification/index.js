@@ -26,7 +26,7 @@ const useLicenseLimitNotification = () => {
       return;
     }
 
-    const { currentUserCount, permittedSeats, licenseLimitStatus, isHostedOnStrapiCloud } =
+    const { enforcementUserCount, permittedSeats, licenseLimitStatus, isHostedOnStrapiCloud } =
       license?.data ?? {};
 
     const shouldDisplayNotification =
@@ -47,19 +47,21 @@ const useLicenseLimitNotification = () => {
         type: notificationType,
         message: formatMessage(
           {
-            id: 'notification.ee.warning.seat-limit.message',
+            id: 'notification.ee.warning.over-.message',
             defaultMessage:
-              "Add seats to invite more Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
+              "Add seats to {licenseLimitStatus, select, OVER_LIMIT {invite} other {re-enable}} Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
           },
           { licenseLimitStatus }
         ),
         title: formatMessage(
           {
-            id: 'notification.ee.warning.seat-limit.title',
-            defaultMessage: 'Over seat limit ({currentUserCount}/{permittedSeats})',
+            id: 'notification.ee.warning.at-seat-limit.title',
+            defaultMessage:
+              '{licenseLimitStatus, select, OVER_LIMIT {Over} other {At}} seat limit ({enforcementUserCount}/{permittedSeats})',
           },
           {
-            currentUserCount,
+            licenseLimitStatus,
+            enforcementUserCount,
             permittedSeats,
           }
         ),

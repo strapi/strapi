@@ -40,7 +40,10 @@ const AdminSeatInfo = () => {
                 enforcementUserCount,
                 // eslint-disable-next-line react/no-unstable-nested-components
                 text: (chunks) => (
-                  <Typography fontWeight="semiBold" textColor="danger500">
+                  <Typography
+                    fontWeight="semiBold"
+                    textColor={enforcementUserCount > permittedSeats ? 'danger500' : null}
+                  >
                     {chunks}
                   </Typography>
                 ),
@@ -48,7 +51,7 @@ const AdminSeatInfo = () => {
             )}
           </Typography>
         </Flex>
-        {licenseLimitStatus === 'AT_LIMIT' && (
+        {licenseLimitStatus === 'OVER_LIMIT' && (
           <Tooltip
             description={formatMessage({
               id: 'Settings.application.ee.admin-seats.at-limit-tooltip',
