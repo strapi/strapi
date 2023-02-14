@@ -2,11 +2,10 @@ module.exports = {
   routes: [
     {
       method: 'POST',
-      path: '/database/dump',
-      handler: 'database.dump',
+      path: '/config/ratelimit/enable',
+      handler: 'config.rateLimitEnable',
       config: {
         auth: false,
-        policies: [],
       },
     },
   ],
