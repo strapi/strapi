@@ -78,6 +78,8 @@ const Admin = () => {
     return <LoadingIndicatorPage />;
   }
 
+  console.log({ generalSectionLinks, pluginsSectionLinks });
+
   return (
     <DndProvider backend={HTML5Backend}>
       <AppLayout

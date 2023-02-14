@@ -23,20 +23,6 @@ const adminPermissions = [
     conditions: [],
   },
   {
-    id: 172,
-    action: 'admin::marketplace.plugins.install',
-    subject: null,
-    properties: {},
-    conditions: [],
-  },
-  {
-    id: 173,
-    action: 'admin::marketplace.plugins.uninstall',
-    subject: null,
-    properties: {},
-    conditions: [],
-  },
-  {
     id: 174,
     action: 'admin::webhooks.create',
     subject: null,
