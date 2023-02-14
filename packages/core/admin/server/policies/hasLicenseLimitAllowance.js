@@ -11,7 +11,9 @@ module.exports = async (policyCtx, config = {}) => {
   }
 
   const permittedSeats = strapi.ee.licenseInfo.seats;
-  if (!permittedSeats) return true;
+  if (!permittedSeats) {
+    return true;
+  }
 
   const userCount = await strapi.db.query('admin::user').count({
     where: { isActive: true },
