@@ -41,7 +41,9 @@ const shouldRemoveFromEEDisabledUsersList = async (ids) => {
     where: { key: 'ee_disabled_users' },
   });
 
-  if (!data || !data.value || data.value.length === 0) return;
+  if (!data?.value || data.value.length === 0) {
+    return;
+  }
   const disabledUsers = JSON.parse(data.value);
 
   const newDisabledUsersList = _.filter(disabledUsers, (user) => !idsToCheck.includes(user.id));
