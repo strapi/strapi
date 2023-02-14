@@ -21,6 +21,8 @@ module.exports = {
       ...config,
     });
 
+    const ACL = get(config, ['params', 'ACL'], 'public-read');
+
     const upload = (file, customParams = {}) =>
       new Promise((resolve, reject) => {
         // upload file on S3 bucket
@@ -30,7 +32,7 @@ module.exports = {
           {
             Key: fileKey,
             Body: file.stream || Buffer.from(file.buffer, 'binary'),
-            ACL: 'private',
+            ACL,
             ContentType: file.mime,
             ...customParams,
           },
@@ -53,24 +55,27 @@ module.exports = {
 
     return {
       isPrivate() {
-        return get(config, ['params', 'isPrivate'], false);
+        return ACL === 'private';
       },
       /**
-       *
-       * @param {string} fileIdentifier
-       * @param {*} customParams
-       * @returns
+       * @param {Object} file
+       * @param {string} file.path
+       * @param {string} file.hash
+       * @param {string} file.ext
+       * @param {Object} customParams
+       * @returns {Promise<{url: string}>}
        */
       getSignedUrl(file, customParams = {}) {
         return new Promise((resolve, reject) => {
           const path = file.path ? `${file.path}/` : '';
           const fileKey = `${path}${file.hash}${file.ext}`;
+
           S3.getSignedUrl(
             'getObject',
             {
               Bucket: config.params.Bucket,
               Key: fileKey,
-              Expires: 60 * 60 * 24 * 7, // TODO: Make this configurable.
+              Expires: get(config, ['params', 'signedUrlExpires'], 60 * 60 * 24 * 7), // 7 days
             },
             (err, url) => {
               if (err) {
