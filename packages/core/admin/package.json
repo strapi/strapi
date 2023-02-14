@@ -146,7 +146,7 @@
     "msw": "1.0.0",
     "react-test-renderer": "^17.0.2",
     "speed-measure-webpack-plugin": "1.5.0",
-    "webpack-bundle-analyzer": "^4.7.0"
+    "webpack-bundle-analyzer": "^4.8.0"
   },
   "peerDependencies": {
     "@strapi/strapi": "^4.3.4"
