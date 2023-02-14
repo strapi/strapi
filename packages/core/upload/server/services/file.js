@@ -23,18 +23,13 @@ const deleteByIds = async (ids = []) => {
   return filesToDelete;
 };
 
-const signFileUrl = async (fileIdentifier) => {
-  const { provider } = strapi.plugins.upload;
-  const { url } = await provider.getSignedUrl(fileIdentifier);
-  return url;
-};
-
 const signFileUrls = async (file) => {
   const { provider } = strapi.plugins.upload;
   const { provider: providerConfig } = strapi.config.get('plugin.upload');
+  const isPrivate = await provider.isPrivate();
 
   // Check file provider and if provider is private
-  if (file.provider !== providerConfig || !provider.isPrivate()) {
+  if (file.provider !== providerConfig || !isPrivate) {
     return file;
   }
 
@@ -57,6 +52,5 @@ const signFileUrls = async (file) => {
 module.exports = {
   getFolderPath,
   deleteByIds,
-  signFileUrl,
   signFileUrls,
 };
