@@ -34,13 +34,50 @@ server.listRoutes();
 ```
 
 ### `StrapiServer.app`
+
+[<Type>KoaJS</Type>](https://devdocs.io/koa/index) https://devdocs.io/koa/index
+
+Strapi projects are using KoaJS to run the NodeJS server.
+
 ### `StrapiServer.router`
+
+[<Type>@koa/router</Type>](https://github.com/ZijianHe/koa-router#router-) https://github.com/ZijianHe/koa-router#router-
+
+Strapi projects are using a dependency of KoaJS called @koa/router.
+
 ### `StrapiServer.httpServer`
+
+[<Type>http.Server</Type>](https://nodejs.org/docs/latest-v18.x/api/http.html)
+
+The Strapi's HTTP server.
+
 ### `StrapiServer.api(name)`
+
+- `name`: <Type>String</Type>
+- Returns: [<Type>StrapiAPIs</Type>](#strapiapis)
+
+Getter for apis available in Strapi
+
 ### `StrapiServer.use(...args)`
+
+[<Type>KoaApp.use</Type>](https://devdocs.io/koa/index#appusefunction) https://devdocs.io/koa/index#appusefunction
+
+Shortcut for Koa `app.use(...args)` method.
+
 ### `StrapiServer.routes(routes)`
 ### `StrapiServer.mount()`
 ### `StrapiServer.initRouting()`
 ### `StrapiServer.initMiddlewares()`
 ### `StrapiServer.listRoutes()`
 ### `StrapiServer.listen(...args)`
+### `StrapiServer.destroy()`
+
+### `StrapiAPIs`
+<Type>Object</Type>
+
+- `content-api`: [<Type>API</Type>](API)
+  - API used by external requesters
+- `admin`: [<Type>API</Type>](API)
+  - API used by admin panel
+
+Strapi APIs is a map of all APIs available inside the Strapi project.
