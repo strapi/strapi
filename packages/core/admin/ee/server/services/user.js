@@ -21,7 +21,7 @@ const shouldUpdateEEDisabledUsersList = async (id, input) => {
   } 
 
   if (user.isActive !== input.isActive) {
-    const newDisabledUsersList = _.filter(disabledUsers, (user) => user.id !== Number(id));
+    const newDisabledUsersList = disabledUsers.filter((user) => user.id !== Number(id));
     await strapi.db.query('strapi::ee-store').update({
       where: { id: data.id },
       data: { value: JSON.stringify(newDisabledUsersList) },
