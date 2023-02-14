@@ -16,7 +16,9 @@ const shouldUpdateEEDisabledUsersList = async (id, input) => {
   }
   const disabledUsers = JSON.parse(data.value);
   const user = disabledUsers.find((user) => user.id === Number(id));
-  if (!user) return;
+  if (!user) {
+    return;
+  } 
 
   if (user.isActive !== input.isActive) {
     const newDisabledUsersList = _.filter(disabledUsers, (user) => user.id !== Number(id));
