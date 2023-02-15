@@ -6,7 +6,9 @@ const { getService } = require('../../../server/utils');
 const enableUsersToLicenseLimit = async (numberOfUsersToEnable) => {
   const data = await getService('user').getDisabledUserList();
 
-  if (!data || !data.value || data.value.length === 0) return;
+  if (!data?.value || data.value.length === 0) {
+    return;
+  }
 
   const disabledUsers = JSON.parse(data.value);
 
@@ -64,7 +66,7 @@ const disableUsersAboveLicenseLimit = async (numberOfUsersToDisable) => {
   });
 
   if (data) {
-    return strapi.db.query('strapi::ee-store').update({
+    await strapi.db.query('strapi::ee-store').update({
       where: { id: data.id },
       data: { value: JSON.stringify(usersToDisable) },
     });

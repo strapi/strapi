@@ -1,19 +1,25 @@
 'use strict';
 
 const utils = require('@strapi/utils');
-const { ApplicationError } = require('@strapi/utils/lib/errors');
 
 const { PolicyError } = utils.errors;
 
 module.exports = async (policyCtx, config = {}) => {
-  if (!strapi.EE) return true;
+  if (!strapi.EE) {
+    return true;
+  }
 
   const permittedSeats = strapi.ee.licenseInfo.seats;
-  if (!permittedSeats) return true;
+  if (!permittedSeats) {
+    return true;
+  }
 
   const userCount = await strapi.service('admin::user').getCurrentActiveUserCount();
 
-  if (userCount < permittedSeats) return true;
+  if (userCount < permittedSeats) {
+    return true;
+  }
+
   if (userCount >= permittedSeats && config.isCreating) {
     throw new PolicyError("License seat limit reached, can't create new user", {
       policy: 'license-limit-allowance',
@@ -23,7 +29,7 @@ module.exports = async (policyCtx, config = {}) => {
   const user = await strapi.service('admin::user').findOne(policyCtx.params.id);
 
   if (!user) {
-    throw new ApplicationError('User could not be found');
+    return true; // Delegate not found to the controller
   }
 
   if (

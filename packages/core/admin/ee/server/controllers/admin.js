@@ -6,7 +6,9 @@ const { getService } = require('../../../server/utils');
 module.exports = {
   async licenseLimitInformation() {
     const permittedSeats = strapi.ee.licenseInfo.seats;
-    if (!permittedSeats) return;
+    if (!permittedSeats) {
+      return;
+    }
 
     let shouldNotify = false;
     let licenseLimitStatus = null;

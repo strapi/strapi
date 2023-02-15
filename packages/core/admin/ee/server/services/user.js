@@ -1,6 +1,6 @@
 'use strict';
 
-const { filter, pipe, castArray, map, toNumber } = require('lodash/fp');
+const { pipe, castArray, map, toNumber } = require('lodash/fp');
 
 /** Checks if ee disabled users list needs to be updated
  * @param {string} id
@@ -11,13 +11,17 @@ const shouldUpdateEEDisabledUsersList = async (id, input) => {
     where: { key: 'ee_disabled_users' },
   });
 
-  if (!data || !data.value || data.value.length === 0) return;
+  if (!data?.value || data.value.length === 0) {
+    return;
+  }
   const disabledUsers = JSON.parse(data.value);
   const user = disabledUsers.find((user) => user.id === Number(id));
-  if (!user) return;
+  if (!user) {
+    return;
+  }
 
   if (user.isActive !== input.isActive) {
-    const newDisabledUsersList = filter(disabledUsers, (user) => user.id !== Number(id));
+    const newDisabledUsersList = disabledUsers.filter((user) => user.id !== Number(id));
     await strapi.db.query('strapi::ee-store').update({
       where: { id: data.id },
       data: { value: JSON.stringify(newDisabledUsersList) },
@@ -39,10 +43,12 @@ const shouldRemoveFromEEDisabledUsersList = async (ids) => {
     where: { key: 'ee_disabled_users' },
   });
 
-  if (!data || !data.value || data.value.length === 0) return;
+  if (!data?.value || data.value.length === 0) {
+    return;
+  }
   const disabledUsers = JSON.parse(data.value);
 
-  const newDisabledUsersList = filter(disabledUsers, (user) => !idsToCheck.includes(user.id));
+  const newDisabledUsersList = disabledUsers.filter((user) => !idsToCheck.includes(user.id));
   await strapi.db.query('strapi::ee-store').update({
     where: { id: data.id },
     data: { value: JSON.stringify(newDisabledUsersList) },
