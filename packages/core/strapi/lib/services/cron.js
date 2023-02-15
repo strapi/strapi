@@ -28,8 +28,8 @@ const createCronService = () => {
 
         const fnWithStrapi = (...args) => fn({ strapi }, ...args);
 
-        const job = new Job(null, fnWithStrapi);
-        jobsSpecs.push({ job, options });
+        const job = new Job(taskValue.name || null, fnWithStrapi);
+        jobsSpecs.push({ job, options, name: taskValue.name });
 
         if (running) {
           job.schedule(options);
@@ -38,9 +38,9 @@ const createCronService = () => {
       return this;
     },
     remove(name) {
-      const matchingJobsSpecs = jobsSpecs.filter(({ options }) => options.name === name);
+      const matchingJobsSpecs = jobsSpecs.filter(({ name: jobSpecName }) => jobSpecName === name);
       matchingJobsSpecs.forEach(({ job }) => job.cancel());
-      jobsSpecs = jobsSpecs.filter(({ options }) => options.name !== name);
+      jobsSpecs = jobsSpecs.filter(({ name: jobSpecName }) => jobSpecName !== name);
       return this;
     },
     start() {
