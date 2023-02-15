@@ -122,8 +122,9 @@ const revertSeatEnforcementWorkflow = async () => {
       where: { id: user.id },
     });
 
-    if (!data) return;
-    if (data.isActive !== user.isActive) return;
+    if (!data || data.isActive !== user.isActive) {
+      return;
+    }
 
     await strapi.db.query('admin::user').update({
       where: { id: user.id },
