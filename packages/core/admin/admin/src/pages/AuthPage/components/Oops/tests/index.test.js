@@ -369,7 +369,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
           >
             <div>
               <button
-                aria-controls="simplemenu-1"
+                aria-controls="0"
                 aria-disabled="false"
                 aria-expanded="false"
                 aria-haspopup="true"

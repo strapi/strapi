@@ -801,11 +801,9 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
 
 <div
   class="c0 c1 c2"
-  spacing="1"
 >
   <div
     class="c0 c3 c4"
-    spacing="1"
   >
     <span
       class="c5 c6"
@@ -894,7 +892,7 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
             <span>
               <button
                 aria-disabled="false"
-                aria-labelledby="tooltip-1"
+                aria-labelledby="0"
                 class="c21 c22 c23 c24"
                 id="Bold"
                 name="Bold"
@@ -927,7 +925,7 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
             <span>
               <button
                 aria-disabled="false"
-                aria-labelledby="tooltip-3"
+                aria-labelledby="1"
                 class="c21 c22 c23 c24"
                 id="Italic"
                 name="Italic"
@@ -958,7 +956,7 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
             <span>
               <button
                 aria-disabled="false"
-                aria-labelledby="tooltip-5"
+                aria-labelledby="2"
                 class="c21 c22 c23 c24"
                 id="Underline"
                 name="Underline"
@@ -990,7 +988,7 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
           <span>
             <button
               aria-disabled="false"
-              aria-labelledby="tooltip-7"
+              aria-labelledby="3"
               class="c21 c22 c23 c26"
               id="more"
               tabindex="0"

@@ -1,10 +1,9 @@
 import React, { memo, useState } from 'react';
 import { useIntl } from 'react-intl';
-import get from 'lodash/get';
 import isEqual from 'react-fast-compare';
 import { Button } from '@strapi/design-system/Button';
 import Trash from '@strapi/icons/Trash';
-import { ConfirmDialog, useNotification } from '@strapi/helper-plugin';
+import { ConfirmDialog, useNotification, useAPIErrorHandler } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { getTrad } from '../../../utils';
 import { connect, select } from './utils';
@@ -13,6 +12,7 @@ const DeleteLink = ({ isCreatingEntry, onDelete, onDeleteSucceeded, trackerPrope
   const [showWarningDelete, setWarningDelete] = useState(false);
   const [isModalConfirmButtonLoading, setIsModalConfirmButtonLoading] = useState(false);
   const { formatMessage } = useIntl();
+  const { formatAPIError } = useAPIErrorHandler(getTrad);
   const toggleNotification = useNotification();
 
   const toggleWarningDelete = () => setWarningDelete((prevState) => !prevState);
@@ -29,14 +29,12 @@ const DeleteLink = ({ isCreatingEntry, onDelete, onDeleteSucceeded, trackerPrope
       toggleWarningDelete();
       onDeleteSucceeded();
     } catch (err) {
-      const errorMessage = get(
-        err,
-        'response.payload.message',
-        formatMessage({ id: getTrad('error.record.delete') })
-      );
       setIsModalConfirmButtonLoading(false);
       toggleWarningDelete();
-      toggleNotification({ type: 'warning', message: errorMessage });
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(err),
+      });
     }
   };
 

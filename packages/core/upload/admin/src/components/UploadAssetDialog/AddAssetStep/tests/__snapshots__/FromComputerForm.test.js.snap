@@ -402,7 +402,6 @@ exports[`FromComputerForm snapshots the component 1`] = `
                 name="files"
                 tabindex="-1"
                 type="file"
-                width="100%"
               />
               <div
                 class="c0 c13"

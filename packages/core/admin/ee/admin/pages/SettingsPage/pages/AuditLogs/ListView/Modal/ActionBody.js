@@ -7,7 +7,7 @@ import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
 import { JSONInput } from '@strapi/design-system/JSONInput';
-import getDefaultMessage from '../utils/getActionTypesDefaultMessages';
+import { getDefaultMessage } from '../utils/getActionTypesDefaultMessages';
 import ActionItem from './ActionItem';
 
 const ActionBody = ({ status, data, formattedDate }) => {

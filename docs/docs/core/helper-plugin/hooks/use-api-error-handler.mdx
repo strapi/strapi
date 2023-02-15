@@ -1,0 +1,58 @@
+---
+title: useAPIErrorHandler
+slug: /hooks/use-api-error-handler
+description: API reference for the useAPIErrorHandler() hook
+tags:
+  - hooks
+  - api
+  - error-handling
+---
+
+The purpose of this hook is to offer a unified way to handle errors thrown by API endpoints, regardless of the type of error (`ValidationError`, `ApplicationErrror` ...)
+that has been thrown.
+
+It receives an optional error prefixing function (often `getTrad`), which will be used to make the error message translateable.
+
+## Usage
+
+The following example shows a basic way to use the `useAPIErrorHandler` hook:
+
+```jsx
+import React from 'react';
+
+import { useAPIErrorHandler, useFetchClient, useNotification } from '@strapi/helper-plugin';
+import getTrad from '../utils';
+
+const Component = () => {
+    const { get } = useFetchClient();
+    const { formatAPIError } = useAPIErrorHandler(getTrad);
+    const toggleNotification = useNotification();
+
+    const handleDeleteItem = async () => {
+        try {
+            return await get('/admin');
+        } catch(error) {
+            toggleNotification({
+                type: 'warning',
+                message: formatAPIError(error)
+            })
+        }
+    }
+
+    return (
+        <button onClick={handleDeleteItem}>Delete item</button>
+    )
+}
+```
+
+## Methods
+
+### `formatAPIError(error: ResponseError): string`
+
+This method stringifies the `ResponseObject` into a string. If multiple errors are thrown by the API, which happens e.g.
+in the case of a `ValidationError`, all errors will bo concatenated into a single string.
+
+### `normalizeAPIError(error: ResponseError): Object`
+
+This method is exported alongside from the `@strapi/helper-plugin`. It can be used to normalize the format of `ResponseError`
+in places where the hook can not called (e.g. outside of a React component).

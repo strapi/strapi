@@ -1,6 +1,6 @@
 {
   "name": "@strapi/helper-plugin",
-  "version": "4.6.0",
+  "version": "4.6.1",
   "description": "Helper for Strapi plugins development",
   "repository": {
     "type": "git",
@@ -20,41 +20,38 @@
       "url": "https://strapi.io"
     }
   ],
-  "main": "build/index.js",
+  "main": "build/helper-plugin.js",
+  "module": "build/helper-plugin.esm.js",
+  "exports": {
+    ".": {
+      "require": "./build/helper-plugin.js",
+      "import": "./build/helper-plugin.esm.js"
+    }
+  },
   "files": [
     "build"
   ],
   "scripts": {
     "prebuild": "rimraf build",
-    "build": "yarn build:development && yarn build:production && yarn create:index",
+    "build": "cross-env NODE_ENV=production webpack-cli",
     "build-storybook": "build-storybook",
-    "build:development": "cross-env NODE_ENV=development webpack-cli",
-    "build:production": "cross-env NODE_ENV=production webpack-cli",
-    "create:index": "node ./createBuildIndex.js",
     "prepublishOnly": "npm run build",
     "storybook": "start-storybook -p 6006",
     "test:front": "jest --config ./jest.config.front.js",
     "test:front:cov": "jest --config ./jest.config.front.js --coverage",
     "test:front:watch": "jest --config ./jest.config.front.js --watchAll",
-    "watch": "yarn create:index && cross-env NODE_ENV=development webpack-cli -w"
+    "watch": "cross-env NODE_ENV=development webpack-cli -w"
   },
   "dependencies": {
     "axios": "1.2.2",
     "date-fns": "2.29.3",
     "formik": "^2.2.6",
     "immer": "9.0.19",
-    "invariant": "^2.2.1",
     "lodash": "4.17.21",
-    "match-sorter": "^4.0.2",
     "qs": "6.11.0",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
     "react-helmet": "^6.1.0",
-    "react-intl": "6.2.7",
-    "react-router": "^5.2.0",
-    "react-router-dom": "5.3.4",
+    "react-intl": "6.2.8",
     "react-select": "5.6.0",
-    "styled-components": "5.3.3",
     "whatwg-fetch": "^3.6.2"
   },
   "devDependencies": {
@@ -64,17 +61,30 @@
     "@storybook/builder-webpack5": "6.5.15",
     "@storybook/manager-webpack5": "6.5.15",
     "@storybook/react": "^6.5.16",
-    "@strapi/design-system": "1.6.1",
-    "@strapi/icons": "1.6.1",
+    "@strapi/design-system": "1.6.3",
+    "@strapi/icons": "1.6.3",
     "@testing-library/react": "12.1.4",
     "@testing-library/react-hooks": "8.0.1",
     "browserslist-to-esbuild": "1.2.0",
     "cross-env": "^7.0.3",
     "esbuild-loader": "^2.21.0",
+    "match-sorter": "^4.0.2",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "5.3.4",
     "react-test-renderer": "^17.0.2",
-    "require-from-string": "2.0.2",
     "rimraf": "3.0.2",
-    "typescript": "4.6.2"
+    "styled-components": "5.3.3",
+    "typescript": "4.6.2",
+    "webpack": "^5.75.0"
+  },
+  "peerDependencies": {
+    "@strapi/design-system": "1.6.3",
+    "@strapi/icons": "1.6.3",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "5.3.4",
+    "styled-components": "5.3.3"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",
@@ -88,8 +98,5 @@
         ]
       }
     }
-  },
-  "peerDependencies": {
-    "webpack": "^5.75.0"
   }
 }

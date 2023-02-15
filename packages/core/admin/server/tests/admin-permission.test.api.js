@@ -336,18 +336,6 @@ describe('Role CRUD End to End', () => {
                 "subCategory": "general",
               },
               {
-                "action": "admin::marketplace.plugins.install",
-                "category": "plugins and marketplace",
-                "displayName": "Install (only for dev env)",
-                "subCategory": "plugins",
-              },
-              {
-                "action": "admin::marketplace.plugins.uninstall",
-                "category": "plugins and marketplace",
-                "displayName": "Uninstall (only for dev env)",
-                "subCategory": "plugins",
-              },
-              {
                 "action": "admin::marketplace.read",
                 "category": "plugins and marketplace",
                 "displayName": "Access the marketplace",
@@ -849,18 +837,6 @@ describe('Role CRUD End to End', () => {
                   "category": "audit logs",
                   "displayName": "Read",
                   "subCategory": "options",
-                },
-                {
-                  "action": "admin::marketplace.plugins.install",
-                  "category": "plugins and marketplace",
-                  "displayName": "Install (only for dev env)",
-                  "subCategory": "plugins",
-                },
-                {
-                  "action": "admin::marketplace.plugins.uninstall",
-                  "category": "plugins and marketplace",
-                  "displayName": "Uninstall (only for dev env)",
-                  "subCategory": "plugins",
                 },
                 {
                   "action": "admin::marketplace.read",
@@ -1371,18 +1347,6 @@ describe('Role CRUD End to End', () => {
                   "category": "api tokens",
                   "displayName": "Update",
                   "subCategory": "general",
-                },
-                {
-                  "action": "admin::marketplace.plugins.install",
-                  "category": "plugins and marketplace",
-                  "displayName": "Install (only for dev env)",
-                  "subCategory": "plugins",
-                },
-                {
-                  "action": "admin::marketplace.plugins.uninstall",
-                  "category": "plugins and marketplace",
-                  "displayName": "Uninstall (only for dev env)",
-                  "subCategory": "plugins",
                 },
                 {
                   "action": "admin::marketplace.read",

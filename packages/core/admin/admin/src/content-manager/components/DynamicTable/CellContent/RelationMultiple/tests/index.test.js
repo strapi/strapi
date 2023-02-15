@@ -17,6 +17,14 @@ jest.mock('@strapi/helper-plugin', () => ({
             id: 1,
             name: 'Relation entity 1',
           },
+          {
+            id: 2,
+            name: 'Relation entity 2',
+          },
+          {
+            id: 3,
+            name: 'Relation entity 3',
+          },
         ],
 
         pagination: {
@@ -84,5 +92,20 @@ describe('DynamicTable / Cellcontent / RelationMultiple', () => {
     expect(screen.getByText('Relations are loading')).toBeInTheDocument();
     expect(get).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(screen.getByText('Relation entity 1')).toBeInTheDocument());
+  });
+
+  it('Displays related entities in reversed order', async () => {
+    const { container } = render(<ComponentFixture />);
+    const button = container.querySelector('[type=button]');
+
+    fireEvent(button, new MouseEvent('mousedown', { bubbles: true }));
+
+    await waitFor(() => {
+      const buttons = screen.getAllByRole('menuitem');
+
+      expect(buttons[1]).toHaveTextContent('Relation entity 3');
+      expect(buttons[2]).toHaveTextContent('Relation entity 2');
+      expect(buttons[3]).toHaveTextContent('Relation entity 1');
+    });
   });
 });

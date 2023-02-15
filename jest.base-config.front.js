@@ -30,6 +30,7 @@ module.exports = {
   moduleNameMapper,
   collectCoverageFrom: [
     '<rootDir>/packages/core/*/admin/src/**/*.js',
+    '<rootDir>/packages/core/admin/ee/admin/**/*.js',
     '<rootDir>/packages/plugins/*/admin/src/**/*.js',
   ],
   testPathIgnorePatterns: [
@@ -46,6 +47,7 @@ module.exports = {
     '<rootDir>/packages/admin-test-utils/lib/mocks/IntersectionObserver.js',
     '<rootDir>/packages/admin-test-utils/lib/mocks/ResizeObserver.js',
     '<rootDir>/packages/admin-test-utils/lib/mocks/windowMatchMedia.js',
+    '<rootDir>/packages/admin-test-utils/lib/mocks/mockRangeApi.js',
   ],
   setupFilesAfterEnv: [
     '<rootDir>/packages/admin-test-utils/lib/setup/styled-components.js',
@@ -73,7 +75,7 @@ module.exports = {
       '<rootDir>/fileTransformer.js',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend|@strapi/design-system|@strapi/icons)/)',
+    'node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend|@strapi/design-system|@strapi/icons|fractional-indexing)/)',
   ],
   testMatch: ['/**/tests/**/?(*.)+(spec|test).[jt]s?(x)'],
   testEnvironmentOptions: {
