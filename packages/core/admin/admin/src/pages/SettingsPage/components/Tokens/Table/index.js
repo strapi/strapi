@@ -57,7 +57,9 @@ const Table = ({
               key={token.id}
               {...onRowClick({
                 fn() {
-                  trackUsage('willEditTokenFromList');
+                  trackUsage('willEditTokenFromList', {
+                    tokenType,
+                  });
                   push(`${pathname}/${token.id}`);
                 },
                 condition: canUpdate,
