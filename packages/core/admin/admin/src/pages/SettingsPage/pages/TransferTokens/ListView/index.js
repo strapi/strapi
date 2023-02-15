@@ -11,6 +11,7 @@ import {
   NoPermissions,
   useRBAC,
   NoContent,
+  useTracking,
   useGuidedTour,
   LinkButton,
   useFetchClient,
@@ -34,6 +35,7 @@ const TransferTokenListView = () => {
     allowedActions: { canCreate, canDelete, canUpdate, canRead },
   } = useRBAC(adminPermissions.settings['transfer-tokens']);
   const { push } = useHistory();
+  const { trackUsage } = useTracking();
 
   const { startSection } = useGuidedTour();
   const startSectionRef = useRef(startSection);
@@ -64,6 +66,9 @@ const TransferTokenListView = () => {
   } = useQuery(
     ['transfer-tokens'],
     async () => {
+      trackUsage('willAccessTokenList', {
+        tokenType: TRANSFER_TOKEN_TYPE,
+      });
       const {
         data: { data },
       } = await get(`/admin/transfer/tokens`);

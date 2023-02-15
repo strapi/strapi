@@ -65,7 +65,9 @@ const ApiTokenListView = () => {
   } = useQuery(
     ['api-tokens'],
     async () => {
-      trackUsage('willAccessTokenList');
+      trackUsage('willAccessTokenList', {
+        tokenType: API_TOKEN_TYPE,
+      });
       const {
         data: { data },
       } = await get(`/admin/api-tokens`);
