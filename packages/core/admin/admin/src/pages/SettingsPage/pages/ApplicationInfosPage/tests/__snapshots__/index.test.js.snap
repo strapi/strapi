@@ -1,6 +1,47 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Application page renders and matches the snapshot 1`] = `
+.c9 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c14 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c15 {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666687;
+}
+
+.c21 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c25 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c26 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
+}
+
 .c2 {
   padding-bottom: 56px;
 }
@@ -34,10 +75,6 @@ exports[`Application page renders and matches the snapshot 1`] = `
 
 .c22 {
   padding-top: 4px;
-}
-
-.c30 {
-  padding-left: 8px;
 }
 
 .c6 {
@@ -84,53 +121,6 @@ exports[`Application page renders and matches the snapshot 1`] = `
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
-}
-
-.c9 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c14 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c15 {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c21 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c25 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
-.c26 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c29 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #4945ff;
 }
 
 .c18 > * {
@@ -281,6 +271,39 @@ exports[`Application page renders and matches the snapshot 1`] = `
   fill: #ffffff;
 }
 
+.c23 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+}
+
+.c24 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c1 {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.c3 {
+  overflow-x: hidden;
+}
+
+.c4:focus-visible {
+  outline: none;
+}
+
+.c30 {
+  padding-left: 8px;
+}
+
+.c29 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #4945ff;
+}
+
 .c27 {
   cursor: pointer;
 }
@@ -343,29 +366,6 @@ exports[`Application page renders and matches the snapshot 1`] = `
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-}
-
-.c1 {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-
-.c3 {
-  overflow-x: hidden;
-}
-
-.c23 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-}
-
-.c24 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c4:focus-visible {
-  outline: none;
 }
 
 @media (max-width:68.75rem) {
@@ -489,13 +489,13 @@ exports[`Application page renders and matches the snapshot 1`] = `
                       target="_blank"
                     >
                       <span
-                        class="c8 c29"
+                        class="c29"
                       >
                         Get help
                       </span>
                       <span
                         aria-hidden="true"
-                        class="c0 c30 c31"
+                        class="c30 c31"
                       >
                         <svg
                           fill="none"
@@ -556,13 +556,13 @@ exports[`Application page renders and matches the snapshot 1`] = `
                       target="_blank"
                     >
                       <span
-                        class="c8 c29"
+                        class="c29"
                       >
                         See all pricing plans
                       </span>
                       <span
                         aria-hidden="true"
-                        class="c0 c30 c31"
+                        class="c30 c31"
                       >
                         <svg
                           fill="none"

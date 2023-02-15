@@ -1,8 +1,8 @@
 import React, { memo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import isEqual from 'react-fast-compare';
-import { Button } from '@strapi/design-system/Button';
-import Trash from '@strapi/icons/Trash';
+import { Button } from '@strapi/design-system';
+import { Trash } from '@strapi/icons';
 import { ConfirmDialog, useNotification, useAPIErrorHandler } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { getTrad } from '../../../utils';
