@@ -45,7 +45,7 @@ module.exports = {
   async update(ctx) {
     const { id } = ctx.params;
     const { body: input } = ctx.request;
-    console.log('ee update controller');
+
     await validateUserUpdateInput(input);
 
     if (_.has(input, 'email')) {

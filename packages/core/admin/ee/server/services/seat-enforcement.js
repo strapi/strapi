@@ -1,32 +1,29 @@
 'use strict';
 
-const _ = require('lodash');
+const { take, drop } = require('lodash/fp');
+const { getService } = require('../../../server/utils');
 
 const enableUsersToLicenseLimit = async (numberOfUsersToEnable) => {
-  const data = await strapi.db.query('strapi::ee-store').findOne({
-    where: { key: 'ee_disabled_users' },
-  });
+  const data = await getService('user').getDisabledUserList();
 
   if (!data || !data.value || data.value.length === 0) return;
 
   const disabledUsers = JSON.parse(data.value);
 
-  const usersToEnable = _.take(disabledUsers, numberOfUsersToEnable);
+  const usersToEnable = take(disabledUsers, numberOfUsersToEnable);
 
-  usersToEnable.forEach(async (user) => {
-    const data = await strapi.db.query('admin::user').findOne({
-      where: { id: user.id },
-    });
+  for await (const user of usersToEnable) {
+    try {
+      await strapi.db.query('admin::user').update({
+        where: { id: user.id },
+        data: { isActive: true },
+      });
+    } catch (error) {
+      return;
+    }
+  }
 
-    if (!data) return;
-
-    await strapi.db.query('admin::user').update({
-      where: { id: user.id },
-      data: { isActive: true },
-    });
-  });
-
-  const remainingDisabledUsers = _.drop(disabledUsers, numberOfUsersToEnable);
+  const remainingDisabledUsers = drop(disabledUsers, numberOfUsersToEnable);
 
   await strapi.db.query('strapi::ee-store').update({
     where: { id: data.id },
@@ -35,11 +32,7 @@ const enableUsersToLicenseLimit = async (numberOfUsersToEnable) => {
 };
 
 const calculateAdminSeatDifference = async (seatsAllowedByLicense) => {
-  const currentAdminSeats = await strapi.db.query('admin::user').count({
-    where: {
-      isActive: true,
-    },
-  });
+  const currentAdminSeats = await getService('user').getCurrentActiveUserCount();
   return currentAdminSeats - seatsAllowedByLicense;
 };
 
@@ -50,17 +43,21 @@ const disableUsersAboveLicenseLimit = async (numberOfUsersToDisable) => {
     populate: { roles: { select: ['id'] } },
   });
 
-  const usersToDisable = _.take(users, numberOfUsersToDisable);
+  const usersToDisable = take(users, numberOfUsersToDisable);
 
-  usersToDisable.forEach(async (user) => {
-    user.isActive = false;
-    await strapi.db.query('admin::user').update({
-      where: { id: user.id },
-      data: {
-        isActive: false,
-      },
-    });
-  });
+  for await (const user of usersToDisable) {
+    try {
+      await strapi.db.query('admin::user').update({
+        where: { id: user.id },
+        data: {
+          isActive: false,
+        },
+      });
+      user.isActive = false;
+    } catch (error) {
+      return;
+    }
+  }
 
   const data = await strapi.db.query('strapi::ee-store').findOne({
     where: { key: 'ee_disabled_users' },
@@ -98,7 +95,7 @@ const syncdDisabledUserRecords = async () => {
 
     await strapi.db.query('admin::user').update({
       where: { id: user.id },
-      data: { isActive: user.isActive }, // TODO: should this value be hardcoded to 'false' or no?
+      data: { isActive: false },
     });
   });
 };

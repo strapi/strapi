@@ -5,7 +5,7 @@ const { features } = require('@strapi/strapi/lib/utils/ee');
 const executeCEBootstrap = require('../../server/bootstrap');
 const { getService } = require('../../server/utils');
 const actions = require('./config/admin-actions');
-const { seatEnforcementWorkflow } = require('./seat-enforcement');
+const { seatEnforcementWorkflow } = require('./services/seat-enforcement');
 
 module.exports = async () => {
   const { actionProvider } = getService('permission');
@@ -17,8 +17,6 @@ module.exports = async () => {
   if (features.isEnabled('audit-logs')) {
     await actionProvider.registerMany(actions.auditLogs);
   }
-
-  // TODO: check admin seats
 
   await seatEnforcementWorkflow();
 

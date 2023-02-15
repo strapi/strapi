@@ -1,6 +1,7 @@
 'use strict';
 
 const { env } = require('@strapi/utils');
+const { getService } = require('../../../server/utils');
 
 module.exports = {
   async licenseLimitInformation() {
@@ -11,13 +12,9 @@ module.exports = {
     let licenseLimitStatus = null;
     let enforcementUserCount;
 
-    const currentActiveUserCount = await strapi.db
-      .query('admin::user')
-      .count({ where: { isActive: true } });
+    const currentActiveUserCount = await getService('user').getCurrentActiveUserCount();
 
-    const data = await strapi.db.query('strapi::ee-store').findOne({
-      where: { key: 'ee_disabled_users' },
-    });
+    const data = await getService('user').getDisabledUserList();
 
     if (data.value) {
       const eeDisabledUsers = JSON.parse(data.value);

@@ -11,9 +11,7 @@ module.exports = async (policyCtx, config = {}) => {
   const permittedSeats = strapi.ee.licenseInfo.seats;
   if (!permittedSeats) return true;
 
-  const userCount = await strapi.db.query('admin::user').count({
-    where: { isActive: true },
-  });
+  const userCount = await strapi.service('admin::user').getCurrentActiveUserCount();
 
   if (userCount < permittedSeats) return true;
   if (userCount >= permittedSeats && config.isCreating) {
@@ -22,9 +20,7 @@ module.exports = async (policyCtx, config = {}) => {
     });
   }
 
-  const user = await strapi.db.query('admin::user').findOne({
-    where: { id: policyCtx.params.id },
-  });
+  const user = await strapi.service('admin::user').findOne(policyCtx.params.id);
 
   if (!user) {
     throw new ApplicationError('User could not be found');
