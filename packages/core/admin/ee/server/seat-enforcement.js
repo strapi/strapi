@@ -135,7 +135,9 @@ const revertSeatEnforcementWorkflow = async () => {
 
 const seatEnforcementWorkflow = async () => {
   const permittedAdminSeats = strapi.ee.licenseInfo.seats;
-  if (!permittedAdminSeats) return;
+  if (!permittedAdminSeats) {
+    return;
+  }
 
   await syncdDisabledUserRecords();
   const adminSeatDifference = await calculateAdminSeatDifference(permittedAdminSeats);
