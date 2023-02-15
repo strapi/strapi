@@ -50,7 +50,7 @@
     "lodash": "4.17.21",
     "qs": "6.11.0",
     "react-helmet": "^6.1.0",
-    "react-intl": "6.2.7",
+    "react-intl": "6.2.8",
     "react-select": "5.6.0",
     "whatwg-fetch": "^3.6.2"
   },
