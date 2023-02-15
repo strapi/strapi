@@ -11,22 +11,6 @@ module.exports = {
       subCategory: 'marketplace',
     },
     {
-      uid: 'marketplace.plugins.install',
-      displayName: 'Install (only for dev env)',
-      pluginName: 'admin',
-      section: 'settings',
-      category: 'plugins and marketplace',
-      subCategory: 'plugins',
-    },
-    {
-      uid: 'marketplace.plugins.uninstall',
-      displayName: 'Uninstall (only for dev env)',
-      pluginName: 'admin',
-      section: 'settings',
-      category: 'plugins and marketplace',
-      subCategory: 'plugins',
-    },
-    {
       uid: 'webhooks.create',
       displayName: 'Create',
       pluginName: 'admin',
