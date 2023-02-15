@@ -60,6 +60,7 @@ module.exports = {
       '@swc/jest',
       {
         env: {
+          coreJs: '3.28.0',
           mode: 'usage',
         },
 
