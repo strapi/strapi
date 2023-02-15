@@ -23,6 +23,7 @@ import Plus from '@strapi/icons/Plus';
 import adminPermissions from '../../../../../permissions';
 import tableHeaders from './utils/tableHeaders';
 import Table from '../../../components/Tokens/Table';
+import { TRANSFER_TOKEN_TYPE } from '../../../components/Tokens/constants';
 
 const TransferTokenListView = () => {
   useFocusWhenNavigate();
@@ -148,6 +149,7 @@ const TransferTokenListView = () => {
             isLoading={isLoading}
             onConfirmDelete={(id) => deleteMutation.mutateAsync(id)}
             tokens={transferTokens}
+            tokenType={TRANSFER_TOKEN_TYPE}
           />
         )}
         {shouldDisplayNoContentWithCreationButton && (

@@ -6,7 +6,7 @@ import { stopPropagation, useTracking } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 
-const DeleteButton = ({ tokenName, onClickDelete }) => {
+const DeleteButton = ({ tokenName, onClickDelete, tokenType }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking(); // TODO: Track different types of tokens
 
@@ -14,7 +14,9 @@ const DeleteButton = ({ tokenName, onClickDelete }) => {
     <Box paddingLeft={1} {...stopPropagation}>
       <IconButton
         onClick={() => {
-          trackUsage('willDeleteToken');
+          trackUsage('willDeleteToken', {
+            tokenType,
+          });
           onClickDelete();
         }}
         label={formatMessage(
@@ -35,6 +37,7 @@ const DeleteButton = ({ tokenName, onClickDelete }) => {
 DeleteButton.propTypes = {
   tokenName: PropTypes.string.isRequired,
   onClickDelete: PropTypes.func.isRequired,
+  tokenType: PropTypes.string.isRequired,
 };
 
 export default DeleteButton;

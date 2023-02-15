@@ -24,6 +24,7 @@ import Plus from '@strapi/icons/Plus';
 import adminPermissions from '../../../../../permissions';
 import tableHeaders from './utils/tableHeaders';
 import Table from '../../../components/Tokens/Table';
+import { API_TOKEN_TYPE } from '../../../components/Tokens/constants';
 
 const ApiTokenListView = () => {
   useFocusWhenNavigate();
@@ -151,6 +152,7 @@ const ApiTokenListView = () => {
             isLoading={isLoading}
             onConfirmDelete={(id) => deleteMutation.mutateAsync(id)}
             tokens={apiTokens}
+            tokenType={API_TOKEN_TYPE}
           />
         )}
         {shouldDisplayNoContentWithCreationButton && (
