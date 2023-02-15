@@ -85,6 +85,17 @@ const Onboarding = () => {
     setIsOpen((prev) => !prev);
   };
 
+  const docLinks = [
+    ...DOCUMENTATION_LINKS,
+    {
+      label: { id: 'Settings.application.get-help', defaultMessage: 'Get help' },
+      icon: Message,
+      href: communityEdition
+        ? 'https://discord.strapi.io'
+        : 'https://support.strapi.io/support/home',
+    },
+  ];
+
   return (
     <Box as="aside" position="fixed" bottom={2} right={2}>
       <HelperButton
@@ -182,7 +193,7 @@ const Onboarding = () => {
                 </VideoLinkWrapper>
               ))}
               <Stack spacing={2} paddingLeft={5} paddingTop={2} paddingBottom={5}>
-                {DOCUMENTATION_LINKS.map(({ label, href, icon }) => (
+                {docLinks.map(({ label, href, icon }) => (
                   <Stack horizontal spacing={3} key={href}>
                     <Icon as={icon} color="primary600" />
                     <TextLink
@@ -197,26 +208,6 @@ const Onboarding = () => {
                     </TextLink>
                   </Stack>
                 ))}
-                <Stack horizontal spacing={3}>
-                  <Icon as={Message} color="primary600" />
-                  <TextLink
-                    as="a"
-                    href={
-                      communityEdition
-                        ? 'https://discord.strapi.io'
-                        : 'https://support.strapi.io/support/home'
-                    }
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    variant="sigma"
-                    textColor="primary700"
-                  >
-                    {formatMessage({
-                      id: 'Settings.application.get-help',
-                      defaultMessage: 'Get help',
-                    })}
-                  </TextLink>
-                </Stack>
               </Stack>
             </FocusTrap>
           </PopoverPrimitives.Content>

@@ -140,6 +140,20 @@ const SocialLinks = () => {
   const { formatMessage } = useIntl();
   const { communityEdition } = useAppInfos();
 
+  const socialLinksExtended = [
+    ...socialLinks,
+    {
+      icon: <StyledStrapi />,
+      link: communityEdition
+        ? 'https://discord.strapi.io'
+        : 'https://support.strapi.io/support/home',
+      name: {
+        id: 'Settings.application.get-help',
+        defaultMessage: 'Get help',
+      },
+    },
+  ];
+
   return (
     <Box
       as="aside"
@@ -178,39 +192,15 @@ const SocialLinks = () => {
         </Stack>
       </Box>
       <GridGap>
-        {socialLinks.map((socialLink) => {
+        {socialLinksExtended.map(({ icon, link, name }) => {
           return (
-            <GridItem col={6} s={12} key={socialLink.name}>
-              <LinkCustom
-                size="L"
-                startIcon={socialLink.icon}
-                variant="tertiary"
-                href={socialLink.link}
-                isExternal
-              >
-                {socialLink.name}
+            <GridItem col={6} s={12} key={name}>
+              <LinkCustom size="L" startIcon={icon} variant="tertiary" href={link} isExternal>
+                {typeof name === 'string' ? name : formatMessage(name)}
               </LinkCustom>
             </GridItem>
           );
         })}
-        <GridItem col={6} s={12}>
-          <LinkCustom
-            size="L"
-            startIcon={<StyledStrapi />}
-            variant="tertiary"
-            href={
-              communityEdition
-                ? 'https://discord.strapi.io'
-                : 'https://support.strapi.io/support/home'
-            }
-            isExternal
-          >
-            {formatMessage({
-              id: 'Settings.application.get-help',
-              defaultMessage: 'Get help',
-            })}
-          </LinkCustom>
-        </GridItem>
       </GridGap>
     </Box>
   );

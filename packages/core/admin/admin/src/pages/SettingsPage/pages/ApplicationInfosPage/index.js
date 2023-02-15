@@ -10,9 +10,9 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import {
-  Box,
   Button,
   ContentLayout,
+  Flex,
   Grid,
   GridItem,
   HeaderLayout,
@@ -143,8 +143,8 @@ const ApplicationInfosPage = () => {
                         defaultMessage: 'strapi version',
                       })}
                     </Typography>
-                    <Typography as="dd">v{strapiVersion}</Typography>
-                    <Box paddingTop={3}>
+                    <Flex gap={3} direction="column" alignItems="start" as="dd">
+                      <Typography>v{strapiVersion}</Typography>
                       {shouldUpdateStrapi && (
                         <Link
                           href={`https://github.com/strapi/strapi/releases/tag/${latestStrapiReleaseTag}`}
@@ -157,7 +157,7 @@ const ApplicationInfosPage = () => {
                           })}
                         </Link>
                       )}
-                    </Box>
+                    </Flex>
                   </GridItem>
                   <GridItem col={6} s={12}>
                     <Typography variant="sigma" textColor="neutral600" as="dt">
@@ -166,15 +166,16 @@ const ApplicationInfosPage = () => {
                         defaultMessage: 'current plan',
                       })}
                     </Typography>
-                    <Typography as="dd">
-                      {formatMessage({
-                        id: currentPlan,
-                        defaultMessage: `${
-                          appInfos.communityEdition ? 'Community Edition' : 'Enterprise Edition'
-                        }`,
-                      })}
-                    </Typography>
-                    <Box paddingTop={3}>
+                    <Flex gap={3} direction="column" alignItems="start" as="dd">
+                      <Typography>
+                        {' '}
+                        {formatMessage({
+                          id: currentPlan,
+                          defaultMessage: `${
+                            appInfos.communityEdition ? 'Community Edition' : 'Enterprise Edition'
+                          }`,
+                        })}
+                      </Typography>
                       <Link
                         href="https://strapi.io/pricing-self-hosted"
                         isExternal
@@ -185,7 +186,7 @@ const ApplicationInfosPage = () => {
                           defaultMessage: 'See all pricing plans',
                         })}
                       </Link>
-                    </Box>
+                    </Flex>
                   </GridItem>
 
                   <GridItem col={6} s={12}>

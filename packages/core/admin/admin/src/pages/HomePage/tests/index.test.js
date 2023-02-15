@@ -54,12 +54,27 @@ describe('Homepage', () => {
     singleTypes: [],
   }));
 
-  it('renders and matches the snapshot', () => {
-    const {
-      container: { firstChild },
-    } = render(App);
+  test('should render all homepage links', () => {
+    const { getByRole } = render(App);
+    expect(getByRole('link', { name: /we are hiring/i })).toBeInTheDocument();
+  });
 
-    expect(firstChild).toMatchSnapshot();
+  test.each([
+    'documentation discover the essential concepts, guides and instructions.',
+    'code example learn by using ready-made starters for your projects.',
+    'tutorials follow step-by-step instructions to use and customize strapi.',
+    'blog read the latest news about strapi and the ecosystem.',
+    'see our road map',
+    'github',
+    'discord',
+    'reddit',
+    'twitter',
+    'forum',
+    'we are hiring',
+  ])('should display %s link', (link) => {
+    const { getByRole } = render(App);
+
+    expect(getByRole('link', { name: new RegExp(link, 'i') })).toBeInTheDocument();
   });
 
   test('should display discord link for CE edition', () => {
