@@ -6,6 +6,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
+import { useAppInfos } from '@strapi/helper-plugin';
 import { Typography } from '@strapi/design-system/Typography';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
@@ -137,6 +138,7 @@ const GridGap = styled(Grid)`
 
 const SocialLinks = () => {
   const { formatMessage } = useIntl();
+  const { communityEdition } = useAppInfos();
 
   return (
     <Box
@@ -191,6 +193,24 @@ const SocialLinks = () => {
             </GridItem>
           );
         })}
+        <GridItem col={6} s={12}>
+          <LinkCustom
+            size="L"
+            startIcon={<StyledStrapi />}
+            variant="tertiary"
+            href={
+              communityEdition
+                ? 'https://discord.strapi.io'
+                : 'https://support.strapi.io/support/home'
+            }
+            isExternal
+          >
+            {formatMessage({
+              id: 'Settings.application.get-help',
+              defaultMessage: 'Get help',
+            })}
+          </LinkCustom>
+        </GridItem>
       </GridGap>
     </Box>
   );
