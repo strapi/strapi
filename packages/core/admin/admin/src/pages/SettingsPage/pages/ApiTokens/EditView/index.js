@@ -155,7 +155,9 @@ const ApiTokenCreateView = () => {
   );
 
   const handleSubmit = async (body, actions) => {
-    trackUsageRef.current(isCreating ? 'willCreateToken' : 'willEditToken');
+    trackUsageRef.current(isCreating ? 'willCreateToken' : 'willEditToken', {
+      tokenType: API_TOKEN_TYPE,
+    });
     lockApp();
     const lifespanVal =
       body.lifespan && parseInt(body.lifespan, 10) && body.lifespan !== '0'
