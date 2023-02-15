@@ -1,10 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Typography } from '@strapi/design-system/Typography';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Icon } from '@strapi/design-system/Icon';
-import EmptyStateDocument from '@strapi/icons/EmptyDocuments';
+import { Typography, Box, Flex, Icon } from '@strapi/design-system';
+import { EmptyStateDocument } from '@strapi/icons';
 import { EmptyNpmPackageGrid } from './EmptyNpmPackageGrid';
 
 const EmptyNpmPackageSearch = ({ content }) => {

@@ -1,18 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and match snapshot 1`] = `
-.c32 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
 .c6 {
   font-weight: 600;
   font-size: 0.6875rem;
@@ -167,27 +155,6 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   flex-direction: row;
 }
 
-.c4 {
-  border-bottom: 2px solid #4945ff;
-}
-
-.c7 {
-  border-bottom: 2px solid transparent;
-}
-
-.c2[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c10 {
-  height: 1px;
-  border: none;
-  -webkit-flex-shrink: 0;
-  -ms-flex-negative: 0;
-  flex-shrink: 0;
-  margin: 0;
-}
-
 .c13 > * {
   margin-top: 0;
   margin-bottom: 0;
@@ -259,13 +226,16 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   border: 2px solid #4945ff;
 }
 
-.c27 {
-  border-radius: 0 0 4px 4px;
-  border-top: 1px solid #eaeaef;
-}
-
-.c30 > * + * {
-  margin-left: 8px;
+.c32 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .c22 {
@@ -406,6 +376,36 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
 .c31 svg > g,
 .c31 svg path {
   fill: #32324d;
+}
+
+.c10 {
+  height: 1px;
+  border: none;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.c27 {
+  border-radius: 0 0 4px 4px;
+  border-top: 1px solid #eaeaef;
+}
+
+.c30 > * + * {
+  margin-left: 8px;
+}
+
+.c4 {
+  border-bottom: 2px solid #4945ff;
+}
+
+.c7 {
+  border-bottom: 2px solid transparent;
+}
+
+.c2[aria-disabled='true'] {
+  cursor: not-allowed;
 }
 
 .c20 {
@@ -609,18 +609,6 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
 `;
 
 exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and match snapshot 1`] = `
-.c25 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
 .c8 {
   font-weight: 600;
   font-size: 0.6875rem;
@@ -718,27 +706,6 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   flex-direction: row;
 }
 
-.c7 {
-  border-bottom: 2px solid #4945ff;
-}
-
-.c4 {
-  border-bottom: 2px solid transparent;
-}
-
-.c2[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c10 {
-  height: 1px;
-  border: none;
-  -webkit-flex-shrink: 0;
-  -ms-flex-negative: 0;
-  flex-shrink: 0;
-  margin: 0;
-}
-
 .c13 > * {
   margin-top: 0;
   margin-bottom: 0;
@@ -806,13 +773,16 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   border: 2px solid #4945ff;
 }
 
-.c20 {
-  border-radius: 0 0 4px 4px;
-  border-top: 1px solid #eaeaef;
-}
-
-.c21 > * + * {
-  margin-left: 8px;
+.c25 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .c24 {
@@ -1014,6 +984,36 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
 .c17:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c10 {
+  height: 1px;
+  border: none;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.c20 {
+  border-radius: 0 0 4px 4px;
+  border-top: 1px solid #eaeaef;
+}
+
+.c21 > * + * {
+  margin-left: 8px;
+}
+
+.c7 {
+  border-bottom: 2px solid #4945ff;
+}
+
+.c4 {
+  border-bottom: 2px solid transparent;
+}
+
+.c2[aria-disabled='true'] {
+  cursor: not-allowed;
 }
 
 <div>

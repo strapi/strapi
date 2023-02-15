@@ -13,7 +13,7 @@ import {
   useOverlayBlocker,
   useFetchClient,
 } from '@strapi/helper-plugin';
-import { Main } from '@strapi/design-system/Main';
+import { Main } from '@strapi/design-system';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { useModels } from '../../../../../hooks';
