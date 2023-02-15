@@ -107,24 +107,9 @@ class Strapi {
     this.reload = this.reload();
 
     // Instantiate the Koa app & the HTTP server
-    // TODO put this in /docs/docs/API/Strapi
-    /*
-        Strapi server object
-
-        Link to server/index.js
-     */
     this.server = createServer(this);
 
     // Strapi utils instanciation
-    // TODO put this in /docs/docs/API/Strapi
-    /*
-      Wrapper around fs module
-      writeAppFile(optPath, data): deprecated
-      writePluginFile(plugin, optPath, data): deprecated
-      removeAppFile(optPath): deprecated
-      appendFile(optPath, data):
-        normalize path (root dir) + fs.appendFileSync
-     */
     this.fs = createStrapiFs(this);
 
     // TODO put this in /docs/docs/API/Strapi
