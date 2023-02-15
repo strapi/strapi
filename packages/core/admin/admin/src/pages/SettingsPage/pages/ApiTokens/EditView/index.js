@@ -110,7 +110,9 @@ const ApiTokenCreateView = () => {
   );
 
   useEffect(() => {
-    trackUsageRef.current(isCreating ? 'didAddTokenFromList' : 'didEditTokenFromList');
+    trackUsageRef.current(isCreating ? 'didAddTokenFromList' : 'didEditTokenFromList', {
+      tokenType: API_TOKEN_TYPE,
+    });
   }, [isCreating]);
 
   const { status } = useQuery(

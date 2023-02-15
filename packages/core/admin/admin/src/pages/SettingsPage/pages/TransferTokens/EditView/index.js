@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
 import { useRouteMatch, useHistory } from 'react-router-dom';
@@ -53,6 +53,12 @@ const TransferTokenCreateView = () => {
   const { get, post, put } = useFetchClient();
 
   const isCreating = id === 'create';
+
+  useEffect(() => {
+    trackUsageRef.current(isCreating ? 'didAddTokenFromList' : 'didEditTokenFromList', {
+      tokenType: TRANSFER_TOKEN_TYPE,
+    });
+  }, [isCreating]);
 
   const { status } = useQuery(
     ['transfer-token', id],
