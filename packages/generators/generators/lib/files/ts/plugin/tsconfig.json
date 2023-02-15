@@ -12,7 +12,7 @@
     "node_modules/",
     "dist/",
 
-    // Do not include admin files in the server compilation
+    // Do not include server files in the server compilation
     "server/",
     // Do not include test files
     "**/*.test.ts"
