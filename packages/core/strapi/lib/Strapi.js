@@ -112,11 +112,6 @@ class Strapi {
     // Strapi utils instanciation
     this.fs = createStrapiFs(this);
 
-    // TODO put this in /docs/docs/API/Strapi
-    /*
-      eventHub instance of EventEmitter = require('events');
-      Link to nodejs events doc
-     */
     this.eventHub = createEventHub();
 
     // TODO put this in /docs/docs/API/Strapi
