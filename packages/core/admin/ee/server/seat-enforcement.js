@@ -20,7 +20,9 @@ const enableUsersToLicenseLimit = async (numberOfUsersToEnable) => {
       where: { id: user.id },
     });
 
-    if (!data) return;
+    if (!data) {
+      return;
+    }
 
     await strapi.db.query('admin::user').update({
       where: { id: user.id },
