@@ -28,6 +28,7 @@ import Permissions from './components/Permissions';
 import FormApiTokenContainer from './components/FormApiTokenContainer';
 import TokenBox from '../../../components/Tokens/TokenBox';
 import FormHead from '../../../components/Tokens/FormHead';
+import { API_TOKEN_TYPE } from '../../../components/Tokens/constants';
 
 const MSG_ERROR_NAME_TAKEN = 'Name already taken';
 
@@ -201,6 +202,7 @@ const ApiTokenCreateView = () => {
 
       trackUsageRef.current(isCreating ? 'didCreateToken' : 'didEditToken', {
         type: apiToken.type,
+        tokenType: API_TOKEN_TYPE,
       });
     } catch (err) {
       const errors = formatAPIErrors(err.response.data);
