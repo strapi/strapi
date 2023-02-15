@@ -141,7 +141,7 @@ const GenericInput = ({
         <JSONInput
           label={label}
           labelAction={labelAction}
-          value={value}
+          value={value === 'null' ? null : value}
           error={errorMessage}
           hint={hint}
           required={required}
