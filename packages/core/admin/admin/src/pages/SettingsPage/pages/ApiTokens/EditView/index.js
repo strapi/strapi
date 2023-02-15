@@ -303,7 +303,9 @@ const ApiTokenCreateView = () => {
 
                 <ContentLayout>
                   <Stack spacing={6}>
-                    {Boolean(apiToken?.name) && <TokenBox token={apiToken?.accessKey} />}
+                    {Boolean(apiToken?.name) && (
+                      <TokenBox token={apiToken?.accessKey} tokenType={API_TOKEN_TYPE} />
+                    )}
                     <FormApiTokenContainer
                       errors={errors}
                       onChange={handleChange}

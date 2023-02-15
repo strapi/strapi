@@ -191,7 +191,9 @@ const TransferTokenCreateView = () => {
               />
               <ContentLayout>
                 <Stack spacing={6}>
-                  {Boolean(transferToken?.name) && <TokenBox token={transferToken?.accessKey} />}
+                  {Boolean(transferToken?.name) && (
+                    <TokenBox token={transferToken?.accessKey} tokenType={TRANSFER_TOKEN_TYPE} />
+                  )}
                   <FormTransferTokenContainer
                     errors={errors}
                     onChange={handleChange}
