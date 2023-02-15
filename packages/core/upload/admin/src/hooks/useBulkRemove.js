@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from 'react-query';
-import { useNotification, useFetchClient } from '@strapi/helper-plugin';
+import { useNotification, useFetchClient, useAPIErrorHandler } from '@strapi/helper-plugin';
 
 import pluginId from '../pluginId';
 import { getRequestUrl, getTrad } from '../utils';
@@ -7,6 +7,7 @@ import { getRequestUrl, getTrad } from '../utils';
 export const useBulkRemove = () => {
   const toggleNotification = useNotification();
   const queryClient = useQueryClient();
+  const { formatAPIError } = useAPIErrorHandler();
   const url = getRequestUrl('actions/bulk-delete');
   const { post } = useFetchClient();
 
@@ -51,7 +52,7 @@ export const useBulkRemove = () => {
       });
     },
     onError(error) {
-      toggleNotification({ type: 'warning', message: error.message });
+      toggleNotification({ type: 'warning', message: formatAPIError(error) });
     },
   });
 

@@ -5,12 +5,14 @@ import useNotification from '../../hooks/useNotification';
 import useRBACProvider from '../../hooks/useRBACProvider';
 import hasPermissions from '../../utils/hasPermissions';
 import LoadingIndicatorPage from '../LoadingIndicatorPage';
+import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
 
 const CheckPagePermissions = ({ permissions, children }) => {
   const abortController = new AbortController();
   const { signal } = abortController;
   const { allPermissions } = useRBACProvider();
   const toggleNotification = useNotification();
+  const { formatAPIError } = useAPIErrorHandler();
 
   const [state, setState] = useState({ isLoading: true, canAccess: false });
   const isMounted = useRef(true);
@@ -27,11 +29,9 @@ const CheckPagePermissions = ({ permissions, children }) => {
         }
       } catch (err) {
         if (isMounted.current) {
-          console.error(err);
-
           toggleNotification({
             type: 'warning',
-            message: { id: 'notification.error' },
+            message: formatAPIError(err),
           });
 
           setState({ isLoading: false });

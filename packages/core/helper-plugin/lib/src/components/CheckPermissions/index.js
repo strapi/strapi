@@ -4,6 +4,7 @@ import useNotification from '../../hooks/useNotification';
 
 import hasPermissions from '../../utils/hasPermissions';
 import useRBACProvider from '../../hooks/useRBACProvider';
+import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
 
 // NOTE: this component is very similar to the CheckPagePermissions
 // except that it does not handle redirections nor loading state
@@ -15,6 +16,7 @@ const CheckPermissions = ({ permissions, children }) => {
   const isMounted = useRef(true);
   const abortController = new AbortController();
   const { signal } = abortController;
+  const { formatAPIError } = useAPIErrorHandler();
 
   useEffect(() => {
     const checkPermission = async () => {
@@ -28,10 +30,9 @@ const CheckPermissions = ({ permissions, children }) => {
         }
       } catch (err) {
         if (isMounted.current) {
-          console.error(err);
           toggleNotification({
             type: 'warning',
-            message: { id: 'notification.error' },
+            message: formatAPIError(err),
           });
 
           setState({ isLoading: false });

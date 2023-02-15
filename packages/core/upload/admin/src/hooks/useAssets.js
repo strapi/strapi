@@ -1,7 +1,7 @@
 import { stringify } from 'qs';
 import { useQuery } from 'react-query';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import { useNotification, useFetchClient } from '@strapi/helper-plugin';
+import { useNotification, useFetchClient, useAPIErrorHandler } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import pluginId from '../pluginId';
@@ -12,6 +12,7 @@ export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
   const toggleNotification = useNotification();
   const { notifyStatus } = useNotifyAT();
   const { get } = useFetchClient();
+  const { formatAPIError } = useAPIErrorHandler();
   const dataRequestURL = getRequestUrl('files');
   const { folder, _q, ...paramsExceptFolderAndQ } = query;
 
@@ -60,7 +61,7 @@ export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
     } catch (err) {
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error' },
+        message: formatAPIError(err),
       });
 
       throw err;

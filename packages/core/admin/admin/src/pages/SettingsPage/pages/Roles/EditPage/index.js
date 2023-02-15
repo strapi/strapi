@@ -4,6 +4,7 @@ import {
   useNotification,
   useOverlayBlocker,
   useTracking,
+  useAPIErrorHandler,
   LoadingIndicatorPage,
   SettingsPageTitle,
   Link,
@@ -15,7 +16,6 @@ import { Main } from '@strapi/design-system/Main';
 import { Stack } from '@strapi/design-system/Stack';
 import { Formik } from 'formik';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
-import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
 import { Permissions, RoleForm } from './components';
@@ -32,6 +32,7 @@ const EditPage = () => {
   const permissionsRef = useRef();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { trackUsage } = useTracking();
+  const { formatAPIError } = useAPIErrorHandler();
 
   const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout(id);
   const {
@@ -74,14 +75,9 @@ const EditPage = () => {
         message: { id: 'notification.success.saved' },
       });
     } catch (err) {
-      console.error(err.response);
-
-      const errorMessage = get(err, 'response.payload.message', 'An error occured');
-      const message = get(err, 'response.payload.data.permissions[0]', errorMessage);
-
       toggleNotification({
         type: 'warning',
-        message,
+        message: formatAPIError(err),
       });
     } finally {
       setIsSubmiting(false);

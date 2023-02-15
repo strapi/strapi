@@ -7,7 +7,13 @@ import pick from 'lodash/pick';
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
 import { stringify } from 'qs';
-import { useNotification, useTracking, ConfirmDialog, Link } from '@strapi/helper-plugin';
+import {
+  useNotification,
+  useTracking,
+  useAPIErrorHandler,
+  ConfirmDialog,
+  Link,
+} from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
 import { Divider } from '@strapi/design-system/Divider';
@@ -33,6 +39,7 @@ const ListSettingsView = ({ layout, slug }) => {
   const pluginsQueryParams = usePluginsQueryParams();
   const toggleNotification = useNotification();
   const { refetchData } = useContext(ModelsContext);
+  const { formatAPIError } = useAPIErrorHandler();
 
   const [showWarningSubmit, setWarningSubmit] = useState(false);
   const toggleWarningSubmit = () => setWarningSubmit((prevState) => !prevState);
@@ -131,10 +138,10 @@ const ListSettingsView = ({ layout, slug }) => {
       trackUsage('didEditListSettings');
       refetchData();
     },
-    onError() {
+    onError(error) {
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error' },
+        message: formatAPIError(error),
       });
     },
   });

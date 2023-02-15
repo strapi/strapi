@@ -1,9 +1,10 @@
 import { useReducer, useEffect } from 'react';
-import { request, useNotification } from '@strapi/helper-plugin';
+import { request, useNotification, useAPIErrorHandler } from '@strapi/helper-plugin';
 import reducer, { initialState } from './reducer';
 
 const useModels = () => {
   const toggleNotification = useNotification();
+  const { formatAPIError } = useAPIErrorHandler();
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
@@ -34,7 +35,7 @@ const useModels = () => {
       });
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error' },
+        message: formatAPIError(err),
       });
     }
   };

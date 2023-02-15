@@ -3,12 +3,14 @@ import {
   useRBACProvider,
   useStrapiApp,
   useFetchClient,
+  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import { useNotifyAT } from '@strapi/design-system';
 import axios from 'axios';
 import { useIntl } from 'react-intl';
+
 import { MUTATE_COLLECTION_TYPES_LINKS, MUTATE_SINGLE_TYPES_LINKS } from '../../../exposedHooks';
 import { getRequestUrl, getTrad } from '../../utils';
 import { getData, resetProps, setContentTypeLinks } from './actions';
@@ -27,6 +29,7 @@ const useModels = () => {
   const { notifyStatus } = useNotifyAT();
   const { formatMessage } = useIntl();
   const { get } = useFetchClient();
+  const { formatAPIError } = useAPIErrorHandler();
 
   const fetchData = async () => {
     dispatch(getData());
@@ -75,9 +78,7 @@ const useModels = () => {
         return;
       }
 
-      console.error(err);
-
-      toggleNotification({ type: 'warning', message: { id: 'notification.error' } });
+      toggleNotification({ type: 'warning', message: formatAPIError(err) });
     }
   };
 

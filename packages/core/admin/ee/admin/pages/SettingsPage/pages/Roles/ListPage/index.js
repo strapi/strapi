@@ -9,6 +9,7 @@ import {
   useQueryParams,
   useRBAC,
   useFocusWhenNavigate,
+  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import Plus from '@strapi/icons/Plus';
 import Trash from '@strapi/icons/Trash';
@@ -20,7 +21,6 @@ import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { Main } from '@strapi/design-system/Main';
 import { Table, Tbody, TFooter, Thead, Th, Tr } from '@strapi/design-system/Table';
 import { Typography } from '@strapi/design-system/Typography';
-import { get } from 'lodash';
 import matchSorter from 'match-sorter';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
@@ -63,7 +63,7 @@ const useSortedRoles = () => {
 
 const useRoleActions = ({ getData, canCreate, canDelete, canUpdate }) => {
   const { formatMessage } = useIntl();
-
+  const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
   const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpenend] = useState(false);
   const { push } = useHistory();
@@ -90,20 +90,10 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate }) => {
         type: 'RESET_DATA_TO_DELETE',
       });
     } catch (err) {
-      const errorIds = get(err, ['response', 'payload', 'data', 'ids'], null);
-
-      if (errorIds && Array.isArray(errorIds)) {
-        const errorsMsg = errorIds.join('\n');
-        toggleNotification({
-          type: 'warning',
-          message: errorsMsg,
-        });
-      } else {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error' },
-        });
-      }
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(err),
+      });
     }
     handleToggleModal();
   };

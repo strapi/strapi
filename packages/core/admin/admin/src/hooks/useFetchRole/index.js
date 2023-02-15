@@ -1,9 +1,10 @@
 import { useCallback, useReducer, useEffect } from 'react';
-import { request, useNotification } from '@strapi/helper-plugin';
+import { request, useNotification, useAPIErrorHandler } from '@strapi/helper-plugin';
 import reducer, { initialState } from './reducer';
 
 const useFetchRole = (id) => {
   const toggleNotification = useNotification();
+  const { formatAPIError } = useAPIErrorHandler();
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
@@ -34,14 +35,12 @@ const useFetchRole = (id) => {
         permissions,
       });
     } catch (err) {
-      console.error(err);
-
       dispatch({
         type: 'GET_DATA_ERROR',
       });
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error' },
+        message: formatAPIError(err),
       });
     }
   };

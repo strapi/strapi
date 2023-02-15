@@ -14,6 +14,7 @@ import {
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
+  useAPIErrorHandler,
   LoadingIndicatorPage,
   Link,
 } from '@strapi/helper-plugin';
@@ -48,6 +49,7 @@ const EditPage = ({ canUpdate }) => {
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   useFocusWhenNavigate();
+  const { formatAPIError } = useAPIErrorHandler();
 
   const { status, data } = useQuery(['user', id], () => fetchUser(id), {
     retry: false,
@@ -106,7 +108,7 @@ const EditPage = ({ canUpdate }) => {
       actions.setErrors(fieldsErrors);
       toggleNotification({
         type: 'warning',
-        message: get(err, 'response.data.message', 'notification.error'),
+        message: formatAPIError(err),
       });
     }
 

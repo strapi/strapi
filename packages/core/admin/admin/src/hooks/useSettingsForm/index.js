@@ -1,6 +1,11 @@
 import { useEffect, useReducer } from 'react';
-import { request, useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
-import { get, has, omit } from 'lodash';
+import {
+  request,
+  useNotification,
+  useOverlayBlocker,
+  useAPIErrorHandler,
+} from '@strapi/helper-plugin';
+import { get, omit } from 'lodash';
 import { checkFormValidity, formatAPIErrors } from '../../utils';
 import { initialState, reducer } from './reducer';
 import init from './init';
@@ -12,6 +17,7 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
   ] = useReducer(reducer, initialState, () => init(initialState, fieldsToPick));
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
+  const { formatAPIError } = useAPIErrorHandler();
 
   useEffect(() => {
     const getData = async () => {
@@ -24,10 +30,9 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
           fieldsToPick,
         });
       } catch (err) {
-        console.error(err.response);
         toggleNotification({
           type: 'warning',
-          message: { id: 'notification.error' },
+          message: formatAPIError(err),
         });
       }
     };
@@ -35,8 +40,7 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
     if (endPoint) {
       getData();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [endPoint]);
+  }, [endPoint, fieldsToPick, formatAPIError, toggleNotification]);
 
   const handleCancel = () => {
     dispatch({
@@ -103,20 +107,12 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
         });
       } catch (err) {
         const data = get(err, 'response.payload', { data: {} });
-
-        if (has(data, 'data') && typeof data.data === 'string') {
-          toggleNotification({
-            type: 'warning',
-            message: data.data,
-          });
-        } else {
-          toggleNotification({
-            type: 'warning',
-            message: data.message,
-          });
-        }
-
         const apiErrors = formatAPIErrors(data);
+
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(err),
+        });
 
         dispatch({
           type: 'SET_ERRORS',

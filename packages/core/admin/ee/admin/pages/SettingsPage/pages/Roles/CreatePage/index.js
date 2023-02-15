@@ -8,6 +8,7 @@ import {
   request,
   useNotification,
   useOverlayBlocker,
+  useAPIErrorHandler,
   useTracking,
   Link,
 } from '@strapi/helper-plugin';
@@ -51,6 +52,7 @@ const CreatePage = () => {
   const { replace } = useHistory();
   const permissionsRef = useRef();
   const { trackUsage } = useTracking();
+  const { formatAPIError } = useAPIErrorHandler();
   const params = useRouteMatch('/settings/roles/duplicate/:id');
   const id = get(params, 'params.id', null);
   const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout();
@@ -99,11 +101,10 @@ const CreatePage = () => {
         replace(`/settings/roles/${res.data.id}`);
       })
       .catch((err) => {
-        console.error(err);
         setIsSubmiting(false);
         toggleNotification({
           type: 'warning',
-          message: { id: 'notification.error' },
+          message: formatAPIError(err),
         });
       })
       .finally(() => {

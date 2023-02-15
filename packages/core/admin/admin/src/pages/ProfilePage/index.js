@@ -10,6 +10,7 @@ import {
   useOverlayBlocker,
   auth,
   useTracking,
+  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
@@ -69,6 +70,7 @@ const ProfilePage = () => {
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { notifyStatus } = useNotifyAT();
+  const { formatAPIError } = useAPIErrorHandler();
   const { currentTheme, themes: allApplicationThemes, onChangeTheme } = useThemeToggle();
   useFocusWhenNavigate();
 
@@ -81,10 +83,10 @@ const ProfilePage = () => {
         })
       );
     },
-    onError() {
+    onError(error) {
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        message: formatAPIError(error),
       });
     },
   });
@@ -133,7 +135,7 @@ const ProfilePage = () => {
 
           return toggleNotification({
             type: 'warning',
-            message: { id: 'notification.error', defaultMessage: 'An error occured' },
+            message: formatAPIError(error),
           });
         },
       }

@@ -21,6 +21,7 @@ import {
   useNotification,
   useOverlayBlocker,
   useFetchClient,
+  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { useQueryClient, useMutation } from 'react-query';
 import formDataModel from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/ModalForm/utils/formDataModel';
@@ -40,6 +41,7 @@ const ModalForm = ({ queryName, onToggle }) => {
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { post } = useFetchClient();
+  const { formatAPIError } = useAPIErrorHandler();
   const postMutation = useMutation(
     (body) => {
       return post('/admin/users', body);
@@ -56,7 +58,7 @@ const ModalForm = ({ queryName, onToggle }) => {
 
         toggleNotification({
           type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occured' },
+          message: formatAPIError(err),
         });
 
         throw err;

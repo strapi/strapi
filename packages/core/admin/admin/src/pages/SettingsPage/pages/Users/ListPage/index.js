@@ -6,6 +6,7 @@ import {
   useRBAC,
   useNotification,
   useFocusWhenNavigate,
+  useAPIErrorHandler,
   NoPermissions,
 } from '@strapi/helper-plugin';
 import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
@@ -36,6 +37,7 @@ const ListPage = () => {
   const { search } = useLocation();
   useFocusWhenNavigate();
   const { notifyStatus } = useNotifyAT();
+  const { formatAPIError } = useAPIErrorHandler();
   const queryName = ['users', search];
 
   const headers = tableHeaders.map((header) => ({
@@ -68,10 +70,10 @@ const ListPage = () => {
     keepPreviousData: true,
     retry: false,
     staleTime: 1000 * 20,
-    onError() {
+    onError(error) {
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        message: formatAPIError(error),
       });
     },
   });
@@ -84,15 +86,11 @@ const ListPage = () => {
     async onSuccess() {
       await queryClient.invalidateQueries(queryName);
     },
-    onError(err) {
-      if (err?.response?.data?.data) {
-        toggleNotification({ type: 'warning', message: err.response.data.data });
-      } else {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occured' },
-        });
-      }
+    onError(error) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(error),
+      });
     },
   });
 

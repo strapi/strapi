@@ -12,20 +12,25 @@ import {
   useQuery,
   useNotification,
   useTracking,
+  useAPIErrorHandler,
   getYupInnerErrors,
   Link,
 } from '@strapi/helper-plugin';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { Main } from '@strapi/design-system/Main';
-import { Flex } from '@strapi/design-system/Flex';
-import { Button } from '@strapi/design-system/Button';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Checkbox } from '@strapi/design-system/Checkbox';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Typography } from '@strapi/design-system/Typography';
-import EyeStriked from '@strapi/icons/EyeStriked';
-import Eye from '@strapi/icons/Eye';
+
+import {
+  Box,
+  Button,
+  Checkbox,
+  Flex,
+  Grid,
+  GridItem,
+  Main,
+  Stack,
+  TextInput,
+  Typography,
+} from '@strapi/design-system';
+import { Eye, EyeStriked } from '@strapi/icons';
+
 import UnauthenticatedLayout, {
   Column,
   LayoutContent,
@@ -56,6 +61,7 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
   const [userInfo, setUserInfo] = useState({});
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
+  const { formatAPIError } = useAPIErrorHandler();
   const query = useQuery();
   const registrationToken = query.get('registrationToken');
 
@@ -77,7 +83,7 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
 
           toggleNotification({
             type: 'warning',
-            message: errorMessage,
+            message: formatAPIError(err),
           });
 
           // Redirect to the oops page in case of an invalid token
@@ -88,8 +94,7 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
 
       getData();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [registrationToken]);
+  }, [registrationToken, formatAPIError, push, toggleNotification]);
 
   return (
     <UnauthenticatedLayout>

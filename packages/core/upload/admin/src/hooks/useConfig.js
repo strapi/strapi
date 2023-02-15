@@ -1,5 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { useNotification, useTracking, useFetchClient } from '@strapi/helper-plugin';
+import {
+  useNotification,
+  useTracking,
+  useFetchClient,
+  useAPIErrorHandler,
+} from '@strapi/helper-plugin';
 
 import pluginId from '../pluginId';
 
@@ -11,6 +16,7 @@ export const useConfig = () => {
   const { trackUsage } = useTracking();
   const toggleNotification = useNotification();
   const { get, put } = useFetchClient();
+  const { formatAPIError } = useAPIErrorHandler();
 
   const config = useQuery(
     queryKey,
@@ -20,10 +26,10 @@ export const useConfig = () => {
       return res.data.data;
     },
     {
-      onError() {
+      onError(error) {
         return toggleNotification({
           type: 'warning',
-          message: { id: 'notification.error' },
+          message: formatAPIError(error),
         });
       },
     }
@@ -34,10 +40,10 @@ export const useConfig = () => {
       trackUsage('didEditMediaLibraryConfig');
       queryClient.refetchQueries(queryKey, { active: true });
     },
-    onError() {
+    onError(error) {
       return toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error' },
+        message: formatAPIError(error),
       });
     },
   });

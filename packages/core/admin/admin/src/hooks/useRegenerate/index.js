@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { get } from 'lodash';
-import { useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { useFetchClient, useNotification, useAPIErrorHandler } from '@strapi/helper-plugin';
 
 const useRegenerate = (id, onRegenerate) => {
   const [isLoadingConfirmation, setIsLoadingConfirmation] = useState(false);
   const toggleNotification = useNotification();
   const { post } = useFetchClient();
+  const { formatAPIError } = useAPIErrorHandler();
 
   const regenerateData = async () => {
     try {
@@ -20,7 +20,7 @@ const useRegenerate = (id, onRegenerate) => {
       setIsLoadingConfirmation(false);
       toggleNotification({
         type: 'warning',
-        message: get(error, 'response.data.message', 'notification.error'),
+        message: formatAPIError(error),
       });
     }
   };

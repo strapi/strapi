@@ -1,5 +1,5 @@
 import { useReducer, useEffect } from 'react';
-import { request, useNotification } from '@strapi/helper-plugin';
+import { request, useNotification, useAPIErrorHandler } from '@strapi/helper-plugin';
 
 import { getRequestUrl } from '../../../../admin/src/utils';
 import reducer, { initialState } from './reducer';
@@ -7,6 +7,7 @@ import reducer, { initialState } from './reducer';
 const useAuthProviders = ({ ssoEnabled }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const toggleNotification = useNotification();
+  const { formatAPIError } = useAPIErrorHandler();
 
   useEffect(() => {
     fetchAuthProviders();
@@ -25,6 +26,7 @@ const useAuthProviders = ({ ssoEnabled }) => {
       }
 
       const requestUrl = getRequestUrl('providers');
+      // TODO: Replace with useFetchClient()
       const data = await request(requestUrl, { method: 'GET' });
 
       dispatch({
@@ -32,15 +34,13 @@ const useAuthProviders = ({ ssoEnabled }) => {
         data,
       });
     } catch (err) {
-      console.error(err);
-
       dispatch({
         type: 'GET_DATA_ERROR',
       });
 
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error' },
+        message: formatAPIError(err),
       });
     }
   };

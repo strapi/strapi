@@ -11,6 +11,7 @@ import {
   useRBACProvider,
   useGuidedTour,
   useFetchClient,
+  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useLocation, useRouteMatch, Redirect } from 'react-router-dom';
@@ -67,7 +68,7 @@ const DataManagerProvider = ({
   const toggleNotification = useNotification();
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
   const { setCurrentStep } = useGuidedTour();
-
+  const { formatAPIError } = useAPIErrorHandler();
   const { getPlugin } = useStrapiApp();
 
   const { apis } = getPlugin(pluginId);
@@ -125,10 +126,9 @@ const DataManagerProvider = ({
         reservedNames,
       });
     } catch (err) {
-      console.error({ err });
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error' },
+        message: formatAPIError(err),
       });
     }
   };
@@ -278,10 +278,9 @@ const DataManagerProvider = ({
         await updatePermissions();
       }
     } catch (err) {
-      console.error({ err });
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error' },
+        message: formatAPIError(err),
       });
     } finally {
       unlockAppWithAutoreload();
@@ -329,10 +328,9 @@ const DataManagerProvider = ({
         await updatePermissions();
       }
     } catch (err) {
-      console.error({ err });
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error' },
+        message: formatAPIError(err),
       });
     } finally {
       unlockAppWithAutoreload();
@@ -360,10 +358,9 @@ const DataManagerProvider = ({
 
       await updatePermissions();
     } catch (err) {
-      console.error({ err });
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error' },
+        message: formatAPIError(err),
       });
     } finally {
       unlockAppWithAutoreload();
@@ -547,10 +544,9 @@ const DataManagerProvider = ({
         trackUsage('didNotSaveComponent');
       }
 
-      console.error({ err: err.response });
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error' },
+        message: formatAPIError(err),
       });
     } finally {
       unlockAppWithAutoreload();

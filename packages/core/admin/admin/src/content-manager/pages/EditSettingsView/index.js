@@ -9,7 +9,13 @@ import flatMap from 'lodash/flatMap';
 import isEqual from 'lodash/isEqual';
 import get from 'lodash/get';
 import set from 'lodash/set';
-import { useNotification, useTracking, ConfirmDialog, Link } from '@strapi/helper-plugin';
+import {
+  useNotification,
+  useTracking,
+  useAPIErrorHandler,
+  ConfirmDialog,
+  Link,
+} from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { Main } from '@strapi/design-system/Main';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
@@ -22,6 +28,7 @@ import { Stack } from '@strapi/design-system/Stack';
 import { Divider } from '@strapi/design-system/Divider';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Check from '@strapi/icons/Check';
+
 import { getTrad } from '../../utils';
 import reducer, { initialState } from './reducer';
 import init from './init';
@@ -43,6 +50,8 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const { componentLayouts, initialData, modifiedData, metaToEdit, metaForm } = reducerState;
   const { formatMessage } = useIntl();
+  const { formatAPIError } = useAPIErrorHandler();
+
   const modelName = get(mainLayout, ['info', 'displayName'], '');
   const attributes = get(modifiedData, ['attributes'], {});
 
@@ -131,8 +140,8 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
         toggleConfirmDialog();
         trackUsage('didEditEditSettings');
       },
-      onError() {
-        toggleNotification({ type: 'warning', message: { id: 'notification.error' } });
+      onError(error) {
+        toggleNotification({ type: 'warning', message: formatAPIError(error) });
       },
     }
   );

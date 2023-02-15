@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { request, useNotification } from '@strapi/helper-plugin';
+import { request, useNotification, useAPIErrorHandler } from '@strapi/helper-plugin';
 import { useDispatch } from 'react-redux';
 import get from 'lodash/get';
 import { getTrad } from '../../utils';
@@ -27,6 +27,7 @@ const useAddLocale = () => {
   const [isLoading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
+  const { formatAPIError } = useAPIErrorHandler();
 
   const persistLocale = async (locale) => {
     setLoading(true);
@@ -45,7 +46,7 @@ const useAddLocale = () => {
       } else {
         toggleNotification({
           type: 'warning',
-          message: { id: 'notification.error' },
+          message: formatAPIError(e),
         });
       }
 
