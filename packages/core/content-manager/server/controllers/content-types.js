@@ -2,7 +2,7 @@
 
 const { has, assoc, mapValues, prop } = require('lodash/fp');
 const { getService } = require('../utils');
-const { createModelConfigurationSchema, validateKind } = require('./validation');
+const { validateModelConfiguration, validateKind } = require('./validation');
 
 const hasEditMainField = has('edit.mainField');
 const getEditMainField = prop('edit.mainField');
@@ -89,19 +89,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    let input;
-    try {
-      input = await createModelConfigurationSchema(contentType).validate(body, {
-        abortEarly: false,
-        stripUnknown: true,
-        strict: true,
-      });
-    } catch (error) {
-      return ctx.badRequest(null, {
-        name: 'validationError',
-        errors: error.errors,
-      });
-    }
+    const input = await validateModelConfiguration(contentType, body, { stripUnknown: true });
 
     const newConfiguration = await contentTypeService.updateConfiguration(contentType, input);
 

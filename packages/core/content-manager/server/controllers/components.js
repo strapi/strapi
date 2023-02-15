@@ -1,7 +1,7 @@
 'use strict';
 
 const { getService } = require('../utils');
-const { createModelConfigurationSchema } = require('./validation');
+const { validateModelConfiguration } = require('./validation');
 
 module.exports = {
   findComponents(ctx) {
@@ -45,19 +45,7 @@ module.exports = {
       return ctx.notFound('component.notFound');
     }
 
-    let input;
-    try {
-      input = await createModelConfigurationSchema(component).validate(body, {
-        abortEarly: false,
-        stripUnknown: true,
-        strict: true,
-      });
-    } catch (error) {
-      return ctx.badRequest(null, {
-        name: 'validationError',
-        errors: error.errors,
-      });
-    }
+    const input = await validateModelConfiguration(component, body, { stripUnknown: true });
 
     const newConfiguration = await componentService.updateConfiguration(component, input);
 

@@ -61,8 +61,15 @@ const validatePagination = ({ page, pageSize }) => {
   }
 };
 
+const validateModelConfiguration = (modelConfiguration, body, opts = {}) => {
+  const schema = createModelConfigurationSchema(modelConfiguration, opts);
+  const validate = validateYupSchema(schema);
+  return validate(body);
+};
+
 module.exports = {
   createModelConfigurationSchema,
+  validateModelConfiguration,
   validateKind: validateYupSchema(kindSchema),
   validateBulkDeleteInput: validateYupSchema(bulkDeleteInputSchema),
   validateGenerateUIDInput: validateYupSchema(generateUIDInputSchema),
