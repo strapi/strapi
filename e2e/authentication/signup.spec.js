@@ -25,7 +25,7 @@ export const fillValidSignUpForm = async ({ page }) => {
 
 test.describe('Sign Up', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath({ filePath: './e2e/data/without-admin.tar' });
+    await resetDatabaseAndImportDataFromPath('./e2e/data/without-admin.tar');
     await page.goto('/admin');
     await fillValidSignUpForm({ page });
   });

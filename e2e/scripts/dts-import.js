@@ -17,7 +17,7 @@ const {
  * see: https://docs.strapi.io/developer-docs/latest/developer-resources/data-management.html
  * @param {String} filePath the path to a DTS backup
  */
-export const resetDatabaseAndImportDataFromPath = async ({ filePath }) => {
+export const resetDatabaseAndImportDataFromPath = async (filePath) => {
   const source = createSourceProvider(filePath);
   const destination = createDestinationProvider();
 

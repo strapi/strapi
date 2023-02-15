@@ -21,10 +21,6 @@ So to solve this, you could use custom API endpoints of the application and whil
 
 The full documentation of the feature can be seen [here](https://docs.strapi.io/developer-docs/latest/developer-resources/data-management.html). Below are a couple of scenarios you might find yourself.
 
-:::warning
-Admin users and API tokens are not exported. Therefore, restored data does not include the users table, which means that createdBy and updatedBy are empty in a restored instance.
-:::
-
 ### Creating a data packet
 
 Because we're using an Strapi template for the test instance, it makes the most sense to add/edit the dataset in said templated instance. Begin by creating the instance:
@@ -49,21 +45,38 @@ If you change any of the content schemas (including adding new ones) be sure to 
 
 ### Exporting a data packet
 
-Once you've created your new data from the test instance, you'll need to export it:
+Once you've created your new data from the test instance, you'll need to export
+it. Data can be exported using the DTS CLI. e.g.
 
 ```shell
 yarn strapi export --file backup --no-encrypt --no-compress
 ```
 
-Once this has been done, replace the existing `backup.tar` in `/e2e/data` so the helper functions can import it correctly.
+This may be sufficient in some cases. However, by default the strapi CLI does
+not export admin users or API tokens. There may be cases where we need this data
+in our backups (e.g. a backup that contains admin users for testing login). For
+this purpose we have the script `/e2e/scripts/dts-export.js`
+
+The script accepts the backup filename as a parameter. Run it from the directory
+of your strapi application to create a backup. e.g.
+
+```shell
+node PATH_TO_SCRIPT/dts-export.js backup-with-admin-user
+```
+
+Once this has been done, add the `.tar` backup to `/e2e/data` so the helper
+functions can import it correctly.
+
+As our suite of e2e tests grows we may hold more DTS backups in order to restore
+the Strapi application to a desired state prior to testing.
 
 ### Importing in test scenarios
 
-There's an abstraction for importing the data programtically during tests named `resetDatabaseAndImportDataFromPath` found in `e2e/scripts/data-transfer.js`. Typically, you'll want to run this **before** each test:
+There's an abstraction for importing the data programtically during tests named `resetDatabaseAndImportDataFromPath` found in `e2e/scripts/dts-import.js`. Typically, you'll want to run this **before** each test:
 
 ```ts {2,5-8}
 import { test } from '@playwright/test';
-import { resetDatabaseAndImportDataFromPath } from './scripts/data-transfer';
+import { resetDatabaseAndImportDataFromPath } from './scripts/dts-import';
 
 test.describe('Strapi Application', () => {
   test.beforeEach(async ({ page }) => {
