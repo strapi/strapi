@@ -26,10 +26,9 @@ Database: ${app.config.database.connection.client}`;
     debugInfo += `\nUUID: ${app.config.uuid}`;
   }
   if (dependencies) {
-    debugInfo += `\nDependencies: ${JSON.stringify(app.config.info.dependencies, null, 2)}`;
-  }
-  if (dependencies) {
-    debugInfo += `\nDev Dependencies: ${JSON.stringify(app.config.info.devDependencies, null, 2)}`;
+    debugInfo += `
+Dependencies: ${JSON.stringify(app.config.info.dependencies, null, 2)}
+Dev Dependencies: ${JSON.stringify(app.config.info.devDependencies, null, 2)}`;
   }
   debugInfo += '\n';
   console.log(debugInfo);
