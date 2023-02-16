@@ -3,7 +3,6 @@
 const { curry } = require('lodash/fp');
 
 const traverseEntity = require('../traverse-entity');
-
 const { removePassword, removePrivate } = require('./visitors');
 
 const sanitizePasswords = curry((schema, entity) => {
@@ -15,13 +14,12 @@ const sanitizePrivates = curry((schema, entity) => {
 });
 
 const defaultSanitizeOutput = curry((schema, entity) => {
-  const defaultSanitize = async (entity) => {
+  const defaultSanitize = (schema, entity) => {
     removePassword(schema, entity);
     removePrivate(schema, entity);
-    return entity;
   };
 
-  return defaultSanitize(entity);
+  return traverseEntity(defaultSanitize, { schema }, entity);
 });
 
 module.exports = {
