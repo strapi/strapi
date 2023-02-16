@@ -48,10 +48,6 @@ const ApplicationInfosPage = () => {
 
   const { data } = useQuery('project-settings', fetchProjectSettings, { enabled: canRead });
 
-  const currentPlan = appInfos.communityEdition
-    ? 'app.components.UpgradePlanModal.text-ce'
-    : 'app.components.UpgradePlanModal.text-ee';
-
   const submitMutation = useMutation((body) => postProjectSettings(body), {
     async onSuccess({ menuLogo, authLogo }) {
       await queryClient.invalidateQueries('project-settings', { refetchActive: true });
@@ -168,13 +164,14 @@ const ApplicationInfosPage = () => {
                     </Typography>
                     <Flex gap={3} direction="column" alignItems="start" as="dd">
                       <Typography>
-                        {' '}
-                        {formatMessage({
-                          id: currentPlan,
-                          defaultMessage: `${
-                            appInfos.communityEdition ? 'Community Edition' : 'Enterprise Edition'
-                          }`,
-                        })}
+                        {formatMessage(
+                          {
+                            id: 'Settings.application.ee-or-ce',
+                            defaultMessage:
+                              '{communityEdition, select, true {Community Edition} other {Enterprise Edition}}',
+                          },
+                          { communityEdition: appInfos.communityEdition }
+                        )}
                       </Typography>
                       <Link
                         href="https://strapi.io/pricing-self-hosted"
