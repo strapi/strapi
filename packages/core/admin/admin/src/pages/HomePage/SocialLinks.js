@@ -63,43 +63,46 @@ const StyledDiscourse = styled(Discourse)`
 
 const socialLinks = [
   {
-    name: 'Github',
+    name: { id: 'app.components.HomePage.community.links.github', defaultMessage: 'Github' },
     link: 'https://github.com/strapi/strapi/',
     icon: <Github fill="#7289DA" />,
     alt: 'github',
   },
   {
-    name: 'Discord',
+    name: { id: 'app.components.HomePage.community.links.discord', defaultMessage: 'Discord' },
     link: 'https://discord.strapi.io/',
     icon: <StyledDiscord />,
     alt: 'discord',
   },
   {
-    name: 'Reddit',
+    name: { id: 'app.components.HomePage.community.links.reddit', defaultMessage: 'Reddit' },
     link: 'https://www.reddit.com/r/Strapi/',
     icon: <StyledReddit />,
     alt: 'reddit',
   },
   {
-    name: 'Twitter',
+    name: { id: 'app.components.HomePage.community.links.twitter', defaultMessage: 'Twitter' },
     link: 'https://twitter.com/strapijs',
     icon: <StyledTwitter />,
     alt: 'twitter',
   },
   {
-    name: 'Forum',
+    name: { id: 'app.components.HomePage.community.links.forum', defaultMessage: 'Forum' },
     link: 'https://forum.strapi.io',
     icon: <StyledDiscourse />,
     alt: 'forum',
   },
   {
-    name: 'Blog',
+    name: { id: 'app.components.HomePage.community.links.blog', defaultMessage: 'Blog' },
     link: 'https://strapi.io/blog?utm_source=referral&utm_medium=admin&utm_campaign=career%20page',
     icon: <StyledStrapi />,
     alt: 'blog',
   },
   {
-    name: 'We are hiring!',
+    name: {
+      id: 'app.components.HomePage.community.links.career',
+      defaultMessage: 'We are hiring!',
+    },
     link: 'https://strapi.io/careers?utm_source=referral&utm_medium=admin&utm_campaign=blog',
     icon: <StyledStrapi />,
     alt: 'career',
@@ -186,7 +189,7 @@ const SocialLinks = () => {
           return (
             <GridItem col={6} s={12} key={name}>
               <LinkCustom size="L" startIcon={icon} variant="tertiary" href={link} isExternal>
-                {typeof name === 'string' ? name : formatMessage(name)}
+                {formatMessage(name)}
               </LinkCustom>
             </GridItem>
           );
