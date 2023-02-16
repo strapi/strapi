@@ -60,6 +60,7 @@ module.exports = {
       '@swc/jest',
       {
         env: {
+          coreJs: '3.28.0',
           mode: 'usage',
         },
 
@@ -68,6 +69,8 @@ module.exports = {
             jsx: true,
             dynamicImport: true,
           },
+          // this should match the minimum supported node.js version
+          target: 'es2020',
         },
       },
     ],
