@@ -263,9 +263,9 @@ program
 program
   .command('debug')
   .description('Get system stats for debugging and submitting issues')
-  .option('--open', 'Create a new issue with the debug information')
-  .option('--uuid', 'Include Project UUID')
-  .option('--dependencies', 'Include Project Dependencies')
+  .option('-o, --open', 'Create a new issue with the debug information')
+  .option('-u, --uuid', 'Include Project UUID')
+  .option('-d, --dependencies', 'Include Project Dependencies')
   .option('--verbose', 'Include All Information')
   .action(getLocalScript('debug'));
 
