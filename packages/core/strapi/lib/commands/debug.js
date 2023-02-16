@@ -42,9 +42,9 @@ Dev Dependencies: ${JSON.stringify(app.config.info.devDependencies, null, 2)}`;
       console.error(e);
       return app.destroy();
     });
-
+  // removes the header from the template
   githubIssueTemplate = githubIssueTemplate.replace(/---[\s\S]*?---/, '');
-
+  // replaces the debug info placeholder with the actual debug info
   const template = githubIssueTemplate.replace(
     /### Required System information[\s\S]*?### Describe the bug/g,
     `### Required System information\n${debugInfo}\n### Describe the bug`
