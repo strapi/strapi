@@ -261,6 +261,15 @@ program
   .action(getLocalScript('opt-in-telemetry'));
 
 program
+  .command('debug')
+  .description('Get system stats for debugging and submitting issues')
+  .option('--open', 'Create a new issue with the debug information')
+  .option('--uuid', 'Include Project UUID')
+  .option('--dependencies', 'Include Project Dependencies')
+  .option('--verbose', 'Include All Information')
+  .action(getLocalScript('debug'));
+
+program
   .command('ts:generate-types')
   .description(`Generate TypeScript typings for your schemas`)
   .option(
