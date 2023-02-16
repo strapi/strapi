@@ -1,6 +1,6 @@
 import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { BaseCheckbox, Box, Stack, Typography } from '@strapi/design-system';
+import { BaseCheckbox, Box, Flex, Typography } from '@strapi/design-system';
 import styled from 'styled-components';
 import get from 'lodash/get';
 import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/GlobalActions/utils/constants';
@@ -9,9 +9,7 @@ import { usePermissionsDataManager } from '../../../../../../../hooks';
 import { cellWidth, firstRowWidth } from '../Permissions/utils/constants';
 import { findDisplayedActions, getCheckboxesState } from './utils';
 
-const CenteredStack = styled(Stack)`
-  align-items: center;
-  justify-content: center;
+const CenteredStack = styled(Flex)`
   width: ${cellWidth};
   flex-shrink: 0;
 `;
@@ -30,7 +28,7 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
 
   return (
     <Box paddingBottom={4} paddingTop={6} style={{ paddingLeft: firstRowWidth }}>
-      <Stack horizontal spacing={0}>
+      <Flex alignItems="center" justifyContent="center" gap={0}>
         {displayedActions.map(({ label, actionId }) => {
           return (
             <CenteredStack key={actionId} spacing={3}>
@@ -64,7 +62,7 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
             </CenteredStack>
           );
         })}
-      </Stack>
+      </Flex>
     </Box>
   );
 };

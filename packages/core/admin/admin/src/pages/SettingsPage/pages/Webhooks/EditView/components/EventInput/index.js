@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FieldLabel, Stack, Typography } from '@strapi/design-system';
+import { FieldLabel, Flex, Typography } from '@strapi/design-system';
 import { useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -97,7 +97,7 @@ const EventInput = ({ isDraftAndPublish }) => {
   };
 
   return (
-    <Stack spacing={1}>
+    <Flex direction="column" alignItems="stretch" gap={1}>
       <FieldLabel>
         {formatMessage({
           id: 'Settings.webhooks.form.events',
@@ -152,7 +152,7 @@ const EventInput = ({ isDraftAndPublish }) => {
           })}
         </tbody>
       </StyledTable>
-    </Stack>
+    </Flex>
   );
 };
 

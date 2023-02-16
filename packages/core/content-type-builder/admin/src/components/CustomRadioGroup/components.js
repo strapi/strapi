@@ -1,7 +1,7 @@
 import styled from 'styled-components';
-import { Stack, Typography, inputFocusStyle } from '@strapi/design-system';
+import { Flex, Typography, inputFocusStyle } from '@strapi/design-system';
 
-const Wrapper = styled(Stack)`
+const Wrapper = styled(Flex)`
   position: relative;
   align-items: stretch;
 

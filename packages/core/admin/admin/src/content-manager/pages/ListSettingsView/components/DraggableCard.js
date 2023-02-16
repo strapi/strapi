@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
-import { Flex, Box, Typography, Stack } from '@strapi/design-system';
+import { Flex, Box, Typography } from '@strapi/design-system';
 import { Pencil, Cross, Drag } from '@strapi/icons';
 import CardPreview from './CardPreview';
 import ellipsisCardTitle from '../utils/ellipsisCardTitle';
@@ -188,7 +188,7 @@ const DraggableCard = ({
           onClick={handleClickEditRow}
           isDragging={isDragging}
         >
-          <Stack horizontal spacing={3}>
+          <Flex gap={3}>
             <DragButton
               as="span"
               aria-label={formatMessage(
@@ -205,7 +205,7 @@ const DraggableCard = ({
               <Drag />
             </DragButton>
             <Typography fontWeight="bold">{cardEllipsisTitle}</Typography>
-          </Stack>
+          </Flex>
           <Flex paddingLeft={3}>
             <ActionButton
               ref={editButtonRef}

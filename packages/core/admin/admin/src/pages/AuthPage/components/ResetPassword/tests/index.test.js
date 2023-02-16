@@ -144,6 +144,21 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+        gap: 24px;
+      }
+
+      .c19 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
       }
 
       .c23 {
@@ -180,15 +195,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         -webkit-justify-content: center;
         -ms-flex-pack: center;
         justify-content: center;
-      }
-
-      .c19 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c19 > * + * {
-        margin-top: 24px;
       }
 
       .c20 > * {
@@ -673,12 +679,12 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                   </div>
                 </div>
                 <div
-                  class="c0 c18 c19"
+                  class="c0 c18"
                 >
                   <div>
                     <div>
                       <div
-                        class="c0 c18 c20"
+                        class="c0 c19 c20"
                       >
                         <label
                           class="c5 c6"
@@ -744,7 +750,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                   <div>
                     <div>
                       <div
-                        class="c0 c18 c20"
+                        class="c0 c19 c20"
                       >
                         <label
                           class="c5 c6"

@@ -193,13 +193,19 @@ describe('Admin | containers | ListView', () => {
         flex-direction: row;
       }
 
-      .c39 > * {
-        margin-left: 0;
-        margin-right: 0;
-      }
-
-      .c39 > * + * {
-        margin-left: 4px;
+      .c39 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        gap: 4px;
       }
 
       .c40 {
@@ -996,7 +1002,7 @@ describe('Admin | containers | ListView', () => {
                           >
                             <div
                               aria-hidden="true"
-                              class="c6 c39"
+                              class="c39"
                               role="button"
                             >
                               <span>
@@ -1159,7 +1165,7 @@ describe('Admin | containers | ListView', () => {
                           >
                             <div
                               aria-hidden="true"
-                              class="c6 c39"
+                              class="c39"
                               role="button"
                             >
                               <span>
