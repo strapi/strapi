@@ -1,12 +1,8 @@
 import React from 'react';
 import { useGuidedTour, useTracking, LinkButton } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { Stack } from '@strapi/design-system/Stack';
-import { Flex } from '@strapi/design-system/Flex';
-import { Box } from '@strapi/design-system/Box';
-import { Typography } from '@strapi/design-system/Typography';
-import { Button } from '@strapi/design-system/Button';
-import ArrowRight from '@strapi/icons/ArrowRight';
+import { Stack, Flex, Box, Typography, Button } from '@strapi/design-system';
+import { ArrowRight } from '@strapi/icons';
 import StepperHomepage from './components/Stepper';
 import layout from '../layout';
 

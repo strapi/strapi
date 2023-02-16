@@ -9,13 +9,16 @@ import isEmpty from 'lodash/isEmpty';
 import { stringify } from 'qs';
 import { useNotification, useTracking, ConfirmDialog, Link } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/design-system/Box';
-import { Divider } from '@strapi/design-system/Divider';
-import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { Button } from '@strapi/design-system/Button';
-import Check from '@strapi/icons/Check';
-import ArrowLeft from '@strapi/icons/ArrowLeft';
+import {
+  Box,
+  Divider,
+  Layout,
+  HeaderLayout,
+  ContentLayout,
+  Main,
+  Button,
+} from '@strapi/design-system';
+import { Check, ArrowLeft } from '@strapi/icons';
 import { checkIfAttributeIsDisplayable, getTrad } from '../../utils';
 import ModelsContext from '../../contexts/ModelsContext';
 import { usePluginsQueryParams } from '../../hooks';

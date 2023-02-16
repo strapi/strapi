@@ -22,10 +22,9 @@ import {
   TimePicker,
   ToggleInput,
   JSONInput,
+  Option,
 } from '@strapi/design-system';
-import { Option } from '@strapi/design-system/Select';
-import EyeStriked from '@strapi/icons/EyeStriked';
-import Eye from '@strapi/icons/Eye';
+import { EyeStriked, Eye } from '@strapi/icons';
 
 import NotSupported from './NotSupported';
 import useFieldHint from '../../hooks/useFieldHint';

@@ -1,9 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Box } from '@strapi/design-system/Box';
-import { Select, Option } from '@strapi/design-system/Select';
+import { Grid, GridItem, Box, Select, Option } from '@strapi/design-system';
 import getTrad from '../../../../utils/getTrad';
 import { pageSizes, sortOptions } from '../../../../constants';
 

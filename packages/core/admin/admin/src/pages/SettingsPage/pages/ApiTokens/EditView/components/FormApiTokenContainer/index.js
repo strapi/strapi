@@ -2,13 +2,17 @@ import React from 'react';
 import { useIntl } from 'react-intl';
 import { usePersistentState } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Select, Option } from '@strapi/design-system/Select';
-import { Stack } from '@strapi/design-system/Stack';
-import { Textarea } from '@strapi/design-system/Textarea';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Typography } from '@strapi/design-system/Typography';
+import {
+  Box,
+  Grid,
+  GridItem,
+  Select,
+  Option,
+  Stack,
+  Textarea,
+  TextInput,
+  Typography,
+} from '@strapi/design-system';
 import { getDateOfExpiration } from '../../utils';
 
 const FormApiTokenContainer = ({

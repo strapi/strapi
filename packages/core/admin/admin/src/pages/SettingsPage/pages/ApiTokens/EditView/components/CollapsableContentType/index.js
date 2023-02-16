@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { capitalize } from 'lodash';
-import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
-import { Checkbox } from '@strapi/design-system/Checkbox';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Typography } from '@strapi/design-system/Typography';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import CogIcon from '@strapi/icons/Cog';
+import {
+  Accordion,
+  AccordionToggle,
+  AccordionContent,
+  Checkbox,
+  Grid,
+  GridItem,
+  Typography,
+  Box,
+  Flex,
+} from '@strapi/design-system';
+import { Cog } from '@strapi/icons';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useApiTokenPermissionsContext } from '../../../../../../../contexts/ApiTokenPermissions';
@@ -115,7 +120,7 @@ const CollapsableContentType = ({
                             }
                             style={{ display: 'inline-flex', alignItems: 'center' }}
                           >
-                            <CogIcon />
+                            <Cog />
                           </button>
                         </CheckboxWrapper>
                       </GridItem>

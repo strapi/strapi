@@ -8,6 +8,7 @@ import uniqBy from 'lodash/uniqBy';
 import merge from 'lodash/merge';
 import castArray from 'lodash/castArray';
 import isNil from 'lodash/isNil';
+import { generateNKeysBetween } from 'fractional-indexing';
 
 import {
   findLeafByPathAndReplace,
@@ -155,17 +156,33 @@ const reducer = (state, action) =>
         const initialDataRelations = get(state, initialDataPath);
         const modifiedDataRelations = get(state, modifiedDataPath);
 
-        /**
-         * Check if the values we're loading are already in initial
-         * data if they are then we don't need to load them at all
-         */
         const valuesToLoad = value.filter((relation) => {
           return !initialDataRelations.some((initialDataRelation) => {
             return initialDataRelation.id === relation.id;
           });
         });
 
-        set(draftState, initialDataPath, uniqBy([...valuesToLoad, ...initialDataRelations], 'id'));
+        const keys = generateNKeysBetween(
+          null,
+          modifiedDataRelations[0]?.__temp_key__,
+          valuesToLoad.length
+        );
+
+        /**
+         * Check if the values we're loading are already in initial
+         * data if they are then we don't need to load them at all
+         */
+
+        const valuesWithKeys = valuesToLoad.map((relation, index) => ({
+          ...relation,
+          __temp_key__: keys[index],
+        }));
+
+        set(
+          draftState,
+          initialDataPath,
+          uniqBy([...valuesWithKeys, ...initialDataRelations], 'id')
+        );
 
         /**
          * We need to set the value also on modifiedData, because initialData
@@ -175,7 +192,7 @@ const reducer = (state, action) =>
         set(
           draftState,
           modifiedDataPath,
-          uniqBy([...valuesToLoad, ...modifiedDataRelations], 'id')
+          uniqBy([...valuesWithKeys, ...modifiedDataRelations], 'id')
         );
 
         break;
@@ -192,7 +209,9 @@ const reducer = (state, action) =>
           set(draftState, path, [value]);
         } else {
           const modifiedDataRelations = get(state, path);
-          const newRelations = [...modifiedDataRelations, value];
+          const [key] = generateNKeysBetween(modifiedDataRelations.at(-1)?.__temp_key__, null, 1);
+
+          const newRelations = [...modifiedDataRelations, { ...value, __temp_key__: key }];
           set(draftState, path, newRelations);
         }
 
@@ -219,8 +238,19 @@ const reducer = (state, action) =>
 
         const newRelations = [...modifiedDataRelations];
 
-        newRelations.splice(oldIndex, 1);
-        newRelations.splice(newIndex, 0, currentItem);
+        if (action.type === 'REORDER_RELATION') {
+          const [newKey] = generateNKeysBetween(
+            modifiedDataRelations[newIndex - 1]?.__temp_key__,
+            modifiedDataRelations[newIndex]?.__temp_key__,
+            1
+          );
+
+          newRelations.splice(oldIndex, 1);
+          newRelations.splice(newIndex, 0, { ...currentItem, __temp_key__: newKey });
+        } else {
+          newRelations.splice(oldIndex, 1);
+          newRelations.splice(newIndex, 0, currentItem);
+        }
 
         set(draftState, path, newRelations);
 

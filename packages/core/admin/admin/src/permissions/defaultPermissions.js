@@ -21,17 +21,8 @@ const permissions = {
     ],
   },
   marketplace: {
-    main: [
-      { action: 'admin::marketplace.read', subject: null },
-      { action: 'admin::marketplace.plugins.install', subject: null },
-      { action: 'admin::marketplace.plugins.uninstall', subject: null },
-    ],
-    install: [{ action: 'admin::marketplace.plugins.install', subject: null }],
-    read: [
-      { action: 'admin::marketplace.read', subject: null },
-      { action: 'admin::marketplace.plugins.uninstall', subject: null },
-    ],
-    uninstall: [{ action: 'admin::marketplace.plugins.uninstall', subject: null }],
+    main: [{ action: 'admin::marketplace.read', subject: null }],
+    read: [{ action: 'admin::marketplace.read', subject: null }],
   },
   settings: {
     roles: {
