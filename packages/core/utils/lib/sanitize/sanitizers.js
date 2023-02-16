@@ -13,13 +13,13 @@ const sanitizePrivates = curry((schema, entity) => {
   return traverseEntity(removePrivate, { schema }, entity);
 });
 
-const defaultSanitizeOutput = curry((schema, entity) => {
-  const defaultSanitize = (schema, entity) => {
-    removePassword(schema, entity);
-    removePrivate(schema, entity);
-  };
+const removePrivateAndPasswords = (ctx, utils) => {
+  removePassword(ctx, utils);
+  removePrivate(ctx, utils);
+};
 
-  return traverseEntity(defaultSanitize, { schema }, entity);
+const defaultSanitizeOutput = curry((schema, entity) => {
+  return traverseEntity(removePrivateAndPasswords, { schema }, entity);
 });
 
 module.exports = {
