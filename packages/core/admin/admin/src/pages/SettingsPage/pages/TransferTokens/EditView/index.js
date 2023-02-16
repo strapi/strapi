@@ -134,7 +134,7 @@ const TransferTokenCreateView = () => {
       });
 
       trackUsageRef.current(isCreating ? 'didCreateToken' : 'didEditToken', {
-        type: transferToken.type,
+        type: transferToken?.type,
         tokenType: TRANSFER_TOKEN_TYPE,
       });
     } catch (err) {

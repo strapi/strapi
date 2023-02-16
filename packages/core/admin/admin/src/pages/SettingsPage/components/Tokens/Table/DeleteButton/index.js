@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 
 const DeleteButton = ({ tokenName, onClickDelete, tokenType }) => {
   const { formatMessage } = useIntl();
-  const { trackUsage } = useTracking(); // TODO: Track different types of tokens
+  const { trackUsage } = useTracking();
 
   return (
     <Box paddingLeft={1} {...stopPropagation}>
