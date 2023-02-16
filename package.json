@@ -106,7 +106,7 @@
     "stylelint-processor-styled-components": "1.10.0",
     "supertest": "6.3.3",
     "ts-jest": "29.0.3",
-    "typescript": "4.6.2",
+    "typescript": "4.9.5",
     "yargs": "17.6.0"
   },
   "engines": {
