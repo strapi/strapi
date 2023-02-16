@@ -37,7 +37,12 @@ Database: ${app.config.database.connection.client}`;
 
   let githubIssueTemplate = await fetch(
     'https://raw.githubusercontent.com/strapi/strapi/main/.github/ISSUE_TEMPLATE/BUG_REPORT.md'
-  ).then((res) => res.text());
+  )
+    .then((res) => res.text())
+    .catch((e) => {
+      console.error(e);
+      return app.destroy();
+    });
 
   githubIssueTemplate = githubIssueTemplate.replace(/---[\s\S]*?---/, '');
 
