@@ -7,19 +7,9 @@ import React from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { useAppInfos } from '@strapi/helper-plugin';
-import { Typography } from '@strapi/design-system/Typography';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { LinkButton } from '@strapi/design-system/v2/LinkButton';
-import { Link } from '@strapi/design-system/v2/Link';
-import ExternalLink from '@strapi/icons/ExternalLink';
-import Github from '@strapi/icons/Github';
-import Discord from '@strapi/icons/Discord';
-import Reddit from '@strapi/icons/Reddit';
-import Strapi from '@strapi/icons/Strapi';
-import Twitter from '@strapi/icons/Twitter';
-import Discourse from '@strapi/icons/Discourse';
+import { Typography, Box, Stack, Grid, GridItem } from '@strapi/design-system';
+import { Link, LinkButton } from '@strapi/design-system/v2';
+import { ExternalLink, Github, Discord, Reddit, Strapi, Twitter, Discourse } from '@strapi/icons';
 
 const StyledDiscord = styled(Discord)`
   path {

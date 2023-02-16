@@ -1,9 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
-import { Popover } from '@strapi/design-system/Popover';
-import { Stack } from '@strapi/design-system/Stack';
-import { FocusTrap } from '@strapi/design-system/FocusTrap';
+import { Box, Popover, Stack, FocusTrap } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import FilterSelect from './FilterSelect';
 

@@ -19,24 +19,32 @@ import {
   stopPropagation,
   LinkButton,
 } from '@strapi/helper-plugin';
-import { HeaderLayout, Layout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
-import { EmptyStateLayout } from '@strapi/design-system/EmptyStateLayout';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import { IconButton } from '@strapi/design-system/IconButton';
-import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import { Table, Thead, Tr, Th, Tbody, Td, TFooter } from '@strapi/design-system/Table';
-import { Typography } from '@strapi/design-system/Typography';
-import { Button } from '@strapi/design-system/Button';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { Switch } from '@strapi/design-system/Switch';
-import { Main } from '@strapi/design-system/Main';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import { Box } from '@strapi/design-system/Box';
-import Plus from '@strapi/icons/Plus';
-import Pencil from '@strapi/icons/Pencil';
-import Trash from '@strapi/icons/Trash';
-import EmptyDocuments from '@strapi/icons/EmptyDocuments';
+import {
+  HeaderLayout,
+  Layout,
+  ContentLayout,
+  ActionLayout,
+  EmptyStateLayout,
+  Flex,
+  Stack,
+  IconButton,
+  BaseCheckbox,
+  Table,
+  Thead,
+  Tr,
+  Th,
+  Tbody,
+  Td,
+  TFooter,
+  Typography,
+  Button,
+  Switch,
+  Main,
+  useNotifyAT,
+  Box,
+  VisuallyHidden,
+} from '@strapi/design-system';
+import { Plus, Pencil, Trash, EmptyDocuments } from '@strapi/icons';
 import reducer, { initialState } from './reducer';
 import adminPermissions from '../../../../../permissions';
 

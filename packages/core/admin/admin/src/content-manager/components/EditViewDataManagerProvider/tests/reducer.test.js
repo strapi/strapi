@@ -869,7 +869,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         componentsDataStructure: {},
         initialData: {},
         modifiedData: {
-          relation: [{ id: 1 }],
+          relation: [{ id: 1, __temp_key__: 'a0' }],
         },
       };
 
@@ -880,6 +880,74 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       };
 
       expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('should set a temp key every time a relation is connected', () => {
+      const state = {
+        ...initialState,
+
+        initialData: {
+          relation: [
+            { id: 1, __temp_key__: 'a0' },
+            { id: 2, __temp_key__: 'a1' },
+          ],
+        },
+        modifiedData: {
+          relation: [
+            { id: 1, __temp_key__: 'a0' },
+            { id: 2, __temp_key__: 'a1' },
+          ],
+        },
+      };
+
+      const nextState = reducer(state, {
+        type: 'CONNECT_RELATION',
+        keys: ['relation'],
+        value: { id: 3 },
+      });
+
+      expect(nextState).toStrictEqual({
+        ...initialState,
+        componentsDataStructure: {},
+        initialData: {
+          relation: [
+            { id: 1, __temp_key__: 'a0' },
+            { id: 2, __temp_key__: 'a1' },
+          ],
+        },
+        modifiedData: {
+          relation: [
+            { id: 1, __temp_key__: 'a0' },
+            { id: 2, __temp_key__: 'a1' },
+            { id: 3, __temp_key__: 'a2' },
+          ],
+        },
+      });
+
+      expect(
+        reducer(nextState, {
+          type: 'CONNECT_RELATION',
+          keys: ['relation'],
+          value: { id: 4 },
+        })
+      ).toStrictEqual({
+        ...initialState,
+        componentsDataStructure: {},
+        initialData: {
+          relation: [
+            { id: 1, __temp_key__: 'a0' },
+            { id: 2, __temp_key__: 'a1' },
+          ],
+        },
+        modifiedData: {
+          relation: [
+            { id: 1, __temp_key__: 'a0' },
+            { id: 2, __temp_key__: 'a1' },
+            { id: 3, __temp_key__: 'a2' },
+            { id: 4, __temp_key__: 'a3' },
+          ],
+        },
+      });
     });
 
     it('should overwrite existing data, when toOneRelation is set to true', () => {
@@ -953,10 +1021,10 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       expect(nextState).toStrictEqual({
         ...initialState,
         initialData: {
-          relation: [{ id: 1 }],
+          relation: [{ id: 1, __temp_key__: 'a0' }],
         },
         modifiedData: {
-          relation: [{ id: 1 }],
+          relation: [{ id: 1, __temp_key__: 'a0' }],
         },
       });
 
@@ -970,10 +1038,16 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       ).toStrictEqual({
         ...initialState,
         initialData: {
-          relation: [{ id: 2 }, { id: 1 }],
+          relation: [
+            { id: 2, __temp_key__: 'Zz' },
+            { id: 1, __temp_key__: 'a0' },
+          ],
         },
         modifiedData: {
-          relation: [{ id: 2 }, { id: 1 }],
+          relation: [
+            { id: 2, __temp_key__: 'Zz' },
+            { id: 1, __temp_key__: 'a0' },
+          ],
         },
       });
     });
@@ -1002,10 +1076,10 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       expect(nextState).toStrictEqual({
         ...initialState,
         initialData: {
-          relation: [{ id: 1 }],
+          relation: [{ id: 1, __temp_key__: 'a0' }],
         },
         modifiedData: {
-          relation: [{ id: 1 }],
+          relation: [{ id: 1, __temp_key__: 'a0' }],
         },
       });
 
@@ -1019,10 +1093,103 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       ).toStrictEqual({
         ...initialState,
         initialData: {
-          relation: [{ id: 1 }],
+          relation: [{ id: 1, __temp_key__: 'a0' }],
         },
         modifiedData: {
-          relation: [{ id: 1 }],
+          relation: [{ id: 1, __temp_key__: 'a0' }],
+        },
+      });
+    });
+
+    it('should add a temp key for all the relations added', () => {
+      const state = {
+        ...initialState,
+        initialData: {
+          relation: [],
+        },
+        modifiedData: {
+          relation: [],
+        },
+      };
+
+      const initialDataPath = ['initialData', 'relation'];
+      const modifiedDataPath = ['modifiedData', 'relation'];
+
+      let nextState = reducer(state, {
+        type: 'LOAD_RELATION',
+        initialDataPath,
+        modifiedDataPath,
+        value: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }],
+      });
+
+      expect(nextState).toStrictEqual({
+        ...initialState,
+        initialData: {
+          relation: [
+            { id: 1, __temp_key__: 'a0' },
+            { id: 2, __temp_key__: 'a1' },
+            { id: 3, __temp_key__: 'a2' },
+            { id: 4, __temp_key__: 'a3' },
+            { id: 5, __temp_key__: 'a4' },
+          ],
+        },
+        modifiedData: {
+          relation: [
+            { id: 1, __temp_key__: 'a0' },
+            { id: 2, __temp_key__: 'a1' },
+            { id: 3, __temp_key__: 'a2' },
+            { id: 4, __temp_key__: 'a3' },
+            { id: 5, __temp_key__: 'a4' },
+          ],
+        },
+      });
+    });
+
+    it('should add a temp key working backwards on every new load because of how relations are shown in the UI', () => {
+      const state = {
+        ...initialState,
+        initialData: {
+          relation: [],
+        },
+        modifiedData: {
+          relation: [],
+        },
+      };
+
+      const initialDataPath = ['initialData', 'relation'];
+      const modifiedDataPath = ['modifiedData', 'relation'];
+
+      let nextState = reducer(state, {
+        type: 'LOAD_RELATION',
+        initialDataPath,
+        modifiedDataPath,
+        value: [{ id: 1 }, { id: 2 }],
+      });
+
+      expect(
+        reducer(nextState, {
+          type: 'LOAD_RELATION',
+          initialDataPath,
+          modifiedDataPath,
+          value: [{ id: 3 }, { id: 4 }],
+        })
+      ).toStrictEqual({
+        ...initialState,
+        initialData: {
+          relation: [
+            { id: 3, __temp_key__: 'Zy' },
+            { id: 4, __temp_key__: 'Zz' },
+            { id: 1, __temp_key__: 'a0' },
+            { id: 2, __temp_key__: 'a1' },
+          ],
+        },
+        modifiedData: {
+          relation: [
+            { id: 3, __temp_key__: 'Zy' },
+            { id: 4, __temp_key__: 'Zz' },
+            { id: 1, __temp_key__: 'a0' },
+            { id: 2, __temp_key__: 'a1' },
+          ],
         },
       });
     });
@@ -2397,10 +2564,10 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           field1: {
             field2: {
               relation: [
-                { name: 'first' },
-                { name: 'second' },
-                { name: 'third' },
-                { name: 'fourth' },
+                { name: 'first', __temp_key__: 'a0' },
+                { name: 'second', __temp_key__: 'a1' },
+                { name: 'third', __temp_key__: 'a2' },
+                { name: 'fourth', __temp_key__: 'a3' },
               ],
             },
           },
@@ -2421,10 +2588,10 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           field1: {
             field2: {
               relation: [
-                { name: 'first' },
-                { name: 'fourth' },
-                { name: 'second' },
-                { name: 'third' },
+                { name: 'first', __temp_key__: 'a0' },
+                { name: 'fourth', __temp_key__: 'a0V' },
+                { name: 'second', __temp_key__: 'a1' },
+                { name: 'third', __temp_key__: 'a2' },
               ],
             },
           },
@@ -2432,6 +2599,89 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       };
 
       expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('should move many components many times and have the correct temp keys', () => {
+      const state = {
+        ...initialState,
+        modifiedData: {
+          relation: [
+            { name: 'first', __temp_key__: 'a0' },
+            { name: 'second', __temp_key__: 'a1' },
+            { name: 'third', __temp_key__: 'a2' },
+            { name: 'fourth', __temp_key__: 'a3' },
+          ],
+        },
+      };
+
+      const generateAction = (newIndex, oldIndex) => ({
+        type: 'REORDER_RELATION',
+        newIndex,
+        oldIndex,
+        keys: ['relation'],
+      });
+
+      const generateExpected = (relation = []) => ({
+        ...initialState,
+        modifiedData: {
+          relation,
+        },
+      });
+
+      const nextState1 = reducer(state, generateAction(1, 3));
+
+      expect(nextState1).toEqual(
+        generateExpected([
+          { name: 'first', __temp_key__: 'a0' },
+          { name: 'fourth', __temp_key__: 'a0V' },
+          { name: 'second', __temp_key__: 'a1' },
+          { name: 'third', __temp_key__: 'a2' },
+        ])
+      );
+
+      const nextState2 = reducer(nextState1, generateAction(1, 2));
+
+      expect(nextState2).toEqual(
+        generateExpected([
+          { name: 'first', __temp_key__: 'a0' },
+          { name: 'second', __temp_key__: 'a0G' },
+          { name: 'fourth', __temp_key__: 'a0V' },
+          { name: 'third', __temp_key__: 'a2' },
+        ])
+      );
+
+      const nextState3 = reducer(nextState2, generateAction(0, 3));
+
+      expect(nextState3).toEqual(
+        generateExpected([
+          { name: 'third', __temp_key__: 'Zz' },
+          { name: 'first', __temp_key__: 'a0' },
+          { name: 'second', __temp_key__: 'a0G' },
+          { name: 'fourth', __temp_key__: 'a0V' },
+        ])
+      );
+
+      const nextState4 = reducer(nextState3, generateAction(3, 1));
+
+      expect(nextState4).toEqual(
+        generateExpected([
+          { name: 'third', __temp_key__: 'Zz' },
+          { name: 'second', __temp_key__: 'a0G' },
+          { name: 'fourth', __temp_key__: 'a0V' },
+          { name: 'first', __temp_key__: 'a0O' },
+        ])
+      );
+
+      const nextState5 = reducer(nextState4, generateAction(1, 2));
+
+      expect(nextState5).toEqual(
+        generateExpected([
+          { name: 'third', __temp_key__: 'Zz' },
+          { name: 'fourth', __temp_key__: 'a0' },
+          { name: 'second', __temp_key__: 'a0G' },
+          { name: 'first', __temp_key__: 'a0O' },
+        ])
+      );
     });
   });
 

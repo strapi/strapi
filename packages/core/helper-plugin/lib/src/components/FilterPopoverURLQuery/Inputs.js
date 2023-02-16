@@ -9,9 +9,9 @@ import {
   NumberInput,
   TimePicker,
   Select,
+  FieldInput,
+  Option,
 } from '@strapi/design-system';
-import { FieldInput } from '@strapi/design-system/Field';
-import { Option } from '@strapi/design-system/Select';
 import { useIntl } from 'react-intl';
 
 const Inputs = ({ label, onChange, options, type, value }) => {

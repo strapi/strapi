@@ -9,7 +9,7 @@ import {
   SubNavSection,
   SubNavSections,
   SubNavLink,
-} from '@strapi/design-system/v2/SubNav';
+} from '@strapi/design-system/v2';
 import { getSectionsToDisplay } from '../../utils';
 
 const SettingsNav = ({ menu }) => {
