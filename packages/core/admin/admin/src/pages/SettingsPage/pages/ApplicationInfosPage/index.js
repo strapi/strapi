@@ -10,19 +10,20 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import {
-  HeaderLayout,
-  Layout,
+  Button,
   ContentLayout,
-  Main,
-  Box,
+  Flex,
   Grid,
   GridItem,
-  Typography,
+  HeaderLayout,
+  Layout,
+  Link,
+  Main,
   Stack,
-  Button,
+  Typography,
 } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
 import { ExternalLink, Check } from '@strapi/icons';
+
 import adminPermissions from '../../../../permissions';
 import { useConfigurations } from '../../../../hooks';
 import CustomizationInfos from './components/CustomizationInfos';
@@ -37,7 +38,7 @@ const ApplicationInfosPage = () => {
   const queryClient = useQueryClient();
   useFocusWhenNavigate();
   const appInfos = useAppInfos();
-  const { shouldUpdateStrapi, latestStrapiReleaseTag, strapiVersion } = appInfos;
+  const { latestStrapiReleaseTag, shouldUpdateStrapi, strapiVersion } = appInfos;
   const { updateProjectSettings } = useConfigurations();
 
   const {
@@ -46,10 +47,6 @@ const ApplicationInfosPage = () => {
   const canSubmit = canRead && canUpdate;
 
   const { data } = useQuery('project-settings', fetchProjectSettings, { enabled: canRead });
-
-  const currentPlan = appInfos.communityEdition
-    ? 'app.components.UpgradePlanModal.text-ce'
-    : 'app.components.UpgradePlanModal.text-ee';
 
   const submitMutation = useMutation((body) => postProjectSettings(body), {
     async onSuccess({ menuLogo, authLogo }) {
@@ -118,7 +115,7 @@ const ApplicationInfosPage = () => {
           <ContentLayout>
             <Stack spacing={6}>
               <Stack
-                spacing={5}
+                spacing={4}
                 hasRadius
                 background="neutral0"
                 shadow="tableShadow"
@@ -134,86 +131,71 @@ const ApplicationInfosPage = () => {
                   })}
                 </Typography>
 
-                <Grid paddingTop={1}>
+                <Grid gap={5} as="dl">
                   <GridItem col={6} s={12}>
-                    <Typography variant="sigma" textColor="neutral600">
+                    <Typography variant="sigma" textColor="neutral600" as="dt">
                       {formatMessage({
                         id: 'Settings.application.strapiVersion',
                         defaultMessage: 'strapi version',
                       })}
                     </Typography>
-                    <Typography as="p">v{strapiVersion}</Typography>
-                    <Link
-                      href={
-                        appInfos.communityEdition
-                          ? 'https://discord.strapi.io'
-                          : 'https://support.strapi.io/support/home'
-                      }
-                      isExternal
-                      endIcon={<ExternalLink />}
-                    >
-                      {formatMessage({
-                        id: 'Settings.application.get-help',
-                        defaultMessage: 'Get help',
-                      })}
-                    </Link>
+                    <Flex gap={3} direction="column" alignItems="start" as="dd">
+                      <Typography>v{strapiVersion}</Typography>
+                      {shouldUpdateStrapi && (
+                        <Link
+                          href={`https://github.com/strapi/strapi/releases/tag/${latestStrapiReleaseTag}`}
+                          isExternal
+                          endIcon={<ExternalLink />}
+                        >
+                          {formatMessage({
+                            id: 'Settings.application.link-upgrade',
+                            defaultMessage: 'Upgrade your admin panel',
+                          })}
+                        </Link>
+                      )}
+                    </Flex>
                   </GridItem>
                   <GridItem col={6} s={12}>
-                    <Typography variant="sigma" textColor="neutral600">
+                    <Typography variant="sigma" textColor="neutral600" as="dt">
                       {formatMessage({
                         id: 'Settings.application.edition-title',
                         defaultMessage: 'current plan',
                       })}
                     </Typography>
-                    <Typography as="p">
-                      {formatMessage({
-                        id: currentPlan,
-                        defaultMessage: `${
-                          appInfos.communityEdition ? 'Community Edition' : 'Enterprise Edition'
-                        }`,
-                      })}
-                    </Typography>
-                  </GridItem>
-                </Grid>
-
-                <Grid paddingTop={1}>
-                  <GridItem col={6} s={12}>
-                    {shouldUpdateStrapi && (
+                    <Flex gap={3} direction="column" alignItems="start" as="dd">
+                      <Typography>
+                        {formatMessage(
+                          {
+                            id: 'Settings.application.ee-or-ce',
+                            defaultMessage:
+                              '{communityEdition, select, true {Community Edition} other {Enterprise Edition}}',
+                          },
+                          { communityEdition: appInfos.communityEdition }
+                        )}
+                      </Typography>
                       <Link
-                        href={`https://github.com/strapi/strapi/releases/tag/${latestStrapiReleaseTag}`}
+                        href="https://strapi.io/pricing-self-hosted"
                         isExternal
                         endIcon={<ExternalLink />}
                       >
                         {formatMessage({
-                          id: 'Settings.application.link-upgrade',
-                          defaultMessage: 'Upgrade your admin panel',
+                          id: 'Settings.application.link-pricing',
+                          defaultMessage: 'See all pricing plans',
                         })}
                       </Link>
-                    )}
+                    </Flex>
                   </GridItem>
+
                   <GridItem col={6} s={12}>
-                    <Link
-                      href="https://strapi.io/pricing-self-hosted"
-                      isExternal
-                      endIcon={<ExternalLink />}
-                    >
+                    <Typography variant="sigma" textColor="neutral600" as="dt">
                       {formatMessage({
-                        id: 'Settings.application.link-pricing',
-                        defaultMessage: 'See all pricing plans',
+                        id: 'Settings.application.node-version',
+                        defaultMessage: 'node version',
                       })}
-                    </Link>
+                    </Typography>
+                    <Typography as="dd">{appInfos.nodeVersion}</Typography>
                   </GridItem>
                 </Grid>
-
-                <Box paddingTop={1}>
-                  <Typography variant="sigma" textColor="neutral600">
-                    {formatMessage({
-                      id: 'Settings.application.node-version',
-                      defaultMessage: 'node version',
-                    })}
-                  </Typography>
-                  <Typography as="p">{appInfos.nodeVersion}</Typography>
-                </Box>
               </Stack>
               {canRead && data && (
                 <CustomizationInfos
