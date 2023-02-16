@@ -7,9 +7,7 @@ module.exports = {
    *
    * This gives you an opportunity to extend code.
    */
-  register(app) {
-    console.log(app);
-  },
+  register({ strapi }) {},
 
   /**
    * An asynchronous bootstrap function that runs before
