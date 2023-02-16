@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import {
   Typography,
   IconButton,
-  Stack,
+  Flex,
   Table,
   Thead,
   Tr,
@@ -68,12 +68,7 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
               </Typography>
             </Td>
             <Td>
-              <Stack
-                horizontal
-                spacing={1}
-                style={{ justifyContent: 'flex-end' }}
-                {...stopPropagation}
-              >
+              <Flex gap={1} justifyContent="flex-end" {...stopPropagation}>
                 {onEditLocale && (
                   <IconButton
                     onClick={() => onEditLocale(locale)}
@@ -90,7 +85,7 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
                     noBorder
                   />
                 )}
-              </Stack>
+              </Flex>
             </Td>
           </Tr>
         ))}

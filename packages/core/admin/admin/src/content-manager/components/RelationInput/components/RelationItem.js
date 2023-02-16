@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 
-import { Box, Flex, Stack, IconButton } from '@strapi/design-system';
+import { Box, Flex, IconButton } from '@strapi/design-system';
 import { Drag } from '@strapi/icons';
 
 import { useDragAndDrop } from '../../../hooks/useDragAndDrop';
@@ -12,7 +12,7 @@ import { composeRefs, ItemTypes } from '../../../utils';
 
 import { RELATION_GUTTER } from '../constants';
 
-export const StackWrapper = styled(Stack)`
+export const FlexWrapper = styled(Flex)`
   width: 100%;
   /* Used to prevent endAction to be pushed out of container */
   min-width: 0;
@@ -94,7 +94,7 @@ export const RelationItem = ({
           data-handler-id={handlerId}
           {...props}
         >
-          <StackWrapper spacing={1} horizontal>
+          <FlexWrapper gap={1}>
             {canDrag ? (
               <IconButton
                 forwardedAs="div"
@@ -109,7 +109,7 @@ export const RelationItem = ({
               </IconButton>
             ) : null}
             <ChildrenWrapper justifyContent="space-between">{children}</ChildrenWrapper>
-          </StackWrapper>
+          </FlexWrapper>
           {endAction && <Box paddingLeft={4}>{endAction}</Box>}
         </Flex>
       )}

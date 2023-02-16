@@ -76,7 +76,7 @@ describe('Admin | containers | RoleCreatePage', () => {
         color: #666687;
       }
 
-      .c19 {
+      .c18 {
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
@@ -96,13 +96,13 @@ describe('Admin | containers | RoleCreatePage', () => {
         color: #666687;
       }
 
-      .c44 {
+      .c45 {
         font-size: 0.75rem;
         line-height: 1.33;
         color: #4945ff;
       }
 
-      .c45 {
+      .c46 {
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
@@ -126,7 +126,7 @@ describe('Admin | containers | RoleCreatePage', () => {
         padding-left: 56px;
       }
 
-      .c17 {
+      .c16 {
         background: #ffffff;
         padding-top: 24px;
         padding-right: 32px;
@@ -153,11 +153,11 @@ describe('Admin | containers | RoleCreatePage', () => {
         padding-left: 32px;
       }
 
-      .c35 {
+      .c36 {
         border-radius: 4px;
       }
 
-      .c37 {
+      .c38 {
         background: #f6f6f9;
         padding-top: 24px;
         padding-right: 24px;
@@ -165,21 +165,21 @@ describe('Admin | containers | RoleCreatePage', () => {
         padding-left: 24px;
       }
 
-      .c39 {
+      .c40 {
         max-width: 100%;
         -webkit-flex: 1;
         -ms-flex: 1;
         flex: 1;
       }
 
-      .c41 {
+      .c42 {
         min-width: 0;
         -webkit-flex: 1;
         -ms-flex: 1;
         flex: 1;
       }
 
-      .c46 {
+      .c47 {
         background: #dcdce4;
         border-radius: 50%;
         width: 2rem;
@@ -190,12 +190,12 @@ describe('Admin | containers | RoleCreatePage', () => {
         cursor: pointer;
       }
 
-      .c48 {
+      .c49 {
         color: #666687;
         width: 0.6875rem;
       }
 
-      .c51 {
+      .c52 {
         background: #eaeaef;
         padding-top: 24px;
         padding-right: 32px;
@@ -247,9 +247,84 @@ describe('Admin | containers | RoleCreatePage', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+        gap: 32px;
       }
 
-      .c47 {
+      .c17 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .c21 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c32 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .c33 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .c35 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .c48 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -270,42 +345,42 @@ describe('Admin | containers | RoleCreatePage', () => {
         justify-content: center;
       }
 
-      .c36 {
+      .c37 {
         border: 1px solid #f6f6f9;
       }
 
-      .c36:hover:not([aria-disabled='true']) {
+      .c37:hover:not([aria-disabled='true']) {
         border: 1px solid #4945ff;
       }
 
-      .c36:hover:not([aria-disabled='true']) .c6 {
+      .c37:hover:not([aria-disabled='true']) .c6 {
         color: #4945ff;
       }
 
-      .c36:hover:not([aria-disabled='true']) > .c3 {
+      .c37:hover:not([aria-disabled='true']) > .c3 {
         background: #f0f0ff;
       }
 
-      .c36:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+      .c37:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
         background: #d9d8ff;
       }
 
-      .c42 {
+      .c43 {
         background: transparent;
         border: none;
         position: relative;
         outline: none;
       }
 
-      .c42[aria-disabled='true'] {
+      .c43[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c42[aria-disabled='true'] svg path {
+      .c43[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c42 svg {
+      .c43 svg {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -313,11 +388,11 @@ describe('Admin | containers | RoleCreatePage', () => {
         font-size: 0.625rem;
       }
 
-      .c42 svg path {
+      .c43 svg path {
         fill: #4945ff;
       }
 
-      .c42:after {
+      .c43:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -332,11 +407,11 @@ describe('Admin | containers | RoleCreatePage', () => {
         border: 2px solid transparent;
       }
 
-      .c42:focus-visible {
+      .c43:focus-visible {
         outline: none;
       }
 
-      .c42:focus-visible:after {
+      .c43:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -345,24 +420,6 @@ describe('Admin | containers | RoleCreatePage', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
-      }
-
-      .c16 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c16 > * + * {
-        margin-top: 32px;
-      }
-
-      .c18 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c18 > * + * {
-        margin-top: 16px;
       }
 
       .c22 > * {
@@ -374,60 +431,42 @@ describe('Admin | containers | RoleCreatePage', () => {
         margin-top: 4px;
       }
 
-      .c32 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c32 > * + * {
-        margin-top: 24px;
-      }
-
-      .c33 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c33 > * + * {
-        margin-top: 8px;
-      }
-
-      .c40 > * {
+      .c41 > * {
         margin-left: 0;
         margin-right: 0;
       }
 
-      .c40 > * + * {
+      .c41 > * + * {
         margin-left: 12px;
       }
 
-      .c49 path {
+      .c50 path {
         fill: #666687;
       }
 
-      .c43 {
+      .c44 {
         text-align: left;
       }
 
-      .c43 > span {
+      .c44 > span {
         max-width: 100%;
       }
 
-      .c43 svg {
+      .c44 svg {
         width: 0.875rem;
         height: 0.875rem;
       }
 
-      .c43 svg path {
+      .c44 svg path {
         fill: #8e8ea9;
       }
 
-      .c38 {
+      .c39 {
         min-height: 5.5rem;
         border-radius: 4px;
       }
 
-      .c38:hover svg path {
+      .c39:hover svg path {
         fill: #4945ff;
       }
 
@@ -622,7 +661,7 @@ describe('Admin | containers | RoleCreatePage', () => {
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c20 {
+      .c19 {
         display: grid;
         grid-template-columns: repeat(12,1fr);
         gap: 16px;
@@ -633,7 +672,7 @@ describe('Admin | containers | RoleCreatePage', () => {
         grid-template-columns: repeat(12,1fr);
       }
 
-      .c21 {
+      .c20 {
         grid-column: span 6;
         max-width: 100%;
       }
@@ -643,7 +682,7 @@ describe('Admin | containers | RoleCreatePage', () => {
         max-width: 100%;
       }
 
-      .c50 {
+      .c51 {
         grid-column: span 5;
         max-width: 100%;
       }
@@ -746,13 +785,13 @@ describe('Admin | containers | RoleCreatePage', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c21 {
+        .c20 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c21 {
+        .c20 {
           grid-column: span;
         }
       }
@@ -770,13 +809,13 @@ describe('Admin | containers | RoleCreatePage', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c50 {
+        .c51 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c50 {
+        .c51 {
           grid-column: span;
         }
       }
@@ -850,24 +889,24 @@ describe('Admin | containers | RoleCreatePage', () => {
             class="c1 c14"
           >
             <div
-              class="c1 c3 c15 c16"
+              class="c1 c3 c15"
             >
               <div
-                class="c1 c17"
+                class="c1 c16"
               >
                 <div
-                  class="c1 c3 c15 c18"
+                  class="c1 c3 c17"
                 >
                   <h2
-                    class="c6 c19"
+                    class="c6 c18"
                   >
                     Role details
                   </h2>
                   <div
-                    class="c1 c20"
+                    class="c1 c19"
                   >
                     <div
-                      class="c21"
+                      class="c20"
                     >
                       <div
                         class="c1 "
@@ -875,7 +914,7 @@ describe('Admin | containers | RoleCreatePage', () => {
                         <div>
                           <div>
                             <div
-                              class="c1 c3 c15 c22"
+                              class="c1 c3 c21 c22"
                             >
                               <label
                                 class="c6 c12"
@@ -906,7 +945,7 @@ describe('Admin | containers | RoleCreatePage', () => {
                       </div>
                     </div>
                     <div
-                      class="c21"
+                      class="c20"
                     >
                       <div
                         class="c1 "
@@ -916,7 +955,7 @@ describe('Admin | containers | RoleCreatePage', () => {
                         >
                           <div>
                             <div
-                              class="c1 c3 c15 c22"
+                              class="c1 c3 c21 c22"
                             >
                               <div
                                 class="c1 c3 c5"
@@ -961,13 +1000,13 @@ describe('Admin | containers | RoleCreatePage', () => {
                     class="c1 c31"
                   >
                     <div
-                      class="c1 c3 c15 c32"
+                      class="c1 c3 c32"
                     >
                       <div
-                        class="c1 c3 c15 c33"
+                        class="c1 c3 c33"
                       >
                         <h2
-                          class="c6 c19"
+                          class="c6 c18"
                         >
                           Permissions
                         </h2>
@@ -978,33 +1017,33 @@ describe('Admin | containers | RoleCreatePage', () => {
                         </p>
                       </div>
                       <div
-                        class="c1 c3 c15 c22"
+                        class="c1 c3 c35"
                       >
                         <div
                           aria-disabled="false"
-                          class="c1 c35 c36"
+                          class="c1 c36 c37"
                           data-strapi-expanded="false"
                         >
                           <div
-                            class="c1 c3 c37 c4 c38"
+                            class="c1 c3 c38 c4 c39"
                           >
                             <div
-                              class="c1 c3 c39 c5 c40"
+                              class="c1 c3 c40 c5 c41"
                             >
                               <button
                                 aria-controls="accordion-content-4"
                                 aria-disabled="false"
                                 aria-expanded="false"
                                 aria-labelledby="accordion-label-4"
-                                class="c1 c3 c41 c5 c42 c43"
+                                class="c1 c3 c42 c5 c43 c44"
                                 data-strapi-accordion-toggle="true"
                                 type="button"
                               >
                                 <span
-                                  class="c6 c44"
+                                  class="c6 c45"
                                 >
                                   <span
-                                    class="c6 c45"
+                                    class="c6 c46"
                                     id="accordion-label-4"
                                   >
                                     Address
@@ -1018,15 +1057,15 @@ describe('Admin | containers | RoleCreatePage', () => {
                                 </span>
                               </button>
                               <div
-                                class="c1 c3 c5 c40"
+                                class="c1 c3 c5 c41"
                               >
                                 <span
                                   aria-hidden="true"
-                                  class="c1 c3 c46 c47"
+                                  class="c1 c3 c47 c48"
                                   data-strapi-dropdown="true"
                                 >
                                   <svg
-                                    class="c1 c48 c49"
+                                    class="c1 c49 c50"
                                     fill="none"
                                     height="1em"
                                     viewBox="0 0 14 8"
@@ -1050,17 +1089,17 @@ describe('Admin | containers | RoleCreatePage', () => {
                   </div>
                 </div>
                 <div
-                  class="c50"
+                  class="c51"
                 >
                   <div
-                    class="c1 c51"
+                    class="c1 c52"
                     style="min-height: 100%;"
                   >
                     <div
-                      class="c1 c3 c15 c33"
+                      class="c1 c3 c33"
                     >
                       <h3
-                        class="c6 c19"
+                        class="c6 c18"
                       >
                         Advanced settings
                       </h3>

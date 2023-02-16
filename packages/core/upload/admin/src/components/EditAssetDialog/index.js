@@ -13,7 +13,6 @@ import {
   ModalLayout,
   ModalBody,
   ModalFooter,
-  Stack,
   Flex,
   Loader,
   Grid,
@@ -195,7 +194,7 @@ export const EditAssetDialog = ({
               </GridItem>
               <GridItem xs={12} col={6}>
                 <Form noValidate>
-                  <Stack spacing={3}>
+                  <Flex direction="column" alignItems="stretch" gap={3}>
                     <ContextInfo
                       blocks={[
                         {
@@ -281,7 +280,7 @@ export const EditAssetDialog = ({
                       disabled={formDisabled}
                     />
 
-                    <Stack spacing={1}>
+                    <Flex direction="column" alignItems="stretch" gap={1}>
                       <FieldLabel htmlFor="asset-folder">
                         {formatMessage({
                           id: getTrad('form.input.label.file-location'),
@@ -302,8 +301,8 @@ export const EditAssetDialog = ({
                         error={errors?.parent}
                         ariaErrorMessage="folder-parent-error"
                       />
-                    </Stack>
-                  </Stack>
+                    </Flex>
+                  </Flex>
 
                   <VisuallyHidden>
                     <button

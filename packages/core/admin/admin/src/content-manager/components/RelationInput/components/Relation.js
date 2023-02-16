@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { Stack, Flex } from '@strapi/design-system';
+import { Flex } from '@strapi/design-system';
 
 export const Relation = ({
   children,
@@ -20,9 +20,15 @@ export const Relation = ({
         alignItems="end"
         wrap="wrap"
       >
-        <Stack basis={size <= 6 ? '100%' : '70%'} spacing={1} {...props}>
+        <Flex
+          direction="column"
+          alignItems="stretch"
+          basis={size <= 6 ? '100%' : '70%'}
+          gap={1}
+          {...props}
+        >
           {search}
-        </Stack>
+        </Flex>
 
         {loadMore}
       </Flex>
