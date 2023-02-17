@@ -132,7 +132,11 @@ const ApiTokenListView = () => {
               data-testid="create-api-token-button"
               startIcon={<Plus />}
               size="S"
-              onClick={() => trackUsage('willAddTokenFromList')}
+              onClick={() =>
+                trackUsage('willAddTokenFromList', {
+                  tokenType: API_TOKEN_TYPE,
+                })
+              }
               to="/settings/api-tokens/create"
             >
               {formatMessage({

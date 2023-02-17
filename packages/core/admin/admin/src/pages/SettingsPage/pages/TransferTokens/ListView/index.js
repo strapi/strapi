@@ -135,6 +135,11 @@ const TransferTokenListView = () => {
               data-testid="create-transfer-token-button"
               startIcon={<Plus />}
               size="S"
+              onClick={() =>
+                trackUsage('willAddTokenFromList', {
+                  tokenType: TRANSFER_TOKEN_TYPE,
+                })
+              }
               to="/settings/transfer-tokens/create"
             >
               {formatMessage({
