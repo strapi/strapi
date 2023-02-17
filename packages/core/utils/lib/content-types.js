@@ -99,7 +99,7 @@ const getPrivateAttributes = (model = {}) => {
   );
 };
 
-const isPrivateAttribute = (model = {}, attributeName) => {
+const isPrivateAttribute = (model, attributeName) => {
   return model?.privateAttributes?.includes(attributeName) || false;
 };
 
