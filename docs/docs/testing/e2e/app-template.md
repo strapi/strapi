@@ -65,9 +65,8 @@ async function toggleRateLimiting(page, enabled = true) {
 
 ##### What does it do?
 
-This endpoint can be used to enable or disable to rate limitting middleware in
-strapi. When enabled login requests for each user are limitted to 5 in 5
-minutes.
+This endpoint can be used to enable or disable the rate limitting middleware in
+strapi. When enabled login requests for each user are limitted to 5 in 5 minutes.
 
 ##### Why do we have it?
 
