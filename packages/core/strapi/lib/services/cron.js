@@ -14,10 +14,15 @@ const createCronService = () => {
 
         let fn;
         let options;
+        let taskName;
         if (isFunction(taskValue)) {
+          // don't use task name if key is the rule
+          taskName = null;
           fn = taskValue.bind(tasks);
           options = taskExpression;
         } else if (isFunction(taskValue.task)) {
+          // set task name if key is not the rule
+          taskName = taskExpression;
           fn = taskValue.task.bind(taskValue);
           options = taskValue.options;
         } else {
@@ -28,8 +33,8 @@ const createCronService = () => {
 
         const fnWithStrapi = (...args) => fn({ strapi }, ...args);
 
-        const job = new Job(taskValue.name || null, fnWithStrapi);
-        jobsSpecs.push({ job, options, name: taskValue.name });
+        const job = new Job(null, fnWithStrapi);
+        jobsSpecs.push({ job, options, name: taskName });
 
         if (running) {
           job.schedule(options);
