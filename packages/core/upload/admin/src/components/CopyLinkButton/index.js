@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { IconButton } from '@strapi/design-system/IconButton';
+import { IconButton } from '@strapi/design-system';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useNotification } from '@strapi/helper-plugin';
-import LinkIcon from '@strapi/icons/Link';
+import { Link as LinkIcon } from '@strapi/icons';
 import getTrad from '../../utils/getTrad';
 
 export const CopyLinkButton = ({ url }) => {
@@ -29,8 +29,9 @@ export const CopyLinkButton = ({ url }) => {
           id: getTrad('control-card.copy-link'),
           defaultMessage: 'Copy link',
         })}
-        icon={<LinkIcon />}
-      />
+      >
+        <LinkIcon />
+      </IconButton>
     </CopyToClipboard>
   );
 };

@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { render, screen } from '@testing-library/react';
-import { ThemeProvider } from '@strapi/design-system/ThemeProvider';
-import { lightTheme } from '@strapi/design-system/themes';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import DateTimePicker from '../index';
 
 describe('DateTimePicker', () => {

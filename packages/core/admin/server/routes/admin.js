@@ -68,32 +68,4 @@ module.exports = [
       ],
     },
   },
-  {
-    method: 'POST',
-    path: '/plugins/install',
-    handler: 'admin.installPlugin',
-    config: {
-      policies: [
-        'admin::isAuthenticatedAdmin',
-        {
-          name: 'admin::hasPermissions',
-          config: { actions: ['admin::marketplace.plugins.install'] },
-        },
-      ],
-    },
-  },
-  {
-    method: 'DELETE',
-    path: '/plugins/uninstall/:plugin',
-    handler: 'admin.uninstallPlugin',
-    config: {
-      policies: [
-        'admin::isAuthenticatedAdmin',
-        {
-          name: 'admin::hasPermissions',
-          config: { actions: ['admin::marketplace.plugins.uninstall'] },
-        },
-      ],
-    },
-  },
 ];

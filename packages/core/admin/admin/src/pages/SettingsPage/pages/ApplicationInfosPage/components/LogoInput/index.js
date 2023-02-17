@@ -1,11 +1,14 @@
 import React, { useReducer } from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { CarouselInput, CarouselSlide, CarouselActions } from '@strapi/design-system/CarouselInput';
-import { IconButton } from '@strapi/design-system/IconButton';
-import { Box } from '@strapi/design-system/Box';
-import Plus from '@strapi/icons/Plus';
-import Refresh from '@strapi/icons/Refresh';
+import {
+  CarouselInput,
+  CarouselSlide,
+  CarouselActions,
+  IconButton,
+  Box,
+} from '@strapi/design-system';
+import { Plus, Refresh } from '@strapi/icons';
 import LogoModalStepper from '../LogoModalStepper';
 import reducer, { initialState } from './reducer';
 import stepper from './stepper';

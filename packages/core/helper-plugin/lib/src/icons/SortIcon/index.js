@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import CarretDown from '@strapi/icons/CarretDown';
+import { CarretDown } from '@strapi/icons';
 import PropTypes from 'prop-types';
 
 const transientProps = {

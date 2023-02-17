@@ -48,16 +48,40 @@ describe('<GuidedTourModal />', () => {
     expect(screen.getByText('🧠 Create a first Collection type')).toBeInTheDocument();
 
     expect(document.body).toMatchInlineSnapshot(`
-      .c0 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
+      .c16 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #4945ff;
+      }
+
+      .c20 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #ffffff;
+      }
+
+      .c21 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c25 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
+      .c27 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
       }
 
       .c2 {
@@ -207,42 +231,6 @@ describe('<GuidedTourModal />', () => {
         justify-content: center;
       }
 
-      .c16 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #4945ff;
-      }
-
-      .c20 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 500;
-        color: #ffffff;
-      }
-
-      .c21 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c25 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c27 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
       .c7 > * {
         margin-top: 0;
         margin-bottom: 0;
@@ -317,6 +305,18 @@ describe('<GuidedTourModal />', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
+      }
+
+      .c0 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
       }
 
       .c26 {

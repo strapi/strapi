@@ -1,16 +1,83 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Marketplace page - layout renders the online layout 1`] = `
-.c19 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
+.c9 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c17 {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666687;
+}
+
+.c22 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c33 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #4945ff;
+}
+
+.c35 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c44 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
   overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c65 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #32324d;
+}
+
+.c70 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c72 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #666687;
+}
+
+.c83 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #328048;
+}
+
+.c88 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 500;
+  color: #32324d;
 }
 
 .c2 {
@@ -25,48 +92,48 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   padding-left: 56px;
 }
 
-.c13 {
-  padding-right: 8px;
-}
-
-.c16 {
+.c18 {
   padding-right: 56px;
   padding-left: 56px;
 }
 
-.c17 {
+.c19 {
   padding-bottom: 16px;
   width: 25%;
 }
 
-.c22 {
+.c25 {
   padding-right: 8px;
   padding-left: 12px;
 }
 
-.c26 {
+.c29 {
   padding-bottom: 16px;
 }
 
-.c28 {
+.c31 {
   padding: 16px;
 }
 
-.c40 {
+.c43 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c42 {
+.c45 {
   padding-left: 12px;
 }
 
-.c45 {
+.c48 {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-.c51 {
+.c52 {
+  padding-right: 8px;
+}
+
+.c56 {
   background: #ffffff;
   padding-top: 16px;
   padding-right: 16px;
@@ -77,67 +144,63 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   height: 100%;
 }
 
-.c54 {
+.c59 {
   border-radius: 4px;
   width: 64px;
   height: 64px;
 }
 
-.c56 {
+.c61 {
   color: #666687;
 }
 
-.c58 {
+.c63 {
   color: #f29d41;
 }
 
-.c61 {
+.c66 {
   background: #dcdce4;
 }
 
-.c64 {
+.c69 {
   padding-top: 16px;
 }
 
-.c66 {
+.c71 {
   padding-top: 8px;
 }
 
-.c69 {
+.c74 {
   padding-top: 24px;
 }
 
-.c71 {
-  padding-left: 8px;
-}
-
-.c73 {
+.c78 {
   color: #328048;
   margin-left: 8px;
 }
 
-.c75 {
+.c80 {
   margin-left: 4px;
   width: 24px;
   height: auto;
 }
 
-.c76 {
+.c81 {
   padding-left: 16px;
 }
 
-.c77 {
+.c82 {
   color: #328048;
   margin-right: 8px;
   width: 12;
   height: 12;
 }
 
-.c79 {
+.c84 {
   padding-top: 32px;
 }
 
-.c80 {
+.c85 {
   background: #ffffff;
   padding: 24px;
   border-radius: 4px;
@@ -145,13 +208,13 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   position: relative;
 }
 
-.c81 {
+.c86 {
   background: #f6ecfc;
   padding: 12px;
   border-radius: 4px;
 }
 
-.c85 {
+.c90 {
   color: #666687;
   margin-left: 8px;
   width: 12px;
@@ -190,7 +253,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   flex-direction: row;
 }
 
-.c33 {
+.c36 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -205,7 +268,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   gap: 8px;
 }
 
-.c35 {
+.c38 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -219,7 +282,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   flex-direction: column;
 }
 
-.c52 {
+.c57 {
   -webkit-align-items: normal;
   -webkit-box-align: normal;
   -ms-flex-align: normal;
@@ -237,7 +300,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   justify-content: space-between;
 }
 
-.c53 {
+.c58 {
   -webkit-align-items: flex-start;
   -webkit-box-align: flex-start;
   -ms-flex-align: flex-start;
@@ -255,106 +318,509 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   justify-content: space-between;
 }
 
-.c9 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c14 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c15 {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c30 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #4945ff;
-}
-
-.c32 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
-.c41 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c60 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #32324d;
-}
-
-.c65 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c67 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #666687;
-}
-
-.c78 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #328048;
-}
-
-.c83 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 500;
-  color: #32324d;
-}
-
-.c36 > * {
+.c39 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c55 > * {
+.c60 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c55 > * + * {
+.c60 > * + * {
   margin-left: 4px;
 }
 
-.c70 > * {
+.c75 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c70 > * + * {
+.c75 > * + * {
   margin-left: 8px;
+}
+
+.c62 path {
+  fill: #666687;
+}
+
+.c64 path {
+  fill: #f29d41;
+}
+
+.c79 path {
+  fill: #328048;
+}
+
+.c49 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c49 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c49 svg > g,
+.c49 svg path {
+  fill: #ffffff;
+}
+
+.c49[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c49:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c49:focus-visible {
+  outline: none;
+}
+
+.c49:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c21 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c53 {
+  height: 100%;
+}
+
+.c50 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: #4945ff;
+  border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+}
+
+.c50 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c50 .c8 {
+  color: #ffffff;
+}
+
+.c50[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c50[aria-disabled='true'] .c8 {
+  color: #666687;
+}
+
+.c50[aria-disabled='true'] svg > g,.c50[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c50[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c50[aria-disabled='true']:active .c8 {
+  color: #666687;
+}
+
+.c50[aria-disabled='true']:active svg > g,.c50[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c50:hover {
+  background-color: #f6f6f9;
+}
+
+.c50:active {
+  background-color: #eaeaef;
+}
+
+.c50 .c8 {
+  color: #32324d;
+}
+
+.c50 svg > g,
+.c50 svg path {
+  fill: #32324d;
+}
+
+.c77 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: #4945ff;
+  border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
+  border: 1px solid #d9d8ff;
+  background: #f0f0ff;
+}
+
+.c77 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c77 .c8 {
+  color: #ffffff;
+}
+
+.c77[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c77[aria-disabled='true'] .c8 {
+  color: #666687;
+}
+
+.c77[aria-disabled='true'] svg > g,.c77[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c77[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c77[aria-disabled='true']:active .c8 {
+  color: #666687;
+}
+
+.c77[aria-disabled='true']:active svg > g,.c77[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c77:hover {
+  background-color: #ffffff;
+}
+
+.c77:active {
+  background-color: #ffffff;
+  border: 1px solid #4945ff;
+}
+
+.c77:active .c8 {
+  color: #4945ff;
+}
+
+.c77:active svg > g,
+.c77:active svg path {
+  fill: #4945ff;
+}
+
+.c77 .c8 {
+  color: #271fe0;
+}
+
+.c77 svg > g,
+.c77 svg path {
+  fill: #271fe0;
+}
+
+.c28 {
+  border: none;
+  border-radius: 4px;
+  padding-bottom: 0.65625rem;
+  padding-left: 0;
+  padding-right: 16px;
+  padding-top: 0.65625rem;
+  color: #32324d;
+  font-weight: 400;
+  font-size: 0.875rem;
+  display: block;
+  width: 100%;
+  background: inherit;
+}
+
+.c28::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c28::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c28:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c28::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c28[aria-disabled='true'] {
+  color: inherit;
+}
+
+.c28:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.c24 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c24:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c40 {
+  position: relative;
+  border: 1px solid #dcdce4;
+  padding-right: 12px;
+  border-radius: 4px;
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 2rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c40:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c46 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c46 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c46 svg path {
+  fill: #666687;
+}
+
+.c47 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+}
+
+.c47 svg {
+  width: 0.375rem;
+}
+
+.c41 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c41:focus {
+  outline: none;
+}
+
+.c41[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c42 {
+  width: 100%;
+}
+
+.c67 {
+  height: 1px;
+  border: none;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+}
+
+.c54 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c55 {
+  grid-column: span 4;
+  max-width: 100%;
+}
+
+.c1 {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.c3 {
+  overflow-x: hidden;
+}
+
+.c4:focus-visible {
+  outline: none;
+}
+
+.c27 {
+  font-size: 0.8rem;
+}
+
+.c27 svg path {
+  fill: #32324d;
+}
+
+.c20 {
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c20:focus-within .c26 svg path {
+  fill: #4945ff;
+}
+
+.c20 .c23 {
+  border: 1px solid transparent;
+}
+
+.c20 .c23:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c32 {
+  border-bottom: 2px solid #4945ff;
+}
+
+.c34 {
+  border-bottom: 2px solid transparent;
+}
+
+.c30[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c87 {
+  margin-right: 24px;
+}
+
+.c87 svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.c89 {
+  word-break: break-all;
+}
+
+.c14 {
+  padding-right: 8px;
+}
+
+.c76 {
+  padding-left: 8px;
+}
+
+.c16 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c10 {
+  cursor: pointer;
 }
 
 .c11 {
@@ -415,354 +881,6 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c48 {
-  height: 100%;
-}
-
-.c46 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
-  height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
-  border: 1px solid #dcdce4;
-  background: #ffffff;
-}
-
-.c46 .c0 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c46 .c8 {
-  color: #ffffff;
-}
-
-.c46[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c46[aria-disabled='true'] .c8 {
-  color: #666687;
-}
-
-.c46[aria-disabled='true'] svg > g,.c46[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c46[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c46[aria-disabled='true']:active .c8 {
-  color: #666687;
-}
-
-.c46[aria-disabled='true']:active svg > g,.c46[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c46:hover {
-  background-color: #f6f6f9;
-}
-
-.c46:active {
-  background-color: #eaeaef;
-}
-
-.c46 .c8 {
-  color: #32324d;
-}
-
-.c46 svg > g,
-.c46 svg path {
-  fill: #32324d;
-}
-
-.c72 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
-  height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
-  border: 1px solid #d9d8ff;
-  background: #f0f0ff;
-}
-
-.c72 .c0 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c72 .c8 {
-  color: #ffffff;
-}
-
-.c72[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c72[aria-disabled='true'] .c8 {
-  color: #666687;
-}
-
-.c72[aria-disabled='true'] svg > g,.c72[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c72[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c72[aria-disabled='true']:active .c8 {
-  color: #666687;
-}
-
-.c72[aria-disabled='true']:active svg > g,.c72[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c72:hover {
-  background-color: #ffffff;
-}
-
-.c72:active {
-  background-color: #ffffff;
-  border: 1px solid #4945ff;
-}
-
-.c72:active .c8 {
-  color: #4945ff;
-}
-
-.c72:active svg > g,
-.c72:active svg path {
-  fill: #4945ff;
-}
-
-.c72 .c8 {
-  color: #271fe0;
-}
-
-.c72 svg > g,
-.c72 svg path {
-  fill: #271fe0;
-}
-
-.c62 {
-  height: 1px;
-  border: none;
-  -webkit-flex-shrink: 0;
-  -ms-flex-negative: 0;
-  flex-shrink: 0;
-}
-
-.c38 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c38:focus {
-  outline: none;
-}
-
-.c38[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c25 {
-  border: none;
-  border-radius: 4px;
-  padding-bottom: 0.65625rem;
-  padding-left: 0;
-  padding-right: 16px;
-  padding-top: 0.65625rem;
-  color: #32324d;
-  font-weight: 400;
-  font-size: 0.875rem;
-  display: block;
-  width: 100%;
-  background: inherit;
-}
-
-.c25::-webkit-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c25::-moz-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c25:-ms-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c25::placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c25[aria-disabled='true'] {
-  color: inherit;
-}
-
-.c25:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-.c21 {
-  border: 1px solid #dcdce4;
-  border-radius: 4px;
-  background: #ffffff;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c21:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c37 {
-  position: relative;
-  border: 1px solid #dcdce4;
-  padding-right: 12px;
-  border-radius: 4px;
-  background: #ffffff;
-  overflow: hidden;
-  min-height: 2rem;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c37:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c43 {
-  background: transparent;
-  border: none;
-  position: relative;
-  z-index: 1;
-}
-
-.c43 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
-}
-
-.c43 svg path {
-  fill: #666687;
-}
-
-.c44 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  background: none;
-  border: none;
-}
-
-.c44 svg {
-  width: 0.375rem;
-}
-
-.c39 {
-  width: 100%;
-}
-
-.c24 {
-  font-size: 0.8rem;
-}
-
-.c24 svg path {
-  fill: #32324d;
-}
-
-.c18 {
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c18:focus-within .c23 svg path {
-  fill: #4945ff;
-}
-
-.c18 .c20 {
-  border: 1px solid transparent;
-}
-
-.c18 .c20:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c57 path {
-  fill: #666687;
-}
-
-.c59 path {
-  fill: #f29d41;
-}
-
-.c74 path {
-  fill: #328048;
-}
-
-.c10 {
-  cursor: pointer;
-}
-
 .c12 {
   padding: 8px 16px;
   background: #4945ff;
@@ -778,7 +896,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   text-decoration: none;
 }
 
-.c12 .c0 {
+.c12 .c13 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -789,7 +907,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   align-items: center;
 }
 
-.c12 .c8 {
+.c12 .c15 {
   color: #ffffff;
 }
 
@@ -798,7 +916,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   background: #eaeaef;
 }
 
-.c12[aria-disabled='true'] .c8 {
+.c12[aria-disabled='true'] .c15 {
   color: #666687;
 }
 
@@ -811,7 +929,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   background: #eaeaef;
 }
 
-.c12[aria-disabled='true']:active .c8 {
+.c12[aria-disabled='true']:active .c15 {
   color: #666687;
 }
 
@@ -827,7 +945,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   background-color: #eaeaef;
 }
 
-.c12 .c8 {
+.c12 .c15 {
   color: #32324d;
 }
 
@@ -836,88 +954,39 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   fill: #32324d;
 }
 
-.c82 {
-  margin-right: 24px;
-}
-
-.c82 svg {
-  width: 2rem;
-  height: 2rem;
-}
-
-.c84 {
-  word-break: break-all;
-}
-
-.c1 {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-
-.c3 {
-  overflow-x: hidden;
-}
-
-.c49 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
-}
-
-.c50 {
-  grid-column: span 4;
-  max-width: 100%;
-}
-
-.c4:focus-visible {
-  outline: none;
-}
-
-.c29 {
-  border-bottom: 2px solid #4945ff;
-}
-
-.c31 {
-  border-bottom: 2px solid transparent;
-}
-
-.c27[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c63 {
+.c68 {
   -webkit-transform: rotate(90deg);
   -ms-transform: rotate(90deg);
   transform: rotate(90deg);
 }
 
-.c68 {
+.c73 {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
 }
 
-.c34 {
+.c37 {
   font-weight: 500;
 }
 
-.c34 span {
+.c37 span {
   font-size: 0.75rem;
 }
 
-.c47 {
+.c51 {
   height: 2rem;
 }
 
 @media (max-width:68.75rem) {
-  .c50 {
+  .c55 {
     grid-column: span 6;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c50 {
+  .c55 {
     grid-column: span 12;
   }
 }
@@ -962,7 +1031,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
             >
               <div
                 aria-hidden="true"
-                class="c0 c13"
+                class="c13 c14"
               >
                 <svg
                   fill="none"
@@ -980,34 +1049,34 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                 </svg>
               </div>
               <span
-                class="c8 c14"
+                class="c15 c16"
               >
                 Submit plugin
               </span>
             </a>
           </div>
           <p
-            class="c8 c15"
+            class="c8 c17"
           >
             Get more out of Strapi
           </p>
         </div>
       </div>
       <div
-        class="c0 c16"
+        class="c0 c18"
       >
         <div
-          class="c0 c17"
+          class="c0 c19"
         >
           <div
-            class="c18"
+            class="c20"
           >
             <div>
               <div
-                class="c19"
+                class="c21"
               >
                 <label
-                  class="c8 c14"
+                  class="c8 c22"
                   for="0"
                 >
                   <div
@@ -1018,13 +1087,13 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                 </label>
               </div>
               <div
-                class="c0 c20 c6 c21"
+                class="c0 c23 c6 c24"
               >
                 <div
-                  class="c0 c22"
+                  class="c0 c25"
                 >
                   <div
-                    class="c0 c23 c7 c24"
+                    class="c0 c26 c7 c27"
                   >
                     <svg
                       aria-hidden="true"
@@ -1047,7 +1116,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                   aria-disabled="false"
                   aria-invalid="false"
                   aria-required="false"
-                  class="c25"
+                  class="c28"
                   id="0"
                   name="searchbar"
                   placeholder="Search"
@@ -1059,7 +1128,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
         </div>
         <div>
           <div
-            class="c0 c26"
+            class="c0 c29"
           >
             <div
               aria-label="Plugins and Providers for Strapi"
@@ -1069,17 +1138,17 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                 aria-controls="tabs-0-tabpanel"
                 aria-disabled="false"
                 aria-selected="true"
-                class="c27"
+                class="c30"
                 id="tabs-0-tab"
                 role="tab"
                 tabindex="0"
                 type="button"
               >
                 <div
-                  class="c0 c28 c29"
+                  class="c0 c31 c32"
                 >
                   <span
-                    class="c8 c30"
+                    class="c8 c33"
                   >
                     Plugins
                      
@@ -1092,17 +1161,17 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
               <button
                 aria-disabled="false"
                 aria-selected="false"
-                class="c27"
+                class="c30"
                 id="tabs-1-tab"
                 role="tab"
                 tabindex="-1"
                 type="button"
               >
                 <div
-                  class="c0 c28 c31"
+                  class="c0 c31 c34"
                 >
                   <span
-                    class="c8 c32"
+                    class="c8 c35"
                   >
                     Providers
                      
@@ -1115,38 +1184,38 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
             </div>
           </div>
           <div
-            class="c0 c26 c33"
+            class="c0 c29 c36"
           >
             <div
-              class="c0 c34"
+              class="c0 c37"
             >
               <div>
                 <div
-                  class="c0 c35 c36"
+                  class="c0 c38 c39"
                 >
                   <div
-                    class="c0 c7 c37"
+                    class="c0 c7 c40"
                   >
                     <button
                       aria-disabled="false"
                       aria-expanded="false"
                       aria-haspopup="listbox"
                       aria-labelledby="sort-by-select sort-by-select-label sort-by-select-content"
-                      class="c38"
+                      class="c41"
                       id="sort-by-select"
                       type="button"
                     />
                     <div
-                      class="c0 c6 c39"
+                      class="c0 c6 c42"
                     >
                       <div
                         class="c0 c7"
                       >
                         <div
-                          class="c0 c40"
+                          class="c0 c43"
                         >
                           <span
-                            class="c8 c41"
+                            class="c8 c44"
                             id="sort-by-select-content"
                           >
                             Sort by alphabetical order
@@ -1158,7 +1227,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                       >
                         <button
                           aria-hidden="true"
-                          class="c0 c42 c43 c44"
+                          class="c0 c45 c46 c47"
                           tabindex="-1"
                           title="Carret Down Button"
                           type="button"
@@ -1185,17 +1254,17 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
               </div>
             </div>
             <div
-              class="c0 c45"
+              class="c0 c48"
             >
               <button
                 aria-disabled="false"
-                class="c11 c46 c47"
+                class="c49 c50 c51"
                 data-testid="filters-button"
                 type="button"
               >
                 <div
                   aria-hidden="true"
-                  class="c0 c13 c48"
+                  class="c0 c52 c53"
                 >
                   <svg
                     fill="none"
@@ -1213,7 +1282,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                   </svg>
                 </div>
                 <span
-                  class="c8 c14"
+                  class="c8 c22"
                 >
                   Filters
                 </span>
@@ -1228,36 +1297,36 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
               tabindex="0"
             >
               <div
-                class="c0 c49"
+                class="c0 c54"
               >
                 <div
-                  class="c50"
+                  class="c55"
                 >
                   <div
                     class="c0 "
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c51 c52"
+                      class="c0 c56 c57"
                       data-testid="npm-package-card"
                     >
                       <div
                         class="c0 "
                       >
                         <div
-                          class="c0 c53"
+                          class="c0 c58"
                         >
                           <img
                             alt="Comments logo"
-                            class="c0 c54"
+                            class="c0 c59"
                             src="https://dl.airtable.com/.attachments/eb4cd59876565af77c9c3e5966b59f10/2111bfc8/vl_strapi-comments.png"
                           />
                           <div
-                            class="c0 c7 c55"
+                            class="c0 c7 c60"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c56 c57"
+                              class="c0 c61 c62"
                               fill="none"
                               height="1em"
                               viewBox="0 0 24 24"
@@ -1271,7 +1340,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                             </svg>
                             <svg
                               aria-hidden="true"
-                              class="c0 c58 c59"
+                              class="c0 c63 c64"
                               fill="none"
                               height="1em"
                               viewBox="0 0 24 24"
@@ -1287,17 +1356,17 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               aria-label="This plugin was starred 323 on GitHub"
                             >
                               <span
-                                class="c8 c60"
+                                class="c8 c65"
                               >
                                 323
                               </span>
                             </p>
                             <hr
-                              class="c0 c61 c62 c63"
+                              class="c0 c66 c67 c68"
                             />
                             <svg
                               aria-hidden="true"
-                              class="c0 c56 c57"
+                              class="c0 c61 c62"
                               fill="none"
                               height="1em"
                               viewBox="0 0 24 25"
@@ -1315,7 +1384,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               aria-label="This plugin has 1123 weekly downloads"
                             >
                               <span
-                                class="c8 c60"
+                                class="c8 c65"
                               >
                                 1123
                               </span>
@@ -1323,10 +1392,10 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           </div>
                         </div>
                         <div
-                          class="c0 c64"
+                          class="c0 c69"
                         >
                           <h3
-                            class="c8 c65"
+                            class="c8 c70"
                           >
                             <div
                               class="c0 c7"
@@ -1336,17 +1405,17 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           </h3>
                         </div>
                         <div
-                          class="c0 c66"
+                          class="c0 c71"
                         >
                           <p
-                            class="c8 c67 c68"
+                            class="c8 c72 c73"
                           >
                             Powerful Strapi based comments moderation tool for you and your users
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c69 c7 c70"
+                        class="c0 c74 c7 c75"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1358,13 +1427,13 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           target="_blank"
                         >
                           <span
-                            class="c8 c14"
+                            class="c15 c16"
                           >
                             More
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c71"
+                            class="c13 c76"
                           >
                             <svg
                               fill="none"
@@ -1382,12 +1451,12 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c11 c72"
+                          class="c49 c77"
                           type="button"
                         >
                           <div
                             aria-hidden="true"
-                            class="c0 c13 c48"
+                            class="c0 c52 c53"
                           >
                             <svg
                               fill="none"
@@ -1407,7 +1476,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                             </svg>
                           </div>
                           <span
-                            class="c8 c14"
+                            class="c8 c22"
                           >
                             Copy install command
                           </span>
@@ -1417,33 +1486,33 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c50"
+                  class="c55"
                 >
                   <div
                     class="c0 "
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c51 c52"
+                      class="c0 c56 c57"
                       data-testid="npm-package-card"
                     >
                       <div
                         class="c0 "
                       >
                         <div
-                          class="c0 c53"
+                          class="c0 c58"
                         >
                           <img
                             alt="Config Sync logo"
-                            class="c0 c54"
+                            class="c0 c59"
                             src="https://dl.airtable.com/.attachments/e23a7231d12cce89cb4b05cbfe759d45/96f5f496/Screenshot2021-12-09at22.15.37.png"
                           />
                           <div
-                            class="c0 c7 c55"
+                            class="c0 c7 c60"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c56 c57"
+                              class="c0 c61 c62"
                               fill="none"
                               height="1em"
                               viewBox="0 0 24 25"
@@ -1461,7 +1530,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               aria-label="This plugin has 0 weekly downloads"
                             >
                               <span
-                                class="c8 c60"
+                                class="c8 c65"
                               >
                                 0
                               </span>
@@ -1469,10 +1538,10 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           </div>
                         </div>
                         <div
-                          class="c0 c64"
+                          class="c0 c69"
                         >
                           <h3
-                            class="c8 c65"
+                            class="c8 c70"
                           >
                             <div
                               class="c0 c7"
@@ -1485,7 +1554,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                                   tabindex="0"
                                 >
                                   <svg
-                                    class="c0 c73 c74"
+                                    class="c0 c78 c79"
                                     fill="none"
                                     height="1em"
                                     viewBox="0 0 24 24"
@@ -1505,17 +1574,17 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           </h3>
                         </div>
                         <div
-                          class="c0 c66"
+                          class="c0 c71"
                         >
                           <p
-                            class="c8 c67 c68"
+                            class="c8 c72 c73"
                           >
                             Migrate your config data across environments using the CLI or Strapi admin panel.
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c69 c7 c70"
+                        class="c0 c74 c7 c75"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1527,13 +1596,13 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           target="_blank"
                         >
                           <span
-                            class="c8 c14"
+                            class="c15 c16"
                           >
                             More
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c71"
+                            class="c13 c76"
                           >
                             <svg
                               fill="none"
@@ -1557,12 +1626,12 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           >
                             <button
                               aria-disabled="false"
-                              class="c11 c72"
+                              class="c49 c77"
                               type="button"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c0 c13 c48"
+                                class="c0 c52 c53"
                               >
                                 <svg
                                   fill="none"
@@ -1582,7 +1651,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                                 </svg>
                               </div>
                               <span
-                                class="c8 c14"
+                                class="c8 c22"
                               >
                                 Copy install command
                               </span>
@@ -1594,33 +1663,33 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c50"
+                  class="c55"
                 >
                   <div
                     class="c0 "
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c51 c52"
+                      class="c0 c56 c57"
                       data-testid="npm-package-card"
                     >
                       <div
                         class="c0 "
                       >
                         <div
-                          class="c0 c53"
+                          class="c0 c58"
                         >
                           <img
                             alt="Content Versioning logo"
-                            class="c0 c54"
+                            class="c0 c59"
                             src="https://dl.airtable.com/.attachments/0b86f18e2606ed7f53bd54d536a1bea5/13a87f30/Artboard7copy.png"
                           />
                           <div
-                            class="c0 c7 c55"
+                            class="c0 c7 c60"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c56 c57"
+                              class="c0 c61 c62"
                               fill="none"
                               height="1em"
                               viewBox="0 0 24 25"
@@ -1638,7 +1707,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               aria-label="This plugin has 0 weekly downloads"
                             >
                               <span
-                                class="c8 c60"
+                                class="c8 c65"
                               >
                                 0
                               </span>
@@ -1646,10 +1715,10 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           </div>
                         </div>
                         <div
-                          class="c0 c64"
+                          class="c0 c69"
                         >
                           <h3
-                            class="c8 c65"
+                            class="c8 c70"
                           >
                             <div
                               class="c0 c7"
@@ -1659,17 +1728,17 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           </h3>
                         </div>
                         <div
-                          class="c0 c66"
+                          class="c0 c71"
                         >
                           <p
-                            class="c8 c67 c68"
+                            class="c8 c72 c73"
                           >
                             This plugin enables you to versioning Content Types. It allows multiple draft versions✅ Keeps history of all changes (with time travel) ✅ 
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c69 c7 c70"
+                        class="c0 c74 c7 c75"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1681,13 +1750,13 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           target="_blank"
                         >
                           <span
-                            class="c8 c14"
+                            class="c15 c16"
                           >
                             More
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c71"
+                            class="c13 c76"
                           >
                             <svg
                               fill="none"
@@ -1711,13 +1780,13 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           >
                             <button
                               aria-disabled="true"
-                              class="c11 c72"
+                              class="c49 c77"
                               disabled=""
                               type="button"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c0 c13 c48"
+                                class="c0 c52 c53"
                               >
                                 <svg
                                   fill="none"
@@ -1737,7 +1806,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                                 </svg>
                               </div>
                               <span
-                                class="c8 c14"
+                                class="c8 c22"
                               >
                                 Copy install command
                               </span>
@@ -1749,33 +1818,33 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c50"
+                  class="c55"
                 >
                   <div
                     class="c0 "
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c51 c52"
+                      class="c0 c56 c57"
                       data-testid="npm-package-card"
                     >
                       <div
                         class="c0 "
                       >
                         <div
-                          class="c0 c53"
+                          class="c0 c58"
                         >
                           <img
                             alt="Documentation logo"
-                            class="c0 c54"
+                            class="c0 c59"
                             src="https://dl.airtable.com/.attachments/b6998ac52e8b0460b8a14ced8074b788/2a4d4a90/swagger.png"
                           />
                           <div
-                            class="c0 c7 c55"
+                            class="c0 c7 c60"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c56 c57"
+                              class="c0 c61 c62"
                               fill="none"
                               height="1em"
                               viewBox="0 0 24 24"
@@ -1789,7 +1858,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                             </svg>
                             <svg
                               aria-hidden="true"
-                              class="c0 c58 c59"
+                              class="c0 c63 c64"
                               fill="none"
                               height="1em"
                               viewBox="0 0 24 24"
@@ -1805,17 +1874,17 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               aria-label="This plugin was starred 49130 on GitHub"
                             >
                               <span
-                                class="c8 c60"
+                                class="c8 c65"
                               >
                                 49130
                               </span>
                             </p>
                             <hr
-                              class="c0 c61 c62 c63"
+                              class="c0 c66 c67 c68"
                             />
                             <svg
                               aria-hidden="true"
-                              class="c0 c56 c57"
+                              class="c0 c61 c62"
                               fill="none"
                               height="1em"
                               viewBox="0 0 24 25"
@@ -1833,7 +1902,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               aria-label="This plugin has 7492 weekly downloads"
                             >
                               <span
-                                class="c8 c60"
+                                class="c8 c65"
                               >
                                 7492
                               </span>
@@ -1841,10 +1910,10 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           </div>
                         </div>
                         <div
-                          class="c0 c64"
+                          class="c0 c69"
                         >
                           <h3
-                            class="c8 c65"
+                            class="c8 c70"
                           >
                             <div
                               class="c0 c7"
@@ -1858,7 +1927,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                                 >
                                   <img
                                     alt="Made by Strapi"
-                                    class="c0 c75"
+                                    class="c0 c80"
                                     src="IMAGE_MOCK"
                                   />
                                 </div>
@@ -1867,17 +1936,17 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           </h3>
                         </div>
                         <div
-                          class="c0 c66"
+                          class="c0 c71"
                         >
                           <p
-                            class="c8 c67 c68"
+                            class="c8 c72 c73"
                           >
                             Create an OpenAPI Document and visualize your API with SWAGGER UI
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c69 c7 c70"
+                        class="c0 c74 c7 c75"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1889,13 +1958,13 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           target="_blank"
                         >
                           <span
-                            class="c8 c14"
+                            class="c15 c16"
                           >
                             More
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c71"
+                            class="c13 c76"
                           >
                             <svg
                               fill="none"
@@ -1912,10 +1981,10 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           </div>
                         </a>
                         <div
-                          class="c0 c76"
+                          class="c0 c81"
                         >
                           <svg
-                            class="c0 c77 c74"
+                            class="c0 c82 c79"
                             fill="none"
                             height="1em"
                             viewBox="0 0 24 24"
@@ -1928,7 +1997,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                             />
                           </svg>
                           <span
-                            class="c8 c78"
+                            class="c8 c83"
                           >
                             Installed
                           </span>
@@ -1938,33 +2007,33 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c50"
+                  class="c55"
                 >
                   <div
                     class="c0 "
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c51 c52"
+                      class="c0 c56 c57"
                       data-testid="npm-package-card"
                     >
                       <div
                         class="c0 "
                       >
                         <div
-                          class="c0 c53"
+                          class="c0 c58"
                         >
                           <img
                             alt="Transformer logo"
-                            class="c0 c54"
+                            class="c0 c59"
                             src="https://dl.airtable.com/.attachments/5ffd1782a2fabf423ccd6f56c562f31a/b8f8598f/transformer-logo.png"
                           />
                           <div
-                            class="c0 c7 c55"
+                            class="c0 c7 c60"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c56 c57"
+                              class="c0 c61 c62"
                               fill="none"
                               height="1em"
                               viewBox="0 0 24 25"
@@ -1982,7 +2051,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               aria-label="This plugin has 0 weekly downloads"
                             >
                               <span
-                                class="c8 c60"
+                                class="c8 c65"
                               >
                                 0
                               </span>
@@ -1990,10 +2059,10 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           </div>
                         </div>
                         <div
-                          class="c0 c64"
+                          class="c0 c69"
                         >
                           <h3
-                            class="c8 c65"
+                            class="c8 c70"
                           >
                             <div
                               class="c0 c7"
@@ -2003,17 +2072,17 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           </h3>
                         </div>
                         <div
-                          class="c0 c66"
+                          class="c0 c71"
                         >
                           <p
-                            class="c8 c67 c68"
+                            class="c8 c72 c73"
                           >
                             A plugin for Strapi Headless CMS that provides the ability to transform the API response. 
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c69 c7 c70"
+                        class="c0 c74 c7 c75"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -2025,13 +2094,13 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           target="_blank"
                         >
                           <span
-                            class="c8 c14"
+                            class="c15 c16"
                           >
                             More
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c71"
+                            class="c13 c76"
                           >
                             <svg
                               fill="none"
@@ -2055,13 +2124,13 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           >
                             <button
                               aria-disabled="true"
-                              class="c11 c72"
+                              class="c49 c77"
                               disabled=""
                               type="button"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c0 c13 c48"
+                                class="c0 c52 c53"
                               >
                                 <svg
                                   fill="none"
@@ -2081,7 +2150,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                                 </svg>
                               </div>
                               <span
-                                class="c8 c14"
+                                class="c8 c22"
                               >
                                 Copy install command
                               </span>
@@ -2097,7 +2166,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
           </div>
         </div>
         <div
-          class="c0 c79"
+          class="c0 c84"
         >
           <a
             href="https://strapi.canny.io/plugin-requests"
@@ -2106,10 +2175,10 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
             target="_blank"
           >
             <div
-              class="c0 c80 c7"
+              class="c0 c85 c7"
             >
               <div
-                class="c0 c81 c7 c82"
+                class="c0 c86 c7 c87"
               >
                 <svg
                   fill="none"
@@ -2131,18 +2200,18 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                 </svg>
               </div>
               <div
-                class="c0 c35 c36"
+                class="c0 c38 c39"
               >
                 <div
                   class="c0 c7"
                 >
                   <span
-                    class="c8 c83 c84"
+                    class="c8 c88 c89"
                   >
                     Documentation
                   </span>
                   <svg
-                    class="c0 c85 c57"
+                    class="c0 c90 c62"
                     fill="none"
                     height="1em"
                     viewBox="0 0 24 24"
@@ -2156,7 +2225,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                   </svg>
                 </div>
                 <span
-                  class="c8 c67"
+                  class="c8 c72"
                 >
                   Tell us what plugin you are looking for and we'll let our community plugin developers know in case they are in search for inspiration!
                 </span>

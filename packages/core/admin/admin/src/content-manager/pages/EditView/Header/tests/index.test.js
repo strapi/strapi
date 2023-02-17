@@ -53,60 +53,6 @@ describe('CONTENT MANAGER | EditView | Header', () => {
     } = render(makeApp());
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c1 {
-        background: #f6f6f9;
-        padding-top: 24px;
-        padding-right: 56px;
-        padding-bottom: 40px;
-        padding-left: 56px;
-      }
-
-      .c2 {
-        padding-bottom: 8px;
-      }
-
-      .c4 {
-        padding-right: 8px;
-      }
-
-      .c8 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-      }
-
-      .c9 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c7 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #4945ff;
-      }
-
       .c10 {
         font-weight: 600;
         font-size: 2rem;
@@ -125,6 +71,50 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         font-size: 1rem;
         line-height: 1.5;
         color: #666687;
+      }
+
+      .c1 {
+        background: #f6f6f9;
+        padding-top: 24px;
+        padding-right: 56px;
+        padding-bottom: 40px;
+        padding-left: 56px;
+      }
+
+      .c2 {
+        padding-bottom: 8px;
+      }
+
+      .c7 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+      }
+
+      .c8 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
       }
 
       .c11 > * {
@@ -217,7 +207,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         align-items: center;
       }
 
-      .c13 .c6 {
+      .c13 .c9 {
         color: #ffffff;
       }
 
@@ -226,7 +216,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         background: #eaeaef;
       }
 
-      .c13[aria-disabled='true'] .c6 {
+      .c13[aria-disabled='true'] .c9 {
         color: #666687;
       }
 
@@ -239,7 +229,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         background: #eaeaef;
       }
 
-      .c13[aria-disabled='true']:active .c6 {
+      .c13[aria-disabled='true']:active .c9 {
         color: #666687;
       }
 
@@ -260,6 +250,16 @@ describe('CONTENT MANAGER | EditView | Header', () => {
       .c13 svg > g,
       .c13 svg path {
         fill: #ffffff;
+      }
+
+      .c4 {
+        padding-right: 8px;
+      }
+
+      .c6 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #4945ff;
       }
 
       .c3 {
@@ -339,7 +339,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
             >
               <span
                 aria-hidden="true"
-                class="c0 c4 c5"
+                class="c4 c5"
               >
                 <svg
                   fill="none"
@@ -355,26 +355,26 @@ describe('CONTENT MANAGER | EditView | Header', () => {
                 </svg>
               </span>
               <span
-                class="c6 c7"
+                class="c6"
               >
                 Back
               </span>
             </a>
           </div>
           <div
-            class="c0 c8"
+            class="c0 c7"
           >
             <div
-              class="c0 c9"
+              class="c0 c8"
             >
               <h1
-                class="c6 c10"
+                class="c9 c10"
               >
                 Create an entry
               </h1>
             </div>
             <div
-              class="c0 c9 c11"
+              class="c0 c8 c11"
             >
               <button
                 aria-disabled="true"
@@ -383,7 +383,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
                 type="submit"
               >
                 <span
-                  class="c6 c14"
+                  class="c9 c14"
                 >
                   Save
                 </span>
@@ -391,7 +391,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
             </div>
           </div>
           <p
-            class="c6 c15"
+            class="c9 c15"
           >
             API ID  : restaurant
           </p>

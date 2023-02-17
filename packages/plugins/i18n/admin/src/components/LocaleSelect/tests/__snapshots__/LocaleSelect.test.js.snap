@@ -1,6 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
+.c3 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
 .c9 {
   padding-left: 12px;
 }
@@ -50,6 +57,27 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
   flex-wrap: wrap;
 }
 
+.c2 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c2 > * + * {
+  margin-top: 4px;
+}
+
+.c0 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
 .c10 {
   background: transparent;
   border: none;
@@ -77,25 +105,6 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
 
 .c11 svg {
   width: 0.375rem;
-}
-
-.c3 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c0 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c5 {
@@ -151,15 +160,6 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
   background: inherit;
   color: inherit;
   cursor: not-allowed;
-}
-
-.c2 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c2 > * + * {
-  margin-top: 4px;
 }
 
 <div>

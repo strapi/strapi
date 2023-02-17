@@ -131,18 +131,6 @@ describe('ADMIN | COMPONENTS | ROLE | PluginsAndSettings | formatLayoutForSetti
               },
             ],
           },
-          {
-            subCategoryName: 'plugins',
-            subCategoryId: 'plugins',
-            actions: [
-              {
-                displayName: 'Install (only for dev env)',
-                action: 'admin::marketplace.plugins.install',
-                category: 'plugins and marketplace',
-                subCategory: 'plugins',
-              },
-            ],
-          },
         ],
       },
     ];

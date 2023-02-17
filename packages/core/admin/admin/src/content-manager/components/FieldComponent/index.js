@@ -6,11 +6,8 @@ import isEqual from 'react-fast-compare';
 import { useIntl } from 'react-intl';
 
 import { NotAllowedInput } from '@strapi/helper-plugin';
-import Trash from '@strapi/icons/Trash';
-import { Box } from '@strapi/design-system/Box';
-import { IconButton } from '@strapi/design-system/IconButton';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
+import { Trash } from '@strapi/icons';
+import { Box, IconButton, Flex, Stack } from '@strapi/design-system';
 
 import connect from './utils/connect';
 import select from './utils/select';

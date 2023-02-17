@@ -1,11 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Stack } from '@strapi/design-system/Stack';
-import { IconButton } from '@strapi/design-system/IconButton';
-import Trash from '@strapi/icons/Trash';
-import DownloadIcon from '@strapi/icons/Download';
-import Resize from '@strapi/icons/Crop';
+import { Stack, IconButton } from '@strapi/design-system';
+import { Trash, Download as DownloadIcon, Crop as Resize } from '@strapi/icons';
 import { useTracking } from '@strapi/helper-plugin';
 import getTrad from '../../../utils/getTrad';
 import { downloadFile } from '../../../utils/downloadFile';
