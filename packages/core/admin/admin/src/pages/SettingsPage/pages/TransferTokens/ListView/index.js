@@ -73,6 +73,8 @@ const TransferTokenListView = () => {
         data: { data },
       } = await get(`/admin/transfer/tokens`);
 
+      trackUsage('didAccessTokenList', { number: data.length, tokenType: TRANSFER_TOKEN_TYPE });
+
       return data;
     },
     {

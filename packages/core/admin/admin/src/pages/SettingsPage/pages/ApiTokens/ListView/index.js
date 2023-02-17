@@ -72,7 +72,7 @@ const ApiTokenListView = () => {
         data: { data },
       } = await get(`/admin/api-tokens`);
 
-      trackUsage('didAccessTokenList', { number: data.length });
+      trackUsage('didAccessTokenList', { number: data.length, tokenType: API_TOKEN_TYPE });
 
       return data;
     },
