@@ -27,6 +27,7 @@ describe('ContentBox', () => {
         padding: 24px;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+        position: relative;
       }
 
       .c2 {

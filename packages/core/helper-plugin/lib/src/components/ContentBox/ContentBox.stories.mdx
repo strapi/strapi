@@ -47,6 +47,28 @@ TODO
         iconBackground="alternative100"
       />
       <ContentBox
+        title="Custom Icon and Decorator"
+        subtitle="Content box with a custom icon and a end decorator"
+        customIcon={
+          <div style={{ background: 'red', height: 56, width: 56, padding: 12, marginRight: 24 }}>
+            <div style={{ background: 'green', height: '100%', width: '100%' }} />
+          </div>
+        }
+        decorator={
+          <div
+            style={{
+              position: 'absolute',
+              width: 10,
+              height: 10,
+              borderRadius: 10,
+              background: 'red',
+              right: 5,
+              top: 5,
+            }}
+          />
+        }
+      />
+      <ContentBox
         titleEllipsis
         endAction={<IconButton label="Duplicate" noBorder icon={<Duplicate />} />}
         title="http://localhost:4000/admin/auth/register?registrationToken=e02849fabef5239fe3c459d23d8c3b30d5057aa9"
