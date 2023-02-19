@@ -27,4 +27,17 @@ describe('useLicenseLimits', () => {
     expect(useQuery).toHaveBeenCalledWith(['ee', 'license-limit-info'], expect.any(Function));
     expect(result.current.license.data).toEqual(data.data);
   });
+
+  it('data should be undefined if there is an API error', async () => {
+    // const data = { data: { id: 1, name: 'Test License' } };
+    useQuery.mockReturnValue({
+      isError: true,
+    });
+
+    const { result } = renderHook(() => useLicenseLimits());
+
+    expect(useFetchClient).toHaveBeenCalled();
+    expect(useQuery).toHaveBeenCalledWith(['ee', 'license-limit-info'], expect.any(Function));
+    expect(result.current.license.data).toEqual(undefined);
+  });
 });
