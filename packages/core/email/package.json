@@ -33,15 +33,23 @@
     "axios": "1.2.2",
     "lodash": "4.17.21",
     "prop-types": "^15.7.2",
-    "react": "^17.0.2",
     "react-intl": "6.2.8",
-    "styled-components": "5.3.3",
     "yup": "^0.32.9"
   },
   "devDependencies": {
     "@strapi/helper-plugin": "4.6.1",
     "@testing-library/react": "12.1.4",
-    "msw": "1.0.0"
+    "msw": "1.0.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "5.3.4",
+    "styled-components": "5.3.3"
+  },
+  "peerDependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "5.3.4",
+    "styled-components": "5.3.3"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",

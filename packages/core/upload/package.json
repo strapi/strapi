@@ -41,19 +41,14 @@
     "mime-types": "2.1.35",
     "prop-types": "^15.7.2",
     "qs": "6.11.0",
-    "react": "^17.0.2",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dnd": "15.1.2",
-    "react-dom": "^17.0.2",
     "react-helmet": "^6.1.0",
     "react-intl": "6.2.8",
     "react-query": "3.24.3",
     "react-redux": "8.0.5",
-    "react-router": "^5.2.0",
-    "react-router-dom": "5.3.4",
     "react-select": "5.6.0",
     "sharp": "0.31.1",
-    "styled-components": "5.3.3",
     "yup": "^0.32.9"
   },
   "devDependencies": {
@@ -62,7 +57,17 @@
     "@testing-library/react-hooks": "8.0.1",
     "@testing-library/user-event": "14.4.3",
     "msw": "1.0.1",
-    "react-test-renderer": "^17.0.2"
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "5.3.4",
+    "react-test-renderer": "^17.0.2",
+    "styled-components": "5.3.3"
+  },
+  "peerDependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "5.3.4",
+    "styled-components": "5.3.3"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",
