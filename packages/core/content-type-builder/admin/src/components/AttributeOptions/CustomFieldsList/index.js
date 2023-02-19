@@ -1,10 +1,6 @@
 import React from 'react';
 import { useCustomFields } from '@strapi/helper-plugin';
-import { Box } from '@strapi/design-system/Box';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
-import { Stack } from '@strapi/design-system/Stack';
-import { Link } from '@strapi/design-system/Link';
+import { Box, Grid, GridItem, KeyboardNavigable, Stack, Link } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import EmptyAttributes from '../EmptyAttributes';
 import CustomFieldOption from '../CustomFieldOption';

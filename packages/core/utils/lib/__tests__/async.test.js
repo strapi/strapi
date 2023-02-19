@@ -1,6 +1,6 @@
 'use strict';
 
-const { pipeAsync, mapAsync } = require('../async');
+const { pipeAsync, mapAsync, reduceAsync } = require('../async');
 
 describe('Async utils', () => {
   describe('pipeAsync', () => {
@@ -75,6 +75,60 @@ describe('Async utils', () => {
 
       expect(result).toEqual([1, 2, 3, 4, 5, 6]);
       expect(maxOperations).toEqual(2);
+    });
+  });
+  describe('reduceAsync', () => {
+    test('Should return an incremented number', async () => {
+      const numberPromiseArray = [Promise.resolve(1), Promise.resolve(2)];
+
+      const reduceFunc = reduceAsync(numberPromiseArray);
+      const result = await reduceFunc(
+        (previousValue, currentValue) => previousValue + currentValue,
+        10
+      );
+
+      expect(result).toEqual(13);
+    });
+    test('Should work without initial value', async () => {
+      const numberPromiseArray = [Promise.resolve(1), Promise.resolve(2)];
+
+      const reduceFunc = reduceAsync(numberPromiseArray);
+      const result = await reduceFunc(
+        (previousValue, currentValue) => (previousValue || 10) + currentValue
+      );
+
+      expect(result).toEqual(13);
+    });
+    test('Should work with mix of promises and values', async () => {
+      const numberMixArray = [1, Promise.resolve(2)];
+
+      const reduceFunc = reduceAsync(numberMixArray);
+      const result = await reduceFunc(
+        (previousValue, currentValue) => previousValue + currentValue,
+        10
+      );
+
+      expect(result).toEqual(13);
+    });
+    test('Should throw an error with proper message when the provided callback throws an error', async () => {
+      const numberPromiseArray = [Promise.resolve(1), Promise.resolve(2)];
+
+      const reduceFunc = reduceAsync(numberPromiseArray);
+
+      await expect(async () => {
+        await reduceFunc(() => {
+          throw new Error('test');
+        });
+      }).rejects.toThrow('test');
+    });
+    test('Should throw an error with proper message when the input array contains a rejected Promise', async () => {
+      const numberPromiseArray = [Promise.reject(new Error('input')), Promise.resolve(2)];
+
+      const reduceFunc = reduceAsync(numberPromiseArray);
+
+      await expect(async () => {
+        await reduceFunc(() => true, null);
+      }).rejects.toThrow('input');
     });
   });
 });

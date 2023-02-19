@@ -1,10 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Td, Tr } from '@strapi/design-system/Table';
-import { Typography } from '@strapi/design-system/Typography';
-import { IconButton } from '@strapi/design-system/IconButton';
+import { Box, Flex, Td, Tr, Typography, IconButton } from '@strapi/design-system';
 import { stopPropagation, onRowClick, pxToRem } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 

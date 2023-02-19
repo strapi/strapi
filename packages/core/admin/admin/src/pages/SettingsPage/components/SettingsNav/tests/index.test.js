@@ -6,6 +6,11 @@ import { createMemoryHistory } from 'history';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import SettingsNav from '../index';
 
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
+}));
+
 const menu = [
   {
     id: 'global',

@@ -6,19 +6,10 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { LinkButton } from '@strapi/design-system/v2/LinkButton';
-import { Link } from '@strapi/design-system/v2/Link';
-import ExternalLink from '@strapi/icons/ExternalLink';
-import Github from '@strapi/icons/Github';
-import Discord from '@strapi/icons/Discord';
-import Reddit from '@strapi/icons/Reddit';
-import Strapi from '@strapi/icons/Strapi';
-import Twitter from '@strapi/icons/Twitter';
-import Discourse from '@strapi/icons/Discourse';
+import { useAppInfos } from '@strapi/helper-plugin';
+import { Typography, Box, Stack, Grid, GridItem } from '@strapi/design-system';
+import { Link, LinkButton } from '@strapi/design-system/v2';
+import { ExternalLink, Github, Discord, Reddit, Strapi, Twitter, Discourse } from '@strapi/icons';
 
 const StyledDiscord = styled(Discord)`
   path {
@@ -72,43 +63,46 @@ const StyledDiscourse = styled(Discourse)`
 
 const socialLinks = [
   {
-    name: 'Github',
+    name: { id: 'app.components.HomePage.community.links.github', defaultMessage: 'Github' },
     link: 'https://github.com/strapi/strapi/',
     icon: <Github fill="#7289DA" />,
     alt: 'github',
   },
   {
-    name: 'Discord',
+    name: { id: 'app.components.HomePage.community.links.discord', defaultMessage: 'Discord' },
     link: 'https://discord.strapi.io/',
     icon: <StyledDiscord />,
     alt: 'discord',
   },
   {
-    name: 'Reddit',
+    name: { id: 'app.components.HomePage.community.links.reddit', defaultMessage: 'Reddit' },
     link: 'https://www.reddit.com/r/Strapi/',
     icon: <StyledReddit />,
     alt: 'reddit',
   },
   {
-    name: 'Twitter',
+    name: { id: 'app.components.HomePage.community.links.twitter', defaultMessage: 'Twitter' },
     link: 'https://twitter.com/strapijs',
     icon: <StyledTwitter />,
     alt: 'twitter',
   },
   {
-    name: 'Forum',
+    name: { id: 'app.components.HomePage.community.links.forum', defaultMessage: 'Forum' },
     link: 'https://forum.strapi.io',
     icon: <StyledDiscourse />,
     alt: 'forum',
   },
   {
-    name: 'Blog',
+    name: { id: 'app.components.HomePage.community.links.blog', defaultMessage: 'Blog' },
     link: 'https://strapi.io/blog?utm_source=referral&utm_medium=admin&utm_campaign=career%20page',
     icon: <StyledStrapi />,
     alt: 'blog',
   },
   {
-    name: 'We are hiring!',
+    name: {
+      id: 'app.components.HomePage.community.links.career',
+      defaultMessage: 'We are hiring!',
+    },
     link: 'https://strapi.io/careers?utm_source=referral&utm_medium=admin&utm_campaign=blog',
     icon: <StyledStrapi />,
     alt: 'career',
@@ -137,6 +131,21 @@ const GridGap = styled(Grid)`
 
 const SocialLinks = () => {
   const { formatMessage } = useIntl();
+  const { communityEdition } = useAppInfos();
+
+  const socialLinksExtended = [
+    ...socialLinks,
+    {
+      icon: <StyledStrapi />,
+      link: communityEdition
+        ? 'https://discord.strapi.io'
+        : 'https://support.strapi.io/support/home',
+      name: {
+        id: 'Settings.application.get-help',
+        defaultMessage: 'Get help',
+      },
+    },
+  ];
 
   return (
     <Box
@@ -176,17 +185,11 @@ const SocialLinks = () => {
         </Stack>
       </Box>
       <GridGap>
-        {socialLinks.map((socialLink) => {
+        {socialLinksExtended.map(({ icon, link, name }) => {
           return (
-            <GridItem col={6} s={12} key={socialLink.name}>
-              <LinkCustom
-                size="L"
-                startIcon={socialLink.icon}
-                variant="tertiary"
-                href={socialLink.link}
-                isExternal
-              >
-                {socialLink.name}
+            <GridItem col={6} s={12} key={name}>
+              <LinkCustom size="L" startIcon={icon} variant="tertiary" href={link} isExternal>
+                {formatMessage(name)}
               </LinkCustom>
             </GridItem>
           );

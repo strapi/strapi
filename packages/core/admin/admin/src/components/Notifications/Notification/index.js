@@ -1,8 +1,8 @@
 import React, { useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Alert } from '@strapi/design-system/Alert';
-import { Link } from '@strapi/design-system/v2/Link';
+import { Alert } from '@strapi/design-system';
+import { Link } from '@strapi/design-system/v2';
 
 const Notification = ({ dispatch, notification }) => {
   const { formatMessage } = useIntl();

@@ -8,9 +8,13 @@ import {
   useFocusWhenNavigate,
   NoPermissions,
 } from '@strapi/helper-plugin';
-import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import {
+  ActionLayout,
+  ContentLayout,
+  HeaderLayout,
+  Main,
+  useNotifyAT,
+} from '@strapi/design-system';
 import { useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';

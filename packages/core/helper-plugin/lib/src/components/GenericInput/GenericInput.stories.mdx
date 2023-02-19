@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { Meta, Story, Canvas } from '@storybook/addon-docs/blocks';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { Stack } from '@strapi/design-system/Stack';
-import { Box } from '@strapi/design-system/Box';
+import { Grid, GridItem } from '@strapi/design-system';
+import { HeaderLayout, ContentLayout } from '@strapi/design-system';
+import { Main } from '@strapi/design-system';
+import { Stack } from '@strapi/design-system';
+import { Box } from '@strapi/design-system';
 import set from 'lodash/set';
 import GenericInput from './index';
 import layout from './storyUtils/layout';
@@ -30,7 +30,7 @@ Description...
         private: null,
         isNullable: null,
         isActiveByDefault: true,
-        isInactiveByDefault: false
+        isInactiveByDefault: false,
       });
       return (
         <ContentLayout>
@@ -39,14 +39,14 @@ Description...
               return (
                 <Box key={rowIndex}>
                   <Grid gap={4}>
-                    {row.map(input => {
+                    {row.map((input) => {
                       return (
                         <GridItem key={input.name} {...input.size}>
                           <GenericInput
                             {...input}
                             value={state[input.name]}
                             onChange={({ target: { name, value } }) => {
-                              setState(prev => {
+                              setState((prev) => {
                                 return { ...prev, [name]: value };
                               });
                             }}

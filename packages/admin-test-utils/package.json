@@ -19,7 +19,6 @@
   "main": "lib/index.js",
   "devDependencies": {
     "@testing-library/jest-dom": "5.16.5",
-    "core-js": "3.27.1",
     "jest-styled-components": "7.1.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

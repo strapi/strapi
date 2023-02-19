@@ -3,11 +3,9 @@
 const path = require('path');
 
 const { map, values, sumBy, pipe, flatMap, propEq } = require('lodash/fp');
-const execa = require('execa');
 const _ = require('lodash');
 const { exists } = require('fs-extra');
 const { env } = require('@strapi/utils');
-const { ValidationError } = require('@strapi/utils').errors;
 const { isUsingTypeScript } = require('@strapi/typescript-utils');
 // eslint-disable-next-line node/no-extraneous-require
 const ee = require('@strapi/strapi/lib/utils/ee');
@@ -18,15 +16,6 @@ const {
   validateUpdateProjectSettingsImagesDimensions,
 } = require('../validation/project-settings');
 const { getService } = require('../utils');
-
-const PLUGIN_NAME_REGEX = /^[A-Za-z][A-Za-z0-9-_]+$/;
-
-/**
- * Validates a plugin name format
- */
-const isValidPluginName = (plugin) => {
-  return _.isString(plugin) && !_.isEmpty(plugin) && PLUGIN_NAME_REGEX.test(plugin);
-};
 
 /**
  * A set of functions called "actions" for `Admin`
@@ -146,28 +135,6 @@ module.exports = {
     };
   },
 
-  async installPlugin(ctx) {
-    try {
-      const { plugin } = ctx.request.body;
-
-      if (!isValidPluginName(plugin)) {
-        throw new ValidationError('Invalid plugin name');
-      }
-
-      strapi.reload.isWatching = false;
-
-      strapi.log.info(`Installing ${plugin}...`);
-      await execa('npm', ['run', 'strapi', '--', 'install', plugin]);
-
-      ctx.send({ ok: true });
-
-      strapi.reload();
-    } catch (err) {
-      strapi.reload.isWatching = true;
-      throw err;
-    }
-  },
-
   async plugins(ctx) {
     const enabledPlugins = strapi.config.get('enabledPlugins');
 
@@ -179,27 +146,5 @@ module.exports = {
     }));
 
     ctx.send({ plugins });
-  },
-
-  async uninstallPlugin(ctx) {
-    try {
-      const { plugin } = ctx.params;
-
-      if (!isValidPluginName(plugin)) {
-        throw new ValidationError('Invalid plugin name');
-      }
-
-      strapi.reload.isWatching = false;
-
-      strapi.log.info(`Uninstalling ${plugin}...`);
-      await execa('npm', ['run', 'strapi', '--', 'uninstall', plugin, '-d']);
-
-      ctx.send({ ok: true });
-
-      strapi.reload();
-    } catch (err) {
-      strapi.reload.isWatching = true;
-      throw err;
-    }
   },
 };

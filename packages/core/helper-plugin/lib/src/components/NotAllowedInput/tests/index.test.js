@@ -27,6 +27,13 @@ describe('<NotAllowedInput />', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c2 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
       .c6 {
         padding-right: 8px;
         padding-left: 12px;
@@ -78,11 +85,13 @@ describe('<NotAllowedInput />', () => {
         justify-content: space-between;
       }
 
-      .c2 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
+      .c1 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c1 > * + * {
+        margin-top: 4px;
       }
 
       .c8 {
@@ -147,15 +156,6 @@ describe('<NotAllowedInput />', () => {
       .c5:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
-      }
-
-      .c1 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c1 > * + * {
-        margin-top: 4px;
       }
 
       .c7 > path {
