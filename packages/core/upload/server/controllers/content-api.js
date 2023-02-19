@@ -5,7 +5,6 @@ const utils = require('@strapi/utils');
 const { getService } = require('../utils');
 const { FILE_MODEL_UID } = require('../constants');
 const validateUploadBody = require('./validation/content-api/upload');
-const { signFileUrl } = require('../services/file');
 
 const { sanitize } = utils;
 const { ValidationError } = utils.errors;
@@ -127,19 +126,5 @@ module.exports = {
     }
 
     await (id ? this.replaceFile : this.uploadFiles)(ctx);
-  },
-
-  async proxy(ctx) {
-    const {
-      query: { fileKey },
-    } = ctx;
-
-    const url = await signFileUrl(fileKey);
-
-    if (!url) {
-      return ctx.notFound();
-    }
-
-    ctx.redirect(url); // Returns 302
   },
 };
