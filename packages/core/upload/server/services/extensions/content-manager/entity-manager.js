@@ -58,11 +58,12 @@ const signEntityMedia = async (entity, uid) => {
   return signedEntity;
 };
 
-const addSignedFileUrlsToAdmin = () => {
+const addSignedFileUrlsToAdmin = async () => {
   const { provider } = strapi.plugins.upload;
+  const isPrivate = await provider.isPrivate();
 
   // We only need to sign the file urls if the provider is private
-  if (!provider.isPrivate()) {
+  if (!isPrivate) {
     return;
   }
 
