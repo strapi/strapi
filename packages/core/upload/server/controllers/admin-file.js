@@ -49,10 +49,8 @@ module.exports = {
       id
     );
 
-    const fileService = await getService('file');
-    await fileService.signFileUrls(file);
-
-    ctx.body = await pm.sanitizeOutput(file);
+    const signedFile = await getService('file').signFileUrls(file);
+    ctx.body = await pm.sanitizeOutput(signedFile);
   },
 
   async destroy(ctx) {
