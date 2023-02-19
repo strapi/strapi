@@ -101,8 +101,9 @@ describe('useLicenseLimitNotification', () => {
     expect(toggleNotification).toHaveBeenCalledWith({
       type: 'softWarning',
       message:
-        "Add seats to invite more Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
-      title: 'Over seat limit ({currentUserCount}/{permittedSeats})',
+        "Add seats to {licenseLimitStatus, select, OVER_LIMIT {invite} other {re-enable}} Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
+      title:
+        '{licenseLimitStatus, select, OVER_LIMIT {Over} other {At}} seat limit ({enforcementUserCount}/{permittedSeats})',
       link: {
         url: 'https://strapi.chargebeeportal.com/portal/v2/login?forward=portal_main',
         label: '{isHostedOnStrapiCloud, select, true {ADD SEATS} other {CONTACT SALES}}',
@@ -127,8 +128,9 @@ describe('useLicenseLimitNotification', () => {
     expect(toggleNotification).toHaveBeenCalledWith({
       type: 'warning',
       message:
-        "Add seats to invite more Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
-      title: 'Over seat limit ({currentUserCount}/{permittedSeats})',
+        "Add seats to {licenseLimitStatus, select, OVER_LIMIT {invite} other {re-enable}} Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
+      title:
+        '{licenseLimitStatus, select, OVER_LIMIT {Over} other {At}} seat limit ({enforcementUserCount}/{permittedSeats})',
       link: {
         url: 'https://strapi.chargebeeportal.com/portal/v2/login?forward=portal_main',
         label: '{isHostedOnStrapiCloud, select, true {ADD SEATS} other {CONTACT SALES}}',
@@ -153,8 +155,9 @@ describe('useLicenseLimitNotification', () => {
     expect(toggleNotification).toHaveBeenCalledWith({
       type: 'softWarning',
       message:
-        "Add seats to invite more Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
-      title: 'Over seat limit ({currentUserCount}/{permittedSeats})',
+        "Add seats to {licenseLimitStatus, select, OVER_LIMIT {invite} other {re-enable}} Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
+      title:
+        '{licenseLimitStatus, select, OVER_LIMIT {Over} other {At}} seat limit ({enforcementUserCount}/{permittedSeats})',
       link: {
         url: 'https://cloud.strapi.io/profile/billing',
         label: '{isHostedOnStrapiCloud, select, true {ADD SEATS} other {CONTACT SALES}}',
