@@ -8,7 +8,7 @@ const CreateAction = ({ onClick }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Button data-testid="create-user-button" onClick={onClick} startIcon={<Envelop />} size="S">
+    <Button onClick={onClick} startIcon={<Envelop />} size="S">
       {formatMessage({
         id: 'Settings.permissions.users.create',
         defaultMessage: 'Invite new user',
