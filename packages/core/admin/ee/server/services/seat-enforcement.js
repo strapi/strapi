@@ -80,12 +80,14 @@ const disableUsersAboveLicenseLimit = async (numberOfUsersToDisable) => {
   });
 };
 
-const syncdDisabledUserRecords = async () => {
+const syncDisabledUserRecords = async () => {
   const data = await strapi.db.query('strapi::ee-store').findOne({
     where: { key: 'ee_disabled_users' },
   });
 
-  if (!data || !data.value || data.value.length === 0) return;
+  if (!data?.value || data.value.length === 0) {
+    return;
+  }
 
   const disabledUsers = JSON.parse(data.value);
   disabledUsers.forEach(async (user) => {
@@ -93,7 +95,9 @@ const syncdDisabledUserRecords = async () => {
       where: { id: user.id },
     });
 
-    if (!data) return;
+    if (!data) {
+      return;
+    }
 
     await strapi.db.query('admin::user').update({
       where: { id: user.id },
@@ -107,7 +111,9 @@ const revertSeatEnforcementWorkflow = async () => {
     where: { key: 'ee_disabled_users' },
   });
 
-  if (!data || !data.value || data.value.length === 0) return;
+  if (!data?.value || data.value.length === 0) {
+    return;
+  }
 
   const disabledUsers = JSON.parse(data.value);
   disabledUsers.forEach(async (user) => {
@@ -115,8 +121,9 @@ const revertSeatEnforcementWorkflow = async () => {
       where: { id: user.id },
     });
 
-    if (!data) return;
-    if (data.isActive !== user.isActive) return;
+    if (!data || data.isActive !== user.isActive) {
+      return;
+    }
 
     await strapi.db.query('admin::user').update({
       where: { id: user.id },
@@ -127,9 +134,11 @@ const revertSeatEnforcementWorkflow = async () => {
 
 const seatEnforcementWorkflow = async () => {
   const permittedAdminSeats = strapi.ee.licenseInfo.seats;
-  if (!permittedAdminSeats) return;
+  if (!permittedAdminSeats) {
+    return;
+  }
 
-  await syncdDisabledUserRecords();
+  await syncDisabledUserRecords();
   const adminSeatDifference = await calculateAdminSeatDifference(permittedAdminSeats);
 
   switch (true) {
