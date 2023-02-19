@@ -34,8 +34,7 @@ const getSignedAttribute = (attributeName, entity, model) => {
  * Check which modelAttributes are media and pre sign the image URLs
  * if they are from the current upload provider
  *
- * TODO: Create a strapi-utils function to iterate through an entity
- * and apply a function on each attribute type
+ * TODO: Use traverse entity for strapi utils?
  *
  * @param {Object} entity
  * @param {Object} modelAttributes
@@ -67,12 +66,6 @@ const addSignedFileUrlsToAdmin = async () => {
     return;
   }
 
-  // TODO:
-  // Test for private providers
-  // Make an impact analysis of this feature
-  //  - What about the webhooks emitted by the entity manager?
-  //  - Do we want to sign the file urls in the event payload?
-  // Documentation
   strapi.container
     .get('services')
     .extend('plugin::content-manager.entity-manager', (entityManager) => {
