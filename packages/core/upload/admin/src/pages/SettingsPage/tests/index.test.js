@@ -49,28 +49,61 @@ describe('Upload | SettingsPage', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c39 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
+      .c6 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
       }
 
-      .c27 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
+      .c11 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c12 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c21 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c33 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #666687;
+        text-transform: uppercase;
+      }
+
+      .c35 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #4945ff;
+        text-transform: uppercase;
+      }
+
+      .c37 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
+      .c38 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #b72b1a;
+        text-transform: uppercase;
       }
 
       .c2 {
@@ -184,63 +217,6 @@ describe('Upload | SettingsPage', () => {
         justify-content: center;
       }
 
-      .c6 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c11 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c12 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c21 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c33 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #666687;
-        text-transform: uppercase;
-      }
-
-      .c35 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #4945ff;
-        text-transform: uppercase;
-      }
-
-      .c37 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #666687;
-      }
-
-      .c38 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #b72b1a;
-        text-transform: uppercase;
-      }
-
       .c18 > * {
         margin-top: 0;
         margin-bottom: 0;
@@ -322,6 +298,18 @@ describe('Upload | SettingsPage', () => {
         border: 2px solid #4945ff;
       }
 
+      .c27 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
       .c10 {
         height: 100%;
       }
@@ -394,6 +382,30 @@ describe('Upload | SettingsPage', () => {
         fill: #ffffff;
       }
 
+      .c22 {
+        display: grid;
+        grid-template-columns: repeat(12,1fr);
+        gap: 24px;
+      }
+
+      .c23 {
+        grid-column: span 6;
+        max-width: 100%;
+      }
+
+      .c14 {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .c16 {
+        overflow-x: hidden;
+      }
+
+      .c0:focus-visible {
+        outline: none;
+      }
+
       .c26 {
         position: relative;
         display: inline-block;
@@ -463,30 +475,6 @@ describe('Upload | SettingsPage', () => {
 
       .c24 {
         max-width: 320px;
-      }
-
-      .c0:focus-visible {
-        outline: none;
-      }
-
-      .c22 {
-        display: grid;
-        grid-template-columns: repeat(12,1fr);
-        gap: 24px;
-      }
-
-      .c23 {
-        grid-column: span 6;
-        max-width: 100%;
-      }
-
-      .c14 {
-        display: grid;
-        grid-template-columns: 1fr;
-      }
-
-      .c16 {
-        overflow-x: hidden;
       }
 
       @media (max-width:68.75rem) {
@@ -851,7 +839,7 @@ describe('Upload | SettingsPage', () => {
           </form>
         </main>
         <div
-          class="c39"
+          class="c27"
         >
           <p
             aria-live="polite"

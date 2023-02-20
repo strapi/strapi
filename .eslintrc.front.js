@@ -38,5 +38,24 @@ module.exports = {
     'react/jsx-no-constructed-context-values': 'warn',
     'react/jsx-no-useless-fragment': 'warn',
     'react/no-unstable-nested-components': 'warn',
+    'no-restricted-imports': [
+      'error',
+      {
+        patterns: [
+          {
+            group: [
+              '@strapi/design-system/*',
+              '!@strapi/design-system/v2',
+              '@strapi/design-system/v2/*',
+            ],
+            message: 'Please use the default import from "@strapi/design-system" packages instead.',
+          },
+          {
+            group: ['@strapi/icons/*'],
+            message: 'Please use the default import from "@strapi/icons" packages instead.',
+          },
+        ],
+      },
+    ],
   },
 };

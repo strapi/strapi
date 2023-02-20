@@ -45,16 +45,41 @@ describe('Admin | UseCasePage', () => {
     const { container: firstChild } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c38 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
+      .c6 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c17 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c28 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        display: block;
+        white-space: nowrap;
         overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
+        text-overflow: ellipsis;
+        color: #666687;
+      }
+
+      .c33 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c37 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #4945ff;
       }
 
       .c2 {
@@ -200,41 +225,61 @@ describe('Admin | UseCasePage', () => {
         justify-content: center;
       }
 
-      .c6 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
+      .c36 {
+        background: transparent;
+        border: none;
+        position: relative;
+        outline: none;
       }
 
-      .c17 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
+      .c36[aria-disabled='true'] {
+        pointer-events: none;
       }
 
-      .c28 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: #666687;
+      .c36[aria-disabled='true'] svg path {
+        fill: #666687;
       }
 
-      .c33 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 600;
-        color: #32324d;
+      .c36 svg {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        font-size: 0.625rem;
       }
 
-      .c37 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #4945ff;
+      .c36 svg path {
+        fill: #4945ff;
+      }
+
+      .c36:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c36:focus-visible {
+        outline: none;
+      }
+
+      .c36:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c20 > * {
@@ -311,6 +356,18 @@ describe('Admin | UseCasePage', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
+      }
+
+      .c38 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
       }
 
       .c4 {
@@ -463,25 +520,6 @@ describe('Admin | UseCasePage', () => {
         fill: #ffffff;
       }
 
-      .c24 {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        top: 0;
-        width: 100%;
-        background: transparent;
-        border: none;
-      }
-
-      .c24:focus {
-        outline: none;
-      }
-
-      .c24[aria-disabled='true'] {
-        cursor: not-allowed;
-      }
-
       .c23 {
         position: relative;
         border: 1px solid #dcdce4;
@@ -532,75 +570,6 @@ describe('Admin | UseCasePage', () => {
         width: 0.375rem;
       }
 
-      .c26 {
-        width: 100%;
-      }
-
-      .c10:focus-visible {
-        outline: none;
-      }
-
-      .c36 {
-        background: transparent;
-        border: none;
-        position: relative;
-        outline: none;
-      }
-
-      .c36[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c36[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c36 svg {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        font-size: 0.625rem;
-      }
-
-      .c36 svg path {
-        fill: #4945ff;
-      }
-
-      .c36:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c36:focus-visible {
-        outline: none;
-      }
-
-      .c36:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c15 {
-        height: 4.5rem;
-      }
-
       .c8 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -615,6 +584,37 @@ describe('Admin | UseCasePage', () => {
       .c8 svg {
         height: 4px;
         width: 6px;
+      }
+
+      .c24 {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
+        width: 100%;
+        background: transparent;
+        border: none;
+      }
+
+      .c24:focus {
+        outline: none;
+      }
+
+      .c24[aria-disabled='true'] {
+        cursor: not-allowed;
+      }
+
+      .c26 {
+        width: 100%;
+      }
+
+      .c10:focus-visible {
+        outline: none;
+      }
+
+      .c15 {
+        height: 4.5rem;
       }
 
       .c12 {

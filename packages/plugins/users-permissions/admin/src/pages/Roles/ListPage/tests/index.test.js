@@ -61,22 +61,31 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c22 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
+      .c9 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
       }
 
-      .c27 {
-        -webkit-animation: gzYjWD 1s infinite linear;
-        animation: gzYjWD 1s infinite linear;
-        will-change: transform;
+      .c14 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c15 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c32 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #666687;
       }
 
       .c2 {
@@ -204,31 +213,8 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         justify-content: space-around;
       }
 
-      .c9 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c14 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c15 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c32 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #666687;
+      .c24 path {
+        fill: #32324d;
       }
 
       .c10 {
@@ -287,6 +273,18 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
+      }
+
+      .c22 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
       }
 
       .c13 {
@@ -361,6 +359,12 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         fill: #ffffff;
       }
 
+      .c27 {
+        -webkit-animation: gzYjWD 1s infinite linear;
+        animation: gzYjWD 1s infinite linear;
+        will-change: transform;
+      }
+
       .c29 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -420,14 +424,6 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         fill: #666687;
       }
 
-      .c24 path {
-        fill: #32324d;
-      }
-
-      .c26 {
-        height: 100vh;
-      }
-
       .c1 {
         display: grid;
         grid-template-columns: 1fr;
@@ -443,6 +439,10 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
 
       .c4:focus-visible {
         outline: none;
+      }
+
+      .c26 {
+        height: 100vh;
       }
 
       <div

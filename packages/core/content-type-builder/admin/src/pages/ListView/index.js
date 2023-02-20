@@ -1,14 +1,7 @@
 import React from 'react';
 import { useTracking, Link } from '@strapi/helper-plugin';
-import Plus from '@strapi/icons/Plus';
-import ArrowLeft from '@strapi/icons/ArrowLeft';
-import Check from '@strapi/icons/Check';
-import Pencil from '@strapi/icons/Pencil';
-import { Button } from '@strapi/design-system/Button';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import { Box } from '@strapi/design-system/Box';
-import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
+import { Plus, ArrowLeft, Check, Pencil } from '@strapi/icons';
+import { Button, Flex, Stack, Box, ContentLayout, HeaderLayout } from '@strapi/design-system';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
