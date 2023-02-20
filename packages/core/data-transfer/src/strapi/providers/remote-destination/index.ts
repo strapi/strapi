@@ -151,7 +151,6 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     }
     const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${wsProtocol}//${url.host}${url.pathname}${TRANSFER_PATH}`;
-
     // No auth defined, trying public access for transfer
     if (!auth) {
       ws = new WebSocket(wsUrl);
@@ -215,35 +214,58 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   }
 
   createEntitiesWriteStream(): Writable {
+    const chunkSize = 100;
+    let entities: IEntity[] = [];
     const startEntitiesTransferOnce = this.#startStepOnce('entities');
 
     return new Writable({
       objectMode: true,
       final: async (callback) => {
+        if (entities.length > 0) {
+          const streamError = await this.#streamStep('entities', entities);
+          entities = [];
+          if (streamError) {
+            return callback(streamError);
+          }
+        }
         const e = await this.#endStep('entities');
 
         callback(e);
       },
       write: async (entity: IEntity, _encoding, callback) => {
         const startError = await startEntitiesTransferOnce();
-
         if (startError) {
           return callback(startError);
         }
-
-        const streamError = await this.#streamStep('entities', entity);
-
-        callback(streamError);
+        entities.push(entity);
+        if (entities.length === chunkSize) {
+          const streamError = await this.#streamStep('entities', entities);
+          if (streamError) {
+            return callback(streamError);
+          }
+          entities = [];
+        }
+        callback();
       },
     });
   }
 
   createLinksWriteStream(): Writable {
+    const chunkSize = 100;
+    let links: ILink[] = [];
     const startLinksTransferOnce = this.#startStepOnce('links');
 
     return new Writable({
       objectMode: true,
       final: async (callback) => {
+        if (links.length > 0) {
+          const streamError = await this.#streamStep('links', links);
+
+          if (streamError) {
+            return callback(streamError);
+          }
+          links = [];
+        }
         const e = await this.#endStep('links');
 
         callback(e);
@@ -255,19 +277,35 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
           return callback(startError);
         }
 
-        const streamError = await this.#streamStep('links', link);
+        if (links.length === chunkSize) {
+          const streamError = await this.#streamStep('links', links);
 
-        callback(streamError);
+          if (streamError) {
+            return callback(streamError);
+          }
+          links = [];
+        }
+        callback();
       },
     });
   }
 
   createConfigurationWriteStream(): Writable {
+    const chunkSize = 100;
+    let configurations: IConfiguration[] = [];
     const startConfigurationTransferOnce = this.#startStepOnce('configuration');
 
     return new Writable({
       objectMode: true,
       final: async (callback) => {
+        if (configurations.length > 0) {
+          const streamError = await this.#streamStep('configuration', configurations);
+
+          if (streamError) {
+            return callback(streamError);
+          }
+          configurations = [];
+        }
         const e = await this.#endStep('configuration');
 
         callback(e);
@@ -279,9 +317,17 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
           return callback(startError);
         }
 
-        const streamError = await this.#streamStep('configuration', configuration);
+        configurations.push(configuration);
+        if (configurations.length === chunkSize) {
+          const streamError = await this.#streamStep('configuration', configurations);
 
-        callback(streamError);
+          if (streamError) {
+            return callback(streamError);
+          }
+          configurations = [];
+        }
+
+        callback();
       },
     });
   }
