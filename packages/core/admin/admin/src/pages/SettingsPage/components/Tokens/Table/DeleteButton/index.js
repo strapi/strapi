@@ -32,12 +32,11 @@ const DeleteButton = ({ tokenName, onClickDelete }) => {
         noBorder
         icon={<Trash />}
       />
-      {showConfirmDialog && (
-        <DeleteTokenDialog
-          onClose={() => setShowConfirmDialog(false)}
-          onConfirm={handleClickDelete}
-        />
-      )}
+      <DeleteTokenDialog
+        onClose={() => setShowConfirmDialog(false)}
+        onConfirm={handleClickDelete}
+        isOpen={showConfirmDialog}
+      />
     </Box>
   );
 };
