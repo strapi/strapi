@@ -1,8 +1,8 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Button } from '@strapi/design-system/Button';
-import Envelop from '@strapi/icons/Envelop';
+import { Button } from '@strapi/design-system';
+import { Envelop } from '@strapi/icons';
 
 const CreateAction = ({ onClick }) => {
   const { formatMessage } = useIntl();

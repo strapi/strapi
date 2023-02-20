@@ -1,7 +1,7 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import { Flex, Tooltip, Icon, GridItem, Typography, Stack } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2/Link';
+import { Link } from '@strapi/design-system/v2';
 import { ExternalLink, ExclamationMarkCircle } from '@strapi/icons';
 import { pxToRem } from '@strapi/helper-plugin';
 import { useLicenseLimits } from '../../../../../../hooks';
