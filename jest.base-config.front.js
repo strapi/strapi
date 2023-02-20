@@ -43,6 +43,7 @@ module.exports = {
   globalSetup: '<rootDir>/test/config/front/global-setup.js',
   setupFiles: [
     '<rootDir>/packages/admin-test-utils/lib/setup/test-bundler.js',
+    '<rootDir>/packages/admin-test-utils/lib/mocks/fetch.js',
     '<rootDir>/packages/admin-test-utils/lib/mocks/LocalStorageMock.js',
     '<rootDir>/packages/admin-test-utils/lib/mocks/IntersectionObserver.js',
     '<rootDir>/packages/admin-test-utils/lib/mocks/ResizeObserver.js',
