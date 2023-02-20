@@ -36,14 +36,8 @@ const addReviewWorkflowMiddleware = (strapi) => {
     const { reviewWorkflows, ...contentType } = ctx.request.body.contentType;
     ctx.request.body.contentType = set('options.reviewWorkflows', reviewWorkflows, contentType);
   };
-  strapi.server.router.use('/content-type-builder/content-types/:uid', (ctx, next) => {
-    if (ctx.method === 'PUT') {
-      moveReviewWorkflowOption(ctx);
-    }
-    return next();
-  });
-  strapi.server.router.use('/content-type-builder/content-types', (ctx, next) => {
-    if (ctx.method === 'POST') {
+  strapi.server.router.use('/content-type-builder/content-types/:uid?', (ctx, next) => {
+    if (ctx.method === 'PUT' || ctx.method === 'POST') {
       moveReviewWorkflowOption(ctx);
     }
     return next();
