@@ -3,7 +3,7 @@ import { useIntl } from 'react-intl';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 
-import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
+import { Layout, HeaderLayout, ContentLayout, Button, Main } from '@strapi/design-system';
 import {
   useNotification,
   ConfirmDialog,
@@ -11,10 +11,7 @@ import {
   useTracking,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-import Check from '@strapi/icons/Check';
-import { Button } from '@strapi/design-system/Button';
-import ArrowLeft from '@strapi/icons/ArrowLeft';
-import { Main } from '@strapi/design-system/Main';
+import { Check, ArrowLeft } from '@strapi/icons';
 import { Settings } from './components/Settings';
 
 import reducer from './state/reducer';

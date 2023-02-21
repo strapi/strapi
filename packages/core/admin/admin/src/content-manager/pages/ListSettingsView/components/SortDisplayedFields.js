@@ -2,13 +2,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { PropTypes } from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
-import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
-import { IconButton } from '@strapi/design-system/IconButton';
-import Plus from '@strapi/icons/Plus';
+import {
+  Box,
+  Flex,
+  Stack,
+  Typography,
+  SimpleMenu,
+  MenuItem,
+  IconButton,
+} from '@strapi/design-system';
+import { Plus } from '@strapi/icons';
 import DraggableCard from './DraggableCard';
 import { getTrad } from '../../../utils';
 

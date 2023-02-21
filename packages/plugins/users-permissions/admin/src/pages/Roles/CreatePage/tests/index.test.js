@@ -63,6 +63,56 @@ describe('Admin | containers | RoleCreatePage', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c7 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c13 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c19 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c12 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c34 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #666687;
+      }
+
+      .c44 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #4945ff;
+      }
+
+      .c45 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #4a4a6a;
+      }
+
       .c2 {
         background: #f6f6f9;
         padding-top: 40px;
@@ -220,84 +270,165 @@ describe('Admin | containers | RoleCreatePage', () => {
         justify-content: center;
       }
 
-      .c7 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
+      .c36 {
+        border: 1px solid #f6f6f9;
       }
 
-      .c13 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
+      .c36:hover:not([aria-disabled='true']) {
+        border: 1px solid #4945ff;
       }
 
-      .c19 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c12 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c34 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #666687;
-      }
-
-      .c44 {
-        font-size: 0.75rem;
-        line-height: 1.33;
+      .c36:hover:not([aria-disabled='true']) .c6 {
         color: #4945ff;
       }
 
-      .c45 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: #4a4a6a;
+      .c36:hover:not([aria-disabled='true']) > .c3 {
+        background: #f0f0ff;
       }
 
-      .c20 {
-        display: grid;
-        grid-template-columns: repeat(12,1fr);
-        gap: 16px;
+      .c36:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+        background: #d9d8ff;
       }
 
-      .c29 {
-        display: grid;
-        grid-template-columns: repeat(12,1fr);
-      }
-
-      .c21 {
-        grid-column: span 6;
-        max-width: 100%;
-      }
-
-      .c30 {
-        grid-column: span 7;
-        max-width: 100%;
-      }
-
-      .c50 {
-        grid-column: span 5;
-        max-width: 100%;
-      }
-
-      .c0:focus-visible {
+      .c42 {
+        background: transparent;
+        border: none;
+        position: relative;
         outline: none;
+      }
+
+      .c42[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c42[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c42 svg {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        font-size: 0.625rem;
+      }
+
+      .c42 svg path {
+        fill: #4945ff;
+      }
+
+      .c42:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c42:focus-visible {
+        outline: none;
+      }
+
+      .c42:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c16 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c16 > * + * {
+        margin-top: 32px;
+      }
+
+      .c18 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c18 > * + * {
+        margin-top: 16px;
+      }
+
+      .c22 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c22 > * + * {
+        margin-top: 4px;
+      }
+
+      .c32 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c32 > * + * {
+        margin-top: 24px;
+      }
+
+      .c33 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c33 > * + * {
+        margin-top: 8px;
+      }
+
+      .c40 > * {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .c40 > * + * {
+        margin-left: 12px;
+      }
+
+      .c49 path {
+        fill: #666687;
+      }
+
+      .c43 {
+        text-align: left;
+      }
+
+      .c43 > span {
+        max-width: 100%;
+      }
+
+      .c43 svg {
+        width: 0.875rem;
+        height: 0.875rem;
+      }
+
+      .c43 svg path {
+        fill: #8e8ea9;
+      }
+
+      .c38 {
+        min-height: 5.5rem;
+        border-radius: 4px;
+      }
+
+      .c38:hover svg path {
+        fill: #4945ff;
       }
 
       .c8 {
@@ -430,60 +561,6 @@ describe('Admin | containers | RoleCreatePage', () => {
         fill: #ffffff;
       }
 
-      .c16 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c16 > * + * {
-        margin-top: 32px;
-      }
-
-      .c18 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c18 > * + * {
-        margin-top: 16px;
-      }
-
-      .c22 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c22 > * + * {
-        margin-top: 4px;
-      }
-
-      .c32 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c32 > * + * {
-        margin-top: 24px;
-      }
-
-      .c33 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c33 > * + * {
-        margin-top: 8px;
-      }
-
-      .c40 > * {
-        margin-left: 0;
-        margin-right: 0;
-      }
-
-      .c40 > * + * {
-        margin-left: 12px;
-      }
-
       .c24 {
         border: none;
         border-radius: 4px;
@@ -543,6 +620,36 @@ describe('Admin | containers | RoleCreatePage', () => {
       .c23:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c20 {
+        display: grid;
+        grid-template-columns: repeat(12,1fr);
+        gap: 16px;
+      }
+
+      .c29 {
+        display: grid;
+        grid-template-columns: repeat(12,1fr);
+      }
+
+      .c21 {
+        grid-column: span 6;
+        max-width: 100%;
+      }
+
+      .c30 {
+        grid-column: span 7;
+        max-width: 100%;
+      }
+
+      .c50 {
+        grid-column: span 5;
+        max-width: 100%;
+      }
+
+      .c0:focus-visible {
+        outline: none;
       }
 
       .c26 {
@@ -636,113 +743,6 @@ describe('Admin | containers | RoleCreatePage', () => {
         line-height: 1.43;
         color: #8e8ea9;
         opacity: 1;
-      }
-
-      .c49 path {
-        fill: #666687;
-      }
-
-      .c36 {
-        border: 1px solid #f6f6f9;
-      }
-
-      .c36:hover:not([aria-disabled='true']) {
-        border: 1px solid #4945ff;
-      }
-
-      .c36:hover:not([aria-disabled='true']) .c6 {
-        color: #4945ff;
-      }
-
-      .c36:hover:not([aria-disabled='true']) > .c3 {
-        background: #f0f0ff;
-      }
-
-      .c36:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
-        background: #d9d8ff;
-      }
-
-      .c42 {
-        background: transparent;
-        border: none;
-        position: relative;
-        outline: none;
-      }
-
-      .c42[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c42[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c42 svg {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        font-size: 0.625rem;
-      }
-
-      .c42 svg path {
-        fill: #4945ff;
-      }
-
-      .c42:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c42:focus-visible {
-        outline: none;
-      }
-
-      .c42:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c43 {
-        text-align: left;
-      }
-
-      .c43 > span {
-        max-width: 100%;
-      }
-
-      .c43 svg {
-        width: 0.875rem;
-        height: 0.875rem;
-      }
-
-      .c43 svg path {
-        fill: #8e8ea9;
-      }
-
-      .c38 {
-        min-height: 5.5rem;
-        border-radius: 4px;
-      }
-
-      .c38:hover svg path {
-        fill: #4945ff;
       }
 
       @media (max-width:68.75rem) {

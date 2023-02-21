@@ -32,7 +32,6 @@ const aliasExactMatch = [
   'redux',
   'reselect',
   'styled-components',
-  'whatwg-fetch',
   'yup',
 ];
 

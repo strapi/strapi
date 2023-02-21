@@ -61,16 +61,39 @@ describe('<ListPage />', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c26 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
+      .c6 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c11 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c12 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c24 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
+      }
+
+      .c35 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #4945ff;
       }
 
       .c2 {
@@ -154,41 +177,6 @@ describe('<ListPage />', () => {
         flex-direction: row;
       }
 
-      .c6 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c11 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c12 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c24 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #666687;
-      }
-
-      .c35 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #4945ff;
-      }
-
       .c7 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -245,6 +233,18 @@ describe('<ListPage />', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
+      }
+
+      .c26 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
       }
 
       .c10 {
@@ -317,6 +317,19 @@ describe('<ListPage />', () => {
       .c8 svg > g,
       .c8 svg path {
         fill: #ffffff;
+      }
+
+      .c29 {
+        height: 1px;
+        border: none;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
+        margin: 0;
+      }
+
+      .c0:focus-visible {
+        outline: none;
       }
 
       .c15 {
@@ -397,15 +410,6 @@ describe('<ListPage />', () => {
         height: 0.25rem;
       }
 
-      .c29 {
-        height: 1px;
-        border: none;
-        -webkit-flex-shrink: 0;
-        -ms-flex-negative: 0;
-        flex-shrink: 0;
-        margin: 0;
-      }
-
       .c33 {
         height: 1.5rem;
         width: 1.5rem;
@@ -438,10 +442,6 @@ describe('<ListPage />', () => {
         display: block;
         width: 100%;
         border: none;
-      }
-
-      .c0:focus-visible {
-        outline: none;
       }
 
       <main

@@ -46,6 +46,27 @@ describe('GuidedTour Stepper', () => {
     } = render(App(<Stepper sections={sections} currentSectionKey="s1" />));
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c4 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #ffffff;
+      }
+
+      .c5 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c11 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #666687;
+      }
+
       .c1 {
         margin-right: 20px;
         min-width: 1.875rem;
@@ -140,27 +161,6 @@ describe('GuidedTour Stepper', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-      }
-
-      .c4 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 500;
-        color: #ffffff;
-      }
-
-      .c5 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c11 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 500;
-        color: #666687;
       }
 
       <div
@@ -296,6 +296,27 @@ describe('GuidedTour Stepper', () => {
     } = render(App(<Stepper sections={sections} currentSectionKey="s2" />));
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c6 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c11 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #ffffff;
+      }
+
+      .c14 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #666687;
+      }
+
       .c1 {
         margin-right: 20px;
         min-width: 1.875rem;
@@ -395,27 +416,6 @@ describe('GuidedTour Stepper', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-      }
-
-      .c6 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c11 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 500;
-        color: #ffffff;
-      }
-
-      .c14 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 500;
-        color: #666687;
       }
 
       .c5 path {
@@ -564,6 +564,13 @@ describe('GuidedTour Stepper', () => {
     } = render(App(<Stepper sections={sections} />));
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c6 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
       .c1 {
         margin-right: 20px;
         min-width: 1.875rem;
@@ -645,13 +652,6 @@ describe('GuidedTour Stepper', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-      }
-
-      .c6 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
       }
 
       .c5 path {

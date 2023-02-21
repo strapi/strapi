@@ -1,16 +1,31 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapshot 1`] = `
-.c33 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
+.c6 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c7 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #8e8ea9;
+}
+
+.c20 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c26 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
 }
 
 .c1 {
@@ -159,31 +174,9 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   flex-direction: row;
 }
 
-.c6 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c7 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #8e8ea9;
-}
-
-.c20 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c26 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
+.c24 {
+  border-radius: 4px;
+  height: 1.5rem;
 }
 
 .c8 {
@@ -242,6 +235,18 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   left: -5px;
   right: -5px;
   border: 2px solid #4945ff;
+}
+
+.c33 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .c9 {
@@ -466,15 +471,6 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   fill: #ffffff;
 }
 
-.c28 {
-  border-radius: 0 0 4px 4px;
-  border-top: 1px solid #eaeaef;
-}
-
-.c30 > * + * {
-  margin-left: 8px;
-}
-
 .c16 {
   margin: 0;
   padding: 0;
@@ -499,11 +495,6 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   border-top-right-radius: 4px;
 }
 
-.c24 {
-  border-radius: 4px;
-  height: 1.5rem;
-}
-
 .c21 {
   margin-left: auto;
   -webkit-flex-shrink: 0;
@@ -521,6 +512,15 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
 
 .c14 {
   border-bottom: 1px solid #eaeaef;
+}
+
+.c28 {
+  border-radius: 0 0 4px 4px;
+  border-top: 1px solid #eaeaef;
+}
+
+.c30 > * + * {
+  margin-left: 8px;
 }
 
 <div>

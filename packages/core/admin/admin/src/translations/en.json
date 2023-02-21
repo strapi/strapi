@@ -112,6 +112,7 @@
   "Settings.application.description": "Administration panel’s global information",
   "Settings.application.edition-title": "current plan",
   "Settings.application.get-help": "Get help",
+  "Settings.application.ee-or-ce": "{communityEdition, select, true {Community Edition} other {Enterprise Edition}}",
   "Settings.application.link-pricing": "See all pricing plans",
   "Settings.application.link-upgrade": "Upgrade your admin panel",
   "Settings.application.node-version": "node version",

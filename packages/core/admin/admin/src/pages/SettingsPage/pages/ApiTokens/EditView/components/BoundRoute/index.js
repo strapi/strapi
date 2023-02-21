@@ -1,8 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Stack } from '@strapi/design-system/Stack';
-import { Box } from '@strapi/design-system/Box';
-import { Typography } from '@strapi/design-system/Typography';
+import { Stack, Box, Typography } from '@strapi/design-system';
 import map from 'lodash/map';
 import tail from 'lodash/tail';
 import { useIntl } from 'react-intl';

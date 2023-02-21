@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeProvider } from '@strapi/design-system/ThemeProvider';
+import { ThemeProvider } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useThemeToggle } from '../../hooks';
 import GlobalStyle from '../GlobalStyle';
