@@ -17,7 +17,16 @@ const superAdminLoginInfo = _.pick(superAdminCredentials, ['email', 'password'])
 
 const TEST_APP_URL = path.resolve(__dirname, '../../testApp');
 
+/**
+ * @param {*} config
+ * @param {Function} config.bootstrap - A function that will be called with the strapi instance as argument
+ * @param {boolean} config.ensureSuperAdmin - If true, will create a super admin user if none exists
+ * @param {string} config.logLevel - The log level to use
+ * @param {boolean} config.bypassAuth - If true, will bypass the auth middleware
+ * @return {Strapi}
+ */
 const createStrapiInstance = async ({
+  bootstrap = () => {},
   ensureSuperAdmin = true,
   logLevel = 'error',
   bypassAuth = true,
@@ -39,8 +48,10 @@ const createStrapiInstance = async ({
       verify() {},
     });
   }
-  await instance.load();
 
+  bootstrap(instance);
+
+  await instance.load();
   instance.log.level = logLevel;
 
   await instance.server.listen();
