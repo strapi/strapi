@@ -1,10 +1,10 @@
 'use strict';
 
 const { features } = require('@strapi/strapi/lib/utils/ee');
-const { set } = require('lodash/fp');
 const executeCERegister = require('../../server/register');
 const migrateAuditLogsTable = require('./migrations/audit-logs-table');
 const createAuditLogsService = require('./services/audit-logs');
+const reviewWorkflowsMiddlewares = require('./middlewares/review-workflows');
 
 module.exports = async ({ strapi }) => {
   if (features.isEnabled('audit-logs')) {
@@ -14,32 +14,7 @@ module.exports = async ({ strapi }) => {
     await auditLogsService.register();
   }
   if (features.isEnabled('review-workflows')) {
-    addReviewWorkflowMiddleware(strapi);
+    reviewWorkflowsMiddlewares.contentTypeMiddleware(strapi);
   }
   await executeCERegister({ strapi });
-};
-
-/**
- * A Strapi middleware function that adds support for review workflows.
- *
- * @param {object} strapi - The Strapi instance.
- */
-const addReviewWorkflowMiddleware = (strapi) => {
-  /**
-   * A middleware function that moves the `reviewWorkflows` attribute from the top level of
-   * the request body to the `options` object within the request body.
-   *
-   * @param {object} ctx - The Koa context object.
-   */
-  const moveReviewWorkflowOption = (ctx) => {
-    // Move reviewWorkflows to options.reviewWorkflows
-    const { reviewWorkflows, ...contentType } = ctx.request.body.contentType;
-    ctx.request.body.contentType = set('options.reviewWorkflows', reviewWorkflows, contentType);
-  };
-  strapi.server.router.use('/content-type-builder/content-types/:uid?', (ctx, next) => {
-    if (ctx.method === 'PUT' || ctx.method === 'POST') {
-      moveReviewWorkflowOption(ctx);
-    }
-    return next();
-  });
 };
