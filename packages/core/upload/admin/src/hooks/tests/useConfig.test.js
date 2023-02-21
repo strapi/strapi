@@ -81,13 +81,28 @@ describe('useConfig', () => {
   describe('query', () => {
     test('does call the get endpoint', async () => {
       const { get } = useFetchClient();
-      get.mockResolvedValue(mockGetResponse);
+      get.mockReturnValueOnce(mockGetResponse);
 
       const { waitFor, result } = await setup();
       expect(get).toHaveBeenCalledWith(`/${pluginId}/configuration`);
 
       await waitFor(() => !result.current.config.isLoading);
       expect(result.current.config.data).toEqual(mockGetResponse.data.data);
+    });
+
+    test('should still return an object even if the server returns a falsey value', async () => {
+      const { get } = useFetchClient();
+      get.mockReturnValueOnce({
+        data: {
+          data: null,
+        },
+      });
+
+      const { waitFor, result } = await setup();
+
+      await waitFor(() => !result.current.config.isLoading);
+
+      expect(result.current.config.data).toEqual({});
     });
 
     test('calls toggleNotification in case of error', async () => {
