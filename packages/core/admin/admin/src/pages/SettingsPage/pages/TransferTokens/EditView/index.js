@@ -13,9 +13,7 @@ import {
   useRBAC,
   useFetchClient,
 } from '@strapi/helper-plugin';
-import { Main } from '@strapi/design-system/Main';
-import { Stack } from '@strapi/design-system/Stack';
-import { ContentLayout } from '@strapi/design-system/Layout';
+import { Main, ContentLayout, Stack } from '@strapi/design-system';
 import { formatAPIErrors } from '../../../../../utils';
 import { schema } from './utils';
 import LoadingView from './components/LoadingView';
@@ -49,6 +47,8 @@ const TransferTokenCreateView = () => {
   const { get, post, put } = useFetchClient();
 
   const isCreating = id === 'create';
+
+  const canOnlyCreate = canCreate && !canUpdate;
 
   const { status } = useQuery(
     ['transfer-token', id],
@@ -99,10 +99,14 @@ const TransferTokenCreateView = () => {
 
       unlockApp();
 
-      if (isCreating) {
+      if (isCreating && !canOnlyCreate) {
         history.replace(`/settings/transfer-tokens/${response.id}`, { transferToken: response });
         setCurrentStep('transferTokens.success');
+      } else if (canOnlyCreate) {
+        history.replace('/settings/transfer-tokens?sort=name:ASC');
+        setCurrentStep('transferTokens.success');
       }
+
       setTransferToken({
         ...response,
       });

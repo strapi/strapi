@@ -56,6 +56,8 @@ const ApiTokenCreateView = () => {
 
   const isCreating = id === 'create';
 
+  const canOnlyCreate = canCreate && !canUpdate;
+
   useQuery(
     'content-api-permissions',
     async () => {
@@ -175,8 +177,11 @@ const ApiTokenCreateView = () => {
             permissions: body.type === 'custom' ? state.selectedActions : null,
           });
 
-      if (isCreating) {
+      if (isCreating && !canOnlyCreate) {
         history.replace(`/settings/api-tokens/${response.id}`, { apiToken: response });
+        setCurrentStep('apiTokens.success');
+      } else if (canOnlyCreate) {
+        history.replace('/settings/api-tokens?sort=name:ASC');
         setCurrentStep('apiTokens.success');
       }
       unlockApp();
