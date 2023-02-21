@@ -16,7 +16,7 @@ module.exports = {
  *
  * @param {object} strapi - The Strapi instance.
  */
-const contentTypeMiddleware = (strapi) => {
+function contentTypeMiddleware(strapi) {
   /**
    * A middleware function that moves the `reviewWorkflows` attribute from the top level of
    * the request body to the `options` object within the request body.
@@ -34,4 +34,4 @@ const contentTypeMiddleware = (strapi) => {
     }
     return next();
   });
-};
+}
