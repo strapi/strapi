@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { Tooltip } from '@strapi/design-system/Tooltip';
+import { Tooltip } from '@strapi/design-system';
 
 const Button = styled.button`
   border: none;

@@ -10,16 +10,22 @@ import {
   useRBAC,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-import Plus from '@strapi/icons/Plus';
-import Trash from '@strapi/icons/Trash';
-import Duplicate from '@strapi/icons/Duplicate';
-import Pencil from '@strapi/icons/Pencil';
-import { Button } from '@strapi/design-system/Button';
-import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { Main } from '@strapi/design-system/Main';
-import { Table, Tbody, TFooter, Thead, Th, Tr } from '@strapi/design-system/Table';
-import { Typography } from '@strapi/design-system/Typography';
+import { Plus, Trash, Duplicate, Pencil } from '@strapi/icons';
+import {
+  Button,
+  ActionLayout,
+  ContentLayout,
+  HeaderLayout,
+  Main,
+  Table,
+  Tbody,
+  TFooter,
+  Thead,
+  Th,
+  Tr,
+  Typography,
+  VisuallyHidden,
+} from '@strapi/design-system';
 import { get } from 'lodash';
 import matchSorter from 'match-sorter';
 import { useIntl } from 'react-intl';

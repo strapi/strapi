@@ -1,4 +1,3 @@
-
 type Handler = (context: any) => any;
 
 type AsyncHook = {
@@ -8,7 +7,6 @@ type AsyncHook = {
   call(): Promise<void>;
 };
 
-
 type SyncHook = {
   get handlers(): Handler[];
   register(handler: Handler): this;
@@ -16,5 +14,4 @@ type SyncHook = {
   call(): void;
 };
 
-
-export type Hook = AsyncHook|SyncHook
+export type Hook = AsyncHook | SyncHook;

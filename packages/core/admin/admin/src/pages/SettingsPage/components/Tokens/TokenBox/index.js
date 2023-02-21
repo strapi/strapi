@@ -1,11 +1,10 @@
 import React, { useRef } from 'react';
 import { useIntl } from 'react-intl';
+import { ContentBox, useNotification, useTracking } from '@strapi/helper-plugin';
+import { IconButton } from '@strapi/design-system';
+import { Duplicate, Key } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { ContentBox, useNotification, useTracking } from '@strapi/helper-plugin';
-import { IconButton } from '@strapi/design-system/IconButton';
-import Duplicate from '@strapi/icons/Duplicate';
-import Key from '@strapi/icons/Key';
 
 const TokenBox = ({ token }) => {
   const { formatMessage } = useIntl();

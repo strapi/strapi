@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Flex } from '@strapi/design-system/Flex';
+import { Flex } from '@strapi/design-system';
 import getRelationType from '../../utils/getRelationType';
 import RelationField from './RelationField';
 import RelationNaturePicker from './RelationNaturePicker';

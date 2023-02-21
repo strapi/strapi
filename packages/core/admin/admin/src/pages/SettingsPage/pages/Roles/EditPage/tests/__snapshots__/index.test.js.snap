@@ -1,22 +1,37 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<EditPage /> renders and matches the snapshot 1`] = `
-.c35 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
+.c11 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
 }
 
-.c36 {
-  -webkit-animation: gzYjWD 1s infinite linear;
-  animation: gzYjWD 1s infinite linear;
-  will-change: transform;
+.c15 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c16 {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666687;
+}
+
+.c22 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #8e8ea9;
+}
+
+.c24 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
 }
 
 .c2 {
@@ -31,10 +46,6 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   padding-bottom: 8px;
 }
 
-.c5 {
-  padding-right: 8px;
-}
-
 .c17 {
   padding-right: 56px;
   padding-left: 56px;
@@ -47,7 +58,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c9 {
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -65,7 +76,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   justify-content: space-between;
 }
 
-.c10 {
+.c9 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -109,45 +120,6 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   -webkit-justify-content: space-around;
   -ms-flex-pack: space-around;
   justify-content: space-around;
-}
-
-.c8 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #4945ff;
-}
-
-.c11 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c15 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c16 {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c22 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #8e8ea9;
-}
-
-.c24 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
 }
 
 .c19 > * {
@@ -244,6 +216,18 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
+.c35 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
 .c14 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -267,7 +251,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c14 .c7 {
+.c14 .c10 {
   color: #ffffff;
 }
 
@@ -276,7 +260,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   background: #eaeaef;
 }
 
-.c14[aria-disabled='true'] .c7 {
+.c14[aria-disabled='true'] .c10 {
   color: #666687;
 }
 
@@ -289,7 +273,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   background: #eaeaef;
 }
 
-.c14[aria-disabled='true']:active .c7 {
+.c14[aria-disabled='true']:active .c10 {
   color: #666687;
 }
 
@@ -337,7 +321,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c23 .c7 {
+.c23 .c10 {
   color: #ffffff;
 }
 
@@ -346,7 +330,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   background: #eaeaef;
 }
 
-.c23[aria-disabled='true'] .c7 {
+.c23[aria-disabled='true'] .c10 {
   color: #666687;
 }
 
@@ -359,7 +343,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   background: #eaeaef;
 }
 
-.c23[aria-disabled='true']:active .c7 {
+.c23[aria-disabled='true']:active .c10 {
   color: #666687;
 }
 
@@ -376,7 +360,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c23:active .c7 {
+.c23:active .c10 {
   color: #4945ff;
 }
 
@@ -385,7 +369,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   fill: #4945ff;
 }
 
-.c23 .c7 {
+.c23 .c10 {
   color: #271fe0;
 }
 
@@ -455,68 +439,10 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c4 {
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  position: relative;
-  outline: none;
-}
-
-.c4 svg path {
-  fill: #4945ff;
-}
-
-.c4 svg {
-  font-size: 0.625rem;
-}
-
-.c4:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c4:focus-visible {
-  outline: none;
-}
-
-.c4:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c6 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-}
-
-.c34 {
-  height: 100vh;
+.c36 {
+  -webkit-animation: gzYjWD 1s infinite linear;
+  animation: gzYjWD 1s infinite linear;
+  will-change: transform;
 }
 
 .c25 {
@@ -627,6 +553,80 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   opacity: 1;
 }
 
+.c34 {
+  height: 100vh;
+}
+
+.c5 {
+  padding-right: 8px;
+}
+
+.c7 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #4945ff;
+}
+
+.c4 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  position: relative;
+  outline: none;
+}
+
+.c4 svg path {
+  fill: #4945ff;
+}
+
+.c4 svg {
+  font-size: 0.625rem;
+}
+
+.c4:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c4:focus-visible {
+  outline: none;
+}
+
+.c4:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c6 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
 @media (max-width:68.75rem) {
   .c26 {
     grid-column: span;
@@ -664,7 +664,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
             >
               <span
                 aria-hidden="true"
-                class="c1 c5 c6"
+                class="c5 c6"
               >
                 <svg
                   fill="none"
@@ -680,26 +680,26 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
                 </svg>
               </span>
               <span
-                class="c7 c8"
+                class="c7"
               >
                 Back
               </span>
             </a>
           </div>
           <div
-            class="c1 c9"
+            class="c1 c8"
           >
             <div
-              class="c1 c10"
+              class="c1 c9"
             >
               <h1
-                class="c7 c11"
+                class="c10 c11"
               >
                 Edit a role
               </h1>
             </div>
             <div
-              class="c1 c10 c12"
+              class="c1 c9 c12"
             >
               <button
                 aria-disabled="false"
@@ -707,7 +707,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
                 type="button"
               >
                 <span
-                  class="c7 c15"
+                  class="c10 c15"
                 >
                   Save
                 </span>
@@ -715,7 +715,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
             </div>
           </div>
           <p
-            class="c7 c16"
+            class="c10 c16"
           >
             Define the rights given to the role
           </p>
@@ -734,7 +734,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
               class="c1 c18 c21"
             >
               <div
-                class="c1 c9"
+                class="c1 c8"
               >
                 <div
                   class="c1 "
@@ -743,14 +743,14 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
                     class="c1 "
                   >
                     <span
-                      class="c7 c15"
+                      class="c10 c15"
                     />
                   </div>
                   <div
                     class="c1 "
                   >
                     <span
-                      class="c7 c22"
+                      class="c10 c22"
                     />
                   </div>
                 </div>
@@ -761,7 +761,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
                   type="button"
                 >
                   <span
-                    class="c7 c24"
+                    class="c10 c24"
                   >
                     NaN users with this role
                   </span>
@@ -782,17 +782,17 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
                           class="c1 c18 c27"
                         >
                           <label
-                            class="c7 c24"
+                            class="c10 c24"
                             for="1"
                           >
                             <div
-                              class="c1 c10"
+                              class="c1 c9"
                             >
                               Name
                             </div>
                           </label>
                           <div
-                            class="c1 c9 c28"
+                            class="c1 c8 c28"
                           >
                             <input
                               aria-disabled="false"
@@ -823,14 +823,14 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
                           class="c1 c18 c27"
                         >
                           <div
-                            class="c1 c10"
+                            class="c1 c9"
                           >
                             <label
-                              class="c7 c24"
+                              class="c10 c24"
                               for="3"
                             >
                               <div
-                                class="c1 c10"
+                                class="c1 c9"
                               >
                                 Description
                               </div>

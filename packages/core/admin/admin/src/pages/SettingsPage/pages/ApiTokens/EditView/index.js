@@ -11,12 +11,10 @@ import {
   useRBAC,
   useFetchClient,
 } from '@strapi/helper-plugin';
-import { Main } from '@strapi/design-system/Main';
+import { Main, ContentLayout, Stack } from '@strapi/design-system';
 import { Formik } from 'formik';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { useQuery } from 'react-query';
-import { ContentLayout } from '@strapi/design-system/Layout';
-import { Stack } from '@strapi/design-system/Stack';
 import { formatAPIErrors } from '../../../../../utils';
 import { schema } from './utils';
 import LoadingView from './components/LoadingView';
