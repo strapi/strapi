@@ -92,6 +92,17 @@ const sidebars = {
           items: [
             {
               type: 'category',
+              label: 'Components',
+              items: [
+                {
+                  type: 'doc',
+                  label: 'Storybook',
+                  id: 'core/helper-plugin/components/storybook',
+                },
+              ],
+            },
+            {
+              type: 'category',
               label: 'Hooks',
               items: [
                 {
@@ -99,7 +110,6 @@ const sidebars = {
                   label: 'useFetchClient',
                   id: 'core/helper-plugin/hooks/use-fetch-client',
                 },
-
                 {
                   type: 'doc',
                   label: 'useAPIErrorHandler',
