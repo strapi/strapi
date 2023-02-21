@@ -20,7 +20,7 @@
   "main": "lib/index.js",
   "dependencies": {
     "@babel/template": "^7.20.7",
-    "reselect": "4.0.0",
+    "reselect": "4.1.7",
     "resolve": "1.20.0"
   },
   "devDependencies": {

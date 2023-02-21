@@ -123,7 +123,7 @@
     "react-router-dom": "5.3.4",
     "react-window": "1.8.7",
     "redux": "^4.2.1",
-    "reselect": "^4.0.0",
+    "reselect": "^4.1.7",
     "rimraf": "3.0.2",
     "sanitize-html": "2.7.3",
     "semver": "7.3.8",

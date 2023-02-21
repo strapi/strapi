@@ -41,7 +41,7 @@
     "react-router": "^5.2.0",
     "react-router-dom": "5.3.4",
     "redux": "^4.2.1",
-    "reselect": "^4.0.0",
+    "reselect": "^4.1.7",
     "yup": "^0.32.9"
   },
   "devDependencies": {
