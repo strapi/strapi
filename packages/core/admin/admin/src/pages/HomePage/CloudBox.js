@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { useTracking } from '@strapi/helper-plugin';
-import { Box, Flex, Stack, Typography } from '@strapi/design-system';
+import { Box, Flex, Typography } from '@strapi/design-system';
 import cloudIconBackgroundImage from './assets/strapi-cloud-background.png';
 import cloudIcon from './assets/strapi-cloud-icon.svg';
 import cloudFlagsImage from './assets/strapi-cloud-flags.svg';
@@ -44,10 +44,15 @@ const CloudBox = () => {
           backgroundImage={cloudIconBackgroundImage}
           hasRadius
           padding={3}
-          width="56px"
           height="56px"
         >
-          <CloudIconWrapper justifyContent="center" hasRadius alignItems="center" height="100%">
+          <CloudIconWrapper
+            width="2rem"
+            height="2rem"
+            justifyContent="center"
+            hasRadius
+            alignItems="center"
+          >
             <img
               src={cloudIcon}
               alt={formatMessage({
@@ -57,7 +62,7 @@ const CloudBox = () => {
             />
           </CloudIconWrapper>
         </CloudCustomWrapper>
-        <Stack gap={1}>
+        <Flex gap={1} direction="column" alignItems="start">
           <Flex>
             <Typography fontWeight="semiBold" variant="pi">
               {formatMessage({
@@ -71,12 +76,12 @@ const CloudBox = () => {
               {formatMessage({
                 id: 'app.components.BlockLink.cloud.content',
                 defaultMessage:
-                  'A fully composable, and collaborative platform to boost your team velocity',
+                  'A fully composable, and collaborative platform to boost your team velocity.',
               })}
             </Typography>
           </Box>
           <Box src={cloudFlagsImage} position="absolute" top={0} right={0} as="img" />
-        </Stack>
+        </Flex>
       </Flex>
     </BlockLink>
   );
