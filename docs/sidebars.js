@@ -99,6 +99,11 @@ const sidebars = {
                   label: 'Storybook',
                   id: 'core/helper-plugin/components/storybook',
                 },
+                {
+                  type: 'doc',
+                  label: 'InjectionZone',
+                  id: 'core/helper-plugin/components/injection-zone',
+                },
               ],
             },
             {

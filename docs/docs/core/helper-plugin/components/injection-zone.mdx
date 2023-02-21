@@ -1,15 +1,19 @@
-import { Meta } from '@storybook/addon-docs';
-
-<Meta title="components/InjectionZone" />
-
-# InjectionZone
+---
+title: InjectionZone
+description: Define an injection zone that other plugins can use to add components in a dedicated area.
+tags:
+  - helper-plugin
+---
 
 This component is used in order to define an injection zone that other plugins can use to add components in a dedicated area.
 
 ## Usage
 
-```
-// Use the injection zone in a view
+### Creating an injection zone
+
+Use the injection zone in a view:
+
+```jsx
 import { InjectionZone } from '@strapi/helper-plugin';
 
 const HomePage = () => {
@@ -20,25 +24,31 @@ const HomePage = () => {
     <InjectionZone area="my-plugin.homePage.right" />
   );
 };
+```
 
+Define this injection zone:
 
-// Define this injection zone
+```js
 // path: 'my-plugin/admin/src/index.js
-
 export default {
   register() {
     app.registerPlugin({
       // ...
       injectionZones: {
         homepage: {
-          right: []
-        }
-      }
+          right: [],
+        },
+      },
     });
   },
-}
+};
+```
 
-// Inject from a plugin
+### Injecting a component
+
+From another plugin, inject a component in the injection zone:
+
+```js
 // path: 'my-other-plugin/admin/src/index.js'
 export default {
   register() {
@@ -49,6 +59,10 @@ export default {
       name: 'my-other-plugin-component',
       Component: () => 'This component is injected',
     });
-  }
+  },
 };
 ```
+
+## Examples
+
+The [Content Manager](/content-manager) creates injection zones that all plugins can use. [They are documented](https://docs.strapi.io/developer-docs/latest/developer-resources/plugin-api-reference/admin-panel.html#injection-zones-api) on the Strapi documentation website.
