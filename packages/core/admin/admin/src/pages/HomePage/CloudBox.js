@@ -3,35 +3,20 @@ import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { useTracking } from '@strapi/helper-plugin';
 import { Box, Flex, Stack, Typography } from '@strapi/design-system';
-import cloudIconBackground from './assets/strapi-cloud-background.png';
+import cloudIconBackgroundImage from './assets/strapi-cloud-background.png';
 import cloudIcon from './assets/strapi-cloud-icon.svg';
-import cloudFlags from './assets/strapi-cloud-flags.svg';
+import cloudFlagsImage from './assets/strapi-cloud-flags.svg';
 
 const BlockLink = styled.a`
   text-decoration: none;
 `;
 
-const CloudCustomWrapper = styled.div`
-  width: 56px;
-  height: 56px;
-  background-image: url(${({ src }) => src});
-  padding: 11px;
-  margin-right: ${({ theme }) => theme.spaces[6]};
+const CloudCustomWrapper = styled(Box)`
+  background-image: url(${({ backgroundImage }) => backgroundImage});
 `;
 
-const CloudIconWrapper = styled.div`
+const CloudIconWrapper = styled(Flex)`
   background: rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-`;
-
-const CloudFlags = styled.img`
-  position: absolute;
-  top: 0;
-  right: 0;
 `;
 
 const CloudBox = () => {
@@ -47,13 +32,32 @@ const CloudBox = () => {
         trackUsage('didClickOnTryStrapiCloudSection');
       }}
     >
-      <Flex shadow="tableShadow" hasRadius padding={6} background="neutral0" position="relative">
-        <CloudCustomWrapper src={cloudIconBackground}>
-          <CloudIconWrapper>
-            <img src={cloudIcon} alt="Strapi Cloud" />
+      <Flex
+        shadow="tableShadow"
+        hasRadius
+        padding={6}
+        background="neutral0"
+        position="relative"
+        gap={6}
+      >
+        <CloudCustomWrapper
+          backgroundImage={cloudIconBackgroundImage}
+          hasRadius
+          padding={3}
+          width="56px"
+          height="56px"
+        >
+          <CloudIconWrapper justifyContent="center" hasRadius alignItems="center" height="100%">
+            <img
+              src={cloudIcon}
+              alt={formatMessage({
+                id: 'app.components.BlockLink.cloud',
+                defaultMessage: 'Strapi Cloud',
+              })}
+            />
           </CloudIconWrapper>
         </CloudCustomWrapper>
-        <Stack spacing={1}>
+        <Stack gap={1}>
           <Flex>
             <Typography fontWeight="semiBold" variant="pi">
               {formatMessage({
@@ -71,7 +75,7 @@ const CloudBox = () => {
               })}
             </Typography>
           </Box>
-          <CloudFlags src={cloudFlags} />
+          <Box src={cloudFlagsImage} position="absolute" top={0} right={0} as="img" />
         </Stack>
       </Flex>
     </BlockLink>
