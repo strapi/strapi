@@ -26,6 +26,10 @@ export const useConfig = () => {
           message: { id: 'notification.error' },
         });
       },
+      /**
+       * We're cementing that we always expect an object to be returned.
+       */
+      select: (data) => (!data ? {} : data),
     }
   );
 
