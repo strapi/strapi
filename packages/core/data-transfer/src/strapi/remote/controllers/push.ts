@@ -106,43 +106,53 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
       async assets(payload) {
         // TODO: close the stream upong receiving an 'end' event instead
         if (payload === null) {
+          const assetsKeys = Object.keys(assets);
+          const previousAssetId = assetsKeys[assetsKeys.length - 1];
+          const { stream } = assets[previousAssetId];
+          stream
+            .on('close', () => {
+              delete assets[previousAssetId];
+            })
+            .on('error', (error) => {
+              throw new Error(`error while closing stream ${error}`);
+            })
+            .end();
           streams.assets?.end();
           return;
         }
-
-        const { action, assetID } = payload;
 
         if (!streams.assets) {
           streams.assets = await provider.createAssetsWriteStream();
         }
 
-        if (action === 'start') {
-          assets[assetID] = { ...payload.data, stream: new PassThrough() };
-          writeAsync(streams.assets, assets[assetID]);
-        }
+        payload.map(async (asset) => {
+          const { action, assetID, data, chunk } = asset;
+          const assetsKeys = Object.keys(assets);
+          if (action === 'stream') {
+            if (!assets[assetID] && assetsKeys.length !== 0) {
+              const previousAssetId = assetsKeys[assetsKeys.length - 1];
+              const { stream } = assets[previousAssetId];
+              stream
+                .on('close', () => {
+                  delete assets[previousAssetId];
+                })
+                .on('error', (error) => {
+                  throw new Error(`error while closing stream ${error}`);
+                })
+                .end();
+            }
 
-        if (action === 'stream') {
-          // The buffer has gone through JSON operations and is now of shape { type: "Buffer"; data: UInt8Array }
-          // We need to transform it back into a Buffer instance
-          const rawBuffer = payload.data as unknown as { type: 'Buffer'; data: Uint8Array };
-          const chunk = Buffer.from(rawBuffer.data);
-
-          await writeAsync(assets[assetID].stream, chunk);
-        }
-
-        if (action === 'end') {
-          await new Promise<void>((resolve, reject) => {
-            const { stream } = assets[assetID];
-
-            stream
-              .on('close', () => {
-                delete assets[assetID];
-                resolve();
-              })
-              .on('error', reject)
-              .end();
-          });
-        }
+            if (!assets[assetID] && streams.assets) {
+              assets[assetID] = { ...data, stream: new PassThrough() };
+              writeAsync(streams.assets, assets[assetID]);
+            }
+            // The buffer has gone through JSON operations and is now of shape { type: "Buffer"; data: UInt8Array }
+            // We need to transform it back into a Buffer instance
+            const rawBuffer = chunk as unknown as { type: 'Buffer'; data: Uint8Array };
+            const buffer = Buffer.from(rawBuffer.data);
+            await writeAsync(assets[assetID].stream, buffer);
+          }
+        });
       },
     },
   };

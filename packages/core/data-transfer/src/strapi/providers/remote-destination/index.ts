@@ -333,11 +333,23 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   }
 
   createAssetsWriteStream(): Writable | Promise<Writable> {
+    type TransferAssetFlow = {
+      assetID: string;
+      action: 'stream';
+      data: Omit<IAsset, 'stream'>;
+      chunk: Buffer;
+    };
+    let batch: TransferAssetFlow[] = [];
+    const batchSize = 100;
     const startAssetsTransferOnce = this.#startStepOnce('assets');
 
     return new Writable({
       objectMode: true,
       final: async (callback) => {
+        if (batch.length > 0) {
+          await this.#streamStep('assets', batch);
+          batch = [];
+        }
         // TODO: replace this stream call by an end call
         const endError = await this.#streamStep('assets', null);
 
@@ -364,25 +376,22 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         const { filename, filepath, stats, stream } = asset;
         const assetID = v4();
 
-        await this.#streamStep('assets', {
-          action: 'start',
-          assetID,
-          data: { filename, filepath, stats },
-        });
-
         for await (const chunk of stream) {
-          await this.#streamStep('assets', {
+          batch.push({
             action: 'stream',
             assetID,
-            data: chunk,
+            data: { filename, filepath, stats },
+            chunk,
           });
+          if (batch.length === batchSize) {
+            await this.#streamStep('assets', batch);
+            batch = [];
+          }
         }
-
-        await this.#streamStep('assets', {
-          action: 'end',
-          assetID,
-        });
-
+        if (batch.length === batchSize) {
+          await this.#streamStep('assets', batch);
+          batch = [];
+        }
         callback();
       },
     });

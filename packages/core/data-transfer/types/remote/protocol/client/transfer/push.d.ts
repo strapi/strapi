@@ -6,7 +6,7 @@ export type TransferPushMessage = CreateTransferMessage<
   | TransferStepCommands<'entities', IEntity[]>
   | TransferStepCommands<'links', ILink[]>
   | TransferStepCommands<'configuration', IConfiguration[]>
-  | TransferStepCommands<'assets', TransferAssetFlow | null>
+  | TransferStepCommands<'assets', TransferAssetFlow[] | null>
 >;
 
 export type GetTransferPushStreamData<T extends TransferPushStep> = {
@@ -24,8 +24,9 @@ type TransferStepCommands<T extends string, U> = { step: T } & TransferStepFlow<
 
 type TransferStepFlow<U> = { action: 'start' } | { action: 'stream'; data: U } | { action: 'end' };
 
-type TransferAssetFlow = { assetID: string } & (
-  | { action: 'start'; data: Omit<IAsset, 'stream'> }
-  | { action: 'stream'; data: Buffer }
-  | { action: 'end' }
-);
+type TransferAssetFlow = {
+  assetID: string;
+  action: 'stream';
+  data: Omit<IAsset, 'stream'>;
+  chunk: Buffer;
+};
