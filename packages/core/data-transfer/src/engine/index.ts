@@ -202,7 +202,7 @@ class TransferEngine<
     }
   ) {
     if (!this.progress.data[stage]) {
-      this.progress.data[stage] = { count: 0, bytes: 0 };
+      this.progress.data[stage] = { count: 0, bytes: 0, startTime: Date.now() };
     }
 
     const stageProgress = this.progress.data[stage];
@@ -251,7 +251,8 @@ class TransferEngine<
       transform: (data, _encoding, callback) => {
         this.#updateTransferProgress(stage, data, aggregate);
         this.#emitStageUpdate('progress', stage);
-        callback(null, data);
+        // callback(null, data);
+        setTimeout(() => callback(null, data), 150);
       },
     });
   }
@@ -437,6 +438,14 @@ class TransferEngine<
   }) {
     const { stage, source, destination, transform, tracker } = options;
 
+    const updateEndTime = () => {
+      const stageData = this.progress.data[stage];
+
+      if (stageData) {
+        stageData.endTime = Date.now();
+      }
+    };
+
     if (!source || !destination || this.shouldSkipStage(stage)) {
       // Wait until source and destination are closed
       const results = await Promise.allSettled(
@@ -480,11 +489,15 @@ class TransferEngine<
       stream
         .pipe(destination)
         .on('error', (e) => {
+          updateEndTime();
           this.#reportError(e, 'error');
           destination.destroy(e);
           reject(e);
         })
-        .on('close', resolve);
+        .on('close', () => {
+          updateEndTime();
+          resolve();
+        });
     });
 
     this.#emitStageUpdate('finish', stage);

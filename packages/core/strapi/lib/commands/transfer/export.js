@@ -10,6 +10,7 @@ const { createTransferEngine } = require('@strapi/data-transfer/lib/engine');
 const { isObject, isString, isFinite, toNumber } = require('lodash/fp');
 const fs = require('fs-extra');
 const chalk = require('chalk');
+const ora = require('ora');
 
 const { TransferEngineTransferError } = require('@strapi/data-transfer/lib/engine/errors');
 const {
@@ -19,8 +20,7 @@ const {
   createStrapiInstance,
   formatDiagnostic,
 } = require('./utils');
-const { exitWith } = require('../utils/helpers');
-
+const { readableBytes, exitWith } = require('../utils/helpers');
 /**
  * @typedef ExportCommandOptions Options given to the CLI import command
  *
@@ -79,6 +79,40 @@ module.exports = async (opts) => {
   engine.diagnostics.onDiagnostic(formatDiagnostic('export'));
 
   const progress = engine.progress.stream;
+
+  const loaders = {};
+
+  const updateLoader = (stage, data) => {
+    if (stage in loaders) {
+      const stageData = data[stage];
+
+      const amount = `amount: ${stageData?.count ?? 0}`;
+      const bytes = `size: ${readableBytes(stageData?.bytes ?? 0)}`;
+      const elapsed = `elapsed: ${stageData?.elapsed ?? 0} ms`;
+      const speed = `${
+        stageData?.endTime
+          ? readableBytes(((stageData?.bytes ?? 0) * 1000) / stageData.elapsed)
+          : '0 B'
+      }/s`;
+
+      loaders[stage].text = `${stage} (${amount}) (${bytes}) (${elapsed}) (${speed})`;
+    }
+  };
+
+  progress.on(`stage::start`, ({ stage, data }) => {
+    Object.assign(loaders, { [stage]: ora() });
+    updateLoader(stage, data);
+    loaders[stage].start();
+  });
+
+  progress.on('stage::finish', ({ stage, data }) => {
+    updateLoader(stage, data);
+    loaders[stage]?.succeed();
+  });
+
+  progress.on('stage::progress', ({ stage, data }) => {
+    updateLoader(stage, data);
+  });
 
   const getTelemetryPayload = (/* payload */) => {
     return {

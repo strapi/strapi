@@ -64,6 +64,8 @@ export type TransferProgress = {
   [key in TransferStage]?: {
     count: number;
     bytes: number;
+    startTime: number;
+    endTime?: number;
     aggregates?: {
       [key: string]: {
         count: number;
