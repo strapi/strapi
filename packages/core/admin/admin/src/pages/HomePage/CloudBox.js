@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { useTracking } from '@strapi/helper-plugin';
+import { useTracking, pxToRem } from '@strapi/helper-plugin';
 import { Box, Flex, Typography } from '@strapi/design-system';
 import cloudIconBackgroundImage from './assets/strapi-cloud-background.png';
 import cloudIcon from './assets/strapi-cloud-icon.svg';
@@ -40,12 +40,7 @@ const CloudBox = () => {
         position="relative"
         gap={6}
       >
-        <CloudCustomWrapper
-          backgroundImage={cloudIconBackgroundImage}
-          hasRadius
-          padding={3}
-          height="56px"
-        >
+        <CloudCustomWrapper backgroundImage={cloudIconBackgroundImage} hasRadius padding={3}>
           <CloudIconWrapper
             width={pxToRem(32)}
             height={pxToRem(32)}
