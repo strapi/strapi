@@ -9,7 +9,7 @@ const { getService } = require('../../../utils');
  * @param {string} schema.key - The key of the attribute
  * @param {string} schema.value - The value of the attribute
  * @param {Object} schema.attribute - The attribute definition
- * @param {Object} entry - The context
+ * @param {Object} entry
  * @param {Function} entry.set - The set function to update the value
  */
 const signEntityMediaVisitor = async ({ key, value, attribute }, { set }) => {
