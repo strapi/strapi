@@ -1208,7 +1208,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
             <span
               class="c9 c16"
             >
-              Add another field
+              content-type-builder.button.attributes.add.another
             </span>
           </button>
           <button
@@ -1287,7 +1287,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
               <span
                 class="c9 c16"
               >
-                Configure the view
+                content-type-builder.form.button.configure-view
               </span>
             </button>
           </div>
@@ -1373,7 +1373,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                     <span
                       class="c9 c35"
                     >
-                      Text
+                      string
                        
                     </span>
                   </td>
@@ -1629,7 +1629,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                     <span
                       class="c9 c35"
                     >
-                      Media
+                      media
                        
                     </span>
                   </td>
@@ -1756,7 +1756,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                     <span
                       class="c9 c35"
                     >
-                      Media
+                      media
                        
                     </span>
                   </td>
@@ -1881,7 +1881,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                     <span
                       class="c9 c35"
                     >
-                      Text
+                      string
                        
                     </span>
                   </td>
@@ -2008,7 +2008,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                     <span
                       class="c9 c35"
                     >
-                      JSON
+                      json
                        
                     </span>
                   </td>
@@ -2129,7 +2129,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                     <span
                       class="c9 c35"
                     >
-                      UID
+                      uid
                        
                     </span>
                   </td>
@@ -2260,7 +2260,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                     <span
                       class="c9 c35"
                     >
-                      Component
+                      component
                        
                     </span>
                   </td>
@@ -2418,7 +2418,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 <span
                                   class="c9 c35"
                                 >
-                                  Text
+                                  string
                                    
                                 </span>
                               </td>
@@ -2562,7 +2562,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 <span
                                   class="c9 c35"
                                 >
-                                  Text
+                                  string
                                    
                                 </span>
                               </td>
@@ -2706,7 +2706,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 <span
                                   class="c9 c35"
                                 >
-                                  Text
+                                  string
                                    
                                 </span>
                               </td>
@@ -2816,7 +2816,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             <span
                               class="c9 c48"
                             >
-                              Add another field to this component
+                              Add another field
                             </span>
                           </div>
                         </div>
@@ -2878,7 +2878,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                     <span
                       class="c9 c35"
                     >
-                      Component
+                      component
                        
                     </span>
                   </td>
@@ -3036,7 +3036,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 <span
                                   class="c9 c35"
                                 >
-                                  Text
+                                  string
                                    
                                 </span>
                               </td>
@@ -3180,7 +3180,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 <span
                                   class="c9 c35"
                                 >
-                                  Text
+                                  string
                                    
                                 </span>
                               </td>
@@ -3324,7 +3324,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 <span
                                   class="c9 c35"
                                 >
-                                  Text
+                                  string
                                    
                                 </span>
                               </td>
@@ -3434,7 +3434,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             <span
                               class="c9 c48"
                             >
-                              Add another field to this component
+                              Add another field
                             </span>
                           </div>
                         </div>
@@ -3490,7 +3490,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                     <span
                       class="c9 c35"
                     >
-                      Dynamic zone
+                      dynamiczone
                        
                     </span>
                   </td>
@@ -3601,7 +3601,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             <span
                               class="c9 c56"
                             >
-                              Add a component
+                              content-type-builder.button.component.add
                             </span>
                           </div>
                         </button>
@@ -3865,7 +3865,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c9 c35"
                                             >
-                                              Text
+                                              string
                                                
                                             </span>
                                           </td>
@@ -4009,7 +4009,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c9 c35"
                                             >
-                                              Email
+                                              email
                                                
                                             </span>
                                           </td>
@@ -4126,7 +4126,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c9 c35"
                                             >
-                                              Number
+                                              integer
                                                
                                             </span>
                                           </td>
@@ -4236,7 +4236,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <span
                                           class="c9 c56"
                                         >
-                                          Add another field to this component
+                                          Add another field
                                         </span>
                                       </div>
                                     </div>
@@ -4334,7 +4334,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c9 c35"
                                             >
-                                              Text
+                                              string
                                                
                                             </span>
                                           </td>
@@ -4478,7 +4478,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c9 c35"
                                             >
-                                              Text
+                                              text
                                                
                                             </span>
                                           </td>
@@ -4595,7 +4595,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c9 c35"
                                             >
-                                              Number
+                                              float
                                                
                                             </span>
                                           </td>
@@ -4741,7 +4741,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c9 c35"
                                             >
-                                              Media
+                                              media
                                                
                                             </span>
                                           </td>
@@ -4858,7 +4858,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c9 c35"
                                             >
-                                              Rich text
+                                              richtext
                                                
                                             </span>
                                           </td>
@@ -5116,7 +5116,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <span
                                           class="c9 c56"
                                         >
-                                          Add another field to this component
+                                          Add another field
                                         </span>
                                       </div>
                                     </div>
@@ -5214,7 +5214,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c9 c35"
                                             >
-                                              Text
+                                              string
                                                
                                             </span>
                                           </td>
@@ -5358,7 +5358,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c9 c35"
                                             >
-                                              Text
+                                              string
                                                
                                             </span>
                                           </td>
@@ -5508,7 +5508,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c9 c35"
                                             >
-                                              Component
+                                              component
                                                
                                               (repeatable)
                                             </span>
@@ -5667,7 +5667,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                         <span
                                                           class="c9 c35"
                                                         >
-                                                          Text
+                                                          string
                                                            
                                                         </span>
                                                       </td>
@@ -5811,7 +5811,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                         <span
                                                           class="c9 c35"
                                                         >
-                                                          Text
+                                                          text
                                                            
                                                         </span>
                                                       </td>
@@ -5928,7 +5928,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                         <span
                                                           class="c9 c35"
                                                         >
-                                                          Number
+                                                          float
                                                            
                                                         </span>
                                                       </td>
@@ -6074,7 +6074,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                         <span
                                                           class="c9 c35"
                                                         >
-                                                          Media
+                                                          media
                                                            
                                                         </span>
                                                       </td>
@@ -6191,7 +6191,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                         <span
                                                           class="c9 c35"
                                                         >
-                                                          Rich text
+                                                          richtext
                                                            
                                                         </span>
                                                       </td>
@@ -6449,7 +6449,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     <span
                                                       class="c9 c48"
                                                     >
-                                                      Add another field to this component
+                                                      Add another field
                                                     </span>
                                                   </div>
                                                 </div>
@@ -6490,7 +6490,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <span
                                           class="c9 c56"
                                         >
-                                          Add another field to this component
+                                          Add another field
                                         </span>
                                       </div>
                                     </div>
@@ -6588,7 +6588,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c9 c35"
                                             >
-                                              Text
+                                              string
                                                
                                             </span>
                                           </td>
@@ -6734,7 +6734,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c9 c35"
                                             >
-                                              Media
+                                              media
                                                
                                             </span>
                                           </td>
@@ -6878,7 +6878,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c9 c35"
                                             >
-                                              Boolean
+                                              boolean
                                                
                                             </span>
                                           </td>
@@ -6988,7 +6988,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <span
                                           class="c9 c56"
                                         >
-                                          Add another field to this component
+                                          Add another field
                                         </span>
                                       </div>
                                     </div>
@@ -7038,7 +7038,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   <span
                     class="c9 c56"
                   >
-                    Add another field to this collection type
+                    Add another field
                   </span>
                 </div>
               </div>

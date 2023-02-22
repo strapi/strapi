@@ -88,7 +88,7 @@ export const PreviewBox = ({
   }, [isCropImageReady, hasCropIntent, onCropStart, crop]);
 
   const handleCropping = async () => {
-    const nextAsset = { ...asset, width, height };
+    const nextAsset = { ...asset, width, height, folder: asset.folder?.id };
     const file = await produceFile(nextAsset.name, nextAsset.mime, nextAsset.updatedAt);
 
     // Making sure that when persisting the new asset, the URL changes with width and height
