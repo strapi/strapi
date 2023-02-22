@@ -15,7 +15,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   color: #32324d;
 }
 
-.c25 {
+.c24 {
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
@@ -59,6 +59,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
 
 .c16 {
   padding-right: 8px;
+}
+
+.c19 {
+  padding-right: 56px;
+  padding-left: 56px;
 }
 
 .c22 {
@@ -179,7 +184,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   flex-direction: row;
 }
 
-.c23 {
+.c20 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -311,12 +316,21 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 2px solid #4945ff;
 }
 
-.c24 > * {
+.c21 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c24 > * + * {
+.c21 > * + * {
+  margin-top: 24px;
+}
+
+.c23 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c23 > * + * {
   margin-top: 16px;
 }
 
@@ -519,7 +533,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   fill: #ffffff;
 }
 
-.c26 {
+.c25 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
   gap: 20px;
@@ -530,7 +544,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   grid-template-columns: repeat(12,1fr);
 }
 
-.c27 {
+.c26 {
   grid-column: span 6;
   max-width: 100%;
 }
@@ -551,11 +565,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
 
 .c5 {
   padding-right: 8px;
-}
-
-.c19 {
-  padding-right: 56px;
-  padding-left: 56px;
 }
 
 .c42 {
@@ -602,7 +611,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   color: #666687;
 }
 
-.c20 {
+.c27 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -706,15 +715,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-}
-
-.c21 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c21 > * + * {
-  margin-top: 24px;
 }
 
 .c28 > * {
@@ -958,13 +958,13 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
 }
 
 @media (max-width:68.75rem) {
-  .c27 {
+  .c26 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c27 {
+  .c26 {
     grid-column: span 12;
   }
 }
@@ -1091,27 +1091,27 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
         </div>
       </div>
       <div
-        class="c19"
+        class="c1 c19"
       >
         <div
-          class="c20 c21"
+          class="c1 c8 c20 c21"
         >
           <div
             class="c1 c22"
           >
             <div
-              class="c1 c8 c23 c24"
+              class="c1 c8 c20 c23"
             >
               <h2
-                class="c11 c25"
+                class="c11 c24"
               >
                 Details
               </h2>
               <div
-                class="c1 c26"
+                class="c1 c25"
               >
                 <div
-                  class="c27"
+                  class="c26"
                 >
                   <div
                     class="c1 "
@@ -1119,7 +1119,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                     <div>
                       <div>
                         <div
-                          class="c20 c28"
+                          class="c27 c28"
                         >
                           <label
                             class="c29"
@@ -1155,7 +1155,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   </div>
                 </div>
                 <div
-                  class="c27"
+                  class="c26"
                 >
                   <div
                     class="c1 "
@@ -1165,7 +1165,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                     >
                       <div>
                         <div
-                          class="c20 c28"
+                          class="c27 c28"
                         >
                           <div
                             class="c30"
@@ -1198,14 +1198,14 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   </div>
                 </div>
                 <div
-                  class="c27"
+                  class="c26"
                 >
                   <div
                     class="c1 "
                   >
                     <div>
                       <div
-                        class="c20 c28"
+                        class="c27 c28"
                       >
                         <label
                           class="c29"
@@ -1288,14 +1288,14 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   </div>
                 </div>
                 <div
-                  class="c27"
+                  class="c26"
                 >
                   <div
                     class="c1 "
                   >
                     <div>
                       <div
-                        class="c20 c28"
+                        class="c27 c28"
                       >
                         <label
                           class="c29"
@@ -1387,10 +1387,10 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                 class="c1 c51"
               >
                 <div
-                  class="c1 c8 c23 c52"
+                  class="c1 c8 c20 c52"
                 >
                   <h2
-                    class="c11 c25"
+                    class="c11 c24"
                   >
                     Permissions
                   </h2>
@@ -1532,10 +1532,10 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                 style="min-height: 100%;"
               >
                 <div
-                  class="c1 c8 c23 c52"
+                  class="c1 c8 c20 c52"
                 >
                   <h3
-                    class="c11 c25"
+                    class="c11 c24"
                   >
                     Advanced settings
                   </h3>
@@ -1592,20 +1592,20 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   color: #32324d;
 }
 
-.c33 {
+.c32 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 500;
   color: #32324d;
 }
 
-.c35 {
+.c34 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #666687;
 }
 
-.c38 {
+.c37 {
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
@@ -1633,6 +1633,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   padding-right: 8px;
 }
 
+.c25 {
+  padding-right: 56px;
+  padding-left: 56px;
+}
+
 .c2 {
   background: #f6f6f9;
   padding-top: 24px;
@@ -1658,7 +1663,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border-radius: 4px;
 }
 
-.c36 {
+.c35 {
   background: #ffffff;
   padding-top: 24px;
   padding-right: 32px;
@@ -1776,7 +1781,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   flex-direction: row;
 }
 
-.c31 {
+.c26 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -1908,21 +1913,30 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 2px solid #4945ff;
 }
 
-.c32 > * {
+.c27 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c32 > * + * {
+.c27 > * + * {
+  margin-top: 24px;
+}
+
+.c31 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c31 > * + * {
   margin-top: 4px;
 }
 
-.c37 > * {
+.c36 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c37 > * + * {
+.c36 > * + * {
   margin-top: 16px;
 }
 
@@ -2148,7 +2162,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   fill: #ffffff;
 }
 
-.c39 {
+.c38 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
   gap: 20px;
@@ -2159,7 +2173,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   grid-template-columns: repeat(12,1fr);
 }
 
-.c40 {
+.c39 {
   grid-column: span 6;
   max-width: 100%;
 }
@@ -2187,17 +2201,12 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   height: 2rem;
 }
 
-.c34 {
+.c33 {
   word-break: break-all;
 }
 
 .c6 {
   padding-right: 8px;
-}
-
-.c25 {
-  padding-right: 56px;
-  padding-left: 56px;
 }
 
 .c54 {
@@ -2254,7 +2263,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   color: #32324d;
 }
 
-.c26 {
+.c40 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -2492,15 +2501,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-}
-
-.c27 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c27 > * + * {
-  margin-top: 24px;
 }
 
 .c41 > * {
@@ -2781,13 +2781,13 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
 }
 
 @media (max-width:68.75rem) {
-  .c40 {
+  .c39 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c40 {
+  .c39 {
     grid-column: span 12;
   }
 }
@@ -2945,10 +2945,10 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
         </div>
       </div>
       <div
-        class="c5 c25"
+        class="c1 c25"
       >
         <div
-          class="c5 c26 c27"
+          class="c1 c10 c26 c27"
         >
           <div
             class="c1 c10 c28 c12"
@@ -2970,40 +2970,40 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
               </svg>
             </div>
             <div
-              class="c1 c10 c31 c32"
+              class="c1 c10 c26 c31"
             >
               <div
                 class="c1 c10 c12"
               >
                 <span
-                  class="c13 c33 c34"
+                  class="c13 c32 c33"
                 >
                   This token isn’t accessible anymore.
                 </span>
               </div>
               <span
-                class="c13 c35"
+                class="c13 c34"
               >
                 For security reasons, you can only see your token once.
               </span>
             </div>
           </div>
           <div
-            class="c1 c36"
+            class="c1 c35"
           >
             <div
-              class="c1 c10 c31 c37"
+              class="c1 c10 c26 c36"
             >
               <h2
-                class="c13 c38"
+                class="c13 c37"
               >
                 Details
               </h2>
               <div
-                class="c1 c39"
+                class="c1 c38"
               >
                 <div
-                  class="c40"
+                  class="c39"
                 >
                   <div
                     class="c1 "
@@ -3011,7 +3011,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                     <div>
                       <div>
                         <div
-                          class="c5 c26 c41"
+                          class="c5 c40 c41"
                         >
                           <label
                             class="c8 c19"
@@ -3047,7 +3047,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   </div>
                 </div>
                 <div
-                  class="c40"
+                  class="c39"
                 >
                   <div
                     class="c1 "
@@ -3057,7 +3057,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                     >
                       <div>
                         <div
-                          class="c5 c26 c41"
+                          class="c5 c40 c41"
                         >
                           <div
                             class="c5 c42"
@@ -3092,14 +3092,14 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   </div>
                 </div>
                 <div
-                  class="c40"
+                  class="c39"
                 >
                   <div
                     class="c1 "
                   >
                     <div>
                       <div
-                        class="c5 c26 c41"
+                        class="c5 c40 c41"
                       >
                         <label
                           class="c8 c19"
@@ -3186,14 +3186,14 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   </div>
                 </div>
                 <div
-                  class="c40"
+                  class="c39"
                 >
                   <div
                     class="c1 "
                   >
                     <div>
                       <div
-                        class="c5 c26 c41"
+                        class="c5 c40 c41"
                       >
                         <label
                           class="c8 c19"
@@ -3285,15 +3285,15 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                 class="c1 c66"
               >
                 <div
-                  class="c1 c10 c31 c67"
+                  class="c1 c10 c26 c67"
                 >
                   <h2
-                    class="c13 c38"
+                    class="c13 c37"
                   >
                     Permissions
                   </h2>
                   <p
-                    class="c13 c35"
+                    class="c13 c34"
                   >
                     Only actions bound by a route are listed below.
                   </p>
@@ -3430,15 +3430,15 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                 style="min-height: 100%;"
               >
                 <div
-                  class="c1 c10 c31 c67"
+                  class="c1 c10 c26 c67"
                 >
                   <h3
-                    class="c13 c38"
+                    class="c13 c37"
                   >
                     Advanced settings
                   </h3>
                   <p
-                    class="c13 c35"
+                    class="c13 c34"
                   >
                     Select the application's actions or the plugin's actions and click on the cog icon to display the bound route
                   </p>
