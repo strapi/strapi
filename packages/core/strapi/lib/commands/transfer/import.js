@@ -11,7 +11,6 @@ const {
   DEFAULT_VERSION_STRATEGY,
   DEFAULT_SCHEMA_STRATEGY,
 } = require('@strapi/data-transfer/lib/engine');
-const ora = require('ora');
 
 const { isObject } = require('lodash/fp');
 
@@ -20,8 +19,9 @@ const {
   DEFAULT_IGNORED_CONTENT_TYPES,
   createStrapiInstance,
   formatDiagnostic,
+  loadersFactory,
 } = require('./utils');
-const { readableBytes, exitWith } = require('../utils/helpers');
+const { exitWith } = require('../utils/helpers');
 
 /**
  * @typedef {import('@strapi/data-transfer').ILocalFileSourceProviderOptions} ILocalFileSourceProviderOptions
@@ -90,34 +90,14 @@ module.exports = async (opts) => {
 
   const progress = engine.progress.stream;
 
-  const loaders = {};
-
-  const updateLoader = (stage, data) => {
-    if (stage in loaders) {
-      const stageData = data[stage];
-
-      const amount = `amount: ${stageData?.count ?? 0}`;
-      const bytes = `size: ${readableBytes(stageData?.bytes ?? 0)}`;
-      const elapsed = `elapsed: ${stageData?.elapsed ?? 0} ms`;
-      const speed = `${
-        stageData?.elapsed
-          ? readableBytes(((stageData?.bytes ?? 0) * 1000) / stageData.elapsed)
-          : '0 B'
-      }/s`;
-
-      loaders[stage].text = `${stage} (${amount}) (${bytes}) (${elapsed}) (${speed})`;
-    }
-  };
+  const { updateLoader } = loadersFactory();
 
   progress.on(`stage::start`, ({ stage, data }) => {
-    Object.assign(loaders, { [stage]: ora() });
-    updateLoader(stage, data);
-    loaders[stage].start();
+    updateLoader(stage, data).start();
   });
 
   progress.on('stage::finish', ({ stage, data }) => {
-    updateLoader(stage, data);
-    loaders[stage]?.succeed();
+    updateLoader(stage, data).succeed();
   });
 
   progress.on('stage::progress', ({ stage, data }) => {

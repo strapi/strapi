@@ -251,8 +251,7 @@ class TransferEngine<
       transform: (data, _encoding, callback) => {
         this.#updateTransferProgress(stage, data, aggregate);
         this.#emitStageUpdate('progress', stage);
-        // callback(null, data);
-        setTimeout(() => callback(null, data), 150);
+        callback(null, data);
       },
     });
   }
