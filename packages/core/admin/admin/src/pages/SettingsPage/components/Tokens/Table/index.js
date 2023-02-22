@@ -1,9 +1,7 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { Typography } from '@strapi/design-system/Typography';
-import { Tbody, Tr, Td } from '@strapi/design-system/Table';
-import { Flex } from '@strapi/design-system/Flex';
+import { Flex, Typography, Tbody, Tr, Td } from '@strapi/design-system';
 import {
   RelativeTime,
   onRowClick,
@@ -55,8 +53,8 @@ const Table = ({ permissions, headers, contentType, isLoading, tokens, onConfirm
                 condition: canUpdate,
               })}
             >
-              <Td>
-                <Typography textColor="neutral800" fontWeight="bold">
+              <Td maxWidth={pxToRem(250)}>
+                <Typography textColor="neutral800" fontWeight="bold" ellipsis>
                   {token.name}
                 </Typography>
               </Td>

@@ -431,7 +431,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         padding-right: 8px;
       }
 
-      .c35 {
+      .c33 {
         max-width: 15.625rem;
       }
 
@@ -442,9 +442,13 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         color: #32324d;
       }
 
-      .c34 {
+      .c35 {
         font-size: 0.875rem;
         line-height: 1.43;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
         font-weight: 600;
         color: #32324d;
       }
@@ -693,14 +697,14 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         height: 3.5rem;
       }
 
-      .c33 {
+      .c34 {
         vertical-align: middle;
         text-align: left;
         color: #666687;
         outline-offset: -4px;
       }
 
-      .c33 input {
+      .c34 input {
         vertical-align: sub;
       }
 
@@ -961,19 +965,19 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                     >
                       <td
                         aria-colindex="1"
-                        class="c9 c33"
+                        class="c9 c33 c34"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <span
-                          class="c11 c34"
+                          class="c11 c35"
                         >
                           My super token
                         </span>
                       </td>
                       <td
                         aria-colindex="2"
-                        class="c9 c35 c33"
+                        class="c9 c33 c34"
                         role="gridcell"
                         tabindex="-1"
                       >
@@ -985,7 +989,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                       </td>
                       <td
                         aria-colindex="3"
-                        class="c9 c33"
+                        class="c9 c34"
                         role="gridcell"
                         tabindex="-1"
                       >
@@ -1002,13 +1006,13 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                       </td>
                       <td
                         aria-colindex="4"
-                        class="c9 c33"
+                        class="c9 c34"
                         role="gridcell"
                         tabindex="-1"
                       />
                       <td
                         aria-colindex="5"
-                        class="c9 c33"
+                        class="c9 c34"
                         role="gridcell"
                         tabindex="-1"
                       >

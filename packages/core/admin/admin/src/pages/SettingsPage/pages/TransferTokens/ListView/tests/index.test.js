@@ -365,7 +365,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
         padding-left: 56px;
       }
 
-      .c34 {
+      .c32 {
         max-width: 15.625rem;
       }
 
@@ -389,9 +389,13 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
         color: #666687;
       }
 
-      .c33 {
+      .c34 {
         font-size: 0.875rem;
         line-height: 1.43;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
         font-weight: 600;
         color: #32324d;
       }
@@ -707,14 +711,14 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
         height: 3.5rem;
       }
 
-      .c32 {
+      .c33 {
         vertical-align: middle;
         text-align: left;
         color: #666687;
         outline-offset: -4px;
       }
 
-      .c32 input {
+      .c33 input {
         vertical-align: sub;
       }
 
@@ -975,19 +979,19 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                     >
                       <td
                         aria-colindex="1"
-                        class="c1 c32"
+                        class="c1 c32 c33"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <span
-                          class="c5 c33"
+                          class="c5 c34"
                         >
                           My super token
                         </span>
                       </td>
                       <td
                         aria-colindex="2"
-                        class="c1 c34 c32"
+                        class="c1 c32 c33"
                         role="gridcell"
                         tabindex="-1"
                       >
@@ -999,7 +1003,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                       </td>
                       <td
                         aria-colindex="3"
-                        class="c1 c32"
+                        class="c1 c33"
                         role="gridcell"
                         tabindex="-1"
                       >
@@ -1016,13 +1020,13 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                       </td>
                       <td
                         aria-colindex="4"
-                        class="c1 c32"
+                        class="c1 c33"
                         role="gridcell"
                         tabindex="-1"
                       />
                       <td
                         aria-colindex="5"
-                        class="c1 c32"
+                        class="c1 c33"
                         role="gridcell"
                         tabindex="-1"
                       >
