@@ -66,15 +66,13 @@ const CloudBox = () => {
               })}
             </Typography>
           </Flex>
-          <Box width="80%">
-            <Typography textColor="neutral600">
-              {formatMessage({
-                id: 'app.components.BlockLink.cloud.content',
-                defaultMessage:
-                  'A fully composable, and collaborative platform to boost your team velocity.',
-              })}
-            </Typography>
-          </Box>
+          <Typography textColor="neutral600">
+            {formatMessage({
+              id: 'app.components.BlockLink.cloud.content',
+              defaultMessage:
+                'A fully composable, and collaborative platform to boost your team velocity.',
+            })}
+          </Typography>
           <Box src={cloudFlagsImage} position="absolute" top={0} right={0} as="img" />
         </Flex>
       </Flex>
