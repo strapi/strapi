@@ -65,7 +65,7 @@ module.exports = {
       return ctx.notFound('User does not exist');
     }
 
-    await getService('user').shouldUpdateEEDisabledUsersList(id, input);
+    await getService('user').updateEEDisabledUsersList(id, input);
 
     ctx.body = {
       data: getService('user').sanitizeUser(updatedUser),
@@ -81,7 +81,7 @@ module.exports = {
       return ctx.notFound('User not found');
     }
 
-    await getService('user').shouldRemoveFromEEDisabledUsersList(id);
+    await getService('user').removeFromEEDisabledUsersList(id);
 
     return ctx.deleted({
       data: getService('user').sanitizeUser(deletedUser),
@@ -98,7 +98,7 @@ module.exports = {
 
     const users = await getService('user').deleteByIds(body.ids);
 
-    await getService('user').shouldRemoveFromEEDisabledUsersList(body.ids);
+    await getService('user').removeFromEEDisabledUsersList(body.ids);
 
     const sanitizedUsers = users.map(getService('user').sanitizeUser);
 
