@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Trash } from '@strapi/icons';
 import { IconButton, Box } from '@strapi/design-system';
-import { stopPropagation, useTracking } from '@strapi/helper-plugin';
+import { stopPropagation, useTracking, ConfirmDialog } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import DeleteTokenDialog from '../../DeleteTokenDialog';
 
 const DeleteButton = ({ tokenName, onClickDelete }) => {
   const { formatMessage } = useIntl();
@@ -31,8 +30,8 @@ const DeleteButton = ({ tokenName, onClickDelete }) => {
         noBorder
         icon={<Trash />}
       />
-      <DeleteTokenDialog
-        onClose={() => setShowConfirmDialog(false)}
+      <ConfirmDialog
+        onToggleDialog={() => setShowConfirmDialog(false)}
         onConfirm={handleClickDelete}
         isOpen={showConfirmDialog}
       />
