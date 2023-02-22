@@ -47,8 +47,8 @@ const CloudBox = () => {
           height="56px"
         >
           <CloudIconWrapper
-            width="2rem"
-            height="2rem"
+            width={pxToRem(32)}
+            height={pxToRem(32)}
             justifyContent="center"
             hasRadius
             alignItems="center"
