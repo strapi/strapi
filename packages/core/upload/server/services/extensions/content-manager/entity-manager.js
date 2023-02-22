@@ -1,31 +1,34 @@
 'use strict';
 
-const { mapAsync } = require('@strapi/utils');
+const { mapAsync, traverseEntity } = require('@strapi/utils');
 const { getService } = require('../../../utils');
 
-const getSignedAttribute = (attributeName, entity, model) => {
+/**
+ * Visitor function to sign media URLs
+ * @param {Object} schema
+ * @param {string} schema.key - The key of the attribute
+ * @param {string} schema.value - The value of the attribute
+ * @param {Object} schema.attribute - The attribute definition
+ * @param {Object} entry
+ * @param {Function} entry.set - The set function to update the value
+ */
+const signEntityMediaVisitor = async ({ key, value, attribute }, { set }) => {
   const { signFileUrls } = getService('file');
 
-  if (!entity) return entity;
-
-  const attribute = model.attributes[attributeName];
-
-  switch (attribute?.type) {
-    case 'media':
-      if (attribute.multiple) {
-        return mapAsync(entity, signFileUrls);
-      }
-      return signFileUrls(entity);
-    case 'component':
-      if (attribute.repeatable) {
-        return mapAsync(entity, (component) => signEntityMedia(component, attribute.component));
-      }
-      return signEntityMedia(entity, attribute.component);
-    case 'dynamiczone':
-      return mapAsync(entity, (component) => signEntityMedia(component, component.__component));
-    default:
-      return entity;
+  if (!value || attribute.type !== 'media') {
+    return;
   }
+
+  // If the attribute is repeatable sign each file
+  if (attribute.multiple) {
+    const signedFiles = await mapAsync(value, signFileUrls);
+    set(key, signedFiles);
+    return;
+  }
+
+  // If the attribute is not repeatable only sign a single file
+  const signedFile = await signFileUrls(value);
+  set(key, signedFile);
 };
 
 /**
@@ -34,27 +37,13 @@ const getSignedAttribute = (attributeName, entity, model) => {
  * Check which modelAttributes are media and pre sign the image URLs
  * if they are from the current upload provider
  *
- * TODO: Use traverse entity for strapi utils?
- *
  * @param {Object} entity
  * @param {Object} modelAttributes
  * @returns
  */
 const signEntityMedia = async (entity, uid) => {
   const model = strapi.getModel(uid);
-
-  const signedEntity = {};
-
-  // TODO: Use asyncReduce
-  for (const attributeName of Object.keys(entity)) {
-    signedEntity[attributeName] = await getSignedAttribute(
-      attributeName,
-      entity[attributeName],
-      model
-    );
-  }
-
-  return signedEntity;
+  return traverseEntity(signEntityMediaVisitor, { schema: model }, entity);
 };
 
 const addSignedFileUrlsToAdmin = async () => {
