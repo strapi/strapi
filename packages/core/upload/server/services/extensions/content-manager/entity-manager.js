@@ -1,6 +1,6 @@
 'use strict';
 
-const { traverseEntity } = require('@strapi/utils');
+const { mapAsync, traverseEntity } = require('@strapi/utils');
 const { getService } = require('../../../utils');
 
 /**
@@ -15,10 +15,20 @@ const { getService } = require('../../../utils');
 const signEntityMediaVisitor = async ({ key, value, attribute }, { set }) => {
   const { signFileUrls } = getService('file');
 
-  if (value && attribute.type === 'media') {
-    const signedFile = await signFileUrls(value);
-    set(key, signedFile);
+  if (!value || attribute.type !== 'media') {
+    return;
   }
+
+  // If the attribute is repeatable sign each file
+  if (attribute.multiple) {
+    const signedFiles = await mapAsync(value, signFileUrls);
+    set(key, signedFiles);
+    return;
+  }
+
+  // If the attribute is not repeatable only sign a single file
+  const signedFile = await signFileUrls(value);
+  set(key, signedFile);
 };
 
 /**
