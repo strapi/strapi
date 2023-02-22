@@ -181,7 +181,7 @@ const ApiTokenCreateView = () => {
         history.replace(`/settings/api-tokens/${response.id}`, { apiToken: response });
         setCurrentStep('apiTokens.success');
       } else if (canOnlyCreate) {
-        history.replace('/settings/api-tokens?sort=name:ASC');
+        history.replace('/settings/api-tokens');
         setCurrentStep('apiTokens.success');
       }
       unlockApp();

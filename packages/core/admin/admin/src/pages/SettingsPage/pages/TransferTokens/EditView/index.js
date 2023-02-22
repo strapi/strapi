@@ -103,7 +103,7 @@ const TransferTokenCreateView = () => {
         history.replace(`/settings/transfer-tokens/${response.id}`, { transferToken: response });
         setCurrentStep('transferTokens.success');
       } else if (canOnlyCreate) {
-        history.replace('/settings/transfer-tokens?sort=name:ASC');
+        history.replace('/settings/transfer-tokens');
         setCurrentStep('transferTokens.success');
       }
 

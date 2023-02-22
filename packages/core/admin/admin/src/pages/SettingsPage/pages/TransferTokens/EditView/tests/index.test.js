@@ -1,9 +1,10 @@
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor, fireEvent } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { useRBAC } from '@strapi/helper-plugin';
 import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
@@ -15,15 +16,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   useNotification: jest.fn(),
   useFocusWhenNavigate: jest.fn(),
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
-  useRBAC: jest.fn(() => ({
-    allowedActions: {
-      canCreate: true,
-      canDelete: true,
-      canRead: true,
-      canUpdate: true,
-      canRegenerate: true,
-    },
-  })),
+  useRBAC: jest.fn(),
   useGuidedTour: jest.fn(() => ({
     startSection: jest.fn(),
   })),
@@ -43,9 +36,7 @@ jest.mock('@strapi/helper-plugin', () => ({
             id: '1',
             name: 'My super token',
             description: 'This describe my super token',
-            type: 'read-only',
             createdAt: '2021-11-15T00:00:00.000Z',
-            permissions: [],
           },
         },
       };
@@ -81,12 +72,25 @@ const makeApp = (history) => {
   );
 };
 
+function getElementByName(container, elementType, name) {
+  return container.querySelector(`${elementType}[name="${name}"]`);
+}
+
 describe('ADMIN | Pages | TRANSFER TOKENS | EditView', () => {
   afterAll(() => {
     jest.resetAllMocks();
   });
 
   it('renders and matches the snapshot when creating token', async () => {
+    useRBAC.mockImplementation(() => ({
+      allowedActions: {
+        canCreate: true,
+        canDelete: true,
+        canRead: true,
+        canUpdate: true,
+        canRegenerate: true,
+      },
+    }));
     const history = createMemoryHistory();
     const App = makeApp(history);
     const { container } = render(App);
@@ -97,6 +101,15 @@ describe('ADMIN | Pages | TRANSFER TOKENS | EditView', () => {
   });
 
   it('renders and matches the snapshot when editing existing token', async () => {
+    useRBAC.mockImplementation(() => ({
+      allowedActions: {
+        canCreate: true,
+        canDelete: true,
+        canRead: true,
+        canUpdate: true,
+        canRegenerate: true,
+      },
+    }));
     const history = createMemoryHistory();
     const App = makeApp(history);
     const { container, getByText } = render(App);
@@ -110,5 +123,50 @@ describe('ADMIN | Pages | TRANSFER TOKENS | EditView', () => {
     });
 
     expect(container).toMatchSnapshot();
+  });
+
+  it('renders the tokens list after the token creation if you have not the update permission', async () => {
+    useRBAC.mockImplementation(() => ({
+      allowedActions: {
+        canCreate: true,
+        canDelete: true,
+        canRead: false,
+        canUpdate: false,
+        canRegenerate: true,
+      },
+    }));
+    const history = createMemoryHistory();
+    const App = makeApp(history);
+    const { container } = render(App);
+
+    history.push('/settings/transfer-tokens/create');
+    const nameToken = 'test transfer';
+    const descriptionToken = 'token description';
+    const tokenDuration = '30 days';
+
+    history.replace = jest.fn();
+
+    act(() => {
+      fireEvent.change(getElementByName(container, 'input', 'name'), {
+        target: { value: nameToken },
+      });
+    });
+
+    act(() => {
+      fireEvent.change(getElementByName(container, 'textarea', 'description'), {
+        target: { value: descriptionToken },
+      });
+    });
+
+    act(() => {
+      const tokenLifespanBtn = getElementByName(container, 'button', 'lifespan');
+      const spanTokenLifespan = tokenLifespanBtn.nextElementSibling.querySelector('span');
+      spanTokenLifespan.innerHtml = tokenDuration;
+    });
+
+    // trigger the submit
+    act(async () => {
+      await fireEvent.click(container.querySelector(`button[type="submit"]`));
+    });
   });
 });
