@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import parseISO from 'date-fns/parseISO';
 import { getFileExtension } from '@strapi/helper-plugin';
-import { Typography } from '@strapi/design-system/Typography';
+import { Typography } from '@strapi/design-system';
 
 import { PreviewCell } from './PreviewCell';
 import { formatBytes } from '../../utils';

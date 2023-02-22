@@ -1,18 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
-.c25 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
 .c6 {
   font-size: 0.75rem;
   line-height: 1.33;
@@ -34,6 +22,13 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   font-size: 0.875rem;
   line-height: 1.43;
   color: #32324d;
+}
+
+.c7 {
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #dcdce4;
 }
 
 .c8 {
@@ -201,6 +196,18 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   border: 2px solid #4945ff;
 }
 
+.c25 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
 .c27 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -271,6 +278,79 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
 .c27 svg > g,
 .c27 svg path {
   fill: #32324d;
+}
+
+.c11 {
+  position: relative;
+  border: 1px solid #dcdce4;
+  padding-right: 12px;
+  border-radius: 4px;
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 2rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c11:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c17 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c17 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c17 svg path {
+  fill: #666687;
+}
+
+.c18 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+}
+
+.c18 svg {
+  width: 0.375rem;
+}
+
+.c12 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c12:focus {
+  outline: none;
+}
+
+.c12[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c13 {
+  width: 100%;
 }
 
 .c23 {
@@ -349,86 +429,6 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
 
 .c19 .c22[aria-disabled='true'] svg path {
   fill: #666687;
-}
-
-.c7 {
-  border-radius: 4px;
-  border-style: solid;
-  border-width: 1px;
-  border-color: #dcdce4;
-}
-
-.c12 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c12:focus {
-  outline: none;
-}
-
-.c12[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c11 {
-  position: relative;
-  border: 1px solid #dcdce4;
-  padding-right: 12px;
-  border-radius: 4px;
-  background: #ffffff;
-  overflow: hidden;
-  min-height: 2rem;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c11:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c17 {
-  background: transparent;
-  border: none;
-  position: relative;
-  z-index: 1;
-}
-
-.c17 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
-}
-
-.c17 svg path {
-  fill: #666687;
-}
-
-.c18 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  background: none;
-  border: none;
-}
-
-.c18 svg {
-  width: 0.375rem;
-}
-
-.c13 {
-  width: 100%;
 }
 
 .c29 {
@@ -812,7 +812,7 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
     </span>
   </div>
   <div
-    class="c7"
+    class="c0 c7"
   >
     <div
       class="c0 c8"

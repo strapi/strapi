@@ -21,18 +21,21 @@ import {
   useRBACProvider,
   useTracking,
   Link,
+  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 
-import { IconButton } from '@strapi/design-system/IconButton';
-import { Main } from '@strapi/design-system/Main';
-import { Box } from '@strapi/design-system/Box';
-import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import { Button } from '@strapi/design-system/Button';
+import {
+  IconButton,
+  Main,
+  Box,
+  ActionLayout,
+  ContentLayout,
+  HeaderLayout,
+  useNotifyAT,
+  Button,
+} from '@strapi/design-system';
 
-import ArrowLeft from '@strapi/icons/ArrowLeft';
-import Plus from '@strapi/icons/Plus';
-import Cog from '@strapi/icons/Cog';
+import { ArrowLeft, Plus, Cog } from '@strapi/icons';
 
 import DynamicTable from '../../components/DynamicTable';
 import AttributeFilter from '../../components/AttributeFilter';
@@ -84,6 +87,7 @@ function ListView({
   const trackUsageRef = useRef(trackUsage);
   const fetchPermissionsRef = useRef(refetchPermissions);
   const { notifyStatus } = useNotifyAT();
+  const { formatAPIError } = useAPIErrorHandler(getTrad);
 
   useFocusWhenNavigate();
 
@@ -148,7 +152,6 @@ function ListView({
           return;
         }
 
-        console.error(err);
         toggleNotification({
           type: 'warning',
           message: { id: getTrad('error.model.fetch') },
@@ -171,11 +174,11 @@ function ListView({
       } catch (err) {
         toggleNotification({
           type: 'warning',
-          message: { id: getTrad('error.record.delete') },
+          message: formatAPIError(err),
         });
       }
     },
-    [fetchData, params, slug, toggleNotification, post]
+    [fetchData, params, slug, toggleNotification, formatAPIError, post]
   );
 
   const handleConfirmDeleteData = useCallback(
@@ -191,19 +194,13 @@ function ListView({
           message: { id: getTrad('success.record.delete') },
         });
       } catch (err) {
-        const errorMessage = get(
-          err,
-          'response.payload.message',
-          formatMessage({ id: getTrad('error.record.delete') })
-        );
-
         toggleNotification({
           type: 'warning',
-          message: errorMessage,
+          message: formatAPIError(err),
         });
       }
     },
-    [slug, params, fetchData, toggleNotification, formatMessage, del]
+    [slug, params, fetchData, toggleNotification, formatAPIError, del]
   );
 
   useEffect(() => {

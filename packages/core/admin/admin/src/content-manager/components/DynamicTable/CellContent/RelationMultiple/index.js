@@ -1,18 +1,21 @@
-import React, { useState, useMemo } from 'react';
-import PropTypes from 'prop-types';
-import { useQuery } from 'react-query';
-import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
-import { Box } from '@strapi/design-system/Box';
-import { Badge } from '@strapi/design-system/Badge';
-import { Flex } from '@strapi/design-system/Flex';
-import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
-import { Loader } from '@strapi/design-system/Loader';
-import styled from 'styled-components';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import {
+  Badge,
+  Box,
+  Flex,
+  Loader,
+  MenuItem,
+  SimpleMenu,
+  Typography,
+  useNotifyAT,
+} from '@strapi/design-system';
 import { stopPropagation, useFetchClient } from '@strapi/helper-plugin';
-import CellValue from '../CellValue';
+import PropTypes from 'prop-types';
+import React, { useMemo, useState } from 'react';
+import { useIntl } from 'react-intl';
+import { useQuery } from 'react-query';
+import styled from 'styled-components';
 import { getRequestUrl, getTrad } from '../../../../utils';
+import CellValue from '../CellValue';
 
 const TypographyMaxWidth = styled(Typography)`
   max-width: 500px;
@@ -67,7 +70,7 @@ const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, conte
       staleTime: 0,
       select: (data) => ({
         ...data,
-        results: data.results.reverse(),
+        results: [...data.results].reverse(),
       }),
     }
   );

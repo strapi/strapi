@@ -1,12 +1,15 @@
 import React from 'react';
-import { Box } from '@strapi/design-system/Box';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
-import { Textarea } from '@strapi/design-system/Textarea';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Button } from '@strapi/design-system/Button';
+import {
+  Box,
+  Grid,
+  GridItem,
+  Flex,
+  Stack,
+  Typography,
+  Textarea,
+  TextInput,
+  Button,
+} from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 

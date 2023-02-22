@@ -29,16 +29,25 @@ describe('DocAssetCard', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c34 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
+      .c24 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c25 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
+      .c33 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
       }
 
       .c0 {
@@ -158,39 +167,6 @@ describe('DocAssetCard', () => {
         justify-content: center;
       }
 
-      .c16 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
-      .c24 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c25 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #666687;
-      }
-
-      .c33 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #666687;
-      }
-
       .c7 > * {
         margin-left: 0;
         margin-right: 0;
@@ -198,6 +174,11 @@ describe('DocAssetCard', () => {
 
       .c7 > * + * {
         margin-left: 8px;
+      }
+
+      .c31 {
+        border-radius: 4px;
+        height: 1.5rem;
       }
 
       .c14 {
@@ -326,6 +307,49 @@ describe('DocAssetCard', () => {
         background-color: #8e8ea9;
       }
 
+      .c16 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c8 {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+      }
+
+      .c12 {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+      }
+
+      .c28 {
+        margin-left: auto;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
+      }
+
+      .c32 {
+        margin-left: 4px;
+      }
+
+      .c22 {
+        word-break: break-all;
+      }
+
+      .c4 {
+        border-bottom: 1px solid #eaeaef;
+      }
+
       .c15 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -364,42 +388,6 @@ describe('DocAssetCard', () => {
 
       .c15[aria-disabled='true'] svg path {
         fill: #666687;
-      }
-
-      .c8 {
-        position: absolute;
-        top: 12px;
-        left: 12px;
-      }
-
-      .c12 {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-      }
-
-      .c31 {
-        border-radius: 4px;
-        height: 1.5rem;
-      }
-
-      .c28 {
-        margin-left: auto;
-        -webkit-flex-shrink: 0;
-        -ms-flex-negative: 0;
-        flex-shrink: 0;
-      }
-
-      .c32 {
-        margin-left: 4px;
-      }
-
-      .c22 {
-        word-break: break-all;
-      }
-
-      .c4 {
-        border-bottom: 1px solid #eaeaef;
       }
 
       .c26 {
@@ -566,7 +554,7 @@ describe('DocAssetCard', () => {
           </div>
         </article>
         <div
-          class="c34"
+          class="c16"
         >
           <p
             aria-live="polite"
