@@ -65,7 +65,13 @@ describe('Upload | extensions | entity-manager', () => {
   }));
 
   describe('signEntityMedia', () => {
-    beforeAll(() => {
+    let spySignFileUrls;
+    beforeEach(() => {
+      spySignFileUrls = jest.fn();
+      getService.mockImplementation(() => ({
+        signFileUrls: spySignFileUrls,
+      }));
+
       global.strapi = {
         plugins: {
           upload: {},
@@ -79,11 +85,6 @@ describe('Upload | extensions | entity-manager', () => {
         media: media[0],
       };
 
-      const spySignFileUrls = jest.fn();
-      getService.mockImplementation(() => ({
-        signFileUrls: spySignFileUrls,
-      }));
-
       await signEntityMedia(entity, modelUID);
       expect(getService).toBeCalledWith('file');
       expect(spySignFileUrls).toBeCalledWith(entity.media);
@@ -93,11 +94,6 @@ describe('Upload | extensions | entity-manager', () => {
       const entity = {
         media_repeatable: media,
       };
-
-      const spySignFileUrls = jest.fn();
-      getService.mockImplementation(() => ({
-        signFileUrls: spySignFileUrls,
-      }));
 
       await signEntityMedia(entity, modelUID);
       expect(getService).toBeCalledWith('file');
@@ -115,11 +111,6 @@ describe('Upload | extensions | entity-manager', () => {
           media_repeatable: media,
         },
       };
-
-      const spySignFileUrls = jest.fn();
-      getService.mockImplementation(() => ({
-        signFileUrls: spySignFileUrls,
-      }));
 
       await signEntityMedia(entity, modelUID);
       expect(getService).toBeCalledWith('file');
@@ -140,11 +131,6 @@ describe('Upload | extensions | entity-manager', () => {
           },
         ],
       };
-
-      const spySignFileUrls = jest.fn();
-      getService.mockImplementation(() => ({
-        signFileUrls: spySignFileUrls,
-      }));
 
       await signEntityMedia(entity, modelUID);
       expect(getService).toBeCalledWith('file');
