@@ -30,6 +30,10 @@ describe('Upload | extensions | entity-manager', () => {
           type: 'component',
           component: componentUID,
         },
+        dynamicZone: {
+          type: 'dynamiczone',
+          components: [componentUID],
+        },
       },
     },
     [componentUID]: {
@@ -143,6 +147,23 @@ describe('Upload | extensions | entity-manager', () => {
         [media[0], 0],
         [media[1], 1],
       ]);
+    });
+
+    test('makes correct calls for dynamic zones', async () => {
+      const entity = {
+        dynamicZone: [
+          {
+            __component: componentUID,
+            media_repeatable: media,
+            media: media[1],
+          },
+        ],
+      };
+
+      await signEntityMedia(entity, modelUID);
+      expect(getService).toBeCalledWith('file');
+      expect(spySignFileUrls).toBeCalledTimes(3);
+      expect(spySignFileUrls.mock.calls).toEqual([[media[0], 0], [media[1], 1], [media[1]]]);
     });
   });
 });
