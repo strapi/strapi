@@ -88,7 +88,13 @@ module.exports = ({ strapi }) => ({
 
     const entities = await strapi.entityService.findMany(uid, params);
 
-    const mappedResults = await mapAsync(entities.results, (entity) => this.mapEntity(entity, uid));
+    if (!entities) {
+      return entities;
+    }
+
+    const mappedResults = await mapAsync(entities.results || [entities], (entity) =>
+      this.mapEntity(entity, uid)
+    );
     return { ...entities, results: mappedResults };
   },
 
@@ -97,7 +103,13 @@ module.exports = ({ strapi }) => ({
 
     const entities = await strapi.entityService.findPage(uid, params);
 
-    const mappedResults = await mapAsync(entities.results, (entity) => this.mapEntity(entity, uid));
+    if (!entities) {
+      return entities;
+    }
+
+    const mappedResults = await mapAsync(entities.results || [entities], (entity) =>
+      this.mapEntity(entity, uid)
+    );
     return { ...entities, results: mappedResults };
   },
 
@@ -107,7 +119,13 @@ module.exports = ({ strapi }) => ({
 
     const entities = await strapi.entityService.findWithRelationCountsPage(uid, params);
 
-    const mappedResults = await mapAsync(entities.results, (entity) => this.mapEntity(entity, uid));
+    if (!entities) {
+      return entities;
+    }
+
+    const mappedResults = await mapAsync(entities.results || [entities], (entity) =>
+      this.mapEntity(entity, uid)
+    );
     return { ...entities, results: mappedResults };
   },
 
