@@ -3,7 +3,7 @@ import { IntlProvider } from 'react-intl';
 import { render, screen } from '@testing-library/react';
 
 import { ThemeProvider, lightTheme, Tooltip } from '@strapi/design-system';
-import Earth from '@strapi/icons/Earth';
+import { Earth } from '@strapi/icons';
 
 import DynamicZoneLabel from '../DynamicZoneLabel';
 

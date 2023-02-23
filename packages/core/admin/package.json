@@ -73,6 +73,7 @@
     "find-root": "1.1.0",
     "fork-ts-checker-webpack-plugin": "7.2.1",
     "formik": "^2.2.6",
+    "fractional-indexing": "3.2.0",
     "fs-extra": "10.0.0",
     "highlight.js": "^10.4.1",
     "history": "^4.9.0",
@@ -100,7 +101,6 @@
     "markdown-it-sup": "1.0.0",
     "match-sorter": "^4.0.2",
     "mini-css-extract-plugin": "2.7.2",
-    "node-polyfill-webpack-plugin": "2.0.1",
     "node-schedule": "2.1.0",
     "p-map": "4.0.0",
     "passport-local": "1.0.0",
@@ -114,7 +114,7 @@
     "react-error-boundary": "3.1.4",
     "react-fast-compare": "^3.2.0",
     "react-helmet": "^6.1.0",
-    "react-intl": "6.2.7",
+    "react-intl": "6.2.8",
     "react-is": "^17.0.2",
     "react-query": "3.24.3",
     "react-redux": "8.0.5",
@@ -144,10 +144,10 @@
     "@testing-library/user-event": "14.4.3",
     "duplicate-dependencies-webpack-plugin": "^1.0.2",
     "glob": "8.0.3",
-    "msw": "1.0.0",
+    "msw": "1.0.1",
     "react-test-renderer": "^17.0.2",
     "speed-measure-webpack-plugin": "1.5.0",
-    "webpack-bundle-analyzer": "^4.7.0"
+    "webpack-bundle-analyzer": "^4.8.0"
   },
   "peerDependencies": {
     "@strapi/strapi": "^4.3.4"

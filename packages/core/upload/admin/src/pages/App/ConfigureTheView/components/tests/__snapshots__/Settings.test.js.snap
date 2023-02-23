@@ -1,16 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Upload - Configure | Settings initial render renders and matches the snapshot 1`] = `
-.c17 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
+.c5 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c12 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
   overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c16 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
 }
 
 .c0 {
@@ -78,29 +89,6 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   justify-content: space-between;
 }
 
-.c5 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c12 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c16 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
 .c4 > * {
   margin-top: 0;
   margin-bottom: 0;
@@ -110,23 +98,16 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   margin-top: 4px;
 }
 
-.c8 {
+.c17 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c8:focus {
-  outline: none;
-}
-
-.c8[aria-disabled='true'] {
-  cursor: not-allowed;
+  width: 1px;
 }
 
 .c7 {
@@ -177,6 +158,25 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 
 .c15 svg {
   width: 0.375rem;
+}
+
+.c8 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c8:focus {
+  outline: none;
+}
+
+.c8[aria-disabled='true'] {
+  cursor: not-allowed;
 }
 
 .c10 {

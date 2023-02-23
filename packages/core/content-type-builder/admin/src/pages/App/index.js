@@ -9,7 +9,7 @@ import { Switch, Route } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { LoadingIndicatorPage, CheckPagePermissions, useGuidedTour } from '@strapi/helper-plugin';
-import { Layout } from '@strapi/design-system/Layout';
+import { Layout } from '@strapi/design-system';
 import pluginPermissions from '../../permissions';
 import pluginId from '../../pluginId';
 import DataManagerProvider from '../../components/DataManagerProvider';

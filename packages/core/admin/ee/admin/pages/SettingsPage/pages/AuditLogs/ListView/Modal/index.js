@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useQuery } from 'react-query';
-import { ModalLayout, ModalHeader, ModalBody } from '@strapi/design-system/ModalLayout';
-import { Breadcrumbs, Crumb } from '@strapi/design-system/Breadcrumbs';
+import { ModalLayout, ModalHeader, ModalBody, Breadcrumbs, Crumb } from '@strapi/design-system';
 import { useNotification, useFetchClient } from '@strapi/helper-plugin';
 import useFormatTimeStamp from '../hooks/useFormatTimeStamp';
 import ActionBody from './ActionBody';

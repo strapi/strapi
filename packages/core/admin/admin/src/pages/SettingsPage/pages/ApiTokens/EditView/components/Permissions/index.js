@@ -1,8 +1,6 @@
 import React, { memo } from 'react';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
-import { Stack } from '@strapi/design-system/Stack';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Typography, Stack, Grid, GridItem } from '@strapi/design-system';
 import ContentTypesSection from '../ContenTypesSection';
 import ActionBoundRoutes from '../ActionBoundRoutes';
 import { useApiTokenPermissionsContext } from '../../../../../../../contexts/ApiTokenPermissions';
