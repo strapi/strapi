@@ -333,13 +333,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   }
 
   createAssetsWriteStream(): Writable | Promise<Writable> {
-    type TransferAssetFlow = {
-      assetID: string;
-      action: 'stream';
-      data: Omit<IAsset, 'stream'>;
-      chunk: Buffer;
-    };
-    let batch: TransferAssetFlow[] = [];
+    let batch: any[] = [];
     const batchSize = 100;
     const startAssetsTransferOnce = this.#startStepOnce('assets');
 
@@ -375,23 +369,33 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
         const { filename, filepath, stats, stream } = asset;
         const assetID = v4();
+        batch.push({
+          action: 'start',
+          assetID,
+          data: { filename, filepath, stats },
+        });
+        if (batch.length === batchSize) {
+          await this.#streamStep('assets', batch);
+          batch = [];
+        }
 
         for await (const chunk of stream) {
-          batch.push({
-            action: 'stream',
-            assetID,
-            data: { filename, filepath, stats },
-            chunk,
-          });
+          batch.push({ action: 'stream', assetID, data: chunk });
           if (batch.length === batchSize) {
             await this.#streamStep('assets', batch);
             batch = [];
           }
         }
+
+        batch.push({
+          action: 'end',
+          assetID,
+        });
         if (batch.length === batchSize) {
           await this.#streamStep('assets', batch);
           batch = [];
         }
+
         callback();
       },
     });
