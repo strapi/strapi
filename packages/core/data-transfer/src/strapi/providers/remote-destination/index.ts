@@ -333,7 +333,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   }
 
   createAssetsWriteStream(): Writable | Promise<Writable> {
-    let batch: any[] = [];
+    let batch: client.TransferAssetFlow[] = [];
     const batchSize = 100;
     const startAssetsTransferOnce = this.#startStepOnce('assets');
 
