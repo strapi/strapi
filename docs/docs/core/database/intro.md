@@ -1,8 +1,8 @@
 ---
 title: Introduction
-slug: /content-manager
+slug: /database
 tags:
-  - dat
+  - database
 ---
 
 # Database
