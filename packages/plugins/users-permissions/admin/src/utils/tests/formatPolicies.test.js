@@ -1,7 +1,7 @@
 import formatPolicies from '../formatPolicies';
 
 describe('USERS PERMISSIONS | utils | formatPolicies', () => {
-  it('should format the policies correclty', () => {
+  it('should format the policies correctly', () => {
     const policies = ['customPolicies', 'rateLimit', 'isAuthenticated'];
 
     const expected = [

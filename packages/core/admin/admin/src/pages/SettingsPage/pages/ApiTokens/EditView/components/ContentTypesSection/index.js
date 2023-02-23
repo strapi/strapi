@@ -4,8 +4,8 @@ import { Box } from '@strapi/design-system';
 import CollapsableContentType from '../CollapsableContentType';
 
 const ContentTypesSection = ({ section, ...props }) => {
-  const [indexExpandedCollpsedContent, setIndexExpandedCollpsedContent] = useState(null);
-  const handleExpandedCollpsedContentIndex = (index) => setIndexExpandedCollpsedContent(index);
+  const [indexExpandedCollapsedContent, setIndexExpandedCollapsedContent] = useState(null);
+  const handleExpandedCollapsedContentIndex = (index) => setIndexExpandedCollapsedContent(index);
 
   return (
     <Box padding={4} background="neutral0">
@@ -16,8 +16,8 @@ const ContentTypesSection = ({ section, ...props }) => {
             label={api.label}
             controllers={api.controllers}
             orderNumber={index}
-            indexExpandendCollapsedContent={indexExpandedCollpsedContent}
-            onExpanded={handleExpandedCollpsedContentIndex}
+            indexExpandedCollapsedContent={indexExpandedCollapsedContent}
+            onExpanded={handleExpandedCollapsedContentIndex}
             name={api.apiId}
             {...props}
           />

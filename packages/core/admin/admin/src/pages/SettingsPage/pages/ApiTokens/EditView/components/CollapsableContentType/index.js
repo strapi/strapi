@@ -29,7 +29,7 @@ const CollapsableContentType = ({
   orderNumber,
   disabled,
   onExpanded,
-  indexExpandendCollapsedContent,
+  indexExpandedCollapsedContent,
 }) => {
   const {
     value: { onChangeSelectAll, onChange, selectedActions, setSelectedAction, selectedAction },
@@ -43,13 +43,13 @@ const CollapsableContentType = ({
 
   useEffect(() => {
     if (
-      indexExpandendCollapsedContent !== null &&
-      indexExpandendCollapsedContent !== orderNumber &&
+      indexExpandedCollapsedContent !== null &&
+      indexExpandedCollapsedContent !== orderNumber &&
       expanded
     ) {
       setExpanded(false);
     }
-  }, [indexExpandendCollapsedContent, orderNumber, expanded]);
+  }, [indexExpandedCollapsedContent, orderNumber, expanded]);
 
   const isActionSelected = (actionId) => actionId === selectedAction;
 
@@ -140,7 +140,7 @@ CollapsableContentType.defaultProps = {
   orderNumber: 0,
   disabled: false,
   onExpanded: () => null,
-  indexExpandendCollapsedContent: null,
+  indexExpandedCollapsedContent: null,
 };
 
 CollapsableContentType.propTypes = {
@@ -149,7 +149,7 @@ CollapsableContentType.propTypes = {
   label: PropTypes.string.isRequired,
   disabled: PropTypes.bool,
   onExpanded: PropTypes.func,
-  indexExpandendCollapsedContent: PropTypes.number,
+  indexExpandedCollapsedContent: PropTypes.number,
 };
 
 export default CollapsableContentType;

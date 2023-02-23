@@ -85,7 +85,7 @@ paths:
         required: true
       responses:
         200:
-          description: Successfull registration
+          description: Successful registration
           content:
             application/json:
               schema:
@@ -449,7 +449,7 @@ paths:
         $ref: '#/components/requestBodies/Users-Permissions-RoleRequest'
       responses:
         200:
-          description: Returns ok if the role was udpated
+          description: Returns ok if the role was updated
           content:
             application/json:
               schema:

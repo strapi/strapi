@@ -26,7 +26,7 @@ export interface ITransferEngine<
    */
   destinationProvider: IDestinationProvider;
   /**
-   * The options used to customize the behavio of the transfer engine
+   * The options used to customize the behavior of the transfer engine
    */
   options: ITransferEngineOptions;
   /**

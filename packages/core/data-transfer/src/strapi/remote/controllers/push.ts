@@ -95,7 +95,7 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
       },
 
       async assets(payload) {
-        // TODO: close the stream upong receiving an 'end' event instead
+        // TODO: close the stream upon receiving an 'end' event instead
         if (payload === null) {
           streams.assets?.end();
           return;

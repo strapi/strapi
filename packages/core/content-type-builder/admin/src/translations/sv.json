@@ -165,7 +165,7 @@
   "modelPage.attribute.relation-polymorphic": "Relation (polymorfisk)",
   "modelPage.attribute.relationWith": "Relation med",
   "notification.error.dynamiczone-min.validation": "Minst en komponent måste vara vald för en dynamisk zon för att kunna spara innehållstypen",
-  "notification.info.autoreaload-disable": "autoReload-funktionen krävs för att använda detta plugin. Starta servern med `strapi develop`",
+  "notification.info.autoreload-disable": "autoReload-funktionen krävs för att använda detta plugin. Starta servern med `strapi develop`",
   "notification.info.creating.notSaved": "Spara ditt arbete innan du skapar en ny samlingstyp eller komponent",
   "plugin.description.long": "Modellera datastrukturen för ditt API. Skapa nya fält och relationer på bara en minut. Filerna skapas och uppdateras automatiskt i ditt projekt.",
   "plugin.description.short": "Modellera datastrukturen för ditt API.",

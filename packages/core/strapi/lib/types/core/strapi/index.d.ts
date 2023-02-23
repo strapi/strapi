@@ -181,7 +181,7 @@ export interface Strapi {
   register(): Promise<Strapi>;
 
   /**
-   * Bootstraping phase.
+   * Bootstrapping phase.
    *
    * - Load all the content types
    * - Initialize the database layer
@@ -250,19 +250,19 @@ export interface Strapi {
   startWebhooks(): Promise<void>;
 
   /**
-   * Method called when the server is fully initialized and listen to incomming requests.
+   * Method called when the server is fully initialized and listen to incoming requests.
    * It handles tasks such as logging the startup message
    * or automatically opening the administration panel.
    */
   postListen(): Promise<void>;
 
   /**
-   * Start listening for incomming requests
+   * Start listening for incoming requests
    */
   listen(): Promise<void | Error>;
 
   /**
-   * Opent he administration panel in a browser if the option is enabled.
+   * Open the administration panel in a browser if the option is enabled.
    * You can disable it using the admin.autoOpen configuration variable.
    *
    * Note: It only works in development envs.

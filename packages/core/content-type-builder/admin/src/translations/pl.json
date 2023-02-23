@@ -156,7 +156,7 @@
   "modelPage.attribute.relation-polymorphic": "Relacja",
   "modelPage.attribute.relationWith": "Relacja z",
   "notification.error.dynamiczone-min.validation": "Co najmniej jeden komponent jest wymagany",
-  "notification.info.autoreaload-disable": "Funkcja autoReload jest wymagana by użyć tego pluginu. Uruchom serwer używając `strapi develop`",
+  "notification.info.autoreload-disable": "Funkcja autoReload jest wymagana by użyć tego pluginu. Uruchom serwer używając `strapi develop`",
   "notification.info.creating.notSaved": "Zapisz swoją pracę przed utworzeniem nowego typu treści lub komponentu",
   "plugin.description.long": "Modeluj strukturę danych swojego API. Twórz atrybuty i relacje w minutę. Pliki są automatycznie tworzone i aktualizowane w twoim projekcie.",
   "plugin.description.short": "Modeluj strukturę danych swojego API.",

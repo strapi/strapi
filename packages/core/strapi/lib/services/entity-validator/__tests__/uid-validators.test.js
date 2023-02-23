@@ -183,7 +183,7 @@ describe('UID validator', () => {
   });
 
   describe('regExp', () => {
-    test('it fails to validate the uid if it does not fit the requried format', async () => {
+    test('it fails to validate the uid if it does not fit the required format', async () => {
       expect.assertions(1);
       fakeFindOne.mockResolvedValueOnce(null);
 
@@ -200,7 +200,7 @@ describe('UID validator', () => {
       );
 
       try {
-        await validator('wrongly\\formated||UID');
+        await validator('wrongly\\formatted||UID');
       } catch (err) {
         expect(err).toBeInstanceOf(YupValidationError);
       }
@@ -221,7 +221,7 @@ describe('UID validator', () => {
         )
       );
 
-      expect(await validator('properly.formated-uid')).toBe('properly.formated-uid');
+      expect(await validator('properly.formatted-uid')).toBe('properly.formatted-uid');
     });
   });
 });

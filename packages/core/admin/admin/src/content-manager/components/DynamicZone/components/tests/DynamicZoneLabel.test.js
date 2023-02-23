@@ -50,7 +50,7 @@ describe('DynamicZoneLabel', () => {
     expect(screen.getByText(/2/)).toBeInTheDocument();
   });
 
-  it('should render an asteriks when the required prop is true', () => {
+  it('should render an asterisk when the required prop is true', () => {
     setup({ required: true });
 
     expect(screen.getByText(/\*/)).toBeInTheDocument();

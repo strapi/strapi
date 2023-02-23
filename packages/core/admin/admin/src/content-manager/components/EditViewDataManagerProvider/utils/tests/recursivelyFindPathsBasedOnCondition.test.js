@@ -241,7 +241,7 @@ describe('recursivelyFindPathsBasedOnCondition', () => {
             },
           },
         },
-        'basic.repetable-repeatble-relation': {
+        'basic.repeatable-repeatable-relation': {
           attributes: {
             id: {
               type: 'integer',
@@ -268,7 +268,7 @@ describe('recursivelyFindPathsBasedOnCondition', () => {
         repeatable_repeatable_nested_component: {
           type: 'component',
           repeatable: true,
-          component: 'basic.repetable-repeatble-relation',
+          component: 'basic.repeatable-repeatable-relation',
         },
       };
 
@@ -315,7 +315,7 @@ describe('recursivelyFindPathsBasedOnCondition', () => {
             },
           },
         },
-        'basic.repetable-repeatble-relation': {
+        'basic.repeatable-repeatable-relation': {
           attributes: {
             id: {
               type: 'integer',
@@ -333,7 +333,7 @@ describe('recursivelyFindPathsBasedOnCondition', () => {
           type: 'dynamiczone',
           components: [
             'basic.nested-relation',
-            'basic.repetable-repeatble-relation',
+            'basic.repeatable-repeatable-relation',
             'basic.relation',
           ],
         },
@@ -353,7 +353,7 @@ describe('recursivelyFindPathsBasedOnCondition', () => {
   });
 
   describe('repeatable components', () => {
-    test('given that there are repeatble fields in the attributes it should return those paths in the array', () => {
+    test('given that there are repeatable fields in the attributes it should return those paths in the array', () => {
       const components = {
         component1: {
           attributes: {
@@ -440,7 +440,7 @@ describe('recursivelyFindPathsBasedOnCondition', () => {
             },
           },
         },
-        'basic.repetable-repeatble-relation': {
+        'basic.repeatable-repeatable-relation': {
           attributes: {
             id: {
               type: 'integer',
@@ -458,7 +458,7 @@ describe('recursivelyFindPathsBasedOnCondition', () => {
         repeatable_repeatable_nested_component: {
           type: 'component',
           repeatable: true,
-          component: 'basic.repetable-repeatble-relation',
+          component: 'basic.repeatable-repeatable-relation',
         },
       };
 
@@ -506,7 +506,7 @@ describe('recursivelyFindPathsBasedOnCondition', () => {
             },
           },
         },
-        'basic.repetable-repeatble-relation': {
+        'basic.repeatable-repeatable-relation': {
           attributes: {
             id: {
               type: 'integer',
@@ -523,7 +523,11 @@ describe('recursivelyFindPathsBasedOnCondition', () => {
       const attributes = {
         dynamic_relations: {
           type: 'dynamiczone',
-          components: ['basic.nested-simple', 'basic.repetable-repeatble-relation', 'basic.simple'],
+          components: [
+            'basic.nested-simple',
+            'basic.repeatable-repeatable-relation',
+            'basic.simple',
+          ],
         },
       };
 
@@ -578,11 +582,11 @@ describe('recursivelyFindPathsBasedOnCondition', () => {
             },
             simple: {
               type: 'dynamiczone',
-              components: ['basic.simple', 'basic.repetable-repeatble-relation'],
+              components: ['basic.simple', 'basic.repeatable-repeatable-relation'],
             },
           },
         },
-        'basic.repetable-repeatble-relation': {
+        'basic.repeatable-repeatable-relation': {
           attributes: {
             id: {
               type: 'integer',

@@ -5,7 +5,7 @@ const fs = require('fs-extra');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const glob = require('glob');
 
-// Only for dev environement
+// Only for dev environment
 const getPluginsPath = () => {
   const rootPath = resolve(__dirname, '..', join('..', '..', '..', 'packages'));
   /**

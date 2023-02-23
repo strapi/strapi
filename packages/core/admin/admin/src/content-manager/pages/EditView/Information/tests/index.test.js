@@ -45,7 +45,7 @@ describe('CONTENT MANAGER | EditView | Information', () => {
     global.Date.now = RealNow;
   });
 
-  it('renders and matches the snaphsot in case an entry is created', () => {
+  it('renders and matches the snapshot in case an entry is created', () => {
     useCMEditViewDataManager.mockImplementationOnce(() => ({
       initialData: {},
       isCreatingEntry: true,
@@ -60,7 +60,7 @@ describe('CONTENT MANAGER | EditView | Information', () => {
     expect(getAllByText('-').length).toBe(2);
   });
 
-  it('renders and matches the snaphsot in case an entry is edited', () => {
+  it('renders and matches the snapshot in case an entry is edited', () => {
     useCMEditViewDataManager.mockImplementationOnce(() => ({
       initialData: {
         updatedAt: 'Fri Jan 13 2022 13:10:14 GMT+0100',
@@ -84,7 +84,7 @@ describe('CONTENT MANAGER | EditView | Information', () => {
     expect(getAllByText('First name Last name').length).toBe(2);
   });
 
-  it('renders and matches the snaphsot in case a username is set', () => {
+  it('renders and matches the snapshot in case a username is set', () => {
     useCMEditViewDataManager.mockImplementationOnce(() => ({
       initialData: {
         updatedAt: 'Fri Jan 13 2022 13:10:14 GMT+0100',

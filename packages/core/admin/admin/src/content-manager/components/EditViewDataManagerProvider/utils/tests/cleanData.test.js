@@ -344,13 +344,13 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
         repeatable_repeatable_nested_component: {
           type: 'component',
           repeatable: true,
-          component: 'basic.repetable-repeatble-relation',
+          component: 'basic.repeatable-repeatable-relation',
         },
         dynamic_relations: {
           type: 'dynamiczone',
           components: [
             'basic.nested-relation',
-            'basic.repetable-repeatble-relation',
+            'basic.repeatable-repeatable-relation',
             'basic.relation',
           ],
         },
@@ -388,8 +388,8 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
           },
         },
       },
-      'basic.repetable-repeatble-relation': {
-        uid: 'basic.repetable-repeatble-relation',
+      'basic.repeatable-repeatable-relation': {
+        uid: 'basic.repeatable-repeatable-relation',
         attributes: {
           id: {
             type: 'integer',
@@ -609,7 +609,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
                 },
               },
               {
-                __component: 'basic.repetable-repeatble-relation',
+                __component: 'basic.repeatable-repeatable-relation',
                 id: 3,
                 repeatable_simple: [
                   {
@@ -636,7 +636,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
                 },
               },
               {
-                __component: 'basic.repetable-repeatble-relation',
+                __component: 'basic.repeatable-repeatable-relation',
                 id: 3,
                 repeatable_simple: [
                   {
@@ -674,7 +674,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             },
           },
           {
-            __component: 'basic.repetable-repeatble-relation',
+            __component: 'basic.repeatable-repeatable-relation',
             id: 3,
             repeatable_simple: [
               {
@@ -709,7 +709,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
                 },
               },
               {
-                __component: 'basic.repetable-repeatble-relation',
+                __component: 'basic.repeatable-repeatable-relation',
                 id: 3,
                 repeatable_simple: [
                   {
@@ -741,7 +741,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
                 },
               },
               {
-                __component: 'basic.repetable-repeatble-relation',
+                __component: 'basic.repeatable-repeatable-relation',
                 id: 3,
                 repeatable_simple: [
                   {
@@ -784,7 +784,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             },
           },
           {
-            __component: 'basic.repetable-repeatble-relation',
+            __component: 'basic.repeatable-repeatable-relation',
             id: 3,
             repeatable_simple: [
               {
@@ -871,7 +871,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
       });
     });
 
-    test('given relations are added that are infront of the existing relations, it should only return the new relations', () => {
+    test('given relations are added that are in front of the existing relations, it should only return the new relations', () => {
       const result = cleanData(
         {
           browserState: {
@@ -910,7 +910,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
       });
     });
 
-    test('given a complicated list of reorderd relations it should only contain the items that moved', () => {
+    test('given a complicated list of reordered relations it should only contain the items that moved', () => {
       const result = cleanData(
         {
           browserState: {

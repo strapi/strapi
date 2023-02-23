@@ -216,7 +216,7 @@ describe('Project setting', () => {
       expect(providerDelete).not.toBeCalled();
     });
 
-    it('Deletes when inputs are explicitely set to null', async () => {
+    it('Deletes when inputs are explicitly set to null', async () => {
       const previousSettings = {
         menuLogo: {
           size: 24085,

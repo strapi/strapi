@@ -152,7 +152,7 @@ describe('TableList | TableRows', () => {
       expect(getByRole('link', { name: 'Access folder', hidden: true })).toBeInTheDocument();
     });
 
-    it('should display folder nagivation as a button if a folder url exists', () => {
+    it('should display folder navigation as a button if a folder url exists', () => {
       const { getByRole } = setup({ rows: [FOLDER_FIXTURE] });
 
       expect(getByRole('button', { name: 'Access folder', hidden: true })).toBeInTheDocument();

@@ -69,7 +69,7 @@ module.exports = {
     params.push(...targetFieldParams);
 
     // If the options property is defined, transform it to
-    // a type literral node and add it to the params list
+    // a type literal node and add it to the params list
     if (_.isObject(options)) {
       params.push(toTypeLiteral(options));
     }

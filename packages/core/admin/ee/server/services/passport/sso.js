@@ -5,7 +5,7 @@ const { authEventsMapper } = require('../../../../server/services/passport');
 const createProviderRegistry = require('./provider-registry');
 
 const providerRegistry = createProviderRegistry();
-const errorMessage = 'SSO is disabled. Its functionnalities cannot be accessed.';
+const errorMessage = 'SSO is disabled. Its functionalities cannot be accessed.';
 
 const getStrategyCallbackURL = (providerName) => {
   if (!ee.features.isEnabled('sso')) {

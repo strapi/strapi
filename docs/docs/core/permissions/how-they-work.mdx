@@ -19,7 +19,7 @@ Example 2: the condition `isCreator` added to the previous permission will ensur
 
 Example 3: the action `access the Marketplace page` has no subject to apply on. The permission only contains the action `admin::marketplace.read`.
 
-The permissions are attached to a role. Each role can have different permissions independentely. There is no inheritance system.
+The permissions are attached to a role. Each role can have different permissions independently. There is no inheritance system.
 To check if an action can be performed by a user, frontend and backend simply retrieve the list of the permissions associated with the user's roles and check if it contains the permission associated with the action about to be performed. The backend also runs the associated conditions.
 
 :::tip
@@ -35,7 +35,7 @@ An action contains the following information:
 | key                           | description                                                                                                                                       | type   | required | Default value | example                    |
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | -------- | ------------- | -------------------------- |
 | **uid**                       | An id that has to be unique within the plugin.                                                                                                    | string | required | -             | `'audit-logs.read'`        |
-| **pluginName**                | Name of the plugin registrering the action.                                                                                                       | string | -        | `'api'`       | `'admin'`                  |
+| **pluginName**                | Name of the plugin registering the action.                                                                                                       | string | -        | `'api'`       | `'admin'`                  |
 | **section**                   | Name of the section among `contentTypes`, `plugins` and `settings`. It will define in which permission tab the action will appear                 | string | required | -             | `'settings'`               |
 | **category**                  | Name of the category. It will define in which category the action will appear. _Only for the plugins and settings section_.                       | string | -        | -             | `'audit logs'`             |
 | **subCategory**               | Name of the subcategory. It will define in which subcategory or the category the action will appear. _Only for the plugins and settings section_. | string | -        | -             | `'options'`                |
@@ -142,7 +142,7 @@ The permissions are modified in the admin panel (on the [edit page](http://local
 | -------------- | -------------------------------------------------------------------------------------------------------------------------- | ------ | -------- | ------------------------------------------------------------- |
 | **action**     | Id of the action that will be permitted.                                                                                   | string | required | `'plugin::content-manager.explorer.update'`                   |
 | **subject**    | Id of the subject on which the action will be permitted.                                                                   | string | -        | `'api::article.article'`                                      |
-| **properties** | List of the properties of the subject on wich the action will be permitted                                                 | object | -        | `{ fields: ['title', 'description'], locales: ['en', 'fr'] }` |
+| **properties** | List of the properties of the subject on which the action will be permitted                                                 | object | -        | `{ fields: ['title', 'description'], locales: ['en', 'fr'] }` |
 | **conditions** | List of the conditions that will be ran against an entry to determine whether the action on this entry is permitted or not | array  | -        | `['admin::is-creator']`                                       |
 
 A permission contains all needed information for the backend and the frontend to prevent users to perform non-permitted action.

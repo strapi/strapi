@@ -11,7 +11,7 @@ tags:
 An abstraction around `react-dnd`'s `useDrag` and `useDrop` hooks. It provides a simple API to handle drag and drop
 events maintaining the same behaviour across the application e.g. when we consider the item to be above a new drop zone.
 
-This hook also wraps an internal hook `useKeyboardDragAndDrop` which implements keyboard accessibile drag and drop by
+This hook also wraps an internal hook `useKeyboardDragAndDrop` which implements keyboard accessible drag and drop by
 returning an onKeyDown handler to be passed to the component's drag icon button.
 
 ## Usage
@@ -217,4 +217,4 @@ You might notice in the [basic usage](#basic-usage) section this piece of code:
 In `firefox` the drag handler will not work if you click and drag when the element is a `button`, this is known [bug in the browser](bugzilla.mozilla.org/show_bug.cgi?id=568313).
 Therefore the workaround is to use the `forwardedAs` prop to render a `div` instead of a `button`
 and add the `role` and `tabIndex` props to make this accessible. The actual `IconButton` component
-adds an accessible lable from the `aria-label` prop. So we don't have to concern ourselves with that.
+adds an accessible label from the `aria-label` prop. So we don't have to concern ourselves with that.

@@ -69,7 +69,7 @@ describe('Upload image', () => {
     await fse.remove(tmpWorkingDirectory);
   });
 
-  test('Upload with thubmnail', async () => {
+  test('Upload with thumbnail', async () => {
     const fileData = getFileData(imageFilePath);
     const upload = jest.fn();
     mockUploadProvider(upload);

@@ -127,7 +127,7 @@ export const useRelation = (cacheKey, { relation, search }) => {
 
   useEffect(() => {
     if (status === 'success' && data && data.pages?.at(-1)?.results && onLoadRelationsCallback) {
-      // everytime we fetch, we normalize prior to adding to redux
+      // every time we fetch, we normalize prior to adding to redux
       const normalizedResults = normalizeRelations(data.pages.at(-1).results, normalizeArguments);
 
       // this is loadRelation from EditViewDataManagerProvider

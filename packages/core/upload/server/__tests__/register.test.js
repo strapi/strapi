@@ -52,7 +52,7 @@ describe('Upload plugin register function', () => {
     expect(registerRoute).toHaveBeenCalledTimes(1);
   });
 
-  test('Strapi config can programatically be extended by providers', async () => {
+  test('Strapi config can programmatically be extended by providers', async () => {
     const setConfig = jest.fn();
 
     global.strapi = {

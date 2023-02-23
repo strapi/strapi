@@ -480,7 +480,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('should override the light theme with a legacy syntax (without light or dark keys) and log a warning', () => {
-      const origalConsoleWarning = console.warn;
+      const originalConsoleWarning = console.warn;
 
       console.warn = jest.fn();
 
@@ -494,7 +494,7 @@ describe('ADMIN | StrapiApp', () => {
       expect(app.configurations.themes.light.colors.red).toBe('black');
       expect(console.warn).toBeCalledTimes(1);
 
-      console.warn = origalConsoleWarning;
+      console.warn = originalConsoleWarning;
     });
 
     it('should override the tutorials', () => {

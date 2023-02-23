@@ -52,7 +52,7 @@ const init = (licenseDir, logger) => {
 /**
  * Contact the license registry to update the license to its latest state.
  *
- * Store the result in database to avoid unecessary requests, and will fallback to that in case of a network failure.
+ * Store the result in database to avoid unnecessary requests, and will fallback to that in case of a network failure.
  */
 const onlineUpdate = async ({ strapi }) => {
   const { get, commit, rollback } = await strapi.db.transaction();

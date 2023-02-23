@@ -8,7 +8,7 @@ const chalk = require('chalk');
 const { getTemplatePackageInfo, downloadNpmTemplate } = require('./fetch-npm-template');
 
 // Specify all the files and directories a template can have
-const allowFile = Symbol('alloFile');
+const allowFile = Symbol('allowFile');
 const allowChildren = Symbol('allowChildren');
 const allowedTemplateContents = {
   'README.md': allowFile,

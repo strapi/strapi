@@ -100,7 +100,7 @@ const getAttributeModifiers = (attribute) => {
   }
 
   // Min / Max
-  // TODO: Always provide a second type argument for min/max (ie: resolve the attribute scalar type with a `GetAttributeType<${mappers[attribute][0]}>` (useful for biginter (string values)))
+  // TODO: Always provide a second type argument for min/max (ie: resolve the attribute scalar type with a `GetAttributeType<${mappers[attribute][0]}>` (useful for biginteger (string values)))
   if (!_.isNil(attribute.min) || !_.isNil(attribute.max)) {
     addImport('SetMinMax');
 

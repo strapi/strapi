@@ -4,7 +4,7 @@ import { normalizeAPIError } from '../normalizeAPIError';
  * Method to stringify an API error object
  *
  * @export
- * @param {object} API Reponse error object
+ * @param {object} API Response error object
  * @param {{ formatMessage: Function, intlMessagePrefixCallback: Function }} - Object containing a formatMessage (from react-intl) callback and an intlMessagePrefixCallback (usually getTrad()
  * @return {string} Stringified response error
  */

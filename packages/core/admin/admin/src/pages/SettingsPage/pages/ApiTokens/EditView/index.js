@@ -98,7 +98,7 @@ const ApiTokenCreateView = () => {
       onError() {
         toggleNotification({
           type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occured' },
+          message: { id: 'notification.error', defaultMessage: 'An error occurred' },
         });
       },
     }
@@ -143,7 +143,7 @@ const ApiTokenCreateView = () => {
       onError() {
         toggleNotification({
           type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occured' },
+          message: { id: 'notification.error', defaultMessage: 'An error occurred' },
         });
       },
     }

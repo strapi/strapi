@@ -19,7 +19,7 @@ const VALID_SCHEMA_PROPERTIES = [
 ];
 
 /**
- * Sanitize a schemas dictionnary by omiting unwanted properties
+ * Sanitize a schemas dictionary by omitting unwanted properties
  * The list of allowed properties can be found here: {@link VALID_SCHEMA_PROPERTIES}
  */
 export const mapSchemasValues = (schemas: Record<string, Schema>) => {

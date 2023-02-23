@@ -14,7 +14,7 @@ const createDatabaseConfig = ({ useTypescript }) => {
   return compile();
 };
 
-const generateDbEnvariables = ({ connection, client }) => {
+const generateDbEnvVariables = ({ connection, client }) => {
   const tmpl = fs.readFileSync(path.join(__dirname, 'database-templates', `${client}.template`));
   const compile = _.template(tmpl);
 
@@ -27,4 +27,4 @@ const generateDbEnvariables = ({ connection, client }) => {
   });
 };
 
-module.exports = { createDatabaseConfig, generateDbEnvariables };
+module.exports = { createDatabaseConfig, generateDbEnvVariables };

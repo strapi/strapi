@@ -1,7 +1,7 @@
 import isGuidedTourCompleted from '../isGuidedTourCompleted';
 
 describe('Guided Tour | utils | isGuidedTourComplete', () => {
-  it('should return false with uncomplete state', () => {
+  it('should return false with incomplete state', () => {
     const state = {
       contentTypeBuilder: {
         create: false,

@@ -702,7 +702,7 @@ describe('API Token', () => {
         // It should not recreate this action
         'admin::subject.keepThisAction',
         'admin::subject.newAction',
-        // It should ignore the duplicate and not call create on the second occurence
+        // It should ignore the duplicate and not call create on the second occurrence
         'admin::subject.newAction',
         'admin::subject.otherAction',
       ],
@@ -962,11 +962,11 @@ describe('API Token', () => {
         },
       };
 
-      const res = await apiTokenService.getByName('unexistant-name');
+      const res = await apiTokenService.getByName('nonexistent-name');
 
       expect(findOne).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
-        where: { name: 'unexistant-name' },
+        where: { name: 'nonexistent-name' },
         populate: ['permissions'],
       });
       expect(res).toEqual(null);

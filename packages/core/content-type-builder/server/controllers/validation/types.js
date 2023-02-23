@@ -41,7 +41,7 @@ const getTypeValidator = (attribute, { types, modelType, attributes }) => {
 const getTypeShape = (attribute, { modelType, attributes } = {}) => {
   switch (attribute.type) {
     /**
-     * complexe types
+     * complex types
      */
 
     case 'media': {

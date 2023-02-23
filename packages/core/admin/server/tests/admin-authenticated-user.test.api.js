@@ -147,7 +147,7 @@ describe('Authenticated User', () => {
     test('Allows edition of names', async () => {
       const input = {
         firstname: 'newFirstName',
-        lastname: 'newLastaName',
+        lastname: 'newLastName',
       };
 
       const res = await rq({

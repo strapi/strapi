@@ -109,8 +109,8 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
             },
           },
         },
-        'basic.repeatable-repeatble-relation': {
-          uid: 'basic.repeatable-repeatble-relation',
+        'basic.repeatable-repeatable-relation': {
+          uid: 'basic.repeatable-repeatable-relation',
           attributes: {
             repeatable_simple: {
               type: 'component',
@@ -144,7 +144,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
 
       const action = {
         type: 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD',
-        componentLayoutData: components['basic.repeatable-repeatble-relation'],
+        componentLayoutData: components['basic.repeatable-repeatable-relation'],
         allComponents: components,
         keys: ['component_field', 'sub_component'],
       };
@@ -429,8 +429,8 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
             },
           },
         },
-        'basic.repeatable-repeatble-relation': {
-          uid: 'basic.repeatable-repeatble-relation',
+        'basic.repeatable-repeatable-relation': {
+          uid: 'basic.repeatable-repeatable-relation',
           attributes: {
             id: {
               type: 'integer',
@@ -460,7 +460,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
         keys: ['repeatable_repeatable_nested_component'],
         componentLayoutData: {
-          uid: 'basic.repeatable-repeatble-relation',
+          uid: 'basic.repeatable-repeatable-relation',
           attributes: {
             id: {
               type: 'integer',
@@ -997,7 +997,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
   });
 
   describe('LOAD_RELATION', () => {
-    it('should add loaded relations to initalData & modifiedState', () => {
+    it('should add loaded relations to initialData & modifiedState', () => {
       const state = {
         ...initialState,
         initialData: {
@@ -1883,7 +1883,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
             ok: true,
             dynamic_relations: [
               {
-                __component: 'basic.repeatable-repeatble-relation',
+                __component: 'basic.repeatable-repeatable-relation',
                 id: 5,
                 __temp_key__: 0,
                 repeatable_simple: [
@@ -1919,7 +1919,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
             "initialData": {
               "dynamic_relations": [
                 {
-                  "__component": "basic.repeatable-repeatble-relation",
+                  "__component": "basic.repeatable-repeatable-relation",
                   "__temp_key__": 0,
                   "id": 5,
                   "repeatable_simple": [
@@ -1944,7 +1944,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
             "modifiedData": {
               "dynamic_relations": [
                 {
-                  "__component": "basic.repeatable-repeatble-relation",
+                  "__component": "basic.repeatable-repeatable-relation",
                   "__temp_key__": 0,
                   "id": 5,
                   "repeatable_simple": [
@@ -1989,7 +1989,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
             ok: true,
             dynamic_relations: [
               {
-                __component: 'basic.repeatable-repeatble-relation',
+                __component: 'basic.repeatable-repeatable-relation',
                 id: 5,
                 repeatable_simple: [
                   {
@@ -2016,7 +2016,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
             "initialData": {
               "dynamic_relations": [
                 {
-                  "__component": "basic.repeatable-repeatble-relation",
+                  "__component": "basic.repeatable-repeatable-relation",
                   "__temp_key__": 1,
                   "id": 5,
                   "repeatable_simple": [
@@ -2039,7 +2039,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
             "modifiedData": {
               "dynamic_relations": [
                 {
-                  "__component": "basic.repeatable-repeatble-relation",
+                  "__component": "basic.repeatable-repeatable-relation",
                   "__temp_key__": 1,
                   "id": 5,
                   "repeatable_simple": [

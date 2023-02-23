@@ -636,7 +636,7 @@ class TransferEngine<
           this.#panic(error);
         } else {
           this.#panic(
-            new Error(`Unknwon error when executing "beforeTransfer" on the ${origin} provider`)
+            new Error(`Unknown error when executing "beforeTransfer" on the ${origin} provider`)
           );
         }
       }

@@ -45,7 +45,7 @@ describe('Section', () => {
   });
 
   describe('appliesToAction', () => {
-    test(`If there is no matcher registered, it should return false everytime`, async () => {
+    test(`If there is no matcher registered, it should return false every time`, async () => {
       const section = createSection();
       const action = {};
 

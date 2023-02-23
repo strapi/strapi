@@ -35,7 +35,7 @@ const InternalErrorPage = () => {
           }
           content={formatMessage({
             id: 'notification.error',
-            defaultMessage: 'An error occured',
+            defaultMessage: 'An error occurred',
           })}
           hasRadius
           icon={<EmptyPictures width="10rem" />}

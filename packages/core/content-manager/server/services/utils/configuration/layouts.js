@@ -142,9 +142,9 @@ const appendToEditLayout = (layout = [], keysToAppend, schema) => {
     const attribute = schema.attributes[key];
 
     const attributeSize = getDefaultFieldSize(attribute.type);
-    const currenRowSize = rowSize(layout[currentRowIndex]);
+    const currentRowSize = rowSize(layout[currentRowIndex]);
 
-    if (currenRowSize + attributeSize > MAX_ROW_SIZE) {
+    if (currentRowSize + attributeSize > MAX_ROW_SIZE) {
       currentRowIndex += 1;
       layout[currentRowIndex] = [];
     }

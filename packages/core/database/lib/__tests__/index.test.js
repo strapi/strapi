@@ -50,7 +50,7 @@ describe('Database', () => {
       expect(async () => Database.init()).rejects.toThrowError();
     });
 
-    it('it should intialize if config is provided', async () => {
+    it('it should initialize if config is provided', async () => {
       expect(() => Database.init(config)).toBeDefined();
     });
   });

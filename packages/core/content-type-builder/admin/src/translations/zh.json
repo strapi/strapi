@@ -165,7 +165,7 @@
   "modelPage.attribute.relation-polymorphic": "關聯 (多對多多型)",
   "modelPage.attribute.relationWith": "關聯到",
   "notification.error.dynamiczone-min.validation": "至少要有一個位於動態區域中的元件才能儲存內容型別",
-  "notification.info.autoreaload-disable": "啟用這個擴充模組需要重新啟動，使用 `strapi develop` 指令重新啟動",
+  "notification.info.autoreload-disable": "啟用這個擴充模組需要重新啟動，使用 `strapi develop` 指令重新啟動",
   "notification.info.creating.notSaved": "在建立新的集合型別或元件前請記得儲存",
   "plugin.description.long": "為您的 API 定義資料結構，使您輕鬆新增欄位和關聯結構，您所做的修改會自動更新專案。",
   "plugin.description.short": "為您的 API 定義資料結構",

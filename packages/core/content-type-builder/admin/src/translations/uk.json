@@ -133,7 +133,7 @@
   "modalForm.sub-header.chooseAttribute.singleType": "Виберіть поле для вашего Single Type",
   "modelPage.attribute.relation-polymorphic": "Зв'язок (поліморфний)",
   "modelPage.attribute.relationWith": "Зв'язок з",
-  "notification.info.autoreaload-disable": "Функція autoReload має буте включена. Будь ласка, запустіть свій додаток вікористовуючи `strapi develop`.",
+  "notification.info.autoreload-disable": "Функція autoReload має буте включена. Будь ласка, запустіть свій додаток вікористовуючи `strapi develop`.",
   "notification.info.creating.notSaved": "Будь ласка, збережіть ваші зміни перед тим як створювати новий компонент або Collection Type",
   "plugin.description.long": "Моделюйте структуру данних для вашого API. Створюйте нові поля та зв'язки за хвилину. Файли будуть автоматично створені та оновлені в вашему проекту.",
   "plugin.description.short": "Моделюйте структуру данних для вашого API.",

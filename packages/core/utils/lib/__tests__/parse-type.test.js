@@ -59,7 +59,7 @@ describe('parseType', () => {
       expect(parseType({ type: 'date', value: isoDateFormat })).toBe(expectedDateFormat);
     });
 
-    it('Throws on invalid formator dates', () => {
+    it('Throws on invalid formatter dates', () => {
       expect(() => parseType({ type: 'date', value: '-1029-11-02' })).toThrow(
         'Invalid format, expected an ISO compatible date'
       );

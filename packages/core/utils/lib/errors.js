@@ -10,7 +10,7 @@ class ApplicationError extends Error {
   constructor(message, details = {}) {
     super();
     this.name = 'ApplicationError';
-    this.message = message || 'An application error occured';
+    this.message = message || 'An application error occurred';
     this.details = details;
   }
 }

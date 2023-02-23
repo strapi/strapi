@@ -53,7 +53,7 @@ const getAssociationFromFieldKey = ({ model, field }) => {
 /**
  * Cast an input value
  * @param {Object} options - Options
- * @param {string} options.type - type of the atribute
+ * @param {string} options.type - type of the attribute
  * @param {*} options.value - value tu cast
  * @param {string} options.operator - name of operator
  */
@@ -66,7 +66,7 @@ const castInput = ({ type, value, operator }) => {
 /**
  * Cast basic values based on attribute type
  * @param {Object} options - Options
- * @param {string} options.type - type of the atribute
+ * @param {string} options.type - type of the attribute
  * @param {*} options.value - value tu cast
  * @param {string} options.operator - name of operator
  */

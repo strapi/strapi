@@ -17,7 +17,7 @@ const mergeTemplate = require('./utils/merge-template.js');
 const packageJSON = require('./resources/json/common/package.json');
 const {
   createDatabaseConfig,
-  generateDbEnvariables,
+  generateDbEnvVariables,
 } = require('./resources/templates/database.js');
 const createEnvFile = require('./resources/templates/env.js');
 
@@ -67,7 +67,7 @@ module.exports = async function createProject(scope, { client, connection, depen
       join(rootPath, 'package.json'),
       packageJSON({
         strapiDependencies: scope.strapiDependencies,
-        additionalsDependencies: dependencies,
+        additionalDependencies: dependencies,
         strapiVersion: scope.strapiVersion,
         projectName: _.kebabCase(scope.name),
         uuid: scope.uuid,
@@ -101,7 +101,7 @@ module.exports = async function createProject(scope, { client, connection, depen
     await fse.ensureDir(join(rootPath, 'node_modules'));
 
     // create config/database
-    await fse.appendFile(join(rootPath, '.env'), generateDbEnvariables({ client, connection }));
+    await fse.appendFile(join(rootPath, '.env'), generateDbEnvVariables({ client, connection }));
     await fse.writeFile(
       join(rootPath, `config/database.${language}`),
       createDatabaseConfig({

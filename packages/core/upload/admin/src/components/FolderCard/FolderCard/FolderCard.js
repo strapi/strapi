@@ -46,10 +46,10 @@ const Card = styled(Box)`
 export const FolderCard = forwardRef(
   ({ children, id, startAction, cardActions, ariaLabel, onClick, to, ...props }, ref) => {
     const generatedId = useId(id);
-    const fodlerCtxValue = useMemo(() => ({ id: generatedId }), [generatedId]);
+    const folderCtxValue = useMemo(() => ({ id: generatedId }), [generatedId]);
 
     return (
-      <FolderCardContext.Provider value={fodlerCtxValue}>
+      <FolderCardContext.Provider value={folderCtxValue}>
         <Card position="relative" tabIndex={0} isCardActions={!!cardActions} ref={ref} {...props}>
           <FauxClickWrapper
             to={to || undefined}

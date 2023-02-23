@@ -50,7 +50,7 @@ const CustomDragLayer = () => {
   }
 
   /**
-   * Because a user may have multiple relations / dynamic zones / repeable fields in the same content type,
+   * Because a user may have multiple relations / dynamic zones / repeatable fields in the same content type,
    * we append the fieldName for the item type to make them unique, however, we then want to extract that
    * first type to apply the correct preview.
    */

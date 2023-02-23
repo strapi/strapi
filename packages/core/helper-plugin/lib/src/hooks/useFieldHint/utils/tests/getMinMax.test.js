@@ -3,11 +3,11 @@ import getMinMax from '../getMinMax';
 describe('Content Manager | Inputs | Utils', () => {
   describe('getMinMax', () => {
     it('ignores a blank schema', () => {
-      expect(getMinMax({})).toEqual({ maximum: undefined, minimium: undefined });
+      expect(getMinMax({})).toEqual({ maximum: undefined, minimum: undefined });
     });
 
     it('ignores a null schema', () => {
-      expect(getMinMax(null)).toEqual({ maximum: undefined, minimium: undefined });
+      expect(getMinMax(null)).toEqual({ maximum: undefined, minimum: undefined });
     });
 
     it('ignores values provided as strings that cannot be parsed to integers', () => {

@@ -31,7 +31,7 @@ const transformLoadParamsToQuery = (uid, field, params = {}, pagination = {}) =>
   };
 };
 
-// TODO: those should be strapi events used by the webhooks not the other way arround
+// TODO: those should be strapi events used by the webhooks not the other way around
 const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
 
 const databaseErrorsToTransform = [

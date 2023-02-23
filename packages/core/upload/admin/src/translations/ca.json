@@ -16,7 +16,7 @@
   "control-card.stop-crop": "Deixa de retallar",
   "filter.add": "Afegeix un filtre",
   "form.button.replace-media": "Substituïu els fitxers",
-  "form.input.decription.file-alt": "Aquest text es mostrarà si el recurs no es pot mostrar.",
+  "form.input.description.file-alt": "Aquest text es mostrarà si el recurs no es pot mostrar.",
   "form.input.label.file-alt": "Text alternatiu",
   "form.input.label.file-caption": "Subtítol",
   "form.input.label.file-name": "Nom de l'arxiu",

@@ -24,9 +24,9 @@ const TableRows = ({ canDelete, canUpdate, canRead, onClickDelete, withBulkActio
   const { trackUsage } = useTracking();
 
   const apiTokens = rows.sort((a, b) => {
-    const comparaison = a.name.localeCompare(b.name);
+    const comparison = a.name.localeCompare(b.name);
 
-    return sortOrder === 'DESC' ? -comparaison : comparaison;
+    return sortOrder === 'DESC' ? -comparison : comparison;
   });
 
   return (

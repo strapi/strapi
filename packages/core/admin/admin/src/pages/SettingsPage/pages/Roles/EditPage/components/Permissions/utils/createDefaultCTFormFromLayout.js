@@ -79,7 +79,7 @@ const createDefaultPropertiesForm = (propertiesArray, ctLayout, matchingPermissi
 };
 
 /**
- * Return an object of content types layout of an action's subject ex: { adress: {uid, label, properties } }
+ * Return an object of content types layout of an action's subject ex: { address: {uid, label, properties } }
  * @param {array<object>} allLayouts All the content types' layout
  * @param {object} subjects
  */

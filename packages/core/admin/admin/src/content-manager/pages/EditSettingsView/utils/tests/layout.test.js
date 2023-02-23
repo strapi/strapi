@@ -121,7 +121,7 @@ describe('Content Manager | containers | EditSettingsView | utils | layout', () 
   describe('getDefaultInputSize', () => {
     it('Should return 6 if the type is unknown, undefined or text', () => {
       expect(getDefaultInputSize(undefined)).toBe(6);
-      expect(getDefaultInputSize('unkown')).toBe(6);
+      expect(getDefaultInputSize('unknown')).toBe(6);
       expect(getDefaultInputSize('text')).toBe(6);
     });
 

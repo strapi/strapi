@@ -44,7 +44,7 @@ const getStreamSize = (stream) =>
 function writableDiscardStream(options) {
   return new Writable({
     ...options,
-    write(chunk, encding, callback) {
+    write(chunk, encoding, callback) {
       setImmediate(callback);
     },
   });

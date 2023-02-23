@@ -80,12 +80,12 @@ module.exports = function createSchemaHandler(infos) {
       return this;
     },
 
-    // get a particuar path inside the schema
+    // get a particular path inside the schema
     get(path) {
       return _.get(state.schema, path);
     },
 
-    // set a particuar path inside the schema
+    // set a particular path inside the schema
     set(path, val) {
       modified = true;
 
@@ -95,7 +95,7 @@ module.exports = function createSchemaHandler(infos) {
       return this;
     },
 
-    // delete a particuar path inside the schema
+    // delete a particular path inside the schema
     unset(path) {
       modified = true;
 

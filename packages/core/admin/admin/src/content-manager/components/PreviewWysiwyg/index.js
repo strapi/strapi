@@ -9,7 +9,7 @@ import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 import md from './utils/mdRenderer';
-import sanitizeHtml from './utils/satinizeHtml';
+import sanitizeHtml from './utils/sanitizeHtml';
 import Wrapper from './Wrapper';
 
 const PreviewWysiwyg = ({ data }) => {

@@ -12,7 +12,7 @@ describe('ADMIN | HOOKS | useFetchPermissionsLayout | reducer', () => {
   });
 
   describe('GET_DATA_ERROR', () => {
-    it('should set isLoading to false is an error occured', () => {
+    it('should set isLoading to false is an error occurred', () => {
       const action = {
         type: 'GET_DATA_ERROR',
         error: {

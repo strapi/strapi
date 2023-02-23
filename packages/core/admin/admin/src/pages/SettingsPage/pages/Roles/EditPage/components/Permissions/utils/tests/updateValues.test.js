@@ -19,7 +19,7 @@ describe('ADMIN | COMPONENTS | Permissions | utils | updateValues', () => {
   });
 
   it('set the leafs of an object with the second argument passed to the function', () => {
-    const complexeObject = {
+    const complexObject = {
       conditions: 'test',
       properties: {
         enabled: true,
@@ -52,6 +52,6 @@ describe('ADMIN | COMPONENTS | Permissions | utils | updateValues', () => {
       },
     };
 
-    expect(updateValues(complexeObject, false)).toEqual(expected);
+    expect(updateValues(complexObject, false)).toEqual(expected);
   });
 });

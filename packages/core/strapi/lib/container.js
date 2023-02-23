@@ -15,7 +15,7 @@ const createContainer = (strapi) => {
     },
 
     get(name, args) {
-      // TODO: handle singleton vs reinstanciation everytime
+      // TODO: handle singleton vs reinstantiation every time
       if (resolved.has(name)) {
         return resolved.get(name);
       }

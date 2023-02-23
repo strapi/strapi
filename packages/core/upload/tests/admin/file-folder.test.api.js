@@ -369,7 +369,7 @@ describe('File', () => {
         expect(res.body.error.message).toBe('the folder does not exist');
       });
 
-      test('whithout replacing the file', async () => {
+      test('without replacing the file', async () => {
         const res = await rq({
           method: 'POST',
           url: `/upload?id=${data.files[1].id}`,

@@ -91,7 +91,7 @@ export const createTransferHandler =
         const init = (msg: client.InitCommand): server.Payload<server.InitMessage> => {
           // TODO: this only checks for this instance of node: we should consider a database lock
           if (state.controller) {
-            throw new ProviderInitializationError('Transfer already in progres');
+            throw new ProviderInitializationError('Transfer already in progress');
           }
 
           const { transfer } = msg.params;

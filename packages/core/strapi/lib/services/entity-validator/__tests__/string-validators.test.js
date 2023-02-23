@@ -257,8 +257,8 @@ describe('String validator', () => {
         )
       );
 
-      expect(await validator('this string is longer than the minLenght')).toBe(
-        'this string is longer than the minLenght'
+      expect(await validator('this string is longer than the minLength')).toBe(
+        'this string is longer than the minLength'
       );
     });
   });

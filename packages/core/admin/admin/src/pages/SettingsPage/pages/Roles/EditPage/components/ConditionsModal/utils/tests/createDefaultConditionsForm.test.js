@@ -3,7 +3,7 @@ import createDefaultConditionsForm, {
   createCategoryForm,
 } from '../createDefaultConditionsForm';
 
-describe('ADMIN | COMPONENTS | Roles | ConditionsModale | utils ', () => {
+describe('ADMIN | COMPONENTS | Roles | ConditionsModal | utils ', () => {
   describe('createConditionsForms', () => {
     it('should return an object with keys corresponding to the condition id and the leafs corresponding to the value retrieved from the argument', () => {
       const conditions = [{ id: 'admin::is-creator' }, { id: 'admin::has-role' }];

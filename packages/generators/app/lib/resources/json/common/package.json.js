@@ -8,7 +8,7 @@
 module.exports = (opts) => {
   const {
     strapiDependencies,
-    additionalsDependencies,
+    additionalDependencies,
     strapiVersion,
     projectName,
     uuid,
@@ -33,7 +33,7 @@ module.exports = (opts) => {
         acc[key] = strapiVersion;
         return acc;
       }, {}),
-      ...additionalsDependencies,
+      ...additionalDependencies,
     },
     author: {
       name: 'A Strapi developer',

@@ -38,7 +38,7 @@ module.exports = {
     let uuid = strapi.config.get('uuid', false);
     const hasAdmin = await getService('user').exists();
     const { menuLogo, authLogo } = await getService('project-settings').getProjectSettings();
-    // set to null if telemetryDisabled flag not avaialble in package.json
+    // set to null if telemetryDisabled flag not available in package.json
     const telemetryDisabled = strapi.config.get('packageJsonStrapi.telemetryDisabled', null);
 
     if (telemetryDisabled !== null && telemetryDisabled === true) {
@@ -69,10 +69,10 @@ module.exports = {
     await validateUpdateProjectSettings(body);
     await validateUpdateProjectSettingsFiles(files);
 
-    const formatedFiles = await projectSettingsService.parseFilesData(files);
-    await validateUpdateProjectSettingsImagesDimensions(formatedFiles);
+    const formattedFiles = await projectSettingsService.parseFilesData(files);
+    await validateUpdateProjectSettingsImagesDimensions(formattedFiles);
 
-    return projectSettingsService.updateProjectSettings({ ...body, ...formatedFiles });
+    return projectSettingsService.updateProjectSettings({ ...body, ...formattedFiles });
   },
 
   async telemetryProperties(ctx) {

@@ -25,13 +25,13 @@ const LIFECYCLES = [
 ];
 
 /**
- * For enumerations the least common denomiator is GraphQL, where
+ * For enumerations the least common denominator is GraphQL, where
  * values needs to match the secure name regex:
  * GraphQL Spec https://spec.graphql.org/June2018/#sec-Names
  *
  * Therefore we need to make sure our users only use values, which
  * can be returned by GraphQL, by checking the regressed values
- * agains the GraphQL regex.
+ * against the GraphQL regex.
  *
  * TODO V5: check if we can avoid this coupling by moving this logic
  * into the GraphQL plugin.
@@ -61,7 +61,7 @@ const contentTypeSchemaValidator = yup.object().shape({
 
             // should match the GraphQL regex
             if (!regressedValues.every((value) => GRAPHQL_ENUM_REGEX.test(value))) {
-              const message = `Invalid enumeration value. Values should have at least one alphabetical character preceeding the first occurence of a number. Update your enumeration '${attrName}'.`;
+              const message = `Invalid enumeration value. Values should have at least one alphabetical character preceding the first occurrence of a number. Update your enumeration '${attrName}'.`;
 
               return this.createError({ message });
             }

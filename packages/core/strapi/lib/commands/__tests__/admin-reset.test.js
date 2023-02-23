@@ -34,7 +34,7 @@ describe('admin:reset-password command', () => {
 
   test('resetAdminPasswordCommand accepts direct input', async () => {
     const email = 'email@email.fr';
-    const password = 'testPasword1234';
+    const password = 'testPassword1234';
 
     const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {});
     const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
@@ -79,7 +79,7 @@ describe('admin:reset-password command', () => {
     test('Stops if not confirmed', async () => {
       process.stdin.isTTY = true;
       const email = 'email@email.fr';
-      const password = 'testPasword1234';
+      const password = 'testPassword1234';
 
       const mockInquiry = jest
         .spyOn(inquirer, 'prompt')
@@ -121,7 +121,7 @@ describe('admin:reset-password command', () => {
 
     test('Calls the reset method with user input', async () => {
       const email = 'email@email.fr';
-      const password = 'testPasword1234';
+      const password = 'testPassword1234';
 
       const mockInquiry = jest
         .spyOn(inquirer, 'prompt')

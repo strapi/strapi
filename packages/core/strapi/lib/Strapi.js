@@ -109,7 +109,7 @@ class Strapi {
     // Instantiate the Koa app & the HTTP server
     this.server = createServer(this);
 
-    // Strapi utils instanciation
+    // Strapi utils instantiation
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
     this.startupLogger = createStartupLogger(this);
@@ -519,7 +519,7 @@ class Strapi {
       configurable: true,
       enumerable: true,
       set(value) {
-        // Special state when the reloader is disabled temporarly (see GraphQL plugin example).
+        // Special state when the reloader is disabled temporarily (see GraphQL plugin example).
         if (state.isWatching === false && value === true) {
           state.shouldReload += 1;
         }

@@ -19,8 +19,8 @@ const alreadyUsedAttributeNames = (usedNames) => {
   };
 };
 
-const getUsedContentTypeAttributeNames = (ctShema, isEdition, attributeNameToEdit) => {
-  const attributes = get(ctShema, ['schema', 'attributes'], {});
+const getUsedContentTypeAttributeNames = (ctSchema, isEdition, attributeNameToEdit) => {
+  const attributes = get(ctSchema, ['schema', 'attributes'], {});
 
   return Object.keys(attributes).filter((attr) => {
     if (isEdition) {

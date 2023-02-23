@@ -1091,7 +1091,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         initialComponents: { [componentUID]: compoSchema },
         modifiedData: {
           components: { [componentUID]: compoSchema },
-          contenType: {},
+          contentType: {},
         },
       };
 
@@ -1135,7 +1135,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
               },
             },
           },
-          contenType: {},
+          contentType: {},
         },
       };
 

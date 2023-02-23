@@ -27,7 +27,7 @@ describe('ADMIN | HOOKS | useSettingsForm | reducer', () => {
           ok: true,
           email: 'test@test.io',
           firstname: 'test',
-          lastname: 'testest',
+          lastname: 'testtest',
           username: 'test test',
         },
       };
@@ -38,14 +38,14 @@ describe('ADMIN | HOOKS | useSettingsForm | reducer', () => {
         initialData: {
           email: 'test@test.io',
           firstname: 'test',
-          lastname: 'testest',
+          lastname: 'testtest',
           username: 'test test',
         },
         isLoading: false,
         modifiedData: {
           email: 'test@test.io',
           firstname: 'test',
-          lastname: 'testest',
+          lastname: 'testtest',
           username: 'test test',
         },
         showHeaderLoader: false,
@@ -230,13 +230,13 @@ describe('ADMIN | HOOKS | useSettingsForm | reducer', () => {
         initialData: {
           email: 'test@test.io',
           firstname: 'test',
-          lastname: 'testest',
+          lastname: 'testtest',
           username: 'test test',
         },
         modifiedData: {
           email: 'test@test.io',
           firstname: 'test',
-          lastname: 'testest',
+          lastname: 'testtest',
           username: 'test test',
         },
         isLoading: false,
@@ -250,7 +250,7 @@ describe('ADMIN | HOOKS | useSettingsForm | reducer', () => {
           ok: true,
           email: 'test@test.io',
           firstname: 'test',
-          lastname: 'testest',
+          lastname: 'testtest',
           username: 'test test',
         },
       };

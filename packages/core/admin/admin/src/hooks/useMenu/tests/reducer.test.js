@@ -17,15 +17,15 @@ describe('ADMIN | LeftMenu | reducer', () => {
       const action = {
         type: 'SET_SECTION_LINKS',
         data: {
-          authorizedGeneralSectionLinks: ['authorizd', 'links'],
-          authorizedPluginSectionLinks: ['authorizd', 'plugin-links'],
+          authorizedGeneralSectionLinks: ['authorized', 'links'],
+          authorizedPluginSectionLinks: ['authorized', 'plugin-links'],
         },
       };
 
       const expected = {
         ...initialState,
-        generalSectionLinks: ['authorizd', 'links'],
-        pluginsSectionLinks: ['authorizd', 'plugin-links'],
+        generalSectionLinks: ['authorized', 'links'],
+        pluginsSectionLinks: ['authorized', 'plugin-links'],
       };
       const actual = reducer(state, action);
 

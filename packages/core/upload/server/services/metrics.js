@@ -31,9 +31,9 @@ module.exports = ({ strapi }) => ({
       The following query goal is to count the number of folders with depth 1, depth 2 etc.
       The query returns :
       [
-        { depth: 1, occurence: 4 },
-        { depth: 2, occurence: 2 },
-        { depth: 3, occurence: 5 },
+        { depth: 1, occurrence: 4 },
+        { depth: 2, occurrence: 2 },
+        { depth: 3, occurrence: 5 },
       ]
 
       The query is built as follow:
@@ -51,19 +51,19 @@ module.exports = ({ strapi }) => ({
         .getConnection(folderTable)
         .select(
           strapi.db.connection.raw(
-            `LENGTH(${keepOnlySlashesSQLString}) AS depth, COUNT(*) AS occurence`,
+            `LENGTH(${keepOnlySlashesSQLString}) AS depth, COUNT(*) AS occurrence`,
             queryParams
           )
         )
         .groupBy('depth')
-    ).map((map) => ({ depth: Number(map.depth), occurence: Number(map.occurence) })); // values can be strings depending on the database
+    ).map((map) => ({ depth: Number(map.depth), occurrence: Number(map.occurrence) })); // values can be strings depending on the database
 
     let product = 0;
     let folderNumber = 0;
     let maxDepth = 0;
     for (const folderLevel of folderLevelsArray) {
-      product += folderLevel.depth * folderLevel.occurence;
-      folderNumber += folderLevel.occurence;
+      product += folderLevel.depth * folderLevel.occurrence;
+      folderNumber += folderLevel.occurrence;
       if (folderLevel.depth > maxDepth) {
         maxDepth = folderLevel.depth;
       }
@@ -72,7 +72,7 @@ module.exports = ({ strapi }) => ({
 
     let sumOfDeviation = 0;
     for (const folderLevel of folderLevelsArray) {
-      sumOfDeviation += Math.abs(folderLevel.depth - averageDepth) * folderLevel.occurence;
+      sumOfDeviation += Math.abs(folderLevel.depth - averageDepth) * folderLevel.occurrence;
     }
 
     const averageDeviationDepth = folderNumber !== 0 ? sumOfDeviation / folderNumber : 0;

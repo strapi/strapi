@@ -389,7 +389,7 @@ paths:
 
         All components and dynamic zones along with relations (1 level only) are automatically populated.
 
-        xToMany relations are counted (exemple: { count: 4 }).
+        xToMany relations are counted (example: { count: 4 }).
       parameters:
         - $ref: '#/components/parameters/model'
       responses:
@@ -456,7 +456,7 @@ paths:
 
         All components and dynamic zones along with relations (1 level only) are automatically populated.
 
-        All relations are counted (exemple: { count: 4 }).
+        All relations are counted (example: { count: 4 }).
       parameters:
         - $ref: '#/components/parameters/model'
         - $ref: '#/components/parameters/entity-id'

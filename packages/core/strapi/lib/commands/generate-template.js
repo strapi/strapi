@@ -82,7 +82,7 @@ module.exports = async function generateTemplate(directory) {
     }
   }
 
-  // Create or replace root directory with <roothPath>/template
+  // Create or replace root directory with <rootPath>/template
   await fse.ensureDir(templatePath);
   // Copy content to /template
   await copyContent(templatePath, rootBase);

@@ -142,7 +142,7 @@
   "modalForm.tabs.label": "Varsayılan ve Özel tip sekmeleri",
   "modelPage.attribute.relationWith": "İlişkili",
   "notification.error.dynamiczone-min.validation": "Bir içerik tipini kaydetmek için dinamik bölgede en az bir bileşen olması gereklidir",
-  "notification.info.autoreaload-disable": "Bu eklentinin kullanılabilmesi için otomatik yeniden yükleme (autoReload) özelliği gereklidir. Sunucunu `strapi develop` ile başlat",
+  "notification.info.autoreload-disable": "Bu eklentinin kullanılabilmesi için otomatik yeniden yükleme (autoReload) özelliği gereklidir. Sunucunu `strapi develop` ile başlat",
   "notification.info.creating.notSaved": "Yeni bir koleksiyon tipi ya da bileşen oluşturmadan önce yaptıklarını kaydet",
   "plugin.description.long": "APInin veri yapısını modelle. Sadece bir iki dakikada yeni alanlar ve ilişkiler oluştur. Projendeki dosyalar otomatik olarak oluşturulur ve güncellenir.",
   "plugin.description.short": "APInin veri yapısını modelle.",

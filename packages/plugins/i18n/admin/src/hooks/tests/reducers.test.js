@@ -4,7 +4,7 @@ import { RESOLVE_LOCALES, ADD_LOCALE, DELETE_LOCALE, UPDATE_LOCALE } from '../co
 describe('i18n reducer', () => {
   it('resolves the initial state when the action is not known', () => {
     const action = {
-      type: 'UNKNWON_ACTION',
+      type: 'UNKNOWN_ACTION',
     };
 
     const actual = reducers.i18n_locales(initialState, action);

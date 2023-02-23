@@ -15,7 +15,7 @@ import { useSelectionState } from '@strapi/helper-plugin';
 
 const Modal = ({ onToggle, isOpen }) => {
   const [selectedAssets, { selectOne, selectAll, selectOnly, setSelections }] = useSelectionState(
-    ['id'], // This are the comparaison attribute names
+    ['id'], // This are the comparison attribute names
     []
   );
 

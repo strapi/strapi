@@ -172,7 +172,7 @@ describe('RelationInputDataManager | select', () => {
 
     const { result } = await setup({
       ...SELECT_ATTR_FIXTURE,
-      name: 'someting.component-name.field-name',
+      name: 'something.component-name.field-name',
     });
 
     expect(result.current.queryInfos).toStrictEqual({

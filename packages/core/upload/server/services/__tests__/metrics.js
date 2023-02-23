@@ -46,7 +46,7 @@ describe('metrics', () => {
               select() {
                 return {
                   groupBy: () =>
-                    folderLevels.map((info) => ({ depth: info[0], occurence: info[1] })),
+                    folderLevels.map((info) => ({ depth: info[0], occurrence: info[1] })),
                 };
               },
             };
@@ -62,7 +62,7 @@ describe('metrics', () => {
         expectedResults;
 
       expect(raw).toHaveBeenCalledWith(
-        'LENGTH(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(??, ?, ?), ?, ?), ?, ?), ?, ?), ?, ?), ?, ?), ?, ?), ?, ?), ?, ?), ?, ?)) AS depth, COUNT(*) AS occurence',
+        'LENGTH(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(??, ?, ?), ?, ?), ?, ?), ?, ?), ?, ?), ?, ?), ?, ?), ?, ?), ?, ?), ?, ?)) AS depth, COUNT(*) AS occurrence',
         [
           'path',
           '0',

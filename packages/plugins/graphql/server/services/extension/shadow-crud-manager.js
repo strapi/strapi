@@ -120,7 +120,7 @@ module.exports = () => {
             return fields.get(fieldName).output;
           },
 
-          hasFiltersEnabeld() {
+          hasFiltersEnabled() {
             return fields.get(fieldName).filters;
           },
 

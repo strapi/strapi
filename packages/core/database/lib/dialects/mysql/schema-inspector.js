@@ -200,11 +200,11 @@ class MysqlSchemaInspector {
       };
     }
 
-    const contraintNames = Object.keys(ret);
+    const constraintNames = Object.keys(ret);
 
-    if (contraintNames.length > 0) {
+    if (constraintNames.length > 0) {
       const [fkReferences] = await this.db.connection.raw(SQL_QUERIES.FOREIGN_KEY_REFERENCES, [
-        contraintNames,
+        constraintNames,
         tableName,
       ]);
 
@@ -216,7 +216,7 @@ class MysqlSchemaInspector {
 
       const [fkReferentialConstraints] = await this.db.connection.raw(
         SQL_QUERIES.FOREIGN_KEY_REFERENTIALS_CONSTRAINTS,
-        [contraintNames, tableName]
+        [constraintNames, tableName]
       );
 
       for (const fkReferentialConstraint of fkReferentialConstraints) {

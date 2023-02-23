@@ -10,9 +10,9 @@
  * This function will recursively find all the paths in the `currentContentTypeLayout.attributes`
  * based on the boolean return of the condition e.g. `type === 'relation'`.
  *
- * It's original use was for the preperation of action items for the INIT_FORM action. It requires
+ * It's original use was for the preparation of action items for the INIT_FORM action. It requires
  * knowledge of the `components` in the entity, however `components` doesn't change nor does the predicate
- * function so we don't need to pass it everytime hence why it's curried.
+ * function so we don't need to pass it every time hence why it's curried.
  *
  *
  * @param {{[key: string]: { attributes: Attributes }}} components

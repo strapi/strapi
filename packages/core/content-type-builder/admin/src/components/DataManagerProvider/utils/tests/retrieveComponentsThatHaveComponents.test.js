@@ -89,7 +89,7 @@ describe('retrieveComponentsThatHaveComponents', () => {
     });
   });
 
-  describe('retrievComponentsThatHaveComponents', () => {
+  describe('retrieveComponentsThatHaveComponents', () => {
     it('should return an array with all the components that have nested components', () => {
       expect(retrieveComponentsThatHaveComponents(data)).toEqual(['blog.slider']);
     });

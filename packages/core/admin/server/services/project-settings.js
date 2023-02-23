@@ -6,7 +6,7 @@ const { pick } = require('lodash');
 const PROJECT_SETTINGS_FILE_INPUTS = ['menuLogo', 'authLogo'];
 
 const parseFilesData = async (files) => {
-  const formatedFilesData = {};
+  const formattedFilesData = {};
 
   await Promise.all(
     PROJECT_SETTINGS_FILE_INPUTS.map(async (inputName) => {
@@ -19,8 +19,8 @@ const parseFilesData = async (files) => {
 
       const getStream = () => fs.createReadStream(file.path);
 
-      // Add formated data for the upload provider
-      formatedFilesData[inputName] = await strapi
+      // Add formatted data for the upload provider
+      formattedFilesData[inputName] = await strapi
         .plugin('upload')
         .service('upload')
         .formatFileInfo({
@@ -31,12 +31,12 @@ const parseFilesData = async (files) => {
 
       // Add image dimensions
       Object.assign(
-        formatedFilesData[inputName],
+        formattedFilesData[inputName],
         await strapi.plugin('upload').service('image-manipulation').getDimensions({ getStream })
       );
 
       // Add file path, and stream
-      Object.assign(formatedFilesData[inputName], {
+      Object.assign(formattedFilesData[inputName], {
         stream: getStream(),
         tmpPath: file.path,
         provider: strapi.config.get('plugin.upload').provider,
@@ -44,7 +44,7 @@ const parseFilesData = async (files) => {
     })
   );
 
-  return formatedFilesData;
+  return formattedFilesData;
 };
 
 const getProjectSettings = async () => {

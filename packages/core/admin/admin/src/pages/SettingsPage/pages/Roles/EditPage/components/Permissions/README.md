@@ -70,7 +70,7 @@ const layout = {
   - someChecked: `true` or `false`,
   - checked: `true` of `false`
     > Both states are coupled: if `someChecked=true` then `checked=false`.
-    > In terms of user's interaction when cliking a parent checkbox it will toggle the value of its children.
+    > In terms of user's interaction when clicking a parent checkbox it will toggle the value of its children.
 
 Ex: given the following data:
 
@@ -152,7 +152,7 @@ In order to build the layout, the components use the `sections.collectionTypes.s
 
 This section covers the logic defined in order to display a global checkbox like the `create` one. Each global action, is considered as a parent checkbox since their purpose is to check or uncheck all the checkboxes that are located below them.
 
-Pratical example:
+Practical example:
 
 ```js
 // layout.sections.collectionTypes.actions

@@ -24,7 +24,7 @@ _above: An example of the relations input in the CMS edit view_
 ## Data management in frontend
 
 <img
-  src="/img/content-manager/relations/relations-statemanagemen-diagram.png"
+  src="/img/content-manager/relations/relations-statemanagement-diagram.png"
   alt="a diagram overview explaining how state management works in relations"
 />
 
@@ -54,7 +54,7 @@ following conditions:
 - The field is a repeatable component
 - The field is a dynamic zone
 
-These paths _do not_ take into account index values. So if you have a repetable component field where the schema looks like:
+These paths _do not_ take into account index values. So if you have a repeatable component field where the schema looks like:
 
 ```json
 {
@@ -97,15 +97,15 @@ Inside the reducer we reduce the array of `relationalFieldPaths` to an object wi
 as the base. If there is `modifiedData` in the browser i.e. you've made changes to the entity and saved those changes,
 we just replace the first level of the field with the `modifiedData` so the data structure is preserved and we're not
 loosing the relations we had already loaded in the component. If the first part of the path is highlighted as the
-`relationalField` then we simply replace that intial object with an empty array.
+`relationalField` then we simply replace that initial object with an empty array.
 
 However, if the first part of the path is either a repeatable component, a dynamic zone or a regular component then we
 recursively find the relation fields and replace the object with an array. This is handled by the `findLeafByPathAndReplace`
 utility function. This function in short, takes an end path (in this case the relational field) and a primitive to replace
 when it finds the endpath (an empty array in this case). It then recursively reduces the paths to the relational field mapping
-through arrays if necessary (in the instance of repetable components for example) replacing the endpath with the primitive.
+through arrays if necessary (in the instance of repeatable components for example) replacing the endpath with the primitive.
 
-When this is done, we have sucessfully prepared our initial data for usage with relations.
+When this is done, we have successfully prepared our initial data for usage with relations.
 
 ### Handling updates to relation fields
 
@@ -120,7 +120,7 @@ the beginning of the list. This is the expected behaviour, to keep the order of 
 :::
 
 The `RelationInput` component takes the field in `modifiedData` as its source of truth. You could therefore consider this to
-be the `browserState` and `initialData` to be the `serverState`. When relations are loaded they're added to both the `intialData`
+be the `browserState` and `initialData` to be the `serverState`. When relations are loaded they're added to both the `initialData`
 and `modifiedData` objects, but when you connect/disconnect only the `modifiedData` is updated. This is useful when we're preparing
 data for the api.
 
@@ -160,7 +160,7 @@ would otherwise have a negative impact on the overall performance of the content
 
 ## useRelation() hook
 
-This hook takes care of data-fetching and normalizes results relations aswell as search-results.
+This hook takes care of data-fetching and normalizes results relations as well as search-results.
 
 ```ts
 const { relations: RelationResults, search: RelationResults, searchFor } = useRelation(reactQueryCacheKey: string, options: Options);
@@ -213,12 +213,12 @@ type RelationResult = {
 
 #### `relations`
 
-`relations` refers to a [inifinite-query return type](https://tanstack.com/query/v4/docs/react/guides/infinite-queries) from react-query. It exposes paginated relational data
-aswell as methods to check if there are more pages or fetch more paginated results. Relations for a given field are fetched as soon as the hook is called.
+`relations` refers to a [infinite-query return type](https://tanstack.com/query/v4/docs/react/guides/infinite-queries) from react-query. It exposes paginated relational data
+as well as methods to check if there are more pages or fetch more paginated results. Relations for a given field are fetched as soon as the hook is called.
 
 #### `search`
 
-`search` refers to a [inifinite-query return type](https://tanstack.com/query/v4/docs/react/guides/infinite-queries) from react-query. It exposes paginated search results
+`search` refers to a [infinite-query return type](https://tanstack.com/query/v4/docs/react/guides/infinite-queries) from react-query. It exposes paginated search results
 for a relational field. Search results are only fetched after `searchFor()` has been called.
 
 #### `searchFor(string)`

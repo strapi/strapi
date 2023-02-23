@@ -77,7 +77,7 @@ const ApiTokenListView = () => {
       onError() {
         toggleNotification({
           type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occured' },
+          message: { id: 'notification.error', defaultMessage: 'An error occurred' },
         });
       },
     }
@@ -102,7 +102,7 @@ const ApiTokenListView = () => {
         } else {
           toggleNotification({
             type: 'warning',
-            message: { id: 'notification.error', defaultMessage: 'An error occured' },
+            message: { id: 'notification.error', defaultMessage: 'An error occurred' },
           });
         }
       },

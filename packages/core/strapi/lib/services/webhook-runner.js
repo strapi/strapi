@@ -16,7 +16,7 @@ const defaultConfiguration = {
 
 class WebhookRunner {
   constructor({ eventHub, logger, configuration = {} }) {
-    debug('Initialized webhook runer');
+    debug('Initialized webhook runner');
     this.eventHub = eventHub;
     this.logger = logger;
     this.webhooksMap = new Map();

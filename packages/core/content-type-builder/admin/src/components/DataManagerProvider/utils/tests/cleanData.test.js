@@ -105,7 +105,7 @@ describe('CleanData utils', () => {
         });
       });
 
-      describe('PUTING a content type', () => {
+      describe('PUTTING a content type', () => {
         it('should format the content type correctly', () => {
           const {
             rawData: { contentTypeToEdit },

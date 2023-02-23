@@ -22,7 +22,7 @@ Available functions:
 
 ### When to use
 
-Everytime the code has to act with promises and iterate other them, an async utils function should be used.
+Every time the code has to act with promises and iterate other them, an async utils function should be used.
 
 ### Should I add my function here ?
 

@@ -10,7 +10,7 @@ import { isAllowedContentTypesForRelations } from '../../../../utils';
 const RelationTargetPicker = ({ oneThatIsCreatingARelationWithAnother, target }) => {
   const { contentTypes, sortedContentTypesList } = useDataManager();
   const dispatch = useDispatch();
-  // TODO: replace with an obj { relation: 'x', bidirctional: true|false }
+  // TODO: replace with an obj { relation: 'x', bidirectional: true|false }
   const allowedContentTypesForRelation = sortedContentTypesList.filter(
     isAllowedContentTypesForRelations
   );

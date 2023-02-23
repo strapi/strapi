@@ -236,7 +236,7 @@ const DisplayedFieldButton = ({
     },
     canDrag() {
       // Each row of the layout has a max size of 12 (based on bootstrap grid system)
-      // So in order to offer a better drop zone we add the _TEMP_ div to complete the remaining substract (12 - existing)
+      // So in order to offer a better drop zone we add the _TEMP_ div to complete the remaining subtract (12 - existing)
       // Those divs cannot be dragged
       // If we wanted to offer the ability to create new lines in the layout (which will come later)
       // We will need to add a 12 size _TEMP_ div to offer a drop target between each existing row.

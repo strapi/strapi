@@ -5,7 +5,7 @@ const { cloneDeep, isPlainObject } = require('lodash/fp');
 const { subject: asSubject } = require('@casl/ability');
 const createSanitizeHelpers = require('./sanitize');
 
-const { buildStrapiQuery, buildCaslQuery } = require('./query-builers');
+const { buildStrapiQuery, buildCaslQuery } = require('./query-builders');
 
 module.exports = ({ ability, action, model }) => ({
   ability,

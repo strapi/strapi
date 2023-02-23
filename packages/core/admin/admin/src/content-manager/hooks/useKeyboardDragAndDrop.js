@@ -12,7 +12,7 @@ import { useState } from 'react';
  */
 
 /**
- * Utility hook designed to implement keyboard accessibile drag and drop by
+ * Utility hook designed to implement keyboard accessible drag and drop by
  * returning an onKeyDown handler to be passed to the drag icon button.
  *
  * @internal - You should use `useDragAndDrop` instead.

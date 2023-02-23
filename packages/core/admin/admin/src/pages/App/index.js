@@ -109,7 +109,7 @@ function App() {
                 event: 'didInitializeAdministration',
                 userId: '',
                 deviceId,
-                eventPropeties: {},
+                eventProperties: {},
                 userProperties: { environment: appInfo.currentEnvironment },
                 groupProperties: { ...properties, projectId: uuid },
               }),

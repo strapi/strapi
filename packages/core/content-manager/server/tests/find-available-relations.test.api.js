@@ -196,7 +196,7 @@ describe.each([[false], [true]])('Relations, with d&p: %p', (withDraftAndPublish
       test("Fail when the field doesn't exist", async () => {
         const res = await rq({
           method: 'GET',
-          url: '/content-manager/relations/api::shop.shop/unkown',
+          url: '/content-manager/relations/api::shop.shop/unknown',
         });
 
         expect(res.status).toBe(400);

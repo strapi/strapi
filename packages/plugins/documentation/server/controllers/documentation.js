@@ -37,7 +37,7 @@ module.exports = {
     try {
       /**
        * We don't expose the specs using koa-static or something else due to security reasons.
-       * That's why, we need to read the file localy and send the specs through it when we serve the Swagger UI.
+       * That's why, we need to read the file locally and send the specs through it when we serve the Swagger UI.
        */
       const { major, minor, patch } = ctx.params;
       const version =

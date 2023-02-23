@@ -1,4 +1,4 @@
-// TODO: refacto this file to avoid eslint issues
+// TODO: refactor this file to avoid eslint issues
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */

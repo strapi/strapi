@@ -71,7 +71,7 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate }) => {
   const { formatMessage } = useIntl();
 
   const toggleNotification = useNotification();
-  const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpenend] = useState(false);
+  const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpened] = useState(false);
   const { push } = useHistory();
   const [{ selectedRoles, showModalConfirmButtonLoading, roleToDelete }, dispatch] = useReducer(
     reducer,
@@ -132,7 +132,7 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate }) => {
     handleToggleModal();
   }, []);
 
-  const handleToggleModal = () => setIsWarningDeleteAllOpenend((prev) => !prev);
+  const handleToggleModal = () => setIsWarningDeleteAllOpened((prev) => !prev);
 
   const handleGoTo = useCallback(
     (id) => {

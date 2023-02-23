@@ -49,7 +49,7 @@ const generateTestApp = async ({ appName, database }) => {
       '@strapi/plugin-documentation',
       '@strapi/plugin-i18n',
     ],
-    additionalsDependencies: {},
+    additionalDependencies: {},
   };
 
   await generateNew(scope);

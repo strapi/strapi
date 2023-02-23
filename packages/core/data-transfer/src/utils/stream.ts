@@ -47,7 +47,7 @@ export const map = <T, U = T>(
 /**
  * Collect every chunks from a Readable stream.
  *
- * @param stream - The redable stream to collect data from
+ * @param stream - The readable stream to collect data from
  * @param options.destroy - If set to true, it automatically calls `destroy()` on the given stream upon receiving the 'end' event
  */
 export const collect = <T = unknown>(
