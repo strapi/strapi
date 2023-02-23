@@ -37,6 +37,13 @@ describe('<PaginationURLQuery />', () => {
     } = render(makeApp(history, 1));
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c7 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
       .c0 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -51,10 +58,6 @@ describe('<PaginationURLQuery />', () => {
         flex-direction: row;
       }
 
-      .c1 > * + * {
-        margin-left: 4px;
-      }
-
       .c4 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
@@ -67,11 +70,8 @@ describe('<PaginationURLQuery />', () => {
         width: 1px;
       }
 
-      .c7 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
+      .c1 > * + * {
+        margin-left: 4px;
       }
 
       .c8 {
@@ -190,7 +190,7 @@ describe('<PaginationURLQuery />', () => {
 
       <nav
         aria-label="pagination"
-        class="sc-ezHhwS"
+        class=""
       >
         <ul
           class="c0 c1"

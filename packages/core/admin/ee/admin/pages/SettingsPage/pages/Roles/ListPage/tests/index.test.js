@@ -96,12 +96,12 @@ describe('<ListPage />', () => {
         will-change: transform;
       }
 
-      .c2 {
-        height: 100vh;
-      }
-
       .c0:focus-visible {
         outline: none;
+      }
+
+      .c2 {
+        height: 100vh;
       }
 
       <main

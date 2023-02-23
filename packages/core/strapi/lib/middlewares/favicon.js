@@ -1,5 +1,6 @@
 'use strict';
 
+const { existsSync } = require('fs');
 const { resolve } = require('path');
 const { defaultsDeep } = require('lodash/fp');
 const favicon = require('koa-favicon');
@@ -13,7 +14,19 @@ const defaults = {
  * @type {import('./').MiddlewareFactory}
  */
 module.exports = (config, { strapi }) => {
-  const { maxAge, path: faviconPath } = defaultsDeep(defaults, config);
+  const { maxAge, path: faviconDefaultPath } = defaultsDeep(defaults, config);
+  const { root: appRoot } = strapi.dirs.app;
+  let faviconPath = faviconDefaultPath;
 
-  return favicon(resolve(strapi.dirs.app.root, faviconPath), { maxAge });
+  /** TODO (v5): Updating the favicon to use a png caused
+   *  https://github.com/strapi/strapi/issues/14693
+   *
+   *  This check ensures backwards compatibility until
+   *  the next major version
+   */
+  if (!existsSync(resolve(appRoot, faviconPath))) {
+    faviconPath = 'favicon.ico';
+  }
+
+  return favicon(resolve(appRoot, faviconPath), { maxAge });
 };

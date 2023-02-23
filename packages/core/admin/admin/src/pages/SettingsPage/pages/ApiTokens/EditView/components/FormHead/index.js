@@ -2,11 +2,8 @@ import React from 'react';
 import { useIntl } from 'react-intl';
 import { Link } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
-import ArrowLeft from '@strapi/icons/ArrowLeft';
-import Check from '@strapi/icons/Check';
-import { Button } from '@strapi/design-system/Button';
-import { HeaderLayout } from '@strapi/design-system/Layout';
-import { Stack } from '@strapi/design-system/Stack';
+import { ArrowLeft, Check } from '@strapi/icons';
+import { Button, HeaderLayout, Stack } from '@strapi/design-system';
 import Regenerate from '../Regenerate';
 
 const FormHead = ({ apiToken, setApiToken, canEditInputs, canRegenerate, isSubmitting }) => {
@@ -67,19 +64,23 @@ const FormHead = ({ apiToken, setApiToken, canEditInputs, canRegenerate, isSubmi
 
 FormHead.propTypes = {
   apiToken: PropTypes.shape({
-    id: PropTypes.string,
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     type: PropTypes.string,
-    lifespan: PropTypes.number,
+    lifespan: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     name: PropTypes.string,
     accessKey: PropTypes.string,
     permissions: PropTypes.array,
     description: PropTypes.string,
     createdAt: PropTypes.string,
-  }).isRequired,
+  }),
   canEditInputs: PropTypes.bool.isRequired,
   canRegenerate: PropTypes.bool.isRequired,
   setApiToken: PropTypes.func.isRequired,
   isSubmitting: PropTypes.bool.isRequired,
+};
+
+FormHead.defaultProps = {
+  apiToken: undefined,
 };
 
 export default FormHead;

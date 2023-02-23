@@ -1,10 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
-import ChevronDown from '@strapi/icons/ChevronDown';
-import ChevronUp from '@strapi/icons/ChevronUp';
-import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
+import { ChevronDown, ChevronUp } from '@strapi/icons';
+import { BaseCheckbox, Box, Flex } from '@strapi/design-system';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
 import { useIntl } from 'react-intl';
@@ -232,7 +229,7 @@ const Collapse = ({
         </Flex>
         {isModalOpen && (
           <ConditionsModal
-            headerBreadCrumbs={[label, 'app.components.LeftMenuLinkContainer.settings']}
+            headerBreadCrumbs={[label, 'Settings.permissions.conditions.conditions']}
             actions={checkboxesActions}
             isFormDisabled={isFormDisabled}
             onClosed={handleModalClose}

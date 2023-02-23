@@ -61,145 +61,56 @@ describe('<ListPage />', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c11 {
+      .c6 {
         font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
         color: #32324d;
+      }
+
+      .c11 {
         font-size: 0.75rem;
         line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
       }
 
-      .c8 {
-        padding-right: 8px;
+      .c12 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
       }
 
-      .c5 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
+      .c24 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
       }
 
-      .c5 svg {
-        height: 12px;
-        width: 12px;
+      .c35 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #4945ff;
       }
 
-      .c5 svg > g,
-      .c5 svg path {
-        fill: #ffffff;
-      }
-
-      .c5[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c5:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c5:focus-visible {
-        outline: none;
-      }
-
-      .c5:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
+      .c2 {
+        background: #f6f6f9;
+        padding-top: 40px;
+        padding-right: 56px;
+        padding-bottom: 40px;
+        padding-left: 56px;
       }
 
       .c9 {
-        height: 100%;
+        padding-right: 8px;
       }
 
-      .c6 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        padding: 8px 16px;
-        background: #4945ff;
-        border: 1px solid #4945ff;
-      }
-
-      .c6 .c7 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c6 .c10 {
-        color: #ffffff;
-      }
-
-      .c6[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c6[aria-disabled='true'] .c10 {
-        color: #666687;
-      }
-
-      .c6[aria-disabled='true'] svg > g,
-      .c6[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c6[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c6[aria-disabled='true']:active .c10 {
-        color: #666687;
-      }
-
-      .c6[aria-disabled='true']:active svg > g,
-      .c6[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c6:hover {
-        border: 1px solid #7b79ff;
-        background: #7b79ff;
-      }
-
-      .c6:active {
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c6 svg > g,
-      .c6 svg path {
-        fill: #ffffff;
+      .c13 {
+        padding-right: 56px;
+        padding-left: 56px;
       }
 
       .c14 {
@@ -208,7 +119,11 @@ describe('<ListPage />', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c17 {
+      .c16 {
+        position: relative;
+      }
+
+      .c18 {
         padding-right: 24px;
         padding-left: 24px;
       }
@@ -230,74 +145,25 @@ describe('<ListPage />', () => {
         padding-left: 12px;
       }
 
-      .c15 {
-        overflow: hidden;
-        border: 1px solid #eaeaef;
+      .c3 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
       }
 
-      .c19 {
-        width: 100%;
-        white-space: nowrap;
-      }
-
-      .c16 {
-        position: relative;
-      }
-
-      .c16:before {
-        background: linear-gradient(90deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
-        opacity: 0.2;
-        position: absolute;
-        height: 100%;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-        width: 8px;
-        left: 0;
-      }
-
-      .c16:after {
-        background: linear-gradient(270deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
-        opacity: 0.2;
-        position: absolute;
-        height: 100%;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-        width: 8px;
-        right: 0;
-        top: 0;
-      }
-
-      .c18 {
-        overflow-x: auto;
-      }
-
-      .c27 tr:last-of-type {
-        border-bottom: none;
-      }
-
-      .c20 {
-        border-bottom: 1px solid #eaeaef;
-      }
-
-      .c21 {
-        border-bottom: 1px solid #eaeaef;
-      }
-
-      .c21 td,
-      .c21 th {
-        padding: 16px;
-      }
-
-      .c21 td:first-of-type,
-      .c21 th:first-of-type {
-        padding: 0 4px;
-      }
-
-      .c21 th {
-        padding-top: 0;
-        padding-bottom: 0;
-        height: 3.5rem;
-      }
-
-      .c23 {
+      .c4 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -311,32 +177,237 @@ describe('<ListPage />', () => {
         flex-direction: row;
       }
 
+      .c7 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
+      }
+
+      .c7 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c7 svg > g,
+      .c7 svg path {
+        fill: #ffffff;
+      }
+
+      .c7[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c7:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c7:focus-visible {
+        outline: none;
+      }
+
+      .c7:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c26 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c10 {
+        height: 100%;
+      }
+
+      .c8 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        background-color: #4945ff;
+        border: 1px solid #4945ff;
+        height: 2rem;
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .c8 .c1 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c8 .c5 {
+        color: #ffffff;
+      }
+
+      .c8[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c8[aria-disabled='true'] .c5 {
+        color: #666687;
+      }
+
+      .c8[aria-disabled='true'] svg > g,.c8[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c8[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c8[aria-disabled='true']:active .c5 {
+        color: #666687;
+      }
+
+      .c8[aria-disabled='true']:active svg > g,.c8[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c8:hover {
+        border: 1px solid #7b79ff;
+        background: #7b79ff;
+      }
+
+      .c8:active {
+        border: 1px solid #4945ff;
+        background: #4945ff;
+      }
+
+      .c8 svg > g,
+      .c8 svg path {
+        fill: #ffffff;
+      }
+
+      .c29 {
+        height: 1px;
+        border: none;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
+        margin: 0;
+      }
+
+      .c0:focus-visible {
+        outline: none;
+      }
+
+      .c15 {
+        overflow: hidden;
+        border: 1px solid #eaeaef;
+      }
+
+      .c20 {
+        width: 100%;
+        white-space: nowrap;
+      }
+
+      .c17:before {
+        background: linear-gradient(90deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
+        opacity: 0.2;
+        position: absolute;
+        height: 100%;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+        width: 8px;
+        left: 0;
+      }
+
+      .c17:after {
+        background: linear-gradient(270deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
+        opacity: 0.2;
+        position: absolute;
+        height: 100%;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+        width: 8px;
+        right: 0;
+        top: 0;
+      }
+
+      .c19 {
+        overflow-x: auto;
+      }
+
+      .c27 tr:last-of-type {
+        border-bottom: none;
+      }
+
+      .c21 {
+        border-bottom: 1px solid #eaeaef;
+      }
+
       .c22 {
+        border-bottom: 1px solid #eaeaef;
+      }
+
+      .c22 td,
+      .c22 th {
+        padding: 16px;
+      }
+
+      .c22 td:first-of-type,
+      .c22 th:first-of-type {
+        padding: 0 4px;
+      }
+
+      .c22 th {
+        padding-top: 0;
+        padding-bottom: 0;
+        height: 3.5rem;
+      }
+
+      .c23 {
         vertical-align: middle;
         text-align: left;
         color: #666687;
         outline-offset: -4px;
       }
 
-      .c22 input {
+      .c23 input {
         vertical-align: sub;
       }
 
       .c25 svg {
         height: 0.25rem;
-      }
-
-      .c29 {
-        height: 1px;
-        border: none;
-        margin: 0;
-      }
-
-      .c35 {
-        font-weight: 600;
-        color: #4945ff;
-        font-size: 0.75rem;
-        line-height: 1.33;
       }
 
       .c33 {
@@ -373,88 +444,6 @@ describe('<ListPage />', () => {
         border: none;
       }
 
-      .c24 {
-        color: #666687;
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-      }
-
-      .c26 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
-      .c1 {
-        background: #f6f6f9;
-        padding-top: 40px;
-        padding-right: 56px;
-        padding-bottom: 40px;
-        padding-left: 56px;
-      }
-
-      .c13 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
-
-      .c2 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-      }
-
-      .c3 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c4 {
-        color: #32324d;
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-      }
-
-      .c12 {
-        color: #666687;
-        font-size: 1rem;
-        line-height: 1.5;
-      }
-
-      .c0:focus-visible {
-        outline: none;
-      }
-
       <main
         aria-labelledby="main-content-title"
         class="c0"
@@ -465,29 +454,29 @@ describe('<ListPage />', () => {
           style="height: 0px;"
         >
           <div
-            class="c1"
+            class="c1 c2"
             data-strapi-header="true"
           >
             <div
-              class="c2"
+              class="c1 c3"
             >
               <div
-                class="c3"
+                class="c1 c4"
               >
                 <h1
-                  class="c4"
+                  class="c5 c6"
                 >
                   roles
                 </h1>
               </div>
               <button
                 aria-disabled="false"
-                class="c5 c6"
+                class="c7 c8"
                 type="button"
               >
                 <div
                   aria-hidden="true"
-                  class="c7 c8 c9"
+                  class="c1 c9 c10"
                 >
                   <svg
                     fill="none"
@@ -503,53 +492,55 @@ describe('<ListPage />', () => {
                   </svg>
                 </div>
                 <span
-                  class="c10 c11"
+                  class="c5 c11"
                 >
                   Add new role
                 </span>
               </button>
             </div>
             <p
-              class="c12"
+              class="c5 c12"
             >
               List of roles
             </p>
           </div>
         </div>
         <div
-          class="c13"
+          class="c1 c13"
         >
           <div
-            class="c14 c15"
+            class="c1 c14 c15"
           >
             <div
-              class="c16"
+              class="c1 c16 c17"
             >
               <div
-                class="c17 c18"
+                class="c1 c18 c19"
               >
                 <table
                   aria-colcount="5"
                   aria-rowcount="1"
-                  class="c19"
+                  class="c20"
+                  role="grid"
                 >
                   <thead
-                    class="c20"
+                    class="c21"
                   >
                     <tr
                       aria-rowindex="1"
-                      class="c21"
+                      class="c1 c22"
                     >
                       <th
                         aria-colindex="1"
-                        class="c22"
+                        class="c1 c23"
+                        role="gridcell"
                         tabindex="0"
                       >
                         <div
-                          class="c23"
+                          class="c1 c4"
                         >
                           <span
-                            class="c24"
+                            class="c5 c24"
                           >
                             Name
                           </span>
@@ -560,14 +551,15 @@ describe('<ListPage />', () => {
                       </th>
                       <th
                         aria-colindex="2"
-                        class="c22"
+                        class="c1 c23"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <div
-                          class="c23"
+                          class="c1 c4"
                         >
                           <span
-                            class="c24"
+                            class="c5 c24"
                           >
                             Description
                           </span>
@@ -578,14 +570,15 @@ describe('<ListPage />', () => {
                       </th>
                       <th
                         aria-colindex="3"
-                        class="c22"
+                        class="c1 c23"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <div
-                          class="c23"
+                          class="c1 c4"
                         >
                           <span
-                            class="c24"
+                            class="c5 c24"
                           >
                             Users
                           </span>
@@ -596,11 +589,12 @@ describe('<ListPage />', () => {
                       </th>
                       <th
                         aria-colindex="4"
-                        class="c22"
+                        class="c1 c23"
+                        role="gridcell"
                         tabindex="-1"
                       >
                         <div
-                          class="c23"
+                          class="c1 c4"
                         >
                           <div
                             class="c26"
@@ -622,17 +616,17 @@ describe('<ListPage />', () => {
             </div>
             <div>
               <hr
-                class="c28 c29"
+                class="c1 c28 c29"
               />
               <button
-                class="c30 c31"
+                class="c1 c30 c31"
               >
                 <div
-                  class="c23"
+                  class="c1 c4"
                 >
                   <div
                     aria-hidden="true"
-                    class="c32 c33"
+                    class="c1 c32 c33"
                   >
                     <svg
                       fill="none"
@@ -648,10 +642,10 @@ describe('<ListPage />', () => {
                     </svg>
                   </div>
                   <div
-                    class="c34"
+                    class="c1 c34"
                   >
                     <span
-                      class="c35"
+                      class="c5 c35"
                     >
                       Add new role
                     </span>

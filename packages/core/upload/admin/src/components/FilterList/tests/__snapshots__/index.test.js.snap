@@ -1,27 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<FilterList /> renders and matches the snapshot 1`] = `
-.c7 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
+.c4 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
 }
 
 .c0 {
   padding: 4px;
-}
-
-.c4 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
 }
 
 .c1 {
@@ -54,6 +42,18 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
+.c7 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
 .c2 svg {
   height: 0.5rem;
   width: 0.5rem;
@@ -76,7 +76,6 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -115,7 +114,6 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -154,7 +152,6 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -193,7 +190,6 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -232,7 +228,6 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -271,7 +266,6 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"

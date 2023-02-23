@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Button } from '@strapi/design-system/Button';
-import Refresh from '@strapi/icons/Refresh';
+import { Button } from '@strapi/design-system';
+import { Refresh } from '@strapi/icons';
 import { ConfirmDialog } from '@strapi/helper-plugin';
 import { useRegenerate } from '../../../../../../../hooks';
 
@@ -62,7 +62,7 @@ Regenerate.defaultProps = { onRegenerate() {} };
 
 Regenerate.propTypes = {
   onRegenerate: PropTypes.func,
-  idToRegenerate: PropTypes.string.isRequired,
+  idToRegenerate: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
 };
 
 export default Regenerate;

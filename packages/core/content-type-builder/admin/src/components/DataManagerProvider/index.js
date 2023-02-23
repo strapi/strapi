@@ -10,6 +10,7 @@ import {
   useAppInfos,
   useRBACProvider,
   useGuidedTour,
+  useFetchClient,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useLocation, useRouteMatch, Redirect } from 'react-router-dom';
@@ -17,7 +18,6 @@ import { connect, useDispatch } from 'react-redux';
 import { compose } from 'redux';
 import DataManagerContext from '../../contexts/DataManagerContext';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
-import axiosInstance from '../../utils/axiosInstance';
 import getTrad from '../../utils/getTrad';
 import makeUnique from '../../utils/makeUnique';
 import pluginId from '../../pluginId';
@@ -54,7 +54,6 @@ import makeSelectDataManagerProvider from './selectors';
 import formatSchemas from './utils/formatSchemas';
 
 const DataManagerProvider = ({
-  allIcons,
   children,
   components,
   contentTypes,
@@ -82,6 +81,8 @@ const DataManagerProvider = ({
   const componentMatch = useRouteMatch(
     `/plugins/${pluginId}/component-categories/:categoryUid/:componentUid`
   );
+  const fetchClient = useFetchClient();
+  const { put, post, del } = fetchClient;
 
   const formatMessageRef = useRef();
   formatMessageRef.current = formatMessage;
@@ -108,7 +109,7 @@ const DataManagerProvider = ({
         { data: reservedNames },
       ] = await Promise.all(
         ['components', 'content-types', 'reserved-names'].map((endPoint) => {
-          return axiosInstance.get(endPoint);
+          return fetchClient.get(`/${pluginId}/${endPoint}`);
         })
       );
 
@@ -253,7 +254,7 @@ const DataManagerProvider = ({
 
   const deleteCategory = async (categoryUid) => {
     try {
-      const requestURL = `/component-categories/${categoryUid}`;
+      const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
       // eslint-disable-next-line no-alert
       const userConfirm = window.confirm(
         formatMessage({
@@ -266,7 +267,7 @@ const DataManagerProvider = ({
       if (userConfirm) {
         lockAppWithAutoreload();
 
-        await axiosInstance.delete(requestURL);
+        await del(requestURL);
 
         // Make sure the server has restarted
         await serverRestartWatcher(true);
@@ -289,7 +290,7 @@ const DataManagerProvider = ({
 
   const deleteData = async () => {
     try {
-      const requestURL = `/${endPoint}/${currentUid}`;
+      const requestURL = `/${pluginId}/${endPoint}/${currentUid}`;
       const isTemporary = get(modifiedData, [firstKeyToMainSchema, 'isTemporary'], false);
       // eslint-disable-next-line no-alert
       const userConfirm = window.confirm(
@@ -316,7 +317,7 @@ const DataManagerProvider = ({
 
         lockAppWithAutoreload();
 
-        await axiosInstance.delete(requestURL);
+        await del(requestURL);
 
         // Make sure the server has restarted
         await serverRestartWatcher(true);
@@ -340,7 +341,7 @@ const DataManagerProvider = ({
 
   const editCategory = async (categoryUid, body) => {
     try {
-      const requestURL = `/component-categories/${categoryUid}`;
+      const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
 
       // Close the modal
       onCloseModal();
@@ -349,7 +350,7 @@ const DataManagerProvider = ({
       lockAppWithAutoreload();
 
       // Update the category
-      await axiosInstance({ url: requestURL, method: 'PUT', data: body });
+      await put(requestURL, body);
 
       // Make sure the server has restarted
       await serverRestartWatcher(true);
@@ -499,19 +500,17 @@ const DataManagerProvider = ({
         trackUsage('willSaveComponent');
       }
 
-      const method = isCreating ? 'POST' : 'PUT';
-
-      const baseURL = `/${endPoint}`;
-      const requestURL = isCreating ? baseURL : `${baseURL}/${currentUid}`;
-
       // Lock the app
       lockAppWithAutoreload();
 
-      await axiosInstance({
-        url: requestURL,
-        method,
-        data: body,
-      });
+      const baseURL = `/${pluginId}/${endPoint}`;
+      const requestURL = isCreating ? baseURL : `${baseURL}/${currentUid}`;
+
+      if (isCreating) {
+        await post(requestURL, body);
+      } else {
+        await put(requestURL, body);
+      }
 
       // Make sure the server has restarted
       await serverRestartWatcher(true);
@@ -578,7 +577,6 @@ const DataManagerProvider = ({
         addCustomFieldAttribute,
         addCreatedComponentToDynamicZone,
         allComponentsCategories: retrieveSpecificInfoFromComponents(components, ['category']),
-        allIcons,
         changeDynamicZoneComponents,
         components,
         componentsGroupedByCategory: groupBy(components, 'category'),
@@ -621,7 +619,6 @@ DataManagerProvider.defaultProps = {
 };
 
 DataManagerProvider.propTypes = {
-  allIcons: PropTypes.array.isRequired,
   children: PropTypes.node.isRequired,
   components: PropTypes.object,
   contentTypes: PropTypes.object.isRequired,

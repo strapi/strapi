@@ -29,7 +29,7 @@
   "pages.PluginPage.table.icon.regenerate": "{target} 재생성",
   "pages.PluginPage.table.icon.show": "{target} 열기",
   "pages.PluginPage.table.version": "버전",
-  "pages.SettingsPage.Button.description": "도큐멘테이션 플러그인 설정",
+  "pages.SettingsPage.header.description": "도큐멘테이션 플러그인 설정",
   "pages.SettingsPage.header.save": "저장",
   "pages.SettingsPage.toggle.hint": "도큐멘테이션 엔드포인트를 비공개로 설정합니다.",
   "pages.SettingsPage.toggle.label": "액세스 제한",

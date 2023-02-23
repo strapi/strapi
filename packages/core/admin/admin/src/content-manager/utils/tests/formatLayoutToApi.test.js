@@ -5,7 +5,6 @@ describe('CONTENT MANAGER | utils | formatLayoutToApi', () => {
     const layouts = {
       list: [{ name: 'test', size: 6 }],
       edit: [],
-      editRelations: [],
     };
 
     expect(formatLayoutToApi({ layouts, metadatas: {} }).layouts.list).toEqual(['test']);
@@ -15,7 +14,6 @@ describe('CONTENT MANAGER | utils | formatLayoutToApi', () => {
     const layouts = {
       list: ['test'],
       edit: [],
-      editRelations: [],
     };
 
     expect(formatLayoutToApi({ layouts, metadatas: {} }).layouts.list).toEqual(['test']);
@@ -25,7 +23,6 @@ describe('CONTENT MANAGER | utils | formatLayoutToApi', () => {
     const layouts = {
       list: ['test'],
       edit: [],
-      editRelations: [],
     };
     const metadatas = {
       categories: {

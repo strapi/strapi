@@ -3,15 +3,9 @@ import PropTypes from 'prop-types';
 import { Link, useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 
-import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import { Box } from '@strapi/design-system/Box';
-import { IconButton } from '@strapi/design-system/IconButton';
-import { Tbody, Td, Tr } from '@strapi/design-system/Table';
-import { Flex } from '@strapi/design-system/Flex';
+import { BaseCheckbox, Box, IconButton, Tbody, Td, Tr, Flex } from '@strapi/design-system';
 
-import Trash from '@strapi/icons/Trash';
-import Duplicate from '@strapi/icons/Duplicate';
-import Pencil from '@strapi/icons/Pencil';
+import { Trash, Duplicate, Pencil } from '@strapi/icons';
 
 import { useTracking, stopPropagation, onRowClick } from '@strapi/helper-plugin';
 
@@ -24,6 +18,7 @@ import CellContent from '../CellContent';
 const TableRows = ({
   canCreate,
   canDelete,
+  contentType,
   headers,
   entriesToDelete,
   onClickDelete,
@@ -94,6 +89,7 @@ const TableRows = ({
                     <CellContent
                       content={data[name.split('.')[0]]}
                       name={name}
+                      contentType={contentType}
                       {...rest}
                       rowId={data.id}
                     />
@@ -185,6 +181,9 @@ TableRows.defaultProps = {
 TableRows.propTypes = {
   canCreate: PropTypes.bool,
   canDelete: PropTypes.bool,
+  contentType: PropTypes.shape({
+    uid: PropTypes.string.isRequired,
+  }).isRequired,
   entriesToDelete: PropTypes.array,
   headers: PropTypes.array.isRequired,
   onClickDelete: PropTypes.func,

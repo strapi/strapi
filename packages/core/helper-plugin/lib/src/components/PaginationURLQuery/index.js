@@ -15,13 +15,7 @@
  */
 
 import React from 'react';
-import {
-  NextLink,
-  Pagination,
-  PreviousLink,
-  Dots,
-  PageLink,
-} from '@strapi/design-system/Pagination';
+import { NextLink, Pagination, PreviousLink, Dots, PageLink } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useLocation, NavLink } from 'react-router-dom';
 import { useIntl } from 'react-intl';

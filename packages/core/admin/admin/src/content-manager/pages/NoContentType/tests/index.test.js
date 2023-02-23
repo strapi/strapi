@@ -30,11 +30,31 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c4 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
       .c11 {
-        color: #666687;
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
+        color: #666687;
+      }
+
+      .c1 {
+        background: #f6f6f9;
+        padding-top: 40px;
+        padding-right: 56px;
+        padding-bottom: 40px;
+        padding-left: 56px;
+      }
+
+      .c5 {
+        padding-right: 56px;
+        padding-left: 56px;
       }
 
       .c6 {
@@ -50,6 +70,38 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
 
       .c10 {
         padding-bottom: 16px;
+      }
+
+      .c2 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+      }
+
+      .c3 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
       }
 
       .c7 {
@@ -71,15 +123,19 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         height: 5.5rem;
       }
 
-      .c17 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
+      .c0:focus-visible {
+        outline: none;
       }
 
       .c15 {
         padding-right: 8px;
+      }
+
+      .c17 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
       }
 
       .c12 {
@@ -179,8 +235,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         color: #666687;
       }
 
-      .c13[aria-disabled='true'] svg > g,
-      .c13[aria-disabled='true'] svg path {
+      .c13[aria-disabled='true'] svg > g,.c13[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -193,8 +248,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         color: #666687;
       }
 
-      .c13[aria-disabled='true']:active svg > g,
-      .c13[aria-disabled='true']:active svg path {
+      .c13[aria-disabled='true']:active svg > g,.c13[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -223,62 +277,6 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
       .c13 svg > g,
       .c13 svg path {
         fill: #271fe0;
-      }
-
-      .c0:focus-visible {
-        outline: none;
-      }
-
-      .c1 {
-        background: #f6f6f9;
-        padding-top: 40px;
-        padding-right: 56px;
-        padding-bottom: 40px;
-        padding-left: 56px;
-      }
-
-      .c5 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
-
-      .c2 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-      }
-
-      .c3 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c4 {
-        color: #32324d;
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
       }
 
       <main

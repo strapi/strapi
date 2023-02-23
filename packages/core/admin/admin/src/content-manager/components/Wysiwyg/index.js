@@ -2,9 +2,7 @@ import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
+import { Typography, Box, Stack } from '@strapi/design-system';
 import { prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
 import Editor from './Editor';
 import WysiwygNav from './WysiwygNav';
@@ -31,7 +29,7 @@ const TypographyAsterisk = styled(Typography)`
 `;
 
 const Wysiwyg = ({
-  description,
+  hint,
   disabled,
   error,
   intlLabel,
@@ -167,7 +165,7 @@ const Wysiwyg = ({
 
           {!isExpandMode && <WysiwygFooter onToggleExpand={handleToggleExpand} />}
         </EditorLayout>
-        <Hint description={description} name={name} error={error} />
+        <Hint hint={hint} name={name} error={error} />
       </Stack>
 
       {error && (
@@ -186,21 +184,17 @@ const Wysiwyg = ({
 };
 
 Wysiwyg.defaultProps = {
-  description: null,
   disabled: false,
   error: '',
   labelAction: undefined,
   placeholder: null,
   required: false,
   value: '',
+  hint: '',
 };
 
 Wysiwyg.propTypes = {
-  description: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }),
+  hint: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
   disabled: PropTypes.bool,
   error: PropTypes.string,
   intlLabel: PropTypes.shape({

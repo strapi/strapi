@@ -22,6 +22,19 @@ describe('ContentBox', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c6 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 500;
+        color: #32324d;
+      }
+
+      .c8 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #666687;
+      }
+
       .c0 {
         background: #ffffff;
         padding: 24px;
@@ -71,19 +84,6 @@ describe('ContentBox', () => {
         margin-top: 4px;
       }
 
-      .c6 {
-        font-weight: 500;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c8 {
-        color: #666687;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
       .c3 {
         margin-right: 24px;
       }
@@ -105,7 +105,6 @@ describe('ContentBox', () => {
         />
         <div
           class="c4 c5"
-          spacing="1"
         >
           <div
             class="c1"

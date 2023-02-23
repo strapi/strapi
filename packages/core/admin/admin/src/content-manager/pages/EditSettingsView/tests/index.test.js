@@ -6,8 +6,7 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { ThemeProvider } from '@strapi/design-system/ThemeProvider';
-import { lightTheme } from '@strapi/design-system/themes';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import EditSettingsView from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -41,7 +40,6 @@ const makeApp = (history, layout) => {
         ],
       ],
       list: ['postal_code', 'categories'],
-      editRelations: ['categories'],
     },
     metadatas: {
       postal_code: { edit: {}, list: { label: 'postal_code' } },
@@ -91,25 +89,6 @@ describe('EditSettingsView', () => {
     expect(container).toMatchSnapshot();
   });
 
-  it('should add relation', async () => {
-    const history = createMemoryHistory();
-
-    const { container } = render(makeApp(history));
-
-    await waitFor(() =>
-      expect(screen.getByText('Configure the view - Address')).toBeInTheDocument()
-    );
-
-    fireEvent.mouseDown(screen.getByTestId('add-relation'));
-
-    await waitFor(() => expect(screen.getByText('categories')).toBeInTheDocument());
-
-    fireEvent.mouseDown(screen.getByText('categories'));
-    fireEvent.mouseDown(screen.getByTestId('add-relation'));
-
-    expect(container).toMatchSnapshot();
-  });
-
   it('should add field', async () => {
     const history = createMemoryHistory();
 
@@ -139,7 +118,6 @@ describe('EditSettingsView', () => {
       layouts: {
         edit: [[{ name: 'postal_code', size: 6 }]],
         list: ['postal_code'],
-        editRelations: [],
       },
       metadatas: {
         postal_code: { edit: {}, list: { label: 'postal_code' } },

@@ -53,10 +53,217 @@ describe('Admin | containers | ListView', () => {
     });
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c7 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c14 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c29 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
+      }
+
+      .c33 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #32324d;
+      }
+
+      .c34 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
+      .c50 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #4945ff;
+      }
+
+      .c1 {
+        padding-bottom: 56px;
+      }
+
+      .c4 {
+        background: #f6f6f9;
+        padding-top: 40px;
+        padding-right: 56px;
+        padding-bottom: 40px;
+        padding-left: 56px;
+      }
+
+      .c15 {
+        padding-right: 56px;
+        padding-left: 56px;
+      }
+
+      .c16 {
+        background: #ffffff;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c18 {
+        position: relative;
+      }
+
+      .c20 {
+        padding-right: 24px;
+        padding-left: 24px;
+      }
+
+      .c28 {
+        width: 20%;
+      }
+
+      .c30 {
+        width: 60%;
+      }
+
+      .c38 {
+        color: #328048;
+        padding-left: 8px;
+      }
+
+      .c42 {
+        color: #d02b20;
+        padding-left: 8px;
+      }
+
+      .c43 {
+        background: #eaeaef;
+      }
+
+      .c45 {
+        background: #f0f0ff;
+        padding: 20px;
+      }
+
+      .c47 {
+        background: #d9d8ff;
+      }
+
+      .c49 {
+        padding-left: 12px;
+      }
+
+      .c5 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+      }
+
+      .c6 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c39 > * {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .c39 > * + * {
+        margin-left: 4px;
+      }
+
+      .c40 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
+      }
+
+      .c40 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c40 svg > g,
+      .c40 svg path {
+        fill: #ffffff;
+      }
+
+      .c40[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c40:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c40:focus-visible {
+        outline: none;
+      }
+
+      .c40:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
       .c26 {
-        margin: 0;
         height: 18px;
         min-width: 18px;
+        margin: 0;
         border-radius: 4px;
         border: 1px solid #c0c0cf;
         -webkit-appearance: none;
@@ -121,79 +328,28 @@ describe('Admin | containers | ListView', () => {
         background-color: #8e8ea9;
       }
 
-      .c35 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c43 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
-      }
-
-      .c43 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c43 svg > g,
-      .c43 svg path {
-        fill: #ffffff;
-      }
-
-      .c43[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c43:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
+      .c31 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
         position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c43:focus-visible {
-        outline: none;
-      }
-
-      .c43:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
+        width: 1px;
       }
 
       .c44 {
+        height: 1px;
+        border: none;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
+        margin: 0;
+      }
+
+      .c41 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -211,86 +367,82 @@ describe('Admin | containers | ListView', () => {
         border: none;
       }
 
-      .c44 svg > g,
-      .c44 svg path {
+      .c41 svg > g,
+      .c41 svg path {
         fill: #8e8ea9;
       }
 
-      .c44:hover svg > g,
-      .c44:hover svg path {
+      .c41:hover svg > g,
+      .c41:hover svg path {
         fill: #666687;
       }
 
-      .c44:active svg > g,
-      .c44:active svg path {
+      .c41:active svg > g,
+      .c41:active svg path {
         fill: #a5a5ba;
       }
 
-      .c44[aria-disabled='true'] {
+      .c41[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c44[aria-disabled='true'] svg path {
+      .c41[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c41 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
+      .c0 {
+        display: grid;
+        grid-template-columns: 1fr;
       }
 
-      .c42 > * {
-        margin-left: 0;
-        margin-right: 0;
+      .c2 {
+        overflow-x: hidden;
       }
 
-      .c42 > * + * {
-        margin-left: 4px;
+      .c3:focus-visible {
+        outline: none;
       }
 
-      .c16 {
+      .c37 {
+        background: #ee5e52;
+        border: none;
+        border-radius: 16px;
+        position: relative;
+        height: 1.5rem;
+        width: 2.5rem;
+      }
+
+      .c37 span {
+        font-size: 0;
+      }
+
+      .c37:before {
+        content: '';
         background: #ffffff;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+        position: absolute;
+        -webkit-transition: all 0.5s;
+        transition: all 0.5s;
+        left: 4px;
+        top: 4px;
       }
 
-      .c19 {
-        padding-right: 24px;
-        padding-left: 24px;
+      .c35 {
+        background: transparent;
+        padding: 0;
+        border: none;
       }
 
-      .c28 {
-        width: 20%;
+      .c35[aria-checked='true'] .c36 {
+        background: #5cb176;
       }
 
-      .c30 {
-        width: 60%;
-      }
-
-      .c46 {
-        background: #eaeaef;
-      }
-
-      .c48 {
-        background: #f0f0ff;
-        padding: 20px;
-      }
-
-      .c50 {
-        background: #d9d8ff;
-      }
-
-      .c52 {
-        padding-left: 12px;
+      .c35[aria-checked='true'] .c36:before {
+        -webkit-transform: translateX(1rem);
+        -ms-transform: translateX(1rem);
+        transform: translateX(1rem);
       }
 
       .c17 {
@@ -298,16 +450,12 @@ describe('Admin | containers | ListView', () => {
         border: 1px solid #eaeaef;
       }
 
-      .c21 {
+      .c22 {
         width: 100%;
         white-space: nowrap;
       }
 
-      .c18 {
-        position: relative;
-      }
-
-      .c18:before {
+      .c19:before {
         background: linear-gradient(90deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
@@ -317,7 +465,7 @@ describe('Admin | containers | ListView', () => {
         left: 0;
       }
 
-      .c18:after {
+      .c19:after {
         background: linear-gradient(270deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
@@ -328,7 +476,7 @@ describe('Admin | containers | ListView', () => {
         top: 0;
       }
 
-      .c20 {
+      .c21 {
         overflow-x: auto;
       }
 
@@ -336,52 +484,38 @@ describe('Admin | containers | ListView', () => {
         border-bottom: none;
       }
 
-      .c22 {
-        border-bottom: 1px solid #eaeaef;
-      }
-
       .c23 {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c23 td,
-      .c23 th {
+      .c24 {
+        border-bottom: 1px solid #eaeaef;
+      }
+
+      .c24 td,
+      .c24 th {
         padding: 16px;
       }
 
-      .c23 td:first-of-type,
-      .c23 th:first-of-type {
+      .c24 td:first-of-type,
+      .c24 th:first-of-type {
         padding: 0 4px;
       }
 
-      .c23 th {
+      .c24 th {
         padding-top: 0;
         padding-bottom: 0;
         height: 3.5rem;
       }
 
       .c25 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c24 {
         vertical-align: middle;
         text-align: left;
         color: #666687;
         outline-offset: -4px;
       }
 
-      .c24 input {
+      .c25 input {
         vertical-align: sub;
       }
 
@@ -389,20 +523,7 @@ describe('Admin | containers | ListView', () => {
         height: 0.25rem;
       }
 
-      .c47 {
-        height: 1px;
-        border: none;
-        margin: 0;
-      }
-
-      .c53 {
-        font-weight: 600;
-        color: #4945ff;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c51 {
+      .c48 {
         height: 1.5rem;
         width: 1.5rem;
         border-radius: 50%;
@@ -420,64 +541,31 @@ describe('Admin | containers | ListView', () => {
         align-items: center;
       }
 
-      .c51 svg {
+      .c48 svg {
         height: 0.625rem;
         width: 0.625rem;
       }
 
-      .c51 svg path {
+      .c48 svg path {
         fill: #4945ff;
       }
 
-      .c49 {
+      .c46 {
         border-radius: 0 0 4px 4px;
         display: block;
         width: 100%;
         border: none;
       }
 
-      .c29 {
-        color: #666687;
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-      }
-
-      .c33 {
-        font-weight: 500;
-        color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c34 {
-        color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c31 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
+      .c11 {
+        padding-right: 8px;
       }
 
       .c13 {
-        font-weight: 600;
-        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
-      }
-
-      .c11 {
-        padding-right: 8px;
+        font-weight: 600;
+        color: #32324d;
       }
 
       .c8 {
@@ -575,8 +663,7 @@ describe('Admin | containers | ListView', () => {
         color: #666687;
       }
 
-      .c9[aria-disabled='true'] svg > g,
-      .c9[aria-disabled='true'] svg path {
+      .c9[aria-disabled='true'] svg > g,.c9[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -589,8 +676,7 @@ describe('Admin | containers | ListView', () => {
         color: #666687;
       }
 
-      .c9[aria-disabled='true']:active svg > g,
-      .c9[aria-disabled='true']:active svg path {
+      .c9[aria-disabled='true']:active svg > g,.c9[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -609,149 +695,8 @@ describe('Admin | containers | ListView', () => {
         fill: #ffffff;
       }
 
-      .c1 {
-        padding-bottom: 56px;
-      }
-
-      .c4 {
-        background: #f6f6f9;
-        padding-top: 40px;
-        padding-right: 56px;
-        padding-bottom: 40px;
-        padding-left: 56px;
-      }
-
-      .c15 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
-
-      .c0 {
-        display: grid;
-        grid-template-columns: 1fr;
-      }
-
-      .c2 {
-        overflow-x: hidden;
-      }
-
-      .c5 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-      }
-
-      .c6 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c7 {
-        color: #32324d;
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-      }
-
-      .c14 {
-        color: #666687;
-        font-size: 1rem;
-        line-height: 1.5;
-      }
-
-      .c40 {
-        color: #328048;
-        padding-left: 8px;
-      }
-
-      .c45 {
-        color: #d02b20;
-        padding-left: 8px;
-      }
-
-      .c37 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c39 {
-        background: #ee5e52;
-        border: none;
-        border-radius: 16px;
-        position: relative;
-        height: 1.5rem;
-        width: 2.5rem;
-      }
-
-      .c39 span {
-        font-size: 0;
-      }
-
-      .c39:before {
-        content: '';
-        background: #ffffff;
-        width: 1rem;
-        height: 1rem;
-        border-radius: 50%;
-        position: absolute;
-        -webkit-transition: all 0.5s;
-        transition: all 0.5s;
-        left: 4px;
-        top: 4px;
-      }
-
-      .c36 {
-        background: transparent;
-        padding: 0;
-        border: none;
-      }
-
-      .c36[aria-checked='true'] .c38 {
-        background: #5cb176;
-      }
-
-      .c36[aria-checked='true'] .c38:before {
-        -webkit-transform: translateX(1rem);
-        -ms-transform: translateX(1rem);
-        transform: translateX(1rem);
-      }
-
-      .c3:focus-visible {
-        outline: none;
-      }
-
       @media (prefers-reduced-motion:reduce) {
-        .c39:before {
+        .c37:before {
           -webkit-transition: none;
           transition: none;
         }
@@ -833,36 +778,42 @@ describe('Admin | containers | ListView', () => {
                 class="c16 c17"
               >
                 <div
-                  class="c18"
+                  class="c18 c19"
                 >
                   <div
-                    class="c19 c20"
+                    class="c20 c21"
                   >
                     <table
                       aria-colcount="5"
                       aria-rowcount="3"
-                      class="c21"
+                      class="c22"
+                      role="grid"
                     >
                       <thead
-                        class="c22"
+                        class="c23"
                       >
                         <tr
                           aria-rowindex="1"
-                          class="c23"
+                          class="c24"
                         >
                           <th
                             aria-colindex="1"
-                            class="c24"
+                            class="c25"
+                            role="gridcell"
                           >
                             <div
-                              class="c25"
+                              class="c6"
                             >
-                              <input
-                                aria-label="Select all entries"
-                                class="c26"
-                                tabindex="0"
-                                type="checkbox"
-                              />
+                              <div
+                                class=""
+                              >
+                                <input
+                                  aria-label="Select all entries"
+                                  class="c26"
+                                  tabindex="0"
+                                  type="checkbox"
+                                />
+                              </div>
                               <span
                                 class="c27"
                               />
@@ -870,12 +821,12 @@ describe('Admin | containers | ListView', () => {
                           </th>
                           <th
                             aria-colindex="2"
-                            class="c28 c24"
+                            class="c28 c25"
+                            role="gridcell"
                             tabindex="-1"
-                            width="20%"
                           >
                             <div
-                              class="c25"
+                              class="c6"
                             >
                               <span
                                 class="c29"
@@ -889,12 +840,12 @@ describe('Admin | containers | ListView', () => {
                           </th>
                           <th
                             aria-colindex="3"
-                            class="c30 c24"
+                            class="c30 c25"
+                            role="gridcell"
                             tabindex="-1"
-                            width="60%"
                           >
                             <div
-                              class="c25"
+                              class="c6"
                             >
                               <span
                                 class="c29"
@@ -908,12 +859,12 @@ describe('Admin | containers | ListView', () => {
                           </th>
                           <th
                             aria-colindex="4"
-                            class="c28 c24"
+                            class="c28 c25"
+                            role="gridcell"
                             tabindex="-1"
-                            width="20%"
                           >
                             <div
-                              class="c25"
+                              class="c6"
                             >
                               <span
                                 class="c29"
@@ -927,11 +878,12 @@ describe('Admin | containers | ListView', () => {
                           </th>
                           <th
                             aria-colindex="5"
-                            class="c24"
+                            class="c25"
+                            role="gridcell"
                             tabindex="-1"
                           >
                             <div
-                              class="c25"
+                              class="c6"
                             >
                               <div
                                 class="c31"
@@ -950,27 +902,32 @@ describe('Admin | containers | ListView', () => {
                       >
                         <tr
                           aria-rowindex="2"
-                          class="c23"
+                          class="c24"
                           style="cursor: pointer;"
                         >
                           <td
                             aria-colindex="1"
                             aria-hidden="true"
-                            class="c24"
+                            class="c25"
                             role="button"
                           >
-                            <input
-                              aria-label="Select test"
-                              class="c26"
-                              id="select"
-                              name="select"
-                              tabindex="-1"
-                              type="checkbox"
-                            />
+                            <div
+                              class=""
+                            >
+                              <input
+                                aria-label="Select test"
+                                class="c26"
+                                id="select"
+                                name="select"
+                                tabindex="-1"
+                                type="checkbox"
+                              />
+                            </div>
                           </td>
                           <td
                             aria-colindex="2"
-                            class="c24"
+                            class="c25"
+                            role="gridcell"
                             tabindex="-1"
                           >
                             <span
@@ -981,7 +938,8 @@ describe('Admin | containers | ListView', () => {
                           </td>
                           <td
                             aria-colindex="3"
-                            class="c24"
+                            class="c25"
+                            role="gridcell"
                             tabindex="-1"
                           >
                             <span
@@ -992,26 +950,27 @@ describe('Admin | containers | ListView', () => {
                           </td>
                           <td
                             aria-colindex="4"
-                            class="c24"
+                            class="c25"
+                            role="gridcell"
                           >
                             <div
                               aria-hidden="true"
-                              class="c35"
+                              class="c6"
                               role="button"
                             >
                               <button
                                 aria-checked="true"
                                 aria-label="test Status"
-                                class="c36"
+                                class="c35"
                                 role="switch"
                                 tabindex="-1"
                                 type="button"
                               >
                                 <div
-                                  class="c37"
+                                  class="c6"
                                 >
                                   <div
-                                    class="c38 c39"
+                                    class="c36 c37"
                                   >
                                     <span>
                                       Enabled
@@ -1022,7 +981,7 @@ describe('Admin | containers | ListView', () => {
                                   </div>
                                   <span
                                     aria-hidden="true"
-                                    class="c40"
+                                    class="c38"
                                   >
                                     Enabled
                                   </span>
@@ -1032,24 +991,31 @@ describe('Admin | containers | ListView', () => {
                           </td>
                           <td
                             aria-colindex="5"
-                            class="c24"
+                            class="c25"
+                            role="gridcell"
                           >
                             <div
                               aria-hidden="true"
-                              class="c41 c42"
+                              class="c6 c39"
                               role="button"
-                              spacing="1"
                             >
                               <span>
                                 <button
                                   aria-disabled="false"
-                                  aria-labelledby="tooltip-1"
-                                  class="c43 c44"
+                                  aria-labelledby="1"
+                                  class="c40 c41"
                                   tabindex="-1"
                                   type="button"
                                 >
+                                  <span
+                                    class="c31"
+                                  >
+                                    Update
+                                  </span>
                                   <svg
+                                    aria-hidden="true"
                                     fill="none"
+                                    focusable="false"
                                     height="1em"
                                     viewBox="0 0 24 24"
                                     width="1em"
@@ -1067,14 +1033,21 @@ describe('Admin | containers | ListView', () => {
                               <span>
                                 <button
                                   aria-disabled="false"
-                                  aria-labelledby="tooltip-3"
-                                  class="c43 c44"
+                                  aria-labelledby="2"
+                                  class="c40 c41"
                                   id="delete-1"
                                   tabindex="-1"
                                   type="button"
                                 >
+                                  <span
+                                    class="c31"
+                                  >
+                                    Delete
+                                  </span>
                                   <svg
+                                    aria-hidden="true"
                                     fill="none"
+                                    focusable="false"
                                     height="1em"
                                     viewBox="0 0 24 24"
                                     width="1em"
@@ -1092,27 +1065,32 @@ describe('Admin | containers | ListView', () => {
                         </tr>
                         <tr
                           aria-rowindex="3"
-                          class="c23"
+                          class="c24"
                           style="cursor: pointer;"
                         >
                           <td
                             aria-colindex="1"
                             aria-hidden="true"
-                            class="c24"
+                            class="c25"
                             role="button"
                           >
-                            <input
-                              aria-label="Select test2"
-                              class="c26"
-                              id="select"
-                              name="select"
-                              tabindex="-1"
-                              type="checkbox"
-                            />
+                            <div
+                              class=""
+                            >
+                              <input
+                                aria-label="Select test2"
+                                class="c26"
+                                id="select"
+                                name="select"
+                                tabindex="-1"
+                                type="checkbox"
+                              />
+                            </div>
                           </td>
                           <td
                             aria-colindex="2"
-                            class="c24"
+                            class="c25"
+                            role="gridcell"
                             tabindex="-1"
                           >
                             <span
@@ -1123,7 +1101,8 @@ describe('Admin | containers | ListView', () => {
                           </td>
                           <td
                             aria-colindex="3"
-                            class="c24"
+                            class="c25"
+                            role="gridcell"
                             tabindex="-1"
                           >
                             <span
@@ -1134,26 +1113,27 @@ describe('Admin | containers | ListView', () => {
                           </td>
                           <td
                             aria-colindex="4"
-                            class="c24"
+                            class="c25"
+                            role="gridcell"
                           >
                             <div
                               aria-hidden="true"
-                              class="c35"
+                              class="c6"
                               role="button"
                             >
                               <button
                                 aria-checked="false"
                                 aria-label="test2 Status"
-                                class="c36"
+                                class="c35"
                                 role="switch"
                                 tabindex="-1"
                                 type="button"
                               >
                                 <div
-                                  class="c37"
+                                  class="c6"
                                 >
                                   <div
-                                    class="c38 c39"
+                                    class="c36 c37"
                                   >
                                     <span>
                                       Enabled
@@ -1164,7 +1144,7 @@ describe('Admin | containers | ListView', () => {
                                   </div>
                                   <span
                                     aria-hidden="true"
-                                    class="c45"
+                                    class="c42"
                                   >
                                     Disabled
                                   </span>
@@ -1174,24 +1154,31 @@ describe('Admin | containers | ListView', () => {
                           </td>
                           <td
                             aria-colindex="5"
-                            class="c24"
+                            class="c25"
+                            role="gridcell"
                           >
                             <div
                               aria-hidden="true"
-                              class="c41 c42"
+                              class="c6 c39"
                               role="button"
-                              spacing="1"
                             >
                               <span>
                                 <button
                                   aria-disabled="false"
-                                  aria-labelledby="tooltip-5"
-                                  class="c43 c44"
+                                  aria-labelledby="3"
+                                  class="c40 c41"
                                   tabindex="-1"
                                   type="button"
                                 >
+                                  <span
+                                    class="c31"
+                                  >
+                                    Update
+                                  </span>
                                   <svg
+                                    aria-hidden="true"
                                     fill="none"
+                                    focusable="false"
                                     height="1em"
                                     viewBox="0 0 24 24"
                                     width="1em"
@@ -1209,14 +1196,21 @@ describe('Admin | containers | ListView', () => {
                               <span>
                                 <button
                                   aria-disabled="false"
-                                  aria-labelledby="tooltip-7"
-                                  class="c43 c44"
+                                  aria-labelledby="4"
+                                  class="c40 c41"
                                   id="delete-2"
                                   tabindex="-1"
                                   type="button"
                                 >
+                                  <span
+                                    class="c31"
+                                  >
+                                    Delete
+                                  </span>
                                   <svg
+                                    aria-hidden="true"
                                     fill="none"
+                                    focusable="false"
                                     height="1em"
                                     viewBox="0 0 24 24"
                                     width="1em"
@@ -1238,17 +1232,17 @@ describe('Admin | containers | ListView', () => {
                 </div>
                 <div>
                   <hr
-                    class="c46 c47"
+                    class="c43 c44"
                   />
                   <button
-                    class="c48 c49"
+                    class="c45 c46"
                   >
                     <div
-                      class="c25"
+                      class="c6"
                     >
                       <div
                         aria-hidden="true"
-                        class="c50 c51"
+                        class="c47 c48"
                       >
                         <svg
                           fill="none"
@@ -1264,10 +1258,10 @@ describe('Admin | containers | ListView', () => {
                         </svg>
                       </div>
                       <div
-                        class="c52"
+                        class="c49"
                       >
                         <span
-                          class="c53"
+                          class="c50"
                         >
                           Create new webhook
                         </span>

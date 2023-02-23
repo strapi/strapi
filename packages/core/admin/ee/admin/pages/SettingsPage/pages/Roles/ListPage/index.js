@@ -4,26 +4,32 @@ import {
   LoadingIndicatorPage,
   SearchURLQuery,
   SettingsPageTitle,
+  getFetchClient,
   useNotification,
   useQueryParams,
   useRBAC,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-import Plus from '@strapi/icons/Plus';
-import Trash from '@strapi/icons/Trash';
-import Duplicate from '@strapi/icons/Duplicate';
-import Pencil from '@strapi/icons/Pencil';
-import { Button } from '@strapi/design-system/Button';
-import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { Main } from '@strapi/design-system/Main';
-import { Table, Tbody, TFooter, Thead, Th, Tr } from '@strapi/design-system/Table';
-import { Typography } from '@strapi/design-system/Typography';
+import { Plus, Trash, Duplicate, Pencil } from '@strapi/icons';
+import {
+  Button,
+  ActionLayout,
+  ContentLayout,
+  HeaderLayout,
+  Main,
+  Table,
+  Tbody,
+  TFooter,
+  Thead,
+  Th,
+  Tr,
+  Typography,
+  VisuallyHidden,
+} from '@strapi/design-system';
 import { get } from 'lodash';
 import matchSorter from 'match-sorter';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
-import { axiosInstance } from '../../../../../../../admin/src/core/utils';
 import { useRolesList } from '../../../../../../../admin/src/hooks';
 import adminPermissions from '../../../../../../../admin/src/permissions';
 import EmptyRole from '../../../../../../../admin/src/pages/SettingsPage/pages/Roles/ListPage/components/EmptyRole';
@@ -72,13 +78,15 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate }) => {
     initialState
   );
 
+  const { post } = getFetchClient();
+
   const handleDeleteData = async () => {
     try {
       dispatch({
         type: 'ON_REMOVE_ROLES',
       });
 
-      await axiosInstance.post('/admin/roles/batch-delete', {
+      await post('/admin/roles/batch-delete', {
         ids: [roleToDelete],
       });
 
@@ -303,7 +311,7 @@ const RoleListPage = () => {
             }
           >
             <Thead>
-              <Tr>
+              <Tr aria-rowindex={1}>
                 <Th>
                   <Typography variant="sigma" textColor="neutral600">
                     {formatMessage({
@@ -339,7 +347,7 @@ const RoleListPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {sortedRoles?.map((role) => (
+              {sortedRoles?.map((role, index) => (
                 <BaseRoleRow
                   key={role.id}
                   id={role.id}
@@ -347,6 +355,7 @@ const RoleListPage = () => {
                   description={role.description}
                   usersCount={role.usersCount}
                   icons={getIcons(role)}
+                  rowIndex={index + 2}
                 />
               ))}
             </Tbody>

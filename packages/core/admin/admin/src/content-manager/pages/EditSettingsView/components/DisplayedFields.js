@@ -1,18 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Button } from '@strapi/design-system/Button';
-import { Box } from '@strapi/design-system/Box';
-import { Typography } from '@strapi/design-system/Typography';
-import { Stack } from '@strapi/design-system/Stack';
-import { Flex } from '@strapi/design-system/Flex';
-import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
-import Plus from '@strapi/icons/Plus';
+import { Button, Box, Typography, Stack, Flex, SimpleMenu, MenuItem } from '@strapi/design-system';
+import { Plus } from '@strapi/icons';
 import { getTrad } from '../../../utils';
 import RowsLayout from './RowsLayout';
 import LinkToCTB from './LinkToCTB';
 
-const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField, onAddField }) => {
+const DisplayedFields = ({ editLayout, fields, onRemoveField, onAddField }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -55,9 +50,9 @@ const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField,
             startIcon={<Plus />}
             endIcon={null}
             variant="secondary"
-            disabled={editLayoutRemainingFields.length === 0}
+            disabled={fields.length === 0}
           >
-            {editLayoutRemainingFields.map((field) => (
+            {fields.map((field) => (
               <MenuItem key={field} onClick={() => onAddField(field)}>
                 {field}
               </MenuItem>
@@ -71,7 +66,7 @@ const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField,
 
 DisplayedFields.propTypes = {
   editLayout: PropTypes.array.isRequired,
-  editLayoutRemainingFields: PropTypes.array.isRequired,
+  fields: PropTypes.array.isRequired,
   onAddField: PropTypes.func.isRequired,
   onRemoveField: PropTypes.func.isRequired,
 };

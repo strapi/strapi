@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Typography } from '@strapi/design-system/Typography';
-import { Tooltip } from '@strapi/design-system/Tooltip';
+import { Typography, Tooltip } from '@strapi/design-system';
 import Media from './Media';
 import MultipleMedias from './MultipleMedias';
 import RelationMultiple from './RelationMultiple';
@@ -17,7 +16,7 @@ const TypographyMaxWidth = styled(Typography)`
   max-width: 300px;
 `;
 
-const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId }) => {
+const CellContent = ({ content, fieldSchema, metadatas, name, rowId, contentType }) => {
   const { type } = fieldSchema;
 
   if (!hasContent(type, content, metadatas, fieldSchema)) {
@@ -40,11 +39,11 @@ const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId 
       return (
         <RelationMultiple
           fieldSchema={fieldSchema}
-          queryInfos={queryInfos}
           metadatas={metadatas}
           value={content}
           name={name}
-          rowId={rowId}
+          entityId={rowId}
+          contentType={contentType}
         />
       );
     }
@@ -76,11 +75,13 @@ const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId 
 
 CellContent.defaultProps = {
   content: undefined,
-  queryInfos: undefined,
 };
 
 CellContent.propTypes = {
   content: PropTypes.any,
+  contentType: PropTypes.shape({
+    uid: PropTypes.string.isRequired,
+  }).isRequired,
   fieldSchema: PropTypes.shape({
     component: PropTypes.string,
     multiple: PropTypes.bool,
@@ -91,7 +92,6 @@ CellContent.propTypes = {
   metadatas: PropTypes.object.isRequired,
   name: PropTypes.string.isRequired,
   rowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-  queryInfos: PropTypes.shape({ endPoint: PropTypes.string.isRequired }),
 };
 
 export default CellContent;

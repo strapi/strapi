@@ -4,15 +4,20 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';
-import { Button } from '@strapi/design-system/Button';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { ModalLayout, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
-import { FieldLabel } from '@strapi/design-system/Field';
-import { Flex } from '@strapi/design-system/Flex';
-import { Loader } from '@strapi/design-system/Loader';
-import { Stack } from '@strapi/design-system/Stack';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Typography } from '@strapi/design-system/Typography';
+import {
+  Button,
+  Grid,
+  GridItem,
+  ModalLayout,
+  ModalBody,
+  ModalFooter,
+  FieldLabel,
+  Flex,
+  Loader,
+  Stack,
+  TextInput,
+  Typography,
+} from '@strapi/design-system';
 import { Form, useNotification, getAPIInnerErrors, useTracking } from '@strapi/helper-plugin';
 
 import { getTrad, findRecursiveFolderByValue } from '../../utils';
@@ -258,7 +263,7 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                         disabled={!canUpdate || isEditFolderLoading}
                       >
                         {formatMessage({
-                          id: 'modal.folder.create.delete',
+                          id: getTrad('modal.folder.create.delete'),
                           defaultMessage: 'Delete folder',
                         })}
                       </Button>
@@ -272,8 +277,8 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                     >
                       {formatMessage(
                         isEditing
-                          ? { id: 'modal.folder.edit.submit', defaultMessage: 'Save' }
-                          : { id: 'modal.folder.create.submit', defaultMessage: 'Create' }
+                          ? { id: getTrad('modal.folder.edit.submit'), defaultMessage: 'Save' }
+                          : { id: getTrad('modal.folder.create.submit'), defaultMessage: 'Create' }
                       )}
                     </Button>
                   </Stack>

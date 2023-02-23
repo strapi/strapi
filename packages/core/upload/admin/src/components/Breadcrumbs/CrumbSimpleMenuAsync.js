@@ -3,9 +3,8 @@ import PropTypes from 'prop-types';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { useQueryParams } from '@strapi/helper-plugin';
-import { CrumbSimpleMenu } from '@strapi/design-system/v2/Breadcrumbs';
-import { MenuItem } from '@strapi/design-system/v2/SimpleMenu';
-import { Loader } from '@strapi/design-system/Loader';
+import { MenuItem, CrumbSimpleMenu } from '@strapi/design-system/v2';
+import { Loader } from '@strapi/design-system';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { getFolderParents, getFolderURL, getTrad } from '../../utils';
 
@@ -58,7 +57,7 @@ export const CrumbSimpleMenuAsync = ({ parentsToOmit, currentFolderId, onChangeF
             );
           }
 
-          const url = getFolderURL(pathname, query, ascendant);
+          const url = getFolderURL(pathname, query, ascendant?.id);
 
           return (
             <MenuItem isLink as={NavLink} to={url} key={ascendant.id}>

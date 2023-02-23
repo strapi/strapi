@@ -49,7 +49,42 @@ describe('GuidedTour Homepage', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c0 {
+      .c5 {
+        font-weight: 600;
+        font-size: 1.125rem;
+        line-height: 1.22;
+        color: #32324d;
+      }
+
+      .c10 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #ffffff;
+      }
+
+      .c11 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c23 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #666687;
+      }
+
+      .c28 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c1 {
         background: #ffffff;
         padding-top: 32px;
         padding-right: 16px;
@@ -59,169 +94,12 @@ describe('GuidedTour Homepage', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c5 {
+      .c7 {
         margin-right: 20px;
         min-width: 1.875rem;
       }
 
-      .c12 {
-        background: #7b79ff;
-        border-radius: 4px;
-        width: 0.125rem;
-        height: 100%;
-        min-height: 5.3125rem;
-      }
-
-      .c13 {
-        margin-top: 8px;
-      }
-
-      .c22 {
-        background: #c0c0cf;
-        border-radius: 4px;
-        width: 0.125rem;
-        height: 100%;
-        min-height: 4.0625rem;
-      }
-
-      .c27 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c24 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
-      }
-
-      .c24 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c24 svg > g,
-      .c24 svg path {
-        fill: #ffffff;
-      }
-
-      .c24[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c24:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c24:focus-visible {
-        outline: none;
-      }
-
-      .c24:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c25 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        padding: 8px 16px;
-        background: #4945ff;
-        border: 1px solid #4945ff;
-        border: 1px solid #dcdce4;
-        background: #ffffff;
-      }
-
-      .c25 .sc-hKwDye {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c25 .c26 {
-        color: #ffffff;
-      }
-
-      .c25[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c25[aria-disabled='true'] .c26 {
-        color: #666687;
-      }
-
-      .c25[aria-disabled='true'] svg > g,
-      .c25[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c25[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c25[aria-disabled='true']:active .c26 {
-        color: #666687;
-      }
-
-      .c25[aria-disabled='true']:active svg > g,
-      .c25[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c25:hover {
-        background-color: #f6f6f9;
-      }
-
-      .c25:active {
-        background-color: #eaeaef;
-      }
-
-      .c25 .c26 {
-        color: #32324d;
-      }
-
-      .c25 svg > g,
-      .c25 svg path {
-        fill: #32324d;
-      }
-
-      .c6 {
+      .c8 {
         background: #4945ff;
         padding: 8px;
         border-radius: 50%;
@@ -229,14 +107,26 @@ describe('GuidedTour Homepage', () => {
         height: 1.875rem;
       }
 
-      .c11 {
+      .c13 {
         margin-right: 20px;
         margin-top: 12px;
         margin-bottom: 12px;
         min-width: 1.875rem;
       }
 
-      .c20 {
+      .c14 {
+        background: #7b79ff;
+        border-radius: 4px;
+        width: 0.125rem;
+        height: 100%;
+        min-height: 5.3125rem;
+      }
+
+      .c15 {
+        margin-top: 8px;
+      }
+
+      .c22 {
         padding: 8px;
         border-radius: 50%;
         border-style: solid;
@@ -246,7 +136,29 @@ describe('GuidedTour Homepage', () => {
         height: 1.875rem;
       }
 
-      .c4 {
+      .c24 {
+        background: #c0c0cf;
+        border-radius: 4px;
+        width: 0.125rem;
+        height: 100%;
+        min-height: 4.0625rem;
+      }
+
+      .c2 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c6 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -260,7 +172,7 @@ describe('GuidedTour Homepage', () => {
         flex-direction: row;
       }
 
-      .c7 {
+      .c9 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -278,7 +190,7 @@ describe('GuidedTour Homepage', () => {
         justify-content: center;
       }
 
-      .c10 {
+      .c12 {
         -webkit-align-items: flex-start;
         -webkit-box-align: flex-start;
         -ms-flex-align: flex-start;
@@ -292,7 +204,7 @@ describe('GuidedTour Homepage', () => {
         flex-direction: row;
       }
 
-      .c23 {
+      .c25 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -310,69 +222,16 @@ describe('GuidedTour Homepage', () => {
         justify-content: flex-end;
       }
 
-      .c1 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c2 > * {
+      .c3 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c2 > * + * {
+      .c3 > * + * {
         margin-top: 24px;
       }
 
-      .c3 {
-        color: #32324d;
-        font-weight: 600;
-        font-size: 1.125rem;
-        line-height: 1.22;
-      }
-
-      .c8 {
-        font-weight: 500;
-        color: #ffffff;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c9 {
-        color: #32324d;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-      }
-
-      .c21 {
-        font-weight: 500;
-        color: #666687;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c17 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c19 {
-        padding-left: 8px;
-      }
-
-      .c14 {
+      .c26 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -386,21 +245,21 @@ describe('GuidedTour Homepage', () => {
         outline: none;
       }
 
-      .c14 svg {
+      .c26 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c14 svg > g,
-      .c14 svg path {
+      .c26 svg > g,
+      .c26 svg path {
         fill: #ffffff;
       }
 
-      .c14[aria-disabled='true'] {
+      .c26[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c14:after {
+      .c26:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -415,11 +274,11 @@ describe('GuidedTour Homepage', () => {
         border: 2px solid transparent;
       }
 
-      .c14:focus-visible {
+      .c26:focus-visible {
         outline: none;
       }
 
-      .c14:focus-visible:after {
+      .c26:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -430,7 +289,148 @@ describe('GuidedTour Homepage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c15 {
+      .c27 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        background-color: #4945ff;
+        border: 1px solid #4945ff;
+        height: 2rem;
+        padding-left: 16px;
+        padding-right: 16px;
+        border: 1px solid #dcdce4;
+        background: #ffffff;
+      }
+
+      .c27 .c0 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c27 .c4 {
+        color: #ffffff;
+      }
+
+      .c27[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c27[aria-disabled='true'] .c4 {
+        color: #666687;
+      }
+
+      .c27[aria-disabled='true'] svg > g,.c27[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c27[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c27[aria-disabled='true']:active .c4 {
+        color: #666687;
+      }
+
+      .c27[aria-disabled='true']:active svg > g,.c27[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c27:hover {
+        background-color: #f6f6f9;
+      }
+
+      .c27:active {
+        background-color: #eaeaef;
+      }
+
+      .c27 .c4 {
+        color: #32324d;
+      }
+
+      .c27 svg > g,
+      .c27 svg path {
+        fill: #32324d;
+      }
+
+      .c21 {
+        padding-left: 8px;
+      }
+
+      .c19 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c16 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
+      }
+
+      .c16 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c16 svg > g,
+      .c16 svg path {
+        fill: #ffffff;
+      }
+
+      .c16[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c16:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c16:focus-visible {
+        outline: none;
+      }
+
+      .c16:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c17 {
         padding: 8px 16px;
         background: #4945ff;
         border: 1px solid #4945ff;
@@ -443,7 +443,7 @@ describe('GuidedTour Homepage', () => {
         text-decoration: none;
       }
 
-      .c15 .c18 {
+      .c17 .c20 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -454,124 +454,117 @@ describe('GuidedTour Homepage', () => {
         align-items: center;
       }
 
-      .c15 .c16 {
+      .c17 .c18 {
         color: #ffffff;
       }
 
-      .c15[aria-disabled='true'] {
+      .c17[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c15[aria-disabled='true'] .c16 {
+      .c17[aria-disabled='true'] .c18 {
         color: #666687;
       }
 
-      .c15[aria-disabled='true'] svg > g,
-      .c15[aria-disabled='true'] svg path {
+      .c17[aria-disabled='true'] svg > g,.c17[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c15[aria-disabled='true']:active {
+      .c17[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c15[aria-disabled='true']:active .c16 {
+      .c17[aria-disabled='true']:active .c18 {
         color: #666687;
       }
 
-      .c15[aria-disabled='true']:active svg > g,
-      .c15[aria-disabled='true']:active svg path {
+      .c17[aria-disabled='true']:active svg > g,.c17[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c15:hover {
+      .c17:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c15:active {
+      .c17:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
-      .c15 svg > g,
-      .c15 svg path {
+      .c17 svg > g,
+      .c17 svg path {
         fill: #ffffff;
       }
 
       <div
-        class="c0"
+        class="c0 c1"
       >
         <div
-          class="c1 c2"
-          spacing="6"
+          class="c0 c2 c3"
         >
           <h2
-            class="c3"
+            class="c4 c5"
           >
             3 steps to get started
           </h2>
           <div
-            class=""
+            class="c0 "
           >
             <div
-              class=""
+              class="c0 "
             >
               <div
-                class="c4"
+                class="c0 c6"
               >
                 <div
-                  class="c5"
+                  class="c0 c7"
                 >
                   <div
-                    class="c6 c7"
-                    height="1.875rem"
-                    width="1.875rem"
+                    class="c0 c8 c9"
                   >
                     <span
-                      class="c8"
+                      class="c4 c10"
                     >
                       1
                     </span>
                   </div>
                 </div>
                 <h3
-                  class="c9"
+                  class="c4 c11"
                 >
                   🧠 Build the content structure
                 </h3>
               </div>
               <div
-                class="c10"
+                class="c0 c12"
               >
                 <div
-                  class="c11 c7"
+                  class="c0 c13 c9"
                 >
                   <div
-                    class="c12"
-                    height="100%"
-                    width="0.125rem"
+                    class="c0 c14"
                   />
                 </div>
                 <div
-                  class="c13"
+                  class="c0 c15"
                 >
                   <a
                     aria-disabled="false"
-                    class="c14 c15"
+                    class="c16 c17"
                     href="/plugins/content-type-builder"
                     variant="default"
                   >
                     <span
-                      class="c16 c17"
+                      class="c18 c19"
                     >
                       Go to the Content type Builder
                     </span>
                     <div
                       aria-hidden="true"
-                      class="c18 c19"
+                      class="c20 c21"
                     >
                       <svg
                         fill="none"
@@ -591,99 +584,93 @@ describe('GuidedTour Homepage', () => {
               </div>
             </div>
             <div
-              class=""
+              class="c0 "
             >
               <div
-                class="c4"
+                class="c0 c6"
               >
                 <div
-                  class="c5"
+                  class="c0 c7"
                 >
                   <div
-                    class="c20 c7"
-                    height="1.875rem"
-                    width="1.875rem"
+                    class="c0 c22 c9"
                   >
                     <span
-                      class="c21"
+                      class="c4 c23"
                     >
                       2
                     </span>
                   </div>
                 </div>
                 <h3
-                  class="c9"
+                  class="c4 c11"
                 >
                   ⚡️ What would you like to share with the world?
                 </h3>
               </div>
               <div
-                class="c10"
+                class="c0 c12"
               >
                 <div
-                  class="c11 c7"
+                  class="c0 c13 c9"
                 >
                   <div
-                    class="c22"
-                    height="100%"
-                    width="0.125rem"
+                    class="c0 c24"
                   />
                 </div>
                 <div
-                  class="c13"
+                  class="c0 c15"
                 />
               </div>
             </div>
             <div
-              class=""
+              class="c0 "
             >
               <div
-                class="c4"
+                class="c0 c6"
               >
                 <div
-                  class="c5"
+                  class="c0 c7"
                 >
                   <div
-                    class="c20 c7"
-                    height="1.875rem"
-                    width="1.875rem"
+                    class="c0 c22 c9"
                   >
                     <span
-                      class="c21"
+                      class="c4 c23"
                     >
                       3
                     </span>
                   </div>
                 </div>
                 <h3
-                  class="c9"
+                  class="c4 c11"
                 >
                   🚀 See content in action
                 </h3>
               </div>
               <div
-                class="c10"
+                class="c0 c12"
               >
                 <div
-                  class="c11 c7"
+                  class="c0 c13 c9"
                 />
                 <div
-                  class="c13"
+                  class="c0 c15"
                 />
               </div>
             </div>
           </div>
         </div>
         <div
-          class="c23"
+          class="c0 c25"
         >
           <button
             aria-disabled="false"
-            class="c24 c25"
+            class="c26 c27"
             type="button"
           >
             <span
-              class="c26 c27"
+              class="c4 c28"
             >
               Skip the tour
             </span>

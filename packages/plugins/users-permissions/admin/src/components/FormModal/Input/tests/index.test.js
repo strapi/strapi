@@ -34,6 +34,13 @@ describe('<Input />', () => {
     } = render(makeApp('test', 'text', 'test'));
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c2 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
       .c0 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
@@ -80,11 +87,13 @@ describe('<Input />', () => {
         justify-content: space-between;
       }
 
-      .c2 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
+      .c1 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c1 > * + * {
+        margin-top: 4px;
       }
 
       .c6 {
@@ -148,24 +157,14 @@ describe('<Input />', () => {
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c1 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c1 > * + * {
-        margin-top: 4px;
-      }
-
       <div>
         <div>
           <div
             class="c0 c1"
-            spacing="1"
           >
             <label
               class="c2"
-              for="textinput-1"
+              for="1"
             >
               <div
                 class="c3"
@@ -180,8 +179,9 @@ describe('<Input />', () => {
                 aria-disabled="false"
                 aria-invalid="false"
                 aria-label="test"
+                aria-required="false"
                 class="c6"
-                id="textinput-1"
+                id="1"
                 name="test"
                 placeholder=""
                 type="text"

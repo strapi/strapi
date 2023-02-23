@@ -47,34 +47,11 @@ describe('<InputUID />', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c9 {
-        border: none;
-        background: transparent;
-        font-size: 1.6rem;
-        width: auto;
-        padding: 0;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c11 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
+      .c2 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
       }
 
       .c7 {
@@ -128,11 +105,13 @@ describe('<InputUID />', () => {
         justify-content: space-between;
       }
 
-      .c2 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
+      .c1 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c1 > * + * {
+        margin-top: 4px;
       }
 
       .c6 {
@@ -196,13 +175,20 @@ describe('<InputUID />', () => {
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c1 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c1 > * + * {
-        margin-top: 4px;
+      .c9 {
+        border: none;
+        background: transparent;
+        font-size: 1.6rem;
+        width: auto;
+        padding: 0;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
       }
 
       .c8 {
@@ -222,7 +208,7 @@ describe('<InputUID />', () => {
         fill: #4945ff;
       }
 
-      .c12 {
+      .c11 {
         -webkit-animation: gzYjWD 2s infinite linear;
         animation: gzYjWD 2s infinite linear;
       }
@@ -231,11 +217,10 @@ describe('<InputUID />', () => {
         <div>
           <div
             class="c0 c1"
-            spacing="1"
           >
             <label
               class="c2"
-              for="textinput-1"
+              for="1"
             >
               <div
                 class="c3"
@@ -249,8 +234,9 @@ describe('<InputUID />', () => {
               <input
                 aria-disabled="false"
                 aria-invalid="false"
+                aria-required="false"
                 class="c6"
-                id="textinput-1"
+                id="1"
                 name="test"
                 placeholder=""
                 value="michka"
@@ -267,7 +253,7 @@ describe('<InputUID />', () => {
                     type="button"
                   >
                     <div
-                      class="c11 c12"
+                      class="c3 c11"
                     >
                       <svg
                         fill="none"

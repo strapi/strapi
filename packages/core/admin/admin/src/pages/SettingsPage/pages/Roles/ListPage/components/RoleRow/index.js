@@ -1,14 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Td, Tr } from '@strapi/design-system/Table';
-import { Typography } from '@strapi/design-system/Typography';
-import { IconButton } from '@strapi/design-system/IconButton';
+import { Box, Flex, Td, Tr, Typography, IconButton } from '@strapi/design-system';
 import { stopPropagation, onRowClick, pxToRem } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
-const RoleRow = ({ id, name, description, usersCount, icons }) => {
+const RoleRow = ({ id, name, description, usersCount, icons, rowIndex }) => {
   const { formatMessage } = useIntl();
 
   const usersCountText = formatMessage(
@@ -21,6 +17,7 @@ const RoleRow = ({ id, name, description, usersCount, icons }) => {
 
   return (
     <Tr
+      aria-rowindex={rowIndex}
       key={id}
       {...onRowClick({
         fn: icons[1].onClick,
@@ -60,6 +57,7 @@ RoleRow.propTypes = {
   description: PropTypes.string.isRequired,
   usersCount: PropTypes.number.isRequired,
   icons: PropTypes.array.isRequired,
+  rowIndex: PropTypes.number.isRequired,
 };
 
 export default RoleRow;

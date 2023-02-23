@@ -1,6 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
+.c6 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #32324d;
+}
+
+.c11 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
 .c0 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -15,10 +28,6 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
   flex-direction: row;
 }
 
-.c1 > * + * {
-  margin-left: 4px;
-}
-
 .c4 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -31,17 +40,8 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
   width: 1px;
 }
 
-.c6 {
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c11 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
+.c1 > * + * {
+  margin-left: 4px;
 }
 
 .c7 {
@@ -171,7 +171,7 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
 
 <nav
   aria-label="pagination"
-  class="sc-ezHhwS"
+  class=""
 >
   <ul
     class="c0 c1"
@@ -364,6 +364,19 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
 `;
 
 exports[`<PaginationURLQuery /> should work when the pageCount is inferior or equal to 4 1`] = `
+.c7 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c10 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #32324d;
+}
+
 .c0 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -378,10 +391,6 @@ exports[`<PaginationURLQuery /> should work when the pageCount is inferior or eq
   flex-direction: row;
 }
 
-.c1 > * + * {
-  margin-left: 4px;
-}
-
 .c4 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -394,17 +403,8 @@ exports[`<PaginationURLQuery /> should work when the pageCount is inferior or eq
   width: 1px;
 }
 
-.c7 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c10 {
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
+.c1 > * + * {
+  margin-left: 4px;
 }
 
 .c8 {
@@ -544,7 +544,7 @@ exports[`<PaginationURLQuery /> should work when the pageCount is inferior or eq
 
 <nav
   aria-label="pagination"
-  class="sc-ezHhwS"
+  class=""
 >
   <ul
     class="c0 c1"

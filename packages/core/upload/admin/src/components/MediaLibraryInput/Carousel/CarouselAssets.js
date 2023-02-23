@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { CarouselInput, CarouselSlide } from '@strapi/design-system/CarouselInput';
+import { CarouselInput, CarouselSlide } from '@strapi/design-system';
 import getTrad from '../../../utils/getTrad';
 import { AssetDefinition } from '../../../constants';
 import { CarouselAssetActions } from './CarouselAssetActions';
@@ -15,6 +15,7 @@ export const CarouselAssets = ({
   error,
   hint,
   label,
+  labelAction,
   onAddAsset,
   onDeleteAsset,
   onDeleteAssetFromMediaLibrary,
@@ -35,6 +36,7 @@ export const CarouselAssets = ({
     <>
       <CarouselInput
         label={label}
+        labelAction={labelAction}
         secondaryLabel={currentAsset?.name}
         selectedSlide={selectedAssetIndex}
         previousLabel={formatMessage({
@@ -55,7 +57,6 @@ export const CarouselAssets = ({
             <CarouselAssetActions
               asset={currentAsset}
               onDeleteAsset={disabled ? undefined : onDeleteAsset}
-              onDeleteAssetFromMediaLibrary={onDeleteAssetFromMediaLibrary}
               onAddAsset={disabled ? undefined : onAddAsset}
               onEditAsset={onEditAsset ? () => setIsEditingAsset(true) : undefined}
             />
@@ -118,6 +119,7 @@ CarouselAssets.defaultProps = {
   disabled: false,
   error: undefined,
   hint: undefined,
+  labelAction: undefined,
   onDropAsset: undefined,
   required: false,
   trackedLocation: undefined,
@@ -129,6 +131,7 @@ CarouselAssets.propTypes = {
   error: PropTypes.string,
   hint: PropTypes.string,
   label: PropTypes.string.isRequired,
+  labelAction: PropTypes.node,
   onAddAsset: PropTypes.func.isRequired,
   onDeleteAsset: PropTypes.func.isRequired,
   onDeleteAssetFromMediaLibrary: PropTypes.func.isRequired,

@@ -1,6 +1,6 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
-
+const path = require('path');
 const lightCodeTheme = require('prism-react-renderer/themes/github');
 const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
@@ -8,9 +8,9 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 const config = {
   title: 'Doc',
   tagline: 'Dinosaurs are cool',
-  url: 'https://strapi.github.io/strapi',
-  baseUrl: '/strapi/',
-  onBrokenLinks: 'throw',
+  url: 'https://contributor.strapi.io',
+  baseUrl: '/',
+  onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.png',
   organizationName: 'strapi',
@@ -24,7 +24,20 @@ const config = {
     defaultLocale: 'en',
     locales: ['en'],
   },
-  plugins: [],
+  plugins: [
+    () => ({
+      name: 'resolve-react',
+      configureWebpack() {
+        return {
+          resolve: {
+            alias: {
+              react: path.resolve(__dirname, './node_modules/react'),
+            },
+          },
+        };
+      },
+    }),
+  ],
   presets: [
     [
       'classic',
@@ -64,6 +77,12 @@ const config = {
             position: 'left',
             sidebarId: 'api',
             label: 'API',
+          },
+          {
+            type: 'docSidebar',
+            position: 'left',
+            sidebarId: 'community',
+            label: 'Community',
           },
         ],
       },

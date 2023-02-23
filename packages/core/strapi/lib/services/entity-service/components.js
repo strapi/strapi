@@ -1,11 +1,13 @@
 'use strict';
 
 const _ = require('lodash');
-const { has, prop, omit, toString } = require('lodash/fp');
+const { has, prop, omit, toString, pipe, assign } = require('lodash/fp');
 
-const { contentTypes: contentTypesUtils } = require('@strapi/utils');
+const { contentTypes: contentTypesUtils, mapAsync } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getComponentAttributes } = require('@strapi/utils').contentTypes;
+
+const isDialectMySQL = () => strapi.db.dialect.client === 'mysql';
 
 const omitComponentData = (contentType, data) => {
   const { attributes } = contentType;
@@ -43,16 +45,17 @@ const createComponents = async (uid, data) => {
           throw new Error('Expected an array to create repeatable component');
         }
 
-        const components = await Promise.all(
-          componentValue.map((value) => createComponent(componentUID, value))
+        // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+        const components = await mapAsync(
+          componentValue,
+          (value) => createComponent(componentUID, value),
+          { concurrency: isDialectMySQL() ? 1 : Infinity }
         );
 
-        // TODO: add order
-        componentBody[attributeName] = components.map(({ id }, idx) => {
+        componentBody[attributeName] = components.map(({ id }) => {
           return {
             id,
             __pivot: {
-              order: idx + 1,
               field: attributeName,
               component_type: componentUID,
             },
@@ -63,7 +66,6 @@ const createComponents = async (uid, data) => {
         componentBody[attributeName] = {
           id: component.id,
           __pivot: {
-            order: 1,
             field: attributeName,
             component_type: componentUID,
           },
@@ -80,18 +82,22 @@ const createComponents = async (uid, data) => {
         throw new Error('Expected an array to create repeatable component');
       }
 
-      componentBody[attributeName] = await Promise.all(
-        dynamiczoneValues.map(async (value, idx) => {
-          const { id } = await createComponent(value.__component, value);
-          return {
-            id,
-            __component: value.__component,
-            __pivot: {
-              order: idx + 1,
-              field: attributeName,
-            },
-          };
-        })
+      const createDynamicZoneComponents = async (value) => {
+        const { id } = await createComponent(value.__component, value);
+        return {
+          id,
+          __component: value.__component,
+          __pivot: {
+            field: attributeName,
+          },
+        };
+      };
+
+      // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+      componentBody[attributeName] = await mapAsync(
+        dynamiczoneValues,
+        createDynamicZoneComponents,
+        { concurrency: isDialectMySQL() ? 1 : Infinity }
       );
 
       continue;
@@ -141,15 +147,17 @@ const updateComponents = async (uid, entityToUpdate, data) => {
           throw new Error('Expected an array to create repeatable component');
         }
 
-        const components = await Promise.all(
-          componentValue.map((value) => updateOrCreateComponent(componentUID, value))
+        // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+        const components = await mapAsync(
+          componentValue,
+          (value) => updateOrCreateComponent(componentUID, value),
+          { concurrency: isDialectMySQL() ? 1 : Infinity }
         );
 
-        componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }, idx) => {
+        componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }) => {
           return {
             id,
             __pivot: {
-              order: idx + 1,
               field: attributeName,
               component_type: componentUID,
             },
@@ -160,7 +168,6 @@ const updateComponents = async (uid, entityToUpdate, data) => {
         componentBody[attributeName] = component && {
           id: component.id,
           __pivot: {
-            order: 1,
             field: attributeName,
             component_type: componentUID,
           },
@@ -179,19 +186,21 @@ const updateComponents = async (uid, entityToUpdate, data) => {
         throw new Error('Expected an array to create repeatable component');
       }
 
-      componentBody[attributeName] = await Promise.all(
-        dynamiczoneValues.map(async (value, idx) => {
+      // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+      componentBody[attributeName] = await mapAsync(
+        dynamiczoneValues,
+        async (value) => {
           const { id } = await updateOrCreateComponent(value.__component, value);
 
           return {
             id,
             __component: value.__component,
             __pivot: {
-              order: idx + 1,
               field: attributeName,
             },
           };
-        })
+        },
+        { concurrency: isDialectMySQL() ? 1 : Infinity }
       );
 
       continue;
@@ -274,44 +283,38 @@ const deleteOldDZComponents = async (uid, entityToUpdate, attributeName, dynamic
   }
 };
 
-const deleteComponents = async (uid, entityToDelete) => {
+const deleteComponents = async (uid, entityToDelete, { loadComponents = true } = {}) => {
   const { attributes = {} } = strapi.getModel(uid);
 
   for (const attributeName of Object.keys(attributes)) {
     const attribute = attributes[attributeName];
 
-    if (attribute.type === 'component') {
-      const { component: componentUID } = attribute;
-
-      // Load attribute value if it's not already loaded
-      const value =
-        entityToDelete[attributeName] ||
-        (await strapi.query(uid).load(entityToDelete, attributeName));
-
-      if (!value) {
-        continue;
-      }
-
-      if (Array.isArray(value)) {
-        await Promise.all(value.map((subValue) => deleteComponent(componentUID, subValue)));
+    if (attribute.type === 'component' || attribute.type === 'dynamiczone') {
+      let value;
+      if (loadComponents) {
+        value = await strapi.query(uid).load(entityToDelete, attributeName);
       } else {
-        await deleteComponent(componentUID, value);
+        value = entityToDelete[attributeName];
       }
-
-      continue;
-    }
-
-    if (attribute.type === 'dynamiczone') {
-      const value =
-        entityToDelete[attributeName] ||
-        (await strapi.query(uid).load(entityToDelete, attributeName));
 
       if (!value) {
         continue;
       }
 
-      if (Array.isArray(value)) {
-        await Promise.all(value.map((subValue) => deleteComponent(subValue.__component, subValue)));
+      if (attribute.type === 'component') {
+        const { component: componentUID } = attribute;
+        // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+        await mapAsync(_.castArray(value), (subValue) => deleteComponent(componentUID, subValue), {
+          concurrency: isDialectMySQL() ? 1 : Infinity,
+        });
+      } else {
+        // delete dynamic zone components
+        // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+        await mapAsync(
+          _.castArray(value),
+          (subValue) => deleteComponent(subValue.__component, subValue),
+          { concurrency: isDialectMySQL() ? 1 : Infinity }
+        );
       }
 
       continue;
@@ -328,10 +331,16 @@ const createComponent = async (uid, data) => {
   const model = strapi.getModel(uid);
 
   const componentData = await createComponents(uid, data);
+  const transform = pipe(
+    // Make sure we don't save the component with a pre-defined ID
+    omit('id'),
+    // Remove the component data from the original data object ...
+    (payload) => omitComponentData(model, payload),
+    // ... and assign the newly created component instead
+    assign(componentData)
+  );
 
-  return strapi.query(uid).create({
-    data: Object.assign(omitComponentData(model, data), componentData),
-  });
+  return strapi.query(uid).create({ data: transform(data) });
 };
 
 // components can have nested compos so this must be recursive

@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
-import Cross from '@strapi/icons/Cross';
-import { Tag } from '@strapi/design-system/Tag';
+import { Box, Tag } from '@strapi/design-system';
+import { Cross } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 const AttributeTag = ({ attribute, filter, onClick, operator, value }) => {
@@ -14,7 +13,7 @@ const AttributeTag = ({ attribute, filter, onClick, operator, value }) => {
 
   const { fieldSchema } = attribute;
 
-  const type = fieldSchema?.mainField?.schema.type || fieldSchema.type;
+  const type = fieldSchema?.mainField?.schema?.type || fieldSchema.type;
 
   let formattedValue = value;
 
@@ -42,14 +41,29 @@ const AttributeTag = ({ attribute, filter, onClick, operator, value }) => {
     formattedValue = formatNumber(value);
   }
 
+  // Handle custom input
+  if (attribute.metadatas.customInput) {
+    // If the custom input has an options array, find the option with a customValue matching the query value
+    if (attribute.metadatas.options) {
+      const selectedOption = attribute.metadatas.options.find((option) => {
+        return option.customValue === value;
+      });
+      // Expecting option as an object: {label: 'Neat label', customValue: 'some.value'}
+      // return the label or fallback to the query value
+      formattedValue = selectedOption?.label || value;
+    }
+  }
+
   const content = `${attribute.metadatas.label || attribute.name} ${formatMessage({
     id: `components.FilterOptions.FILTER_TYPES.${operator}`,
     defaultMessage: operator,
   })} ${operator !== '$null' && operator !== '$notNull' ? formattedValue : ''}`;
 
   return (
-    <Box padding={1} onClick={handleClick}>
-      <Tag icon={<Cross />}>{content}</Tag>
+    <Box padding={1}>
+      <Tag onClick={handleClick} icon={<Cross />}>
+        {content}
+      </Tag>
     </Box>
   );
 };
@@ -58,7 +72,11 @@ AttributeTag.propTypes = {
   attribute: PropTypes.shape({
     name: PropTypes.string.isRequired,
     fieldSchema: PropTypes.object.isRequired,
-    metadatas: PropTypes.shape({ label: PropTypes.string.isRequired }).isRequired,
+    metadatas: PropTypes.shape({
+      label: PropTypes.string.isRequired,
+      options: PropTypes.array,
+      customInput: PropTypes.func,
+    }).isRequired,
   }).isRequired,
   filter: PropTypes.object.isRequired,
   onClick: PropTypes.func.isRequired,

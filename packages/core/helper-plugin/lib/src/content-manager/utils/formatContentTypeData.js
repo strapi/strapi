@@ -12,14 +12,14 @@ const formatContentTypeData = (data, ct, composSchema) => {
       const compoUid = getOtherInfos(schema, [current, 'component']);
       const isRepeatable = getOtherInfos(schema, [current, 'repeatable']);
 
-      if (!value) {
-        acc[current] = value;
+      if (type === 'json' && value !== undefined) {
+        acc[current] = JSON.stringify(value, null, 2);
 
         return acc;
       }
 
-      if (type === 'json') {
-        acc[current] = JSON.stringify(value, null, 2);
+      if (!value) {
+        acc[current] = value;
 
         return acc;
       }

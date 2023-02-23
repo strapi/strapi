@@ -2,10 +2,8 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Icon } from '@strapi/design-system/Icon';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import PicturePlusIcon from '@strapi/icons/PicturePlus';
+import { Icon, Flex, Typography } from '@strapi/design-system';
+import { PicturePlus } from '@strapi/icons';
 import getTrad from '../../../utils/getTrad';
 import { rawFileToAsset } from '../../../utils/rawFileToAsset';
 import { AssetSource } from '../../../constants';
@@ -74,7 +72,7 @@ export const EmptyStateAsset = ({ disabled, onClick, onDropAsset }) => {
       style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
     >
       <Icon
-        as={PicturePlusIcon}
+        as={PicturePlus}
         aria-hidden
         width="30px"
         height="24px"

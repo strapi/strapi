@@ -2,11 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import PlusCircle from '@strapi/icons/PlusCircle';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
+import { PlusCircle } from '@strapi/icons';
+import { Box, Stack, Flex, Typography } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
 
@@ -57,13 +54,7 @@ const ComponentInitializer = ({ error, isReadOnly, onClick }) => {
       </Box>
       {error?.id && (
         <Typography textColor="danger600" variant="pi">
-          {formatMessage(
-            {
-              id: error.id,
-              defaultMessage: error.id,
-            },
-            { ...error.values }
-          )}
+          {formatMessage(error, { ...error.values })}
         </Typography>
       )}
     </>

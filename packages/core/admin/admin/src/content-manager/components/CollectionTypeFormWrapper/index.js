@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useQueryClient } from 'react-query';
 import { useHistory } from 'react-router-dom';
 import axios from 'axios';
 import get from 'lodash/get';
@@ -9,11 +10,12 @@ import {
   formatContentTypeData,
   contentManagementUtilRemoveFieldsFromData,
   useGuidedTour,
+  useAPIErrorHandler,
+  useFetchClient,
 } from '@strapi/helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import isEqual from 'react-fast-compare';
-import { axiosInstance } from '../../../core/utils';
 import {
   createDefaultForm,
   getTrad,
@@ -34,6 +36,7 @@ import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
 
 // This container is used to handle the CRUD
 const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }) => {
+  const queryClient = useQueryClient();
   const toggleNotification = useNotification();
   const { setCurrentStep } = useGuidedTour();
   const { trackUsage } = useTracking();
@@ -43,11 +46,15 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   const { componentsDataStructure, contentTypeDataStructure, data, isLoading, status } =
     useSelector(selectCrudReducer);
   const redirectionLink = useFindRedirectionLink(slug);
+  const { formatAPIError } = useAPIErrorHandler(getTrad);
 
   const isMounted = useRef(true);
   const trackUsageRef = useRef(trackUsage);
 
   const allLayoutDataRef = useRef(allLayoutData);
+
+  const fetchClient = useFetchClient();
+  const { put, post, del } = fetchClient;
 
   const isCreatingEntry = id === null;
 
@@ -135,15 +142,13 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       dispatch(getData());
 
       try {
-        const { data } = await axiosInstance.get(requestURL, { cancelToken: source.token });
+        const { data } = await fetchClient.get(requestURL, { cancelToken: source.token });
 
         dispatch(getDataSucceeded(cleanReceivedData(cleanClonedData(data))));
       } catch (err) {
         if (axios.isCancel(err)) {
           return;
         }
-
-        console.error(err);
 
         const resStatus = get(err, 'response.status', null);
 
@@ -185,6 +190,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       source.cancel('Operation canceled by the user.');
     };
   }, [
+    fetchClient,
     cleanClonedData,
     cleanReceivedData,
     push,
@@ -197,29 +203,19 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
   const displayErrors = useCallback(
     (err) => {
-      const errorPayload = err.response.data;
-      let errorMessage = get(errorPayload, ['error', 'message'], 'Bad Request');
-
-      // TODO handle errors correctly when back-end ready
-      if (Array.isArray(errorMessage)) {
-        errorMessage = get(errorMessage, ['0', 'messages', '0', 'id']);
-      }
-
-      if (typeof errorMessage === 'string') {
-        toggleNotification({ type: 'warning', message: errorMessage });
-      }
+      toggleNotification({ type: 'warning', message: formatAPIError(err) });
     },
-    [toggleNotification]
+    [toggleNotification, formatAPIError]
   );
 
   const onDelete = useCallback(
     async (trackerProperty) => {
+      console.log('onDelete');
+
       try {
         trackUsageRef.current('willDeleteEntry', trackerProperty);
 
-        const { data } = await axiosInstance.delete(
-          getRequestUrl(`collection-types/${slug}/${id}`)
-        );
+        const { data } = await del(getRequestUrl(`collection-types/${slug}/${id}`));
 
         toggleNotification({
           type: 'success',
@@ -235,7 +231,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         return Promise.reject(err);
       }
     },
-    [id, slug, toggleNotification]
+    [id, slug, toggleNotification, del]
   );
 
   const onDeleteSucceeded = useCallback(() => {
@@ -245,12 +241,11 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   const onPost = useCallback(
     async (body, trackerProperty) => {
       const endPoint = `${getRequestUrl(`collection-types/${slug}`)}${rawQuery}`;
-
       try {
         // Show a loading button in the EditView/Header.js && lock the app => no navigation
         dispatch(setStatus('submit-pending'));
 
-        const { data } = await axiosInstance.post(endPoint, body);
+        const { data } = await post(endPoint, body);
 
         trackUsageRef.current('didCreateEntry', trackerProperty);
         toggleNotification({
@@ -260,7 +255,11 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
         setCurrentStep('contentManager.success');
 
+        // TODO: need to find a better place, or a better abstraction
+        queryClient.invalidateQueries(['relation']);
+
         dispatch(submitSucceeded(cleanReceivedData(data)));
+
         // Enable navigation and remove loaders
         dispatch(setStatus('resolved'));
 
@@ -284,8 +283,33 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       rawQuery,
       toggleNotification,
       setCurrentStep,
+      queryClient,
+      post,
     ]
   );
+
+  const onDraftRelationCheck = useCallback(async () => {
+    try {
+      trackUsageRef.current('willCheckDraftRelations');
+
+      const endPoint = getRequestUrl(
+        `collection-types/${slug}/${id}/actions/numberOfDraftRelations`
+      );
+      dispatch(setStatus('draft-relation-check-pending'));
+
+      const numberOfDraftRelations = await fetchClient.get(endPoint);
+      trackUsageRef.current('didCheckDraftRelations');
+
+      dispatch(setStatus('resolved'));
+
+      return numberOfDraftRelations.data.data;
+    } catch (err) {
+      displayErrors(err);
+      dispatch(setStatus('resolved'));
+
+      return Promise.reject(err);
+    }
+  }, [displayErrors, id, slug, dispatch, fetchClient]);
 
   const onPublish = useCallback(async () => {
     try {
@@ -294,7 +318,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
       dispatch(setStatus('publish-pending'));
 
-      const { data } = await axiosInstance.post(endPoint);
+      const { data } = await post(endPoint);
 
       trackUsageRef.current('didPublishEntry');
 
@@ -313,7 +337,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
       return Promise.reject(err);
     }
-  }, [cleanReceivedData, displayErrors, id, slug, dispatch, toggleNotification]);
+  }, [cleanReceivedData, displayErrors, id, slug, dispatch, toggleNotification, post]);
 
   const onPut = useCallback(
     async (body, trackerProperty) => {
@@ -324,13 +348,16 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
         dispatch(setStatus('submit-pending'));
 
-        const { data } = await axiosInstance.put(endPoint, body);
+        const { data } = await put(endPoint, body);
 
         trackUsageRef.current('didEditEntry', { trackerProperty });
         toggleNotification({
           type: 'success',
           message: { id: getTrad('success.record.save') },
         });
+
+        // TODO: need to find a better place, or a better abstraction
+        queryClient.invalidateQueries(['relation']);
 
         dispatch(submitSucceeded(cleanReceivedData(data)));
 
@@ -346,7 +373,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         return Promise.reject(err);
       }
     },
-    [cleanReceivedData, displayErrors, slug, id, dispatch, toggleNotification]
+    [cleanReceivedData, displayErrors, slug, id, dispatch, toggleNotification, queryClient, put]
   );
 
   const onUnpublish = useCallback(async () => {
@@ -357,7 +384,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     try {
       trackUsageRef.current('willUnpublishEntry');
 
-      const { data } = await axiosInstance.post(endPoint);
+      const { data } = await post(endPoint);
 
       trackUsageRef.current('didUnpublishEntry');
       toggleNotification({
@@ -375,7 +402,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
       return Promise.reject(err);
     }
-  }, [cleanReceivedData, displayErrors, id, slug, dispatch, toggleNotification]);
+  }, [cleanReceivedData, displayErrors, id, slug, dispatch, toggleNotification, post]);
 
   return children({
     componentsDataStructure,
@@ -387,6 +414,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     onDeleteSucceeded,
     onPost,
     onPublish,
+    onDraftRelationCheck,
     onPut,
     onUnpublish,
     status,

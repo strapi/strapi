@@ -1,16 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ContextInfo renders 1`] = `
-.c7 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
+.c5 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c6 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #4a4a6a;
 }
 
 .c0 {
@@ -45,6 +47,18 @@ exports[`ContextInfo renders 1`] = `
   margin-top: 4px;
 }
 
+.c7 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
 .c1 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
@@ -54,20 +68,6 @@ exports[`ContextInfo renders 1`] = `
 .c2 {
   grid-column: span 6;
   max-width: 100%;
-}
-
-.c5 {
-  color: #666687;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.c6 {
-  color: #4a4a6a;
-  font-size: 0.75rem;
-  line-height: 1.33;
 }
 
 @media (max-width:68.75rem) {
@@ -97,7 +97,6 @@ exports[`ContextInfo renders 1`] = `
         >
           <div
             class="c3 c4"
-            spacing="1"
           >
             <span
               class="c5"
@@ -120,7 +119,6 @@ exports[`ContextInfo renders 1`] = `
         >
           <div
             class="c3 c4"
-            spacing="1"
           >
             <span
               class="c5"
@@ -143,7 +141,6 @@ exports[`ContextInfo renders 1`] = `
         >
           <div
             class="c3 c4"
-            spacing="1"
           >
             <span
               class="c5"

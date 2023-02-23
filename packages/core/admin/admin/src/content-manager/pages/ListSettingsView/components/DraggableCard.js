@@ -4,13 +4,8 @@ import PropTypes from 'prop-types';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
-import { Flex } from '@strapi/design-system/Flex';
-import { Box } from '@strapi/design-system/Box';
-import { Typography } from '@strapi/design-system/Typography';
-import { Stack } from '@strapi/design-system/Stack';
-import Pencil from '@strapi/icons/Pencil';
-import Cross from '@strapi/icons/Cross';
-import Drag from '@strapi/icons/Drag';
+import { Flex, Box, Typography, Stack } from '@strapi/design-system';
+import { Pencil, Cross, Drag } from '@strapi/icons';
 import CardPreview from './CardPreview';
 import ellipsisCardTitle from '../utils/ellipsisCardTitle';
 import { getTrad, ItemTypes } from '../../../utils';
@@ -201,7 +196,7 @@ const DraggableCard = ({
                   id: getTrad('components.DraggableCard.move.field'),
                   defaultMessage: 'Move {item}',
                 },
-                { item: name }
+                { item: labelField }
               )}
               onClick={(e) => e.stopPropagation()}
               ref={refs.dragRef}
@@ -223,7 +218,7 @@ const DraggableCard = ({
                   id: getTrad('components.DraggableCard.edit.field'),
                   defaultMessage: 'Edit {item}',
                 },
-                { item: name }
+                { item: labelField }
               )}
               type="button"
             >
@@ -237,7 +232,7 @@ const DraggableCard = ({
                   id: getTrad('components.DraggableCard.delete.field'),
                   defaultMessage: 'Delete {item}',
                 },
-                { item: name }
+                { item: labelField }
               )}
               type="button"
             >

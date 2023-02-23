@@ -1,8 +1,6 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
-import { Stack } from '@strapi/design-system/Stack';
-import { GridItem } from '@strapi/design-system/Grid';
+import { Typography, Stack, GridItem } from '@strapi/design-system';
 import { get, isEmpty, without } from 'lodash';
 import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
 import BoundRoute from '../BoundRoute';
