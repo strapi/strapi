@@ -5,7 +5,7 @@ tags:
   - dat
 ---
 
-# Content Manager
+# Database
 
 This section is an overview of all the features related to the Database package:
 
