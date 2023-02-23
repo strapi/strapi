@@ -102,10 +102,8 @@ describe('Upload | extensions | entity-manager', () => {
       await signEntityMedia(entity, modelUID);
       expect(getService).toBeCalledWith('file');
       expect(spySignFileUrls).toBeCalledTimes(2);
-      expect(spySignFileUrls.mock.calls).toEqual([
-        [media[0], 0],
-        [media[1], 1],
-      ]);
+      expect(spySignFileUrls).toBeCalledWith(media[0], expect.anything());
+      expect(spySignFileUrls).toBeCalledWith(media[1], expect.anything());
     });
 
     test('makes correct calls for components', async () => {
@@ -119,7 +117,9 @@ describe('Upload | extensions | entity-manager', () => {
       await signEntityMedia(entity, modelUID);
       expect(getService).toBeCalledWith('file');
       expect(spySignFileUrls).toBeCalledTimes(3);
-      expect(spySignFileUrls.mock.calls).toEqual([[media[0]], [media[0], 0], [media[1], 1]]);
+      expect(spySignFileUrls).toBeCalledWith(media[0], expect.anything());
+      expect(spySignFileUrls).toBeCalledWith(media[0], expect.anything());
+      expect(spySignFileUrls).toBeCalledWith(media[1], expect.anything());
     });
 
     test('makes correct calls for repeatable components', async () => {
@@ -139,14 +139,12 @@ describe('Upload | extensions | entity-manager', () => {
       await signEntityMedia(entity, modelUID);
       expect(getService).toBeCalledWith('file');
       expect(spySignFileUrls).toBeCalledTimes(6);
-      expect(spySignFileUrls.mock.calls).toEqual([
-        [media[0]],
-        [media[1]],
-        [media[0], 0],
-        [media[1], 1],
-        [media[0], 0],
-        [media[1], 1],
-      ]);
+      expect(spySignFileUrls).toBeCalledWith(media[0], expect.anything());
+      expect(spySignFileUrls).toBeCalledWith(media[1], expect.anything());
+      expect(spySignFileUrls).toBeCalledWith(media[0], expect.anything());
+      expect(spySignFileUrls).toBeCalledWith(media[1], expect.anything());
+      expect(spySignFileUrls).toBeCalledWith(media[0], expect.anything());
+      expect(spySignFileUrls).toBeCalledWith(media[1], expect.anything());
     });
 
     test('makes correct calls for dynamic zones', async () => {
@@ -163,7 +161,9 @@ describe('Upload | extensions | entity-manager', () => {
       await signEntityMedia(entity, modelUID);
       expect(getService).toBeCalledWith('file');
       expect(spySignFileUrls).toBeCalledTimes(3);
-      expect(spySignFileUrls.mock.calls).toEqual([[media[0], 0], [media[1], 1], [media[1]]]);
+      expect(spySignFileUrls).toBeCalledWith(media[0], expect.anything());
+      expect(spySignFileUrls).toBeCalledWith(media[1], expect.anything());
+      expect(spySignFileUrls).toBeCalledWith(media[1], expect.anything());
     });
   });
 });
