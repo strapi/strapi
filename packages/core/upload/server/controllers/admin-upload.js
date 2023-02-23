@@ -51,7 +51,10 @@ module.exports = {
     const data = await validateUploadBody(body);
     const replacedFiles = await uploadService.replace(id, { data, file: files }, { user });
 
-    ctx.body = await pm.sanitizeOutput(replacedFiles, { action: ACTIONS.read });
+    // Sign file urls for private providers
+    const signedFiles = await getService('file').signFileUrls(replacedFiles);
+
+    ctx.body = await pm.sanitizeOutput(signedFiles, { action: ACTIONS.read });
   },
 
   async uploadFiles(ctx) {
