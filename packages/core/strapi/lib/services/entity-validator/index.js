@@ -163,7 +163,7 @@ const createMediaAttributeValidator = (createOrUpdate) => (metas, options) => {
   let validator;
 
   if (metas.attr.multiple) {
-    validator = yup.array().of(yup.mixed());
+    validator = yup.array().of(yup.mixed()).min(1);
   } else {
     validator = yup.mixed();
   }

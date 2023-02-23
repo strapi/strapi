@@ -1,5 +1,7 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
 const { createContentAPIRequest } = require('../../../../../test/helpers/request');
@@ -39,9 +41,17 @@ const productWithMedia = {
 describe('Core API - Basic + required media', () => {
   beforeAll(async () => {
     await builder.addContentType(productWithMedia).build();
-
     strapi = await createStrapiInstance();
     rq = await createContentAPIRequest({ strapi });
+
+    // Create file
+    await rq({
+      method: 'POST',
+      url: '/upload',
+      formData: {
+        files: fs.createReadStream(path.join(__dirname, 'basic-media.test.api.js')),
+      },
+    });
   });
 
   afterAll(async () => {
@@ -75,6 +85,41 @@ describe('Core API - Basic + required media', () => {
             {
               path: ['multipleMedia'],
               message: 'multipleMedia must be defined.',
+              name: 'ValidationError',
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  test('Create entry with required multiple media as an empty array', async () => {
+    const product = {
+      name: 'product',
+      description: 'description',
+      multipleMedia: [],
+      media: 1,
+    };
+
+    const res = await rq({
+      method: 'POST',
+      url: '/product-with-medias',
+      body: { data: product },
+      qs: { populate: true },
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toMatchObject({
+      data: null,
+      error: {
+        status: 400,
+        name: 'ValidationError',
+        message: 'multipleMedia field must have at least 1 items',
+        details: {
+          errors: [
+            {
+              path: ['multipleMedia'],
+              message: 'multipleMedia field must have at least 1 items',
               name: 'ValidationError',
             },
           ],
