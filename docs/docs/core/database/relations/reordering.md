@@ -1,0 +1,116 @@
+---
+title: Relations
+slug: /database/relations
+description: Conceptual guide to relations reordering in the Database
+tags:
+  - database
+  - relations
+  - reordering
+---
+
+Strapi allows to reorder a relation list.
+
+<img src="/img/database/reordering.png" alt="An example of reordering in the CM" />
+
+This reordering feature is available in the Content Manager and the API.
+
+## Code location
+
+`packages/core/database/lib/entity-manager/relations-orderer.js`
+
+## How order is stored in DB?
+
+- We store the order of the relations in a `order` field.
+- For bidirectional relations, we store the order of the other side in a `inverse_order` field.
+
+We store order for all type of relations, except for:
+
+- Polymorphic relations (too complicated to implement).
+- One to one relations. (as there is only one relation per pair)
+
+### Many to many (Addresses <-> Categories)
+
+<img src="/img/database/m2m-example.png" alt="many to many relation" />
+
+- `category_order` is the order of the categories relations in an address entity.
+- `address_order` is the order of the addresses relations in a category entity.
+
+### One to one (Kitchensinks <-> Tags)
+
+<img src="/img/database/o2o-example.png" alt="one to one relation" />
+
+- there is no `order` fields as there is only one relation per pair.
+
+### One way relation (Restaurants <-> Categories)
+
+Where a restaurant has many categories:
+
+<img src="/img/database/mw-example.png" alt="many way relation" />
+
+- `category_order` is the order of the categories relations in a restaurant entity.
+- There is no `restaurant_order` as it is a one way relation.
+
+## How to use this in the DB layer?
+
+See more on [Strapi Docs](https://docs.strapi.io/dev-docs/api/rest/relations#connect)
+
+The database layer receives a payload like this:
+
+```js
+  category: {
+    connect: [
+      { id: 6, position: { after: 1} },    // It should be after relation id=1
+      { id: 8, position: { end: true }},   // It should be at the end
+    ],
+    disconnect: [
+      { id: 4 }
+    ]
+  }
+```
+
+## How does it work?
+
+We use fractional indexing. This means that we use decimal numbers to order the relations.
+
+### Simple example
+
+<img src="/img/database/reordering-algo-1.png" alt="An example of reordering in the CM"/>
+
+### Complex example
+
+<img src="/img/database/reordering-algo-2.png" alt="An example of reordering in the CM" />
+
+### Algorithm steps
+
+From the `connect` array:
+
+1. For every element, **load relations by id**, **from fields `after` or `before`**.
+2. Start computing, from after before relations array:
+   1. **Initialize** with after/before relations (**step 1**). Let's call these ones **init relations.**
+   2. **Apply the updates** from the `connect` array, **sequentially**.
+      1. `before`:
+         1. Place **before** the element with that **id** in the list
+            1. If placing before an init relation: **order = beforeRelation.order -0.5**
+               _(0.5 is based on the “gap” between the init relation and the one before, so it is placed in between them)_
+            2. Else **order = beforeRelation.order**
+      2. `after`:
+         1. Place **after** the element with that **id** in the list
+            1. If placing after an init relation: **order = beforeRelation.after + 0.5**
+               _(0.5 is based on the “gap” between the init relation and the one after, so it is placed in between them)_
+            2. Else **order = beforeRelation.order**
+      3. `end`:
+         1. Place at the **end**
+            1. If placing after an init relation: **order = lastRelation.order + 0.5**
+               _(0.5 to place it after the last relation)_
+            2. Else **order = lastRelation.order**
+      4. `start`:
+         1. Place at the **start**
+            1. **order = 0.5**
+               _(0.5 to place it before the first one)_
+      5. `before/after`: If the **id does not exist in the current array**, **throw an error**
+      6. If an **id** was **already in this array, remove the previous one**
+3. **Grouping by the order value**, and ignoring init relations
+   1. Recalculate order values for each group, so there are no repeated numbers & they keep the same order.
+      1. Example : [ {id: 5 , order: 1.5}, {id: 3, order: 1.5 } ] → [ {id: 5 , order: 1.33}, {id: 3, order: 1.66 } ]
+   2. **Insert values in the database**
+   3. **Update database order based on their order position.** (using ROW_NUMBER() clause)
