@@ -45,6 +45,7 @@ const Table = ({
   const COL_COUNT = headers.length + (withBulkActions ? 1 : 0) + (withMainAction ? 1 : 0);
   const hasFilters = query?.filters !== undefined;
   const areAllEntriesSelected = entriesToDelete.length === rows.length && rows.length > 0;
+  const [lastSelectedIndex, setLastSelectedIndex] = useState(-1);
 
   const content = hasFilters
     ? {
@@ -86,6 +87,7 @@ const Table = ({
     } else {
       setEntriesToDelete([]);
     }
+    setLastSelectedIndex(-1);
   };
 
   const handleToggleConfirmDeleteAll = () => {
@@ -109,7 +111,13 @@ const Table = ({
     handleToggleConfirmDelete();
   };
 
-  const handleSelectRow = ({ name, value }) => {
+  const handleSelectRow = ({ name, value, index, isShiftKeyHeld }) => {
+    // Selects Range, if shift key is held.
+    if (isShiftKeyHeld && lastSelectedIndex !== index) {
+      handleSelectRange(index);
+
+      return;
+    }
     setEntriesToDelete((prev) => {
       if (value) {
         return prev.concat(name);
@@ -117,6 +125,31 @@ const Table = ({
 
       return prev.filter((id) => id !== name);
     });
+    setLastSelectedIndex(index);
+  };
+
+  const isChecked = (index) => entriesToDelete.findIndex((id) => id === rows[index]?.id) !== -1;
+
+  const handleSelectRange = (currentIndex) => {
+    const start = lastSelectedIndex === -1 ? currentIndex : lastSelectedIndex;
+    const end = currentIndex;
+
+    const rowsInSelectionRange =
+      start < end
+        ? rows.slice(start, end + 1).map((row) => row.id)
+        : rows.slice(end, start + 1).map((row) => row.id);
+
+    setEntriesToDelete((prev) => {
+      if (isChecked(currentIndex)) {
+        return prev.filter(
+          (id) => !rowsInSelectionRange.includes(id) || id === rows[currentIndex]?.id
+        );
+      }
+
+      return prev.concat(rowsInSelectionRange.filter((id) => !prev.includes(id)));
+    });
+
+    setLastSelectedIndex(currentIndex);
   };
 
   const ConfirmDeleteAllComponent = components?.ConfirmDialogDeleteAll

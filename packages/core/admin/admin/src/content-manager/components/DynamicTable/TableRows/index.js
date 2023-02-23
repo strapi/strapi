@@ -74,8 +74,13 @@ const TableRows = ({
                     { target: getFullName(data.firstname, data.lastname) }
                   )}
                   checked={isChecked}
-                  onChange={() => {
-                    onSelectRow({ name: data.id, value: !isChecked });
+                  onChange={(event) => {
+                    onSelectRow({
+                      name: data.id,
+                      value: !isChecked,
+                      index,
+                      isShiftKeyHeld: event.nativeEvent.shiftKey,
+                    });
                   }}
                 />
               </Td>
