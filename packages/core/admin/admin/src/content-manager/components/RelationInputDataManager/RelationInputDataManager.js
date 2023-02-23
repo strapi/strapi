@@ -57,41 +57,47 @@ export const RelationInputDataManager = ({
 
   const currentLastPage = Math.ceil(get(initialData, name, []).length / RELATIONS_TO_DISPLAY);
 
-  const cacheKey = `${slug}-${initialDataPath.join('.')}`;
-  const { relations, search, searchFor } = useRelation(cacheKey, {
-    relation: {
-      enabled: !!endpoints.relation,
-      endpoint: endpoints.relation,
-      pageGoal: currentLastPage,
-      pageParams: {
-        ...defaultParams,
-        pageSize: RELATIONS_TO_DISPLAY,
+  const { relations, search, searchFor } = useRelation(
+    [slug, initialDataPath.join('.'), modifiedData.id],
+    {
+      relation: {
+        enabled: !!endpoints.relation,
+        endpoint: endpoints.relation,
+        pageGoal: currentLastPage,
+        pageParams: {
+          ...defaultParams,
+          pageSize: RELATIONS_TO_DISPLAY,
+        },
+        onLoad(value) {
+          relationLoad({
+            target: {
+              initialDataPath: ['initialData', ...initialDataPath],
+              modifiedDataPath: ['modifiedData', ...nameSplit],
+              value,
+            },
+          });
+        },
+        normalizeArguments: {
+          mainFieldName: mainField.name,
+          shouldAddLink: shouldDisplayRelationLink,
+          targetModel,
+        },
       },
-      onLoad(value) {
-        relationLoad({
-          target: {
-            initialDataPath: ['initialData', ...initialDataPath],
-            modifiedDataPath: ['modifiedData', ...nameSplit],
-            value,
-          },
-        });
+      search: {
+        endpoint: endpoints.search,
+        pageParams: {
+          ...defaultParams,
+          // eslint-disable-next-line no-nested-ternary
+          entityId: isCreatingEntry
+            ? undefined
+            : isComponentRelation
+            ? componentId
+            : initialData.id,
+          pageSize: SEARCH_RESULTS_TO_DISPLAY,
+        },
       },
-      normalizeArguments: {
-        mainFieldName: mainField.name,
-        shouldAddLink: shouldDisplayRelationLink,
-        targetModel,
-      },
-    },
-    search: {
-      endpoint: endpoints.search,
-      pageParams: {
-        ...defaultParams,
-        // eslint-disable-next-line no-nested-ternary
-        entityId: isCreatingEntry ? undefined : isComponentRelation ? componentId : initialData.id,
-        pageSize: SEARCH_RESULTS_TO_DISPLAY,
-      },
-    },
-  });
+    }
+  );
 
   const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
   const toOneRelation = [
