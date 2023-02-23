@@ -4,6 +4,7 @@ const { features } = require('@strapi/strapi/lib/utils/ee');
 const executeCERegister = require('../../server/register');
 const migrateAuditLogsTable = require('./migrations/audit-logs-table');
 const createAuditLogsService = require('./services/audit-logs');
+const reviewWorkflowsMiddlewares = require('./middlewares/review-workflows');
 
 module.exports = async ({ strapi }) => {
   if (features.isEnabled('audit-logs')) {
@@ -12,6 +13,8 @@ module.exports = async ({ strapi }) => {
     strapi.container.register('audit-logs', auditLogsService);
     await auditLogsService.register();
   }
-
+  if (features.isEnabled('review-workflows')) {
+    reviewWorkflowsMiddlewares.contentTypeMiddleware(strapi);
+  }
   await executeCERegister({ strapi });
 };
