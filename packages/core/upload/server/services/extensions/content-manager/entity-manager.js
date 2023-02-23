@@ -72,4 +72,5 @@ const addSignedFileUrlsToAdmin = async () => {
 
 module.exports = {
   addSignedFileUrlsToAdmin,
+  signEntityMedia,
 };
