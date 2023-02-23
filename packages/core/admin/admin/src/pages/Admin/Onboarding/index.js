@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
+import { useAppInfos } from '@strapi/helper-plugin';
 import {
   Box,
   Button,
@@ -14,7 +15,7 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Cross, Play, Question } from '@strapi/icons';
+import { Cross, Message, Play, Question } from '@strapi/icons';
 
 import onboardingPreview from '../../../assets/images/onboarding-preview.png';
 import { VIDEO_LINKS, DOCUMENTATION_LINKS, WATCH_MORE } from './constants';
@@ -78,10 +79,22 @@ const Onboarding = () => {
   const triggerRef = useRef();
   const [isOpen, setIsOpen] = useState(false);
   const { formatMessage } = useIntl();
+  const { communityEdition } = useAppInfos();
 
   const handlePopoverVisibility = () => {
     setIsOpen((prev) => !prev);
   };
+
+  const docLinks = [
+    ...DOCUMENTATION_LINKS,
+    {
+      label: { id: 'Settings.application.get-help', defaultMessage: 'Get help' },
+      icon: Message,
+      href: communityEdition
+        ? 'https://discord.strapi.io'
+        : 'https://support.strapi.io/support/home',
+    },
+  ];
 
   return (
     <Box as="aside" position="fixed" bottom={2} right={2}>
@@ -180,7 +193,7 @@ const Onboarding = () => {
                 </VideoLinkWrapper>
               ))}
               <Stack spacing={2} paddingLeft={5} paddingTop={2} paddingBottom={5}>
-                {DOCUMENTATION_LINKS.map(({ label, href, icon }) => (
+                {docLinks.map(({ label, href, icon }) => (
                   <Stack horizontal spacing={3} key={href}>
                     <Icon as={icon} color="primary600" />
                     <TextLink

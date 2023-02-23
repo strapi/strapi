@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin-test-utils",
-  "version": "4.6.1",
+  "version": "4.6.2",
   "private": true,
   "description": "Test utilities for the Strapi administration panel",
   "license": "MIT",
@@ -24,7 +24,8 @@
     "react-dom": "^17.0.2",
     "react-is": "^17.0.2",
     "redux": "^4.2.1",
-    "styled-components": "5.3.3"
+    "styled-components": "5.3.3",
+    "whatwg-fetch": "3.6.2"
   },
   "peerDependencies": {
     "redux": "^4.2.1"

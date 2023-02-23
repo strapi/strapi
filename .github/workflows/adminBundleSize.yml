@@ -4,13 +4,22 @@ on:
   pull_request:
     paths:
       - '**/admin/src/**.js'
+      - '**/ee/admin/**.js'
       - '**/helper-plugin/lib/src/**.js'
       - '**/translations/**.json'
+
+      # Might be too broad, but it runs the action even if a
+      # package.json wasn't changed, e.g. for non-pinned dependencies
       - 'yarn.lock'
 
 jobs:
   admin_size:
     runs-on: ubuntu-latest
+
+    # Allows the action to comment on PRs
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v3
@@ -24,3 +33,8 @@ jobs:
         with:
           pattern: '**/build/**/*.{js,css,html,svg}'
           strip-hash: "\\.(?:(\\w{8})\\.chunk)|(?:\\.(\\w{8}))"
+          minimum-change-threshold: 10
+
+          # FIXME: exclude unnamed webpack chunks - remove once webpack
+          # does not create them anymore
+          exclude: '{**/build/**/+([0-9]{,4})*,**/node_modules/**}'
