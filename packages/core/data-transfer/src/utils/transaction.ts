@@ -6,6 +6,7 @@ import { Transaction, TransactionCallback } from '../../types/utils';
 
 export const createTransaction = (strapi: Strapi): Transaction => {
   const fns: { fn: TransactionCallback; uuid: string }[] = [];
+
   let done = false;
   let resume: null | (() => void) = null;
 
@@ -16,12 +17,19 @@ export const createTransaction = (strapi: Strapi): Transaction => {
   });
 
   e.on('close', () => {
+    e.removeAllListeners('rollback');
+    e.removeAllListeners('spawn');
+
     done = true;
     resume?.();
   });
+
   strapi.db.transaction(async ({ trx, rollback }) => {
-    e.on('rollback', async () => {
+    e.once('rollback', async () => {
+      console.log('rolling back the transaction');
       await rollback();
+      done = true;
+      resume?.();
     });
 
     while (!done) {

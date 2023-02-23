@@ -184,6 +184,13 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async close() {
+    if (!this.dispatcher?.transferID) {
+      throw new ProviderTransferError('transferID is not defined');
+    }
+    await this.dispatcher?.dispatchCommand({
+      command: 'end',
+      params: { transferID: this.dispatcher.transferID },
+    });
     await this.dispatcher?.dispatchTransferAction('close');
 
     await new Promise<void>((resolve) => {
@@ -204,6 +211,10 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
   async beforeTransfer() {
     await this.dispatcher?.dispatchTransferAction('beforeTransfer');
+  }
+
+  async rollback() {
+    await this.dispatcher?.dispatchTransferAction('rollback');
   }
 
   getSchemas(): Promise<Strapi.Schemas | null> {

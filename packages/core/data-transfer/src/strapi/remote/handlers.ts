@@ -13,7 +13,7 @@ import { ProviderTransferError, ProviderInitializationError } from '../../errors
 import { TRANSFER_METHODS } from './constants';
 import { createFlow, DEFAULT_TRANSFER_FLOW } from './flows';
 
-type TransferMethod = typeof TRANSFER_METHODS[number];
+type TransferMethod = (typeof TRANSFER_METHODS)[number];
 
 interface ITransferState {
   transfer?: {
@@ -108,9 +108,19 @@ export const createTransferHandler = (options: IHandlerOptions) => {
           }
         };
 
-        const teardown = (): void => {
+        const cleanup = () => {
           delete state.controller;
           delete state.transfer;
+        };
+
+        const teardown = async (): Promise<void> => {
+          if (state.controller) {
+            await state.controller.actions.rollback();
+          } else {
+            // do nothing
+          }
+
+          cleanup();
         };
 
         const end = async (msg: client.EndCommand): Promise<server.Payload<server.EndMessage>> => {
@@ -120,7 +130,7 @@ export const createTransferHandler = (options: IHandlerOptions) => {
             throw new ProviderTransferError('Bad transfer ID provided');
           }
 
-          teardown();
+          cleanup();
 
           return { ok: true };
         };
@@ -341,12 +351,12 @@ export const createTransferHandler = (options: IHandlerOptions) => {
           }
         };
 
-        ws.on('close', () => {
-          teardown();
+        ws.on('close', async () => {
+          await teardown();
         });
 
-        ws.on('error', (e) => {
-          teardown();
+        ws.on('error', async (e) => {
+          await teardown();
           strapi.log.error(e);
         });
 

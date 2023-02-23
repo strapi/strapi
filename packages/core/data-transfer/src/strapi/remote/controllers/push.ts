@@ -18,6 +18,7 @@ export interface IPushController {
     bootstrap(): Promise<void>;
     close(): Promise<void>;
     beforeTransfer(): Promise<void>;
+    rollback(): Promise<void>;
   };
   transfer: {
     [key in TransferPushStep]: <T extends TransferPushMessage>(
@@ -66,6 +67,10 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
 
       async beforeTransfer() {
         return provider.beforeTransfer();
+      },
+
+      async rollback() {
+        return provider.rollback();
       },
     },
 
