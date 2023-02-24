@@ -703,7 +703,7 @@ class TransferEngine<
     const transform = this.#createStageTransformStream(stage);
     const tracker = this.#progressTracker(stage, {
       size: (value: IAsset) => value.stats.size,
-      key: (value: IAsset) => extname(value.filename) ?? 'NA',
+      key: (value: IAsset) => extname(value.filename) || 'No extension',
     });
 
     await this.#transferStage({ stage, source, destination, transform, tracker });

@@ -173,7 +173,9 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
         chunk.stream
           .pipe(writableStream)
-          .on('close', callback)
+          .on('close', () => {
+            callback(null);
+          })
           .on('error', async (error: NodeJS.ErrnoException) => {
             const errorMessage =
               error.code === 'ENOSPC'
