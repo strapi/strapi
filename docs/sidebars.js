@@ -169,7 +169,7 @@ const sidebars = {
     },
     {
       type: 'category',
-      label: 'How to install',
+      label: 'How to install packages in a module',
       link: {
         type: 'doc',
         id: 'how-to-install-packages',
