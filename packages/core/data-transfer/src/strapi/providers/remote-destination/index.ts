@@ -265,6 +265,10 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     await this.dispatcher?.dispatchTransferAction('beforeTransfer');
   }
 
+  async rollback() {
+    await this.dispatcher?.dispatchTransferAction('rollback');
+  }
+
   getSchemas(): Promise<Strapi.Schemas | null> {
     if (!this.dispatcher) {
       return Promise.resolve(null);
