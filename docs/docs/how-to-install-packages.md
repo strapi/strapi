@@ -2,11 +2,11 @@
 title: How to install packages
 slug: /how-to-install-packages
 tags:
-  - content-type-builder
-  - plugins
+  - lerna
+  - packages
 ---
 
-# Best practices for installing packages in the Strapi
+# Best practices for installing packages in Strapi
 
 When working with the Strapi mono repo, it's important to follow best practices for installing packages to avoid potential issues and ensure consistent results. Instead of using the standard **`yarn add`** command, we recommend using **`yarn lerna add <package_name> --scope @strapi/<module_name>`** for installing packages.
 
