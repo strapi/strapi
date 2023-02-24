@@ -5,6 +5,10 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   font-weight: 600;
   font-size: 2rem;
   line-height: 1.25;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: #32324d;
 }
 
@@ -13,6 +17,35 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   line-height: 1.33;
   font-weight: 600;
   color: #32324d;
+}
+
+.c23 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c27 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #d02b20;
+}
+
+.c38 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c42 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
 }
 
 .c2 {
@@ -29,6 +62,30 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
 
 .c15 {
   padding-right: 8px;
+}
+
+.c18 {
+  padding-right: 56px;
+  padding-left: 56px;
+}
+
+.c21 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c37 {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.c39 {
+  padding-left: 12px;
 }
 
 .c8 {
@@ -61,6 +118,47 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
+}
+
+.c19 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c20 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c20 > * + * {
+  margin-top: 24px;
+}
+
+.c22 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c22 > * + * {
+  margin-top: 16px;
+}
+
+.c26 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c26 > * + * {
+  margin-top: 4px;
 }
 
 .c12 > * {
@@ -130,7 +228,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border: 2px solid #4945ff;
 }
 
-.c46 {
+.c43 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -214,120 +312,260 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   fill: #ffffff;
 }
 
-.c5 {
-  padding-right: 8px;
+.c28 {
+  line-height: 0;
 }
 
-.c18 {
-  padding-right: 56px;
-  padding-left: 56px;
-}
-
-.c21 {
-  background: #ffffff;
-  padding-top: 24px;
-  padding-right: 32px;
-  padding-bottom: 24px;
-  padding-left: 32px;
+.c30 {
+  border: none;
   border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  padding-bottom: 0.65625rem;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 0.65625rem;
+  color: #32324d;
+  font-weight: 400;
+  font-size: 0.875rem;
+  display: block;
+  width: 100%;
+  background: inherit;
+}
+
+.c30::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c30::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c30:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c30::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c30[aria-disabled='true'] {
+  color: inherit;
+}
+
+.c30:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.c29 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c29:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c34 {
+  position: relative;
+  border: 1px solid #dcdce4;
+  padding-right: 12px;
+  border-radius: 4px;
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 2.5rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c34:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
 .c40 {
-  padding-right: 16px;
-  padding-left: 16px;
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
 }
 
-.c42 {
-  padding-left: 12px;
+.c40 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c40 svg path {
+  fill: #666687;
+}
+
+.c41 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+}
+
+.c41 svg {
+  width: 0.375rem;
+}
+
+.c35 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c35:focus {
+  outline: none;
+}
+
+.c35[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c36 {
+  width: 100%;
+}
+
+.c24 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 20px;
+}
+
+.c25 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c0:focus-visible {
+  outline: none;
+}
+
+.c32 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c32:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c33 {
+  display: block;
+  width: 100%;
+  font-weight: 400;
+  font-size: 0.875rem;
+  border: none;
+  color: #32324d;
+  resize: none;
+  background: inherit;
+}
+
+.c33::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c33::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c33:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c33::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c33:focus-within {
+  outline: none;
+}
+
+.c31 textarea {
+  height: 5rem;
+  line-height: 1.25rem;
+}
+
+.c31 textarea::-webkit-input-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c31 textarea::-moz-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c31 textarea:-ms-input-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c31 textarea::placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c5 {
+  padding-right: 8px;
 }
 
 .c7 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #4945ff;
-}
-
-.c23 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c27 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c29 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #d02b20;
-}
-
-.c41 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
-}
-
-.c45 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c19 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c28 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c31 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
 }
 
 .c4 {
@@ -388,279 +626,6 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-}
-
-.c20 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c20 > * + * {
-  margin-top: 24px;
-}
-
-.c22 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c22 > * + * {
-  margin-top: 16px;
-}
-
-.c26 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c26 > * + * {
-  margin-top: 4px;
-}
-
-.c24 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 20px;
-}
-
-.c25 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c30 {
-  line-height: 0;
-}
-
-.c33 {
-  border: none;
-  border-radius: 4px;
-  padding-bottom: 0.65625rem;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 0.65625rem;
-  color: #32324d;
-  font-weight: 400;
-  font-size: 0.875rem;
-  display: block;
-  width: 100%;
-  background: inherit;
-}
-
-.c33::-webkit-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c33::-moz-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c33:-ms-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c33::placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c33[aria-disabled='true'] {
-  color: inherit;
-}
-
-.c33:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-.c32 {
-  border: 1px solid #dcdce4;
-  border-radius: 4px;
-  background: #ffffff;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c32:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c0:focus-visible {
-  outline: none;
-}
-
-.c38 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c38:focus {
-  outline: none;
-}
-
-.c38[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c37 {
-  position: relative;
-  border: 1px solid #dcdce4;
-  padding-right: 12px;
-  border-radius: 4px;
-  background: #ffffff;
-  overflow: hidden;
-  min-height: 2.5rem;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c37:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c43 {
-  background: transparent;
-  border: none;
-  position: relative;
-  z-index: 1;
-}
-
-.c43 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
-}
-
-.c43 svg path {
-  fill: #666687;
-}
-
-.c44 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  background: none;
-  border: none;
-}
-
-.c44 svg {
-  width: 0.375rem;
-}
-
-.c39 {
-  width: 100%;
-}
-
-.c35 {
-  border: 1px solid #dcdce4;
-  border-radius: 4px;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 12px;
-  padding-bottom: 12px;
-  background: #ffffff;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c35:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c36 {
-  display: block;
-  width: 100%;
-  font-weight: 400;
-  font-size: 0.875rem;
-  border: none;
-  color: #32324d;
-  resize: none;
-  background: inherit;
-}
-
-.c36::-webkit-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c36::-moz-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c36:-ms-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c36::placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c36:focus-within {
-  outline: none;
-}
-
-.c34 textarea {
-  height: 5rem;
-  line-height: 1.25rem;
-}
-
-.c34 textarea::-webkit-input-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c34 textarea::-moz-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c34 textarea:-ms-input-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c34 textarea::placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
 }
 
 @media (max-width:68.75rem) {
@@ -773,59 +738,59 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
         </div>
       </div>
       <div
-        class="c18"
+        class="c1 c18"
       >
         <div
-          class="c19 c20"
+          class="c1 c19 c20"
         >
           <div
-            class="c21"
+            class="c1 c21"
           >
             <div
-              class="c19 c22"
+              class="c1 c19 c22"
             >
               <h2
-                class="c23"
+                class="c10 c23"
               >
                 Details
               </h2>
               <div
-                class="c24"
+                class="c1 c24"
               >
                 <div
                   class="c25"
                 >
                   <div
-                    class=""
+                    class="c1 "
                   >
                     <div>
                       <div>
                         <div
-                          class="c19 c26"
+                          class="c1 c19 c26"
                         >
                           <label
-                            class="c27"
+                            class="c10 c17"
                             for="1"
                           >
                             <div
-                              class="c28"
+                              class="c1 c9"
                             >
                               Name
                               <span
-                                class="c29 c30"
+                                class="c10 c27 c28"
                               >
                                 *
                               </span>
                             </div>
                           </label>
                           <div
-                            class="c31 c32"
+                            class="c1 c8 c29"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
                               aria-required="true"
-                              class="c33"
+                              class="c30"
                               id="1"
                               name="name"
                               value=""
@@ -840,36 +805,36 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                   class="c25"
                 >
                   <div
-                    class=""
+                    class="c1 "
                   >
                     <div
-                      class="c34"
+                      class="c31"
                     >
                       <div>
                         <div
-                          class="c19 c26"
+                          class="c1 c19 c26"
                         >
                           <div
-                            class="c28"
+                            class="c1 c9"
                           >
                             <label
-                              class="c27"
+                              class="c10 c17"
                               for="3"
                             >
                               <div
-                                class="c28"
+                                class="c1 c9"
                               >
                                 Description
                               </div>
                             </label>
                           </div>
                           <div
-                            class="c35"
+                            class="c32"
                           >
                             <textarea
                               aria-invalid="false"
                               aria-required="false"
-                              class="c36"
+                              class="c33"
                               id="3"
                               name="description"
                             />
@@ -883,51 +848,51 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                   class="c25"
                 >
                   <div
-                    class=""
+                    class="c1 "
                   >
                     <div>
                       <div
-                        class="c19 c26"
+                        class="c1 c19 c26"
                       >
                         <label
-                          class="c27"
+                          class="c10 c17"
                           for="5"
                         >
                           <div
-                            class="c28"
+                            class="c1 c9"
                           >
                             Token duration
                             <span
-                              class="c29 c30"
+                              class="c10 c27 c28"
                             >
                               *
                             </span>
                           </div>
                         </label>
                         <div
-                          class="c28 c37"
+                          class="c1 c9 c34"
                         >
                           <button
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-labelledby="5 5-label 5-content"
-                            class="c38"
+                            class="c35"
                             id="5"
                             name="lifespan"
                             type="button"
                           />
                           <div
-                            class="c31 c39"
+                            class="c1 c8 c36"
                           >
                             <div
-                              class="c28"
+                              class="c1 c9"
                             >
                               <div
-                                class="c40"
+                                class="c1 c37"
                               >
                                 <span
-                                  class="c41"
+                                  class="c10 c38"
                                   id="5-content"
                                 >
                                   Select
@@ -935,11 +900,11 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                               </div>
                             </div>
                             <div
-                              class="c28"
+                              class="c1 c9"
                             >
                               <button
                                 aria-hidden="true"
-                                class="c42 c43 c44"
+                                class="c1 c39 c40 c41"
                                 tabindex="-1"
                                 title="Carret Down Button"
                                 type="button"
@@ -965,7 +930,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                       </div>
                     </div>
                     <span
-                      class="c45"
+                      class="c10 c42"
                     />
                   </div>
                 </div>
@@ -977,7 +942,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
     </form>
   </main>
   <div
-    class="c46"
+    class="c43"
   >
     <p
       aria-live="polite"
@@ -1002,31 +967,73 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
 `;
 
 exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snapshot when editing existing token 1`] = `
-.c13 {
+.c11 {
   font-weight: 600;
   font-size: 2rem;
   line-height: 1.25;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: #32324d;
 }
 
-.c23 {
+.c17 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
   color: #32324d;
 }
 
-.c32 {
+.c26 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 500;
   color: #32324d;
 }
 
-.c34 {
+.c28 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #666687;
+}
+
+.c31 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c34 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #d02b20;
+}
+
+.c45 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c49 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c15 {
+  padding-right: 8px;
+}
+
+.c19 {
+  padding-right: 56px;
+  padding-left: 56px;
 }
 
 .c2 {
@@ -1041,24 +1048,39 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   padding-bottom: 8px;
 }
 
-.c21 {
-  padding-right: 8px;
-}
-
-.c27 {
+.c22 {
   background: #ffffff;
   padding: 24px;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c28 {
+.c23 {
   background: #f6f6f9;
   padding: 12px;
   border-radius: 4px;
 }
 
-.c10 {
+.c29 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c44 {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.c46 {
+  padding-left: 12px;
+}
+
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1076,7 +1098,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   justify-content: space-between;
 }
 
-.c11 {
+.c9 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1090,7 +1112,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   flex-direction: row;
 }
 
-.c30 {
+.c20 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -1104,25 +1126,43 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   flex-direction: column;
 }
 
-.c31 > * {
+.c21 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c31 > * + * {
+.c21 > * + * {
+  margin-top: 24px;
+}
+
+.c25 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c25 > * + * {
   margin-top: 4px;
 }
 
-.c14 > * {
+.c30 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c30 > * + * {
+  margin-top: 16px;
+}
+
+.c12 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c14 > * + * {
+.c12 > * + * {
   margin-left: 8px;
 }
 
-.c19 {
+.c13 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1136,21 +1176,21 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   outline: none;
 }
 
-.c19 svg {
+.c13 svg {
   height: 12px;
   width: 12px;
 }
 
-.c19 svg > g,
-.c19 svg path {
+.c13 svg > g,
+.c13 svg path {
   fill: #ffffff;
 }
 
-.c19[aria-disabled='true'] {
+.c13[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c19:after {
+.c13:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -1165,11 +1205,11 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border: 2px solid transparent;
 }
 
-.c19:focus-visible {
+.c13:focus-visible {
   outline: none;
 }
 
-.c19:focus-visible:after {
+.c13:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -1180,7 +1220,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border: 2px solid #4945ff;
 }
 
-.c59 {
+.c50 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -1192,11 +1232,106 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   width: 1px;
 }
 
-.c22 {
+.c16 {
   height: 100%;
 }
 
-.c20 {
+.c51 .c1 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c51 .c10 {
+  color: #ffffff;
+}
+
+.c51[aria-disabled='true'] .c10 {
+  color: #666687;
+}
+
+.c51[aria-disabled='true']:active .c10 {
+  color: #666687;
+}
+
+.c14 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: #4945ff;
+  border: 1px solid #4945ff;
+  height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+}
+
+.c14 .c1 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c14 .c10 {
+  color: #ffffff;
+}
+
+.c14[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c14[aria-disabled='true'] .c10 {
+  color: #666687;
+}
+
+.c14[aria-disabled='true'] svg > g,.c14[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c14[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c14[aria-disabled='true']:active .c10 {
+  color: #666687;
+}
+
+.c14[aria-disabled='true']:active svg > g,.c14[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c14:hover {
+  background-color: #f6f6f9;
+}
+
+.c14:active {
+  background-color: #eaeaef;
+}
+
+.c14 .c10 {
+  color: #32324d;
+}
+
+.c14 svg > g,
+.c14 svg path {
+  fill: #32324d;
+}
+
+.c18 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1208,7 +1343,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   padding-right: 16px;
 }
 
-.c20 .c1 {
+.c18 .c1 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1219,335 +1354,321 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   align-items: center;
 }
 
-.c20 .c12 {
+.c18 .c10 {
   color: #ffffff;
 }
 
-.c20[aria-disabled='true'] {
+.c18[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c20[aria-disabled='true'] .c12 {
+.c18[aria-disabled='true'] .c10 {
   color: #666687;
 }
 
-.c20[aria-disabled='true'] svg > g,.c20[aria-disabled='true'] svg path {
+.c18[aria-disabled='true'] svg > g,.c18[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c20[aria-disabled='true']:active {
+.c18[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c20[aria-disabled='true']:active .c12 {
+.c18[aria-disabled='true']:active .c10 {
   color: #666687;
 }
 
-.c20[aria-disabled='true']:active svg > g,.c20[aria-disabled='true']:active svg path {
+.c18[aria-disabled='true']:active svg > g,.c18[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c20:hover {
+.c18:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c20:active {
+.c18:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c20 svg > g,
-.c20 svg path {
+.c18 svg > g,
+.c18 svg path {
   fill: #ffffff;
 }
 
-.c29 {
+.c35 {
+  line-height: 0;
+}
+
+.c37 {
+  border: none;
+  border-radius: 4px;
+  padding-bottom: 0.65625rem;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 0.65625rem;
+  color: #32324d;
+  font-weight: 400;
+  font-size: 0.875rem;
+  display: block;
+  width: 100%;
+  background: inherit;
+}
+
+.c37::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c37::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c37:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c37::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c37[aria-disabled='true'] {
+  color: inherit;
+}
+
+.c37:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.c36 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c36:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c41 {
+  position: relative;
+  border: 1px solid #dcdce4;
+  padding-right: 12px;
+  border-radius: 4px;
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 2.5rem;
+  color: #666687;
+  background: #eaeaef;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c41:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c47 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c47 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c47 svg path {
+  fill: #666687;
+}
+
+.c48 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+  cursor: not-allowed;
+}
+
+.c48 svg {
+  width: 0.375rem;
+}
+
+.c42 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c42:focus {
+  outline: none;
+}
+
+.c42[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c43 {
+  width: 100%;
+}
+
+.c32 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 20px;
+}
+
+.c33 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c0:focus-visible {
+  outline: none;
+}
+
+.c39 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c39:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c40 {
+  display: block;
+  width: 100%;
+  font-weight: 400;
+  font-size: 0.875rem;
+  border: none;
+  color: #32324d;
+  resize: none;
+  background: inherit;
+}
+
+.c40::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c40::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c40:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c40::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c40:focus-within {
+  outline: none;
+}
+
+.c38 textarea {
+  height: 5rem;
+  line-height: 1.25rem;
+}
+
+.c38 textarea::-webkit-input-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c38 textarea::-moz-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c38 textarea:-ms-input-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c38 textarea::placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c24 {
   margin-right: 24px;
 }
 
-.c29 svg {
+.c24 svg {
   width: 2rem;
   height: 2rem;
 }
 
-.c33 {
+.c27 {
   word-break: break-all;
 }
 
-.c6 {
+.c5 {
   padding-right: 8px;
 }
 
-.c24 {
-  padding-right: 56px;
-  padding-left: 56px;
-}
-
-.c35 {
-  background: #ffffff;
-  padding-top: 24px;
-  padding-right: 32px;
-  padding-bottom: 24px;
-  padding-left: 32px;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-}
-
-.c53 {
-  padding-right: 16px;
-  padding-left: 16px;
-}
-
-.c55 {
-  padding-left: 12px;
-}
-
-.c9 {
+.c7 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #4945ff;
-}
-
-.c18 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c37 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c42 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #d02b20;
-}
-
-.c54 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
-}
-
-.c58 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c44 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c41 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c25 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c15 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c15 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c15 svg > g,
-.c15 svg path {
-  fill: #ffffff;
-}
-
-.c15[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c15:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c15:focus-visible {
-  outline: none;
-}
-
-.c15:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c17 {
-  height: 100%;
-}
-
-.c60 .c5 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c60 .c8 {
-  color: #ffffff;
-}
-
-.c60[aria-disabled='true'] .c8 {
-  color: #666687;
-}
-
-.c60[aria-disabled='true']:active .c8 {
-  color: #666687;
-}
-
-.c16 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
-  height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
-  border: 1px solid #dcdce4;
-  background: #ffffff;
-}
-
-.c16 .c5 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c16 .c8 {
-  color: #ffffff;
-}
-
-.c16[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c16[aria-disabled='true'] .c8 {
-  color: #666687;
-}
-
-.c16[aria-disabled='true'] svg > g,.c16[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c16[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c16[aria-disabled='true']:active .c8 {
-  color: #666687;
-}
-
-.c16[aria-disabled='true']:active svg > g,.c16[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c16:hover {
-  background-color: #f6f6f9;
-}
-
-.c16:active {
-  background-color: #eaeaef;
-}
-
-.c16 .c8 {
-  color: #32324d;
-}
-
-.c16 svg > g,
-.c16 svg path {
-  fill: #32324d;
 }
 
 .c4 {
@@ -1603,297 +1724,21 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border: 2px solid #4945ff;
 }
 
-.c7 {
+.c6 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-}
-
-.c26 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c26 > * + * {
-  margin-top: 24px;
-}
-
-.c36 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c36 > * + * {
-  margin-top: 16px;
-}
-
-.c40 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c40 > * + * {
-  margin-top: 4px;
-}
-
-.c38 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 20px;
-}
-
-.c39 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c43 {
-  line-height: 0;
-}
-
-.c46 {
-  border: none;
-  border-radius: 4px;
-  padding-bottom: 0.65625rem;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 0.65625rem;
-  color: #32324d;
-  font-weight: 400;
-  font-size: 0.875rem;
-  display: block;
-  width: 100%;
-  background: inherit;
-}
-
-.c46::-webkit-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c46::-moz-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c46:-ms-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c46::placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c46[aria-disabled='true'] {
-  color: inherit;
-}
-
-.c46:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-.c45 {
-  border: 1px solid #dcdce4;
-  border-radius: 4px;
-  background: #ffffff;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c45:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c0:focus-visible {
-  outline: none;
-}
-
-.c51 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c51:focus {
-  outline: none;
-}
-
-.c51[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c50 {
-  position: relative;
-  border: 1px solid #dcdce4;
-  padding-right: 12px;
-  border-radius: 4px;
-  background: #ffffff;
-  overflow: hidden;
-  min-height: 2.5rem;
-  color: #666687;
-  background: #eaeaef;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c50:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c56 {
-  background: transparent;
-  border: none;
-  position: relative;
-  z-index: 1;
-}
-
-.c56 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
-}
-
-.c56 svg path {
-  fill: #666687;
-}
-
-.c57 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  background: none;
-  border: none;
-  cursor: not-allowed;
-}
-
-.c57 svg {
-  width: 0.375rem;
-}
-
-.c52 {
-  width: 100%;
-}
-
-.c48 {
-  border: 1px solid #dcdce4;
-  border-radius: 4px;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 12px;
-  padding-bottom: 12px;
-  background: #ffffff;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c48:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c49 {
-  display: block;
-  width: 100%;
-  font-weight: 400;
-  font-size: 0.875rem;
-  border: none;
-  color: #32324d;
-  resize: none;
-  background: inherit;
-}
-
-.c49::-webkit-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c49::-moz-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c49:-ms-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c49::placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c49:focus-within {
-  outline: none;
-}
-
-.c47 textarea {
-  height: 5rem;
-  line-height: 1.25rem;
-}
-
-.c47 textarea::-webkit-input-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c47 textarea::-moz-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c47 textarea:-ms-input-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c47 textarea::placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
 }
 
 @media (max-width:68.75rem) {
-  .c39 {
+  .c33 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c39 {
+  .c33 {
     grid-column: span 12;
   }
 }
@@ -1926,7 +1771,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
             >
               <span
                 aria-hidden="true"
-                class="c5 c6 c7"
+                class="c5 c6"
               >
                 <svg
                   fill="none"
@@ -1942,36 +1787,36 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                 </svg>
               </span>
               <span
-                class="c8 c9"
+                class="c7"
               >
                 Back
               </span>
             </a>
           </div>
           <div
-            class="c1 c10"
+            class="c1 c8"
           >
             <div
-              class="c1 c11"
+              class="c1 c9"
             >
               <h1
-                class="c12 c13"
+                class="c10 c11"
               >
                 My super token
               </h1>
             </div>
             <div
-              class="c1 c11 c14"
+              class="c1 c9 c12"
             >
               <button
                 aria-disabled="false"
-                class="c15 c16"
+                class="c13 c14"
                 name="regenerate"
                 type="button"
               >
                 <div
                   aria-hidden="true"
-                  class="c5 c6 c17"
+                  class="c1 c15 c16"
                 >
                   <svg
                     fill="none"
@@ -1989,19 +1834,19 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                   </svg>
                 </div>
                 <span
-                  class="c8 c18"
+                  class="c10 c17"
                 >
                   Regenerate
                 </span>
               </button>
               <button
                 aria-disabled="false"
-                class="c19 c20"
+                class="c13 c18"
                 type="submit"
               >
                 <div
                   aria-hidden="true"
-                  class="c1 c21 c22"
+                  class="c1 c15 c16"
                 >
                   <svg
                     fill="none"
@@ -2017,7 +1862,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                   </svg>
                 </div>
                 <span
-                  class="c12 c23"
+                  class="c10 c17"
                 >
                   Save
                 </span>
@@ -2027,16 +1872,16 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
         </div>
       </div>
       <div
-        class="c5 c24"
+        class="c1 c19"
       >
         <div
-          class="c5 c25 c26"
+          class="c1 c20 c21"
         >
           <div
-            class="c1 c27 c11"
+            class="c1 c22 c9"
           >
             <div
-              class="c1 c28 c11 c29"
+              class="c1 c23 c9 c24"
             >
               <svg
                 fill="none"
@@ -2052,73 +1897,73 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
               </svg>
             </div>
             <div
-              class="c1 c30 c31"
+              class="c1 c20 c25"
             >
               <div
-                class="c1 c11"
+                class="c1 c9"
               >
                 <span
-                  class="c12 c32 c33"
+                  class="c10 c26 c27"
                 >
                   This token isn’t accessible anymore.
                 </span>
               </div>
               <span
-                class="c12 c34"
+                class="c10 c28"
               >
                 For security reasons, you can only see your token once.
               </span>
             </div>
           </div>
           <div
-            class="c5 c35"
+            class="c1 c29"
           >
             <div
-              class="c5 c25 c36"
+              class="c1 c20 c30"
             >
               <h2
-                class="c8 c37"
+                class="c10 c31"
               >
                 Details
               </h2>
               <div
-                class="c5 c38"
+                class="c1 c32"
               >
                 <div
-                  class="c39"
+                  class="c33"
                 >
                   <div
-                    class="c5 "
+                    class="c1 "
                   >
                     <div>
                       <div>
                         <div
-                          class="c5 c25 c40"
+                          class="c1 c20 c25"
                         >
                           <label
-                            class="c8 c18"
-                            for="7"
+                            class="c10 c17"
+                            for="8"
                           >
                             <div
-                              class="c5 c41"
+                              class="c1 c9"
                             >
                               Name
                               <span
-                                class="c8 c42 c43"
+                                class="c10 c34 c35"
                               >
                                 *
                               </span>
                             </div>
                           </label>
                           <div
-                            class="c5 c44 c45"
+                            class="c1 c8 c36"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
                               aria-required="true"
-                              class="c46"
-                              id="7"
+                              class="c37"
+                              id="8"
                               name="name"
                               value="My super token"
                             />
@@ -2129,40 +1974,40 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                   </div>
                 </div>
                 <div
-                  class="c39"
+                  class="c33"
                 >
                   <div
-                    class="c5 "
+                    class="c1 "
                   >
                     <div
-                      class="c47"
+                      class="c38"
                     >
                       <div>
                         <div
-                          class="c5 c25 c40"
+                          class="c1 c20 c25"
                         >
                           <div
-                            class="c5 c41"
+                            class="c1 c9"
                           >
                             <label
-                              class="c8 c18"
-                              for="9"
+                              class="c10 c17"
+                              for="10"
                             >
                               <div
-                                class="c5 c41"
+                                class="c1 c9"
                               >
                                 Description
                               </div>
                             </label>
                           </div>
                           <div
-                            class="c48"
+                            class="c39"
                           >
                             <textarea
                               aria-invalid="false"
                               aria-required="false"
-                              class="c49"
-                              id="9"
+                              class="c40"
+                              id="10"
                               name="description"
                             >
                               This describe my super token
@@ -2174,67 +2019,67 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                   </div>
                 </div>
                 <div
-                  class="c39"
+                  class="c33"
                 >
                   <div
-                    class="c5 "
+                    class="c1 "
                   >
                     <div>
                       <div
-                        class="c5 c25 c40"
+                        class="c1 c20 c25"
                       >
                         <label
-                          class="c8 c18"
-                          for="11"
+                          class="c10 c17"
+                          for="12"
                         >
                           <div
-                            class="c5 c41"
+                            class="c1 c9"
                           >
                             Token duration
                             <span
-                              class="c8 c42 c43"
+                              class="c10 c34 c35"
                             >
                               *
                             </span>
                           </div>
                         </label>
                         <div
-                          class="c5 c41 c50"
+                          class="c1 c9 c41"
                           disabled=""
                         >
                           <button
                             aria-disabled="true"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="11 11-label 11-content"
-                            class="c51"
-                            id="11"
+                            aria-labelledby="12 12-label 12-content"
+                            class="c42"
+                            id="12"
                             name="lifespan"
                             type="button"
                           />
                           <div
-                            class="c5 c44 c52"
+                            class="c1 c8 c43"
                           >
                             <div
-                              class="c5 c41"
+                              class="c1 c9"
                             >
                               <div
-                                class="c5 c53"
+                                class="c1 c44"
                               >
                                 <span
-                                  class="c8 c54"
-                                  id="11-content"
+                                  class="c10 c45"
+                                  id="12-content"
                                 >
                                   Select
                                 </span>
                               </div>
                             </div>
                             <div
-                              class="c5 c41"
+                              class="c1 c9"
                             >
                               <button
                                 aria-hidden="true"
-                                class="c5 c55 c56 c57"
+                                class="c1 c46 c47 c48"
                                 disabled=""
                                 tabindex="-1"
                                 title="Carret Down Button"
@@ -2261,7 +2106,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                       </div>
                     </div>
                     <span
-                      class="c8 c58"
+                      class="c10 c49"
                     >
                       Expiration date: Unlimited
                     </span>
@@ -2275,7 +2120,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
     </form>
   </main>
   <div
-    class="c59"
+    class="c50"
   >
     <p
       aria-live="polite"

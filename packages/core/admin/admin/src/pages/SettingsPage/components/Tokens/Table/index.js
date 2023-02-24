@@ -1,7 +1,7 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { Flex, Typography, Tbody, Tr, Td } from '@strapi/design-system';
+import { Typography, Flex, Tbody, Tr, Td } from '@strapi/design-system';
 import {
   RelativeTime,
   onRowClick,

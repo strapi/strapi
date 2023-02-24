@@ -137,6 +137,33 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         color: #666687;
       }
 
+      .c33 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c34 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #32324d;
+      }
+
+      .c35 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
       .c2 {
         background: #f6f6f9;
         padding-top: 40px;
@@ -165,7 +192,11 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         padding-left: 24px;
       }
 
-      .c42 {
+      .c32 {
+        max-width: 15.625rem;
+      }
+
+      .c40 {
         padding-left: 4px;
       }
 
@@ -199,6 +230,24 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+      }
+
+      .c36 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: end;
+        -webkit-justify-content: end;
+        -ms-flex-pack: end;
+        justify-content: end;
       }
 
       .c27 {
@@ -271,7 +320,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         width: 1px;
       }
 
-      .c43 .c1 {
+      .c41 .c1 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -282,23 +331,23 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         align-items: center;
       }
 
-      .c43 .c5 {
+      .c41 .c5 {
         color: #ffffff;
       }
 
-      .c43[aria-disabled='true'] .c5 {
+      .c41[aria-disabled='true'] .c5 {
         color: #666687;
       }
 
-      .c43[aria-disabled='true']:active .c5 {
+      .c41[aria-disabled='true']:active .c5 {
         color: #666687;
       }
 
-      .c43:active .c5 {
+      .c41:active .c5 {
         color: #4945ff;
       }
 
-      .c43 .c5 {
+      .c41 .c5 {
         color: #271fe0;
       }
 
@@ -382,6 +431,10 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         overflow-x: auto;
       }
 
+      .c31 tr:last-of-type {
+        border-bottom: none;
+      }
+
       .c22 {
         border-bottom: 1px solid #eaeaef;
       }
@@ -431,10 +484,6 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         padding-right: 8px;
       }
 
-      .c33 {
-        max-width: 15.625rem;
-      }
-
       .c12 {
         font-size: 0.75rem;
         line-height: 1.33;
@@ -442,55 +491,10 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         color: #32324d;
       }
 
-      .c35 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c36 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: #32324d;
-      }
-
-      .c37 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c41 {
+      .c39 {
         font-size: 0.875rem;
         line-height: 1.43;
         color: #4945ff;
-      }
-
-      .c38 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: end;
-        -webkit-justify-content: end;
-        -ms-flex-pack: end;
-        justify-content: end;
       }
 
       .c7 {
@@ -551,7 +555,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c39 {
+      .c37 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -566,15 +570,15 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         outline: none;
       }
 
-      .c39 svg path {
+      .c37 svg path {
         fill: #4945ff;
       }
 
-      .c39 svg {
+      .c37 svg {
         font-size: 0.625rem;
       }
 
-      .c39:after {
+      .c37:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -589,11 +593,11 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         border: 2px solid transparent;
       }
 
-      .c39:focus-visible {
+      .c37:focus-visible {
         outline: none;
       }
 
-      .c39:focus-visible:after {
+      .c37:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -673,47 +677,12 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         fill: #ffffff;
       }
 
-      .c31 tr:last-of-type {
-        border-bottom: none;
-      }
-
-      .c32 {
-        border-bottom: 1px solid #eaeaef;
-      }
-
-      .c32 td,
-      .c32 th {
-        padding: 16px;
-      }
-
-      .c32 td:first-of-type,
-      .c32 th:first-of-type {
-        padding: 0 4px;
-      }
-
-      .c32 th {
-        padding-top: 0;
-        padding-bottom: 0;
-        height: 3.5rem;
-      }
-
-      .c34 {
-        vertical-align: middle;
-        text-align: left;
-        color: #666687;
-        outline-offset: -4px;
-      }
-
-      .c34 input {
-        vertical-align: sub;
-      }
-
-      .c40 svg path {
+      .c38 svg path {
         fill: #8e8ea9;
       }
 
-      .c40:hover svg path,
-      .c40:focus svg path {
+      .c38:hover svg path,
+      .c38:focus svg path {
         fill: #32324d;
       }
 
@@ -960,41 +929,41 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                   >
                     <tr
                       aria-rowindex="2"
-                      class="c9 c32"
+                      class="c1 c23"
                       style="cursor: pointer;"
                     >
                       <td
                         aria-colindex="1"
-                        class="c9 c33 c34"
+                        class="c1 c32 c24"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <span
-                          class="c11 c35"
+                          class="c5 c33"
                         >
                           My super token
                         </span>
                       </td>
                       <td
                         aria-colindex="2"
-                        class="c9 c33 c34"
+                        class="c1 c32 c24"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <span
-                          class="c11 c36"
+                          class="c5 c34"
                         >
                           This describe my super token
                         </span>
                       </td>
                       <td
                         aria-colindex="3"
-                        class="c9 c34"
+                        class="c1 c24"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <span
-                          class="c11 c37"
+                          class="c5 c35"
                         >
                           <time
                             datetime="2021-11-15T00:00:00.000Z"
@@ -1006,27 +975,27 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                       </td>
                       <td
                         aria-colindex="4"
-                        class="c9 c34"
+                        class="c1 c24"
                         role="gridcell"
                         tabindex="-1"
                       />
                       <td
                         aria-colindex="5"
-                        class="c9 c34"
+                        class="c1 c24"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <div
-                          class="c9 c38"
+                          class="c1 c36"
                         >
                           <a
-                            class="c39 c40"
+                            class="c37 c38"
                             href="/settings/api-tokens/1"
                             tabindex="-1"
                             title="Edit My super token"
                           >
                             <span
-                              class="c11 c41"
+                              class="c11 c39"
                             >
                               <svg
                                 fill="none"
@@ -1045,9 +1014,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                             </span>
                           </a>
                           <div
-                            aria-hidden="true"
-                            class="c1 c42"
-                            role="button"
+                            class="c1 c40"
                           >
                             <span>
                               <button
