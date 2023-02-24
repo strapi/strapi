@@ -18,7 +18,10 @@ const DeleteButton = ({ tokenName, onClickDelete }) => {
   return (
     <Box paddingLeft={1}>
       <IconButton
-        onClick={() => setShowConfirmDialog(true)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowConfirmDialog(true);
+        }}
         label={formatMessage(
           {
             id: 'global.delete-target',
