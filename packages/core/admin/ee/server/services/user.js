@@ -13,6 +13,11 @@ const { SUPER_ADMIN_CODE } = require('../../../server/services/constants');
  */
 const updateEEDisabledUsersList = async (id, input) => {
   const disabledUsers = await getService('seat-enforcement').getDisabledUserList();
+
+  if (!disabledUsers) {
+    return;
+  }
+
   const user = disabledUsers.find((user) => user.id === Number(id));
   if (!user) {
     return;
@@ -39,6 +44,10 @@ const removeFromEEDisabledUsersList = async (ids) => {
   }
 
   const disabledUsers = await getService('seat-enforcement').getDisabledUserList();
+
+  if (!disabledUsers) {
+    return;
+  }
 
   const newDisabledUsersList = disabledUsers.filter((user) => !idsToCheck.includes(user.id));
   await strapi.store.set({
