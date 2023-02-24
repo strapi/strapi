@@ -109,11 +109,16 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
           streams.assets?.end();
           return;
         }
+
         if (!streams.assets) {
           streams.assets = await provider.createAssetsWriteStream();
         }
 
-        payloads.forEach(async (payload) => {
+        for (const payload of payloads) {
+          if (streams.assets.closed) {
+            return;
+          }
+
           const { action, assetID } = payload;
 
           if (action === 'start' && streams.assets) {
@@ -139,11 +144,15 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
                   delete assets[assetID];
                   resolve();
                 })
-                .on('error', reject)
+                .on('error', (e) => {
+                  reject(e);
+                })
                 .end();
             });
           }
-        });
+        }
+
+        console.log('[assets] done');
       },
     },
   };

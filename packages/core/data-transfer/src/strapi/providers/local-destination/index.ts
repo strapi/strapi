@@ -171,9 +171,14 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
         const entryPath = path.join(assetsDirectory, chunk.filename);
         const writableStream = fse.createWriteStream(entryPath);
 
+        console.log('hello from the other side?');
+
         chunk.stream
           .pipe(writableStream)
-          .on('close', callback)
+          .on('close', () => {
+            console.log('close/end substream');
+            callback(null);
+          })
           .on('error', async (error: NodeJS.ErrnoException) => {
             const errorMessage =
               error.code === 'ENOSPC'
