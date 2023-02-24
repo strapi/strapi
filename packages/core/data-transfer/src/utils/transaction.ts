@@ -26,7 +26,6 @@ export const createTransaction = (strapi: Strapi): Transaction => {
 
   strapi.db.transaction(async ({ trx, rollback }) => {
     e.once('rollback', async () => {
-      console.log('rolling back the transaction');
       await rollback();
       done = true;
       resume?.();

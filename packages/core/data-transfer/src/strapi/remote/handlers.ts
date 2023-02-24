@@ -116,8 +116,6 @@ export const createTransferHandler = (options: IHandlerOptions) => {
         const teardown = async (): Promise<void> => {
           if (state.controller) {
             await state.controller.actions.rollback();
-          } else {
-            // do nothing
           }
 
           cleanup();

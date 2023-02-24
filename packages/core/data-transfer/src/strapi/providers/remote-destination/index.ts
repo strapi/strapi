@@ -185,7 +185,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
   async close() {
     if (!this.dispatcher?.transferID) {
-      throw new ProviderTransferError('transferID is not defined');
+      throw new ProviderTransferError('Failed to end the transfer: no transfer process found.');
     }
     await this.dispatcher?.dispatchCommand({
       command: 'end',
