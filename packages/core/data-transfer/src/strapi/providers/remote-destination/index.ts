@@ -35,10 +35,13 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
   dispatcher: ReturnType<typeof createDispatcher> | null;
 
+  transferID: string | null;
+
   constructor(options: IRemoteStrapiDestinationProviderOptions) {
     this.options = options;
     this.ws = null;
     this.dispatcher = null;
+    this.transferID = null;
   }
 
   async initTransfer(): Promise<string> {
@@ -224,15 +227,23 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     this.ws = ws;
     this.dispatcher = createDispatcher(this.ws);
 
-    const transferID = await this.initTransfer();
+    this.transferID = await this.initTransfer();
 
-    this.dispatcher.setTransferProperties({ id: transferID, kind: 'push' });
+    this.dispatcher.setTransferProperties({ id: this.transferID, kind: 'push' });
 
     await this.dispatcher.dispatchTransferAction('bootstrap');
   }
 
   async close() {
-    await this.dispatcher?.dispatchTransferAction('close');
+    // Gracefully close the remote transfer process
+    if (this.transferID && this.dispatcher) {
+      await this.dispatcher.dispatchTransferAction('close');
+
+      await this.dispatcher.dispatchCommand({
+        command: 'end',
+        params: { transferID: this.transferID },
+      });
+    }
 
     await new Promise<void>((resolve) => {
       const { ws } = this;
