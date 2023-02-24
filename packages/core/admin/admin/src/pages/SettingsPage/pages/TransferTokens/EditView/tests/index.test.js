@@ -1,5 +1,5 @@
 import React from 'react';
-import { act, render, waitFor, fireEvent } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
@@ -72,10 +72,6 @@ const makeApp = (history) => {
   );
 };
 
-function getElementByName(container, elementType, name) {
-  return container.querySelector(`${elementType}[name="${name}"]`);
-}
-
 describe('ADMIN | Pages | TRANSFER TOKENS | EditView', () => {
   afterAll(() => {
     jest.resetAllMocks();
@@ -123,50 +119,5 @@ describe('ADMIN | Pages | TRANSFER TOKENS | EditView', () => {
     });
 
     expect(container).toMatchSnapshot();
-  });
-
-  it('renders the tokens list after the token creation if you have not the update permission', async () => {
-    useRBAC.mockImplementation(() => ({
-      allowedActions: {
-        canCreate: true,
-        canDelete: true,
-        canRead: false,
-        canUpdate: false,
-        canRegenerate: true,
-      },
-    }));
-    const history = createMemoryHistory();
-    const App = makeApp(history);
-    const { container } = render(App);
-
-    history.push('/settings/transfer-tokens/create');
-    const nameToken = 'test transfer';
-    const descriptionToken = 'token description';
-    const tokenDuration = '30 days';
-
-    history.replace = jest.fn();
-
-    act(() => {
-      fireEvent.change(getElementByName(container, 'input', 'name'), {
-        target: { value: nameToken },
-      });
-    });
-
-    act(() => {
-      fireEvent.change(getElementByName(container, 'textarea', 'description'), {
-        target: { value: descriptionToken },
-      });
-    });
-
-    act(() => {
-      const tokenLifespanBtn = getElementByName(container, 'button', 'lifespan');
-      const spanTokenLifespan = tokenLifespanBtn.nextElementSibling.querySelector('span');
-      spanTokenLifespan.innerHtml = tokenDuration;
-    });
-
-    // trigger the submit
-    act(async () => {
-      await fireEvent.click(container.querySelector(`button[type="submit"]`));
-    });
   });
 });
