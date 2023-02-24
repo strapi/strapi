@@ -16,6 +16,7 @@ const {
   createStrapiInstance,
   DEFAULT_IGNORED_CONTENT_TYPES,
   formatDiagnostic,
+  loadersFactory,
 } = require('./utils');
 const { exitWith } = require('../utils/helpers');
 
@@ -115,6 +116,22 @@ module.exports = async (opts) => {
   });
 
   engine.diagnostics.onDiagnostic(formatDiagnostic('transfer'));
+
+  const progress = engine.progress.stream;
+
+  const { updateLoader } = loadersFactory();
+
+  progress.on(`stage::start`, ({ stage, data }) => {
+    updateLoader(stage, data).start();
+  });
+
+  progress.on('stage::finish', ({ stage, data }) => {
+    updateLoader(stage, data).succeed();
+  });
+
+  progress.on('stage::progress', ({ stage, data }) => {
+    updateLoader(stage, data);
+  });
 
   let results;
   try {

@@ -9,6 +9,7 @@ const {
   configs: { createOutputFileConfiguration },
   createLogger,
 } = require('@strapi/logger');
+const ora = require('ora');
 const { readableBytes, exitWith } = require('../utils/helpers');
 const strapi = require('../../index');
 const { getParseListWithChoices } = require('../utils/commander');
@@ -171,7 +172,46 @@ const formatDiagnostic =
     }
   };
 
+const loadersFactory = (defaultLoaders = {}) => {
+  const loaders = defaultLoaders;
+  const updateLoader = (stage, data) => {
+    if (!(stage in loaders)) {
+      createLoader(stage);
+    }
+    const stageData = data[stage];
+    const elapsedTime = stageData?.startTime
+      ? (stageData?.endTime || Date.now()) - stageData.startTime
+      : 0;
+    const size = `size: ${readableBytes(stageData?.bytes ?? 0)}`;
+    const elapsed = `elapsed: ${elapsedTime} ms`;
+    const speed =
+      elapsedTime > 0 && `(${readableBytes(((stageData?.bytes ?? 0) * 1000) / elapsedTime)}/s)`;
+
+    loaders[stage].text = `${stage}: ${stageData?.count ?? 0} transfered (${size}) (${elapsed}) ${
+      !stageData?.endTime ? speed : ''
+    }`;
+
+    return loaders[stage];
+  };
+
+  const createLoader = (stage) => {
+    Object.assign(loaders, { [stage]: ora() });
+    return loaders[stage];
+  };
+
+  const getLoader = (stage) => {
+    return loaders[stage];
+  };
+
+  return {
+    updateLoader,
+    createLoader,
+    getLoader,
+  };
+};
+
 module.exports = {
+  loadersFactory,
   buildTransferTable,
   getDefaultExportName,
   DEFAULT_IGNORED_CONTENT_TYPES,
