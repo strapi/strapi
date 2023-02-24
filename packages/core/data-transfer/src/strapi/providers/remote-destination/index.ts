@@ -272,6 +272,8 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
   createAssetsWriteStream(): Writable | Promise<Writable> {
     let batch: client.TransferAssetFlow[] = [];
+    let hasStarted = false;
+
     const batchSize = 1024 * 1024; // 1MB;
     const batchLength = () => {
       return batch.reduce(
@@ -299,17 +301,13 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         if (batch.length > 0) {
           await flush();
         }
-        // TODO: replace this stream call by an end call
-        const endError = await this.#streamStep('assets', null);
 
-        if (endError) {
-          return callback(endError);
-        }
+        if (hasStarted) {
+          const endStepError = await this.#endStep('assets');
 
-        const endStepError = await this.#endStep('assets');
-
-        if (endStepError) {
-          return callback(endStepError);
+          if (endStepError) {
+            return callback(endStepError);
+          }
         }
 
         return callback(null);
@@ -321,6 +319,8 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         if (startError) {
           return callback(startError);
         }
+
+        hasStarted = true;
 
         const assetID = v4();
         const { filename, filepath, stats, stream } = asset;
