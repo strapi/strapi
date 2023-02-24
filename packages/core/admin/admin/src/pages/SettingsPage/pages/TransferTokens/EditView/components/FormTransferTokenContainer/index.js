@@ -1,11 +1,8 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Stack } from '@strapi/design-system/Stack';
+import { Box, Grid, GridItem, Stack, Typography } from '@strapi/design-system';
 
-import { Typography } from '@strapi/design-system/Typography';
 import LifeSpanInput from '../../../../../components/Tokens/LifeSpanInput';
 import TokenName from '../../../../../components/Tokens/TokenName';
 import TokenDescription from '../../../../../components/Tokens/TokenDescription';

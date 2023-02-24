@@ -14,9 +14,7 @@ import {
   useRBAC,
   useFetchClient,
 } from '@strapi/helper-plugin';
-import { Main } from '@strapi/design-system/Main';
-import { Stack } from '@strapi/design-system/Stack';
-import { ContentLayout } from '@strapi/design-system/Layout';
+import { ContentLayout, Main, Stack } from '@strapi/design-system';
 import { formatAPIErrors } from '../../../../../utils';
 import { schema } from './utils';
 import LoadingView from './components/LoadingView';
