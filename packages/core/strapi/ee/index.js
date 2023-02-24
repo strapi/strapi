@@ -21,7 +21,6 @@ const disable = (message) => {
   // Only keep the license key for potential re-enabling during a later check
   ee.licenseInfo = pick('licenseKey', ee.licenseInfo);
 
-  // Prevent emitting ee.disable if it was already disabled
   ee.enabled = false;
 
   if (shouldEmitEvent) {
@@ -31,7 +30,7 @@ const disable = (message) => {
 };
 
 const enable = () => {
-  // Prevent emitting ee.disable if it was already disabled
+  // Prevent emitting ee.enable if it was already enabled
   const shouldEmitEvent = ee.enabled !== true;
 
   ee.enabled = true;
@@ -162,7 +161,6 @@ const validateInfo = () => {
     return disable('License expired.');
   }
 
-  // Prevent emitting ee.enable if it was already enabled
   enable();
 };
 
@@ -174,7 +172,6 @@ const checkLicense = async ({ strapi }) => {
 
   if (!shouldStayOffline) {
     await onlineUpdate({ strapi });
-
     strapi.cron.add({ [shiftCronExpression('0 0 */12 * * *')]: onlineUpdate });
   } else {
     if (!ee.licenseInfo.expireAt) {
