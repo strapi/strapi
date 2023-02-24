@@ -12,14 +12,7 @@ const { SUPER_ADMIN_CODE } = require('../../../server/services/constants');
  * @param {object} input
  */
 const updateEEDisabledUsersList = async (id, input) => {
-  const data = await strapi.db.query('strapi::ee-store').findOne({
-    where: { key: 'ee_disabled_users' },
-  });
-
-  if (!data?.value || data.value.length === 0) {
-    return;
-  }
-  const disabledUsers = JSON.parse(data.value);
+  const disabledUsers = await getService('seat-enforcement').getDisabledUserList();
   const user = disabledUsers.find((user) => user.id === Number(id));
   if (!user) {
     return;
@@ -27,9 +20,10 @@ const updateEEDisabledUsersList = async (id, input) => {
 
   if (user.isActive !== input.isActive) {
     const newDisabledUsersList = disabledUsers.filter((user) => user.id !== Number(id));
-    await strapi.db.query('strapi::ee-store').update({
-      where: { id: data.id },
-      data: { value: JSON.stringify(newDisabledUsersList) },
+    await strapi.store.set({
+      type: 'ee',
+      key: 'disabled_users',
+      value: newDisabledUsersList,
     });
   }
 };
@@ -44,19 +38,13 @@ const removeFromEEDisabledUsersList = async (ids) => {
     idsToCheck = [Number(ids)];
   }
 
-  const data = await strapi.db.query('strapi::ee-store').findOne({
-    where: { key: 'ee_disabled_users' },
-  });
-
-  if (!data?.value || data.value.length === 0) {
-    return;
-  }
-  const disabledUsers = JSON.parse(data.value);
+  const disabledUsers = await getService('seat-enforcement').getDisabledUserList();
 
   const newDisabledUsersList = disabledUsers.filter((user) => !idsToCheck.includes(user.id));
-  await strapi.db.query('strapi::ee-store').update({
-    where: { id: data.id },
-    data: { value: JSON.stringify(newDisabledUsersList) },
+  await strapi.store.set({
+    type: 'ee',
+    key: 'disabled_users',
+    value: newDisabledUsersList,
   });
 };
 
@@ -226,17 +214,10 @@ const getCurrentActiveUserCount = async () => {
   return strapi.db.query('admin::user').count({ where: { isActive: true } });
 };
 
-const getDisabledUserList = async () => {
-  return strapi.db.query('strapi::ee-store').findOne({
-    where: { key: 'ee_disabled_users' },
-  });
-};
-
 module.exports = {
   updateEEDisabledUsersList,
   removeFromEEDisabledUsersList,
   getCurrentActiveUserCount,
-  getDisabledUserList,
   deleteByIds,
   deleteById,
   updateById,

@@ -33,7 +33,6 @@ module.exports = [
       policies: [
         'admin::isAuthenticatedAdmin',
         { name: 'admin::hasPermissions', config: { actions: ['admin::users.create'] } },
-        { name: 'admin::hasLicenseSeatsLimitAllowance', config: { isCreating: true } },
       ],
     },
   },
@@ -67,7 +66,6 @@ module.exports = [
       policies: [
         'admin::isAuthenticatedAdmin',
         { name: 'admin::hasPermissions', config: { actions: ['admin::users.update'] } },
-        'admin::hasLicenseSeatsLimitAllowance',
       ],
     },
   },

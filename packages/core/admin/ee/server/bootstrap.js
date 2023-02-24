@@ -5,7 +5,6 @@ const { features } = require('@strapi/strapi/lib/utils/ee');
 const executeCEBootstrap = require('../../server/bootstrap');
 const { getService } = require('../../server/utils');
 const actions = require('./config/admin-actions');
-const { seatEnforcementWorkflow } = require('./services/seat-enforcement');
 
 module.exports = async () => {
   const { actionProvider } = getService('permission');
@@ -18,7 +17,7 @@ module.exports = async () => {
     await actionProvider.registerMany(actions.auditLogs);
   }
 
-  await seatEnforcementWorkflow();
+  await getService('seat-enforcement').seatEnforcementWorkflow();
 
   await executeCEBootstrap();
 };

@@ -5,7 +5,6 @@ const { pipeAsync } = require('@strapi/utils');
 const { getService } = require('./utils');
 const adminActions = require('./config/admin-actions');
 const adminConditions = require('./config/admin-conditions');
-const { revertSeatEnforcementWorkflow } = require('../ee/server/services/seat-enforcement');
 
 const defaultAdminAuthSettings = {
   providers: {
@@ -92,8 +91,6 @@ module.exports = async () => {
 
   await syncAuthSettings();
   await syncAPITokensPermissions();
-
-  await revertSeatEnforcementWorkflow();
 
   apiTokenService.checkSaltIsDefined();
   tokenService.checkSecretIsDefined();

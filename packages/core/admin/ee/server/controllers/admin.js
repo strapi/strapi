@@ -1,14 +1,13 @@
 'use strict';
 
+// eslint-disable-next-line node/no-extraneous-require
+const ee = require('@strapi/strapi/lib/utils/ee');
 const { env } = require('@strapi/utils');
 const { getService } = require('../../../server/utils');
 
 module.exports = {
   async licenseLimitInformation() {
-    const permittedSeats = strapi.ee.licenseInfo.seats;
-    if (!permittedSeats) {
-      return;
-    }
+    const permittedSeats = ee.seats;
 
     let shouldNotify = false;
     let licenseLimitStatus = null;
@@ -16,10 +15,9 @@ module.exports = {
 
     const currentActiveUserCount = await getService('user').getCurrentActiveUserCount();
 
-    const data = await getService('user').getDisabledUserList();
+    const eeDisabledUsers = await getService('seat-enforcement').getDisabledUserList();
 
-    if (data.value) {
-      const eeDisabledUsers = JSON.parse(data.value);
+    if (eeDisabledUsers) {
       enforcementUserCount = currentActiveUserCount + eeDisabledUsers.length;
     } else {
       enforcementUserCount = currentActiveUserCount;
@@ -35,17 +33,16 @@ module.exports = {
       licenseLimitStatus = 'AT_LIMIT';
     }
 
-    return {
-      data: {
-        enforcementUserCount,
-        currentActiveUserCount,
-        permittedSeats,
-        shouldNotify,
-        shouldStopCreate: currentActiveUserCount >= permittedSeats,
-        licenseLimitStatus,
-        isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
-        licenseType: strapi.ee.licenseInfo.type,
-      },
+    const data = {
+      enforcementUserCount,
+      currentActiveUserCount,
+      permittedSeats,
+      shouldNotify,
+      shouldStopCreate: currentActiveUserCount >= permittedSeats,
+      licenseLimitStatus,
+      isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
     };
+
+    return { data };
   },
 };

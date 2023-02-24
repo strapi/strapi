@@ -1,8 +1,10 @@
 'use strict';
 
+// eslint-disable-next-line node/no-extraneous-require
+const ee = require('@strapi/strapi/lib/utils/ee');
 const { _, get } = require('lodash');
 const { pick } = require('lodash/fp');
-const { ApplicationError } = require('@strapi/utils').errors;
+const { ApplicationError, ForbiddenError } = require('@strapi/utils').errors;
 const { validateUserCreationInput } = require('../validation/user');
 const {
   validateUserUpdateInput,
@@ -12,8 +14,29 @@ const { getService } = require('../../../server/utils');
 
 const pickUserCreationAttributes = pick(['firstname', 'lastname', 'email', 'roles']);
 
+const hasAdminSeatsAvaialble = async () => {
+  if (!strapi.EE) {
+    return true;
+  }
+
+  const permittedSeats = ee.seats;
+  if (!permittedSeats) {
+    return true;
+  }
+
+  const userCount = await strapi.service('admin::user').getCurrentActiveUserCount();
+
+  if (userCount < permittedSeats) {
+    return true;
+  }
+};
+
 module.exports = {
   async create(ctx) {
+    if (!(await hasAdminSeatsAvaialble())) {
+      throw new ForbiddenError('License seat limit reached. You cannot create a new user');
+    }
+
     const { body } = ctx.request;
     const cleanData = { ...body, email: get(body, `email`, ``).toLowerCase() };
 
@@ -59,13 +82,17 @@ module.exports = {
       }
     }
 
+    const user = await getService('user').findOne(id, null);
+
+    if (!(await hasAdminSeatsAvaialble()) && !user.isActive && input.isActive) {
+      throw new ForbiddenError('License seat limit reached. You cannot active this user');
+    }
+
     const updatedUser = await getService('user').updateById(id, input);
 
     if (!updatedUser) {
       return ctx.notFound('User does not exist');
     }
-
-    await getService('user').updateEEDisabledUsersList(id, input);
 
     ctx.body = {
       data: getService('user').sanitizeUser(updatedUser),
@@ -81,8 +108,6 @@ module.exports = {
       return ctx.notFound('User not found');
     }
 
-    await getService('user').removeFromEEDisabledUsersList(id);
-
     return ctx.deleted({
       data: getService('user').sanitizeUser(deletedUser),
     });
@@ -97,8 +122,6 @@ module.exports = {
     await validateUsersDeleteInput(body);
 
     const users = await getService('user').deleteByIds(body.ids);
-
-    await getService('user').removeFromEEDisabledUsersList(body.ids);
 
     const sanitizedUsers = users.map(getService('user').sanitizeUser);
 
