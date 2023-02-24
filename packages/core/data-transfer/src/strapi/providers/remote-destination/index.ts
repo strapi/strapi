@@ -48,22 +48,26 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     return new Promise<string>((resolve, reject) => {
       this.ws
         ?.once('open', async () => {
-          const query = this.dispatcher?.dispatchCommand({
-            command: 'init',
-            params: { options: { strategy, restore }, transfer: 'push' },
-          });
+          try {
+            const query = this.dispatcher?.dispatchCommand({
+              command: 'init',
+              params: { options: { strategy, restore }, transfer: 'push' },
+            });
 
-          const res = (await query) as server.Payload<server.InitMessage>;
+            const res = (await query) as server.Payload<server.InitMessage>;
 
-          if (!res?.transferID) {
-            return reject(
-              new ProviderTransferError('Init failed, invalid response from the server')
-            );
+            if (!res?.transferID) {
+              throw new ProviderTransferError('Init failed, invalid response from the server');
+            }
+
+            resolve(res.transferID);
+          } catch (e: unknown) {
+            reject(e);
           }
-
-          resolve(res.transferID);
         })
-        .once('error', reject);
+        .once('error', (message) => {
+          reject(message);
+        });
     });
   }
 

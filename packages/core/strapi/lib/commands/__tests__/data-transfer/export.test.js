@@ -56,6 +56,7 @@ describe('Export', () => {
 
   // mock utils
   const mockUtils = {
+    loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
     formatDiagnostic: jest.fn(),
     createStrapiInstance() {
       return {
