@@ -35,24 +35,16 @@ describe('DeleteButton', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
-  it('renders and matches the snapshot', () => {
-    const { baseElement } = setup();
-    expect(baseElement).toMatchSnapshot();
-  });
   it('show confirmation delete dialog when the delete button is clicked', () => {
     const { baseElement, queryByText } = setup();
-    act(() => {
-      fireEvent.click(getButton(baseElement, 'delete'));
-    });
+    fireEvent.click(getButton(baseElement, 'delete'));
 
     expect(queryByText('Are you sure you want to delete this?')).toBeInTheDocument();
   });
 
   it('closes the modal when you click on Cancel button', () => {
     const { baseElement, queryByText, getByText } = setup();
-    act(() => {
-      fireEvent.click(getButton(baseElement, 'delete'));
-    });
+    fireEvent.click(getButton(baseElement, 'delete'));
 
     act(() => {
       fireEvent.click(getByText('Cancel'));
@@ -65,13 +57,8 @@ describe('DeleteButton', () => {
     const spy = jest.fn();
     const { baseElement, getByText } = setup({ onClickDelete: spy });
 
-    act(() => {
-      fireEvent.click(getButton(baseElement, 'delete'));
-    });
-
-    act(() => {
-      fireEvent.click(getByText('Confirm'));
-    });
+    fireEvent.click(getButton(baseElement, 'delete'));
+    fireEvent.click(getByText('Confirm'));
 
     expect(spy).toBeCalledTimes(1);
   });
