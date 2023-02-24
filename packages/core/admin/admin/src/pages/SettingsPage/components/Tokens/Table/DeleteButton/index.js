@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Trash } from '@strapi/icons';
 import { IconButton, Box } from '@strapi/design-system';
-import { stopPropagation, useTracking, ConfirmDialog } from '@strapi/helper-plugin';
+import { useTracking, ConfirmDialog } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 
@@ -16,7 +16,7 @@ const DeleteButton = ({ tokenName, onClickDelete }) => {
   };
 
   return (
-    <Box paddingLeft={1} {...stopPropagation}>
+    <Box paddingLeft={1}>
       <IconButton
         onClick={() => setShowConfirmDialog(true)}
         label={formatMessage(

@@ -11,10 +11,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));
 
-function getButton(container, name) {
-  return container.querySelector(`button[name="${name}"]`);
-}
-
 function ComponentToTest(props) {
   return (
     <IntlProvider locale="en" messages={{}}>
@@ -36,15 +32,15 @@ describe('DeleteButton', () => {
     jest.clearAllMocks();
   });
   it('show confirmation delete dialog when the delete button is clicked', () => {
-    const { baseElement, queryByText } = setup();
-    fireEvent.click(getButton(baseElement, 'delete'));
+    const { queryByText, getByRole } = setup();
+    fireEvent.click(getByRole('button', { name: 'Delete test' }));
 
     expect(queryByText('Are you sure you want to delete this?')).toBeInTheDocument();
   });
 
   it('closes the modal when you click on Cancel button', () => {
-    const { baseElement, queryByText, getByText } = setup();
-    fireEvent.click(getButton(baseElement, 'delete'));
+    const { queryByText, getByText, getByRole } = setup();
+    fireEvent.click(getByRole('button', { name: 'Delete test' }));
 
     act(() => {
       fireEvent.click(getByText('Cancel'));
@@ -55,9 +51,9 @@ describe('DeleteButton', () => {
 
   it('trigger the onClickDelete function when you click on the Confirm button', () => {
     const spy = jest.fn();
-    const { baseElement, getByText } = setup({ onClickDelete: spy });
+    const { getByRole, getByText } = setup({ onClickDelete: spy });
 
-    fireEvent.click(getButton(baseElement, 'delete'));
+    fireEvent.click(getByRole('button', { name: 'Delete test' }));
     fireEvent.click(getByText('Confirm'));
 
     expect(spy).toBeCalledTimes(1);
