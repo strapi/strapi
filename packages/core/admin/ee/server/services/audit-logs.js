@@ -53,6 +53,24 @@ const getEventMap = (defaultEvents) => {
   }, {});
 };
 
+const getRetentionDays = (strapi) => {
+  const licenseRetentionDays = features.get('audit-logs')?.options.retentionDays;
+  const userRetentionDays = strapi.config.get('admin.auditLogs.retentionDays');
+
+  // For enterprise plans, use 90 days by default, but allow users to override it
+  if (licenseRetentionDays == null) {
+    return userRetentionDays ?? DEFAULT_RETENTION_DAYS;
+  }
+
+  // Allow users to override the license retention days, but not to increase it
+  if (userRetentionDays && userRetentionDays < licenseRetentionDays) {
+    return userRetentionDays;
+  }
+
+  // User didn't provide a retention days value, use the license one
+  return licenseRetentionDays;
+};
+
 const createAuditLogsService = (strapi) => {
   // NOTE: providers should be able to replace getEventMap to add or remove events
   const eventMap = getEventMap(defaultEvents);
@@ -99,10 +117,45 @@ const createAuditLogsService = (strapi) => {
 
   return {
     async register() {
-      const retentionDays =
-        features.get('audit-logs')?.options.retentionDays ?? DEFAULT_RETENTION_DAYS;
+      console.log('audit logs register');
+      // Handle license being enabled
+      if (!this._eeEnableUnsubscribe) {
+        this._eeEnableUnsubscribe = strapi.eventHub.once('ee.enable', () => {
+          console.log('listened to ee.enable');
+          // Recreate the service to use the new license info
+          this.destroy();
+          this.register();
+        });
+      }
+
+      // Handle license being updated
+      this._eeUpdateUnsubscribe = strapi.eventHub.on('ee.update', () => {
+        console.log('listened to ee.update');
+        // Recreate the service to use the new license info
+        this.destroy();
+        this.register();
+      });
+
+      // Handle license being disabled
+      this._eeDisableUnsubscribe = strapi.eventHub.on('ee.disable', () => {
+        console.log('listened to ee.disable');
+        // Turn off service when the license gets disabled
+        // Only the ee.enable listener remains active to recreate the service
+        this.destroy();
+      });
+
+      // Check current state of license
+      if (!features.isEnabled('audit-logs')) {
+        return this;
+      }
+
+      // Start saving events
       this._provider = await localProvider.register({ strapi });
       this._eventHubUnsubscribe = strapi.eventHub.subscribe(handleEvent.bind(this));
+
+      // Manage audit logs auto deletion
+      const retentionDays = getRetentionDays(strapi);
+      console.log('registering audit logs service', retentionDays);
       this._deleteExpiredJob = scheduleJob('0 0 * * *', () => {
         const expirationDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
         this._provider.deleteExpiredEvents(expirationDate);
@@ -143,6 +196,14 @@ const createAuditLogsService = (strapi) => {
     },
 
     unsubscribe() {
+      if (this._eeUpdateUnsubscribe) {
+        this._eeUpdateUnsubscribe();
+      }
+
+      if (this._eeDisableUnsubscribe) {
+        this._eeDisableUnsubscribe();
+      }
+
       if (this._eventHubUnsubscribe) {
         this._eventHubUnsubscribe();
       }
@@ -155,6 +216,7 @@ const createAuditLogsService = (strapi) => {
     },
 
     destroy() {
+      console.log('audit logs destroy');
       return this.unsubscribe();
     },
   };

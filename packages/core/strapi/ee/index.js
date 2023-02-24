@@ -1,12 +1,12 @@
 'use strict';
 
-const { pick } = require('lodash/fp');
+const { pick, isEqual } = require('lodash/fp');
 
 const { readLicense, verifyLicense, fetchLicense, LicenseCheckError } = require('./license');
 const { eeStoreModel } = require('./ee-store');
 const { shiftCronExpression } = require('../lib/utils/cron');
 
-const ONE_MINUTE = 1000 * 60;
+const ONE_MINUTE = 1 * 60;
 
 const ee = {
   enabled: false,
@@ -14,10 +14,33 @@ const ee = {
 };
 
 const disable = (message) => {
+  // Prevent emitting ee.disable if it was already disabled
+  const shouldEmitEvent = ee.enabled !== false;
+
   ee.logger?.warn(`${message} Switching to CE.`);
   // Only keep the license key for potential re-enabling during a later check
   ee.licenseInfo = pick('licenseKey', ee.licenseInfo);
+
+  // Prevent emitting ee.disable if it was already disabled
+  console.log('disabling EE');
   ee.enabled = false;
+
+  if (shouldEmitEvent) {
+    // Notify EE features that they should be disabled
+    strapi.eventHub.emit('ee.disable');
+  }
+};
+
+const enable = () => {
+  // Prevent emitting ee.disable if it was already disabled
+  const shouldEmitEvent = ee.enabled !== true;
+
+  ee.enabled = true;
+
+  if (shouldEmitEvent) {
+    // Notify EE features that they should be disabled
+    strapi.eventHub.emit('ee.enable');
+  }
 };
 
 let initialized = false;
@@ -42,7 +65,7 @@ const init = (licenseDir, logger) => {
 
     if (license) {
       ee.licenseInfo = verifyLicense(license);
-      ee.enabled = true;
+      enable();
     }
   } catch (error) {
     disable(error.message);
@@ -55,6 +78,7 @@ const init = (licenseDir, logger) => {
  * Store the result in database to avoid unecessary requests, and will fallback to that in case of a network failure.
  */
 const onlineUpdate = async ({ strapi }) => {
+  console.log('onlineUpdate');
   const { get, commit, rollback } = await strapi.db.transaction();
   const transaction = get();
 
@@ -90,8 +114,22 @@ const onlineUpdate = async ({ strapi }) => {
 
     if (license) {
       try {
-        ee.licenseInfo = verifyLicense(license);
+        // Verify license and check if its info changed
+        const newLicenseInfo = verifyLicense(license);
+        const fieldsToCompare = ['licenseKey', 'features', 'plan'];
+        const licenseInfoChanged = !isEqual(
+          pick(fieldsToCompare, newLicenseInfo),
+          pick(fieldsToCompare, ee.licenseInfo)
+        );
+
+        // Store the new license info
+        ee.licenseInfo = newLicenseInfo;
         validateInfo();
+
+        // Notify EE features
+        if (licenseInfoChanged) {
+          strapi.eventHub.emit('ee.update');
+        }
       } catch (error) {
         disable(error.message);
       }
@@ -126,7 +164,8 @@ const validateInfo = () => {
     return disable('License expired.');
   }
 
-  ee.enabled = true;
+  // Prevent emitting ee.enable if it was already enabled
+  enable();
 };
 
 const checkLicense = async ({ strapi }) => {
@@ -137,7 +176,9 @@ const checkLicense = async ({ strapi }) => {
 
   if (!shouldStayOffline) {
     await onlineUpdate({ strapi });
-    strapi.cron.add({ [shiftCronExpression('0 0 */12 * * *')]: onlineUpdate });
+
+    // strapi.cron.add({ [shiftCronExpression('0 0 */12 * * *')]: onlineUpdate });
+    strapi.cron.add({ [shiftCronExpression('*/10 * * * * *')]: onlineUpdate });
   } else {
     if (!ee.licenseInfo.expireAt) {
       return disable('Your license does not have offline support.');
