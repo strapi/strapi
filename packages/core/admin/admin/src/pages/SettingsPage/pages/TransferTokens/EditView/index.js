@@ -13,7 +13,7 @@ import {
   useRBAC,
   useFetchClient,
 } from '@strapi/helper-plugin';
-import { Main, ContentLayout, Stack } from '@strapi/design-system';
+import { ContentLayout, Main, Stack } from '@strapi/design-system';
 import { formatAPIErrors } from '../../../../../utils';
 import { schema } from './utils';
 import LoadingView from './components/LoadingView';
