@@ -56,7 +56,6 @@ const createDispatcher = (ws: WebSocket) => {
         }
       };
 
-      // TODO: What happens if the server sends another message (not a response to this message)
       ws.once('message', onResponse);
     });
   };
