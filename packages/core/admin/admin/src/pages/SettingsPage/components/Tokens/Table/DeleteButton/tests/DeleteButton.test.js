@@ -16,7 +16,12 @@ function ComponentToTest(props) {
     <IntlProvider locale="en" messages={{}}>
       <ThemeProvider theme={lightTheme}>
         <NotificationsProvider toggleNotification={() => {}}>
-          <DeleteButton tokenName="test" onClickDelete={() => {}} {...props} />
+          <DeleteButton
+            tokenType="api-token"
+            tokenName="test"
+            onClickDelete={() => {}}
+            {...props}
+          />
         </NotificationsProvider>
       </ThemeProvider>
     </IntlProvider>

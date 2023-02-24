@@ -5,13 +5,15 @@ import { useTracking, ConfirmDialog } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 
-const DeleteButton = ({ tokenName, onClickDelete }) => {
+const DeleteButton = ({ tokenName, onClickDelete, tokenType }) => {
   const { formatMessage } = useIntl();
-  const { trackUsage } = useTracking(); // TODO: Track different types of tokens
+  const { trackUsage } = useTracking();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const handleClickDelete = () => {
     setShowConfirmDialog(false);
-    trackUsage('willDeleteToken');
+    trackUsage('willDeleteToken', {
+      tokenType,
+    });
     onClickDelete();
   };
 
@@ -44,6 +46,7 @@ const DeleteButton = ({ tokenName, onClickDelete }) => {
 DeleteButton.propTypes = {
   tokenName: PropTypes.string.isRequired,
   onClickDelete: PropTypes.func.isRequired,
+  tokenType: PropTypes.string.isRequired,
 };
 
 export default DeleteButton;

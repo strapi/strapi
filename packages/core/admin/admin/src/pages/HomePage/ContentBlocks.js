@@ -4,6 +4,7 @@ import { useIntl } from 'react-intl';
 import { ContentBox, useTracking } from '@strapi/helper-plugin';
 import { Stack } from '@strapi/design-system';
 import { InformationSquare, CodeSquare, PlaySquare, FeatherSquare } from '@strapi/icons';
+import CloudBox from './CloudBox';
 
 const BlockLink = styled.a`
   text-decoration: none;
@@ -19,6 +20,7 @@ const ContentBlocks = () => {
 
   return (
     <Stack spacing={5}>
+      <CloudBox />
       <BlockLink
         href="https://strapi.io/resource-center"
         target="_blank"
