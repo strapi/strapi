@@ -117,11 +117,9 @@ const createAuditLogsService = (strapi) => {
 
   return {
     async register() {
-      console.log('audit logs register');
       // Handle license being enabled
       if (!this._eeEnableUnsubscribe) {
         this._eeEnableUnsubscribe = strapi.eventHub.once('ee.enable', () => {
-          console.log('listened to ee.enable');
           // Recreate the service to use the new license info
           this.destroy();
           this.register();
@@ -130,7 +128,6 @@ const createAuditLogsService = (strapi) => {
 
       // Handle license being updated
       this._eeUpdateUnsubscribe = strapi.eventHub.on('ee.update', () => {
-        console.log('listened to ee.update');
         // Recreate the service to use the new license info
         this.destroy();
         this.register();
@@ -138,7 +135,6 @@ const createAuditLogsService = (strapi) => {
 
       // Handle license being disabled
       this._eeDisableUnsubscribe = strapi.eventHub.on('ee.disable', () => {
-        console.log('listened to ee.disable');
         // Turn off service when the license gets disabled
         // Only the ee.enable listener remains active to recreate the service
         this.destroy();
@@ -155,7 +151,6 @@ const createAuditLogsService = (strapi) => {
 
       // Manage audit logs auto deletion
       const retentionDays = getRetentionDays(strapi);
-      console.log('registering audit logs service', retentionDays);
       this._deleteExpiredJob = scheduleJob('0 0 * * *', () => {
         const expirationDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
         this._provider.deleteExpiredEvents(expirationDate);
@@ -216,7 +211,6 @@ const createAuditLogsService = (strapi) => {
     },
 
     destroy() {
-      console.log('audit logs destroy');
       return this.unsubscribe();
     },
   };
