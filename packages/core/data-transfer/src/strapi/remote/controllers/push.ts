@@ -152,8 +152,6 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
             });
           }
         }
-
-        console.log('[assets] done');
       },
     },
   };
