@@ -22,6 +22,7 @@ import { Plus } from '@strapi/icons';
 import adminPermissions from '../../../../../permissions';
 import tableHeaders from './utils/tableHeaders';
 import Table from '../../../components/Tokens/Table';
+import { API_TOKEN_TYPE } from '../../../components/Tokens/constants';
 
 const ApiTokenListView = () => {
   useFocusWhenNavigate();
@@ -62,12 +63,14 @@ const ApiTokenListView = () => {
   } = useQuery(
     ['api-tokens'],
     async () => {
-      trackUsage('willAccessTokenList');
+      trackUsage('willAccessTokenList', {
+        tokenType: API_TOKEN_TYPE,
+      });
       const {
         data: { data },
       } = await get(`/admin/api-tokens`);
 
-      trackUsage('didAccessTokenList', { number: data.length });
+      trackUsage('didAccessTokenList', { number: data.length, tokenType: API_TOKEN_TYPE });
 
       return data;
     },
@@ -127,7 +130,11 @@ const ApiTokenListView = () => {
               data-testid="create-api-token-button"
               startIcon={<Plus />}
               size="S"
-              onClick={() => trackUsage('willAddTokenFromList')}
+              onClick={() =>
+                trackUsage('willAddTokenFromList', {
+                  tokenType: API_TOKEN_TYPE,
+                })
+              }
               to="/settings/api-tokens/create"
             >
               {formatMessage({
@@ -149,6 +156,7 @@ const ApiTokenListView = () => {
             isLoading={isLoading}
             onConfirmDelete={(id) => deleteMutation.mutateAsync(id)}
             tokens={apiTokens}
+            tokenType={API_TOKEN_TYPE}
           />
         )}
         {shouldDisplayNoContentWithCreationButton && (

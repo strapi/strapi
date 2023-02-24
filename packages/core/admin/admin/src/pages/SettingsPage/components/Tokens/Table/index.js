@@ -14,7 +14,15 @@ import DeleteButton from './DeleteButton';
 import UpdateButton from './UpdateButton';
 import ReadButton from './ReadButton';
 
-const Table = ({ permissions, headers, contentType, isLoading, tokens, onConfirmDelete }) => {
+const Table = ({
+  permissions,
+  headers,
+  contentType,
+  isLoading,
+  tokens,
+  onConfirmDelete,
+  tokenType,
+}) => {
   const { canDelete, canUpdate, canRead } = permissions;
   const withBulkActions = canDelete || canUpdate || canRead;
   const [{ query }] = useQueryParams();
@@ -47,7 +55,9 @@ const Table = ({ permissions, headers, contentType, isLoading, tokens, onConfirm
               key={token.id}
               {...onRowClick({
                 fn() {
-                  trackUsage('willEditTokenFromList');
+                  trackUsage('willEditTokenFromList', {
+                    tokenType,
+                  });
                   push(`${pathname}/${token.id}`);
                 },
                 condition: canUpdate,
@@ -87,6 +97,7 @@ const Table = ({ permissions, headers, contentType, isLoading, tokens, onConfirm
                       <DeleteButton
                         tokenName={token.name}
                         onClickDelete={() => onConfirmDelete(token.id)}
+                        tokenType={tokenType}
                       />
                     )}
                   </Flex>
@@ -121,6 +132,7 @@ Table.propTypes = {
   contentType: PropTypes.string.isRequired,
   isLoading: PropTypes.bool,
   onConfirmDelete: PropTypes.func,
+  tokenType: PropTypes.string.isRequired,
 };
 
 Table.defaultProps = {
