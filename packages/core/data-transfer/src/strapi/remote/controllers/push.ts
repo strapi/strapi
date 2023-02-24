@@ -2,6 +2,7 @@ import { PassThrough, Writable } from 'stream-chain';
 
 import type { IAsset, IMetadata } from '../../../../types';
 import type {
+  TransferAssetFlow,
   TransferPushMessage,
   TransferPushStep,
 } from '../../../../types/remote/protocol/client';
@@ -114,7 +115,7 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
           streams.assets = await provider.createAssetsWriteStream();
         }
 
-        for (const payload of payloads) {
+        for (const payload of payloads as Array<TransferAssetFlow>) {
           if (streams.assets.closed) {
             return;
           }
