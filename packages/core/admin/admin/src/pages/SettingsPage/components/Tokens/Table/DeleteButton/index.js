@@ -16,10 +16,9 @@ const DeleteButton = ({ tokenName, onClickDelete }) => {
   };
 
   return (
-    <Box paddingLeft={1}>
+    <Box paddingLeft={1} onClick={(e) => e.stopPropagation()}>
       <IconButton
-        onClick={(e) => {
-          e.stopPropagation();
+        onClick={() => {
           setShowConfirmDialog(true);
         }}
         label={formatMessage(
