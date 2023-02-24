@@ -11,6 +11,7 @@ import {
   NoPermissions,
   useRBAC,
   NoContent,
+  useTracking,
   useGuidedTour,
   LinkButton,
   useFetchClient,
@@ -21,6 +22,7 @@ import { Plus } from '@strapi/icons';
 import adminPermissions from '../../../../../permissions';
 import tableHeaders from './utils/tableHeaders';
 import Table from '../../../components/Tokens/Table';
+import { TRANSFER_TOKEN_TYPE } from '../../../components/Tokens/constants';
 
 const TransferTokenListView = () => {
   useFocusWhenNavigate();
@@ -31,6 +33,7 @@ const TransferTokenListView = () => {
     allowedActions: { canCreate, canDelete, canUpdate, canRead },
   } = useRBAC(adminPermissions.settings['transfer-tokens']);
   const { push } = useHistory();
+  const { trackUsage } = useTracking();
 
   const { startSection } = useGuidedTour();
   const startSectionRef = useRef(startSection);
@@ -61,9 +64,14 @@ const TransferTokenListView = () => {
   } = useQuery(
     ['transfer-tokens'],
     async () => {
+      trackUsage('willAccessTokenList', {
+        tokenType: TRANSFER_TOKEN_TYPE,
+      });
       const {
         data: { data },
       } = await get(`/admin/transfer/tokens`);
+
+      trackUsage('didAccessTokenList', { number: data.length, tokenType: TRANSFER_TOKEN_TYPE });
 
       return data;
     },
@@ -125,6 +133,11 @@ const TransferTokenListView = () => {
               data-testid="create-transfer-token-button"
               startIcon={<Plus />}
               size="S"
+              onClick={() =>
+                trackUsage('willAddTokenFromList', {
+                  tokenType: TRANSFER_TOKEN_TYPE,
+                })
+              }
               to="/settings/transfer-tokens/create"
             >
               {formatMessage({
@@ -146,6 +159,7 @@ const TransferTokenListView = () => {
             isLoading={isLoading}
             onConfirmDelete={(id) => deleteMutation.mutateAsync(id)}
             tokens={transferTokens}
+            tokenType={TRANSFER_TOKEN_TYPE}
           />
         )}
         {shouldDisplayNoContentWithCreationButton && (

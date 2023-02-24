@@ -26,6 +26,7 @@ import Permissions from './components/Permissions';
 import FormApiTokenContainer from './components/FormApiTokenContainer';
 import TokenBox from '../../../components/Tokens/TokenBox';
 import FormHead from '../../../components/Tokens/FormHead';
+import { API_TOKEN_TYPE } from '../../../components/Tokens/constants';
 
 const MSG_ERROR_NAME_TAKEN = 'Name already taken';
 
@@ -109,7 +110,9 @@ const ApiTokenCreateView = () => {
   );
 
   useEffect(() => {
-    trackUsageRef.current(isCreating ? 'didAddTokenFromList' : 'didEditTokenFromList');
+    trackUsageRef.current(isCreating ? 'didAddTokenFromList' : 'didEditTokenFromList', {
+      tokenType: API_TOKEN_TYPE,
+    });
   }, [isCreating]);
 
   const { status } = useQuery(
@@ -154,7 +157,9 @@ const ApiTokenCreateView = () => {
   );
 
   const handleSubmit = async (body, actions) => {
-    trackUsageRef.current(isCreating ? 'willCreateToken' : 'willEditToken');
+    trackUsageRef.current(isCreating ? 'willCreateToken' : 'willEditToken', {
+      tokenType: API_TOKEN_TYPE,
+    });
     lockApp();
     const lifespanVal =
       body.lifespan && parseInt(body.lifespan, 10) && body.lifespan !== '0'
@@ -204,6 +209,7 @@ const ApiTokenCreateView = () => {
 
       trackUsageRef.current(isCreating ? 'didCreateToken' : 'didEditToken', {
         type: apiToken.type,
+        tokenType: API_TOKEN_TYPE,
       });
     } catch (err) {
       const errors = formatAPIErrors(err.response.data);
@@ -302,7 +308,9 @@ const ApiTokenCreateView = () => {
 
                 <ContentLayout>
                   <Stack spacing={6}>
-                    {Boolean(apiToken?.name) && <TokenBox token={apiToken?.accessKey} />}
+                    {Boolean(apiToken?.name) && (
+                      <TokenBox token={apiToken?.accessKey} tokenType={API_TOKEN_TYPE} />
+                    )}
                     <FormApiTokenContainer
                       errors={errors}
                       onChange={handleChange}
