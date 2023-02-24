@@ -13,7 +13,7 @@ import { ProviderTransferError, ProviderInitializationError } from '../../errors
 import { TRANSFER_METHODS } from './constants';
 import { createFlow, DEFAULT_TRANSFER_FLOW } from './flows';
 
-type TransferMethod = typeof TRANSFER_METHODS[number];
+type TransferMethod = (typeof TRANSFER_METHODS)[number];
 
 interface ITransferState {
   transfer?: {

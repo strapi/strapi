@@ -16,7 +16,7 @@ import {
   LinkButton,
   useFetchClient,
 } from '@strapi/helper-plugin';
-import { Button, Main, HeaderLayout, ContentLayout } from '@strapi/design-system';
+import { HeaderLayout, ContentLayout, Main, Button } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 
 import adminPermissions from '../../../../../permissions';
