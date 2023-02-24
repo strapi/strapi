@@ -39,19 +39,22 @@ const productWithMedia = {
 };
 
 describe('Core API - Basic + required media', () => {
+  let file;
+
   beforeAll(async () => {
     await builder.addContentType(productWithMedia).build();
     strapi = await createStrapiInstance();
     rq = await createContentAPIRequest({ strapi });
 
     // Create file
-    await rq({
+    const result = await rq({
       method: 'POST',
       url: '/upload',
       formData: {
         files: fs.createReadStream(path.join(__dirname, 'basic-media.test.api.js')),
       },
     });
+    file = result.body[0];
   });
 
   afterAll(async () => {
@@ -63,7 +66,7 @@ describe('Core API - Basic + required media', () => {
     const product = {
       name: 'product',
       description: 'description',
-      media: 1,
+      media: file.id,
     };
 
     const res = await rq({
@@ -98,7 +101,7 @@ describe('Core API - Basic + required media', () => {
       name: 'product',
       description: 'description',
       multipleMedia: [],
-      media: 1,
+      media: file.id,
     };
 
     const res = await rq({
@@ -132,7 +135,7 @@ describe('Core API - Basic + required media', () => {
     const product = {
       name: 'product',
       description: 'description',
-      multipleMedia: [{ id: 1 }],
+      multipleMedia: [{ id: file.id }],
     };
 
     const res = await rq({
