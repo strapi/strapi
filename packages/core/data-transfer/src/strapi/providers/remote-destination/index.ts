@@ -174,11 +174,11 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         if (batchLength() >= batchSize) {
           const streamError = await this.#streamStep(step, batch);
 
+          batch = [];
+
           if (streamError) {
             return callback(streamError);
           }
-
-          batch = [];
         }
 
         callback();
@@ -305,6 +305,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
     const safePush = async (chunk: client.TransferAssetFlow) => {
       batch.push(chunk);
+
       if (batchLength() >= batchSize) {
         await flush();
       }
@@ -318,6 +319,8 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         }
 
         if (hasStarted) {
+          await this.#streamStep('assets', null);
+
           const endStepError = await this.#endStep('assets');
 
           if (endStepError) {

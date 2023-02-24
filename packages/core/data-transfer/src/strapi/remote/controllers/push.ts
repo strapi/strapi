@@ -75,6 +75,7 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
         if (!streams.entities) {
           streams.entities = provider.createEntitiesWriteStream();
         }
+
         entities.map(async (entity) => {
           if (streams.entities) {
             await writeAsync(streams.entities, entity);
@@ -86,6 +87,7 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
         if (!streams.links) {
           streams.links = await provider.createLinksWriteStream();
         }
+
         links.map(async (link) => {
           if (streams.links) {
             await writeAsync(streams.links, link);
@@ -97,6 +99,7 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
         if (!streams.configuration) {
           streams.configuration = await provider.createConfigurationWriteStream();
         }
+
         configs.map(async (config) => {
           if (streams.configuration) {
             await writeAsync(streams.configuration, config);
@@ -105,7 +108,6 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
       },
 
       async assets(payloads) {
-        // TODO: close the stream upong receiving an 'end' event instead
         if (payloads === null) {
           streams.assets?.end();
           return;
