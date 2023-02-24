@@ -165,8 +165,6 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         batch.push(chunk);
 
         if (batchLength() >= batchSize) {
-          console.log('flushing', batchLength(), '>', batchSize);
-          console.log(batch.length, 'items at once');
           const streamError = await this.#streamStep(step, batch);
 
           if (streamError) {
