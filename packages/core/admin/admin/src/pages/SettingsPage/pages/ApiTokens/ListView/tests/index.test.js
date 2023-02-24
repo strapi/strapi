@@ -1010,9 +1010,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                             </span>
                           </a>
                           <div
-                            aria-hidden="true"
                             class="c1 c40"
-                            role="button"
                           >
                             <span>
                               <button
