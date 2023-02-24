@@ -80,7 +80,7 @@ describe('<AdminSeatInfo />', () => {
     expect(getByText('Contact sales')).toBeInTheDocument();
     expect(getByText('Contact sales').closest('a')).toHaveAttribute(
       'href',
-      'https://share.hsforms.com/1WhxtbTkJSUmfqqEuv4pwuA43qp4'
+      'https://strapi.io/billing/request-seats'
     );
   });
 

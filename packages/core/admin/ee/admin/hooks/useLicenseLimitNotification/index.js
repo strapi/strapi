@@ -12,8 +12,7 @@ import useLicenseLimits from '../useLicenseLimits';
 const STORAGE_KEY_PREFIX = 'strapi-notification-seat-limit';
 
 const BILLING_STRAPI_CLOUD_URL = 'https://cloud.strapi.io/profile/billing';
-const BILLING_SELF_HOSTED_URL =
-  'https://strapi.chargebeeportal.com/portal/v2/login?forward=portal_main';
+const BILLING_SELF_HOSTED_URL = 'https://strapi.io/billing/request-seats';
 
 const useLicenseLimitNotification = () => {
   const { formatMessage } = useIntl();

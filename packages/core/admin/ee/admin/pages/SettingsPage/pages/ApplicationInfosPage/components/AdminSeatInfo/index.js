@@ -7,7 +7,7 @@ import { pxToRem } from '@strapi/helper-plugin';
 import { useLicenseLimits } from '../../../../../../hooks';
 
 const BILLING_STRAPI_CLOUD_URL = 'https://cloud.strapi.io/profile/billing';
-const BILLING_SELF_HOSTED_URL = 'https://share.hsforms.com/1WhxtbTkJSUmfqqEuv4pwuA43qp4';
+const BILLING_SELF_HOSTED_URL = 'https://strapi.io/billing/request-seats';
 
 const AdminSeatInfo = () => {
   const { formatMessage } = useIntl();

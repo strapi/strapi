@@ -105,7 +105,7 @@ describe('useLicenseLimitNotification', () => {
       title:
         '{licenseLimitStatus, select, OVER_LIMIT {Over} other {At}} seat limit ({enforcementUserCount}/{permittedSeats})',
       link: {
-        url: 'https://strapi.chargebeeportal.com/portal/v2/login?forward=portal_main',
+        url: 'https://strapi.io/billing/request-seats',
         label: '{isHostedOnStrapiCloud, select, true {ADD SEATS} other {CONTACT SALES}}',
       },
       blockTransition: true,
@@ -132,7 +132,7 @@ describe('useLicenseLimitNotification', () => {
       title:
         '{licenseLimitStatus, select, OVER_LIMIT {Over} other {At}} seat limit ({enforcementUserCount}/{permittedSeats})',
       link: {
-        url: 'https://strapi.chargebeeportal.com/portal/v2/login?forward=portal_main',
+        url: 'https://strapi.io/billing/request-seats',
         label: '{isHostedOnStrapiCloud, select, true {ADD SEATS} other {CONTACT SALES}}',
       },
       blockTransition: true,
