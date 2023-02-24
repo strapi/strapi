@@ -9,7 +9,11 @@ import type { TransferFlow, Step } from './flows';
 import type { client, server } from '../../../types/remote/protocol';
 
 import createPushController from './controllers/push';
-import { ProviderTransferError, ProviderInitializationError } from '../../errors/providers';
+import {
+  ProviderTransferError,
+  ProviderInitializationError,
+  ProviderError,
+} from '../../errors/providers';
 import { TRANSFER_METHODS } from './constants';
 import { createFlow, DEFAULT_TRANSFER_FLOW } from './flows';
 
@@ -202,8 +206,10 @@ export const createTransferHandler = (options: IHandlerOptions) => {
           }
 
           if (command === 'end') {
-            assertValidTransfer(state);
-            await answer(() => end(msg));
+            await answer(() => {
+              assertValidTransfer(state);
+              end(msg);
+            });
           }
 
           if (command === 'status') {
@@ -359,28 +365,39 @@ export const createTransferHandler = (options: IHandlerOptions) => {
         });
 
         ws.on('message', async (raw) => {
-          const msg: client.Message = JSON.parse(raw.toString());
+          try {
+            const msg: client.Message = JSON.parse(raw.toString());
 
-          if (!msg.uuid) {
-            await callback(new ProviderTransferError('Missing uuid in message'));
-            return;
-          }
+            if (!msg.uuid) {
+              await callback(new ProviderTransferError('Missing uuid in message'));
+              return;
+            }
 
-          uuid = msg.uuid;
+            uuid = msg.uuid;
+            // Regular command message (init, end, status)
+            if (msg.type === 'command') {
+              await onCommand(msg);
+            }
 
-          // Regular command message (init, end, status)
-          if (msg.type === 'command') {
-            await onCommand(msg);
-          }
+            // Transfer message (the transfer must be initialized first)
+            else if (msg.type === 'transfer') {
+              await onTransferCommand(msg);
+            }
 
-          // Transfer message (the transfer must be initialized first)
-          else if (msg.type === 'transfer') {
-            await onTransferCommand(msg);
-          }
+            // Invalid messages
+            else {
+              await callback(new ProviderTransferError('Bad request'));
+            }
+          } catch (e: unknown) {
+            // Only known errors should be returned to client
+            if (e instanceof ProviderError || e instanceof SyntaxError) {
+              await callback(e);
+            } else {
+              // TODO: log error to server?
 
-          // Invalid messages
-          else {
-            await callback(new ProviderTransferError('Bad request'));
+              // Unknown errors should not be sent to client
+              await callback(new ProviderTransferError('Unknown transfer error'));
+            }
           }
         });
       });

@@ -70,7 +70,7 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
       },
 
       async rollback() {
-        return provider.rollback();
+        await provider.rollback();
       },
     },
 

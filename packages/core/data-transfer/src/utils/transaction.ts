@@ -26,9 +26,18 @@ export const createTransaction = (strapi: Strapi): Transaction => {
 
   strapi.db.transaction(async ({ trx, rollback }) => {
     e.once('rollback', async () => {
-      await rollback();
-      done = true;
-      resume?.();
+      e.removeAllListeners('close');
+      e.removeAllListeners('spawn');
+
+      try {
+        await rollback();
+        e.emit('rollback_completed');
+      } catch {
+        e.emit('rollback_failed');
+      } finally {
+        done = true;
+        resume?.();
+      }
     });
 
     while (!done) {
@@ -72,11 +81,18 @@ export const createTransaction = (strapi: Strapi): Transaction => {
         });
       });
     },
+
     end() {
       return e.emit('close');
     },
+
     rollback() {
-      return e.emit('rollback');
+      return new Promise<boolean>((resolve) => {
+        e.emit('rollback');
+
+        e.once('rollback_failed', () => resolve(false));
+        e.once('rollback_completed', () => resolve(true));
+      });
     },
   };
 };
