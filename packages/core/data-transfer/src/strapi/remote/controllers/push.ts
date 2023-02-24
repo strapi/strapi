@@ -2,6 +2,7 @@ import { PassThrough, Writable } from 'stream-chain';
 
 import type { IAsset, IMetadata } from '../../../../types';
 import type {
+  TransferAssetFlow,
   TransferPushMessage,
   TransferPushStep,
 } from '../../../../types/remote/protocol/client';
@@ -70,69 +71,86 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
     },
 
     transfer: {
-      async entities(entity) {
+      async entities(entities) {
         if (!streams.entities) {
           streams.entities = provider.createEntitiesWriteStream();
         }
-
-        await writeAsync(streams.entities, entity);
+        entities.map(async (entity) => {
+          if (streams.entities) {
+            await writeAsync(streams.entities, entity);
+          }
+        });
       },
 
-      async links(link) {
+      async links(links) {
         if (!streams.links) {
           streams.links = await provider.createLinksWriteStream();
         }
-
-        await writeAsync(streams.links, link);
+        links.map(async (link) => {
+          if (streams.links) {
+            await writeAsync(streams.links, link);
+          }
+        });
       },
 
-      async configuration(config) {
+      async configuration(configs) {
         if (!streams.configuration) {
           streams.configuration = await provider.createConfigurationWriteStream();
         }
-
-        await writeAsync(streams.configuration, config);
+        configs.map(async (config) => {
+          if (streams.configuration) {
+            await writeAsync(streams.configuration, config);
+          }
+        });
       },
 
-      async assets(payload) {
+      async assets(payloads) {
         // TODO: close the stream upong receiving an 'end' event instead
-        if (payload === null) {
+        if (payloads === null) {
           streams.assets?.end();
           return;
         }
-
-        const { action, assetID } = payload;
 
         if (!streams.assets) {
           streams.assets = await provider.createAssetsWriteStream();
         }
 
-        if (action === 'start') {
-          assets[assetID] = { ...payload.data, stream: new PassThrough() };
-          writeAsync(streams.assets, assets[assetID]);
-        }
+        for (const payload of payloads as Array<TransferAssetFlow>) {
+          if (streams.assets.closed) {
+            return;
+          }
 
-        if (action === 'stream') {
-          // The buffer has gone through JSON operations and is now of shape { type: "Buffer"; data: UInt8Array }
-          // We need to transform it back into a Buffer instance
-          const rawBuffer = payload.data as unknown as { type: 'Buffer'; data: Uint8Array };
-          const chunk = Buffer.from(rawBuffer.data);
+          const { action, assetID } = payload;
 
-          await writeAsync(assets[assetID].stream, chunk);
-        }
+          if (action === 'start' && streams.assets) {
+            assets[assetID] = { ...payload.data, stream: new PassThrough() };
+            writeAsync(streams.assets, assets[assetID]);
+          }
 
-        if (action === 'end') {
-          await new Promise<void>((resolve, reject) => {
-            const { stream } = assets[assetID];
+          if (action === 'stream') {
+            // The buffer has gone through JSON operations and is now of shape { type: "Buffer"; data: UInt8Array }
+            // We need to transform it back into a Buffer instance
+            const rawBuffer = payload.data as unknown as { type: 'Buffer'; data: Uint8Array };
+            const chunk = Buffer.from(rawBuffer.data);
 
-            stream
-              .on('close', () => {
-                delete assets[assetID];
-                resolve();
-              })
-              .on('error', reject)
-              .end();
-          });
+            await writeAsync(assets[assetID].stream, chunk);
+          }
+
+          if (action === 'end') {
+            await new Promise<void>((resolve, reject) => {
+              const { stream } = assets[assetID];
+
+              stream
+                .on('close', () => {
+                  delete assets[assetID];
+                  resolve();
+                })
+                .on('error', (e) => {
+                  reject(e);
+                })
+                .end();
+            });
+          }
         }
       },
     },
