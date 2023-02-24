@@ -5,4 +5,4 @@ export const SeverityKind: Record<string, ErrorDiagnosticSeverity> = {
   ERROR: 'error',
   SILLY: 'silly',
 } as const;
-export type Severity = (typeof SeverityKind)[keyof typeof SeverityKind];
+export type Severity = typeof SeverityKind[keyof typeof SeverityKind];
