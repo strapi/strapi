@@ -366,7 +366,16 @@ describe('Entity service', () => {
 
         const fakeStrapi = {
           getModel: jest.fn((modelName) => fakeModels[modelName]),
+          query: jest.fn(() => fakeQuery),
+          db: {
+            dialect: {
+              client: 'sqlite',
+            },
+          },
         };
+
+        global.strapi = fakeStrapi;
+
         instance = createEntityService({
           strapi: fakeStrapi,
           db: fakeDB,

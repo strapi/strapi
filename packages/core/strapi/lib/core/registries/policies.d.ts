@@ -6,4 +6,8 @@ interface PolicyContext extends BaseContext {
   is(name): boolean;
 }
 
-export type Policy<T=unknown> = (ctx: PolicyContext,cfg:T, { strapi: Strapi }) => boolean | undefined;
+export type Policy<T = unknown> = (
+  ctx: PolicyContext,
+  cfg: T,
+  { strapi: Strapi }
+) => boolean | undefined;

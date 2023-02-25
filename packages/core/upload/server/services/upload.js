@@ -18,15 +18,14 @@ const {
   nameToSlug,
   contentTypes: contentTypesUtils,
   webhook: webhookUtils,
+  errors: { ApplicationError, NotFoundError },
+  file: { bytesToKbytes },
 } = require('@strapi/utils');
-const { NotFoundError } = require('@strapi/utils').errors;
 
 const { MEDIA_UPDATE, MEDIA_CREATE, MEDIA_DELETE } = webhookUtils.webhookEvents;
 
-const { ApplicationError } = require('@strapi/utils/lib/errors');
 const { FILE_MODEL_UID } = require('../constants');
 const { getService } = require('../utils');
-const { bytesToKbytes } = require('../utils/file');
 
 const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
 
@@ -182,7 +181,7 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * When uploading an image, an additional thubmnail is generated.
+   * When uploading an image, an additional thumbnail is generated.
    * Also, if there are responsive formats defined, another set of images will be generated too.
    *
    * @param {*} fileData
@@ -244,8 +243,9 @@ module.exports = ({ strapi }) => ({
    */
   async uploadFileAndPersist(fileData, { user } = {}) {
     const config = strapi.config.get('plugin.upload');
-
     const { isImage } = getService('image-manipulation');
+
+    await getService('provider').checkFileSize(fileData);
 
     if (await isImage(fileData)) {
       await this.uploadImage(fileData);

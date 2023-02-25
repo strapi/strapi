@@ -1,6 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FolderCard has all required ids set when rendering a start action 1`] = `
+.c14 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 500;
+  color: #32324d;
+}
+
 .c0 {
   position: relative;
 }
@@ -72,25 +79,6 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
-}
-
-.c18 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
-.c14 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 500;
-  color: #32324d;
 }
 
 .c4 > * {
@@ -170,6 +158,18 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   background-color: #8e8ea9;
 }
 
+.c18 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
 .c17 {
   position: absolute;
   top: 12px;
@@ -224,8 +224,6 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
     />
     <div
       class="c2 c3 c4"
-      cursor="pointer"
-      spacing="2"
     >
       <div
         class="c5"
@@ -282,7 +280,6 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
       >
         <div
           class="c16 c3 c4 c17"
-          spacing="2"
         />
       </div>
     </div>
@@ -313,6 +310,13 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 `;
 
 exports[`FolderCard renders and matches the snapshot 1`] = `
+.c12 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 500;
+  color: #32324d;
+}
+
 .c0 {
   position: relative;
 }
@@ -381,6 +385,15 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
   flex-direction: column;
 }
 
+.c4 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c4 > * + * {
+  margin-left: 8px;
+}
+
 .c16 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -391,22 +404,6 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
   padding: 0;
   position: absolute;
   width: 1px;
-}
-
-.c12 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 500;
-  color: #32324d;
-}
-
-.c4 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c4 > * + * {
-  margin-left: 8px;
 }
 
 .c15 {
@@ -463,8 +460,6 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
     />
     <div
       class="c2 c3 c4"
-      cursor="pointer"
-      spacing="2"
     >
       <div
         class="c5"
@@ -508,7 +503,6 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
       >
         <div
           class="c14 c3 c4 c15"
-          spacing="2"
         />
       </div>
     </div>

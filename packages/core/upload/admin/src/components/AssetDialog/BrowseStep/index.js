@@ -4,19 +4,18 @@ import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 
 import { usePersistentState } from '@strapi/helper-plugin';
-import { Button } from '@strapi/design-system/Button';
-import { Flex } from '@strapi/design-system/Flex';
-import { Box } from '@strapi/design-system/Box';
-import { Divider } from '@strapi/design-system/Divider';
-import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import { GridItem } from '@strapi/design-system/Grid';
-import { Typography } from '@strapi/design-system/Typography';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { IconButton } from '@strapi/design-system/IconButton';
-import PencilIcon from '@strapi/icons/Pencil';
-import PlusIcon from '@strapi/icons/Plus';
-import Grid from '@strapi/icons/Grid';
-import List from '@strapi/icons/List';
+import {
+  Button,
+  Flex,
+  Box,
+  Divider,
+  BaseCheckbox,
+  GridItem,
+  Typography,
+  IconButton,
+  VisuallyHidden,
+} from '@strapi/design-system';
+import { Pencil, Plus, Grid, List } from '@strapi/icons';
 
 import {
   FolderDefinition,
@@ -211,7 +210,7 @@ export const BrowseStep = ({
               canCreate &&
               !isFiltering &&
               !isSearching && (
-                <Button variant="secondary" startIcon={<PlusIcon />} onClick={onAddAsset}>
+                <Button variant="secondary" startIcon={<Plus />} onClick={onAddAsset}>
                   {formatMessage({
                     id: getTrad('header.actions.add-assets'),
                     defaultMessage: 'Add new assets',
@@ -286,7 +285,7 @@ export const BrowseStep = ({
                       cardActions={
                         onEditFolder && (
                           <IconButton
-                            icon={<PencilIcon />}
+                            icon={<Pencil />}
                             aria-label={formatMessage({
                               id: getTrad('list.folder.edit'),
                               defaultMessage: 'Edit folder',

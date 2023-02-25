@@ -47,6 +47,13 @@ describe('<InputUID />', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c2 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
       .c7 {
         padding-right: 12px;
         padding-left: 8px;
@@ -96,13 +103,6 @@ describe('<InputUID />', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
-      }
-
-      .c2 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
       }
 
       .c1 > * {
@@ -217,11 +217,10 @@ describe('<InputUID />', () => {
         <div>
           <div
             class="c0 c1"
-            spacing="1"
           >
             <label
               class="c2"
-              for="textinput-1"
+              for="1"
             >
               <div
                 class="c3"
@@ -237,7 +236,7 @@ describe('<InputUID />', () => {
                 aria-invalid="false"
                 aria-required="false"
                 class="c6"
-                id="textinput-1"
+                id="1"
                 name="test"
                 placeholder=""
                 value="michka"

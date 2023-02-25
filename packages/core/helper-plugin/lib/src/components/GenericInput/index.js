@@ -22,10 +22,9 @@ import {
   TimePicker,
   ToggleInput,
   JSONInput,
+  Option,
 } from '@strapi/design-system';
-import { Option } from '@strapi/design-system/Select';
-import EyeStriked from '@strapi/icons/EyeStriked';
-import Eye from '@strapi/icons/Eye';
+import { EyeStriked, Eye } from '@strapi/icons';
 
 import NotSupported from './NotSupported';
 import useFieldHint from '../../hooks/useFieldHint';
@@ -146,7 +145,9 @@ const GenericInput = ({
           hint={hint}
           required={required}
           onChange={(json) => {
-            onChange({ target: { name, value: json } });
+            // Default to null when the field is not required and there is no input value
+            const value = !attribute.required && !json.length ? 'null' : json;
+            onChange({ target: { name, value } });
           }}
           minHeight={pxToRem(252)}
           maxHeight={pxToRem(504)}

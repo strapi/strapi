@@ -3,20 +3,21 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';
-import { Button } from '@strapi/design-system/Button';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Flex } from '@strapi/design-system/Flex';
-import { Loader } from '@strapi/design-system/Loader';
 import {
+  Button,
+  Grid,
+  GridItem,
+  Flex,
+  Loader,
   ModalLayout,
   ModalHeader,
   ModalBody,
   ModalFooter,
-} from '@strapi/design-system/ModalLayout';
-import { FieldLabel } from '@strapi/design-system/Field';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
-import { Form, getAPIInnerErrors } from '@strapi/helper-plugin';
+  FieldLabel,
+  Stack,
+  Typography,
+} from '@strapi/design-system';
+import { Form, normalizeAPIError } from '@strapi/helper-plugin';
 
 import { useBulkMove } from '../../hooks/useBulkMove';
 import { getTrad } from '../../utils';
@@ -38,9 +39,10 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
       await move(values.destination.value, selected);
       onClose();
     } catch (error) {
-      const errors = getAPIInnerErrors(error, { getTrad });
-      const formikErrors = Object.entries(errors).reduce((acc, [key, error]) => {
-        acc[key || 'destination'] = error.defaultMessage;
+      const normalizedError = normalizeAPIError(error);
+
+      const formikErrors = normalizedError.errors.reduce((acc, error) => {
+        acc[error.values?.path?.length || 'destination'] = error.defaultMessage;
 
         return acc;
       }, {});
