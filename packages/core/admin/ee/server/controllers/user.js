@@ -2,7 +2,7 @@
 
 // eslint-disable-next-line node/no-extraneous-require
 const ee = require('@strapi/strapi/lib/utils/ee');
-const { _, get } = require('lodash');
+const _ = require('lodash');
 const { pick } = require('lodash/fp');
 const { ApplicationError, ForbiddenError } = require('@strapi/utils').errors;
 const { validateUserCreationInput } = require('../validation/user');
@@ -38,7 +38,7 @@ module.exports = {
     }
 
     const { body } = ctx.request;
-    const cleanData = { ...body, email: get(body, `email`, ``).toLowerCase() };
+    const cleanData = { ...body, email: _.get(body, `email`, ``).toLowerCase() };
 
     await validateUserCreationInput(cleanData);
 
