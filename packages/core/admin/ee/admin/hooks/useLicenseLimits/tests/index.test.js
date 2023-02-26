@@ -7,6 +7,15 @@ jest.mock('@strapi/helper-plugin', () => ({
   useFetchClient: jest.fn(() => ({
     get: jest.fn(),
   })),
+  useRBAC: jest.fn(() => ({
+    isLoading: false,
+    allowedActions: {
+      canRead: true,
+      canCreate: true,
+      canUpdate: true,
+      canDelete: true,
+    },
+  })),
 }));
 
 jest.mock('react-query', () => ({
@@ -24,7 +33,9 @@ describe('useLicenseLimits', () => {
     const { result } = renderHook(() => useLicenseLimits());
 
     expect(useFetchClient).toHaveBeenCalled();
-    expect(useQuery).toHaveBeenCalledWith(['ee', 'license-limit-info'], expect.any(Function));
+    expect(useQuery).toHaveBeenCalledWith(['ee', 'license-limit-info'], expect.any(Function), {
+      enabled: true,
+    });
     expect(result.current.license.data).toEqual(data.data);
   });
 
@@ -37,7 +48,9 @@ describe('useLicenseLimits', () => {
     const { result } = renderHook(() => useLicenseLimits());
 
     expect(useFetchClient).toHaveBeenCalled();
-    expect(useQuery).toHaveBeenCalledWith(['ee', 'license-limit-info'], expect.any(Function));
+    expect(useQuery).toHaveBeenCalledWith(['ee', 'license-limit-info'], expect.any(Function), {
+      enabled: true,
+    });
     expect(result.current.license.data).toEqual(undefined);
   });
 });
