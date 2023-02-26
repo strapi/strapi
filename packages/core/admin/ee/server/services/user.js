@@ -1,6 +1,7 @@
 'use strict';
 
-const { pipe, castArray, map, toNumber, omit, pick, has } = require('lodash/fp');
+const _ = require('lodash');
+const { pipe, map, castArray, toNumber } = require('lodash/fp');
 const { stringIncludes } = require('@strapi/utils');
 const { ValidationError } = require('@strapi/utils').errors;
 const { hasSuperAdminRole } = require('../../../server/domain/user');
@@ -65,7 +66,7 @@ const removeFromEEDisabledUsersList = async (ids) => {
  */
 const updateById = async (id, attributes) => {
   // Check at least one super admin remains
-  if (has(attributes, 'roles')) {
+  if (_.has(attributes, 'roles')) {
     const lastAdminUser = await isLastSuperAdminUser(id);
     const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
     const willRemoveSuperAdminRole = !stringIncludes(attributes.roles, superAdminRole.id);
@@ -84,7 +85,7 @@ const updateById = async (id, attributes) => {
   }
 
   // hash password if a new one is sent
-  if (has(attributes, 'password')) {
+  if (_.has(attributes, 'password')) {
     const hashedPassword = await getService('auth').hashPassword(attributes.password);
 
     const updatedUser = await strapi.query('admin::user').update({
@@ -188,7 +189,7 @@ const deleteByIds = async (ids) => {
   return deletedUsers;
 };
 
-const sanitizeUserRoles = (role) => pick(role, ['id', 'name', 'description', 'code']);
+const sanitizeUserRoles = (role) => _.pick(role, ['id', 'name', 'description', 'code']);
 
 /**
  * Check if a user is the last super admin
@@ -207,7 +208,7 @@ const isLastSuperAdminUser = async (userId) => {
  */
 const sanitizeUser = (user) => {
   return {
-    ...omit(user, ['password', 'resetPasswordToken', 'registrationToken', 'roles']),
+    ..._.omit(user, ['password', 'resetPasswordToken', 'registrationToken', 'roles']),
     roles: user.roles && user.roles.map(sanitizeUserRoles),
   };
 };
