@@ -53,8 +53,6 @@ const EditPage = ({ canUpdate }) => {
 
   const { status, data } = useQuery(['user', id], () => fetchUser(id), {
     retry: false,
-    keepPreviousData: false,
-    staleTime: 1000 * 20,
     onError(err) {
       const status = err.response.status;
 
