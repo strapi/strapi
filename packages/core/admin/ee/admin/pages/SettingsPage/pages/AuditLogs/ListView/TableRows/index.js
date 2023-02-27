@@ -1,14 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { IconButton } from '@strapi/design-system/IconButton';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import { Tbody, Td, Tr } from '@strapi/design-system/Table';
-import Eye from '@strapi/icons/Eye';
+import { IconButton, Flex, Typography, Tbody, Td, Tr } from '@strapi/design-system';
+import { Eye } from '@strapi/icons';
 import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import useFormatTimeStamp from '../hooks/useFormatTimeStamp';
-import getDefaultMessage from '../utils/getActionTypesDefaultMessages';
+import { getDefaultMessage } from '../utils/getActionTypesDefaultMessages';
 
 const TableRows = ({ headers, rows, onOpenModal }) => {
   const { formatMessage } = useIntl();

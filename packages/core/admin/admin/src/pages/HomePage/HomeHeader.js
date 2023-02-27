@@ -2,12 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
-import { Link } from '@strapi/design-system/v2/Link';
-import { Stack } from '@strapi/design-system/Stack';
-import { Box } from '@strapi/design-system/Box';
-import { Button } from '@strapi/design-system/Button';
-import ArrowRight from '@strapi/icons/ArrowRight';
+import { Typography, Stack, Box, Button } from '@strapi/design-system';
+import { Link } from '@strapi/design-system/v2';
+import { ArrowRight } from '@strapi/icons';
 
 const WordWrap = styled(Typography)`
   word-break: break-word;

@@ -336,18 +336,6 @@ describe('Role CRUD End to End', () => {
                 "subCategory": "general",
               },
               {
-                "action": "admin::marketplace.plugins.install",
-                "category": "plugins and marketplace",
-                "displayName": "Install (only for dev env)",
-                "subCategory": "plugins",
-              },
-              {
-                "action": "admin::marketplace.plugins.uninstall",
-                "category": "plugins and marketplace",
-                "displayName": "Uninstall (only for dev env)",
-                "subCategory": "plugins",
-              },
-              {
                 "action": "admin::marketplace.read",
                 "category": "plugins and marketplace",
                 "displayName": "Access the marketplace",
@@ -388,6 +376,42 @@ describe('Role CRUD End to End', () => {
                 "category": "users and roles",
                 "displayName": "Update",
                 "subCategory": "roles",
+              },
+              {
+                "action": "admin::transfer.tokens.access",
+                "category": "transfer tokens",
+                "displayName": "Access the transfer tokens settings page",
+                "subCategory": "transfer tokens",
+              },
+              {
+                "action": "admin::transfer.tokens.create",
+                "category": "transfer tokens",
+                "displayName": "Create (generate)",
+                "subCategory": "general",
+              },
+              {
+                "action": "admin::transfer.tokens.delete",
+                "category": "transfer tokens",
+                "displayName": "Delete (revoke)",
+                "subCategory": "general",
+              },
+              {
+                "action": "admin::transfer.tokens.read",
+                "category": "transfer tokens",
+                "displayName": "Read",
+                "subCategory": "general",
+              },
+              {
+                "action": "admin::transfer.tokens.regenerate",
+                "category": "transfer tokens",
+                "displayName": "Regenerate",
+                "subCategory": "general",
+              },
+              {
+                "action": "admin::transfer.tokens.update",
+                "category": "transfer tokens",
+                "displayName": "Update",
+                "subCategory": "general",
               },
               {
                 "action": "admin::users.create",
@@ -851,18 +875,6 @@ describe('Role CRUD End to End', () => {
                   "subCategory": "options",
                 },
                 {
-                  "action": "admin::marketplace.plugins.install",
-                  "category": "plugins and marketplace",
-                  "displayName": "Install (only for dev env)",
-                  "subCategory": "plugins",
-                },
-                {
-                  "action": "admin::marketplace.plugins.uninstall",
-                  "category": "plugins and marketplace",
-                  "displayName": "Uninstall (only for dev env)",
-                  "subCategory": "plugins",
-                },
-                {
                   "action": "admin::marketplace.read",
                   "category": "plugins and marketplace",
                   "displayName": "Access the marketplace",
@@ -915,6 +927,42 @@ describe('Role CRUD End to End', () => {
                   "category": "users and roles",
                   "displayName": "Update",
                   "subCategory": "roles",
+                },
+                {
+                  "action": "admin::transfer.tokens.access",
+                  "category": "transfer tokens",
+                  "displayName": "Access the transfer tokens settings page",
+                  "subCategory": "transfer tokens",
+                },
+                {
+                  "action": "admin::transfer.tokens.create",
+                  "category": "transfer tokens",
+                  "displayName": "Create (generate)",
+                  "subCategory": "general",
+                },
+                {
+                  "action": "admin::transfer.tokens.delete",
+                  "category": "transfer tokens",
+                  "displayName": "Delete (revoke)",
+                  "subCategory": "general",
+                },
+                {
+                  "action": "admin::transfer.tokens.read",
+                  "category": "transfer tokens",
+                  "displayName": "Read",
+                  "subCategory": "general",
+                },
+                {
+                  "action": "admin::transfer.tokens.regenerate",
+                  "category": "transfer tokens",
+                  "displayName": "Regenerate",
+                  "subCategory": "general",
+                },
+                {
+                  "action": "admin::transfer.tokens.update",
+                  "category": "transfer tokens",
+                  "displayName": "Update",
+                  "subCategory": "general",
                 },
                 {
                   "action": "admin::users.create",
@@ -1365,18 +1413,6 @@ describe('Role CRUD End to End', () => {
                   "category": "api tokens",
                   "displayName": "Update",
                   "subCategory": "general",
-                },
-                {
-                  "action": "admin::marketplace.plugins.install",
-                  "category": "plugins and marketplace",
-                  "displayName": "Install (only for dev env)",
-                  "subCategory": "plugins",
-                },
-                {
-                  "action": "admin::marketplace.plugins.uninstall",
-                  "category": "plugins and marketplace",
-                  "displayName": "Uninstall (only for dev env)",
-                  "subCategory": "plugins",
                 },
                 {
                   "action": "admin::marketplace.read",

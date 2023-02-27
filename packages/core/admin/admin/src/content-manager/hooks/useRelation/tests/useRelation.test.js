@@ -2,12 +2,12 @@ import React from 'react';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { axiosInstance } from '../../../../core/utils';
+import { useFetchClient } from '@strapi/helper-plugin';
 import { useRelation } from '../useRelation';
 
-jest.mock('../../../../core/utils', () => ({
-  ...jest.requireActual('../../../../core/utils'),
-  axiosInstance: {
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useFetchClient: jest.fn().mockReturnValue({
     get: jest.fn().mockResolvedValue({
       data: {
         results: [
@@ -17,7 +17,7 @@ jest.mock('../../../../core/utils', () => ({
         pagination: { page: 1, pageCount: 10 },
       },
     }),
-  },
+  }),
 }));
 
 const client = new QueryClient({
@@ -85,9 +85,11 @@ describe('useRelation', () => {
       },
     });
 
-    await waitFor(() => expect(axiosInstance.get).toBeCalledTimes(1));
+    const { get } = useFetchClient();
 
-    expect(axiosInstance.get).toBeCalledWith('/', {
+    await waitFor(() => expect(get).toBeCalledTimes(1));
+
+    expect(get).toBeCalledWith('/', {
       params: {
         limit: 10,
         page: 1,
@@ -110,7 +112,7 @@ describe('useRelation', () => {
       title: 'xToOne relation',
     };
 
-    axiosInstance.get = jest.fn().mockResolvedValueOnce({
+    useFetchClient().get = jest.fn().mockResolvedValueOnce({
       data: {
         data: FIXTURE,
       },
@@ -134,7 +136,9 @@ describe('useRelation', () => {
 
     await waitForNextUpdate();
 
-    expect(axiosInstance.get).toBeCalledWith(expect.any(String), {
+    const { get } = useFetchClient();
+
+    expect(get).toBeCalledWith(expect.any(String), {
       params: {
         limit: 5,
         page: expect.any(Number),
@@ -144,8 +148,9 @@ describe('useRelation', () => {
 
   test('does not fetch relations if it was not enabled', async () => {
     await setup({ relation: { enabled: false } });
+    const { get } = useFetchClient();
 
-    expect(axiosInstance.get).not.toBeCalled();
+    expect(get).not.toBeCalled();
   });
 
   test('fetch relations', async () => {
@@ -153,9 +158,11 @@ describe('useRelation', () => {
 
     await waitForNextUpdate();
 
+    const { get } = useFetchClient();
+
     expect(result.current.relations.isSuccess).toBe(true);
-    expect(axiosInstance.get).toBeCalledTimes(1);
-    expect(axiosInstance.get).toBeCalledWith('/', {
+    expect(get).toBeCalledTimes(1);
+    expect(get).toBeCalledWith('/', {
       params: {
         limit: 10,
         page: 1,
@@ -164,7 +171,7 @@ describe('useRelation', () => {
   });
 
   test('fetch relations next page, if there is one', async () => {
-    axiosInstance.get = jest.fn().mockResolvedValueOnce({
+    useFetchClient().get = jest.fn().mockResolvedValueOnce({
       data: {
         results: [],
         pagination: {
@@ -174,6 +181,8 @@ describe('useRelation', () => {
       },
     });
 
+    const { get } = useFetchClient();
+
     const { result, waitForNextUpdate } = await setup();
 
     await waitForNextUpdate();
@@ -184,14 +193,14 @@ describe('useRelation', () => {
 
     await waitForNextUpdate();
 
-    expect(axiosInstance.get).toBeCalledTimes(2);
-    expect(axiosInstance.get).toHaveBeenNthCalledWith(1, expect.any(String), {
+    expect(get).toBeCalledTimes(2);
+    expect(get).toHaveBeenNthCalledWith(1, expect.any(String), {
       params: {
         limit: expect.any(Number),
         page: 1,
       },
     });
-    expect(axiosInstance.get).toHaveBeenNthCalledWith(2, expect.any(String), {
+    expect(get).toHaveBeenNthCalledWith(2, expect.any(String), {
       params: {
         limit: expect.any(Number),
         page: 2,
@@ -200,7 +209,7 @@ describe('useRelation', () => {
   });
 
   test("does not fetch relations next page, if there isn't one", async () => {
-    axiosInstance.get = jest.fn().mockResolvedValueOnce({
+    useFetchClient().get = jest.fn().mockResolvedValueOnce({
       data: {
         results: [],
         pagination: {
@@ -210,6 +219,8 @@ describe('useRelation', () => {
       },
     });
 
+    const { get } = useFetchClient();
+
     const { result, waitForNextUpdate } = await setup();
 
     await waitForNextUpdate();
@@ -220,7 +231,7 @@ describe('useRelation', () => {
 
     await waitForNextUpdate();
 
-    expect(axiosInstance.get).toBeCalledTimes(1);
+    expect(get).toBeCalledTimes(1);
   });
 
   test('does not fetch search by default', async () => {
@@ -239,7 +250,7 @@ describe('useRelation', () => {
     const spy = jest
       .fn()
       .mockResolvedValue({ data: { results: [], pagination: { page: 1, pageCount: 2 } } });
-    axiosInstance.get = spy;
+    useFetchClient().get = spy;
 
     act(() => {
       result.current.searchFor('something');
@@ -261,7 +272,7 @@ describe('useRelation', () => {
     const spy = jest
       .fn()
       .mockResolvedValue({ data: { values: [], pagination: { page: 1, pageCount: 2 } } });
-    axiosInstance.get = spy;
+    useFetchClient().get = spy;
 
     act(() => {
       result.current.searchFor('something');
@@ -285,7 +296,7 @@ describe('useRelation', () => {
     const spy = jest
       .fn()
       .mockResolvedValue({ data: { results: [], pagination: { page: 1, pageCount: 2 } } });
-    axiosInstance.get = spy;
+    useFetchClient().get = spy;
 
     act(() => {
       result.current.searchFor('something');
@@ -322,7 +333,7 @@ describe('useRelation', () => {
     const spy = jest.fn().mockResolvedValueOnce({
       data: { results: [], pagination: { page: 1, pageCount: 1 } },
     });
-    axiosInstance.get = spy;
+    useFetchClient().get = spy;
 
     act(() => {
       result.current.searchFor('something');

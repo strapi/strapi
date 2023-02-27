@@ -10,10 +10,11 @@ import { useTracking, LoadingIndicatorPage, useStrapiApp } from '@strapi/helper-
 import { useDispatch, useSelector } from 'react-redux';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+
 import GuidedTourModal from '../../components/GuidedTour/Modal';
 import LeftMenu from '../../components/LeftMenu';
 import AppLayout from '../../layouts/AppLayout';
-import { useMenu } from '../../hooks';
+import { useMenu, useConfigurations } from '../../hooks';
 import { createRoute } from '../../utils';
 import { SET_APP_RUNTIME_STATUS } from '../App/constants';
 import Onboarding from './Onboarding';
@@ -65,6 +66,7 @@ const Admin = () => {
   useTrackUsage();
   const { isLoading, generalSectionLinks, pluginsSectionLinks } = useMenu();
   const { menu } = useStrapiApp();
+  const { showTutorials } = useConfigurations();
 
   const routes = useMemo(() => {
     return menu
@@ -106,7 +108,8 @@ const Admin = () => {
           </Switch>
         </Suspense>
         <GuidedTourModal />
-        <Onboarding />
+
+        {showTutorials && <Onboarding />}
       </AppLayout>
     </DndProvider>
   );

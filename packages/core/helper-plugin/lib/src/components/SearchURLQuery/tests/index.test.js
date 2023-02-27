@@ -33,32 +33,12 @@ describe('<SearchURLQuery />', () => {
     const { container } = render(makeApp(history));
 
     expect(container).toMatchInlineSnapshot(`
-      .c5 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
       .c3 {
         color: #32324d;
       }
 
-      .c2 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
+      .c4 path {
+        fill: #32324d;
       }
 
       .c0 {
@@ -119,6 +99,18 @@ describe('<SearchURLQuery />', () => {
         border: 2px solid #4945ff;
       }
 
+      .c2 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
       .c1 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -159,15 +151,11 @@ describe('<SearchURLQuery />', () => {
         fill: #666687;
       }
 
-      .c4 path {
-        fill: #32324d;
-      }
-
       <div>
         <span>
           <button
             aria-disabled="false"
-            aria-labelledby="tooltip-1"
+            aria-labelledby="0"
             class="c0 c1"
             tabindex="0"
             type="button"
@@ -197,7 +185,7 @@ describe('<SearchURLQuery />', () => {
           </button>
         </span>
         <div
-          class="c5"
+          class="c2"
         >
           <p
             aria-live="polite"
@@ -229,16 +217,11 @@ describe('<SearchURLQuery />', () => {
     fireEvent.click(container.querySelector('button[type="button"]'));
 
     expect(container).toMatchInlineSnapshot(`
-      .c11 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
+      .c2 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
       }
 
       .c7 {
@@ -278,11 +261,16 @@ describe('<SearchURLQuery />', () => {
         justify-content: space-between;
       }
 
-      .c2 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
+      .c1 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
       }
 
       .c10 {
@@ -346,18 +334,6 @@ describe('<SearchURLQuery />', () => {
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c1 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
       .c9 {
         font-size: 0.8rem;
       }
@@ -404,7 +380,7 @@ describe('<SearchURLQuery />', () => {
                 >
                   <label
                     class="c2"
-                    for="field-5"
+                    for="4"
                   >
                     <div
                       class="c3"
@@ -444,7 +420,7 @@ describe('<SearchURLQuery />', () => {
                     aria-invalid="false"
                     aria-required="false"
                     class="c10"
-                    id="field-5"
+                    id="4"
                     name="search"
                     value=""
                   />
@@ -454,7 +430,7 @@ describe('<SearchURLQuery />', () => {
           </form>
         </div>
         <div
-          class="c11"
+          class="c1"
         >
           <p
             aria-live="polite"

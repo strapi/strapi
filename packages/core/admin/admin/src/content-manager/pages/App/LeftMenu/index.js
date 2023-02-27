@@ -15,7 +15,7 @@ import {
   SubNavSection,
   SubNavSections,
   SubNavLink,
-} from '@strapi/design-system/v2/SubNav';
+} from '@strapi/design-system/v2';
 
 import { matchByTitle } from './utils';
 import getTrad from '../../../utils/getTrad';

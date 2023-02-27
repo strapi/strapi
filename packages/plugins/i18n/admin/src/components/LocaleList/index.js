@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Button } from '@strapi/design-system/Button';
-import { Main } from '@strapi/design-system/Main';
-import { EmptyStateLayout } from '@strapi/design-system';
-import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
+import { Button, Main, EmptyStateLayout, ContentLayout, HeaderLayout } from '@strapi/design-system';
 import { useFocusWhenNavigate } from '@strapi/helper-plugin';
-import Plus from '@strapi/icons/Plus';
-import EmptyDocuments from '@strapi/icons/EmptyDocuments';
+import { Plus, EmptyDocuments } from '@strapi/icons';
 import useLocales from '../../hooks/useLocales';
 import { getTrad } from '../../utils';
 import ModalEdit from '../ModalEdit';

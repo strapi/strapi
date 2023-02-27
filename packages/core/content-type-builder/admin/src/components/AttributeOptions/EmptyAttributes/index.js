@@ -1,13 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import { LinkButton } from '@strapi/design-system/LinkButton';
-import { Icon } from '@strapi/design-system/Icon';
-import Plus from '@strapi/icons/Plus';
-import EmptyStateDocument from '@strapi/icons/EmptyDocuments';
+import qs from 'qs';
+import { Box, Flex, Typography, LinkButton, Icon } from '@strapi/design-system';
+import { Plus, EmptyStateDocument } from '@strapi/icons';
 import { getTrad } from '../../../utils';
 
 const EmptyCard = styled(Box)`
@@ -62,7 +58,11 @@ const EmptyAttributes = () => {
               </Box>
             </Box>
           </Box>
-          <LinkButton to="/marketplace" variant="secondary" startIcon={<Plus />}>
+          <LinkButton
+            to={`/marketplace?${qs.stringify({ categories: ['Custom fields'] })}`}
+            variant="secondary"
+            startIcon={<Plus />}
+          >
             {formatMessage({
               id: getTrad('modalForm.empty.button'),
               defaultMessage: 'Add custom fields',

@@ -8,18 +8,6 @@ const hasPermissionsTestData = {
         properties: {},
         conditions: [],
       },
-      {
-        action: 'admin::marketplace.plugins.install',
-        subject: null,
-        properties: {},
-        conditions: [],
-      },
-      {
-        action: 'admin::marketplace.plugins.uninstall',
-        subject: null,
-        properties: {},
-        conditions: ['customCondition'],
-      },
 
       // Admin webhooks
       {
@@ -222,13 +210,6 @@ const hasPermissionsTestData = {
       },
     ],
     user2: [
-      {
-        action: 'admin::marketplace.plugins.install',
-        subject: null,
-        properties: {},
-        conditions: ['some condition'],
-      },
-
       // Admin webhooks
       {
         action: 'admin::webhooks.create',
@@ -411,14 +392,8 @@ const hasPermissionsTestData = {
     ],
   },
   permissionsToCheck: {
-    listPlugins: [
-      { action: 'admin::marketplace.read', subject: null },
-      { action: 'admin::marketplace.plugins.uninstall', subject: null },
-    ],
-    marketplace: [
-      { action: 'admin::marketplace.read', subject: null },
-      { action: 'admin::marketplace.plugins.install', subject: null },
-    ],
+    listPlugins: [{ action: 'admin::marketplace.read', subject: null }],
+    marketplace: [{ action: 'admin::marketplace.read', subject: null }],
     settings: [
       // webhooks
       { action: 'admin::webhook.create', subject: null },

@@ -1,13 +1,13 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
+import { useAppInfos } from '@strapi/helper-plugin';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import Onboarding from '../index';
 
-jest.mock('../../../../hooks', () => ({
-  useConfigurations: jest.fn(() => {
-    return { showTutorials: true };
-  }),
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useAppInfos: jest.fn(() => ({ communityEdition: true })),
 }));
 
 const App = (
@@ -19,18 +19,42 @@ const App = (
 );
 
 describe('Onboarding', () => {
-  it('renders and matches the snapshot', async () => {
-    const {
-      container: { firstChild },
-    } = render(App);
+  test.each([
+    'watch more videos',
+    'build a content architecture',
+    'add & manage content',
+    'manage media',
+    'documentation',
+    'cheatsheet',
+    'get help',
+  ])('should display %s link', (link) => {
+    const { getByRole } = render(App);
 
-    expect(firstChild).toMatchSnapshot();
+    fireEvent.click(getByRole('button', { name: /open help menu/i }));
+
+    expect(getByRole('link', { name: new RegExp(link, 'i') })).toBeInTheDocument();
   });
 
-  it('should open links when button is clicked', () => {
-    render(App);
+  test('should display discord link for CE edition', () => {
+    const { getByRole } = render(App);
 
-    fireEvent.click(document.querySelector('#onboarding'));
-    expect(screen.getByText('Documentation')).toBeInTheDocument();
+    fireEvent.click(getByRole('button', { name: /open help menu/i }));
+
+    expect(getByRole('link', { name: /get help/i })).toHaveAttribute(
+      'href',
+      'https://discord.strapi.io'
+    );
+  });
+
+  test('should display support link for EE edition', () => {
+    useAppInfos.mockImplementation(() => ({ communityEdition: false }));
+    const { getByRole } = render(App);
+
+    fireEvent.click(getByRole('button', { name: /open help menu/i }));
+
+    expect(getByRole('link', { name: /get help/i })).toHaveAttribute(
+      'href',
+      'https://support.strapi.io/support/home'
+    );
   });
 });

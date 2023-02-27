@@ -2,7 +2,7 @@
 
 module.exports = {
   kind: 'collectionType',
-  collectionName: 'audit_logs',
+  collectionName: 'strapi_audit_logs',
   info: {
     singularName: 'audit-log',
     pluralName: 'audit-logs',

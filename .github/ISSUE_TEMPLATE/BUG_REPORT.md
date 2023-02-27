@@ -28,6 +28,7 @@ https://github.com/strapi/strapi/blob/main/CONTRIBUTING.md#reporting-an-issue
 - Strapi version:
 - Database:
 - Operating system:
+- Is your project Javascript or Typescript:
 
 ### Describe the bug
 

@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Select, Option } from '@strapi/design-system/Select';
+import { Select, Option } from '@strapi/design-system';
 import { useQuery } from 'react-query';
 import styled, { keyframes } from 'styled-components';
-import LoadingIcon from '@strapi/icons/Loader';
-import { axiosInstance } from '../../../../../../core/utils';
+import { Loader as LoadingIcon } from '@strapi/icons';
+import { getFetchClient } from '@strapi/helper-plugin';
 
 const rotation = keyframes`
   from {
@@ -27,7 +27,8 @@ const Loader = () => (
 );
 
 const fetchData = async () => {
-  const { data } = await axiosInstance.get('/admin/roles');
+  const { get } = getFetchClient();
+  const { data } = await get('/admin/roles');
 
   return data.data;
 };
