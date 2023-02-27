@@ -65,9 +65,31 @@ export const createTransferHandler = (options: IHandlerOptions) => {
         }
 
         /**
+         * Format error & message to follow the remote transfer protocol
+         */
+        const sendErrorResponse = (uuid: string | undefined, e: Error | null = null) => {
+          return new Promise<void>((resolve, reject) => {
+            const payload = JSON.stringify({
+              uuid,
+              error: e
+                ? {
+                    code: 'ERR',
+                    message: e?.message,
+                  }
+                : null,
+            });
+
+            ws.send(payload, (error) => (error ? reject(error) : resolve()));
+          });
+        };
+        /**
          * Format message to follow the remote transfer protocol
          */
         const sendResponse = <T = unknown>(uuid: string, data: T) => {
+          if (data instanceof Error) {
+            return sendErrorResponse(uuid, data);
+          }
+
           return new Promise<void>((resolve, reject) => {
             if (!uuid) {
               reject(new Error('Missing uuid for this message'));
@@ -77,33 +99,6 @@ export const createTransferHandler = (options: IHandlerOptions) => {
             const payload = JSON.stringify({
               uuid,
               data: data ?? null,
-            });
-
-            ws.send(payload, (error) => (error ? reject(error) : resolve()));
-          });
-        };
-
-        /**
-         * Format error & message to follow the remote transfer protocol
-         */
-        const sendErrorResponse = <T = unknown>(
-          uuid: string | undefined,
-          e: Error | null = null
-        ) => {
-          return new Promise<void>((resolve, reject) => {
-            if (!uuid && !e) {
-              reject(new Error('Missing uuid for this message'));
-              return;
-            }
-
-            const payload = JSON.stringify({
-              uuid,
-              error: e
-                ? {
-                    code: 'ERR',
-                    message: e?.message,
-                  }
-                : null,
             });
 
             ws.send(payload, (error) => (error ? reject(error) : resolve()));
