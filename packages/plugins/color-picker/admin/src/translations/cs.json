@@ -8,7 +8,5 @@
   "color-picker.options.advanced.requiredField": "Povinné pole",
   "color-picker.options.advanced.requiredField.description": "Pokud je toto pole prázdné, nebudete moci vytvořit záznam",
   "color-picker.settings": "Nastavení",
-  "color-picker.toggle.aria-label": "Přepínač výběru barvy",
-  "plugin.description.long": "A Strapi-maintained color picker custom field. Use saturation and hue sliders to select a color and save the value as a HEX string.",
-  "plugin.description.short": "A Strapi-maintained color picker custom field."
+  "color-picker.toggle.aria-label": "Přepínač výběru barvy"
 }
