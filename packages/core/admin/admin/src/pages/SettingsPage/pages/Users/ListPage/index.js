@@ -7,6 +7,7 @@ import {
   useNotification,
   useFocusWhenNavigate,
   NoPermissions,
+  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import {
   ActionLayout,
@@ -30,6 +31,7 @@ import displayedFilters from './utils/displayedFilters';
 import tableHeaders from './utils/tableHeaders';
 
 const ListPage = () => {
+  const { formatAPIError } = useAPIErrorHandler();
   const [isModalOpened, setIsModalOpen] = useState(false);
   const {
     allowedActions: { canCreate, canDelete, canRead },
@@ -71,10 +73,14 @@ const ListPage = () => {
   const { status, data, isFetching } = useQuery(queryName, () => fetchData(search, notifyLoad), {
     enabled: canRead,
     retry: false,
-    onError() {
+    onError(error) {
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        message: {
+          id: 'notification.error',
+          message: formatAPIError(error),
+          defaultMessage: 'An error occured',
+        },
       });
     },
   });
@@ -85,17 +91,20 @@ const ListPage = () => {
 
   const deleteAllMutation = useMutation((ids) => deleteData(ids), {
     async onSuccess() {
-      await queryClient.invalidateQueries(queryName);
+      await queryClient.refetchQueries(queryName);
+
+      // Toggle enabled/ disabled state on the invite button
+      await queryClient.refetchQueries(['ee', 'license-limit-info']);
     },
-    onError(err) {
-      if (err?.response?.data?.data) {
-        toggleNotification({ type: 'warning', message: err.response.data.data });
-      } else {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occured' },
-        });
-      }
+    onError(error) {
+      toggleNotification({
+        type: 'warning',
+        message: {
+          id: 'notification.error',
+          message: formatAPIError(error),
+          defaultMessage: 'An error occured',
+        },
+      });
     },
   });
 
