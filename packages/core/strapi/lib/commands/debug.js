@@ -68,4 +68,3 @@ Dev Dependencies: ${JSON.stringify(app.config.info.devDependencies, null, 2)}`;
 
   await app.destroy();
 };
-
