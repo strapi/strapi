@@ -353,6 +353,8 @@
   "app.components.BlockLink.documentation.content": "Discover the essential concepts, guides and instructions.",
   "app.components.BlockLink.tutorial": "Tutorials",
   "app.components.BlockLink.tutorial.content": "Follow step-by-step instructions to use and customize Strapi.",
+  "app.components.BlockLink.cloud": "Strapi Cloud",
+  "app.components.BlockLink.cloud.content": "A fully composable, and collaborative platform to boost your team velocity.",
   "app.components.Button.cancel": "Cancel",
   "app.components.Button.confirm": "Confirm",
   "app.components.Button.reset": "Reset",

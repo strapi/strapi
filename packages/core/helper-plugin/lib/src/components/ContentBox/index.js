@@ -5,6 +5,7 @@ import { Flex, Stack, Typography } from '@strapi/design-system';
 
 const IconWrapper = styled(Flex)`
   margin-right: ${({ theme }) => theme.spaces[6]};
+
   svg {
     width: ${32 / 16}rem;
     height: ${32 / 16}rem;
