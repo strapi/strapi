@@ -46,6 +46,27 @@ describe('GuidedTour Stepper', () => {
     } = render(App(<Stepper sections={sections} currentSectionKey="s1" />));
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c4 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #ffffff;
+      }
+
+      .c5 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c11 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #666687;
+      }
+
       .c1 {
         margin-right: 20px;
         min-width: 1.875rem;
@@ -142,27 +163,6 @@ describe('GuidedTour Stepper', () => {
         flex-direction: row;
       }
 
-      .c4 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 500;
-        color: #ffffff;
-      }
-
-      .c5 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c11 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 500;
-        color: #666687;
-      }
-
       <div
         class=""
       >
@@ -177,8 +177,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c2 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <span
                   class="c4"
@@ -201,8 +199,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c8"
-                height="100%"
-                width="0.125rem"
               />
             </div>
             <div
@@ -225,8 +221,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c10 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <span
                   class="c11"
@@ -249,8 +243,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c12"
-                height="100%"
-                width="0.125rem"
               />
             </div>
             <div
@@ -269,8 +261,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c10 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <span
                   class="c11"
@@ -306,6 +296,27 @@ describe('GuidedTour Stepper', () => {
     } = render(App(<Stepper sections={sections} currentSectionKey="s2" />));
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c6 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c11 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #ffffff;
+      }
+
+      .c14 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #666687;
+      }
+
       .c1 {
         margin-right: 20px;
         min-width: 1.875rem;
@@ -407,27 +418,6 @@ describe('GuidedTour Stepper', () => {
         flex-direction: row;
       }
 
-      .c6 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c11 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 500;
-        color: #ffffff;
-      }
-
-      .c14 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 500;
-        color: #666687;
-      }
-
       .c5 path {
         fill: #ffffff;
       }
@@ -446,8 +436,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c2 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <svg
                   aria-hidden="true"
@@ -455,7 +443,7 @@ describe('GuidedTour Stepper', () => {
                   fill="none"
                   height="1em"
                   viewBox="0 0 24 24"
-                  width="1rem"
+                  width="1em"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
@@ -479,8 +467,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c9"
-                height="100%"
-                width="0.125rem"
               />
             </div>
             <div
@@ -499,8 +485,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c2 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <span
                   class="c11"
@@ -523,8 +507,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c12"
-                height="100%"
-                width="0.125rem"
               />
             </div>
             <div
@@ -547,8 +529,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c13 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <span
                   class="c14"
@@ -584,6 +564,13 @@ describe('GuidedTour Stepper', () => {
     } = render(App(<Stepper sections={sections} />));
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c6 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
       .c1 {
         margin-right: 20px;
         min-width: 1.875rem;
@@ -667,13 +654,6 @@ describe('GuidedTour Stepper', () => {
         flex-direction: row;
       }
 
-      .c6 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
       .c5 path {
         fill: #ffffff;
       }
@@ -692,8 +672,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c2 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <svg
                   aria-hidden="true"
@@ -701,7 +679,7 @@ describe('GuidedTour Stepper', () => {
                   fill="none"
                   height="1em"
                   viewBox="0 0 24 24"
-                  width="1rem"
+                  width="1em"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
@@ -725,8 +703,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c9"
-                height="100%"
-                width="0.125rem"
               />
             </div>
             <div
@@ -745,8 +721,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c2 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <svg
                   aria-hidden="true"
@@ -754,7 +728,7 @@ describe('GuidedTour Stepper', () => {
                   fill="none"
                   height="1em"
                   viewBox="0 0 24 24"
-                  width="1rem"
+                  width="1em"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
@@ -778,8 +752,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c9"
-                height="100%"
-                width="0.125rem"
               />
             </div>
             <div
@@ -798,8 +770,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c2 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <svg
                   aria-hidden="true"
@@ -807,7 +777,7 @@ describe('GuidedTour Stepper', () => {
                   fill="none"
                   height="1em"
                   viewBox="0 0 24 24"
-                  width="1rem"
+                  width="1em"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path

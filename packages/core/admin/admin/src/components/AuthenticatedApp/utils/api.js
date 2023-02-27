@@ -1,10 +1,11 @@
 import axios from 'axios';
+import { getFetchClient } from '@strapi/helper-plugin';
 import checkLatestStrapiVersion from './checkLatestStrapiVersion';
-import { axiosInstance } from '../../../core/utils';
 import packageJSON from '../../../../../package.json';
 
 const strapiVersion = packageJSON.version;
 const showUpdateNotif = !JSON.parse(localStorage.getItem('STRAPI_UPDATE_NOTIF'));
+const { get } = getFetchClient();
 
 const fetchStrapiLatestRelease = async (toggleNotification) => {
   try {
@@ -38,7 +39,7 @@ const fetchStrapiLatestRelease = async (toggleNotification) => {
 
 const fetchAppInfo = async () => {
   try {
-    const { data, headers } = await axiosInstance.get('/admin/information');
+    const { data, headers } = await get('/admin/information');
 
     if (!headers['content-type'].includes('application/json')) {
       throw new Error('Not found');
@@ -52,7 +53,7 @@ const fetchAppInfo = async () => {
 
 const fetchCurrentUserPermissions = async () => {
   try {
-    const { data, headers } = await axiosInstance.get('/admin/users/me/permissions');
+    const { data, headers } = await get('/admin/users/me/permissions');
 
     if (!headers['content-type'].includes('application/json')) {
       throw new Error('Not found');
@@ -70,7 +71,7 @@ const fetchUserRoles = async () => {
       data: {
         data: { roles },
       },
-    } = await axiosInstance.get('/admin/users/me');
+    } = await get('/admin/users/me');
 
     return roles;
   } catch (err) {

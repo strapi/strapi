@@ -36,8 +36,9 @@ function createDefaultMetadata(schema, name) {
     editable: true,
   };
 
-  if (isRelation(schema.attributes[name])) {
-    const { targetModel } = schema.attributes[name];
+  const fieldAttributes = schema.attributes[name];
+  if (isRelation(fieldAttributes)) {
+    const { targetModel } = fieldAttributes;
 
     const targetSchema = getTargetSchema(targetModel);
 

@@ -8,7 +8,7 @@ jest.mock('@strapi/strapi/lib/utils/ee', () => {
       isEnabled() {
         return false;
       },
-      getEnabled() {
+      list() {
         return [];
       },
     },

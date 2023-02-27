@@ -1,20 +1,25 @@
 import React, { useState, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
-import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { Button } from '@strapi/design-system/Button';
-import { Stack } from '@strapi/design-system/Stack';
-import { Box } from '@strapi/design-system/Box';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Textarea } from '@strapi/design-system/Textarea';
-import { Typography } from '@strapi/design-system/Typography';
-import Check from '@strapi/icons/Check';
-import { GridItem, Grid } from '@strapi/design-system/Grid';
+import {
+  ContentLayout,
+  HeaderLayout,
+  Main,
+  Button,
+  Stack,
+  Box,
+  TextInput,
+  Textarea,
+  Typography,
+  GridItem,
+  Grid,
+} from '@strapi/design-system';
+import { Check } from '@strapi/icons';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import {
   useOverlayBlocker,
   SettingsPageTitle,
+  useFetchClient,
   useTracking,
   Form,
   useNotification,
@@ -24,7 +29,6 @@ import getTrad from '../../../utils/getTrad';
 import pluginId from '../../../pluginId';
 import { usePlugins } from '../../../hooks';
 import schema from './utils/schema';
-import axiosInstance from '../../../utils/axiosInstance';
 
 const EditPage = () => {
   const { formatMessage } = useIntl();
@@ -35,6 +39,7 @@ const EditPage = () => {
   const { isLoading: isLoadingPlugins, permissions, routes } = usePlugins();
   const { trackUsage } = useTracking();
   const permissionsRef = useRef();
+  const { post } = useFetchClient();
 
   const handleCreateRoleSubmit = async (data) => {
     // Set loading state
@@ -43,7 +48,7 @@ const EditPage = () => {
     try {
       const permissions = permissionsRef.current.getPermissions();
       // Update role in Strapi
-      await axiosInstance.post(`/${pluginId}/roles`, { ...data, ...permissions, users: [] });
+      await post(`/${pluginId}/roles`, { ...data, ...permissions, users: [] });
       // Notify success
       trackUsage('didCreateRole');
       toggleNotification({

@@ -2,10 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { getFileExtension, prefixFileUrlWithBackendUrl, pxToRem } from '@strapi/helper-plugin';
-import { Avatar, Initials } from '@strapi/design-system/Avatar';
-import { Box } from '@strapi/design-system/Box';
-import { Icon } from '@strapi/design-system/Icon';
-import Folder from '@strapi/icons/Folder';
+import { Avatar, Initials, Box, Icon } from '@strapi/design-system';
+import { Folder } from '@strapi/icons';
 
 import { AssetType } from '../../constants';
 import { createAssetUrl } from '../../utils';
@@ -13,8 +11,8 @@ import { VideoPreview } from '../AssetCard/VideoPreview';
 
 const VideoPreviewWrapper = styled(Box)`
   figure {
-    width: 26px;
-    height: 26px;
+    width: ${({ theme }) => theme.spaces[7]};
+    height: ${({ theme }) => theme.spaces[7]};
   }
 
   canvas,

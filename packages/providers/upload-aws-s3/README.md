@@ -31,7 +31,7 @@ See the [documentation about using a provider](https://docs.strapi.io/developer-
 
 ### Provider Configuration
 
-`./config/plugins.js`
+`./config/plugins.js` or `./config/plugins.ts` for TypeScript projects:
 
 ```js
 module.exports = ({ env }) => ({

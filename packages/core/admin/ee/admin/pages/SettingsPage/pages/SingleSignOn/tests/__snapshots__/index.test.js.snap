@@ -1,16 +1,70 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = `
-.c27 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
+.c9 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c14 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c15 {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666687;
+}
+
+.c20 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c25 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c33 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #666687;
+  text-transform: uppercase;
+}
+
+.c35 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #4945ff;
+  text-transform: uppercase;
+}
+
+.c37 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c42 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
   overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
+  text-overflow: ellipsis;
+  color: #32324d;
 }
 
 .c2 {
@@ -133,73 +187,6 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   justify-content: center;
 }
 
-.c9 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c14 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  line-height: 1.14;
-  color: #32324d;
-}
-
-.c15 {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c20 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c25 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c33 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #666687;
-  text-transform: uppercase;
-}
-
-.c35 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #4945ff;
-  text-transform: uppercase;
-}
-
-.c37 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c42 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
 .c19 > * {
   margin-top: 0;
   margin-bottom: 0;
@@ -276,6 +263,18 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   border: 2px solid #4945ff;
 }
 
+.c27 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
 .c13 {
   height: 100%;
 }
@@ -348,25 +347,6 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   fill: #ffffff;
 }
 
-.c39 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c39:focus {
-  outline: none;
-}
-
-.c39[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
 .c38 {
   position: relative;
   border: 1px solid #dcdce4;
@@ -417,17 +397,27 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   width: 0.375rem;
 }
 
+.c39 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c39:focus {
+  outline: none;
+}
+
+.c39[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
 .c40 {
   width: 100%;
-}
-
-.c1 {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-
-.c3 {
-  overflow-x: hidden;
 }
 
 .c21 {
@@ -439,6 +429,15 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
 .c22 {
   grid-column: span 6;
   max-width: 100%;
+}
+
+.c1 {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.c3 {
+  overflow-x: hidden;
 }
 
 .c4:focus-visible {
@@ -603,7 +602,6 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
         >
           <div
             class="c0 c17 c18 c19"
-            spacing="4"
           >
             <h2
               class="c8 c20"
@@ -624,14 +622,13 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                   >
                     <div
                       class="c0 c18 c24"
-                      spacing="1"
                     >
                       <div
                         class="c0 c7"
                       >
                         <label
                           class="c8 c25"
-                          for="toggleinput-1"
+                          for="1"
                         >
                           <div
                             class="c0 c7"
@@ -673,13 +670,14 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                             </span>
                           </div>
                           <input
+                            aria-describedby="1-hint"
                             aria-disabled="false"
                             aria-label="autoRegister"
                             aria-required="false"
                             checked=""
                             class="c36"
                             data-testid="autoRegister"
-                            id="toggleinput-1"
+                            id="1"
                             name="autoRegister"
                             type="checkbox"
                           />
@@ -687,7 +685,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                       </label>
                       <p
                         class="c8 c37"
-                        id="toggleinput-1-hint"
+                        id="1-hint"
                       >
                         Create new user on SSO login if no account exists
                       </p>
@@ -704,11 +702,10 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                   <div>
                     <div
                       class="c0 c18 c24"
-                      spacing="1"
                     >
                       <label
                         class="c8 c25"
-                        for="select-2"
+                        for="3"
                       >
                         <div
                           class="c0 c7"
@@ -720,13 +717,13 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                         class="c0 c7 c38"
                       >
                         <button
-                          aria-describedby="select-2-error"
+                          aria-describedby="3-hint"
                           aria-disabled="false"
                           aria-expanded="false"
                           aria-haspopup="listbox"
-                          aria-labelledby="select-2 select-2-label select-2-content"
+                          aria-labelledby="3 3-label 3-content"
                           class="c39"
-                          id="select-2"
+                          id="3"
                           name="defaultRole"
                           type="button"
                         />
@@ -741,7 +738,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                             >
                               <span
                                 class="c8 c42"
-                                id="select-2-content"
+                                id="3-content"
                               >
                                 Editor
                               </span>
@@ -777,7 +774,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                       </div>
                       <p
                         class="c8 c37"
-                        id="select-2-hint"
+                        id="3-hint"
                       >
                         It will attach the new authenticated user to the selected role
                       </p>

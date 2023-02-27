@@ -1,37 +1,34 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
-.c0 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
+.c11 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
 }
 
-.c12 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
+.c20 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
 }
 
-.c3 {
+.c2 {
+  padding-right: 40px;
+  padding-left: 40px;
+  position: fixed;
+  z-index: 4;
+}
+
+.c5 {
   background: #ffffff;
   border-radius: 4px;
   box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
 }
 
-.c5 {
+.c7 {
   background: #f6f6f9;
   padding-top: 16px;
   padding-right: 20px;
@@ -39,15 +36,33 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   padding-left: 20px;
 }
 
-.c13 {
+.c14 {
   padding: 32px;
 }
 
-.c21 {
+.c22 {
   padding-right: 12px;
 }
 
-.c7 {
+.c3 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c9 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -65,7 +80,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   justify-content: space-between;
 }
 
-.c17 {
+.c18 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -79,7 +94,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   flex-direction: column;
 }
 
-.c20 {
+.c21 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -93,38 +108,16 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
-.c9 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c19 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c27 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 1.14;
-  color: #32324d;
-}
-
-.c18 > * {
+.c19 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c18 > * + * {
+.c19 > * + * {
   margin-top: 4px;
 }
 
-.c10 {
+.c12 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -138,21 +131,21 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   outline: none;
 }
 
-.c10 svg {
+.c12 svg {
   height: 12px;
   width: 12px;
 }
 
-.c10 svg > g,
-.c10 svg path {
+.c12 svg > g,
+.c12 svg path {
   fill: #ffffff;
 }
 
-.c10[aria-disabled='true'] {
+.c12[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c10:after {
+.c12:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -167,11 +160,11 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c10:focus-visible {
+.c12:focus-visible {
   outline: none;
 }
 
-.c10:focus-visible:after {
+.c12:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -182,7 +175,19 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c26 {
+.c0 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c27 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -196,7 +201,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   background: #ffffff;
 }
 
-.c26 .c2 {
+.c27 .c1 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -207,50 +212,50 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c26 .c8 {
+.c27 .c10 {
   color: #ffffff;
 }
 
-.c26[aria-disabled='true'] {
+.c27[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c26[aria-disabled='true'] .c8 {
+.c27[aria-disabled='true'] .c10 {
   color: #666687;
 }
 
-.c26[aria-disabled='true'] svg > g,.c26[aria-disabled='true'] svg path {
+.c27[aria-disabled='true'] svg > g,.c27[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c26[aria-disabled='true']:active {
+.c27[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c26[aria-disabled='true']:active .c8 {
+.c27[aria-disabled='true']:active .c10 {
   color: #666687;
 }
 
-.c26[aria-disabled='true']:active svg > g,.c26[aria-disabled='true']:active svg path {
+.c27[aria-disabled='true']:active svg > g,.c27[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c26:hover {
+.c27:hover {
   background-color: #f6f6f9;
 }
 
-.c26:active {
+.c27:active {
   background-color: #eaeaef;
 }
 
-.c26 .c8 {
+.c27 .c10 {
   color: #32324d;
 }
 
-.c26 svg > g,
-.c26 svg path {
+.c27 svg > g,
+.c27 svg path {
   fill: #32324d;
 }
 
@@ -266,7 +271,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   padding-right: 16px;
 }
 
-.c28 .c2 {
+.c28 .c1 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -277,7 +282,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c28 .c8 {
+.c28 .c10 {
   color: #ffffff;
 }
 
@@ -286,7 +291,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   background: #eaeaef;
 }
 
-.c28[aria-disabled='true'] .c8 {
+.c28[aria-disabled='true'] .c10 {
   color: #666687;
 }
 
@@ -299,7 +304,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   background: #eaeaef;
 }
 
-.c28[aria-disabled='true']:active .c8 {
+.c28[aria-disabled='true']:active .c10 {
   color: #666687;
 }
 
@@ -322,7 +327,18 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   fill: #ffffff;
 }
 
-.c11 {
+.c16 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c17 {
+  grid-column: span 12;
+  max-width: 100%;
+}
+
+.c13 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -339,46 +355,74 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   width: 2rem;
 }
 
-.c11 svg > g,
-.c11 svg path {
+.c13 svg > g,
+.c13 svg path {
   fill: #8e8ea9;
 }
 
-.c11:hover svg > g,
-.c11:hover svg path {
+.c13:hover svg > g,
+.c13:hover svg path {
   fill: #666687;
 }
 
-.c11:active svg > g,
-.c11:active svg path {
+.c13:active svg > g,
+.c13:active svg path {
   fill: #a5a5ba;
 }
 
-.c11[aria-disabled='true'] {
+.c13[aria-disabled='true'] {
   background-color: #eaeaef;
 }
 
-.c11[aria-disabled='true'] svg path {
+.c13[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c22 {
+.c4 {
+  inset: 0;
+  background: #32324d1F;
+}
+
+.c6 {
+  width: 51.875rem;
+}
+
+.c8 {
+  border-radius: 4px 4px 0 0;
+  border-bottom: 1px solid #eaeaef;
+}
+
+.c25 {
+  border-radius: 0 0 4px 4px;
+  border-top: 1px solid #eaeaef;
+}
+
+.c26 > * + * {
+  margin-left: 8px;
+}
+
+.c15 {
+  overflow: auto;
+  max-height: 60vh;
+}
+
+.c23 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c22 svg {
+.c23 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c22 svg path {
+.c23 svg path {
   fill: #666687;
 }
 
-.c23 {
+.c24 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -387,72 +431,18 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   border: none;
 }
 
-.c23 svg {
+.c24 svg {
   width: 0.5625rem;
 }
 
-.c15 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
-}
-
-.c16 {
-  grid-column: span 12;
-  max-width: 100%;
-}
-
-.c1 {
-  position: fixed;
-  z-index: 4;
-  inset: 0;
-  background: #32324d1F;
-  padding: 0 40px;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c4 {
-  width: 51.875rem;
-}
-
-.c6 {
-  border-radius: 4px 4px 0 0;
-  border-bottom: 1px solid #eaeaef;
-}
-
-.c24 {
-  border-radius: 0 0 4px 4px;
-  border-top: 1px solid #eaeaef;
-}
-
-.c25 > * + * {
-  margin-left: 8px;
-}
-
-.c14 {
-  overflow: auto;
-  max-height: 60vh;
-}
-
 @media (max-width:68.75rem) {
-  .c16 {
+  .c17 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c16 {
+  .c17 {
     grid-column: span 12;
   }
 }
@@ -488,14 +478,14 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
     data-react-portal="true"
   >
     <div
-      class="c1"
+      class="c1 c2 c3 c4"
     >
       <div>
         <div>
           <div
             aria-labelledby="title"
             aria-modal="true"
-            class="c2 c3 c4"
+            class="c1 c5 c6"
             role="dialog"
           >
             <form
@@ -503,24 +493,24 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
               novalidate=""
             >
               <div
-                class="c2 c5 c6"
+                class="c1 c7 c8"
               >
                 <div
-                  class="c2 c7"
+                  class="c1 c9"
                 >
                   <h2
-                    class="c8 c9"
+                    class="c10 c11"
                     id="title"
                   >
                     Move elements to
                   </h2>
                   <button
                     aria-disabled="false"
-                    class="c10 c11"
+                    class="c12 c13"
                     type="button"
                   >
                     <span
-                      class="c12"
+                      class="c0"
                     >
                       Close the modal
                     </span>
@@ -542,27 +532,26 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <div
-                class="c2 c13 c14"
+                class="c1 c14 c15"
               >
                 <div
-                  class="c2 c15"
+                  class="c1 c16"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c2 "
+                      class="c1 "
                     >
                       <div
-                        class="c2 c17 c18"
-                        spacing="1"
+                        class="c1 c18 c19"
                       >
                         <label
-                          class="c8 c19"
+                          class="c10 c20"
                           for="folder-destination"
                         >
                           <div
-                            class="c2 c20"
+                            class="c1 c21"
                           >
                             Location
                           </div>
@@ -610,7 +599,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
                             >
                               <div
                                 aria-hidden="true"
-                                class="c2 c21 c22 c23"
+                                class="c1 c22 c23 c24"
                               >
                                 <svg
                                   fill="none"
@@ -641,37 +630,37 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <div
-                class="c2 c5 c24"
+                class="c1 c7 c25"
               >
                 <div
-                  class="c2 c7"
+                  class="c1 c9"
                 >
                   <div
-                    class="c2 c20 c25"
+                    class="c1 c21 c26"
                   >
                     <button
                       aria-disabled="false"
-                      class="c10 c26"
+                      class="c12 c27"
                       name="cancel"
                       type="button"
                     >
                       <span
-                        class="c8 c27"
+                        class="c10 c20"
                       >
                         Cancel
                       </span>
                     </button>
                   </div>
                   <div
-                    class="c2 c20 c25"
+                    class="c1 c21 c26"
                   >
                     <button
                       aria-disabled="false"
-                      class="c10 c28"
+                      class="c12 c28"
                       type="submit"
                     >
                       <span
-                        class="c8 c27"
+                        class="c10 c20"
                       >
                         Move
                       </span>

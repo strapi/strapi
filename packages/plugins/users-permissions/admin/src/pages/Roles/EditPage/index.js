@@ -3,6 +3,7 @@ import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
 import {
+  useFetchClient,
   useOverlayBlocker,
   SettingsPageTitle,
   LoadingIndicatorPage,
@@ -10,23 +11,25 @@ import {
   useNotification,
   Link,
 } from '@strapi/helper-plugin';
-import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { Button } from '@strapi/design-system/Button';
-import { Stack } from '@strapi/design-system/Stack';
-import { Box } from '@strapi/design-system/Box';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Textarea } from '@strapi/design-system/Textarea';
-import { Typography } from '@strapi/design-system/Typography';
-import ArrowLeft from '@strapi/icons/ArrowLeft';
-import Check from '@strapi/icons/Check';
-import { GridItem, Grid } from '@strapi/design-system/Grid';
+import {
+  ContentLayout,
+  HeaderLayout,
+  Main,
+  Button,
+  Stack,
+  Box,
+  TextInput,
+  Textarea,
+  Typography,
+  GridItem,
+  Grid,
+} from '@strapi/design-system';
+import { ArrowLeft, Check } from '@strapi/icons';
 import UsersPermissions from '../../../components/UsersPermissions';
 import getTrad from '../../../utils/getTrad';
 import pluginId from '../../../pluginId';
 import { usePlugins, useFetchRole } from '../../../hooks';
 import schema from './utils/schema';
-import axiosInstance from '../../../utils/axiosInstance';
 
 const EditPage = () => {
   const { formatMessage } = useIntl();
@@ -39,6 +42,7 @@ const EditPage = () => {
   const { isLoading: isLoadingPlugins, routes } = usePlugins();
   const { role, onSubmitSucceeded, isLoading: isLoadingRole } = useFetchRole(id);
   const permissionsRef = useRef();
+  const { put } = useFetchClient();
 
   const handleEditRoleSubmit = async (data) => {
     // Set loading state
@@ -47,7 +51,7 @@ const EditPage = () => {
     try {
       const permissions = permissionsRef.current.getPermissions();
       // Update role in Strapi
-      await axiosInstance.put(`/${pluginId}/roles/${id}`, { ...data, ...permissions, users: [] });
+      await put(`/${pluginId}/roles/${id}`, { ...data, ...permissions, users: [] });
       // Notify success
       onSubmitSucceeded({ name: data.name, description: data.description });
       toggleNotification({

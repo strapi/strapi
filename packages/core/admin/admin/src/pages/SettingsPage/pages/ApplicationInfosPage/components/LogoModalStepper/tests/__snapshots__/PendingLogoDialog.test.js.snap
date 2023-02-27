@@ -1,16 +1,31 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapshot 1`] = `
-.c33 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
+.c6 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c7 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #8e8ea9;
+}
+
+.c20 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c26 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
 }
 
 .c1 {
@@ -24,17 +39,21 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   padding-bottom: 24px;
 }
 
-.c11 {
+.c10 {
   max-width: 11.25rem;
 }
 
-.c12 {
+.c11 {
   background: #ffffff;
   border-radius: 4px;
   border-style: solid;
   border-width: 1px;
   border-color: #eaeaef;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c12 {
+  position: relative;
 }
 
 .c17 {
@@ -155,39 +174,9 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   flex-direction: row;
 }
 
-.c6 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c7 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #8e8ea9;
-}
-
-.c10 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 1.14;
-  color: #32324d;
-}
-
-.c20 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c26 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
+.c24 {
+  border-radius: 4px;
+  height: 1.5rem;
 }
 
 .c8 {
@@ -246,6 +235,18 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   left: -5px;
   right: -5px;
   border: 2px solid #4945ff;
+}
+
+.c33 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .c9 {
@@ -470,15 +471,6 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   fill: #ffffff;
 }
 
-.c28 {
-  border-radius: 0 0 4px 4px;
-  border-top: 1px solid #eaeaef;
-}
-
-.c30 > * + * {
-  margin-left: 8px;
-}
-
 .c16 {
   margin: 0;
   padding: 0;
@@ -503,11 +495,6 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   border-top-right-radius: 4px;
 }
 
-.c24 {
-  border-radius: 4px;
-  height: 1.5rem;
-}
-
 .c21 {
   margin-left: auto;
   -webkit-flex-shrink: 0;
@@ -524,8 +511,16 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
 }
 
 .c14 {
-  position: relative;
   border-bottom: 1px solid #eaeaef;
+}
+
+.c28 {
+  border-radius: 0 0 4px 4px;
+  border-top: 1px solid #eaeaef;
+}
+
+.c30 > * + * {
+  margin-left: 8px;
 }
 
 <div>
@@ -555,22 +550,22 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
         type="button"
       >
         <span
-          class="c5 c10"
+          class="c5 c6"
         >
           Choose another logo
         </span>
       </button>
     </div>
     <div
-      class="c0 c11"
+      class="c0 c10"
     >
       <article
-        aria-labelledby="card-1-title"
-        class="c0 c12"
+        aria-labelledby="0-title"
+        class="c0 c11"
         tabindex="0"
       >
         <div
-          class="c0 c13 c14"
+          class="c0 c12 c13 c14"
         >
           <div
             class="c15"
@@ -593,7 +588,7 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
             >
               <div
                 class="c5 c6"
-                id="card-1-title"
+                id="0-title"
               >
                 asset.jpeg
               </div>
@@ -636,7 +631,7 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
           type="button"
         >
           <span
-            class="c5 c10"
+            class="c5 c6"
           >
             Cancel
           </span>
@@ -651,7 +646,7 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
           type="button"
         >
           <span
-            class="c5 c10"
+            class="c5 c6"
           >
             Upload logo
           </span>

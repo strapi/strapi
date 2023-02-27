@@ -6,17 +6,12 @@
 
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Button } from '@strapi/design-system/Button';
-import { Box } from '@strapi/design-system/Box';
-import { Popover } from '@strapi/design-system/Popover';
-import { Stack } from '@strapi/design-system/Stack';
-import { FocusTrap } from '@strapi/design-system/FocusTrap';
-import { Select, Option } from '@strapi/design-system/Select';
-import Plus from '@strapi/icons/Plus';
+import { Button, Box, Popover, Stack, FocusTrap, Select, Option } from '@strapi/design-system';
+import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import useQueryParams from '../../hooks/useQueryParams';
 import useTracking from '../../hooks/useTracking';
-import Inputs from './Inputs';
+import DefaultInputs from './Inputs';
 import getFilterList from './utils/getFilterList';
 
 const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, source }) => {
@@ -50,7 +45,7 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
     }
 
     if (type === 'enumeration') {
-      filterValue = options[0];
+      filterValue = options?.[0];
     }
 
     const filter = getFilterList(nextField)[0].value;
@@ -113,6 +108,8 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
 
   const appliedFilter = displayedFilters.find((filter) => filter.name === modifiedData.name);
   const operator = modifiedData.filter;
+  const filterList = appliedFilter.metadatas.customOperators || getFilterList(appliedFilter);
+  const Inputs = appliedFilter.metadatas.customInput || DefaultInputs;
 
   return (
     <Popover source={source} padding={3} spacing={4} onBlur={onBlur}>
@@ -150,7 +147,7 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
                 value={modifiedData.filter}
                 onChange={handleChangeOperator}
               >
-                {getFilterList(appliedFilter).map((option) => {
+                {filterList.map((option) => {
                   return (
                     <Option key={option.value} value={option.value}>
                       {formatMessage(option.intlLabel)}

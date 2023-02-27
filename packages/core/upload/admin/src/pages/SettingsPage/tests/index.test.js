@@ -49,28 +49,61 @@ describe('Upload | SettingsPage', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c40 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
+      .c6 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
       }
 
-      .c28 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
+      .c11 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c12 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c21 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c33 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #666687;
+        text-transform: uppercase;
+      }
+
+      .c35 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #4945ff;
+        text-transform: uppercase;
+      }
+
+      .c37 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
+      .c38 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #b72b1a;
+        text-transform: uppercase;
       }
 
       .c2 {
@@ -101,7 +134,7 @@ describe('Upload | SettingsPage', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c29 {
+      .c28 {
         background: #f6f6f9;
         padding: 4px;
         border-radius: 4px;
@@ -114,7 +147,7 @@ describe('Upload | SettingsPage', () => {
         display: flex;
       }
 
-      .c31 {
+      .c30 {
         padding-right: 12px;
         padding-left: 12px;
         border-radius: 4px;
@@ -166,7 +199,7 @@ describe('Upload | SettingsPage', () => {
         flex-direction: column;
       }
 
-      .c32 {
+      .c31 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -182,71 +215,6 @@ describe('Upload | SettingsPage', () => {
         -webkit-justify-content: center;
         -ms-flex-pack: center;
         justify-content: center;
-      }
-
-      .c6 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c11 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        line-height: 1.14;
-        color: #32324d;
-      }
-
-      .c12 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c21 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c26 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c34 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #666687;
-        text-transform: uppercase;
-      }
-
-      .c36 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #4945ff;
-        text-transform: uppercase;
-      }
-
-      .c38 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #666687;
-      }
-
-      .c39 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #b72b1a;
-        text-transform: uppercase;
       }
 
       .c18 > * {
@@ -330,6 +298,18 @@ describe('Upload | SettingsPage', () => {
         border: 2px solid #4945ff;
       }
 
+      .c27 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
       .c10 {
         height: 100%;
       }
@@ -402,81 +382,6 @@ describe('Upload | SettingsPage', () => {
         fill: #ffffff;
       }
 
-      .c27 {
-        position: relative;
-        display: inline-block;
-        z-index: 0;
-        width: 100%;
-      }
-
-      .c30 {
-        overflow: hidden;
-        -webkit-flex-wrap: wrap;
-        -ms-flex-wrap: wrap;
-        flex-wrap: wrap;
-        outline: none;
-        box-shadow: 0;
-        -webkit-transition-property: border-color,box-shadow,fill;
-        transition-property: border-color,box-shadow,fill;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-      }
-
-      .c30:focus-within {
-        border: 1px solid #4945ff;
-        box-shadow: #4945ff 0px 0px 0px 2px;
-      }
-
-      .c33 {
-        background-color: transparent;
-        border: 1px solid #f6f6f9;
-        position: relative;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        z-index: 2;
-        -webkit-flex: 1 1 50%;
-        -ms-flex: 1 1 50%;
-        flex: 1 1 50%;
-        padding-top: 6px;
-        padding-bottom: 6px;
-      }
-
-      .c35 {
-        background-color: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        z-index: 2;
-        -webkit-flex: 1 1 50%;
-        -ms-flex: 1 1 50%;
-        flex: 1 1 50%;
-        padding-top: 6px;
-        padding-bottom: 6px;
-      }
-
-      .c37 {
-        height: 100%;
-        left: 0;
-        opacity: 0;
-        position: absolute;
-        top: 0;
-        z-index: 1;
-        width: 100%;
-      }
-
-      .c24 {
-        max-width: 320px;
-      }
-
-      .c0:focus-visible {
-        outline: none;
-      }
-
       .c22 {
         display: grid;
         grid-template-columns: repeat(12,1fr);
@@ -495,6 +400,81 @@ describe('Upload | SettingsPage', () => {
 
       .c16 {
         overflow-x: hidden;
+      }
+
+      .c0:focus-visible {
+        outline: none;
+      }
+
+      .c26 {
+        position: relative;
+        display: inline-block;
+        z-index: 0;
+        width: 100%;
+      }
+
+      .c29 {
+        overflow: hidden;
+        -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+      }
+
+      .c29:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c32 {
+        background-color: transparent;
+        border: 1px solid #f6f6f9;
+        position: relative;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        z-index: 2;
+        -webkit-flex: 1 1 50%;
+        -ms-flex: 1 1 50%;
+        flex: 1 1 50%;
+        padding-top: 6px;
+        padding-bottom: 6px;
+      }
+
+      .c34 {
+        background-color: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        z-index: 2;
+        -webkit-flex: 1 1 50%;
+        -ms-flex: 1 1 50%;
+        flex: 1 1 50%;
+        padding-top: 6px;
+        padding-bottom: 6px;
+      }
+
+      .c36 {
+        height: 100%;
+        left: 0;
+        opacity: 0;
+        position: absolute;
+        top: 0;
+        z-index: 1;
+        width: 100%;
+      }
+
+      .c24 {
+        max-width: 320px;
       }
 
       @media (max-width:68.75rem) {
@@ -585,14 +565,12 @@ describe('Upload | SettingsPage', () => {
                 >
                   <div
                     class="c1 c17 c18"
-                    spacing="12"
                   >
                     <div
                       class="c1 c19"
                     >
                       <div
                         class="c1 c17 c20"
-                        spacing="4"
                       >
                         <div
                           class="c1 c4"
@@ -617,14 +595,13 @@ describe('Upload | SettingsPage', () => {
                               >
                                 <div
                                   class="c1 c17 c25"
-                                  spacing="1"
                                 >
                                   <div
                                     class="c1 c4"
                                   >
                                     <label
-                                      class="c5 c26"
-                                      for="toggleinput-1"
+                                      class="c5 c11"
+                                      for="1"
                                     >
                                       <div
                                         class="c1 c4"
@@ -634,53 +611,54 @@ describe('Upload | SettingsPage', () => {
                                     </label>
                                   </div>
                                   <label
-                                    class="c27"
+                                    class="c26"
                                   >
                                     <div
-                                      class="c28"
+                                      class="c27"
                                     >
                                       Responsive friendly upload
                                     </div>
                                     <div
-                                      class="c1 c29 c30"
+                                      class="c1 c28 c29"
                                       display="flex"
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c1 c31 c32 c33"
+                                        class="c1 c30 c31 c32"
                                       >
                                         <span
-                                          class="c5 c34"
+                                          class="c5 c33"
                                         >
                                           Off
                                         </span>
                                       </div>
                                       <div
                                         aria-hidden="true"
-                                        class="c1 c31 c32 c35"
+                                        class="c1 c30 c31 c34"
                                       >
                                         <span
-                                          class="c5 c36"
+                                          class="c5 c35"
                                         >
                                           On
                                         </span>
                                       </div>
                                       <input
+                                        aria-describedby="1-hint"
                                         aria-disabled="false"
                                         aria-label="responsiveDimensions"
                                         aria-required="false"
                                         checked=""
-                                        class="c37"
+                                        class="c36"
                                         data-testid="responsiveDimensions"
-                                        id="toggleinput-1"
+                                        id="1"
                                         name="responsiveDimensions"
                                         type="checkbox"
                                       />
                                     </div>
                                   </label>
                                   <p
-                                    class="c5 c38"
-                                    id="toggleinput-1-hint"
+                                    class="c5 c37"
+                                    id="1-hint"
                                   >
                                     Enabling this option will generate multiple formats (small, medium and large) of the uploaded asset.
                                   </p>
@@ -699,14 +677,13 @@ describe('Upload | SettingsPage', () => {
                               >
                                 <div
                                   class="c1 c17 c25"
-                                  spacing="1"
                                 >
                                   <div
                                     class="c1 c4"
                                   >
                                     <label
-                                      class="c5 c26"
-                                      for="toggleinput-2"
+                                      class="c5 c11"
+                                      for="3"
                                     >
                                       <div
                                         class="c1 c4"
@@ -716,52 +693,53 @@ describe('Upload | SettingsPage', () => {
                                     </label>
                                   </div>
                                   <label
-                                    class="c27"
+                                    class="c26"
                                   >
                                     <div
-                                      class="c28"
+                                      class="c27"
                                     >
                                       Size optimization
                                     </div>
                                     <div
-                                      class="c1 c29 c30"
+                                      class="c1 c28 c29"
                                       display="flex"
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c1 c31 c32 c35"
+                                        class="c1 c30 c31 c34"
                                       >
                                         <span
-                                          class="c5 c39"
+                                          class="c5 c38"
                                         >
                                           Off
                                         </span>
                                       </div>
                                       <div
                                         aria-hidden="true"
-                                        class="c1 c31 c32 c33"
+                                        class="c1 c30 c31 c32"
                                       >
                                         <span
-                                          class="c5 c34"
+                                          class="c5 c33"
                                         >
                                           On
                                         </span>
                                       </div>
                                       <input
+                                        aria-describedby="3-hint"
                                         aria-disabled="false"
                                         aria-label="sizeOptimization"
                                         aria-required="false"
-                                        class="c37"
+                                        class="c36"
                                         data-testid="sizeOptimization"
-                                        id="toggleinput-2"
+                                        id="3"
                                         name="sizeOptimization"
                                         type="checkbox"
                                       />
                                     </div>
                                   </label>
                                   <p
-                                    class="c5 c38"
-                                    id="toggleinput-2-hint"
+                                    class="c5 c37"
+                                    id="3-hint"
                                   >
                                     Enabling this option will reduce the image size and slightly reduce its quality.
                                   </p>
@@ -780,14 +758,13 @@ describe('Upload | SettingsPage', () => {
                               >
                                 <div
                                   class="c1 c17 c25"
-                                  spacing="1"
                                 >
                                   <div
                                     class="c1 c4"
                                   >
                                     <label
-                                      class="c5 c26"
-                                      for="toggleinput-3"
+                                      class="c5 c11"
+                                      for="5"
                                     >
                                       <div
                                         class="c1 c4"
@@ -797,53 +774,54 @@ describe('Upload | SettingsPage', () => {
                                     </label>
                                   </div>
                                   <label
-                                    class="c27"
+                                    class="c26"
                                   >
                                     <div
-                                      class="c28"
+                                      class="c27"
                                     >
                                       Auto orientation
                                     </div>
                                     <div
-                                      class="c1 c29 c30"
+                                      class="c1 c28 c29"
                                       display="flex"
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c1 c31 c32 c33"
+                                        class="c1 c30 c31 c32"
                                       >
                                         <span
-                                          class="c5 c34"
+                                          class="c5 c33"
                                         >
                                           Off
                                         </span>
                                       </div>
                                       <div
                                         aria-hidden="true"
-                                        class="c1 c31 c32 c35"
+                                        class="c1 c30 c31 c34"
                                       >
                                         <span
-                                          class="c5 c36"
+                                          class="c5 c35"
                                         >
                                           On
                                         </span>
                                       </div>
                                       <input
+                                        aria-describedby="5-hint"
                                         aria-disabled="false"
                                         aria-label="autoOrientation"
                                         aria-required="false"
                                         checked=""
-                                        class="c37"
+                                        class="c36"
                                         data-testid="autoOrientation"
-                                        id="toggleinput-3"
+                                        id="5"
                                         name="autoOrientation"
                                         type="checkbox"
                                       />
                                     </div>
                                   </label>
                                   <p
-                                    class="c5 c38"
-                                    id="toggleinput-3-hint"
+                                    class="c5 c37"
+                                    id="5-hint"
                                   >
                                     Enabling this option will automatically rotate the image according to EXIF orientation tag.
                                   </p>
@@ -861,7 +839,7 @@ describe('Upload | SettingsPage', () => {
           </form>
         </main>
         <div
-          class="c40"
+          class="c27"
         >
           <p
             aria-live="polite"

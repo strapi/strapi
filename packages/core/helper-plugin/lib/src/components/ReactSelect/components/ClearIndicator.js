@@ -1,6 +1,6 @@
 import React from 'react';
 import { components } from 'react-select';
-import Cross from '@strapi/icons/Cross';
+import { Cross } from '@strapi/icons';
 import IconBox from './IconBox';
 
 const ClearIndicator = (props) => {

@@ -3,7 +3,7 @@ import { Switch, Route } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { Helmet } from 'react-helmet';
 import { LoadingIndicatorPage, useQueryParams, useFocusWhenNavigate } from '@strapi/helper-plugin';
-import { Main } from '@strapi/design-system/Main';
+import { Main } from '@strapi/design-system';
 
 import { MediaLibrary } from './MediaLibrary';
 import { getTrad } from '../../utils';

@@ -39,6 +39,22 @@ describe('<PageSizeURLQuery />', () => {
     } = render(makeApp(history));
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c8 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #32324d;
+      }
+
+      .c13 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #666687;
+      }
+
       .c7 {
         padding-right: 16px;
         padding-left: 16px;
@@ -98,41 +114,6 @@ describe('<PageSizeURLQuery />', () => {
         justify-content: space-between;
       }
 
-      .c4 {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        top: 0;
-        width: 100%;
-        background: transparent;
-        border: none;
-      }
-
-      .c4:focus {
-        outline: none;
-      }
-
-      .c4[aria-disabled='true'] {
-        cursor: not-allowed;
-      }
-
-      .c8 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: #32324d;
-      }
-
-      .c13 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #666687;
-      }
-
       .c2 > * {
         margin-top: 0;
         margin-bottom: 0;
@@ -188,6 +169,25 @@ describe('<PageSizeURLQuery />', () => {
         width: 0.375rem;
       }
 
+      .c4 {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
+        width: 100%;
+        background: transparent;
+        border: none;
+      }
+
+      .c4:focus {
+        outline: none;
+      }
+
+      .c4[aria-disabled='true'] {
+        cursor: not-allowed;
+      }
+
       .c6 {
         width: 100%;
       }
@@ -207,9 +207,9 @@ describe('<PageSizeURLQuery />', () => {
                 aria-expanded="false"
                 aria-haspopup="listbox"
                 aria-label="Entries per page"
-                aria-labelledby="select-1 select-1-label select-1-content"
+                aria-labelledby="1 1-label 1-content"
                 class="c4"
-                id="select-1"
+                id="1"
                 type="button"
               />
               <div
@@ -223,7 +223,7 @@ describe('<PageSizeURLQuery />', () => {
                   >
                     <span
                       class="c8"
-                      id="select-1-content"
+                      id="1-content"
                     >
                       10
                     </span>
