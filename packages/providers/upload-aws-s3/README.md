@@ -64,6 +64,41 @@ module.exports = ({ env }) => ({
 });
 ```
 
+### Configuration for a private S3 bucket
+
+If your bucket is configured to be private, you will need to set the `ACL` option to `private` in the `params` object. This will ensure that the signed URL is generated with the correct permissions.
+
+You can also define the expiration time of the signed URL by setting the `signedUrlExpires` option in the `params` object. The default value is 7 days.
+
+`./config/plugins.js`
+
+```js
+module.exports = ({ env }) => ({
+  // ...
+  upload: {
+    config: {
+      provider: 'aws-s3',
+      providerOptions: {
+        accessKeyId: env('AWS_ACCESS_KEY_ID'),
+        secretAccessKey: env('AWS_ACCESS_SECRET'),
+        region: env('AWS_REGION'),
+        params: {
+          ACL: 'private', // <== set ACL to private
+          signedUrlExpires: env('AWS_SIGNED_URL_EXPIRES', 60 * 60 * 24 * 7),
+          Bucket: env('AWS_BUCKET'),
+        },
+      },
+      actionOptions: {
+        upload: {},
+        uploadStream: {},
+        delete: {},
+      },
+    },
+  },
+  // ...
+});
+```
+
 #### Configuration for S3 compatible services
 
 This plugin may work with S3 compatible services by using the `endpoint` option instead of `region`. Scaleway example:
