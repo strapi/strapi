@@ -193,11 +193,11 @@ const ApiTokenCreateView = () => {
         type: 'success',
         message: isCreating
           ? formatMessage({
-              id: 'notification.success.tokencreated',
+              id: 'notification.success.apitokencreated',
               defaultMessage: 'API Token successfully created',
             })
           : formatMessage({
-              id: 'notification.success.tokenedited',
+              id: 'notification.success.apitokenedited',
               defaultMessage: 'API Token successfully edited',
             }),
       });

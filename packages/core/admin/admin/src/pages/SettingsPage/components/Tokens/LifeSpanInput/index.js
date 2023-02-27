@@ -12,7 +12,7 @@ const LifeSpanInput = ({ token, errors, values, onChange, isCreating }) => {
       <Select
         name="lifespan"
         label={formatMessage({
-          id: 'Settings.apiTokens.form.duration',
+          id: 'Settings.tokens.form.duration',
           defaultMessage: 'Token duration',
         })}
         value={values.lifespan !== null ? values.lifespan : '0'}
