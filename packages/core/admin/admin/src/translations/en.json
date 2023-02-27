@@ -862,14 +862,10 @@
   "notification.success.tokencreated": "API Token successfully created",
   "notification.success.tokenedited": "API Token successfully edited",
   "notification.version.update.message": "A new version of Strapi is available!",
-  "notification.warning.404": "404 — Not found",
   "notification.warning.title": "Warning:",
-<<<<<<< HEAD
   "notification.warning.404": "404 - Not found",
   "notification.ee.warning.over-.message": "Add seats to {licenseLimitStatus, select, OVER_LIMIT {invite} AT_LIMIT {re-enable}} Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
   "notification.ee.warning.at-seat-limit.title": "{licenseLimitStatus, select, OVER_LIMIT {Over} AT_LIMIT {At}} seat limit ({currentUserCount}/{permittedSeats})",
-=======
->>>>>>> main
   "or": "OR",
   "request.error.model.unknown": "This model doesn't exist",
   "selectButtonTitle": "Select",
