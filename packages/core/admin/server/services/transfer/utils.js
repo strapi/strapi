@@ -19,7 +19,7 @@ const isDisabledFromEnv = () => {
  * @returns {boolean}
  */
 const hasValidTokenSalt = () => {
-  const salt = strapi.config.get('TRANSFER_TOKEN_SALT', null);
+  const salt = strapi.config.get('admin.transfer.token.salt', null);
 
   return typeof salt === 'string' && salt.length > 0;
 };
