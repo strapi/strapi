@@ -70,7 +70,7 @@ export const createTransferHandler = (options: IHandlerOptions) => {
          */
         const callback = <T = unknown>(e: Error | null = null, data?: T) => {
           return new Promise<void>((resolve, reject) => {
-            if (!uuid) {
+            if (!uuid && !e) {
               reject(new Error('Missing uuid for this message'));
               return;
             }
