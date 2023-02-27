@@ -4,11 +4,11 @@
   "components.Row.regenerate": "Regenerar",
   "containers.HomePage.Block.title": "Versiones",
   "containers.HomePage.Button.update": "Actualizar",
-  "containers.HomePage.PluginHeader.title": "Documentación - Configuración",
+  "containers.HomePage.PluginHeader.title": "Documentación — Configuración",
   "containers.HomePage.PopUpWarning.confirm": "Confirmar",
   "containers.HomePage.PopUpWarning.message": "¿Estás seguro de que deseas eliminar esta versión?",
   "containers.HomePage.copied": "Token copiado al portapapeles",
-  "containers.HomePage.form.jwtToken": "Recupera tu token jwt",
+  "containers.HomePage.form.jwtToken": "Recupera tu token JWT",
   "containers.HomePage.form.jwtToken.description": "Copie este token y utilícelo con arrogancia para realizar solicitudes",
   "containers.HomePage.form.password": "Contraseña",
   "containers.HomePage.form.password.inputDescription": "Establezca la contraseña para acceder a la documentación",
@@ -33,7 +33,7 @@
   "pages.SettingsPage.header.save": "Guardar",
   "pages.SettingsPage.toggle.hint": "Hacer que la documentación sea privada",
   "pages.SettingsPage.toggle.label": "Acceso restringido",
-  "plugin.description.long": "Cree un documento OpenAPI y visualice su API con SWAGGER UI.",
-  "plugin.description.short": "Cree un documento OpenAPI y visualice su API con SWAGGER UI.",
+  "plugin.description.long": "Cree un documento OpenAPI y visualice su API con Swagger UI.",
+  "plugin.description.short": "Cree un documento OpenAPI y visualice su API con Swagger UI.",
   "plugin.name": "Documentación"
 }
