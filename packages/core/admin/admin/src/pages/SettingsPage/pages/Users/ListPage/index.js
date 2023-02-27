@@ -92,6 +92,9 @@ const ListPage = () => {
   const deleteAllMutation = useMutation((ids) => deleteData(ids), {
     async onSuccess() {
       await queryClient.refetchQueries(queryName);
+
+      // Toggle enabled/ disabled state on the invite button
+      await queryClient.refetchQueries(['ee', 'license-limit-info']);
     },
     onError(error) {
       toggleNotification({
