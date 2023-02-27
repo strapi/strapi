@@ -328,6 +328,12 @@ const getExpirationFields = (lifespan) => {
  * @returns {string}
  */
 const hash = (accessKey) => {
+  const { hasValidTokenSalt } = getService('transfer').utils;
+
+  if (!hasValidTokenSalt()) {
+    throw new TypeError('Required token salt is not defined');
+  }
+
   return crypto
     .createHmac('sha512', strapi.config.get('admin.transfer.token.salt'))
     .update(accessKey)
