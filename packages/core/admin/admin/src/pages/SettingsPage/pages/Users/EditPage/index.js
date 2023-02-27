@@ -47,7 +47,6 @@ const EditPage = ({ canUpdate }) => {
   } = useRouteMatch('/settings/users/:id');
   const { push } = useHistory();
   const { setUserDisplayName } = useAppInfos();
-
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   useFocusWhenNavigate();
@@ -109,7 +108,7 @@ const EditPage = ({ canUpdate }) => {
       actions.setErrors(fieldsErrors);
       toggleNotification({
         type: 'warning',
-        message: get(err, 'response.data.message', 'notification.error'),
+        message: get(err, 'response.data.error.message', 'notification.error'),
       });
     }
 

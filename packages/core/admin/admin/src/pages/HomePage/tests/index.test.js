@@ -35,6 +35,11 @@ jest.mock('../../../hooks', () => ({
   useModels: jest.fn(),
 }));
 
+jest.mock('ee_else_ce/hooks/useLicenseLimitNotification', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
 const history = createMemoryHistory();
 
 const App = (

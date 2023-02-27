@@ -20,6 +20,15 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
+jest.mock('ee_else_ce/hooks/useLicenseLimitNotification', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
+jest.mock('ee_else_ce/pages/SettingsPage/pages/Users/ListPage/CreateAction', () => () => {
+  return <></>;
+});
+
 const client = new QueryClient({
   defaultOptions: {
     queries: {
@@ -77,20 +86,20 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         color: #32324d;
       }
 
-      .c11 {
+      .c7 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c22 {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
         color: #32324d;
       }
 
-      .c12 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c36 {
+      .c35 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
@@ -98,7 +107,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         color: #666687;
       }
 
-      .c51 {
+      .c50 {
         font-size: 0.875rem;
         line-height: 1.43;
         display: block;
@@ -108,7 +117,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         color: #32324d;
       }
 
-      .c56 {
+      .c55 {
         font-size: 0.875rem;
         line-height: 1.43;
         color: #666687;
@@ -122,62 +131,62 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         padding-left: 56px;
       }
 
-      .c9 {
-        padding-right: 8px;
-      }
-
-      .c13 {
+      .c8 {
         padding-right: 56px;
         padding-left: 56px;
       }
 
-      .c14 {
+      .c9 {
         padding-bottom: 16px;
       }
 
-      .c20 {
+      .c16 {
         color: #32324d;
       }
 
-      .c22 {
+      .c18 {
         padding-top: 4px;
         padding-bottom: 4px;
       }
 
-      .c24 {
+      .c20 {
+        padding-right: 8px;
+      }
+
+      .c23 {
         background: #ffffff;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c26 {
+      .c25 {
         position: relative;
       }
 
-      .c28 {
+      .c27 {
         padding-right: 24px;
         padding-left: 24px;
       }
 
-      .c41 {
+      .c40 {
         background: #ffffff;
         padding: 64px;
       }
 
-      .c43 {
+      .c42 {
         padding-top: 16px;
       }
 
-      .c50 {
+      .c49 {
         padding-right: 16px;
         padding-left: 16px;
       }
 
-      .c52 {
+      .c51 {
         padding-left: 12px;
       }
 
-      .c55 {
+      .c54 {
         padding-left: 8px;
       }
 
@@ -213,7 +222,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         flex-direction: row;
       }
 
-      .c15 {
+      .c10 {
         -webkit-align-items: flex-start;
         -webkit-box-align: flex-start;
         -ms-flex-align: flex-start;
@@ -231,7 +240,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         justify-content: space-between;
       }
 
-      .c16 {
+      .c11 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -248,7 +257,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         flex-wrap: wrap;
       }
 
-      .c40 {
+      .c39 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -266,7 +275,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         justify-content: center;
       }
 
-      .c44 {
+      .c43 {
         -webkit-align-items: flex-end;
         -webkit-box-align: flex-end;
         -ms-flex-align: flex-end;
@@ -284,7 +293,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         justify-content: space-between;
       }
 
-      .c45 {
+      .c44 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
         -ms-flex-align: stretch;
@@ -298,16 +307,16 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         flex-direction: column;
       }
 
-      .c46 > * {
+      .c45 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c21 path {
+      .c17 path {
         fill: #32324d;
       }
 
-      .c7 {
+      .c13 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -321,21 +330,21 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         outline: none;
       }
 
-      .c7 svg {
+      .c13 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c7 svg > g,
-      .c7 svg path {
+      .c13 svg > g,
+      .c13 svg path {
         fill: #ffffff;
       }
 
-      .c7[aria-disabled='true'] {
+      .c13[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c7:after {
+      .c13:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -350,11 +359,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border: 2px solid transparent;
       }
 
-      .c7:focus-visible {
+      .c13:focus-visible {
         outline: none;
       }
 
-      .c7:focus-visible:after {
+      .c13:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -365,7 +374,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c34 {
+      .c33 {
         height: 18px;
         min-width: 18px;
         margin: 0;
@@ -376,12 +385,12 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         cursor: pointer;
       }
 
-      .c34:checked {
+      .c33:checked {
         background-color: #4945ff;
         border: 1px solid #4945ff;
       }
 
-      .c34:checked:after {
+      .c33:checked:after {
         content: '';
         display: block;
         position: relative;
@@ -395,21 +404,21 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         transform: translateX(-50%) translateY(-50%);
       }
 
-      .c34:checked:disabled:after {
+      .c33:checked:disabled:after {
         background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
       }
 
-      .c34:disabled {
+      .c33:disabled {
         background-color: #dcdce4;
         border: 1px solid #c0c0cf;
       }
 
-      .c34:indeterminate {
+      .c33:indeterminate {
         background-color: #4945ff;
         border: 1px solid #4945ff;
       }
 
-      .c34:indeterminate:after {
+      .c33:indeterminate:after {
         content: '';
         display: block;
         position: relative;
@@ -424,16 +433,16 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         transform: translateX(-50%) translateY(-50%);
       }
 
-      .c34:indeterminate:disabled {
+      .c33:indeterminate:disabled {
         background-color: #dcdce4;
         border: 1px solid #c0c0cf;
       }
 
-      .c34:indeterminate:disabled:after {
+      .c33:indeterminate:disabled:after {
         background-color: #8e8ea9;
       }
 
-      .c19 {
+      .c15 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -445,79 +454,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         width: 1px;
       }
 
-      .c10 {
+      .c21 {
         height: 100%;
       }
 
-      .c8 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        background-color: #4945ff;
-        border: 1px solid #4945ff;
-        height: 2rem;
-        padding-left: 16px;
-        padding-right: 16px;
-      }
-
-      .c8 .c1 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c8 .c5 {
-        color: #ffffff;
-      }
-
-      .c8[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c8[aria-disabled='true'] .c5 {
-        color: #666687;
-      }
-
-      .c8[aria-disabled='true'] svg > g,.c8[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c8[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c8[aria-disabled='true']:active .c5 {
-        color: #666687;
-      }
-
-      .c8[aria-disabled='true']:active svg > g,.c8[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c8:hover {
-        border: 1px solid #7b79ff;
-        background: #7b79ff;
-      }
-
-      .c8:active {
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c8 svg > g,
-      .c8 svg path {
-        fill: #ffffff;
-      }
-
-      .c23 {
+      .c19 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -531,7 +472,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         background: #ffffff;
       }
 
-      .c23 .c1 {
+      .c19 .c1 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -542,54 +483,54 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         align-items: center;
       }
 
-      .c23 .c5 {
+      .c19 .c5 {
         color: #ffffff;
       }
 
-      .c23[aria-disabled='true'] {
+      .c19[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c23[aria-disabled='true'] .c5 {
+      .c19[aria-disabled='true'] .c5 {
         color: #666687;
       }
 
-      .c23[aria-disabled='true'] svg > g,.c23[aria-disabled='true'] svg path {
+      .c19[aria-disabled='true'] svg > g,.c19[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c23[aria-disabled='true']:active {
+      .c19[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c23[aria-disabled='true']:active .c5 {
+      .c19[aria-disabled='true']:active .c5 {
         color: #666687;
       }
 
-      .c23[aria-disabled='true']:active svg > g,.c23[aria-disabled='true']:active svg path {
+      .c19[aria-disabled='true']:active svg > g,.c19[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c23:hover {
+      .c19:hover {
         background-color: #f6f6f9;
       }
 
-      .c23:active {
+      .c19:active {
         background-color: #eaeaef;
       }
 
-      .c23 .c5 {
+      .c19 .c5 {
         color: #32324d;
       }
 
-      .c23 svg > g,
-      .c23 svg path {
+      .c19 svg > g,
+      .c19 svg path {
         fill: #32324d;
       }
 
-      .c47 {
+      .c46 {
         position: relative;
         border: 1px solid #dcdce4;
         padding-right: 12px;
@@ -605,28 +546,28 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         transition-duration: 0.2s;
       }
 
-      .c47:focus-within {
+      .c46:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c53 {
+      .c52 {
         background: transparent;
         border: none;
         position: relative;
         z-index: 1;
       }
 
-      .c53 svg {
+      .c52 svg {
         height: 0.6875rem;
         width: 0.6875rem;
       }
 
-      .c53 svg path {
+      .c52 svg path {
         fill: #666687;
       }
 
-      .c54 {
+      .c53 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -635,17 +576,17 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border: none;
       }
 
-      .c54 svg {
+      .c53 svg {
         width: 0.375rem;
       }
 
-      .c42 {
+      .c41 {
         -webkit-animation: gzYjWD 1s infinite linear;
         animation: gzYjWD 1s infinite linear;
         will-change: transform;
       }
 
-      .c48 {
+      .c47 {
         position: absolute;
         left: 0;
         right: 0;
@@ -656,19 +597,19 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border: none;
       }
 
-      .c48:focus {
+      .c47:focus {
         outline: none;
       }
 
-      .c48[aria-disabled='true'] {
+      .c47[aria-disabled='true'] {
         cursor: not-allowed;
       }
 
-      .c49 {
+      .c48 {
         width: 100%;
       }
 
-      .c18 {
+      .c14 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -685,30 +626,30 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         width: 2rem;
       }
 
-      .c18 svg > g,
-      .c18 svg path {
+      .c14 svg > g,
+      .c14 svg path {
         fill: #8e8ea9;
       }
 
-      .c18:hover svg > g,
-      .c18:hover svg path {
+      .c14:hover svg > g,
+      .c14:hover svg path {
         fill: #666687;
       }
 
-      .c18:active svg > g,
-      .c18:active svg path {
+      .c14:active svg > g,
+      .c14:active svg path {
         fill: #a5a5ba;
       }
 
-      .c18[aria-disabled='true'] {
+      .c14[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c18[aria-disabled='true'] svg path {
+      .c14[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c37 {
+      .c36 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -726,30 +667,30 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border: none;
       }
 
-      .c37 svg > g,
-      .c37 svg path {
+      .c36 svg > g,
+      .c36 svg path {
         fill: #8e8ea9;
       }
 
-      .c37:hover svg > g,
-      .c37:hover svg path {
+      .c36:hover svg > g,
+      .c36:hover svg path {
         fill: #666687;
       }
 
-      .c37:active svg > g,
-      .c37:active svg path {
+      .c36:active svg > g,
+      .c36:active svg path {
         fill: #a5a5ba;
       }
 
-      .c37[aria-disabled='true'] {
+      .c36[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c37[aria-disabled='true'] svg path {
+      .c36[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c17 > * + * {
+      .c12 > * + * {
         margin-left: 8px;
       }
 
@@ -757,11 +698,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         outline: none;
       }
 
-      .c57 > * + * {
+      .c56 > * + * {
         margin-left: 4px;
       }
 
-      .c58 {
+      .c57 {
         padding: 12px;
         border-radius: 4px;
         -webkit-text-decoration: none;
@@ -774,7 +715,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         outline: none;
       }
 
-      .c58:after {
+      .c57:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -789,11 +730,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border: 2px solid transparent;
       }
 
-      .c58:focus-visible {
+      .c57:focus-visible {
         outline: none;
       }
 
-      .c58:focus-visible:after {
+      .c57:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -804,44 +745,44 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c59 {
+      .c58 {
         font-size: 0.7rem;
         pointer-events: none;
       }
 
-      .c59 svg path {
+      .c58 svg path {
         fill: #c0c0cf;
+      }
+
+      .c58:focus svg path,
+      .c58:hover svg path {
+        fill: #c0c0cf;
+      }
+
+      .c59 {
+        font-size: 0.7rem;
+      }
+
+      .c59 svg path {
+        fill: #666687;
       }
 
       .c59:focus svg path,
       .c59:hover svg path {
-        fill: #c0c0cf;
-      }
-
-      .c60 {
-        font-size: 0.7rem;
-      }
-
-      .c60 svg path {
-        fill: #666687;
-      }
-
-      .c60:focus svg path,
-      .c60:hover svg path {
         fill: #4a4a6a;
       }
 
-      .c25 {
+      .c24 {
         overflow: hidden;
         border: 1px solid #eaeaef;
       }
 
-      .c30 {
+      .c29 {
         width: 100%;
         white-space: nowrap;
       }
 
-      .c27:before {
+      .c26:before {
         background: linear-gradient(90deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
@@ -851,7 +792,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         left: 0;
       }
 
-      .c27:after {
+      .c26:after {
         background: linear-gradient(270deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
@@ -862,54 +803,54 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         top: 0;
       }
 
-      .c29 {
+      .c28 {
         overflow-x: auto;
       }
 
-      .c39 tr:last-of-type {
+      .c38 tr:last-of-type {
         border-bottom: none;
+      }
+
+      .c30 {
+        border-bottom: 1px solid #eaeaef;
       }
 
       .c31 {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c32 {
-        border-bottom: 1px solid #eaeaef;
-      }
-
-      .c32 td,
-      .c32 th {
+      .c31 td,
+      .c31 th {
         padding: 16px;
       }
 
-      .c32 td:first-of-type,
-      .c32 th:first-of-type {
+      .c31 td:first-of-type,
+      .c31 th:first-of-type {
         padding: 0 4px;
       }
 
-      .c32 th {
+      .c31 th {
         padding-top: 0;
         padding-bottom: 0;
         height: 3.5rem;
       }
 
-      .c33 {
+      .c32 {
         vertical-align: middle;
         text-align: left;
         color: #666687;
         outline-offset: -4px;
       }
 
-      .c33 input {
+      .c32 input {
         vertical-align: sub;
       }
 
-      .c35 svg {
+      .c34 svg {
         height: 0.25rem;
       }
 
-      .c38 {
+      .c37 {
         -webkit-transform: rotate(0deg);
         -ms-transform: rotate(0deg);
         transform: rotate(0deg);
@@ -941,80 +882,43 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                   Users
                 </h1>
               </div>
-              <button
-                aria-disabled="false"
-                class="c7 c8"
-                data-testid="create-user-button"
-                type="button"
-              >
-                <div
-                  aria-hidden="true"
-                  class="c1 c9 c10"
-                >
-                  <svg
-                    fill="none"
-                    height="1em"
-                    viewBox="0 0 24 24"
-                    width="1em"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M0 2.8A.8.8 0 01.8 2h22.4a.8.8 0 01.8.8v2.71a1 1 0 01-1 1H1a1 1 0 01-1-1V2.8z"
-                      fill="#32324D"
-                    />
-                    <path
-                      d="M1.922 7.991C.197 6.675 0 6.252 0 5.289h23.953c.305 1.363-1.594 2.506-2.297 3.125-1.953 1.363-6.253 4.36-7.828 5.45-1.575 1.09-3.031.455-3.562 0-2.063-1.41-6.62-4.557-8.344-5.873zM22.8 18H1.2c-.663 0-1.2.471-1.2 1.053v1.894C0 21.529.537 22 1.2 22h21.6c.663 0 1.2-.471 1.2-1.053v-1.894c0-.582-.537-1.053-1.2-1.053z"
-                      fill="#32324D"
-                    />
-                    <path
-                      d="M0 9.555v10.972h24V9.554c-2.633 1.95-8.367 6.113-9.96 7.166-1.595 1.052-3.352.438-4.032 0L0 9.555z"
-                      fill="#32324D"
-                    />
-                  </svg>
-                </div>
-                <span
-                  class="c5 c11"
-                >
-                  Invite new user
-                </span>
-              </button>
             </div>
             <p
-              class="c5 c12"
+              class="c5 c7"
             >
               All the users who have access to the Strapi admin panel
             </p>
           </div>
         </div>
         <div
-          class="c1 c13"
+          class="c1 c8"
         >
           <div
-            class="c1 c14"
+            class="c1 c9"
           >
             <div
-              class="c1 c15"
+              class="c1 c10"
             >
               <div
-                class="c1 c16 c17"
+                class="c1 c11 c12"
                 wrap="wrap"
               >
                 <span>
                   <button
                     aria-disabled="false"
                     aria-labelledby="0"
-                    class="c7 c18"
+                    class="c13 c14"
                     tabindex="0"
                     type="button"
                   >
                     <span
-                      class="c19"
+                      class="c15"
                     >
                       Search
                     </span>
                     <svg
                       aria-hidden="true"
-                      class="c1 c20 c21"
+                      class="c1 c16 c17"
                       fill="none"
                       focusable="false"
                       height="1em"
@@ -1032,16 +936,16 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                   </button>
                 </span>
                 <div
-                  class="c1 c22"
+                  class="c1 c18"
                 >
                   <button
                     aria-disabled="false"
-                    class="c7 c23"
+                    class="c13 c19"
                     type="button"
                   >
                     <div
                       aria-hidden="true"
-                      class="c1 c9 c10"
+                      class="c1 c20 c21"
                     >
                       <svg
                         fill="none"
@@ -1059,7 +963,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                       </svg>
                     </div>
                     <span
-                      class="c5 c11"
+                      class="c5 c22"
                     >
                       Filters
                     </span>
@@ -1070,33 +974,33 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
           </div>
         </div>
         <div
-          class="c1 c13"
+          class="c1 c8"
         >
           <div
-            class="c1 c24 c25"
+            class="c1 c23 c24"
           >
             <div
-              class="c1 c26 c27"
+              class="c1 c25 c26"
             >
               <div
-                class="c1 c28 c29"
+                class="c1 c27 c28"
               >
                 <table
                   aria-colcount="8"
                   aria-rowcount="1"
-                  class="c30"
+                  class="c29"
                   role="grid"
                 >
                   <thead
-                    class="c31"
+                    class="c30"
                   >
                     <tr
                       aria-rowindex="1"
-                      class="c1 c32"
+                      class="c1 c31"
                     >
                       <th
                         aria-colindex="1"
-                        class="c1 c33"
+                        class="c1 c32"
                         role="gridcell"
                       >
                         <div
@@ -1107,19 +1011,19 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           >
                             <input
                               aria-label="Select all entries"
-                              class="c34"
+                              class="c33"
                               tabindex="0"
                               type="checkbox"
                             />
                           </div>
                           <span
-                            class="c35"
+                            class="c34"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="2"
-                        class="c1 c33"
+                        class="c1 c32"
                         role="gridcell"
                         tabindex="-1"
                       >
@@ -1129,7 +1033,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <span
                               aria-labelledby="1"
-                              class="c5 c36"
+                              class="c5 c35"
                               label="Firstname"
                               tabindex="-1"
                             >
@@ -1137,24 +1041,24 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             </span>
                           </span>
                           <span
-                            class="c35"
+                            class="c34"
                           >
                             <span>
                               <button
                                 aria-disabled="false"
                                 aria-labelledby="2"
-                                class="c7 c37"
+                                class="c13 c36"
                                 tabindex="-1"
                                 type="button"
                               >
                                 <span
-                                  class="c19"
+                                  class="c15"
                                 >
                                   Sort on Firstname
                                 </span>
                                 <svg
                                   aria-hidden="true"
-                                  class="c38"
+                                  class="c37"
                                   fill="none"
                                   focusable="false"
                                   height="1em"
@@ -1176,7 +1080,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                       </th>
                       <th
                         aria-colindex="3"
-                        class="c1 c33"
+                        class="c1 c32"
                         role="gridcell"
                       >
                         <div
@@ -1185,7 +1089,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <button
                               aria-labelledby="3"
-                              class="c5 c36"
+                              class="c5 c35"
                               label="Lastname"
                               tabindex="-1"
                             >
@@ -1193,13 +1097,13 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             </button>
                           </span>
                           <span
-                            class="c35"
+                            class="c34"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="4"
-                        class="c1 c33"
+                        class="c1 c32"
                         role="gridcell"
                       >
                         <div
@@ -1208,7 +1112,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <button
                               aria-labelledby="4"
-                              class="c5 c36"
+                              class="c5 c35"
                               label="Email"
                               tabindex="-1"
                             >
@@ -1216,13 +1120,13 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             </button>
                           </span>
                           <span
-                            class="c35"
+                            class="c34"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="5"
-                        class="c1 c33"
+                        class="c1 c32"
                         role="gridcell"
                       >
                         <div
@@ -1231,7 +1135,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <span
                               aria-labelledby="5"
-                              class="c5 c36"
+                              class="c5 c35"
                               label="Roles"
                               tabindex="-1"
                             >
@@ -1239,13 +1143,13 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             </span>
                           </span>
                           <span
-                            class="c35"
+                            class="c34"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="6"
-                        class="c1 c33"
+                        class="c1 c32"
                         role="gridcell"
                       >
                         <div
@@ -1254,7 +1158,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <button
                               aria-labelledby="6"
-                              class="c5 c36"
+                              class="c5 c35"
                               label="Username"
                               tabindex="-1"
                             >
@@ -1262,13 +1166,13 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             </button>
                           </span>
                           <span
-                            class="c35"
+                            class="c34"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="7"
-                        class="c1 c33"
+                        class="c1 c32"
                         role="gridcell"
                       >
                         <div
@@ -1277,7 +1181,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <span
                               aria-labelledby="7"
-                              class="c5 c36"
+                              class="c5 c35"
                               label="User status"
                               tabindex="-1"
                             >
@@ -1285,13 +1189,13 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             </span>
                           </span>
                           <span
-                            class="c35"
+                            class="c34"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="8"
-                        class="c1 c33"
+                        class="c1 c32"
                         role="gridcell"
                         tabindex="-1"
                       >
@@ -1299,49 +1203,49 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           class="c1 c4"
                         >
                           <div
-                            class="c19"
+                            class="c15"
                           >
                             Actions
                           </div>
                           <span
-                            class="c35"
+                            class="c34"
                           />
                         </div>
                       </th>
                     </tr>
                   </thead>
                   <tbody
-                    class="c39"
+                    class="c38"
                   >
                     <tr
                       aria-rowindex="2"
-                      class="c1 c32"
+                      class="c1 c31"
                     >
                       <td
                         aria-colindex="1"
-                        class="c1 c33"
+                        class="c1 c32"
                         colspan="8"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <div
-                          class="c1 c40"
+                          class="c1 c39"
                         >
                           <div
-                            class="c1 c41"
+                            class="c1 c40"
                           >
                             <div
                               aria-live="assertive"
                               role="alert"
                             >
                               <div
-                                class="c19"
+                                class="c15"
                               >
                                 Loading content...
                               </div>
                               <img
                                 aria-hidden="true"
-                                class="c42"
+                                class="c41"
                                 src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjMiIGhlaWdodD0iNjMiIHZpZXdCb3g9IjAgMCA2MyA2MyIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQyLjU1NjMgMTEuOTgxNkMzOS40ODQgMTAuMzA3MSAzNS44NTc1IDkuMjkwOTcgMzIuMzM1NCA5LjEzNTIxQzI4LjY0NDMgOC45Mjg4OCAyNC44Mjk1IDkuNzIzMTggMjEuMzMzNiAxMS40MTI5QzIwLjkxMjMgMTEuNTkwMSAyMC41Mzc2IDExLjgxMDEgMjAuMTcyMiAxMi4wMjQ5TDIwLjAxMDggMTIuMTE3OUMxOS44Nzc0IDEyLjE5NTEgMTkuNzQ0MSAxMi4yNzI0IDE5LjYwOCAxMi4zNTM2QzE5LjMyNTMgMTIuNTE0NiAxOS4wNDkyIDEyLjY3NDQgMTguNzU0NCAxMi44NzkyQzE4LjU0NjMgMTMuMDMyOSAxOC4zMzk1IDEzLjE3NTkgMTguMTMwMSAxMy4zMjNDMTcuNTY1OCAxMy43MjA4IDE2Ljk4NjggMTQuMTMxNyAxNi40OTgzIDE0LjU5NzlDMTQuODQ3NiAxNS45NTI0IDEzLjU1NzEgMTcuNjA3NSAxMi42MDcxIDE4LjkyMTRDMTAuNDM2NSAyMi4xNTY2IDkuMDg2MjIgMjUuOTU2NyA4LjgwNzAyIDI5LjYxNDNMOC43NzY0IDMwLjE1ODhDOC43MzMyOCAzMC45MTk2IDguNjg0NzYgMzEuNzA1NyA4Ljc1MzUzIDMyLjQ1NTVDOC43NjY0OCAzMi42MDg0IDguNzY2MSAzMi43NjM4IDguNzc1MDYgMzIuOTE0QzguNzg4OTUgMzMuMjI5IDguODAxNTIgMzMuNTM3MyA4Ljg0NiAzMy44NjcyTDkuMDczOTYgMzUuNDIyMUM5LjA5NzU2IDM1LjU3NjQgOS4xMTk4IDM1Ljc0MTMgOS4xNjMzIDM1LjkyNjNMOS42NTkxOSAzNy45MjcyTDEwLjEzOCAzOS4yODIzQzEwLjI3MjkgMzkuNjY3MyAxMC40MTU4IDQwLjA3NTEgMTAuNiA0MC40M0MxMi4wMjkyIDQzLjYzNyAxNC4xNDI1IDQ2LjQ1NzggMTYuNzA2MyA0OC41ODVDMTkuMDUwOCA1MC41Mjk2IDIxLjgyNCA1Mi4wMDIzIDI0Ljc0OTEgNTIuODQ1MkwyNi4yMzcxIDUzLjIzNzZDMjYuMzc4MSA1My4yNjkzIDI2LjQ5MjYgNTMuMjg4OSAyNi42MDMxIDUzLjMwNThMMjYuNzc3NSA1My4zMzExQzI3LjAwNTIgNTMuMzYzNiAyNy4yMTk1IDUzLjM5ODYgMjcuNDQ0NSA1My40MzVDMjcuODU5OCA1My41MDc2IDI4LjI2NzIgNTMuNTc0OCAyOC43MDc5IDUzLjYxODNMMzAuNTY0MSA1My43MjI5QzMwLjk1MTYgNTMuNzI0OSAzMS4zMzUyIDUzLjcwNjggMzEuNzA4MSA1My42ODc0QzMxLjkwMzkgNTMuNjgxIDMyLjA5ODQgNTMuNjY4MSAzMi4zMjg4IDUzLjY2MkMzNC41MjUzIDUzLjQ3NzIgMzYuNTEwNiA1My4wNjM0IDM4LjA1MTYgNTIuNDY1MkMzOC4xNzY5IDUyLjQxNzEgMzguMzAwOCA1Mi4zNzk2IDM4LjQyMzQgNTIuMzM1NUMzOC42NzI3IDUyLjI0OTkgMzguOTI1OSA1Mi4xNjcgMzkuMTQzMiA1Mi4wNTk5TDQwLjg1OTEgNTEuMjYyNkw0Mi41NzAyIDUwLjI2NkM0Mi45MDA5IDUwLjA2ODIgNDMuMDIwNSA0OS42NDE0IDQyLjgyODIgNDkuMjk4NEM0Mi42MzIgNDguOTUyNiA0Mi4yMDM0IDQ4LjgzMDggNDEuODYzNCA0OS4wMTY2TDQwLjE3OTIgNDkuOTIxOEwzOC40OTk1IDUwLjYyMjRDMzguMzE2OSA1MC42OTUzIDM4LjEyMSA1MC43NTM0IDM3LjkyMjQgNTAuODE1NUMzNy43ODM4IDUwLjg0ODkgMzcuNjUxOCA1MC44OTgzIDM3LjUwMTIgNTAuOTQwOEMzNi4wNzExIDUxLjQzNSAzNC4yNDQ1IDUxLjc0MjUgMzIuMjQ0IDUxLjgzNDZDMzIuMDQ0MiA1MS44MzgzIDMxLjg0NzEgNTEuODM3OSAzMS42NTQgNTEuODQwM0MzMS4zMDUxIDUxLjg0MTQgMzAuOTYwMiA1MS44NDUxIDMwLjYzOTIgNTEuODMwNUwyOC45MTc3IDUxLjY3MjVDMjguNTQ3NiA1MS42MTkgMjguMTY5NSA1MS41NDI3IDI3Ljc4NDggNTEuNDY3OEMyNy41NjM5IDUxLjQxNjcgMjcuMzM3NiA1MS4zNzM3IDI3LjEyOTkgNTEuMzM3NEwyNi45NTI5IDUxLjI5ODdDMjYuODcwNCA1MS4yODM0IDI2Ljc3NzIgNTEuMjY2NyAyNi43MzMzIDUxLjI1NDNMMjUuMzQ2NiA1MC44MzIyQzIyLjc2NTEgNDkuOTc4OSAyMC4zMyA0OC41NzI5IDE4LjI5NDIgNDYuNzU1N0MxNi4xMDU2IDQ0Ljc5NTEgMTQuMzMzOSA0Mi4yMzM1IDEzLjE3NDIgMzkuMzU4MkMxMi4wMjc2IDM2LjYwMTMgMTEuNTk4OCAzMy4yNzkyIDExLjk3MTYgMzAuMDA3NkMxMi4zMTQ1IDI3LjAyMTMgMTMuMzk0OCAyNC4xNjM1IDE1LjE4NTggMjEuNTA4M0MxNS4zMDM0IDIxLjMzMzkgMTUuNDIxIDIxLjE1OTYgMTUuNTIxMiAyMS4wMTk2QzE2LjQzMDkgMTkuODY4OCAxNy41NDA4IDE4LjU1ODkgMTguOTQ4MyAxNy40OTZDMTkuMzM2NyAxNy4xNTI1IDE5Ljc4NjIgMTYuODU2IDIwLjI2MTEgMTYuNTQ3OEMyMC40ODc4IDE2LjQwMDkgMjAuNzA3OSAxNi4yNTUzIDIwLjg5MDcgMTYuMTMwNkMyMS4wOTc0IDE2LjAwNDggMjEuMzE4OCAxNS44ODMxIDIxLjUzNDggMTUuNzY5NEMyMS42NzYxIDE1LjY5NzUgMjEuODE2MiAxNS42MTkgMjEuOTM4OCAxNS41NTc2TDIyLjEwMDIgMTUuNDY0NkMyMi40MDAyIDE1LjMwMzcgMjIuNjc0OSAxNS4xNTQ2IDIyLjk5MDggMTUuMDM5TDI0LjExODYgMTQuNTcxNUMyNC4zMzk5IDE0LjQ4NDQgMjQuNTcxOCAxNC40MTU5IDI0Ljc5OTcgMTQuMzQ0N0MyNC45NTMgMTQuMjk4MiAyNS4wOTgyIDE0LjI2MzUgMjUuMjYzNSAxNC4yMDc4QzI1Ljc4NiAxNC4wMTgyIDI2LjMyODMgMTMuOTExMiAyNi45MTA1IDEzLjc5NjVDMjcuMTE3IDEzLjc1NzEgMjcuMzMwMiAxMy43MTYzIDI3LjU2MDggMTMuNjU4NUMyNy43NTUzIDEzLjYxMSAyNy45NzM3IDEzLjU5NjkgMjguMjA4MiAxMy41NzYyQzI4LjM2NCAxMy41NjAzIDI4LjUxNzIgMTMuNTQ4MyAyOC42MzE4IDEzLjUzMzNDMjguNzg3NiAxMy41MTczIDI4LjkzNDIgMTMuNTA2NiAyOS4wOTI3IDEzLjQ4NjdDMjkuMzI4NSAxMy40NTU1IDI5LjU0NTYgMTMuNDM0NyAyOS43NDk0IDEzLjQzMzdDMzAuMDIzNyAxMy40NCAzMC4yOTk0IDEzLjQzNTcgMzAuNTc3NyAxMy40Mjc0QzMxLjA4MTEgMTMuNDIxIDMxLjU1NzkgMTMuNDE5NyAzMi4wMzE4IDEzLjQ5MTRDMzQuOTY2NCAxMy43MzUyIDM3LjcxNDQgMTQuNjA4NSA0MC4yMDUyIDE2LjA4NjhDNDIuMzQ4OSAxNy4zNjU1IDQ0LjI3MTYgMTkuMTUyNSA0NS43NjA3IDIxLjI2NEM0Ny4wMjU1IDIzLjA2MjggNDcuOTc1NiAyNS4wNTI4IDQ4LjQ5MjggMjcuMDM5M0M0OC41NzIgMjcuMzE3NiA0OC42Mjk5IDI3LjU5MzEgNDguNjgzOSAyNy44NjU5QzQ4LjcxNTQgMjguMDQyOCA0OC43NTYzIDI4LjIxNDUgNDguNzg5MiAyOC4zNjM2QzQ4LjgwMzcgMjguNDU0MSA0OC44MjA4IDI4LjU0MDYgNDguODQ0NSAyOC42MjU4QzQ4Ljg3NDkgMjguNzQ0MyA0OC44OTg2IDI4Ljg2NCA0OC45MTE2IDI4Ljk2NTFMNDguOTc5MyAyOS42MDQ3QzQ4Ljk5MjIgMjkuNzc0OCA0OS4wMTMyIDI5LjkzMzEgNDkuMDMwMSAzMC4wODg3QzQ5LjA2NjggMzAuMzI2OCA0OS4wODg5IDMwLjU2MDggNDkuMDk2NCAzMC43NTYxTDQ5LjEwODMgMzEuOTAwMUM0OS4xMzEyIDMyLjMzMDcgNDkuMDg5IDMyLjcxMTYgNDkuMDUyMiAzMy4wNjczQzQ5LjAzODQgMzMuMjU5OCA0OS4wMTI2IDMzLjQ0NDMgNDkuMDEyMyAzMy41ODI0QzQ4Ljk5NjEgMzMuNjkyNiA0OC45OTE4IDMzLjc5MzUgNDguOTgzNiAzMy44OTE3QzQ4Ljk3NTMgMzQuMDA3MiA0OC45NzI0IDM0LjExNDggNDguOTQxNCAzNC4yNTU0TDQ4LjU0NDkgMzYuMzA1OUM0OC4zMTM0IDM3Ljg2MjMgNDkuMzc5MyAzOS4zMzY1IDUwLjk0ODggMzkuNTgyMkM1Mi4wNDE3IDM5Ljc2MDEgNTMuMTUzNiAzOS4yODE5IDUzLjc3MTEgMzguMzY2NEM1NC4wMDYzIDM4LjAxNzYgNTQuMTYwNCAzNy42MjU3IDU0LjIyMjcgMzcuMjA2NEw1NC41MjE3IDM1LjI1NzRDNTQuNTUxNCAzNS4wNzU2IDU0LjU3MiAzNC44MyA1NC41ODQ2IDM0LjU3OTFMNTQuNjAyOCAzNC4yMzM4QzU0LjYwOTggMzQuMDU5OCA1NC42MjIzIDMzLjg3NzkgNTQuNjM0NyAzMy42Nzg4QzU0LjY3MzQgMzMuMTA1MiA1NC43MTYzIDMyLjQ0NzkgNTQuNjYxOSAzMS44MDU4TDU0LjU4NjcgMzAuNDI4OUM1NC41NjIyIDMwLjA5NTIgNTQuNTA5NyAyOS43NiA1NC40NTU5IDI5LjQxODFDNTQuNDMxIDI5LjI1NzIgNTQuNDA0OCAyOS4wODk2IDU0LjM4MjYgMjguOTA3NEw1NC4yNjg3IDI4LjEwNEM1NC4yMzMyIDI3LjkyNDQgNTQuMTgwNCAyNy43MjczIDU0LjEzMjkgMjcuNTM5Nkw1NC4wNjQzIDI3LjI0NTRDNTQuMDE5NSAyNy4wNzEgNTMuOTc3MyAyNi44OTI3IDUzLjkzMzggMjYuNzA3NkM1My44NDU1IDI2LjMzMDkgNTMuNzQ3OSAyNS45NDIyIDUzLjYxMyAyNS41NTcxQzUyLjg0IDIzLjAyOTIgNTEuNTM4MyAyMC41MTk0IDQ5LjgzMzggMTguMjc5OUM0Ny44NTQ0IDE1LjY4MiA0NS4zMzMzIDEzLjUwODcgNDIuNTU2MyAxMS45ODE2WiIgZmlsbD0iIzQ5NDVGRiIvPgo8L3N2Zz4K"
                               />
                             </div>
@@ -1355,20 +1259,20 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
             </div>
           </div>
           <div
-            class="c1 c43"
+            class="c1 c42"
           >
             <div
-              class="c1 c44"
+              class="c1 c43"
             >
               <div
                 class="c1 c4"
               >
                 <div>
                   <div
-                    class="c1 c45 c46"
+                    class="c1 c44 c45"
                   >
                     <div
-                      class="c1 c4 c47"
+                      class="c1 c4 c46"
                     >
                       <button
                         aria-disabled="false"
@@ -1376,21 +1280,21 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                         aria-haspopup="listbox"
                         aria-label="Entries per page"
                         aria-labelledby="11 11-label 11-content"
-                        class="c48"
+                        class="c47"
                         id="11"
                         type="button"
                       />
                       <div
-                        class="c1 c3 c49"
+                        class="c1 c3 c48"
                       >
                         <div
                           class="c1 c4"
                         >
                           <div
-                            class="c1 c50"
+                            class="c1 c49"
                           >
                             <span
-                              class="c5 c51"
+                              class="c5 c50"
                               id="11-content"
                             >
                               10
@@ -1402,7 +1306,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                         >
                           <button
                             aria-hidden="true"
-                            class="c1 c52 c53 c54"
+                            class="c1 c51 c52 c53"
                             tabindex="-1"
                             title="Carret Down Button"
                             type="button"
@@ -1428,10 +1332,10 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                   </div>
                 </div>
                 <div
-                  class="c1 c55"
+                  class="c1 c54"
                 >
                   <label
-                    class="c5 c56"
+                    class="c5 c55"
                     for="page-size"
                   >
                     Entries per page
@@ -1443,18 +1347,18 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                 class=""
               >
                 <ul
-                  class="c1 c4 c57"
+                  class="c1 c4 c56"
                 >
                   <li>
                     <a
                       aria-current="page"
                       aria-disabled="true"
-                      class="c58 c59 active"
+                      class="c57 c58 active"
                       href="/settings/user"
                       tabindex="-1"
                     >
                       <div
-                        class="c19"
+                        class="c15"
                       >
                         Go to previous page
                       </div>
@@ -1477,11 +1381,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                     <a
                       aria-current="page"
                       aria-disabled="false"
-                      class="c58 c60 active"
+                      class="c57 c59 active"
                       href="/settings/user?pageSize=10&page=1&sort=firstname"
                     >
                       <div
-                        class="c19"
+                        class="c15"
                       >
                         Go to next page
                       </div>
@@ -1533,10 +1437,8 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
     history.push('/settings/user?pageSize=10&page=1&sort=firstname');
     const app = makeApp(history);
 
-    const { queryByTestId } = render(app);
+    const { queryByText } = render(app);
 
-    await waitFor(() => {
-      expect(queryByTestId('create-user-button')).not.toBeInTheDocument();
-    });
+    expect(queryByText('Invite new user')).not.toBeInTheDocument();
   });
 });
