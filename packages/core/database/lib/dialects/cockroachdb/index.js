@@ -26,6 +26,12 @@ class CockroachDialect extends Dialect {
       'text',
       parseFloat
     );
+    // Don't parse JSONB automatically
+    this.db.connection.client.driver.types.setTypeParser(
+      this.db.connection.client.driver.types.builtins.JSONB,
+      'text',
+      (v) => v
+    );
     // sets default int to 32 bit and sets serial normalization to sql_sequence to mimic postgres
     this.db.connection.client.pool.on('acquireSuccess', async (eventId, resource) => {
       resource.query('SET serial_normalization = "sql_sequence";');

@@ -65,7 +65,7 @@ const SQL_QUERIES = {
   `,
 };
 
-const toStrapiType = column => {
+const toStrapiType = (column) => {
   const rootType = column.data_type.toLowerCase().match(/[^(), ]+/)[0];
 
   switch (rootType) {
@@ -109,6 +109,17 @@ const toStrapiType = column => {
     }
   }
 };
+const getIndexType = (index) => {
+  if (index.is_primary) {
+    return 'primary';
+  }
+
+  if (index.is_unique) {
+    return 'unique';
+  }
+
+  return null;
+};
 
 class CockroachdbSchemaInspector {
   constructor(db) {
@@ -121,7 +132,7 @@ class CockroachdbSchemaInspector {
     const tables = await this.getTables();
 
     schema.tables = await Promise.all(
-      tables.map(async tableName => {
+      tables.map(async (tableName) => {
         const columns = await this.getColumns(tableName);
         const indexes = await this.getIndexes(tableName);
         const foreignKeys = await this.getForeignKeys(tableName);
@@ -147,7 +158,7 @@ class CockroachdbSchemaInspector {
       this.getDatabaseSchema(),
     ]);
 
-    return rows.map(row => row.table_name);
+    return rows.map((row) => row.table_name);
   }
 
   async getColumns(tableName) {
@@ -156,7 +167,7 @@ class CockroachdbSchemaInspector {
       tableName,
     ]);
 
-    return rows.map(row => {
+    return rows.map((row) => {
       const { type, args = [], ...rest } = toStrapiType(row);
 
       const defaultTo =
@@ -191,7 +202,7 @@ class CockroachdbSchemaInspector {
         ret[index.indexrelid] = {
           columns: [index.column_name],
           name: index.index_name,
-          type: index.is_primary ? 'primary' : index.is_unique ? 'unique' : null,
+          type: getIndexType(index),
         };
       } else {
         ret[index.indexrelid].columns.push(index.column_name);
