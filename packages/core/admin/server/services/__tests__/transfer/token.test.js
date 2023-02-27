@@ -10,7 +10,10 @@ const getActionProvider = (actions = []) => {
   return {
     admin: {
       services: {
-        transfer: { permission: { providers: { action: { keys: jest.fn(() => actions) } } } },
+        transfer: {
+          utils: { hasValidTokenSalt: jest.fn(() => true) },
+          permission: { providers: { action: { keys: jest.fn(() => actions) } } },
+        },
       },
     },
   };
@@ -376,6 +379,16 @@ describe('Transfer Token', () => {
       const mockedConfigSet = jest.fn();
 
       global.strapi = {
+        admin: {
+          services: {
+            transfer: {
+              utils: {
+                hasValidTokenSalt: jest.fn(() => true),
+                isDisabledFromEnv: jest.fn(() => false),
+              },
+            },
+          },
+        },
         config: {
           get: jest.fn(() => ({
             admin: { transfer: { token: { salt: 'transfer-token_tests-salt' } } },
@@ -388,39 +401,6 @@ describe('Transfer Token', () => {
 
       expect(mockedAppendFile).not.toHaveBeenCalled();
       expect(mockedConfigSet).not.toHaveBeenCalled();
-    });
-
-    test('It throws if the salt is not defined', () => {
-      global.strapi = {
-        config: {
-          get: jest.fn(() => null),
-        },
-      };
-
-      try {
-        transferTokenService.checkSaltIsDefined();
-      } catch (e) {
-        expect(e.message.includes('Missing transfer.token.salt.')).toBe(true);
-      }
-
-      expect.assertions(1);
-    });
-
-    test('It throws an error if the env variable used in the config file has been changed and is empty', () => {
-      expect.assertions(1);
-      process.env.TRANSFER_TOKEN_SALT = 'transfer-token_tests-salt';
-
-      global.strapi = {
-        config: {
-          get: jest.fn(() => null),
-        },
-      };
-
-      try {
-        transferTokenService.createSaltIfNotDefined();
-      } catch (err) {
-        expect(err).toBeInstanceOf(Error);
-      }
     });
   });
 
@@ -571,6 +551,15 @@ describe('Transfer Token', () => {
       const update = jest.fn(({ data }) => Promise.resolve(data));
 
       global.strapi = {
+        admin: {
+          services: {
+            transfer: {
+              utils: {
+                hasValidTokenSalt: jest.fn(() => true),
+              },
+            },
+          },
+        },
         query() {
           return { update };
         },
@@ -597,6 +586,15 @@ describe('Transfer Token', () => {
       const update = jest.fn(() => Promise.resolve(null));
 
       global.strapi = {
+        admin: {
+          services: {
+            transfer: {
+              utils: {
+                hasValidTokenSalt: jest.fn(() => true),
+              },
+            },
+          },
+        },
         query() {
           return { update };
         },
