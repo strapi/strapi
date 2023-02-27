@@ -1,19 +1,11 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { usePersistentState } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
-import {
-  Box,
-  Grid,
-  GridItem,
-  Select,
-  Option,
-  Stack,
-  Textarea,
-  TextInput,
-  Typography,
-} from '@strapi/design-system';
-import { getDateOfExpiration } from '../../utils';
+import { Box, Grid, GridItem, Stack, Typography } from '@strapi/design-system';
+import LifeSpanInput from '../../../../../components/Tokens/LifeSpanInput';
+import TokenName from '../../../../../components/Tokens/TokenName';
+import TokenDescription from '../../../../../components/Tokens/TokenDescription';
+import TokenTypeSelect from '../../../../../components/Tokens/TokenTypeSelect';
 
 const FormApiTokenContainer = ({
   errors,
@@ -26,7 +18,6 @@ const FormApiTokenContainer = ({
   setHasChangedPermissions,
 }) => {
   const { formatMessage } = useIntl();
-  const [lang] = usePersistentState('strapi-admin-language', 'en');
 
   const handleChangeSelectApiTokenType = ({ target: { value } }) => {
     setHasChangedPermissions(false);
@@ -42,6 +33,30 @@ const FormApiTokenContainer = ({
       });
     }
   };
+
+  const typeOptions = [
+    {
+      value: 'read-only',
+      label: {
+        id: 'Settings.tokens.types.read-only',
+        defaultMessage: 'Read-only',
+      },
+    },
+    {
+      value: 'full-access',
+      label: {
+        id: 'Settings.tokens.types.full-access',
+        defaultMessage: 'Full access',
+      },
+    },
+    {
+      value: 'custom',
+      label: {
+        id: 'Settings.tokens.types.custom',
+        defaultMessage: 'Custom',
+      },
+    },
+  ];
 
   return (
     <Box
@@ -62,158 +77,46 @@ const FormApiTokenContainer = ({
         </Typography>
         <Grid gap={5}>
           <GridItem key="name" col={6} xs={12}>
-            <TextInput
-              name="name"
-              error={
-                errors.name
-                  ? formatMessage(
-                      errors.name?.id
-                        ? errors.name
-                        : { id: errors.name, defaultMessage: errors.name }
-                    )
-                  : null
-              }
-              label={formatMessage({
-                id: 'Settings.apiTokens.form.name',
-                defaultMessage: 'Name',
-              })}
+            <TokenName
+              errors={errors}
+              values={values}
+              canEditInputs={canEditInputs}
               onChange={onChange}
-              value={values.name}
-              disabled={!canEditInputs}
-              required
             />
           </GridItem>
           <GridItem key="description" col={6} xs={12}>
-            <Textarea
-              label={formatMessage({
-                id: 'Settings.apiTokens.form.description',
-                defaultMessage: 'Description',
-              })}
-              name="description"
-              error={
-                errors.description
-                  ? formatMessage(
-                      errors.description?.id
-                        ? errors.description
-                        : {
-                            id: errors.description,
-                            defaultMessage: errors.description,
-                          }
-                    )
-                  : null
-              }
+            <TokenDescription
+              errors={errors}
+              values={values}
+              canEditInputs={canEditInputs}
               onChange={onChange}
-              disabled={!canEditInputs}
-            >
-              {values.description}
-            </Textarea>
+            />
           </GridItem>
           <GridItem key="lifespan" col={6} xs={12}>
-            <Select
-              name="lifespan"
-              label={formatMessage({
-                id: 'Settings.apiTokens.form.duration',
-                defaultMessage: 'Token duration',
-              })}
-              value={values.lifespan !== null ? values.lifespan : '0'}
-              error={
-                errors.lifespan
-                  ? formatMessage(
-                      errors.lifespan?.id
-                        ? errors.lifespan
-                        : { id: errors.lifespan, defaultMessage: errors.lifespan }
-                    )
-                  : null
-              }
-              onChange={(value) => {
-                onChange({ target: { name: 'lifespan', value } });
-              }}
-              required
-              disabled={!isCreating}
-              placeholder="Select"
-            >
-              <Option value="604800000">
-                {formatMessage({
-                  id: 'Settings.apiTokens.duration.7-days',
-                  defaultMessage: '7 days',
-                })}
-              </Option>
-              <Option value="2592000000">
-                {formatMessage({
-                  id: 'Settings.apiTokens.duration.30-days',
-                  defaultMessage: '30 days',
-                })}
-              </Option>
-              <Option value="7776000000">
-                {formatMessage({
-                  id: 'Settings.apiTokens.duration.90-days',
-                  defaultMessage: '90 days',
-                })}
-              </Option>
-              <Option value="0">
-                {formatMessage({
-                  id: 'Settings.apiTokens.duration.unlimited',
-                  defaultMessage: 'Unlimited',
-                })}
-              </Option>
-            </Select>
-            <Typography variant="pi" textColor="neutral600">
-              {!isCreating &&
-                `${formatMessage({
-                  id: 'Settings.apiTokens.duration.expiration-date',
-                  defaultMessage: 'Expiration date',
-                })}: ${getDateOfExpiration(
-                  apiToken?.createdAt,
-                  parseInt(values.lifespan, 10),
-                  lang
-                )}`}
-            </Typography>
+            <LifeSpanInput
+              isCreating={isCreating}
+              errors={errors}
+              values={values}
+              onChange={onChange}
+              token={apiToken}
+            />
           </GridItem>
 
           <GridItem key="type" col={6} xs={12}>
-            <Select
-              name="type"
-              label={formatMessage({
-                id: 'Settings.apiTokens.form.type',
+            <TokenTypeSelect
+              values={values}
+              errors={errors}
+              label={{
+                id: 'Settings.tokens.form.type',
                 defaultMessage: 'Token type',
-              })}
-              value={values?.type}
-              error={
-                errors.type
-                  ? formatMessage(
-                      errors.type?.id
-                        ? errors.type
-                        : { id: errors.type, defaultMessage: errors.type }
-                    )
-                  : null
-              }
+              }}
               onChange={(value) => {
                 handleChangeSelectApiTokenType({ target: { value } });
                 onChange({ target: { name: 'type', value } });
               }}
-              placeholder="Select"
-              required
-              disabled={!canEditInputs}
-            >
-              <Option value="read-only">
-                {formatMessage({
-                  id: 'Settings.apiTokens.types.read-only',
-                  defaultMessage: 'Read-only',
-                })}
-              </Option>
-              <Option value="full-access">
-                {formatMessage({
-                  id: 'Settings.apiTokens.types.full-access',
-                  defaultMessage: 'Full access',
-                })}
-              </Option>
-              <Option value="custom">
-                {formatMessage({
-                  id: 'Settings.apiTokens.types.custom',
-                  defaultMessage: 'Custom',
-                })}
-              </Option>
-            </Select>
+              options={typeOptions}
+              canEditInputs={canEditInputs}
+            />
           </GridItem>
         </Grid>
       </Stack>

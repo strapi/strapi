@@ -64,6 +64,8 @@ export type TransferProgress = {
   [key in TransferStage]?: {
     count: number;
     bytes: number;
+    startTime: number;
+    endTime?: number;
     aggregates?: {
       [key: string]: {
         count: number;
@@ -89,5 +91,5 @@ export type TransactionCallback = (trx?: KnexTransaction) => Promise<void>;
 export type Transaction = {
   attach<T = undefined>(callback: TransactionCallback): Promise<T | undefined>;
   end(): boolean;
-  rollback(): boolean;
+  rollback(): Promise<boolean>;
 };

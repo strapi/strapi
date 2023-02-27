@@ -18,6 +18,13 @@ jest.mock('@strapi/helper-plugin', () => ({
   useGuidedTour: jest.fn(() => ({
     startSection: jest.fn(),
   })),
+  useQueryParams: jest.fn().mockReturnValue([
+    {
+      query: {
+        sort: 'test:ASC',
+      },
+    },
+  ]),
   useFetchClient: jest.fn().mockReturnValue({
     get: jest.fn().mockResolvedValue({
       data: {
@@ -913,6 +920,8 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                   </thead>
                   <tbody
                     class="c31"
+                    entriestodelete=""
+                    headers="[object Object],[object Object],[object Object],[object Object]"
                   >
                     <tr
                       aria-rowindex="2"
@@ -1001,9 +1010,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                             </span>
                           </a>
                           <div
-                            aria-hidden="true"
                             class="c1 c40"
-                            role="button"
                           >
                             <span>
                               <button
