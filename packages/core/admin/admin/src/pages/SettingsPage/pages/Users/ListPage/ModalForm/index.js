@@ -49,7 +49,10 @@ const ModalForm = ({ queryName, onToggle }) => {
     {
       async onSuccess({ data }) {
         setRegistrationToken(data.data.registrationToken);
-        await queryClient.invalidateQueries(queryName);
+
+        await queryClient.refetchQueries(queryName);
+        await queryClient.refetchQueries(['ee', 'license-limit-info']);
+
         goNext();
         setIsSubmitting(false);
       },
