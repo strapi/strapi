@@ -65,9 +65,31 @@ export const createTransferHandler = (options: IHandlerOptions) => {
         }
 
         /**
+         * Format message to follow the remote transfer protocol
+         */
+        const sendResponse = <T = unknown>(uuid: string, data: T) => {
+          return new Promise<void>((resolve, reject) => {
+            if (!uuid) {
+              reject(new Error('Missing uuid for this message'));
+              return;
+            }
+
+            const payload = JSON.stringify({
+              uuid,
+              data: data ?? null,
+            });
+
+            ws.send(payload, (error) => (error ? reject(error) : resolve()));
+          });
+        };
+
+        /**
          * Format error & message to follow the remote transfer protocol
          */
-        const sendResponse = <T = unknown>(e: Error | null = null, data?: T, uuid?: string) => {
+        const sendErrorResponse = <T = unknown>(
+          uuid: string | undefined,
+          e: Error | null = null
+        ) => {
           return new Promise<void>((resolve, reject) => {
             if (!uuid && !e) {
               reject(new Error('Missing uuid for this message'));
@@ -76,7 +98,6 @@ export const createTransferHandler = (options: IHandlerOptions) => {
 
             const payload = JSON.stringify({
               uuid,
-              data: data ?? null,
               error: e
                 ? {
                     code: 'ERR',
@@ -95,20 +116,19 @@ export const createTransferHandler = (options: IHandlerOptions) => {
         const answer = async <T = unknown>(fn: () => T, uuid: string) => {
           try {
             const response = await fn();
-            return await sendResponse(null, response, uuid);
+            return await sendResponse(uuid, response);
           } catch (e) {
             if (e instanceof Error) {
-              return sendResponse(e, undefined, uuid);
+              return sendErrorResponse(uuid, e);
             }
             if (typeof e === 'string') {
-              return sendResponse(new ProviderTransferError(e), undefined, uuid);
+              return sendErrorResponse(uuid, new ProviderTransferError(e));
             }
-            return sendResponse(
+            return sendErrorResponse(
+              uuid,
               new ProviderTransferError('Unexpected error', {
                 error: e,
-              }),
-              undefined,
-              uuid
+              })
             );
           }
         };
@@ -230,23 +250,21 @@ export const createTransferHandler = (options: IHandlerOptions) => {
           // It shouldn't be possible to start a pull transfer for now, so reaching
           // this code should be impossible too, but this has been added by security
           if (transfer.kind === 'pull') {
-            return sendResponse(
-              new ProviderTransferError('Pull transfer not implemented'),
-              undefined,
-              uuid
+            return sendErrorResponse(
+              uuid,
+              new ProviderTransferError('Pull transfer not implemented')
             );
           }
 
           if (!controller) {
-            return sendResponse(
-              new ProviderTransferError("The transfer hasn't been initialized"),
-              undefined,
-              uuid
+            return sendErrorResponse(
+              uuid,
+              new ProviderTransferError("The transfer hasn't been initialized")
             );
           }
 
           if (!transferID) {
-            return sendResponse(new ProviderTransferError('Missing transfer ID'), undefined, uuid);
+            return sendErrorResponse(uuid, new ProviderTransferError('Missing transfer ID'));
           }
 
           // Action
@@ -254,13 +272,12 @@ export const createTransferHandler = (options: IHandlerOptions) => {
             const { action } = msg;
 
             if (!(action in controller.actions)) {
-              return sendResponse(
+              return sendErrorResponse(
+                uuid,
                 new ProviderTransferError(`Invalid action provided: "${action}"`, {
                   action,
                   validActions: Object.keys(controller.actions),
-                }),
-                undefined,
-                uuid
+                })
               );
             }
 
@@ -269,15 +286,14 @@ export const createTransferHandler = (options: IHandlerOptions) => {
 
             if (isStepRegistered) {
               if (transfer.flow.cannot(step)) {
-                return sendResponse(
+                return sendErrorResponse(
+                  uuid,
                   new ProviderTransferError(
                     `Invalid action "${action}" found for the current flow `,
                     {
                       action,
                     }
-                  ),
-                  undefined,
-                  uuid
+                  )
                 );
               }
 
@@ -301,42 +317,42 @@ export const createTransferHandler = (options: IHandlerOptions) => {
             // Lock the current transfer stage
             if (message.action === 'start') {
               if (currentStep?.kind === 'transfer' && currentStep.locked) {
-                return sendResponse(
+                return sendErrorResponse(
+                  uuid,
                   new ProviderTransferError(
                     `It's not possible to start a new transfer stage (${message.step}) while another one is in progress (${currentStep.stage})`
-                  ),
-                  undefined,
-                  uuid
+                  )
                 );
               }
 
               if (transfer.flow.cannot(step)) {
-                return sendResponse(
+                return sendErrorResponse(
+                  uuid,
                   new ProviderTransferError(
                     `Invalid stage (${message.step}) provided for the current flow`,
                     { step }
-                  ),
-                  undefined,
-                  uuid
+                  )
                 );
               }
 
               transfer?.flow.set({ ...step, locked: true });
 
-              return sendResponse(null, { ok: true }, uuid);
+              return sendResponse(uuid, { ok: true });
             }
 
             // Stream operation on the current transfer stage
             if (message.action === 'stream') {
               if (currentStep?.kind === 'transfer' && !currentStep.locked) {
-                return sendResponse(
+                return sendErrorResponse(
+                  uuid,
                   new ProviderTransferError(
                     `You need to initialize the transfer stage (${message.step}) before starting to stream data`
                   )
                 );
               }
               if (transfer?.flow.cannot(step)) {
-                return sendResponse(
+                return sendErrorResponse(
+                  uuid,
                   new ProviderTransferError(
                     `Invalid stage (${message.step}) provided for the current flow`,
                     { step }
@@ -351,30 +367,28 @@ export const createTransferHandler = (options: IHandlerOptions) => {
             if (message.action === 'end') {
               // Cannot unlock if not locked (aka: started)
               if (currentStep?.kind === 'transfer' && !currentStep.locked) {
-                return sendResponse(
+                return sendErrorResponse(
+                  uuid,
                   new ProviderTransferError(
                     `You need to initialize the transfer stage (${message.step}) before ending it`
-                  ),
-                  undefined,
-                  uuid
+                  )
                 );
               }
 
               // Cannot unlock if invalid step provided
               if (transfer?.flow.cannot(step)) {
-                return sendResponse(
+                return sendErrorResponse(
+                  uuid,
                   new ProviderTransferError(
                     `Invalid stage (${message.step}) provided for the current flow`,
                     { step }
-                  ),
-                  undefined,
-                  uuid
+                  )
                 );
               }
 
               transfer?.flow.set({ ...step, locked: false });
 
-              return sendResponse(null, { ok: true }, uuid);
+              return sendResponse(uuid, { ok: true });
             }
           }
         };
@@ -392,18 +406,33 @@ export const createTransferHandler = (options: IHandlerOptions) => {
           let msg: client.Message | undefined;
           try {
             msg = JSON.parse(raw.toString());
+
+            if (!msg) {
+              return await sendErrorResponse(
+                undefined,
+                new ProviderTransferError("Couldn't parse message")
+              );
+            }
+
+            if (!msg.uuid) {
+              return await sendErrorResponse(
+                undefined,
+                new ProviderTransferError('Missing uuid in message')
+              );
+            }
           } catch (e: unknown) {
             if (e instanceof Error) {
-              return await sendResponse(e);
+              return await sendErrorResponse(undefined, e);
             }
-            return await sendResponse(new ProviderTransferError('Unknown transfer parse error'));
+            return await sendErrorResponse(
+              undefined,
+              new ProviderTransferError('Unknown transfer parse error')
+            );
           }
 
-          try {
-            if (!msg?.uuid) {
-              return await sendResponse(new ProviderTransferError('Missing uuid in message'));
-            }
+          const uuid = msg.uuid;
 
+          try {
             // Regular command message (init, end, status)
             if (msg.type === 'command') {
               return await onCommand(msg);
@@ -415,16 +444,19 @@ export const createTransferHandler = (options: IHandlerOptions) => {
             }
 
             // Invalid messages
-            return await sendResponse(new ProviderTransferError('Bad request'));
+            return await sendErrorResponse(uuid, new ProviderTransferError('Bad request'));
           } catch (e: unknown) {
             // Only known errors should be returned to client
             if (e instanceof ProviderError || e instanceof SyntaxError) {
-              return await sendResponse(e);
+              return await sendErrorResponse(uuid, e);
             }
             // TODO: log error to server?
 
             // Unknown errors should not be sent to client
-            return await sendResponse(new ProviderTransferError('Unknown transfer error'));
+            return await sendErrorResponse(
+              uuid,
+              new ProviderTransferError('Unknown transfer error')
+            );
           }
         });
       });
