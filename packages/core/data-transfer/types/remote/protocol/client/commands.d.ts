@@ -1,6 +1,8 @@
+import { MessageBody } from '.';
 import type { ILocalStrapiDestinationProviderOptions } from '../../../../src/strapi/providers';
 
-export type CommandMessage = { type: 'command' } & (InitCommand | EndCommand | StatusCommand);
+export type CommandMessage = { type: 'command' } & MessageBody &
+  (InitCommand | EndCommand | StatusCommand);
 
 export type Command = CommandMessage['command'];
 

@@ -53,7 +53,6 @@ export const createTransferHandler = (options: IHandlerOptions) => {
         wss.emit('connection', ws, ctx.req);
 
         const state: ITransferState = {};
-        let uuid: string | undefined;
 
         function assertValidTransfer(
           transferState: ITransferState
@@ -68,7 +67,7 @@ export const createTransferHandler = (options: IHandlerOptions) => {
         /**
          * Format error & message to follow the remote transfer protocol
          */
-        const callback = <T = unknown>(e: Error | null = null, data?: T) => {
+        const sendResponse = <T = unknown>(e: Error | null = null, data?: T, uuid?: string) => {
           return new Promise<void>((resolve, reject) => {
             if (!uuid && !e) {
               reject(new Error('Missing uuid for this message'));
@@ -93,22 +92,24 @@ export const createTransferHandler = (options: IHandlerOptions) => {
         /**
          * Wrap a function call to catch errors and answer the request with the correct format
          */
-        const answer = async <T = unknown>(fn: () => T) => {
+        const answer = async <T = unknown>(fn: () => T, uuid: string) => {
           try {
             const response = await fn();
-            callback(null, response);
+            return await sendResponse(null, response, uuid);
           } catch (e) {
             if (e instanceof Error) {
-              callback(e);
-            } else if (typeof e === 'string') {
-              callback(new ProviderTransferError(e));
-            } else {
-              callback(
-                new ProviderTransferError('Unexpected error', {
-                  error: e,
-                })
-              );
+              return sendResponse(e, undefined, uuid);
             }
+            if (typeof e === 'string') {
+              return sendResponse(new ProviderTransferError(e), undefined, uuid);
+            }
+            return sendResponse(
+              new ProviderTransferError('Unexpected error', {
+                error: e,
+              }),
+              undefined,
+              uuid
+            );
           }
         };
 
@@ -198,29 +199,29 @@ export const createTransferHandler = (options: IHandlerOptions) => {
         /**
          * On command message (init, end, status, ...)
          */
-        const onCommand = async (msg: client.CommandMessage) => {
-          const { command } = msg;
+        const onCommand = async (msg: client.CommandMessage): Promise<void> => {
+          const { command, uuid } = msg;
 
           if (command === 'init') {
-            await answer(() => init(msg));
+            return answer(() => init(msg), uuid);
           }
 
           if (command === 'end') {
-            await answer(() => {
+            return answer(() => {
               assertValidTransfer(state);
               end(msg);
-            });
+            }, uuid);
           }
 
           if (command === 'status') {
-            await answer(status);
+            return answer(status, uuid);
           }
         };
 
-        const onTransferCommand = async (msg: client.TransferMessage) => {
+        const onTransferCommand = async (msg: client.TransferMessage): Promise<void> => {
           assertValidTransfer(state);
 
-          const { transferID, kind } = msg;
+          const { transferID, kind, uuid } = msg;
           const { controller, transfer } = state;
 
           await verifyAuth(transfer.kind);
@@ -229,15 +230,23 @@ export const createTransferHandler = (options: IHandlerOptions) => {
           // It shouldn't be possible to start a pull transfer for now, so reaching
           // this code should be impossible too, but this has been added by security
           if (transfer.kind === 'pull') {
-            return callback(new ProviderTransferError('Pull transfer not implemented'));
+            return sendResponse(
+              new ProviderTransferError('Pull transfer not implemented'),
+              undefined,
+              uuid
+            );
           }
 
           if (!controller) {
-            return callback(new ProviderTransferError("The transfer hasn't been initialized"));
+            return sendResponse(
+              new ProviderTransferError("The transfer hasn't been initialized"),
+              undefined,
+              uuid
+            );
           }
 
           if (!transferID) {
-            return callback(new ProviderTransferError('Missing transfer ID'));
+            return sendResponse(new ProviderTransferError('Missing transfer ID'), undefined, uuid);
           }
 
           // Action
@@ -245,11 +254,13 @@ export const createTransferHandler = (options: IHandlerOptions) => {
             const { action } = msg;
 
             if (!(action in controller.actions)) {
-              return callback(
+              return sendResponse(
                 new ProviderTransferError(`Invalid action provided: "${action}"`, {
                   action,
                   validActions: Object.keys(controller.actions),
-                })
+                }),
+                undefined,
+                uuid
               );
             }
 
@@ -258,24 +269,29 @@ export const createTransferHandler = (options: IHandlerOptions) => {
 
             if (isStepRegistered) {
               if (transfer.flow.cannot(step)) {
-                return callback(
+                return sendResponse(
                   new ProviderTransferError(
                     `Invalid action "${action}" found for the current flow `,
                     {
                       action,
                     }
-                  )
+                  ),
+                  undefined,
+                  uuid
                 );
               }
 
               transfer.flow.set(step);
             }
 
-            await answer(() => controller.actions[action as keyof typeof controller.actions]());
+            return answer(
+              () => controller.actions[action as keyof typeof controller.actions](),
+              uuid
+            );
           }
 
           // Transfer
-          else if (kind === 'step') {
+          if (kind === 'step') {
             // We can only have push transfer message for the moment
             const message = msg as client.TransferPushMessage;
 
@@ -285,38 +301,42 @@ export const createTransferHandler = (options: IHandlerOptions) => {
             // Lock the current transfer stage
             if (message.action === 'start') {
               if (currentStep?.kind === 'transfer' && currentStep.locked) {
-                return callback(
+                return sendResponse(
                   new ProviderTransferError(
                     `It's not possible to start a new transfer stage (${message.step}) while another one is in progress (${currentStep.stage})`
-                  )
+                  ),
+                  undefined,
+                  uuid
                 );
               }
 
               if (transfer.flow.cannot(step)) {
-                return callback(
+                return sendResponse(
                   new ProviderTransferError(
                     `Invalid stage (${message.step}) provided for the current flow`,
                     { step }
-                  )
+                  ),
+                  undefined,
+                  uuid
                 );
               }
 
               transfer?.flow.set({ ...step, locked: true });
 
-              return callback(null, { ok: true });
+              return sendResponse(null, { ok: true }, uuid);
             }
 
             // Stream operation on the current transfer stage
             if (message.action === 'stream') {
               if (currentStep?.kind === 'transfer' && !currentStep.locked) {
-                return callback(
+                return sendResponse(
                   new ProviderTransferError(
                     `You need to initialize the transfer stage (${message.step}) before starting to stream data`
                   )
                 );
               }
               if (transfer?.flow.cannot(step)) {
-                return callback(
+                return sendResponse(
                   new ProviderTransferError(
                     `Invalid stage (${message.step}) provided for the current flow`,
                     { step }
@@ -324,33 +344,37 @@ export const createTransferHandler = (options: IHandlerOptions) => {
                 );
               }
 
-              await answer(() => controller.transfer[message.step]?.(message.data as never));
+              await answer(() => controller.transfer[message.step]?.(message.data as never), uuid);
             }
 
             // Unlock the current transfer stage
             if (message.action === 'end') {
               // Cannot unlock if not locked (aka: started)
               if (currentStep?.kind === 'transfer' && !currentStep.locked) {
-                return callback(
+                return sendResponse(
                   new ProviderTransferError(
                     `You need to initialize the transfer stage (${message.step}) before ending it`
-                  )
+                  ),
+                  undefined,
+                  uuid
                 );
               }
 
               // Cannot unlock if invalid step provided
               if (transfer?.flow.cannot(step)) {
-                return callback(
+                return sendResponse(
                   new ProviderTransferError(
                     `Invalid stage (${message.step}) provided for the current flow`,
                     { step }
-                  )
+                  ),
+                  undefined,
+                  uuid
                 );
               }
 
               transfer?.flow.set({ ...step, locked: false });
 
-              return callback(null, { ok: true });
+              return sendResponse(null, { ok: true }, uuid);
             }
           }
         };
@@ -365,39 +389,42 @@ export const createTransferHandler = (options: IHandlerOptions) => {
         });
 
         ws.on('message', async (raw) => {
+          let msg: client.Message | undefined;
           try {
-            const msg: client.Message = JSON.parse(raw.toString());
+            msg = JSON.parse(raw.toString());
+          } catch (e: unknown) {
+            if (e instanceof Error) {
+              return await sendResponse(e);
+            }
+            return await sendResponse(new ProviderTransferError('Unknown transfer parse error'));
+          }
 
-            if (!msg.uuid) {
-              await callback(new ProviderTransferError('Missing uuid in message'));
-              return;
+          try {
+            if (!msg?.uuid) {
+              return await sendResponse(new ProviderTransferError('Missing uuid in message'));
             }
 
-            uuid = msg.uuid;
             // Regular command message (init, end, status)
             if (msg.type === 'command') {
-              await onCommand(msg);
+              return await onCommand(msg);
             }
 
             // Transfer message (the transfer must be initialized first)
-            else if (msg.type === 'transfer') {
-              await onTransferCommand(msg);
+            if (msg.type === 'transfer') {
+              return await onTransferCommand(msg);
             }
 
             // Invalid messages
-            else {
-              await callback(new ProviderTransferError('Bad request'));
-            }
+            return await sendResponse(new ProviderTransferError('Bad request'));
           } catch (e: unknown) {
             // Only known errors should be returned to client
             if (e instanceof ProviderError || e instanceof SyntaxError) {
-              await callback(e);
-            } else {
-              // TODO: log error to server?
-
-              // Unknown errors should not be sent to client
-              await callback(new ProviderTransferError('Unknown transfer error'));
+              return await sendResponse(e);
             }
+            // TODO: log error to server?
+
+            // Unknown errors should not be sent to client
+            return await sendResponse(new ProviderTransferError('Unknown transfer error'));
           }
         });
       });
