@@ -8,6 +8,7 @@ const {
 } = require('@strapi/utils');
 
 const constants = require('../constants');
+const { getService } = require('../../utils');
 
 const TRANSFER_TOKEN_UID = 'admin::transfer-token';
 const TRANSFER_TOKEN_PERMISSION_UID = 'admin::transfer-token-permission';
@@ -327,6 +328,12 @@ const getExpirationFields = (lifespan) => {
  * @returns {string}
  */
 const hash = (accessKey) => {
+  const { hasValidTokenSalt } = getService('transfer').utils;
+
+  if (!hasValidTokenSalt()) {
+    throw new TypeError('Required token salt is not defined');
+  }
+
   return crypto
     .createHmac('sha512', strapi.config.get('admin.transfer.token.salt'))
     .update(accessKey)
@@ -337,9 +344,17 @@ const hash = (accessKey) => {
  * @returns {void}
  */
 const checkSaltIsDefined = () => {
-  if (!strapi.config.get('admin.transfer.token.salt')) {
-    throw new Error(
-      `Missing transfer.token.salt. Please set transfer.token.salt in config/admin.js (ex: you can generate one using Node with \`crypto.randomBytes(16).toString('base64')\`).
+  const { hasValidTokenSalt, isDisabledFromEnv } = getService('transfer').utils;
+
+  // Ignore the check if the data-transfer feature is manually disabled
+  if (isDisabledFromEnv()) {
+    return;
+  }
+
+  if (!hasValidTokenSalt()) {
+    process.emitWarning(
+      `Missing transfer.token.salt: Data transfer features have been disabled.
+Please set transfer.token.salt in config/admin.js (ex: you can generate one using Node with \`crypto.randomBytes(16).toString('base64')\`)
 For security reasons, prefer storing the secret in an environment variable and read it in config/admin.js. See https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#configuration-using-environment-variables.`
     );
   }
