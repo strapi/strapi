@@ -4,7 +4,7 @@ const tableHeaders = [
     key: 'name',
     metadatas: {
       label: {
-        id: 'Settings.transferTokens.ListView.headers.name',
+        id: 'Settings.tokens.ListView.headers.name',
         defaultMessage: 'Name',
       },
       sortable: true,
@@ -15,7 +15,7 @@ const tableHeaders = [
     key: 'description',
     metadatas: {
       label: {
-        id: 'Settings.transferTokens.ListView.headers.description',
+        id: 'Settings.tokens.ListView.headers.description',
         defaultMessage: 'Description',
       },
       sortable: false,
@@ -26,7 +26,7 @@ const tableHeaders = [
     key: 'createdAt',
     metadatas: {
       label: {
-        id: 'Settings.transferTokens.ListView.headers.createdAt',
+        id: 'Settings.tokens.ListView.headers.createdAt',
         defaultMessage: 'Created at',
       },
       sortable: false,
@@ -37,7 +37,7 @@ const tableHeaders = [
     key: 'lastUsedAt',
     metadatas: {
       label: {
-        id: 'Settings.transferTokens.ListView.headers.lastUsedAt',
+        id: 'Settings.tokens.ListView.headers.lastUsedAt',
         defaultMessage: 'Last used',
       },
       sortable: false,
