@@ -70,9 +70,7 @@ const ListPage = () => {
 
   const { status, data, isFetching } = useQuery(queryName, () => fetchData(search, notifyLoad), {
     enabled: canRead,
-    keepPreviousData: true,
     retry: false,
-    staleTime: 1000 * 20,
     onError() {
       toggleNotification({
         type: 'warning',
