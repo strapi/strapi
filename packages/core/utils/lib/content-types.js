@@ -99,8 +99,8 @@ const getPrivateAttributes = (model = {}) => {
   );
 };
 
-const isPrivateAttribute = (model = {}, attributeName) => {
-  return model && model.privateAttributes && model.privateAttributes.includes(attributeName);
+const isPrivateAttribute = (model, attributeName) => {
+  return model?.privateAttributes?.includes(attributeName) || false;
 };
 
 const isScalarAttribute = (attribute) => {
