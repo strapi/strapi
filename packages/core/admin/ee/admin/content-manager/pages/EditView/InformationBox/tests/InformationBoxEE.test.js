@@ -1,0 +1,156 @@
+import React from 'react';
+import { fireEvent, render } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { QueryClientProvider, QueryClient } from 'react-query';
+
+import { InformationBoxEE } from '../InformationBoxEE';
+
+const STAGE_ATTRIBUTE_NAME = 'strapi_reviewWorkflows_stage';
+const STAGE_FIXTURE = {
+  id: 1,
+  name: 'Stage 1',
+  worklow: 1,
+};
+
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useCMEditViewDataManager: jest.fn(),
+  useNotification: jest.fn(() => ({
+    toggleNotification: jest.fn(),
+  })),
+}));
+
+jest.mock(
+  '../../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows',
+  () => ({
+    useReviewWorkflows: jest.fn(() => ({
+      workflows: {
+        isLoading: false,
+        data: {
+          stages: [
+            {
+              id: 1,
+              name: 'Stage 1',
+            },
+
+            {
+              id: 2,
+              name: 'Stage 2',
+            },
+          ],
+        },
+      },
+    })),
+  })
+);
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+const ComponentFixture = (props) => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <IntlProvider locale="en" defaultLocale="en">
+        <ThemeProvider theme={lightTheme}>
+          <InformationBoxEE {...props} />
+        </ThemeProvider>
+      </IntlProvider>
+    </QueryClientProvider>
+  );
+};
+
+const setup = (props) => {
+  return render(<ComponentFixture {...props} />);
+};
+
+describe('EE | Content Manager | EditView | InformationBox', () => {
+  it('renders the title and body of the Information component', () => {
+    useCMEditViewDataManager.mockReturnValue({
+      initialData: {},
+      isCreatingEntry: true,
+    });
+
+    const { getByText } = setup();
+
+    expect(getByText('Information')).toBeInTheDocument();
+    expect(getByText('Last update')).toBeInTheDocument();
+  });
+
+  it('renders no select input, if no workflow stage is assigned to the entity', () => {
+    useCMEditViewDataManager.mockReturnValue({
+      initialData: {},
+      isCreatingEntry: true,
+    });
+
+    const { queryByRole } = setup();
+
+    expect(queryByRole('combobox')).not.toBeInTheDocument();
+  });
+
+  it('renders no select input, if no workflow stage is assigned to the entity', () => {
+    useCMEditViewDataManager.mockReturnValue({
+      initialData: {},
+      isCreatingEntry: true,
+    });
+
+    const { queryByRole } = setup();
+
+    expect(queryByRole('combobox')).not.toBeInTheDocument();
+  });
+
+  it('renders a disabled select input, if the entity is created', () => {
+    useCMEditViewDataManager.mockReturnValue({
+      initialData: {
+        [STAGE_ATTRIBUTE_NAME]: STAGE_FIXTURE,
+      },
+      isCreatingEntry: true,
+    });
+
+    const { queryByRole } = setup();
+    const select = queryByRole('combobox');
+
+    expect(select).toBeInTheDocument();
+    expect(select).toHaveAttribute('disabled');
+  });
+
+  it('renders an enabled select input, if the entity is edited', () => {
+    useCMEditViewDataManager.mockReturnValue({
+      initialData: {
+        [STAGE_ATTRIBUTE_NAME]: STAGE_FIXTURE,
+      },
+      isCreatingEntry: false,
+    });
+
+    const { queryByRole } = setup();
+    const select = queryByRole('combobox');
+
+    expect(select).toBeInTheDocument();
+    expect(select).not.toHaveAttribute('disabled');
+  });
+
+  it('renders a select input, if a workflow stage is assigned to the entity', () => {
+    useCMEditViewDataManager.mockReturnValue({
+      initialData: {
+        [STAGE_ATTRIBUTE_NAME]: STAGE_FIXTURE,
+      },
+      isCreatingEntry: false,
+    });
+
+    const { queryByRole, getByText } = setup();
+    const select = queryByRole('combobox');
+
+    expect(select).toBeInTheDocument();
+    expect(getByText('Stage 1')).toBeInTheDocument();
+
+    fireEvent.mouseDown(select);
+
+    expect(getByText('Stage 2')).toBeInTheDocument();
+  });
+});

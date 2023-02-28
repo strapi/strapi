@@ -1,8 +1,9 @@
 import React from 'react';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { renderHook, act } from '@testing-library/react-hooks';
+import { IntlProvider } from 'react-intl';
 
-import { useFetchClient } from '@strapi/helper-plugin';
+import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 
 import { useReviewWorkflows } from '../useReviewWorkflows';
 
@@ -12,7 +13,7 @@ jest.mock('@strapi/helper-plugin', () => ({
     get: jest.fn().mockResolvedValue({ data: {} }),
     put: jest.fn().mockResolvedValue({ data: {} }),
   }),
-  useNotification: jest.fn().mockReturnValue(() => {}),
+  useNotification: jest.fn().mockReturnValue(jest.fn()),
 }));
 
 const client = new QueryClient({
@@ -25,7 +26,9 @@ const client = new QueryClient({
 
 // eslint-disable-next-line react/prop-types
 const ComponentFixture = ({ children }) => (
-  <QueryClientProvider client={client}>{children}</QueryClientProvider>
+  <IntlProvider locale="en" messages={{}}>
+    <QueryClientProvider client={client}>{children}</QueryClientProvider>
+  </IntlProvider>
 );
 
 function setup(id) {
@@ -112,6 +115,7 @@ describe('useReviewWorkflows', () => {
 
   test('send put request on the updateWorkflowStages mutation', async () => {
     const { put } = useFetchClient();
+    const toggleNotification = useNotification();
     const idFixture = 1;
     const stagesFixture = [{ id: 2, name: 'stage' }];
 
@@ -130,6 +134,44 @@ describe('useReviewWorkflows', () => {
     expect(put).toBeCalledWith(`/admin/review-workflows/workflows/${idFixture}/stages`, {
       data: stagesFixture,
     });
+
+    expect(toggleNotification).toBeCalled();
+  });
+
+  test('display error notification on a failed updateWorkflowStages mutation', async () => {
+    const originalError = console.error;
+    console.error = jest.fn();
+
+    const { put } = useFetchClient();
+    const toggleNotification = useNotification();
+    const idFixture = 1;
+    const stagesFixture = [{ id: 2, name: 'stage' }];
+
+    put.mockRejectedValue({
+      response: {
+        data: {
+          error: {
+            name: 'ValidationError',
+            message: 'Failed',
+          },
+        },
+      },
+    });
+
+    const { result, waitFor } = await setup(idFixture);
+
+    try {
+      await act(async () => {
+        await result.current.updateWorkflowStages(idFixture, stagesFixture);
+      });
+
+      await waitFor(() => result.current.workflows.isLoading);
+    } catch (error) {
+      // mutation is expected to throw an error
+    }
+
+    expect(toggleNotification).toBeCalled();
+    console.error = originalError;
   });
 
   test('refetchWorkflow() re-fetches the loaded default workflow', async () => {
@@ -154,5 +196,71 @@ describe('useReviewWorkflows', () => {
     });
 
     expect(spy).toBeCalledWith(['review-workflows', 1]);
+  });
+
+  test('send put request on the entityStageMutation mutation', async () => {
+    const { put } = useFetchClient();
+    const toggleNotification = useNotification();
+    const idFixture = 1;
+    const stageIdFixture = 2;
+
+    put.mockResolvedValue({
+      data: {},
+    });
+
+    const { result, waitFor } = await setup(idFixture);
+
+    await act(async () => {
+      await result.current.setStageForEntity(idFixture, stageIdFixture);
+    });
+
+    await waitFor(() => expect(result.current.workflows.isLoading).toBe(false));
+
+    expect(put).toBeCalledWith(
+      `/admin/content-manager/collection-types/:model_uid/${idFixture}/stage`,
+      {
+        data: {
+          id: stageIdFixture,
+        },
+      }
+    );
+
+    expect(toggleNotification).toBeCalled();
+  });
+
+  test('display error notification on a failed entityStageMutation mutation', async () => {
+    const originalError = console.error;
+    console.error = jest.fn();
+
+    const { put } = useFetchClient();
+    const toggleNotification = useNotification();
+    const idFixture = 1;
+    const stageIdFixture = 2;
+
+    put.mockRejectedValue({
+      response: {
+        data: {
+          error: {
+            name: 'ValidationError',
+            message: 'Failed',
+          },
+        },
+      },
+    });
+
+    const { result, waitFor } = await setup(idFixture);
+
+    try {
+      await act(async () => {
+        await result.current.setStageForEntity(idFixture, stageIdFixture);
+      });
+
+      await waitFor(() => result.current.workflows.isLoading);
+    } catch (error) {
+      // mutation is expected to throw an error
+    }
+
+    expect(toggleNotification).toBeCalled();
+    console.error = originalError;
   });
 });
