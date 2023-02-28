@@ -9,7 +9,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 const TokenBox = ({ token, tokenType }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
-  const { trackUsage } = useTracking(); // TODO: Track different types of tokens
+  const { trackUsage } = useTracking();
   const trackUsageRef = useRef(trackUsage);
 
   return (

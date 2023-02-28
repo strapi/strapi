@@ -31,7 +31,7 @@ const Table = ({
     push,
     location: { pathname },
   } = useHistory();
-  const { trackUsage } = useTracking(); // TODO: Track different types of tokens
+  const { trackUsage } = useTracking();
 
   const sortedTokens = tokens.sort((a, b) => {
     const comparison = a.name.localeCompare(b.name);

@@ -38,21 +38,21 @@ const FormApiTokenContainer = ({
     {
       value: 'read-only',
       label: {
-        id: 'Settings.apiTokens.types.read-only',
+        id: 'Settings.tokens.types.read-only',
         defaultMessage: 'Read-only',
       },
     },
     {
       value: 'full-access',
       label: {
-        id: 'Settings.apiTokens.types.full-access',
+        id: 'Settings.tokens.types.full-access',
         defaultMessage: 'Full access',
       },
     },
     {
       value: 'custom',
       label: {
-        id: 'Settings.apiTokens.types.custom',
+        id: 'Settings.tokens.types.custom',
         defaultMessage: 'Custom',
       },
     },
@@ -107,7 +107,7 @@ const FormApiTokenContainer = ({
               values={values}
               errors={errors}
               label={{
-                id: 'Settings.apiTokens.form.type',
+                id: 'Settings.tokens.form.type',
                 defaultMessage: 'Token type',
               }}
               onChange={(value) => {
