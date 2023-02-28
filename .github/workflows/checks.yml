@@ -26,3 +26,15 @@ jobs:
         with:
           cache: yarn
       - uses: ./.github/actions/security/lockfile
+
+  audit-deps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2.2.4
+      - uses: actions/setup-node@v3
+        with:
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # check prod dependencies as these would affect users
+      - run: pnpm audit --prod
