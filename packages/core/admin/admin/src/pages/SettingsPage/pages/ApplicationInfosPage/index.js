@@ -23,6 +23,7 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { ExternalLink, Check } from '@strapi/icons';
+import AdminSeatInfo from 'ee_else_ce/pages/SettingsPage/pages/ApplicationInfosPage/components/AdminSeatInfo';
 
 import adminPermissions from '../../../../permissions';
 import { useConfigurations } from '../../../../hooks';
@@ -195,6 +196,7 @@ const ApplicationInfosPage = () => {
                     </Typography>
                     <Typography as="dd">{appInfos.nodeVersion}</Typography>
                   </GridItem>
+                  <AdminSeatInfo />
                 </Grid>
               </Stack>
               {canRead && data && (

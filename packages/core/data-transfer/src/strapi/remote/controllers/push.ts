@@ -81,11 +81,11 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
           streams.entities = provider.createEntitiesWriteStream();
         }
 
-        entities.map(async (entity) => {
+        for (const entity of entities) {
           if (streams.entities) {
             await writeAsync(streams.entities, entity);
           }
-        });
+        }
       },
 
       async links(links) {
@@ -93,11 +93,11 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
           streams.links = await provider.createLinksWriteStream();
         }
 
-        links.map(async (link) => {
+        for (const link of links) {
           if (streams.links) {
             await writeAsync(streams.links, link);
           }
-        });
+        }
       },
 
       async configuration(configs) {
@@ -105,11 +105,11 @@ const createPushController = (options: ILocalStrapiDestinationProviderOptions): 
           streams.configuration = await provider.createConfigurationWriteStream();
         }
 
-        configs.map(async (config) => {
+        for (const config of configs) {
           if (streams.configuration) {
             await writeAsync(streams.configuration, config);
           }
-        });
+        }
       },
 
       async assets(payloads) {
