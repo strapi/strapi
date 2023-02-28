@@ -65,8 +65,8 @@ const addSignedFileUrlsToAdmin = async () => {
        * @returns
        */
       const mapEntity = async (entity, uid) => {
-        const signedEntity = await signEntityMedia(entity, uid);
-        return entityManager.mapEntity(signedEntity, uid);
+        const mappedEntity = await entityManager.mapEntity(entity, uid);
+        return signEntityMedia(mappedEntity, uid);
       };
 
       return { ...entityManager, mapEntity };
