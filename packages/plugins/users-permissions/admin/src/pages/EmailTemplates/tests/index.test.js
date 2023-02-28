@@ -65,16 +65,25 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c17 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
+      .c4 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c19 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
+      }
+
+      .c23 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
       }
 
       .c1 {
@@ -145,25 +154,8 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         flex-direction: row;
       }
 
-      .c4 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c19 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #666687;
-      }
-
-      .c23 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
+      .c22 path {
+        fill: #666687;
       }
 
       .c24 {
@@ -222,6 +214,63 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
+      }
+
+      .c17 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c25 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        height: 2rem;
+        width: 2rem;
+        border: none;
+      }
+
+      .c25 svg > g,
+      .c25 svg path {
+        fill: #8e8ea9;
+      }
+
+      .c25:hover svg > g,
+      .c25:hover svg path {
+        fill: #666687;
+      }
+
+      .c25:active svg > g,
+      .c25:active svg path {
+        fill: #a5a5ba;
+      }
+
+      .c25[aria-disabled='true'] {
+        background-color: #eaeaef;
+      }
+
+      .c25[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c0:focus-visible {
+        outline: none;
       }
 
       .c7 {
@@ -300,55 +349,6 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
 
       .c18 svg {
         height: 0.25rem;
-      }
-
-      .c25 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        height: 2rem;
-        width: 2rem;
-        border: none;
-      }
-
-      .c25 svg > g,
-      .c25 svg path {
-        fill: #8e8ea9;
-      }
-
-      .c25:hover svg > g,
-      .c25:hover svg path {
-        fill: #666687;
-      }
-
-      .c25:active svg > g,
-      .c25:active svg path {
-        fill: #a5a5ba;
-      }
-
-      .c25[aria-disabled='true'] {
-        background-color: #eaeaef;
-      }
-
-      .c25[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c22 path {
-        fill: #666687;
-      }
-
-      .c0:focus-visible {
-        outline: none;
       }
 
       <main

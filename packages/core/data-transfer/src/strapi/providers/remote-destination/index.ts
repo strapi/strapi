@@ -1,39 +1,28 @@
 import { WebSocket } from 'ws';
 import { v4 } from 'uuid';
 import { Writable } from 'stream';
+import { once } from 'lodash/fp';
 
 import { createDispatcher } from './utils';
 
-import type {
-  IDestinationProvider,
-  IEntity,
-  ILink,
-  IMetadata,
-  ProviderType,
-  IConfiguration,
-  IAsset,
-} from '../../../../types';
+import type { IDestinationProvider, IMetadata, ProviderType, IAsset } from '../../../../types';
 import type { client, server } from '../../../../types/remote/protocol';
 import type { ILocalStrapiDestinationProviderOptions } from '../local-destination';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 
-interface ITokenAuth {
+interface ITransferTokenAuth {
   type: 'token';
   token: string;
-}
-
-interface ICredentialsAuth {
-  type: 'credentials';
-  email: string;
-  password: string;
 }
 
 export interface IRemoteStrapiDestinationProviderOptions
   extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
   url: URL;
-  auth?: ITokenAuth | ICredentialsAuth;
+  auth?: ITransferTokenAuth;
 }
+
+const jsonLength = (obj: object) => Buffer.byteLength(JSON.stringify(obj));
 
 class RemoteStrapiDestinationProvider implements IDestinationProvider {
   name = 'destination::remote-strapi';
@@ -46,10 +35,13 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
   dispatcher: ReturnType<typeof createDispatcher> | null;
 
+  transferID: string | null;
+
   constructor(options: IRemoteStrapiDestinationProviderOptions) {
     this.options = options;
     this.ws = null;
     this.dispatcher = null;
+    this.transferID = null;
   }
 
   async initTransfer(): Promise<string> {
@@ -59,23 +51,67 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     return new Promise<string>((resolve, reject) => {
       this.ws
         ?.once('open', async () => {
-          const query = this.dispatcher?.dispatchCommand({
-            command: 'init',
-            params: { options: { strategy, restore }, transfer: 'push' },
-          });
+          try {
+            const query = this.dispatcher?.dispatchCommand({
+              command: 'init',
+              params: { options: { strategy, restore }, transfer: 'push' },
+            });
 
-          const res = (await query) as server.Payload<server.InitMessage>;
+            const res = (await query) as server.Payload<server.InitMessage>;
 
-          if (!res?.transferID) {
-            return reject(
-              new ProviderTransferError('Init failed, invalid response from the server')
-            );
+            if (!res?.transferID) {
+              throw new ProviderTransferError('Init failed, invalid response from the server');
+            }
+
+            resolve(res.transferID);
+          } catch (e: unknown) {
+            reject(e);
           }
-
-          resolve(res.transferID);
         })
-        .once('error', reject);
+        .once('error', (message) => {
+          reject(message);
+        });
     });
+  }
+
+  #startStepOnce(stage: client.TransferPushStep) {
+    return once(() => this.#startStep(stage));
+  }
+
+  async #startStep<T extends client.TransferPushStep>(step: T) {
+    try {
+      await this.dispatcher?.dispatchTransferStep({ action: 'start', step });
+    } catch (e) {
+      if (e instanceof Error) {
+        return e;
+      }
+
+      if (typeof e === 'string') {
+        return new ProviderTransferError(e);
+      }
+
+      return new ProviderTransferError('Unexpected error');
+    }
+
+    return null;
+  }
+
+  async #endStep<T extends client.TransferPushStep>(step: T) {
+    try {
+      await this.dispatcher?.dispatchTransferStep({ action: 'end', step });
+    } catch (e) {
+      if (e instanceof Error) {
+        return e;
+      }
+
+      if (typeof e === 'string') {
+        return new ProviderTransferError(e);
+      }
+
+      return new ProviderTransferError('Unexpected error');
+    }
+
+    return null;
   }
 
   async #streamStep<T extends client.TransferPushStep>(
@@ -99,6 +135,57 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     return null;
   }
 
+  #writeStream(step: Exclude<client.TransferPushStep, 'assets'>): Writable {
+    type Step = typeof step;
+
+    const batchSize = 1024 * 1024; // 1MB;
+    const startTransferOnce = this.#startStepOnce(step);
+
+    let batch = [] as client.GetTransferPushStreamData<Step>;
+
+    const batchLength = () => jsonLength(batch);
+
+    return new Writable({
+      objectMode: true,
+
+      final: async (callback) => {
+        if (batch.length > 0) {
+          const streamError = await this.#streamStep(step, batch);
+
+          batch = [];
+
+          if (streamError) {
+            return callback(streamError);
+          }
+        }
+        const e = await this.#endStep(step);
+
+        callback(e);
+      },
+
+      write: async (chunk, _encoding, callback) => {
+        const startError = await startTransferOnce();
+        if (startError) {
+          return callback(startError);
+        }
+
+        batch.push(chunk);
+
+        if (batchLength() >= batchSize) {
+          const streamError = await this.#streamStep(step, batch);
+
+          batch = [];
+
+          if (streamError) {
+            return callback(streamError);
+          }
+        }
+
+        callback();
+      },
+    });
+  }
+
   async bootstrap(): Promise<void> {
     const { url, auth } = this.options;
     const validProtocols = ['https:', 'http:'];
@@ -116,8 +203,6 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     }
     const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${wsProtocol}//${url.host}${url.pathname}${TRANSFER_PATH}`;
-    const validAuthMethods = ['token'];
-
     // No auth defined, trying public access for transfer
     if (!auth) {
       ws = new WebSocket(wsUrl);
@@ -131,11 +216,10 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
     // Invalid auth method provided
     else {
-      throw new ProviderValidationError('Auth method not implemented', {
+      throw new ProviderValidationError('Auth method not available', {
         check: 'auth.type',
         details: {
           auth: auth.type,
-          validAuthMethods,
         },
       });
     }
@@ -143,15 +227,23 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     this.ws = ws;
     this.dispatcher = createDispatcher(this.ws);
 
-    const transferID = await this.initTransfer();
+    this.transferID = await this.initTransfer();
 
-    this.dispatcher.setTransferProperties({ id: transferID, kind: 'push' });
+    this.dispatcher.setTransferProperties({ id: this.transferID, kind: 'push' });
 
     await this.dispatcher.dispatchTransferAction('bootstrap');
   }
 
   async close() {
-    await this.dispatcher?.dispatchTransferAction('close');
+    // Gracefully close the remote transfer process
+    if (this.transferID && this.dispatcher) {
+      await this.dispatcher.dispatchTransferAction('close');
+
+      await this.dispatcher.dispatchCommand({
+        command: 'end',
+        params: { transferID: this.transferID },
+      });
+    }
 
     await new Promise<void>((resolve) => {
       const { ws } = this;
@@ -173,6 +265,10 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     await this.dispatcher?.dispatchTransferAction('beforeTransfer');
   }
 
+  async rollback() {
+    await this.dispatcher?.dispatchTransferAction('rollback');
+  }
+
   getSchemas(): Promise<Strapi.Schemas | null> {
     if (!this.dispatcher) {
       return Promise.resolve(null);
@@ -182,69 +278,82 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   }
 
   createEntitiesWriteStream(): Writable {
-    return new Writable({
-      objectMode: true,
-      write: async (entity: IEntity, _encoding, callback) => {
-        const e = await this.#streamStep('entities', entity);
-
-        callback(e);
-      },
-    });
+    return this.#writeStream('entities');
   }
 
   createLinksWriteStream(): Writable {
-    return new Writable({
-      objectMode: true,
-      write: async (link: ILink, _encoding, callback) => {
-        const e = await this.#streamStep('links', link);
-
-        callback(e);
-      },
-    });
+    return this.#writeStream('links');
   }
 
   createConfigurationWriteStream(): Writable {
-    return new Writable({
-      objectMode: true,
-      write: async (configuration: IConfiguration, _encoding, callback) => {
-        const e = await this.#streamStep('configuration', configuration);
-
-        callback(e);
-      },
-    });
+    return this.#writeStream('configuration');
   }
 
   createAssetsWriteStream(): Writable | Promise<Writable> {
+    let batch: client.TransferAssetFlow[] = [];
+    let hasStarted = false;
+
+    const batchSize = 1024 * 1024; // 1MB;
+    const batchLength = () => {
+      return batch.reduce(
+        (acc, chunk) => (chunk.action === 'stream' ? acc + chunk.data.byteLength : acc),
+        0
+      );
+    };
+    const startAssetsTransferOnce = this.#startStepOnce('assets');
+
+    const flush = async () => {
+      await this.#streamStep('assets', batch);
+      batch = [];
+    };
+
+    const safePush = async (chunk: client.TransferAssetFlow) => {
+      batch.push(chunk);
+
+      if (batchLength() >= batchSize) {
+        await flush();
+      }
+    };
+
     return new Writable({
       objectMode: true,
       final: async (callback) => {
-        // TODO: replace this stream call by an end call
-        const e = await this.#streamStep('assets', null);
-
-        callback(e);
-      },
-      write: async (asset: IAsset, _encoding, callback) => {
-        const { filename, filepath, stats, stream } = asset;
-        const assetID = v4();
-
-        await this.#streamStep('assets', {
-          action: 'start',
-          assetID,
-          data: { filename, filepath, stats },
-        });
-
-        for await (const chunk of stream) {
-          await this.#streamStep('assets', {
-            action: 'stream',
-            assetID,
-            data: chunk,
-          });
+        if (batch.length > 0) {
+          await flush();
         }
 
-        await this.#streamStep('assets', {
-          action: 'end',
-          assetID,
-        });
+        if (hasStarted) {
+          await this.#streamStep('assets', null);
+
+          const endStepError = await this.#endStep('assets');
+
+          if (endStepError) {
+            return callback(endStepError);
+          }
+        }
+
+        return callback(null);
+      },
+
+      async write(asset: IAsset, _encoding, callback) {
+        const startError = await startAssetsTransferOnce();
+
+        if (startError) {
+          return callback(startError);
+        }
+
+        hasStarted = true;
+
+        const assetID = v4();
+        const { filename, filepath, stats, stream } = asset;
+
+        await safePush({ action: 'start', assetID, data: { filename, filepath, stats } });
+
+        for await (const chunk of stream) {
+          await safePush({ action: 'stream', assetID, data: chunk });
+        }
+
+        await safePush({ action: 'end', assetID });
 
         callback();
       },

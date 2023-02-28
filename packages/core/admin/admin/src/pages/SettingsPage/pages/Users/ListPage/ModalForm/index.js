@@ -6,13 +6,15 @@ import {
   ModalHeader,
   ModalFooter,
   ModalBody,
-} from '@strapi/design-system/ModalLayout';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Breadcrumbs, Crumb } from '@strapi/design-system/Breadcrumbs';
-import { Box } from '@strapi/design-system/Box';
-import { Button } from '@strapi/design-system/Button';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
+  Grid,
+  GridItem,
+  Breadcrumbs,
+  Crumb,
+  Box,
+  Button,
+  Stack,
+  Typography,
+} from '@strapi/design-system';
 
 import { Formik } from 'formik';
 import {
@@ -47,7 +49,10 @@ const ModalForm = ({ queryName, onToggle }) => {
     {
       async onSuccess({ data }) {
         setRegistrationToken(data.data.registrationToken);
-        await queryClient.invalidateQueries(queryName);
+
+        await queryClient.refetchQueries(queryName);
+        await queryClient.refetchQueries(['ee', 'license-limit-info']);
+
         goNext();
         setIsSubmitting(false);
       },

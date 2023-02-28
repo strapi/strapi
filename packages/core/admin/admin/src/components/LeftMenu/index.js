@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { NavLink as RouterNavLink, useLocation, useHistory } from 'react-router-dom';
-import { Divider } from '@strapi/design-system/Divider';
+import { Divider, FocusTrap, Box, Typography, Stack } from '@strapi/design-system';
 import {
   MainNav,
   NavBrand,
@@ -13,13 +13,8 @@ import {
   NavUser,
   NavCondense,
   NavFooter,
-} from '@strapi/design-system/v2/MainNav';
-import { FocusTrap } from '@strapi/design-system/FocusTrap';
-import { Box } from '@strapi/design-system/Box';
-import { Typography } from '@strapi/design-system/Typography';
-import { Stack } from '@strapi/design-system/Stack';
-import Write from '@strapi/icons/Write';
-import Exit from '@strapi/icons/Exit';
+} from '@strapi/design-system/v2';
+import { Write, Exit } from '@strapi/icons';
 import {
   auth,
   usePersistentState,

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Typography } from '@strapi/design-system/Typography';
+import { Typography } from '@strapi/design-system';
 
 export const Hint = ({ id, error, name, hint }) => {
   if (hint.length === 0 || error) {

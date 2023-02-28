@@ -10,6 +10,7 @@ import {
   formatContentTypeData,
   contentManagementUtilRemoveFieldsFromData,
   useGuidedTour,
+  useAPIErrorHandler,
   useFetchClient,
 } from '@strapi/helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
@@ -45,6 +46,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   const { componentsDataStructure, contentTypeDataStructure, data, isLoading, status } =
     useSelector(selectCrudReducer);
   const redirectionLink = useFindRedirectionLink(slug);
+  const { formatAPIError } = useAPIErrorHandler(getTrad);
 
   const isMounted = useRef(true);
   const trackUsageRef = useRef(trackUsage);
@@ -148,8 +150,6 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
           return;
         }
 
-        console.error(err);
-
         const resStatus = get(err, 'response.status', null);
 
         if (resStatus === 404) {
@@ -203,25 +203,13 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
   const displayErrors = useCallback(
     (err) => {
-      const errorPayload = err.response.data;
-      let errorMessage = get(errorPayload, ['error', 'message'], 'Bad Request');
-
-      // TODO handle errors correctly when back-end ready
-      if (Array.isArray(errorMessage)) {
-        errorMessage = get(errorMessage, ['0', 'messages', '0', 'id']);
-      }
-
-      if (typeof errorMessage === 'string') {
-        toggleNotification({ type: 'warning', message: errorMessage });
-      }
+      toggleNotification({ type: 'warning', message: formatAPIError(err) });
     },
-    [toggleNotification]
+    [toggleNotification, formatAPIError]
   );
 
   const onDelete = useCallback(
     async (trackerProperty) => {
-      console.log('onDelete');
-
       try {
         trackUsageRef.current('willDeleteEntry', trackerProperty);
 

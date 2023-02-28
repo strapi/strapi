@@ -4,11 +4,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Stack } from '@strapi/design-system/Stack';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Typography } from '@strapi/design-system/Typography';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Select, Option } from '@strapi/design-system/Select';
+import {
+  Stack,
+  Grid,
+  GridItem,
+  Typography,
+  TextInput,
+  Select,
+  Option,
+} from '@strapi/design-system';
 import getTrad from '../../../utils/getTrad';
 
 const DocumentationLink = styled.a`

@@ -10,7 +10,11 @@ const { expectExit } = require('./shared/transfer.test.utils');
 
 const createTransferEngine = jest.fn(() => {
   return {
-    transfer: jest.fn().mockReturnValue(Promise.resolve({})),
+    transfer: jest.fn(() => {
+      return {
+        engine: {},
+      };
+    }),
     progress: {
       on: jest.fn(),
       stream: {
@@ -57,6 +61,7 @@ describe('Import', () => {
 
   // mock utils
   const mockUtils = {
+    loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
     formatDiagnostic: jest.fn(),
     createStrapiInstance: jest.fn().mockReturnValue({
       telemetry: {
@@ -64,7 +69,13 @@ describe('Import', () => {
       },
       destroy: jest.fn(),
     }),
-    buildTransferTable: jest.fn(() => 'table'),
+    buildTransferTable: jest.fn(() => {
+      return {
+        toString() {
+          return 'table';
+        },
+      };
+    }),
   };
   jest.mock(
     '../../transfer/utils',
@@ -74,11 +85,11 @@ describe('Import', () => {
     { virtual: true }
   );
 
-  // other spies
-  // jest.spyOn(console, 'log').mockImplementation(() => {});
-  // jest.spyOn(console, 'warn').mockImplementation(() => {});
-  // jest.spyOn(console, 'info').mockImplementation(() => {});
-  // jest.spyOn(console, 'error').mockImplementation(() => {});
+  // console spies
+  jest.spyOn(console, 'log').mockImplementation(() => {});
+  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  jest.spyOn(console, 'info').mockImplementation(() => {});
+  jest.spyOn(console, 'error').mockImplementation(() => {});
 
   // Now that everything is mocked, load the 'import' command
   const importCommand = require('../../transfer/import');

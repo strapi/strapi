@@ -11,20 +11,18 @@ import {
   NoPermissions,
   useRBAC,
   NoContent,
-  DynamicTable,
   useTracking,
   useGuidedTour,
   useFetchClient,
   LinkButton,
 } from '@strapi/helper-plugin';
-import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { Button } from '@strapi/design-system/Button';
-import Plus from '@strapi/icons/Plus';
+import { HeaderLayout, ContentLayout, Main, Button } from '@strapi/design-system';
+import { Plus } from '@strapi/icons';
 
 import adminPermissions from '../../../../../permissions';
 import tableHeaders from './utils/tableHeaders';
-import TableRows from './DynamicTable';
+import Table from '../../../components/Tokens/Table';
+import { API_TOKEN_TYPE } from '../../../components/Tokens/constants';
 
 const ApiTokenListView = () => {
   useFocusWhenNavigate();
@@ -65,12 +63,14 @@ const ApiTokenListView = () => {
   } = useQuery(
     ['api-tokens'],
     async () => {
-      trackUsage('willAccessTokenList');
+      trackUsage('willAccessTokenList', {
+        tokenType: API_TOKEN_TYPE,
+      });
       const {
         data: { data },
       } = await get(`/admin/api-tokens`);
 
-      trackUsage('didAccessTokenList', { number: data.length });
+      trackUsage('didAccessTokenList', { number: data.length, tokenType: API_TOKEN_TYPE });
 
       return data;
     },
@@ -130,7 +130,11 @@ const ApiTokenListView = () => {
               data-testid="create-api-token-button"
               startIcon={<Plus />}
               size="S"
-              onClick={() => trackUsage('willAddTokenFromList')}
+              onClick={() =>
+                trackUsage('willAddTokenFromList', {
+                  tokenType: API_TOKEN_TYPE,
+                })
+              }
               to="/settings/api-tokens/create"
             >
               {formatMessage({
@@ -144,22 +148,16 @@ const ApiTokenListView = () => {
       <ContentLayout>
         {!canRead && <NoPermissions />}
         {shouldDisplayDynamicTable && (
-          <DynamicTable
+          <Table
+            permissions={{ canRead, canDelete, canUpdate }}
             headers={headers}
             contentType="api-tokens"
             rows={apiTokens}
-            withBulkActions={canDelete || canUpdate || canRead}
             isLoading={isLoading}
             onConfirmDelete={(id) => deleteMutation.mutateAsync(id)}
-          >
-            <TableRows
-              canRead={canRead}
-              canDelete={canDelete}
-              canUpdate={canUpdate}
-              rows={apiTokens}
-              withBulkActions={canDelete || canUpdate || canRead}
-            />
-          </DynamicTable>
+            tokens={apiTokens}
+            tokenType={API_TOKEN_TYPE}
+          />
         )}
         {shouldDisplayNoContentWithCreationButton && (
           <NoContent

@@ -1,16 +1,70 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = `
-.c27 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
+.c9 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c14 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c15 {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666687;
+}
+
+.c20 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c25 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c33 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #666687;
+  text-transform: uppercase;
+}
+
+.c35 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #4945ff;
+  text-transform: uppercase;
+}
+
+.c37 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c42 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
   overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
+  text-overflow: ellipsis;
+  color: #32324d;
 }
 
 .c2 {
@@ -133,72 +187,6 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   justify-content: center;
 }
 
-.c9 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c14 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c15 {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c20 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c25 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c33 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #666687;
-  text-transform: uppercase;
-}
-
-.c35 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #4945ff;
-  text-transform: uppercase;
-}
-
-.c37 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c42 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
 .c19 > * {
   margin-top: 0;
   margin-bottom: 0;
@@ -275,6 +263,18 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   border: 2px solid #4945ff;
 }
 
+.c27 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
 .c13 {
   height: 100%;
 }
@@ -347,25 +347,6 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   fill: #ffffff;
 }
 
-.c39 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c39:focus {
-  outline: none;
-}
-
-.c39[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
 .c38 {
   position: relative;
   border: 1px solid #dcdce4;
@@ -416,17 +397,27 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   width: 0.375rem;
 }
 
+.c39 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c39:focus {
+  outline: none;
+}
+
+.c39[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
 .c40 {
   width: 100%;
-}
-
-.c1 {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-
-.c3 {
-  overflow-x: hidden;
 }
 
 .c21 {
@@ -438,6 +429,15 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
 .c22 {
   grid-column: span 6;
   max-width: 100%;
+}
+
+.c1 {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.c3 {
+  overflow-x: hidden;
 }
 
 .c4:focus-visible {

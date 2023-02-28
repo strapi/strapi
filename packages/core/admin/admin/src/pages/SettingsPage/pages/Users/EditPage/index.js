@@ -19,15 +19,18 @@ import {
 } from '@strapi/helper-plugin';
 import { useQuery } from 'react-query';
 import { Formik } from 'formik';
-import { Box } from '@strapi/design-system/Box';
-import { Button } from '@strapi/design-system/Button';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
-import { Typography } from '@strapi/design-system/Typography';
-import { Main } from '@strapi/design-system/Main';
-import { Stack } from '@strapi/design-system/Stack';
-import ArrowLeft from '@strapi/icons/ArrowLeft';
-import Check from '@strapi/icons/Check';
+import {
+  Box,
+  Button,
+  Grid,
+  GridItem,
+  HeaderLayout,
+  ContentLayout,
+  Typography,
+  Main,
+  Stack,
+} from '@strapi/design-system';
+import { ArrowLeft, Check } from '@strapi/icons';
 import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
 import { formatAPIErrors, getFullName } from '../../../../../utils';
 import { fetchUser, putUser } from './utils/api';
@@ -44,15 +47,12 @@ const EditPage = ({ canUpdate }) => {
   } = useRouteMatch('/settings/users/:id');
   const { push } = useHistory();
   const { setUserDisplayName } = useAppInfos();
-
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   useFocusWhenNavigate();
 
   const { status, data } = useQuery(['user', id], () => fetchUser(id), {
     retry: false,
-    keepPreviousData: false,
-    staleTime: 1000 * 20,
     onError(err) {
       const status = err.response.status;
 
@@ -106,7 +106,7 @@ const EditPage = ({ canUpdate }) => {
       actions.setErrors(fieldsErrors);
       toggleNotification({
         type: 'warning',
-        message: get(err, 'response.data.message', 'notification.error'),
+        message: get(err, 'response.data.error.message', 'notification.error'),
       });
     }
 

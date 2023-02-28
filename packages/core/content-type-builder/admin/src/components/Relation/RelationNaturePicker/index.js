@@ -5,16 +5,15 @@ import { useDispatch } from 'react-redux';
 import get from 'lodash/get';
 import truncate from 'lodash/truncate';
 import pluralize from 'pluralize';
-import OneToOne from '@strapi/icons/OneToOne';
-import OneWay from '@strapi/icons/OneWay';
-import ManyWay from '@strapi/icons/ManyWays';
-import OneToMany from '@strapi/icons/OneToMany';
-import ManyToOne from '@strapi/icons/ManyToOne';
-import ManyToMany from '@strapi/icons/ManyToMany';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
-import { Stack } from '@strapi/design-system/Stack';
+import {
+  OneToOne,
+  OneWay,
+  ManyWays as ManyWay,
+  OneToMany,
+  ManyToOne,
+  ManyToMany,
+} from '@strapi/icons';
+import { Flex, Typography, KeyboardNavigable, Stack } from '@strapi/design-system';
 import useDataManager from '../../../hooks/useDataManager';
 import { ON_CHANGE_RELATION_TYPE } from '../../FormModal/constants';
 import getTrad from '../../../utils/getTrad';

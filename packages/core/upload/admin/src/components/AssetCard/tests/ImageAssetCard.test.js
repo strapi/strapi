@@ -32,16 +32,25 @@ describe('ImageAssetCard', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c33 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
+      .c23 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c24 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
+      .c32 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
       }
 
       .c0 {
@@ -165,77 +174,67 @@ describe('ImageAssetCard', () => {
         margin-left: 8px;
       }
 
-      .c8 {
-        position: absolute;
-        top: 12px;
-        left: 12px;
-      }
-
-      .c12 {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-      }
-
-      .c18 {
-        margin: 0;
-        padding: 0;
-        max-height: 100%;
-        max-width: 100%;
-        object-fit: contain;
-      }
-
-      .c17 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        height: 10.25rem;
-        width: 100%;
-        background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
-        border-top-left-radius: 4px;
-        border-top-right-radius: 4px;
-      }
-
-      .c23 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c24 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #666687;
-      }
-
-      .c32 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #666687;
-      }
-
       .c30 {
         border-radius: 4px;
         height: 1.5rem;
       }
 
-      .c27 {
-        margin-left: auto;
-        -webkit-flex-shrink: 0;
-        -ms-flex-negative: 0;
-        flex-shrink: 0;
+      .c14 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
       }
 
-      .c31 {
-        margin-left: 4px;
+      .c14 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c14 svg > g,
+      .c14 svg path {
+        fill: #ffffff;
+      }
+
+      .c14[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c14:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c14:focus-visible {
+        outline: none;
+      }
+
+      .c14:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c9 {
@@ -306,14 +305,6 @@ describe('ImageAssetCard', () => {
         background-color: #8e8ea9;
       }
 
-      .c21 {
-        word-break: break-all;
-      }
-
-      .c4 {
-        border-bottom: 1px solid #eaeaef;
-      }
-
       .c16 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
@@ -326,62 +317,59 @@ describe('ImageAssetCard', () => {
         width: 1px;
       }
 
-      .c14 {
+      .c8 {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+      }
+
+      .c12 {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+      }
+
+      .c18 {
+        margin: 0;
+        padding: 0;
+        max-height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+      }
+
+      .c17 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        height: 10.25rem;
+        width: 100%;
+        background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
       }
 
-      .c14 svg {
-        height: 12px;
-        width: 12px;
+      .c27 {
+        margin-left: auto;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
       }
 
-      .c14 svg > g,
-      .c14 svg path {
-        fill: #ffffff;
+      .c31 {
+        margin-left: 4px;
       }
 
-      .c14[aria-disabled='true'] {
-        pointer-events: none;
+      .c21 {
+        word-break: break-all;
       }
 
-      .c14:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c14:focus-visible {
-        outline: none;
-      }
-
-      .c14:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
+      .c4 {
+        border-bottom: 1px solid #eaeaef;
       }
 
       .c15 {
@@ -566,7 +554,7 @@ describe('ImageAssetCard', () => {
           </div>
         </article>
         <div
-          class="c33"
+          class="c16"
         >
           <p
             aria-live="polite"

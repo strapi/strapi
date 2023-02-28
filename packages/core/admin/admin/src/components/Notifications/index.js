@@ -1,7 +1,7 @@
 import { NotificationsProvider } from '@strapi/helper-plugin';
 import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
-import { Stack } from '@strapi/design-system/Stack';
+import { Stack } from '@strapi/design-system';
 import Notification from './Notification';
 import reducer, { initialState } from './reducer';
 

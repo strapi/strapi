@@ -95,28 +95,22 @@ const cleanData = ({ browserState, serverState }, currentSchema, componentsSchem
            */
           let actualOldValue = get(rootServerState, trueInitialDataPath, []);
 
-          const valuesWithPositions = value.map((relation, index, allRelations) => {
-            const nextRelation = allRelations[index + 1];
-
-            if (nextRelation) {
-              return { ...relation, position: { before: nextRelation.id } };
-            }
-
-            return { ...relation, position: { end: true } };
-          });
-
           /**
            * Instead of the full relation object, we only want to send its ID
            *  connectedRelations are the items that are in the browserState
            * array but not in the serverState
            */
-          const connectedRelations = valuesWithPositions.reduce((acc, relation, currentIndex) => {
-            const indexOfRelationOnServer = actualOldValue.findIndex(
+          const connectedRelations = value.reduce((acc, relation, currentIndex, array) => {
+            const relationOnServer = actualOldValue.find(
               (oldRelation) => oldRelation.id === relation.id
             );
 
-            if (indexOfRelationOnServer === -1 || indexOfRelationOnServer !== currentIndex) {
-              return [...acc, { id: relation.id, position: relation.position }];
+            const relationInFront = array[currentIndex + 1];
+
+            if (!relationOnServer || relationOnServer.__temp_key__ !== relation.__temp_key__) {
+              const position = relationInFront ? { before: relationInFront.id } : { end: true };
+
+              return [...acc, { id: relation.id, position }];
             }
 
             return acc;
@@ -127,7 +121,7 @@ const cleanData = ({ browserState, serverState }, currentSchema, componentsSchem
            * are no longer in the browserState
            */
           const disconnectedRelations = actualOldValue.reduce((acc, relation) => {
-            if (!valuesWithPositions.find((newRelation) => newRelation.id === relation.id)) {
+            if (!value.find((newRelation) => newRelation.id === relation.id)) {
               return [...acc, { id: relation.id }];
             }
 
