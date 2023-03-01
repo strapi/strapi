@@ -6,32 +6,61 @@ const path = require('path');
 // Helpers.
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
-const {
-  createAuthRequest,
-  createContentAPIRequest,
-} = require('../../../../../test/helpers/request');
+const { createAuthRequest } = require('../../../../../test/helpers/request');
 
 const builder = createTestBuilder();
 let strapi;
-let request;
-let contentAPIRequest;
 
-const model = {
-  uid: 'api::profile.profile',
-  displayName: 'Profile',
-  singularName: 'profile',
-  pluralName: 'profiles',
-  kind: 'collectionType',
-  attributes: {
-    name: {
-      type: 'text',
+let baseRequest;
+let rq;
+
+const modelUID = 'api::model.model';
+const componentUID = 'default.component';
+
+const models = {
+  [modelUID]: {
+    displayName: 'Model',
+    singularName: 'model',
+    pluralName: 'models',
+    kind: 'collectionType',
+    attributes: {
+      name: {
+        type: 'text',
+      },
+      media: {
+        type: 'media',
+      },
+      media_repeatable: {
+        type: 'media',
+        multiple: true,
+      },
+      // TODO add these cases in the test
+      // compo_media: {
+      //   type: 'component',
+      //   component: componentUID,
+      // },
+      // compo_media_repeatable: {
+      //   type: 'component',
+      //   repeatable: true,
+      //   component: componentUID,
+      // },
+      // dynamicZone: {
+      //   type: 'dynamiczone',
+      //   components: [componentUID],
+      // },
     },
-    profilePicture: {
-      type: 'media',
-    },
-    slideShow: {
-      type: 'media',
-      multiple: true,
+  },
+  [componentUID]: {
+    displayName: 'component',
+    attributes: {
+      media_repeatable: {
+        type: 'media',
+        multiple: true,
+      },
+      media: {
+        type: 'media',
+        multiple: false,
+      },
     },
   },
 };
@@ -53,28 +82,46 @@ const mockProvider = (signUrl = true) => ({
   },
 });
 
+const uploadImg = (fileName) => {
+  return baseRequest({
+    method: 'POST',
+    url: '/upload',
+    formData: {
+      files: fs.createReadStream(path.join(__dirname, `../utils/${fileName}`)),
+    },
+  });
+};
+
 describe('Upload Plugin url signing', () => {
   beforeAll(async () => {
     const localProviderPath = require.resolve('@strapi/provider-upload-local');
     jest.mock(localProviderPath, () => mockProvider(true));
 
     //  Create builder
-    await builder.addContentType(model).build();
+    await builder.addComponent(models[componentUID]).addContentType(models[modelUID]).build();
 
     // Create api instance
     strapi = await createStrapiInstance();
 
-    request = await createAuthRequest({ strapi });
-    contentAPIRequest = createContentAPIRequest({ strapi });
+    baseRequest = await createAuthRequest({ strapi });
 
-    await contentAPIRequest({
-      method: 'POST',
-      url: '/profiles?populate=*',
-      formData: {
-        data: '{}',
-        'files.profilePicture': fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+    rq = await createAuthRequest({ strapi });
+    rq.setURLPrefix(`/content-manager/collection-types/${modelUID}`);
+
+    const imgRes = [await uploadImg('rec.jpg'), await uploadImg('strapi.jpg')];
+
+    const creationResult = await rq.post('/', {
+      body: {
+        name: 'name',
+        media: imgRes[0].body[0].id,
+        media_repeatable: imgRes.map((img) => img.body[0].id),
+      },
+      qs: {
+        populate: ['name'],
       },
     });
+
+    expect(creationResult.statusCode).toBe(200);
   });
 
   afterAll(async () => {
@@ -83,12 +130,16 @@ describe('Upload Plugin url signing', () => {
   });
 
   test('returns a signed url for private upload providers', async () => {
-    const res = await request({
+    const res = await baseRequest({
       method: 'GET',
-      url: '/content-manager/collection-types/api::profile.profile/1',
+      url: `/content-manager/collection-types/${modelUID}/1`,
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.profilePicture.url).toEqual('signedUrl');
+    expect(res.body.media.url).toEqual('signedUrl');
+
+    for (const media of res.body.media_repeatable) {
+      expect(media.url).toEqual('signedUrl');
+    }
   });
 });
