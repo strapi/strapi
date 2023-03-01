@@ -38,7 +38,7 @@ module.exports = {
       currentActiveUserCount,
       permittedSeats,
       shouldNotify,
-      shouldStopCreate: currentActiveUserCount >= permittedSeats,
+      shouldStopCreate: permittedSeats && currentActiveUserCount >= permittedSeats,
       licenseLimitStatus,
       isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
     };
