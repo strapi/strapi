@@ -83,13 +83,29 @@ module.exports = ({ strapi }) => ({
     return entity;
   },
 
+  /**
+   * Some entity manager functions may return multiple entities or one entity.
+   * This function maps the response in both cases
+   * @param {Array|Object|null} entities
+   * @param {string} uid
+   */
+  async mapEntitiesResponse(entities, uid) {
+    if (entities?.results) {
+      const mappedResults = await mapAsync(entities.results, (entity) =>
+        this.mapEntity(entity, uid)
+      );
+      return { ...entities, results: mappedResults };
+    }
+    // if entity is single type
+    return this.mapEntity(entities, uid);
+  },
+
   async find(opts, uid) {
     const params = { ...opts, populate: getDeepPopulate(uid) };
 
     const entities = await strapi.entityService.findMany(uid, params);
 
-    const mappedResults = await mapAsync(entities.results, (entity) => this.mapEntity(entity, uid));
-    return { ...entities, results: mappedResults };
+    return this.mapEntitiesResponse(entities, uid);
   },
 
   async findPage(opts, uid) {
@@ -97,8 +113,7 @@ module.exports = ({ strapi }) => ({
 
     const entities = await strapi.entityService.findPage(uid, params);
 
-    const mappedResults = await mapAsync(entities.results, (entity) => this.mapEntity(entity, uid));
-    return { ...entities, results: mappedResults };
+    return this.mapEntitiesResponse(entities, uid);
   },
 
   async findWithRelationCountsPage(opts, uid) {
@@ -107,8 +122,7 @@ module.exports = ({ strapi }) => ({
 
     const entities = await strapi.entityService.findWithRelationCountsPage(uid, params);
 
-    const mappedResults = await mapAsync(entities.results, (entity) => this.mapEntity(entity, uid));
-    return { ...entities, results: mappedResults };
+    return this.mapEntitiesResponse(entities, uid);
   },
 
   async findOneWithCreatorRolesAndCount(id, uid) {
