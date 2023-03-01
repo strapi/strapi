@@ -34,20 +34,19 @@ const models = {
         type: 'media',
         multiple: true,
       },
-      // TODO add these cases in the test
-      // compo_media: {
-      //   type: 'component',
-      //   component: componentUID,
-      // },
-      // compo_media_repeatable: {
-      //   type: 'component',
-      //   repeatable: true,
-      //   component: componentUID,
-      // },
-      // dynamicZone: {
-      //   type: 'dynamiczone',
-      //   components: [componentUID],
-      // },
+      compo_media: {
+        type: 'component',
+        component: componentUID,
+      },
+      compo_media_repeatable: {
+        type: 'component',
+        repeatable: true,
+        component: componentUID,
+      },
+      dynamicZone: {
+        type: 'dynamiczone',
+        components: [componentUID],
+      },
     },
   },
   [componentUID]: {
@@ -110,11 +109,26 @@ describe('Upload Plugin url signing', () => {
 
     const imgRes = [await uploadImg('rec.jpg'), await uploadImg('strapi.jpg')];
 
+    const repeatable = imgRes.map((img) => img.body[0].id);
+    const singleMedia = imgRes[0].body[0].id;
+    const mediaEntry = {
+      media: singleMedia,
+      media_repeatable: repeatable,
+    };
+
     const creationResult = await rq.post('/', {
       body: {
         name: 'name',
-        media: imgRes[0].body[0].id,
-        media_repeatable: imgRes.map((img) => img.body[0].id),
+        media: singleMedia,
+        media_repeatable: repeatable,
+        compo_media: mediaEntry,
+        compo_media_repeatable: [mediaEntry, mediaEntry],
+        dynamicZone: [
+          {
+            __component: componentUID,
+            ...mediaEntry,
+          },
+        ],
       },
       qs: {
         populate: ['name'],
@@ -140,6 +154,25 @@ describe('Upload Plugin url signing', () => {
 
     for (const media of res.body.media_repeatable) {
       expect(media.url).toEqual('signedUrl');
+    }
+
+    expect(res.body.compo_media.media.url).toEqual('signedUrl');
+    for (const media of res.body.compo_media.media_repeatable) {
+      expect(media.url).toEqual('signedUrl');
+    }
+
+    for (const component of res.body.compo_media_repeatable) {
+      expect(component.media.url).toEqual('signedUrl');
+      for (const media of component.media_repeatable) {
+        expect(media.url).toEqual('signedUrl');
+      }
+    }
+
+    for (const component of res.body.dynamicZone) {
+      expect(component.media.url).toEqual('signedUrl');
+      for (const media of component.media_repeatable) {
+        expect(media.url).toEqual('signedUrl');
+      }
     }
   });
 });
