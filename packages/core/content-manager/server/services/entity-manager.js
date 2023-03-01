@@ -84,12 +84,12 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * Some entity manager functions may return multiple entites or one entity.
+   * Some entity manager functions may return multiple entities or one entity.
    * This function maps the response in both cases
    * @param {Array|Object|null} entities
    * @param {string} uid
    */
-  async mapEntitesResponse(entities, uid) {
+  async mapEntitiesResponse(entities, uid) {
     if (entities?.results) {
       const mappedResults = await mapAsync(entities.results, (entity) =>
         this.mapEntity(entity, uid)
@@ -105,7 +105,7 @@ module.exports = ({ strapi }) => ({
 
     const entities = await strapi.entityService.findMany(uid, params);
 
-    return this.mapEntitesResponse(entities, uid);
+    return this.mapEntitiesResponse(entities, uid);
   },
 
   async findPage(opts, uid) {
@@ -113,7 +113,7 @@ module.exports = ({ strapi }) => ({
 
     const entities = await strapi.entityService.findPage(uid, params);
 
-    return this.mapEntitesResponse(entities, uid);
+    return this.mapEntitiesResponse(entities, uid);
   },
 
   async findWithRelationCountsPage(opts, uid) {
@@ -122,7 +122,7 @@ module.exports = ({ strapi }) => ({
 
     const entities = await strapi.entityService.findWithRelationCountsPage(uid, params);
 
-    return this.mapEntitesResponse(entities, uid);
+    return this.mapEntitiesResponse(entities, uid);
   },
 
   async findOneWithCreatorRolesAndCount(id, uid) {
