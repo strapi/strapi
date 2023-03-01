@@ -7,7 +7,6 @@ import {
   Grid,
   GridItem,
   Flex,
-  Stack,
   TextInput,
   TextButton,
 } from '@strapi/design-system';
@@ -20,7 +19,7 @@ const HeadersInput = () => {
   const { values, errors } = useFormikContext();
 
   return (
-    <Stack spacing={1}>
+    <Flex direction="column" alignItems="stretch" gap={1}>
       <FieldLabel>
         {formatMessage({
           id: 'Settings.webhooks.form.headers',
@@ -112,7 +111,7 @@ const HeadersInput = () => {
           )}
         />
       </Box>
-    </Stack>
+    </Flex>
   );
 };
 

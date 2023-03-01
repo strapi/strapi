@@ -49,7 +49,7 @@ describe('<UploadProgress />', () => {
     } = renderCompo();
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c10 {
+      .c9 {
         font-size: 0.75rem;
         line-height: 1.33;
       }
@@ -62,7 +62,7 @@ describe('<UploadProgress />', () => {
         width: 100%;
       }
 
-      .c6 {
+      .c5 {
         background: #666687;
         border-radius: 4px;
         position: relative;
@@ -96,27 +96,25 @@ describe('<UploadProgress />', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+        gap: 8px;
       }
 
-      .c5 > * {
-        margin-top: 0;
-        margin-bottom: 0;
+      .c8 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        gap: 8px;
       }
 
-      .c5 > * + * {
-        margin-top: 8px;
-      }
-
-      .c9 > * {
-        margin-left: 0;
-        margin-right: 0;
-      }
-
-      .c9 > * + * {
-        margin-left: 8px;
-      }
-
-      .c7:before {
+      .c6:before {
         background-color: #ffffff;
         border-radius: 4px;
         bottom: 0;
@@ -132,7 +130,7 @@ describe('<UploadProgress />', () => {
         height: 100%;
       }
 
-      .c8 {
+      .c7 {
         border: none;
         background: none;
         width: -webkit-min-content;
@@ -141,17 +139,17 @@ describe('<UploadProgress />', () => {
         color: #666687;
       }
 
-      .c8:hover,
-      .c8:focus {
+      .c7:hover,
+      .c7:focus {
         color: #4a4a6a;
       }
 
-      .c8 svg {
+      .c7 svg {
         height: 10px;
         width: 10px;
       }
 
-      .c8 svg path {
+      .c7 svg path {
         fill: currentColor;
       }
 
@@ -159,26 +157,26 @@ describe('<UploadProgress />', () => {
         class="c0 c1 c2"
       >
         <div
-          class="c3 c4 c5"
+          class="c3 c4"
         >
           <div
             aria-label="0/100%"
             aria-valuemax="100"
             aria-valuemin="0"
             aria-valuenow="0"
-            class="c6 c7"
+            class="c5 c6"
             role="progressbar"
             value="0"
           />
           <button
-            class="c8"
+            class="c7"
             type="button"
           >
             <div
-              class="c1 c9"
+              class="c8"
             >
               <span
-                class="c10"
+                class="c9"
               >
                 Cancel
               </span>

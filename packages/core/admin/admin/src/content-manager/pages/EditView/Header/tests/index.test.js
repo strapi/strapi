@@ -117,13 +117,19 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         flex-direction: row;
       }
 
-      .c11 > * {
-        margin-left: 0;
-        margin-right: 0;
-      }
-
-      .c11 > * + * {
-        margin-left: 8px;
+      .c11 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        gap: 8px;
       }
 
       .c12 {
@@ -374,7 +380,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
               </h1>
             </div>
             <div
-              class="c0 c8 c11"
+              class="c0 c11"
             >
               <button
                 aria-disabled="true"

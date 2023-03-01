@@ -14,7 +14,7 @@ import {
   useRBAC,
   useFetchClient,
 } from '@strapi/helper-plugin';
-import { ContentLayout, Main, Stack } from '@strapi/design-system';
+import { ContentLayout, Main, Flex } from '@strapi/design-system';
 import { formatAPIErrors } from '../../../../../utils';
 import { schema } from './utils';
 import LoadingView from './components/LoadingView';
@@ -198,7 +198,7 @@ const TransferTokenCreateView = () => {
                 regenerateUrl="/admin/transfer/tokens/"
               />
               <ContentLayout>
-                <Stack spacing={6}>
+                <Flex direction="column" alignItems="stretch" gap={6}>
                   {Boolean(transferToken?.name) && (
                     <TokenBox token={transferToken?.accessKey} tokenType={TRANSFER_TOKEN_TYPE} />
                   )}
@@ -210,7 +210,7 @@ const TransferTokenCreateView = () => {
                     values={values}
                     transferToken={transferToken}
                   />
-                </Stack>
+                </Flex>
               </ContentLayout>
             </Form>
           );

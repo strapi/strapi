@@ -17,21 +17,21 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   color: #666687;
 }
 
-.c19 {
+.c18 {
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
   color: #32324d;
 }
 
-.c23 {
+.c22 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
   color: #32324d;
 }
 
-.c25 {
+.c24 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
@@ -57,7 +57,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   padding-left: 40px;
 }
 
-.c14 {
+.c13 {
   background: #f6f6f9;
   padding-top: 48px;
   padding-bottom: 32px;
@@ -68,22 +68,22 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   position: relative;
 }
 
-.c16 {
+.c15 {
   color: #4945ff;
   width: 3.75rem;
   height: 3.75rem;
 }
 
-.c18 {
+.c17 {
   padding-top: 12px;
   padding-bottom: 20px;
 }
 
-.c24 {
+.c23 {
   padding-top: 24px;
 }
 
-.c26 {
+.c25 {
   background: #f6f6f9;
   padding-top: 16px;
   padding-right: 20px;
@@ -103,9 +103,10 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 8px;
 }
 
-.c15 {
+.c14 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -123,7 +124,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   justify-content: center;
 }
 
-.c28 {
+.c27 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -141,7 +142,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   justify-content: space-between;
 }
 
-.c29 {
+.c28 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -155,20 +156,11 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   flex-direction: row;
 }
 
-.c13 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c13 > * + * {
-  margin-top: 8px;
-}
-
-.c17 path {
+.c16 path {
   fill: #4945ff;
 }
 
-.c21 {
+.c20 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -182,21 +174,21 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   outline: none;
 }
 
-.c21 svg {
+.c20 svg {
   height: 12px;
   width: 12px;
 }
 
-.c21 svg > g,
-.c21 svg path {
+.c20 svg > g,
+.c20 svg path {
   fill: #ffffff;
 }
 
-.c21[aria-disabled='true'] {
+.c20[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c21:after {
+.c20:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -211,11 +203,11 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   border: 2px solid transparent;
 }
 
-.c21:focus-visible {
+.c20:focus-visible {
   outline: none;
 }
 
-.c21:focus-visible:after {
+.c20:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -226,7 +218,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   border: 2px solid #4945ff;
 }
 
-.c32 {
+.c31 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -238,7 +230,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   width: 1px;
 }
 
-.c22 {
+.c21 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -250,7 +242,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   padding-right: 16px;
 }
 
-.c22 .c0 {
+.c21 .c0 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -261,52 +253,52 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   align-items: center;
 }
 
-.c22 .c5 {
+.c21 .c5 {
   color: #ffffff;
 }
 
-.c22[aria-disabled='true'] {
+.c21[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c22[aria-disabled='true'] .c5 {
+.c21[aria-disabled='true'] .c5 {
   color: #666687;
 }
 
-.c22[aria-disabled='true'] svg > g,.c22[aria-disabled='true'] svg path {
+.c21[aria-disabled='true'] svg > g,.c21[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c22[aria-disabled='true']:active {
+.c21[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c22[aria-disabled='true']:active .c5 {
+.c21[aria-disabled='true']:active .c5 {
   color: #666687;
 }
 
-.c22[aria-disabled='true']:active svg > g,.c22[aria-disabled='true']:active svg path {
+.c21[aria-disabled='true']:active svg > g,.c21[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c22:hover {
+.c21:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c22:active {
+.c21:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c22 svg > g,
-.c22 svg path {
+.c21 svg > g,
+.c21 svg path {
   fill: #ffffff;
 }
 
-.c31 {
+.c30 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -320,7 +312,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   background: #ffffff;
 }
 
-.c31 .c0 {
+.c30 .c0 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -331,50 +323,50 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   align-items: center;
 }
 
-.c31 .c5 {
+.c30 .c5 {
   color: #ffffff;
 }
 
-.c31[aria-disabled='true'] {
+.c30[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c31[aria-disabled='true'] .c5 {
+.c30[aria-disabled='true'] .c5 {
   color: #666687;
 }
 
-.c31[aria-disabled='true'] svg > g,.c31[aria-disabled='true'] svg path {
+.c30[aria-disabled='true'] svg > g,.c30[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c31[aria-disabled='true']:active {
+.c30[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c31[aria-disabled='true']:active .c5 {
+.c30[aria-disabled='true']:active .c5 {
   color: #666687;
 }
 
-.c31[aria-disabled='true']:active svg > g,.c31[aria-disabled='true']:active svg path {
+.c30[aria-disabled='true']:active svg > g,.c30[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c31:hover {
+.c30:hover {
   background-color: #f6f6f9;
 }
 
-.c31:active {
+.c30:active {
   background-color: #eaeaef;
 }
 
-.c31 .c5 {
+.c30 .c5 {
   color: #32324d;
 }
 
-.c31 svg > g,
-.c31 svg path {
+.c30 svg > g,
+.c30 svg path {
   fill: #32324d;
 }
 
@@ -387,12 +379,12 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   margin: 0;
 }
 
-.c27 {
+.c26 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
 
-.c30 > * + * {
+.c29 > * + * {
   margin-left: 8px;
 }
 
@@ -408,7 +400,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   cursor: not-allowed;
 }
 
-.c20 {
+.c19 {
   opacity: 0;
   position: absolute;
   top: 0;
@@ -487,14 +479,14 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
                 for="logo-upload"
               >
                 <div
-                  class="c0 c12 c13"
+                  class="c0 c12"
                 >
                   <div
-                    class="c0 c14 c15"
+                    class="c0 c13 c14"
                   >
                     <svg
                       aria-hidden="true"
-                      class="c0 c16 c17"
+                      class="c0 c15 c16"
                       fill="none"
                       height="1em"
                       viewBox="0 0 24 20"
@@ -511,17 +503,17 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
                       />
                     </svg>
                     <div
-                      class="c0 c18"
+                      class="c0 c17"
                     >
                       <span
-                        class="c5 c19"
+                        class="c5 c18"
                       >
                         Drag and Drop here or
                       </span>
                     </div>
                     <input
                       accept="image/jpeg,image/png,image/svg+xml"
-                      class="c20"
+                      class="c19"
                       cursor="pointer"
                       id="logo-upload"
                       name="files"
@@ -530,20 +522,20 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
                     />
                     <button
                       aria-disabled="false"
-                      class="c21 c22"
+                      class="c20 c21"
                       type="button"
                     >
                       <span
-                        class="c5 c23"
+                        class="c5 c22"
                       >
                         Browse files
                       </span>
                     </button>
                     <div
-                      class="c0 c24"
+                      class="c0 c23"
                     >
                       <span
-                        class="c5 c25"
+                        class="c5 c24"
                       >
                         Max dimension: 750x750, Max size: 100KB
                       </span>
@@ -555,28 +547,28 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
           </div>
         </form>
         <div
-          class="c0 c26 c27"
+          class="c0 c25 c26"
         >
           <div
-            class="c0 c28"
+            class="c0 c27"
           >
             <div
-              class="c0 c29 c30"
+              class="c0 c28 c29"
             >
               <button
                 aria-disabled="false"
-                class="c21 c31"
+                class="c20 c30"
                 type="button"
               >
                 <span
-                  class="c5 c23"
+                  class="c5 c22"
                 >
                   Cancel
                 </span>
               </button>
             </div>
             <div
-              class="c0 c29 c30"
+              class="c0 c28 c29"
             />
           </div>
         </div>
@@ -584,7 +576,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
     </div>
   </div>
   <div
-    class="c32"
+    class="c31"
   >
     <p
       aria-live="polite"
@@ -660,20 +652,6 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   padding-left: 20px;
 }
 
-.c12 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
 .c16 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -704,6 +682,20 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
+}
+
+.c12 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
 }
 
 .c13 > * {

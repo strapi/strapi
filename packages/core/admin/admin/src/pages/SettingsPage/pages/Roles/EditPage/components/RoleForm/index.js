@@ -4,7 +4,6 @@ import {
   Grid,
   GridItem,
   Flex,
-  Stack,
   Typography,
   Textarea,
   TextInput,
@@ -18,7 +17,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
 
   return (
     <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-      <Stack spacing={4}>
+      <Flex direction="column" alignItems="stretch" gap={4}>
         <Flex justifyContent="space-between">
           <Box>
             <Box>
@@ -84,7 +83,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
             </Textarea>
           </GridItem>
         </Grid>
-      </Stack>
+      </Flex>
     </Box>
   );
 };

@@ -7,7 +7,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { useAppInfos } from '@strapi/helper-plugin';
-import { Typography, Box, Stack, Grid, GridItem } from '@strapi/design-system';
+import { Typography, Box, Flex, Grid, GridItem } from '@strapi/design-system';
 import { Link, LinkButton } from '@strapi/design-system/v2';
 import { ExternalLink, Github, Discord, Reddit, Strapi, Twitter, Discourse } from '@strapi/icons';
 
@@ -160,8 +160,8 @@ const SocialLinks = () => {
       shadow="tableShadow"
     >
       <Box paddingBottom={7}>
-        <Stack spacing={5}>
-          <Stack spacing={3}>
+        <Flex direction="column" alignItems="stretch" gap={5}>
+          <Flex direction="column" alignItems="stretch" gap={3}>
             <Typography variant="delta" as="h2" id="join-the-community">
               {formatMessage({
                 id: 'app.components.HomePage.community',
@@ -175,14 +175,14 @@ const SocialLinks = () => {
                   'Discuss with team members, contributors and developers on different channels',
               })}
             </Typography>
-          </Stack>
+          </Flex>
           <Link href="https://feedback.strapi.io/" isExternal endIcon={<ExternalLink />}>
             {formatMessage({
               id: 'app.components.HomePage.roadmap',
               defaultMessage: 'See our road map',
             })}
           </Link>
-        </Stack>
+        </Flex>
       </Box>
       <GridGap>
         {socialLinksExtended.map(({ icon, link, name }) => {
