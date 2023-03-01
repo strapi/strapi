@@ -35,7 +35,7 @@ jobs:
 
       - run: yarn install --frozen-lockfile
       - name: Build TypeScript packages # for lint we need to build ts, for rules checking if paths exist
-        run: yarn build:ts
+        run: yarn build
       - name: Run lint
         run: yarn run -s lint
 

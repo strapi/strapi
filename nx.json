@@ -1,0 +1,20 @@
+{
+  "targetDefaults": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["{projectRoot}/lib", "{projectRoot}/build"]
+    },
+    "build:ts": {
+      "dependsOn": ["^build"],
+      "outputs": ["{projectRoot}/lib", "{projectRoot}/build"]
+    }
+  },
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx/tasks-runners/default",
+      "options": {
+        "cacheableOperations": ["build", "build:ts", "lint", "test:unit", "test:front"]
+      }
+    }
+  }
+}

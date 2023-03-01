@@ -1,0 +1,11 @@
+{
+  "extends": "@tsconfig/node16/tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "lib": ["ES2021"],
+    "target": "ES2021",
+    "declaration": true,
+    "sourceMap": true
+  },
+  "exclude": ["node_modules", "**/__tests__/**"]
+}

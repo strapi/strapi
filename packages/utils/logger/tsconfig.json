@@ -1,13 +1,8 @@
 {
-  "extends": "@tsconfig/node16/tsconfig.json",
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "strict": true,
-    "lib": ["ES2021"],
-    "target": "ES2021",
     "outDir": "lib",
-    "declaration": true,
-    "sourceMap": true
+    "esModuleInterop": true
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*.ts"]
 }
