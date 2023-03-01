@@ -31,6 +31,11 @@ module.exports = {
         inversedBy: 'stages',
         configurable: false,
       },
+      related: {
+        type: 'relation',
+        relation: 'morphToMany',
+        configurable: false,
+      },
     },
   },
 };

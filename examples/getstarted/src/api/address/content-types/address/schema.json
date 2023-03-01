@@ -9,8 +9,8 @@
     "name": "Address"
   },
   "options": {
-    "draftAndPublish": false,
-    "comment": ""
+    "reviewWorkflows": true,
+    "draftAndPublish": true
   },
   "pluginOptions": {},
   "attributes": {
