@@ -24,15 +24,24 @@
     }
   ],
   "main": "./lib/index.js",
-  "directories": {
-    "lib": "./lib"
-  },
+  "types": "./lib/index.ts",
+  "files": [
+    "./lib"
+  ],
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "build": "tsc",
+    "watch": "yarn build -w --preserveWatchOutput",
+    "clean": "rimraf ./lib",
+    "prepublishOnly": "yarn clean && yarn build",
+    "typedoc": "typedoc src/index.ts",
+    "test": "echo \"no tests\""
   },
   "dependencies": {
     "lodash": "4.17.21",
     "winston": "3.3.3"
+  },
+  "devDependencies": {
+    "rimraf": "3.0.2"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",

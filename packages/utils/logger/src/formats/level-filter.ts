@@ -1,7 +1,5 @@
-'use strict';
+import { format } from 'winston';
 
-const { format } = require('winston');
-
-module.exports = (...levels) => {
+export default (...levels: string[]) => {
   return format((info) => (levels.some((level) => info.level.includes(level)) ? info : false))();
 };

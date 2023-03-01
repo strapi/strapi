@@ -1,8 +1,6 @@
-'use strict';
+import { format } from 'winston';
 
-const { format } = require('winston');
-
-module.exports = format((info) => {
+export default format((info) => {
   if (info instanceof Error) {
     return { ...info, message: `${info.message}${info.stack ? `\n${info.stack}` : ''}` };
   }
