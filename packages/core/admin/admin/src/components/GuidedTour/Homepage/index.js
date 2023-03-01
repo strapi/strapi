@@ -1,7 +1,7 @@
 import React from 'react';
 import { useGuidedTour, useTracking, LinkButton } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { Stack, Flex, Box, Typography, Button } from '@strapi/design-system';
+import { Flex, Box, Typography, Button } from '@strapi/design-system';
 import { ArrowRight } from '@strapi/icons';
 import StepperHomepage from './components/Stepper';
 import layout from '../layout';
@@ -47,7 +47,7 @@ const GuidedTourHomepage = () => {
       paddingBottom={4}
       background="neutral0"
     >
-      <Stack spacing={6}>
+      <Flex direction="column" alignItems="stretch" gap={6}>
         <Typography variant="beta" as="h2">
           {formatMessage({
             id: 'app.components.GuidedTour.title',
@@ -55,7 +55,7 @@ const GuidedTourHomepage = () => {
           })}
         </Typography>
         <StepperHomepage sections={sections} currentSectionKey={activeSection} />
-      </Stack>
+      </Flex>
       <Flex justifyContent="flex-end">
         <Button variant="tertiary" onClick={handleSkip}>
           {formatMessage({ id: 'app.components.GuidedTour.skip', defaultMessage: 'Skip the tour' })}

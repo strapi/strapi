@@ -21,7 +21,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c24 {
+.c23 {
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
@@ -182,6 +182,36 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 16px;
+}
+
+.c26 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c45 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .c49 {
@@ -198,15 +228,6 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
-.c23 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c23 > * + * {
-  margin-top: 16px;
-}
-
 .c27 > * {
   margin-top: 0;
   margin-bottom: 0;
@@ -214,15 +235,6 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
 
 .c27 > * + * {
   margin-top: 4px;
-}
-
-.c45 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c45 > * + * {
-  margin-top: 8px;
 }
 
 .c14 {
@@ -540,12 +552,12 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   margin: 0;
 }
 
-.c25 {
+.c24 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
 }
 
-.c26 {
+.c25 {
   grid-column: span 6;
   max-width: 100%;
 }
@@ -859,13 +871,13 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
 }
 
 @media (max-width:68.75rem) {
-  .c26 {
+  .c25 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c26 {
+  .c25 {
     grid-column: span;
   }
 }
@@ -985,25 +997,25 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
           class="c1 c21"
         >
           <div
-            class="c1 c22 c23"
+            class="c1 c22"
           >
             <h2
-              class="c12 c24"
+              class="c12 c23"
             >
               Settings
             </h2>
             <div
-              class="c1 c25"
+              class="c1 c24"
             >
               <div
-                class="c26"
+                class="c25"
               >
                 <div
                   class="c1 "
                 >
                   <div>
                     <div
-                      class="c1 c22 c27"
+                      class="c1 c26 c27"
                     >
                       <label
                         class="c12 c18"
@@ -1092,12 +1104,12 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
               />
             </div>
             <h3
-              class="c12 c24"
+              class="c12 c23"
             >
               View
             </h3>
             <div
-              class="c1 c22 c23"
+              class="c1 c22"
             >
               <div
                 class="c1 c10"
@@ -1160,10 +1172,10 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                 class="c1 c44"
               >
                 <div
-                  class="c1 c22 c45"
+                  class="c1 c45"
                 >
                   <div
-                    class="c1 c25"
+                    class="c1 c24"
                   >
                     <div
                       class="c46"
@@ -1534,7 +1546,7 @@ exports[`EditSettingsView should add field 1`] = `
   color: #666687;
 }
 
-.c24 {
+.c23 {
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
@@ -1695,6 +1707,36 @@ exports[`EditSettingsView should add field 1`] = `
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 16px;
+}
+
+.c26 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c45 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .c49 {
@@ -1711,15 +1753,6 @@ exports[`EditSettingsView should add field 1`] = `
   flex-direction: row;
 }
 
-.c23 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c23 > * + * {
-  margin-top: 16px;
-}
-
 .c27 > * {
   margin-top: 0;
   margin-bottom: 0;
@@ -1727,15 +1760,6 @@ exports[`EditSettingsView should add field 1`] = `
 
 .c27 > * + * {
   margin-top: 4px;
-}
-
-.c45 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c45 > * + * {
-  margin-top: 8px;
 }
 
 .c14 {
@@ -2053,12 +2077,12 @@ exports[`EditSettingsView should add field 1`] = `
   margin: 0;
 }
 
-.c25 {
+.c24 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
 }
 
-.c26 {
+.c25 {
   grid-column: span 6;
   max-width: 100%;
 }
@@ -2372,13 +2396,13 @@ exports[`EditSettingsView should add field 1`] = `
 }
 
 @media (max-width:68.75rem) {
-  .c26 {
+  .c25 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c26 {
+  .c25 {
     grid-column: span;
   }
 }
@@ -2498,25 +2522,25 @@ exports[`EditSettingsView should add field 1`] = `
           class="c1 c21"
         >
           <div
-            class="c1 c22 c23"
+            class="c1 c22"
           >
             <h2
-              class="c12 c24"
+              class="c12 c23"
             >
               Settings
             </h2>
             <div
-              class="c1 c25"
+              class="c1 c24"
             >
               <div
-                class="c26"
+                class="c25"
               >
                 <div
                   class="c1 "
                 >
                   <div>
                     <div
-                      class="c1 c22 c27"
+                      class="c1 c26 c27"
                     >
                       <label
                         class="c12 c18"
@@ -2605,12 +2629,12 @@ exports[`EditSettingsView should add field 1`] = `
               />
             </div>
             <h3
-              class="c12 c24"
+              class="c12 c23"
             >
               View
             </h3>
             <div
-              class="c1 c22 c23"
+              class="c1 c22"
             >
               <div
                 class="c1 c10"
@@ -2673,10 +2697,10 @@ exports[`EditSettingsView should add field 1`] = `
                 class="c1 c44"
               >
                 <div
-                  class="c1 c22 c45"
+                  class="c1 c45"
                 >
                   <div
-                    class="c1 c25"
+                    class="c1 c24"
                   >
                     <div
                       class="c46"

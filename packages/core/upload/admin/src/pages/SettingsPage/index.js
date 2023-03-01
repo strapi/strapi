@@ -17,7 +17,6 @@ import {
   Typography,
   Button,
   Main,
-  Stack,
   Grid,
   GridItem,
   ContentLayout,
@@ -158,9 +157,9 @@ export const SettingsPage = () => {
             <LoadingIndicatorPage />
           ) : (
             <Layout>
-              <Stack spacing={12}>
+              <Flex direction="column" alignItems="stretch" gap={12}>
                 <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-                  <Stack spacing={4}>
+                  <Flex direction="column" alignItems="stretch" gap={4}>
                     <Flex>
                       <Typography variant="delta" as="h2">
                         {formatMessage({
@@ -261,9 +260,9 @@ export const SettingsPage = () => {
                         />
                       </GridItem>
                     </Grid>
-                  </Stack>
+                  </Flex>
                 </Box>
-              </Stack>
+              </Flex>
             </Layout>
           )}
         </ContentLayout>

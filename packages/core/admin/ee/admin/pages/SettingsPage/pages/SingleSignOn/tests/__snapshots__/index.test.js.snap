@@ -21,7 +21,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   color: #666687;
 }
 
-.c20 {
+.c19 {
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
@@ -167,6 +167,21 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 16px;
+}
+
+.c23 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
 }
 
 .c31 {
@@ -185,15 +200,6 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   -webkit-justify-content: center;
   -ms-flex-pack: center;
   justify-content: center;
-}
-
-.c19 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c19 > * + * {
-  margin-top: 16px;
 }
 
 .c24 > * {
@@ -420,13 +426,13 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   width: 100%;
 }
 
-.c21 {
+.c20 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
   gap: 16px;
 }
 
-.c22 {
+.c21 {
   grid-column: span 6;
   max-width: 100%;
 }
@@ -511,18 +517,18 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   width: 100%;
 }
 
-.c23 {
+.c22 {
   max-width: 320px;
 }
 
 @media (max-width:68.75rem) {
-  .c22 {
+  .c21 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c22 {
+  .c21 {
     grid-column: span;
   }
 }
@@ -601,27 +607,27 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
           class="c0 c16"
         >
           <div
-            class="c0 c17 c18 c19"
+            class="c0 c17 c18"
           >
             <h2
-              class="c8 c20"
+              class="c8 c19"
             >
               Settings
             </h2>
             <div
-              class="c0 c21"
+              class="c0 c20"
             >
               <div
-                class="c22"
+                class="c21"
               >
                 <div
                   class="c0 "
                 >
                   <div
-                    class="c23"
+                    class="c22"
                   >
                     <div
-                      class="c0 c18 c24"
+                      class="c0 c23 c24"
                     >
                       <div
                         class="c0 c7"
@@ -694,14 +700,14 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                 </div>
               </div>
               <div
-                class="c22"
+                class="c21"
               >
                 <div
                   class="c0 "
                 >
                   <div>
                     <div
-                      class="c0 c18 c24"
+                      class="c0 c23 c24"
                     >
                       <label
                         class="c8 c25"

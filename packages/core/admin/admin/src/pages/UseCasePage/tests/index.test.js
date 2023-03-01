@@ -173,6 +173,21 @@ describe('Admin | UseCasePage', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+        gap: 24px;
+      }
+
+      .c20 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
       }
 
       .c22 {
@@ -280,15 +295,6 @@ describe('Admin | UseCasePage', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
-      }
-
-      .c20 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c20 > * + * {
-        margin-top: 24px;
       }
 
       .c21 > * {
@@ -711,11 +717,11 @@ describe('Admin | UseCasePage', () => {
                     </div>
                   </div>
                   <div
-                    class="c0 c19 c20"
+                    class="c0 c19"
                   >
                     <div>
                       <div
-                        class="c0 c19 c21"
+                        class="c0 c20 c21"
                       >
                         <label
                           class="c5 c6"

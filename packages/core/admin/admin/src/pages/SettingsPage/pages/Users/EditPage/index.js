@@ -28,7 +28,7 @@ import {
   ContentLayout,
   Typography,
   Main,
-  Stack,
+  Flex,
 } from '@strapi/design-system';
 import { ArrowLeft, Check } from '@strapi/icons';
 import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
@@ -205,7 +205,7 @@ const EditPage = ({ canUpdate }) => {
                     <MagicLink registrationToken={data.registrationToken} />
                   </Box>
                 )}
-                <Stack spacing={7}>
+                <Flex direction="column" alignItems="stretch" gap={7}>
                   <Box
                     background="neutral0"
                     hasRadius
@@ -215,7 +215,7 @@ const EditPage = ({ canUpdate }) => {
                     paddingLeft={7}
                     paddingRight={7}
                   >
-                    <Stack spacing={4}>
+                    <Flex direction="column" alignItems="stretch" gap={4}>
                       <Typography variant="delta" as="h2">
                         {formatMessage({
                           id: 'app.components.Users.ModalCreateBody.block-title.details',
@@ -239,7 +239,7 @@ const EditPage = ({ canUpdate }) => {
                           });
                         })}
                       </Grid>
-                    </Stack>
+                    </Flex>
                   </Box>
                   <Box
                     background="neutral0"
@@ -250,7 +250,7 @@ const EditPage = ({ canUpdate }) => {
                     paddingLeft={7}
                     paddingRight={7}
                   >
-                    <Stack spacing={4}>
+                    <Flex direction="column" alignItems="stretch" gap={4}>
                       <Typography variant="delta" as="h2">
                         {formatMessage({
                           id: 'global.roles',
@@ -267,9 +267,9 @@ const EditPage = ({ canUpdate }) => {
                           />
                         </GridItem>
                       </Grid>
-                    </Stack>
+                    </Flex>
                   </Box>
-                </Stack>
+                </Flex>
               </ContentLayout>
             </Form>
           );

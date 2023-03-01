@@ -1,6 +1,6 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { Flex, Tooltip, Icon, GridItem, Typography, Stack } from '@strapi/design-system';
+import { Flex, Tooltip, Icon, GridItem, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import { ExternalLink, ExclamationMarkCircle } from '@strapi/icons';
 import { pxToRem } from '@strapi/helper-plugin';
@@ -27,7 +27,7 @@ const AdminSeatInfo = () => {
           defaultMessage: 'Admin seats',
         })}
       </Typography>
-      <Stack spacing={2} horizontal>
+      <Flex gap={2}>
         <Flex>
           <Typography as="p">
             {formatMessage(
@@ -66,7 +66,7 @@ const AdminSeatInfo = () => {
             />
           </Tooltip>
         )}
-      </Stack>
+      </Flex>
       <Link
         href={isHostedOnStrapiCloud ? BILLING_STRAPI_CLOUD_URL : BILLING_SELF_HOSTED_URL}
         isExternal

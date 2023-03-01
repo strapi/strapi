@@ -239,6 +239,21 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   justify-content: space-between;
 }
 
+.c43 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .c45 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -264,15 +279,6 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
 
 .c2 > * + * {
   margin-top: 4px;
-}
-
-.c43 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c43 > * + * {
-  margin-top: 8px;
 }
 
 .c16 > * {
@@ -891,7 +897,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                           for="logo-upload"
                         >
                           <div
-                            class="c0 c1 c43"
+                            class="c0 c43"
                           >
                             <div
                               class="c0 c44 c45"

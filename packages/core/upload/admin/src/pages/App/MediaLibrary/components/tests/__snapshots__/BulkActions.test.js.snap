@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`BulkActions renders 1`] = `
-.c5 {
+.c4 {
   font-size: 1rem;
   line-height: 1.5;
   color: #666687;
 }
 
-.c10 {
+.c9 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
@@ -18,7 +18,7 @@ exports[`BulkActions renders 1`] = `
   padding-bottom: 20px;
 }
 
-.c8 {
+.c7 {
   padding-right: 8px;
 }
 
@@ -34,18 +34,10 @@ exports[`BulkActions renders 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
+  gap: 8px;
 }
 
-.c3 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c3 > * + * {
-  margin-left: 8px;
-}
-
-.c6 {
+.c5 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -59,21 +51,21 @@ exports[`BulkActions renders 1`] = `
   outline: none;
 }
 
-.c6 svg {
+.c5 svg {
   height: 12px;
   width: 12px;
 }
 
-.c6 svg > g,
-.c6 svg path {
+.c5 svg > g,
+.c5 svg path {
   fill: #ffffff;
 }
 
-.c6[aria-disabled='true'] {
+.c5[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c6:after {
+.c5:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -88,11 +80,11 @@ exports[`BulkActions renders 1`] = `
   border: 2px solid transparent;
 }
 
-.c6:focus-visible {
+.c5:focus-visible {
   outline: none;
 }
 
-.c6:focus-visible:after {
+.c5:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -103,7 +95,7 @@ exports[`BulkActions renders 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c12 {
+.c11 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -115,11 +107,11 @@ exports[`BulkActions renders 1`] = `
   width: 1px;
 }
 
-.c9 {
+.c8 {
   height: 100%;
 }
 
-.c7 {
+.c6 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -133,7 +125,7 @@ exports[`BulkActions renders 1`] = `
   background: #fcecea;
 }
 
-.c7 .c0 {
+.c6 .c0 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -144,64 +136,64 @@ exports[`BulkActions renders 1`] = `
   align-items: center;
 }
 
-.c7 .c4 {
+.c6 .c3 {
   color: #ffffff;
 }
 
-.c7[aria-disabled='true'] {
+.c6[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c7[aria-disabled='true'] .c4 {
+.c6[aria-disabled='true'] .c3 {
   color: #666687;
 }
 
-.c7[aria-disabled='true'] svg > g,.c7[aria-disabled='true'] svg path {
+.c6[aria-disabled='true'] svg > g,.c6[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c7[aria-disabled='true']:active {
+.c6[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c7[aria-disabled='true']:active .c4 {
+.c6[aria-disabled='true']:active .c3 {
   color: #666687;
 }
 
-.c7[aria-disabled='true']:active svg > g,.c7[aria-disabled='true']:active svg path {
+.c6[aria-disabled='true']:active svg > g,.c6[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c7:hover {
+.c6:hover {
   background-color: #ffffff;
 }
 
-.c7:active {
+.c6:active {
   background-color: #ffffff;
   border: 1px solid #d02b20;
 }
 
-.c7:active .c4 {
+.c6:active .c3 {
   color: #d02b20;
 }
 
-.c7:active svg > g,
-.c7:active svg path {
+.c6:active svg > g,
+.c6:active svg path {
   fill: #d02b20;
 }
 
-.c7 .c4 {
+.c6 .c3 {
   color: #b72b1a;
 }
 
-.c7 svg > g,
-.c7 svg path {
+.c6 svg > g,
+.c6 svg path {
   fill: #b72b1a;
 }
 
-.c11 {
+.c10 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -215,7 +207,7 @@ exports[`BulkActions renders 1`] = `
   background: #f0f0ff;
 }
 
-.c11 .c0 {
+.c10 .c0 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -226,80 +218,80 @@ exports[`BulkActions renders 1`] = `
   align-items: center;
 }
 
-.c11 .c4 {
+.c10 .c3 {
   color: #ffffff;
 }
 
-.c11[aria-disabled='true'] {
+.c10[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c11[aria-disabled='true'] .c4 {
+.c10[aria-disabled='true'] .c3 {
   color: #666687;
 }
 
-.c11[aria-disabled='true'] svg > g,.c11[aria-disabled='true'] svg path {
+.c10[aria-disabled='true'] svg > g,.c10[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c11[aria-disabled='true']:active {
+.c10[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c11[aria-disabled='true']:active .c4 {
+.c10[aria-disabled='true']:active .c3 {
   color: #666687;
 }
 
-.c11[aria-disabled='true']:active svg > g,.c11[aria-disabled='true']:active svg path {
+.c10[aria-disabled='true']:active svg > g,.c10[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c11:hover {
+.c10:hover {
   background-color: #ffffff;
 }
 
-.c11:active {
+.c10:active {
   background-color: #ffffff;
   border: 1px solid #4945ff;
 }
 
-.c11:active .c4 {
+.c10:active .c3 {
   color: #4945ff;
 }
 
-.c11:active svg > g,
-.c11:active svg path {
+.c10:active svg > g,
+.c10:active svg path {
   fill: #4945ff;
 }
 
-.c11 .c4 {
+.c10 .c3 {
   color: #271fe0;
 }
 
-.c11 svg > g,
-.c11 svg path {
+.c10 svg > g,
+.c10 svg path {
   fill: #271fe0;
 }
 
 <div>
   <div
-    class="c0 c1 c2 c3"
+    class="c0 c1 c2"
   >
     <span
-      class="c4 c5"
+      class="c3 c4"
     >
       0 folders - 0 assets selected
     </span>
     <button
       aria-disabled="false"
-      class="c6 c7"
+      class="c5 c6"
       type="button"
     >
       <div
         aria-hidden="true"
-        class="c0 c8 c9"
+        class="c0 c7 c8"
       >
         <svg
           fill="none"
@@ -315,19 +307,19 @@ exports[`BulkActions renders 1`] = `
         </svg>
       </div>
       <span
-        class="c4 c10"
+        class="c3 c9"
       >
         Delete
       </span>
     </button>
     <button
       aria-disabled="false"
-      class="c6 c11"
+      class="c5 c10"
       type="button"
     >
       <div
         aria-hidden="true"
-        class="c0 c8 c9"
+        class="c0 c7 c8"
       >
         <svg
           fill="none"
@@ -343,14 +335,14 @@ exports[`BulkActions renders 1`] = `
         </svg>
       </div>
       <span
-        class="c4 c10"
+        class="c3 c9"
       >
         Move
       </span>
     </button>
   </div>
   <div
-    class="c12"
+    class="c11"
   >
     <p
       aria-live="polite"

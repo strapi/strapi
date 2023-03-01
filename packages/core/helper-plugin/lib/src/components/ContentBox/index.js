@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Flex, Stack, Typography } from '@strapi/design-system';
+import { Flex, Typography } from '@strapi/design-system';
 
 const IconWrapper = styled(Flex)`
   margin-right: ${({ theme }) => theme.spaces[6]};
@@ -26,7 +26,7 @@ const ContentBox = ({ title, subtitle, icon, iconBackground, endAction, titleEll
       <IconWrapper background={iconBackground} hasRadius padding={3}>
         {icon}
       </IconWrapper>
-      <Stack spacing={endAction ? 0 : 1}>
+      <Flex direction="column" alignItems="stretch" gap={endAction ? 0 : 1}>
         <Flex>
           <TypographyWordBreak fontWeight="semiBold" variant="pi">
             {title}
@@ -34,7 +34,7 @@ const ContentBox = ({ title, subtitle, icon, iconBackground, endAction, titleEll
           {endAction}
         </Flex>
         <Typography textColor="neutral600">{subtitle}</Typography>
-      </Stack>
+      </Flex>
     </Flex>
   );
 };
