@@ -53,6 +53,8 @@ async function initDefaultWorkflow({ workflowsService, stagesService }) {
     };
 
     await workflowsService.create(workflow);
+    // If there is any manually activated RW on content-types, we want to migrate the related entities
+    await enableReviewWorkflow({ strapi })({ contentTypes: strapi.contentTypes });
   }
 }
 
@@ -80,37 +82,53 @@ function extendReviewWorkflowContentTypes({ strapi }) {
 
 function enableReviewWorkflow({ strapi }) {
   return async ({ contentTypes }) => {
+    const nowDate = Date.now();
     // TODO To be refactored when multiple workflows are added
-    const { stages } = await strapi.query(WORKFLOW_MODEL_UID).findOne({ populate: ['stages'] });
+    const defaultWorkflow = await strapi
+      .query(WORKFLOW_MODEL_UID)
+      .findOne({ populate: ['stages'] });
+
+    // This is possible if this is the first start of EE, there won't be any workflow in DB before bootstrap
+    if (!defaultWorkflow) {
+      return;
+    }
+    const firstStage = defaultWorkflow.stages[0];
     const up = async (contentTypeUID) => {
+      const contentTypeQuery = strapi.query(contentTypeUID);
       const limit = 1000;
       const getEntitiesToUpdate = (offset) =>
-        strapi.entityService.findMany(contentTypeUID, {
-          fields: 'id',
-          filters: { [ENTITY_STAGE_ATTRIBUTE]: { id: { $null: true } } },
+        contentTypeQuery.findMany(contentTypeUID, {
+          select: 'id',
+          where: { [ENTITY_STAGE_ATTRIBUTE]: null },
           limit,
-          start: offset,
+          offset,
         });
 
+      const dateBeforeUpdate = Date.now();
       for (let count; isUndefined(count) || (count % limit === 0 && count !== 0); ) {
         const entitiesToUpdate = await getEntitiesToUpdate(count ?? 0);
         count = (count ?? 0) + entitiesToUpdate.length;
-        await mapAsync(
-          entitiesToUpdate,
-          ({ id }) =>
-            strapi
-              .query(contentTypeUID)
-              .updateRelations(id, { [ENTITY_STAGE_ATTRIBUTE]: stages[0] }),
-          { concurrency: 100 }
+        await mapAsync(entitiesToUpdate, async ({ id }) =>
+          contentTypeQuery.updateRelations(id, { [ENTITY_STAGE_ATTRIBUTE]: firstStage })
+        );
+        console.log(
+          `Time spent on ${entitiesToUpdate.length} (count: ${count}): ${
+            Date.now() - dateBeforeUpdate
+          }ms`
         );
       }
+      console.log(
+        `Time spent on enabling RW for ${contentTypeUID}: ${Date.now() - dateBeforeUpdate}ms`
+      );
     };
 
-    return pipe([
+    const result = await pipe([
       getContentTypeUIDsWithActivatedReviewWorkflows,
       // Iterate over UIDs to extend the content-type
       (contentTypesUIDs) => mapAsync(contentTypesUIDs, up),
     ])(contentTypes);
+    console.log(`Performance for enableReviewWorkflow: ${Date.now() - nowDate}ms`);
+    return result;
   };
 }
 
