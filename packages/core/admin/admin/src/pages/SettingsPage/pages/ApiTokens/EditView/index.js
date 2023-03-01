@@ -47,7 +47,7 @@ const ApiTokenCreateView = () => {
   const trackUsageRef = useRef(trackUsage);
   const { setCurrentStep } = useGuidedTour();
   const {
-    allowedActions: { canCreate, canUpdate, canRegenerate },
+    allowedActions: { canCreate, canUpdate, canRegenerate, canRead },
   } = useRBAC(adminPermissions.settings['api-tokens']);
   const [state, dispatch] = useReducer(reducer, initialState, (state) => init(state, {}));
   const {
@@ -56,8 +56,6 @@ const ApiTokenCreateView = () => {
   const { get, post, put } = useFetchClient();
 
   const isCreating = id === 'create';
-
-  const canOnlyCreate = canCreate && !canUpdate;
 
   useQuery(
     'content-api-permissions',
@@ -182,10 +180,10 @@ const ApiTokenCreateView = () => {
             permissions: body.type === 'custom' ? state.selectedActions : null,
           });
 
-      if (isCreating && !canOnlyCreate) {
+      if (isCreating && canCreate && canRead) {
         history.replace(`/settings/api-tokens/${response.id}`, { apiToken: response });
         setCurrentStep('apiTokens.success');
-      } else if (canOnlyCreate) {
+      } else if (isCreating && canCreate && !canRead) {
         history.replace('/settings/api-tokens');
         setCurrentStep('apiTokens.success');
       }

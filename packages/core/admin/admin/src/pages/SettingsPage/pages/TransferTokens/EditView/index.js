@@ -43,7 +43,7 @@ const TransferTokenCreateView = () => {
   const trackUsageRef = useRef(trackUsage);
   const { setCurrentStep } = useGuidedTour();
   const {
-    allowedActions: { canCreate, canUpdate, canRegenerate },
+    allowedActions: { canCreate, canUpdate, canRegenerate, canRead },
   } = useRBAC(adminPermissions.settings['transfer-tokens']);
   const {
     params: { id },
@@ -57,8 +57,6 @@ const TransferTokenCreateView = () => {
       tokenType: TRANSFER_TOKEN_TYPE,
     });
   }, [isCreating]);
-
-  const canOnlyCreate = canCreate && !canUpdate;
 
   const { status } = useQuery(
     ['transfer-token', id],
@@ -112,10 +110,10 @@ const TransferTokenCreateView = () => {
 
       unlockApp();
 
-      if (isCreating && !canOnlyCreate) {
+      if (isCreating && canCreate && canRead) {
         history.replace(`/settings/transfer-tokens/${response.id}`, { transferToken: response });
         setCurrentStep('transferTokens.success');
-      } else if (canOnlyCreate) {
+      } else if (isCreating && canCreate && !canRead) {
         history.replace('/settings/transfer-tokens');
         setCurrentStep('transferTokens.success');
       }
