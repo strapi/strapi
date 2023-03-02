@@ -177,7 +177,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     auth?: ITransferTokenAuth
   ): Promise<WebSocket> {
     return new Promise((resolve, reject) => {
-      const server = new WebSocket(wsUrl, { headers });
+      const server = headers ? new WebSocket(wsUrl, { headers }) : new WebSocket(wsUrl);
       server.once('open', () => {
         resolve(server);
       });
