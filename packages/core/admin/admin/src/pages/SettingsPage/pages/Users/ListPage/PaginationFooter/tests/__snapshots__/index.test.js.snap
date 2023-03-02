@@ -1,35 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DynamicTable renders and matches the snapshot 1`] = `
-.c10 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c15 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #666687;
-}
-
-.c22 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c25 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #32324d;
-}
-
 .c0 {
   padding-top: 16px;
 }
@@ -109,6 +80,35 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   -webkit-justify-content: space-between;
   -ms-flex-pack: justify;
   justify-content: space-between;
+}
+
+.c10 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c15 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #666687;
+}
+
+.c22 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c25 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #32324d;
 }
 
 .c4 > * {
@@ -396,14 +396,14 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
                   >
                     <svg
                       fill="none"
-                      height="1em"
+                      height="1rem"
                       viewBox="0 0 14 8"
-                      width="1em"
+                      width="1rem"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
                         clip-rule="evenodd"
-                        d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                        d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                         fill="#32324D"
                         fill-rule="evenodd"
                       />
@@ -448,13 +448,13 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
               <svg
                 aria-hidden="true"
                 fill="none"
-                height="1em"
+                height="1rem"
                 viewBox="0 0 10 16"
-                width="1em"
+                width="1rem"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M9.88 14.12L3.773 8 9.88 1.88 8 0 0 8l8 8 1.88-1.88z"
+                  d="M9.88 14.12 3.773 8 9.88 1.88 8 0 0 8l8 8 1.88-1.88Z"
                   fill="#32324D"
                 />
               </svg>
@@ -513,13 +513,13 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
               <svg
                 aria-hidden="true"
                 fill="none"
-                height="1em"
+                height="1rem"
                 viewBox="0 0 10 16"
-                width="1em"
+                width="1rem"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M0 1.88L6.107 8 0 14.12 1.88 16l8-8-8-8L0 1.88z"
+                  d="M0 1.88 6.107 8 0 14.12 1.88 16l8-8-8-8L0 1.88Z"
                   fill="#32324D"
                 />
               </svg>
