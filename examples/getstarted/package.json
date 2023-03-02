@@ -12,6 +12,7 @@
     "strapi": "strapi"
   },
   "dependencies": {
+    "@strapi/icons": "1.6.3",
     "@strapi/plugin-color-picker": "4.7.1",
     "@strapi/plugin-documentation": "4.7.1",
     "@strapi/plugin-graphql": "4.7.1",
@@ -28,6 +29,8 @@
     "mysql": "2.18.1",
     "passport-google-oauth2": "0.2.0",
     "pg": "8.8.0",
+    "react": "^17.0.2",
+    "react-intl": "6.2.8",
     "sqlite3": "5.1.2"
   },
   "strapi": {
