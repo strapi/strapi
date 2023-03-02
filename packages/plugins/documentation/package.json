@@ -41,7 +41,7 @@
     "react-router": "^5.2.0",
     "react-router-dom": "5.3.4",
     "redux": "^4.2.1",
-    "reselect": "^4.0.0",
+    "reselect": "^4.1.7",
     "swagger-ui-dist": "4.15.5",
     "yaml": "1.10.2"
   },
