@@ -1,5 +1,6 @@
 'use strict';
 
+const { isNil } = require('lodash/fp');
 // eslint-disable-next-line node/no-extraneous-require
 const ee = require('@strapi/strapi/lib/utils/ee');
 const { env } = require('@strapi/utils');
@@ -23,12 +24,12 @@ module.exports = {
       enforcementUserCount = currentActiveUserCount;
     }
 
-    if (enforcementUserCount > permittedSeats) {
+    if (!isNil(permittedSeats) && enforcementUserCount > permittedSeats) {
       shouldNotify = true;
       licenseLimitStatus = 'OVER_LIMIT';
     }
 
-    if (enforcementUserCount === permittedSeats) {
+    if (!isNil(permittedSeats) && enforcementUserCount === permittedSeats) {
       shouldNotify = true;
       licenseLimitStatus = 'AT_LIMIT';
     }
@@ -38,7 +39,7 @@ module.exports = {
       currentActiveUserCount,
       permittedSeats,
       shouldNotify,
-      shouldStopCreate: permittedSeats && currentActiveUserCount >= permittedSeats,
+      shouldStopCreate: isNil(permittedSeats) ? false : currentActiveUserCount >= permittedSeats,
       licenseLimitStatus,
       isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
     };
