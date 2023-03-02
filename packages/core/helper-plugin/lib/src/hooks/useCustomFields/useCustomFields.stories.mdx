@@ -20,7 +20,8 @@ const CustomIcon = ({ customFieldUuid }) => {
   const customField = customFieldsRegistry.get(customFieldUuid);
 
   if (customField?.icon) {
-    return customFieldIcon;
+    const CustomFieldIcon = customField.icon;
+    return <CustomFieldIcon />;
   }
 
   return <Placeholder />;
@@ -35,8 +36,7 @@ import { Typography } from '@strapi/design-system';
 
 const CustomFieldsList = () => {
   const customFieldsRegistry = useCustomFields();
-  const customFields = customFieldsRegistry.getAll();
-  const registeredCustomFields = Object.entries(customFields.getAll());
+  const registeredCustomFields = Object.entries(customFieldsRegistry.getAll());
 
   return (
     <>
@@ -62,22 +62,18 @@ With this method from `useCustomFields` hook, you will receive a dictionary cont
 
 ```ts
 interface CustomField {
-  components: Object;
+  components: object;
   icon: React.ComponentType;
   intlDescription: IntlObject;
   intlLabel: IntlObject;
   name: string;
-  options: Object;
+  options: object;
   pluginId: string;
   type: string;
 }
 
-type CustomFields = {
-  [uid: string]: CustomField;
-};
-
 type UseCustomFields = () => {
   get: (uid: string) => CustomField | undefined;
-  getAll: () => CustomFields;
+  getAll: () => Record<string, CustomField>;
 };
 ```
