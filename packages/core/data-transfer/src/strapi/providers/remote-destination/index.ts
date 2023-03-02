@@ -47,31 +47,16 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   async initTransfer(): Promise<string> {
     const { strategy, restore } = this.options;
 
-    // Wait for the connection to be made to the server, then init the transfer
-    return new Promise<string>((resolve, reject) => {
-      this.ws
-        ?.once('open', async () => {
-          try {
-            const query = this.dispatcher?.dispatchCommand({
-              command: 'init',
-              params: { options: { strategy, restore }, transfer: 'push' },
-            });
-
-            const res = (await query) as server.Payload<server.InitMessage>;
-
-            if (!res?.transferID) {
-              throw new ProviderTransferError('Init failed, invalid response from the server');
-            }
-
-            resolve(res.transferID);
-          } catch (e: unknown) {
-            reject(e);
-          }
-        })
-        .once('error', (message) => {
-          reject(message);
-        });
+    const query = this.dispatcher?.dispatchCommand({
+      command: 'init',
+      params: { options: { strategy, restore }, transfer: 'push' },
     });
+
+    const res = (await query) as server.Payload<server.InitMessage>;
+    if (!res?.transferID) {
+      throw new ProviderTransferError('Init failed, invalid response from the server');
+    }
+    return res.transferID;
   }
 
   #startStepOnce(stage: client.TransferPushStep) {
@@ -186,6 +171,33 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     });
   }
 
+  async #connectToWebsocket(
+    wsUrl: string,
+    headers?: { Authorization: string },
+    auth?: ITransferTokenAuth
+  ): Promise<WebSocket> {
+    return new Promise((resolve, reject) => {
+      const server = new WebSocket(wsUrl, { headers });
+      server.once('open', () => {
+        resolve(server);
+      });
+
+      server.once('error', (err) => {
+        if (err.message === 'Unexpected server response: 401') {
+          reject(
+            new ProviderValidationError('Invalid Transfer Token', {
+              check: 'auth.token',
+              details: {
+                token: auth?.token,
+              },
+            })
+          );
+        }
+        reject(new ProviderTransferError('Error connecting to server'));
+      });
+    });
+  }
+
   async bootstrap(): Promise<void> {
     const { url, auth } = this.options;
     const validProtocols = ['https:', 'http:'];
@@ -205,13 +217,13 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     const wsUrl = `${wsProtocol}//${url.host}${url.pathname}${TRANSFER_PATH}`;
     // No auth defined, trying public access for transfer
     if (!auth) {
-      ws = new WebSocket(wsUrl);
+      ws = await this.#connectToWebsocket(wsUrl);
     }
 
     // Common token auth, this should be the main auth method
     else if (auth.type === 'token') {
       const headers = { Authorization: `Bearer ${auth.token}` };
-      ws = new WebSocket(wsUrl, { headers });
+      ws = await this.#connectToWebsocket(wsUrl, headers, auth);
     }
 
     // Invalid auth method provided
