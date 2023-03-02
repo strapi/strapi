@@ -342,7 +342,8 @@ program
         }
 
         await confirmMessage(
-          'The transfer will delete all data in the remote database and media files. Are you sure you want to proceed?'
+          'The transfer will delete all data in the remote database and media files. Are you sure you want to proceed?',
+          { failMessage: 'Transfer process aborted' }
         )(thisCommand);
       }
     )
@@ -450,7 +451,8 @@ program
   .hook(
     'preAction',
     confirmMessage(
-      'The import will delete all data in your database and media files. Are you sure you want to proceed?'
+      'The import will delete all data in your database and media files. Are you sure you want to proceed?',
+      { failMessage: 'Import process aborted' }
     )
   )
   .action(getLocalScript('transfer/import'));
