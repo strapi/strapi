@@ -1,6 +1,6 @@
 'use strict';
 
-const { set, get, forEach, keys, pickBy, pipe, isUndefined } = require('lodash/fp');
+const { set, get, forEach, keys, pickBy, pipe } = require('lodash/fp');
 const { mapAsync } = require('@strapi/utils');
 const { getService } = require('../../utils');
 
@@ -82,7 +82,6 @@ function extendReviewWorkflowContentTypes({ strapi }) {
 
 function enableReviewWorkflow({ strapi }) {
   return async ({ contentTypes }) => {
-    const nowDate = Date.now();
     // TODO To be refactored when multiple workflows are added
     const defaultWorkflow = await strapi
       .query(WORKFLOW_MODEL_UID)
@@ -94,41 +93,30 @@ function enableReviewWorkflow({ strapi }) {
     }
     const firstStage = defaultWorkflow.stages[0];
     const up = async (contentTypeUID) => {
-      const contentTypeQuery = strapi.query(contentTypeUID);
-      const limit = 1000;
-      const getEntitiesToUpdate = (offset) =>
-        contentTypeQuery.findMany(contentTypeUID, {
-          select: 'id',
-          where: { [ENTITY_STAGE_ATTRIBUTE]: null },
-          limit,
-          offset,
-        });
+      const contentTypeMetadata = strapi.db.metadata.get(contentTypeUID);
+      const { target, morphBy } = contentTypeMetadata.attributes[ENTITY_STAGE_ATTRIBUTE];
+      const { joinTable } = strapi.db.metadata.get(target).attributes[morphBy];
+      const { idColumn, typeColumn } = joinTable.morphColumn;
 
-      const dateBeforeUpdate = Date.now();
-      for (let count; isUndefined(count) || (count % limit === 0 && count !== 0); ) {
-        const entitiesToUpdate = await getEntitiesToUpdate(count ?? 0);
-        count = (count ?? 0) + entitiesToUpdate.length;
-        await mapAsync(entitiesToUpdate, async ({ id }) =>
-          contentTypeQuery.updateRelations(id, { [ENTITY_STAGE_ATTRIBUTE]: firstStage })
-        );
-        console.log(
-          `Time spent on ${entitiesToUpdate.length} (count: ${count}): ${
-            Date.now() - dateBeforeUpdate
-          }ms`
-        );
-      }
-      console.log(
-        `Time spent on enabling RW for ${contentTypeUID}: ${Date.now() - dateBeforeUpdate}ms`
-      );
+      await strapi.db.connection
+        .raw(`INSERT INTO ${joinTable.name} (${idColumn.name}, field, "order", ${joinTable.joinColumn.name}, ${typeColumn.name})
+                SELECT
+                    entity.id as ${idColumn.name},
+                    '${ENTITY_STAGE_ATTRIBUTE}' as field,
+                    1 as "order",
+                    ${firstStage.id} as ${joinTable.joinColumn.name},
+                    '${contentTypeUID}' as ${typeColumn.name}
+                FROM ${contentTypeMetadata.tableName} entity
+                LEFT JOIN ${joinTable.name} jointable
+                ON  entity.id = jointable.${idColumn.name}
+                WHERE jointable.${idColumn.name} IS NULL`);
     };
 
-    const result = await pipe([
+    return pipe([
       getContentTypeUIDsWithActivatedReviewWorkflows,
       // Iterate over UIDs to extend the content-type
       (contentTypesUIDs) => mapAsync(contentTypesUIDs, up),
     ])(contentTypes);
-    console.log(`Performance for enableReviewWorkflow: ${Date.now() - nowDate}ms`);
-    return result;
   };
 }
 
