@@ -30,12 +30,10 @@
   ],
   "scripts": {
     "build": "tsc",
-    "build:ts": "tsc",
     "watch": "yarn build -w --preserveWatchOutput",
     "clean": "rimraf ./lib",
     "prepublishOnly": "yarn clean && yarn build",
-    "typedoc": "typedoc src/index.ts",
-    "test": "echo \"no tests\""
+    "typedoc": "typedoc src/index.ts"
   },
   "dependencies": {
     "lodash": "4.17.21",
@@ -47,28 +45,5 @@
   "engines": {
     "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"
-  },
-  "nx": {
-    "namedInputs": {
-      "default": [
-        "{projectRoot}/src/**/*.ts",
-        "{projectRoot}/tsconfig.json"
-      ],
-      "production": [
-        "default"
-      ]
-    },
-    "targets": {
-      "build": {
-        "inputs": [
-          "production"
-        ]
-      },
-      "build:ts": {
-        "inputs": [
-          "production"
-        ]
-      }
-    }
   }
 }

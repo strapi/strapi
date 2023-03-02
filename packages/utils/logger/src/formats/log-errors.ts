@@ -1,9 +1,11 @@
-import { format } from 'winston';
+import { format, Logform } from 'winston';
 
-export default format((info) => {
+const logErrors: Logform.FormatWrap = format((info) => {
   if (info instanceof Error) {
     return { ...info, message: `${info.message}${info.stack ? `\n${info.stack}` : ''}` };
   }
 
   return info;
 });
+
+export default logErrors;

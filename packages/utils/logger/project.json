@@ -1,0 +1,7 @@
+{
+  "name": "logger",
+  "namedInputs": {
+    "default": ["{projectRoot}/src/**/*.ts", "{projectRoot}/tsconfig.json"],
+    "production": ["default"]
+  }
+}

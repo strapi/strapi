@@ -1,19 +1,34 @@
 {
+  "namedInputs": {
+    "sharedGlobals": ["{workspaceRoot}/tsconfig.base.json"],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "production": [
+      "default",
+      "!{projectRoot}/**/*.test.ts",
+      "!{projectRoot}/**/*.test.js",
+      "!{projectRoot}/**/*.md"
+    ]
+  },
   "targetDefaults": {
     "build": {
+      "inputs": ["production", "^production"],
       "dependsOn": ["^build"],
       "outputs": ["{projectRoot}/lib", "{projectRoot}/build"]
     },
     "build:ts": {
+      "inputs": ["production", "^production"],
       "dependsOn": ["^build"],
       "outputs": ["{projectRoot}/lib", "{projectRoot}/build"]
+    },
+    "test": {
+      "dependsOn": ["^build"]
     }
   },
   "tasksRunnerOptions": {
     "default": {
       "runner": "nx/tasks-runners/default",
       "options": {
-        "cacheableOperations": ["build", "build:ts", "lint", "test:unit", "test:front"]
+        "cacheableOperations": ["build", "build:ts", "lint", "test", "test:unit", "test:front"]
       }
     }
   }

@@ -1,4 +1,4 @@
-import { format } from 'winston';
+import { format, Logform } from 'winston';
 
 import { isString } from 'lodash/fp';
 import logErrors from './log-errors';
@@ -20,10 +20,10 @@ export interface PrettyPrintOptions {
  * Create a pretty print formatter for a winston logger
  * @param options
  */
-export default (options: PrettyPrintOptions = {}) => {
+export default (options: PrettyPrintOptions = {}): Logform.Format => {
   const { timestamps = true, colors = true } = options;
 
-  const handlers = [];
+  const handlers: Logform.Format[] = [];
 
   if (timestamps) {
     handlers.push(

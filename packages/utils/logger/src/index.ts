@@ -3,7 +3,7 @@ import winston, { LoggerOptions } from 'winston';
 import * as formats from './formats';
 import * as configs from './configs';
 
-const createLogger = (userConfiguration: LoggerOptions = {}) => {
+const createLogger = (userConfiguration: LoggerOptions = {}): winston.Logger => {
   const configuration = configs.createDefaultConfiguration();
 
   Object.assign(configuration, userConfiguration);
