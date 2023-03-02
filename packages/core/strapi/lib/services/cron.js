@@ -63,6 +63,7 @@ const createCronService = () => {
       jobsSpecs = [];
       return this;
     },
+    jobs: jobsSpecs,
   };
 };
 
