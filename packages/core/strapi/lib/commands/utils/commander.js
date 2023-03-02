@@ -116,7 +116,7 @@ const confirmMessage = (message) => {
       },
     ]);
     if (!answers.confirm) {
-      exitWith(0);
+      exitWith(1);
     }
   };
 };
