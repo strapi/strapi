@@ -3,6 +3,7 @@ import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Stack, Button, Tooltip, Icon } from '@strapi/design-system';
 import { Envelop, ExclamationMarkCircle } from '@strapi/icons';
+import isNil from 'lodash/isNil';
 import { useLicenseLimits } from '../../../../../../hooks';
 
 const CreateAction = ({ onClick }) => {
@@ -12,7 +13,7 @@ const CreateAction = ({ onClick }) => {
 
   return (
     <Stack spacing={2} horizontal>
-      {permittedSeats && shouldStopCreate && (
+      {!isNil(permittedSeats) && shouldStopCreate && (
         <Tooltip
           description={formatMessage({
             id: 'Settings.application.admin-seats.at-limit-tooltip',
