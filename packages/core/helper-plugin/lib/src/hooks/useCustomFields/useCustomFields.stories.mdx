@@ -1,0 +1,74 @@
+<!--- useCustomFields.stories.mdx --->
+
+import { Meta, Canvas, Story } from '@storybook/addon-docs';
+
+<Meta title="hooks/useCustomFields" />
+
+# useCustomFields
+
+This hook provides you with a `get` function to retrieve information about a specific custom field registered in the app, as well as an `getAll` function to obtain information about all custom fields registered in the app.
+
+## Get information about a specific plugin if I know its uid
+
+With the `get` function from the `useCustomFields` hook you can have all the information of a custom field.
+
+### Example
+
+```js
+import { useCustomFields } from '@strapi/helper-plugin';
+
+const CustomIcon = ({ customFieldUuid }) => {
+  const customFieldsRegistry = useCustomFields();
+  const customField = customFieldsRegistry.get(customFieldUuid);
+
+  /*
+  {
+    components: {},
+    icon: {},
+    intlDescription: {},
+    intlLabel: {},
+    name: "Custom field name",
+    options: {},
+    pluginId: "custom-field-id",
+    type: "string|number|etc"
+  }
+  */
+
+  if (customField?.icon) {
+    return customFieldIcon;
+  }
+
+  return <Placeholder />;
+};
+```
+
+## Get all the custom fields
+
+With the getAll function of the useCustomFields hook, you will receive a dictionary containing all the custom fields with their respective information.
+
+```js
+import { useCustomFields } from '@strapi/helper-plugin';
+import { Typography } from '@strapi/design-system';
+
+const CustomFieldsList = () => {
+  const customFieldsRegistry = useCustomFields();
+  const customFields = customFieldsRegistry.getAll();
+  /*
+    {
+      plugin::my-plugin.my-custom-field: {
+        ... All the custom field information 
+      },
+      plugin::other-plugin.other-custom-field: { ... }
+    }
+  */
+  const registeredCustomFields = Object.entries(customFields.getAll());
+
+  return (
+    <>
+      {registeredCustomFields.map(([uid, customField]) => (
+        <Typography>{`${customField.name} uid: ${uid}`}</Typography>
+      ))}
+    </>
+  );
+};
+```
