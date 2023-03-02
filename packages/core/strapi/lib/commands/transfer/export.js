@@ -2,16 +2,16 @@
 
 const {
   providers: { createLocalFileDestinationProvider },
-} = require('@strapi/data-transfer/lib/file');
+} = require('@strapi/data-transfer').file;
 const {
   providers: { createLocalStrapiSourceProvider },
-} = require('@strapi/data-transfer/lib/strapi');
-const { createTransferEngine } = require('@strapi/data-transfer/lib/engine');
+} = require('@strapi/data-transfer').strapi;
+const { createTransferEngine } = require('@strapi/data-transfer').engine;
 const { isObject, isString, isFinite, toNumber } = require('lodash/fp');
 const fs = require('fs-extra');
 const chalk = require('chalk');
 
-const { TransferEngineTransferError } = require('@strapi/data-transfer/lib/engine/errors');
+const { TransferEngineTransferError } = require('@strapi/data-transfer').engine.errors;
 const {
   getDefaultExportName,
   buildTransferTable,

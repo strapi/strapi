@@ -1,6 +1,8 @@
 'use strict';
 
-const { UnauthorizedError } = require('@strapi/utils/lib/errors');
+const {
+  errors: { UnauthorizedError },
+} = require('@strapi/utils');
 const createContext = require('../../../../../../test/helpers/create-context');
 const apiTokenStrategy = require('../api-token');
 

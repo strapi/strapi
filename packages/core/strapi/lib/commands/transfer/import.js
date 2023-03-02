@@ -2,15 +2,12 @@
 
 const {
   providers: { createLocalFileSourceProvider },
-} = require('@strapi/data-transfer/lib/file');
+} = require('@strapi/data-transfer').file;
 const {
   providers: { createLocalStrapiDestinationProvider, DEFAULT_CONFLICT_STRATEGY },
-} = require('@strapi/data-transfer/lib/strapi');
-const {
-  createTransferEngine,
-  DEFAULT_VERSION_STRATEGY,
-  DEFAULT_SCHEMA_STRATEGY,
-} = require('@strapi/data-transfer/lib/engine');
+} = require('@strapi/data-transfer').strapi;
+const { createTransferEngine, DEFAULT_VERSION_STRATEGY, DEFAULT_SCHEMA_STRATEGY } =
+  require('@strapi/data-transfer').engine;
 
 const { isObject } = require('lodash/fp');
 

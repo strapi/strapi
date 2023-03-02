@@ -1,7 +1,9 @@
 'use strict';
 
-const { stringEquals } = require('@strapi/utils/lib');
-const { ApplicationError } = require('@strapi/utils').errors;
+const {
+  stringEquals,
+  errors: { ApplicationError },
+} = require('@strapi/utils');
 const { trim, has } = require('lodash/fp');
 const { getService } = require('../utils');
 const {
