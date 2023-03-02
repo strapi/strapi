@@ -189,11 +189,18 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
               check: 'auth.token',
               details: {
                 token: auth?.token,
+                error: err.message,
               },
             })
           );
         }
-        reject(new ProviderTransferError('Error connecting to server'));
+        reject(
+          new ProviderTransferError('Error connecting to server', {
+            details: {
+              error: err.message,
+            },
+          })
+        );
       });
     });
   }
