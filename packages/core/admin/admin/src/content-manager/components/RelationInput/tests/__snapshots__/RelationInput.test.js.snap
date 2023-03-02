@@ -1,33 +1,33 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Content-Manager || RelationInput should render and match snapshot 1`] = `
-.c6 {
+.c5 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
   color: #32324d;
 }
 
-.c13 {
+.c12 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #4945ff;
 }
 
-.c27 {
+.c26 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #32324d;
 }
 
-.c30 {
+.c29 {
   font-size: 0.875rem;
   line-height: 1.43;
   font-weight: 600;
   color: #006096;
 }
 
-.c35 {
+.c34 {
   font-size: 0.875rem;
   line-height: 1.43;
   display: block;
@@ -37,14 +37,14 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   color: #4945ff;
 }
 
-.c38 {
+.c37 {
   font-size: 0.875rem;
   line-height: 1.43;
   font-weight: 600;
   color: #2f6846;
 }
 
-.c40 {
+.c39 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
@@ -60,19 +60,19 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   flex-basis: 70%;
 }
 
-.c8 {
+.c7 {
   padding-right: 12px;
 }
 
-.c12 {
+.c11 {
   padding-right: 8px;
 }
 
-.c16 {
+.c15 {
   cursor: all-scroll;
 }
 
-.c17 {
+.c16 {
   background: #ffffff;
   padding-top: 8px;
   padding-right: 16px;
@@ -83,14 +83,14 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   border: 1px solid #dcdce4;
 }
 
-.c24 {
+.c23 {
   padding-top: 4px;
   padding-right: 16px;
   padding-bottom: 4px;
   min-width: 0;
 }
 
-.c28 {
+.c27 {
   background: #eaf5ff;
   padding-top: 4px;
   padding-right: 8px;
@@ -101,16 +101,16 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   border: 1px solid #b8e1ff;
 }
 
-.c31 {
+.c30 {
   padding-left: 16px;
 }
 
-.c33 {
+.c32 {
   color: #666687;
   width: 12px;
 }
 
-.c36 {
+.c35 {
   background: #eafbe7;
   padding-top: 4px;
   padding-right: 8px;
@@ -121,7 +121,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   border: 1px solid #c6f0c2;
 }
 
-.c39 {
+.c38 {
   padding-top: 8px;
 }
 
@@ -159,9 +159,10 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 4px;
 }
 
-.c7 {
+.c6 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -175,7 +176,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   flex-direction: row;
 }
 
-.c18 {
+.c17 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -193,22 +194,37 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   justify-content: space-between;
 }
 
-.c11 {
+.c18 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 4px;
+}
+
+.c10 {
   background: transparent;
   border: none;
   position: relative;
   outline: none;
 }
 
-.c11[aria-disabled='true'] {
+.c10[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c11[aria-disabled='true'] svg path {
+.c10[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c11 svg {
+.c10 svg {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -216,11 +232,11 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   font-size: 0.625rem;
 }
 
-.c11 svg path {
+.c10 svg path {
   fill: #4945ff;
 }
 
-.c11:after {
+.c10:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -235,11 +251,11 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   border: 2px solid transparent;
 }
 
-.c11:focus-visible {
+.c10:focus-visible {
   outline: none;
 }
 
-.c11:focus-visible:after {
+.c10:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -250,29 +266,11 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   border: 2px solid #4945ff;
 }
 
-.c4 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c4 > * + * {
-  margin-top: 4px;
-}
-
-.c19 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c19 > * + * {
-  margin-left: 4px;
-}
-
-.c34 path {
+.c33 path {
   fill: #666687;
 }
 
-.c21 {
+.c20 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -286,21 +284,21 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   outline: none;
 }
 
-.c21 svg {
+.c20 svg {
   height: 12px;
   width: 12px;
 }
 
-.c21 svg > g,
-.c21 svg path {
+.c20 svg > g,
+.c20 svg path {
   fill: #ffffff;
 }
 
-.c21[aria-disabled='true'] {
+.c20[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c21:after {
+.c20:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -315,11 +313,11 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   border: 2px solid transparent;
 }
 
-.c21:focus-visible {
+.c20:focus-visible {
   outline: none;
 }
 
-.c21:focus-visible:after {
+.c20:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -330,7 +328,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   border: 2px solid #4945ff;
 }
 
-.c15 {
+.c14 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -342,7 +340,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   width: 1px;
 }
 
-.c25 {
+.c24 {
   display: -webkit-inline-box;
   display: -webkit-inline-flex;
   display: -ms-inline-flexbox;
@@ -358,31 +356,31 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   outline: none;
 }
 
-.c25 svg path {
+.c24 svg path {
   -webkit-transition: fill 150ms ease-out;
   transition: fill 150ms ease-out;
   fill: currentColor;
 }
 
-.c25 svg {
+.c24 svg {
   font-size: 0.625rem;
 }
 
-.c25 .c5 {
+.c24 .c4 {
   -webkit-transition: color 150ms ease-out;
   transition: color 150ms ease-out;
   color: currentColor;
 }
 
-.c25:hover {
+.c24:hover {
   color: #7b79ff;
 }
 
-.c25:active {
+.c24:active {
   color: #271fe0;
 }
 
-.c25:after {
+.c24:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -397,11 +395,11 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   border: 2px solid transparent;
 }
 
-.c25:focus-visible {
+.c24:focus-visible {
   outline: none;
 }
 
-.c25:focus-visible:after {
+.c24:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -412,7 +410,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   border: 2px solid #4945ff;
 }
 
-.c22 {
+.c21 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -430,54 +428,54 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   border: none;
 }
 
-.c22 svg > g,
-.c22 svg path {
+.c21 svg > g,
+.c21 svg path {
   fill: #8e8ea9;
 }
 
-.c22:hover svg > g,
-.c22:hover svg path {
+.c21:hover svg > g,
+.c21:hover svg path {
   fill: #666687;
 }
 
-.c22:active svg > g,
-.c22:active svg path {
+.c21:active svg > g,
+.c21:active svg path {
   fill: #a5a5ba;
 }
 
-.c22[aria-disabled='true'] {
+.c21[aria-disabled='true'] {
   background-color: #eaeaef;
 }
 
-.c22[aria-disabled='true'] svg path {
+.c21[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c29 .c5 {
+.c28 .c4 {
   color: #0c75af;
 }
 
-.c37 .c5 {
+.c36 .c4 {
   color: #328048;
 }
 
-.c9 {
+.c8 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c9 svg {
+.c8 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c9 svg path {
+.c8 svg path {
   fill: #666687;
 }
 
-.c10 {
+.c9 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -486,39 +484,39 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   border: none;
 }
 
-.c10 svg {
+.c9 svg {
   width: 0.5625rem;
 }
 
-.c20 {
+.c19 {
   width: 100%;
   min-width: 0;
 }
 
-.c20 > div[role='button'] {
+.c19 > div[role='button'] {
   cursor: all-scroll;
 }
 
-.c23 {
+.c22 {
   width: 100%;
   min-width: 0;
 }
 
-.c14 {
+.c13 {
   position: relative;
   overflow-x: hidden;
   overflow-y: auto;
 }
 
-.c14:before,
-.c14:after {
+.c13:before,
+.c13:after {
   position: absolute;
   width: 100%;
   height: 4px;
   z-index: 1;
 }
 
-.c14:before {
+.c13:before {
   content: '';
   background: linear-gradient(rgba(3,3,5,0.2) 0%,rgba(0,0,0,0) 100%);
   top: 0;
@@ -527,7 +525,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   transition: opacity 0.2s ease-in-out;
 }
 
-.c14:after {
+.c13:after {
   content: '';
   background: linear-gradient(0deg,rgba(3,3,5,0.2) 0%,rgba(0,0,0,0) 100%);
   bottom: 0;
@@ -536,23 +534,23 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   transition: opacity 0.2s ease-in-out;
 }
 
-.c26 {
+.c25 {
   display: block;
 }
 
-.c26 > span {
+.c25 > span {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   display: block;
 }
 
-.c32 svg path {
+.c31 svg path {
   fill: #8e8ea9;
 }
 
-.c32:hover svg path,
-.c32:focus svg path {
+.c31:hover svg path,
+.c31:focus svg path {
   fill: #666687;
 }
 
@@ -563,14 +561,14 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
       wrap="wrap"
     >
       <div
-        class="c2 c3 c4"
+        class="c2 c3"
       >
         <label
-          class="c5 c6"
+          class="c4 c5"
           for="1"
         >
           <div
-            class="c7"
+            class="c6"
           >
             Some Relation
           </div>
@@ -629,7 +627,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
             >
               <div
                 aria-hidden="true"
-                class="c8 c9 c10"
+                class="c7 c8 c9"
               >
                 <svg
                   fill="none"
@@ -657,12 +655,12 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
       </div>
       <button
         aria-disabled="false"
-        class="c7 c11"
+        class="c6 c10"
         type="button"
       >
         <span
           aria-hidden="true"
-          class="c12"
+          class="c11"
         >
           <svg
             fill="none"
@@ -680,24 +678,24 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
           </svg>
         </span>
         <span
-          class="c5 c13"
+          class="c4 c12"
         >
           Load more
         </span>
       </button>
     </div>
     <div
-      class="c14"
+      class="c13"
     >
       <div
-        class="c15"
+        class="c14"
         id="some-relation-1-item-instructions"
       >
         Press spacebar to grab and re-order
       </div>
       <div
         aria-live="assertive"
-        class="c15"
+        class="c14"
       />
       <div
         style="position: relative; height: 162px; overflow: auto; will-change: transform; direction: ltr;"
@@ -707,26 +705,26 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
         >
           <li
             aria-describedby="some-relation-1-item-instructions"
-            class="c16"
+            class="c15"
             style="position: absolute; left: 0px; top: 0px; height: 54px; width: 100%; bottom: 4px;"
           >
             <div
-              class="c17 c18"
+              class="c16 c17"
               data-handler-id="T0"
               draggable="true"
             >
               <div
-                class="c7 c19 c20"
+                class="c18 c19"
               >
                 <div
                   aria-disabled="false"
-                  class="c21 c22"
+                  class="c20 c21"
                   role="button"
                   tabindex="0"
                   type="button"
                 >
                   <span
-                    class="c15"
+                    class="c14"
                   >
                     Drag
                   </span>
@@ -770,21 +768,21 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                   </svg>
                 </div>
                 <div
-                  class="c18 c23"
+                  class="c17 c22"
                 >
                   <div
-                    class="c24"
+                    class="c23"
                   >
                     <span>
                       <a
                         aria-current="page"
                         aria-describedby="0"
-                        class="c25 c26 active"
+                        class="c24 c25 active"
                         href="/"
                         tabindex="0"
                       >
                         <span
-                          class="c5 c27"
+                          class="c4 c26"
                         >
                           Relation 1
                         </span>
@@ -792,10 +790,10 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                     </span>
                   </div>
                   <div
-                    class="c28 c29"
+                    class="c27 c28"
                   >
                     <span
-                      class="c5 c30"
+                      class="c4 c29"
                     >
                       Draft
                     </span>
@@ -803,16 +801,16 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                 </div>
               </div>
               <div
-                class="c31"
+                class="c30"
               >
                 <button
                   aria-label="Remove"
-                  class="c32"
+                  class="c31"
                   data-testid="remove-relation-1"
                   type="button"
                 >
                   <svg
-                    class="c33 c34"
+                    class="c32 c33"
                     fill="none"
                     height="1em"
                     viewBox="0 0 24 24"
@@ -830,26 +828,26 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
           </li>
           <li
             aria-describedby="some-relation-1-item-instructions"
-            class="c16"
+            class="c15"
             style="position: absolute; left: 0px; top: 54px; height: 54px; width: 100%; bottom: 4px;"
           >
             <div
-              class="c17 c18"
+              class="c16 c17"
               data-handler-id="T2"
               draggable="true"
             >
               <div
-                class="c7 c19 c20"
+                class="c18 c19"
               >
                 <div
                   aria-disabled="false"
-                  class="c21 c22"
+                  class="c20 c21"
                   role="button"
                   tabindex="0"
                   type="button"
                 >
                   <span
-                    class="c15"
+                    class="c14"
                   >
                     Drag
                   </span>
@@ -893,15 +891,15 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                   </svg>
                 </div>
                 <div
-                  class="c18 c23"
+                  class="c17 c22"
                 >
                   <div
-                    class="c24"
+                    class="c23"
                   >
                     <span>
                       <span
                         aria-describedby="1"
-                        class="c5 c35"
+                        class="c4 c34"
                         tabindex="0"
                       >
                         Relation 2
@@ -909,10 +907,10 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                     </span>
                   </div>
                   <div
-                    class="c36 c37"
+                    class="c35 c36"
                   >
                     <span
-                      class="c5 c38"
+                      class="c4 c37"
                     >
                       Published
                     </span>
@@ -920,16 +918,16 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                 </div>
               </div>
               <div
-                class="c31"
+                class="c30"
               >
                 <button
                   aria-label="Remove"
-                  class="c32"
+                  class="c31"
                   data-testid="remove-relation-2"
                   type="button"
                 >
                   <svg
-                    class="c33 c34"
+                    class="c32 c33"
                     fill="none"
                     height="1em"
                     viewBox="0 0 24 24"
@@ -947,26 +945,26 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
           </li>
           <li
             aria-describedby="some-relation-1-item-instructions"
-            class="c16"
+            class="c15"
             style="position: absolute; left: 0px; top: 108px; height: 54px; width: 100%; bottom: 4px;"
           >
             <div
-              class="c17 c18"
+              class="c16 c17"
               data-handler-id="T4"
               draggable="true"
             >
               <div
-                class="c7 c19 c20"
+                class="c18 c19"
               >
                 <div
                   aria-disabled="false"
-                  class="c21 c22"
+                  class="c20 c21"
                   role="button"
                   tabindex="0"
                   type="button"
                 >
                   <span
-                    class="c15"
+                    class="c14"
                   >
                     Drag
                   </span>
@@ -1010,15 +1008,15 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                   </svg>
                 </div>
                 <div
-                  class="c18 c23"
+                  class="c17 c22"
                 >
                   <div
-                    class="c24"
+                    class="c23"
                   >
                     <span>
                       <span
                         aria-describedby="2"
-                        class="c5 c35"
+                        class="c4 c34"
                         tabindex="0"
                       >
                         Relation 3
@@ -1028,16 +1026,16 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                 </div>
               </div>
               <div
-                class="c31"
+                class="c30"
               >
                 <button
                   aria-label="Remove"
-                  class="c32"
+                  class="c31"
                   data-testid="remove-relation-3"
                   type="button"
                 >
                   <svg
-                    class="c33 c34"
+                    class="c32 c33"
                     fill="none"
                     height="1em"
                     viewBox="0 0 24 24"
@@ -1057,10 +1055,10 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
       </div>
     </div>
     <div
-      class="c39"
+      class="c38"
     >
       <p
-        class="c5 c40"
+        class="c4 c39"
         id="1-hint"
       >
         this is a description
@@ -1068,7 +1066,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
     </div>
   </div>
   <div
-    class="c15"
+    class="c14"
   >
     <p
       aria-live="polite"

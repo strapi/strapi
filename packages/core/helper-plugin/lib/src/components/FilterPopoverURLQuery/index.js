@@ -6,7 +6,7 @@
 
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Box, Popover, Stack, FocusTrap, Select, Option } from '@strapi/design-system';
+import { Button, Flex, Box, Popover, FocusTrap, Select, Option } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import useQueryParams from '../../hooks/useQueryParams';
@@ -115,7 +115,7 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
     <Popover source={source} padding={3} spacing={4} onBlur={onBlur}>
       <FocusTrap onEscape={onToggle}>
         <form onSubmit={handleSubmit}>
-          <Stack spacing={1} style={{ minWidth: 184 }}>
+          <Flex direction="column" alignItems="stretch" gap={1} style={{ minWidth: 184 }}>
             <Box>
               <Select
                 aria-label={formatMessage({
@@ -171,7 +171,7 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
                 {formatMessage({ id: 'app.utils.add-filter', defaultMessage: 'Add filter' })}
               </Button>
             </Box>
-          </Stack>
+          </Flex>
         </form>
       </FocusTrap>
     </Popover>

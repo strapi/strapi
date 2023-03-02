@@ -3,7 +3,7 @@ import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Link } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
-import { Button, HeaderLayout, Stack } from '@strapi/design-system';
+import { Button, HeaderLayout, Flex } from '@strapi/design-system';
 import Regenerate from '../Regenerate';
 
 const FormHead = ({
@@ -29,7 +29,7 @@ const FormHead = ({
       title={token?.name || formatMessage(title)}
       primaryAction={
         canEditInputs ? (
-          <Stack horizontal spacing={2}>
+          <Flex gap={2}>
             {canRegenerate && token?.id && (
               <Regenerate
                 backUrl={regenerateUrl}
@@ -49,7 +49,7 @@ const FormHead = ({
                 defaultMessage: 'Save',
               })}
             </Button>
-          </Stack>
+          </Flex>
         ) : (
           canRegenerate &&
           token?.id && (

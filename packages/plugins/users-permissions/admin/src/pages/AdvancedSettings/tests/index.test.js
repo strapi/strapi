@@ -76,7 +76,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         color: #32324d;
       }
 
-      .c16 {
+      .c15 {
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
@@ -214,6 +214,21 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+        gap: 16px;
+      }
+
+      .c18 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
       }
 
       .c36 {
@@ -232,15 +247,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         -webkit-justify-content: center;
         -ms-flex-pack: center;
         justify-content: center;
-      }
-
-      .c15 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c15 > * + * {
-        margin-top: 16px;
       }
 
       .c19 > * {
@@ -592,13 +598,13 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         width: 100%;
       }
 
-      .c17 {
+      .c16 {
         display: grid;
         grid-template-columns: repeat(12,1fr);
         gap: 24px;
       }
 
-      .c18 {
+      .c17 {
         grid-column: span 6;
         max-width: 100%;
       }
@@ -689,13 +695,13 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c18 {
+        .c17 {
           grid-column: span 12;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c18 {
+        .c17 {
           grid-column: span;
         }
       }
@@ -792,25 +798,25 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
               class="c1 c13"
             >
               <div
-                class="c1 c14 c15"
+                class="c1 c14"
               >
                 <h2
-                  class="c5 c16"
+                  class="c5 c15"
                 >
                   Settings
                 </h2>
                 <div
-                  class="c1 c17"
+                  class="c1 c16"
                 >
                   <div
-                    class="c18"
+                    class="c17"
                   >
                     <div
                       class="c1 "
                     >
                       <div>
                         <div
-                          class="c1 c14 c19"
+                          class="c1 c18 c19"
                         >
                           <label
                             class="c5 c11"
@@ -900,7 +906,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                         class="c30"
                       >
                         <div
-                          class="c1 c14 c19"
+                          class="c1 c18 c19"
                         >
                           <div
                             class="c1 c4"
@@ -979,7 +985,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                         class="c30"
                       >
                         <div
-                          class="c1 c14 c19"
+                          class="c1 c18 c19"
                         >
                           <div
                             class="c1 c4"
@@ -1057,7 +1063,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                       <div>
                         <div>
                           <div
-                            class="c1 c14 c19"
+                            class="c1 c18 c19"
                           >
                             <label
                               class="c5 c11"
@@ -1106,7 +1112,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                         class="c30"
                       >
                         <div
-                          class="c1 c14 c19"
+                          class="c1 c18 c19"
                         >
                           <div
                             class="c1 c4"
@@ -1184,7 +1190,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                       <div>
                         <div>
                           <div
-                            class="c1 c14 c19"
+                            class="c1 c18 c19"
                           >
                             <label
                               class="c5 c11"

@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import propTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { Box, Divider, Flex, Stack, Typography } from '@strapi/design-system';
+import { Box, Divider, Flex, Typography } from '@strapi/design-system';
 
 import { getTrad } from '../../../utils';
 import getUnits from './utils/getUnits';
@@ -49,7 +49,7 @@ const Information = () => {
   const created = getFieldInfo('createdAt', 'createdBy');
 
   return (
-    <Stack spacing={2}>
+    <Flex direction="column" alignItems="stretch" gap={2}>
       <Typography variant="sigma" textColor="neutral600" id="additional-information">
         {formatMessage({
           id: getTrad('containers.Edit.information'),
@@ -61,8 +61,8 @@ const Information = () => {
         <Divider />
       </Box>
 
-      <Stack spacing={4}>
-        <Stack spacing={2} as="dl">
+      <Flex direction="column" alignItems="stretch" gap={4}>
+        <Flex direction="column" alignItems="stretch" gap={2} as="dl">
           <KeyValuePair
             label={formatMessage({
               id: getTrad('containers.Edit.information.created'),
@@ -78,9 +78,9 @@ const Information = () => {
             })}
             value={created.by}
           />
-        </Stack>
+        </Flex>
 
-        <Stack spacing={2} as="dl">
+        <Flex direction="column" alignItems="stretch" gap={2} as="dl">
           <KeyValuePair
             label={formatMessage({
               id: getTrad('containers.Edit.information.lastUpdate'),
@@ -96,9 +96,9 @@ const Information = () => {
             })}
             value={updated.by}
           />
-        </Stack>
-      </Stack>
-    </Stack>
+        </Flex>
+      </Flex>
+    </Flex>
   );
 };
 

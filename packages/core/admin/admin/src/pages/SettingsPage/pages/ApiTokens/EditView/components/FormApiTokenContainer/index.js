@@ -1,7 +1,7 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Box, Grid, GridItem, Stack, Typography } from '@strapi/design-system';
+import { Box, Grid, GridItem, Flex, Typography } from '@strapi/design-system';
 import LifeSpanInput from '../../../../../components/Tokens/LifeSpanInput';
 import TokenName from '../../../../../components/Tokens/TokenName';
 import TokenDescription from '../../../../../components/Tokens/TokenDescription';
@@ -68,7 +68,7 @@ const FormApiTokenContainer = ({
       paddingLeft={7}
       paddingRight={7}
     >
-      <Stack spacing={4}>
+      <Flex direction="column" alignItems="stretch" gap={4}>
         <Typography variant="delta" as="h2">
           {formatMessage({
             id: 'global.details',
@@ -119,7 +119,7 @@ const FormApiTokenContainer = ({
             />
           </GridItem>
         </Grid>
-      </Stack>
+      </Flex>
     </Box>
   );
 };

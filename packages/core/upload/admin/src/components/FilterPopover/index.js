@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Button, Box, Popover, Stack, FocusTrap, Select, Option } from '@strapi/design-system';
+import { Button, Box, Popover, Flex, FocusTrap, Select, Option } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import FilterValueInput from './FilterValueInput';
 import getFilterList from './utils/getFilterList';
@@ -190,7 +190,7 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
     <Popover source={source} padding={3} spacing={4}>
       <FocusTrap onEscape={onToggle}>
         <form onSubmit={handleSubmit}>
-          <Stack spacing={1} style={{ minWidth: 184 }}>
+          <Flex direction="column" alignItems="stretch" gap={1} style={{ minWidth: 184 }}>
             <Box>
               <Select
                 aria-label={formatMessage({
@@ -244,7 +244,7 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
                 {formatMessage({ id: 'app.utils.add-filter', defaultMessage: 'Add filter' })}
               </Button>
             </Box>
-          </Stack>
+          </Flex>
         </form>
       </FocusTrap>
     </Popover>

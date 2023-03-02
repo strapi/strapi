@@ -4,7 +4,6 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import {
   Box,
-  Stack,
   Flex,
   Icon,
   Typography,
@@ -81,7 +80,7 @@ const FromComputerForm = ({ setLocalImage, goTo, next, onClose }) => {
         <Box paddingLeft={8} paddingRight={8} paddingTop={6} paddingBottom={6}>
           <Field name="logo-upload" error={fileError}>
             <label htmlFor="logo-upload">
-              <Stack spacing={2}>
+              <Flex direction="column" alignItems="stretch" gap={2}>
                 <Flex
                   paddingTop={9}
                   paddingBottom={7}
@@ -147,7 +146,7 @@ const FromComputerForm = ({ setLocalImage, goTo, next, onClose }) => {
                   </Box>
                 </Flex>
                 <FieldError />
-              </Stack>
+              </Flex>
             </label>
           </Field>
         </Box>

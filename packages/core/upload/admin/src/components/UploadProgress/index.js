@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Cross } from '@strapi/icons';
-import { Typography, Flex, Stack, ProgressBar } from '@strapi/design-system';
+import { Typography, Flex, ProgressBar } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 const BoxWrapper = styled(Flex)`
@@ -46,11 +46,11 @@ export const UploadProgress = ({ onCancel, progress, error }) => {
       {error ? (
         <Cross aria-label={error?.message} />
       ) : (
-        <Stack alignItems="center" spacing={2} width="100%">
+        <Flex direction="column" alignItems="center" gap={2} width="100%">
           <ProgressBar value={progress}>{`${progress}/100%`}</ProgressBar>
 
           <CancelButton type="button" onClick={onCancel}>
-            <Stack horizontal spacing={2}>
+            <Flex gap={2}>
               <Typography variant="pi" as="span" textColor="inherit">
                 {formatMessage({
                   id: 'app.components.Button.cancel',
@@ -59,9 +59,9 @@ export const UploadProgress = ({ onCancel, progress, error }) => {
               </Typography>
 
               <Cross aria-hidden />
-            </Stack>
+            </Flex>
           </CancelButton>
-        </Stack>
+        </Flex>
       )}
     </BoxWrapper>
   );

@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import {
-  Stack,
   Typography,
   Flex,
   Box,
@@ -109,7 +108,7 @@ const ColorPickerInput = ({
       hint={description && formatMessage(description)}
       required={required}
     >
-      <Stack spacing={1}>
+      <Flex direction="column" alignItems="stretch" gap={1}>
         <FieldLabel action={labelAction}>{formatMessage(intlLabel)}</FieldLabel>
         <ColorPickerToggle
           ref={colorPickerButtonRef}
@@ -176,7 +175,7 @@ const ColorPickerInput = ({
         )}
         <FieldHint />
         <FieldError />
-      </Stack>
+      </Flex>
     </Field>
   );
 };
