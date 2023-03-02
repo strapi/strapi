@@ -3,14 +3,12 @@
 const fs = require('fs');
 const path = require('path');
 
-// Helpers.
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 
 const builder = createTestBuilder();
 let strapi;
-
 let baseRequest;
 let rq;
 
@@ -91,7 +89,40 @@ const uploadImg = (fileName) => {
   });
 };
 
+let repeatable;
+let singleMedia;
+let mediaEntry = {};
+
 describe('Upload Plugin url signing', () => {
+  const responseExpectations = (result) => {
+    expect(result.statusCode).toBe(200);
+
+    expect(result.body.media.url).toEqual('signedUrl');
+
+    for (const media of result.body.media_repeatable) {
+      expect(media.url).toEqual('signedUrl');
+    }
+
+    expect(result.body.compo_media.media.url).toEqual('signedUrl');
+    for (const media of result.body.compo_media.media_repeatable) {
+      expect(media.url).toEqual('signedUrl');
+    }
+
+    for (const component of result.body.compo_media_repeatable) {
+      expect(component.media.url).toEqual('signedUrl');
+      for (const media of component.media_repeatable) {
+        expect(media.url).toEqual('signedUrl');
+      }
+    }
+
+    for (const component of result.body.dynamicZone) {
+      expect(component.media.url).toEqual('signedUrl');
+      for (const media of component.media_repeatable) {
+        expect(media.url).toEqual('signedUrl');
+      }
+    }
+  };
+
   beforeAll(async () => {
     const localProviderPath = require.resolve('@strapi/provider-upload-local');
     jest.mock(localProviderPath, () => mockProvider(true));
@@ -109,13 +140,20 @@ describe('Upload Plugin url signing', () => {
 
     const imgRes = [await uploadImg('rec.jpg'), await uploadImg('strapi.jpg')];
 
-    const repeatable = imgRes.map((img) => img.body[0].id);
-    const singleMedia = imgRes[0].body[0].id;
-    const mediaEntry = {
+    repeatable = imgRes.map((img) => img.body[0].id);
+    singleMedia = imgRes[0].body[0].id;
+    mediaEntry = {
       media: singleMedia,
       media_repeatable: repeatable,
     };
+  });
 
+  afterAll(async () => {
+    await strapi.destroy();
+    await builder.cleanup();
+  });
+
+  test('returns signed media URLs on content creation', async () => {
     const creationResult = await rq.post('/', {
       body: {
         name: 'name',
@@ -135,44 +173,15 @@ describe('Upload Plugin url signing', () => {
       },
     });
 
-    expect(creationResult.statusCode).toBe(200);
+    responseExpectations(creationResult);
   });
 
-  afterAll(async () => {
-    await strapi.destroy();
-    await builder.cleanup();
-  });
-
-  test('returns a signed url for private upload providers', async () => {
-    const res = await baseRequest({
+  test('returns signed media URLs when we GET content', async () => {
+    const result = await baseRequest({
       method: 'GET',
       url: `/content-manager/collection-types/${modelUID}/1`,
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body.media.url).toEqual('signedUrl');
-
-    for (const media of res.body.media_repeatable) {
-      expect(media.url).toEqual('signedUrl');
-    }
-
-    expect(res.body.compo_media.media.url).toEqual('signedUrl');
-    for (const media of res.body.compo_media.media_repeatable) {
-      expect(media.url).toEqual('signedUrl');
-    }
-
-    for (const component of res.body.compo_media_repeatable) {
-      expect(component.media.url).toEqual('signedUrl');
-      for (const media of component.media_repeatable) {
-        expect(media.url).toEqual('signedUrl');
-      }
-    }
-
-    for (const component of res.body.dynamicZone) {
-      expect(component.media.url).toEqual('signedUrl');
-      for (const media of component.media_repeatable) {
-        expect(media.url).toEqual('signedUrl');
-      }
-    }
+    responseExpectations(result);
   });
 });
