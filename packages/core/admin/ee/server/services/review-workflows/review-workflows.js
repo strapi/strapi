@@ -80,7 +80,15 @@ function extendReviewWorkflowContentTypes({ strapi }) {
   ])(strapi.contentTypes);
 }
 
+/**
+ * Enables the review workflow for the given content types.
+ * @param {Object} strapi - Strapi instance
+ */
 function enableReviewWorkflow({ strapi }) {
+  /**
+   * @param {Array<string>} contentTypes - Content type UIDs to enable the review workflow for.
+   * @returns {Promise<void>} - Promise that resolves when the review workflow is enabled.
+   */
   return async ({ contentTypes }) => {
     // TODO To be refactored when multiple workflows are added
     const defaultWorkflow = await strapi
@@ -98,6 +106,8 @@ function enableReviewWorkflow({ strapi }) {
       const { joinTable } = strapi.db.metadata.get(target).attributes[morphBy];
       const { idColumn, typeColumn } = joinTable.morphColumn;
 
+      // Execute a raw SQL query to insert records into the join table mapping the specified content type with the first stage of the default workflow.
+      // Only entities that do not have a record in the join table yet are selected.
       await strapi.db.connection
         .raw(`INSERT INTO ${joinTable.name} (${idColumn.name}, field, "order", ${joinTable.joinColumn.name}, ${typeColumn.name})
                 SELECT
