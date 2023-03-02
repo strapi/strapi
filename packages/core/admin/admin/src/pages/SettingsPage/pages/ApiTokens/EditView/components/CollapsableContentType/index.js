@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { capitalize } from 'lodash';
+import { useIntl } from 'react-intl';
 import {
   Accordion,
   AccordionToggle,
@@ -35,6 +36,7 @@ const CollapsableContentType = ({
     value: { onChangeSelectAll, onChange, selectedActions, setSelectedAction, selectedAction },
   } = useApiTokenPermissionsContext();
   const [expanded, setExpanded] = useState(false);
+  const { formatMessage } = useIntl();
 
   const handleExpandedAccordion = () => {
     setExpanded((s) => !s);
@@ -88,7 +90,7 @@ const CollapsableContentType = ({
                     }}
                     disabled={disabled}
                   >
-                    Select all
+                    {formatMessage({ id: 'app.utils.select-all', defaultMessage: 'Select all' })}
                   </Checkbox>
                 </Box>
               </Flex>

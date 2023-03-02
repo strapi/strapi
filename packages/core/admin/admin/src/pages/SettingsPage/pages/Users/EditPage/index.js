@@ -47,15 +47,12 @@ const EditPage = ({ canUpdate }) => {
   } = useRouteMatch('/settings/users/:id');
   const { push } = useHistory();
   const { setUserDisplayName } = useAppInfos();
-
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   useFocusWhenNavigate();
 
   const { status, data } = useQuery(['user', id], () => fetchUser(id), {
     retry: false,
-    keepPreviousData: false,
-    staleTime: 1000 * 20,
     onError(err) {
       const status = err.response.status;
 
@@ -109,7 +106,7 @@ const EditPage = ({ canUpdate }) => {
       actions.setErrors(fieldsErrors);
       toggleNotification({
         type: 'warning',
-        message: get(err, 'response.data.message', 'notification.error'),
+        message: get(err, 'response.data.error.message', 'notification.error'),
       });
     }
 

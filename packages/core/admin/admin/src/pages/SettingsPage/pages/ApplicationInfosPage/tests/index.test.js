@@ -40,6 +40,12 @@ jest.mock('../../../../../hooks', () => ({
     updateProjectSettings: updateProjectSettingsSpy,
   })),
 }));
+jest.mock(
+  'ee_else_ce/pages/SettingsPage/pages/ApplicationInfosPage/components/AdminSeatInfo',
+  () => () => {
+    return <></>;
+  }
+);
 
 const client = new QueryClient();
 
