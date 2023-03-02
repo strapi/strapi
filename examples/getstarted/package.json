@@ -23,7 +23,7 @@
     "@strapi/provider-upload-aws-s3": "4.7.1",
     "@strapi/provider-upload-cloudinary": "4.7.1",
     "@strapi/strapi": "4.7.1",
-    "@vscode/sqlite3": "5.0.8",
+    "@vscode/sqlite3": "5.1.2",
     "better-sqlite3": "8.0.1",
     "lodash": "4.17.21",
     "mysql": "2.18.1",
