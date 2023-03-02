@@ -10,7 +10,7 @@ const composeVisitors = (visitors) => {
   return visitors.reduceRight(
     (next, visitor) => {
       return (...args) => {
-        return visitor(...args, next);
+        return visitor(...args, () => next(...args));
       };
     },
     () => {}
