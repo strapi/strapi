@@ -1,7 +1,7 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Stack, Button, Tooltip, Icon } from '@strapi/design-system';
+import { Flex, Button, Tooltip, Icon } from '@strapi/design-system';
 import { Envelop, ExclamationMarkCircle } from '@strapi/icons';
 import isNil from 'lodash/isNil';
 import { useLicenseLimits } from '../../../../../../hooks';
@@ -12,7 +12,7 @@ const CreateAction = ({ onClick }) => {
   const { permittedSeats, shouldStopCreate } = license?.data ?? {};
 
   return (
-    <Stack spacing={2} horizontal>
+    <Flex gap={2}>
       {!isNil(permittedSeats) && shouldStopCreate && (
         <Tooltip
           description={formatMessage({
@@ -41,7 +41,7 @@ const CreateAction = ({ onClick }) => {
           defaultMessage: 'Invite new user',
         })}
       </Button>
-    </Stack>
+    </Flex>
   );
 };
 

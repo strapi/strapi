@@ -21,7 +21,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c23 {
+.c22 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
@@ -51,7 +51,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   padding-left: 56px;
 }
 
-.c21 {
+.c20 {
   background: #ffffff;
   padding: 24px;
   border-radius: 4px;
@@ -90,7 +90,52 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
+.c12 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
 .c19 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.c21 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.c26 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -122,24 +167,6 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   justify-content: space-around;
 }
 
-.c20 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c20 > * + * {
-  margin-top: 24px;
-}
-
-.c22 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c22 > * + * {
-  margin-top: 16px;
-}
-
 .c27 > * {
   margin-top: 0;
   margin-bottom: 0;
@@ -147,15 +174,6 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
 
 .c27 > * + * {
   margin-top: 4px;
-}
-
-.c12 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c12 > * + * {
-  margin-left: 8px;
 }
 
 .c13 {
@@ -445,13 +463,13 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   will-change: transform;
 }
 
-.c25 {
+.c24 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
   gap: 16px;
 }
 
-.c26 {
+.c25 {
   grid-column: span 6;
   max-width: 100%;
 }
@@ -627,7 +645,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   display: flex;
 }
 
-.c24 {
+.c23 {
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
   padding: 8px 16px;
@@ -638,13 +656,13 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
 }
 
 @media (max-width:68.75rem) {
-  .c26 {
+  .c25 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c26 {
+  .c25 {
     grid-column: span;
   }
 }
@@ -712,7 +730,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
               </h1>
             </div>
             <div
-              class="c1 c9 c12"
+              class="c1 c12"
             >
               <button
                 aria-disabled="false"
@@ -749,13 +767,13 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
         class="c1 c18"
       >
         <div
-          class="c1 c19 c20"
+          class="c1 c19"
         >
           <div
-            class="c1 c21"
+            class="c1 c20"
           >
             <div
-              class="c1 c19 c22"
+              class="c1 c21"
             >
               <div
                 class="c1 c8"
@@ -776,23 +794,23 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
                     class="c1 "
                   >
                     <span
-                      class="c10 c23"
+                      class="c10 c22"
                     >
                       Name and description of the role
                     </span>
                   </div>
                 </div>
                 <div
-                  class="c24"
+                  class="c23"
                 >
                   0 users with this role
                 </div>
               </div>
               <div
-                class="c1 c25"
+                class="c1 c24"
               >
                 <div
-                  class="c26"
+                  class="c25"
                 >
                   <div
                     class="c1 "
@@ -800,7 +818,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
                     <div>
                       <div>
                         <div
-                          class="c1 c19 c27"
+                          class="c1 c26 c27"
                         >
                           <label
                             class="c10 c28"
@@ -831,7 +849,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c26"
+                  class="c25"
                 >
                   <div
                     class="c1 "
@@ -841,7 +859,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
                     >
                       <div>
                         <div
-                          class="c1 c19 c27"
+                          class="c1 c26 c27"
                         >
                           <div
                             class="c1 c9"
@@ -879,7 +897,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
             </div>
           </div>
           <div
-            class="c1 c21"
+            class="c1 c20"
           >
             <div
               class="c1 c34 c35"

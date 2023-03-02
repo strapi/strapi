@@ -14,7 +14,6 @@ import {
   ModalBody,
   ModalFooter,
   FieldLabel,
-  Stack,
   Typography,
 } from '@strapi/design-system';
 import { Form, normalizeAPIError } from '@strapi/helper-plugin';
@@ -98,7 +97,7 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
             <ModalBody>
               <Grid gap={4}>
                 <GridItem xs={12} col={12}>
-                  <Stack spacing={1}>
+                  <Flex direction="column" alignItems="stretch" gap={1}>
                     <FieldLabel htmlFor="folder-destination">
                       {formatMessage({
                         id: getTrad('form.input.label.folder-location'),
@@ -129,7 +128,7 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
                         {errors.destination}
                       </Typography>
                     )}
-                  </Stack>
+                  </Flex>
                 </GridItem>
               </Grid>
             </ModalBody>

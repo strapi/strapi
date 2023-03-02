@@ -2,7 +2,7 @@ import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Form, Link } from '@strapi/helper-plugin';
-import { Box, Stack, Main, Flex, Button, TextInput, Typography } from '@strapi/design-system';
+import { Box, Flex, Main, Button, TextInput, Typography } from '@strapi/design-system';
 import { Formik } from 'formik';
 import UnauthenticatedLayout, {
   Column,
@@ -53,7 +53,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                   )}
                 </Column>
 
-                <Stack spacing={6}>
+                <Flex direction="column" alignItems="stretch" gap={6}>
                   <TextInput
                     error={
                       errors.email
@@ -79,7 +79,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                       defaultMessage: 'Send Email',
                     })}
                   </Button>
-                </Stack>
+                </Flex>
               </Form>
             )}
           </Formik>

@@ -1,7 +1,7 @@
 <!--- Search.stories.mdx --->
 
 import { ArgsTable, Meta, Canvas, Story } from '@storybook/addon-docs';
-import { Stack } from '@strapi/design-system';
+import { Flex } from '@strapi/design-system';
 import matchSorter from 'match-sorter';
 import useQueryParams from '../../hooks/useQueryParams';
 import SearchURLQuery from './index';
@@ -68,7 +68,7 @@ const HomePage = () => {
       const sortedList = matchSorter(items, _q, { keys: ['name', 'instrument'] });
       const itemsList = sortedList?.length ? sortedList : items;
       return (
-        <Stack paddingTop={6} spacing={4}>
+        <Flex direction="column" alignItems="stretch" paddingTop={6} gap={4}>
           <SearchURLQuery label="Label" />
           {itemsList.map((item, i) => (
             <div key={i}>
@@ -76,7 +76,7 @@ const HomePage = () => {
               <p>{item.instrument}</p>
             </div>
           ))}
-        </Stack>
+        </Flex>
       );
     }}
   </Story>

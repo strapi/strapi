@@ -69,7 +69,7 @@ describe('Upload | SettingsPage', () => {
         color: #666687;
       }
 
-      .c21 {
+      .c20 {
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
@@ -127,7 +127,7 @@ describe('Upload | SettingsPage', () => {
         padding-bottom: 56px;
       }
 
-      .c19 {
+      .c18 {
         background: #ffffff;
         padding: 24px;
         border-radius: 4px;
@@ -197,6 +197,36 @@ describe('Upload | SettingsPage', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+        gap: 12;
+      }
+
+      .c19 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .c24 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
       }
 
       .c31 {
@@ -215,20 +245,6 @@ describe('Upload | SettingsPage', () => {
         -webkit-justify-content: center;
         -ms-flex-pack: center;
         justify-content: center;
-      }
-
-      .c18 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c20 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c20 > * + * {
-        margin-top: 16px;
       }
 
       .c25 > * {
@@ -382,13 +398,13 @@ describe('Upload | SettingsPage', () => {
         fill: #ffffff;
       }
 
-      .c22 {
+      .c21 {
         display: grid;
         grid-template-columns: repeat(12,1fr);
         gap: 24px;
       }
 
-      .c23 {
+      .c22 {
         grid-column: span 6;
         max-width: 100%;
       }
@@ -473,18 +489,18 @@ describe('Upload | SettingsPage', () => {
         width: 100%;
       }
 
-      .c24 {
+      .c23 {
         max-width: 320px;
       }
 
       @media (max-width:68.75rem) {
-        .c23 {
+        .c22 {
           grid-column: span 12;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c23 {
+        .c22 {
           grid-column: span;
         }
       }
@@ -564,37 +580,37 @@ describe('Upload | SettingsPage', () => {
                   class="c1 c15 c16"
                 >
                   <div
-                    class="c1 c17 c18"
+                    class="c1 c17"
                   >
                     <div
-                      class="c1 c19"
+                      class="c1 c18"
                     >
                       <div
-                        class="c1 c17 c20"
+                        class="c1 c19"
                       >
                         <div
                           class="c1 c4"
                         >
                           <h2
-                            class="c5 c21"
+                            class="c5 c20"
                           >
                             Asset management
                           </h2>
                         </div>
                         <div
-                          class="c1 c22"
+                          class="c1 c21"
                         >
                           <div
-                            class="c23"
+                            class="c22"
                           >
                             <div
                               class="c1 "
                             >
                               <div
-                                class="c24"
+                                class="c23"
                               >
                                 <div
-                                  class="c1 c17 c25"
+                                  class="c1 c24 c25"
                                 >
                                   <div
                                     class="c1 c4"
@@ -667,16 +683,16 @@ describe('Upload | SettingsPage', () => {
                             </div>
                           </div>
                           <div
-                            class="c23"
+                            class="c22"
                           >
                             <div
                               class="c1 "
                             >
                               <div
-                                class="c24"
+                                class="c23"
                               >
                                 <div
-                                  class="c1 c17 c25"
+                                  class="c1 c24 c25"
                                 >
                                   <div
                                     class="c1 c4"
@@ -748,16 +764,16 @@ describe('Upload | SettingsPage', () => {
                             </div>
                           </div>
                           <div
-                            class="c23"
+                            class="c22"
                           >
                             <div
                               class="c1 "
                             >
                               <div
-                                class="c24"
+                                class="c23"
                               >
                                 <div
-                                  class="c1 c17 c25"
+                                  class="c1 c24 c25"
                                 >
                                   <div
                                     class="c1 c4"

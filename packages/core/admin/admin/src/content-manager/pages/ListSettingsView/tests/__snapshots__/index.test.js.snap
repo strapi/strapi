@@ -21,7 +21,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   color: #666687;
 }
 
-.c25 {
+.c24 {
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
@@ -110,7 +110,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c27 {
+.c26 {
   width: 100%;
 }
 
@@ -216,6 +216,40 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 16px;
+}
+
+.c25 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 16px;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c28 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
 }
 
 .c35 {
@@ -236,13 +270,19 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   justify-content: center;
 }
 
-.c24 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c24 > * + * {
-  margin-top: 16px;
+.c61 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 12px;
 }
 
 .c29 > * {
@@ -252,24 +292,6 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
 
 .c29 > * + * {
   margin-top: 4px;
-}
-
-.c26 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c26 > * + * {
-  margin-left: 16px;
-}
-
-.c61 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c61 > * + * {
-  margin-left: 12px;
 }
 
 .c15 {
@@ -632,7 +654,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   width: 100%;
 }
 
-.c28 {
+.c27 {
   max-width: 320px;
 }
 
@@ -923,24 +945,24 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
               class="c0 c22"
             >
               <div
-                class="c0 c23 c24"
+                class="c0 c23"
               >
                 <h2
-                  class="c13 c25"
+                  class="c13 c24"
                 >
                   Settings
                 </h2>
                 <div
-                  class="c0 c11 c26"
+                  class="c0 c25"
                 >
                   <div
-                    class="c0 c27"
+                    class="c0 c26"
                   >
                     <div
-                      class="c28"
+                      class="c27"
                     >
                       <div
-                        class="c0 c23 c29"
+                        class="c0 c28 c29"
                       >
                         <div
                           class="c0 c12"
@@ -1003,13 +1025,13 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                     </div>
                   </div>
                   <div
-                    class="c0 c27"
+                    class="c0 c26"
                   >
                     <div
-                      class="c28"
+                      class="c27"
                     >
                       <div
-                        class="c0 c23 c29"
+                        class="c0 c28 c29"
                       >
                         <div
                           class="c0 c12"
@@ -1072,13 +1094,13 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                     </div>
                   </div>
                   <div
-                    class="c0 c27"
+                    class="c0 c26"
                   >
                     <div
-                      class="c28"
+                      class="c27"
                     >
                       <div
-                        class="c0 c23 c29"
+                        class="c0 c28 c29"
                       >
                         <div
                           class="c0 c12"
@@ -1151,7 +1173,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                     >
                       <div>
                         <div
-                          class="c0 c23 c29"
+                          class="c0 c28 c29"
                         >
                           <label
                             class="c13 c19"
@@ -1240,7 +1262,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                     >
                       <div>
                         <div
-                          class="c0 c23 c29"
+                          class="c0 c28 c29"
                         >
                           <label
                             class="c13 c19"
@@ -1322,7 +1344,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                     >
                       <div>
                         <div
-                          class="c0 c23 c29"
+                          class="c0 c28 c29"
                         >
                           <label
                             class="c13 c19"
@@ -1409,7 +1431,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                 class="c0 c57"
               >
                 <h2
-                  class="c13 c25"
+                  class="c13 c24"
                 >
                   View
                 </h2>
@@ -1422,7 +1444,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                   size="1"
                 >
                   <div
-                    class="c0 c12 c61"
+                    class="c0 c61"
                   >
                     <div
                       class="c0 c62"
@@ -1431,7 +1453,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         class="c0 c63 c11 c64"
                       >
                         <div
-                          class="c0 c12 c61"
+                          class="c0 c61"
                         >
                           <span
                             aria-label="Move id"
@@ -1534,7 +1556,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         class="c0 c63 c11 c64"
                       >
                         <div
-                          class="c0 c12 c61"
+                          class="c0 c61"
                         >
                           <span
                             aria-label="Move address"
@@ -1724,7 +1746,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   color: #666687;
 }
 
-.c25 {
+.c24 {
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
@@ -1813,7 +1835,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c27 {
+.c26 {
   width: 100%;
 }
 
@@ -1919,6 +1941,40 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 16px;
+}
+
+.c25 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 16px;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c28 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
 }
 
 .c35 {
@@ -1939,13 +1995,19 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   justify-content: center;
 }
 
-.c24 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c24 > * + * {
-  margin-top: 16px;
+.c61 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 12px;
 }
 
 .c29 > * {
@@ -1955,24 +2017,6 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
 
 .c29 > * + * {
   margin-top: 4px;
-}
-
-.c26 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c26 > * + * {
-  margin-left: 16px;
-}
-
-.c61 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c61 > * + * {
-  margin-left: 12px;
 }
 
 .c15 {
@@ -2335,7 +2379,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   width: 100%;
 }
 
-.c28 {
+.c27 {
   max-width: 320px;
 }
 
@@ -2625,24 +2669,24 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
               class="c0 c22"
             >
               <div
-                class="c0 c23 c24"
+                class="c0 c23"
               >
                 <h2
-                  class="c13 c25"
+                  class="c13 c24"
                 >
                   Settings
                 </h2>
                 <div
-                  class="c0 c11 c26"
+                  class="c0 c25"
                 >
                   <div
-                    class="c0 c27"
+                    class="c0 c26"
                   >
                     <div
-                      class="c28"
+                      class="c27"
                     >
                       <div
-                        class="c0 c23 c29"
+                        class="c0 c28 c29"
                       >
                         <div
                           class="c0 c12"
@@ -2705,13 +2749,13 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                     </div>
                   </div>
                   <div
-                    class="c0 c27"
+                    class="c0 c26"
                   >
                     <div
-                      class="c28"
+                      class="c27"
                     >
                       <div
-                        class="c0 c23 c29"
+                        class="c0 c28 c29"
                       >
                         <div
                           class="c0 c12"
@@ -2774,13 +2818,13 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                     </div>
                   </div>
                   <div
-                    class="c0 c27"
+                    class="c0 c26"
                   >
                     <div
-                      class="c28"
+                      class="c27"
                     >
                       <div
-                        class="c0 c23 c29"
+                        class="c0 c28 c29"
                       >
                         <div
                           class="c0 c12"
@@ -2853,7 +2897,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                     >
                       <div>
                         <div
-                          class="c0 c23 c29"
+                          class="c0 c28 c29"
                         >
                           <label
                             class="c13 c19"
@@ -2942,7 +2986,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                     >
                       <div>
                         <div
-                          class="c0 c23 c29"
+                          class="c0 c28 c29"
                         >
                           <label
                             class="c13 c19"
@@ -3024,7 +3068,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                     >
                       <div>
                         <div
-                          class="c0 c23 c29"
+                          class="c0 c28 c29"
                         >
                           <label
                             class="c13 c19"
@@ -3111,7 +3155,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                 class="c0 c57"
               >
                 <h2
-                  class="c13 c25"
+                  class="c13 c24"
                 >
                   View
                 </h2>
@@ -3124,7 +3168,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                   size="1"
                 >
                   <div
-                    class="c0 c12 c61"
+                    class="c0 c61"
                   >
                     <div
                       class="c0 c62"
@@ -3133,7 +3177,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         class="c0 c63 c11 c64"
                       >
                         <div
-                          class="c0 c12 c61"
+                          class="c0 c61"
                         >
                           <span
                             aria-label="Move id"
@@ -3236,7 +3280,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         class="c0 c63 c11 c64"
                       >
                         <div
-                          class="c0 c12 c61"
+                          class="c0 c61"
                         >
                           <span
                             aria-label="Move address"
@@ -3339,7 +3383,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         class="c0 c63 c11 c64"
                       >
                         <div
-                          class="c0 c12 c61"
+                          class="c0 c61"
                         >
                           <span
                             aria-label="Move Cover"

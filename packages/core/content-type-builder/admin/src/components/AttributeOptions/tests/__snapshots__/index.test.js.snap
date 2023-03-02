@@ -24,14 +24,14 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c24 {
+.c23 {
   font-size: 0.875rem;
   line-height: 1.43;
   font-weight: 600;
   color: #32324d;
 }
 
-.c25 {
+.c24 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
@@ -53,17 +53,17 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   background: #eaeaef;
 }
 
-.c17 {
+.c16 {
   padding-right: 8px;
   padding-bottom: 4px;
 }
 
-.c18 {
+.c17 {
   padding: 16px;
   border-radius: 4px;
 }
 
-.c21 {
+.c20 {
   width: 2rem;
   height: 1.5rem;
   -webkit-flex-shrink: 0;
@@ -71,11 +71,11 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   flex-shrink: 0;
 }
 
-.c23 {
+.c22 {
   padding-left: 16px;
 }
 
-.c26 {
+.c25 {
   padding-bottom: 4px;
   padding-left: 8px;
 }
@@ -110,9 +110,10 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 40px;
 }
 
-.c20 {
+.c19 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -126,16 +127,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
-.c14 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c14 > * + * {
-  margin-top: 40px;
-}
-
-.c27 {
+.c26 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -156,12 +148,12 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   margin: 0;
 }
 
-.c15 {
+.c14 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
 }
 
-.c16 {
+.c15 {
   grid-column: span 6;
   max-width: 100%;
 }
@@ -183,31 +175,31 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   cursor: not-allowed;
 }
 
-.c22 svg {
+.c21 svg {
   height: 100%;
   width: 100%;
 }
 
-.c19 {
+.c18 {
   width: 100%;
   height: 100%;
   border: 1px solid #dcdce4;
   text-align: left;
 }
 
-.c19:hover {
+.c18:hover {
   background: #f0f0ff;
   border: 1px solid #d9d8ff;
 }
 
 @media (max-width:68.75rem) {
-  .c16 {
+  .c15 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c16 {
+  .c15 {
     grid-column: span;
   }
 }
@@ -288,32 +280,32 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
             class=""
           >
             <div
-              class="c13 c14"
+              class="c13"
             >
               <div
-                class="c15"
+                class="c14"
               >
                 <div
-                  class="c16"
+                  class="c15"
                 >
                   <div
                     class=""
                     style="height: 100%;"
                   >
                     <div
-                      class="c17"
+                      class="c16"
                       style="height: 100%;"
                     >
                       <button
-                        class="c18 c19"
+                        class="c17 c18"
                         type="button"
                       >
                         <div
-                          class="c20"
+                          class="c19"
                         >
                           <div
                             aria-hidden="true"
-                            class="c21 c22"
+                            class="c20 c21"
                           >
                             <svg
                               class=""
@@ -339,22 +331,22 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             </svg>
                           </div>
                           <div
-                            class="c23"
+                            class="c22"
                           >
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c24"
+                                class="c23"
                               >
                                 text
                               </span>
                             </div>
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c25"
+                                class="c24"
                               >
                                 A type for modeling data
                               </span>
@@ -366,26 +358,26 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c16"
+                  class="c15"
                 >
                   <div
                     class=""
                     style="height: 100%;"
                   >
                     <div
-                      class="c26"
+                      class="c25"
                       style="height: 100%;"
                     >
                       <button
-                        class="c18 c19"
+                        class="c17 c18"
                         type="button"
                       >
                         <div
-                          class="c20"
+                          class="c19"
                         >
                           <div
                             aria-hidden="true"
-                            class="c21 c22"
+                            class="c20 c21"
                           >
                             <svg
                               class=""
@@ -411,22 +403,22 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             </svg>
                           </div>
                           <div
-                            class="c23"
+                            class="c22"
                           >
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c24"
+                                class="c23"
                               >
                                 email
                               </span>
                             </div>
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c25"
+                                class="c24"
                               >
                                 A type for modeling data
                               </span>
@@ -438,26 +430,26 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c16"
+                  class="c15"
                 >
                   <div
                     class=""
                     style="height: 100%;"
                   >
                     <div
-                      class="c17"
+                      class="c16"
                       style="height: 100%;"
                     >
                       <button
-                        class="c18 c19"
+                        class="c17 c18"
                         type="button"
                       >
                         <div
-                          class="c20"
+                          class="c19"
                         >
                           <div
                             aria-hidden="true"
-                            class="c21 c22"
+                            class="c20 c21"
                           >
                             <svg
                               class=""
@@ -485,22 +477,22 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             </svg>
                           </div>
                           <div
-                            class="c23"
+                            class="c22"
                           >
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c24"
+                                class="c23"
                               >
                                 richtext
                               </span>
                             </div>
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c25"
+                                class="c24"
                               >
                                 A type for modeling data
                               </span>
@@ -512,26 +504,26 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c16"
+                  class="c15"
                 >
                   <div
                     class=""
                     style="height: 100%;"
                   >
                     <div
-                      class="c26"
+                      class="c25"
                       style="height: 100%;"
                     >
                       <button
-                        class="c18 c19"
+                        class="c17 c18"
                         type="button"
                       >
                         <div
-                          class="c20"
+                          class="c19"
                         >
                           <div
                             aria-hidden="true"
-                            class="c21 c22"
+                            class="c20 c21"
                           >
                             <svg
                               class=""
@@ -553,22 +545,22 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             </svg>
                           </div>
                           <div
-                            class="c23"
+                            class="c22"
                           >
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c24"
+                                class="c23"
                               >
                                 password
                               </span>
                             </div>
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c25"
+                                class="c24"
                               >
                                 A type for modeling data
                               </span>
@@ -580,26 +572,26 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c16"
+                  class="c15"
                 >
                   <div
                     class=""
                     style="height: 100%;"
                   >
                     <div
-                      class="c17"
+                      class="c16"
                       style="height: 100%;"
                     >
                       <button
-                        class="c18 c19"
+                        class="c17 c18"
                         type="button"
                       >
                         <div
-                          class="c20"
+                          class="c19"
                         >
                           <div
                             aria-hidden="true"
-                            class="c21 c22"
+                            class="c20 c21"
                           >
                             <svg
                               class=""
@@ -625,22 +617,22 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             </svg>
                           </div>
                           <div
-                            class="c23"
+                            class="c22"
                           >
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c24"
+                                class="c23"
                               >
                                 number
                               </span>
                             </div>
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c25"
+                                class="c24"
                               >
                                 A type for modeling data
                               </span>
@@ -652,26 +644,26 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c16"
+                  class="c15"
                 >
                   <div
                     class=""
                     style="height: 100%;"
                   >
                     <div
-                      class="c26"
+                      class="c25"
                       style="height: 100%;"
                     >
                       <button
-                        class="c18 c19"
+                        class="c17 c18"
                         type="button"
                       >
                         <div
-                          class="c20"
+                          class="c19"
                         >
                           <div
                             aria-hidden="true"
-                            class="c21 c22"
+                            class="c20 c21"
                           >
                             <svg
                               class=""
@@ -699,22 +691,22 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             </svg>
                           </div>
                           <div
-                            class="c23"
+                            class="c22"
                           >
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c24"
+                                class="c23"
                               >
                                 enumeration
                               </span>
                             </div>
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c25"
+                                class="c24"
                               >
                                 A type for modeling data
                               </span>
@@ -726,26 +718,26 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c16"
+                  class="c15"
                 >
                   <div
                     class=""
                     style="height: 100%;"
                   >
                     <div
-                      class="c17"
+                      class="c16"
                       style="height: 100%;"
                     >
                       <button
-                        class="c18 c19"
+                        class="c17 c18"
                         type="button"
                       >
                         <div
-                          class="c20"
+                          class="c19"
                         >
                           <div
                             aria-hidden="true"
-                            class="c21 c22"
+                            class="c20 c21"
                           >
                             <svg
                               class=""
@@ -769,22 +761,22 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             </svg>
                           </div>
                           <div
-                            class="c23"
+                            class="c22"
                           >
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c24"
+                                class="c23"
                               >
                                 date
                               </span>
                             </div>
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c25"
+                                class="c24"
                               >
                                 A type for modeling data
                               </span>
@@ -796,26 +788,26 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c16"
+                  class="c15"
                 >
                   <div
                     class=""
                     style="height: 100%;"
                   >
                     <div
-                      class="c26"
+                      class="c25"
                       style="height: 100%;"
                     >
                       <button
-                        class="c18 c19"
+                        class="c17 c18"
                         type="button"
                       >
                         <div
-                          class="c20"
+                          class="c19"
                         >
                           <div
                             aria-hidden="true"
-                            class="c21 c22"
+                            class="c20 c21"
                           >
                             <svg
                               class=""
@@ -843,22 +835,22 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             </svg>
                           </div>
                           <div
-                            class="c23"
+                            class="c22"
                           >
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c24"
+                                class="c23"
                               >
                                 media
                               </span>
                             </div>
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c25"
+                                class="c24"
                               >
                                 A type for modeling data
                               </span>
@@ -870,26 +862,26 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c16"
+                  class="c15"
                 >
                   <div
                     class=""
                     style="height: 100%;"
                   >
                     <div
-                      class="c17"
+                      class="c16"
                       style="height: 100%;"
                     >
                       <button
-                        class="c18 c19"
+                        class="c17 c18"
                         type="button"
                       >
                         <div
-                          class="c20"
+                          class="c19"
                         >
                           <div
                             aria-hidden="true"
-                            class="c21 c22"
+                            class="c20 c21"
                           >
                             <svg
                               class=""
@@ -915,22 +907,22 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             </svg>
                           </div>
                           <div
-                            class="c23"
+                            class="c22"
                           >
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c24"
+                                class="c23"
                               >
                                 boolean
                               </span>
                             </div>
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c25"
+                                class="c24"
                               >
                                 A type for modeling data
                               </span>
@@ -942,26 +934,26 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c16"
+                  class="c15"
                 >
                   <div
                     class=""
                     style="height: 100%;"
                   >
                     <div
-                      class="c26"
+                      class="c25"
                       style="height: 100%;"
                     >
                       <button
-                        class="c18 c19"
+                        class="c17 c18"
                         type="button"
                       >
                         <div
-                          class="c20"
+                          class="c19"
                         >
                           <div
                             aria-hidden="true"
-                            class="c21 c22"
+                            class="c20 c21"
                           >
                             <svg
                               class=""
@@ -989,22 +981,22 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             </svg>
                           </div>
                           <div
-                            class="c23"
+                            class="c22"
                           >
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c24"
+                                class="c23"
                               >
                                 json
                               </span>
                             </div>
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c25"
+                                class="c24"
                               >
                                 A type for modeling data
                               </span>
@@ -1016,26 +1008,26 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c16"
+                  class="c15"
                 >
                   <div
                     class=""
                     style="height: 100%;"
                   >
                     <div
-                      class="c17"
+                      class="c16"
                       style="height: 100%;"
                     >
                       <button
-                        class="c18 c19"
+                        class="c17 c18"
                         type="button"
                       >
                         <div
-                          class="c20"
+                          class="c19"
                         >
                           <div
                             aria-hidden="true"
-                            class="c21 c22"
+                            class="c20 c21"
                           >
                             <svg
                               class=""
@@ -1059,22 +1051,22 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             </svg>
                           </div>
                           <div
-                            class="c23"
+                            class="c22"
                           >
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c24"
+                                class="c23"
                               >
                                 relation
                               </span>
                             </div>
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c25"
+                                class="c24"
                               >
                                 A type for modeling data
                               </span>
@@ -1086,26 +1078,26 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c16"
+                  class="c15"
                 >
                   <div
                     class=""
                     style="height: 100%;"
                   >
                     <div
-                      class="c26"
+                      class="c25"
                       style="height: 100%;"
                     >
                       <button
-                        class="c18 c19"
+                        class="c17 c18"
                         type="button"
                       >
                         <div
-                          class="c20"
+                          class="c19"
                         >
                           <div
                             aria-hidden="true"
-                            class="c21 c22"
+                            class="c20 c21"
                           >
                             <svg
                               class=""
@@ -1127,22 +1119,22 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             </svg>
                           </div>
                           <div
-                            class="c23"
+                            class="c22"
                           >
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c24"
+                                class="c23"
                               >
                                 uid
                               </span>
                             </div>
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c25"
+                                class="c24"
                               >
                                 A type for modeling data
                               </span>
@@ -1155,29 +1147,29 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <div
-                class="c15"
+                class="c14"
               >
                 <div
-                  class="c16"
+                  class="c15"
                 >
                   <div
                     class=""
                     style="height: 100%;"
                   >
                     <div
-                      class="c17"
+                      class="c16"
                       style="height: 100%;"
                     >
                       <button
-                        class="c18 c19"
+                        class="c17 c18"
                         type="button"
                       >
                         <div
-                          class="c20"
+                          class="c19"
                         >
                           <div
                             aria-hidden="true"
-                            class="c21 c22"
+                            class="c20 c21"
                           >
                             <svg
                               class=""
@@ -1209,22 +1201,22 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             </svg>
                           </div>
                           <div
-                            class="c23"
+                            class="c22"
                           >
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c24"
+                                class="c23"
                               >
                                 component
                               </span>
                             </div>
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c25"
+                                class="c24"
                               >
                                 A type for modeling data
                               </span>
@@ -1236,26 +1228,26 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c16"
+                  class="c15"
                 >
                   <div
                     class=""
                     style="height: 100%;"
                   >
                     <div
-                      class="c26"
+                      class="c25"
                       style="height: 100%;"
                     >
                       <button
-                        class="c18 c19"
+                        class="c17 c18"
                         type="button"
                       >
                         <div
-                          class="c20"
+                          class="c19"
                         >
                           <div
                             aria-hidden="true"
-                            class="c21 c22"
+                            class="c20 c21"
                           >
                             <svg
                               class=""
@@ -1281,22 +1273,22 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                             </svg>
                           </div>
                           <div
-                            class="c23"
+                            class="c22"
                           >
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c24"
+                                class="c23"
                               >
                                 dynamiczone
                               </span>
                             </div>
                             <div
-                              class="c20"
+                              class="c19"
                             >
                               <span
-                                class="c25"
+                                class="c24"
                               >
                                 A type for modeling data
                               </span>
@@ -1315,7 +1307,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
     </div>
   </div>
   <div
-    class="c27"
+    class="c26"
   >
     <p
       aria-live="polite"
