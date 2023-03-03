@@ -1,4 +1,4 @@
-import { PassThrough, Transform, Readable, Writable, Stream } from 'stream';
+import { PassThrough, Transform, Readable, Writable } from 'stream';
 import { extname } from 'path';
 import { EOL } from 'os';
 import { isEmpty, uniq, last } from 'lodash/fp';
@@ -26,7 +26,7 @@ import type { Diff } from '../utils/json';
 import { compareSchemas, validateProvider } from './validation';
 import { filter, map } from '../utils/stream';
 
-import { TransferEngineValidationError } from './errors';
+import { TransferEngineError, TransferEngineValidationError } from './errors';
 import {
   createDiagnosticReporter,
   IDiagnosticReporter,
@@ -94,6 +94,12 @@ class TransferEngine<
   };
 
   diagnostics: IDiagnosticReporter;
+
+  // TODO: can we use progress.stream instead?
+  #currentStream?: Writable;
+
+  // TODO: is there another way to communicate with the stream 'finish' event? send it another event first?
+  #aborted = false;
 
   constructor(sourceProvider: S, destinationProvider: D, options: ITransferEngineOptions) {
     this.diagnostics = createDiagnosticReporter();
@@ -248,9 +254,12 @@ class TransferEngine<
   ) {
     return new PassThrough({
       objectMode: true,
-      transform: (data, _encoding, callback) => {
+      transform: async (data, _encoding, callback) => {
         this.#updateTransferProgress(stage, data, aggregate);
         this.#emitStageUpdate('progress', stage);
+        await new Promise((resolve) => {
+          setTimeout(resolve, 300);
+        });
         callback(null, data);
       },
     });
@@ -266,7 +275,10 @@ class TransferEngine<
   /**
    * Shorthand method used to trigger stage update events to every listeners
    */
-  #emitStageUpdate(type: 'start' | 'finish' | 'progress' | 'skip', transferStage: TransferStage) {
+  #emitStageUpdate(
+    type: 'start' | 'finish' | 'progress' | 'skip' | 'abort',
+    transferStage: TransferStage
+  ) {
     this.progress.stream.emit(`stage::${type}`, {
       data: this.progress.data,
       stage: transferStage,
@@ -475,7 +487,7 @@ class TransferEngine<
     this.#emitStageUpdate('start', stage);
 
     await new Promise<void>((resolve, reject) => {
-      let stream: Stream = source;
+      let stream: Readable = source;
 
       if (transform) {
         stream = stream.pipe(transform);
@@ -485,21 +497,35 @@ class TransferEngine<
         stream = stream.pipe(tracker);
       }
 
-      stream
+      this.#currentStream = stream
         .pipe(destination)
         .on('error', (e) => {
           updateEndTime();
           this.#reportError(e, 'error');
           destination.destroy(e);
+          this.#currentStream = undefined;
           reject(e);
         })
         .on('close', () => {
+          if (this.#aborted) {
+            this.#emitStageUpdate('abort', stage);
+            reject(new TransferEngineError('fatal', 'Transfer aborted.'));
+          }
+
+          this.#currentStream = undefined;
           updateEndTime();
           resolve();
         });
     });
 
     this.#emitStageUpdate('finish', stage);
+  }
+
+  // Cause an ongoing transfer to abort gracefully
+  async abortTransfer(): Promise<void> {
+    this.#aborted = true;
+    this.#currentStream?.destroy();
+    await this.close();
   }
 
   async init(): Promise<void> {

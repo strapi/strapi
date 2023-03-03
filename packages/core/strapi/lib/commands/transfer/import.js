@@ -20,6 +20,7 @@ const {
   createStrapiInstance,
   formatDiagnostic,
   loadersFactory,
+  exitMessageText,
 } = require('./utils');
 const { exitWith } = require('../utils/helpers');
 
@@ -123,8 +124,7 @@ module.exports = async (opts) => {
     results = await engine.transfer();
   } catch (e) {
     await strapiInstance.telemetry.send('didDEITSProcessFail', getTelemetryPayload());
-    console.error('Import process failed.');
-    process.exit(1);
+    exitWith(1, exitMessageText('import', true));
   }
 
   try {
@@ -137,7 +137,7 @@ module.exports = async (opts) => {
   await strapiInstance.telemetry.send('didDEITSProcessFinish', getTelemetryPayload());
   await strapiInstance.destroy();
 
-  exitWith(0, 'Import process has been completed successfully!');
+  exitWith(0, exitMessageText('import'));
 };
 
 /**

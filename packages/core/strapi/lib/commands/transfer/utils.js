@@ -14,6 +14,18 @@ const { readableBytes, exitWith } = require('../utils/helpers');
 const strapi = require('../../index');
 const { getParseListWithChoices } = require('../utils/commander');
 
+const exitMessageText = (process, success = true) => {
+  const processCapitalized = process[0].toUpperCase() + process.slice(1);
+
+  if (success) {
+    return chalk.bold(
+      chalk.green(`${processCapitalized} process has been completed successfully!`)
+    );
+  }
+
+  return chalk.bold(chalk.red(`${processCapitalized} process failed.`));
+};
+
 const pad = (n) => {
   return (n < 10 ? '0' : '') + String(n);
 };
@@ -88,12 +100,12 @@ const DEFAULT_IGNORED_CONTENT_TYPES = [
   'admin::audit-log',
 ];
 
-const createStrapiInstance = async (logLevel = 'error') => {
+const createStrapiInstance = async (opts = {}) => {
   try {
     const appContext = await strapi.compile();
-    const app = strapi(appContext);
+    const app = strapi({ ...opts, ...appContext });
 
-    app.log.level = logLevel;
+    app.log.level = opts.logLevel || 'error';
     return await app.load();
   } catch (err) {
     if (err.code === 'ECONNREFUSED') {
@@ -217,6 +229,7 @@ module.exports = {
   DEFAULT_IGNORED_CONTENT_TYPES,
   createStrapiInstance,
   excludeOption,
+  exitMessageText,
   onlyOption,
   validateExcludeOnly,
   formatDiagnostic,

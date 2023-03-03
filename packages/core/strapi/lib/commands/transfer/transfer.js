@@ -9,7 +9,6 @@ const {
   },
 } = require('@strapi/data-transfer/lib/strapi');
 const { isObject } = require('lodash/fp');
-const chalk = require('chalk');
 
 const {
   buildTransferTable,
@@ -17,8 +16,14 @@ const {
   DEFAULT_IGNORED_CONTENT_TYPES,
   formatDiagnostic,
   loadersFactory,
+  exitMessageText,
 } = require('./utils');
 const { exitWith } = require('../utils/helpers');
+
+const gracefulAbort = async (engine) => {
+  await engine.abortTransfer();
+  exitWith(1, exitMessageText('transfer', false));
+};
 
 /**
  * @typedef TransferCommandOptions Options given to the CLI transfer command
@@ -42,7 +47,7 @@ module.exports = async (opts) => {
     exitWith(1, 'Could not parse command arguments');
   }
 
-  const strapi = await createStrapiInstance();
+  const strapi = await createStrapiInstance({ destroyOnSignal: false });
 
   let source;
   let destination;
@@ -133,15 +138,24 @@ module.exports = async (opts) => {
     updateLoader(stage, data);
   });
 
+  progress.on('stage::abort', ({ stage, data }) => {
+    updateLoader(stage, data).fail();
+  });
+
   let results;
   try {
     console.log(`Starting transfer...`);
+
+    ['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach((signal) => {
+      process.on(signal, () => gracefulAbort(engine));
+    });
+
     results = await engine.transfer();
   } catch (e) {
-    exitWith(1, 'Transfer process failed.');
+    exitWith(1, exitMessageText('transfer', false));
   }
 
   const table = buildTransferTable(results.engine);
   console.log(table.toString());
-  exitWith(0, `${chalk.bold('Transfer process has been completed successfully!')}`);
+  exitWith(0, exitMessageText('transfer'));
 };

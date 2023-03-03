@@ -19,6 +19,7 @@ const {
   createStrapiInstance,
   formatDiagnostic,
   loadersFactory,
+  exitMessageText,
 } = require('./utils');
 const { exitWith } = require('../utils/helpers');
 /**
@@ -119,7 +120,7 @@ module.exports = async (opts) => {
     }
   } catch {
     await strapi.telemetry.send('didDEITSProcessFail', getTelemetryPayload());
-    exitWith(1, 'Export process failed.');
+    exitWith(1, exitMessageText('export', true));
   }
 
   await strapi.telemetry.send('didDEITSProcessFinish', getTelemetryPayload());
@@ -130,7 +131,8 @@ module.exports = async (opts) => {
     console.error('There was an error displaying the results of the transfer.');
   }
 
-  console.log(`${chalk.bold('Export process has been completed successfully!')}`);
+  // TODO: should the archive filename come before the exit text?
+  console.log(exitMessageText('export'));
   exitWith(0, `Export archive is in ${chalk.green(outFile)}`);
 };
 
