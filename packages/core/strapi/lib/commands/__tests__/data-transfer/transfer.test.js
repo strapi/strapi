@@ -22,6 +22,7 @@ describe('Transfer', () => {
         },
       };
     }),
+    exitMessageText: jest.fn(),
   };
   jest.mock(
     '../../transfer/utils',

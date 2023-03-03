@@ -20,14 +20,13 @@ const {
 } = require('./utils');
 const { exitWith } = require('../utils/helpers');
 
-const gracefulAbort = async ({ engine, strapi }) => {
+const gracefulAbort = async ({ engine }) => {
   try {
     await engine.abortTransfer();
     await strapi.destroy();
   } catch (e) {
     // ignore
   }
-  exitWith(1, exitMessageText('transfer', false));
 };
 
 /**
@@ -143,7 +142,7 @@ module.exports = async (opts) => {
     updateLoader(stage, data);
   });
 
-  progress.on('stage::abort', ({ stage, data }) => {
+  progress.on('stage::error', ({ stage, data }) => {
     updateLoader(stage, data).fail();
   });
 
@@ -151,6 +150,7 @@ module.exports = async (opts) => {
   try {
     console.log(`Starting transfer...`);
 
+    // TODO: should this be the responsibility of the engine? Otherwise it has to be done in transfer/export/import and could be forgotten (leading to uninterruptable transfers)
     ['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach((signal) => {
       process.on(signal, () => gracefulAbort({ engine, strapi }));
     });

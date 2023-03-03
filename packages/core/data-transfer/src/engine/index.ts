@@ -273,7 +273,7 @@ class TransferEngine<
    * Shorthand method used to trigger stage update events to every listeners
    */
   #emitStageUpdate(
-    type: 'start' | 'finish' | 'progress' | 'skip' | 'abort',
+    type: 'start' | 'finish' | 'progress' | 'skip' | 'error',
     transferStage: TransferStage
   ) {
     this.progress.stream.emit(`stage::${type}`, {
@@ -498,17 +498,12 @@ class TransferEngine<
         .pipe(destination)
         .on('error', (e) => {
           updateEndTime();
+          this.#emitStageUpdate('error', stage);
           this.#reportError(e, 'error');
           destination.destroy(e);
-          this.#currentStream = undefined;
           reject(e);
         })
         .on('close', () => {
-          if (this.#aborted) {
-            this.#emitStageUpdate('abort', stage);
-            reject(new TransferEngineError('fatal', 'Transfer aborted.'));
-          }
-
           this.#currentStream = undefined;
           updateEndTime();
           resolve();
@@ -520,9 +515,7 @@ class TransferEngine<
 
   // Cause an ongoing transfer to abort gracefully
   async abortTransfer(): Promise<void> {
-    this.#aborted = true;
-    this.#currentStream?.destroy();
-    await this.close();
+    this.#currentStream?.destroy(new TransferEngineError('fatal', 'Transfer aborted.'));
   }
 
   async init(): Promise<void> {

@@ -121,6 +121,7 @@ module.exports = async (opts) => {
 
   let results;
   try {
+    // TODO: add signal listeners for abort
     results = await engine.transfer();
   } catch (e) {
     await strapiInstance.telemetry.send('didDEITSProcessFail', getTelemetryPayload());

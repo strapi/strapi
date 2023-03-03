@@ -112,6 +112,7 @@ module.exports = async (opts) => {
   let results;
   let outFile;
   try {
+    // TODO: add signal listeners for abort
     results = await engine.transfer();
     outFile = results.destination.file.path;
     const outFileExists = await fs.pathExists(outFile);
