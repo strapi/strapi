@@ -3,11 +3,11 @@
 const dataTransferAuthStrategy = require('../strategies/data-transfer');
 
 module.exports = [
-  // Transfer route
+  // Transfer Push
   {
     method: 'GET',
-    path: '/transfer/runner/connect',
-    handler: 'transfer.runner-connect',
+    path: '/transfer/runner/push',
+    handler: 'transfer.runner-push',
     config: {
       middlewares: [
         (ctx, next) => {
@@ -18,8 +18,25 @@ module.exports = [
           return next();
         },
       ],
-      // TODO: Allow not passing any scope <> Add a way to prevent assigning one by default
       auth: { strategies: [dataTransferAuthStrategy], scope: ['push'] },
+    },
+  },
+  // Transfer Pull
+  {
+    method: 'GET',
+    path: '/transfer/runner/pull',
+    handler: 'transfer.runner-pull',
+    config: {
+      middlewares: [
+        (ctx, next) => {
+          if (process.env.STRAPI_DISABLE_REMOTE_DATA_TRANSFER === 'true') {
+            return ctx.notFound();
+          }
+
+          return next();
+        },
+      ],
+      auth: { strategies: [dataTransferAuthStrategy], scope: ['pull'] },
     },
   },
   // Transfer Tokens
