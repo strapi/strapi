@@ -20,8 +20,9 @@ const {
 } = require('./utils');
 const { exitWith } = require('../utils/helpers');
 
-const gracefulAbort = async (engine) => {
+const gracefulAbort = async ({ engine, strapi }) => {
   await engine.abortTransfer();
+  await strapi.destroy();
   exitWith(1, exitMessageText('transfer', false));
 };
 
@@ -147,7 +148,7 @@ module.exports = async (opts) => {
     console.log(`Starting transfer...`);
 
     ['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach((signal) => {
-      process.on(signal, () => gracefulAbort(engine));
+      process.on(signal, () => gracefulAbort({ engine, strapi }));
     });
 
     results = await engine.transfer();
