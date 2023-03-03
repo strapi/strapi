@@ -30,6 +30,12 @@ const productWithMedia = {
       required: true,
       allowedTypes: ['images', 'files', 'videos', 'audios'],
     },
+    nonRequiredMultipleMedia: {
+      type: 'media',
+      multiple: true,
+      required: false,
+      allowedTypes: ['images', 'files', 'videos', 'audios'],
+    },
   },
   displayName: 'product-with-media',
   singularName: 'product-with-media',
@@ -67,6 +73,7 @@ describe('Core API - Basic + required media', () => {
       name: 'product',
       description: 'description',
       media: file.id,
+      nonRequiredMultipleMedia: [],
     };
 
     const res = await rq({
