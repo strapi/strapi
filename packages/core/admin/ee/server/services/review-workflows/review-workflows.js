@@ -37,7 +37,7 @@ function buildStagesConnectArray(stages) {
   });
 }
 
-async function initDefaultWorkflow({ workflowsService, stagesService }) {
+async function initDefaultWorkflow({ workflowsService, stagesService, strapi }) {
   const wfCount = await workflowsService.count();
   const stagesCount = await stagesService.count();
 
@@ -136,7 +136,7 @@ module.exports = ({ strapi }) => {
 
   return {
     async bootstrap() {
-      await initDefaultWorkflow({ workflowsService, stagesService });
+      await initDefaultWorkflow({ workflowsService, stagesService, strapi });
     },
     async register() {
       extendReviewWorkflowContentTypes({ strapi });

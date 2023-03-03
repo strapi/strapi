@@ -29,7 +29,13 @@ const stagesServiceMock = {
   createMany: jest.fn(() => stagesMock),
 };
 
+const queryMock = {
+  findOne: jest.fn(),
+};
+
 const strapiMock = {
+  contentTypes: {},
+  query: jest.fn(() => queryMock),
   service(serviceName) {
     switch (serviceName) {
       case 'admin::stages':
