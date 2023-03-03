@@ -53,7 +53,8 @@ module.exports = (db) => {
   const diffIndexes = (oldIndex, index) => {
     const changes = [];
 
-    if (!_.isEqual(oldIndex.columns, index.columns)) {
+    // we need to sort the array because sometimes the column indexes are returned in a different order
+    if (!_.isEqual(oldIndex.columns.sort(), index.columns.sort())) {
       changes.push('columns');
     }
 
