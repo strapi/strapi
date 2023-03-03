@@ -1,34 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
-.c11 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c20 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c2 {
+.c1 {
   padding-right: 40px;
   padding-left: 40px;
   position: fixed;
   z-index: 4;
 }
 
-.c5 {
+.c4 {
   background: #ffffff;
   border-radius: 4px;
   box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
 }
 
-.c7 {
+.c6 {
   background: #f6f6f9;
   padding-top: 16px;
   padding-right: 20px;
@@ -36,15 +22,36 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   padding-left: 20px;
 }
 
+.c11 {
+  padding: 8px;
+  border-radius: 4px;
+  border-color: #dcdce4;
+  border: 1px solid #dcdce4;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+}
+
 .c14 {
   padding: 32px;
 }
 
-.c22 {
+.c21 {
   padding-right: 12px;
 }
 
-.c3 {
+.c26 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
+}
+
+.c2 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -62,7 +69,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   justify-content: center;
 }
 
-.c9 {
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -92,9 +99,10 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 4px;
 }
 
-.c21 {
+.c20 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -108,25 +116,43 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
-.c19 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c19 > * + * {
-  margin-top: 4px;
-}
-
-.c12 {
+.c27 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c10 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c19 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c29 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c12 {
   position: relative;
   outline: none;
 }
@@ -187,103 +213,10 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c27 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
+.c28 {
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
   border: 1px solid #dcdce4;
   background: #ffffff;
-}
-
-.c27 .c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c27 .c10 {
-  color: #ffffff;
-}
-
-.c27[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c27[aria-disabled='true'] .c10 {
-  color: #666687;
-}
-
-.c27[aria-disabled='true'] svg > g,.c27[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c27[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c27[aria-disabled='true']:active .c10 {
-  color: #666687;
-}
-
-.c27[aria-disabled='true']:active svg > g,.c27[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c27:hover {
-  background-color: #f6f6f9;
-}
-
-.c27:active {
-  background-color: #eaeaef;
-}
-
-.c27 .c10 {
-  color: #32324d;
-}
-
-.c27 svg > g,
-.c27 svg path {
-  fill: #32324d;
-}
-
-.c28 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
-  height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
-}
-
-.c28 .c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c28 .c10 {
-  color: #ffffff;
 }
 
 .c28[aria-disabled='true'] {
@@ -291,7 +224,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   background: #eaeaef;
 }
 
-.c28[aria-disabled='true'] .c10 {
+.c28[aria-disabled='true'] .c9 {
   color: #666687;
 }
 
@@ -304,7 +237,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   background: #eaeaef;
 }
 
-.c28[aria-disabled='true']:active .c10 {
+.c28[aria-disabled='true']:active .c9 {
   color: #666687;
 }
 
@@ -313,17 +246,64 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
 }
 
 .c28:hover {
-  border: 1px solid #7b79ff;
-  background: #7b79ff;
+  background-color: #f6f6f9;
 }
 
 .c28:active {
-  border: 1px solid #4945ff;
-  background: #4945ff;
+  background-color: #eaeaef;
+}
+
+.c28 .c9 {
+  color: #32324d;
 }
 
 .c28 svg > g,
 .c28 svg path {
+  fill: #32324d;
+}
+
+.c30 {
+  height: 2rem;
+}
+
+.c30[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c30[aria-disabled='true'] .c9 {
+  color: #666687;
+}
+
+.c30[aria-disabled='true'] svg > g,.c30[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c30[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c30[aria-disabled='true']:active .c9 {
+  color: #666687;
+}
+
+.c30[aria-disabled='true']:active svg > g,.c30[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c30:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c30:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c30 svg > g,
+.c30 svg path {
   fill: #ffffff;
 }
 
@@ -336,23 +316,6 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
 .c17 {
   grid-column: span 12;
   max-width: 100%;
-}
-
-.c13 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
 }
 
 .c13 svg > g,
@@ -370,34 +333,30 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   fill: #a5a5ba;
 }
 
-.c13[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
 .c13[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c4 {
+.c3 {
   inset: 0;
   background: #32324d1F;
 }
 
-.c6 {
+.c5 {
   width: 51.875rem;
 }
 
-.c8 {
+.c7 {
   border-radius: 4px 4px 0 0;
   border-bottom: 1px solid #eaeaef;
 }
 
-.c25 {
+.c24 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
 
-.c26 > * + * {
+.c25 > * + * {
   margin-left: 8px;
 }
 
@@ -406,23 +365,23 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   max-height: 60vh;
 }
 
-.c23 {
+.c22 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c23 svg {
+.c22 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c23 svg path {
+.c22 svg path {
   fill: #666687;
 }
 
-.c24 {
+.c23 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -431,7 +390,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   border: none;
 }
 
-.c24 svg {
+.c23 svg {
   width: 0.5625rem;
 }
 
@@ -478,14 +437,14 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
     data-react-portal="true"
   >
     <div
-      class="c1 c2 c3 c4"
+      class="c1 c2 c3"
     >
       <div>
         <div>
           <div
             aria-labelledby="title"
             aria-modal="true"
-            class="c1 c5 c6"
+            class="c4 c5"
             role="dialog"
           >
             <form
@@ -493,20 +452,20 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
               novalidate=""
             >
               <div
-                class="c1 c7 c8"
+                class="c6 c7"
               >
                 <div
-                  class="c1 c9"
+                  class="c8"
                 >
                   <h2
-                    class="c10 c11"
+                    class="c9 c10"
                     id="title"
                   >
                     Move elements to
                   </h2>
                   <button
                     aria-disabled="false"
-                    class="c12 c13"
+                    class="c11 c2 c12 c13"
                     type="button"
                   >
                     <span
@@ -518,13 +477,13 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
                       aria-hidden="true"
                       fill="none"
                       focusable="false"
-                      height="1em"
+                      height="1rem"
                       viewBox="0 0 24 24"
-                      width="1em"
+                      width="1rem"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                        d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
                         fill="#212134"
                       />
                     </svg>
@@ -532,26 +491,26 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <div
-                class="c1 c14 c15"
+                class="c14 c15"
               >
                 <div
-                  class="c1 c16"
+                  class="c16"
                 >
                   <div
                     class="c17"
                   >
                     <div
-                      class="c1 "
+                      class=""
                     >
                       <div
-                        class="c1 c18 c19"
+                        class="c18"
                       >
                         <label
-                          class="c10 c20"
+                          class="c9 c19"
                           for="folder-destination"
                         >
                           <div
-                            class="c1 c21"
+                            class="c20"
                           >
                             Location
                           </div>
@@ -599,18 +558,18 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
                             >
                               <div
                                 aria-hidden="true"
-                                class="c1 c22 c23 c24"
+                                class="c21 c22 c23"
                               >
                                 <svg
                                   fill="none"
-                                  height="1em"
+                                  height="1rem"
                                   viewBox="0 0 14 8"
-                                  width="1em"
+                                  width="1rem"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
                                     clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                     fill="#32324D"
                                     fill-rule="evenodd"
                                   />
@@ -630,37 +589,37 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <div
-                class="c1 c7 c25"
+                class="c6 c24"
               >
                 <div
-                  class="c1 c9"
+                  class="c8"
                 >
                   <div
-                    class="c1 c21 c26"
+                    class="c20 c25"
                   >
                     <button
                       aria-disabled="false"
-                      class="c12 c27"
+                      class="c26 c27 c12 c28"
                       name="cancel"
                       type="button"
                     >
                       <span
-                        class="c10 c20"
+                        class="c9 c29"
                       >
                         Cancel
                       </span>
                     </button>
                   </div>
                   <div
-                    class="c1 c21 c26"
+                    class="c20 c25"
                   >
                     <button
                       aria-disabled="false"
-                      class="c12 c28"
+                      class="c26 c27 c12 c30"
                       type="submit"
                     >
                       <span
-                        class="c10 c20"
+                        class="c9 c29"
                       >
                         Move
                       </span>

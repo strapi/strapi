@@ -3,10 +3,10 @@ import type { IEntity, ILink, IConfiguration, IAsset } from '../../../../common-
 
 export type TransferPushMessage = CreateTransferMessage<
   'step',
-  | TransferStepCommands<'entities', IEntity>
-  | TransferStepCommands<'links', ILink>
-  | TransferStepCommands<'configuration', IConfiguration>
-  | TransferStepCommands<'assets', TransferAssetFlow | null>
+  | TransferStepCommands<'entities', IEntity[]>
+  | TransferStepCommands<'links', ILink[]>
+  | TransferStepCommands<'configuration', IConfiguration[]>
+  | TransferStepCommands<'assets', TransferAssetFlow[] | null>
 >;
 
 export type GetTransferPushStreamData<T extends TransferPushStep> = {

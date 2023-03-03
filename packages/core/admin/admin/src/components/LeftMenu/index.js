@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { NavLink as RouterNavLink, useLocation, useHistory } from 'react-router-dom';
-import { Divider, FocusTrap, Box, Typography, Stack } from '@strapi/design-system';
+import { Divider, FocusTrap, Box, Typography, Flex } from '@strapi/design-system';
 import {
   MainNav,
   NavBrand,
@@ -203,7 +203,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
             hasRadius
           >
             <FocusTrap onEscape={handleToggleUserLinks}>
-              <Stack spacing={0}>
+              <Flex direction="column" alignItems="stretch" gap={0}>
                 <LinkUser tabIndex={0} onClick={handleToggleUserLinks} to="/me">
                   <Typography>
                     {formatMessage({
@@ -221,7 +221,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
                   </Typography>
                   <Exit />
                 </LinkUser>
-              </Stack>
+              </Flex>
             </FocusTrap>
           </LinkUserWrapper>
         )}

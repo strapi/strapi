@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Portal, FocusTrap, IconButton, Box, Flex, Typography, Stack } from '@strapi/design-system';
+import { Portal, FocusTrap, IconButton, Box, Flex, Typography } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
 import { ExternalLink, Cross } from '@strapi/icons';
 import { setHexOpacity, useLockScroll } from '@strapi/helper-plugin';
@@ -41,8 +41,7 @@ const UpgradeContainer = styled(Flex)`
   }
 `;
 
-const StackFlexStart = styled(Stack)`
-  align-items: flex-start;
+const FlexStart = styled(Flex)`
   max-width: ${400 / 16}rem;
   z-index: 0;
 `;
@@ -75,14 +74,14 @@ const UpgradePlanModal = ({ onClose, isOpen }) => {
             <CloseButtonContainer>
               <IconButton onClick={onClose} aria-label="Close" icon={<Cross />} />
             </CloseButtonContainer>
-            <StackFlexStart spacing={6}>
+            <FlexStart direction="column" alignItems="flex-start" gap={6}>
               <Typography fontWeight="bold" textColor="primary600">
                 {formatMessage({
                   id: 'app.components.UpgradePlanModal.text-ce',
                   defaultMessage: 'COMMUNITY EDITION',
                 })}
               </Typography>
-              <Stack spacing={2}>
+              <Flex direction="column" alignItems="stretch" gap={2}>
                 <Typography variant="alpha" as="h2" id="upgrade-plan">
                   {formatMessage({
                     id: 'app.components.UpgradePlanModal.limit-reached',
@@ -96,7 +95,7 @@ const UpgradePlanModal = ({ onClose, isOpen }) => {
                       'Unlock the full power of Strapi by upgrading your plan to the Enterprise Edition',
                   })}
                 </Typography>
-              </Stack>
+              </Flex>
               <LinkButton
                 href="https://strapi.io/pricing-self-hosted"
                 isExternal
@@ -107,7 +106,7 @@ const UpgradePlanModal = ({ onClose, isOpen }) => {
                   defaultMessage: 'Learn more',
                 })}
               </LinkButton>
-            </StackFlexStart>
+            </FlexStart>
             <img src={BigArrow} alt="upgrade-arrow" />
           </UpgradeContainer>
         </FocusTrap>

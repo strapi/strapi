@@ -36,22 +36,29 @@ const readableBytes = (bytes, decimals = 1, padStart = 0) => {
  *
  * @param {number} code Code to exit process with
  * @param {string | Array} message Message(s) to display before exiting
+ * @param {Object} options
+ * @param {console} options.logger - logger object, defaults to console
+ * @param {process} options.prc - process object, defaults to process
+ *
  */
-const exitWith = (code, message = undefined) => {
-  const logger = (message) => {
+const exitWith = (code, message = undefined, options = {}) => {
+  const { logger = console, prc = process } = options;
+
+  const log = (message) => {
     if (code === 0) {
-      console.log(chalk.green(message));
+      logger.log(chalk.green(message));
     } else {
-      console.error(chalk.red(message));
+      logger.error(chalk.red(message));
     }
   };
 
   if (isString(message)) {
-    logger(message);
+    log(message);
   } else if (isArray(message)) {
-    message.forEach((msg) => logger(msg));
+    message.forEach((msg) => log(msg));
   }
-  process.exit(code);
+
+  prc.exit(code);
 };
 
 /**

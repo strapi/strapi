@@ -256,5 +256,53 @@ describe('Audit logs service', () => {
 
       expect(mockSaveEvent).not.toHaveBeenCalled();
     });
+
+    it('should use username if user has username when returning an event', async () => {
+      mockEntityServiceFindOne.mockResolvedValueOnce({
+        user: {
+          username: 'testUser',
+          firstname: 'John',
+          lastname: 'Doe',
+          email: 'john@doe.com',
+        },
+      });
+
+      const auditLogsService = createAuditLogsService(strapi);
+      await auditLogsService.register();
+      const event = await auditLogsService.findOne(1);
+      expect(event.user.displayName).toEqual('testUser');
+    });
+
+    it('should use firstname and lastname if user doesnt have username when returning an event', async () => {
+      mockEntityServiceFindOne.mockResolvedValueOnce({
+        user: {
+          username: null,
+          firstname: 'John',
+          lastname: 'Doe',
+          email: 'john@doe.com',
+        },
+      });
+
+      const auditLogsService = createAuditLogsService(strapi);
+      await auditLogsService.register();
+      const event = await auditLogsService.findOne(1);
+      expect(event.user.displayName).toEqual('John Doe');
+    });
+
+    it('should use email if username and firstname and lastname are not defined when returning an event', async () => {
+      mockEntityServiceFindOne.mockResolvedValueOnce({
+        user: {
+          username: null,
+          firstname: null,
+          lastname: null,
+          email: 'john@doe.com',
+        },
+      });
+
+      const auditLogsService = createAuditLogsService(strapi);
+      await auditLogsService.register();
+      const event = await auditLogsService.findOne(1);
+      expect(event.user.displayName).toEqual('john@doe.com');
+    });
   });
 });

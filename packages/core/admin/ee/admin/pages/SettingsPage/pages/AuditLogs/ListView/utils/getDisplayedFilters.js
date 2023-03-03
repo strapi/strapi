@@ -13,6 +13,26 @@ const customOperators = [
 ];
 
 const getDisplayedFilters = ({ formatMessage, users }) => {
+  const getDisplaynameFromUser = (user) => {
+    if (user.username) {
+      return user.username;
+    }
+    if (user.firstname && user.lastname) {
+      return formatMessage(
+        {
+          id: 'Settings.permissions.auditLogs.user.fullname',
+          defaultMessage: '{firstname} {lastname}',
+        },
+        {
+          firstname: user.firstname,
+          lastname: user.lastname,
+        }
+      );
+    }
+
+    return user.email;
+  };
+
   const actionOptions = Object.keys(actionTypes).map((action) => {
     return {
       label: formatMessage(
@@ -30,16 +50,7 @@ const getDisplayedFilters = ({ formatMessage, users }) => {
     users &&
     users.results.map((user) => {
       return {
-        label: formatMessage(
-          {
-            id: 'Settings.permissions.auditLogs.user.fullname',
-            defaultMessage: '{firstname} {lastname}',
-          },
-          {
-            firstname: user.firstname,
-            lastname: user.lastname,
-          }
-        ),
+        label: getDisplaynameFromUser(user),
         // Combobox expects a string value
         customValue: user.id.toString(),
       };

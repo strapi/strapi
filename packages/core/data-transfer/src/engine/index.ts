@@ -202,7 +202,7 @@ class TransferEngine<
     }
   ) {
     if (!this.progress.data[stage]) {
-      this.progress.data[stage] = { count: 0, bytes: 0 };
+      this.progress.data[stage] = { count: 0, bytes: 0, startTime: Date.now() };
     }
 
     const stageProgress = this.progress.data[stage];
@@ -437,6 +437,14 @@ class TransferEngine<
   }) {
     const { stage, source, destination, transform, tracker } = options;
 
+    const updateEndTime = () => {
+      const stageData = this.progress.data[stage];
+
+      if (stageData) {
+        stageData.endTime = Date.now();
+      }
+    };
+
     if (!source || !destination || this.shouldSkipStage(stage)) {
       // Wait until source and destination are closed
       const results = await Promise.allSettled(
@@ -480,11 +488,15 @@ class TransferEngine<
       stream
         .pipe(destination)
         .on('error', (e) => {
+          updateEndTime();
           this.#reportError(e, 'error');
           destination.destroy(e);
           reject(e);
         })
-        .on('close', resolve);
+        .on('close', () => {
+          updateEndTime();
+          resolve();
+        });
     });
 
     this.#emitStageUpdate('finish', stage);
@@ -691,7 +703,7 @@ class TransferEngine<
     const transform = this.#createStageTransformStream(stage);
     const tracker = this.#progressTracker(stage, {
       size: (value: IAsset) => value.stats.size,
-      key: (value: IAsset) => extname(value.filename) ?? 'NA',
+      key: (value: IAsset) => extname(value.filename) || 'No extension',
     });
 
     await this.#transferStage({ stage, source, destination, transform, tracker });
@@ -717,3 +729,5 @@ export const createTransferEngine = <S extends ISourceProvider, D extends IDesti
 ): TransferEngine<S, D> => {
   return new TransferEngine<S, D>(sourceProvider, destinationProvider, options);
 };
+
+export * as errors from './errors';

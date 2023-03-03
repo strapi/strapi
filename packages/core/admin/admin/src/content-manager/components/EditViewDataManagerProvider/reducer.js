@@ -156,11 +156,13 @@ const reducer = (state, action) =>
         const initialDataRelations = get(state, initialDataPath);
         const modifiedDataRelations = get(state, modifiedDataPath);
 
-        const valuesToLoad = value.filter((relation) => {
-          return !initialDataRelations.some((initialDataRelation) => {
-            return initialDataRelation.id === relation.id;
-          });
-        });
+        const valuesToLoad = !initialDataRelations
+          ? value
+          : value.filter((relation) => {
+              return !initialDataRelations.some((initialDataRelation) => {
+                return initialDataRelation.id === relation.id;
+              });
+            });
 
         const keys = generateNKeysBetween(
           null,
@@ -282,9 +284,7 @@ const reducer = (state, action) =>
          * relationalFieldPaths won't be an array which is what we're expecting
          * Therefore we reset these bits of state to the correct data type
          * which is an array. Hence why we replace those fields.
-         *
          */
-
         const mergeDataWithPreparedRelations = relationalFieldPaths
           .map((path) => path.split('.'))
           .reduce((acc, currentPaths) => {
@@ -301,7 +301,14 @@ const reducer = (state, action) =>
               return result;
             }, existingComponents);
 
-            if (state.modifiedData && get(state.modifiedData, componentName)) {
+            if (
+              state.modifiedData &&
+              get(state.modifiedData, componentName) &&
+              /**
+               * Only replace the state if the entity ids are the same.
+               */
+              state.modifiedData?.id === initialValues?.id
+            ) {
               /**
                * this will be null on initial load, however subsequent calls
                * will have data in them correlating to the names of the relational fields.

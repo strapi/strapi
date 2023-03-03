@@ -1,15 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import {
-  Dialog,
-  DialogBody,
-  DialogFooter,
-  Stack,
-  Flex,
-  Typography,
-  Button,
-} from '@strapi/design-system';
+import { Dialog, DialogBody, DialogFooter, Flex, Typography, Button } from '@strapi/design-system';
 import { ExclamationMarkCircle, Trash } from '@strapi/icons';
 import InjectionZoneList from '../../InjectionZoneList';
 
@@ -28,7 +20,7 @@ const ConfirmDialogDelete = ({ isConfirmButtonLoading, isOpen, onToggleDialog, o
       isOpen={isOpen}
     >
       <DialogBody icon={<ExclamationMarkCircle />}>
-        <Stack spacing={2}>
+        <Flex direction="column" alignItems="stretch" gap={2}>
           <Flex justifyContent="center">
             <Typography id="confirm-description">
               {formatMessage({
@@ -40,7 +32,7 @@ const ConfirmDialogDelete = ({ isConfirmButtonLoading, isOpen, onToggleDialog, o
           <Flex>
             <InjectionZoneList area="contentManager.listView.deleteModalAdditionalInfos" />
           </Flex>
-        </Stack>
+        </Flex>
       </DialogBody>
       <DialogFooter
         startAction={

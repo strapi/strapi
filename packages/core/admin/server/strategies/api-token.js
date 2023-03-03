@@ -24,7 +24,8 @@ const extractToken = (ctx) => {
 /**
  * Authenticate the validity of the token
  *
- *  @type {import('.').AuthenticateFunction} */
+ *  @type {import('.').AuthenticateFunction}
+ */
 const authenticate = async (ctx) => {
   const apiTokenService = getService('api-token');
   const token = extractToken(ctx);
@@ -72,7 +73,8 @@ const authenticate = async (ctx) => {
 /**
  * Verify the token has the required abilities for the requested scope
  *
- *  @type {import('.').VerifyFunction} */
+ *  @type {import('.').VerifyFunction}
+ */
 const verify = (auth, config) => {
   const { credentials: apiToken, ability } = auth;
 
