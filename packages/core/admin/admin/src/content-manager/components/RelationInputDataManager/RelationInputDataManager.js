@@ -58,7 +58,7 @@ export const RelationInputDataManager = ({
   const currentLastPage = Math.ceil(get(initialData, name, []).length / RELATIONS_TO_DISPLAY);
 
   const { relations, search, searchFor } = useRelation(
-    [slug, initialDataPath.join('.'), modifiedData.id],
+    [slug, initialDataPath.join('.'), modifiedData.id, defaultParams],
     {
       relation: {
         enabled: !!endpoints.relation,
