@@ -60,7 +60,7 @@
     "babel-plugin-styled-components": "2.0.2",
     "bcryptjs": "2.4.3",
     "browserslist-to-esbuild": "1.2.0",
-    "chalk": "^4.1.1",
+    "chalk": "^4.1.2",
     "chokidar": "^3.5.1",
     "codemirror5": "npm:codemirror@^5.65.11",
     "cross-env": "^7.0.3",
