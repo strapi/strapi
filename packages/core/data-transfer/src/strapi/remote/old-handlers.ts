@@ -134,13 +134,13 @@ export const createTransferHandler = (options: IHandlerOptions) => {
             throw new ProviderInitializationError('Transfer already in progres');
           }
 
-          const { transfer } = msg.params;
+          const { transfer } = msg.params as any;
 
           await verifyAuth(transfer);
 
           // Push transfer
           if (transfer === 'push') {
-            const { options: controllerOptions } = msg.params;
+            const { options: controllerOptions } = msg.params as any;
 
             state.controller = createPushController({
               ...controllerOptions,
@@ -210,13 +210,6 @@ export const createTransferHandler = (options: IHandlerOptions) => {
           const { controller, transfer } = state;
 
           await verifyAuth(transfer.kind);
-
-          // TODO: (re)move this check
-          // It shouldn't be possible to start a pull transfer for now, so reaching
-          // this code should be impossible too, but this has been added by security
-          if (transfer.kind === 'pull') {
-            return callback(new ProviderTransferError('Pull transfer not implemented'));
-          }
 
           if (!controller) {
             return callback(new ProviderTransferError("The transfer hasn't been initialized"));

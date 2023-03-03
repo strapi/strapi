@@ -1,8 +1,17 @@
+import type { IEntity, ILink, IConfiguration, IAsset } from '../../../../common-entities';
 import { CreateTransferMessage } from './utils';
 
 export type TransferPullMessage = CreateTransferMessage<
   'step',
-  {
-    action: 'start' | 'stop';
-  }
+  | TransferStepCommands<'entities', IEntity>
+  | TransferStepCommands<'links', ILink>
+  | TransferStepCommands<'configuration', IConfiguration>
+  | TransferStepCommands<'assets', TransferAssetFlow | null>
 >;
+
+// TODO Delete duplications
+export type TransferPullStep = TransferPullMessage['step'];
+
+type TransferStepCommands<T extends string, U> = { step: T } & TransferStepFlow<U>;
+
+type TransferStepFlow<U> = { action: 'start' } | { action: 'stream'; data: U } | { action: 'end' };

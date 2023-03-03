@@ -44,12 +44,27 @@ export const handleWSUpgrade = (wss: WebSocketServer, ctx: Context, callback: WS
 
 interface TransferState {
   id?: string;
+  startedAt?: number;
 }
 
 export interface Handler {
   // Transfer ID
   get transferID(): TransferState['id'];
   set transferID(id: TransferState['id']);
+
+  // Started At
+  get startedAt(): TransferState['startedAt'];
+  set startedAt(id: TransferState['startedAt']);
+
+  /**
+   * Returns whether a transfer is currently in progress or not
+   */
+  isTransferStarted(): boolean;
+
+  /**
+   * Make sure the current transfer is started and initialized
+   */
+  assertValidTransfer(): void;
 
   // Messaging utils
 
@@ -71,6 +86,11 @@ export interface Handler {
   // Utils
 
   /**
+   * Check the current auth has the permission for the given scope
+   */
+  verifyAuth(scope?: TransferMethod): Promise<void>;
+
+  /**
    * Invoke a function and return its result to the client
    */
   executeAndRespond<T = unknown>(uuid: string, fn: () => T): Promise<void>;
@@ -82,135 +102,182 @@ export interface Handler {
    */
   teardown(): Promise<void> | void;
 
+  /**
+   * Lifecycle called to cleanup the transfer state
+   */
+  cleanup(): Promise<void> | void;
+
+  // Transfer Commands
+  init(...args: unknown[]): unknown;
+  end(...args: unknown[]): unknown;
+  status(...args: unknown[]): unknown;
+
   // Events
   onMessage(message: RawData, isBinary: boolean): Promise<void> | void;
   onClose(code: number, reason: Buffer): Promise<void> | void;
   onError(err: Error): Promise<void> | void;
 }
 
-export const handlerFactory = (implementation: Partial<Handler>, options: IHandlerOptions) => {
-  const { verify, server: serverOptions } = options ?? {};
+export const handlerFactory =
+  <T extends Partial<Handler>>(implementation: (proto: Handler) => T) =>
+  (options: IHandlerOptions) => {
+    const { verify, server: serverOptions } = options ?? {};
 
-  const wss = new WebSocket.Server({ ...serverOptions, noServer: true });
+    const wss = new WebSocket.Server({ ...serverOptions, noServer: true });
 
-  return async (ctx: Context) => {
-    const verifyAuth = (scope?: TransferMethod) => verify(ctx, scope);
+    return async (ctx: Context) => {
+      handleWSUpgrade(wss, ctx, (ws) => {
+        console.log('upgraded');
+        const state: TransferState = { id: undefined };
 
-    handleWSUpgrade(wss, ctx, (ws) => {
-      const state: TransferState = { id: undefined };
+        const prototype: Handler = {
+          // Transfer ID
+          get transferID() {
+            return state.id;
+          },
 
-      const proto: Handler = {
-        // Transfer ID
-        get transferID() {
-          return state.id;
-        },
+          set transferID(id) {
+            state.id = id;
+          },
 
-        set transferID(id) {
-          state.id = id;
-        },
+          // Started at
+          get startedAt() {
+            return state.startedAt;
+          },
 
-        respond(uuid, e, data) {
-          return new Promise<void>((resolve, reject) => {
-            if (!uuid && !e) {
-              reject(new Error('Missing uuid for this message'));
-              return;
+          set startedAt(timestamp) {
+            state.startedAt = timestamp;
+          },
+
+          isTransferStarted() {
+            return this.transferID !== undefined && this.startedAt !== undefined;
+          },
+
+          assertValidTransfer() {
+            const isStarted = this.isTransferStarted();
+
+            if (!isStarted) {
+              throw new Error('Invalid Transfer Process');
             }
+          },
 
-            const payload = {
-              uuid,
-              data: data ?? null,
-              error: e
-                ? {
-                    code: e?.name ?? 'ERR',
-                    message: e?.message,
-                  }
-                : null,
-            };
-
-            this.send(payload, (error) => (error ? reject(error) : resolve()));
-          });
-        },
-
-        send(message, cb) {
-          let payload;
-
-          try {
-            payload = JSON.stringify(message);
-          } catch {
-            payload = message;
-          }
-
-          ws.send(payload, cb);
-        },
-
-        confirm(message) {
-          return new Promise((resolve, reject) => {
-            const uuid = randomUUID();
-
-            const payload = { uuid, data: message };
-
-            const stringifiedPayload = JSON.stringify(payload);
-
-            ws.send(stringifiedPayload, (error) => {
-              if (error) {
-                reject(error);
+          respond(uuid, e, data) {
+            return new Promise<void>((resolve, reject) => {
+              if (!uuid && !e) {
+                reject(new Error('Missing uuid for this message'));
+                return;
               }
-            });
 
-            const onResponse = (raw: RawData) => {
-              const response = JSON.parse(raw.toString());
-
-              if (response.uuid === uuid) {
-                if (response.error) {
-                  return reject(new Error(response.error.message));
-                }
-
-                resolve(response.data ?? null);
-              } else {
-                ws.once('message', onResponse);
-              }
-            };
-
-            ws.once('message', onResponse);
-          });
-        },
-
-        async executeAndRespond(uuid, fn) {
-          try {
-            const response = await fn();
-            this.respond(uuid, null, response);
-          } catch (e) {
-            if (e instanceof Error) {
-              this.respond(uuid, e);
-            } else if (typeof e === 'string') {
-              this.respond(uuid, new ProviderTransferError(e));
-            } else {
-              this.respond(
+              const payload = {
                 uuid,
-                new ProviderTransferError('Unexpected error', {
-                  error: e,
-                })
-              );
+                data: data ?? null,
+                error: e
+                  ? {
+                      code: e?.name ?? 'ERR',
+                      message: e?.message,
+                    }
+                  : null,
+              };
+
+              this.send(payload, (error) => (error ? reject(error) : resolve()));
+            });
+          },
+
+          send(message, cb) {
+            let payload;
+
+            try {
+              payload = JSON.stringify(message);
+            } catch {
+              payload = message;
             }
-          }
-        },
 
-        teardown() {
-          this.transferID = undefined;
-        },
+            ws.send(payload, cb);
+          },
 
-        // Default prototype implementation for events
-        onMessage() {},
-        onError() {},
-        onClose() {},
-      };
+          confirm(message) {
+            return new Promise((resolve, reject) => {
+              const uuid = randomUUID();
 
-      const handler: Handler = Object.assign(Object.create(proto), implementation);
+              const payload = { uuid, data: message };
 
-      // Events
-      ws.on('close', (...args) => handler.onClose(...args));
-      ws.on('error', (...args) => handler.onError(...args));
-      ws.on('message', (...args) => handler.onMessage(...args));
-    });
+              const stringifiedPayload = JSON.stringify(payload);
+
+              ws.send(stringifiedPayload, (error) => {
+                if (error) {
+                  reject(error);
+                }
+              });
+
+              const onResponse = (raw: RawData) => {
+                const response = JSON.parse(raw.toString());
+
+                if (response.uuid === uuid) {
+                  if (response.error) {
+                    return reject(new Error(response.error.message));
+                  }
+
+                  resolve(response.data ?? null);
+                } else {
+                  ws.once('message', onResponse);
+                }
+              };
+
+              ws.once('message', onResponse);
+            });
+          },
+
+          async executeAndRespond(uuid, fn) {
+            try {
+              const response = await fn();
+              this.respond(uuid, null, response);
+            } catch (e) {
+              if (e instanceof Error) {
+                this.respond(uuid, e);
+              } else if (typeof e === 'string') {
+                this.respond(uuid, new ProviderTransferError(e));
+              } else {
+                this.respond(
+                  uuid,
+                  new ProviderTransferError('Unexpected error', {
+                    error: e,
+                  })
+                );
+              }
+            }
+          },
+
+          cleanup() {
+            console.log('bye bye');
+            this.transferID = undefined;
+            this.startedAt = undefined;
+          },
+
+          teardown() {
+            this.cleanup();
+          },
+
+          verifyAuth(scope?: TransferMethod) {
+            return verify(ctx, scope);
+          },
+
+          // Transfer commands
+          init() {},
+          end() {},
+          status() {},
+
+          // Default prototype implementation for events
+          onMessage() {},
+          onError() {},
+          onClose() {},
+        };
+
+        const handler: Handler = Object.assign(Object.create(prototype), implementation(prototype));
+
+        // Bind ws events to handler methods
+        ws.on('close', (...args) => handler.onClose(...args));
+        ws.on('error', (...args) => handler.onError(...args));
+        ws.on('message', (...args) => handler.onMessage(...args));
+      });
+    };
   };
-};

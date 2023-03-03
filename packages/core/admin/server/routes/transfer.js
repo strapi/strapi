@@ -25,7 +25,7 @@ module.exports = [
   {
     method: 'GET',
     path: '/transfer/runner/pull',
-    handler: 'transfer.runner-pull',
+    handler: 'transfer.runner-push', // TODO Change this
     config: {
       middlewares: [
         (ctx, next) => {

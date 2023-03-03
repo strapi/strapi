@@ -20,5 +20,5 @@ const verify = async (ctx, scope) => {
 };
 
 module.exports = {
-  connect: remote.handlers.createTransferHandler({ verify }),
+  push: remote.handlers.createPushController({ verify }),
 };

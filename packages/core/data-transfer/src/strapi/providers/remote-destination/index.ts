@@ -56,7 +56,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         ?.once('open', async () => {
           const query = this.dispatcher?.dispatchCommand({
             command: 'init',
-            params: { options: { strategy, restore }, transfer: 'push' },
+            params: { strategy, restore },
           });
 
           const res = (await query) as server.Payload<server.InitMessage>;
@@ -150,7 +150,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
       });
     }
     const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${wsProtocol}//${url.host}${url.pathname}${TRANSFER_PATH}`;
+    const wsUrl = `${wsProtocol}//${url.host}${url.pathname}${TRANSFER_PATH}/push`;
 
     // No auth defined, trying public access for transfer
     if (!auth) {
