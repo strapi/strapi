@@ -212,7 +212,7 @@ module.exports = ({ strapi }) => ({
 
     const updatedEntity = await strapi.entityService.update(uid, entity.id, params);
 
-    await emitEvent(ENTRY_PUBLISH, updatedEntity, uid); 
+    await emitEvent(ENTRY_PUBLISH, updatedEntity, uid);
 
     // If relations were populated, relations count will be returned instead of the array of relations.
     if (isRelationsPopulateEnabled(uid)) {
