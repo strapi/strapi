@@ -119,6 +119,7 @@ function enableReviewWorkflow({ strapi }) {
                 FROM ${contentTypeMetadata.tableName} entity
                 LEFT JOIN ${joinTable.name} jointable
                 ON  entity.id = jointable.${idColumn.name}
+                AND jointable.${typeColumn.name} = '${contentTypeUID}'
                 WHERE jointable.${idColumn.name} IS NULL`);
     };
 
