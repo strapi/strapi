@@ -395,10 +395,40 @@ program
       'Provide encryption key in command instead of using the prompt'
     )
   )
+  .addOption(
+    new Option(
+      '--to <destinationURL>',
+      `URL of the remote Strapi instance to send data to`
+    ).argParser(parseURL)
+  )
+  .addOption(new Option('--to-token <token>', `Transfer token for the remote Strapi destination`))
   .addOption(forceOption)
   .addOption(excludeOption)
   .addOption(onlyOption)
   .hook('preAction', validateExcludeOnly)
+  // If --to is used, validate the URL and token
+  .hook(
+    'preAction',
+    ifOptions(
+      (opts) => opts.to,
+      async (thisCommand) => {
+        assertUrlHasProtocol(thisCommand.opts().to, ['https:', 'http:']);
+        if (!thisCommand.opts().toToken) {
+          const answers = await inquirer.prompt([
+            {
+              type: 'password',
+              message: 'Please enter your transfer token for the remote Strapi destination',
+              name: 'toToken',
+            },
+          ]);
+          if (!answers.toToken?.length) {
+            exitWith(1, 'No token entered, aborting transfer.');
+          }
+          thisCommand.opts().toToken = answers.toToken;
+        }
+      }
+    )
+  )
   .hook('preAction', async (thisCommand) => {
     const opts = thisCommand.opts();
     const ext = path.extname(String(opts.file));
