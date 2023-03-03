@@ -1,12 +1,15 @@
 'use strict';
 
 const {
-  providers: { createLocalFileDestinationProvider },
-} = require('@strapi/data-transfer').file;
-const {
-  providers: { createLocalStrapiSourceProvider },
-} = require('@strapi/data-transfer').strapi;
-const { createTransferEngine } = require('@strapi/data-transfer').engine;
+  file: {
+    providers: { createLocalFileDestinationProvider },
+  },
+  strapi: {
+    providers: { createLocalStrapiSourceProvider },
+  },
+  engine: { createTransferEngine },
+} = require('@strapi/data-transfer');
+
 const { isObject, isString, isFinite, toNumber } = require('lodash/fp');
 const fs = require('fs-extra');
 const chalk = require('chalk');
