@@ -133,6 +133,15 @@ const updateEntry = async (pluralName, id, data, populate) => {
   return body;
 };
 
+const getShop = async (id, populate = populateShop) => {
+  const { body } = await rq({
+    method: 'GET',
+    url: `/shops/${id}`,
+    qs: { populate },
+  });
+  return body;
+};
+
 const createShop = async ({
   anyToOneRel = [{ id: id1 }],
   anyToManyRel = [{ id: id1 }, { id: id2 }, { id: id3 }],
@@ -155,6 +164,35 @@ const createShop = async ({
       myCompo: {
         compo_products_ow: { connect: anyToOneRel },
         compo_products_mw: { options, connect: anyToManyRel },
+      },
+      ...data,
+    },
+    populate || populateShop
+  );
+};
+
+const cloneShop = async (
+  shopIdToClone,
+  {
+    // anyToOneRel = [{ id: id1 }],
+    // anyToManyRel = [{ id: id1 }, { id: id2 }, { id: id3 }],
+    data = {},
+    populate,
+  }
+) => {
+  return createEntry(
+    'shops',
+    {
+      name: 'Cazotte Shop',
+      products_ow: { clone: shopIdToClone },
+      products_oo: { clone: shopIdToClone },
+      products_mo: { clone: shopIdToClone },
+      products_om: { clone: shopIdToClone },
+      products_mm: { clone: shopIdToClone },
+      products_mw: { clone: shopIdToClone },
+      myCompo: {
+        compo_products_ow: { clone: shopIdToClone },
+        compo_products_mw: { clone: shopIdToClone },
       },
       ...data,
     },
@@ -883,6 +921,40 @@ describe('Relations', () => {
       });
 
       expect(updatedShop.data).toMatchObject(expectedShop);
+    });
+  });
+
+  describe('Clone entity relations', () => {
+    test('relations are cloned', async () => {
+      const createdShop = await createShop({
+        anyToOneRel: [{ id: id1 }],
+        anyToManyRel: [{ id: id1 }, { id: id2 }],
+      });
+
+      const clonedShop = await cloneShop(createdShop.data.id, {});
+
+      const expectedCreatedShop = shopFactory({ anyToManyRel: [{ id: id1 }, { id: id2 }] });
+      expect(clonedShop.data).toMatchObject(expectedCreatedShop);
+    });
+
+    test.only('relations oneToAny are deleted', async () => {
+      // Create a shop with relations
+      const createdShop = await createShop({
+        anyToOneRel: [{ id: id1 }],
+        anyToManyRel: [{ id: id1 }, { id: id2 }],
+      });
+
+      // Clone that same shop with its relations
+      await cloneShop(createdShop.data.id, {});
+
+      // When cloning, anyToOne & oneToOne relations are deleted from the original shop
+      const shop = await getShop(createdShop.data.id);
+
+      const expectedCreatedShop = shopFactory({ anyToManyRel: [{ id: id1 }, { id: id2 }] });
+      expectedCreatedShop.attributes.products_om = { data: null };
+      expectedCreatedShop.attributes.products_oo = { data: null };
+
+      expect(shop.data).toMatchObject(expectedCreatedShop);
     });
   });
 });
