@@ -61,8 +61,8 @@ async function initDefaultWorkflow({ workflowsService, stagesService, strapi }) 
 const setStageAttribute = set(`attributes.${ENTITY_STAGE_ATTRIBUTE}`, {
   writable: true,
   private: false,
-  configurable: true,
-  visible: true,
+  configurable: false,
+  visible: false,
   type: 'relation',
   relation: 'morphOne',
   target: 'admin::workflow-stage',
