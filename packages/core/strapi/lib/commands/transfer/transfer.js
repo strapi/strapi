@@ -21,8 +21,12 @@ const {
 const { exitWith } = require('../utils/helpers');
 
 const gracefulAbort = async ({ engine, strapi }) => {
-  await engine.abortTransfer();
-  await strapi.destroy();
+  try {
+    await engine.abortTransfer();
+    await strapi.destroy();
+  } catch (e) {
+    // ignore
+  }
   exitWith(1, exitMessageText('transfer', false));
 };
 
