@@ -117,6 +117,21 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+        gap: 24px;
+      }
+
+      .c13 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
       }
 
       .c18 {
@@ -153,15 +168,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         -webkit-justify-content: center;
         -ms-flex-pack: center;
         justify-content: center;
-      }
-
-      .c13 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c13 > * + * {
-        margin-top: 24px;
       }
 
       .c14 > * {
@@ -649,12 +655,12 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
               </div>
             </div>
             <div
-              class="c1 c12 c13"
+              class="c1 c12"
             >
               <div>
                 <div>
                   <div
-                    class="c1 c12 c14"
+                    class="c1 c13 c14"
                   >
                     <label
                       class="c8 c15"
@@ -691,7 +697,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
               <div>
                 <div>
                   <div
-                    class="c1 c12 c14"
+                    class="c1 c13 c14"
                   >
                     <label
                       class="c8 c15"
@@ -749,7 +755,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
               </div>
               <div>
                 <div
-                  class="c1 c12 c14"
+                  class="c1 c13 c14"
                 >
                   <label
                     class="c8 c26 c27"

@@ -8,8 +8,8 @@ import {
   Select,
   Option,
   ToggleInput,
-  Stack,
   Typography,
+  Flex,
 } from '@strapi/design-system';
 import { getTrad } from '../../../utils';
 
@@ -18,7 +18,7 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
   const { settings, metadatas } = modifiedData;
 
   return (
-    <Stack spacing={4}>
+    <Flex direction="column" alignItems="stretch" gap={4}>
       <Typography variant="delta" as="h2">
         {formatMessage({
           id: getTrad('containers.SettingPage.settings'),
@@ -26,7 +26,7 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
         })}
       </Typography>
 
-      <Stack horizontal justifyContent="space-between" spacing={4}>
+      <Flex justifyContent="space-between" gap={4}>
         <Box width="100%">
           <ToggleInput
             label={formatMessage({
@@ -92,7 +92,7 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
             checked={settings.bulkable}
           />
         </Box>
-      </Stack>
+      </Flex>
 
       <Grid gap={4}>
         <GridItem s={12} col={6}>
@@ -152,7 +152,7 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
           </Select>
         </GridItem>
       </Grid>
-    </Stack>
+    </Flex>
   );
 };
 

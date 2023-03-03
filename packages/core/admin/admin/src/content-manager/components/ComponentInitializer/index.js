@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { PlusCircle } from '@strapi/icons';
-import { Box, Stack, Flex, Typography } from '@strapi/design-system';
+import { Box, Flex, Typography } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
 
@@ -36,7 +36,7 @@ const ComponentInitializer = ({ error, isReadOnly, onClick }) => {
         paddingBottom={9}
         type="button"
       >
-        <Stack spacing={2}>
+        <Flex direction="column" alignItems="flex-start" gap={2}>
           <Flex justifyContent="center" style={{ cursor: isReadOnly ? 'not-allowed' : 'inherit' }}>
             <IconWrapper>
               <PlusCircle />
@@ -50,7 +50,7 @@ const ComponentInitializer = ({ error, isReadOnly, onClick }) => {
               })}
             </Typography>
           </Flex>
-        </Stack>
+        </Flex>
       </Box>
       {error?.id && (
         <Typography textColor="danger600" variant="pi">

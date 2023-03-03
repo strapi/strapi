@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router';
 import { useNotification } from '@strapi/helper-plugin';
+import isNil from 'lodash/isNil';
 import useLicenseLimits from '../useLicenseLimits';
 
 const STORAGE_KEY_PREFIX = 'strapi-notification-seat-limit';
@@ -29,7 +30,7 @@ const useLicenseLimitNotification = () => {
       license?.data ?? {};
 
     const shouldDisplayNotification =
-      permittedSeats &&
+      !isNil(permittedSeats) &&
       !window.sessionStorage.getItem(`${STORAGE_KEY_PREFIX}-${pathname}`) &&
       (licenseLimitStatus === 'AT_LIMIT' || licenseLimitStatus === 'OVER_LIMIT');
 

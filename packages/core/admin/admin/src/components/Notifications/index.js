@@ -1,7 +1,7 @@
 import { NotificationsProvider } from '@strapi/helper-plugin';
 import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
-import { Stack } from '@strapi/design-system';
+import { Flex } from '@strapi/design-system';
 import Notification from './Notification';
 import reducer, { initialState } from './reducer';
 
@@ -17,11 +17,13 @@ const Notifications = ({ children }) => {
 
   return (
     <NotificationsProvider toggleNotification={displayNotification}>
-      <Stack
+      <Flex
         left="50%"
         marginLeft="-250px"
         position="fixed"
-        spacing={2}
+        direction="column"
+        alignItems="stretch"
+        gap={2}
         top={`${46 / 16}rem`}
         width={`${500 / 16}rem`}
         zIndex={10}
@@ -31,7 +33,7 @@ const Notifications = ({ children }) => {
             <Notification key={notification.id} dispatch={dispatch} notification={notification} />
           );
         })}
-      </Stack>
+      </Flex>
       {children}
     </NotificationsProvider>
   );

@@ -41,7 +41,7 @@ module.exports = ({ strapi }) => ({
 
     return {
       uid: component.uid,
-      category: component.categoru,
+      category: component.category,
       ...configuration,
     };
   },

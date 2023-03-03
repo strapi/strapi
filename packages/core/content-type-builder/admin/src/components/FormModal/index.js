@@ -26,7 +26,6 @@ import {
   TabPanels,
   TabPanel,
   Flex,
-  Stack,
 } from '@strapi/design-system';
 import { isEqual } from 'lodash';
 import pluginId from '../../pluginId';
@@ -1050,7 +1049,7 @@ const FormModal = () => {
               <Box paddingTop={6}>
                 <TabPanels>
                   <TabPanel>
-                    <Stack spacing={6}>
+                    <Flex direction="column" alignItems="stretch" gap={6}>
                       <TabForm
                         form={baseForm}
                         formErrors={formErrors}
@@ -1058,10 +1057,10 @@ const FormModal = () => {
                         modifiedData={modifiedData}
                         onChange={handleChange}
                       />
-                    </Stack>
+                    </Flex>
                   </TabPanel>
                   <TabPanel>
-                    <Stack spacing={6}>
+                    <Flex direction="column" alignItems="stretch" gap={6}>
                       <TabForm
                         form={advancedForm}
                         formErrors={formErrors}
@@ -1069,7 +1068,7 @@ const FormModal = () => {
                         modifiedData={modifiedData}
                         onChange={handleChange}
                       />
-                    </Stack>
+                    </Flex>
                   </TabPanel>
                 </TabPanels>
               </Box>
