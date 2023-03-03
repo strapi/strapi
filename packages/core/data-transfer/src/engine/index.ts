@@ -257,9 +257,6 @@ class TransferEngine<
       transform: async (data, _encoding, callback) => {
         this.#updateTransferProgress(stage, data, aggregate);
         this.#emitStageUpdate('progress', stage);
-        await new Promise((resolve) => {
-          setTimeout(resolve, 300);
-        });
         callback(null, data);
       },
     });
