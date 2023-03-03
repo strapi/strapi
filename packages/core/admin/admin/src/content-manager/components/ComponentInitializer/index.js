@@ -36,7 +36,7 @@ const ComponentInitializer = ({ error, isReadOnly, onClick }) => {
         paddingBottom={9}
         type="button"
       >
-        <Flex direction="column" alignItems="flex-start" gap={2}>
+        <Flex direction="column" gap={2}>
           <Flex justifyContent="center" style={{ cursor: isReadOnly ? 'not-allowed' : 'inherit' }}>
             <IconWrapper>
               <PlusCircle />
