@@ -4,7 +4,7 @@ const _ = require('lodash');
 const {
   template: { createStrictInterpolationRegExp },
   keysDeep,
-} = require('@strapi/utils/');
+} = require('@strapi/utils');
 
 const getProviderSettings = () => {
   return strapi.config.get('plugin.email');

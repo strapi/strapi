@@ -3,7 +3,9 @@
 const chalk = require('chalk');
 const Table = require('cli-table3');
 const { Option } = require('commander');
-const { TransferGroupPresets } = require('@strapi/data-transfer/lib/engine');
+const {
+  engine: { TransferGroupPresets },
+} = require('@strapi/data-transfer');
 
 const {
   configs: { createOutputFileConfiguration },
