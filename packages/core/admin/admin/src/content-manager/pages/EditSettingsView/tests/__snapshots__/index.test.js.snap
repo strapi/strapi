@@ -1,68 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EditSettingsView renders and matches the snapshot 1`] = `
-.c13 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c18 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c19 {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c23 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c32 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c36 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c40 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c55 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 500;
-  color: #32324d;
-}
-
-.c2 {
+.c1 {
   background: #f6f6f9;
   padding-top: 24px;
   padding-right: 56px;
@@ -70,20 +9,27 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   padding-left: 56px;
 }
 
-.c3 {
+.c2 {
   padding-bottom: 8px;
 }
 
-.c16 {
-  padding-right: 8px;
+.c12 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
 }
 
-.c20 {
+.c18 {
   padding-right: 56px;
   padding-left: 56px;
 }
 
-.c21 {
+.c19 {
   background: #ffffff;
   padding-top: 24px;
   padding-right: 32px;
@@ -93,25 +39,25 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c31 {
+.c30 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c33 {
+.c32 {
   padding-left: 12px;
 }
 
-.c37 {
+.c36 {
   padding-top: 8px;
   padding-bottom: 8px;
 }
 
-.c38 {
+.c37 {
   background: #eaeaef;
 }
 
-.c44 {
+.c46 {
   padding: 16px;
   border-radius: 4px;
   border-style: dashed;
@@ -119,7 +65,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   border-color: #c0c0cf;
 }
 
-.c48 {
+.c50 {
   background: #f6f6f9;
   border-radius: 4px;
   border-color: #eaeaef;
@@ -128,17 +74,39 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   min-height: 2rem;
 }
 
-.c51 {
+.c53 {
   padding-right: 12px;
   padding-left: 12px;
 }
 
-.c54 {
+.c56 {
   overflow: hidden;
   width: 100%;
 }
 
-.c10 {
+.c58 {
+  padding: 8px;
+  border-radius: 4px;
+  border-width: 0;
+  border-color: #dcdce4;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+}
+
+.c64 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  width: 100%;
+  cursor: pointer;
+}
+
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -156,7 +124,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   justify-content: space-between;
 }
 
-.c11 {
+.c9 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -170,7 +138,22 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
-.c22 {
+.c13 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c20 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -185,7 +168,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   gap: 16px;
 }
 
-.c26 {
+.c24 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -199,7 +182,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   flex-direction: column;
 }
 
-.c45 {
+.c47 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -214,7 +197,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   gap: 8px;
 }
 
-.c49 {
+.c51 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -228,25 +211,121 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
-.c27 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c27 > * + * {
-  margin-top: 4px;
-}
-
-.c14 {
+.c59 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c65 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c11 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c16 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c17 {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666687;
+}
+
+.c21 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c26 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c31 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c35 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c39 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c57 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  color: #32324d;
+}
+
+.c25 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c25 > * + * {
+  margin-top: 4px;
+}
+
+.c14 {
   position: relative;
   outline: none;
 }
@@ -295,7 +374,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c58 {
+.c62 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -307,35 +386,8 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c17 {
-  height: 100%;
-}
-
 .c15 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
-}
-
-.c15 .c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c15 .c12 {
-  color: #ffffff;
 }
 
 .c15[aria-disabled='true'] {
@@ -343,7 +395,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   background: #eaeaef;
 }
 
-.c15[aria-disabled='true'] .c12 {
+.c15[aria-disabled='true'] .c10 {
   color: #666687;
 }
 
@@ -356,7 +408,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   background: #eaeaef;
 }
 
-.c15[aria-disabled='true']:active .c12 {
+.c15[aria-disabled='true']:active .c10 {
   color: #666687;
 }
 
@@ -379,98 +431,66 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   fill: #ffffff;
 }
 
-.c60 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
+.c66 {
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  width: 100%;
 }
 
-.c60 .c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c60 .c12 {
-  color: #ffffff;
-}
-
-.c60[aria-disabled='true'] {
+.c66[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c60[aria-disabled='true'] .c12 {
+.c66[aria-disabled='true'] .c10 {
   color: #666687;
 }
 
-.c60[aria-disabled='true'] svg > g,.c60[aria-disabled='true'] svg path {
+.c66[aria-disabled='true'] svg > g,.c66[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c60[aria-disabled='true']:active {
+.c66[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c60[aria-disabled='true']:active .c12 {
+.c66[aria-disabled='true']:active .c10 {
   color: #666687;
 }
 
-.c60[aria-disabled='true']:active svg > g,.c60[aria-disabled='true']:active svg path {
+.c66[aria-disabled='true']:active svg > g,.c66[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c60:hover {
+.c66:hover {
   background-color: #ffffff;
 }
 
-.c60:active {
+.c66:active {
   background-color: #ffffff;
   border: 1px solid #4945ff;
 }
 
-.c60:active .c12 {
+.c66:active .c10 {
   color: #4945ff;
 }
 
-.c60:active svg > g,
-.c60:active svg path {
+.c66:active svg > g,
+.c66:active svg path {
   fill: #4945ff;
 }
 
-.c60 .c12 {
+.c66 .c10 {
   color: #271fe0;
 }
 
-.c60 svg > g,
-.c60 svg path {
+.c66 svg > g,
+.c66 svg path {
   fill: #271fe0;
 }
 
-.c28 {
+.c27 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -486,28 +506,28 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   transition-duration: 0.2s;
 }
 
-.c28:focus-within {
+.c27:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c34 {
+.c33 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c34 svg {
+.c33 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c34 svg path {
+.c33 svg path {
   fill: #666687;
 }
 
-.c35 {
+.c34 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -516,11 +536,11 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   border: none;
 }
 
-.c35 svg {
+.c34 svg {
   width: 0.375rem;
 }
 
-.c29 {
+.c28 {
   position: absolute;
   left: 0;
   right: 0;
@@ -531,19 +551,19 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   border: none;
 }
 
-.c29:focus {
+.c28:focus {
   outline: none;
 }
 
-.c29[aria-disabled='true'] {
+.c28[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c30 {
+.c29 {
   width: 100%;
 }
 
-.c39 {
+.c38 {
   height: 1px;
   border: none;
   -webkit-flex-shrink: 0;
@@ -552,59 +572,37 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   margin: 0;
 }
 
-.c24 {
+.c22 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
 }
 
-.c25 {
+.c23 {
   grid-column: span 6;
   max-width: 100%;
 }
 
-.c46 {
+.c48 {
   grid-column: span 6;
   max-width: 100%;
 }
 
-.c56 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-  border: none;
-}
-
-.c56 svg > g,
-.c56 svg path {
+.c60 svg > g,
+.c60 svg path {
   fill: #8e8ea9;
 }
 
-.c56:hover svg > g,
-.c56:hover svg path {
+.c60:hover svg > g,
+.c60:hover svg path {
   fill: #666687;
 }
 
-.c56:active svg > g,
-.c56:active svg path {
+.c60:active svg > g,
+.c60:active svg path {
   fill: #a5a5ba;
 }
 
-.c56[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c56[aria-disabled='true'] svg path {
+.c60[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -612,52 +610,83 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   outline: none;
 }
 
-.c6 {
+.c4 {
   padding-right: 8px;
 }
 
-.c9 {
+.c40 {
+  background: #4945ff;
+  padding-top: 8px;
+  padding-right: 16px;
+  padding-bottom: 8px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+}
+
+.c7 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #4945ff;
 }
 
-.c43 {
+.c45 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
-  color: #32324d;
+  color: #ffffff;
 }
 
 .c41 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c44 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c42 {
   position: relative;
   outline: none;
 }
 
-.c41 svg {
+.c42 svg {
   height: 12px;
   width: 12px;
 }
 
-.c41 svg > g,
-.c41 svg path {
+.c42 svg > g,
+.c42 svg path {
   fill: #ffffff;
 }
 
-.c41[aria-disabled='true'] {
+.c42[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c41:after {
+.c42:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -672,11 +701,11 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c41:focus-visible {
+.c42:focus-visible {
   outline: none;
 }
 
-.c41:focus-visible:after {
+.c42:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -687,7 +716,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c4 {
+.c3 {
   display: -webkit-inline-box;
   display: -webkit-inline-flex;
   display: -ms-inline-flexbox;
@@ -702,15 +731,15 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   outline: none;
 }
 
-.c4 svg path {
+.c3 svg path {
   fill: #4945ff;
 }
 
-.c4 svg {
+.c3 svg {
   font-size: 0.625rem;
 }
 
-.c4:after {
+.c3:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -725,11 +754,11 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c4:focus-visible {
+.c3:focus-visible {
   outline: none;
 }
 
-.c4:focus-visible:after {
+.c3:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -740,124 +769,101 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c7 {
+.c5 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
 }
 
-.c42 {
-  padding: 8px 16px;
-  background: #4945ff;
-  border: 1px solid #4945ff;
-  border-radius: 4px;
-  border: 1px solid #d9d8ff;
-  background: #f0f0ff;
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
+.c43 {
   -webkit-text-decoration: none;
   text-decoration: none;
+  border: 1px solid #d9d8ff;
+  background: #f0f0ff;
 }
 
-.c42 .c5 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c42 .c8 {
-  color: #ffffff;
-}
-
-.c42[aria-disabled='true'] {
+.c43[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c42[aria-disabled='true'] .c8 {
+.c43[aria-disabled='true'] .c6 {
   color: #666687;
 }
 
-.c42[aria-disabled='true'] svg > g,.c42[aria-disabled='true'] svg path {
+.c43[aria-disabled='true'] svg > g,.c43[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c42[aria-disabled='true']:active {
+.c43[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c42[aria-disabled='true']:active .c8 {
+.c43[aria-disabled='true']:active .c6 {
   color: #666687;
 }
 
-.c42[aria-disabled='true']:active svg > g,.c42[aria-disabled='true']:active svg path {
+.c43[aria-disabled='true']:active svg > g,.c43[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c42:hover {
+.c43:hover {
   background-color: #ffffff;
 }
 
-.c42:active {
+.c43:active {
   background-color: #ffffff;
   border: 1px solid #4945ff;
 }
 
-.c42:active .c8 {
+.c43:active .c6 {
   color: #4945ff;
 }
 
-.c42:active svg > g,
-.c42:active svg path {
+.c43:active svg > g,
+.c43:active svg path {
   fill: #4945ff;
 }
 
-.c42 .c8 {
+.c43 .c6 {
   color: #271fe0;
 }
 
-.c42 svg > g,
-.c42 svg path {
+.c43 svg > g,
+.c43 svg path {
   fill: #271fe0;
 }
 
-.c57 {
+.c61 {
   background-color: transparent;
 }
 
-.c57 path {
+.c61 path {
   fill: #666687;
 }
 
-.c47 {
+.c49 {
   position: relative;
   padding-right: 4px;
 }
 
-.c59 {
+.c63 {
   position: relative;
   padding-left: 4px;
 }
 
-.c53 {
+.c55 {
   height: 0.75rem;
   width: 0.75rem;
 }
 
-.c53 path {
+.c55 path {
   fill: #666687;
 }
 
-.c50 {
+.c52 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -865,31 +871,31 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   opacity: 1;
 }
 
-.c52 {
+.c54 {
   cursor: all-scroll;
   border-right: 1px solid #dcdce4;
 }
 
 @media (max-width:68.75rem) {
-  .c25 {
+  .c23 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c25 {
+  .c23 {
     grid-column: span;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c46 {
+  .c48 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c46 {
+  .c48 {
     grid-column: span;
   }
 }
@@ -906,129 +912,129 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
         style="height: 0px;"
       >
         <div
-          class="c1 c2"
+          class="c1"
           data-strapi-header="true"
         >
           <div
-            class="c1 c3"
+            class="c2"
           >
             <a
               aria-current="page"
-              class="c4 active"
+              class="c3 active"
               href="/"
             >
               <span
                 aria-hidden="true"
-                class="c5 c6 c7"
+                class="c4 c5"
               >
                 <svg
                   fill="none"
-                  height="1em"
+                  height="1rem"
                   viewBox="0 0 24 24"
-                  width="1em"
+                  width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M24 13.3a.2.2 0 01-.2.2H5.74l8.239 8.239a.2.2 0 010 .282L12.14 23.86a.2.2 0 01-.282 0L.14 12.14a.2.2 0 010-.282L11.86.14a.2.2 0 01.282 0L13.98 1.98a.2.2 0 010 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6z"
+                    d="M24 13.3a.2.2 0 0 1-.2.2H5.74l8.239 8.239a.2.2 0 0 1 0 .282L12.14 23.86a.2.2 0 0 1-.282 0L.14 12.14a.2.2 0 0 1 0-.282L11.86.14a.2.2 0 0 1 .282 0L13.98 1.98a.2.2 0 0 1 0 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6Z"
                     fill="#212134"
                   />
                 </svg>
               </span>
               <span
-                class="c8 c9"
+                class="c6 c7"
               >
                 Back
               </span>
             </a>
           </div>
           <div
-            class="c1 c10"
+            class="c8"
           >
             <div
-              class="c1 c11"
+              class="c9"
             >
               <h1
-                class="c12 c13"
+                class="c10 c11"
               >
                 Configure the view - Address
               </h1>
             </div>
             <button
               aria-disabled="true"
-              class="c14 c15"
+              class="c12 c13 c14 c15"
               disabled=""
               type="submit"
             >
               <div
                 aria-hidden="true"
-                class="c1 c16 c17"
+                class=""
               >
                 <svg
                   fill="none"
-                  height="1em"
+                  height="1rem"
                   viewBox="0 0 24 24"
-                  width="1em"
+                  width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
+                    d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
                     fill="#212134"
                   />
                 </svg>
               </div>
               <span
-                class="c12 c18"
+                class="c10 c16"
               >
                 Save
               </span>
             </button>
           </div>
           <p
-            class="c12 c19"
+            class="c10 c17"
           >
             Customize how the edit view will look like.
           </p>
         </div>
       </div>
       <div
-        class="c1 c20"
+        class="c18"
       >
         <div
-          class="c1 c21"
+          class="c19"
         >
           <div
-            class="c1 c22"
+            class="c20"
           >
             <h2
-              class="c12 c23"
+              class="c10 c21"
             >
               Settings
             </h2>
             <div
-              class="c1 c24"
+              class="c22"
             >
               <div
-                class="c25"
+                class="c23"
               >
                 <div
-                  class="c1 "
+                  class=""
                 >
                   <div>
                     <div
-                      class="c1 c26 c27"
+                      class="c24 c25"
                     >
                       <label
-                        class="c12 c18"
+                        class="c10 c26"
                         for="1"
                       >
                         <div
-                          class="c1 c11"
+                          class="c9"
                         >
                           Entry title
                         </div>
                       </label>
                       <div
-                        class="c1 c11 c28"
+                        class="c9 c27"
                       >
                         <button
                           aria-describedby="1-hint"
@@ -1036,21 +1042,21 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                           aria-expanded="false"
                           aria-haspopup="listbox"
                           aria-labelledby="1 1-label 1-content"
-                          class="c29"
+                          class="c28"
                           id="1"
                           type="button"
                         />
                         <div
-                          class="c1 c10 c30"
+                          class="c8 c29"
                         >
                           <div
-                            class="c1 c11"
+                            class="c9"
                           >
                             <div
-                              class="c1 c31"
+                              class="c30"
                             >
                               <span
-                                class="c12 c32"
+                                class="c10 c31"
                                 id="1-content"
                               >
                                 postal_code
@@ -1058,25 +1064,25 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                             </div>
                           </div>
                           <div
-                            class="c1 c11"
+                            class="c9"
                           >
                             <button
                               aria-hidden="true"
-                              class="c1 c33 c34 c35"
+                              class="c32 c33 c34"
                               tabindex="-1"
                               title="Carret Down Button"
                               type="button"
                             >
                               <svg
                                 fill="none"
-                                height="1em"
+                                height="1rem"
                                 viewBox="0 0 14 8"
-                                width="1em"
+                                width="1rem"
                                 xmlns="http://www.w3.org/2000/svg"
                               >
                                 <path
                                   clip-rule="evenodd"
-                                  d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                   fill="#32324D"
                                   fill-rule="evenodd"
                                 />
@@ -1086,7 +1092,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                         </div>
                       </div>
                       <p
-                        class="c12 c36"
+                        class="c10 c35"
                         id="1-hint"
                       >
                         Set the display field of your entry
@@ -1097,38 +1103,38 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
               </div>
             </div>
             <div
-              class="c1 c37"
+              class="c36"
             >
               <hr
-                class="c1 c38 c39"
+                class="c37 c38"
               />
             </div>
             <h3
-              class="c12 c23"
+              class="c10 c21"
             >
               View
             </h3>
             <div
-              class="c1 c22"
+              class="c20"
             >
               <div
-                class="c1 c10"
+                class="c8"
               >
                 <div>
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <span
-                      class="c12 c40"
+                      class="c10 c39"
                     >
                       Displayed fields
                     </span>
                   </div>
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <span
-                      class="c12 c36"
+                      class="c10 c35"
                     >
                       Drag & drop the fields to build the layout
                     </span>
@@ -1137,31 +1143,30 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                 <div>
                   <a
                     aria-disabled="false"
-                    class="c41 c42"
+                    class="c40 c41 c42 c43"
                     href="/plugins/content-type-builder/content-types/api::address.address"
-                    variant="secondary"
                   >
                     <div
                       aria-hidden="true"
-                      class="c5 c6"
+                      class="c44"
                     >
                       <svg
                         fill="none"
-                        height="1em"
+                        height="1rem"
                         viewBox="0 0 24 24"
-                        width="1em"
+                        width="1rem"
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
                           clip-rule="evenodd"
-                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 0 1 1.887 0l3.118 3.118ZM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0Z"
                           fill="#212134"
                           fill-rule="evenodd"
                         />
                       </svg>
                     </div>
                     <span
-                      class="c8 c43"
+                      class="c6 c45"
                     >
                       Edit the content type
                     </span>
@@ -1169,95 +1174,95 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <div
-                class="c1 c44"
+                class="c46"
               >
                 <div
-                  class="c1 c45"
+                  class="c47"
                 >
                   <div
-                    class="c1 c24"
+                    class="c22"
                   >
                     <div
-                      class="c46"
+                      class="c48"
                     >
                       <div
-                        class="c1 "
+                        class=""
                       >
                         <div
-                          class="c1 c11 c47"
+                          class="c9 c49"
                         >
                           <div
-                            class="c1 c48 c49 c50"
+                            class="c50 c51 c52"
                           >
                             <span
-                              class="c1 c51 c11 c52"
+                              class="c53 c9 c54"
                               draggable="true"
                               tabindex="-1"
                               type="button"
                             >
                               <svg
-                                class="c53"
+                                class="c55"
                                 fill="none"
-                                height="1em"
+                                height="1rem"
                                 viewBox="0 0 24 24"
-                                width="1em"
+                                width="1rem"
                                 xmlns="http://www.w3.org/2000/svg"
                               >
                                 <path
-                                  d="M16.563 5.587a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                  d="M16.563 5.587a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574A1.943 1.943 0 0114.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 011.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0017.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM16.563 14.372a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                  d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 0 1-2.184-.574A1.943 1.943 0 0 1 14.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 0 1 1.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0 0 17.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006ZM16.563 14.372a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005zM16.563 23.392a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                  d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 0 1-2.184-.574 1.943 1.943 0 0 1-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 0 0-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005ZM16.563 23.392a2.503 2.503 0 1 0 0-5.006 2.503 2.503 0 0 0 0 5.006Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM7.378 5.622a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                  d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 0 1-2.184-.574 1.943 1.943 0 0 1-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 0 0-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006ZM7.378 5.622a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005zM7.378 14.406a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                  d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 0 1 1.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 0 0 8.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005ZM7.378 14.406a2.503 2.503 0 1 0 0-5.006 2.503 2.503 0 0 0 0 5.006Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006zM7.378 23.427a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                  d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 0 1 1.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 0 0 8.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006ZM7.378 23.427a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 008.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0z"
+                                  d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 0 0 8.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0Z"
                                   fill="#212134"
                                 />
                               </svg>
                             </span>
                             <div
-                              class="c1 c54"
+                              class="c56"
                               overflow="hidden"
                             >
                               <div
-                                class="c1 c33 c10"
+                                class="c32 c8"
                               >
                                 <span
-                                  class="c12 c55"
+                                  class="c10 c57"
                                 >
                                   postal_code
                                 </span>
                                 <div
-                                  class="c1 c11"
+                                  class="c9"
                                 >
                                   <span>
                                     <button
                                       aria-disabled="false"
                                       aria-labelledby="2"
-                                      class="c14 c56 c57"
+                                      class="c58 c59 c14 c60 c61"
                                       tabindex="0"
                                       type="button"
                                     >
                                       <span
-                                        class="c58"
+                                        class="c62"
                                       >
                                         Edit postal_code
                                       </span>
@@ -1265,14 +1270,14 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                                         aria-hidden="true"
                                         fill="none"
                                         focusable="false"
-                                        height="1em"
+                                        height="1rem"
                                         viewBox="0 0 24 24"
-                                        width="1em"
+                                        width="1rem"
                                         xmlns="http://www.w3.org/2000/svg"
                                       >
                                         <path
                                           clip-rule="evenodd"
-                                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 0 1 1.887 0l3.118 3.118ZM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0Z"
                                           fill="#212134"
                                           fill-rule="evenodd"
                                         />
@@ -1283,13 +1288,13 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                                     <button
                                       aria-disabled="false"
                                       aria-labelledby="3"
-                                      class="c14 c56 c57"
+                                      class="c58 c59 c14 c60 c61"
                                       data-testid="delete-field"
                                       tabindex="0"
                                       type="button"
                                     >
                                       <span
-                                        class="c58"
+                                        class="c62"
                                       >
                                         Delete postal_code
                                       </span>
@@ -1297,13 +1302,13 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                                         aria-hidden="true"
                                         fill="none"
                                         focusable="false"
-                                        height="1em"
+                                        height="1rem"
                                         viewBox="0 0 24 24"
-                                        width="1em"
+                                        width="1rem"
                                         xmlns="http://www.w3.org/2000/svg"
                                       >
                                         <path
-                                          d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
+                                          d="M3.236 6.149a.2.2 0 0 0-.197.233L6 24h12l2.96-17.618a.2.2 0 0 0-.196-.233H3.236ZM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 0 1-.2.2H2.2a.2.2 0 0 1-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8Z"
                                           fill="#32324D"
                                         />
                                       </svg>
@@ -1317,86 +1322,86 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                       </div>
                     </div>
                     <div
-                      class="c46"
+                      class="c48"
                     >
                       <div
-                        class="c1 "
+                        class=""
                       >
                         <div
-                          class="c1 c11 c59"
+                          class="c9 c63"
                         >
                           <div
-                            class="c1 c48 c49 c50"
+                            class="c50 c51 c52"
                           >
                             <span
-                              class="c1 c51 c11 c52"
+                              class="c53 c9 c54"
                               draggable="true"
                               tabindex="-1"
                               type="button"
                             >
                               <svg
-                                class="c53"
+                                class="c55"
                                 fill="none"
-                                height="1em"
+                                height="1rem"
                                 viewBox="0 0 24 24"
-                                width="1em"
+                                width="1rem"
                                 xmlns="http://www.w3.org/2000/svg"
                               >
                                 <path
-                                  d="M16.563 5.587a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                  d="M16.563 5.587a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574A1.943 1.943 0 0114.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 011.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0017.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM16.563 14.372a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                  d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 0 1-2.184-.574A1.943 1.943 0 0 1 14.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 0 1 1.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0 0 17.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006ZM16.563 14.372a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005zM16.563 23.392a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                  d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 0 1-2.184-.574 1.943 1.943 0 0 1-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 0 0-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005ZM16.563 23.392a2.503 2.503 0 1 0 0-5.006 2.503 2.503 0 0 0 0 5.006Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM7.378 5.622a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                  d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 0 1-2.184-.574 1.943 1.943 0 0 1-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 0 0-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006ZM7.378 5.622a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005zM7.378 14.406a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                  d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 0 1 1.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 0 0 8.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005ZM7.378 14.406a2.503 2.503 0 1 0 0-5.006 2.503 2.503 0 0 0 0 5.006Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006zM7.378 23.427a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                  d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 0 1 1.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 0 0 8.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006ZM7.378 23.427a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 008.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0z"
+                                  d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 0 0 8.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0Z"
                                   fill="#212134"
                                 />
                               </svg>
                             </span>
                             <div
-                              class="c1 c54"
+                              class="c56"
                               overflow="hidden"
                             >
                               <div
-                                class="c1 c33 c10"
+                                class="c32 c8"
                               >
                                 <span
-                                  class="c12 c55"
+                                  class="c10 c57"
                                 >
                                   city
                                 </span>
                                 <div
-                                  class="c1 c11"
+                                  class="c9"
                                 >
                                   <span>
                                     <button
                                       aria-disabled="false"
                                       aria-labelledby="4"
-                                      class="c14 c56 c57"
+                                      class="c58 c59 c14 c60 c61"
                                       tabindex="0"
                                       type="button"
                                     >
                                       <span
-                                        class="c58"
+                                        class="c62"
                                       >
                                         Edit city
                                       </span>
@@ -1404,14 +1409,14 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                                         aria-hidden="true"
                                         fill="none"
                                         focusable="false"
-                                        height="1em"
+                                        height="1rem"
                                         viewBox="0 0 24 24"
-                                        width="1em"
+                                        width="1rem"
                                         xmlns="http://www.w3.org/2000/svg"
                                       >
                                         <path
                                           clip-rule="evenodd"
-                                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 0 1 1.887 0l3.118 3.118ZM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0Z"
                                           fill="#212134"
                                           fill-rule="evenodd"
                                         />
@@ -1422,13 +1427,13 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                                     <button
                                       aria-disabled="false"
                                       aria-labelledby="5"
-                                      class="c14 c56 c57"
+                                      class="c58 c59 c14 c60 c61"
                                       data-testid="delete-field"
                                       tabindex="0"
                                       type="button"
                                     >
                                       <span
-                                        class="c58"
+                                        class="c62"
                                       >
                                         Delete city
                                       </span>
@@ -1436,13 +1441,13 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                                         aria-hidden="true"
                                         fill="none"
                                         focusable="false"
-                                        height="1em"
+                                        height="1rem"
                                         viewBox="0 0 24 24"
-                                        width="1em"
+                                        width="1rem"
                                         xmlns="http://www.w3.org/2000/svg"
                                       >
                                         <path
-                                          d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
+                                          d="M3.236 6.149a.2.2 0 0 0-.197.233L6 24h12l2.96-17.618a.2.2 0 0 0-.196-.233H3.236ZM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 0 1-.2.2H2.2a.2.2 0 0 1-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8Z"
                                           fill="#32324D"
                                         />
                                       </svg>
@@ -1462,7 +1467,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                       aria-disabled="true"
                       aria-expanded="false"
                       aria-haspopup="true"
-                      class="c14 c60"
+                      class="c64 c65 c14 c66"
                       data-testid="add-field"
                       disabled=""
                       label="Insert another field"
@@ -1470,23 +1475,23 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                     >
                       <div
                         aria-hidden="true"
-                        class="c1 c16 c17"
+                        class=""
                       >
                         <svg
                           fill="none"
-                          height="1em"
+                          height="1rem"
                           viewBox="0 0 24 24"
-                          width="1em"
+                          width="1rem"
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
-                            d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
+                            d="M24 13.604a.3.3 0 0 1-.3.3h-9.795V23.7a.3.3 0 0 1-.3.3h-3.21a.3.3 0 0 1-.3-.3v-9.795H.3a.3.3 0 0 1-.3-.3v-3.21a.3.3 0 0 1 .3-.3h9.795V.3a.3.3 0 0 1 .3-.3h3.21a.3.3 0 0 1 .3.3v9.795H23.7a.3.3 0 0 1 .3.3v3.21Z"
                             fill="#212134"
                           />
                         </svg>
                       </div>
                       <span
-                        class="c12 c18"
+                        class="c10 c16"
                       >
                         Insert another field
                       </span>
@@ -1501,7 +1506,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
     </form>
   </main>
   <div
-    class="c58"
+    class="c62"
   >
     <p
       aria-live="polite"
@@ -1526,68 +1531,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
 `;
 
 exports[`EditSettingsView should add field 1`] = `
-.c13 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c18 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c19 {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c23 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c32 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c36 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c40 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c55 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 500;
-  color: #32324d;
-}
-
-.c2 {
+.c1 {
   background: #f6f6f9;
   padding-top: 24px;
   padding-right: 56px;
@@ -1595,20 +1539,27 @@ exports[`EditSettingsView should add field 1`] = `
   padding-left: 56px;
 }
 
-.c3 {
+.c2 {
   padding-bottom: 8px;
 }
 
-.c16 {
-  padding-right: 8px;
+.c12 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
 }
 
-.c20 {
+.c18 {
   padding-right: 56px;
   padding-left: 56px;
 }
 
-.c21 {
+.c19 {
   background: #ffffff;
   padding-top: 24px;
   padding-right: 32px;
@@ -1618,25 +1569,25 @@ exports[`EditSettingsView should add field 1`] = `
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c31 {
+.c30 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c33 {
+.c32 {
   padding-left: 12px;
 }
 
-.c37 {
+.c36 {
   padding-top: 8px;
   padding-bottom: 8px;
 }
 
-.c38 {
+.c37 {
   background: #eaeaef;
 }
 
-.c44 {
+.c46 {
   padding: 16px;
   border-radius: 4px;
   border-style: dashed;
@@ -1644,7 +1595,7 @@ exports[`EditSettingsView should add field 1`] = `
   border-color: #c0c0cf;
 }
 
-.c48 {
+.c50 {
   background: #f6f6f9;
   border-radius: 4px;
   border-color: #eaeaef;
@@ -1653,17 +1604,39 @@ exports[`EditSettingsView should add field 1`] = `
   min-height: 2rem;
 }
 
-.c51 {
+.c53 {
   padding-right: 12px;
   padding-left: 12px;
 }
 
-.c54 {
+.c56 {
   overflow: hidden;
   width: 100%;
 }
 
-.c10 {
+.c58 {
+  padding: 8px;
+  border-radius: 4px;
+  border-width: 0;
+  border-color: #dcdce4;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+}
+
+.c64 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  width: 100%;
+  cursor: pointer;
+}
+
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1681,7 +1654,7 @@ exports[`EditSettingsView should add field 1`] = `
   justify-content: space-between;
 }
 
-.c11 {
+.c9 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1695,7 +1668,22 @@ exports[`EditSettingsView should add field 1`] = `
   flex-direction: row;
 }
 
-.c22 {
+.c13 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c20 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -1710,7 +1698,7 @@ exports[`EditSettingsView should add field 1`] = `
   gap: 16px;
 }
 
-.c26 {
+.c24 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -1724,7 +1712,7 @@ exports[`EditSettingsView should add field 1`] = `
   flex-direction: column;
 }
 
-.c45 {
+.c47 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -1739,7 +1727,7 @@ exports[`EditSettingsView should add field 1`] = `
   gap: 8px;
 }
 
-.c49 {
+.c51 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -1753,25 +1741,121 @@ exports[`EditSettingsView should add field 1`] = `
   flex-direction: row;
 }
 
-.c27 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c27 > * + * {
-  margin-top: 4px;
-}
-
-.c14 {
+.c59 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c65 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c11 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c16 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c17 {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666687;
+}
+
+.c21 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c26 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c31 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c35 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c39 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c57 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  color: #32324d;
+}
+
+.c25 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c25 > * + * {
+  margin-top: 4px;
+}
+
+.c14 {
   position: relative;
   outline: none;
 }
@@ -1820,7 +1904,7 @@ exports[`EditSettingsView should add field 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c58 {
+.c62 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -1832,35 +1916,8 @@ exports[`EditSettingsView should add field 1`] = `
   width: 1px;
 }
 
-.c17 {
-  height: 100%;
-}
-
 .c15 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
-}
-
-.c15 .c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c15 .c12 {
-  color: #ffffff;
 }
 
 .c15[aria-disabled='true'] {
@@ -1868,7 +1925,7 @@ exports[`EditSettingsView should add field 1`] = `
   background: #eaeaef;
 }
 
-.c15[aria-disabled='true'] .c12 {
+.c15[aria-disabled='true'] .c10 {
   color: #666687;
 }
 
@@ -1881,7 +1938,7 @@ exports[`EditSettingsView should add field 1`] = `
   background: #eaeaef;
 }
 
-.c15[aria-disabled='true']:active .c12 {
+.c15[aria-disabled='true']:active .c10 {
   color: #666687;
 }
 
@@ -1904,98 +1961,66 @@ exports[`EditSettingsView should add field 1`] = `
   fill: #ffffff;
 }
 
-.c60 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
+.c66 {
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  width: 100%;
 }
 
-.c60 .c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c60 .c12 {
-  color: #ffffff;
-}
-
-.c60[aria-disabled='true'] {
+.c66[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c60[aria-disabled='true'] .c12 {
+.c66[aria-disabled='true'] .c10 {
   color: #666687;
 }
 
-.c60[aria-disabled='true'] svg > g,.c60[aria-disabled='true'] svg path {
+.c66[aria-disabled='true'] svg > g,.c66[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c60[aria-disabled='true']:active {
+.c66[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c60[aria-disabled='true']:active .c12 {
+.c66[aria-disabled='true']:active .c10 {
   color: #666687;
 }
 
-.c60[aria-disabled='true']:active svg > g,.c60[aria-disabled='true']:active svg path {
+.c66[aria-disabled='true']:active svg > g,.c66[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c60:hover {
+.c66:hover {
   background-color: #ffffff;
 }
 
-.c60:active {
+.c66:active {
   background-color: #ffffff;
   border: 1px solid #4945ff;
 }
 
-.c60:active .c12 {
+.c66:active .c10 {
   color: #4945ff;
 }
 
-.c60:active svg > g,
-.c60:active svg path {
+.c66:active svg > g,
+.c66:active svg path {
   fill: #4945ff;
 }
 
-.c60 .c12 {
+.c66 .c10 {
   color: #271fe0;
 }
 
-.c60 svg > g,
-.c60 svg path {
+.c66 svg > g,
+.c66 svg path {
   fill: #271fe0;
 }
 
-.c28 {
+.c27 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -2011,28 +2036,28 @@ exports[`EditSettingsView should add field 1`] = `
   transition-duration: 0.2s;
 }
 
-.c28:focus-within {
+.c27:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c34 {
+.c33 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c34 svg {
+.c33 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c34 svg path {
+.c33 svg path {
   fill: #666687;
 }
 
-.c35 {
+.c34 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2041,11 +2066,11 @@ exports[`EditSettingsView should add field 1`] = `
   border: none;
 }
 
-.c35 svg {
+.c34 svg {
   width: 0.375rem;
 }
 
-.c29 {
+.c28 {
   position: absolute;
   left: 0;
   right: 0;
@@ -2056,19 +2081,19 @@ exports[`EditSettingsView should add field 1`] = `
   border: none;
 }
 
-.c29:focus {
+.c28:focus {
   outline: none;
 }
 
-.c29[aria-disabled='true'] {
+.c28[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c30 {
+.c29 {
   width: 100%;
 }
 
-.c39 {
+.c38 {
   height: 1px;
   border: none;
   -webkit-flex-shrink: 0;
@@ -2077,59 +2102,37 @@ exports[`EditSettingsView should add field 1`] = `
   margin: 0;
 }
 
-.c24 {
+.c22 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
 }
 
-.c25 {
+.c23 {
   grid-column: span 6;
   max-width: 100%;
 }
 
-.c46 {
+.c48 {
   grid-column: span 6;
   max-width: 100%;
 }
 
-.c56 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-  border: none;
-}
-
-.c56 svg > g,
-.c56 svg path {
+.c60 svg > g,
+.c60 svg path {
   fill: #8e8ea9;
 }
 
-.c56:hover svg > g,
-.c56:hover svg path {
+.c60:hover svg > g,
+.c60:hover svg path {
   fill: #666687;
 }
 
-.c56:active svg > g,
-.c56:active svg path {
+.c60:active svg > g,
+.c60:active svg path {
   fill: #a5a5ba;
 }
 
-.c56[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c56[aria-disabled='true'] svg path {
+.c60[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -2137,52 +2140,83 @@ exports[`EditSettingsView should add field 1`] = `
   outline: none;
 }
 
-.c6 {
+.c4 {
   padding-right: 8px;
 }
 
-.c9 {
+.c40 {
+  background: #4945ff;
+  padding-top: 8px;
+  padding-right: 16px;
+  padding-bottom: 8px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+}
+
+.c7 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #4945ff;
 }
 
-.c43 {
+.c45 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
-  color: #32324d;
+  color: #ffffff;
 }
 
 .c41 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c44 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c42 {
   position: relative;
   outline: none;
 }
 
-.c41 svg {
+.c42 svg {
   height: 12px;
   width: 12px;
 }
 
-.c41 svg > g,
-.c41 svg path {
+.c42 svg > g,
+.c42 svg path {
   fill: #ffffff;
 }
 
-.c41[aria-disabled='true'] {
+.c42[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c41:after {
+.c42:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -2197,11 +2231,11 @@ exports[`EditSettingsView should add field 1`] = `
   border: 2px solid transparent;
 }
 
-.c41:focus-visible {
+.c42:focus-visible {
   outline: none;
 }
 
-.c41:focus-visible:after {
+.c42:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -2212,7 +2246,7 @@ exports[`EditSettingsView should add field 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c4 {
+.c3 {
   display: -webkit-inline-box;
   display: -webkit-inline-flex;
   display: -ms-inline-flexbox;
@@ -2227,15 +2261,15 @@ exports[`EditSettingsView should add field 1`] = `
   outline: none;
 }
 
-.c4 svg path {
+.c3 svg path {
   fill: #4945ff;
 }
 
-.c4 svg {
+.c3 svg {
   font-size: 0.625rem;
 }
 
-.c4:after {
+.c3:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -2250,11 +2284,11 @@ exports[`EditSettingsView should add field 1`] = `
   border: 2px solid transparent;
 }
 
-.c4:focus-visible {
+.c3:focus-visible {
   outline: none;
 }
 
-.c4:focus-visible:after {
+.c3:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -2265,124 +2299,101 @@ exports[`EditSettingsView should add field 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c7 {
+.c5 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
 }
 
-.c42 {
-  padding: 8px 16px;
-  background: #4945ff;
-  border: 1px solid #4945ff;
-  border-radius: 4px;
-  border: 1px solid #d9d8ff;
-  background: #f0f0ff;
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
+.c43 {
   -webkit-text-decoration: none;
   text-decoration: none;
+  border: 1px solid #d9d8ff;
+  background: #f0f0ff;
 }
 
-.c42 .c5 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c42 .c8 {
-  color: #ffffff;
-}
-
-.c42[aria-disabled='true'] {
+.c43[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c42[aria-disabled='true'] .c8 {
+.c43[aria-disabled='true'] .c6 {
   color: #666687;
 }
 
-.c42[aria-disabled='true'] svg > g,.c42[aria-disabled='true'] svg path {
+.c43[aria-disabled='true'] svg > g,.c43[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c42[aria-disabled='true']:active {
+.c43[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c42[aria-disabled='true']:active .c8 {
+.c43[aria-disabled='true']:active .c6 {
   color: #666687;
 }
 
-.c42[aria-disabled='true']:active svg > g,.c42[aria-disabled='true']:active svg path {
+.c43[aria-disabled='true']:active svg > g,.c43[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c42:hover {
+.c43:hover {
   background-color: #ffffff;
 }
 
-.c42:active {
+.c43:active {
   background-color: #ffffff;
   border: 1px solid #4945ff;
 }
 
-.c42:active .c8 {
+.c43:active .c6 {
   color: #4945ff;
 }
 
-.c42:active svg > g,
-.c42:active svg path {
+.c43:active svg > g,
+.c43:active svg path {
   fill: #4945ff;
 }
 
-.c42 .c8 {
+.c43 .c6 {
   color: #271fe0;
 }
 
-.c42 svg > g,
-.c42 svg path {
+.c43 svg > g,
+.c43 svg path {
   fill: #271fe0;
 }
 
-.c57 {
+.c61 {
   background-color: transparent;
 }
 
-.c57 path {
+.c61 path {
   fill: #666687;
 }
 
-.c47 {
+.c49 {
   position: relative;
   padding-right: 4px;
 }
 
-.c59 {
+.c63 {
   position: relative;
   padding-left: 4px;
 }
 
-.c53 {
+.c55 {
   height: 0.75rem;
   width: 0.75rem;
 }
 
-.c53 path {
+.c55 path {
   fill: #666687;
 }
 
-.c50 {
+.c52 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2390,31 +2401,31 @@ exports[`EditSettingsView should add field 1`] = `
   opacity: 1;
 }
 
-.c52 {
+.c54 {
   cursor: all-scroll;
   border-right: 1px solid #dcdce4;
 }
 
 @media (max-width:68.75rem) {
-  .c25 {
+  .c23 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c25 {
+  .c23 {
     grid-column: span;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c46 {
+  .c48 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c46 {
+  .c48 {
     grid-column: span;
   }
 }
@@ -2431,129 +2442,129 @@ exports[`EditSettingsView should add field 1`] = `
         style="height: 0px;"
       >
         <div
-          class="c1 c2"
+          class="c1"
           data-strapi-header="true"
         >
           <div
-            class="c1 c3"
+            class="c2"
           >
             <a
               aria-current="page"
-              class="c4 active"
+              class="c3 active"
               href="/"
             >
               <span
                 aria-hidden="true"
-                class="c5 c6 c7"
+                class="c4 c5"
               >
                 <svg
                   fill="none"
-                  height="1em"
+                  height="1rem"
                   viewBox="0 0 24 24"
-                  width="1em"
+                  width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M24 13.3a.2.2 0 01-.2.2H5.74l8.239 8.239a.2.2 0 010 .282L12.14 23.86a.2.2 0 01-.282 0L.14 12.14a.2.2 0 010-.282L11.86.14a.2.2 0 01.282 0L13.98 1.98a.2.2 0 010 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6z"
+                    d="M24 13.3a.2.2 0 0 1-.2.2H5.74l8.239 8.239a.2.2 0 0 1 0 .282L12.14 23.86a.2.2 0 0 1-.282 0L.14 12.14a.2.2 0 0 1 0-.282L11.86.14a.2.2 0 0 1 .282 0L13.98 1.98a.2.2 0 0 1 0 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6Z"
                     fill="#212134"
                   />
                 </svg>
               </span>
               <span
-                class="c8 c9"
+                class="c6 c7"
               >
                 Back
               </span>
             </a>
           </div>
           <div
-            class="c1 c10"
+            class="c8"
           >
             <div
-              class="c1 c11"
+              class="c9"
             >
               <h1
-                class="c12 c13"
+                class="c10 c11"
               >
                 Configure the view - Address
               </h1>
             </div>
             <button
               aria-disabled="true"
-              class="c14 c15"
+              class="c12 c13 c14 c15"
               disabled=""
               type="submit"
             >
               <div
                 aria-hidden="true"
-                class="c1 c16 c17"
+                class=""
               >
                 <svg
                   fill="none"
-                  height="1em"
+                  height="1rem"
                   viewBox="0 0 24 24"
-                  width="1em"
+                  width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
+                    d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
                     fill="#212134"
                   />
                 </svg>
               </div>
               <span
-                class="c12 c18"
+                class="c10 c16"
               >
                 Save
               </span>
             </button>
           </div>
           <p
-            class="c12 c19"
+            class="c10 c17"
           >
             Customize how the edit view will look like.
           </p>
         </div>
       </div>
       <div
-        class="c1 c20"
+        class="c18"
       >
         <div
-          class="c1 c21"
+          class="c19"
         >
           <div
-            class="c1 c22"
+            class="c20"
           >
             <h2
-              class="c12 c23"
+              class="c10 c21"
             >
               Settings
             </h2>
             <div
-              class="c1 c24"
+              class="c22"
             >
               <div
-                class="c25"
+                class="c23"
               >
                 <div
-                  class="c1 "
+                  class=""
                 >
                   <div>
                     <div
-                      class="c1 c26 c27"
+                      class="c24 c25"
                     >
                       <label
-                        class="c12 c18"
+                        class="c10 c26"
                         for="12"
                       >
                         <div
-                          class="c1 c11"
+                          class="c9"
                         >
                           Entry title
                         </div>
                       </label>
                       <div
-                        class="c1 c11 c28"
+                        class="c9 c27"
                       >
                         <button
                           aria-describedby="12-hint"
@@ -2561,21 +2572,21 @@ exports[`EditSettingsView should add field 1`] = `
                           aria-expanded="false"
                           aria-haspopup="listbox"
                           aria-labelledby="12 12-label 12-content"
-                          class="c29"
+                          class="c28"
                           id="12"
                           type="button"
                         />
                         <div
-                          class="c1 c10 c30"
+                          class="c8 c29"
                         >
                           <div
-                            class="c1 c11"
+                            class="c9"
                           >
                             <div
-                              class="c1 c31"
+                              class="c30"
                             >
                               <span
-                                class="c12 c32"
+                                class="c10 c31"
                                 id="12-content"
                               >
                                 postal_code
@@ -2583,25 +2594,25 @@ exports[`EditSettingsView should add field 1`] = `
                             </div>
                           </div>
                           <div
-                            class="c1 c11"
+                            class="c9"
                           >
                             <button
                               aria-hidden="true"
-                              class="c1 c33 c34 c35"
+                              class="c32 c33 c34"
                               tabindex="-1"
                               title="Carret Down Button"
                               type="button"
                             >
                               <svg
                                 fill="none"
-                                height="1em"
+                                height="1rem"
                                 viewBox="0 0 14 8"
-                                width="1em"
+                                width="1rem"
                                 xmlns="http://www.w3.org/2000/svg"
                               >
                                 <path
                                   clip-rule="evenodd"
-                                  d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                   fill="#32324D"
                                   fill-rule="evenodd"
                                 />
@@ -2611,7 +2622,7 @@ exports[`EditSettingsView should add field 1`] = `
                         </div>
                       </div>
                       <p
-                        class="c12 c36"
+                        class="c10 c35"
                         id="12-hint"
                       >
                         Set the display field of your entry
@@ -2622,38 +2633,38 @@ exports[`EditSettingsView should add field 1`] = `
               </div>
             </div>
             <div
-              class="c1 c37"
+              class="c36"
             >
               <hr
-                class="c1 c38 c39"
+                class="c37 c38"
               />
             </div>
             <h3
-              class="c12 c23"
+              class="c10 c21"
             >
               View
             </h3>
             <div
-              class="c1 c22"
+              class="c20"
             >
               <div
-                class="c1 c10"
+                class="c8"
               >
                 <div>
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <span
-                      class="c12 c40"
+                      class="c10 c39"
                     >
                       Displayed fields
                     </span>
                   </div>
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <span
-                      class="c12 c36"
+                      class="c10 c35"
                     >
                       Drag & drop the fields to build the layout
                     </span>
@@ -2662,31 +2673,30 @@ exports[`EditSettingsView should add field 1`] = `
                 <div>
                   <a
                     aria-disabled="false"
-                    class="c41 c42"
+                    class="c40 c41 c42 c43"
                     href="/plugins/content-type-builder/content-types/api::address.address"
-                    variant="secondary"
                   >
                     <div
                       aria-hidden="true"
-                      class="c5 c6"
+                      class="c44"
                     >
                       <svg
                         fill="none"
-                        height="1em"
+                        height="1rem"
                         viewBox="0 0 24 24"
-                        width="1em"
+                        width="1rem"
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
                           clip-rule="evenodd"
-                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 0 1 1.887 0l3.118 3.118ZM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0Z"
                           fill="#212134"
                           fill-rule="evenodd"
                         />
                       </svg>
                     </div>
                     <span
-                      class="c8 c43"
+                      class="c6 c45"
                     >
                       Edit the content type
                     </span>
@@ -2694,95 +2704,95 @@ exports[`EditSettingsView should add field 1`] = `
                 </div>
               </div>
               <div
-                class="c1 c44"
+                class="c46"
               >
                 <div
-                  class="c1 c45"
+                  class="c47"
                 >
                   <div
-                    class="c1 c24"
+                    class="c22"
                   >
                     <div
-                      class="c46"
+                      class="c48"
                     >
                       <div
-                        class="c1 "
+                        class=""
                       >
                         <div
-                          class="c1 c11 c47"
+                          class="c9 c49"
                         >
                           <div
-                            class="c1 c48 c49 c50"
+                            class="c50 c51 c52"
                           >
                             <span
-                              class="c1 c51 c11 c52"
+                              class="c53 c9 c54"
                               draggable="true"
                               tabindex="-1"
                               type="button"
                             >
                               <svg
-                                class="c53"
+                                class="c55"
                                 fill="none"
-                                height="1em"
+                                height="1rem"
                                 viewBox="0 0 24 24"
-                                width="1em"
+                                width="1rem"
                                 xmlns="http://www.w3.org/2000/svg"
                               >
                                 <path
-                                  d="M16.563 5.587a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                  d="M16.563 5.587a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574A1.943 1.943 0 0114.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 011.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0017.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM16.563 14.372a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                  d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 0 1-2.184-.574A1.943 1.943 0 0 1 14.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 0 1 1.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0 0 17.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006ZM16.563 14.372a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005zM16.563 23.392a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                  d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 0 1-2.184-.574 1.943 1.943 0 0 1-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 0 0-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005ZM16.563 23.392a2.503 2.503 0 1 0 0-5.006 2.503 2.503 0 0 0 0 5.006Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM7.378 5.622a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                  d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 0 1-2.184-.574 1.943 1.943 0 0 1-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 0 0-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006ZM7.378 5.622a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005zM7.378 14.406a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                  d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 0 1 1.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 0 0 8.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005ZM7.378 14.406a2.503 2.503 0 1 0 0-5.006 2.503 2.503 0 0 0 0 5.006Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006zM7.378 23.427a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                  d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 0 1 1.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 0 0 8.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006ZM7.378 23.427a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 008.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0z"
+                                  d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 0 0 8.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0Z"
                                   fill="#212134"
                                 />
                               </svg>
                             </span>
                             <div
-                              class="c1 c54"
+                              class="c56"
                               overflow="hidden"
                             >
                               <div
-                                class="c1 c33 c10"
+                                class="c32 c8"
                               >
                                 <span
-                                  class="c12 c55"
+                                  class="c10 c57"
                                 >
                                   postal_code
                                 </span>
                                 <div
-                                  class="c1 c11"
+                                  class="c9"
                                 >
                                   <span>
                                     <button
                                       aria-disabled="false"
                                       aria-labelledby="13"
-                                      class="c14 c56 c57"
+                                      class="c58 c59 c14 c60 c61"
                                       tabindex="0"
                                       type="button"
                                     >
                                       <span
-                                        class="c58"
+                                        class="c62"
                                       >
                                         Edit postal_code
                                       </span>
@@ -2790,14 +2800,14 @@ exports[`EditSettingsView should add field 1`] = `
                                         aria-hidden="true"
                                         fill="none"
                                         focusable="false"
-                                        height="1em"
+                                        height="1rem"
                                         viewBox="0 0 24 24"
-                                        width="1em"
+                                        width="1rem"
                                         xmlns="http://www.w3.org/2000/svg"
                                       >
                                         <path
                                           clip-rule="evenodd"
-                                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 0 1 1.887 0l3.118 3.118ZM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0Z"
                                           fill="#212134"
                                           fill-rule="evenodd"
                                         />
@@ -2808,13 +2818,13 @@ exports[`EditSettingsView should add field 1`] = `
                                     <button
                                       aria-disabled="false"
                                       aria-labelledby="14"
-                                      class="c14 c56 c57"
+                                      class="c58 c59 c14 c60 c61"
                                       data-testid="delete-field"
                                       tabindex="0"
                                       type="button"
                                     >
                                       <span
-                                        class="c58"
+                                        class="c62"
                                       >
                                         Delete postal_code
                                       </span>
@@ -2822,13 +2832,13 @@ exports[`EditSettingsView should add field 1`] = `
                                         aria-hidden="true"
                                         fill="none"
                                         focusable="false"
-                                        height="1em"
+                                        height="1rem"
                                         viewBox="0 0 24 24"
-                                        width="1em"
+                                        width="1rem"
                                         xmlns="http://www.w3.org/2000/svg"
                                       >
                                         <path
-                                          d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
+                                          d="M3.236 6.149a.2.2 0 0 0-.197.233L6 24h12l2.96-17.618a.2.2 0 0 0-.196-.233H3.236ZM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 0 1-.2.2H2.2a.2.2 0 0 1-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8Z"
                                           fill="#32324D"
                                         />
                                       </svg>
@@ -2842,86 +2852,86 @@ exports[`EditSettingsView should add field 1`] = `
                       </div>
                     </div>
                     <div
-                      class="c46"
+                      class="c48"
                     >
                       <div
-                        class="c1 "
+                        class=""
                       >
                         <div
-                          class="c1 c11 c59"
+                          class="c9 c63"
                         >
                           <div
-                            class="c1 c48 c49 c50"
+                            class="c50 c51 c52"
                           >
                             <span
-                              class="c1 c51 c11 c52"
+                              class="c53 c9 c54"
                               draggable="true"
                               tabindex="-1"
                               type="button"
                             >
                               <svg
-                                class="c53"
+                                class="c55"
                                 fill="none"
-                                height="1em"
+                                height="1rem"
                                 viewBox="0 0 24 24"
-                                width="1em"
+                                width="1rem"
                                 xmlns="http://www.w3.org/2000/svg"
                               >
                                 <path
-                                  d="M16.563 5.587a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                  d="M16.563 5.587a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574A1.943 1.943 0 0114.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 011.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0017.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM16.563 14.372a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                  d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 0 1-2.184-.574A1.943 1.943 0 0 1 14.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 0 1 1.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0 0 17.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006ZM16.563 14.372a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005zM16.563 23.392a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                  d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 0 1-2.184-.574 1.943 1.943 0 0 1-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 0 0-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005ZM16.563 23.392a2.503 2.503 0 1 0 0-5.006 2.503 2.503 0 0 0 0 5.006Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM7.378 5.622a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                  d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 0 1-2.184-.574 1.943 1.943 0 0 1-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 0 0-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006ZM7.378 5.622a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005zM7.378 14.406a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                  d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 0 1 1.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 0 0 8.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005ZM7.378 14.406a2.503 2.503 0 1 0 0-5.006 2.503 2.503 0 0 0 0 5.006Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006zM7.378 23.427a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                  d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 0 1 1.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 0 0 8.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006ZM7.378 23.427a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                   fill="#212134"
                                 />
                                 <path
-                                  d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 008.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0z"
+                                  d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 0 0 8.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0Z"
                                   fill="#212134"
                                 />
                               </svg>
                             </span>
                             <div
-                              class="c1 c54"
+                              class="c56"
                               overflow="hidden"
                             >
                               <div
-                                class="c1 c33 c10"
+                                class="c32 c8"
                               >
                                 <span
-                                  class="c12 c55"
+                                  class="c10 c57"
                                 >
                                   city
                                 </span>
                                 <div
-                                  class="c1 c11"
+                                  class="c9"
                                 >
                                   <span>
                                     <button
                                       aria-disabled="false"
                                       aria-labelledby="15"
-                                      class="c14 c56 c57"
+                                      class="c58 c59 c14 c60 c61"
                                       tabindex="0"
                                       type="button"
                                     >
                                       <span
-                                        class="c58"
+                                        class="c62"
                                       >
                                         Edit city
                                       </span>
@@ -2929,14 +2939,14 @@ exports[`EditSettingsView should add field 1`] = `
                                         aria-hidden="true"
                                         fill="none"
                                         focusable="false"
-                                        height="1em"
+                                        height="1rem"
                                         viewBox="0 0 24 24"
-                                        width="1em"
+                                        width="1rem"
                                         xmlns="http://www.w3.org/2000/svg"
                                       >
                                         <path
                                           clip-rule="evenodd"
-                                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 0 1 1.887 0l3.118 3.118ZM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0Z"
                                           fill="#212134"
                                           fill-rule="evenodd"
                                         />
@@ -2947,13 +2957,13 @@ exports[`EditSettingsView should add field 1`] = `
                                     <button
                                       aria-disabled="false"
                                       aria-labelledby="16"
-                                      class="c14 c56 c57"
+                                      class="c58 c59 c14 c60 c61"
                                       data-testid="delete-field"
                                       tabindex="0"
                                       type="button"
                                     >
                                       <span
-                                        class="c58"
+                                        class="c62"
                                       >
                                         Delete city
                                       </span>
@@ -2961,13 +2971,13 @@ exports[`EditSettingsView should add field 1`] = `
                                         aria-hidden="true"
                                         fill="none"
                                         focusable="false"
-                                        height="1em"
+                                        height="1rem"
                                         viewBox="0 0 24 24"
-                                        width="1em"
+                                        width="1rem"
                                         xmlns="http://www.w3.org/2000/svg"
                                       >
                                         <path
-                                          d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
+                                          d="M3.236 6.149a.2.2 0 0 0-.197.233L6 24h12l2.96-17.618a.2.2 0 0 0-.196-.233H3.236ZM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 0 1-.2.2H2.2a.2.2 0 0 1-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8Z"
                                           fill="#32324D"
                                         />
                                       </svg>
@@ -2987,7 +2997,7 @@ exports[`EditSettingsView should add field 1`] = `
                       aria-disabled="true"
                       aria-expanded="false"
                       aria-haspopup="true"
-                      class="c14 c60"
+                      class="c64 c65 c14 c66"
                       data-testid="add-field"
                       disabled=""
                       label="Insert another field"
@@ -2995,23 +3005,23 @@ exports[`EditSettingsView should add field 1`] = `
                     >
                       <div
                         aria-hidden="true"
-                        class="c1 c16 c17"
+                        class=""
                       >
                         <svg
                           fill="none"
-                          height="1em"
+                          height="1rem"
                           viewBox="0 0 24 24"
-                          width="1em"
+                          width="1rem"
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
-                            d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
+                            d="M24 13.604a.3.3 0 0 1-.3.3h-9.795V23.7a.3.3 0 0 1-.3.3h-3.21a.3.3 0 0 1-.3-.3v-9.795H.3a.3.3 0 0 1-.3-.3v-3.21a.3.3 0 0 1 .3-.3h9.795V.3a.3.3 0 0 1 .3-.3h3.21a.3.3 0 0 1 .3.3v9.795H23.7a.3.3 0 0 1 .3.3v3.21Z"
                             fill="#212134"
                           />
                         </svg>
                       </div>
                       <span
-                        class="c12 c18"
+                        class="c10 c16"
                       >
                         Insert another field
                       </span>
@@ -3026,7 +3036,7 @@ exports[`EditSettingsView should add field 1`] = `
     </form>
   </main>
   <div
-    class="c58"
+    class="c62"
   >
     <p
       aria-live="polite"
