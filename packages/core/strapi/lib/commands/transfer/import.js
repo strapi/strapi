@@ -4,7 +4,11 @@ const {
   providers: { createLocalFileSourceProvider },
 } = require('@strapi/data-transfer/lib/file');
 const {
-  providers: { createLocalStrapiDestinationProvider, DEFAULT_CONFLICT_STRATEGY },
+  providers: {
+    createLocalStrapiDestinationProvider,
+    createRemoteStrapiDestinationProvider,
+    DEFAULT_CONFLICT_STRATEGY,
+  },
 } = require('@strapi/data-transfer/lib/strapi');
 const {
   createTransferEngine,
@@ -14,9 +18,6 @@ const {
 
 const { isObject } = require('lodash/fp');
 
-const {
-  providers: createRemoteStrapiDestinationProvider,
-} = require('@strapi/data-transfer/lib/strapi');
 const {
   buildTransferTable,
   DEFAULT_IGNORED_CONTENT_TYPES,
@@ -51,20 +52,6 @@ module.exports = async (opts) => {
   let destination;
   // if no URL provided, use local Strapi
   if (!opts.to) {
-    destination = createRemoteStrapiDestinationProvider({
-      url: opts.to,
-      auth: {
-        type: 'token',
-        token: opts.toToken,
-      },
-      strategy: 'restore',
-      restore: {
-        entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },
-      },
-    });
-  }
-  // if URL provided, set up a remote source provider
-  else {
     const destinationOptions = {
       async getStrapi() {
         return strapiInstance;
@@ -76,6 +63,20 @@ module.exports = async (opts) => {
       },
     };
     destination = createLocalStrapiDestinationProvider(destinationOptions);
+  }
+  // if URL provided, set up a remote source provider
+  else {
+    destination = createRemoteStrapiDestinationProvider({
+      url: opts.to,
+      auth: {
+        type: 'token',
+        token: opts.toToken,
+      },
+      strategy: 'restore',
+      restore: {
+        entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },
+      },
+    });
   }
 
   /**
