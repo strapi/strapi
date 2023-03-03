@@ -108,7 +108,7 @@ export const createTransferHandler = (options: IHandlerOptions) => {
         /**
          * Wrap a function call to catch errors and answer the request with the correct format
          */
-        const answer = async <T = unknown>(fn: () => T, uuid: string) => {
+        const answer = async <T = unknown>(uuid: string, fn: () => T) => {
           try {
             const response = await fn();
             return await sendResponse(uuid, response);
@@ -218,18 +218,18 @@ export const createTransferHandler = (options: IHandlerOptions) => {
           const { command, uuid } = msg;
 
           if (command === 'init') {
-            return answer(() => init(msg), uuid);
+            return answer(uuid, () => init(msg));
           }
 
           if (command === 'end') {
-            return answer(() => {
+            return answer(uuid, () => {
               assertValidTransfer(state);
               end(msg);
-            }, uuid);
+            });
           }
 
           if (command === 'status') {
-            return answer(status, uuid);
+            return answer(uuid, status);
           }
         };
 
@@ -295,9 +295,8 @@ export const createTransferHandler = (options: IHandlerOptions) => {
               transfer.flow.set(step);
             }
 
-            return answer(
-              () => controller.actions[action as keyof typeof controller.actions](),
-              uuid
+            return answer(uuid, () =>
+              controller.actions[action as keyof typeof controller.actions]()
             );
           }
 
@@ -355,7 +354,7 @@ export const createTransferHandler = (options: IHandlerOptions) => {
                 );
               }
 
-              await answer(() => controller.transfer[message.step]?.(message.data as never), uuid);
+              await answer(uuid, () => controller.transfer[message.step]?.(message.data as never));
             }
 
             // Unlock the current transfer stage
