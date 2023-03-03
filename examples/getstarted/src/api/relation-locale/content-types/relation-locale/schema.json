@@ -40,7 +40,7 @@
       },
       "component": "basic.relation"
     },
-    "dyanmic_relations": {
+    "dynamic_relations": {
       "pluginOptions": {
         "i18n": {
           "localized": true
