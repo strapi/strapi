@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Flex, Typography, Stack } from '@strapi/design-system';
+import { Flex, Typography } from '@strapi/design-system';
 import { Pencil, Cross, Drag } from '@strapi/icons';
 import ellipsisCardTitle from '../utils/ellipsisCardTitle';
 
@@ -62,12 +62,12 @@ const CardPreview = ({ labelField, transparent, isSibling }) => {
       transparent={transparent}
       isSibling={isSibling}
     >
-      <Stack horizontal spacing={3}>
+      <Flex gap={3}>
         <DragButton alignItems="center">
           <Drag />
         </DragButton>
         <Typography fontWeight="bold">{cardEllipsisTitle}</Typography>
-      </Stack>
+      </Flex>
       <Flex paddingLeft={3}>
         <ActionBox alignItems="center">
           <Pencil />

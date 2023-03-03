@@ -1,7 +1,7 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Box, Grid, GridItem, Stack, Typography } from '@strapi/design-system';
+import { Box, Grid, GridItem, Flex, Typography } from '@strapi/design-system';
 import LifeSpanInput from '../../../../../components/Tokens/LifeSpanInput';
 import TokenName from '../../../../../components/Tokens/TokenName';
 import TokenDescription from '../../../../../components/Tokens/TokenDescription';
@@ -38,21 +38,21 @@ const FormApiTokenContainer = ({
     {
       value: 'read-only',
       label: {
-        id: 'Settings.apiTokens.types.read-only',
+        id: 'Settings.tokens.types.read-only',
         defaultMessage: 'Read-only',
       },
     },
     {
       value: 'full-access',
       label: {
-        id: 'Settings.apiTokens.types.full-access',
+        id: 'Settings.tokens.types.full-access',
         defaultMessage: 'Full access',
       },
     },
     {
       value: 'custom',
       label: {
-        id: 'Settings.apiTokens.types.custom',
+        id: 'Settings.tokens.types.custom',
         defaultMessage: 'Custom',
       },
     },
@@ -68,7 +68,7 @@ const FormApiTokenContainer = ({
       paddingLeft={7}
       paddingRight={7}
     >
-      <Stack spacing={4}>
+      <Flex direction="column" alignItems="stretch" gap={4}>
         <Typography variant="delta" as="h2">
           {formatMessage({
             id: 'global.details',
@@ -107,7 +107,7 @@ const FormApiTokenContainer = ({
               values={values}
               errors={errors}
               label={{
-                id: 'Settings.apiTokens.form.type',
+                id: 'Settings.tokens.form.type',
                 defaultMessage: 'Token type',
               }}
               onChange={(value) => {
@@ -119,7 +119,7 @@ const FormApiTokenContainer = ({
             />
           </GridItem>
         </Grid>
-      </Stack>
+      </Flex>
     </Box>
   );
 };

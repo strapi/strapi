@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Button, Box, Typography, Stack, Flex, SimpleMenu, MenuItem } from '@strapi/design-system';
+import { Button, Box, Typography, Flex, SimpleMenu, MenuItem } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { getTrad } from '../../../utils';
 import RowsLayout from './RowsLayout';
@@ -11,7 +11,7 @@ const DisplayedFields = ({ editLayout, fields, onRemoveField, onAddField }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Stack spacing={4}>
+    <Flex direction="column" alignItems="stretch" gap={4}>
       <Flex justifyContent="space-between">
         <div>
           <Box>
@@ -34,7 +34,7 @@ const DisplayedFields = ({ editLayout, fields, onRemoveField, onAddField }) => {
         <LinkToCTB />
       </Flex>
       <Box padding={4} hasRadius borderStyle="dashed" borderWidth="1px" borderColor="neutral300">
-        <Stack spacing={2}>
+        <Flex direction="column" alignItems="stretch" gap={2}>
           {editLayout.map((row, index) => (
             <RowsLayout key={row.rowId} row={row} rowIndex={index} onRemoveField={onRemoveField} />
           ))}
@@ -58,9 +58,9 @@ const DisplayedFields = ({ editLayout, fields, onRemoveField, onAddField }) => {
               </MenuItem>
             ))}
           </SimpleMenu>
-        </Stack>
+        </Flex>
       </Box>
-    </Stack>
+    </Flex>
   );
 };
 

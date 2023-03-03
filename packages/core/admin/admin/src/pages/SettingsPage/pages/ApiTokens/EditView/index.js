@@ -11,7 +11,7 @@ import {
   useRBAC,
   useFetchClient,
 } from '@strapi/helper-plugin';
-import { Main, ContentLayout, Stack } from '@strapi/design-system';
+import { Main, ContentLayout, Flex } from '@strapi/design-system';
 import { Formik } from 'formik';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { useQuery } from 'react-query';
@@ -193,11 +193,11 @@ const ApiTokenCreateView = () => {
         type: 'success',
         message: isCreating
           ? formatMessage({
-              id: 'notification.success.tokencreated',
+              id: 'notification.success.apitokencreated',
               defaultMessage: 'API Token successfully created',
             })
           : formatMessage({
-              id: 'notification.success.tokenedited',
+              id: 'notification.success.apitokenedited',
               defaultMessage: 'API Token successfully edited',
             }),
       });
@@ -302,7 +302,7 @@ const ApiTokenCreateView = () => {
                 />
 
                 <ContentLayout>
-                  <Stack spacing={6}>
+                  <Flex direction="column" alignItems="stretch" gap={6}>
                     {Boolean(apiToken?.name) && (
                       <TokenBox token={apiToken?.accessKey} tokenType={API_TOKEN_TYPE} />
                     )}
@@ -323,7 +323,7 @@ const ApiTokenCreateView = () => {
                         values?.type === 'full-access'
                       }
                     />
-                  </Stack>
+                  </Flex>
                 </ContentLayout>
               </Form>
             );

@@ -14,7 +14,6 @@ import {
   FieldLabel,
   Flex,
   Loader,
-  Stack,
   TextInput,
   Typography,
 } from '@strapi/design-system';
@@ -208,7 +207,7 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                   </GridItem>
 
                   <GridItem xs={12} col={6}>
-                    <Stack spacing={1}>
+                    <Flex direction="column" alignItems="stretch" gap={1}>
                       <FieldLabel htmlFor="folder-parent">
                         {formatMessage({
                           id: getTrad('form.input.label.folder-location'),
@@ -241,7 +240,7 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                           {errors.parent}
                         </Typography>
                       )}
-                    </Stack>
+                    </Flex>
                   </GridItem>
                 </Grid>
               </ModalBody>
@@ -253,7 +252,7 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                   </Button>
                 }
                 endActions={
-                  <Stack horizontal spacing={2}>
+                  <Flex gap={2}>
                     {isEditing && canUpdate && (
                       <Button
                         type="button"
@@ -281,7 +280,7 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                           : { id: getTrad('modal.folder.create.submit'), defaultMessage: 'Create' }
                       )}
                     </Button>
-                  </Stack>
+                  </Flex>
                 }
               />
             </Form>

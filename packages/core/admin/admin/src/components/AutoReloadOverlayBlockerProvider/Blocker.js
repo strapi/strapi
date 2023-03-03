@@ -6,7 +6,7 @@ import styled, { keyframes } from 'styled-components';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Clock, Refresh } from '@strapi/icons';
 import { Link } from '@strapi/design-system/v2';
-import { Box, Stack, Flex, Typography } from '@strapi/design-system';
+import { Box, Flex, Typography } from '@strapi/design-system';
 import { Content, IconBox, Overlay } from './Overlay';
 
 const overlayContainer = document.createElement('div');
@@ -40,8 +40,8 @@ const Blocker = ({ displayedIcon, description, title, isOpen }) => {
   if (isOpen) {
     return ReactDOM.createPortal(
       <Overlay>
-        <Content spacing={6}>
-          <Stack spacing={2}>
+        <Content direction="column" alignItems="stretch" gap={6}>
+          <Flex direction="column" alignItems="stretch" gap={2}>
             <Flex justifyContent="center">
               <Typography as="h1" variant="alpha">
                 {formatMessage(title)}
@@ -52,7 +52,7 @@ const Blocker = ({ displayedIcon, description, title, isOpen }) => {
                 {formatMessage(description)}
               </Typography>
             </Flex>
-          </Stack>
+          </Flex>
           <Flex justifyContent="center">
             {displayedIcon === 'reload' && (
               <IconBox padding={6} background="primary100" borderColor="primary200">

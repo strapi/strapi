@@ -37,11 +37,21 @@ const defaultEvents = [
   'permission.delete',
 ];
 
-const getSanitizedUser = (user) => ({
-  id: user.id,
-  email: user.email,
-  fullname: `${user.firstname} ${user.lastname}`,
-});
+const getSanitizedUser = (user) => {
+  let displayName = user.email;
+
+  if (user.username) {
+    displayName = user.username;
+  } else if (user.firstname && user.lastname) {
+    displayName = `${user.firstname} ${user.lastname}`;
+  }
+
+  return {
+    id: user.id,
+    email: user.email,
+    displayName,
+  };
+};
 
 const getEventMap = (defaultEvents) => {
   const getDefaultPayload = (...args) => args[0];

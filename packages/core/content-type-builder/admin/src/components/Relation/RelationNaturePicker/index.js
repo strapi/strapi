@@ -13,7 +13,7 @@ import {
   ManyToOne,
   ManyToMany,
 } from '@strapi/icons';
-import { Flex, Typography, KeyboardNavigable, Stack } from '@strapi/design-system';
+import { Flex, Typography, KeyboardNavigable } from '@strapi/design-system';
 import useDataManager from '../../../hooks/useDataManager';
 import { ON_CHANGE_RELATION_TYPE } from '../../FormModal/constants';
 import getTrad from '../../../utils/getTrad';
@@ -71,7 +71,7 @@ const RelationNaturePicker = ({
       <Wrapper>
         <Flex paddingLeft={9} paddingRight={9} paddingTop={1} justifyContent="center">
           <KeyboardNavigable tagName="button">
-            <Stack spacing={3} horizontal>
+            <Flex gap={3}>
               {relationsType.map((relation) => {
                 const Asset = relations[relation];
                 const isEnabled =
@@ -102,7 +102,7 @@ const RelationNaturePicker = ({
                   </IconWrapper>
                 );
               })}
-            </Stack>
+            </Flex>
           </KeyboardNavigable>
         </Flex>
       </Wrapper>
