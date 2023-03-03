@@ -1,13 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { useFetchClient, useNotification, useAPIErrorHandler } from '@strapi/helper-plugin';
 
 const QUERY_BASE_KEY = 'review-workflows';
 const API_BASE_URL = '/admin/review-workflows';
+const API_CM_BASE_URL = '/admin/content-manager';
 
 export function useReviewWorkflows(workflowId) {
   const { get, put } = useFetchClient();
   const toggleNotification = useNotification();
   const client = useQueryClient();
+  const { formatAPIError } = useAPIErrorHandler();
   const workflowQueryKey = [QUERY_BASE_KEY, workflowId ?? 'default'];
 
   async function fetchWorkflows({ params = { populate: 'stages' } }) {
@@ -28,8 +30,23 @@ export function useReviewWorkflows(workflowId) {
     return data;
   }
 
+  async function updateEntityStage({ entityId, stageId }) {
+    const {
+      data: { data },
+      // TODO: endpoint differs for collection-types and single-types
+    } = await put(`${API_CM_BASE_URL}/collection-types/:model_uid/${entityId}/stage`, {
+      data: { id: stageId },
+    });
+
+    return data;
+  }
+
   function updateWorkflowStages(workflowId, stages) {
     return workflowUpdateMutation.mutateAsync({ workflowId, stages });
+  }
+
+  function setStageForEntity(entityId, stageId) {
+    return entityStageMutation.mutateAsync({ entityId, stageId });
   }
 
   function refetchWorkflow() {
@@ -39,11 +56,26 @@ export function useReviewWorkflows(workflowId) {
   const workflows = useQuery(workflowQueryKey, fetchWorkflows);
 
   const workflowUpdateMutation = useMutation(updateRemoteWorkflowStages, {
-    async onError() {
-      // TODO: this should return the proper error thrown by the API
+    async onError(error) {
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        message: formatAPIError(error),
+      });
+    },
+
+    async onSuccess() {
+      toggleNotification({
+        type: 'success',
+        message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
+      });
+    },
+  });
+
+  const entityStageMutation = useMutation(updateEntityStage, {
+    async onError(error) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(error),
       });
     },
 
@@ -59,5 +91,6 @@ export function useReviewWorkflows(workflowId) {
     workflows,
     updateWorkflowStages,
     refetchWorkflow,
+    setStageForEntity,
   };
 }
