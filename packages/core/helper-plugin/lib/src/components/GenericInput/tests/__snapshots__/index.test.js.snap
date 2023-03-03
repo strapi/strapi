@@ -1,13 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`GenericInput json renders and matches the snapshot 1`] = `
-.c2 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
 .c4 {
   font-size: 0.875rem;
   border-radius: 4px;
@@ -55,6 +48,13 @@ exports[`GenericInput json renders and matches the snapshot 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
+}
+
+.c2 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
 }
 
 .c1 > * {
@@ -243,19 +243,6 @@ exports[`GenericInput json renders and matches the snapshot 1`] = `
 `;
 
 exports[`GenericInput number renders and matches the snapshot 1`] = `
-.c2 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c4 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #d02b20;
-}
-
 .c9 {
   padding-right: 12px;
   padding-left: 8px;
@@ -311,6 +298,23 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
   justify-content: space-between;
 }
 
+.c2 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c4 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #d02b20;
+}
+
+.c12 path {
+  fill: #8e8ea9;
+}
+
 .c1 > * {
   margin-top: 0;
   margin-bottom: 0;
@@ -318,10 +322,6 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
 
 .c1 > * + * {
   margin-top: 4px;
-}
-
-.c12 path {
-  fill: #8e8ea9;
 }
 
 .c14 {
@@ -491,14 +491,14 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
             <svg
               class="c11 c12"
               fill="none"
-              height="1em"
+              height="1rem"
               viewBox="0 0 14 8"
-              width="1em"
+              width="1rem"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 clip-rule="evenodd"
-                d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                 fill="#32324D"
                 fill-rule="evenodd"
               />
@@ -514,14 +514,14 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
             <svg
               class="c11 c12"
               fill="none"
-              height="1em"
+              height="1rem"
               viewBox="0 0 14 8"
-              width="1em"
+              width="1rem"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 clip-rule="evenodd"
-                d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                 fill="#32324D"
                 fill-rule="evenodd"
               />
