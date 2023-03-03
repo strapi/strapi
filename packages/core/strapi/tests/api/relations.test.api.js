@@ -924,7 +924,7 @@ describe('Relations', () => {
     });
   });
 
-  describe('Clone entity relations', () => {
+  describe.only('Clone entity relations', () => {
     test('relations are cloned', async () => {
       const createdShop = await createShop({
         anyToOneRel: [{ id: id1 }],
@@ -937,7 +937,7 @@ describe('Relations', () => {
       expect(clonedShop.data).toMatchObject(expectedCreatedShop);
     });
 
-    test.only('relations oneToAny are deleted', async () => {
+    test('relations oneToAny are deleted', async () => {
       // Create a shop with relations
       const createdShop = await createShop({
         anyToOneRel: [{ id: id1 }],
@@ -947,14 +947,28 @@ describe('Relations', () => {
       // Clone that same shop with its relations
       await cloneShop(createdShop.data.id, {});
 
-      // When cloning, anyToOne & oneToOne relations are deleted from the original shop
+      // When cloning, anyToOne relations are to be deleted from the original shop
       const shop = await getShop(createdShop.data.id);
 
       const expectedCreatedShop = shopFactory({ anyToManyRel: [{ id: id1 }, { id: id2 }] });
-      expectedCreatedShop.attributes.products_om = { data: null };
+      expectedCreatedShop.attributes.products_mo = { data: null };
       expectedCreatedShop.attributes.products_oo = { data: null };
+      expectedCreatedShop.attributes.products_ow = { data: null };
+      expectedCreatedShop.attributes.myCompo.compo_products_ow = { data: null };
 
       expect(shop.data).toMatchObject(expectedCreatedShop);
+    });
+
+    test('relations inverse order are recalculated', async () => {
+      const createdShop = await createShop({
+        anyToOneRel: [{ id: id1 }],
+        anyToManyRel: [{ id: id1 }, { id: id2 }],
+      });
+
+      const clonedShop = await cloneShop(createdShop.data.id, {});
+
+      const expectedCreatedShop = shopFactory({ anyToManyRel: [{ id: id1 }, { id: id2 }] });
+      expect(clonedShop.data).toMatchObject(expectedCreatedShop);
     });
   });
 });

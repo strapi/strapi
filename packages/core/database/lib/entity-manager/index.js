@@ -580,52 +580,52 @@ const createEntityManager = (db) => {
             };
           });
 
-          // TODO Clean for xtoOne relations, to update id instead of creating a new one
           // TODO: How to reorder inverse columns?
           if (cleanRelationData.clone) {
             const relIdToClone = cleanRelationData.clone;
 
-            // TODO: Clean this?
-            const columns = [joinColumn.name, inverseJoinColumn.name];
-            if (orderColumnName) columns.push(orderColumnName);
-            if (inverseOrderColumnName) columns.push(inverseOrderColumnName);
-            if (joinTable.on) columns.push(...Object.keys(joinTable.on));
+            // If it was any to one, just update the joinColumn
+            if (isAnyToOne(attribute)) {
+              await this.createQueryBuilder(joinTable.name)
+                .update({ [joinColumn.name]: id })
+                .where({ [joinColumn.name]: relIdToClone })
+                .transacting(trx)
+                .execute();
+            } else {
+              // TODO: Clean this?
+              const columns = [joinColumn.name, inverseJoinColumn.name];
+              if (orderColumnName) columns.push(orderColumnName);
+              if (inverseOrderColumnName) columns.push(inverseOrderColumnName);
+              if (joinTable.on) columns.push(...Object.keys(joinTable.on));
 
-            const con = strapi.db.getConnection();
+              const con = strapi.db.getConnection();
 
-            const selectStatement = con
-              .select(
-                // Override the joinColumn id with the new id
-                con.raw(`?? as ${joinColumn.name}`, [id]),
-                // Add the rest of the columns
-                ...columns.slice(1)
-              )
+              const selectStatement = con
+                .select(
+                  // Override the joinColumn id with the new id
+                  con.raw(`?? as ${joinColumn.name}`, [id]),
+                  // Add the rest of the columns
+                  ...columns.slice(1)
+                )
 
-              // Select the entity id we want to clone it's relations
-              .where(joinColumn.name, relIdToClone)
-              .from(joinTable.name)
-              .toSQL();
+                // Select the entity id we want to clone it's relations
+                .where(joinColumn.name, relIdToClone)
+                .from(joinTable.name)
+                .toSQL();
 
-            // Insert the clone relations
-            await this.createQueryBuilder(joinTable.name)
-              .insert(
-                con.raw(`(${columns.join(',')})  ${selectStatement.sql}`, selectStatement.bindings)
-              )
-              .onConflict([joinColumn.name, inverseJoinColumn.name])
-              .ignore()
-              .transacting(trx)
-              .execute();
-
-            // If it was oneToX, we need to delete the previous relations
-            // if (isOneToAny(attribute)) {
-            //   await deletePreviousOneToAnyRelations({
-            //     id: cleanRelationData.clone,
-            //     attribute,
-            //     relIdsToadd,
-            //     db,
-            //     transaction: trx,
-            //   });
-            // }
+              // Insert the clone relations
+              await this.createQueryBuilder(joinTable.name)
+                .insert(
+                  con.raw(
+                    `(${columns.join(',')})  ${selectStatement.sql}`,
+                    selectStatement.bindings
+                  )
+                )
+                .onConflict([joinColumn.name, inverseJoinColumn.name])
+                .ignore()
+                .transacting(trx)
+                .execute();
+            }
           }
 
           // add order value
