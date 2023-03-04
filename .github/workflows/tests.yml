@@ -329,7 +329,7 @@ jobs:
     services:
       cockroachdb:
         # Docker Hub image
-        image: cockroachdb/cockroach:latest
+        image: timveil/cockroachdb-single-node:latest
         env:
           COCKROACH_DATABASE: strapi_test
         # Set health checks to wait until cockroachdb has started
