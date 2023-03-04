@@ -133,7 +133,7 @@ async function askDatabaseInfos(scope) {
       type: 'list',
       name: 'client',
       message: 'Choose your default database client',
-      choices: ['sqlite', 'postgres', 'mysql'],
+      choices: ['sqlite', 'postgres', 'mysql', 'cockroachdb'],
       default: 'sqlite',
     },
   ]);

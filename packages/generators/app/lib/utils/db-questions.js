@@ -2,6 +2,7 @@
 
 const DEFAULT_PORTS = {
   postgres: 5432,
+  cockroachdb: 26257,
   mysql: 3306,
 };
 
@@ -63,5 +64,6 @@ const filename = () => ({
 module.exports = {
   sqlite: [filename],
   postgres: [database, host, port, username, password, ssl],
+  cockroachdb: [database, host, port, username, password, ssl],
   mysql: [database, host, port, username, password, ssl],
 };

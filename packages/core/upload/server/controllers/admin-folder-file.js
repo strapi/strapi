@@ -147,6 +147,7 @@ module.exports = {
             case 'sqlite':
               replaceQuery = '? || SUBSTRING(??, ?)';
               break;
+            case 'cockroachdb':
             case 'postgres':
               replaceQuery = 'CONCAT(?::TEXT, SUBSTRING(??, ?::INTEGER))';
               break;
