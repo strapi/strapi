@@ -151,7 +151,7 @@ jobs:
           COCKROACH_DATABASE: strapi_test
         # Set health checks to wait until cockroachdb has started
         options: >-
-          --health-cmd curl "http://cockroachdb:8080/health?ready=1"
+          --health-cmd "curl http://cockroachdb:8080/health?ready=1"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -334,7 +334,7 @@ jobs:
           COCKROACH_DATABASE: strapi_test
         # Set health checks to wait until cockroachdb has started
         options: >-
-          --health-cmd curl "http://cockroachdb:8080/health?ready=1"
+          --health-cmd "curl http://cockroachdb:8080/health?ready=1"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
