@@ -170,7 +170,7 @@ jobs:
       - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         with:
-          dbOptions: '--dbclient=cockroachdb --dbhost=localhost --dbport=26257 --dbname=strapi_test --dbusername=root --dbpassword=""'
+          dbOptions: '--dbclient=cockroachdb --dbhost=localhost --dbport=26257 --dbname=defaultdb --dbusername=root --dbpassword=""'
 
   api_ce_mysql:
     runs-on: ubuntu-latest
@@ -352,7 +352,7 @@ jobs:
       - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
         with:
-          dbOptions: '--dbclient=cockroachdb --dbhost=localhost --dbport=26257 --dbname=strapi_test --dbusername=root --dbpassword=""'
+          dbOptions: '--dbclient=cockroachdb --dbhost=localhost --dbport=26257 --dbname=defaultdb --dbusername=root --dbpassword=""'
           runEE: true
 
   api_ee_mysql:
