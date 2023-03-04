@@ -625,6 +625,38 @@ const createEntityManager = (db) => {
                 .ignore()
                 .transacting(trx)
                 .execute();
+
+              // Clean the inverse order column
+
+              if (inverseOrderColumnName) {
+                /*
+                Query to perform: (pseudo code)
+                  update
+                    `:joinTableName` as `t1`
+                  set
+                    `:inverseOrderColumnName` = (
+                      select
+                        max(`:inverseOrderColumnName`) + 1
+                      from
+                        `:joinTableName` as `t2`
+                      where
+                        t2.:inverseJoinColumn = t1.:inverseJoinColumn
+                    )
+                  where
+                    `t1`.`:joinColumnName` = 38
+                */
+                // New inverse order will be the max value + 1
+                const selectMaxInverseOrder = con.raw(`max(${inverseOrderColumnName}) + 1`);
+
+                const subQuery = con(`${joinTable.name} as t2`)
+                  .select(selectMaxInverseOrder)
+                  .whereRaw(`t2.${inverseJoinColumn.name} = t1.${inverseJoinColumn.name}`);
+
+                await con(`${joinTable.name} as t1`)
+                  .where(`t1.${joinColumn.name}`, id)
+                  .update({ [inverseOrderColumnName]: subQuery })
+                  .transacting(trx);
+              }
             }
           }
 
