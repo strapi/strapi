@@ -315,14 +315,12 @@ const assignARoleToAll = async (roleId) => {
     },
   });
 
-  await Promise.all(
-    users.map((user) => {
-      return strapi.query('admin::user').update({
-        where: { id: user.id },
-        data: { roles: [roleId] },
-      });
-    })
-  );
+  for (const user of users) {
+    await strapi.query('admin::user').update({
+      where: { id: user.id },
+      data: { roles: [roleId] },
+    });
+  }
 };
 
 /** Display a warning if some users don't have at least one role
