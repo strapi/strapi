@@ -222,13 +222,13 @@ const create = async (attributes) => {
     //   populate: POPULATE_FIELDS,
     //   data: attributes.permissions.map(action => ({ action, token: apiToken })),
     // });
-    await Promise.all(
-      uniq(attributes.permissions).map((action) =>
-        strapi.query('admin::api-token-permission').create({
-          data: { action, token: apiToken },
-        })
-      )
-    );
+    const permissions = uniq(attributes.permissions);
+
+    for (const action of permissions) {
+      await strapi.query('admin::api-token-permission').create({
+        data: { action, token: apiToken },
+      });
+    }
 
     const currentPermissions = await strapi.entityService.load(
       'admin::api-token',
