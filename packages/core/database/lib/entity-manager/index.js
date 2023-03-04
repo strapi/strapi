@@ -598,7 +598,7 @@ const createEntityManager = (db) => {
               if (inverseOrderColumnName) columns.push(inverseOrderColumnName);
               if (joinTable.on) columns.push(...Object.keys(joinTable.on));
 
-              const con = strapi.db.getConnection();
+              const con = strapi.db.connection;
 
               const selectStatement = con
                 .select(
