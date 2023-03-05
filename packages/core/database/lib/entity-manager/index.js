@@ -611,8 +611,7 @@ const createEntityManager = (db) => {
               .whereIn(inverseJoinColumn.name, relIdsToadd)
               .where(joinTable.on || {})
               .groupBy(inverseJoinColumn.name)
-              .from(joinTable.name)
-              .transacting(trx);
+              .from(joinTable.name);
 
             const maxMap = maxResults.reduce(
               (acc, res) => Object.assign(acc, { [res[inverseJoinColumn.name]]: res.max }),

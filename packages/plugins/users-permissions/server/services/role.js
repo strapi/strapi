@@ -135,9 +135,11 @@ module.exports = ({ strapi }) => ({
       )
     );
 
-    for (const permissionInfo of toCreate) {
-      await strapi.query('plugin::users-permissions.permission').create({ data: permissionInfo });
-    }
+    await Promise.all(
+      toCreate.map((permissionInfo) =>
+        strapi.query('plugin::users-permissions.permission').create({ data: permissionInfo })
+      )
+    );
   },
 
   async deleteRole(roleID, publicRoleID) {

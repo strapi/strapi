@@ -190,14 +190,16 @@ module.exports = ({ strapi }) => ({
           map(prop('action'))
         )(DEFAULT_PERMISSIONS);
 
-        for (const action of toCreate) {
-          await strapi.query('plugin::users-permissions.permission').create({
-            data: {
-              action,
-              role: role.id,
-            },
-          });
-        }
+        await Promise.all(
+          toCreate.map((action) => {
+            return strapi.query('plugin::users-permissions.permission').create({
+              data: {
+                action,
+                role: role.id,
+              },
+            });
+          })
+        );
       }
     }
   },
