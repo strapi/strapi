@@ -254,7 +254,7 @@ class TransferEngine<
   ) {
     return new PassThrough({
       objectMode: true,
-      transform: async (data, _encoding, callback) => {
+      transform: (data, _encoding, callback) => {
         this.#updateTransferProgress(stage, data, aggregate);
         this.#emitStageUpdate('progress', stage);
         callback(null, data);

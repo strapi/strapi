@@ -19,17 +19,9 @@ const {
   formatDiagnostic,
   loadersFactory,
   exitMessageText,
+  abortTransfer,
 } = require('./utils');
 const { exitWith } = require('../utils/helpers');
-
-const gracefulAbort = async ({ engine }) => {
-  try {
-    await engine.abortTransfer();
-    await strapi.destroy();
-  } catch (e) {
-    // ignore
-  }
-};
 
 /**
  * @typedef TransferCommandOptions Options given to the CLI transfer command
@@ -53,7 +45,7 @@ module.exports = async (opts) => {
     exitWith(1, 'Could not parse command arguments');
   }
 
-  const strapi = await createStrapiInstance({ destroyOnSignal: false });
+  const strapi = await createStrapiInstance();
 
   let source;
   let destination;
@@ -152,14 +144,15 @@ module.exports = async (opts) => {
   try {
     console.log(`Starting transfer...`);
 
-    // TODO: should this be the responsibility of the engine? Otherwise it has to be done in transfer/export/import and could be forgotten (leading to uninterruptable transfers)
+    // Abort transfer if user interrupts process
     ['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach((signal) => {
-      process.on(signal, () => gracefulAbort({ engine, strapi }));
+      process.removeAllListeners(signal);
+      process.on(signal, () => abortTransfer({ engine, strapi }));
     });
 
     results = await engine.transfer();
   } catch (e) {
-    exitWith(1, exitMessageText('transfer', false));
+    exitWith(1, exitMessageText('transfer', true));
   }
 
   const table = buildTransferTable(results.engine);
