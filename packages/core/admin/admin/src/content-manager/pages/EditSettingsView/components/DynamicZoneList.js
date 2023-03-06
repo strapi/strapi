@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { Box, Flex, Typography, Stack } from '@strapi/design-system';
+import { Box, Flex, Typography } from '@strapi/design-system';
 
 import { ComponentIcon } from '../../../components/ComponentIcon';
 import useLayoutDnd from '../../../hooks/useLayoutDnd';
@@ -33,7 +33,7 @@ const DynamicZoneList = ({ components }) => {
   const { componentLayouts } = useLayoutDnd();
 
   return (
-    <Stack spacing={2} horizontal overflow="scroll hidden" padding={3}>
+    <Flex gap={2} overflow="scroll hidden" padding={3}>
       {components.map((componentUid) => (
         <CustomLink
           hasRadius
@@ -58,7 +58,7 @@ const DynamicZoneList = ({ components }) => {
           </Box>
         </CustomLink>
       ))}
-    </Stack>
+    </Flex>
   );
 };
 

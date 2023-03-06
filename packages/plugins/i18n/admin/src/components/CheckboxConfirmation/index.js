@@ -9,7 +9,6 @@ import {
   DialogFooter,
   Typography,
   Flex,
-  Stack,
   Button,
 } from '@strapi/design-system';
 import { ExclamationMarkCircle } from '@strapi/icons';
@@ -71,7 +70,7 @@ const CheckboxConfirmation = ({ description, isCreating, intlLabel, name, onChan
       {isOpen && (
         <Dialog onClose={handleToggle} title="Confirmation" isOpen={isOpen}>
           <DialogBody icon={<ExclamationMarkCircle />}>
-            <Stack spacing={2}>
+            <Flex direction="column" alignItems="stretch" gap={2}>
               <Flex justifyContent="center">
                 <TextAlignTypography id="confirm-description">
                   {formatMessage({
@@ -89,7 +88,7 @@ const CheckboxConfirmation = ({ description, isCreating, intlLabel, name, onChan
                   })}
                 </Typography>
               </Flex>
-            </Stack>
+            </Flex>
           </DialogBody>
           <DialogFooter
             startAction={

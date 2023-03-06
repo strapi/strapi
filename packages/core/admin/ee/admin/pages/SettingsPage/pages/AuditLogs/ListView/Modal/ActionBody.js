@@ -64,7 +64,7 @@ const ActionBody = ({ status, data, formattedDate }) => {
             id: 'Settings.permissions.auditLogs.user',
             defaultMessage: 'User',
           })}
-          actionName={user?.fullname || '-'}
+          actionName={user?.displayName || '-'}
         />
         <ActionItem
           actionLabel={formatMessage({

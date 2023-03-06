@@ -17,7 +17,6 @@ import {
   TabPanel,
   Badge,
   Loader,
-  Stack,
 } from '@strapi/design-system';
 import { NoPermissions, AnErrorOccurred, useSelectionState, pxToRem } from '@strapi/helper-plugin';
 import { getTrad, containsAssetFilter } from '../../utils';
@@ -250,7 +249,7 @@ export const AssetDialog = ({
               <Badge marginLeft={2}>{selectedAssets.length}</Badge>
             </Tab>
           </Tabs>
-          <Stack horizontal spacing={2}>
+          <Flex gap={2}>
             <Button
               variant="secondary"
               onClick={() => onAddFolder({ folderId: queryObject?.folder })}
@@ -266,7 +265,7 @@ export const AssetDialog = ({
                 defaultMessage: 'Add more assets',
               })}
             </Button>
-          </Stack>
+          </Flex>
         </Flex>
         <Divider />
         <TabPanels>

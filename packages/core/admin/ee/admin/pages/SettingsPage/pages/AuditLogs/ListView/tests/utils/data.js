@@ -5,7 +5,7 @@ const TEST_PAGE_DATA = [
     date: '2022-12-27T10:02:06.598Z',
     user: {
       id: 1,
-      fullname: 'test user',
+      displayName: 'test user',
       email: 'test@test.com',
     },
     payload: {},
@@ -16,7 +16,7 @@ const TEST_PAGE_DATA = [
     date: '2022-12-27T16:28:08.977Z',
     user: {
       id: 1,
-      fullname: 'test user',
+      displayName: 'test user',
       email: 'test@test.com',
     },
     payload: {},
@@ -36,7 +36,7 @@ const TEST_PAGE_DATA = [
     date: '2022-12-27T17:51:04.146Z',
     user: {
       id: 1,
-      fullname: 'test user',
+      displayName: 'test user',
       email: 'test@test.com',
     },
     payload: {},
@@ -52,7 +52,7 @@ const TEST_SINGLE_DATA = {
   },
   user: {
     id: 1,
-    fullname: 'test user',
+    displayName: 'test user',
     email: 'test@test.com',
   },
 };

@@ -19,10 +19,10 @@ import {
   Layout,
   Link,
   Main,
-  Stack,
   Typography,
 } from '@strapi/design-system';
 import { ExternalLink, Check } from '@strapi/icons';
+import AdminSeatInfo from 'ee_else_ce/pages/SettingsPage/pages/ApplicationInfosPage/components/AdminSeatInfo';
 
 import adminPermissions from '../../../../permissions';
 import { useConfigurations } from '../../../../hooks';
@@ -113,9 +113,11 @@ const ApplicationInfosPage = () => {
             }
           />
           <ContentLayout>
-            <Stack spacing={6}>
-              <Stack
-                spacing={4}
+            <Flex direction="column" alignItems="stretch" gap={6}>
+              <Flex
+                direction="column"
+                alignItems="stretch"
+                gap={4}
                 hasRadius
                 background="neutral0"
                 shadow="tableShadow"
@@ -195,8 +197,9 @@ const ApplicationInfosPage = () => {
                     </Typography>
                     <Typography as="dd">{appInfos.nodeVersion}</Typography>
                   </GridItem>
+                  <AdminSeatInfo />
                 </Grid>
-              </Stack>
+              </Flex>
               {canRead && data && (
                 <CustomizationInfos
                   canUpdate={canUpdate}
@@ -204,7 +207,7 @@ const ApplicationInfosPage = () => {
                   projectSettingsStored={data}
                 />
               )}
-            </Stack>
+            </Flex>
           </ContentLayout>
         </form>
       </Main>

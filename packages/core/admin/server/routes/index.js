@@ -8,6 +8,7 @@ const roles = require('./roles');
 const webhooks = require('./webhooks');
 const apiTokens = require('./api-tokens');
 const contentApi = require('./content-api');
+const transfer = require('./transfer');
 
 module.exports = [
   ...admin,
@@ -18,4 +19,5 @@ module.exports = [
   ...webhooks,
   ...apiTokens,
   ...contentApi,
+  ...transfer,
 ];
