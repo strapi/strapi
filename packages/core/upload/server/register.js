@@ -12,7 +12,7 @@ const registerUploadMiddleware = require('./middlewares/upload');
  * @param {{ strapi: import('@strapi/strapi').Strapi }}
  */
 module.exports = async ({ strapi }) => {
-  strapi.plugin('upload').provider = createProvider(strapi.config.get('plugin.upload', {}));
+  strapi.plugin('upload').provider = await createProvider(strapi.config.get('plugin.upload', {}));
 
   await registerUploadMiddleware({ strapi });
 
@@ -41,9 +41,21 @@ const createProvider = (config) => {
   try {
     provider = require(modulePath);
   } catch (err) {
-    const newError = new Error(`Could not load upload provider "${providerName}".`);
-    newError.stack = err.stack;
-    throw newError;
+    if (err.code !== 'ERR_REQUIRE_ESM') {
+      const newError = new Error(`Could not load upload provider "${providerName}".`);
+      newError.stack = err.stack;
+      throw newError;
+    }
+  }
+
+  if (provider === undefined) {
+    try {
+      provider = (await import(modulePath)).default;
+    } catch (err) {
+      const newError = new Error(`Could not load upload provider "${providerName}".`);
+      newError.stack = err.stack;
+      throw newError;
+    }
   }
 
   const providerInstance = provider.init(providerOptions);
