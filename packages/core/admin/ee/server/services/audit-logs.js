@@ -72,15 +72,18 @@ const getRetentionDays = (strapi) => {
 };
 
 const createAuditLogsService = (strapi) => {
+  // Manage internal service state privately
+  const state = {};
+
   // NOTE: providers should be able to replace getEventMap to add or remove events
   const eventMap = getEventMap(defaultEvents);
 
   const processEvent = (name, ...args) => {
-    const state = strapi.requestContext.get()?.state;
+    const requestState = strapi.requestContext.get()?.state;
 
     // Ignore events with auth strategies different from admin
-    const isUsingAdminAuth = state?.auth?.strategy.name === 'admin';
-    const user = state?.user;
+    const isUsingAdminAuth = requestState?.auth?.strategy.name === 'admin';
+    const user = requestState?.user;
 
     if (!isUsingAdminAuth || !user) {
       return null;
@@ -111,15 +114,15 @@ const createAuditLogsService = (strapi) => {
     const processedEvent = processEvent(name, ...args);
 
     if (processedEvent) {
-      await this._provider.saveEvent(processedEvent);
+      await state.provider.saveEvent(processedEvent);
     }
   }
 
   return {
     async register() {
       // Handle license being enabled
-      if (!this._eeEnableUnsubscribe) {
-        this._eeEnableUnsubscribe = strapi.eventHub.once('ee.enable', () => {
+      if (state.eeEnableUnsubscribe) {
+        state.eeEnableUnsubscribe = strapi.eventHub.once('ee.enable', () => {
           // Recreate the service to use the new license info
           this.destroy();
           this.register();
@@ -127,14 +130,14 @@ const createAuditLogsService = (strapi) => {
       }
 
       // Handle license being updated
-      this._eeUpdateUnsubscribe = strapi.eventHub.on('ee.update', () => {
+      state.eeUpdateUnsubscribe = strapi.eventHub.on('ee.update', () => {
         // Recreate the service to use the new license info
         this.destroy();
         this.register();
       });
 
       // Handle license being disabled
-      this._eeDisableUnsubscribe = strapi.eventHub.on('ee.disable', () => {
+      state.eeDisableUnsubscribe = strapi.eventHub.on('ee.disable', () => {
         // Turn off service when the license gets disabled
         // Only the ee.enable listener remains active to recreate the service
         this.destroy();
@@ -146,21 +149,21 @@ const createAuditLogsService = (strapi) => {
       }
 
       // Start saving events
-      this._provider = await localProvider.register({ strapi });
-      this._eventHubUnsubscribe = strapi.eventHub.subscribe(handleEvent.bind(this));
+      state.provider = await localProvider.register({ strapi });
+      state.eventHubUnsubscribe = strapi.eventHub.subscribe(handleEvent.bind(this));
 
       // Manage audit logs auto deletion
       const retentionDays = getRetentionDays(strapi);
-      this._deleteExpiredJob = scheduleJob('0 0 * * *', () => {
+      state.deleteExpiredJob = scheduleJob('0 0 * * *', () => {
         const expirationDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
-        this._provider.deleteExpiredEvents(expirationDate);
+        state.provider.deleteExpiredEvents(expirationDate);
       });
 
       return this;
     },
 
     async findMany(query) {
-      const { results, pagination } = await this._provider.findMany(query);
+      const { results, pagination } = await state.provider.findMany(query);
 
       const sanitizedResults = results.map((result) => {
         const { user, ...rest } = result;
@@ -177,7 +180,7 @@ const createAuditLogsService = (strapi) => {
     },
 
     async findOne(id) {
-      const result = await this._provider.findOne(id);
+      const result = await state.provider.findOne(id);
 
       if (!result) {
         return null;
@@ -191,20 +194,20 @@ const createAuditLogsService = (strapi) => {
     },
 
     unsubscribe() {
-      if (this._eeUpdateUnsubscribe) {
-        this._eeUpdateUnsubscribe();
+      if (state.eeUpdateUnsubscribe) {
+        state.eeUpdateUnsubscribe();
       }
 
-      if (this._eeDisableUnsubscribe) {
-        this._eeDisableUnsubscribe();
+      if (state.eeDisableUnsubscribe) {
+        state.eeDisableUnsubscribe();
       }
 
-      if (this._eventHubUnsubscribe) {
-        this._eventHubUnsubscribe();
+      if (state.eventHubUnsubscribe) {
+        state.eventHubUnsubscribe();
       }
 
-      if (this._deleteExpiredJob) {
-        this._deleteExpiredJob.cancel();
+      if (state.deleteExpiredJob) {
+        state.deleteExpiredJob.cancel();
       }
 
       return this;
