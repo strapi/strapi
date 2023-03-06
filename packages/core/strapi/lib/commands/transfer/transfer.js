@@ -49,10 +49,6 @@ module.exports = async (opts) => {
   let source;
   let destination;
 
-  if (!opts.from && !opts.to) {
-    exitWith(1, 'At least one source (from) or destination (to) option must be provided');
-  }
-
   // if no URL provided, use local Strapi
   if (!opts.from) {
     source = createLocalStrapiSourceProvider({
@@ -61,6 +57,10 @@ module.exports = async (opts) => {
   }
   // if URL provided, set up a remote source provider
   else {
+    if (!opts.fromToken) {
+      exitWith(1, 'Missing token for remote destination');
+    }
+
     exitWith(1, `Remote Strapi source provider not yet implemented`);
   }
 

@@ -312,7 +312,7 @@ program
             },
           ]);
           if (!answers.fromToken?.length) {
-            exitWith(0, 'No token entered, aborting transfer.');
+            exitWith(1, 'No source token entered, aborting transfer.');
           }
           thisCommand.opts().fromToken = answers.fromToken;
         }
@@ -335,7 +335,7 @@ program
             },
           ]);
           if (!answers.toToken?.length) {
-            exitWith(0, 'No token entered, aborting transfer.');
+            exitWith(1, 'No destination token entered, aborting transfer.');
           }
           thisCommand.opts().toToken = answers.toToken;
         }
@@ -344,6 +344,21 @@ program
           'The transfer will delete all data in the remote database and media files. Are you sure you want to proceed?'
         )(thisCommand);
       }
+    )
+  )
+  .hook(
+    'preAction',
+    ifOptions(
+      (opts) => !opts.from && !opts.to,
+      () =>
+        exitWith(1, 'At least one remote source (from) or destination (to) option must be provided')
+    )
+  )
+  .hook(
+    'preAction',
+    ifOptions(
+      (opts) => opts.from && opts.to,
+      () => exitWith(1, 'Only one source (from) or destination (to) option may be provided')
     )
   )
   .action(getLocalScript('transfer/transfer'));
