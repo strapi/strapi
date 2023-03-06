@@ -23,6 +23,7 @@ const {
   formatDiagnostic,
   loadersFactory,
   exitMessageText,
+  abortTransfer,
 } = require('./utils');
 const { exitWith } = require('../utils/helpers');
 /**
@@ -109,13 +110,19 @@ module.exports = async (opts) => {
 
   progress.on('transfer::start', async () => {
     console.log(`Starting export...`);
+
     await strapi.telemetry.send('didDEITSProcessStart', getTelemetryPayload());
   });
 
   let results;
   let outFile;
   try {
-    // TODO: add signal listeners for abort
+    // Abort transfer if user interrupts process
+    ['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach((signal) => {
+      process.removeAllListeners(signal);
+      process.on(signal, () => abortTransfer({ engine, strapi }));
+    });
+
     results = await engine.transfer();
     outFile = results.destination.file.path;
     const outFileExists = await fs.pathExists(outFile);

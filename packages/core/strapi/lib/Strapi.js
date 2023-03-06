@@ -72,9 +72,7 @@ const resolveWorkingDirectories = (opts) => {
 /** @implements {import('@strapi/strapi').Strapi} */
 class Strapi {
   constructor(opts = {}) {
-    if (opts.destroyOnSignal !== false) {
-      destroyOnSignal(this);
-    }
+    destroyOnSignal(this);
 
     const rootDirs = resolveWorkingDirectories(opts);
 

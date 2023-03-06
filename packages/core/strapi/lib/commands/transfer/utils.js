@@ -16,10 +16,10 @@ const { readableBytes, exitWith } = require('../utils/helpers');
 const strapi = require('../../index');
 const { getParseListWithChoices } = require('../utils/commander');
 
-const exitMessageText = (process, success = true) => {
+const exitMessageText = (process, error = false) => {
   const processCapitalized = process[0].toUpperCase() + process.slice(1);
 
-  if (success) {
+  if (!error) {
     return chalk.bold(
       chalk.green(`${processCapitalized} process has been completed successfully!`)
     );
@@ -101,6 +101,17 @@ const DEFAULT_IGNORED_CONTENT_TYPES = [
   'admin::transfer-token-permission',
   'admin::audit-log',
 ];
+
+const abortTransfer = async ({ engine, strapi }) => {
+  try {
+    await engine.abortTransfer();
+    await strapi.destroy();
+  } catch (e) {
+    // ignore because there's not much else we can do
+    return false;
+  }
+  return true;
+};
 
 const createStrapiInstance = async (opts = {}) => {
   try {
@@ -235,4 +246,5 @@ module.exports = {
   onlyOption,
   validateExcludeOnly,
   formatDiagnostic,
+  abortTransfer,
 };
