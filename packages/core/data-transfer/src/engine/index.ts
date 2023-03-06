@@ -88,18 +88,18 @@ class TransferEngine<
 
   #metadata: { source?: IMetadata; destination?: IMetadata } = {};
 
+  // Progress of the current stage
   progress: {
+    // metrics on the progress such as size and record count
     data: TransferProgress;
+    // stream that emits events
     stream: PassThrough;
   };
 
   diagnostics: IDiagnosticReporter;
 
-  // TODO: can we use progress.stream instead?
+  // Save the currently open stream so that we can access it at any time
   #currentStream?: Writable;
-
-  // TODO: is there another way to communicate with the stream 'finish' event? send it another event first?
-  #aborted = false;
 
   constructor(sourceProvider: S, destinationProvider: D, options: ITransferEngineOptions) {
     this.diagnostics = createDiagnosticReporter();

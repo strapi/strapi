@@ -483,7 +483,6 @@ describe('Transfer engine', () => {
     });
   });
 
-  // TODO: open handle somewhere in here
   describe('integrity checks', () => {
     describe('schema matching', () => {
       describe('exact', () => {
