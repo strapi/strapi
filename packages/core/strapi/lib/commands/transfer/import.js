@@ -1,16 +1,14 @@
 'use strict';
 
 const {
-  providers: { createLocalFileSourceProvider },
-} = require('@strapi/data-transfer/lib/file');
-const {
-  providers: { createLocalStrapiDestinationProvider, DEFAULT_CONFLICT_STRATEGY },
-} = require('@strapi/data-transfer/lib/strapi');
-const {
-  createTransferEngine,
-  DEFAULT_VERSION_STRATEGY,
-  DEFAULT_SCHEMA_STRATEGY,
-} = require('@strapi/data-transfer/lib/engine');
+  file: {
+    providers: { createLocalFileSourceProvider },
+  },
+  strapi: {
+    providers: { createLocalStrapiDestinationProvider, DEFAULT_CONFLICT_STRATEGY },
+  },
+  engine: { createTransferEngine, DEFAULT_VERSION_STRATEGY, DEFAULT_SCHEMA_STRATEGY },
+} = require('@strapi/data-transfer');
 
 const { isObject } = require('lodash/fp');
 

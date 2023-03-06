@@ -1,13 +1,15 @@
 'use strict';
 
-const { createTransferEngine } = require('@strapi/data-transfer/lib/engine');
 const {
-  providers: {
-    createRemoteStrapiDestinationProvider,
-    createLocalStrapiSourceProvider,
-    createLocalStrapiDestinationProvider,
+  engine: { createTransferEngine },
+  strapi: {
+    providers: {
+      createRemoteStrapiDestinationProvider,
+      createLocalStrapiSourceProvider,
+      createLocalStrapiDestinationProvider,
+    },
   },
-} = require('@strapi/data-transfer/lib/strapi');
+} = require('@strapi/data-transfer');
 const { isObject } = require('lodash/fp');
 
 const {
