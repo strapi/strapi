@@ -298,7 +298,7 @@ describe('Transfer engine', () => {
     versionStrategy: 'exact',
     schemaStrategy: 'exact',
     exclude: [],
-  } as ITransferEngineOptions;
+  } as unknown as ITransferEngineOptions;
 
   let completeSource;
   let completeDestination;
@@ -353,8 +353,7 @@ describe('Transfer engine', () => {
     });
   });
 
-  // TODO: open handle somewhere in here
-  describe.skip('transfer', () => {
+  describe('transfer', () => {
     test('calls all provider stages', async () => {
       const engine = createTransferEngine(completeSource, completeDestination, defaultOptions);
       expect(completeSource).toHaveSourceStagesCalledTimes(0);
@@ -384,7 +383,7 @@ describe('Transfer engine', () => {
     });
   });
 
-  describe.skip('progressStream', () => {
+  describe('progressStream', () => {
     test("emits 'transfer::start' and 'transfer::finish' events", async () => {
       const source = createSource();
       const engine = createTransferEngine(source, completeDestination, defaultOptions);
@@ -485,14 +484,14 @@ describe('Transfer engine', () => {
   });
 
   // TODO: open handle somewhere in here
-  describe.skip('integrity checks', () => {
+  describe('integrity checks', () => {
     describe('schema matching', () => {
       describe('exact', () => {
         const engineOptions = {
           versionStrategy: 'exact',
           schemaStrategy: 'exact',
           exclude: [],
-        } as ITransferEngineOptions;
+        } as unknown as ITransferEngineOptions;
         test('source with source schema missing in destination fails', async () => {
           const source = createSource();
           source.getSchemas = jest.fn().mockResolvedValue([...schemas, { foo: 'bar' }]);
