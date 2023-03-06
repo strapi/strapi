@@ -379,9 +379,75 @@ const cleanOrderColumnsForOldDatabases = async ({
   }
 };
 
+const recalculateInverseOrderColumn = async ({ id, attribute, trx }) => {
+  const con = strapi.db.connection;
+  const { joinTable } = attribute;
+  const { joinColumn, inverseJoinColumn, inverseOrderColumnName } = joinTable;
+
+  switch (strapi.db.dialect.client) {
+    /*
+    Query to perform: (pseudo code)
+      UPDATE `:joinTableName` AS `t1`
+      JOIN (
+          SELECT
+            `inverseJoinColumn`,
+            MAX(`:inverseOrderColumnNAme`) AS `max_inv_order`
+          FROM `:joinTableName`
+          GROUP BY `:inverseJoinColumn`
+      ) AS `t2`
+      ON `t1`.`:inverseJoinColumn` = `t2`.`:inverseJoinColumn`
+      SET `t1`.`:inverseOrderColumnNAme` = `t2`.`max_inv_order` + 1
+      WHERE `t1`.`:joinColumnName` = :id;
+    */
+    // TODO: IS this possible with createQueryBuilder?
+    case 'mysql': {
+      // Group by the inverse join column and get the max value of the inverse order column
+      const subQuery = con(joinTable.name)
+        .select(inverseJoinColumn.name)
+        .max(inverseOrderColumnName, { as: 'max_inv_order' })
+        .groupBy(inverseJoinColumn.name)
+        .as('t2');
+
+      //  Update ids with the new inverse order
+      await con(`${joinTable.name} as t1`)
+        .join(subQuery, `t1.${inverseJoinColumn.name}`, '=', `t2.${inverseJoinColumn.name}`)
+        .where(joinColumn.name, id)
+        .update({
+          [inverseOrderColumnName]: con.raw('t2.max_inv_order + 1'),
+        })
+        .transacting(trx);
+      break;
+    }
+    default: {
+      /*
+      Query to perform: (pseudo code)
+        UPDATE `:joinTableName` as `t1`
+        SET `:inverseOrderColumnName` = (
+          SELECT max(`:inverseOrderColumnName`) + 1
+          FROM `:joinTableName` as `t2`
+          WHERE t2.:inverseJoinColumn = t1.:inverseJoinColumn
+        )
+        WHERE `t1`.`:joinColumnName` = :id
+      */
+      // New inverse order will be the max value + 1
+      const selectMaxInverseOrder = con.raw(`max(${inverseOrderColumnName}) + 1`);
+
+      const subQuery = con(`${joinTable.name} as t2`)
+        .select(selectMaxInverseOrder)
+        .whereRaw(`t2.${inverseJoinColumn.name} = t1.${inverseJoinColumn.name}`);
+
+      await con(`${joinTable.name} as t1`)
+        .where(`t1.${joinColumn.name}`, id)
+        .update({ [inverseOrderColumnName]: subQuery })
+        .transacting(trx);
+    }
+  }
+};
+
 module.exports = {
   deletePreviousOneToAnyRelations,
   deletePreviousAnyToOneRelations,
   deleteRelations,
   cleanOrderColumns,
+  recalculateInverseOrderColumn,
 };

@@ -38,6 +38,7 @@ const {
   deletePreviousAnyToOneRelations,
   deleteRelations,
   cleanOrderColumns,
+  recalculateInverseOrderColumn,
 } = require('./regular-relations');
 const { relationsOrderer } = require('./relations-orderer');
 
@@ -584,15 +585,17 @@ const createEntityManager = (db) => {
           if (cleanRelationData.clone) {
             const relIdToClone = cleanRelationData.clone;
 
-            // If it was any to one, just update the joinColumn
-            if (isAnyToOne(attribute)) {
+            if (isOneToAny(attribute) && isBidirectional(attribute)) {
+              // We are effectively stealing the relation from the cloned entity
               await this.createQueryBuilder(joinTable.name)
                 .update({ [joinColumn.name]: id })
                 .where({ [joinColumn.name]: relIdToClone })
+                // Don't steal the relations we are about to delete
+                .where({ $not: { [inverseJoinColumn.name]: toIds(cleanRelationData.delete) } })
                 .transacting(trx)
                 .execute();
             } else {
-              // TODO: Clean this?
+              // If it was many to many, clone the relations
               const columns = [joinColumn.name, inverseJoinColumn.name];
               if (orderColumnName) columns.push(orderColumnName);
               if (inverseOrderColumnName) columns.push(inverseOrderColumnName);
@@ -627,35 +630,12 @@ const createEntityManager = (db) => {
                 .execute();
 
               // Clean the inverse order column
-
               if (inverseOrderColumnName) {
-                /*
-                Query to perform: (pseudo code)
-                  update
-                    `:joinTableName` as `t1`
-                  set
-                    `:inverseOrderColumnName` = (
-                      select
-                        max(`:inverseOrderColumnName`) + 1
-                      from
-                        `:joinTableName` as `t2`
-                      where
-                        t2.:inverseJoinColumn = t1.:inverseJoinColumn
-                    )
-                  where
-                    `t1`.`:joinColumnName` = 38
-                */
-                // New inverse order will be the max value + 1
-                const selectMaxInverseOrder = con.raw(`max(${inverseOrderColumnName}) + 1`);
-
-                const subQuery = con(`${joinTable.name} as t2`)
-                  .select(selectMaxInverseOrder)
-                  .whereRaw(`t2.${inverseJoinColumn.name} = t1.${inverseJoinColumn.name}`);
-
-                await con(`${joinTable.name} as t1`)
-                  .where(`t1.${joinColumn.name}`, id)
-                  .update({ [inverseOrderColumnName]: subQuery })
-                  .transacting(trx);
+                await recalculateInverseOrderColumn({
+                  id,
+                  attribute,
+                  trx,
+                });
               }
             }
           }
