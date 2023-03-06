@@ -222,11 +222,10 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
           <div>
             <div
               class="c3 c4"
-              spacing="1"
             >
               <label
                 class="c5"
-                for="select-1"
+                for="1"
               >
                 <div
                   class="c6"
@@ -238,14 +237,14 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
                 class="c6 c7"
               >
                 <button
-                  aria-describedby="select-1-hint"
+                  aria-describedby="1-hint"
                   aria-disabled="false"
                   aria-expanded="false"
                   aria-haspopup="listbox"
-                  aria-labelledby="select-1 select-1-label select-1-content"
+                  aria-labelledby="1 1-label 1-content"
                   class="c8"
                   data-testid="pageSize-select"
-                  id="select-1"
+                  id="1"
                   name="pageSize"
                   type="button"
                 />
@@ -260,7 +259,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
                     >
                       <span
                         class="c12"
-                        id="select-1-content"
+                        id="1-content"
                       >
                         10
                       </span>
@@ -296,7 +295,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
               </div>
               <p
                 class="c16"
-                id="select-1-hint"
+                id="1-hint"
               >
                 Number of assets displayed by default in the Media Library
               </p>
@@ -313,11 +312,10 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
           <div>
             <div
               class="c3 c4"
-              spacing="1"
             >
               <label
                 class="c5"
-                for="select-2"
+                for="3"
               >
                 <div
                   class="c6"
@@ -329,14 +327,14 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
                 class="c6 c7"
               >
                 <button
-                  aria-describedby="select-2-hint"
+                  aria-describedby="3-hint"
                   aria-disabled="false"
                   aria-expanded="false"
                   aria-haspopup="listbox"
-                  aria-labelledby="select-2 select-2-label select-2-content"
+                  aria-labelledby="3 3-label 3-content"
                   class="c8"
                   data-testid="sort-select"
-                  id="select-2"
+                  id="3"
                   name="sort"
                   type="button"
                 />
@@ -351,7 +349,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
                     >
                       <span
                         class="c12"
-                        id="select-2-content"
+                        id="3-content"
                       >
                         createdAt:DESC
                       </span>
@@ -387,7 +385,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
               </div>
               <p
                 class="c16"
-                id="select-2-hint"
+                id="3-hint"
               >
                 Note: You can override this value in the media library.
               </p>

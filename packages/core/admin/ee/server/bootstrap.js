@@ -17,7 +17,13 @@ module.exports = async () => {
     await actionProvider.registerMany(actions.auditLogs);
   }
 
-  // TODO: check admin seats
+  if (features.isEnabled('review-workflows')) {
+    const { bootstrap: rwBootstrap } = getService('review-workflows');
 
+    await rwBootstrap();
+    await actionProvider.registerMany(actions.reviewWorkflows);
+  }
+
+  // TODO: check admin seats
   await executeCEBootstrap();
 };

@@ -161,11 +161,10 @@ describe('<Input />', () => {
         <div>
           <div
             class="c0 c1"
-            spacing="1"
           >
             <label
               class="c2"
-              for="textinput-1"
+              for="1"
             >
               <div
                 class="c3"
@@ -182,7 +181,7 @@ describe('<Input />', () => {
                 aria-label="test"
                 aria-required="false"
                 class="c6"
-                id="textinput-1"
+                id="1"
                 name="test"
                 placeholder=""
                 type="text"

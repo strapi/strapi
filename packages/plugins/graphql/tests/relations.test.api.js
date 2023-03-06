@@ -384,6 +384,71 @@ describe('Test Graphql Relations API End to End', () => {
       data.labels = res.body.data.labels.data;
     });
 
+    test('List labels with documents paginated', async () => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          query labels($pagination: PaginationArg!) {
+            labels {
+              data {
+                id
+                attributes {
+                  name
+                  color {
+                    name
+                    red
+                    green
+                    blue
+                  }
+                  documents(pagination: $pagination) {
+                    data {
+                      id
+                      attributes {
+                        name
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        `,
+        variables: {
+          pagination: {
+            page: 1,
+            pageSize: 1,
+          },
+        },
+      });
+
+      const { body } = res;
+
+      expect(res.statusCode).toBe(200);
+      expect(body).toMatchObject({
+        data: {
+          labels: {
+            data: expect.arrayContaining(
+              data.labels.map((label) => ({
+                id: label.id,
+                attributes: {
+                  ...label.attributes,
+                  documents: {
+                    data: expect.arrayContaining(
+                      data.documents.slice(0, 1).map((document) => ({
+                        id: document.id,
+                        attributes: selectFields(document.attributes),
+                      }))
+                    ),
+                  },
+                },
+              }))
+            ),
+          },
+        },
+      });
+
+      // assign for later use
+      data.labels = res.body.data.labels.data;
+    });
     test('Deep query', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `

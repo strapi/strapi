@@ -1,5 +1,6 @@
 ---
 title: Example
+description: Short description
 tags:
   - content-manager
 ---

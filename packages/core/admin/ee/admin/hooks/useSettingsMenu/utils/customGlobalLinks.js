@@ -18,7 +18,7 @@ if (window.strapi.features.isEnabled(window.strapi.features.REVIEW_WORKFLOWS)) {
     to: '/settings/review-workflows',
     id: 'review-workflows',
     isDisplayed: false,
-    permissions: adminPermissions.settings.reviewWorkflows.main,
+    permissions: adminPermissions.settings['review-workflows'].main,
   });
 }
 

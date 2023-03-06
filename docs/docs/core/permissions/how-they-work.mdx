@@ -1,0 +1,148 @@
+---
+title: How Permissions Work
+tags:
+  - permissions
+  - RBAC
+---
+
+## Overview
+
+The RBAC permission system relies under the hood on the [CASL](https://casl.js.org) library.
+
+A `permission` is the combination of an `action`, a `subject`, some `properties` and some `conditions`.
+The logic is that: a user can perform an `action` on a `subject` and some of its `properties` only if it its role has the `permission` and if the `conditions` associated to the permission pass.
+The creation and edition of permissions is done through the [edit page](http://localhost:1337/admin/settings/roles/2) of a role by checking or unchecking checkboxes.
+
+Example 1: the action `update` can be applied on the subject `article` and property `title`, this result is the permission to update the title of an article.
+
+Example 2: the condition `isCreator` added to the previous permission will ensure that only the creator of the article can update the title.
+
+Example 3: the action `access the Marketplace page` has no subject to apply on. The permission only contains the action `admin::marketplace.read`.
+
+The permissions are attached to a role. Each role can have different permissions independentely. There is no inheritance system.
+To check if an action can be performed by a user, frontend and backend simply retrieve the list of the permissions associated with the user's roles and check if it contains the permission associated with the action about to be performed. The backend also runs the associated conditions.
+
+:::tip
+If a user has several role, the user will be allowed to perform an action if at least one of its roles is allowed to perform it.
+:::
+
+## Actions
+
+### Action definition
+
+An action contains the following information:
+
+| key                           | description                                                                                                                                       | type   | required | Default value | example                    |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | -------- | ------------- | -------------------------- |
+| **uid**                       | An id that has to be unique within the plugin.                                                                                                    | string | required | -             | `'audit-logs.read'`        |
+| **pluginName**                | Name of the plugin registrering the action.                                                                                                       | string | -        | `'api'`       | `'admin'`                  |
+| **section**                   | Name of the section among `contentTypes`, `plugins` and `settings`. It will define in which permission tab the action will appear                 | string | required | -             | `'settings'`               |
+| **category**                  | Name of the category. It will define in which category the action will appear. _Only for the plugins and settings section_.                       | string | -        | -             | `'audit logs'`             |
+| **subCategory**               | Name of the subcategory. It will define in which subcategory or the category the action will appear. _Only for the plugins and settings section_. | string | -        | -             | `'options'`                |
+| **displayName**               | Human name of the action.                                                                                                                         | string | required | -             | `'Read'`                   |
+| **subjects**                  | List of subjects the action can be applied to. _Only for the contentTypes section_.                                                               | array  | -        | -             | `['api::article.article']` |
+| **options**                   | Option object                                                                                                                                     | object | -        | `{}`          | `{}`                       |
+| **options.applyToProperties** | List of properties the action can be applied to. _Only for the contentTypes section_.                                                             | -      | -        | `[]`          | `['fields', 'locale']`     |
+
+import rbacEditPageImage from '@site/static/img/permissions/rbac-edit-page.png';
+
+<figure>
+  <img
+    src={rbacEditPageImage}
+    alt="Screenshot of the RBAC edit page showing the where are located the section, category, subcategory and display name"
+  />
+  <figcaption>
+    Screenshot of the RBAC edit page showing the where are located the section, category,
+    subcategory and display name
+  </figcaption>
+</figure>
+
+:::note
+`uid` and `pluginName` are used to create a global unique id.
+
+Examples: `admin::audit-logs.read`, `plugin::content-manager.explorer.create`
+:::
+
+### Register an action
+
+An action can be registered in the backend during the `bootstrap` phase of the app.
+
+Example:
+
+```ts
+// bootstrap.ts
+module.exports = async () => {
+  const actions = [
+    {
+      uid: 'provider-login.read',
+      displayName: 'Read',
+      pluginName: 'admin',
+      section: 'settings',
+      category: 'single sign on',
+      subCategory: 'options',
+    },
+  ];
+  await strapi.admin.services.permission.actionProvider.registerMany(actions);
+};
+```
+
+## Conditions
+
+### Condition definition
+
+A condition contains the following information:
+
+| key             | description                                                                                                                                                                                        | type   | required | default value | example        |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | -------- | ------------- | -------------- |
+| **displayName** | The condition name as shown in the admin panel                                                                                                                                                     | string | required | -             | `'Is creator'` |
+| **name**        | A name that has to be unique within the plugin                                                                                                                                                     | string | required | -             | `'is-creator'` |
+| **plugin**      | Name of the plugin that register the condition                                                                                                                                                     | string | -        | `'api'`       | `'admin'`      |
+| **category**    | Name of the category. Conditions can be grouped into categories available in the admin panel                                                                                                       | string | -        | `'Default'`   | `'admin'`      |
+| **handler**     | A function used to verify the condition (see [docs.strapi.io](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/rbac.html#using-the-condition-handler)) | string | required | -             | `'admin'`      |
+
+:::note
+Currently the user can choose to apply a condition on any action. There is no way to define a list of actions on which the condition can be applied to. This is why it is possible to set the condition `isCreator` on a the action `plugin::content-manager.explorer.create` even if it doesn't make sense.
+:::
+:::note
+`name` and `plugin` are used to create a global unique id.
+
+Examples: `admin::is-creator`
+:::
+
+### Registering a condition
+
+A condition can be registered in the backend during the `bootstrap` phase of the app.
+
+Example:
+
+```ts
+// bootstrap.ts
+module.exports = async () => {
+  const conditions = [
+    {
+      displayName: 'Is creator',
+      name: 'is-creator',
+      plugin: 'admin',
+      handler: (user) => ({ 'createdBy.id': user.id }),
+    },
+  ];
+  await strapi.admin.services.permission.conditionProvider.registerMany(conditions);
+};
+```
+
+More information on how the handler works [here](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/rbac.html#using-the-condition-handler).
+
+## Permissions
+
+### Permission definition
+
+The permissions are modified in the admin panel (on the [edit page](http://localhost:1337/admin/settings/roles/2) of a role) and stored in the database with the following information:
+
+| key            | description                                                                                                                | type   | required | example                                                       |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------- | ------ | -------- | ------------------------------------------------------------- |
+| **action**     | Id of the action that will be permitted.                                                                                   | string | required | `'plugin::content-manager.explorer.update'`                   |
+| **subject**    | Id of the subject on which the action will be permitted.                                                                   | string | -        | `'api::article.article'`                                      |
+| **properties** | List of the properties of the subject on wich the action will be permitted                                                 | object | -        | `{ fields: ['title', 'description'], locales: ['en', 'fr'] }` |
+| **conditions** | List of the conditions that will be ran against an entry to determine whether the action on this entry is permitted or not | array  | -        | `['admin::is-creator']`                                       |
+
+A permission contains all needed information for the backend and the frontend to prevent users to perform non-permitted action.

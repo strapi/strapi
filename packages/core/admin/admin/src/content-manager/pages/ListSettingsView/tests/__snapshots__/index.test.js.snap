@@ -932,7 +932,6 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
             >
               <div
                 class="c0 c22 c23"
-                spacing="4"
               >
                 <h2
                   class="c10 c24"
@@ -941,25 +940,22 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                 </h2>
                 <div
                   class="c0 c12 c25"
-                  spacing="4"
                 >
                   <div
                     class="c0 c26"
-                    width="100%"
                   >
                     <div
                       class="c27"
                     >
                       <div
                         class="c0 c22 c28"
-                        spacing="1"
                       >
                         <div
                           class="c0 c13"
                         >
                           <label
                             class="c10 c18"
-                            for="toggleinput-1"
+                            for="1"
                           >
                             <div
                               class="c0 c13"
@@ -1005,7 +1001,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                               aria-required="false"
                               checked=""
                               class="c39"
-                              id="toggleinput-1"
+                              id="1"
                               name="settings.searchable"
                               type="checkbox"
                             />
@@ -1016,21 +1012,19 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                   </div>
                   <div
                     class="c0 c26"
-                    width="100%"
                   >
                     <div
                       class="c27"
                     >
                       <div
                         class="c0 c22 c28"
-                        spacing="1"
                       >
                         <div
                           class="c0 c13"
                         >
                           <label
                             class="c10 c18"
-                            for="toggleinput-2"
+                            for="3"
                           >
                             <div
                               class="c0 c13"
@@ -1076,7 +1070,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                               aria-required="false"
                               checked=""
                               class="c39"
-                              id="toggleinput-2"
+                              id="3"
                               name="settings.filterable"
                               type="checkbox"
                             />
@@ -1087,21 +1081,19 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                   </div>
                   <div
                     class="c0 c26"
-                    width="100%"
                   >
                     <div
                       class="c27"
                     >
                       <div
                         class="c0 c22 c28"
-                        spacing="1"
                       >
                         <div
                           class="c0 c13"
                         >
                           <label
                             class="c10 c18"
-                            for="toggleinput-3"
+                            for="5"
                           >
                             <div
                               class="c0 c13"
@@ -1146,7 +1138,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                               aria-disabled="false"
                               aria-required="false"
                               class="c39"
-                              id="toggleinput-3"
+                              id="5"
                               name="settings.bulkable"
                               type="checkbox"
                             />
@@ -1168,11 +1160,10 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                       <div>
                         <div
                           class="c0 c22 c28"
-                          spacing="1"
                         >
                           <label
                             class="c10 c18"
-                            for="select-4"
+                            for="7"
                           >
                             <div
                               class="c0 c13"
@@ -1184,13 +1175,13 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                             class="c0 c13 c43"
                           >
                             <button
-                              aria-describedby="select-4-hint"
+                              aria-describedby="7-hint"
                               aria-disabled="false"
                               aria-expanded="false"
                               aria-haspopup="listbox"
-                              aria-labelledby="select-4 select-4-label select-4-content"
+                              aria-labelledby="7 7-label 7-content"
                               class="c44"
-                              id="select-4"
+                              id="7"
                               name="settings.pageSize"
                               type="button"
                             />
@@ -1205,7 +1196,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                                 >
                                   <span
                                     class="c10 c47"
-                                    id="select-4-content"
+                                    id="7-content"
                                   >
                                     10
                                   </span>
@@ -1241,7 +1232,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           </div>
                           <p
                             class="c10 c51"
-                            id="select-4-hint"
+                            id="7-hint"
                           >
                             Note: You can override this value in the Collection Type settings page.
                           </p>
@@ -1258,11 +1249,10 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                       <div>
                         <div
                           class="c0 c22 c28"
-                          spacing="1"
                         >
                           <label
                             class="c10 c18"
-                            for="select-5"
+                            for="9"
                           >
                             <div
                               class="c0 c13"
@@ -1277,9 +1267,9 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                               aria-disabled="false"
                               aria-expanded="false"
                               aria-haspopup="listbox"
-                              aria-labelledby="select-5 select-5-label select-5-content"
+                              aria-labelledby="9 9-label 9-content"
                               class="c44"
-                              id="select-5"
+                              id="9"
                               name="settings.defaultSortBy"
                               type="button"
                             />
@@ -1294,7 +1284,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                                 >
                                   <span
                                     class="c10 c47"
-                                    id="select-5-content"
+                                    id="9-content"
                                   >
                                     id
                                   </span>
@@ -1341,11 +1331,10 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                       <div>
                         <div
                           class="c0 c22 c28"
-                          spacing="1"
                         >
                           <label
                             class="c10 c18"
-                            for="select-6"
+                            for="11"
                           >
                             <div
                               class="c0 c13"
@@ -1360,9 +1349,9 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                               aria-disabled="false"
                               aria-expanded="false"
                               aria-haspopup="listbox"
-                              aria-labelledby="select-6 select-6-label select-6-content"
+                              aria-labelledby="11 11-label 11-content"
                               class="c44"
-                              id="select-6"
+                              id="11"
                               name="settings.defaultSortOrder"
                               type="button"
                             />
@@ -1377,7 +1366,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                                 >
                                   <span
                                     class="c10 c47"
-                                    id="select-6-content"
+                                    id="11-content"
                                   >
                                     ASC
                                   </span>
@@ -1442,7 +1431,6 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                 >
                   <div
                     class="c0 c13 c60"
-                    spacing="3"
                   >
                     <div
                       class="c0 c61"
@@ -1452,7 +1440,6 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                       >
                         <div
                           class="c0 c13 c60"
-                          spacing="3"
                         >
                           <span
                             aria-label="Move id"
@@ -1556,7 +1543,6 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                       >
                         <div
                           class="c0 c13 c60"
-                          spacing="3"
                         >
                           <span
                             aria-label="Move address"
@@ -1660,11 +1646,11 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                   <div>
                     <span>
                       <button
-                        aria-controls="simplemenu-7"
+                        aria-controls="13"
                         aria-disabled="false"
                         aria-expanded="false"
                         aria-haspopup="true"
-                        aria-labelledby="tooltip-8"
+                        aria-labelledby="12"
                         class="c15 c70"
                         data-testid="add-field"
                         tabindex="0"
@@ -2656,7 +2642,6 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
             >
               <div
                 class="c0 c22 c23"
-                spacing="4"
               >
                 <h2
                   class="c10 c24"
@@ -2665,25 +2650,22 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                 </h2>
                 <div
                   class="c0 c12 c25"
-                  spacing="4"
                 >
                   <div
                     class="c0 c26"
-                    width="100%"
                   >
                     <div
                       class="c27"
                     >
                       <div
                         class="c0 c22 c28"
-                        spacing="1"
                       >
                         <div
                           class="c0 c13"
                         >
                           <label
                             class="c10 c18"
-                            for="toggleinput-31"
+                            for="33"
                           >
                             <div
                               class="c0 c13"
@@ -2729,7 +2711,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                               aria-required="false"
                               checked=""
                               class="c39"
-                              id="toggleinput-31"
+                              id="33"
                               name="settings.searchable"
                               type="checkbox"
                             />
@@ -2740,21 +2722,19 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                   </div>
                   <div
                     class="c0 c26"
-                    width="100%"
                   >
                     <div
                       class="c27"
                     >
                       <div
                         class="c0 c22 c28"
-                        spacing="1"
                       >
                         <div
                           class="c0 c13"
                         >
                           <label
                             class="c10 c18"
-                            for="toggleinput-32"
+                            for="35"
                           >
                             <div
                               class="c0 c13"
@@ -2800,7 +2780,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                               aria-required="false"
                               checked=""
                               class="c39"
-                              id="toggleinput-32"
+                              id="35"
                               name="settings.filterable"
                               type="checkbox"
                             />
@@ -2811,21 +2791,19 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                   </div>
                   <div
                     class="c0 c26"
-                    width="100%"
                   >
                     <div
                       class="c27"
                     >
                       <div
                         class="c0 c22 c28"
-                        spacing="1"
                       >
                         <div
                           class="c0 c13"
                         >
                           <label
                             class="c10 c18"
-                            for="toggleinput-33"
+                            for="37"
                           >
                             <div
                               class="c0 c13"
@@ -2870,7 +2848,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                               aria-disabled="false"
                               aria-required="false"
                               class="c39"
-                              id="toggleinput-33"
+                              id="37"
                               name="settings.bulkable"
                               type="checkbox"
                             />
@@ -2892,11 +2870,10 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                       <div>
                         <div
                           class="c0 c22 c28"
-                          spacing="1"
                         >
                           <label
                             class="c10 c18"
-                            for="select-34"
+                            for="39"
                           >
                             <div
                               class="c0 c13"
@@ -2908,13 +2885,13 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                             class="c0 c13 c43"
                           >
                             <button
-                              aria-describedby="select-34-hint"
+                              aria-describedby="39-hint"
                               aria-disabled="false"
                               aria-expanded="false"
                               aria-haspopup="listbox"
-                              aria-labelledby="select-34 select-34-label select-34-content"
+                              aria-labelledby="39 39-label 39-content"
                               class="c44"
-                              id="select-34"
+                              id="39"
                               name="settings.pageSize"
                               type="button"
                             />
@@ -2929,7 +2906,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                                 >
                                   <span
                                     class="c10 c47"
-                                    id="select-34-content"
+                                    id="39-content"
                                   >
                                     10
                                   </span>
@@ -2965,7 +2942,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           </div>
                           <p
                             class="c10 c51"
-                            id="select-34-hint"
+                            id="39-hint"
                           >
                             Note: You can override this value in the Collection Type settings page.
                           </p>
@@ -2982,11 +2959,10 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                       <div>
                         <div
                           class="c0 c22 c28"
-                          spacing="1"
                         >
                           <label
                             class="c10 c18"
-                            for="select-35"
+                            for="41"
                           >
                             <div
                               class="c0 c13"
@@ -3001,9 +2977,9 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                               aria-disabled="false"
                               aria-expanded="false"
                               aria-haspopup="listbox"
-                              aria-labelledby="select-35 select-35-label select-35-content"
+                              aria-labelledby="41 41-label 41-content"
                               class="c44"
-                              id="select-35"
+                              id="41"
                               name="settings.defaultSortBy"
                               type="button"
                             />
@@ -3018,7 +2994,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                                 >
                                   <span
                                     class="c10 c47"
-                                    id="select-35-content"
+                                    id="41-content"
                                   >
                                     id
                                   </span>
@@ -3065,11 +3041,10 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                       <div>
                         <div
                           class="c0 c22 c28"
-                          spacing="1"
                         >
                           <label
                             class="c10 c18"
-                            for="select-36"
+                            for="43"
                           >
                             <div
                               class="c0 c13"
@@ -3084,9 +3059,9 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                               aria-disabled="false"
                               aria-expanded="false"
                               aria-haspopup="listbox"
-                              aria-labelledby="select-36 select-36-label select-36-content"
+                              aria-labelledby="43 43-label 43-content"
                               class="c44"
-                              id="select-36"
+                              id="43"
                               name="settings.defaultSortOrder"
                               type="button"
                             />
@@ -3101,7 +3076,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                                 >
                                   <span
                                     class="c10 c47"
-                                    id="select-36-content"
+                                    id="43-content"
                                   >
                                     ASC
                                   </span>
@@ -3166,7 +3141,6 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                 >
                   <div
                     class="c0 c13 c60"
-                    spacing="3"
                   >
                     <div
                       class="c0 c61"
@@ -3176,7 +3150,6 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                       >
                         <div
                           class="c0 c13 c60"
-                          spacing="3"
                         >
                           <span
                             aria-label="Move id"
@@ -3280,7 +3253,6 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                       >
                         <div
                           class="c0 c13 c60"
-                          spacing="3"
                         >
                           <span
                             aria-label="Move address"
@@ -3384,7 +3356,6 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                       >
                         <div
                           class="c0 c13 c60"
-                          spacing="3"
                         >
                           <span
                             aria-label="Move Cover"
@@ -3488,11 +3459,11 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                   <div>
                     <span>
                       <button
-                        aria-controls="simplemenu-37"
+                        aria-controls="45"
                         aria-disabled="false"
                         aria-expanded="true"
                         aria-haspopup="true"
-                        aria-labelledby="tooltip-38"
+                        aria-labelledby="44"
                         class="c15 c70"
                         data-testid="add-field"
                         tabindex="0"

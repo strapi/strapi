@@ -636,7 +636,7 @@ describe('Admin | UseCasePage', () => {
             >
               <div>
                 <button
-                  aria-controls="simplemenu-1"
+                  aria-controls="0"
                   aria-disabled="false"
                   aria-expanded="false"
                   aria-haspopup="true"
@@ -701,7 +701,6 @@ describe('Admin | UseCasePage', () => {
                     />
                     <div
                       class="c0 c16"
-                      width="15.625rem"
                     >
                       <h1
                         class="c5 c17 c18"
@@ -713,12 +712,10 @@ describe('Admin | UseCasePage', () => {
                   </div>
                   <div
                     class="c0 c19 c20"
-                    spacing="6"
                   >
                     <div>
                       <div
                         class="c0 c19 c21"
-                        spacing="1"
                       >
                         <label
                           class="c5 c6"

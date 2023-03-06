@@ -87,7 +87,6 @@ exports[`Content-Manager || RelationInput || RelationItem should render and matc
   <li
     aria-describedby="test"
     class="c0"
-    cursor="default"
   >
     <div
       class="c1 c2"
@@ -95,7 +94,6 @@ exports[`Content-Manager || RelationInput || RelationItem should render and matc
     >
       <div
         class="c3 c4 c5"
-        spacing="1"
       >
         <div
           class="c2 c6"

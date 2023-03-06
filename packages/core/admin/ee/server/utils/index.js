@@ -1,6 +1,6 @@
 'use strict';
 
-const getService = (name) => {
+const getService = (name, { strapi } = { strapi: global.strapi }) => {
   return strapi.service(`admin::${name}`);
 };
 module.exports = {

@@ -336,18 +336,6 @@ describe('Role CRUD End to End', () => {
                 "subCategory": "general",
               },
               {
-                "action": "admin::marketplace.plugins.install",
-                "category": "plugins and marketplace",
-                "displayName": "Install (only for dev env)",
-                "subCategory": "plugins",
-              },
-              {
-                "action": "admin::marketplace.plugins.uninstall",
-                "category": "plugins and marketplace",
-                "displayName": "Uninstall (only for dev env)",
-                "subCategory": "plugins",
-              },
-              {
                 "action": "admin::marketplace.read",
                 "category": "plugins and marketplace",
                 "displayName": "Access the marketplace",
@@ -851,18 +839,6 @@ describe('Role CRUD End to End', () => {
                   "subCategory": "options",
                 },
                 {
-                  "action": "admin::marketplace.plugins.install",
-                  "category": "plugins and marketplace",
-                  "displayName": "Install (only for dev env)",
-                  "subCategory": "plugins",
-                },
-                {
-                  "action": "admin::marketplace.plugins.uninstall",
-                  "category": "plugins and marketplace",
-                  "displayName": "Uninstall (only for dev env)",
-                  "subCategory": "plugins",
-                },
-                {
                   "action": "admin::marketplace.read",
                   "category": "plugins and marketplace",
                   "displayName": "Access the marketplace",
@@ -890,6 +866,12 @@ describe('Role CRUD End to End', () => {
                   "action": "admin::provider-login.update",
                   "category": "single sign on",
                   "displayName": "Update",
+                  "subCategory": "options",
+                },
+                {
+                  "action": "admin::review-workflows.read",
+                  "category": "review workflows",
+                  "displayName": "Read",
                   "subCategory": "options",
                 },
                 {
@@ -1365,18 +1347,6 @@ describe('Role CRUD End to End', () => {
                   "category": "api tokens",
                   "displayName": "Update",
                   "subCategory": "general",
-                },
-                {
-                  "action": "admin::marketplace.plugins.install",
-                  "category": "plugins and marketplace",
-                  "displayName": "Install (only for dev env)",
-                  "subCategory": "plugins",
-                },
-                {
-                  "action": "admin::marketplace.plugins.uninstall",
-                  "category": "plugins and marketplace",
-                  "displayName": "Uninstall (only for dev env)",
-                  "subCategory": "plugins",
                 },
                 {
                   "action": "admin::marketplace.read",

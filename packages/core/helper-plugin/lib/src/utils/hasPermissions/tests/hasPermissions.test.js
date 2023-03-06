@@ -23,19 +23,13 @@ describe('STRAPI-HELPER_PLUGIN | utils ', () => {
       const data = hasPermissionsTestData.userPermissions.user1;
       const dataToCheck = hasPermissionsTestData.permissionsToCheck.listPlugins;
 
-      expect(findMatchingPermissions(data, dataToCheck)).toHaveLength(2);
+      expect(findMatchingPermissions(data, dataToCheck)).toHaveLength(1);
       expect(findMatchingPermissions(data, dataToCheck)).toEqual([
         {
           action: 'admin::marketplace.read',
           subject: null,
           properties: {},
           conditions: [],
-        },
-        {
-          action: 'admin::marketplace.plugins.uninstall',
-          subject: null,
-          properties: {},
-          conditions: ['customCondition'],
         },
       ]);
     });
@@ -53,7 +47,7 @@ describe('STRAPI-HELPER_PLUGIN | utils ', () => {
           conditions: [],
         },
         {
-          action: 'admin::marketplace.plugins.uninstall',
+          action: 'admin::webhooks.delete',
           subject: null,
           properties: {},
           conditions: ['customCondition'],
@@ -64,7 +58,7 @@ describe('STRAPI-HELPER_PLUGIN | utils ', () => {
           action: 'admin::marketplace.read',
         },
         {
-          action: 'admin::marketplace.plugins.uninstall',
+          action: 'admin::webhooks.delete',
         },
       ];
 
@@ -130,13 +124,13 @@ describe('STRAPI-HELPER_PLUGIN | utils ', () => {
           conditions: [],
         },
         {
-          action: 'admin::marketplace.plugins.uninstall',
+          action: 'admin::webhooks.delete',
           subject: null,
           properties: {},
           conditions: ['customCondition'],
         },
         {
-          action: 'admin::marketplace.plugins.install',
+          action: 'admin::webhooks.create',
           subject: null,
           properties: {},
           conditions: null,
@@ -155,13 +149,13 @@ describe('STRAPI-HELPER_PLUGIN | utils ', () => {
           conditions: ['test'],
         },
         {
-          action: 'admin::marketplace.plugins.uninstall',
+          action: 'admin::webhooks.delete',
           subject: null,
           properties: {},
           conditions: ['customCondition'],
         },
         {
-          action: 'admin::marketplace.plugins.install',
+          action: 'admin::webhooks.create',
           subject: null,
           properties: {},
           conditions: ['test'],

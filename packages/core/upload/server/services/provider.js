@@ -1,9 +1,15 @@
 'use strict';
 
 const { isFunction } = require('lodash/fp');
-const { streamToBuffer } = require('../utils/file');
+const {
+  file: { streamToBuffer },
+} = require('@strapi/utils');
 
 module.exports = ({ strapi }) => ({
+  async checkFileSize(file) {
+    const { sizeLimit } = strapi.config.get('plugin.upload', {});
+    await strapi.plugin('upload').provider.checkFileSize(file, { sizeLimit });
+  },
   async upload(file) {
     if (isFunction(strapi.plugin('upload').provider.uploadStream)) {
       file.stream = file.getStream();
