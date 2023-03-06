@@ -1,7 +1,9 @@
 'use strict';
 
-const { remote } = require('@strapi/data-transfer/lib/strapi');
-const { UnauthorizedError } = require('@strapi/utils/lib/errors');
+const { createTransferHandler } = require('@strapi/data-transfer').strapi.remote.handlers;
+const {
+  errors: { UnauthorizedError },
+} = require('@strapi/utils');
 
 const dataTransferAuthStrategy = require('../../strategies/data-transfer');
 
@@ -20,5 +22,5 @@ const verify = async (ctx, scope) => {
 };
 
 module.exports = {
-  connect: remote.handlers.createTransferHandler({ verify }),
+  connect: createTransferHandler({ verify }),
 };

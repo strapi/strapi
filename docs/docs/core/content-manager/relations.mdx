@@ -147,7 +147,7 @@ The input field for relation fields consist of two components:
 
 ### `RelationInputDataManager`
 
-This container component handles data fetching and data normalization for the `RelationInput` component. This has been extracted from 
+This container component handles data fetching and data normalization for the `RelationInput` component. This has been extracted from
 the `RelationInput` so that Strapi is able to move the underlying component into the design-system if the community would need it
 (most other input components can be consumed from there).
 
@@ -163,7 +163,7 @@ would otherwise have a negative impact on the overall performance of the content
 This hook takes care of data-fetching and normalizes results relations aswell as search-results.
 
 ```ts
-const { relations: RelationResults, search: RelationResults, searchFor } = useRelation(reactQueryCacheKey: string, options: Options);
+const { relations: RelationResults, search: RelationResults, searchFor } = useRelation(reactQueryCacheKey: Array<string | object>, options: Options);
 ```
 
 ### `Options`
@@ -205,10 +205,10 @@ type RelationResults = RelationResult[];
 
 type RelationResult = {
   id: number;
-  href?: string;  // based on `shouldAddLink` and the `targetModel`
+  href?: string; // based on `shouldAddLink` and the `targetModel`
   publicationState: 'draft' | 'published';
-  mainField: string;  // will fallback to "id" if not set
-}
+  mainField: string; // will fallback to "id" if not set
+};
 ```
 
 #### `relations`

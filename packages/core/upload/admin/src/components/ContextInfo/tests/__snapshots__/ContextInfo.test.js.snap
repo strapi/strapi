@@ -1,20 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ContextInfo renders 1`] = `
-.c4 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
-.c5 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #4a4a6a;
-}
-
 .c0 {
   background: #f6f6f9;
   padding-top: 16px;
@@ -37,6 +23,20 @@ exports[`ContextInfo renders 1`] = `
   -ms-flex-direction: column;
   flex-direction: column;
   gap: 4px;
+}
+
+.c4 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c5 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #4a4a6a;
 }
 
 .c6 {
