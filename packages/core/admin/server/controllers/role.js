@@ -142,9 +142,9 @@ module.exports = {
 
     const sanitizedPermissions = permissions.map(permissionService.sanitizePermission);
 
-    return ctx.send({
+    ctx.body = {
       data: sanitizedPermissions,
-    });
+    };
   },
 
   /**
