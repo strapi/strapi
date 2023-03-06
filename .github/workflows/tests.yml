@@ -115,7 +115,7 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - name: Build
-        run: yarn build
+        run: yarn build --scope @strapi/admin --scope @strapi/helper-plugin
 
   api_ce_pg:
     runs-on: ubuntu-latest
