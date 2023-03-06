@@ -581,7 +581,6 @@ const createEntityManager = (db) => {
             };
           });
 
-          // TODO: How to reorder inverse columns?
           if (cleanRelationData.clone) {
             const relIdToClone = cleanRelationData.clone;
 
