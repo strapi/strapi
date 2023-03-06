@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Formik } from 'formik';
 import { Form, Link } from '@strapi/helper-plugin';
-import { Box, Stack, Main, Flex, Button, TextInput, Typography } from '@strapi/design-system';
+import { Box, Main, Flex, Button, TextInput, Typography } from '@strapi/design-system';
 import { EyeStriked, Eye } from '@strapi/icons';
 import UnauthenticatedLayout, {
   Column,
@@ -65,7 +65,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                   )}
                 </Column>
 
-                <Stack spacing={6}>
+                <Flex direction="column" alignItems="stretch" gap={6}>
                   <PasswordInput
                     name="password"
                     onChange={handleChange}
@@ -157,7 +157,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                       defaultMessage: 'Change password',
                     })}
                   </Button>
-                </Stack>
+                </Flex>
               </Form>
             )}
           </Formik>

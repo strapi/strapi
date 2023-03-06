@@ -35,6 +35,11 @@ jest.mock('../../../hooks', () => ({
   useModels: jest.fn(),
 }));
 
+jest.mock('ee_else_ce/hooks/useLicenseLimitNotification', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
 const history = createMemoryHistory();
 
 const App = (
@@ -60,6 +65,7 @@ describe('Homepage', () => {
   });
 
   test.each([
+    'strapi cloud a fully composable, and collaborative platform to boost your team velocity.',
     'documentation discover the essential concepts, guides and instructions.',
     'code example learn by using ready-made starters for your projects.',
     'tutorials follow step-by-step instructions to use and customize strapi.',

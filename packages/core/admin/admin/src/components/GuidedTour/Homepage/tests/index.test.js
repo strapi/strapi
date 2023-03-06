@@ -49,42 +49,7 @@ describe('GuidedTour Homepage', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c5 {
-        font-weight: 600;
-        font-size: 1.125rem;
-        line-height: 1.22;
-        color: #32324d;
-      }
-
-      .c10 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 500;
-        color: #ffffff;
-      }
-
-      .c11 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c23 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 500;
-        color: #666687;
-      }
-
-      .c28 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c1 {
+      .c0 {
         background: #ffffff;
         padding-top: 32px;
         padding-right: 16px;
@@ -94,12 +59,12 @@ describe('GuidedTour Homepage', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c7 {
+      .c5 {
         margin-right: 20px;
         min-width: 1.875rem;
       }
 
-      .c8 {
+      .c6 {
         background: #4945ff;
         padding: 8px;
         border-radius: 50%;
@@ -107,14 +72,14 @@ describe('GuidedTour Homepage', () => {
         height: 1.875rem;
       }
 
-      .c13 {
+      .c11 {
         margin-right: 20px;
         margin-top: 12px;
         margin-bottom: 12px;
         min-width: 1.875rem;
       }
 
-      .c14 {
+      .c12 {
         background: #7b79ff;
         border-radius: 4px;
         width: 0.125rem;
@@ -122,11 +87,11 @@ describe('GuidedTour Homepage', () => {
         min-height: 5.3125rem;
       }
 
-      .c15 {
+      .c13 {
         margin-top: 8px;
       }
 
-      .c22 {
+      .c21 {
         padding: 8px;
         border-radius: 50%;
         border-style: solid;
@@ -136,7 +101,7 @@ describe('GuidedTour Homepage', () => {
         height: 1.875rem;
       }
 
-      .c24 {
+      .c23 {
         background: #c0c0cf;
         border-radius: 4px;
         width: 0.125rem;
@@ -144,7 +109,18 @@ describe('GuidedTour Homepage', () => {
         min-height: 4.0625rem;
       }
 
-      .c2 {
+      .c25 {
+        background: #4945ff;
+        padding: 8px;
+        padding-right: 16px;
+        padding-left: 16px;
+        border-radius: 4px;
+        border-color: #4945ff;
+        border: 1px solid #4945ff;
+        cursor: pointer;
+      }
+
+      .c1 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
         -ms-flex-align: stretch;
@@ -156,9 +132,10 @@ describe('GuidedTour Homepage', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+        gap: 24px;
       }
 
-      .c6 {
+      .c4 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -172,7 +149,7 @@ describe('GuidedTour Homepage', () => {
         flex-direction: row;
       }
 
-      .c9 {
+      .c7 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -190,7 +167,7 @@ describe('GuidedTour Homepage', () => {
         justify-content: center;
       }
 
-      .c12 {
+      .c10 {
         -webkit-align-items: flex-start;
         -webkit-box-align: flex-start;
         -ms-flex-align: flex-start;
@@ -204,7 +181,7 @@ describe('GuidedTour Homepage', () => {
         flex-direction: row;
       }
 
-      .c25 {
+      .c24 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -222,44 +199,76 @@ describe('GuidedTour Homepage', () => {
         justify-content: flex-end;
       }
 
-      .c3 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c3 > * + * {
-        margin-top: 24px;
-      }
-
       .c26 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        gap: 8px;
+      }
+
+      .c3 {
+        font-weight: 600;
+        font-size: 1.125rem;
+        line-height: 1.22;
+        color: #32324d;
+      }
+
+      .c8 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #ffffff;
+      }
+
+      .c9 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c22 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #666687;
+      }
+
+      .c29 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #ffffff;
+      }
+
+      .c27 {
         position: relative;
         outline: none;
       }
 
-      .c26 svg {
+      .c27 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c26 svg > g,
-      .c26 svg path {
+      .c27 svg > g,
+      .c27 svg path {
         fill: #ffffff;
       }
 
-      .c26[aria-disabled='true'] {
+      .c27[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c26:after {
+      .c27:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -274,11 +283,11 @@ describe('GuidedTour Homepage', () => {
         border: 2px solid transparent;
       }
 
-      .c26:focus-visible {
+      .c27:focus-visible {
         outline: none;
       }
 
-      .c26:focus-visible:after {
+      .c27:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -289,99 +298,103 @@ describe('GuidedTour Homepage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c27 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        background-color: #4945ff;
-        border: 1px solid #4945ff;
+      .c28 {
         height: 2rem;
-        padding-left: 16px;
-        padding-right: 16px;
         border: 1px solid #dcdce4;
         background: #ffffff;
       }
 
-      .c27 .c0 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c27 .c4 {
-        color: #ffffff;
-      }
-
-      .c27[aria-disabled='true'] {
+      .c28[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c27[aria-disabled='true'] .c4 {
+      .c28[aria-disabled='true'] .c2 {
         color: #666687;
       }
 
-      .c27[aria-disabled='true'] svg > g,.c27[aria-disabled='true'] svg path {
+      .c28[aria-disabled='true'] svg > g,.c28[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c27[aria-disabled='true']:active {
+      .c28[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c27[aria-disabled='true']:active .c4 {
+      .c28[aria-disabled='true']:active .c2 {
         color: #666687;
       }
 
-      .c27[aria-disabled='true']:active svg > g,.c27[aria-disabled='true']:active svg path {
+      .c28[aria-disabled='true']:active svg > g,.c28[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c27:hover {
+      .c28:hover {
         background-color: #f6f6f9;
       }
 
-      .c27:active {
+      .c28:active {
         background-color: #eaeaef;
       }
 
-      .c27 .c4 {
+      .c28 .c2 {
         color: #32324d;
       }
 
-      .c27 svg > g,
-      .c27 svg path {
+      .c28 svg > g,
+      .c28 svg path {
         fill: #32324d;
       }
 
-      .c21 {
-        padding-left: 8px;
+      .c14 {
+        background: #4945ff;
+        padding-top: 8px;
+        padding-right: 16px;
+        padding-bottom: 8px;
+        padding-left: 16px;
+        border-radius: 4px;
+        border-color: #4945ff;
+        border: 1px solid #4945ff;
       }
 
       .c19 {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
-        color: #32324d;
+        color: #ffffff;
       }
 
-      .c16 {
+      .c15 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        gap: 8px;
+      }
+
+      .c20 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c16 {
         position: relative;
         outline: none;
       }
@@ -431,31 +444,8 @@ describe('GuidedTour Homepage', () => {
       }
 
       .c17 {
-        padding: 8px 16px;
-        background: #4945ff;
-        border: 1px solid #4945ff;
-        border-radius: 4px;
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
         -webkit-text-decoration: none;
         text-decoration: none;
-      }
-
-      .c17 .c20 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c17 .c18 {
-        color: #ffffff;
       }
 
       .c17[aria-disabled='true'] {
@@ -500,62 +490,61 @@ describe('GuidedTour Homepage', () => {
       }
 
       <div
-        class="c0 c1"
+        class="c0"
       >
         <div
-          class="c0 c2 c3"
+          class="c1"
         >
           <h2
-            class="c4 c5"
+            class="c2 c3"
           >
             3 steps to get started
           </h2>
           <div
-            class="c0 "
+            class=""
           >
             <div
-              class="c0 "
+              class=""
             >
               <div
-                class="c0 c6"
+                class="c4"
               >
                 <div
-                  class="c0 c7"
+                  class="c5"
                 >
                   <div
-                    class="c0 c8 c9"
+                    class="c6 c7"
                   >
                     <span
-                      class="c4 c10"
+                      class="c2 c8"
                     >
                       1
                     </span>
                   </div>
                 </div>
                 <h3
-                  class="c4 c11"
+                  class="c2 c9"
                 >
                   🧠 Build the content structure
                 </h3>
               </div>
               <div
-                class="c0 c12"
+                class="c10"
               >
                 <div
-                  class="c0 c13 c9"
+                  class="c11 c7"
                 >
                   <div
-                    class="c0 c14"
+                    class="c12"
                   />
                 </div>
                 <div
-                  class="c0 c15"
+                  class="c13"
                 >
                   <a
                     aria-disabled="false"
-                    class="c16 c17"
+                    class="c14 c15 c16 c17"
                     href="/plugins/content-type-builder"
-                    variant="default"
                   >
                     <span
                       class="c18 c19"
@@ -564,17 +553,17 @@ describe('GuidedTour Homepage', () => {
                     </span>
                     <div
                       aria-hidden="true"
-                      class="c20 c21"
+                      class="c20"
                     >
                       <svg
                         fill="none"
-                        height="1em"
+                        height="1rem"
                         viewBox="0 0 24 24"
-                        width="1em"
+                        width="1rem"
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
-                          d="M0 10.7c0-.11.09-.2.2-.2h18.06l-8.239-8.239a.2.2 0 010-.282L11.86.14a.2.2 0 01.282 0L23.86 11.86a.2.2 0 010 .282L12.14 23.86a.2.2 0 01-.282 0L10.02 22.02a.2.2 0 010-.282L18.26 13.5H.2a.2.2 0 01-.2-.2v-2.6z"
+                          d="M0 10.7c0-.11.09-.2.2-.2h18.06l-8.239-8.239a.2.2 0 0 1 0-.282L11.86.14a.2.2 0 0 1 .282 0L23.86 11.86a.2.2 0 0 1 0 .282L12.14 23.86a.2.2 0 0 1-.282 0L10.02 22.02a.2.2 0 0 1 0-.282L18.26 13.5H.2a.2.2 0 0 1-.2-.2v-2.6Z"
                           fill="#212134"
                         />
                       </svg>
@@ -584,93 +573,93 @@ describe('GuidedTour Homepage', () => {
               </div>
             </div>
             <div
-              class="c0 "
+              class=""
             >
               <div
-                class="c0 c6"
+                class="c4"
               >
                 <div
-                  class="c0 c7"
+                  class="c5"
                 >
                   <div
-                    class="c0 c22 c9"
+                    class="c21 c7"
                   >
                     <span
-                      class="c4 c23"
+                      class="c2 c22"
                     >
                       2
                     </span>
                   </div>
                 </div>
                 <h3
-                  class="c4 c11"
+                  class="c2 c9"
                 >
                   ⚡️ What would you like to share with the world?
                 </h3>
               </div>
               <div
-                class="c0 c12"
+                class="c10"
               >
                 <div
-                  class="c0 c13 c9"
+                  class="c11 c7"
                 >
                   <div
-                    class="c0 c24"
+                    class="c23"
                   />
                 </div>
                 <div
-                  class="c0 c15"
+                  class="c13"
                 />
               </div>
             </div>
             <div
-              class="c0 "
+              class=""
             >
               <div
-                class="c0 c6"
+                class="c4"
               >
                 <div
-                  class="c0 c7"
+                  class="c5"
                 >
                   <div
-                    class="c0 c22 c9"
+                    class="c21 c7"
                   >
                     <span
-                      class="c4 c23"
+                      class="c2 c22"
                     >
                       3
                     </span>
                   </div>
                 </div>
                 <h3
-                  class="c4 c11"
+                  class="c2 c9"
                 >
                   🚀 See content in action
                 </h3>
               </div>
               <div
-                class="c0 c12"
+                class="c10"
               >
                 <div
-                  class="c0 c13 c9"
+                  class="c11 c7"
                 />
                 <div
-                  class="c0 c15"
+                  class="c13"
                 />
               </div>
             </div>
           </div>
         </div>
         <div
-          class="c0 c25"
+          class="c24"
         >
           <button
             aria-disabled="false"
-            class="c26 c27"
+            class="c25 c26 c27 c28"
             type="button"
           >
             <span
-              class="c4 c28"
+              class="c2 c29"
             >
               Skip the tour
             </span>

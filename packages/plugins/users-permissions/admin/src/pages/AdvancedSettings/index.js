@@ -20,7 +20,7 @@ import {
   ContentLayout,
   Button,
   Box,
-  Stack,
+  Flex,
   Select,
   Option,
   Typography,
@@ -173,7 +173,7 @@ const AdvancedSettingsPage = () => {
                   paddingLeft={7}
                   paddingRight={7}
                 >
-                  <Stack spacing={4}>
+                  <Flex direction="column" alignItems="stretch" gap={4}>
                     <Typography variant="delta" as="h2">
                       {formatMessage({
                         id: 'global.settings',
@@ -229,7 +229,7 @@ const AdvancedSettingsPage = () => {
                         );
                       })}
                     </Grid>
-                  </Stack>
+                  </Flex>
                 </Box>
               </ContentLayout>
             </Form>
