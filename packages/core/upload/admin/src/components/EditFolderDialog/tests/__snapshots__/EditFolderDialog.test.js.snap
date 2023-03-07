@@ -652,13 +652,13 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                             class="css-1f43avz-a11yText-A11yText"
                           />
                           <div
-                            class=" css-1e1stxh-control"
+                            class=" css-1ckpxei-control"
                           >
                             <div
-                              class=" css-do2euy-ValueContainer"
+                              class=" css-1drmnx5-ValueContainer"
                             >
                               <div
-                                class=" css-1sqm0gs-singleValue"
+                                class=" css-1ryi7up-singleValue"
                               >
                                 Media Library
                               </div>

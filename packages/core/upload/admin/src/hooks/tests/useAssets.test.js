@@ -243,4 +243,97 @@ describe('useAssets', () => {
 
     console.error = originalConsoleError;
   });
+
+  it('should filter out any assets without a name', async () => {
+    const { get } = useFetchClient();
+
+    get.mockReturnValue({
+      data: {
+        results: [
+          {
+            name: null,
+            mime: 'image/jpeg',
+            ext: 'jpg',
+          },
+          {
+            name: 'test',
+            mime: 'image/jpeg',
+            ext: 'jpg',
+          },
+        ],
+      },
+    });
+
+    const { result, waitFor } = await setup({});
+
+    await waitFor(() => result.current.data !== undefined);
+
+    expect(result.current.data.results).toEqual([
+      {
+        name: 'test',
+        mime: 'image/jpeg',
+        ext: 'jpg',
+      },
+    ]);
+  });
+
+  it('should set mime and ext to strings as defaults if they are nullish', async () => {
+    const { get } = useFetchClient();
+
+    get.mockReturnValue({
+      data: {
+        results: [
+          {
+            name: 'test 1',
+            mime: null,
+            ext: 'jpg',
+          },
+          {
+            name: 'test 2',
+            mime: 'image/jpeg',
+            ext: null,
+          },
+          {
+            name: 'test 3',
+            mime: null,
+            ext: null,
+          },
+          {
+            name: 'test 4',
+            mime: 'image/jpeg',
+            ext: 'jpg',
+          },
+        ],
+      },
+    });
+
+    const { result, waitFor } = await setup({});
+
+    await waitFor(() => result.current.data !== undefined);
+
+    expect(result.current.data.results).toMatchInlineSnapshot(`
+      [
+        {
+          "ext": "jpg",
+          "mime": "",
+          "name": "test 1",
+        },
+        {
+          "ext": "",
+          "mime": "image/jpeg",
+          "name": "test 2",
+        },
+        {
+          "ext": "",
+          "mime": "",
+          "name": "test 3",
+        },
+        {
+          "ext": "jpg",
+          "mime": "image/jpeg",
+          "name": "test 4",
+        },
+      ]
+    `);
+  });
 });
