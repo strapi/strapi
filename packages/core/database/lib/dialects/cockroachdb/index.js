@@ -36,6 +36,7 @@ class CockroachDialect extends Dialect {
     this.db.connection.client.pool.on('acquireSuccess', async (eventId, resource) => {
       resource.query('SET serial_normalization = "sql_sequence";');
       resource.query('SET default_int_size = 4;');
+      resource.query('SET default_transaction_isolation = "READ COMMITTED";');
     });
   }
 
