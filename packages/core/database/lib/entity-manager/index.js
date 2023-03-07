@@ -540,11 +540,8 @@ const createEntityManager = (db) => {
           continue;
         }
 
-        // TODO: handle bidirectional as in creation, but it seems it was not working correctly before.
-        // TODO: add tests for joinColumn relations
         if (attribute.joinColumn && attribute.owner) {
-          // handled in the row itself
-
+          // handled in the row itself when updating an entity
           const relIdsToAdd = toIds(cleanRelationData.set);
           if (
             isNewEntity &&
@@ -661,7 +658,6 @@ const createEntityManager = (db) => {
                   });
                 }
               }
-              // return this.updateRelations(uid, id, data, { transaction: trx });
             }
             if (isPartialUpdate) {
               if (isAnyToOne(attribute)) {
