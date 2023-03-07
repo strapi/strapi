@@ -5,7 +5,7 @@ import { Meta, Story, Canvas } from '@storybook/addon-docs/blocks';
 import { Grid, GridItem } from '@strapi/design-system';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system';
 import { Main } from '@strapi/design-system';
-import { Stack } from '@strapi/design-system';
+import { Flex } from '@strapi/design-system';
 import { Box } from '@strapi/design-system';
 import set from 'lodash/set';
 import GenericInput from './index';
@@ -34,7 +34,7 @@ Description...
       });
       return (
         <ContentLayout>
-          <Stack spacing={4}>
+          <Flex direction="column" alignItems="stretch" gap={4}>
             {layout.map((row, rowIndex) => {
               return (
                 <Box key={rowIndex}>
@@ -58,7 +58,7 @@ Description...
                 </Box>
               );
             })}
-          </Stack>
+          </Flex>
         </ContentLayout>
       );
     }}

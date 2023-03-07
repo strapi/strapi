@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Stack, Grid, GridItem, Typography } from '@strapi/design-system';
+import { Box, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 
 export const ContextInfo = ({ blocks }) => {
   return (
@@ -15,14 +15,14 @@ export const ContextInfo = ({ blocks }) => {
       <Grid gap={4}>
         {blocks.map(({ label, value }) => (
           <GridItem col={6} xs={12} key={label}>
-            <Stack spacing={1}>
+            <Flex direction="column" alignItems="stretch" gap={1}>
               <Typography variant="sigma" textColor="neutral600">
                 {label}
               </Typography>
               <Typography variant="pi" textColor="neutral700">
                 {value}
               </Typography>
-            </Stack>
+            </Flex>
           </GridItem>
         ))}
       </Grid>

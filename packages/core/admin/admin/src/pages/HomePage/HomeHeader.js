@@ -2,16 +2,12 @@ import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Typography, Stack, Box, Button } from '@strapi/design-system';
+import { Typography, Box, Button, Flex } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import { ArrowRight } from '@strapi/icons';
 
 const WordWrap = styled(Typography)`
   word-break: break-word;
-`;
-
-const StackCustom = styled(Stack)`
-  align-items: flex-start;
 `;
 
 const HomeHeader = ({ hasCreatedContentType, onCreateCT }) => {
@@ -20,7 +16,7 @@ const HomeHeader = ({ hasCreatedContentType, onCreateCT }) => {
   return (
     <div>
       <Box paddingLeft={6} paddingBottom={10}>
-        <StackCustom spacing={5}>
+        <Flex direction="column" alignItems="flex-start" gap={5}>
           <Typography as="h1" variant="alpha">
             {hasCreatedContentType
               ? formatMessage({
@@ -60,7 +56,7 @@ const HomeHeader = ({ hasCreatedContentType, onCreateCT }) => {
               })}
             </Button>
           )}
-        </StackCustom>
+        </Flex>
       </Box>
     </div>
   );

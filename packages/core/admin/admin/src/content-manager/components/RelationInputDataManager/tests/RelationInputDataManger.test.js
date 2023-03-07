@@ -189,7 +189,7 @@ describe('RelationInputDataManager', () => {
     });
 
     expect(useRelation).toBeCalledWith(
-      expect.any(String),
+      expect.arrayContaining([expect.any(String)]),
       expect.objectContaining({
         search: expect.objectContaining({
           pageParams: expect.objectContaining({

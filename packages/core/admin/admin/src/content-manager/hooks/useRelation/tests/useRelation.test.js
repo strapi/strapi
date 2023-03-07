@@ -33,7 +33,7 @@ const ComponentFixture = ({ children }) => (
   <QueryClientProvider client={client}>{children}</QueryClientProvider>
 );
 
-const cacheKey = 'useRelation-cache-key';
+const cacheKey = ['useRelation-cache-key'];
 function setup(args) {
   return new Promise((resolve) => {
     act(() => {

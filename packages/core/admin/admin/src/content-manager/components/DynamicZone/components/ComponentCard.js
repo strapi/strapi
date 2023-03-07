@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-import { Box, Typography, Stack } from '@strapi/design-system';
+import { Box, Typography, Flex } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
 
 import { ComponentIcon } from '../../ComponentIcon';
@@ -32,7 +32,7 @@ const ComponentBox = styled(Box)`
       color: ${({ theme }) => theme.colors.primary600};
     }
 
-    /* > Stack > ComponentIcon */
+    /* > Flex > ComponentIcon */
     > div > div:first-child {
       background: ${({ theme }) => theme.colors.primary200};
       color: ${({ theme }) => theme.colors.primary600};
@@ -43,13 +43,13 @@ const ComponentBox = styled(Box)`
 export default function ComponentCard({ children, onClick }) {
   return (
     <ComponentBox as="button" type="button" onClick={onClick} hasRadius>
-      <Stack spacing={1} alignItems="center" justifyContent="center">
+      <Flex direction="column" gap={1} alignItems="center" justifyContent="center">
         <ComponentIcon />
 
         <Typography variant="pi" fontWeight="bold" textColor="neutral600">
           {children}
         </Typography>
-      </Stack>
+      </Flex>
     </ComponentBox>
   );
 }
