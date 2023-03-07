@@ -8,6 +8,8 @@ const defaultStages = require('../../constants/default-stages.json');
 const defaultWorkflow = require('../../constants/default-workflow.json');
 const { WORKFLOW_MODEL_UID, ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 
+const disableReviewWorkFlows = require('../../migrations/review-workflows');
+
 const getContentTypeUIDsWithActivatedReviewWorkflows = pipe([
   // Pick only content-types with reviewWorkflows options set to true
   pickBy(get('options.reviewWorkflows')),
@@ -142,6 +144,7 @@ module.exports = ({ strapi }) => {
     async register() {
       extendReviewWorkflowContentTypes({ strapi });
       strapi.hook('strapi::content-types.afterSync').register(enableReviewWorkflow({ strapi }));
+      strapi.hook('strapi::content-types.afterSync').register(disableReviewWorkFlows);
     },
   };
 };
