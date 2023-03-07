@@ -167,7 +167,7 @@ const Header = ({
         isOpen={showWarningUnpublish}
       >
         <DialogBody icon={<ExclamationMarkCircle />}>
-          <Flex direction="column" alignItems="stretch" spacing={2}>
+          <Flex direction="column" alignItems="stretch" gap={2}>
             <Flex justifyContent="center" style={{ textAlign: 'center' }}>
               <Typography id="confirm-description">
                 {formatMessage(

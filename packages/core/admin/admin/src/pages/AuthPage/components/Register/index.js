@@ -158,7 +158,7 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
                       </Typography>
                     </CenteredBox>
                   </Column>
-                  <Flex direction="column" alignItems="stretch" spacing={6}>
+                  <Flex direction="column" alignItems="stretch" gap={6}>
                     <Grid gap={4}>
                       <GridItem col={6}>
                         <TextInput
