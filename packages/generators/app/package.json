@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@sentry/node": "6.19.7",
-    "chalk": "^4.1.1",
+    "chalk": "^4.1.2",
     "execa": "^1.0.0",
     "fs-extra": "10.0.0",
     "inquirer": "8.2.5",
