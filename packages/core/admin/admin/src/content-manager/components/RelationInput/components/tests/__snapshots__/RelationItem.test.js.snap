@@ -46,18 +46,10 @@ exports[`Content-Manager || RelationInput || RelationItem should render and matc
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
+  gap: 4px;
 }
 
-.c4 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c4 > * + * {
-  margin-left: 4px;
-}
-
-.c7 {
+.c6 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -69,16 +61,16 @@ exports[`Content-Manager || RelationInput || RelationItem should render and matc
   width: 1px;
 }
 
-.c5 {
+.c4 {
   width: 100%;
   min-width: 0;
 }
 
-.c5 > div[role='button'] {
+.c4 > div[role='button'] {
   cursor: all-scroll;
 }
 
-.c6 {
+.c5 {
   width: 100%;
   min-width: 0;
 }
@@ -93,10 +85,10 @@ exports[`Content-Manager || RelationInput || RelationItem should render and matc
       data-handler-id="T0"
     >
       <div
-        class="c3 c4 c5"
+        class="c3 c4"
       >
         <div
-          class="c2 c6"
+          class="c2 c5"
         >
           First relation
         </div>
@@ -104,7 +96,7 @@ exports[`Content-Manager || RelationInput || RelationItem should render and matc
     </div>
   </li>
   <div
-    class="c7"
+    class="c6"
   >
     <p
       aria-live="polite"

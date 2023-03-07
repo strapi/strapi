@@ -2,15 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { PropTypes } from 'prop-types';
 import { useIntl } from 'react-intl';
-import {
-  Box,
-  Flex,
-  Stack,
-  Typography,
-  SimpleMenu,
-  MenuItem,
-  IconButton,
-} from '@strapi/design-system';
+import { Box, Flex, Typography, SimpleMenu, MenuItem, IconButton } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import DraggableCard from './DraggableCard';
 import { getTrad } from '../../../utils';
@@ -78,7 +70,7 @@ const SortDisplayedFields = ({
         hasRadius
       >
         <ScrollableContainer size="1" paddingBottom={4} ref={scrollableContainerRef}>
-          <Stack horizontal spacing={3}>
+          <Flex gap={3}>
             {displayedFields.map((field, index) => (
               <DraggableCard
                 key={field}
@@ -92,7 +84,7 @@ const SortDisplayedFields = ({
                 setIsDraggingSibling={setIsDraggingSibling}
               />
             ))}
-          </Stack>
+          </Flex>
         </ScrollableContainer>
         <SelectContainer size="auto" paddingBottom={4}>
           <SimpleMenu

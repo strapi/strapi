@@ -13,7 +13,6 @@ import {
   Box,
   Typography,
   Flex,
-  Stack,
 } from '@strapi/design-system';
 import { ExclamationMarkCircle, Duplicate } from '@strapi/icons';
 import { useCMEditViewDataManager, useNotification, useFetchClient } from '@strapi/helper-plugin';
@@ -131,7 +130,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
       {isOpen && (
         <Dialog onClose={handleToggle} title="Confirmation" isOpen={isOpen}>
           <DialogBody icon={<ExclamationMarkCircle />}>
-            <Stack spacing={2}>
+            <Flex direction="column" alignItems="stretch" gap={2}>
               <Flex justifyContent="center">
                 <CenteredTypography id="confirm-description">
                   {formatMessage({
@@ -158,7 +157,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
                   })}
                 </Select>
               </Box>
-            </Stack>
+            </Flex>
           </DialogBody>
           <DialogFooter
             startAction={

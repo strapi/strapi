@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import pluralize from 'pluralize';
-import { Box, Stack, Typography, Flex, Icon, Tooltip } from '@strapi/design-system';
+import { Box, Typography, Flex, Icon, Tooltip } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
 import { ExternalLink, CheckCircle } from '@strapi/icons';
 import { useTracking } from '@strapi/helper-plugin';
@@ -117,7 +117,7 @@ const NpmPackageCard = ({
         </Box>
       </Box>
 
-      <Stack horizontal spacing={2} style={{ alignSelf: 'flex-end' }} paddingTop={6}>
+      <Flex gap={2} style={{ alignSelf: 'flex-end' }} paddingTop={6}>
         <LinkButton
           size="S"
           href={npmPackageHref}
@@ -146,7 +146,7 @@ const NpmPackageCard = ({
           strapiPeerDepVersion={attributes.strapiVersion}
           pluginName={attributes.name}
         />
-      </Stack>
+      </Flex>
     </Flex>
   );
 };

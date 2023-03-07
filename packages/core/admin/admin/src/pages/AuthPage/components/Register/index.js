@@ -17,7 +17,6 @@ import {
 } from '@strapi/helper-plugin';
 import {
   Box,
-  Stack,
   Main,
   Flex,
   Button,
@@ -159,7 +158,7 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
                       </Typography>
                     </CenteredBox>
                   </Column>
-                  <Stack spacing={6}>
+                  <Flex direction="column" alignItems="stretch" gap={6}>
                     <Grid gap={4}>
                       <GridItem col={6}>
                         <TextInput
@@ -314,7 +313,7 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
                         defaultMessage: "Let's start",
                       })}
                     </Button>
-                  </Stack>
+                  </Flex>
                 </Main>
               </Form>
             );

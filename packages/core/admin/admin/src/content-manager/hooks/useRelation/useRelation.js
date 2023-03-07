@@ -49,7 +49,7 @@ export const useRelation = (cacheKey, { relation, search }) => {
 
   const { onLoad: onLoadRelations, normalizeArguments = {} } = relation;
 
-  const relationsRes = useInfiniteQuery(['relation', cacheKey], fetchRelations, {
+  const relationsRes = useInfiniteQuery(['relation', ...cacheKey], fetchRelations, {
     cacheTime: 0,
     enabled: relation.enabled,
     /**
@@ -138,7 +138,7 @@ export const useRelation = (cacheKey, { relation, search }) => {
   }, [status, onLoadRelationsCallback, data]);
 
   const searchRes = useInfiniteQuery(
-    ['relation', cacheKey, 'search', JSON.stringify(searchParams)],
+    ['relation', ...cacheKey, 'search', JSON.stringify(searchParams)],
     fetchSearch,
     {
       enabled: Object.keys(searchParams).length > 0,

@@ -17,7 +17,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 
 describe('useRegenerate', () => {
   it('returns a function to regenerate the data and a boolean', () => {
-    const { result } = renderHook(() => useRegenerate(1, (accessKey) => accessKey));
+    const { result } = renderHook(() => useRegenerate('/test', 1, (accessKey) => accessKey));
 
     expect(result.current).toEqual({
       regenerateData: expect.any(Function),
