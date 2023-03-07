@@ -1,13 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
-import { Stack } from '@strapi/design-system/Stack';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import { Button } from '@strapi/design-system/Button';
-import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
-import Trash from '@strapi/icons/Trash';
+import { Dialog, DialogBody, DialogFooter, Flex, Typography, Button } from '@strapi/design-system';
+import { ExclamationMarkCircle, Trash } from '@strapi/icons';
 
 const ConfirmDialog = ({
   bodyText,
@@ -36,7 +31,7 @@ const ConfirmDialog = ({
       {...props}
     >
       <DialogBody icon={iconBody}>
-        <Stack spacing={2}>
+        <Flex direction="column" alignItems="stretch" gap={2}>
           <Flex justifyContent="center">
             <Typography variant="omega" id="confirm-description">
               {formatMessage({
@@ -45,7 +40,7 @@ const ConfirmDialog = ({
               })}
             </Typography>
           </Flex>
-        </Stack>
+        </Flex>
       </DialogBody>
       <DialogFooter
         startAction={

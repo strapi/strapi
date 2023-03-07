@@ -2,14 +2,7 @@ import React from 'react';
 import { Redirect, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { Link } from '@strapi/helper-plugin';
-import { Divider } from '@strapi/design-system/Divider';
-import { Stack } from '@strapi/design-system/Stack';
-import { Flex } from '@strapi/design-system/Flex';
-import { Box } from '@strapi/design-system/Box';
-import { Button } from '@strapi/design-system/Button';
-import { Loader } from '@strapi/design-system/Loader';
-import { Typography } from '@strapi/design-system/Typography';
-import { Main } from '@strapi/design-system/Main';
+import { Divider, Flex, Box, Button, Loader, Typography, Main } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useAuthProviders } from '../../../../hooks';
 import UnauthenticatedLayout, {
@@ -55,7 +48,7 @@ const Providers = () => {
               </Typography>
             </Box>
           </Column>
-          <Stack spacing={7}>
+          <Flex direction="column" alignItems="stretch" gap={7}>
             {isLoading ? (
               <Flex justifyContent="center">
                 <Loader>{formatMessage({ id: 'Auth.login.sso.loading' })}</Loader>
@@ -75,7 +68,7 @@ const Providers = () => {
             <Button fullWidth size="L" onClick={handleClick}>
               {formatMessage({ id: 'Auth.form.button.login.strapi' })}
             </Button>
-          </Stack>
+          </Flex>
         </LayoutContent>
         <Flex justifyContent="center">
           <Box paddingTop={4}>

@@ -6,6 +6,9 @@ import take from 'lodash/take';
 import cloneDeep from 'lodash/cloneDeep';
 import uniqBy from 'lodash/uniqBy';
 import merge from 'lodash/merge';
+import castArray from 'lodash/castArray';
+import isNil from 'lodash/isNil';
+import { generateNKeysBetween } from 'fractional-indexing';
 
 import {
   findLeafByPathAndReplace,
@@ -88,6 +91,7 @@ const reducer = (state, action) =>
             ? {
                 ...state.componentsDataStructure[componentLayoutData.uid],
                 __component: componentLayoutData.uid,
+                __temp_key__: getMaxTempKey(currentValue) + 1,
               }
             : {
                 ...state.componentsDataStructure[componentLayoutData.uid],
@@ -147,22 +151,51 @@ const reducer = (state, action) =>
         break;
       }
       case 'LOAD_RELATION': {
-        const initialDataPath = ['initialData', ...action.keys];
-        const modifiedDataPath = ['modifiedData', ...action.keys];
-        const { value } = action;
+        const { initialDataPath, modifiedDataPath, value } = action;
 
         const initialDataRelations = get(state, initialDataPath);
         const modifiedDataRelations = get(state, modifiedDataPath);
 
-        set(draftState, initialDataPath, uniqBy([...value, ...initialDataRelations], 'id'));
+        const valuesToLoad = !initialDataRelations
+          ? value
+          : value.filter((relation) => {
+              return !initialDataRelations.some((initialDataRelation) => {
+                return initialDataRelation.id === relation.id;
+              });
+            });
+
+        const keys = generateNKeysBetween(
+          null,
+          modifiedDataRelations[0]?.__temp_key__,
+          valuesToLoad.length
+        );
+
+        /**
+         * Check if the values we're loading are already in initial
+         * data if they are then we don't need to load them at all
+         */
+
+        const valuesWithKeys = valuesToLoad.map((relation, index) => ({
+          ...relation,
+          __temp_key__: keys[index],
+        }));
+
+        set(
+          draftState,
+          initialDataPath,
+          uniqBy([...valuesWithKeys, ...initialDataRelations], 'id')
+        );
 
         /**
          * We need to set the value also on modifiedData, because initialData
          * and modifiedData need to stay in sync, so that the CM can compare
          * both states, to render the dirty UI state
          */
-
-        set(draftState, modifiedDataPath, uniqBy([...value, ...modifiedDataRelations], 'id'));
+        set(
+          draftState,
+          modifiedDataPath,
+          uniqBy([...valuesWithKeys, ...modifiedDataRelations], 'id')
+        );
 
         break;
       }
@@ -178,7 +211,9 @@ const reducer = (state, action) =>
           set(draftState, path, [value]);
         } else {
           const modifiedDataRelations = get(state, path);
-          const newRelations = [...modifiedDataRelations, value];
+          const [key] = generateNKeysBetween(modifiedDataRelations.at(-1)?.__temp_key__, null, 1);
+
+          const newRelations = [...modifiedDataRelations, { ...value, __temp_key__: key }];
           set(draftState, path, newRelations);
         }
 
@@ -189,10 +224,35 @@ const reducer = (state, action) =>
         const { id } = action;
         const modifiedDataRelation = get(state, [...path]);
 
-        /**
-         * TODO: before merge make this performant (e.g. 1000 relations === long time)
-         */
         const newRelations = modifiedDataRelation.filter((rel) => rel.id !== id);
+
+        set(draftState, path, newRelations);
+
+        break;
+      }
+      case 'MOVE_COMPONENT_FIELD':
+      case 'REORDER_RELATION': {
+        const { oldIndex, newIndex, keys } = action;
+        const path = ['modifiedData', ...keys];
+        const modifiedDataRelations = get(state, [...path]);
+
+        const currentItem = modifiedDataRelations[oldIndex];
+
+        const newRelations = [...modifiedDataRelations];
+
+        if (action.type === 'REORDER_RELATION') {
+          const [newKey] = generateNKeysBetween(
+            modifiedDataRelations[newIndex - 1]?.__temp_key__,
+            modifiedDataRelations[newIndex]?.__temp_key__,
+            1
+          );
+
+          newRelations.splice(oldIndex, 1);
+          newRelations.splice(newIndex, 0, { ...currentItem, __temp_key__: newKey });
+        } else {
+          newRelations.splice(oldIndex, 1);
+          newRelations.splice(newIndex, 0, currentItem);
+        }
 
         set(draftState, path, newRelations);
 
@@ -224,15 +284,31 @@ const reducer = (state, action) =>
          * relationalFieldPaths won't be an array which is what we're expecting
          * Therefore we reset these bits of state to the correct data type
          * which is an array. Hence why we replace those fields.
-         *
          */
-
         const mergeDataWithPreparedRelations = relationalFieldPaths
           .map((path) => path.split('.'))
           .reduce((acc, currentPaths) => {
             const [componentName] = currentPaths;
 
-            if (state.modifiedData && get(state.modifiedData, componentName)) {
+            const existingComponents = castArray(acc[componentName] || []);
+            existingComponents.reduce((result, currentEntry) => {
+              if (!isNil(get(currentEntry, [`__temp_key__`]))) {
+                return result;
+              }
+
+              set(currentEntry, [`__temp_key__`], getMaxTempKey(result) + 1);
+
+              return result;
+            }, existingComponents);
+
+            if (
+              state.modifiedData &&
+              get(state.modifiedData, componentName) &&
+              /**
+               * Only replace the state if the entity ids are the same.
+               */
+              state.modifiedData?.id === initialValues?.id
+            ) {
               /**
                * this will be null on initial load, however subsequent calls
                * will have data in them correlating to the names of the relational fields.
@@ -271,25 +347,6 @@ const reducer = (state, action) =>
 
         draftState.modifiedDZName = null;
         draftState.shouldCheckErrors = false;
-        break;
-      }
-      case 'MOVE_COMPONENT_FIELD': {
-        const currentValue = get(state, ['modifiedData', ...action.pathToComponent]);
-        const valueToInsert = get(state, [
-          'modifiedData',
-          ...action.pathToComponent,
-          action.dragIndex,
-        ]);
-
-        const updatedValue = moveFields(
-          currentValue,
-          action.dragIndex,
-          action.hoverIndex,
-          valueToInsert
-        );
-
-        set(draftState, ['modifiedData', ...action.pathToComponent], updatedValue);
-
         break;
       }
       case 'MOVE_COMPONENT_UP':

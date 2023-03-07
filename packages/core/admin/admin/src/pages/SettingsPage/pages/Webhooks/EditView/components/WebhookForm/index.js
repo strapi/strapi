@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Form, Link } from '@strapi/helper-plugin';
-import ArrowLeft from '@strapi/icons/ArrowLeft';
-import Check from '@strapi/icons/Check';
-import Publish from '@strapi/icons/Play';
-import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { Box } from '@strapi/design-system/Box';
-import { Button } from '@strapi/design-system/Button';
-import { Stack } from '@strapi/design-system/Stack';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { ArrowLeft, Check, Play as Publish } from '@strapi/icons';
+import {
+  ContentLayout,
+  HeaderLayout,
+  Box,
+  Button,
+  Flex,
+  TextInput,
+  Grid,
+  GridItem,
+} from '@strapi/design-system';
 import { Field, Formik } from 'formik';
 
 import { useIntl } from 'react-intl';
@@ -49,7 +51,7 @@ const WebhookForm = ({
         <Form noValidate>
           <HeaderLayout
             primaryAction={
-              <Stack horizontal spacing={2}>
+              <Flex gap={2}>
                 <Button
                   onClick={() => {
                     triggerWebhook();
@@ -71,7 +73,7 @@ const WebhookForm = ({
                     defaultMessage: 'Save',
                   })}
                 </Button>
-              </Stack>
+              </Flex>
             }
             title={
               isCreating
@@ -91,7 +93,7 @@ const WebhookForm = ({
             }
           />
           <ContentLayout>
-            <Stack spacing={4}>
+            <Flex direction="column" alignItems="stretch" gap={4}>
               {showTriggerResponse && (
                 <div className="trigger-wrapper">
                   <TriggerContainer
@@ -102,7 +104,7 @@ const WebhookForm = ({
                 </div>
               )}
               <Box background="neutral0" padding={8} shadow="filterShadow" hasRadius>
-                <Stack spacing={6}>
+                <Flex direction="column" alignItems="stretch" gap={6}>
                   <Grid gap={6}>
                     <GridItem col={6}>
                       <Field
@@ -131,9 +133,9 @@ const WebhookForm = ({
                   </Grid>
                   <HeadersInput />
                   <EventInput isDraftAndPublish={isDraftAndPublishEvents} />
-                </Stack>
+                </Flex>
               </Box>
-            </Stack>
+            </Flex>
           </ContentLayout>
         </Form>
       )}

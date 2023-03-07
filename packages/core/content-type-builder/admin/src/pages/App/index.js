@@ -9,13 +9,12 @@ import { Switch, Route } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { LoadingIndicatorPage, CheckPagePermissions, useGuidedTour } from '@strapi/helper-plugin';
-import { Layout } from '@strapi/design-system/Layout';
+import { Layout } from '@strapi/design-system';
 import pluginPermissions from '../../permissions';
 import pluginId from '../../pluginId';
 import DataManagerProvider from '../../components/DataManagerProvider';
 import FormModalNavigationProvider from '../../components/FormModalNavigationProvider';
 import RecursivePath from '../RecursivePath';
-import icons from './utils/icons.json';
 import ContentTypeBuilderNav from '../../components/ContentTypeBuilderNav';
 
 const ListView = lazy(() =>
@@ -41,7 +40,7 @@ const App = () => {
     <CheckPagePermissions permissions={pluginPermissions.main}>
       <Helmet title={title} />
       <FormModalNavigationProvider>
-        <DataManagerProvider allIcons={icons}>
+        <DataManagerProvider>
           <Layout sideNav={<ContentTypeBuilderNav />}>
             <Suspense fallback={<LoadingIndicatorPage />}>
               <Switch>

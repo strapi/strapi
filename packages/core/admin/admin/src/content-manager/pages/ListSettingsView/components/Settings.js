@@ -1,12 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/design-system/Box';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Select, Option } from '@strapi/design-system/Select';
-import { ToggleInput } from '@strapi/design-system/ToggleInput';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
+import {
+  Box,
+  Grid,
+  GridItem,
+  Select,
+  Option,
+  ToggleInput,
+  Typography,
+  Flex,
+} from '@strapi/design-system';
 import { getTrad } from '../../../utils';
 
 const Settings = ({ modifiedData, onChange, sortOptions }) => {
@@ -14,7 +18,7 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
   const { settings, metadatas } = modifiedData;
 
   return (
-    <Stack spacing={4}>
+    <Flex direction="column" alignItems="stretch" gap={4}>
       <Typography variant="delta" as="h2">
         {formatMessage({
           id: getTrad('containers.SettingPage.settings'),
@@ -22,7 +26,7 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
         })}
       </Typography>
 
-      <Stack horizontal justifyContent="space-between" spacing={4}>
+      <Flex justifyContent="space-between" gap={4}>
         <Box width="100%">
           <ToggleInput
             label={formatMessage({
@@ -88,7 +92,7 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
             checked={settings.bulkable}
           />
         </Box>
-      </Stack>
+      </Flex>
 
       <Grid gap={4}>
         <GridItem s={12} col={6}>
@@ -148,7 +152,7 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
           </Select>
         </GridItem>
       </Grid>
-    </Stack>
+    </Flex>
   );
 };
 

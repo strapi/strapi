@@ -1,18 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
-.c7 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
 .c0 {
   padding: 4px;
 }
@@ -33,13 +21,6 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   padding-left: 8px;
 }
 
-.c4 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
 .c3 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -52,6 +33,25 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
+}
+
+.c4 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c7 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .c2 svg {
@@ -76,7 +76,6 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -94,13 +93,13 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
           >
             <svg
               fill="none"
-              height="1em"
+              height="1rem"
               viewBox="0 0 24 24"
-              width="1em"
+              width="1rem"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
                 fill="#212134"
               />
             </svg>
@@ -115,7 +114,6 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -133,13 +131,13 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
           >
             <svg
               fill="none"
-              height="1em"
+              height="1rem"
               viewBox="0 0 24 24"
-              width="1em"
+              width="1rem"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
                 fill="#212134"
               />
             </svg>
@@ -154,7 +152,6 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -172,13 +169,13 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
           >
             <svg
               fill="none"
-              height="1em"
+              height="1rem"
               viewBox="0 0 24 24"
-              width="1em"
+              width="1rem"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
                 fill="#212134"
               />
             </svg>
@@ -193,7 +190,6 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -211,13 +207,13 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
           >
             <svg
               fill="none"
-              height="1em"
+              height="1rem"
               viewBox="0 0 24 24"
-              width="1em"
+              width="1rem"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
                 fill="#212134"
               />
             </svg>
@@ -232,7 +228,6 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -250,13 +245,13 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
           >
             <svg
               fill="none"
-              height="1em"
+              height="1rem"
               viewBox="0 0 24 24"
-              width="1em"
+              width="1rem"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
                 fill="#212134"
               />
             </svg>
@@ -271,7 +266,6 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -289,13 +283,13 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
           >
             <svg
               fill="none"
-              height="1em"
+              height="1rem"
               viewBox="0 0 24 24"
-              width="1em"
+              width="1rem"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
                 fill="#212134"
               />
             </svg>
@@ -310,7 +304,6 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -328,13 +321,13 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
           >
             <svg
               fill="none"
-              height="1em"
+              height="1rem"
               viewBox="0 0 24 24"
-              width="1em"
+              width="1rem"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
                 fill="#212134"
               />
             </svg>
@@ -349,7 +342,6 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -367,13 +359,13 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
           >
             <svg
               fill="none"
-              height="1em"
+              height="1rem"
               viewBox="0 0 24 24"
-              width="1em"
+              width="1rem"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
                 fill="#212134"
               />
             </svg>
@@ -388,7 +380,6 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -406,13 +397,13 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
           >
             <svg
               fill="none"
-              height="1em"
+              height="1rem"
               viewBox="0 0 24 24"
-              width="1em"
+              width="1rem"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
                 fill="#212134"
               />
             </svg>
@@ -427,7 +418,6 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -445,13 +435,13 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
           >
             <svg
               fill="none"
-              height="1em"
+              height="1rem"
               viewBox="0 0 24 24"
-              width="1em"
+              width="1rem"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
                 fill="#212134"
               />
             </svg>
@@ -466,7 +456,6 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -484,13 +473,13 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
           >
             <svg
               fill="none"
-              height="1em"
+              height="1rem"
               viewBox="0 0 24 24"
-              width="1em"
+              width="1rem"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
                 fill="#212134"
               />
             </svg>
@@ -505,7 +494,6 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -523,13 +511,13 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
           >
             <svg
               fill="none"
-              height="1em"
+              height="1rem"
               viewBox="0 0 24 24"
-              width="1em"
+              width="1rem"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
                 fill="#212134"
               />
             </svg>
@@ -544,7 +532,6 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     <button
       aria-disabled="false"
       class="c1 c2"
-      height="2rem"
     >
       <div
         class="c3"
@@ -562,13 +549,13 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
           >
             <svg
               fill="none"
-              height="1em"
+              height="1rem"
               viewBox="0 0 24 24"
-              width="1em"
+              width="1rem"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
                 fill="#212134"
               />
             </svg>

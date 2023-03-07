@@ -9,21 +9,24 @@ import {
   useTracking,
   useGuidedTour,
   useRBAC,
+  useFetchClient,
 } from '@strapi/helper-plugin';
-import { Main } from '@strapi/design-system/Main';
+import { Main, ContentLayout, Flex } from '@strapi/design-system';
 import { Formik } from 'formik';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { formatAPIErrors } from '../../../../../utils';
-import { axiosInstance } from '../../../../../core/utils';
 import { schema } from './utils';
 import LoadingView from './components/LoadingView';
-import FormHead from './components/FormHead';
-import FormBody from './components/FormBody';
 import adminPermissions from '../../../../../permissions';
 import { ApiTokenPermissionsContextProvider } from '../../../../../contexts/ApiTokenPermissions';
 import init from './init';
 import reducer, { initialState } from './reducer';
+import Permissions from './components/Permissions';
+import FormApiTokenContainer from './components/FormApiTokenContainer';
+import TokenBox from '../../../components/Tokens/TokenBox';
+import FormHead from '../../../components/Tokens/FormHead';
+import { API_TOKEN_TYPE } from '../../../components/Tokens/constants';
 
 const MSG_ERROR_NAME_TAKEN = 'Name already taken';
 
@@ -50,6 +53,7 @@ const ApiTokenCreateView = () => {
   const {
     params: { id },
   } = useRouteMatch('/settings/api-tokens/:id');
+  const { get, post, put } = useFetchClient();
 
   const isCreating = id === 'create';
 
@@ -58,7 +62,7 @@ const ApiTokenCreateView = () => {
     async () => {
       const [permissions, routes] = await Promise.all(
         ['/admin/content-api/permissions', '/admin/content-api/routes'].map(async (url) => {
-          const { data } = await axiosInstance.get(url);
+          const { data } = await get(url);
 
           return data.data;
         })
@@ -104,7 +108,9 @@ const ApiTokenCreateView = () => {
   );
 
   useEffect(() => {
-    trackUsageRef.current(isCreating ? 'didAddTokenFromList' : 'didEditTokenFromList');
+    trackUsageRef.current(isCreating ? 'didAddTokenFromList' : 'didEditTokenFromList', {
+      tokenType: API_TOKEN_TYPE,
+    });
   }, [isCreating]);
 
   const { status } = useQuery(
@@ -112,7 +118,7 @@ const ApiTokenCreateView = () => {
     async () => {
       const {
         data: { data },
-      } = await axiosInstance.get(`/admin/api-tokens/${id}`);
+      } = await get(`/admin/api-tokens/${id}`);
 
       setApiToken({
         ...data,
@@ -149,7 +155,9 @@ const ApiTokenCreateView = () => {
   );
 
   const handleSubmit = async (body, actions) => {
-    trackUsageRef.current(isCreating ? 'willCreateToken' : 'willEditToken');
+    trackUsageRef.current(isCreating ? 'willCreateToken' : 'willEditToken', {
+      tokenType: API_TOKEN_TYPE,
+    });
     lockApp();
     const lifespanVal =
       body.lifespan && parseInt(body.lifespan, 10) && body.lifespan !== '0'
@@ -160,12 +168,12 @@ const ApiTokenCreateView = () => {
       const {
         data: { data: response },
       } = isCreating
-        ? await axiosInstance.post(`/admin/api-tokens`, {
+        ? await post(`/admin/api-tokens`, {
             ...body,
             lifespan: lifespanVal,
             permissions: body.type === 'custom' ? state.selectedActions : null,
           })
-        : await axiosInstance.put(`/admin/api-tokens/${id}`, {
+        : await put(`/admin/api-tokens/${id}`, {
             name: body.name,
             description: body.description,
             type: body.type,
@@ -185,17 +193,18 @@ const ApiTokenCreateView = () => {
         type: 'success',
         message: isCreating
           ? formatMessage({
-              id: 'notification.success.tokencreated',
+              id: 'notification.success.apitokencreated',
               defaultMessage: 'API Token successfully created',
             })
           : formatMessage({
-              id: 'notification.success.tokenedited',
+              id: 'notification.success.apitokenedited',
               defaultMessage: 'API Token successfully edited',
             }),
       });
 
       trackUsageRef.current(isCreating ? 'didCreateToken' : 'didEditToken', {
         type: apiToken.type,
+        tokenType: API_TOKEN_TYPE,
       });
     } catch (err) {
       const errors = formatAPIErrors(err.response.data);
@@ -279,22 +288,43 @@ const ApiTokenCreateView = () => {
             return (
               <Form>
                 <FormHead
-                  apiToken={apiToken}
-                  setApiToken={setApiToken}
+                  backUrl="/settings/api-tokens"
+                  title={{
+                    id: 'Settings.apiTokens.createPage.title',
+                    defaultMessage: 'Create API Token',
+                  }}
+                  token={apiToken}
+                  setToken={setApiToken}
                   canEditInputs={canEditInputs}
                   canRegenerate={canRegenerate}
                   isSubmitting={isSubmitting}
+                  regenerateUrl="/admin/api-tokens/"
                 />
-                <FormBody
-                  apiToken={apiToken}
-                  errors={errors}
-                  onChange={handleChange}
-                  canEditInputs={canEditInputs}
-                  isCreating={isCreating}
-                  values={values}
-                  onDispatch={dispatch}
-                  setHasChangedPermissions={setHasChangedPermissions}
-                />
+
+                <ContentLayout>
+                  <Flex direction="column" alignItems="stretch" gap={6}>
+                    {Boolean(apiToken?.name) && (
+                      <TokenBox token={apiToken?.accessKey} tokenType={API_TOKEN_TYPE} />
+                    )}
+                    <FormApiTokenContainer
+                      errors={errors}
+                      onChange={handleChange}
+                      canEditInputs={canEditInputs}
+                      isCreating={isCreating}
+                      values={values}
+                      apiToken={apiToken}
+                      onDispatch={dispatch}
+                      setHasChangedPermissions={setHasChangedPermissions}
+                    />
+                    <Permissions
+                      disabled={
+                        !canEditInputs ||
+                        values?.type === 'read-only' ||
+                        values?.type === 'full-access'
+                      }
+                    />
+                  </Flex>
+                </ContentLayout>
               </Form>
             );
           }}

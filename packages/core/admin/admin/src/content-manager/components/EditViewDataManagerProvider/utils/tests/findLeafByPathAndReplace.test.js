@@ -18,13 +18,15 @@ describe('findLeafByPathAndReplace', () => {
 
     path.reduce(findLeaf, obj);
 
-    expect(obj).toMatchObject({
-      a: {
-        b: {
-          c: [],
+    expect(obj).toMatchInlineSnapshot(`
+      {
+        "a": {
+          "b": {
+            "c": [],
+          },
         },
-      },
-    });
+      }
+    `);
   });
 
   it('should replace the value of the leaf by the provided one for all cases in the event of the leaf being a branch of an array', () => {
@@ -49,18 +51,20 @@ describe('findLeafByPathAndReplace', () => {
 
     path.reduce(findLeaf, obj);
 
-    expect(obj).toMatchObject({
-      a: {
-        b: [
-          {
-            c: [],
-          },
-          {
-            c: [],
-          },
-        ],
-      },
-    });
+    expect(obj).toMatchInlineSnapshot(`
+      {
+        "a": {
+          "b": [
+            {
+              "c": [],
+            },
+            {
+              "c": [],
+            },
+          ],
+        },
+      }
+    `);
   });
 
   it('should only replace the leaf declared no matter how many duplicate exist higher in the tree', () => {
@@ -97,29 +101,63 @@ describe('findLeafByPathAndReplace', () => {
 
     path.reduce(findLeaf, obj);
 
-    expect(obj).toMatchObject({
-      a: {
-        b: [
-          {
-            c: false,
-            d: {
-              e: [
-                {
-                  f: {
-                    c: [],
+    expect(obj).toMatchInlineSnapshot(`
+      {
+        "a": {
+          "b": [
+            {
+              "c": false,
+              "d": {
+                "e": [
+                  {
+                    "f": {
+                      "c": [],
+                    },
                   },
-                },
-                {
-                  f: {
-                    c: [],
+                  {
+                    "f": {
+                      "c": [],
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
+          ],
+          "c": false,
+        },
+      }
+    `);
+  });
+
+  it('should only replace the leaf if it is the last item in the array of paths', () => {
+    const obj = {
+      a: {
+        a: [
+          {
+            a: 'd',
           },
         ],
-        c: false,
       },
-    });
+    };
+
+    const path = ['a', 'a', 'a'];
+
+    const [lastPath] = path.slice(-1);
+
+    const findLeaf = findLeafByPathAndReplace(lastPath, []);
+
+    path.reduce(findLeaf, obj);
+
+    expect(obj).toMatchInlineSnapshot(`
+      {
+        "a": {
+          "a": [
+            {
+              "a": [],
+            },
+          ],
+        },
+      }
+    `);
   });
 });

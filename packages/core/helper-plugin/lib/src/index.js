@@ -29,6 +29,7 @@ export { default as useRBAC } from './hooks/useRBAC';
 export { default as usePersistentState } from './hooks/usePersistentState';
 export { default as useFocusWhenNavigate } from './hooks/useFocusWhenNavigate';
 export { default as useLockScroll } from './hooks/useLockScroll';
+export { default as useFetchClient } from './hooks/useFetchClient';
 
 // Providers
 export { default as GuidedTourProvider } from './providers/GuidedTourProvider';
@@ -100,3 +101,6 @@ export { default as wrapAxiosInstance } from './utils/wrapAxiosInstance';
 export { default as request } from './utils/request';
 export { default as getAPIInnerErrors } from './utils/getAPIInnerErrors';
 export { default as getYupInnerErrors } from './utils/getYupInnerErrors';
+export * from './hooks/useAPIErrorHandler';
+
+export { default as getFetchClient } from './utils/getFetchClient';

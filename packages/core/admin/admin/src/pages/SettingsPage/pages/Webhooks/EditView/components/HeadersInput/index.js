@@ -1,13 +1,15 @@
 import React from 'react';
 import { RemoveRoundedButton } from '@strapi/helper-plugin';
-import Plus from '@strapi/icons/Plus';
-import { Box } from '@strapi/design-system/Box';
-import { FieldLabel } from '@strapi/design-system/Field';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { TextButton } from '@strapi/design-system/TextButton';
+import { Plus } from '@strapi/icons';
+import {
+  Box,
+  FieldLabel,
+  Grid,
+  GridItem,
+  Flex,
+  TextInput,
+  TextButton,
+} from '@strapi/design-system';
 import { Field, FieldArray, useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
 import Combobox from './Combobox';
@@ -17,7 +19,7 @@ const HeadersInput = () => {
   const { values, errors } = useFormikContext();
 
   return (
-    <Stack spacing={1}>
+    <Flex direction="column" alignItems="stretch" gap={1}>
       <FieldLabel>
         {formatMessage({
           id: 'Settings.webhooks.form.headers',
@@ -109,7 +111,7 @@ const HeadersInput = () => {
           )}
         />
       </Box>
-    </Stack>
+    </Flex>
   );
 };
 

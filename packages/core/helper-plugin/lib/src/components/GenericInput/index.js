@@ -9,19 +9,26 @@ import PropTypes from 'prop-types';
 import parseISO from 'date-fns/parseISO';
 import formatISO from 'date-fns/formatISO';
 import { useIntl } from 'react-intl';
-import { Checkbox } from '@strapi/design-system/Checkbox';
-import { DatePicker } from '@strapi/design-system/DatePicker';
-import { NumberInput } from '@strapi/design-system/NumberInput';
-import { Select, Option } from '@strapi/design-system/Select';
-import { Textarea } from '@strapi/design-system/Textarea';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { TimePicker } from '@strapi/design-system/TimePicker';
-import { ToggleInput } from '@strapi/design-system/ToggleInput';
-import { Icon } from '@strapi/design-system/Icon';
-import EyeStriked from '@strapi/icons/EyeStriked';
-import Eye from '@strapi/icons/Eye';
-import DateTimePicker from '../DateTimePicker';
+
+import {
+  Checkbox,
+  DatePicker,
+  DateTimePicker,
+  Icon,
+  NumberInput,
+  Select,
+  Textarea,
+  TextInput,
+  TimePicker,
+  ToggleInput,
+  JSONInput,
+  Option,
+} from '@strapi/design-system';
+import { EyeStriked, Eye } from '@strapi/icons';
+
 import NotSupported from './NotSupported';
+import useFieldHint from '../../hooks/useFieldHint';
+import pxToRem from '../../utils/pxToRem';
 
 const GenericInput = ({
   autoComplete,
@@ -40,9 +47,16 @@ const GenericInput = ({
   type,
   value: defaultValue,
   isNullable,
+  attribute,
   ...rest
 }) => {
   const { formatMessage } = useIntl();
+
+  const { hint } = useFieldHint({
+    description,
+    fieldSchema: attribute,
+    type: attribute?.type || type,
+  });
   const [showPassword, setShowPassword] = useState(false);
 
   const CustomInput = customInputs ? customInputs[type] : null;
@@ -88,7 +102,9 @@ const GenericInput = ({
     return (
       <CustomInput
         {...rest}
+        attribute={attribute}
         description={description}
+        hint={hint}
         disabled={disabled}
         intlLabel={intlLabel}
         labelAction={labelAction}
@@ -111,13 +127,6 @@ const GenericInput = ({
       )
     : name;
 
-  const hint = description
-    ? formatMessage(
-        { id: description.id, defaultMessage: description.defaultMessage },
-        { ...description.values }
-      )
-    : '';
-
   const formattedPlaceholder = placeholder
     ? formatMessage(
         { id: placeholder.id, defaultMessage: placeholder.defaultMessage },
@@ -126,6 +135,25 @@ const GenericInput = ({
     : '';
 
   switch (type) {
+    case 'json': {
+      return (
+        <JSONInput
+          label={label}
+          labelAction={labelAction}
+          value={value}
+          error={errorMessage}
+          hint={hint}
+          required={required}
+          onChange={(json) => {
+            // Default to null when the field is not required and there is no input value
+            const value = !attribute.required && !json.length ? 'null' : json;
+            onChange({ target: { name, value } });
+          }}
+          minHeight={pxToRem(252)}
+          maxHeight={pxToRem(504)}
+        />
+      );
+    }
     case 'bool': {
       const clearProps = {
         clearLabel:
@@ -207,6 +235,10 @@ const GenericInput = ({
           required={required}
           value={value && new Date(value)}
           selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}
+          selectButtonTitle={formatMessage({
+            id: 'selectButtonTitle',
+            defaultMessage: 'Select',
+          })}
         />
       );
     }
@@ -447,6 +479,7 @@ GenericInput.defaultProps = {
   options: [],
   step: 1,
   value: undefined,
+  attribute: null,
 };
 
 GenericInput.propTypes = {
@@ -457,6 +490,7 @@ GenericInput.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }),
+  attribute: PropTypes.object,
   disabled: PropTypes.bool,
   error: PropTypes.oneOfType([
     PropTypes.string,

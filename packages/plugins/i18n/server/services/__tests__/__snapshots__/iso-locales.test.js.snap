@@ -348,7 +348,7 @@ exports[`ISO locales getIsoLocales 1`] = `
   },
   {
     "code": "zh-Hans-HK",
-    "name": "Chinese (Simplified, Hong Kong SAR China) (zh-Hans-HK) ",
+    "name": "Chinese (Simplified, Hong Kong SAR China) (zh-Hans-HK)",
   },
   {
     "code": "zh-Hans-MO",
@@ -633,6 +633,10 @@ exports[`ISO locales getIsoLocales 1`] = `
   {
     "code": "en-KI",
     "name": "English (Kiribati) (en-KI)",
+  },
+  {
+    "code": "en-KW",
+    "name": "English (Kuwait) (en-KW)",
   },
   {
     "code": "en-LS",
@@ -1053,6 +1057,10 @@ exports[`ISO locales getIsoLocales 1`] = `
   {
     "code": "fr-MF",
     "name": "French (Saint Martin) (fr-MF)",
+  },
+  {
+    "code": "fr-MU",
+    "name": "French (Mauritius) (fr-MU)",
   },
   {
     "code": "fr-SN",

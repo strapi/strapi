@@ -116,18 +116,21 @@ class Strapi {
     this.cron = createCronService();
     this.telemetry = createTelemetry(this);
     this.requestContext = requestContext;
-
     this.customFields = createCustomFields(this);
 
     createUpdateNotifier(this).notify();
+
+    Object.defineProperty(this, 'EE', {
+      get: () => {
+        ee.init(this.dirs.app.root, this.log);
+        return ee.isEE;
+      },
+      configurable: false,
+    });
   }
 
   get config() {
     return this.container.get('config');
-  }
-
-  get EE() {
-    return ee({ dir: this.dirs.app.root, logger: this.log });
   }
 
   get services() {
@@ -222,10 +225,9 @@ class Strapi {
 
   async destroy() {
     await this.server.destroy();
-
     await this.runLifecyclesFunctions(LIFECYCLES.DESTROY);
 
-    this.eventHub.removeAllListeners();
+    this.eventHub.destroy();
 
     if (_.has(this, 'db')) {
       await this.db.destroy();
@@ -446,6 +448,10 @@ class Strapi {
     });
 
     await this.db.schema.sync();
+
+    if (this.EE) {
+      await ee.checkLicense({ strapi: this });
+    }
 
     await this.hook('strapi::content-types.afterSync').call({
       oldContentTypes,

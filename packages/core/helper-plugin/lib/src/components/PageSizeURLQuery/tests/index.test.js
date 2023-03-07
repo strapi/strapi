@@ -98,25 +98,6 @@ describe('<PageSizeURLQuery />', () => {
         justify-content: space-between;
       }
 
-      .c4 {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        top: 0;
-        width: 100%;
-        background: transparent;
-        border: none;
-      }
-
-      .c4:focus {
-        outline: none;
-      }
-
-      .c4[aria-disabled='true'] {
-        cursor: not-allowed;
-      }
-
       .c8 {
         font-size: 0.875rem;
         line-height: 1.43;
@@ -188,6 +169,25 @@ describe('<PageSizeURLQuery />', () => {
         width: 0.375rem;
       }
 
+      .c4 {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
+        width: 100%;
+        background: transparent;
+        border: none;
+      }
+
+      .c4:focus {
+        outline: none;
+      }
+
+      .c4[aria-disabled='true'] {
+        cursor: not-allowed;
+      }
+
       .c6 {
         width: 100%;
       }
@@ -207,9 +207,9 @@ describe('<PageSizeURLQuery />', () => {
                 aria-expanded="false"
                 aria-haspopup="listbox"
                 aria-label="Entries per page"
-                aria-labelledby="select-1-label select-1-content"
+                aria-labelledby="1 1-label 1-content"
                 class="c4"
-                id="select-1"
+                id="1"
                 type="button"
               />
               <div
@@ -223,7 +223,7 @@ describe('<PageSizeURLQuery />', () => {
                   >
                     <span
                       class="c8"
-                      id="select-1-content"
+                      id="1-content"
                     >
                       10
                     </span>
@@ -241,14 +241,14 @@ describe('<PageSizeURLQuery />', () => {
                   >
                     <svg
                       fill="none"
-                      height="1em"
+                      height="1rem"
                       viewBox="0 0 14 8"
-                      width="1em"
+                      width="1rem"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
                         clip-rule="evenodd"
-                        d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                        d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                         fill="#32324D"
                         fill-rule="evenodd"
                       />

@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
-import { Box } from '@strapi/design-system/Box';
+import { Accordion, AccordionToggle, AccordionContent, Box } from '@strapi/design-system';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 
@@ -30,8 +29,8 @@ const ComponentCategory = ({ category, components, variant, isOpen, onAddCompone
       <AccordionContent>
         <Box paddingTop={4} paddingBottom={4} paddingLeft={3} paddingRight={3}>
           <Grid>
-            {components.map(({ componentUid, info: { displayName, icon } }) => (
-              <ComponentCard key={componentUid} icon={icon} onClick={onAddComponent(componentUid)}>
+            {components.map(({ componentUid, info: { displayName } }) => (
+              <ComponentCard key={componentUid} onClick={onAddComponent(componentUid)}>
                 {formatMessage({ id: displayName, defaultMessage: displayName })}
               </ComponentCard>
             ))}

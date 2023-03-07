@@ -3,6 +3,7 @@
 const {
   isUndefined,
   castArray,
+  compact,
   isNil,
   has,
   isString,
@@ -18,6 +19,7 @@ const {
   isNumber,
   map,
   difference,
+  uniqBy,
 } = require('lodash/fp');
 const types = require('../types');
 const { createField } = require('../fields');
@@ -37,6 +39,7 @@ const {
   deleteRelations,
   cleanOrderColumns,
 } = require('./regular-relations');
+const { relationsOrderer } = require('./relations-orderer');
 
 const toId = (value) => value.id || value;
 const toIds = (value) => castArray(value || []).map(toId);
@@ -75,7 +78,13 @@ const toAssocs = (data) => {
   }
 
   return {
-    connect: toIdArray(data?.connect),
+    options: {
+      strict: data?.options?.strict,
+    },
+    connect: toIdArray(data?.connect).map((elm) => ({
+      id: elm.id,
+      position: elm.position ? elm.position : { end: true },
+    })),
     disconnect: toIdArray(data?.disconnect),
   };
 };
@@ -218,7 +227,7 @@ const createEntityManager = (db) => {
 
       const trx = await strapi.db.transaction();
       try {
-        await this.attachRelations(uid, id, data, { transaction: trx });
+        await this.attachRelations(uid, id, data, { transaction: trx.get() });
 
         await trx.commit();
       } catch (e) {
@@ -302,7 +311,7 @@ const createEntityManager = (db) => {
 
       const trx = await strapi.db.transaction();
       try {
-        await this.updateRelations(uid, id, data, { transaction: trx });
+        await this.updateRelations(uid, id, data, { transaction: trx.get() });
         await trx.commit();
       } catch (e) {
         await trx.rollback();
@@ -373,7 +382,7 @@ const createEntityManager = (db) => {
 
       const trx = await strapi.db.transaction();
       try {
-        await this.deleteRelations(uid, id, { transaction: trx });
+        await this.deleteRelations(uid, id, { transaction: trx.get() });
 
         await trx.commit();
       } catch (e) {
@@ -561,7 +570,7 @@ const createEntityManager = (db) => {
           }
 
           // prepare new relations to insert
-          const insert = relsToAdd.map((data) => {
+          const insert = uniqBy('id', relsToAdd).map((data) => {
             return {
               [joinColumn.name]: id,
               [inverseJoinColumn.name]: data.id,
@@ -571,11 +580,28 @@ const createEntityManager = (db) => {
           });
 
           // add order value
-          if (hasOrderColumn(attribute)) {
-            insert.forEach((rel, idx) => {
-              rel[orderColumnName] = idx + 1;
+          if (cleanRelationData.set && hasOrderColumn(attribute)) {
+            insert.forEach((data, idx) => {
+              data[orderColumnName] = idx + 1;
+            });
+          } else if (cleanRelationData.connect && hasOrderColumn(attribute)) {
+            // use position attributes to calculate order
+            const orderMap = relationsOrderer(
+              [],
+              inverseJoinColumn.name,
+              joinTable.orderColumnName,
+              true // Always make an strict connect when inserting
+            )
+              .connect(relsToAdd)
+              .get()
+              // set the order based on the order of the ids
+              .reduce((acc, rel, idx) => ({ ...acc, [rel.id]: idx }), {});
+
+            insert.forEach((row) => {
+              row[orderColumnName] = orderMap[row[inverseJoinColumn.name]];
             });
           }
+
           // add inv_order value
           if (hasInverseOrderColumn(attribute)) {
             const maxResults = await db
@@ -815,27 +841,54 @@ const createEntityManager = (db) => {
               }
 
               // prepare relations to insert
-              const insert = cleanRelationData.connect.map((relToAdd) => ({
+              const insert = uniqBy('id', cleanRelationData.connect).map((relToAdd) => ({
                 [joinColumn.name]: id,
                 [inverseJoinColumn.name]: relToAdd.id,
                 ...(joinTable.on || {}),
                 ...(relToAdd.__pivot || {}),
               }));
 
-              // add order value
               if (hasOrderColumn(attribute)) {
-                const orderMax = (
-                  await this.createQueryBuilder(joinTable.name)
-                    .max(orderColumnName)
-                    .where({ [joinColumn.name]: id })
-                    .where(joinTable.on || {})
-                    .first()
-                    .transacting(trx)
-                    .execute()
-                ).max;
+                // Get all adjacent relations and the one with the highest order
+                const adjacentRelations = await this.createQueryBuilder(joinTable.name)
+                  .where({
+                    $or: [
+                      {
+                        [joinColumn.name]: id,
+                        [inverseJoinColumn.name]: {
+                          $in: compact(
+                            cleanRelationData.connect.map(
+                              (r) => r.position?.after || r.position?.before
+                            )
+                          ),
+                        },
+                      },
+                      {
+                        [joinColumn.name]: id,
+                        [orderColumnName]: this.createQueryBuilder(joinTable.name)
+                          .max(orderColumnName)
+                          .where({ [joinColumn.name]: id })
+                          .where(joinTable.on || {})
+                          .transacting(trx)
+                          .getKnexQuery(),
+                      },
+                    ],
+                  })
+                  .where(joinTable.on || {})
+                  .transacting(trx)
+                  .execute();
 
-                insert.forEach((row, idx) => {
-                  row[orderColumnName] = orderMax + idx + 1;
+                const orderMap = relationsOrderer(
+                  adjacentRelations,
+                  inverseJoinColumn.name,
+                  joinTable.orderColumnName,
+                  cleanRelationData.options.strict
+                )
+                  .connect(cleanRelationData.connect)
+                  .getOrderMap();
+
+                insert.forEach((row) => {
+                  row[orderColumnName] = orderMap[row[inverseJoinColumn.name]];
                 });
               }
 
@@ -901,7 +954,7 @@ const createEntityManager = (db) => {
                 continue;
               }
 
-              const insert = cleanRelationData.set.map((relToAdd) => ({
+              const insert = uniqBy('id', cleanRelationData.set).map((relToAdd) => ({
                 [joinColumn.name]: id,
                 [inverseJoinColumn.name]: relToAdd.id,
                 ...(joinTable.on || {}),

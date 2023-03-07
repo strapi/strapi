@@ -1,0 +1,77 @@
+{
+  "name": "@strapi/data-transfer",
+  "version": "4.7.1",
+  "description": "Data transfer capabilities for Strapi",
+  "keywords": [
+    "strapi",
+    "data",
+    "transfer",
+    "import",
+    "export",
+    "backup",
+    "restore"
+  ],
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "scripts": {
+    "build": "yarn build:ts",
+    "build:ts": "tsc -p tsconfig.json",
+    "build:clean": "yarn clean && yarn build",
+    "clean": "rimraf ./lib",
+    "prepublishOnly": "yarn build:clean",
+    "test:unit": "jest --verbose",
+    "watch": "yarn build:ts -w --preserveWatchOutput"
+  },
+  "directories": {
+    "lib": "./lib"
+  },
+  "dependencies": {
+    "@strapi/logger": "4.7.1",
+    "@strapi/strapi": "4.7.1",
+    "chalk": "4.1.2",
+    "fs-extra": "10.0.0",
+    "lodash": "4.17.21",
+    "semver": "7.3.8",
+    "stream-chain": "2.2.5",
+    "stream-json": "1.7.4",
+    "tar": "6.1.13",
+    "tar-stream": "2.2.0",
+    "uuid": "9.0.0",
+    "ws": "8.11.0"
+  },
+  "devDependencies": {
+    "@tsconfig/node16": "1.0.3",
+    "@types/fs-extra": "9.0.13",
+    "@types/jest": "29.2.0",
+    "@types/koa": "2.13.4",
+    "@types/lodash": "^4.14.191",
+    "@types/semver": "7.3.13",
+    "@types/stream-chain": "2.0.1",
+    "@types/stream-json": "1.7.3",
+    "@types/tar": "6.1.4",
+    "@types/tar-stream": "2.2.2",
+    "@types/uuid": "9.0.0",
+    "@types/ws": "^8.5.4",
+    "knex": "2.4.0",
+    "koa": "2.13.4",
+    "rimraf": "3.0.2",
+    "typescript": "4.6.2"
+  },
+  "engines": {
+    "node": ">=14.19.1 <=18.x.x",
+    "npm": ">=6.0.0"
+  }
+}

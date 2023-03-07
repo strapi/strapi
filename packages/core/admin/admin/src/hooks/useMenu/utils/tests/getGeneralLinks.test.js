@@ -68,14 +68,6 @@ describe('getGeneralLinks', () => {
             action: 'admin::marketplace.read',
             subject: null,
           },
-          {
-            action: 'admin::marketplace.plugins.install',
-            subject: null,
-          },
-          {
-            action: 'admin::marketplace.plugins.uninstall',
-            subject: null,
-          },
         ],
         notificationsCount: 0,
       },
@@ -87,14 +79,6 @@ describe('getGeneralLinks', () => {
         permissions: [
           {
             action: 'admin::marketplace.read',
-            subject: null,
-          },
-          {
-            action: 'admin::marketplace.plugins.install',
-            subject: null,
-          },
-          {
-            action: 'admin::marketplace.plugins.uninstall',
             subject: null,
           },
         ],
@@ -121,14 +105,6 @@ describe('getGeneralLinks', () => {
             action: 'admin::marketplace.read',
             subject: null,
           },
-          {
-            action: 'admin::marketplace.plugins.install',
-            subject: null,
-          },
-          {
-            action: 'admin::marketplace.plugins.uninstall',
-            subject: null,
-          },
         ],
         notificationsCount: 0,
       },
@@ -140,14 +116,6 @@ describe('getGeneralLinks', () => {
         permissions: [
           {
             action: 'admin::marketplace.read',
-            subject: null,
-          },
-          {
-            action: 'admin::marketplace.plugins.install',
-            subject: null,
-          },
-          {
-            action: 'admin::marketplace.plugins.uninstall',
             subject: null,
           },
         ],
