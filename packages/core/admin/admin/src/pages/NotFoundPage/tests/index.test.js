@@ -33,23 +33,27 @@ describe('NotFoundPage', () => {
         padding-left: 56px;
       }
 
-      .c5 {
+      .c3 {
+        min-width: 0;
+      }
+
+      .c6 {
         padding-right: 56px;
         padding-left: 56px;
       }
 
-      .c6 {
+      .c7 {
         background: #ffffff;
         padding: 64px;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c8 {
+      .c9 {
         padding-bottom: 24px;
       }
 
-      .c10 {
+      .c11 {
         padding-bottom: 16px;
       }
 
@@ -71,7 +75,7 @@ describe('NotFoundPage', () => {
         justify-content: space-between;
       }
 
-      .c3 {
+      .c4 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -85,21 +89,21 @@ describe('NotFoundPage', () => {
         flex-direction: row;
       }
 
-      .c4 {
+      .c5 {
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
         color: #32324d;
       }
 
-      .c11 {
+      .c12 {
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
         color: #666687;
       }
 
-      .c7 {
+      .c8 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -114,7 +118,7 @@ describe('NotFoundPage', () => {
         text-align: center;
       }
 
-      .c9 svg {
+      .c10 svg {
         height: 5.5rem;
       }
 
@@ -122,7 +126,7 @@ describe('NotFoundPage', () => {
         outline: none;
       }
 
-      .c12 {
+      .c13 {
         background: #4945ff;
         padding-top: 8px;
         padding-right: 16px;
@@ -133,14 +137,14 @@ describe('NotFoundPage', () => {
         border: 1px solid #4945ff;
       }
 
-      .c17 {
+      .c18 {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
         color: #ffffff;
       }
 
-      .c13 {
+      .c14 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -155,7 +159,7 @@ describe('NotFoundPage', () => {
         gap: 8px;
       }
 
-      .c18 {
+      .c19 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -169,26 +173,26 @@ describe('NotFoundPage', () => {
         flex-direction: row;
       }
 
-      .c14 {
+      .c15 {
         position: relative;
         outline: none;
       }
 
-      .c14 svg {
+      .c15 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c14 svg > g,
-      .c14 svg path {
+      .c15 svg > g,
+      .c15 svg path {
         fill: #ffffff;
       }
 
-      .c14[aria-disabled='true'] {
+      .c15[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c14:after {
+      .c15:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -203,11 +207,11 @@ describe('NotFoundPage', () => {
         border: 2px solid transparent;
       }
 
-      .c14:focus-visible {
+      .c15:focus-visible {
         outline: none;
       }
 
-      .c14:focus-visible:after {
+      .c15:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -218,63 +222,63 @@ describe('NotFoundPage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c15 {
+      .c16 {
         -webkit-text-decoration: none;
         text-decoration: none;
         border: 1px solid #d9d8ff;
         background: #f0f0ff;
       }
 
-      .c15[aria-disabled='true'] {
+      .c16[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c15[aria-disabled='true'] .c16 {
+      .c16[aria-disabled='true'] .c17 {
         color: #666687;
       }
 
-      .c15[aria-disabled='true'] svg > g,.c15[aria-disabled='true'] svg path {
+      .c16[aria-disabled='true'] svg > g,.c16[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c15[aria-disabled='true']:active {
+      .c16[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c15[aria-disabled='true']:active .c16 {
+      .c16[aria-disabled='true']:active .c17 {
         color: #666687;
       }
 
-      .c15[aria-disabled='true']:active svg > g,.c15[aria-disabled='true']:active svg path {
+      .c16[aria-disabled='true']:active svg > g,.c16[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c15:hover {
+      .c16:hover {
         background-color: #ffffff;
       }
 
-      .c15:active {
+      .c16:active {
         background-color: #ffffff;
         border: 1px solid #4945ff;
       }
 
-      .c15:active .c16 {
+      .c16:active .c17 {
         color: #4945ff;
       }
 
-      .c15:active svg > g,
-      .c15:active svg path {
+      .c16:active svg > g,
+      .c16:active svg path {
         fill: #4945ff;
       }
 
-      .c15 .c16 {
+      .c16 .c17 {
         color: #271fe0;
       }
 
-      .c15 svg > g,
-      .c15 svg path {
+      .c16 svg > g,
+      .c16 svg path {
         fill: #271fe0;
       }
 
@@ -295,10 +299,10 @@ describe('NotFoundPage', () => {
               class="c2"
             >
               <div
-                class="c3"
+                class="c3 c4"
               >
                 <h1
-                  class="c4"
+                  class="c5"
                   id="title"
                 >
                   Page not found
@@ -308,14 +312,14 @@ describe('NotFoundPage', () => {
           </div>
         </div>
         <div
-          class="c5"
+          class="c6"
         >
           <div
-            class="c6 c7"
+            class="c7 c8"
           >
             <div
               aria-hidden="true"
-              class="c8 c9"
+              class="c9 c10"
             >
               <svg
                 fill="none"
@@ -394,10 +398,10 @@ describe('NotFoundPage', () => {
               </svg>
             </div>
             <div
-              class="c10"
+              class="c11"
             >
               <p
-                class="c11"
+                class="c12"
               >
                 Oops! We can't seem to find the page you're looging for...
               </p>
@@ -405,17 +409,17 @@ describe('NotFoundPage', () => {
             <a
               aria-current="page"
               aria-disabled="false"
-              class="c12 c13 c14 c15 active"
+              class="c13 c14 c15 c16 active"
               href="/"
             >
               <span
-                class="c16 c17"
+                class="c17 c18"
               >
                 Back to homepage
               </span>
               <div
                 aria-hidden="true"
-                class="c18"
+                class="c19"
               >
                 <svg
                   fill="none"

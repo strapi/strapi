@@ -27,7 +27,7 @@ describe('<NotAllowedInput />', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c6 {
+      .c5 {
         padding-right: 8px;
         padding-left: 12px;
       }
@@ -44,9 +44,10 @@ describe('<NotAllowedInput />', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+        gap: 4px;
       }
 
-      .c3 {
+      .c2 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -60,7 +61,7 @@ describe('<NotAllowedInput />', () => {
         flex-direction: row;
       }
 
-      .c4 {
+      .c3 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -78,23 +79,14 @@ describe('<NotAllowedInput />', () => {
         justify-content: space-between;
       }
 
-      .c2 {
+      .c1 {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
         color: #32324d;
       }
 
-      .c1 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c1 > * + * {
-        margin-top: 4px;
-      }
-
-      .c8 {
+      .c7 {
         border: none;
         border-radius: 4px;
         padding-bottom: 0.65625rem;
@@ -110,36 +102,36 @@ describe('<NotAllowedInput />', () => {
         background: inherit;
       }
 
-      .c8::-webkit-input-placeholder {
+      .c7::-webkit-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c8::-moz-placeholder {
+      .c7::-moz-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c8:-ms-input-placeholder {
+      .c7:-ms-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c8::placeholder {
+      .c7::placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c8[aria-disabled='true'] {
+      .c7[aria-disabled='true'] {
         color: inherit;
       }
 
-      .c8:focus {
+      .c7:focus {
         outline: none;
         box-shadow: none;
       }
 
-      .c5 {
+      .c4 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
@@ -153,39 +145,41 @@ describe('<NotAllowedInput />', () => {
         background: #eaeaef;
       }
 
-      .c5:focus-within {
+      .c4:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c7 > path {
+      .c6 > path {
         fill: #666687;
       }
 
       <div>
-        <div>
+        <div
+          class=""
+        >
           <div
-            class="c0 c1"
+            class="c0"
           >
             <label
-              class="c2"
+              class="c1"
               for="test"
             >
               <div
-                class="c3"
+                class="c2"
               >
                 test
               </div>
             </label>
             <div
-              class="c4 c5"
+              class="c3 c4"
               disabled=""
             >
               <div
-                class="c6"
+                class="c5"
               >
                 <svg
-                  class="c7"
+                  class="c6"
                   fill="none"
                   height="1rem"
                   viewBox="0 0 24 24"
@@ -202,7 +196,9 @@ describe('<NotAllowedInput />', () => {
                 aria-disabled="true"
                 aria-invalid="false"
                 aria-required="false"
-                class="c8"
+                class="c7"
+                data-disabled=""
+                disabled=""
                 id="test"
                 name="test"
                 placeholder="No permissions to see this field"

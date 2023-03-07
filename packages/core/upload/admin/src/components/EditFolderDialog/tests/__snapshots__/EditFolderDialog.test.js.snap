@@ -36,11 +36,11 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   padding: 32px;
 }
 
-.c25 {
+.c23 {
   padding-right: 12px;
 }
 
-.c30 {
+.c28 {
   background: #4945ff;
   padding: 8px;
   padding-right: 16px;
@@ -99,9 +99,10 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 4px;
 }
 
-.c21 {
+.c20 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -115,22 +116,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
-.c24 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.c31 {
+.c29 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -152,27 +138,18 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   color: #32324d;
 }
 
-.c20 {
+.c19 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
   color: #32324d;
 }
 
-.c33 {
+.c31 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
   color: #ffffff;
-}
-
-.c19 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c19 > * + * {
-  margin-top: 4px;
 }
 
 .c12 {
@@ -236,10 +213,57 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c32 {
+.c30 {
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
+}
+
+.c30[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c30[aria-disabled='true'] .c9 {
+  color: #666687;
+}
+
+.c30[aria-disabled='true'] svg > g,.c30[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c30[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c30[aria-disabled='true']:active .c9 {
+  color: #666687;
+}
+
+.c30[aria-disabled='true']:active svg > g,.c30[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c30:hover {
+  background-color: #f6f6f9;
+}
+
+.c30:active {
+  background-color: #eaeaef;
+}
+
+.c30 .c9 {
+  color: #32324d;
+}
+
+.c30 svg > g,
+.c30 svg path {
+  fill: #32324d;
+}
+
+.c32 {
+  height: 2rem;
 }
 
 .c32[aria-disabled='true'] {
@@ -269,68 +293,21 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
 }
 
 .c32:hover {
-  background-color: #f6f6f9;
-}
-
-.c32:active {
-  background-color: #eaeaef;
-}
-
-.c32 .c9 {
-  color: #32324d;
-}
-
-.c32 svg > g,
-.c32 svg path {
-  fill: #32324d;
-}
-
-.c34 {
-  height: 2rem;
-}
-
-.c34[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c34[aria-disabled='true'] .c9 {
-  color: #666687;
-}
-
-.c34[aria-disabled='true'] svg > g,.c34[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c34[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c34[aria-disabled='true']:active .c9 {
-  color: #666687;
-}
-
-.c34[aria-disabled='true']:active svg > g,.c34[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c34:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c34:active {
+.c32:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c34 svg > g,
-.c34 svg path {
+.c32 svg > g,
+.c32 svg path {
   fill: #ffffff;
 }
 
-.c23 {
+.c22 {
   border: none;
   border-radius: 4px;
   padding-bottom: 0.65625rem;
@@ -345,36 +322,36 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   background: inherit;
 }
 
-.c23::-webkit-input-placeholder {
+.c22::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c23::-moz-placeholder {
+.c22::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c23:-ms-input-placeholder {
+.c22:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c23::placeholder {
+.c22::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c23[aria-disabled='true'] {
+.c22[aria-disabled='true'] {
   color: inherit;
 }
 
-.c23:focus {
+.c22:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c22 {
+.c21 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
@@ -386,7 +363,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   transition-duration: 0.2s;
 }
 
-.c22:focus-within {
+.c21:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
@@ -435,12 +412,12 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   border-bottom: 1px solid #eaeaef;
 }
 
-.c28 {
+.c26 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
 
-.c29 > * + * {
+.c27 > * + * {
   margin-left: 8px;
 }
 
@@ -449,23 +426,23 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   max-height: 60vh;
 }
 
-.c26 {
+.c24 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c26 svg {
+.c24 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c26 svg path {
+.c24 svg path {
   fill: #666687;
 }
 
-.c27 {
+.c25 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -474,7 +451,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   border: none;
 }
 
-.c27 svg {
+.c25 svg {
   width: 0.5625rem;
 }
 
@@ -587,28 +564,30 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                       class=""
                     >
                       <div>
-                        <div>
+                        <div
+                          class=""
+                        >
                           <div
-                            class="c18 c19"
+                            class="c18"
                           >
                             <label
-                              class="c9 c20"
+                              class="c9 c19"
                               for="1"
                             >
                               <div
-                                class="c21"
+                                class="c20"
                               >
                                 Name
                               </div>
                             </label>
                             <div
-                              class="c8 c22"
+                              class="c8 c21"
                             >
                               <input
                                 aria-disabled="false"
                                 aria-invalid="false"
                                 aria-required="false"
-                                class="c23"
+                                class="c22"
                                 id="1"
                                 name="name"
                                 value=""
@@ -626,14 +605,14 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                       class=""
                     >
                       <div
-                        class="c24"
+                        class="c18"
                       >
                         <label
-                          class="c9 c20"
+                          class="c9 c19"
                           for="folder-parent"
                         >
                           <div
-                            class="c21"
+                            class="c20"
                           >
                             Location
                           </div>
@@ -681,7 +660,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                             >
                               <div
                                 aria-hidden="true"
-                                class="c25 c26 c27"
+                                class="c23 c24 c25"
                               >
                                 <svg
                                   fill="none"
@@ -712,41 +691,41 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <div
-                class="c6 c28"
+                class="c6 c26"
               >
                 <div
                   class="c8"
                 >
                   <div
-                    class="c21 c29"
+                    class="c20 c27"
                   >
                     <button
                       aria-disabled="false"
-                      class="c30 c31 c12 c32"
+                      class="c28 c29 c12 c30"
                       name="cancel"
                       type="button"
                     >
                       <span
-                        class="c9 c33"
+                        class="c9 c31"
                       >
                         Cancel
                       </span>
                     </button>
                   </div>
                   <div
-                    class="c21 c29"
+                    class="c20 c27"
                   >
                     <div
-                      class="c31"
+                      class="c29"
                     >
                       <button
                         aria-disabled="false"
-                        class="c30 c31 c12 c34"
+                        class="c28 c29 c12 c32"
                         name="submit"
                         type="submit"
                       >
                         <span
-                          class="c9 c33"
+                          class="c9 c31"
                         >
                           Create
                         </span>
