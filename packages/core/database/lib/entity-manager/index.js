@@ -229,8 +229,7 @@ const createEntityManager = (db) => {
 
       const trx = await strapi.db.transaction();
       try {
-        await this.attachRelations(uid, id, data, { transaction: trx.get() });
-
+        await this.attachRelations(uid, id, data, { transaction: trx.get(), isNewEntity: true });
         await trx.commit();
       } catch (e) {
         await trx.rollback();
@@ -313,7 +312,7 @@ const createEntityManager = (db) => {
 
       const trx = await strapi.db.transaction();
       try {
-        await this.updateRelations(uid, id, data, { transaction: trx.get() });
+        await this.attachRelations(uid, id, data, { transaction: trx.get() });
         await trx.commit();
       } catch (e) {
         await trx.rollback();
@@ -413,288 +412,6 @@ const createEntityManager = (db) => {
     },
 
     /**
-     * Attach relations to a new entity
-     *
-     * @param {EntityManager} em - entity manager instance
-     * @param {Metadata} metadata - model metadta
-     * @param {ID} id - entity ID
-     * @param {object} data - data received for creation
-     */
-    async attachRelations(uid, id, data, { transaction: trx }) {
-      const { attributes } = db.metadata.get(uid);
-
-      for (const attributeName of Object.keys(attributes)) {
-        const attribute = attributes[attributeName];
-
-        const isValidLink = has(attributeName, data) && !isNil(data[attributeName]);
-
-        if (attribute.type !== 'relation' || !isValidLink) {
-          continue;
-        }
-
-        const cleanRelationData = toAssocs(data[attributeName]);
-
-        if (attribute.relation === 'morphOne' || attribute.relation === 'morphMany') {
-          const { target, morphBy } = attribute;
-
-          const targetAttribute = db.metadata.get(target).attributes[morphBy];
-
-          if (targetAttribute.relation === 'morphToOne') {
-            // set columns
-            const { idColumn, typeColumn } = targetAttribute.morphColumn;
-
-            const relId = toId(cleanRelationData.set[0]);
-
-            await this.createQueryBuilder(target)
-              .update({ [idColumn.name]: id, [typeColumn.name]: uid })
-              .where({ id: relId })
-              .transacting(trx)
-              .execute();
-          } else if (targetAttribute.relation === 'morphToMany') {
-            const { joinTable } = targetAttribute;
-            const { joinColumn, morphColumn } = joinTable;
-
-            const { idColumn, typeColumn } = morphColumn;
-
-            if (isEmpty(cleanRelationData.set)) {
-              continue;
-            }
-
-            const rows = cleanRelationData.set.map((data, idx) => {
-              return {
-                [joinColumn.name]: data.id,
-                [idColumn.name]: id,
-                [typeColumn.name]: uid,
-                ...(joinTable.on || {}),
-                ...(data.__pivot || {}),
-                order: idx + 1,
-                field: attributeName,
-              };
-            });
-
-            await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
-          }
-
-          continue;
-        } else if (attribute.relation === 'morphToOne') {
-          // handled on the entry itself
-          continue;
-        } else if (attribute.relation === 'morphToMany') {
-          const { joinTable } = attribute;
-          const { joinColumn, morphColumn } = joinTable;
-
-          const { idColumn, typeColumn, typeField = '__type' } = morphColumn;
-
-          if (isEmpty(cleanRelationData.set)) {
-            continue;
-          }
-
-          const rows = cleanRelationData.set.map((data, idx) => ({
-            [joinColumn.name]: id,
-            [idColumn.name]: data.id,
-            [typeColumn.name]: data[typeField],
-            ...(joinTable.on || {}),
-            ...(data.__pivot || {}),
-            order: idx + 1,
-          }));
-
-          // delete previous relations
-          await deleteRelatedMorphOneRelationsAfterMorphToManyUpdate(rows, {
-            uid,
-            attributeName,
-            joinTable,
-            db,
-            transaction: trx,
-          });
-
-          await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
-
-          continue;
-        }
-
-        if (attribute.joinColumn && attribute.owner) {
-          const relIdsToAdd = toIds(cleanRelationData.set);
-          if (
-            attribute.relation === 'oneToOne' &&
-            isBidirectional(attribute) &&
-            relIdsToAdd.length
-          ) {
-            await this.createQueryBuilder(uid)
-              .where({ [attribute.joinColumn.name]: relIdsToAdd, id: { $ne: id } })
-              .update({ [attribute.joinColumn.name]: null })
-              .transacting(trx)
-              .execute();
-          }
-
-          continue;
-        }
-
-        // oneToOne oneToMany on the non owning side
-        if (attribute.joinColumn && !attribute.owner) {
-          // need to set the column on the target
-          const { target } = attribute;
-
-          // TODO: check it is an id & the entity exists (will throw due to FKs otherwise so not a big pbl in SQL)
-          const relIdsToAdd = toIds(cleanRelationData.set);
-
-          await this.createQueryBuilder(target)
-            .where({ [attribute.joinColumn.referencedColumn]: id })
-            .update({ [attribute.joinColumn.referencedColumn]: null })
-            .transacting(trx)
-            .execute();
-
-          await this.createQueryBuilder(target)
-            .update({ [attribute.joinColumn.referencedColumn]: id })
-            // NOTE: works if it is an array or a single id
-            .where({ id: relIdsToAdd })
-            .transacting(trx)
-            .execute();
-        }
-
-        if (attribute.joinTable) {
-          // need to set the column on the target
-
-          const { joinTable } = attribute;
-          const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } =
-            joinTable;
-
-          const relsToAdd = cleanRelationData.set || cleanRelationData.connect;
-          const relIdsToadd = toIds(relsToAdd);
-
-          if (isBidirectional(attribute) && isOneToAny(attribute)) {
-            await deletePreviousOneToAnyRelations({
-              id,
-              attribute,
-              relIdsToadd,
-              db,
-              transaction: trx,
-            });
-          }
-
-          // prepare new relations to insert
-          const insert = uniqBy('id', relsToAdd).map((data) => {
-            return {
-              [joinColumn.name]: id,
-              [inverseJoinColumn.name]: data.id,
-              ...(joinTable.on || {}),
-              ...(data.__pivot || {}),
-            };
-          });
-
-          if (cleanRelationData.clone) {
-            const relIdToClone = cleanRelationData.clone;
-
-            if (isOneToAny(attribute) && isBidirectional(attribute)) {
-              // We are effectively stealing the relation from the cloned entity
-              await this.createQueryBuilder(joinTable.name)
-                .update({ [joinColumn.name]: id })
-                .where({ [joinColumn.name]: relIdToClone })
-                // Don't steal the relations we are about to delete
-                .where({ $not: { [inverseJoinColumn.name]: toIds(cleanRelationData.delete) } })
-                .transacting(trx)
-                .execute();
-            } else {
-              // If it was many to many, clone the relations
-              const columns = [joinColumn.name, inverseJoinColumn.name];
-              if (orderColumnName) columns.push(orderColumnName);
-              if (inverseOrderColumnName) columns.push(inverseOrderColumnName);
-              if (joinTable.on) columns.push(...Object.keys(joinTable.on));
-
-              const con = strapi.db.connection;
-
-              const selectStatement = con
-                .select(
-                  // Override the joinColumn id with the new id
-                  con.raw(`?? as ${joinColumn.name}`, [id]),
-                  // Add the rest of the columns
-                  ...columns.slice(1)
-                )
-
-                // Select the entity id we want to clone it's relations
-                .where(joinColumn.name, relIdToClone)
-                .from(joinTable.name)
-                .toSQL();
-
-              // Insert the clone relations
-              await this.createQueryBuilder(joinTable.name)
-                .insert(
-                  con.raw(
-                    `(${columns.join(',')})  ${selectStatement.sql}`,
-                    selectStatement.bindings
-                  )
-                )
-                .onConflict([joinColumn.name, inverseJoinColumn.name])
-                .ignore()
-                .transacting(trx)
-                .execute();
-
-              // Clean the inverse order column
-              if (inverseOrderColumnName) {
-                await recalculateInverseOrderColumn({
-                  id,
-                  attribute,
-                  trx,
-                });
-              }
-            }
-          }
-
-          // add order value
-          if (cleanRelationData.set && hasOrderColumn(attribute)) {
-            insert.forEach((data, idx) => {
-              data[orderColumnName] = idx + 1;
-            });
-          } else if (cleanRelationData.connect && hasOrderColumn(attribute)) {
-            // use position attributes to calculate order
-            const orderMap = relationsOrderer(
-              [],
-              inverseJoinColumn.name,
-              joinTable.orderColumnName,
-              true // Always make an strict connect when inserting
-            )
-              .connect(relsToAdd)
-              .get()
-              // set the order based on the order of the ids
-              .reduce((acc, rel, idx) => ({ ...acc, [rel.id]: idx }), {});
-
-            insert.forEach((row) => {
-              row[orderColumnName] = orderMap[row[inverseJoinColumn.name]];
-            });
-          }
-
-          // add inv_order value
-          if (hasInverseOrderColumn(attribute)) {
-            const maxResults = await db
-              .getConnection()
-              .select(inverseJoinColumn.name)
-              .max(inverseOrderColumnName, { as: 'max' })
-              .whereIn(inverseJoinColumn.name, relIdsToadd)
-              .where(joinTable.on || {})
-              .groupBy(inverseJoinColumn.name)
-              .from(joinTable.name)
-              .transacting(trx);
-
-            const maxMap = maxResults.reduce(
-              (acc, res) => Object.assign(acc, { [res[inverseJoinColumn.name]]: res.max }),
-              {}
-            );
-
-            insert.forEach((rel) => {
-              rel[inverseOrderColumnName] = (maxMap[rel[inverseJoinColumn.name]] || 0) + 1;
-            });
-          }
-
-          if (insert.length === 0) {
-            continue;
-          }
-
-          // insert new relations
-          await this.createQueryBuilder(joinTable.name).insert(insert).transacting(trx).execute();
-        }
-      }
-    },
-
-    /**
      * Updates relations of an existing entity
      *
      * @param {EntityManager} em - entity manager instance
@@ -703,7 +420,7 @@ const createEntityManager = (db) => {
      * @param {object} data - data received for creation
      */
     // TODO: check relation exists (handled by FKs except for polymorphics)
-    async updateRelations(uid, id, data, { transaction: trx }) {
+    async attachRelations(uid, id, data, { transaction: trx, isNewEntity = false }) {
       const { attributes } = db.metadata.get(uid);
 
       for (const attributeName of Object.keys(attributes)) {
@@ -823,8 +540,24 @@ const createEntityManager = (db) => {
           continue;
         }
 
+        // TODO: handle bidirectional as in creation, but it seems it was not working correctly before.
+        // TODO: add tests for joinColumn relations
         if (attribute.joinColumn && attribute.owner) {
           // handled in the row itself
+
+          const relIdsToAdd = toIds(cleanRelationData.set);
+          if (
+            isNewEntity &&
+            attribute.relation === 'oneToOne' &&
+            isBidirectional(attribute) &&
+            relIdsToAdd.length
+          ) {
+            await this.createQueryBuilder(uid)
+              .where({ [attribute.joinColumn.name]: relIdsToAdd, id: { $ne: id } })
+              .update({ [attribute.joinColumn.name]: null })
+              .transacting(trx)
+              .execute();
+          }
           continue;
         }
 
@@ -840,7 +573,8 @@ const createEntityManager = (db) => {
             .transacting(trx)
             .execute();
 
-          if (!isNull(cleanRelationData.set)) {
+          if (isNewEntity || !isNull(cleanRelationData.set)) {
+            // TODO: check it is an id & the entity exists (will throw due to FKs otherwise so not a big pbl in SQL)
             const relIdsToAdd = toIds(cleanRelationData.set);
             await this.createQueryBuilder(target)
               .where({ id: relIdsToAdd })
@@ -869,6 +603,66 @@ const createEntityManager = (db) => {
             const isPartialUpdate = !has('set', cleanRelationData);
             let relIdsToaddOrMove;
 
+            if (cleanRelationData.clone) {
+              const relIdToClone = cleanRelationData.clone;
+
+              if (isOneToAny(attribute) && isBidirectional(attribute)) {
+                // We are effectively stealing the relation from the cloned entity
+                await this.createQueryBuilder(joinTable.name)
+                  .update({ [joinColumn.name]: id })
+                  .where({ [joinColumn.name]: relIdToClone })
+                  // Don't steal the relations we are about to delete
+                  .where({ $not: { [inverseJoinColumn.name]: toIds(cleanRelationData.delete) } })
+                  .onConflict([joinColumn.name, inverseJoinColumn.name])
+                  .ignore()
+                  .transacting(trx)
+                  .execute();
+              } else {
+                // If it was many to many, clone the relations
+                const columns = [joinColumn.name, inverseJoinColumn.name];
+                if (orderColumnName) columns.push(orderColumnName);
+                if (inverseOrderColumnName) columns.push(inverseOrderColumnName);
+                if (joinTable.on) columns.push(...Object.keys(joinTable.on));
+
+                const con = strapi.db.connection;
+
+                const selectStatement = con
+                  .select(
+                    // Override the joinColumn id with the new id
+                    con.raw(`?? as ${joinColumn.name}`, [id]),
+                    // Add the rest of the columns
+                    ...columns.slice(1)
+                  )
+
+                  // Select the entity id we want to clone it's relations
+                  .where(joinColumn.name, relIdToClone)
+                  .from(joinTable.name)
+                  .toSQL();
+
+                // Insert the clone relations
+                await this.createQueryBuilder(joinTable.name)
+                  .insert(
+                    con.raw(
+                      `(${columns.join(',')})  ${selectStatement.sql}`,
+                      selectStatement.bindings
+                    )
+                  )
+                  .onConflict([joinColumn.name, inverseJoinColumn.name])
+                  .ignore()
+                  .transacting(trx)
+                  .execute();
+
+                // Clean the inverse order column
+                if (inverseOrderColumnName) {
+                  await recalculateInverseOrderColumn({
+                    id,
+                    attribute,
+                    trx,
+                  });
+                }
+              }
+              // return this.updateRelations(uid, id, data, { transaction: trx });
+            }
             if (isPartialUpdate) {
               if (isAnyToOne(attribute)) {
                 cleanRelationData.connect = cleanRelationData.connect.slice(-1);

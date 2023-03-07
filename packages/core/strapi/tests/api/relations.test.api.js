@@ -26,6 +26,8 @@ const populateShop = [
   'myCompo.compo_products_mw',
 ];
 
+const populateProduct = ['shop', 'shops_mo', 'shop_om', 'shops'];
+
 const compo = (withRelations = false) => ({
   displayName: 'compo',
   category: 'default',
@@ -137,6 +139,15 @@ const getShop = async (id, populate = populateShop) => {
   const { body } = await rq({
     method: 'GET',
     url: `/shops/${id}`,
+    qs: { populate },
+  });
+  return body;
+};
+
+const getProduct = async (id, populate = populateProduct) => {
+  const { body } = await rq({
+    method: 'GET',
+    url: `/products/${id}`,
     qs: { populate },
   });
   return body;
@@ -951,10 +962,8 @@ describe('Relations', () => {
       const shop = await getShop(createdShop.data.id);
 
       const expectedCreatedShop = shopFactory({ anyToManyRel: [{ id: id1 }, { id: id2 }] });
-      expectedCreatedShop.attributes.products_mo = { data: null };
+      expectedCreatedShop.attributes.products_om = { data: [] };
       expectedCreatedShop.attributes.products_oo = { data: null };
-      expectedCreatedShop.attributes.products_ow = { data: null };
-      expectedCreatedShop.attributes.myCompo.compo_products_ow = { data: null };
 
       expect(shop.data).toMatchObject(expectedCreatedShop);
     });
@@ -967,7 +976,55 @@ describe('Relations', () => {
 
       const clonedShop = await cloneShop(createdShop.data.id, {});
 
-      const expectedCreatedShop = shopFactory({ anyToManyRel: [{ id: id1 }, { id: id2 }] });
+      // When cloning, on the product side the cloned shop relation should be at the end of the list
+      const product = await getProduct(id1);
+
+      const expectedProduct = {
+        attributes: {
+          shops_mo: {
+            data: expect.arrayContaining([
+              expect.objectContaining({ id: createdShop.data.id }),
+              expect.objectContaining({ id: clonedShop.data.id }),
+            ]),
+          },
+          shops: {
+            data: expect.arrayContaining([
+              expect.objectContaining({ id: createdShop.data.id }),
+              expect.objectContaining({ id: clonedShop.data.id }),
+            ]),
+          },
+        },
+      };
+
+      expect(product.data).toMatchObject(expectedProduct);
+    });
+
+    test('clone and update relations', async () => {
+      const createdShop = await createShop({
+        anyToOneRel: [{ id: id1 }],
+        anyToManyRel: [{ id: id1 }, { id: id2 }],
+      });
+
+      const clonedShop = await createEntry(
+        'shops',
+        {
+          name: 'Cazotte Shop',
+          products_ow: { clone: createdShop.data.id },
+          products_oo: { clone: createdShop.data.id },
+          products_mo: { clone: createdShop.data.id },
+          products_om: { clone: createdShop.data.id, disconnect: [id1] },
+          products_mm: { clone: createdShop.data.id, disconnect: [id1] },
+          products_mw: { clone: createdShop.data.id, disconnect: [id1] },
+          myCompo: {
+            compo_products_ow: { clone: createdShop.data.id },
+            compo_products_mw: { clone: createdShop.data.id, disconnect: [id1] },
+          },
+          ...data,
+        },
+        populateShop
+      );
+
+      const expectedCreatedShop = shopFactory({ anyToManyRel: [{ id: id2 }] });
       expect(clonedShop.data).toMatchObject(expectedCreatedShop);
     });
   });
