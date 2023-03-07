@@ -106,9 +106,8 @@ function enableReviewWorkflow({ strapi }) {
       const { joinTable } = strapi.db.metadata.get(target).attributes[morphBy];
       const { idColumn, typeColumn } = joinTable.morphColumn;
 
-      // Execute a raw SQL query to insert records into the join table mapping the specified content type with the first stage of the default workflow.
-      // Only entities that do not have a record in the join table yet are
-      // selected.
+      // Execute an SQL query to insert records into the join table mapping the specified content type with the first stage of the default workflow.
+      // Only entities that do not have a record in the join table yet are selected.
       const connection = strapi.db.connection;
       const columnsToInsert = [
         idColumn.name,
