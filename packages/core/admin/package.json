@@ -121,7 +121,7 @@
     "react-redux": "8.0.5",
     "react-refresh": "0.14.0",
     "react-router-dom": "5.3.4",
-    "react-select": "5.6.0",
+    "react-select": "5.7.0",
     "react-window": "1.8.7",
     "redux": "^4.2.1",
     "reselect": "^4.1.7",
