@@ -69,7 +69,7 @@ module.exports = async (opts) => {
       url: opts.from,
       auth: {
         type: 'token',
-        token: opts.toToken,
+        token: opts.fromToken,
       },
     });
   }
