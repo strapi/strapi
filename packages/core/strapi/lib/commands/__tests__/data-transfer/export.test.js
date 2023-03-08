@@ -21,6 +21,7 @@ describe('Export', () => {
       },
     },
     engine: {
+      errors: {},
       createTransferEngine() {
         return {
           transfer: jest.fn(() => {
@@ -50,12 +51,11 @@ describe('Export', () => {
     },
   };
 
-  jest.mock('@strapi/data-transfer/lib/engine', () => mockDataTransfer.engine, { virtual: true });
-  jest.mock('@strapi/data-transfer/lib/strapi', () => mockDataTransfer.strapi, { virtual: true });
-  jest.mock('@strapi/data-transfer/lib/file', () => mockDataTransfer.file, { virtual: true });
+  jest.mock('@strapi/data-transfer', () => mockDataTransfer);
 
   // mock utils
   const mockUtils = {
+    loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
     formatDiagnostic: jest.fn(),
     createStrapiInstance() {
       return {

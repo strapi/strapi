@@ -116,19 +116,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c26 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
-      .c2 {
+      .c1 {
         background: #f6f6f9;
         padding-top: 40px;
         padding-right: 56px;
@@ -136,39 +124,45 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
         padding-left: 56px;
       }
 
-      .c9 {
-        padding-right: 8px;
-      }
-
-      .c12 {
+      .c14 {
         padding-right: 56px;
         padding-left: 56px;
       }
 
-      .c13 {
+      .c15 {
         background: #ffffff;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c15 {
+      .c17 {
         position: relative;
       }
 
-      .c17 {
+      .c19 {
         padding-right: 24px;
         padding-left: 24px;
       }
 
-      .c30 {
+      .c27 {
+        padding: 8px;
+        border-radius: 4px;
+        border-width: 0;
+        border-color: #dcdce4;
+        width: 2rem;
+        height: 2rem;
+        cursor: pointer;
+      }
+
+      .c35 {
         max-width: 15.625rem;
       }
 
-      .c37 {
+      .c42 {
         padding-left: 4px;
       }
 
-      .c3 {
+      .c2 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -186,7 +180,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
         justify-content: space-between;
       }
 
-      .c4 {
+      .c3 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -200,7 +194,25 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
         flex-direction: row;
       }
 
-      .c33 {
+      .c28 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+      }
+
+      .c38 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -218,27 +230,20 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
         justify-content: end;
       }
 
-      .c6 {
+      .c5 {
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
         color: #32324d;
       }
 
-      .c10 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c11 {
+      .c13 {
         font-size: 1rem;
         line-height: 1.5;
         color: #666687;
       }
 
-      .c23 {
+      .c25 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
@@ -246,14 +251,14 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
         color: #666687;
       }
 
-      .c29 {
+      .c34 {
         font-size: 0.875rem;
         line-height: 1.43;
         font-weight: 600;
         color: #32324d;
       }
 
-      .c31 {
+      .c36 {
         font-size: 0.875rem;
         line-height: 1.43;
         display: block;
@@ -263,47 +268,32 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
         color: #32324d;
       }
 
-      .c32 {
+      .c37 {
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c36 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #4945ff;
-      }
-
-      .c7 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
+      .c29 {
         position: relative;
         outline: none;
       }
 
-      .c7 svg {
+      .c29 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c7 svg > g,
-      .c7 svg path {
+      .c29 svg > g,
+      .c29 svg path {
         fill: #ffffff;
       }
 
-      .c7[aria-disabled='true'] {
+      .c29[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c7:after {
+      .c29:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -318,11 +308,11 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
         border: 2px solid transparent;
       }
 
-      .c7:focus-visible {
+      .c29:focus-visible {
         outline: none;
       }
 
-      .c7:focus-visible:after {
+      .c29:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -333,48 +323,68 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c38 .c1 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
+      .c31 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
       }
 
-      .c38 .c5 {
-        color: #ffffff;
-      }
-
-      .c38[aria-disabled='true'] .c5 {
+      .c43[aria-disabled='true'] .c4 {
         color: #666687;
       }
 
-      .c38[aria-disabled='true']:active .c5 {
+      .c43[aria-disabled='true']:active .c4 {
         color: #666687;
       }
 
-      .c38:active .c5 {
+      .c43:active .c4 {
         color: #4945ff;
       }
 
-      .c38 .c5 {
+      .c43 .c4 {
         color: #271fe0;
       }
 
-      .c14 {
+      .c30 svg > g,
+      .c30 svg path {
+        fill: #8e8ea9;
+      }
+
+      .c30:hover svg > g,
+      .c30:hover svg path {
+        fill: #666687;
+      }
+
+      .c30:active svg > g,
+      .c30:active svg path {
+        fill: #a5a5ba;
+      }
+
+      .c30[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c0:focus-visible {
+        outline: none;
+      }
+
+      .c16 {
         overflow: hidden;
         border: 1px solid #eaeaef;
       }
 
-      .c19 {
+      .c21 {
         width: 100%;
         white-space: nowrap;
       }
 
-      .c16:before {
+      .c18:before {
         background: linear-gradient(90deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
@@ -384,7 +394,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
         left: 0;
       }
 
-      .c16:after {
+      .c18:after {
         background: linear-gradient(270deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
@@ -395,118 +405,132 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
         top: 0;
       }
 
-      .c18 {
+      .c20 {
         overflow-x: auto;
       }
 
-      .c28 tr:last-of-type {
+      .c33 tr:last-of-type {
         border-bottom: none;
       }
 
-      .c20 {
+      .c22 {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c21 {
+      .c23 {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c21 td,
-      .c21 th {
+      .c23 td,
+      .c23 th {
         padding: 16px;
       }
 
-      .c21 td:first-of-type,
-      .c21 th:first-of-type {
+      .c23 td:first-of-type,
+      .c23 th:first-of-type {
         padding: 0 4px;
       }
 
-      .c21 th {
+      .c23 th {
         padding-top: 0;
         padding-bottom: 0;
         height: 3.5rem;
       }
 
-      .c22 {
+      .c24 {
         vertical-align: middle;
         text-align: left;
         color: #666687;
         outline-offset: -4px;
       }
 
-      .c22 input {
+      .c24 input {
         vertical-align: sub;
       }
 
-      .c24 svg {
+      .c26 svg {
         height: 0.25rem;
       }
 
-      .c25 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
+      .c32 {
+        -webkit-transform: rotate(180deg);
+        -ms-transform: rotate(180deg);
+        transform: rotate(180deg);
+      }
+
+      .c6 {
+        background: #4945ff;
+        padding-top: 8px;
+        padding-right: 16px;
+        padding-bottom: 8px;
+        padding-left: 16px;
+        border-radius: 4px;
+        border-color: #4945ff;
+        border: 1px solid #4945ff;
+      }
+
+      .c12 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #ffffff;
+      }
+
+      .c41 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #4945ff;
+      }
+
+      .c7 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        height: 2rem;
-        width: 2rem;
-        border: none;
-      }
-
-      .c25 svg > g,
-      .c25 svg path {
-        fill: #8e8ea9;
-      }
-
-      .c25:hover svg > g,
-      .c25:hover svg path {
-        fill: #666687;
-      }
-
-      .c25:active svg > g,
-      .c25:active svg path {
-        fill: #a5a5ba;
-      }
-
-      .c25[aria-disabled='true'] {
-        background-color: #eaeaef;
-      }
-
-      .c25[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c34 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
         display: inline-flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        gap: 8px;
+      }
+
+      .c10 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-        -webkit-text-decoration: none;
-        text-decoration: none;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c8 {
         position: relative;
         outline: none;
       }
 
-      .c34 svg path {
-        fill: #4945ff;
+      .c8 svg {
+        height: 12px;
+        width: 12px;
       }
 
-      .c34 svg {
-        font-size: 0.625rem;
+      .c8 svg > g,
+      .c8 svg path {
+        fill: #ffffff;
       }
 
-      .c34:after {
+      .c8[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c8:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -521,11 +545,11 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
         border: 2px solid transparent;
       }
 
-      .c34:focus-visible {
+      .c8:focus-visible {
         outline: none;
       }
 
-      .c34:focus-visible:after {
+      .c8:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -536,91 +560,111 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c8 {
-        padding: 8px 16px;
-        background: #4945ff;
-        border: 1px solid #4945ff;
-        border-radius: 4px;
+      .c39 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
         display: inline-flex;
-        -webkit-text-decoration: none;
-        text-decoration: none;
-      }
-
-      .c8 .c1 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+        position: relative;
+        outline: none;
       }
 
-      .c8 .c5 {
-        color: #ffffff;
+      .c39 svg path {
+        fill: #4945ff;
       }
 
-      .c8[aria-disabled='true'] {
+      .c39 svg {
+        font-size: 0.625rem;
+      }
+
+      .c39:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c39:focus-visible {
+        outline: none;
+      }
+
+      .c39:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c9 {
+        -webkit-text-decoration: none;
+        text-decoration: none;
+      }
+
+      .c9[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c8[aria-disabled='true'] .c5 {
+      .c9[aria-disabled='true'] .c11 {
         color: #666687;
       }
 
-      .c8[aria-disabled='true'] svg > g,.c8[aria-disabled='true'] svg path {
+      .c9[aria-disabled='true'] svg > g,.c9[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c8[aria-disabled='true']:active {
+      .c9[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c8[aria-disabled='true']:active .c5 {
+      .c9[aria-disabled='true']:active .c11 {
         color: #666687;
       }
 
-      .c8[aria-disabled='true']:active svg > g,.c8[aria-disabled='true']:active svg path {
+      .c9[aria-disabled='true']:active svg > g,.c9[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c8:hover {
+      .c9:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c8:active {
+      .c9:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
-      .c8 svg > g,
-      .c8 svg path {
+      .c9 svg > g,
+      .c9 svg path {
         fill: #ffffff;
       }
 
-      .c27 {
-        -webkit-transform: rotate(180deg);
-        -ms-transform: rotate(180deg);
-        transform: rotate(180deg);
-      }
-
-      .c0:focus-visible {
-        outline: none;
-      }
-
-      .c35 svg path {
+      .c40 svg path {
         fill: #8e8ea9;
       }
 
-      .c35:hover svg path,
-      .c35:focus svg path {
+      .c40:hover svg path,
+      .c40:focus svg path {
         fill: #32324d;
       }
 
@@ -635,97 +679,96 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
           style="height: 0px;"
         >
           <div
-            class="c1 c2"
+            class="c1"
             data-strapi-header="true"
           >
             <div
-              class="c1 c3"
+              class="c2"
             >
               <div
-                class="c1 c4"
+                class="c3"
               >
                 <h1
-                  class="c5 c6"
+                  class="c4 c5"
                 >
                   Transfer Tokens
                 </h1>
               </div>
               <a
                 aria-disabled="false"
-                class="c7 c8"
+                class="c6 c7 c8 c9"
                 data-testid="create-transfer-token-button"
                 href="/settings/transfer-tokens/create"
-                variant="default"
               >
                 <div
                   aria-hidden="true"
-                  class="c1 c9"
+                  class="c10"
                 >
                   <svg
                     fill="none"
-                    height="1em"
+                    height="1rem"
                     viewBox="0 0 24 24"
-                    width="1em"
+                    width="1rem"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
+                      d="M24 13.604a.3.3 0 0 1-.3.3h-9.795V23.7a.3.3 0 0 1-.3.3h-3.21a.3.3 0 0 1-.3-.3v-9.795H.3a.3.3 0 0 1-.3-.3v-3.21a.3.3 0 0 1 .3-.3h9.795V.3a.3.3 0 0 1 .3-.3h3.21a.3.3 0 0 1 .3.3v9.795H23.7a.3.3 0 0 1 .3.3v3.21Z"
                       fill="#212134"
                     />
                   </svg>
                 </div>
                 <span
-                  class="c5 c10"
+                  class="c11 c12"
                 >
                   Create new Transfer Token
                 </span>
               </a>
             </div>
             <p
-              class="c5 c11"
+              class="c4 c13"
             >
               "List of generated transfer tokens"
             </p>
           </div>
         </div>
         <div
-          class="c1 c12"
+          class="c14"
         >
           <div
-            class="c1 c13 c14"
+            class="c15 c16"
           >
             <div
-              class="c1 c15 c16"
+              class="c17 c18"
             >
               <div
-                class="c1 c17 c18"
+                class="c19 c20"
               >
                 <table
                   aria-colcount="5"
                   aria-rowcount="2"
-                  class="c19"
+                  class="c21"
                   role="grid"
                 >
                   <thead
-                    class="c20"
+                    class="c22"
                   >
                     <tr
                       aria-rowindex="1"
-                      class="c1 c21"
+                      class="c23"
                     >
                       <th
                         aria-colindex="1"
-                        class="c1 c22"
+                        class="c24"
                         role="gridcell"
                         tabindex="0"
                       >
                         <div
-                          class="c1 c4"
+                          class="c3"
                         >
                           <span>
                             <span
                               aria-labelledby="0"
-                              class="c5 c23"
+                              class="c4 c25"
                               label="Name"
                               tabindex="-1"
                             >
@@ -733,34 +776,34 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                             </span>
                           </span>
                           <span
-                            class="c24"
+                            class="c26"
                           >
                             <span>
                               <button
                                 aria-disabled="false"
                                 aria-labelledby="1"
-                                class="c7 c25"
+                                class="c27 c28 c29 c30"
                                 tabindex="-1"
                                 type="button"
                               >
                                 <span
-                                  class="c26"
+                                  class="c31"
                                 >
                                   Sort on Name
                                 </span>
                                 <svg
                                   aria-hidden="true"
-                                  class="c27"
+                                  class="c32"
                                   fill="none"
                                   focusable="false"
-                                  height="1em"
+                                  height="1rem"
                                   viewBox="0 0 14 8"
-                                  width="1em"
+                                  width="1rem"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
                                     clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                     fill="#32324D"
                                     fill-rule="evenodd"
                                   />
@@ -772,16 +815,16 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                       </th>
                       <th
                         aria-colindex="2"
-                        class="c1 c22"
+                        class="c24"
                         role="gridcell"
                       >
                         <div
-                          class="c1 c4"
+                          class="c3"
                         >
                           <span>
                             <span
                               aria-labelledby="2"
-                              class="c5 c23"
+                              class="c4 c25"
                               label="Description"
                               tabindex="-1"
                             >
@@ -789,22 +832,22 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                             </span>
                           </span>
                           <span
-                            class="c24"
+                            class="c26"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="3"
-                        class="c1 c22"
+                        class="c24"
                         role="gridcell"
                       >
                         <div
-                          class="c1 c4"
+                          class="c3"
                         >
                           <span>
                             <span
                               aria-labelledby="3"
-                              class="c5 c23"
+                              class="c4 c25"
                               label="Created at"
                               tabindex="-1"
                             >
@@ -812,22 +855,22 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                             </span>
                           </span>
                           <span
-                            class="c24"
+                            class="c26"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="4"
-                        class="c1 c22"
+                        class="c24"
                         role="gridcell"
                       >
                         <div
-                          class="c1 c4"
+                          class="c3"
                         >
                           <span>
                             <span
                               aria-labelledby="4"
-                              class="c5 c23"
+                              class="c4 c25"
                               label="Last used"
                               tabindex="-1"
                             >
@@ -835,73 +878,73 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                             </span>
                           </span>
                           <span
-                            class="c24"
+                            class="c26"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="5"
-                        class="c1 c22"
+                        class="c24"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <div
-                          class="c1 c4"
+                          class="c3"
                         >
                           <div
-                            class="c26"
+                            class="c31"
                           >
                             Actions
                           </div>
                           <span
-                            class="c24"
+                            class="c26"
                           />
                         </div>
                       </th>
                     </tr>
                   </thead>
                   <tbody
-                    class="c28"
+                    class="c33"
                     entriestodelete=""
                     headers="[object Object],[object Object],[object Object],[object Object]"
                   >
                     <tr
                       aria-rowindex="2"
-                      class="c1 c21"
+                      class="c23"
                       style="cursor: pointer;"
                     >
                       <td
                         aria-colindex="1"
-                        class="c1 c22"
+                        class="c24"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <span
-                          class="c5 c29"
+                          class="c4 c34"
                         >
                           My super token
                         </span>
                       </td>
                       <td
                         aria-colindex="2"
-                        class="c1 c30 c22"
+                        class="c35 c24"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <span
-                          class="c5 c31"
+                          class="c4 c36"
                         >
                           This describe my super token
                         </span>
                       </td>
                       <td
                         aria-colindex="3"
-                        class="c1 c22"
+                        class="c24"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <span
-                          class="c5 c32"
+                          class="c4 c37"
                         >
                           <time
                             datetime="2021-11-15T00:00:00.000Z"
@@ -913,38 +956,38 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                       </td>
                       <td
                         aria-colindex="4"
-                        class="c1 c22"
+                        class="c24"
                         role="gridcell"
                         tabindex="-1"
                       />
                       <td
                         aria-colindex="5"
-                        class="c1 c22"
+                        class="c24"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <div
-                          class="c1 c33"
+                          class="c38"
                         >
                           <a
-                            class="c34 c35"
+                            class="c39 c40"
                             href="/settings/transfer-tokens/1"
                             tabindex="-1"
                             title="Edit My super token"
                           >
                             <span
-                              class="c5 c36"
+                              class="c11 c41"
                             >
                               <svg
                                 fill="none"
-                                height="1em"
+                                height="1rem"
                                 viewBox="0 0 24 24"
-                                width="1em"
+                                width="1rem"
                                 xmlns="http://www.w3.org/2000/svg"
                               >
                                 <path
                                   clip-rule="evenodd"
-                                  d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                                  d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 0 1 1.887 0l3.118 3.118ZM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0Z"
                                   fill="#212134"
                                   fill-rule="evenodd"
                                 />
@@ -952,21 +995,19 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                             </span>
                           </a>
                           <div
-                            aria-hidden="true"
-                            class="c1 c37"
-                            role="button"
+                            class="c42"
                           >
                             <span>
                               <button
                                 aria-disabled="false"
                                 aria-labelledby="5"
-                                class="c7 c25"
+                                class="c27 c28 c29 c30"
                                 name="delete"
                                 tabindex="-1"
                                 type="button"
                               >
                                 <span
-                                  class="c26"
+                                  class="c31"
                                 >
                                   Delete My super token
                                 </span>
@@ -974,13 +1015,13 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                                   aria-hidden="true"
                                   fill="none"
                                   focusable="false"
-                                  height="1em"
+                                  height="1rem"
                                   viewBox="0 0 24 24"
-                                  width="1em"
+                                  width="1rem"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
-                                    d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
+                                    d="M3.236 6.149a.2.2 0 0 0-.197.233L6 24h12l2.96-17.618a.2.2 0 0 0-.196-.233H3.236ZM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 0 1-.2.2H2.2a.2.2 0 0 1-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8Z"
                                     fill="#32324D"
                                   />
                                 </svg>

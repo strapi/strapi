@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-documentation",
-  "version": "4.6.1",
+  "version": "4.7.1",
   "description": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
   "repository": {
     "type": "git",
@@ -24,33 +24,44 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@strapi/helper-plugin": "4.6.1",
-    "@strapi/utils": "4.6.1",
+    "@strapi/design-system": "1.6.4",
+    "@strapi/helper-plugin": "4.7.1",
+    "@strapi/icons": "1.6.4",
+    "@strapi/utils": "4.7.1",
     "bcryptjs": "2.4.3",
     "cheerio": "^1.0.0-rc.12",
+    "formik": "2.2.9",
     "fs-extra": "10.0.0",
     "koa-static": "^5.0.0",
     "lodash": "4.17.21",
     "path-to-regexp": "6.2.1",
     "pluralize": "8.0.0",
-    "react": "^17.0.2",
     "react-copy-to-clipboard": "^5.1.0",
-    "react-dom": "^17.0.2",
+    "react-helmet": "^6.1.0",
     "react-intl": "6.2.8",
+    "react-query": "3.24.3",
     "react-redux": "8.0.5",
-    "react-router": "^5.2.0",
-    "react-router-dom": "5.3.4",
     "redux": "^4.2.1",
-    "reselect": "^4.0.0",
+    "reselect": "^4.1.7",
     "swagger-ui-dist": "4.15.5",
-    "yaml": "1.10.2"
+    "yaml": "1.10.2",
+    "yup": "^0.32.9"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^4.0.0"
+    "@strapi/strapi": "^4.0.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "5.3.4",
+    "styled-components": "5.3.3"
   },
   "devDependencies": {
     "@testing-library/react": "12.1.4",
-    "msw": "1.0.1"
+    "history": "^4.9.0",
+    "msw": "1.0.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "5.3.4",
+    "styled-components": "5.3.3"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",

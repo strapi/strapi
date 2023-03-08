@@ -1,9 +1,10 @@
 'use strict';
 
 const {
-  DEFAULT_CONFLICT_STRATEGY,
-  DEFAULT_SCHEMA_STRATEGY,
-  DEFAULT_VERSION_STRATEGY,
+  strapi: {
+    providers: { DEFAULT_CONFLICT_STRATEGY },
+  },
+  engine: { DEFAULT_SCHEMA_STRATEGY, DEFAULT_VERSION_STRATEGY },
 } = require('@strapi/data-transfer');
 
 const { expectExit } = require('./shared/transfer.test.utils');
@@ -45,22 +46,24 @@ describe('Import', () => {
     },
     strapi: {
       providers: {
+        DEFAULT_CONFLICT_STRATEGY,
         createLocalStrapiDestinationProvider: jest
           .fn()
           .mockReturnValue({ name: 'testStrapiDest', type: 'destination', getMetadata: jest.fn() }),
       },
     },
     engine: {
+      DEFAULT_SCHEMA_STRATEGY,
+      DEFAULT_VERSION_STRATEGY,
       createTransferEngine,
     },
   };
 
-  jest.mock('@strapi/data-transfer/lib/engine', () => mockDataTransfer.engine, { virtual: true });
-  jest.mock('@strapi/data-transfer/lib/strapi', () => mockDataTransfer.strapi, { virtual: true });
-  jest.mock('@strapi/data-transfer/lib/file', () => mockDataTransfer.file, { virtual: true });
+  jest.mock('@strapi/data-transfer', () => mockDataTransfer);
 
   // mock utils
   const mockUtils = {
+    loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
     formatDiagnostic: jest.fn(),
     createStrapiInstance: jest.fn().mockReturnValue({
       telemetry: {

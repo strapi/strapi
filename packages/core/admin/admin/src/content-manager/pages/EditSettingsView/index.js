@@ -22,7 +22,7 @@ import {
   GridItem,
   Select,
   Option,
-  Stack,
+  Flex,
   Divider,
 } from '@strapi/design-system';
 import { ArrowLeft, Check } from '@strapi/icons';
@@ -264,7 +264,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
               paddingLeft={7}
               paddingRight={7}
             >
-              <Stack spacing={4}>
+              <Flex direction="column" alignItems="stretch" gap={4}>
                 <Typography variant="delta" as="h2">
                   {formatMessage({
                     id: getTrad('containers.SettingPage.settings'),
@@ -328,7 +328,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                     });
                   }}
                 />
-              </Stack>
+              </Flex>
             </Box>
           </ContentLayout>
           <ConfirmDialog

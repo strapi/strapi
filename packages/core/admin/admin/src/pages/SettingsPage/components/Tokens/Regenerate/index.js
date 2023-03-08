@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Button } from '@strapi/design-system/Button';
-import Refresh from '@strapi/icons/Refresh';
+import { Button } from '@strapi/design-system';
+import { Refresh } from '@strapi/icons';
 import { ConfirmDialog } from '@strapi/helper-plugin';
 import { useRegenerate } from '../../../../../hooks';
 
@@ -30,14 +30,14 @@ export const Regenerate = ({ onRegenerate, idToRegenerate, backUrl }) => {
         name="regenerate"
       >
         {formatMessage({
-          id: 'Settings.apiTokens.regenerate',
+          id: 'Settings.tokens.regenerate',
           defaultMessage: 'Regenerate',
         })}
       </Button>
 
       <ConfirmDialog
         bodyText={{
-          id: 'Settings.apiTokens.popUpWarning.message',
+          id: 'Settings.tokens.popUpWarning.message',
           defaultMessage: 'Are you sure you want to regenerate this token?',
         }}
         iconRightButton={<Refresh />}
@@ -46,15 +46,15 @@ export const Regenerate = ({ onRegenerate, idToRegenerate, backUrl }) => {
         onToggleDialog={() => setShowConfirmDialog(false)}
         onConfirm={handleConfirmRegeneration}
         leftButtonText={{
-          id: 'Settings.apiTokens.Button.cancel',
+          id: 'Settings.tokens.Button.cancel',
           defaultMessage: 'Cancel',
         }}
         rightButtonText={{
-          id: 'Settings.apiTokens.Button.regenerate',
+          id: 'Settings.tokens.Button.regenerate',
           defaultMessage: 'Regenerate',
         }}
         title={{
-          id: 'Settings.apiTokens.RegenerateDialog.title',
+          id: 'Settings.tokens.RegenerateDialog.title',
           defaultMessage: 'Regenerate token',
         }}
       />

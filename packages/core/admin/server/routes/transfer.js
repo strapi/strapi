@@ -9,15 +9,7 @@ module.exports = [
     path: '/transfer/runner/push',
     handler: 'transfer.runner-push',
     config: {
-      middlewares: [
-        (ctx, next) => {
-          if (process.env.STRAPI_DISABLE_REMOTE_DATA_TRANSFER === 'true') {
-            return ctx.notFound();
-          }
-
-          return next();
-        },
-      ],
+      middlewares: ['admin::data-transfer'],
       auth: { strategies: [dataTransferAuthStrategy], scope: ['push'] },
     },
   },
@@ -25,17 +17,9 @@ module.exports = [
   {
     method: 'GET',
     path: '/transfer/runner/pull',
-    handler: 'transfer.runner-push', // TODO Change this
+    handler: 'transfer.runner-pull',
     config: {
-      middlewares: [
-        (ctx, next) => {
-          if (process.env.STRAPI_DISABLE_REMOTE_DATA_TRANSFER === 'true') {
-            return ctx.notFound();
-          }
-
-          return next();
-        },
-      ],
+      middlewares: ['admin::data-transfer'],
       auth: { strategies: [dataTransferAuthStrategy], scope: ['pull'] },
     },
   },
@@ -45,6 +29,7 @@ module.exports = [
     path: '/transfer/tokens',
     handler: 'transfer.token-create',
     config: {
+      middlewares: ['admin::data-transfer'],
       policies: [
         'admin::isAuthenticatedAdmin',
         { name: 'admin::hasPermissions', config: { actions: ['admin::transfer.tokens.create'] } },
@@ -56,6 +41,7 @@ module.exports = [
     path: '/transfer/tokens',
     handler: 'transfer.token-list',
     config: {
+      middlewares: ['admin::data-transfer'],
       policies: [
         'admin::isAuthenticatedAdmin',
         { name: 'admin::hasPermissions', config: { actions: ['admin::transfer.tokens.read'] } },
@@ -67,6 +53,7 @@ module.exports = [
     path: '/transfer/tokens/:id',
     handler: 'transfer.token-revoke',
     config: {
+      middlewares: ['admin::data-transfer'],
       policies: [
         'admin::isAuthenticatedAdmin',
         { name: 'admin::hasPermissions', config: { actions: ['admin::transfer.tokens.delete'] } },
@@ -78,6 +65,7 @@ module.exports = [
     path: '/transfer/tokens/:id',
     handler: 'transfer.token-getById',
     config: {
+      middlewares: ['admin::data-transfer'],
       policies: [
         'admin::isAuthenticatedAdmin',
         { name: 'admin::hasPermissions', config: { actions: ['admin::transfer.tokens.read'] } },
@@ -89,6 +77,7 @@ module.exports = [
     path: '/transfer/tokens/:id',
     handler: 'transfer.token-update',
     config: {
+      middlewares: ['admin::data-transfer'],
       policies: [
         'admin::isAuthenticatedAdmin',
         { name: 'admin::hasPermissions', config: { actions: ['admin::transfer.tokens.update'] } },
@@ -100,6 +89,7 @@ module.exports = [
     path: '/transfer/tokens/:id/regenerate',
     handler: 'transfer.token-regenerate',
     config: {
+      middlewares: ['admin::data-transfer'],
       policies: [
         'admin::isAuthenticatedAdmin',
         {

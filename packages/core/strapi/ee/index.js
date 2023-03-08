@@ -3,7 +3,6 @@
 const { pick } = require('lodash/fp');
 
 const { readLicense, verifyLicense, fetchLicense, LicenseCheckError } = require('./license');
-const { eeStoreModel } = require('./ee-store');
 const { shiftCronExpression } = require('../lib/utils/cron');
 
 const ONE_MINUTE = 1000 * 60;
@@ -60,7 +59,7 @@ const onlineUpdate = async ({ strapi }) => {
 
   try {
     const storedInfo = await strapi.db
-      .queryBuilder(eeStoreModel.uid)
+      .queryBuilder('strapi::core-store')
       .where({ key: 'ee_information' })
       .select('value')
       .first()
@@ -101,7 +100,7 @@ const onlineUpdate = async ({ strapi }) => {
 
     if (shouldContactRegistry) {
       result.license = license ?? null;
-      const query = strapi.db.queryBuilder(eeStoreModel.uid).transacting(transaction);
+      const query = strapi.db.queryBuilder('strapi::core-store').transacting(transaction);
 
       if (!storedInfo) {
         query.insert({ key: 'ee_information', value: JSON.stringify(result) });
@@ -163,6 +162,10 @@ module.exports = Object.freeze({
 
   get isEE() {
     return ee.enabled;
+  },
+
+  get seats() {
+    return ee.licenseInfo.seats;
   },
 
   features: Object.freeze({

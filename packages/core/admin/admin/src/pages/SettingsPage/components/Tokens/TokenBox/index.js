@@ -6,10 +6,10 @@ import { Duplicate, Key } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
-const TokenBox = ({ token }) => {
+const TokenBox = ({ token, tokenType }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
-  const { trackUsage } = useTracking(); // TODO: Track different types of tokens
+  const { trackUsage } = useTracking();
   const trackUsageRef = useRef(trackUsage);
 
   return (
@@ -19,7 +19,9 @@ const TokenBox = ({ token }) => {
           <span style={{ alignSelf: 'start' }}>
             <CopyToClipboard
               onCopy={() => {
-                trackUsageRef.current('didCopyTokenKey');
+                trackUsageRef.current('didCopyTokenKey', {
+                  tokenType,
+                });
                 toggleNotification({
                   type: 'success',
                   message: { id: 'Settings.tokens.notification.copied' },
@@ -70,6 +72,7 @@ TokenBox.defaultProps = {
 
 TokenBox.propTypes = {
   token: PropTypes.string,
+  tokenType: PropTypes.string.isRequired,
 };
 
 export default TokenBox;

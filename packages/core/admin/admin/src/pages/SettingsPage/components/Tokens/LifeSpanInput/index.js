@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Select, Option } from '@strapi/design-system/Select';
-import { Typography } from '@strapi/design-system/Typography';
+import { Select, Option, Typography } from '@strapi/design-system';
 import { getDateOfExpiration } from '../../../pages/ApiTokens/EditView/utils';
 
 const LifeSpanInput = ({ token, errors, values, onChange, isCreating }) => {
@@ -13,7 +12,7 @@ const LifeSpanInput = ({ token, errors, values, onChange, isCreating }) => {
       <Select
         name="lifespan"
         label={formatMessage({
-          id: 'Settings.apiTokens.form.duration',
+          id: 'Settings.tokens.form.duration',
           defaultMessage: 'Token duration',
         })}
         value={values.lifespan !== null ? values.lifespan : '0'}

@@ -8,7 +8,6 @@ import {
   Typography,
   Button,
   Flex,
-  Stack,
   Grid,
   GridItem,
   KeyboardNavigable,
@@ -98,9 +97,9 @@ export const PendingAssetStep = ({
       </ModalHeader>
 
       <ModalBody>
-        <Stack spacing={7}>
+        <Flex direction="column" alignItems="stretch" gap={7}>
           <Flex justifyContent="space-between">
-            <Stack spacing={0}>
+            <Flex direction="column" alignItems="stretch" gap={0}>
               <Typography variant="pi" fontWeight="bold" textColor="neutral800">
                 {formatMessage(
                   {
@@ -117,7 +116,7 @@ export const PendingAssetStep = ({
                   defaultMessage: 'Manage the assets before adding them to the Media Library',
                 })}
               </Typography>
-            </Stack>
+            </Flex>
             <Button size="S" onClick={onClickAddAsset}>
               {formatMessage({
                 id: getTrad('header.actions.add-assets'),
@@ -163,7 +162,7 @@ export const PendingAssetStep = ({
               })}
             </Grid>
           </KeyboardNavigable>
-        </Stack>
+        </Flex>
       </ModalBody>
 
       <ModalFooter

@@ -1,51 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot when creating token 1`] = `
-.c12 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c18 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c25 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c53 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #666687;
-}
-
-.c64 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #4945ff;
-}
-
-.c65 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #4a4a6a;
-}
-
-.c2 {
+.c1 {
   background: #f6f6f9;
   padding-top: 24px;
   padding-right: 56px;
@@ -53,15 +9,27 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   padding-left: 56px;
 }
 
-.c3 {
+.c2 {
   padding-bottom: 8px;
 }
 
-.c16 {
-  padding-right: 8px;
+.c13 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
 }
 
-.c22 {
+.c17 {
+  padding-right: 56px;
+  padding-left: 56px;
+}
+
+.c19 {
   background: #ffffff;
   padding-top: 24px;
   padding-right: 32px;
@@ -71,25 +39,34 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c48 {
+.c37 {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.c39 {
+  padding-left: 12px;
+}
+
+.c43 {
   background: #ffffff;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c51 {
+.c46 {
   padding-top: 24px;
   padding-right: 32px;
   padding-bottom: 24px;
   padding-left: 32px;
 }
 
-.c54 {
+.c49 {
   background: #ffffff;
   padding: 16px;
 }
 
-.c73 {
+.c68 {
   background: #eaeaef;
   padding-top: 24px;
   padding-right: 32px;
@@ -97,11 +74,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   padding-left: 32px;
 }
 
-.c55 {
+.c50 {
   border-radius: 4px;
 }
 
-.c57 {
+.c52 {
   background: #f6f6f9;
   padding-top: 24px;
   padding-right: 24px;
@@ -109,21 +86,21 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   padding-left: 24px;
 }
 
-.c59 {
+.c54 {
   max-width: 100%;
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
 }
 
-.c61 {
+.c56 {
   min-width: 0;
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
 }
 
-.c66 {
+.c61 {
   background: #dcdce4;
   border-radius: 50%;
   width: 2rem;
@@ -134,12 +111,12 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   cursor: pointer;
 }
 
-.c68 {
+.c63 {
   color: #666687;
   width: 0.6875rem;
 }
 
-.c71 {
+.c66 {
   background: #ffffff;
   padding-top: 24px;
   padding-right: 24px;
@@ -147,7 +124,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   padding-left: 24px;
 }
 
-.c9 {
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -165,7 +142,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   justify-content: space-between;
 }
 
-.c10 {
+.c9 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -179,7 +156,52 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   flex-direction: row;
 }
 
-.c23 {
+.c12 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c18 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.c20 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.c24 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -193,7 +215,22 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   flex-direction: column;
 }
 
-.c67 {
+.c47 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.c62 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -214,62 +251,157 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   justify-content: center;
 }
 
-.c56 {
+.c11 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c16 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c21 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c26 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c27 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #d02b20;
+}
+
+.c38 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c42 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c48 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #666687;
+}
+
+.c59 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #4945ff;
+}
+
+.c60 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #4a4a6a;
+}
+
+.c51 {
   border: 1px solid #f6f6f9;
 }
 
-.c56:hover:not([aria-disabled='true']) {
+.c51:hover:not([aria-disabled='true']) {
   border: 1px solid #4945ff;
 }
 
-.c56:hover:not([aria-disabled='true']) .c11 {
+.c51:hover:not([aria-disabled='true']) .c10 {
   color: #4945ff;
 }
 
-.c56:hover:not([aria-disabled='true']) > .c8 {
+.c51:hover:not([aria-disabled='true']) > .c7 {
   background: #f0f0ff;
 }
 
-.c56:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+.c51:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
   background: #d9d8ff;
 }
 
-.c70 {
+.c65 {
   border: 1px solid #ffffff;
 }
 
-.c70:hover:not([aria-disabled='true']) {
+.c65:hover:not([aria-disabled='true']) {
   border: 1px solid #4945ff;
 }
 
-.c70:hover:not([aria-disabled='true']) .c11 {
+.c65:hover:not([aria-disabled='true']) .c10 {
   color: #4945ff;
 }
 
-.c70:hover:not([aria-disabled='true']) > .c8 {
+.c65:hover:not([aria-disabled='true']) > .c7 {
   background: #f0f0ff;
 }
 
-.c70:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+.c65:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
   background: #d9d8ff;
 }
 
-.c62 {
+.c64 path {
+  fill: #666687;
+}
+
+.c25 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c25 > * + * {
+  margin-top: 4px;
+}
+
+.c55 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c55 > * + * {
+  margin-left: 12px;
+}
+
+.c57 {
   background: transparent;
   border: none;
   position: relative;
   outline: none;
 }
 
-.c62[aria-disabled='true'] {
+.c57[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c62[aria-disabled='true'] svg path {
+.c57[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c62 svg {
+.c57 svg {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -277,11 +409,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   font-size: 0.625rem;
 }
 
-.c62 svg path {
+.c57 svg path {
   fill: #4945ff;
 }
 
-.c62:after {
+.c57:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -296,11 +428,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 2px solid transparent;
 }
 
-.c62:focus-visible {
+.c57:focus-visible {
   outline: none;
 }
 
-.c62:focus-visible:after {
+.c57:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -311,82 +443,33 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 2px solid #4945ff;
 }
 
-.c24 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c24 > * + * {
-  margin-top: 16px;
-}
-
-.c52 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c52 > * + * {
-  margin-top: 8px;
-}
-
-.c13 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c13 > * + * {
-  margin-left: 8px;
-}
-
-.c60 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c60 > * + * {
-  margin-left: 12px;
-}
-
-.c69 path {
-  fill: #666687;
-}
-
-.c63 {
+.c58 {
   text-align: left;
 }
 
-.c63 > span {
+.c58 > span {
   max-width: 100%;
 }
 
-.c63 svg {
+.c58 svg {
   width: 0.875rem;
   height: 0.875rem;
 }
 
-.c63 svg path {
+.c58 svg path {
   fill: #8e8ea9;
 }
 
-.c58 {
+.c53 {
   min-height: 5.5rem;
   border-radius: 4px;
 }
 
-.c58:hover svg path {
+.c53:hover svg path {
   fill: #4945ff;
 }
 
 .c14 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
   position: relative;
   outline: none;
 }
@@ -435,7 +518,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 2px solid #4945ff;
 }
 
-.c74 {
+.c69 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -447,35 +530,8 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   width: 1px;
 }
 
-.c17 {
-  height: 100%;
-}
-
 .c15 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
-}
-
-.c15 .c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c15 .c11 {
-  color: #ffffff;
 }
 
 .c15[aria-disabled='true'] {
@@ -483,7 +539,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   background: #eaeaef;
 }
 
-.c15[aria-disabled='true'] .c11 {
+.c15[aria-disabled='true'] .c10 {
   color: #666687;
 }
 
@@ -496,7 +552,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   background: #eaeaef;
 }
 
-.c15[aria-disabled='true']:active .c11 {
+.c15[aria-disabled='true']:active .c10 {
   color: #666687;
 }
 
@@ -519,218 +575,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   fill: #ffffff;
 }
 
-.c26 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 20px;
-}
-
-.c49 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-}
-
-.c27 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c50 {
-  grid-column: span 7;
-  max-width: 100%;
-}
-
-.c72 {
-  grid-column: span 5;
-  max-width: 100%;
-}
-
-.c0:focus-visible {
-  outline: none;
-}
-
-.c5 {
-  padding-right: 8px;
-}
-
-.c19 {
-  padding-right: 56px;
-  padding-left: 56px;
-}
-
-.c42 {
-  padding-right: 16px;
-  padding-left: 16px;
-}
-
-.c44 {
-  padding-left: 12px;
-}
-
-.c7 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #4945ff;
-}
-
-.c29 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c31 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #d02b20;
-}
-
-.c43 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
-}
-
-.c47 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c20 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c30 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c33 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c4 {
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  position: relative;
-  outline: none;
-}
-
-.c4 svg path {
-  fill: #4945ff;
-}
-
-.c4 svg {
-  font-size: 0.625rem;
-}
-
-.c4:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c4:focus-visible {
-  outline: none;
-}
-
-.c4:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c6 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-}
-
-.c21 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c21 > * + * {
-  margin-top: 24px;
-}
-
-.c28 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c28 > * + * {
-  margin-top: 4px;
-}
-
-.c32 {
+.c28 {
   line-height: 0;
 }
 
-.c35 {
+.c30 {
   border: none;
   border-radius: 4px;
   padding-bottom: 0.65625rem;
@@ -745,36 +594,36 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   background: inherit;
 }
 
-.c35::-webkit-input-placeholder {
+.c30::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c35::-moz-placeholder {
+.c30::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c35:-ms-input-placeholder {
+.c30:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c35::placeholder {
+.c30::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c35[aria-disabled='true'] {
+.c30[aria-disabled='true'] {
   color: inherit;
 }
 
-.c35:focus {
+.c30:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c34 {
+.c29 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
@@ -786,31 +635,12 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   transition-duration: 0.2s;
 }
 
-.c34:focus-within {
+.c29:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c40 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c40:focus {
-  outline: none;
-}
-
-.c40[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c39 {
+.c34 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -826,28 +656,28 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   transition-duration: 0.2s;
 }
 
-.c39:focus-within {
+.c34:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c45 {
+.c40 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c45 svg {
+.c40 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c45 svg path {
+.c40 svg path {
   fill: #666687;
 }
 
-.c46 {
+.c41 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -856,15 +686,64 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: none;
 }
 
-.c46 svg {
+.c41 svg {
   width: 0.375rem;
 }
 
-.c41 {
+.c35 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c35:focus {
+  outline: none;
+}
+
+.c35[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c36 {
   width: 100%;
 }
 
-.c37 {
+.c22 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 20px;
+}
+
+.c44 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+}
+
+.c23 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c45 {
+  grid-column: span 7;
+  max-width: 100%;
+}
+
+.c67 {
+  grid-column: span 5;
+  max-width: 100%;
+}
+
+.c0:focus-visible {
+  outline: none;
+}
+
+.c32 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   padding-left: 16px;
@@ -880,12 +759,12 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   transition-duration: 0.2s;
 }
 
-.c37:focus-within {
+.c32:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c38 {
+.c33 {
   display: block;
   width: 100%;
   font-weight: 400;
@@ -896,36 +775,36 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   background: inherit;
 }
 
-.c38::-webkit-input-placeholder {
+.c33::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c38::-moz-placeholder {
+.c33::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c38:-ms-input-placeholder {
+.c33:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c38::placeholder {
+.c33::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c38:focus-within {
+.c33:focus-within {
   outline: none;
 }
 
-.c36 textarea {
+.c31 textarea {
   height: 5rem;
   line-height: 1.25rem;
 }
 
-.c36 textarea::-webkit-input-placeholder {
+.c31 textarea::-webkit-input-placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
@@ -933,7 +812,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   opacity: 1;
 }
 
-.c36 textarea::-moz-placeholder {
+.c31 textarea::-moz-placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
@@ -941,7 +820,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   opacity: 1;
 }
 
-.c36 textarea:-ms-input-placeholder {
+.c31 textarea:-ms-input-placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
@@ -949,46 +828,116 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   opacity: 1;
 }
 
-.c36 textarea::placeholder {
+.c31 textarea::placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
   color: #8e8ea9;
   opacity: 1;
+}
+
+.c4 {
+  padding-right: 8px;
+}
+
+.c6 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #4945ff;
+}
+
+.c3 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  position: relative;
+  outline: none;
+}
+
+.c3 svg path {
+  fill: #4945ff;
+}
+
+.c3 svg {
+  font-size: 0.625rem;
+}
+
+.c3:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c3:focus-visible {
+  outline: none;
+}
+
+.c3:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c5 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
 }
 
 @media (max-width:68.75rem) {
-  .c27 {
+  .c23 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c27 {
+  .c23 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c50 {
+  .c45 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c50 {
+  .c45 {
     grid-column: span;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c72 {
+  .c67 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c72 {
+  .c67 {
     grid-column: span;
   }
 }
@@ -1008,80 +957,80 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
         style="height: 0px;"
       >
         <div
-          class="c1 c2"
+          class="c1"
           data-strapi-header="true"
         >
           <div
-            class="c1 c3"
+            class="c2"
           >
             <a
               aria-current="page"
-              class="c4 active"
+              class="c3 active"
               href="/settings/api-tokens"
             >
               <span
                 aria-hidden="true"
-                class="c5 c6"
+                class="c4 c5"
               >
                 <svg
                   fill="none"
-                  height="1em"
+                  height="1rem"
                   viewBox="0 0 24 24"
-                  width="1em"
+                  width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M24 13.3a.2.2 0 01-.2.2H5.74l8.239 8.239a.2.2 0 010 .282L12.14 23.86a.2.2 0 01-.282 0L.14 12.14a.2.2 0 010-.282L11.86.14a.2.2 0 01.282 0L13.98 1.98a.2.2 0 010 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6z"
+                    d="M24 13.3a.2.2 0 0 1-.2.2H5.74l8.239 8.239a.2.2 0 0 1 0 .282L12.14 23.86a.2.2 0 0 1-.282 0L.14 12.14a.2.2 0 0 1 0-.282L11.86.14a.2.2 0 0 1 .282 0L13.98 1.98a.2.2 0 0 1 0 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6Z"
                     fill="#212134"
                   />
                 </svg>
               </span>
               <span
-                class="c7"
+                class="c6"
               >
                 Back
               </span>
             </a>
           </div>
           <div
-            class="c1 c8 c9"
+            class="c7 c8"
           >
             <div
-              class="c1 c8 c10"
+              class="c7 c9"
             >
               <h1
-                class="c11 c12"
+                class="c10 c11"
               >
                 Create API Token
               </h1>
             </div>
             <div
-              class="c1 c8 c10 c13"
+              class="c7 c12"
             >
               <button
                 aria-disabled="false"
-                class="c14 c15"
+                class="c7 c13 c12 c14 c15"
                 type="submit"
               >
                 <div
                   aria-hidden="true"
-                  class="c1 c16 c17"
+                  class=""
                 >
                   <svg
                     fill="none"
-                    height="1em"
+                    height="1rem"
                     viewBox="0 0 24 24"
-                    width="1em"
+                    width="1rem"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
+                      d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
                       fill="#212134"
                     />
                   </svg>
                 </div>
                 <span
-                  class="c11 c18"
+                  class="c10 c16"
                 >
                   Save
                 </span>
@@ -1091,59 +1040,59 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
         </div>
       </div>
       <div
-        class="c19"
+        class="c17"
       >
         <div
-          class="c20 c21"
+          class="c7 c18"
         >
           <div
-            class="c1 c22"
+            class="c19"
           >
             <div
-              class="c1 c8 c23 c24"
+              class="c7 c20"
             >
               <h2
-                class="c11 c25"
+                class="c10 c21"
               >
                 Details
               </h2>
               <div
-                class="c1 c26"
+                class="c22"
               >
                 <div
-                  class="c27"
+                  class="c23"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <div>
                       <div>
                         <div
-                          class="c20 c28"
+                          class="c7 c24 c25"
                         >
                           <label
-                            class="c29"
+                            class="c10 c26"
                             for="1"
                           >
                             <div
-                              class="c30"
+                              class="c7 c9"
                             >
                               Name
                               <span
-                                class="c31 c32"
+                                class="c10 c27 c28"
                               >
                                 *
                               </span>
                             </div>
                           </label>
                           <div
-                            class="c33 c34"
+                            class="c7 c8 c29"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
                               aria-required="true"
-                              class="c35"
+                              class="c30"
                               id="1"
                               name="name"
                               value=""
@@ -1155,39 +1104,39 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   </div>
                 </div>
                 <div
-                  class="c27"
+                  class="c23"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <div
-                      class="c36"
+                      class="c31"
                     >
                       <div>
                         <div
-                          class="c20 c28"
+                          class="c7 c24 c25"
                         >
                           <div
-                            class="c30"
+                            class="c7 c9"
                           >
                             <label
-                              class="c29"
+                              class="c10 c26"
                               for="3"
                             >
                               <div
-                                class="c30"
+                                class="c7 c9"
                               >
                                 Description
                               </div>
                             </label>
                           </div>
                           <div
-                            class="c37"
+                            class="c32"
                           >
                             <textarea
                               aria-invalid="false"
                               aria-required="false"
-                              class="c38"
+                              class="c33"
                               id="3"
                               name="description"
                             />
@@ -1198,54 +1147,54 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   </div>
                 </div>
                 <div
-                  class="c27"
+                  class="c23"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <div>
                       <div
-                        class="c20 c28"
+                        class="c7 c24 c25"
                       >
                         <label
-                          class="c29"
+                          class="c10 c26"
                           for="5"
                         >
                           <div
-                            class="c30"
+                            class="c7 c9"
                           >
                             Token duration
                             <span
-                              class="c31 c32"
+                              class="c10 c27 c28"
                             >
                               *
                             </span>
                           </div>
                         </label>
                         <div
-                          class="c30 c39"
+                          class="c7 c9 c34"
                         >
                           <button
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-labelledby="5 5-label 5-content"
-                            class="c40"
+                            class="c35"
                             id="5"
                             name="lifespan"
                             type="button"
                           />
                           <div
-                            class="c33 c41"
+                            class="c7 c8 c36"
                           >
                             <div
-                              class="c30"
+                              class="c7 c9"
                             >
                               <div
-                                class="c42"
+                                class="c37"
                               >
                                 <span
-                                  class="c43"
+                                  class="c10 c38"
                                   id="5-content"
                                 >
                                   Select
@@ -1253,25 +1202,25 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                               </div>
                             </div>
                             <div
-                              class="c30"
+                              class="c7 c9"
                             >
                               <button
                                 aria-hidden="true"
-                                class="c44 c45 c46"
+                                class="c39 c40 c41"
                                 tabindex="-1"
                                 title="Carret Down Button"
                                 type="button"
                               >
                                 <svg
                                   fill="none"
-                                  height="1em"
+                                  height="1rem"
                                   viewBox="0 0 14 8"
-                                  width="1em"
+                                  width="1rem"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
                                     clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                     fill="#32324D"
                                     fill-rule="evenodd"
                                   />
@@ -1283,59 +1232,59 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                       </div>
                     </div>
                     <span
-                      class="c47"
+                      class="c10 c42"
                     />
                   </div>
                 </div>
                 <div
-                  class="c27"
+                  class="c23"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <div>
                       <div
-                        class="c20 c28"
+                        class="c7 c24 c25"
                       >
                         <label
-                          class="c29"
+                          class="c10 c26"
                           for="7"
                         >
                           <div
-                            class="c30"
+                            class="c7 c9"
                           >
                             Token type
                             <span
-                              class="c31 c32"
+                              class="c10 c27 c28"
                             >
                               *
                             </span>
                           </div>
                         </label>
                         <div
-                          class="c30 c39"
+                          class="c7 c9 c34"
                         >
                           <button
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-labelledby="7 7-label 7-content"
-                            class="c40"
+                            class="c35"
                             id="7"
                             name="type"
                             type="button"
                           />
                           <div
-                            class="c33 c41"
+                            class="c7 c8 c36"
                           >
                             <div
-                              class="c30"
+                              class="c7 c9"
                             >
                               <div
-                                class="c42"
+                                class="c37"
                               >
                                 <span
-                                  class="c43"
+                                  class="c10 c38"
                                   id="7-content"
                                 >
                                   Select
@@ -1343,25 +1292,25 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                               </div>
                             </div>
                             <div
-                              class="c30"
+                              class="c7 c9"
                             >
                               <button
                                 aria-hidden="true"
-                                class="c44 c45 c46"
+                                class="c39 c40 c41"
                                 tabindex="-1"
                                 title="Carret Down Button"
                                 type="button"
                               >
                                 <svg
                                   fill="none"
-                                  height="1em"
+                                  height="1rem"
                                   viewBox="0 0 14 8"
-                                  width="1em"
+                                  width="1rem"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
                                     clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                     fill="#32324D"
                                     fill-rule="evenodd"
                                   />
@@ -1378,81 +1327,81 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
             </div>
           </div>
           <div
-            class="c1 c48 c49"
+            class="c43 c44"
           >
             <div
-              class="c50"
+              class="c45"
             >
               <div
-                class="c1 c51"
+                class="c46"
               >
                 <div
-                  class="c1 c8 c23 c52"
+                  class="c7 c47"
                 >
                   <h2
-                    class="c11 c25"
+                    class="c10 c21"
                   >
                     Permissions
                   </h2>
                   <p
-                    class="c11 c53"
+                    class="c10 c48"
                   >
                     Only actions bound by a route are listed below.
                   </p>
                 </div>
                 <div
-                  class="c1 c54"
+                  class="c49"
                 >
                   <div
                     aria-disabled="false"
-                    class="c1 c55 c56"
+                    class="c50 c51"
                     data-strapi-expanded="false"
                   >
                     <div
-                      class="c1 c8 c57 c9 c58"
+                      class="c7 c52 c8 c53"
                     >
                       <div
-                        class="c1 c8 c59 c10 c60"
+                        class="c7 c54 c9 c55"
                       >
                         <button
-                          aria-controls="accordion-content-0"
+                          aria-controls="accordion-content-8"
                           aria-disabled="false"
                           aria-expanded="false"
-                          aria-labelledby="accordion-label-0"
-                          class="c1 c8 c61 c10 c62 c63"
+                          aria-labelledby="accordion-label-8"
+                          class="c7 c56 c9 c57 c58"
                           data-strapi-accordion-toggle="true"
                           type="button"
                         >
                           <span
-                            class="c11 c64"
+                            class="c10 c59"
                           >
                             <span
-                              class="c11 c65"
-                              id="accordion-label-0"
+                              class="c10 c60"
+                              id="accordion-label-8"
                             >
                               Address
                             </span>
                           </span>
                         </button>
                         <div
-                          class="c1 c8 c10 c60"
+                          class="c7 c9 c55"
                         >
                           <span
                             aria-hidden="true"
-                            class="c1 c8 c66 c67"
+                            class="c7 c61 c62"
                             data-strapi-dropdown="true"
                           >
                             <svg
-                              class="c1 c68 c69"
+                              class="c63 c64"
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 14 8"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                 fill="#32324D"
                                 fill-rule="evenodd"
                               />
@@ -1464,54 +1413,54 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   </div>
                   <div
                     aria-disabled="false"
-                    class="c1 c55 c70"
+                    class="c50 c65"
                     data-strapi-expanded="false"
                   >
                     <div
-                      class="c1 c8 c71 c9 c58"
+                      class="c7 c66 c8 c53"
                     >
                       <div
-                        class="c1 c8 c59 c10 c60"
+                        class="c7 c54 c9 c55"
                       >
                         <button
-                          aria-controls="accordion-content-1"
+                          aria-controls="accordion-content-9"
                           aria-disabled="false"
                           aria-expanded="false"
-                          aria-labelledby="accordion-label-1"
-                          class="c1 c8 c61 c10 c62 c63"
+                          aria-labelledby="accordion-label-9"
+                          class="c7 c56 c9 c57 c58"
                           data-strapi-accordion-toggle="true"
                           type="button"
                         >
                           <span
-                            class="c11 c64"
+                            class="c10 c59"
                           >
                             <span
-                              class="c11 c65"
-                              id="accordion-label-1"
+                              class="c10 c60"
+                              id="accordion-label-9"
                             >
                               Category
                             </span>
                           </span>
                         </button>
                         <div
-                          class="c1 c8 c10 c60"
+                          class="c7 c9 c55"
                         >
                           <span
                             aria-hidden="true"
-                            class="c1 c8 c66 c67"
+                            class="c7 c61 c62"
                             data-strapi-dropdown="true"
                           >
                             <svg
-                              class="c1 c68 c69"
+                              class="c63 c64"
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 14 8"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                 fill="#32324D"
                                 fill-rule="evenodd"
                               />
@@ -1525,22 +1474,22 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
               </div>
             </div>
             <div
-              class="c72"
+              class="c67"
             >
               <div
-                class="c1 c73"
+                class="c68"
                 style="min-height: 100%;"
               >
                 <div
-                  class="c1 c8 c23 c52"
+                  class="c7 c47"
                 >
                   <h3
-                    class="c11 c25"
+                    class="c10 c21"
                   >
                     Advanced settings
                   </h3>
                   <p
-                    class="c11 c53"
+                    class="c10 c48"
                   >
                     Select the application's actions or the plugin's actions and click on the cog icon to display the bound route
                   </p>
@@ -1553,7 +1502,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
     </form>
   </main>
   <div
-    class="c74"
+    class="c69"
   >
     <p
       aria-live="polite"
@@ -1578,62 +1527,23 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
 `;
 
 exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot when editing existing token 1`] = `
-.c14 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
+.c13 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
 }
 
-.c24 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
+.c18 {
+  padding-right: 56px;
+  padding-left: 56px;
 }
 
-.c33 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 500;
-  color: #32324d;
-}
-
-.c35 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #666687;
-}
-
-.c38 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c78 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #4945ff;
-}
-
-.c79 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #4a4a6a;
-}
-
-.c22 {
-  padding-right: 8px;
-}
-
-.c2 {
+.c1 {
   background: #f6f6f9;
   padding-top: 24px;
   padding-right: 56px;
@@ -1641,24 +1551,24 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   padding-left: 56px;
 }
 
-.c3 {
+.c2 {
   padding-bottom: 8px;
 }
 
-.c28 {
+.c20 {
   background: #ffffff;
   padding: 24px;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c29 {
+.c21 {
   background: #f6f6f9;
   padding: 12px;
   border-radius: 4px;
 }
 
-.c36 {
+.c27 {
   background: #ffffff;
   padding-top: 24px;
   padding-right: 32px;
@@ -1668,25 +1578,34 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c63 {
+.c45 {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.c47 {
+  padding-left: 12px;
+}
+
+.c54 {
   background: #ffffff;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c66 {
+.c57 {
   padding-top: 24px;
   padding-right: 32px;
   padding-bottom: 24px;
   padding-left: 32px;
 }
 
-.c68 {
+.c59 {
   background: #ffffff;
   padding: 16px;
 }
 
-.c87 {
+.c78 {
   background: #eaeaef;
   padding-top: 24px;
   padding-right: 32px;
@@ -1694,11 +1613,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   padding-left: 32px;
 }
 
-.c69 {
+.c60 {
   border-radius: 4px;
 }
 
-.c71 {
+.c62 {
   background: #f6f6f9;
   padding-top: 24px;
   padding-right: 24px;
@@ -1706,21 +1625,21 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   padding-left: 24px;
 }
 
-.c73 {
+.c64 {
   max-width: 100%;
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
 }
 
-.c75 {
+.c66 {
   min-width: 0;
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
 }
 
-.c80 {
+.c71 {
   background: #dcdce4;
   border-radius: 50%;
   width: 2rem;
@@ -1731,12 +1650,12 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   cursor: pointer;
 }
 
-.c82 {
+.c73 {
   color: #666687;
   width: 0.6875rem;
 }
 
-.c85 {
+.c76 {
   background: #ffffff;
   padding-top: 24px;
   padding-right: 24px;
@@ -1744,7 +1663,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   padding-left: 24px;
 }
 
-.c11 {
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1762,7 +1681,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   justify-content: space-between;
 }
 
-.c12 {
+.c9 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1776,7 +1695,67 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   flex-direction: row;
 }
 
-.c31 {
+.c12 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c19 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.c23 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.c28 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.c32 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -1790,7 +1769,22 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   flex-direction: column;
 }
 
-.c81 {
+.c58 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.c72 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1811,62 +1805,174 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   justify-content: center;
 }
 
+.c11 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c16 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c24 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 500;
+  color: #32324d;
+}
+
+.c26 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #666687;
+}
+
+.c29 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c34 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c35 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #d02b20;
+}
+
+.c46 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c50 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c52 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c69 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #4945ff;
+}
+
 .c70 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #4a4a6a;
+}
+
+.c61 {
   border: 1px solid #f6f6f9;
 }
 
-.c70:hover:not([aria-disabled='true']) {
+.c61:hover:not([aria-disabled='true']) {
   border: 1px solid #4945ff;
 }
 
-.c70:hover:not([aria-disabled='true']) .c13 {
+.c61:hover:not([aria-disabled='true']) .c10 {
   color: #4945ff;
 }
 
-.c70:hover:not([aria-disabled='true']) > .c10 {
+.c61:hover:not([aria-disabled='true']) > .c7 {
   background: #f0f0ff;
 }
 
-.c70:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+.c61:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
   background: #d9d8ff;
 }
 
-.c84 {
+.c75 {
   border: 1px solid #ffffff;
 }
 
-.c84:hover:not([aria-disabled='true']) {
+.c75:hover:not([aria-disabled='true']) {
   border: 1px solid #4945ff;
 }
 
-.c84:hover:not([aria-disabled='true']) .c13 {
+.c75:hover:not([aria-disabled='true']) .c10 {
   color: #4945ff;
 }
 
-.c84:hover:not([aria-disabled='true']) > .c10 {
+.c75:hover:not([aria-disabled='true']) > .c7 {
   background: #f0f0ff;
 }
 
-.c84:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+.c75:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
   background: #d9d8ff;
 }
 
-.c76 {
+.c74 path {
+  fill: #666687;
+}
+
+.c33 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c33 > * + * {
+  margin-top: 4px;
+}
+
+.c65 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c65 > * + * {
+  margin-left: 12px;
+}
+
+.c67 {
   background: transparent;
   border: none;
   position: relative;
   outline: none;
 }
 
-.c76[aria-disabled='true'] {
+.c67[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c76[aria-disabled='true'] svg path {
+.c67[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c76 svg {
+.c67 svg {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1874,11 +1980,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   font-size: 0.625rem;
 }
 
-.c76 svg path {
+.c67 svg path {
   fill: #4945ff;
 }
 
-.c76:after {
+.c67:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -1893,11 +1999,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 2px solid transparent;
 }
 
-.c76:focus-visible {
+.c67:focus-visible {
   outline: none;
 }
 
-.c76:focus-visible:after {
+.c67:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -1908,110 +2014,52 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 2px solid #4945ff;
 }
 
-.c32 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c32 > * + * {
-  margin-top: 4px;
-}
-
-.c37 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c37 > * + * {
-  margin-top: 16px;
-}
-
-.c67 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c67 > * + * {
-  margin-top: 8px;
-}
-
-.c15 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c15 > * + * {
-  margin-left: 8px;
-}
-
-.c74 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c74 > * + * {
-  margin-left: 12px;
-}
-
-.c83 path {
-  fill: #666687;
-}
-
-.c77 {
+.c68 {
   text-align: left;
 }
 
-.c77 > span {
+.c68 > span {
   max-width: 100%;
 }
 
-.c77 svg {
+.c68 svg {
   width: 0.875rem;
   height: 0.875rem;
 }
 
-.c77 svg path {
+.c68 svg path {
   fill: #8e8ea9;
 }
 
-.c72 {
+.c63 {
   min-height: 5.5rem;
   border-radius: 4px;
 }
 
-.c72:hover svg path {
+.c63:hover svg path {
   fill: #4945ff;
 }
 
-.c20 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
+.c14 {
   position: relative;
   outline: none;
 }
 
-.c20 svg {
+.c14 svg {
   height: 12px;
   width: 12px;
 }
 
-.c20 svg > g,
-.c20 svg path {
+.c14 svg > g,
+.c14 svg path {
   fill: #ffffff;
 }
 
-.c20[aria-disabled='true'] {
+.c14[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c20:after {
+.c14:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -2026,11 +2074,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 2px solid transparent;
 }
 
-.c20:focus-visible {
+.c14:focus-visible {
   outline: none;
 }
 
-.c20:focus-visible:after {
+.c14:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -2041,7 +2089,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 2px solid #4945ff;
 }
 
-.c88 {
+.c79 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -2053,342 +2101,65 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   width: 1px;
 }
 
-.c23 {
-  height: 100%;
-}
-
-.c89 .c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c89 .c13 {
-  color: #ffffff;
-}
-
-.c89[aria-disabled='true'] .c13 {
+.c80[aria-disabled='true'] .c10 {
   color: #666687;
 }
 
-.c89[aria-disabled='true']:active .c13 {
+.c80[aria-disabled='true']:active .c10 {
   color: #666687;
 }
 
-.c21 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
+.c15 {
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
-}
-
-.c21 .c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c21 .c13 {
-  color: #ffffff;
-}
-
-.c21[aria-disabled='true'] {
   border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c21[aria-disabled='true'] .c13 {
-  color: #666687;
-}
-
-.c21[aria-disabled='true'] svg > g,.c21[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c21[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c21[aria-disabled='true']:active .c13 {
-  color: #666687;
-}
-
-.c21[aria-disabled='true']:active svg > g,.c21[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c21:hover {
-  border: 1px solid #7b79ff;
-  background: #7b79ff;
-}
-
-.c21:active {
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c21 svg > g,
-.c21 svg path {
-  fill: #ffffff;
-}
-
-.c39 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 20px;
-}
-
-.c64 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-}
-
-.c40 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c65 {
-  grid-column: span 7;
-  max-width: 100%;
-}
-
-.c86 {
-  grid-column: span 5;
-  max-width: 100%;
-}
-
-.c0:focus-visible {
-  outline: none;
-}
-
-.c30 {
-  margin-right: 24px;
-}
-
-.c30 svg {
-  width: 2rem;
-  height: 2rem;
-}
-
-.c34 {
-  word-break: break-all;
-}
-
-.c6 {
-  padding-right: 8px;
-}
-
-.c25 {
-  padding-right: 56px;
-  padding-left: 56px;
-}
-
-.c54 {
-  padding-right: 16px;
-  padding-left: 16px;
-}
-
-.c56 {
-  padding-left: 12px;
-}
-
-.c9 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #4945ff;
-}
-
-.c19 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c43 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #d02b20;
-}
-
-.c55 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
-}
-
-.c59 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c61 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c26 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c42 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c45 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c16 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
   background: #ffffff;
+}
+
+.c15[aria-disabled='true'] {
   border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
+  background: #eaeaef;
 }
 
-.c16 svg {
-  height: 12px;
-  width: 12px;
+.c15[aria-disabled='true'] .c10 {
+  color: #666687;
 }
 
-.c16 svg > g,
-.c16 svg path {
-  fill: #ffffff;
+.c15[aria-disabled='true'] svg > g,.c15[aria-disabled='true'] svg path {
+  fill: #666687;
 }
 
-.c16[aria-disabled='true'] {
-  pointer-events: none;
+.c15[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
 }
 
-.c16:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
+.c15[aria-disabled='true']:active .c10 {
+  color: #666687;
 }
 
-.c16:focus-visible {
-  outline: none;
+.c15[aria-disabled='true']:active svg > g,.c15[aria-disabled='true']:active svg path {
+  fill: #666687;
 }
 
-.c16:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
+.c15:hover {
+  background-color: #f6f6f9;
 }
 
-.c18 {
-  height: 100%;
+.c15:active {
+  background-color: #eaeaef;
+}
+
+.c15 .c10 {
+  color: #32324d;
+}
+
+.c15 svg > g,
+.c15 svg path {
+  fill: #32324d;
 }
 
 .c17 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
-  border: 1px solid #dcdce4;
-  background: #ffffff;
-}
-
-.c17 .c5 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c17 .c8 {
-  color: #ffffff;
 }
 
 .c17[aria-disabled='true'] {
@@ -2396,7 +2167,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   background: #eaeaef;
 }
 
-.c17[aria-disabled='true'] .c8 {
+.c17[aria-disabled='true'] .c10 {
   color: #666687;
 }
 
@@ -2409,7 +2180,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   background: #eaeaef;
 }
 
-.c17[aria-disabled='true']:active .c8 {
+.c17[aria-disabled='true']:active .c10 {
   color: #666687;
 }
 
@@ -2418,105 +2189,25 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
 }
 
 .c17:hover {
-  background-color: #f6f6f9;
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
 }
 
 .c17:active {
-  background-color: #eaeaef;
-}
-
-.c17 .c8 {
-  color: #32324d;
+  border: 1px solid #4945ff;
+  background: #4945ff;
 }
 
 .c17 svg > g,
 .c17 svg path {
-  fill: #32324d;
+  fill: #ffffff;
 }
 
-.c4 {
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  position: relative;
-  outline: none;
-}
-
-.c4 svg path {
-  fill: #4945ff;
-}
-
-.c4 svg {
-  font-size: 0.625rem;
-}
-
-.c4:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c4:focus-visible {
-  outline: none;
-}
-
-.c4:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c7 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-}
-
-.c27 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c27 > * + * {
-  margin-top: 24px;
-}
-
-.c41 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c41 > * + * {
-  margin-top: 4px;
-}
-
-.c44 {
+.c36 {
   line-height: 0;
 }
 
-.c47 {
+.c38 {
   border: none;
   border-radius: 4px;
   padding-bottom: 0.65625rem;
@@ -2531,36 +2222,36 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   background: inherit;
 }
 
-.c47::-webkit-input-placeholder {
+.c38::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c47::-moz-placeholder {
+.c38::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c47:-ms-input-placeholder {
+.c38:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c47::placeholder {
+.c38::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c47[aria-disabled='true'] {
+.c38[aria-disabled='true'] {
   color: inherit;
 }
 
-.c47:focus {
+.c38:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c46 {
+.c37 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
@@ -2572,31 +2263,12 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   transition-duration: 0.2s;
 }
 
-.c46:focus-within {
+.c37:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c52 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c52:focus {
-  outline: none;
-}
-
-.c52[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c51 {
+.c42 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -2614,12 +2286,12 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   transition-duration: 0.2s;
 }
 
-.c51:focus-within {
+.c42:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c60 {
+.c51 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -2635,28 +2307,28 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   transition-duration: 0.2s;
 }
 
-.c60:focus-within {
+.c51:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c57 {
+.c48 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c57 svg {
+.c48 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c57 svg path {
+.c48 svg path {
   fill: #666687;
 }
 
-.c58 {
+.c49 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2666,11 +2338,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   cursor: not-allowed;
 }
 
-.c58 svg {
+.c49 svg {
   width: 0.375rem;
 }
 
-.c62 {
+.c53 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2679,15 +2351,64 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: none;
 }
 
-.c62 svg {
+.c53 svg {
   width: 0.375rem;
 }
 
-.c53 {
+.c43 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c43:focus {
+  outline: none;
+}
+
+.c43[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c44 {
   width: 100%;
 }
 
-.c49 {
+.c30 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 20px;
+}
+
+.c55 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+}
+
+.c31 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c56 {
+  grid-column: span 7;
+  max-width: 100%;
+}
+
+.c77 {
+  grid-column: span 5;
+  max-width: 100%;
+}
+
+.c0:focus-visible {
+  outline: none;
+}
+
+.c40 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   padding-left: 16px;
@@ -2703,12 +2424,12 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   transition-duration: 0.2s;
 }
 
-.c49:focus-within {
+.c40:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c50 {
+.c41 {
   display: block;
   width: 100%;
   font-weight: 400;
@@ -2719,36 +2440,36 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   background: inherit;
 }
 
-.c50::-webkit-input-placeholder {
+.c41::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c50::-moz-placeholder {
+.c41::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c50:-ms-input-placeholder {
+.c41:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c50::placeholder {
+.c41::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c50:focus-within {
+.c41:focus-within {
   outline: none;
 }
 
-.c48 textarea {
+.c39 textarea {
   height: 5rem;
   line-height: 1.25rem;
 }
 
-.c48 textarea::-webkit-input-placeholder {
+.c39 textarea::-webkit-input-placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
@@ -2756,7 +2477,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   opacity: 1;
 }
 
-.c48 textarea::-moz-placeholder {
+.c39 textarea::-moz-placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
@@ -2764,7 +2485,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   opacity: 1;
 }
 
-.c48 textarea:-ms-input-placeholder {
+.c39 textarea:-ms-input-placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
@@ -2772,46 +2493,129 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   opacity: 1;
 }
 
-.c48 textarea::placeholder {
+.c39 textarea::placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
   color: #8e8ea9;
   opacity: 1;
+}
+
+.c22 {
+  margin-right: 24px;
+}
+
+.c22 svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.c25 {
+  word-break: break-all;
+}
+
+.c4 {
+  padding-right: 8px;
+}
+
+.c6 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #4945ff;
+}
+
+.c3 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  position: relative;
+  outline: none;
+}
+
+.c3 svg path {
+  fill: #4945ff;
+}
+
+.c3 svg {
+  font-size: 0.625rem;
+}
+
+.c3:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c3:focus-visible {
+  outline: none;
+}
+
+.c3:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c5 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
 }
 
 @media (max-width:68.75rem) {
-  .c40 {
+  .c31 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c40 {
+  .c31 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c65 {
+  .c56 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c65 {
+  .c56 {
     grid-column: span;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c86 {
+  .c77 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c86 {
+  .c77 {
     grid-column: span;
   }
 }
@@ -2831,111 +2635,111 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
         style="height: 0px;"
       >
         <div
-          class="c1 c2"
+          class="c1"
           data-strapi-header="true"
         >
           <div
-            class="c1 c3"
+            class="c2"
           >
             <a
               aria-current="page"
-              class="c4 active"
+              class="c3 active"
               href="/settings/api-tokens"
             >
               <span
                 aria-hidden="true"
-                class="c5 c6 c7"
+                class="c4 c5"
               >
                 <svg
                   fill="none"
-                  height="1em"
+                  height="1rem"
                   viewBox="0 0 24 24"
-                  width="1em"
+                  width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M24 13.3a.2.2 0 01-.2.2H5.74l8.239 8.239a.2.2 0 010 .282L12.14 23.86a.2.2 0 01-.282 0L.14 12.14a.2.2 0 010-.282L11.86.14a.2.2 0 01.282 0L13.98 1.98a.2.2 0 010 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6z"
+                    d="M24 13.3a.2.2 0 0 1-.2.2H5.74l8.239 8.239a.2.2 0 0 1 0 .282L12.14 23.86a.2.2 0 0 1-.282 0L.14 12.14a.2.2 0 0 1 0-.282L11.86.14a.2.2 0 0 1 .282 0L13.98 1.98a.2.2 0 0 1 0 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6Z"
                     fill="#212134"
                   />
                 </svg>
               </span>
               <span
-                class="c8 c9"
+                class="c6"
               >
                 Back
               </span>
             </a>
           </div>
           <div
-            class="c1 c10 c11"
+            class="c7 c8"
           >
             <div
-              class="c1 c10 c12"
+              class="c7 c9"
             >
               <h1
-                class="c13 c14"
+                class="c10 c11"
               >
                 My super token
               </h1>
             </div>
             <div
-              class="c1 c10 c12 c15"
+              class="c7 c12"
             >
               <button
                 aria-disabled="false"
-                class="c16 c17"
+                class="c7 c13 c12 c14 c15"
                 name="regenerate"
                 type="button"
               >
                 <div
                   aria-hidden="true"
-                  class="c5 c6 c18"
+                  class=""
                 >
                   <svg
                     fill="none"
-                    height="1em"
+                    height="1rem"
                     viewBox="0 0 24 24"
-                    width="1em"
+                    width="1rem"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
                       clip-rule="evenodd"
-                      d="M15.681 2.804A9.64 9.64 0 0011.818 2C6.398 2 2 6.48 2 12c0 5.521 4.397 10 9.818 10 2.03 0 4.011-.641 5.67-1.835a9.987 9.987 0 003.589-4.831 1.117 1.117 0 00-.664-1.418 1.086 1.086 0 00-1.393.676 7.769 7.769 0 01-2.792 3.758 7.546 7.546 0 01-4.41 1.428V4.222h.002a7.492 7.492 0 013.003.625 7.61 7.61 0 012.5 1.762l.464.551-2.986 3.042a.186.186 0 00.129.316H22V3.317a.188.188 0 00-.112-.172.179.179 0 00-.199.04l-2.355 2.4-.394-.468-.02-.02a9.791 9.791 0 00-3.239-2.293zm-3.863 1.418V2v2.222zm0 0v15.556c-4.216 0-7.636-3.484-7.636-7.778s3.42-7.777 7.636-7.778z"
+                      d="M15.681 2.804A9.64 9.64 0 0 0 11.818 2C6.398 2 2 6.48 2 12c0 5.521 4.397 10 9.818 10 2.03 0 4.011-.641 5.67-1.835a9.987 9.987 0 0 0 3.589-4.831 1.117 1.117 0 0 0-.664-1.418 1.086 1.086 0 0 0-1.393.676 7.769 7.769 0 0 1-2.792 3.758 7.546 7.546 0 0 1-4.41 1.428V4.222h.002a7.492 7.492 0 0 1 3.003.625 7.61 7.61 0 0 1 2.5 1.762l.464.551-2.986 3.042a.186.186 0 0 0 .129.316H22V3.317a.188.188 0 0 0-.112-.172.179.179 0 0 0-.199.04l-2.355 2.4-.394-.468-.02-.02a9.791 9.791 0 0 0-3.239-2.293Zm-3.863 1.418V2v2.222Zm0 0v15.556c-4.216 0-7.636-3.484-7.636-7.778s3.42-7.777 7.636-7.778Z"
                       fill="#212134"
                       fill-rule="evenodd"
                     />
                   </svg>
                 </div>
                 <span
-                  class="c8 c19"
+                  class="c10 c16"
                 >
                   Regenerate
                 </span>
               </button>
               <button
                 aria-disabled="false"
-                class="c20 c21"
+                class="c7 c13 c12 c14 c17"
                 type="submit"
               >
                 <div
                   aria-hidden="true"
-                  class="c1 c22 c23"
+                  class=""
                 >
                   <svg
                     fill="none"
-                    height="1em"
+                    height="1rem"
                     viewBox="0 0 24 24"
-                    width="1em"
+                    width="1rem"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
+                      d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
                       fill="#212134"
                     />
                   </svg>
                 </div>
                 <span
-                  class="c13 c24"
+                  class="c10 c16"
                 >
                   Save
                 </span>
@@ -2945,98 +2749,98 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
         </div>
       </div>
       <div
-        class="c5 c25"
+        class="c18"
       >
         <div
-          class="c5 c26 c27"
+          class="c7 c19"
         >
           <div
-            class="c1 c10 c28 c12"
+            class="c7 c20 c9"
           >
             <div
-              class="c1 c10 c29 c12 c30"
+              class="c7 c21 c9 c22"
             >
               <svg
                 fill="none"
-                height="1em"
+                height="1rem"
                 viewBox="0 0 24 24"
-                width="1em"
+                width="1rem"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M17 14h-4.34a6 6 0 110-4H23v4h-2v4h-4v-4zM7 14a2 2 0 100-4 2 2 0 000 4z"
+                  d="M17 14h-4.34a6 6 0 1 1 0-4H23v4h-2v4h-4v-4ZM7 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"
                   fill="#8E8EA9"
                 />
               </svg>
             </div>
             <div
-              class="c1 c10 c31 c32"
+              class="c7 c23"
             >
               <div
-                class="c1 c10 c12"
+                class="c7 c9"
               >
                 <span
-                  class="c13 c33 c34"
+                  class="c10 c24 c25"
                 >
                   This token isn’t accessible anymore.
                 </span>
               </div>
               <span
-                class="c13 c35"
+                class="c10 c26"
               >
                 For security reasons, you can only see your token once.
               </span>
             </div>
           </div>
           <div
-            class="c1 c36"
+            class="c27"
           >
             <div
-              class="c1 c10 c31 c37"
+              class="c7 c28"
             >
               <h2
-                class="c13 c38"
+                class="c10 c29"
               >
                 Details
               </h2>
               <div
-                class="c1 c39"
+                class="c30"
               >
                 <div
-                  class="c40"
+                  class="c31"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <div>
                       <div>
                         <div
-                          class="c5 c26 c41"
+                          class="c7 c32 c33"
                         >
                           <label
-                            class="c8 c19"
-                            for="9"
+                            class="c10 c34"
+                            for="12"
                           >
                             <div
-                              class="c5 c42"
+                              class="c7 c9"
                             >
                               Name
                               <span
-                                class="c8 c43 c44"
+                                class="c10 c35 c36"
                               >
                                 *
                               </span>
                             </div>
                           </label>
                           <div
-                            class="c5 c45 c46"
+                            class="c7 c8 c37"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
                               aria-required="true"
-                              class="c47"
-                              id="9"
+                              class="c38"
+                              id="12"
                               name="name"
                               value="My super token"
                             />
@@ -3047,40 +2851,40 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   </div>
                 </div>
                 <div
-                  class="c40"
+                  class="c31"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <div
-                      class="c48"
+                      class="c39"
                     >
                       <div>
                         <div
-                          class="c5 c26 c41"
+                          class="c7 c32 c33"
                         >
                           <div
-                            class="c5 c42"
+                            class="c7 c9"
                           >
                             <label
-                              class="c8 c19"
-                              for="11"
+                              class="c10 c34"
+                              for="14"
                             >
                               <div
-                                class="c5 c42"
+                                class="c7 c9"
                               >
                                 Description
                               </div>
                             </label>
                           </div>
                           <div
-                            class="c49"
+                            class="c40"
                           >
                             <textarea
                               aria-invalid="false"
                               aria-required="false"
-                              class="c50"
-                              id="11"
+                              class="c41"
+                              id="14"
                               name="description"
                             >
                               This describe my super token
@@ -3092,67 +2896,67 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   </div>
                 </div>
                 <div
-                  class="c40"
+                  class="c31"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <div>
                       <div
-                        class="c5 c26 c41"
+                        class="c7 c32 c33"
                       >
                         <label
-                          class="c8 c19"
-                          for="13"
+                          class="c10 c34"
+                          for="16"
                         >
                           <div
-                            class="c5 c42"
+                            class="c7 c9"
                           >
                             Token duration
                             <span
-                              class="c8 c43 c44"
+                              class="c10 c35 c36"
                             >
                               *
                             </span>
                           </div>
                         </label>
                         <div
-                          class="c5 c42 c51"
+                          class="c7 c9 c42"
                           disabled=""
                         >
                           <button
                             aria-disabled="true"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="13 13-label 13-content"
-                            class="c52"
-                            id="13"
+                            aria-labelledby="16 16-label 16-content"
+                            class="c43"
+                            id="16"
                             name="lifespan"
                             type="button"
                           />
                           <div
-                            class="c5 c45 c53"
+                            class="c7 c8 c44"
                           >
                             <div
-                              class="c5 c42"
+                              class="c7 c9"
                             >
                               <div
-                                class="c5 c54"
+                                class="c45"
                               >
                                 <span
-                                  class="c8 c55"
-                                  id="13-content"
+                                  class="c10 c46"
+                                  id="16-content"
                                 >
                                   Select
                                 </span>
                               </div>
                             </div>
                             <div
-                              class="c5 c42"
+                              class="c7 c9"
                             >
                               <button
                                 aria-hidden="true"
-                                class="c5 c56 c57 c58"
+                                class="c47 c48 c49"
                                 disabled=""
                                 tabindex="-1"
                                 title="Carret Down Button"
@@ -3160,14 +2964,14 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                               >
                                 <svg
                                   fill="none"
-                                  height="1em"
+                                  height="1rem"
                                   viewBox="0 0 14 8"
-                                  width="1em"
+                                  width="1rem"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
                                     clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                     fill="#32324D"
                                     fill-rule="evenodd"
                                   />
@@ -3179,87 +2983,87 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                       </div>
                     </div>
                     <span
-                      class="c8 c59"
+                      class="c10 c50"
                     >
                       Expiration date: Unlimited
                     </span>
                   </div>
                 </div>
                 <div
-                  class="c40"
+                  class="c31"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <div>
                       <div
-                        class="c5 c26 c41"
+                        class="c7 c32 c33"
                       >
                         <label
-                          class="c8 c19"
-                          for="15"
+                          class="c10 c34"
+                          for="18"
                         >
                           <div
-                            class="c5 c42"
+                            class="c7 c9"
                           >
                             Token type
                             <span
-                              class="c8 c43 c44"
+                              class="c10 c35 c36"
                             >
                               *
                             </span>
                           </div>
                         </label>
                         <div
-                          class="c5 c42 c60"
+                          class="c7 c9 c51"
                         >
                           <button
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="15 15-label 15-content"
-                            class="c52"
-                            id="15"
+                            aria-labelledby="18 18-label 18-content"
+                            class="c43"
+                            id="18"
                             name="type"
                             type="button"
                           />
                           <div
-                            class="c5 c45 c53"
+                            class="c7 c8 c44"
                           >
                             <div
-                              class="c5 c42"
+                              class="c7 c9"
                             >
                               <div
-                                class="c5 c54"
+                                class="c45"
                               >
                                 <span
-                                  class="c8 c61"
-                                  id="15-content"
+                                  class="c10 c52"
+                                  id="18-content"
                                 >
                                   Read-only
                                 </span>
                               </div>
                             </div>
                             <div
-                              class="c5 c42"
+                              class="c7 c9"
                             >
                               <button
                                 aria-hidden="true"
-                                class="c5 c56 c57 c62"
+                                class="c47 c48 c53"
                                 tabindex="-1"
                                 title="Carret Down Button"
                                 type="button"
                               >
                                 <svg
                                   fill="none"
-                                  height="1em"
+                                  height="1rem"
                                   viewBox="0 0 14 8"
-                                  width="1em"
+                                  width="1rem"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
                                     clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                     fill="#32324D"
                                     fill-rule="evenodd"
                                   />
@@ -3276,81 +3080,81 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
             </div>
           </div>
           <div
-            class="c1 c63 c64"
+            class="c54 c55"
           >
             <div
-              class="c65"
+              class="c56"
             >
               <div
-                class="c1 c66"
+                class="c57"
               >
                 <div
-                  class="c1 c10 c31 c67"
+                  class="c7 c58"
                 >
                   <h2
-                    class="c13 c38"
+                    class="c10 c29"
                   >
                     Permissions
                   </h2>
                   <p
-                    class="c13 c35"
+                    class="c10 c26"
                   >
                     Only actions bound by a route are listed below.
                   </p>
                 </div>
                 <div
-                  class="c1 c68"
+                  class="c59"
                 >
                   <div
                     aria-disabled="false"
-                    class="c1 c69 c70"
+                    class="c60 c61"
                     data-strapi-expanded="false"
                   >
                     <div
-                      class="c1 c10 c71 c11 c72"
+                      class="c7 c62 c8 c63"
                     >
                       <div
-                        class="c1 c10 c73 c12 c74"
+                        class="c7 c64 c9 c65"
                       >
                         <button
-                          aria-controls="accordion-content-3"
+                          aria-controls="accordion-content-19"
                           aria-disabled="false"
                           aria-expanded="false"
-                          aria-labelledby="accordion-label-3"
-                          class="c1 c10 c75 c12 c76 c77"
+                          aria-labelledby="accordion-label-19"
+                          class="c7 c66 c9 c67 c68"
                           data-strapi-accordion-toggle="true"
                           type="button"
                         >
                           <span
-                            class="c13 c78"
+                            class="c10 c69"
                           >
                             <span
-                              class="c13 c79"
-                              id="accordion-label-3"
+                              class="c10 c70"
+                              id="accordion-label-19"
                             >
                               Address
                             </span>
                           </span>
                         </button>
                         <div
-                          class="c1 c10 c12 c74"
+                          class="c7 c9 c65"
                         >
                           <span
                             aria-hidden="true"
-                            class="c1 c10 c80 c81"
+                            class="c7 c71 c72"
                             data-strapi-dropdown="true"
                           >
                             <svg
-                              class="c1 c82 c83"
+                              class="c73 c74"
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 14 8"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                 fill="#32324D"
                                 fill-rule="evenodd"
                               />
@@ -3362,54 +3166,54 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                   </div>
                   <div
                     aria-disabled="false"
-                    class="c1 c69 c84"
+                    class="c60 c75"
                     data-strapi-expanded="false"
                   >
                     <div
-                      class="c1 c10 c85 c11 c72"
+                      class="c7 c76 c8 c63"
                     >
                       <div
-                        class="c1 c10 c73 c12 c74"
+                        class="c7 c64 c9 c65"
                       >
                         <button
-                          aria-controls="accordion-content-4"
+                          aria-controls="accordion-content-20"
                           aria-disabled="false"
                           aria-expanded="false"
-                          aria-labelledby="accordion-label-4"
-                          class="c1 c10 c75 c12 c76 c77"
+                          aria-labelledby="accordion-label-20"
+                          class="c7 c66 c9 c67 c68"
                           data-strapi-accordion-toggle="true"
                           type="button"
                         >
                           <span
-                            class="c13 c78"
+                            class="c10 c69"
                           >
                             <span
-                              class="c13 c79"
-                              id="accordion-label-4"
+                              class="c10 c70"
+                              id="accordion-label-20"
                             >
                               Category
                             </span>
                           </span>
                         </button>
                         <div
-                          class="c1 c10 c12 c74"
+                          class="c7 c9 c65"
                         >
                           <span
                             aria-hidden="true"
-                            class="c1 c10 c80 c81"
+                            class="c7 c71 c72"
                             data-strapi-dropdown="true"
                           >
                             <svg
-                              class="c1 c82 c83"
+                              class="c73 c74"
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 14 8"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                 fill="#32324D"
                                 fill-rule="evenodd"
                               />
@@ -3423,22 +3227,22 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
               </div>
             </div>
             <div
-              class="c86"
+              class="c77"
             >
               <div
-                class="c1 c87"
+                class="c78"
                 style="min-height: 100%;"
               >
                 <div
-                  class="c1 c10 c31 c67"
+                  class="c7 c58"
                 >
                   <h3
-                    class="c13 c38"
+                    class="c10 c29"
                   >
                     Advanced settings
                   </h3>
                   <p
-                    class="c13 c35"
+                    class="c10 c26"
                   >
                     Select the application's actions or the plugin's actions and click on the cog icon to display the bound route
                   </p>
@@ -3451,7 +3255,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
     </form>
   </main>
   <div
-    class="c88"
+    class="c79"
   >
     <p
       aria-live="polite"

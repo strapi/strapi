@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
 import { useRouteMatch, useHistory } from 'react-router-dom';
@@ -9,13 +9,12 @@ import {
   Form,
   useOverlayBlocker,
   useNotification,
+  useTracking,
   useGuidedTour,
   useRBAC,
   useFetchClient,
 } from '@strapi/helper-plugin';
-import { Main } from '@strapi/design-system/Main';
-import { Stack } from '@strapi/design-system/Stack';
-import { ContentLayout } from '@strapi/design-system/Layout';
+import { ContentLayout, Main, Flex } from '@strapi/design-system';
 import { formatAPIErrors } from '../../../../../utils';
 import { schema } from './utils';
 import LoadingView from './components/LoadingView';
@@ -23,6 +22,7 @@ import adminPermissions from '../../../../../permissions';
 import FormTransferTokenContainer from './components/FormTransferTokenContainer';
 import TokenBox from '../../../components/Tokens/TokenBox';
 import FormHead from '../../../components/Tokens/FormHead';
+import { TRANSFER_TOKEN_TYPE } from '../../../components/Tokens/constants';
 
 const MSG_ERROR_NAME_TAKEN = 'Name already taken';
 
@@ -39,6 +39,8 @@ const TransferTokenCreateView = () => {
         }
       : null
   );
+  const { trackUsage } = useTracking();
+  const trackUsageRef = useRef(trackUsage);
   const { setCurrentStep } = useGuidedTour();
   const {
     allowedActions: { canCreate, canUpdate, canRegenerate },
@@ -49,6 +51,12 @@ const TransferTokenCreateView = () => {
   const { get, post, put } = useFetchClient();
 
   const isCreating = id === 'create';
+
+  useEffect(() => {
+    trackUsageRef.current(isCreating ? 'didAddTokenFromList' : 'didEditTokenFromList', {
+      tokenType: TRANSFER_TOKEN_TYPE,
+    });
+  }, [isCreating]);
 
   const { status } = useQuery(
     ['transfer-token', id],
@@ -75,6 +83,9 @@ const TransferTokenCreateView = () => {
   );
 
   const handleSubmit = async (body, actions) => {
+    trackUsageRef.current(isCreating ? 'willCreateToken' : 'willEditToken', {
+      tokenType: TRANSFER_TOKEN_TYPE,
+    });
     lockApp();
     const lifespanVal =
       body.lifespan && parseInt(body.lifespan, 10) && body.lifespan !== '0'
@@ -118,6 +129,11 @@ const TransferTokenCreateView = () => {
               id: 'notification.success.transfertokenedited',
               defaultMessage: 'Transfer Token successfully edited',
             }),
+      });
+
+      trackUsageRef.current(isCreating ? 'didCreateToken' : 'didEditToken', {
+        type: transferToken?.type,
+        tokenType: TRANSFER_TOKEN_TYPE,
       });
     } catch (err) {
       const errors = formatAPIErrors(err.response.data);
@@ -178,8 +194,10 @@ const TransferTokenCreateView = () => {
                 regenerateUrl="/admin/transfer/tokens/"
               />
               <ContentLayout>
-                <Stack spacing={6}>
-                  {Boolean(transferToken?.name) && <TokenBox token={transferToken?.accessKey} />}
+                <Flex direction="column" alignItems="stretch" gap={6}>
+                  {Boolean(transferToken?.name) && (
+                    <TokenBox token={transferToken?.accessKey} tokenType={TRANSFER_TOKEN_TYPE} />
+                  )}
                   <FormTransferTokenContainer
                     errors={errors}
                     onChange={handleChange}
@@ -188,7 +206,7 @@ const TransferTokenCreateView = () => {
                     values={values}
                     transferToken={transferToken}
                   />
-                </Stack>
+                </Flex>
               </ContentLayout>
             </Form>
           );

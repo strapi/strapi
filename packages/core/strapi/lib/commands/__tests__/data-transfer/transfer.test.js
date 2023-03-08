@@ -5,6 +5,7 @@ const { expectExit } = require('./shared/transfer.test.utils');
 describe('Transfer', () => {
   // mock utils
   const mockUtils = {
+    loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
     formatDiagnostic: jest.fn(),
     createStrapiInstance() {
       return {
@@ -64,9 +65,7 @@ describe('Transfer', () => {
     },
   };
 
-  jest.mock('@strapi/data-transfer/lib/engine', () => mockDataTransfer.engine, { virtual: true });
-  jest.mock('@strapi/data-transfer/lib/strapi', () => mockDataTransfer.strapi, { virtual: true });
-  jest.mock('@strapi/data-transfer/lib/file', () => mockDataTransfer.file, { virtual: true });
+  jest.mock('@strapi/data-transfer', () => mockDataTransfer);
 
   const transferCommand = require('../../transfer/transfer');
 

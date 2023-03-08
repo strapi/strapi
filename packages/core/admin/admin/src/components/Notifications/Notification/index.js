@@ -67,7 +67,14 @@ const Notification = ({ dispatch, notification }) => {
   }
 
   if (title) {
-    alertTitle = typeof title === 'string' ? title : formatMessage(title);
+    alertTitle =
+      typeof title === 'string'
+        ? title
+        : formattedMessage({
+            id: title?.id || title,
+            defaultMessage: title?.defaultMessage || title?.id || title,
+            values: title?.values,
+          });
   }
 
   return (

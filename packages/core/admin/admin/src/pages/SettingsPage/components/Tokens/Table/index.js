@@ -1,9 +1,7 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { Typography } from '@strapi/design-system/Typography';
-import { Tbody, Tr, Td } from '@strapi/design-system/Table';
-import { Flex } from '@strapi/design-system/Flex';
+import { Typography, Flex, Tbody, Tr, Td } from '@strapi/design-system';
 import {
   RelativeTime,
   onRowClick,
@@ -16,7 +14,15 @@ import DeleteButton from './DeleteButton';
 import UpdateButton from './UpdateButton';
 import ReadButton from './ReadButton';
 
-const Table = ({ permissions, headers, contentType, isLoading, tokens, onConfirmDelete }) => {
+const Table = ({
+  permissions,
+  headers,
+  contentType,
+  isLoading,
+  tokens,
+  onConfirmDelete,
+  tokenType,
+}) => {
   const { canDelete, canUpdate, canRead } = permissions;
   const withBulkActions = canDelete || canUpdate || canRead;
   const [{ query }] = useQueryParams();
@@ -25,7 +31,7 @@ const Table = ({ permissions, headers, contentType, isLoading, tokens, onConfirm
     push,
     location: { pathname },
   } = useHistory();
-  const { trackUsage } = useTracking(); // TODO: Track different types of tokens
+  const { trackUsage } = useTracking();
 
   const sortedTokens = tokens.sort((a, b) => {
     const comparison = a.name.localeCompare(b.name);
@@ -49,7 +55,9 @@ const Table = ({ permissions, headers, contentType, isLoading, tokens, onConfirm
               key={token.id}
               {...onRowClick({
                 fn() {
-                  trackUsage('willEditTokenFromList');
+                  trackUsage('willEditTokenFromList', {
+                    tokenType,
+                  });
                   push(`${pathname}/${token.id}`);
                 },
                 condition: canUpdate,
@@ -89,6 +97,7 @@ const Table = ({ permissions, headers, contentType, isLoading, tokens, onConfirm
                       <DeleteButton
                         tokenName={token.name}
                         onClickDelete={() => onConfirmDelete(token.id)}
+                        tokenType={tokenType}
                       />
                     )}
                   </Flex>
@@ -123,6 +132,7 @@ Table.propTypes = {
   contentType: PropTypes.string.isRequired,
   isLoading: PropTypes.bool,
   onConfirmDelete: PropTypes.func,
+  tokenType: PropTypes.string.isRequired,
 };
 
 Table.defaultProps = {

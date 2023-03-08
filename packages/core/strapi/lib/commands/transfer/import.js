@@ -1,16 +1,14 @@
 'use strict';
 
 const {
-  providers: { createLocalFileSourceProvider },
-} = require('@strapi/data-transfer/lib/file');
-const {
-  providers: { createLocalStrapiDestinationProvider, DEFAULT_CONFLICT_STRATEGY },
-} = require('@strapi/data-transfer/lib/strapi');
-const {
-  createTransferEngine,
-  DEFAULT_VERSION_STRATEGY,
-  DEFAULT_SCHEMA_STRATEGY,
-} = require('@strapi/data-transfer/lib/engine');
+  file: {
+    providers: { createLocalFileSourceProvider },
+  },
+  strapi: {
+    providers: { createLocalStrapiDestinationProvider, DEFAULT_CONFLICT_STRATEGY },
+  },
+  engine: { createTransferEngine, DEFAULT_VERSION_STRATEGY, DEFAULT_SCHEMA_STRATEGY },
+} = require('@strapi/data-transfer');
 
 const { isObject } = require('lodash/fp');
 
@@ -19,6 +17,7 @@ const {
   DEFAULT_IGNORED_CONTENT_TYPES,
   createStrapiInstance,
   formatDiagnostic,
+  loadersFactory,
 } = require('./utils');
 const { exitWith } = require('../utils/helpers');
 
@@ -88,6 +87,21 @@ module.exports = async (opts) => {
   engine.diagnostics.onDiagnostic(formatDiagnostic('import'));
 
   const progress = engine.progress.stream;
+
+  const { updateLoader } = loadersFactory();
+
+  progress.on(`stage::start`, ({ stage, data }) => {
+    updateLoader(stage, data).start();
+  });
+
+  progress.on('stage::finish', ({ stage, data }) => {
+    updateLoader(stage, data).succeed();
+  });
+
+  progress.on('stage::progress', ({ stage, data }) => {
+    updateLoader(stage, data);
+  });
+
   const getTelemetryPayload = () => {
     return {
       eventProperties: {

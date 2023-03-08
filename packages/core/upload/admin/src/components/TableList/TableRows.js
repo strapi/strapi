@@ -74,7 +74,7 @@ export const TableRows = ({
               <Flex justifyContent="flex-end">
                 {contentType === 'folder' && (
                   <IconButton
-                    forwardedAs={folderURL ? Link : undefined}
+                    as={folderURL ? Link : undefined}
                     label={formatMessage({
                       id: getTrad('list.folders.link-label'),
                       defaultMessage: 'Access folder',

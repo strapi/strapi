@@ -1,26 +1,29 @@
 'use strict';
 
 const {
-  providers: { createLocalFileDestinationProvider },
-} = require('@strapi/data-transfer/lib/file');
-const {
-  providers: { createLocalStrapiSourceProvider },
-} = require('@strapi/data-transfer/lib/strapi');
-const { createTransferEngine } = require('@strapi/data-transfer/lib/engine');
+  file: {
+    providers: { createLocalFileDestinationProvider },
+  },
+  strapi: {
+    providers: { createLocalStrapiSourceProvider },
+  },
+  engine: { createTransferEngine },
+} = require('@strapi/data-transfer');
+
 const { isObject, isString, isFinite, toNumber } = require('lodash/fp');
 const fs = require('fs-extra');
 const chalk = require('chalk');
 
-const { TransferEngineTransferError } = require('@strapi/data-transfer/lib/engine/errors');
+const { TransferEngineTransferError } = require('@strapi/data-transfer').engine.errors;
 const {
   getDefaultExportName,
   buildTransferTable,
   DEFAULT_IGNORED_CONTENT_TYPES,
   createStrapiInstance,
   formatDiagnostic,
+  loadersFactory,
 } = require('./utils');
 const { exitWith } = require('../utils/helpers');
-
 /**
  * @typedef ExportCommandOptions Options given to the CLI import command
  *
@@ -79,6 +82,20 @@ module.exports = async (opts) => {
   engine.diagnostics.onDiagnostic(formatDiagnostic('export'));
 
   const progress = engine.progress.stream;
+
+  const { updateLoader } = loadersFactory();
+
+  progress.on(`stage::start`, ({ stage, data }) => {
+    updateLoader(stage, data).start();
+  });
+
+  progress.on('stage::finish', ({ stage, data }) => {
+    updateLoader(stage, data).succeed();
+  });
+
+  progress.on('stage::progress', ({ stage, data }) => {
+    updateLoader(stage, data);
+  });
 
   const getTelemetryPayload = (/* payload */) => {
     return {

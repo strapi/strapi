@@ -1,4 +1,4 @@
-import CodeMirror from 'codemirror';
+import CodeMirror from 'codemirror5';
 
 // Disabling eslint on purpose
 /* eslint-disable */
@@ -7,9 +7,9 @@ var listRE = /^(\s*)(>[> ]*|[*+-] \[[x ]\]\s|[*+-]\s|(\d+)([.)]))(\s*)/,
   emptyListRE = /^(\s*)(>[> ]*|[*+-] \[[x ]\]|[*+-]|(\d+)[.)])(\s*)$/,
   unorderedListRE = /[*+-]\s/;
 
-/* 
+/*
   functions coming from CodeMirror addons continuelist.js
-  ===> https://github.com/codemirror/CodeMirror/blob/master/addon/edit/continuelist.js 
+  ===> https://github.com/codemirror/CodeMirror/blob/master/addon/edit/continuelist.js
 
   we imported it because the way the addon ask to use markdown mode
   since we have our own markdown preview system we couldn't use it directly

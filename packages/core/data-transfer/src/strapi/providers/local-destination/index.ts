@@ -77,8 +77,8 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     return restore.deleteRecords(this.strapi, this.options.restore);
   }
 
-  rollback(): void {
-    this.transaction?.rollback();
+  async rollback() {
+    await this.transaction?.rollback();
   }
 
   async beforeTransfer() {
@@ -173,7 +173,9 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
         chunk.stream
           .pipe(writableStream)
-          .on('close', callback)
+          .on('close', () => {
+            callback(null);
+          })
           .on('error', async (error: NodeJS.ErrnoException) => {
             const errorMessage =
               error.code === 'ENOSPC'
