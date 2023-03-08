@@ -44,8 +44,13 @@ module.exports = async (opts) => {
     exitWith(1, 'Could not parse command arguments');
   }
 
-  const strapi = await createStrapiInstance();
+  if (!(opts.from || opts.to) || (opts.from && opts.to)) {
+    console.log('from', opts.from);
+    console.log('to', opts.to);
+    exitWith(1, 'Exactly one source (from) or destination (to) option must be provided');
+  }
 
+  const strapi = await createStrapiInstance();
   let source;
   let destination;
 

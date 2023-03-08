@@ -296,6 +296,14 @@ program
   .addOption(excludeOption)
   .addOption(onlyOption)
   .hook('preAction', validateExcludeOnly)
+  .hook(
+    'preAction',
+    ifOptions(
+      (opts) => !(opts.from || opts.to) || (opts.from && opts.to),
+      () =>
+        exitWith(1, 'Exactly one remote source (from) or destination (to) option must be provided')
+    )
+  )
   // If --from is used, validate the URL and token
   .hook(
     'preAction',
@@ -344,21 +352,6 @@ program
           'The transfer will delete all data in the remote database and media files. Are you sure you want to proceed?'
         )(thisCommand);
       }
-    )
-  )
-  .hook(
-    'preAction',
-    ifOptions(
-      (opts) => !opts.from && !opts.to,
-      () =>
-        exitWith(1, 'At least one remote source (from) or destination (to) option must be provided')
-    )
-  )
-  .hook(
-    'preAction',
-    ifOptions(
-      (opts) => opts.from && opts.to,
-      () => exitWith(1, 'Only one source (from) or destination (to) option may be provided')
     )
   )
   .action(getLocalScript('transfer/transfer'));

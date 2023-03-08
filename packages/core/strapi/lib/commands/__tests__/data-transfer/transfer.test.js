@@ -35,6 +35,9 @@ describe('Transfer', () => {
     strapi: {
       providers: {
         createLocalStrapiSourceProvider: jest.fn().mockReturnValue({ name: 'testLocalSource' }),
+        createLocalStrapiDestinationProvider: jest
+          .fn()
+          .mockReturnValue({ name: 'testLocalDestination' }),
         createRemoteStrapiDestinationProvider: jest
           .fn()
           .mockReturnValue({ name: 'testRemoteDest' }),
