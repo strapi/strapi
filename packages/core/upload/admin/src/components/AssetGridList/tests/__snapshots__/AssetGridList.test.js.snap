@@ -155,15 +155,6 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   color: #ffffff;
 }
 
-.c10 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c10 > * + * {
-  margin-left: 8px;
-}
-
 .c26 {
   border-radius: 4px;
   height: 1.5rem;
@@ -247,6 +238,15 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   padding: 0;
   position: absolute;
   width: 1px;
+}
+
+.c10 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c10 > * + * {
+  margin-left: 8px;
 }
 
 .c11 {

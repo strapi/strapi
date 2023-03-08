@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
-.c9 {
+.c8 {
   padding-left: 12px;
 }
 
@@ -17,9 +17,10 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 4px;
 }
 
-.c4 {
+.c3 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -33,7 +34,7 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
   flex-direction: row;
 }
 
-.c6 {
+.c5 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -50,20 +51,11 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
   flex-wrap: wrap;
 }
 
-.c3 {
+.c2 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
   color: #32324d;
-}
-
-.c2 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c2 > * + * {
-  margin-top: 4px;
 }
 
 .c0 {
@@ -78,7 +70,7 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
   width: 1px;
 }
 
-.c5 {
+.c4 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -93,12 +85,12 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
   transition-duration: 0.2s;
 }
 
-.c5:focus-within {
+.c4:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c7 {
+.c6 {
   display: grid;
   -webkit-flex: 1 1 0%;
   -ms-flex: 1 1 0%;
@@ -106,7 +98,7 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
   position: relative;
 }
 
-.c8 {
+.c7 {
   display: inline-grid;
   grid-area: 1 / 1 / 2 / 3;
   grid-template-columns: 0px min-content;
@@ -121,35 +113,35 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
   outline: none;
 }
 
-.c8:focus-visible {
+.c7:focus-visible {
   outline: none;
   box-shadow: none;
   outline-offset: 0;
 }
 
-.c8[aria-disabled='true'] {
+.c7[aria-disabled='true'] {
   background: inherit;
   color: inherit;
   cursor: not-allowed;
 }
 
-.c10 {
+.c9 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c10 svg {
+.c9 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c10 svg path {
+.c9 svg path {
   fill: #666687;
 }
 
-.c11 {
+.c10 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -158,11 +150,13 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
   border: none;
 }
 
-.c11 svg {
+.c10 svg {
   width: 0.375rem;
 }
 
-<div>
+<div
+  class=""
+>
   <div
     aria-atomic="false"
     aria-live="polite"
@@ -170,23 +164,23 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
     class="c0"
   />
   <div
-    class="c1 c2"
+    class="c1"
   >
     <label
-      class="c3"
+      class="c2"
       for="1"
     >
       <div
-        class="c4"
+        class="c3"
       >
         Locales
       </div>
     </label>
     <div
-      class="c4 c5"
+      class="c3 c4"
     >
       <div
-        class="c6 c7"
+        class="c5 c6"
         wrap="wrap"
       >
         
@@ -199,7 +193,7 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
           aria-haspopup="listbox"
           autocomplete="off"
           autocorrect="off"
-          class="c8"
+          class="c7"
           id="1"
           placeholder="Select"
           role="combobox"
@@ -209,12 +203,12 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
         />
       </div>
       <div
-        class="c4"
+        class="c3"
       >
         
         <button
           aria-hidden="true"
-          class="c9 c10 c11"
+          class="c8 c9 c10"
           tabindex="-1"
           type="button"
         >

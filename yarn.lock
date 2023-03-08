@@ -5684,10 +5684,10 @@
     regenerator-runtime "^0.13.7"
     resolve-from "^5.0.0"
 
-"@strapi/design-system@1.6.4":
-  version "1.6.4"
-  resolved "https://registry.yarnpkg.com/@strapi/design-system/-/design-system-1.6.4.tgz#4f6b29332ea4cc427b24de572ca7780c744eb0ef"
-  integrity sha512-Xfv2ovdHlLbSgtWRwBPB/L21FjdZL7967ZG0ECNP3I2mseq3j2bV7vrFvPL/COsMfOUQmu8CcCoesU5BfZYvEw==
+"@strapi/design-system@1.6.5":
+  version "1.6.5"
+  resolved "https://registry.yarnpkg.com/@strapi/design-system/-/design-system-1.6.5.tgz#819feda630e83fdfe19589bb45b81d17e8b4ce8b"
+  integrity sha512-3jzpBK+A/hrZCFFe7bsA9vltH5g07QLC+ndmCFaLyxkYT6jzU0/HslR2LAJYQMz8VqlYOfDH9zIir134ZfmCTg==
   dependencies:
     "@codemirror/lang-json" "^6.0.1"
     "@floating-ui/react-dom" "^1.0.0"
@@ -5719,10 +5719,10 @@
   optionalDependencies:
     typescript "^4.6.2"
 
-"@strapi/icons@1.6.4":
-  version "1.6.4"
-  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-1.6.4.tgz#2697a8d6d801265045ea89497b2c1d2f3fe142ba"
-  integrity sha512-1k+pvHhnXf3obQ+UsTf4lri0dSyk7bp0O7nIsYAALX9GFucOQG1CGTPHg+Eig5jOcVdSfF0mStb1V/a2lwuWqA==
+"@strapi/icons@1.6.5":
+  version "1.6.5"
+  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-1.6.5.tgz#59935fdeae17bcf5f74882fb10891d8d9b365351"
+  integrity sha512-HYTzC8Rn84TxfEtHkVHo+22EiRu6ynSrIMCD6H5S5pHBNuabmfPVIYwo15XfJ7oXqALCbIm5YiV+ndriBaYivQ==
 
 "@stylelint/postcss-css-in-js@^0.37.2":
   version "0.37.3"

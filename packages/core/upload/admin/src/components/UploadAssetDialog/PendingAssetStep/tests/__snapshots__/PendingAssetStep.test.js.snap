@@ -264,15 +264,6 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   color: #ffffff;
 }
 
-.c28 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c28 > * + * {
-  margin-left: 8px;
-}
-
 .c46 {
   border-radius: 4px;
   height: 1.5rem;
@@ -499,6 +490,15 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 .c57 svg > g,
 .c57 svg path {
   fill: #32324d;
+}
+
+.c28 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c28 > * + * {
+  margin-left: 8px;
 }
 
 .c29 {
