@@ -129,16 +129,16 @@ function enableReviewWorkflow({ strapi }) {
         .from(`${contentTypeMetadata.tableName} AS entity`)
         .toSQL();
 
-      // Insert rows for all entries of the content type that do not have a
-      // default stage
       const columnsToInsert = [
         idColumn.name,
         'field',
-        connection.raw('??', 'order'),
+        connection.raw('??', ['order']),
         joinTable.joinColumn.name,
         typeColumn.name,
       ];
 
+      // Insert rows for all entries of the content type that do not have a
+      // default stage
       await connection(joinTable.name).insert(
         connection.raw(
           `(${columnsToInsert.join(',')})  ${selectStatement.sql}`,
