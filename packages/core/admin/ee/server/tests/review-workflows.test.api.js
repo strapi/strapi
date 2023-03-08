@@ -317,7 +317,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   });
 
   describe('Enable review workflows on a content type', () => {
-    test('When enabled entries in the content type should be added to the first stage of a workflow', async () => {
+    test('when enabled on a content type, entries of this type should be added to the first stage of the workflow', async () => {
       await createEntry(productUID, { name: 'Product' });
       await createEntry(productUID, { name: 'Product 1' });
       await createEntry(productUID, { name: 'Product 2' });
