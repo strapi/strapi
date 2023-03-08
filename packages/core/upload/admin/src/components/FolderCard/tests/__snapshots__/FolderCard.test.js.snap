@@ -1,6 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FolderCard has all required ids set when rendering a start action 1`] = `
+.c13 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 500;
+  color: #32324d;
+}
+
 .c0 {
   position: relative;
 }
@@ -87,13 +94,6 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-}
-
-.c13 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 500;
-  color: #32324d;
 }
 
 .c17 > * {
@@ -265,7 +265,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M12.414 5H21a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h7.414l2 2Z"
+            d="M12.414 5H21a1 1 0 011 1v14a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1h7.414l2 2z"
             fill="#212134"
           />
         </svg>
@@ -325,6 +325,13 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 `;
 
 exports[`FolderCard renders and matches the snapshot 1`] = `
+.c11 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 500;
+  color: #32324d;
+}
+
 .c0 {
   position: relative;
 }
@@ -406,13 +413,6 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-}
-
-.c11 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 500;
-  color: #32324d;
 }
 
 .c15 > * {
@@ -503,7 +503,7 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M12.414 5H21a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h7.414l2 2Z"
+            d="M12.414 5H21a1 1 0 011 1v14a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1h7.414l2 2z"
             fill="#212134"
           />
         </svg>

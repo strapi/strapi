@@ -31,28 +31,41 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
     );
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c1 {
+      .c6 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c17 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c18 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
+      .c2 {
         padding-top: 24px;
         padding-right: 40px;
       }
 
-      .c2 {
-        background: #4945ff;
-        padding: 8px;
-        padding-right: 16px;
-        padding-left: 16px;
-        border-radius: 4px;
-        border-color: #4945ff;
-        border: 1px solid #4945ff;
-        cursor: pointer;
+      .c7 {
+        padding-left: 8px;
       }
 
-      .c10 {
+      .c9 {
         padding-top: 8px;
         padding-bottom: 64px;
       }
 
-      .c12 {
+      .c11 {
         background: #ffffff;
         padding-top: 48px;
         padding-right: 56px;
@@ -71,7 +84,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         padding-top: 16px;
       }
 
-      .c0 {
+      .c1 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -89,22 +102,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         justify-content: flex-end;
       }
 
-      .c3 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        gap: 8px;
-      }
-
-      .c8 {
+      .c13 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -136,46 +134,35 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         justify-content: center;
       }
 
-      .c7 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #ffffff;
-      }
-
-      .c17 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c18 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c4 {
+      .c3 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
         position: relative;
         outline: none;
       }
 
-      .c4 svg {
+      .c3 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c4 svg > g,
-      .c4 svg path {
+      .c3 svg > g,
+      .c3 svg path {
         fill: #ffffff;
       }
 
-      .c4[aria-disabled='true'] {
+      .c3[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c4:after {
+      .c3:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -190,11 +177,11 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         border: 2px solid transparent;
       }
 
-      .c4:focus-visible {
+      .c3:focus-visible {
         outline: none;
       }
 
-      .c4:focus-visible:after {
+      .c3:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -205,57 +192,21 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         border: 2px solid #4945ff;
       }
 
-      .c5 {
+      .c4 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        background-color: #4945ff;
+        border: 1px solid #4945ff;
         height: 2rem;
+        padding-left: 16px;
+        padding-right: 16px;
         border: 1px solid transparent;
         background: transparent;
       }
 
-      .c5[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c5[aria-disabled='true'] .c6 {
-        color: #666687;
-      }
-
-      .c5[aria-disabled='true'] svg > g,.c5[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c5[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c5[aria-disabled='true']:active .c6 {
-        color: #666687;
-      }
-
-      .c5[aria-disabled='true']:active svg > g,.c5[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c5:hover {
-        background-color: #f6f6f9;
-      }
-
-      .c5:active {
-        border: 1px solid undefined;
-        background: undefined;
-      }
-
-      .c5 .c6 {
-        color: #32324d;
-      }
-
-      .c5 svg > g,
-      .c5 svg path {
-        fill: #8e8ea9;
-      }
-
-      .c9 {
+      .c4 .c0 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -266,12 +217,71 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         align-items: center;
       }
 
-      .c9 svg {
+      .c4 .c5 {
+        color: #ffffff;
+      }
+
+      .c4[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c4[aria-disabled='true'] .c5 {
+        color: #666687;
+      }
+
+      .c4[aria-disabled='true'] svg > g,.c4[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c4[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c4[aria-disabled='true']:active .c5 {
+        color: #666687;
+      }
+
+      .c4[aria-disabled='true']:active svg > g,.c4[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c4:hover {
+        background-color: #f6f6f9;
+      }
+
+      .c4:active {
+        border: 1px solid undefined;
+        background: undefined;
+      }
+
+      .c4 .c5 {
+        color: #32324d;
+      }
+
+      .c4 svg > g,
+      .c4 svg path {
+        fill: #8e8ea9;
+      }
+
+      .c8 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c8 svg {
         height: 4px;
         width: 6px;
       }
 
-      .c11:focus-visible {
+      .c10:focus-visible {
         outline: none;
       }
 
@@ -334,7 +344,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         border: 2px solid #4945ff;
       }
 
-      .c13 {
+      .c12 {
         margin: 0 auto;
         width: 552px;
       }
@@ -351,10 +361,10 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
 
       <div>
         <header
-          class="c0"
+          class="c0 c1"
         >
           <div
-            class="c1"
+            class="c0 c2"
           >
             <div>
               <button
@@ -362,33 +372,33 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
                 aria-disabled="false"
                 aria-expanded="false"
                 aria-haspopup="true"
-                class="c2 c3 c4 c5"
+                class="c3 c4"
                 label="English"
                 type="button"
               >
                 <span
-                  class="c6 c7"
+                  class="c5 c6"
                 >
                   English
                 </span>
                 <div
                   aria-hidden="true"
-                  class="c8"
+                  class="c0 c7"
                 >
                   <span
-                    class="c9"
+                    class="c8"
                   >
                     <svg
                       aria-hidden="true"
                       fill="none"
-                      height="1rem"
+                      height="1em"
                       viewBox="0 0 14 8"
-                      width="1rem"
+                      width="1em"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
                         clip-rule="evenodd"
-                        d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                        d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
                         fill="#32324D"
                         fill-rule="evenodd"
                       />
@@ -400,19 +410,19 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
           </div>
         </header>
         <div
-          class="c10"
+          class="c0 c9"
         >
           <main
             aria-labelledby="main-content-title"
-            class="c11"
+            class="c10"
             id="main-content"
             tabindex="-1"
           >
             <div
-              class="c12 c13"
+              class="c0 c11 c12"
             >
               <div
-                class="c8 c14"
+                class="c0 c13 c14"
               >
                 <img
                   alt=""
@@ -421,24 +431,24 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
                   src="customAuthLogo.png"
                 />
                 <div
-                  class="c16"
+                  class="c0 c16"
                 >
                   <h1
-                    class="c6 c17"
+                    class="c5 c17"
                   >
                     Oops...
                   </h1>
                 </div>
                 <span
-                  class="c6 c18"
+                  class="c5 c18"
                 >
                   Your account has been suspended.
                 </span>
                 <div
-                  class="c19"
+                  class="c0 c19"
                 >
                   <span
-                    class="c6 c18"
+                    class="c5 c18"
                   >
                     If this is a mistake, please contact your administrator.
                   </span>
@@ -446,10 +456,10 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
               </div>
             </div>
             <div
-              class="c20"
+              class="c0 c20"
             >
               <div
-                class="c19"
+                class="c0 c19"
               >
                 <a
                   class="c21"

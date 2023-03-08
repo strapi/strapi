@@ -1,14 +1,28 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FromComputerForm snapshots the component 1`] = `
-.c0 {
+.c10 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #666687;
+}
+
+.c16 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c1 {
   padding-top: 24px;
   padding-right: 40px;
   padding-bottom: 24px;
   padding-left: 40px;
 }
 
-.c1 {
+.c2 {
   background: #f6f6f9;
   padding-top: 64px;
   padding-bottom: 64px;
@@ -18,12 +32,12 @@ exports[`FromComputerForm snapshots the component 1`] = `
   position: relative;
 }
 
-.c7 {
+.c8 {
   padding-top: 12px;
   padding-bottom: 20px;
 }
 
-.c10 {
+.c11 {
   position: absolute;
   left: 0;
   right: 0;
@@ -33,22 +47,11 @@ exports[`FromComputerForm snapshots the component 1`] = `
   width: 100%;
 }
 
-.c12 {
+.c13 {
   position: relative;
 }
 
-.c13 {
-  background: #4945ff;
-  padding: 8px;
-  padding-right: 16px;
-  padding-left: 16px;
-  border-radius: 4px;
-  border-color: #4945ff;
-  border: 1px solid #4945ff;
-  cursor: pointer;
-}
-
-.c18 {
+.c17 {
   background: #f6f6f9;
   padding-top: 16px;
   padding-right: 20px;
@@ -56,7 +59,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
   padding-left: 20px;
 }
 
-.c3 {
+.c4 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -74,7 +77,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
   justify-content: center;
 }
 
-.c4 {
+.c5 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -88,22 +91,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
   flex-direction: row;
 }
 
-.c14 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  gap: 8px;
-}
-
-.c20 {
+.c19 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -121,40 +109,35 @@ exports[`FromComputerForm snapshots the component 1`] = `
   justify-content: space-between;
 }
 
-.c9 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #666687;
-}
-
-.c17 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c15 {
+.c14 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
   position: relative;
   outline: none;
 }
 
-.c15 svg {
+.c14 svg {
   height: 12px;
   width: 12px;
 }
 
-.c15 svg > g,
-.c15 svg path {
+.c14 svg > g,
+.c14 svg path {
   fill: #ffffff;
 }
 
-.c15[aria-disabled='true'] {
+.c14[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c15:after {
+.c14:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -169,11 +152,11 @@ exports[`FromComputerForm snapshots the component 1`] = `
   border: 2px solid transparent;
 }
 
-.c15:focus-visible {
+.c14:focus-visible {
   outline: none;
 }
 
-.c15:focus-visible:after {
+.c14:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -184,7 +167,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c23 {
+.c22 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -196,128 +179,174 @@ exports[`FromComputerForm snapshots the component 1`] = `
   width: 1px;
 }
 
-.c16 {
+.c15 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: #4945ff;
+  border: 1px solid #4945ff;
   height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
-.c16[aria-disabled='true'] {
+.c15 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c15 .c9 {
+  color: #ffffff;
+}
+
+.c15[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c16[aria-disabled='true'] .c8 {
+.c15[aria-disabled='true'] .c9 {
   color: #666687;
 }
 
-.c16[aria-disabled='true'] svg > g,.c16[aria-disabled='true'] svg path {
+.c15[aria-disabled='true'] svg > g,.c15[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c16[aria-disabled='true']:active {
+.c15[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c16[aria-disabled='true']:active .c8 {
+.c15[aria-disabled='true']:active .c9 {
   color: #666687;
 }
 
-.c16[aria-disabled='true']:active svg > g,.c16[aria-disabled='true']:active svg path {
+.c15[aria-disabled='true']:active svg > g,.c15[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c16:hover {
+.c15:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c16:active {
+.c15:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c16 svg > g,
-.c16 svg path {
+.c15 svg > g,
+.c15 svg path {
   fill: #ffffff;
 }
 
-.c22 {
+.c21 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: #4945ff;
+  border: 1px solid #4945ff;
   height: 2rem;
+  padding-left: 16px;
+  padding-right: 16px;
   border: 1px solid #dcdce4;
   background: #ffffff;
 }
 
-.c22[aria-disabled='true'] {
+.c21 .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c21 .c9 {
+  color: #ffffff;
+}
+
+.c21[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c22[aria-disabled='true'] .c8 {
+.c21[aria-disabled='true'] .c9 {
   color: #666687;
 }
 
-.c22[aria-disabled='true'] svg > g,.c22[aria-disabled='true'] svg path {
+.c21[aria-disabled='true'] svg > g,.c21[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c22[aria-disabled='true']:active {
+.c21[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c22[aria-disabled='true']:active .c8 {
+.c21[aria-disabled='true']:active .c9 {
   color: #666687;
 }
 
-.c22[aria-disabled='true']:active svg > g,.c22[aria-disabled='true']:active svg path {
+.c21[aria-disabled='true']:active svg > g,.c21[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c22:hover {
+.c21:hover {
   background-color: #f6f6f9;
 }
 
-.c22:active {
+.c21:active {
   background-color: #eaeaef;
 }
 
-.c22 .c8 {
+.c21 .c9 {
   color: #32324d;
 }
 
-.c22 svg > g,
-.c22 svg path {
+.c21 svg > g,
+.c21 svg path {
   fill: #32324d;
 }
 
-.c19 {
+.c18 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
 
-.c21 > * + * {
+.c20 > * + * {
   margin-left: 8px;
 }
 
-.c5 {
+.c6 {
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
 }
 
-.c6 {
+.c7 {
   font-size: 3.75rem;
 }
 
-.c6 svg path {
+.c7 svg path {
   fill: #4945ff;
 }
 
-.c2 {
+.c3 {
   border-style: dashed;
 }
 
-.c11 {
+.c12 {
   opacity: 0;
   cursor: pointer;
 }
@@ -325,65 +354,65 @@ exports[`FromComputerForm snapshots the component 1`] = `
 <div>
   <form>
     <div
-      class="c0"
+      class="c0 c1"
     >
       <label>
         <div
-          class="c1 c2"
+          class="c0 c2 c3"
         >
           <div
-            class="c3"
+            class="c0 c4"
           >
             <div
-              class="c4 c5"
+              class="c0 c5 c6"
             >
               <div
-                class="c6"
+                class="c7"
               >
                 <svg
                   aria-hidden="true"
                   fill="none"
-                  height="1rem"
+                  height="1em"
                   viewBox="0 0 24 20"
-                  width="1rem"
+                  width="1em"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M21.569 2.398H7.829v1.586h13.74c.47 0 .826.5.826 1.094v9.853l-2.791-3.17a2.13 2.13 0 0 0-.74-.55 2.214 2.214 0 0 0-.912-.196 2.215 2.215 0 0 0-.912.191 2.131 2.131 0 0 0-.74.546l-2.93 3.385-2.973-3.36a2.147 2.147 0 0 0-.741-.545 2.228 2.228 0 0 0-1.824.007c-.286.13-.538.319-.739.553l-2.931 3.432V7.653H2.51v9.894c.023.153.06.304.108.452v.127l.041.095c.057.142.126.28.207.412l.099.15c.074.107.157.207.247.302l.124.119c.13.118.275.222.43.309h.024c.36.214.775.327 1.198.325h16.515c.36-.004.716-.085 1.039-.24.323-.153.606-.375.827-.648a2.78 2.78 0 0 0 .504-.888c.066-.217.108-.44.124-.666V5.078a2.497 2.497 0 0 0-.652-1.81 2.706 2.706 0 0 0-1.776-.87Z"
+                    d="M21.569 2.398H7.829v1.586h13.74c.47 0 .826.5.826 1.094v9.853l-2.791-3.17a2.13 2.13 0 00-.74-.55 2.214 2.214 0 00-.912-.196 2.215 2.215 0 00-.912.191 2.131 2.131 0 00-.74.546l-2.93 3.385-2.973-3.36a2.147 2.147 0 00-.741-.545 2.228 2.228 0 00-1.824.007c-.286.13-.538.319-.739.553l-2.931 3.432V7.653H2.51v9.894c.023.153.06.304.108.452v.127l.041.095c.057.142.126.28.207.412l.099.15c.074.107.157.207.247.302l.124.119c.13.118.275.222.43.309h.024c.36.214.775.327 1.198.325h16.515c.36-.004.716-.085 1.039-.24.323-.153.606-.375.827-.648a2.78 2.78 0 00.504-.888c.066-.217.108-.44.124-.666V5.078a2.497 2.497 0 00-.652-1.81 2.706 2.706 0 00-1.776-.87z"
                     fill="#32324D"
                   />
                   <path
-                    d="M12.552 9.199c.912 0 1.651-.71 1.651-1.585 0-.876-.74-1.586-1.651-1.586-.912 0-1.652.71-1.652 1.586 0 .875.74 1.585 1.652 1.585ZM3.303 6.408h.826V3.997h2.477V2.41H4.129V0h-.826c-.219 0-.85.002-.826 0v2.411H0v1.586h2.477v2.41h.826Z"
+                    d="M12.552 9.199c.912 0 1.651-.71 1.651-1.585 0-.876-.74-1.586-1.651-1.586-.912 0-1.652.71-1.652 1.586 0 .875.74 1.585 1.652 1.585zM3.303 6.408h.826V3.997h2.477v-.793-.793H4.129V0h-.826c-.219 0-.85.002-.826 0v2.411H0v1.586h2.477v2.41h.826z"
                     fill="#32324D"
                   />
                 </svg>
               </div>
               <div
-                class="c7"
+                class="c0 c8"
               >
                 <span
-                  class="c8 c9"
+                  class="c9 c10"
                 >
                   Drag & Drop here or
                 </span>
               </div>
               <input
-                class="c10 c11"
+                class="c0 c11 c12"
                 multiple=""
                 name="files"
                 tabindex="-1"
                 type="file"
               />
               <div
-                class="c12"
+                class="c0 c13"
               >
                 <button
                   aria-disabled="false"
-                  class="c13 c14 c15 c16"
+                  class="c14 c15"
                   type="button"
                 >
                   <span
-                    class="c8 c17"
+                    class="c9 c16"
                   >
                     Browse files
                   </span>
@@ -395,34 +424,34 @@ exports[`FromComputerForm snapshots the component 1`] = `
       </label>
     </div>
     <div
-      class="c18 c19"
+      class="c0 c17 c18"
     >
       <div
-        class="c20"
+        class="c0 c19"
       >
         <div
-          class="c4 c21"
+          class="c0 c5 c20"
         >
           <button
             aria-disabled="false"
-            class="c13 c14 c15 c22"
+            class="c14 c21"
             type="button"
           >
             <span
-              class="c8 c17"
+              class="c9 c16"
             >
               cancel
             </span>
           </button>
         </div>
         <div
-          class="c4 c21"
+          class="c0 c5 c20"
         />
       </div>
     </div>
   </form>
   <div
-    class="c23"
+    class="c22"
   >
     <p
       aria-live="polite"

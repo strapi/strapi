@@ -65,6 +65,27 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c4 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c19 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
+      }
+
+      .c23 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
       .c1 {
         background: #f6f6f9;
         padding-top: 40px;
@@ -101,16 +122,6 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         color: #666687;
       }
 
-      .c24 {
-        padding: 8px;
-        border-radius: 4px;
-        border-width: 0;
-        border-color: #dcdce4;
-        width: 2rem;
-        height: 2rem;
-        cursor: pointer;
-      }
-
       .c2 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -143,69 +154,39 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         flex-direction: row;
       }
 
-      .c25 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-      }
-
-      .c4 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c19 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #666687;
-      }
-
-      .c23 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
       .c22 path {
         fill: #666687;
       }
 
-      .c26 {
+      .c24 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
         position: relative;
         outline: none;
       }
 
-      .c26 svg {
+      .c24 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c26 svg > g,
-      .c26 svg path {
+      .c24 svg > g,
+      .c24 svg path {
         fill: #ffffff;
       }
 
-      .c26[aria-disabled='true'] {
+      .c24[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c26:after {
+      .c24:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -220,11 +201,11 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         border: 2px solid transparent;
       }
 
-      .c26:focus-visible {
+      .c24:focus-visible {
         outline: none;
       }
 
-      .c26:focus-visible:after {
+      .c24:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -247,22 +228,44 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         width: 1px;
       }
 
-      .c27 svg > g,
-      .c27 svg path {
+      .c25 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        height: 2rem;
+        width: 2rem;
+        border: none;
+      }
+
+      .c25 svg > g,
+      .c25 svg path {
         fill: #8e8ea9;
       }
 
-      .c27:hover svg > g,
-      .c27:hover svg path {
+      .c25:hover svg > g,
+      .c25:hover svg path {
         fill: #666687;
       }
 
-      .c27:active svg > g,
-      .c27:active svg path {
+      .c25:active svg > g,
+      .c25:active svg path {
         fill: #a5a5ba;
       }
 
-      .c27[aria-disabled='true'] svg path {
+      .c25[aria-disabled='true'] {
+        background-color: #eaeaef;
+      }
+
+      .c25[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -481,14 +484,14 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                           <svg
                             aria-label="Reset password"
                             fill="none"
-                            height="1rem"
+                            height="1em"
                             viewBox="0 0 24 24"
-                            width="1rem"
+                            width="1em"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path
                               clip-rule="evenodd"
-                              d="M15.681 2.804A9.64 9.64 0 0 0 11.818 2C6.398 2 2 6.48 2 12c0 5.521 4.397 10 9.818 10 2.03 0 4.011-.641 5.67-1.835a9.987 9.987 0 0 0 3.589-4.831 1.117 1.117 0 0 0-.664-1.418 1.086 1.086 0 0 0-1.393.676 7.769 7.769 0 0 1-2.792 3.758 7.546 7.546 0 0 1-4.41 1.428V4.222h.002a7.492 7.492 0 0 1 3.003.625 7.61 7.61 0 0 1 2.5 1.762l.464.551-2.986 3.042a.186.186 0 0 0 .129.316H22V3.317a.188.188 0 0 0-.112-.172.179.179 0 0 0-.199.04l-2.355 2.4-.394-.468-.02-.02a9.791 9.791 0 0 0-3.239-2.293Zm-3.863 1.418V2v2.222Zm0 0v15.556c-4.216 0-7.636-3.484-7.636-7.778s3.42-7.777 7.636-7.778Z"
+                              d="M15.681 2.804A9.64 9.64 0 0011.818 2C6.398 2 2 6.48 2 12c0 5.521 4.397 10 9.818 10 2.03 0 4.011-.641 5.67-1.835a9.987 9.987 0 003.589-4.831 1.117 1.117 0 00-.664-1.418 1.086 1.086 0 00-1.393.676 7.769 7.769 0 01-2.792 3.758 7.546 7.546 0 01-4.41 1.428V4.222h.002a7.492 7.492 0 013.003.625 7.61 7.61 0 012.5 1.762l.464.551-2.986 3.042a.186.186 0 00.129.316H22V3.317a.188.188 0 00-.112-.172.179.179 0 00-.199.04l-2.355 2.4-.394-.468-.02-.02a9.791 9.791 0 00-3.239-2.293zm-3.863 1.418V2v2.222zm0 0v15.556c-4.216 0-7.636-3.484-7.636-7.778s3.42-7.777 7.636-7.778z"
                               fill="#212134"
                               fill-rule="evenodd"
                             />
@@ -517,7 +520,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                           <button
                             aria-disabled="false"
                             aria-labelledby="0"
-                            class="c24 c25 c26 c27"
+                            class="c24 c25"
                             tabindex="-1"
                             type="button"
                           >
@@ -530,14 +533,14 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                               aria-hidden="true"
                               fill="none"
                               focusable="false"
-                              height="1rem"
+                              height="1em"
                               viewBox="0 0 24 24"
-                              width="1rem"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 0 1 1.887 0l3.118 3.118ZM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0Z"
+                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                 fill="#212134"
                                 fill-rule="evenodd"
                               />
@@ -563,13 +566,13 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                           <svg
                             aria-label="Email address confirmation"
                             fill="none"
-                            height="1rem"
+                            height="1em"
                             viewBox="0 0 24 24"
-                            width="1rem"
+                            width="1em"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path
-                              d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
+                              d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
                               fill="#212134"
                             />
                           </svg>
@@ -597,7 +600,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                           <button
                             aria-disabled="false"
                             aria-labelledby="1"
-                            class="c24 c25 c26 c27"
+                            class="c24 c25"
                             tabindex="-1"
                             type="button"
                           >
@@ -610,14 +613,14 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                               aria-hidden="true"
                               fill="none"
                               focusable="false"
-                              height="1rem"
+                              height="1em"
                               viewBox="0 0 24 24"
-                              width="1rem"
+                              width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 0 1 1.887 0l3.118 3.118ZM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0Z"
+                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                 fill="#212134"
                                 fill-rule="evenodd"
                               />

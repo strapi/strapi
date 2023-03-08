@@ -30,6 +30,20 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c4 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c11 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #666687;
+      }
+
       .c1 {
         background: #f6f6f9;
         padding-top: 40px;
@@ -90,20 +104,6 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         flex-direction: row;
       }
 
-      .c4 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c11 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #666687;
-      }
-
       .c7 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -127,73 +127,46 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         outline: none;
       }
 
-      .c12 {
-        background: #4945ff;
-        padding-top: 8px;
-        padding-right: 16px;
-        padding-bottom: 8px;
-        padding-left: 16px;
-        border-radius: 4px;
-        border-color: #4945ff;
-        border: 1px solid #4945ff;
+      .c15 {
+        padding-right: 8px;
       }
 
-      .c18 {
+      .c17 {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
-        color: #ffffff;
+        color: #32324d;
       }
 
-      .c13 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        gap: 8px;
-      }
-
-      .c16 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
+      .c12 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c14 {
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
         position: relative;
         outline: none;
       }
 
-      .c14 svg {
+      .c12 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c14 svg > g,
-      .c14 svg path {
+      .c12 svg > g,
+      .c12 svg path {
         fill: #ffffff;
       }
 
-      .c14[aria-disabled='true'] {
+      .c12[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c14:after {
+      .c12:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -208,11 +181,11 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         border: 2px solid transparent;
       }
 
-      .c14:focus-visible {
+      .c12:focus-visible {
         outline: none;
       }
 
-      .c14:focus-visible:after {
+      .c12:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -223,63 +196,86 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         border: 2px solid #4945ff;
       }
 
-      .c15 {
-        -webkit-text-decoration: none;
-        text-decoration: none;
+      .c13 {
+        padding: 8px 16px;
+        background: #4945ff;
+        border: 1px solid #4945ff;
+        border-radius: 4px;
         border: 1px solid #d9d8ff;
         background: #f0f0ff;
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-text-decoration: none;
+        text-decoration: none;
       }
 
-      .c15[aria-disabled='true'] {
+      .c13 .c14 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c13 .c16 {
+        color: #ffffff;
+      }
+
+      .c13[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c15[aria-disabled='true'] .c17 {
+      .c13[aria-disabled='true'] .c16 {
         color: #666687;
       }
 
-      .c15[aria-disabled='true'] svg > g,.c15[aria-disabled='true'] svg path {
+      .c13[aria-disabled='true'] svg > g,.c13[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c15[aria-disabled='true']:active {
+      .c13[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c15[aria-disabled='true']:active .c17 {
+      .c13[aria-disabled='true']:active .c16 {
         color: #666687;
       }
 
-      .c15[aria-disabled='true']:active svg > g,.c15[aria-disabled='true']:active svg path {
+      .c13[aria-disabled='true']:active svg > g,.c13[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c15:hover {
+      .c13:hover {
         background-color: #ffffff;
       }
 
-      .c15:active {
+      .c13:active {
         background-color: #ffffff;
         border: 1px solid #4945ff;
       }
 
-      .c15:active .c17 {
+      .c13:active .c16 {
         color: #4945ff;
       }
 
-      .c15:active svg > g,
-      .c15:active svg path {
+      .c13:active svg > g,
+      .c13:active svg path {
         fill: #4945ff;
       }
 
-      .c15 .c17 {
+      .c13 .c16 {
         color: #271fe0;
       }
 
-      .c15 svg > g,
-      .c15 svg path {
+      .c13 svg > g,
+      .c13 svg path {
         fill: #271fe0;
       }
 
@@ -323,49 +319,49 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
             >
               <svg
                 fill="none"
-                height="1rem"
+                height="1em"
                 viewBox="0 0 216 120"
                 width="10rem"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <g
-                  clip-path="url(#EmptyDocuments_svg__a)"
+                  clip-path="url(#EmptyDocuments_svg__clip0_1142_57509)"
                   opacity="0.84"
                 >
                   <path
                     clip-rule="evenodd"
-                    d="M189.25 19.646a7.583 7.583 0 0 1 0 15.166h-43.333a7.583 7.583 0 0 1 0 15.167h23.833a7.583 7.583 0 0 1 0 15.167h-11.022c-5.28 0-9.561 3.395-9.561 7.583 0 1.956 1.063 3.782 3.19 5.48 2.017 1.608 4.824 1.817 7.064 3.096a7.583 7.583 0 0 1-3.754 14.174H65.75a7.583 7.583 0 0 1 0-15.166H23.5a7.583 7.583 0 1 1 0-15.167h43.333a7.583 7.583 0 1 0 0-15.167H39.75a7.583 7.583 0 1 1 0-15.166h43.333a7.583 7.583 0 0 1 0-15.167H189.25Zm0 30.333a7.583 7.583 0 1 1 0 15.166 7.583 7.583 0 0 1 0-15.166Z"
+                    d="M189.25 19.646a7.583 7.583 0 010 15.166h-43.333a7.583 7.583 0 010 15.167h23.833a7.583 7.583 0 010 15.167h-11.022c-5.28 0-9.561 3.395-9.561 7.583 0 1.956 1.063 3.782 3.19 5.48 2.017 1.608 4.824 1.817 7.064 3.096a7.583 7.583 0 01-3.754 14.174H65.75a7.583 7.583 0 010-15.166H23.5a7.583 7.583 0 110-15.167h43.333a7.583 7.583 0 100-15.167H39.75a7.583 7.583 0 110-15.166h43.333a7.583 7.583 0 010-15.167H189.25zm0 30.333a7.583 7.583 0 110 15.166 7.583 7.583 0 010-15.166z"
                     fill="#D9D8FF"
                     fill-opacity="0.8"
                     fill-rule="evenodd"
                   />
                   <path
                     clip-rule="evenodd"
-                    d="m132.561 19.646 10.077 73.496.906 7.374a4.334 4.334 0 0 1-3.773 4.829l-63.44 7.789a4.333 4.333 0 0 1-4.83-3.772l-9.767-79.547a2.166 2.166 0 0 1 1.91-2.417l5.262-.59 63.655-7.162ZM73.162 26.33l4.97-.557-4.97.557Z"
+                    d="M132.561 19.646l10.077 73.496.906 7.374a4.334 4.334 0 01-3.773 4.829l-63.44 7.789a4.333 4.333 0 01-4.83-3.772l-9.767-79.547a2.166 2.166 0 011.91-2.417l5.262-.59 63.655-7.162zM73.162 26.33l4.97-.557-4.97.557z"
                     fill="#fff"
                     fill-rule="evenodd"
                   />
                   <path
-                    d="m73.162 26.33 4.97-.557m54.429-6.127 10.077 73.496.906 7.374a4.334 4.334 0 0 1-3.773 4.829l-63.44 7.789a4.333 4.333 0 0 1-4.83-3.772l-9.767-79.547a2.166 2.166 0 0 1 1.91-2.417l5.262-.59 63.655-7.162Z"
+                    d="M73.162 26.33l4.97-.557m54.429-6.127l10.077 73.496.906 7.374a4.334 4.334 0 01-3.773 4.829l-63.44 7.789a4.333 4.333 0 01-4.83-3.772l-9.767-79.547a2.166 2.166 0 011.91-2.417l5.262-.59 63.655-7.162z"
                     stroke="#7B79FF"
                     stroke-width="2.5"
                   />
                   <path
                     clip-rule="evenodd"
-                    d="m129.818 24.27 9.122 66.608.82 6.682c.264 2.153-1.246 4.11-3.373 4.371l-56.812 6.976c-2.127.261-4.066-1.272-4.33-3.425l-8.83-71.908a2.167 2.167 0 0 1 1.887-2.415l7.028-.863"
+                    d="M129.818 24.27l9.122 66.608.82 6.682c.264 2.153-1.246 4.11-3.373 4.371l-56.812 6.976c-2.127.261-4.066-1.272-4.33-3.425l-8.83-71.908a2.167 2.167 0 011.887-2.415l7.028-.863"
                     fill="#F0F0FF"
                     fill-rule="evenodd"
                   />
                   <path
                     clip-rule="evenodd"
-                    d="M135.331 5.833H85.978a2.97 2.97 0 0 0-2.107.873A2.97 2.97 0 0 0 83 8.813v82.333c0 .823.333 1.567.872 2.106a2.97 2.97 0 0 0 2.107.873h63.917a2.97 2.97 0 0 0 2.106-.873 2.97 2.97 0 0 0 .873-2.106V23.367a2.98 2.98 0 0 0-.873-2.107L137.437 6.705a2.98 2.98 0 0 0-2.106-.872Z"
+                    d="M135.331 5.833H85.978a2.97 2.97 0 00-2.107.873A2.97 2.97 0 0083 8.813v82.333c0 .823.333 1.567.872 2.106a2.97 2.97 0 002.107.873h63.917a2.97 2.97 0 002.106-.873 2.97 2.97 0 00.873-2.106V23.367a2.98 2.98 0 00-.873-2.107L137.437 6.705a2.98 2.98 0 00-2.106-.872z"
                     fill="#fff"
                     fill-rule="evenodd"
                     stroke="#7B79FF"
                     stroke-width="2.5"
                   />
                   <path
-                    d="M135.811 7.082v12.564a3.25 3.25 0 0 0 3.25 3.25h8.595M94.644 78.146h28.167m-28.167-55.25h28.167-28.167Zm0 13h46.584-46.584Zm0 14.083h46.584-46.584Zm0 14.084h46.584-46.584Z"
+                    d="M135.811 7.082v12.564a3.25 3.25 0 003.25 3.25h8.595M94.644 78.146h28.167m-28.167-55.25h28.167-28.167zm0 13h46.584-46.584zm0 14.083h46.584-46.584zm0 14.084h46.584-46.584z"
                     stroke="#7B79FF"
                     stroke-linecap="round"
                     stroke-linejoin="round"
@@ -374,7 +370,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
                 </g>
                 <defs>
                   <clippath
-                    id="EmptyDocuments_svg__a"
+                    id="EmptyDocuments_svg__clip0_1142_57509"
                   >
                     <path
                       d="M0 0h216v120H0z"
@@ -395,28 +391,29 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
             </div>
             <a
               aria-disabled="false"
-              class="c12 c13 c14 c15"
+              class="c12 c13"
               href="/plugins/content-type-builder/content-types/create-content-type"
+              variant="secondary"
             >
               <div
                 aria-hidden="true"
-                class="c16"
+                class="c14 c15"
               >
                 <svg
                   fill="none"
-                  height="1rem"
+                  height="1em"
                   viewBox="0 0 24 24"
-                  width="1rem"
+                  width="1em"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M24 13.604a.3.3 0 0 1-.3.3h-9.795V23.7a.3.3 0 0 1-.3.3h-3.21a.3.3 0 0 1-.3-.3v-9.795H.3a.3.3 0 0 1-.3-.3v-3.21a.3.3 0 0 1 .3-.3h9.795V.3a.3.3 0 0 1 .3-.3h3.21a.3.3 0 0 1 .3.3v9.795H23.7a.3.3 0 0 1 .3.3v3.21Z"
+                    d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
                     fill="#212134"
                   />
                 </svg>
               </div>
               <span
-                class="c17 c18"
+                class="c16 c17"
               >
                 Create your first Content-type
               </span>

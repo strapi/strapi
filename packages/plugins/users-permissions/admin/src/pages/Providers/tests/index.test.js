@@ -55,6 +55,13 @@ describe('Admin | containers | ProvidersPage', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c7 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
       .c1 {
         padding-bottom: 56px;
       }
@@ -115,13 +122,6 @@ describe('Admin | containers | ProvidersPage', () => {
         -webkit-justify-content: space-around;
         -ms-flex-pack: space-around;
         justify-content: space-around;
-      }
-
-      .c7 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
       }
 
       .c10 {

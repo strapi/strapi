@@ -62,7 +62,60 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c1 {
+      .c6 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c11 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c15 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c24 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #32324d;
+      }
+
+      .c28 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
+      .c38 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #b72b1a;
+        text-transform: uppercase;
+      }
+
+      .c40 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #666687;
+        text-transform: uppercase;
+      }
+
+      .c2 {
         background: #f6f6f9;
         padding-top: 40px;
         padding-right: 56px;
@@ -70,23 +123,16 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         padding-left: 56px;
       }
 
-      .c11 {
+      .c12 {
         padding-right: 56px;
         padding-left: 56px;
       }
 
-      .c6 {
-        background: #4945ff;
-        padding: 8px;
-        padding-right: 16px;
-        padding-left: 16px;
-        border-radius: 4px;
-        border-color: #4945ff;
-        border: 1px solid #4945ff;
-        cursor: pointer;
+      .c9 {
+        padding-right: 8px;
       }
 
-      .c12 {
+      .c13 {
         background: #ffffff;
         padding-top: 24px;
         padding-right: 32px;
@@ -124,7 +170,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         border-radius: 4px;
       }
 
-      .c2 {
+      .c3 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -142,7 +188,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         justify-content: space-between;
       }
 
-      .c3 {
+      .c4 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -156,22 +202,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         flex-direction: row;
       }
 
-      .c7 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        gap: 8px;
-      }
-
-      .c13 {
+      .c14 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
         -ms-flex-align: stretch;
@@ -186,7 +217,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         gap: 16px;
       }
 
-      .c17 {
+      .c18 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
         -ms-flex-align: stretch;
@@ -218,95 +249,44 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         justify-content: center;
       }
 
-      .c5 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c10 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #ffffff;
-      }
-
-      .c14 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c19 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c24 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: #32324d;
-      }
-
-      .c28 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #666687;
-      }
-
-      .c38 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #b72b1a;
-        text-transform: uppercase;
-      }
-
-      .c40 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #666687;
-        text-transform: uppercase;
-      }
-
-      .c18 > * {
+      .c19 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c18 > * + * {
+      .c19 > * + * {
         margin-top: 4px;
       }
 
-      .c8 {
+      .c7 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
         position: relative;
         outline: none;
       }
 
-      .c8 svg {
+      .c7 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c8 svg > g,
-      .c8 svg path {
+      .c7 svg > g,
+      .c7 svg path {
         fill: #ffffff;
       }
 
-      .c8[aria-disabled='true'] {
+      .c7[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c8:after {
+      .c7:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -321,11 +301,11 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         border: 2px solid transparent;
       }
 
-      .c8:focus-visible {
+      .c7:focus-visible {
         outline: none;
       }
 
-      .c8:focus-visible:after {
+      .c7:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -348,48 +328,75 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         width: 1px;
       }
 
-      .c9 {
+      .c10 {
+        height: 100%;
+      }
+
+      .c8 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        background-color: #4945ff;
+        border: 1px solid #4945ff;
         height: 2rem;
+        padding-left: 16px;
+        padding-right: 16px;
       }
 
-      .c9[aria-disabled='true'] {
+      .c8 .c1 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c8 .c5 {
+        color: #ffffff;
+      }
+
+      .c8[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c9[aria-disabled='true'] .c4 {
+      .c8[aria-disabled='true'] .c5 {
         color: #666687;
       }
 
-      .c9[aria-disabled='true'] svg > g,.c9[aria-disabled='true'] svg path {
+      .c8[aria-disabled='true'] svg > g,.c8[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c9[aria-disabled='true']:active {
+      .c8[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c9[aria-disabled='true']:active .c4 {
+      .c8[aria-disabled='true']:active .c5 {
         color: #666687;
       }
 
-      .c9[aria-disabled='true']:active svg > g,.c9[aria-disabled='true']:active svg path {
+      .c8[aria-disabled='true']:active svg > g,.c8[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c9:hover {
+      .c8:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c9:active {
+      .c8:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
-      .c9 svg > g,
-      .c9 svg path {
+      .c8 svg > g,
+      .c8 svg path {
         fill: #ffffff;
       }
 
@@ -591,13 +598,13 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         width: 100%;
       }
 
-      .c15 {
+      .c16 {
         display: grid;
         grid-template-columns: repeat(12,1fr);
         gap: 24px;
       }
 
-      .c16 {
+      .c17 {
         grid-column: span 6;
         max-width: 100%;
       }
@@ -688,13 +695,13 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c16 {
+        .c17 {
           grid-column: span 12;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c16 {
+        .c17 {
           grid-column: span;
         }
       }
@@ -738,45 +745,45 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
             style="height: 0px;"
           >
             <div
-              class="c1"
+              class="c1 c2"
               data-strapi-header="true"
             >
               <div
-                class="c2"
+                class="c1 c3"
               >
                 <div
-                  class="c3"
+                  class="c1 c4"
                 >
                   <h1
-                    class="c4 c5"
+                    class="c5 c6"
                   >
                     Advanced Settings
                   </h1>
                 </div>
                 <button
                   aria-disabled="false"
-                  class="c6 c7 c8 c9"
+                  class="c7 c8"
                   type="submit"
                 >
                   <div
                     aria-hidden="true"
-                    class=""
+                    class="c1 c9 c10"
                   >
                     <svg
                       fill="none"
-                      height="1rem"
+                      height="1em"
                       viewBox="0 0 24 24"
-                      width="1rem"
+                      width="1em"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
+                        d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
                         fill="#212134"
                       />
                     </svg>
                   </div>
                   <span
-                    class="c4 c10"
+                    class="c5 c11"
                   >
                     Save
                   </span>
@@ -785,44 +792,44 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
             </div>
           </div>
           <div
-            class="c11"
+            class="c1 c12"
           >
             <div
-              class="c12"
+              class="c1 c13"
             >
               <div
-                class="c13"
+                class="c1 c14"
               >
                 <h2
-                  class="c4 c14"
+                  class="c5 c15"
                 >
                   Settings
                 </h2>
                 <div
-                  class="c15"
+                  class="c1 c16"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class=""
+                      class="c1 "
                     >
                       <div>
                         <div
-                          class="c17 c18"
+                          class="c1 c18 c19"
                         >
                           <label
-                            class="c4 c19"
+                            class="c5 c11"
                             for="1"
                           >
                             <div
-                              class="c3"
+                              class="c1 c4"
                             >
                               Default role for authenticated users
                             </div>
                           </label>
                           <div
-                            class="c3 c20"
+                            class="c1 c4 c20"
                           >
                             <button
                               aria-describedby="1-hint"
@@ -835,16 +842,16 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               type="button"
                             />
                             <div
-                              class="c2 c22"
+                              class="c1 c3 c22"
                             >
                               <div
-                                class="c3"
+                                class="c1 c4"
                               >
                                 <div
-                                  class="c23"
+                                  class="c1 c23"
                                 >
                                   <span
-                                    class="c4 c24"
+                                    class="c5 c24"
                                     id="1-content"
                                   >
                                     Authenticated
@@ -852,25 +859,25 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 </div>
                               </div>
                               <div
-                                class="c3"
+                                class="c1 c4"
                               >
                                 <button
                                   aria-hidden="true"
-                                  class="c25 c26 c27"
+                                  class="c1 c25 c26 c27"
                                   tabindex="-1"
                                   title="Carret Down Button"
                                   type="button"
                                 >
                                   <svg
                                     fill="none"
-                                    height="1rem"
+                                    height="1em"
                                     viewBox="0 0 14 8"
-                                    width="1rem"
+                                    width="1em"
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path
                                       clip-rule="evenodd"
-                                      d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                      d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
                                       fill="#32324D"
                                       fill-rule="evenodd"
                                     />
@@ -880,7 +887,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                             </div>
                           </div>
                           <p
-                            class="c4 c28"
+                            class="c5 c28"
                             id="1-hint"
                           >
                             It will attach the new authenticated user to the selected role.
@@ -893,23 +900,23 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     class="c29"
                   >
                     <div
-                      class=""
+                      class="c1 "
                     >
                       <div
                         class="c30"
                       >
                         <div
-                          class="c17 c18"
+                          class="c1 c18 c19"
                         >
                           <div
-                            class="c3"
+                            class="c1 c4"
                           >
                             <label
-                              class="c4 c19"
+                              class="c5 c11"
                               for="3"
                             >
                               <div
-                                class="c3"
+                                class="c1 c4"
                               >
                                 One account per email address
                               </div>
@@ -924,25 +931,25 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               One account per email address
                             </div>
                             <div
-                              class="c33 c34"
+                              class="c1 c33 c34"
                               display="flex"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c35 c36 c37"
+                                class="c1 c35 c36 c37"
                               >
                                 <span
-                                  class="c4 c38"
+                                  class="c5 c38"
                                 >
                                   False
                                 </span>
                               </div>
                               <div
                                 aria-hidden="true"
-                                class="c35 c36 c39"
+                                class="c1 c35 c36 c39"
                               >
                                 <span
-                                  class="c4 c40"
+                                  class="c5 c40"
                                 >
                                   True
                                 </span>
@@ -959,7 +966,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                             </div>
                           </label>
                           <p
-                            class="c4 c28"
+                            class="c5 c28"
                             id="3-hint"
                           >
                             Disallow the user to create multiple accounts using the same email address with different authentication providers.
@@ -972,23 +979,23 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     class="c29"
                   >
                     <div
-                      class=""
+                      class="c1 "
                     >
                       <div
                         class="c30"
                       >
                         <div
-                          class="c17 c18"
+                          class="c1 c18 c19"
                         >
                           <div
-                            class="c3"
+                            class="c1 c4"
                           >
                             <label
-                              class="c4 c19"
+                              class="c5 c11"
                               for="5"
                             >
                               <div
-                                class="c3"
+                                class="c1 c4"
                               >
                                 Enable sign-ups
                               </div>
@@ -1003,25 +1010,25 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               Enable sign-ups
                             </div>
                             <div
-                              class="c33 c34"
+                              class="c1 c33 c34"
                               display="flex"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c35 c36 c37"
+                                class="c1 c35 c36 c37"
                               >
                                 <span
-                                  class="c4 c38"
+                                  class="c5 c38"
                                 >
                                   False
                                 </span>
                               </div>
                               <div
                                 aria-hidden="true"
-                                class="c35 c36 c39"
+                                class="c1 c35 c36 c39"
                               >
                                 <span
-                                  class="c4 c40"
+                                  class="c5 c40"
                                 >
                                   True
                                 </span>
@@ -1038,7 +1045,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                             </div>
                           </label>
                           <p
-                            class="c4 c28"
+                            class="c5 c28"
                             id="5-hint"
                           >
                             When disabled (OFF), the registration process is forbidden. No one can subscribe anymore no matter the used provider.
@@ -1051,25 +1058,25 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     class="c42"
                   >
                     <div
-                      class=""
+                      class="c1 "
                     >
                       <div>
                         <div>
                           <div
-                            class="c17 c18"
+                            class="c1 c18 c19"
                           >
                             <label
-                              class="c4 c19"
+                              class="c5 c11"
                               for="email_reset_password"
                             >
                               <div
-                                class="c3"
+                                class="c1 c4"
                               >
                                 Reset password page
                               </div>
                             </label>
                             <div
-                              class="c2 c43"
+                              class="c1 c3 c43"
                             >
                               <input
                                 aria-describedby="email_reset_password-hint"
@@ -1085,7 +1092,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               />
                             </div>
                             <p
-                              class="c4 c28"
+                              class="c5 c28"
                               id="email_reset_password-hint"
                             >
                               URL of your application's reset password page.
@@ -1099,23 +1106,23 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     class="c29"
                   >
                     <div
-                      class=""
+                      class="c1 "
                     >
                       <div
                         class="c30"
                       >
                         <div
-                          class="c17 c18"
+                          class="c1 c18 c19"
                         >
                           <div
-                            class="c3"
+                            class="c1 c4"
                           >
                             <label
-                              class="c4 c19"
+                              class="c5 c11"
                               for="7"
                             >
                               <div
-                                class="c3"
+                                class="c1 c4"
                               >
                                 Enable email confirmation
                               </div>
@@ -1130,25 +1137,25 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               Enable email confirmation
                             </div>
                             <div
-                              class="c33 c34"
+                              class="c1 c33 c34"
                               display="flex"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c35 c36 c37"
+                                class="c1 c35 c36 c37"
                               >
                                 <span
-                                  class="c4 c38"
+                                  class="c5 c38"
                                 >
                                   False
                                 </span>
                               </div>
                               <div
                                 aria-hidden="true"
-                                class="c35 c36 c39"
+                                class="c1 c35 c36 c39"
                               >
                                 <span
-                                  class="c4 c40"
+                                  class="c5 c40"
                                 >
                                   True
                                 </span>
@@ -1165,7 +1172,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                             </div>
                           </label>
                           <p
-                            class="c4 c28"
+                            class="c5 c28"
                             id="7-hint"
                           >
                             When enabled (ON), new registered users receive a confirmation email.
@@ -1178,25 +1185,25 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     class="c42"
                   >
                     <div
-                      class=""
+                      class="c1 "
                     >
                       <div>
                         <div>
                           <div
-                            class="c17 c18"
+                            class="c1 c18 c19"
                           >
                             <label
-                              class="c4 c19"
+                              class="c5 c11"
                               for="email_confirmation_redirection"
                             >
                               <div
-                                class="c3"
+                                class="c1 c4"
                               >
                                 Redirection url
                               </div>
                             </label>
                             <div
-                              class="c2 c45"
+                              class="c1 c3 c45"
                               disabled=""
                             >
                               <input
@@ -1213,7 +1220,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               />
                             </div>
                             <p
-                              class="c4 c28"
+                              class="c5 c28"
                               id="email_confirmation_redirection-hint"
                             >
                               After you confirmed your email, choose where you will be redirected.

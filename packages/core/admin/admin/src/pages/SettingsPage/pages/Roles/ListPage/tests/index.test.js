@@ -61,7 +61,42 @@ describe('<ListPage />', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c1 {
+      .c6 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c11 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c12 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c24 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
+      }
+
+      .c35 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #4945ff;
+      }
+
+      .c2 {
         background: #f6f6f9;
         padding-top: 40px;
         padding-right: 56px;
@@ -69,55 +104,48 @@ describe('<ListPage />', () => {
         padding-left: 56px;
       }
 
-      .c6 {
-        background: #4945ff;
-        padding: 8px;
-        padding-right: 16px;
-        padding-left: 16px;
-        border-radius: 4px;
-        border-color: #4945ff;
-        border: 1px solid #4945ff;
-        cursor: pointer;
+      .c9 {
+        padding-right: 8px;
       }
 
-      .c12 {
+      .c13 {
         padding-right: 56px;
         padding-left: 56px;
       }
 
-      .c13 {
+      .c14 {
         background: #ffffff;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c15 {
+      .c16 {
         position: relative;
       }
 
-      .c17 {
+      .c18 {
         padding-right: 24px;
         padding-left: 24px;
       }
 
-      .c27 {
+      .c28 {
         background: #eaeaef;
       }
 
-      .c29 {
+      .c30 {
         background: #f0f0ff;
         padding: 20px;
       }
 
-      .c31 {
+      .c32 {
         background: #d9d8ff;
       }
 
-      .c33 {
+      .c34 {
         padding-left: 12px;
       }
 
-      .c2 {
+      .c3 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -135,7 +163,7 @@ describe('<ListPage />', () => {
         justify-content: space-between;
       }
 
-      .c3 {
+      .c4 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -150,75 +178,34 @@ describe('<ListPage />', () => {
       }
 
       .c7 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        gap: 8px;
-      }
-
-      .c5 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c10 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #ffffff;
-      }
-
-      .c11 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c23 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #666687;
-      }
-
-      .c34 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #4945ff;
-      }
-
-      .c8 {
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
         position: relative;
         outline: none;
       }
 
-      .c8 svg {
+      .c7 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c8 svg > g,
-      .c8 svg path {
+      .c7 svg > g,
+      .c7 svg path {
         fill: #ffffff;
       }
 
-      .c8[aria-disabled='true'] {
+      .c7[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c8:after {
+      .c7:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -233,11 +220,11 @@ describe('<ListPage />', () => {
         border: 2px solid transparent;
       }
 
-      .c8:focus-visible {
+      .c7:focus-visible {
         outline: none;
       }
 
-      .c8:focus-visible:after {
+      .c7:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -248,7 +235,7 @@ describe('<ListPage />', () => {
         border: 2px solid #4945ff;
       }
 
-      .c25 {
+      .c26 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -260,52 +247,79 @@ describe('<ListPage />', () => {
         width: 1px;
       }
 
-      .c9 {
+      .c10 {
+        height: 100%;
+      }
+
+      .c8 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        background-color: #4945ff;
+        border: 1px solid #4945ff;
         height: 2rem;
+        padding-left: 16px;
+        padding-right: 16px;
       }
 
-      .c9[aria-disabled='true'] {
+      .c8 .c1 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c8 .c5 {
+        color: #ffffff;
+      }
+
+      .c8[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c9[aria-disabled='true'] .c4 {
+      .c8[aria-disabled='true'] .c5 {
         color: #666687;
       }
 
-      .c9[aria-disabled='true'] svg > g,.c9[aria-disabled='true'] svg path {
+      .c8[aria-disabled='true'] svg > g,.c8[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c9[aria-disabled='true']:active {
+      .c8[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c9[aria-disabled='true']:active .c4 {
+      .c8[aria-disabled='true']:active .c5 {
         color: #666687;
       }
 
-      .c9[aria-disabled='true']:active svg > g,.c9[aria-disabled='true']:active svg path {
+      .c8[aria-disabled='true']:active svg > g,.c8[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c9:hover {
+      .c8:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c9:active {
+      .c8:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
-      .c9 svg > g,
-      .c9 svg path {
+      .c8 svg > g,
+      .c8 svg path {
         fill: #ffffff;
       }
 
-      .c28 {
+      .c29 {
         height: 1px;
         border: none;
         -webkit-flex-shrink: 0;
@@ -318,17 +332,17 @@ describe('<ListPage />', () => {
         outline: none;
       }
 
-      .c14 {
+      .c15 {
         overflow: hidden;
         border: 1px solid #eaeaef;
       }
 
-      .c19 {
+      .c20 {
         width: 100%;
         white-space: nowrap;
       }
 
-      .c16:before {
+      .c17:before {
         background: linear-gradient(90deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
@@ -338,7 +352,7 @@ describe('<ListPage />', () => {
         left: 0;
       }
 
-      .c16:after {
+      .c17:after {
         background: linear-gradient(270deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
@@ -349,54 +363,54 @@ describe('<ListPage />', () => {
         top: 0;
       }
 
-      .c18 {
+      .c19 {
         overflow-x: auto;
       }
 
-      .c26 tr:last-of-type {
+      .c27 tr:last-of-type {
         border-bottom: none;
-      }
-
-      .c20 {
-        border-bottom: 1px solid #eaeaef;
       }
 
       .c21 {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c21 td,
-      .c21 th {
+      .c22 {
+        border-bottom: 1px solid #eaeaef;
+      }
+
+      .c22 td,
+      .c22 th {
         padding: 16px;
       }
 
-      .c21 td:first-of-type,
-      .c21 th:first-of-type {
+      .c22 td:first-of-type,
+      .c22 th:first-of-type {
         padding: 0 4px;
       }
 
-      .c21 th {
+      .c22 th {
         padding-top: 0;
         padding-bottom: 0;
         height: 3.5rem;
       }
 
-      .c22 {
+      .c23 {
         vertical-align: middle;
         text-align: left;
         color: #666687;
         outline-offset: -4px;
       }
 
-      .c22 input {
+      .c23 input {
         vertical-align: sub;
       }
 
-      .c24 svg {
+      .c25 svg {
         height: 0.25rem;
       }
 
-      .c32 {
+      .c33 {
         height: 1.5rem;
         width: 1.5rem;
         border-radius: 50%;
@@ -414,16 +428,16 @@ describe('<ListPage />', () => {
         align-items: center;
       }
 
-      .c32 svg {
+      .c33 svg {
         height: 0.625rem;
         width: 0.625rem;
       }
 
-      .c32 svg path {
+      .c33 svg path {
         fill: #4945ff;
       }
 
-      .c30 {
+      .c31 {
         border-radius: 0 0 4px 4px;
         display: block;
         width: 100%;
@@ -440,198 +454,198 @@ describe('<ListPage />', () => {
           style="height: 0px;"
         >
           <div
-            class="c1"
+            class="c1 c2"
             data-strapi-header="true"
           >
             <div
-              class="c2"
+              class="c1 c3"
             >
               <div
-                class="c3"
+                class="c1 c4"
               >
                 <h1
-                  class="c4 c5"
+                  class="c5 c6"
                 >
                   roles
                 </h1>
               </div>
               <button
                 aria-disabled="false"
-                class="c6 c7 c8 c9"
+                class="c7 c8"
                 type="button"
               >
                 <div
                   aria-hidden="true"
-                  class=""
+                  class="c1 c9 c10"
                 >
                   <svg
                     fill="none"
-                    height="1rem"
+                    height="1em"
                     viewBox="0 0 24 24"
-                    width="1rem"
+                    width="1em"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      d="M24 13.604a.3.3 0 0 1-.3.3h-9.795V23.7a.3.3 0 0 1-.3.3h-3.21a.3.3 0 0 1-.3-.3v-9.795H.3a.3.3 0 0 1-.3-.3v-3.21a.3.3 0 0 1 .3-.3h9.795V.3a.3.3 0 0 1 .3-.3h3.21a.3.3 0 0 1 .3.3v9.795H23.7a.3.3 0 0 1 .3.3v3.21Z"
+                      d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
                       fill="#212134"
                     />
                   </svg>
                 </div>
                 <span
-                  class="c4 c10"
+                  class="c5 c11"
                 >
                   Add new role
                 </span>
               </button>
             </div>
             <p
-              class="c4 c11"
+              class="c5 c12"
             >
               List of roles
             </p>
           </div>
         </div>
         <div
-          class="c12"
+          class="c1 c13"
         >
           <div
-            class="c13 c14"
+            class="c1 c14 c15"
           >
             <div
-              class="c15 c16"
+              class="c1 c16 c17"
             >
               <div
-                class="c17 c18"
+                class="c1 c18 c19"
               >
                 <table
                   aria-colcount="5"
                   aria-rowcount="1"
-                  class="c19"
+                  class="c20"
                   role="grid"
                 >
                   <thead
-                    class="c20"
+                    class="c21"
                   >
                     <tr
                       aria-rowindex="1"
-                      class="c21"
+                      class="c1 c22"
                     >
                       <th
                         aria-colindex="1"
-                        class="c22"
+                        class="c1 c23"
                         role="gridcell"
                         tabindex="0"
                       >
                         <div
-                          class="c3"
+                          class="c1 c4"
                         >
                           <span
-                            class="c4 c23"
+                            class="c5 c24"
                           >
                             Name
                           </span>
                           <span
-                            class="c24"
+                            class="c25"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="2"
-                        class="c22"
+                        class="c1 c23"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <div
-                          class="c3"
+                          class="c1 c4"
                         >
                           <span
-                            class="c4 c23"
+                            class="c5 c24"
                           >
                             Description
                           </span>
                           <span
-                            class="c24"
+                            class="c25"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="3"
-                        class="c22"
+                        class="c1 c23"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <div
-                          class="c3"
+                          class="c1 c4"
                         >
                           <span
-                            class="c4 c23"
+                            class="c5 c24"
                           >
                             Users
                           </span>
                           <span
-                            class="c24"
+                            class="c25"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="4"
-                        class="c22"
+                        class="c1 c23"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <div
-                          class="c3"
+                          class="c1 c4"
                         >
                           <div
-                            class="c25"
+                            class="c26"
                           >
                             Actions
                           </div>
                           <span
-                            class="c24"
+                            class="c25"
                           />
                         </div>
                       </th>
                     </tr>
                   </thead>
                   <tbody
-                    class="c26"
+                    class="c27"
                   />
                 </table>
               </div>
             </div>
             <div>
               <hr
-                class="c27 c28"
+                class="c1 c28 c29"
               />
               <button
-                class="c29 c30"
+                class="c1 c30 c31"
               >
                 <div
-                  class="c3"
+                  class="c1 c4"
                 >
                   <div
                     aria-hidden="true"
-                    class="c31 c32"
+                    class="c1 c32 c33"
                   >
                     <svg
                       fill="none"
-                      height="1rem"
+                      height="1em"
                       viewBox="0 0 24 24"
-                      width="1rem"
+                      width="1em"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        d="M24 13.604a.3.3 0 0 1-.3.3h-9.795V23.7a.3.3 0 0 1-.3.3h-3.21a.3.3 0 0 1-.3-.3v-9.795H.3a.3.3 0 0 1-.3-.3v-3.21a.3.3 0 0 1 .3-.3h9.795V.3a.3.3 0 0 1 .3-.3h3.21a.3.3 0 0 1 .3.3v9.795H23.7a.3.3 0 0 1 .3.3v3.21Z"
+                        d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
                         fill="#212134"
                       />
                     </svg>
                   </div>
                   <div
-                    class="c33"
+                    class="c1 c34"
                   >
                     <span
-                      class="c4 c34"
+                      class="c5 c35"
                     >
                       Add new role
                     </span>

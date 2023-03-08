@@ -39,6 +39,22 @@ describe('<PageSizeURLQuery />', () => {
     } = render(makeApp(history));
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c8 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #32324d;
+      }
+
+      .c13 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #666687;
+      }
+
       .c7 {
         padding-right: 16px;
         padding-left: 16px;
@@ -96,22 +112,6 @@ describe('<PageSizeURLQuery />', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
-      }
-
-      .c8 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: #32324d;
-      }
-
-      .c13 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #666687;
       }
 
       .c2 > * {
@@ -241,14 +241,14 @@ describe('<PageSizeURLQuery />', () => {
                   >
                     <svg
                       fill="none"
-                      height="1rem"
+                      height="1em"
                       viewBox="0 0 14 8"
-                      width="1rem"
+                      width="1em"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
                         clip-rule="evenodd"
-                        d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                        d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
                         fill="#32324D"
                         fill-rule="evenodd"
                       />

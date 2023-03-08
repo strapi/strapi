@@ -142,15 +142,6 @@ describe('ADMIN | pages | SettingsPage', () => {
         flex-direction: column;
       }
 
-      .c7 {
-        height: 1px;
-        border: none;
-        -webkit-flex-shrink: 0;
-        -ms-flex-negative: 0;
-        flex-shrink: 0;
-        margin: 0;
-      }
-
       .c11 > * {
         margin-top: 0;
         margin-bottom: 0;
@@ -158,6 +149,15 @@ describe('ADMIN | pages | SettingsPage', () => {
 
       .c11 > * + * {
         margin-top: 8px;
+      }
+
+      .c7 {
+        height: 1px;
+        border: none;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
+        margin: 0;
       }
 
       .c1 {
