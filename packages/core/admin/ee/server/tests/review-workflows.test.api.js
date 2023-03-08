@@ -2,12 +2,31 @@
 
 const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
 const { createAuthRequest, createRequest } = require('../../../../../../test/helpers/request');
+const { createTestBuilder } = require('../../../../../../test/helpers/builder');
+
 const { describeOnCondition } = require('../utils/test');
 const { STAGE_MODEL_UID, WORKFLOW_MODEL_UID } = require('../constants/workflows');
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
+const productUID = 'api::product.product';
+const model = {
+  draftAndPublish: true,
+  pluginOptions: {},
+  singularName: 'product',
+  pluralName: 'products',
+  displayName: 'Product',
+  kind: 'collectionType',
+  attributes: {
+    name: {
+      type: 'string',
+    },
+  },
+};
+
 describeOnCondition(edition === 'EE')('Review workflows', () => {
+  const builder = createTestBuilder();
+
   const requests = {
     public: null,
     admin: null,
@@ -18,11 +37,37 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   let secondStage;
   let testWorkflow;
 
-  beforeAll(async () => {
+  const createEntry = async (uid, data) => {
+    const { body } = await requests.admin({
+      method: 'POST',
+      url: `/content-manager/collection-types/${uid}`,
+      body: data,
+    });
+    return body;
+  };
+
+  const updateContentType = async (uid, data) => {
+    const result = await requests.admin({
+      method: 'PUT',
+      url: `/content-type-builder/content-types/${uid}`,
+      body: data,
+    });
+
+    expect(result.statusCode).toBe(201);
+  };
+
+  const restart = async () => {
+    await strapi.destroy();
     strapi = await createStrapiInstance();
+    requests.admin = await createAuthRequest({ strapi });
+  };
+
+  beforeAll(async () => {
+    await builder.addContentTypes([model]).build();
     // eslint-disable-next-line node/no-extraneous-require
     hasRW = require('@strapi/strapi/lib/utils/ee').features.isEnabled('review-workflows');
 
+    strapi = await createStrapiInstance();
     requests.public = createRequest({ strapi });
     requests.admin = await createAuthRequest({ strapi });
 
@@ -42,6 +87,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
   afterAll(async () => {
     await strapi.destroy();
+    await builder.cleanup();
   });
 
   describe('Get workflows', () => {
@@ -266,6 +312,41 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         expect(stagesRes.body.data).toBeUndefined();
         expect(workflowRes.status).toBe(404);
         expect(workflowRes.body.data).toBeUndefined();
+      }
+    });
+  });
+
+  describe('Enable review workflows on a content type', () => {
+    test('When enabled entries in the content type should be added to the first stage of a workflow', async () => {
+      await createEntry(productUID, { name: 'Product' });
+      await createEntry(productUID, { name: 'Product 1' });
+      await createEntry(productUID, { name: 'Product 2' });
+
+      await updateContentType(productUID, {
+        components: [],
+        contentType: { ...model, reviewWorkflows: true },
+      });
+
+      await restart();
+
+      const res = await requests.admin({
+        method: 'GET',
+        url: `/content-type-builder/content-types/api::product.product`,
+      });
+
+      expect(res.body.data.schema.reviewWorkflows).toBeTruthy();
+
+      const connection = strapi.db.getConnection();
+      const RWMorphTableResults = await connection
+        .select('*')
+        .from('strapi_workflows_stages_related_morphs')
+        .where('related_type', productUID);
+
+      expect(RWMorphTableResults.length).toEqual(3);
+      for (let i = 0; i < RWMorphTableResults.length; i += 1) {
+        const entry = RWMorphTableResults[i];
+        expect(entry.related_id).toEqual(i + 1);
+        expect(entry.order).toEqual(1);
       }
     });
   });
