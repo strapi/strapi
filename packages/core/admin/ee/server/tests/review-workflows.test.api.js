@@ -316,8 +316,8 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
   });
 
-  describe('Enable review workflows on a content type', () => {
-    test('When enabled entries in the content type should be added to the first stage of a workflow', async () => {
+  describe('Enabling/Disabling review workflows on a content type', () => {
+    test('when disabled entries in the content type should be removed from any workflow stage', async () => {
       await createEntry(productUID, { name: 'Product' });
       await createEntry(productUID, { name: 'Product 1' });
       await createEntry(productUID, { name: 'Product 2' });
@@ -326,7 +326,12 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         components: [],
         contentType: { ...model, reviewWorkflows: true },
       });
+      await restart();
 
+      await updateContentType(productUID, {
+        components: [],
+        contentType: { ...model, reviewWorkflows: false },
+      });
       await restart();
 
       const res = await requests.admin({
@@ -334,7 +339,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         url: `/content-type-builder/content-types/api::product.product`,
       });
 
-      expect(res.body.data.schema.reviewWorkflows).toBeTruthy();
+      expect(res.body.data.schema.reviewWorkflows).toBeFalsy();
 
       const connection = strapi.db.getConnection();
       const RWMorphTableResults = await connection
@@ -342,12 +347,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         .from('strapi_workflows_stages_related_morphs')
         .where('related_type', productUID);
 
-      expect(RWMorphTableResults.length).toEqual(3);
-      for (let i = 0; i < RWMorphTableResults.length; i += 1) {
-        const entry = RWMorphTableResults[i];
-        expect(entry.related_id).toEqual(i + 1);
-        expect(entry.order).toEqual(1);
-      }
+      expect(RWMorphTableResults.length).toEqual(0);
     });
   });
 });

@@ -14,7 +14,7 @@ const hasRWEnabled = (contentType) => contentType?.options?.reviewWorkflows || f
 const disableReviewWorkFlows = async ({ oldContentTypes, contentTypes }) => {
   const uidsToRemove = [];
   for (const uid in contentTypes) {
-    if (!oldContentTypes[uid]) {
+    if (!oldContentTypes || !oldContentTypes[uid]) {
       continue;
     }
 
@@ -34,7 +34,7 @@ const disableReviewWorkFlows = async ({ oldContentTypes, contentTypes }) => {
 
   await strapi.db
     .connection('strapi_workflows_stages_related_morphs')
-    .whereIn('id', uidsToRemove)
+    .whereIn('related_type', uidsToRemove)
     .del();
 };
 

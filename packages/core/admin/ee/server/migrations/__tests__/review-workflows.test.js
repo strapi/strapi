@@ -29,7 +29,7 @@ describe('disableReviewWorkFlows', () => {
     disableReviewWorkFlows({ oldContentTypes, contentTypes });
 
     expect(whereInSpy).toHaveBeenCalledTimes(1);
-    expect(whereInSpy).toHaveBeenCalledWith('id', ['U1', 'U3']);
+    expect(whereInSpy).toHaveBeenCalledWith('related_type', ['U1', 'U3']);
     expect(delSpy).toHaveBeenCalledTimes(1);
   });
 });
