@@ -6,7 +6,7 @@
 
 /* eslint-disable no-unused-vars */
 // Public node modules.
-const { get } = require('lodash');
+const { getOr } = require('lodash/fp');
 const AWS = require('aws-sdk');
 const { getBucketFromUrl } = require('./utils');
 
@@ -22,7 +22,7 @@ module.exports = {
       ...config,
     });
 
-    const ACL = get(config, ['params', 'ACL'], 'public-read');
+    const ACL = getOr('public-read', ['params', 'ACL'], config);
 
     const upload = (file, customParams = {}) =>
       new Promise((resolve, reject) => {
@@ -82,7 +82,7 @@ module.exports = {
             {
               Bucket: config.params.Bucket,
               Key: fileKey,
-              Expires: get(config, ['params', 'signedUrlExpires'], 60 * 60 * 24 * 7), // 7 days
+              Expires: getOr(60 * 60 * 24 * 7, ['params', 'signedUrlExpires'], config), // 7 days
             },
             (err, url) => {
               if (err) {
