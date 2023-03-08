@@ -226,7 +226,6 @@ export const handlerFactory =
 
               const onResponse = (raw: RawData) => {
                 const response = JSON.parse(raw.toString());
-                console.log('response', response);
 
                 if (response.uuid === uuid) {
                   if (response.error) {

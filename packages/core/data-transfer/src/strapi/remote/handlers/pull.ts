@@ -61,8 +61,6 @@ const createPullHandler = handlerFactory<Partial<PullHandler>>((proto) => ({
   async onMessage(this: PullHandler, raw) {
     const msg = JSON.parse(raw.toString());
 
-    console.log('msg', msg);
-
     if (!msg.uuid) {
       await this.respond(undefined, new Error('Missing uuid in message'));
     }
@@ -126,7 +124,6 @@ const createPullHandler = handlerFactory<Partial<PullHandler>>((proto) => ({
 
     try {
       for await (const chunk of stream) {
-        console.log('se ejecuta', chunk);
         await this.confirm({ type: 'transfer', data: chunk, ended: false, error: null, id });
       }
 
@@ -185,7 +182,6 @@ const createPullHandler = handlerFactory<Partial<PullHandler>>((proto) => ({
             const { stream: assetStream, ...rest } = chunk as IAsset;
 
             for await (const assetChunk of assetStream) {
-              console.log(rest.filename, assetChunk);
               yield { ...rest, chunk: assetChunk };
             }
           }

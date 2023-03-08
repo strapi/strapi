@@ -46,13 +46,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
   results?: ISourceProviderTransferResults | undefined;
 
   async #createStageReadStream(stage: Exclude<TransferStage, 'schemas'>) {
-    const log = (...args: unknown[]) => console.log(`[transfer][${stage}]:`, ...args);
-
-    log('Starting the transfer');
-
     const startResult = await this.#startStep(stage);
-
-    log('Got response for start', startResult);
 
     if (startResult instanceof Error) {
       throw startResult;
@@ -60,45 +54,35 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
     const { id: processID } = startResult as { id: string };
 
-    log('Creating the stream');
-
     const stream = new PassThrough({ objectMode: true });
 
     const listener = async (raw: Buffer) => {
       const parsed = JSON.parse(raw.toString());
 
-      log('Received a new message', parsed.uuid, parsed?.data?.type, parsed?.data?.id);
-
       // If not a message related to our transfer process, ignore it
       if (!parsed.uuid || parsed?.data?.type !== 'transfer' || parsed?.data?.id !== processID) {
-        log('Ignoring the message');
         this.ws?.once('message', listener);
         return;
       }
-
-      log('Valid message');
 
       const { uuid, data: message } = parsed;
       const { ended, error, data } = message;
 
       if (ended) {
-        log('Stream has been ended');
         await this.#respond(uuid);
         await this.#endStep(stage);
-        console.log('coucou');
+
         stream.end();
         return;
       }
 
       if (error) {
-        log('Something wrong happended, bye bye');
         await this.#respond(uuid);
         await this.#endStep(stage);
         stream.destroy(error);
         return;
       }
 
-      log('Sending chunk to the stream');
       stream.push(data);
 
       this.ws?.once('message', listener);
@@ -107,8 +91,6 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     };
 
     this.ws?.once('message', listener);
-
-    log('Returning the stream');
 
     return stream;
   }
@@ -123,8 +105,6 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
   async createAssetsReadStream(): Promise<Readable> {
     const assets: { [filename: string]: Readable } = {};
-
-    console.log('Assets');
 
     const stream = await this.#createStageReadStream('assets');
     const pass = new PassThrough({ objectMode: true });
@@ -245,7 +225,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
   async close() {
     await this.dispatcher?.dispatchTransferAction('close');
-    console.log('se ejecuta');
+
     await new Promise<void>((resolve) => {
       const { ws } = this;
 
@@ -261,7 +241,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
   async getSchemas(): Promise<Strapi.Schemas | null> {
     const schemas =
       (await this.dispatcher?.dispatchTransferAction<Strapi.Schemas>('getSchemas')) ?? null;
-    console.log('schemas');
+
     return schemas;
   }
 
