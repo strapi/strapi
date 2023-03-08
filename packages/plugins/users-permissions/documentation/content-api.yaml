@@ -12,8 +12,16 @@ tags:
       url: 'https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html'
 
 paths:
-  '/connect/(.*)':
+  /connect/{provider}:
     get:
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          description: Provider name
+          schema:
+            type: string
+            pattern: '.*'
       tags:
         - Users-Permissions - Auth
       summary: Login with a provider
@@ -148,7 +156,7 @@ paths:
                 type: object
                 properties:
                   ok:
-                    type: enum
+                    type: string
                     enum: [true]
         default:
           description: Error
@@ -273,7 +281,7 @@ paths:
                   email:
                     type: string
                   sent:
-                    type: enum
+                    type: string
                     enum: [true]
         default:
           description: Error
@@ -381,7 +389,7 @@ paths:
                 type: object
                 properties:
                   ok:
-                    type: enum
+                    type: string
                     enum: [true]
         default:
           description: Error
@@ -456,7 +464,7 @@ paths:
                 type: object
                 properties:
                   ok:
-                    type: enum
+                    type: string
                     enum: [true]
         default:
           description: Error
@@ -485,7 +493,7 @@ paths:
                 type: object
                 properties:
                   ok:
-                    type: enum
+                    type: string
                     enum: [true]
         default:
           description: Error
@@ -779,9 +787,11 @@ components:
         type:
           type: string
         createdAt:
-          type: datetime
+          type: string
+          format: date-time
         updatedAt:
-          type: datetime
+          type: string
+          format: date-time
 
     Users-Permissions-User:
       type: object
@@ -805,10 +815,12 @@ components:
           type: boolean
           example: false
         createdAt:
-          type: datetime
+          type: string
+          format: date-time
           example: '2022-06-02T08:32:06.258Z'
         updatedAt:
-          type: datetime
+          type: string
+          format: date-time
           example: '2022-06-02T08:32:06.267Z'
 
     Users-Permissions-UserRegistration:
@@ -839,10 +851,6 @@ components:
                     type: boolean
                   policy:
                     type: string
-
-  parameters:
-  responses:
-  examples:
   requestBodies:
     Users-Permissions-RoleRequest:
       required: true
