@@ -29,6 +29,8 @@ const { exitWith } = require('../utils/helpers');
  * @property {URL|undefined} [from] The url of a remote Strapi to use as remote source
  * @property {string|undefined} [toToken] The transfer token for the remote Strapi destination
  * @property {string|undefined} [fromToken] The transfer token for the remote Strapi source
+ * @property {(keyof import('@strapi/data-transfer/src/engine').TransferGroupFilter)[]} [only] If present, only include these filtered groups of data
+ * @property {(keyof import('@strapi/data-transfer/src/engine').TransferGroupFilter)[]} [exclude] If present, exclude these filtered groups of data
  */
 
 /**
@@ -96,6 +98,8 @@ module.exports = async (opts) => {
   const engine = createTransferEngine(source, destination, {
     versionStrategy: 'exact',
     schemaStrategy: 'strict',
+    exclude: opts.exclude,
+    only: opts.only,
     transforms: {
       links: [
         {
