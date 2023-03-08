@@ -40,23 +40,27 @@ describe('<NoPermissions />', () => {
         padding-left: 56px;
       }
 
-      .c5 {
+      .c3 {
+        min-width: 0;
+      }
+
+      .c6 {
         padding-right: 56px;
         padding-left: 56px;
       }
 
-      .c6 {
+      .c7 {
         background: #ffffff;
         padding: 64px;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c8 {
+      .c9 {
         padding-bottom: 24px;
       }
 
-      .c10 {
+      .c11 {
         padding-bottom: 16px;
       }
 
@@ -78,7 +82,7 @@ describe('<NoPermissions />', () => {
         justify-content: space-between;
       }
 
-      .c3 {
+      .c4 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -92,21 +96,21 @@ describe('<NoPermissions />', () => {
         flex-direction: row;
       }
 
-      .c4 {
+      .c5 {
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
         color: #32324d;
       }
 
-      .c11 {
+      .c12 {
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
         color: #666687;
       }
 
-      .c7 {
+      .c8 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -121,7 +125,7 @@ describe('<NoPermissions />', () => {
         text-align: center;
       }
 
-      .c9 svg {
+      .c10 svg {
         height: 5.5rem;
       }
 
@@ -146,10 +150,10 @@ describe('<NoPermissions />', () => {
               class="c2"
             >
               <div
-                class="c3"
+                class="c3 c4"
               >
                 <h1
-                  class="c4"
+                  class="c5"
                 >
                   Content
                 </h1>
@@ -158,14 +162,14 @@ describe('<NoPermissions />', () => {
           </div>
         </div>
         <div
-          class="c5"
+          class="c6"
         >
           <div
-            class="c6 c7"
+            class="c7 c8"
           >
             <div
               aria-hidden="true"
-              class="c8 c9"
+              class="c9 c10"
             >
               <svg
                 fill="none"
@@ -241,10 +245,10 @@ describe('<NoPermissions />', () => {
               </svg>
             </div>
             <div
-              class="c10"
+              class="c11"
             >
               <p
-                class="c11"
+                class="c12"
               >
                 You don't have the permissions to access that content
               </p>
