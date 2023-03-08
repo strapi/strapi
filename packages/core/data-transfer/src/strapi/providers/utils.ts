@@ -1,8 +1,8 @@
 import { v4 } from 'uuid';
 import { RawData, WebSocket } from 'ws';
 
-import type { client, server } from '../../../../types/remote/protocol';
-import { ProviderError } from '../../../errors/providers';
+import type { client, server } from '../../../types/remote/protocol';
+import { ProviderError } from '../../errors/providers';
 
 interface IDispatcherState {
   transfer?: { kind: client.TransferKind; id: string };
@@ -66,7 +66,7 @@ const createDispatcher = (ws: WebSocket) => {
       command: U;
     } & ([client.GetCommandParams<U>] extends [never]
       ? unknown
-      : { params: client.GetCommandParams<U> })
+      : { params?: client.GetCommandParams<U> })
   ) => {
     return dispatch({ type: 'command', ...payload } as client.CommandMessage);
   };

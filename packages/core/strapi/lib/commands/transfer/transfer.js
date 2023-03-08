@@ -12,6 +12,9 @@ const { isObject } = require('lodash/fp');
 const chalk = require('chalk');
 
 const {
+  createRemoteStrapiSourceProvider,
+} = require('@strapi/data-transfer/lib/strapi/providers/remote-source');
+const {
   buildTransferTable,
   createStrapiInstance,
   DEFAULT_IGNORED_CONTENT_TYPES,
@@ -58,13 +61,21 @@ module.exports = async (opts) => {
   }
   // if URL provided, set up a remote source provider
   else {
-    exitWith(1, `Remote Strapi source provider not yet implemented`);
+    source = createRemoteStrapiSourceProvider({
+      getStrapi: () => strapi,
+      url: opts.from,
+      auth: {
+        type: 'token',
+        token: opts.toToken,
+      },
+    });
   }
 
   // if no URL provided, use local Strapi
   if (!opts.to) {
     destination = createLocalStrapiDestinationProvider({
       getStrapi: () => strapi,
+      strategy: 'restore',
     });
   }
   // if URL provided, set up a remote destination provider

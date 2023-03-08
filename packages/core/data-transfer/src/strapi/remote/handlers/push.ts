@@ -11,7 +11,6 @@ import { createFlow, DEFAULT_TRANSFER_FLOW } from '../flows';
 import { createLocalStrapiDestinationProvider } from '../../providers/local-destination';
 import { Handler, handlerFactory } from './utils';
 
-const VALID_TRANSFER_COMMANDS = ['init', 'end', 'status'] as const;
 const VALID_TRANSFER_ACTIONS = [
   'bootstrap',
   'close',
@@ -21,7 +20,6 @@ const VALID_TRANSFER_ACTIONS = [
   'getSchemas',
 ] as const;
 
-type TransferCommand = (typeof VALID_TRANSFER_COMMANDS)[number];
 type PushTransferAction = (typeof VALID_TRANSFER_ACTIONS)[number];
 
 const TRANSFER_KIND = 'push';
@@ -35,7 +33,7 @@ interface PushHandler extends Handler {
   /**
    * Holds all the stages' stream for the current transfer handler (one registry per connection)
    */
-  streams: { [stage in TransferStage]?: Writable };
+  streams?: { [stage in TransferStage]?: Writable };
 
   /**
    * Holds all the transferred assets for the current transfer handler (one registry per connection)
@@ -46,11 +44,6 @@ interface PushHandler extends Handler {
    * Ochestrate and manage the transfer messages' ordering
    */
   flow?: TransferFlow;
-
-  /**
-   * Checks that the given string is a valid transfer command
-   */
-  assertValidTransferCommand(command: string): asserts command is TransferCommand;
 
   /**
    * Checks that the given action is a valid push transfer action
@@ -120,370 +113,361 @@ const writeAsync = <T>(stream: Writable, data: T) => {
   });
 };
 
-const createPushHandler = handlerFactory<Partial<PushHandler>>((proto) => {
-  return {
-    isTransferStarted(this: PushHandler) {
-      return proto.isTransferStarted.call(this) && this.provider !== undefined;
-    },
+const createPushHandler = handlerFactory<Partial<PushHandler>>((proto) => ({
+  isTransferStarted(this: PushHandler) {
+    return proto.isTransferStarted.call(this) && this.provider !== undefined;
+  },
 
-    verifyAuth(this: PushHandler) {
-      return proto.verifyAuth.call(this, TRANSFER_KIND);
-    },
+  verifyAuth(this: PushHandler) {
+    return proto.verifyAuth.call(this, TRANSFER_KIND);
+  },
 
-    cleanup(this: PushHandler) {
-      proto.cleanup.call(this);
+  cleanup(this: PushHandler) {
+    proto.cleanup.call(this);
 
-      this.streams = {};
-      this.assets = {};
+    this.streams = {};
+    this.assets = {};
 
-      delete this.flow;
-      delete this.provider;
-    },
+    delete this.flow;
+    delete this.provider;
+  },
 
-    teardown(this: PushHandler) {
-      if (this.provider) {
-        this.provider.rollback();
-      }
+  teardown(this: PushHandler) {
+    if (this.provider) {
+      this.provider.rollback();
+    }
 
-      proto.teardown.call(this);
-    },
+    proto.teardown.call(this);
+  },
 
-    assertValidTransfer(this: PushHandler) {
-      proto.assertValidTransfer.call(this);
+  assertValidTransfer(this: PushHandler) {
+    proto.assertValidTransfer.call(this);
 
-      if (this.provider === undefined) {
-        throw new Error('Invalid Transfer Process');
-      }
-    },
+    if (this.provider === undefined) {
+      throw new Error('Invalid Transfer Process');
+    }
+  },
 
-    assertValidTransferAction(this: PushHandler, action: PushTransferAction) {
-      if (VALID_TRANSFER_ACTIONS.includes(action)) {
-        return;
-      }
+  assertValidTransferAction(this: PushHandler, action: PushTransferAction) {
+    if (VALID_TRANSFER_ACTIONS.includes(action)) {
+      return;
+    }
 
-      throw new ProviderTransferError(`Invalid action provided: "${action}"`, {
-        action,
-        validActions: Object.keys(VALID_TRANSFER_ACTIONS),
+    throw new ProviderTransferError(`Invalid action provided: "${action}"`, {
+      action,
+      validActions: Object.keys(VALID_TRANSFER_ACTIONS),
+    });
+  },
+
+  assertValidStreamTransferStep(this: PushHandler, stage) {
+    const currentStep = this.flow?.get();
+    const nextStep: Step = { kind: 'transfer', stage };
+
+    if (currentStep?.kind === 'transfer' && !currentStep.locked) {
+      throw new ProviderTransferError(
+        `You need to initialize the transfer stage (${nextStep}) before starting to stream data`
+      );
+    }
+
+    if (this.flow?.cannot(nextStep)) {
+      throw new ProviderTransferError(`Invalid stage (${nextStep}) provided for the current flow`, {
+        step: nextStep,
       });
-    },
+    }
+  },
 
-    assertValidTransferCommand(this: PushHandler, command: TransferCommand) {
-      const isDefined = typeof this[command] === 'function';
-      const isValidTransferCommand = VALID_TRANSFER_COMMANDS.includes(command);
+  async createWritableStreamForStep(this: PushHandler, step: Exclude<TransferStage, 'schemas'>) {
+    const mapper = {
+      entities: () => this.provider?.createEntitiesWriteStream(),
+      links: () => this.provider?.createLinksWriteStream(),
+      configuration: () => this.provider?.createConfigurationWriteStream(),
+      assets: () => this.provider?.createAssetsWriteStream(),
+    };
 
-      if (!isDefined || !isValidTransferCommand) {
-        throw new Error('Invalid transfer command');
-      }
-    },
+    if (!(step in mapper)) {
+      throw new Error('Invalid transfer step, impossible to create a stream');
+    }
 
-    assertValidStreamTransferStep(this: PushHandler, stage) {
-      const currentStep = this.flow?.get();
-      const nextStep: Step = { kind: 'transfer', stage };
+    if (!this.streams) {
+      throw new Error('Invalid transfer state');
+    }
 
-      if (currentStep?.kind === 'transfer' && !currentStep.locked) {
-        throw new ProviderTransferError(
-          `You need to initialize the transfer stage (${nextStep}) before starting to stream data`
-        );
-      }
+    this.streams[step] = await mapper[step]();
+  },
 
-      if (this.flow?.cannot(nextStep)) {
-        throw new ProviderTransferError(
-          `Invalid stage (${nextStep}) provided for the current flow`,
-          { step: nextStep }
-        );
-      }
-    },
+  async onMessage(this: PushHandler, raw) {
+    const msg = JSON.parse(raw.toString());
 
-    async createWritableStreamForStep(this: PushHandler, step: Exclude<TransferStage, 'schemas'>) {
-      const mapper = {
-        entities: () => this.provider?.createEntitiesWriteStream(),
-        links: () => this.provider?.createLinksWriteStream(),
-        configuration: () => this.provider?.createConfigurationWriteStream(),
-        assets: () => this.provider?.createAssetsWriteStream(),
-      };
+    if (!msg.uuid) {
+      await this.respond(undefined, new Error('Missing uuid in message'));
+    }
 
-      if (!(step in mapper)) {
-        throw new Error('Invalid transfer step, impossible to create a stream');
-      }
+    const { uuid, type } = msg;
 
-      this.streams[step] = await mapper[step]();
-    },
+    // Regular command message (init, end, status)
+    if (type === 'command') {
+      const { command, params } = msg;
 
-    async onMessage(this: PushHandler, raw) {
-      const msg = JSON.parse(raw.toString());
+      await this.executeAndRespond(uuid, () => {
+        this.assertValidTransferCommand(command);
 
-      if (!msg.uuid) {
-        await this.respond(undefined, new Error('Missing uuid in message'));
-      }
-
-      const { uuid, type } = msg;
-
-      // Regular command message (init, end, status)
-      if (type === 'command') {
-        const { command, params } = msg;
-
-        await this.executeAndRespond(uuid, () => {
-          this.assertValidTransferCommand(command);
-
-          return this[command](params);
-        });
-      }
-
-      // Transfer message (the transfer must be init first)
-      else if (type === 'transfer') {
-        await this.executeAndRespond(uuid, async () => {
-          await this.verifyAuth();
-
-          this.assertValidTransfer();
-
-          return this.onTransferMessage(msg);
-        });
-      }
-
-      // Invalid messages
-      else {
-        await this.respond(uuid, new Error('Bad Request'));
-      }
-    },
-
-    async onTransferMessage(this: PushHandler, msg) {
-      const { kind } = msg;
-
-      if (kind === 'action') {
-        return this.onTransferAction(msg);
-      }
-
-      if (kind === 'step') {
-        return this.onTransferStep(msg);
-      }
-    },
-
-    lockTransferStep(stage: TransferStage) {
-      const currentStep = this.flow?.get();
-      const nextStep: Step = { kind: 'transfer', stage };
-
-      if (currentStep?.kind === 'transfer' && currentStep.locked) {
-        throw new ProviderTransferError(
-          `It's not possible to start a new transfer stage (${stage}) while another one is in progress (${currentStep.stage})`
-        );
-      }
-
-      if (this.flow?.cannot(nextStep)) {
-        throw new ProviderTransferError(`Invalid stage (${stage}) provided for the current flow`, {
-          step: nextStep,
-        });
-      }
-
-      this.flow?.set({ ...nextStep, locked: true });
-    },
-
-    unlockTransferStep(stage: TransferStage) {
-      const currentStep = this.flow?.get();
-      const nextStep: Step = { kind: 'transfer', stage };
-
-      // Cannot unlock if not locked (aka: started)
-      if (currentStep?.kind === 'transfer' && !currentStep.locked) {
-        throw new ProviderTransferError(
-          `You need to initialize the transfer stage (${stage}) before ending it`
-        );
-      }
-
-      // Cannot unlock if invalid step provided
-      if (this.flow?.cannot(nextStep)) {
-        throw new ProviderTransferError(`Invalid stage (${stage}) provided for the current flow`, {
-          step: nextStep,
-        });
-      }
-
-      this.flow?.set({ ...nextStep, locked: false });
-    },
-
-    async onTransferStep(this: PushHandler, msg: client.TransferPushMessage) {
-      const { step: stage } = msg;
-
-      if (msg.action === 'start') {
-        this.lockTransferStep(stage);
-
-        if (this.streams[stage] instanceof Writable) {
-          throw new Error('Stream already created, something went wrong');
-        }
-
-        await this.createWritableStreamForStep(stage);
-
-        return { ok: true };
-      }
-
-      if (msg.action === 'stream') {
-        this.assertValidStreamTransferStep(stage);
-
-        // Stream operation on the current transfer stage
-        const stream = this.streams[stage];
-
-        if (!stream) {
-          throw new Error('You need to init first');
-        }
-
-        // Assets are nested streams
-        if (stage === 'assets') {
-          return this.streamAsset(msg.data);
-        }
-
-        // For all other steps
-        await writeAsync(stream, msg.data as never);
-      }
-
-      if (msg.action === 'end') {
-        this.unlockTransferStep(stage);
-
-        const stream = this.streams[stage];
-
-        if (stream && !stream.closed) {
-          await new Promise((resolve, reject) => {
-            stream.on('close', resolve).on('error', reject).end();
-          });
-        }
-
-        delete this.streams[stage];
-
-        return { ok: true };
-      }
-    },
-
-    async onTransferAction(this: PushHandler, msg) {
-      const { action } = msg;
-
-      this.assertValidTransferAction(action);
-
-      const step: Step = { kind: 'action', action };
-      const isStepRegistered = this.flow?.has(step);
-
-      if (isStepRegistered) {
-        if (this.flow?.cannot(step)) {
-          throw new ProviderTransferError(
-            `Invalid action "${action}" found for the current flow `,
-            { action }
-          );
-        }
-
-        this.flow?.set(step);
-      }
-
-      return this.provider?.[action]();
-    },
-
-    async streamAsset(this: PushHandler, payload) {
-      const assetsStream = this.streams.assets;
-
-      // TODO: close the stream upong receiving an 'end' event instead
-      if (payload === null) {
-        this.streams.assets?.end();
-        return;
-      }
-
-      const { action, assetID } = payload;
-
-      if (!assetsStream) {
-        throw new Error('Stream not defined');
-      }
-
-      if (action === 'start') {
-        this.assets[assetID] = { ...payload.data, stream: new PassThrough() };
-        writeAsync(assetsStream, this.assets[assetID]);
-      }
-
-      if (action === 'stream') {
-        // The buffer has gone through JSON operations and is now of shape { type: "Buffer"; data: UInt8Array }
-        // We need to transform it back into a Buffer instance
-        const rawBuffer = payload.data as unknown as { type: 'Buffer'; data: Uint8Array };
-        const chunk = Buffer.from(rawBuffer.data);
-
-        await writeAsync(this.assets[assetID].stream, chunk);
-      }
-
-      if (action === 'end') {
-        await new Promise<void>((resolve, reject) => {
-          const { stream: assetStream } = this.assets[assetID];
-          assetStream
-            .on('close', () => {
-              delete this.assets[assetID];
-              resolve();
-            })
-            .on('error', reject)
-            .end();
-        });
-      }
-    },
-
-    onClose(this: Handler) {
-      this.teardown();
-    },
-
-    onError(this: Handler, err) {
-      this.teardown();
-      strapi.log.error(err);
-    },
-
-    // Commands
-
-    async init(
-      this: PushHandler,
-      params: GetCommandParams<'init'>
-    ): Promise<server.Payload<InitMessage>> {
-      if (this.transferID || this.provider) {
-        throw new Error('Transfer already in progress');
-      }
-
-      await this.verifyAuth();
-
-      this.transferID = randomUUID();
-      this.startedAt = Date.now();
-
-      this.assets = {};
-      this.streams = {};
-
-      this.flow = createFlow(DEFAULT_TRANSFER_FLOW);
-
-      this.provider = createLocalStrapiDestinationProvider({
-        ...params,
-        autoDestroy: false,
-        getStrapi: () => strapi,
+        return this[command](params);
       });
+    }
 
-      return { transferID: this.transferID };
-    },
+    // Transfer message (the transfer must be init first)
+    else if (type === 'transfer') {
+      await this.executeAndRespond(uuid, async () => {
+        await this.verifyAuth();
 
-    async status(this: PushHandler) {
-      const isStarted = this.isTransferStarted();
+        this.assertValidTransfer();
 
-      if (isStarted) {
-        const startedAt = this.startedAt as number;
+        return this.onTransferMessage(msg);
+      });
+    }
 
-        return {
-          active: true,
-          kind: TRANSFER_KIND,
-          startedAt,
-          elapsed: Date.now() - startedAt,
-        };
+    // Invalid messages
+    else {
+      await this.respond(uuid, new Error('Bad Request'));
+    }
+  },
+
+  async onTransferMessage(this: PushHandler, msg) {
+    const { kind } = msg;
+
+    if (kind === 'action') {
+      return this.onTransferAction(msg);
+    }
+
+    if (kind === 'step') {
+      return this.onTransferStep(msg);
+    }
+  },
+
+  lockTransferStep(stage: TransferStage) {
+    const currentStep = this.flow?.get();
+    const nextStep: Step = { kind: 'transfer', stage };
+
+    if (currentStep?.kind === 'transfer' && currentStep.locked) {
+      throw new ProviderTransferError(
+        `It's not possible to start a new transfer stage (${stage}) while another one is in progress (${currentStep.stage})`
+      );
+    }
+
+    if (this.flow?.cannot(nextStep)) {
+      throw new ProviderTransferError(`Invalid stage (${stage}) provided for the current flow`, {
+        step: nextStep,
+      });
+    }
+
+    this.flow?.set({ ...nextStep, locked: true });
+  },
+
+  unlockTransferStep(stage: TransferStage) {
+    const currentStep = this.flow?.get();
+    const nextStep: Step = { kind: 'transfer', stage };
+
+    // Cannot unlock if not locked (aka: started)
+    if (currentStep?.kind === 'transfer' && !currentStep.locked) {
+      throw new ProviderTransferError(
+        `You need to initialize the transfer stage (${stage}) before ending it`
+      );
+    }
+
+    // Cannot unlock if invalid step provided
+    if (this.flow?.cannot(nextStep)) {
+      throw new ProviderTransferError(`Invalid stage (${stage}) provided for the current flow`, {
+        step: nextStep,
+      });
+    }
+
+    this.flow?.set({ ...nextStep, locked: false });
+  },
+
+  async onTransferStep(this: PushHandler, msg: client.TransferPushMessage) {
+    const { step: stage } = msg;
+
+    if (msg.action === 'start') {
+      this.lockTransferStep(stage);
+
+      if (this.streams?.[stage] instanceof Writable) {
+        throw new Error('Stream already created, something went wrong');
       }
 
-      return { active: false, kind: null, elapsed: null, startedAt: null };
-    },
-
-    async end(
-      this: PushHandler,
-      params: GetCommandParams<'end'>
-    ): Promise<server.Payload<EndMessage>> {
-      await this.verifyAuth();
-
-      if (this.transferID !== params.transferID) {
-        throw new ProviderTransferError('Bad transfer ID provided');
-      }
-
-      this.cleanup();
+      await this.createWritableStreamForStep(stage);
 
       return { ok: true };
-    },
-  };
-});
+    }
+
+    if (msg.action === 'stream') {
+      this.assertValidStreamTransferStep(stage);
+
+      // Stream operation on the current transfer stage
+      const stream = this.streams?.[stage];
+
+      if (!stream) {
+        throw new Error('You need to init first');
+      }
+
+      // Assets are nested streams
+      if (stage === 'assets') {
+        return this.streamAsset(msg.data);
+      }
+
+      // For all other steps
+      await writeAsync(stream, msg.data as never);
+    }
+
+    if (msg.action === 'end') {
+      this.unlockTransferStep(stage);
+
+      const stream = this.streams?.[stage];
+
+      if (stream && !stream.closed) {
+        await new Promise((resolve, reject) => {
+          stream.on('close', resolve).on('error', reject).end();
+        });
+      }
+
+      delete this.streams?.[stage];
+
+      return { ok: true };
+    }
+  },
+
+  async onTransferAction(this: PushHandler, msg) {
+    const { action } = msg;
+
+    this.assertValidTransferAction(action);
+
+    const step: Step = { kind: 'action', action };
+    const isStepRegistered = this.flow?.has(step);
+
+    if (isStepRegistered) {
+      if (this.flow?.cannot(step)) {
+        throw new ProviderTransferError(`Invalid action "${action}" found for the current flow `, {
+          action,
+        });
+      }
+
+      this.flow?.set(step);
+    }
+
+    return this.provider?.[action]();
+  },
+
+  async streamAsset(this: PushHandler, payload) {
+    const assetsStream = this.streams?.assets;
+
+    // TODO: close the stream upong receiving an 'end' event instead
+    if (payload === null) {
+      this.streams?.assets?.end();
+      return;
+    }
+
+    const { action, assetID } = payload;
+
+    if (!assetsStream) {
+      throw new Error('Stream not defined');
+    }
+
+    if (action === 'start') {
+      this.assets[assetID] = { ...payload.data, stream: new PassThrough() };
+      writeAsync(assetsStream, this.assets[assetID]);
+    }
+
+    if (action === 'stream') {
+      // The buffer has gone through JSON operations and is now of shape { type: "Buffer"; data: UInt8Array }
+      // We need to transform it back into a Buffer instance
+      const rawBuffer = payload.data as unknown as { type: 'Buffer'; data: Uint8Array };
+      const chunk = Buffer.from(rawBuffer.data);
+
+      await writeAsync(this.assets[assetID].stream, chunk);
+    }
+
+    if (action === 'end') {
+      await new Promise<void>((resolve, reject) => {
+        const { stream: assetStream } = this.assets[assetID];
+        assetStream
+          .on('close', () => {
+            delete this.assets[assetID];
+            resolve();
+          })
+          .on('error', reject)
+          .end();
+      });
+    }
+  },
+
+  onClose(this: Handler) {
+    this.teardown();
+  },
+
+  onError(this: Handler, err) {
+    this.teardown();
+    strapi.log.error(err);
+  },
+
+  // Commands
+
+  async init(
+    this: PushHandler,
+    params: GetCommandParams<'init'>
+  ): Promise<server.Payload<InitMessage>> {
+    if (this.transferID || this.provider) {
+      throw new Error('Transfer already in progress');
+    }
+
+    await this.verifyAuth();
+
+    this.transferID = randomUUID();
+    this.startedAt = Date.now();
+
+    this.assets = {};
+    this.streams = {};
+
+    this.flow = createFlow(DEFAULT_TRANSFER_FLOW);
+
+    this.provider = createLocalStrapiDestinationProvider({
+      ...params,
+      autoDestroy: false,
+      getStrapi: () => strapi,
+    });
+
+    return { transferID: this.transferID };
+  },
+
+  async status(this: PushHandler) {
+    const isStarted = this.isTransferStarted();
+
+    if (isStarted) {
+      const startedAt = this.startedAt as number;
+
+      return {
+        active: true,
+        kind: TRANSFER_KIND,
+        startedAt,
+        elapsed: Date.now() - startedAt,
+      };
+    }
+
+    return { active: false, kind: null, elapsed: null, startedAt: null };
+  },
+
+  async end(
+    this: PushHandler,
+    params: GetCommandParams<'end'>
+  ): Promise<server.Payload<EndMessage>> {
+    await this.verifyAuth();
+
+    if (this.transferID !== params.transferID) {
+      throw new ProviderTransferError('Bad transfer ID provided');
+    }
+
+    this.cleanup();
+
+    return { ok: true };
+  },
+}));
 
 export default createPushHandler;

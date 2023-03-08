@@ -8,6 +8,10 @@ import { ProviderTransferError } from '../../../errors/providers';
 
 type WSCallback = (client: WebSocket, request: IncomingMessage) => void;
 
+const VALID_TRANSFER_COMMANDS = ['init', 'end', 'status'] as const;
+
+type TransferCommand = (typeof VALID_TRANSFER_COMMANDS)[number];
+
 export const transformUpgradeHeader = (header = '') => {
   return header.split(',').map((s) => s.trim().toLowerCase());
 };
@@ -65,6 +69,11 @@ export interface Handler {
    * Make sure the current transfer is started and initialized
    */
   assertValidTransfer(): void;
+
+  /**
+   * Checks that the given string is a valid transfer command
+   */
+  assertValidTransferCommand(command: string): asserts command is TransferCommand;
 
   // Messaging utils
 
@@ -127,7 +136,6 @@ export const handlerFactory =
 
     return async (ctx: Context) => {
       handleWSUpgrade(wss, ctx, (ws) => {
-        console.log('upgraded');
         const state: TransferState = { id: undefined };
 
         const prototype: Handler = {
@@ -158,6 +166,15 @@ export const handlerFactory =
 
             if (!isStarted) {
               throw new Error('Invalid Transfer Process');
+            }
+          },
+
+          assertValidTransferCommand(command: TransferCommand) {
+            const isDefined = typeof this[command] === 'function';
+            const isValidTransferCommand = VALID_TRANSFER_COMMANDS.includes(command);
+
+            if (!isDefined || !isValidTransferCommand) {
+              throw new Error('Invalid transfer command');
             }
           },
 
@@ -201,9 +218,7 @@ export const handlerFactory =
 
               const payload = { uuid, data: message };
 
-              const stringifiedPayload = JSON.stringify(payload);
-
-              ws.send(stringifiedPayload, (error) => {
+              this.send(payload, (error) => {
                 if (error) {
                   reject(error);
                 }
@@ -211,6 +226,7 @@ export const handlerFactory =
 
               const onResponse = (raw: RawData) => {
                 const response = JSON.parse(raw.toString());
+                console.log('response', response);
 
                 if (response.uuid === uuid) {
                   if (response.error) {
@@ -248,7 +264,6 @@ export const handlerFactory =
           },
 
           cleanup() {
-            console.log('bye bye');
             this.transferID = undefined;
             this.startedAt = undefined;
           },

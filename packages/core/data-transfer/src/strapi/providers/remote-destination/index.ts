@@ -3,7 +3,7 @@ import { v4 } from 'uuid';
 import { Writable } from 'stream';
 import { once } from 'lodash/fp';
 
-import { createDispatcher } from './utils';
+import { createDispatcher } from '../utils';
 
 import type {
   IDestinationProvider,
