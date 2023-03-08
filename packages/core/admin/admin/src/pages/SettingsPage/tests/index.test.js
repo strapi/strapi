@@ -70,7 +70,7 @@ describe('ADMIN | pages | SettingsPage', () => {
     const { container } = render(App);
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c12 {
+      .c11 {
         padding-bottom: 56px;
       }
 
@@ -79,7 +79,7 @@ describe('ADMIN | pages | SettingsPage', () => {
         grid-template-columns: auto 1fr;
       }
 
-      .c13 {
+      .c12 {
         overflow-x: hidden;
       }
 
@@ -140,6 +140,7 @@ describe('ADMIN | pages | SettingsPage', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+        gap: 8px;
       }
 
       .c7 {
@@ -149,15 +150,6 @@ describe('ADMIN | pages | SettingsPage', () => {
         -ms-flex-negative: 0;
         flex-shrink: 0;
         margin: 0;
-      }
-
-      .c11 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c11 > * + * {
-        margin-top: 8px;
       }
 
       .c1 {
@@ -208,12 +200,12 @@ describe('ADMIN | pages | SettingsPage', () => {
             class="c9"
           >
             <ol
-              class="c10 c11"
+              class="c10"
             />
           </div>
         </nav>
         <div
-          class="c12 c13"
+          class="c11 c12"
         >
           <h1>
             App infos

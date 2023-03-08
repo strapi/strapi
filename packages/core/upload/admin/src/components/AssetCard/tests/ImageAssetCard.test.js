@@ -175,15 +175,6 @@ describe('ImageAssetCard', () => {
         color: #666687;
       }
 
-      .c7 > * {
-        margin-left: 0;
-        margin-right: 0;
-      }
-
-      .c7 > * + * {
-        margin-left: 8px;
-      }
-
       .c31 {
         border-radius: 4px;
         height: 1.5rem;
@@ -316,6 +307,15 @@ describe('ImageAssetCard', () => {
         padding: 0;
         position: absolute;
         width: 1px;
+      }
+
+      .c7 > * {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .c7 > * + * {
+        margin-left: 8px;
       }
 
       .c8 {
