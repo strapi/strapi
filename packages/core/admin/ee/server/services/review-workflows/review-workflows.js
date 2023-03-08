@@ -108,7 +108,7 @@ function enableReviewWorkflow({ strapi }) {
 
       // Execute an SQL query to insert records into the join table mapping the specified content type with the first stage of the default workflow.
       // Only entities that do not have a record in the join table yet are selected.
-      const connection = strapi.db.connection;
+      const connection = strapi.db.getConnection();
       const columnsToInsert = [
         idColumn.name,
         'field',
@@ -125,17 +125,23 @@ function enableReviewWorkflow({ strapi }) {
           connection.raw(`'${firstStage.id}' as ${joinTable.joinColumn.name}`),
           connection.raw(`'${contentTypeUID}' as ${typeColumn.name}`)
         )
-        .leftJoin(`${joinTable.name} AS jointable`, function () {
-          this.on('entity.id', '=', `jointable.${idColumn.name}`).andOn(
-            `jointable.${typeColumn.name}`,
-            '=',
-            connection.raw(`'${contentTypeUID}'`)
-          );
-        })
+        .leftJoin(
+          {
+            jointable: joinTable.name,
+          },
+          function () {
+            this.on('entity.id', '=', `jointable.${idColumn.name}`).andOn(
+              `jointable.${typeColumn.name}`,
+              '=',
+              connection.raw(`'${contentTypeUID}'`)
+            );
+          }
+        )
         .where(`jointable.${idColumn.name}`, null)
-        .from(`${contentTypeMetadata.tableName} AS entity`)
+        .from({
+          entity: contentTypeMetadata.tableName,
+        })
         .toSQL();
-
       // Insert the clone relations
       await connection(joinTable.name).insert(
         connection.raw(
