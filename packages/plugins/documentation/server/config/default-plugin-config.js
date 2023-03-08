@@ -48,7 +48,7 @@ module.exports = {
         properties: {
           data: {
             nullable: true,
-            oneOf: [{ type: 'object' }, { type: 'array', items: [] }],
+            oneOf: [{ type: 'object' }, { type: 'array', items: { type: 'object' } }],
           },
           error: {
             type: 'object',
