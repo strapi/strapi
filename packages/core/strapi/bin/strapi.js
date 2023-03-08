@@ -312,7 +312,7 @@ program
             },
           ]);
           if (!answers.fromToken?.length) {
-            exitWith(0, 'No token entered, aborting transfer.');
+            exitWith(1, 'No token entered, aborting transfer.');
           }
           thisCommand.opts().fromToken = answers.fromToken;
         }
@@ -335,13 +335,14 @@ program
             },
           ]);
           if (!answers.toToken?.length) {
-            exitWith(0, 'No token entered, aborting transfer.');
+            exitWith(1, 'No token entered, aborting transfer.');
           }
           thisCommand.opts().toToken = answers.toToken;
         }
 
         await confirmMessage(
-          'The transfer will delete all data in the remote database and media files. Are you sure you want to proceed?'
+          'The transfer will delete all data in the remote database and media files. Are you sure you want to proceed?',
+          { failMessage: 'Transfer process aborted' }
         )(thisCommand);
       }
     )
@@ -404,7 +405,7 @@ program
           },
         ]);
         if (!answers.key?.length) {
-          exitWith(0, 'No key entered, aborting import.');
+          exitWith(1, 'No key entered, aborting import.');
         }
         opts.key = answers.key;
       }
@@ -442,7 +443,8 @@ program
   .hook(
     'preAction',
     confirmMessage(
-      'The import will delete all data in your database and media files. Are you sure you want to proceed?'
+      'The import will delete all data in your database and media files. Are you sure you want to proceed?',
+      { failMessage: 'Import process aborted' }
     )
   )
   .action(getLocalScript('transfer/import'));
