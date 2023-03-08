@@ -5,13 +5,19 @@ const token = 'coolToken';
 auth.getToken = jest.fn().mockReturnValue(token);
 
 describe('HELPER-PLUGIN | utils | getFetchClient', () => {
-  it('should return the 4 HTTP methods to call GET, POST, PUT and DELETE apis', () => {
+  it('should return the 4 HTTP methods to call GET, POST, PUT and DELETE APIs', () => {
     const response = getFetchClient();
     expect(response).toHaveProperty('get');
     expect(response).toHaveProperty('post');
     expect(response).toHaveProperty('put');
     expect(response).toHaveProperty('del');
   });
+
+  it('should return the client request method to call any API', () => {
+    const response = getFetchClient();
+    expect(response).toHaveProperty('request');
+  });
+
   it('should contain the headers config values and the data when we try to reach an unknown API', async () => {
     const response = getFetchClient();
     try {
