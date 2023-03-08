@@ -240,7 +240,7 @@ const createPushHandler = handlerFactory<Partial<PushHandler>>((proto) => ({
     }
 
     if (kind === 'step') {
-      return this.onTransferStep(msg);
+      return this.onTransferStep(msg as client.TransferPushMessage);
     }
   },
 
@@ -315,7 +315,7 @@ const createPushHandler = handlerFactory<Partial<PushHandler>>((proto) => ({
       }
 
       // For all other steps
-      await writeAsync(stream, msg.data as never);
+      await Promise.all(msg.data.map((item) => writeAsync(stream, item)));
     }
 
     if (msg.action === 'end') {
@@ -365,37 +365,39 @@ const createPushHandler = handlerFactory<Partial<PushHandler>>((proto) => ({
       return;
     }
 
-    const { action, assetID } = payload;
+    for (const item of payload) {
+      const { action, assetID } = item;
 
-    if (!assetsStream) {
-      throw new Error('Stream not defined');
-    }
+      if (!assetsStream) {
+        throw new Error('Stream not defined');
+      }
 
-    if (action === 'start') {
-      this.assets[assetID] = { ...payload.data, stream: new PassThrough() };
-      writeAsync(assetsStream, this.assets[assetID]);
-    }
+      if (action === 'start') {
+        this.assets[assetID] = { ...item.data, stream: new PassThrough() };
+        writeAsync(assetsStream, this.assets[assetID]);
+      }
 
-    if (action === 'stream') {
-      // The buffer has gone through JSON operations and is now of shape { type: "Buffer"; data: UInt8Array }
-      // We need to transform it back into a Buffer instance
-      const rawBuffer = payload.data as unknown as { type: 'Buffer'; data: Uint8Array };
-      const chunk = Buffer.from(rawBuffer.data);
+      if (action === 'stream') {
+        // The buffer has gone through JSON operations and is now of shape { type: "Buffer"; data: UInt8Array }
+        // We need to transform it back into a Buffer instance
+        const rawBuffer = item.data as unknown as { type: 'Buffer'; data: Uint8Array };
+        const chunk = Buffer.from(rawBuffer.data);
 
-      await writeAsync(this.assets[assetID].stream, chunk);
-    }
+        await writeAsync(this.assets[assetID].stream, chunk);
+      }
 
-    if (action === 'end') {
-      await new Promise<void>((resolve, reject) => {
-        const { stream: assetStream } = this.assets[assetID];
-        assetStream
-          .on('close', () => {
-            delete this.assets[assetID];
-            resolve();
-          })
-          .on('error', reject)
-          .end();
-      });
+      if (action === 'end') {
+        await new Promise<void>((resolve, reject) => {
+          const { stream: assetStream } = this.assets[assetID];
+          assetStream
+            .on('close', () => {
+              delete this.assets[assetID];
+              resolve();
+            })
+            .on('error', reject)
+            .end();
+        });
+      }
     }
   },
 
