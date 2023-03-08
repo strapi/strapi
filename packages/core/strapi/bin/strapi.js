@@ -320,7 +320,7 @@ program
             },
           ]);
           if (!answers.fromToken?.length) {
-            exitWith(1, 'No source token entered, aborting transfer.');
+            exitWith(1, 'No token provided for remote source, aborting transfer.');
           }
           thisCommand.opts().fromToken = answers.fromToken;
         }
@@ -343,7 +343,7 @@ program
             },
           ]);
           if (!answers.toToken?.length) {
-            exitWith(1, 'No destination token entered, aborting transfer.');
+            exitWith(1, 'No token provided for remote destination, aborting transfer.');
           }
           thisCommand.opts().toToken = answers.toToken;
         }
