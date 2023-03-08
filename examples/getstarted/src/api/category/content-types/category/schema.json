@@ -53,6 +53,12 @@
         }
       },
       "type": "date"
+    },
+    "relation_locales": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::relation-locale.relation-locale",
+      "mappedBy": "categories"
     }
   }
 }

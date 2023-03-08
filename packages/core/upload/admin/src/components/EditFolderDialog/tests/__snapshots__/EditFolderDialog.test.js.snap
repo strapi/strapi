@@ -1,34 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EditFolderDialog renders and matches the snapshot 1`] = `
-.c11 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c20 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c2 {
+.c1 {
   padding-right: 40px;
   padding-left: 40px;
   position: fixed;
   z-index: 4;
 }
 
-.c5 {
+.c4 {
   background: #ffffff;
   border-radius: 4px;
   box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
 }
 
-.c7 {
+.c6 {
   background: #f6f6f9;
   padding-top: 16px;
   padding-right: 20px;
@@ -36,15 +22,36 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   padding-left: 20px;
 }
 
+.c11 {
+  padding: 8px;
+  border-radius: 4px;
+  border-color: #dcdce4;
+  border: 1px solid #dcdce4;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+}
+
 .c14 {
   padding: 32px;
 }
 
-.c24 {
+.c25 {
   padding-right: 12px;
 }
 
-.c3 {
+.c30 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
+}
+
+.c2 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -62,7 +69,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   justify-content: center;
 }
 
-.c9 {
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -108,6 +115,57 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
+.c24 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.c31 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c10 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c20 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c33 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
 .c19 > * {
   margin-top: 0;
   margin-bottom: 0;
@@ -117,25 +175,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   margin-top: 4px;
 }
 
-.c30 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c30 > * + * {
-  margin-left: 8px;
-}
-
 .c12 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
   position: relative;
   outline: none;
 }
@@ -196,143 +236,97 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c29 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
+.c32 {
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
   border: 1px solid #dcdce4;
   background: #ffffff;
 }
 
-.c29 .c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c29 .c10 {
-  color: #ffffff;
-}
-
-.c29[aria-disabled='true'] {
+.c32[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c29[aria-disabled='true'] .c10 {
+.c32[aria-disabled='true'] .c9 {
   color: #666687;
 }
 
-.c29[aria-disabled='true'] svg > g,.c29[aria-disabled='true'] svg path {
+.c32[aria-disabled='true'] svg > g,.c32[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c29[aria-disabled='true']:active {
+.c32[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c29[aria-disabled='true']:active .c10 {
+.c32[aria-disabled='true']:active .c9 {
   color: #666687;
 }
 
-.c29[aria-disabled='true']:active svg > g,.c29[aria-disabled='true']:active svg path {
+.c32[aria-disabled='true']:active svg > g,.c32[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c29:hover {
+.c32:hover {
   background-color: #f6f6f9;
 }
 
-.c29:active {
+.c32:active {
   background-color: #eaeaef;
 }
 
-.c29 .c10 {
+.c32 .c9 {
   color: #32324d;
 }
 
-.c29 svg > g,
-.c29 svg path {
+.c32 svg > g,
+.c32 svg path {
   fill: #32324d;
 }
 
-.c31 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
+.c34 {
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
 }
 
-.c31 .c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c31 .c10 {
-  color: #ffffff;
-}
-
-.c31[aria-disabled='true'] {
+.c34[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c31[aria-disabled='true'] .c10 {
+.c34[aria-disabled='true'] .c9 {
   color: #666687;
 }
 
-.c31[aria-disabled='true'] svg > g,.c31[aria-disabled='true'] svg path {
+.c34[aria-disabled='true'] svg > g,.c34[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c31[aria-disabled='true']:active {
+.c34[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c31[aria-disabled='true']:active .c10 {
+.c34[aria-disabled='true']:active .c9 {
   color: #666687;
 }
 
-.c31[aria-disabled='true']:active svg > g,.c31[aria-disabled='true']:active svg path {
+.c34[aria-disabled='true']:active svg > g,.c34[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c31:hover {
+.c34:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c31:active {
+.c34:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c31 svg > g,
-.c31 svg path {
+.c34 svg > g,
+.c34 svg path {
   fill: #ffffff;
 }
 
@@ -408,23 +402,6 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   max-width: 100%;
 }
 
-.c13 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-}
-
 .c13 svg > g,
 .c13 svg path {
   fill: #8e8ea9;
@@ -440,34 +417,30 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   fill: #a5a5ba;
 }
 
-.c13[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
 .c13[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c4 {
+.c3 {
   inset: 0;
   background: #32324d1F;
 }
 
-.c6 {
+.c5 {
   width: 51.875rem;
 }
 
-.c8 {
+.c7 {
   border-radius: 4px 4px 0 0;
   border-bottom: 1px solid #eaeaef;
 }
 
-.c27 {
+.c28 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
 
-.c28 > * + * {
+.c29 > * + * {
   margin-left: 8px;
 }
 
@@ -476,23 +449,23 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   max-height: 60vh;
 }
 
-.c25 {
+.c26 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c25 svg {
+.c26 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c25 svg path {
+.c26 svg path {
   fill: #666687;
 }
 
-.c26 {
+.c27 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -501,7 +474,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   border: none;
 }
 
-.c26 svg {
+.c27 svg {
   width: 0.5625rem;
 }
 
@@ -548,14 +521,14 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
     data-react-portal="true"
   >
     <div
-      class="c1 c2 c3 c4"
+      class="c1 c2 c3"
     >
       <div>
         <div>
           <div
             aria-labelledby="title"
             aria-modal="true"
-            class="c1 c5 c6"
+            class="c4 c5"
             role="dialog"
           >
             <form
@@ -563,20 +536,20 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
               novalidate=""
             >
               <div
-                class="c1 c7 c8"
+                class="c6 c7"
               >
                 <div
-                  class="c1 c9"
+                  class="c8"
                 >
                   <h2
-                    class="c10 c11"
+                    class="c9 c10"
                     id="title"
                   >
                     Add new folder
                   </h2>
                   <button
                     aria-disabled="false"
-                    class="c12 c13"
+                    class="c11 c2 c12 c13"
                     type="button"
                   >
                     <span
@@ -588,13 +561,13 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                       aria-hidden="true"
                       fill="none"
                       focusable="false"
-                      height="1em"
+                      height="1rem"
                       viewBox="0 0 24 24"
-                      width="1em"
+                      width="1rem"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                        d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
                         fill="#212134"
                       />
                     </svg>
@@ -602,34 +575,34 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <div
-                class="c1 c14 c15"
+                class="c14 c15"
               >
                 <div
-                  class="c1 c16"
+                  class="c16"
                 >
                   <div
                     class="c17"
                   >
                     <div
-                      class="c1 "
+                      class=""
                     >
                       <div>
                         <div>
                           <div
-                            class="c1 c18 c19"
+                            class="c18 c19"
                           >
                             <label
-                              class="c10 c20"
+                              class="c9 c20"
                               for="1"
                             >
                               <div
-                                class="c1 c21"
+                                class="c21"
                               >
                                 Name
                               </div>
                             </label>
                             <div
-                              class="c1 c9 c22"
+                              class="c8 c22"
                             >
                               <input
                                 aria-disabled="false"
@@ -650,17 +623,17 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                     class="c17"
                   >
                     <div
-                      class="c1 "
+                      class=""
                     >
                       <div
-                        class="c1 c18 c19"
+                        class="c24"
                       >
                         <label
-                          class="c10 c20"
+                          class="c9 c20"
                           for="folder-parent"
                         >
                           <div
-                            class="c1 c21"
+                            class="c21"
                           >
                             Location
                           </div>
@@ -679,13 +652,13 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                             class="css-1f43avz-a11yText-A11yText"
                           />
                           <div
-                            class=" css-1e1stxh-control"
+                            class=" css-1ckpxei-control"
                           >
                             <div
-                              class=" css-do2euy-ValueContainer"
+                              class=" css-1drmnx5-ValueContainer"
                             >
                               <div
-                                class=" css-1sqm0gs-singleValue"
+                                class=" css-1ryi7up-singleValue"
                               >
                                 Media Library
                               </div>
@@ -708,18 +681,18 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                             >
                               <div
                                 aria-hidden="true"
-                                class="c1 c24 c25 c26"
+                                class="c25 c26 c27"
                               >
                                 <svg
                                   fill="none"
-                                  height="1em"
+                                  height="1rem"
                                   viewBox="0 0 14 8"
-                                  width="1em"
+                                  width="1rem"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
                                     clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                     fill="#32324D"
                                     fill-rule="evenodd"
                                   />
@@ -739,41 +712,41 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <div
-                class="c1 c7 c27"
+                class="c6 c28"
               >
                 <div
-                  class="c1 c9"
+                  class="c8"
                 >
                   <div
-                    class="c1 c21 c28"
+                    class="c21 c29"
                   >
                     <button
                       aria-disabled="false"
-                      class="c12 c29"
+                      class="c30 c31 c12 c32"
                       name="cancel"
                       type="button"
                     >
                       <span
-                        class="c10 c20"
+                        class="c9 c33"
                       >
                         Cancel
                       </span>
                     </button>
                   </div>
                   <div
-                    class="c1 c21 c28"
+                    class="c21 c29"
                   >
                     <div
-                      class="c1 c21 c30"
+                      class="c31"
                     >
                       <button
                         aria-disabled="false"
-                        class="c12 c31"
+                        class="c30 c31 c12 c34"
                         name="submit"
                         type="submit"
                       >
                         <span
-                          class="c10 c20"
+                          class="c9 c33"
                         >
                           Create
                         </span>

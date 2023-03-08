@@ -254,7 +254,7 @@ module.exports = ({ strapi }) => ({
 
     const updatedEntity = await strapi.entityService.update(uid, entity.id, params);
 
-    await emitEvent(ENTRY_PUBLISH, entity, uid);
+    await emitEvent(ENTRY_PUBLISH, updatedEntity, uid);
 
     const mappedEntity = await this.mapEntity(updatedEntity, uid);
 
@@ -283,7 +283,7 @@ module.exports = ({ strapi }) => ({
 
     const updatedEntity = await strapi.entityService.update(uid, entity.id, params);
 
-    await emitEvent(ENTRY_UNPUBLISH, entity, uid);
+    await emitEvent(ENTRY_UNPUBLISH, updatedEntity, uid);
 
     const mappedEntity = await this.mapEntity(updatedEntity, uid);
 

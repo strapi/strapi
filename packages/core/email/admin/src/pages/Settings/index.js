@@ -11,13 +11,13 @@ import {
 import {
   Main,
   ContentLayout,
-  Stack,
   Box,
   Grid,
   GridItem,
   Typography,
   TextInput,
   Button,
+  Flex,
   useNotifyAT,
 } from '@strapi/design-system';
 import { Envelop } from '@strapi/icons';
@@ -160,7 +160,7 @@ const SettingsPage = () => {
       <EmailHeader />
       <ContentLayout>
         <form onSubmit={handleSubmit}>
-          <Stack spacing={7}>
+          <Flex direction="column" alignItems="stretch" gap={7}>
             <Box
               background="neutral0"
               hasRadius
@@ -181,7 +181,7 @@ const SettingsPage = () => {
               paddingLeft={7}
               paddingRight={7}
             >
-              <Stack spacing={4}>
+              <Flex direction="column" alignItems="stretch" gap={4}>
                 <Typography variant="delta" as="h2">
                   {formatMessage({
                     id: getTrad('Settings.email.plugin.title.test'),
@@ -226,9 +226,9 @@ const SettingsPage = () => {
                     </Button>
                   </GridItem>
                 </Grid>
-              </Stack>
+              </Flex>
             </Box>
-          </Stack>
+          </Flex>
         </form>
       </ContentLayout>
     </Main>

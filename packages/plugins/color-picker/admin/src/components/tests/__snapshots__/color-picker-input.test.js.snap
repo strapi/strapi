@@ -1,17 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
-.c2 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c7 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #666687;
+.c3 {
+  background: #ffffff;
+  padding: 8px;
+  border-radius: 4px;
+  border-color: #dcdce4;
+  border: 1px solid #dcdce4;
+  cursor: pointer;
 }
 
 .c0 {
@@ -26,9 +22,10 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 4px;
 }
 
-.c3 {
+.c2 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -42,25 +39,20 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
-.c1 > * {
-  margin-top: 0;
-  margin-bottom: 0;
+.c1 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
 }
 
-.c1 > * + * {
-  margin-top: 4px;
+.c7 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #666687;
 }
 
 .c4 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
   position: relative;
   outline: none;
 }
@@ -158,14 +150,14 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
 <div>
   <div>
     <div
-      class="c0 c1"
+      class="c0"
     >
       <label
-        class="c2"
+        class="c1"
         for="color"
       >
         <div
-          class="c3"
+          class="c2"
         >
           color-picker
         </div>
@@ -176,11 +168,11 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
         aria-expanded="false"
         aria-haspopup="dialog"
         aria-label="Color picker toggle"
-        class="c4 c5"
+        class="c3 c2 c4 c5"
         type="button"
       >
         <div
-          class="c3"
+          class="c2"
         >
           <div
             class="c6"
@@ -196,14 +188,14 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
         <svg
           aria-hidden="true"
           fill="none"
-          height="1em"
+          height="1rem"
           viewBox="0 0 14 8"
-          width="1em"
+          width="1rem"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
             clip-rule="evenodd"
-            d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+            d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
             fill="#32324D"
             fill-rule="evenodd"
           />

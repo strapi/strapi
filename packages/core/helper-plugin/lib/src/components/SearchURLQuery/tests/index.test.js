@@ -33,43 +33,62 @@ describe('<SearchURLQuery />', () => {
     const { container } = render(makeApp(history));
 
     expect(container).toMatchInlineSnapshot(`
-      .c3 {
+      .c0 {
+        padding: 8px;
+        border-radius: 4px;
+        border-color: #dcdce4;
+        border: 1px solid #dcdce4;
+        width: 2rem;
+        height: 2rem;
+        cursor: pointer;
+      }
+
+      .c5 {
         color: #32324d;
       }
 
-      .c4 path {
-        fill: #32324d;
-      }
-
-      .c0 {
+      .c1 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+      }
+
+      .c6 path {
+        fill: #32324d;
+      }
+
+      .c2 {
         position: relative;
         outline: none;
       }
 
-      .c0 svg {
+      .c2 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c0 svg > g,
-      .c0 svg path {
+      .c2 svg > g,
+      .c2 svg path {
         fill: #ffffff;
       }
 
-      .c0[aria-disabled='true'] {
+      .c2[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c0:after {
+      .c2:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -84,11 +103,11 @@ describe('<SearchURLQuery />', () => {
         border: 2px solid transparent;
       }
 
-      .c0:focus-visible {
+      .c2:focus-visible {
         outline: none;
       }
 
-      .c0:focus-visible:after {
+      .c2:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -99,7 +118,7 @@ describe('<SearchURLQuery />', () => {
         border: 2px solid #4945ff;
       }
 
-      .c2 {
+      .c4 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -111,43 +130,22 @@ describe('<SearchURLQuery />', () => {
         width: 1px;
       }
 
-      .c1 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        height: 2rem;
-        width: 2rem;
-      }
-
-      .c1 svg > g,
-      .c1 svg path {
+      .c3 svg > g,
+      .c3 svg path {
         fill: #8e8ea9;
       }
 
-      .c1:hover svg > g,
-      .c1:hover svg path {
+      .c3:hover svg > g,
+      .c3:hover svg path {
         fill: #666687;
       }
 
-      .c1:active svg > g,
-      .c1:active svg path {
+      .c3:active svg > g,
+      .c3:active svg path {
         fill: #a5a5ba;
       }
 
-      .c1[aria-disabled='true'] {
-        background-color: #eaeaef;
-      }
-
-      .c1[aria-disabled='true'] svg path {
+      .c3[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -156,28 +154,28 @@ describe('<SearchURLQuery />', () => {
           <button
             aria-disabled="false"
             aria-labelledby="0"
-            class="c0 c1"
+            class="c0 c1 c2 c3"
             tabindex="0"
             type="button"
           >
             <span
-              class="c2"
+              class="c4"
             >
               Search
             </span>
             <svg
               aria-hidden="true"
-              class="c3 c4"
+              class="c5 c6"
               fill="none"
               focusable="false"
-              height="1em"
+              height="1rem"
               viewBox="0 0 24 24"
-              width="1em"
+              width="1rem"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 clip-rule="evenodd"
-                d="M23.813 20.163l-5.3-5.367a9.792 9.792 0 001.312-4.867C19.825 4.455 15.375 0 9.913 0 4.45 0 0 4.455 0 9.929c0 5.473 4.45 9.928 9.912 9.928a9.757 9.757 0 005.007-1.4l5.275 5.35a.634.634 0 00.913 0l2.706-2.737a.641.641 0 000-.907zM9.91 3.867c3.338 0 6.05 2.718 6.05 6.061s-2.712 6.061-6.05 6.061c-3.337 0-6.05-2.718-6.05-6.06 0-3.344 2.713-6.062 6.05-6.062z"
+                d="m23.813 20.163-5.3-5.367a9.792 9.792 0 0 0 1.312-4.867C19.825 4.455 15.375 0 9.913 0 4.45 0 0 4.455 0 9.929c0 5.473 4.45 9.928 9.912 9.928a9.757 9.757 0 0 0 5.007-1.4l5.275 5.35a.634.634 0 0 0 .913 0l2.706-2.737a.641.641 0 0 0 0-.907ZM9.91 3.867c3.338 0 6.05 2.718 6.05 6.061s-2.712 6.061-6.05 6.061c-3.337 0-6.05-2.718-6.05-6.06 0-3.344 2.713-6.062 6.05-6.062Z"
                 fill="#32324D"
                 fill-rule="evenodd"
               />
@@ -185,7 +183,7 @@ describe('<SearchURLQuery />', () => {
           </button>
         </span>
         <div
-          class="c2"
+          class="c4"
         >
           <p
             aria-live="polite"
@@ -217,13 +215,6 @@ describe('<SearchURLQuery />', () => {
     fireEvent.click(container.querySelector('button[type="button"]'));
 
     expect(container).toMatchInlineSnapshot(`
-      .c2 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
       .c7 {
         padding-right: 8px;
         padding-left: 12px;
@@ -259,6 +250,13 @@ describe('<SearchURLQuery />', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
+      }
+
+      .c2 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
       }
 
       .c1 {
@@ -401,14 +399,14 @@ describe('<SearchURLQuery />', () => {
                       <svg
                         aria-hidden="true"
                         fill="none"
-                        height="1em"
+                        height="1rem"
                         viewBox="0 0 24 24"
-                        width="1em"
+                        width="1rem"
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
                           clip-rule="evenodd"
-                          d="M23.813 20.163l-5.3-5.367a9.792 9.792 0 001.312-4.867C19.825 4.455 15.375 0 9.913 0 4.45 0 0 4.455 0 9.929c0 5.473 4.45 9.928 9.912 9.928a9.757 9.757 0 005.007-1.4l5.275 5.35a.634.634 0 00.913 0l2.706-2.737a.641.641 0 000-.907zM9.91 3.867c3.338 0 6.05 2.718 6.05 6.061s-2.712 6.061-6.05 6.061c-3.337 0-6.05-2.718-6.05-6.06 0-3.344 2.713-6.062 6.05-6.062z"
+                          d="m23.813 20.163-5.3-5.367a9.792 9.792 0 0 0 1.312-4.867C19.825 4.455 15.375 0 9.913 0 4.45 0 0 4.455 0 9.929c0 5.473 4.45 9.928 9.912 9.928a9.757 9.757 0 0 0 5.007-1.4l5.275 5.35a.634.634 0 0 0 .913 0l2.706-2.737a.641.641 0 0 0 0-.907ZM9.91 3.867c3.338 0 6.05 2.718 6.05 6.061s-2.712 6.061-6.05 6.061c-3.337 0-6.05-2.718-6.05-6.06 0-3.344 2.713-6.062 6.05-6.062Z"
                           fill="#32324D"
                           fill-rule="evenodd"
                         />

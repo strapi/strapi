@@ -203,14 +203,6 @@ exports[`TableList | CellContent should render extension cell type with "-" when
 `;
 
 exports[`TableList | CellContent should render image cell type when element type is asset and mime does not include image 1`] = `
-.c3 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #0c75af;
-  text-transform: uppercase;
-}
-
 .c0 {
   background: #eaf5ff;
   border-radius: 50%;
@@ -234,6 +226,14 @@ exports[`TableList | CellContent should render image cell type when element type
   -webkit-justify-content: center;
   -ms-flex-pack: center;
   justify-content: center;
+}
+
+.c3 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #0c75af;
+  text-transform: uppercase;
 }
 
 .c2 span {
@@ -353,14 +353,6 @@ exports[`TableList | CellContent should render image cell type when element type
 `;
 
 exports[`TableList | CellContent should render image cell type when element type is folder 1`] = `
-.c3 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #0c75af;
-  text-transform: uppercase;
-}
-
 .c0 {
   background: #eaf5ff;
   border-radius: 50%;
@@ -390,6 +382,14 @@ exports[`TableList | CellContent should render image cell type when element type
   -webkit-justify-content: center;
   -ms-flex-pack: center;
   justify-content: center;
+}
+
+.c3 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #0c75af;
+  text-transform: uppercase;
 }
 
 .c5 path {
@@ -422,13 +422,13 @@ exports[`TableList | CellContent should render image cell type when element type
       <svg
         class="c4 c5"
         fill="none"
-        height="1em"
+        height="1rem"
         viewBox="0 0 24 24"
-        width="1em"
+        width="1rem"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M12.414 5H21a1 1 0 011 1v14a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1h7.414l2 2z"
+          d="M12.414 5H21a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h7.414l2 2Z"
           fill="#212134"
         />
       </svg>

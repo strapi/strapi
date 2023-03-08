@@ -1,6 +1,8 @@
 'use strict';
 
-const { UnauthorizedError, ForbiddenError } = require('@strapi/utils/lib/errors');
+const {
+  errors: { UnauthorizedError, ForbiddenError },
+} = require('@strapi/utils');
 const { castArray, isNil } = require('lodash/fp');
 
 const { getService } = require('../utils');
