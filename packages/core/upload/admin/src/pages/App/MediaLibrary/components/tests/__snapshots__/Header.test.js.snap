@@ -1,27 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Header renders 1`] = `
-.c7 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c10 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c15 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c1 {
+.c0 {
   background: #f6f6f9;
   padding-top: 24px;
   padding-right: 56px;
@@ -29,15 +9,26 @@ exports[`Header renders 1`] = `
   padding-left: 56px;
 }
 
-.c2 {
+.c1 {
   padding-bottom: 8px;
 }
 
-.c4 {
+.c3 {
   padding-right: 8px;
 }
 
-.c8 {
+.c11 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
+}
+
+.c7 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -55,7 +46,7 @@ exports[`Header renders 1`] = `
   justify-content: space-between;
 }
 
-.c9 {
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -69,7 +60,7 @@ exports[`Header renders 1`] = `
   flex-direction: row;
 }
 
-.c11 {
+.c10 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -84,16 +75,27 @@ exports[`Header renders 1`] = `
   gap: 8px;
 }
 
+.c6 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
+}
+
+.c9 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c14 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
 .c12 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
   position: relative;
   outline: none;
 }
@@ -142,7 +144,7 @@ exports[`Header renders 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c17 {
+.c16 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -154,37 +156,10 @@ exports[`Header renders 1`] = `
   width: 1px;
 }
 
-.c14 {
-  height: 100%;
-}
-
 .c13 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
-}
-
-.c13 .c0 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c13 .c6 {
-  color: #ffffff;
 }
 
 .c13[aria-disabled='true'] {
@@ -192,7 +167,7 @@ exports[`Header renders 1`] = `
   background: #eaeaef;
 }
 
-.c13[aria-disabled='true'] .c6 {
+.c13[aria-disabled='true'] .c5 {
   color: #666687;
 }
 
@@ -205,7 +180,7 @@ exports[`Header renders 1`] = `
   background: #eaeaef;
 }
 
-.c13[aria-disabled='true']:active .c6 {
+.c13[aria-disabled='true']:active .c5 {
   color: #666687;
 }
 
@@ -222,7 +197,7 @@ exports[`Header renders 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c13:active .c6 {
+.c13:active .c5 {
   color: #4945ff;
 }
 
@@ -231,7 +206,7 @@ exports[`Header renders 1`] = `
   fill: #4945ff;
 }
 
-.c13 .c6 {
+.c13 .c5 {
   color: #271fe0;
 }
 
@@ -240,75 +215,52 @@ exports[`Header renders 1`] = `
   fill: #271fe0;
 }
 
-.c16 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
+.c15 {
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
 }
 
-.c16 .c0 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c16 .c6 {
-  color: #ffffff;
-}
-
-.c16[aria-disabled='true'] {
+.c15[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c16[aria-disabled='true'] .c6 {
+.c15[aria-disabled='true'] .c5 {
   color: #666687;
 }
 
-.c16[aria-disabled='true'] svg > g,.c16[aria-disabled='true'] svg path {
+.c15[aria-disabled='true'] svg > g,.c15[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c16[aria-disabled='true']:active {
+.c15[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c16[aria-disabled='true']:active .c6 {
+.c15[aria-disabled='true']:active .c5 {
   color: #666687;
 }
 
-.c16[aria-disabled='true']:active svg > g,.c16[aria-disabled='true']:active svg path {
+.c15[aria-disabled='true']:active svg > g,.c15[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c16:hover {
+.c15:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c16:active {
+.c15:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c16 svg > g,
-.c16 svg path {
+.c15 svg > g,
+.c15 svg path {
   fill: #ffffff;
 }
 
-.c3 {
+.c2 {
   display: -webkit-inline-box;
   display: -webkit-inline-flex;
   display: -ms-inline-flexbox;
@@ -324,31 +276,31 @@ exports[`Header renders 1`] = `
   outline: none;
 }
 
-.c3 svg path {
+.c2 svg path {
   -webkit-transition: fill 150ms ease-out;
   transition: fill 150ms ease-out;
   fill: currentColor;
 }
 
-.c3 svg {
+.c2 svg {
   font-size: 0.625rem;
 }
 
-.c3 .c6 {
+.c2 .c5 {
   -webkit-transition: color 150ms ease-out;
   transition: color 150ms ease-out;
   color: currentColor;
 }
 
-.c3:hover {
+.c2:hover {
   color: #7b79ff;
 }
 
-.c3:active {
+.c2:active {
   color: #271fe0;
 }
 
-.c3:after {
+.c2:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -363,11 +315,11 @@ exports[`Header renders 1`] = `
   border: 2px solid transparent;
 }
 
-.c3:focus-visible {
+.c2:focus-visible {
   outline: none;
 }
 
-.c3:focus-visible:after {
+.c2:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -378,7 +330,7 @@ exports[`Header renders 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c5 {
+.c4 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -390,108 +342,108 @@ exports[`Header renders 1`] = `
     style="height: 0px;"
   >
     <div
-      class="c0 c1"
+      class="c0"
       data-strapi-header="true"
     >
       <div
-        class="c0 c2"
+        class="c1"
       >
         <a
           aria-current="page"
-          class="c3 active"
+          class="c2 active"
           href="/?folder=2"
         >
           <span
             aria-hidden="true"
-            class="c0 c4 c5"
+            class="c3 c4"
           >
             <svg
               fill="none"
-              height="1em"
+              height="1rem"
               viewBox="0 0 24 24"
-              width="1em"
+              width="1rem"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M24 13.3a.2.2 0 01-.2.2H5.74l8.239 8.239a.2.2 0 010 .282L12.14 23.86a.2.2 0 01-.282 0L.14 12.14a.2.2 0 010-.282L11.86.14a.2.2 0 01.282 0L13.98 1.98a.2.2 0 010 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6z"
+                d="M24 13.3a.2.2 0 0 1-.2.2H5.74l8.239 8.239a.2.2 0 0 1 0 .282L12.14 23.86a.2.2 0 0 1-.282 0L.14 12.14a.2.2 0 0 1 0-.282L11.86.14a.2.2 0 0 1 .282 0L13.98 1.98a.2.2 0 0 1 0 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6Z"
                 fill="#212134"
               />
             </svg>
           </span>
           <span
-            class="c6 c7"
+            class="c5 c6"
           >
             Back
           </span>
         </a>
       </div>
       <div
-        class="c0 c8"
+        class="c7"
       >
         <div
-          class="c0 c9"
+          class="c8"
         >
           <h1
-            class="c6 c10"
+            class="c5 c9"
           >
             Media Library
           </h1>
         </div>
         <div
-          class="c0 c11"
+          class="c10"
         >
           <button
             aria-disabled="false"
-            class="c12 c13"
+            class="c11 c10 c12 c13"
             type="button"
           >
             <div
               aria-hidden="true"
-              class="c0 c4 c14"
+              class=""
             >
               <svg
                 fill="none"
-                height="1em"
+                height="1rem"
                 viewBox="0 0 24 24"
-                width="1em"
+                width="1rem"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
+                  d="M24 13.604a.3.3 0 0 1-.3.3h-9.795V23.7a.3.3 0 0 1-.3.3h-3.21a.3.3 0 0 1-.3-.3v-9.795H.3a.3.3 0 0 1-.3-.3v-3.21a.3.3 0 0 1 .3-.3h9.795V.3a.3.3 0 0 1 .3-.3h3.21a.3.3 0 0 1 .3.3v9.795H23.7a.3.3 0 0 1 .3.3v3.21Z"
                   fill="#212134"
                 />
               </svg>
             </div>
             <span
-              class="c6 c15"
+              class="c5 c14"
             >
               Add new folder
             </span>
           </button>
           <button
             aria-disabled="false"
-            class="c12 c16"
+            class="c11 c10 c12 c15"
             type="button"
           >
             <div
               aria-hidden="true"
-              class="c0 c4 c14"
+              class=""
             >
               <svg
                 fill="none"
-                height="1em"
+                height="1rem"
                 viewBox="0 0 24 24"
-                width="1em"
+                width="1rem"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
+                  d="M24 13.604a.3.3 0 0 1-.3.3h-9.795V23.7a.3.3 0 0 1-.3.3h-3.21a.3.3 0 0 1-.3-.3v-9.795H.3a.3.3 0 0 1-.3-.3v-3.21a.3.3 0 0 1 .3-.3h9.795V.3a.3.3 0 0 1 .3-.3h3.21a.3.3 0 0 1 .3.3v9.795H23.7a.3.3 0 0 1 .3.3v3.21Z"
                   fill="#212134"
                 />
               </svg>
             </div>
             <span
-              class="c6 c15"
+              class="c5 c14"
             >
               Add new assets
             </span>
@@ -501,7 +453,7 @@ exports[`Header renders 1`] = `
     </div>
   </div>
   <div
-    class="c17"
+    class="c16"
   >
     <p
       aria-live="polite"
