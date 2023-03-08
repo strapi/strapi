@@ -79,6 +79,9 @@ module.exports = async (opts) => {
     destination = createLocalStrapiDestinationProvider({
       getStrapi: () => strapi,
       strategy: 'restore',
+      restore: {
+        entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },
+      },
     });
   }
   // if URL provided, set up a remote destination provider
