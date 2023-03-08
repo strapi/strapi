@@ -142,7 +142,9 @@ function enableReviewWorkflow({ strapi }) {
           entity: contentTypeMetadata.tableName,
         })
         .toSQL();
-      // Insert the clone relations
+
+      // Insert rows for all entries of the content type that do not have a
+      // default stage
       await connection(joinTable.name).insert(
         connection.raw(
           `(${columnsToInsert.join(',')})  ${selectStatement.sql}`,
