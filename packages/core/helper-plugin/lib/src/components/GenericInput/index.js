@@ -142,6 +142,7 @@ const GenericInput = ({
           labelAction={labelAction}
           value={value}
           error={errorMessage}
+          disabled={disabled}
           hint={hint}
           required={required}
           onChange={(json) => {
