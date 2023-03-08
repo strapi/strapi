@@ -609,7 +609,9 @@ const createEntityManager = (db) => {
                   .update({ [joinColumn.name]: id })
                   .where({ [joinColumn.name]: relIdToClone })
                   // Don't steal the relations we are about to delete
-                  .where({ $not: { [inverseJoinColumn.name]: toIds(cleanRelationData.delete) } })
+                  .where({
+                    $not: { [inverseJoinColumn.name]: toIds(cleanRelationData.disconnect) },
+                  })
                   .onConflict([joinColumn.name, inverseJoinColumn.name])
                   .ignore()
                   .transacting(trx)
