@@ -1,0 +1,2095 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snapshot when creating token 1`] = `
+.c1 {
+  background: #f6f6f9;
+  padding-top: 24px;
+  padding-right: 56px;
+  padding-bottom: 40px;
+  padding-left: 56px;
+}
+
+.c2 {
+  padding-bottom: 8px;
+}
+
+.c8 {
+  min-width: 0;
+}
+
+.c13 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
+}
+
+.c17 {
+  padding-right: 56px;
+  padding-left: 56px;
+}
+
+.c19 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c36 {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.c38 {
+  padding-left: 12px;
+}
+
+.c7 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c9 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c12 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c18 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.c20 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.c24 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.c11 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c16 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c21 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c25 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c26 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #d02b20;
+}
+
+.c37 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c41 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c14 {
+  position: relative;
+  outline: none;
+}
+
+.c14 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c14 svg > g,
+.c14 svg path {
+  fill: #ffffff;
+}
+
+.c14[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c14:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c14:focus-visible {
+  outline: none;
+}
+
+.c14:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c42 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c15 {
+  height: 2rem;
+}
+
+.c15[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c15[aria-disabled='true'] .c10 {
+  color: #666687;
+}
+
+.c15[aria-disabled='true'] svg > g,.c15[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c15[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c15[aria-disabled='true']:active .c10 {
+  color: #666687;
+}
+
+.c15[aria-disabled='true']:active svg > g,.c15[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c15:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c15:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c15 svg > g,
+.c15 svg path {
+  fill: #ffffff;
+}
+
+.c27 {
+  line-height: 0;
+}
+
+.c29 {
+  border: none;
+  border-radius: 4px;
+  padding-bottom: 0.65625rem;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 0.65625rem;
+  color: #32324d;
+  font-weight: 400;
+  font-size: 0.875rem;
+  display: block;
+  width: 100%;
+  background: inherit;
+}
+
+.c29::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c29::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c29:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c29::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c29[aria-disabled='true'] {
+  color: inherit;
+}
+
+.c29:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.c28 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c28:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c33 {
+  position: relative;
+  border: 1px solid #dcdce4;
+  padding-right: 12px;
+  border-radius: 4px;
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 2.5rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c33:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c39 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c39 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c39 svg path {
+  fill: #666687;
+}
+
+.c40 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+}
+
+.c40 svg {
+  width: 0.375rem;
+}
+
+.c34 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c34:focus {
+  outline: none;
+}
+
+.c34[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c35 {
+  width: 100%;
+}
+
+.c22 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 20px;
+}
+
+.c23 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c0:focus-visible {
+  outline: none;
+}
+
+.c31 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c31:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c32 {
+  display: block;
+  width: 100%;
+  font-weight: 400;
+  font-size: 0.875rem;
+  border: none;
+  color: #32324d;
+  resize: none;
+  background: inherit;
+}
+
+.c32::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c32::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c32:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c32::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c32:focus-within {
+  outline: none;
+}
+
+.c30 textarea {
+  height: 5rem;
+  line-height: 1.25rem;
+}
+
+.c30 textarea::-webkit-input-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c30 textarea::-moz-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c30 textarea:-ms-input-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c30 textarea::placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c4 {
+  padding-right: 8px;
+}
+
+.c6 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #4945ff;
+}
+
+.c3 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  position: relative;
+  outline: none;
+}
+
+.c3 svg path {
+  fill: #4945ff;
+}
+
+.c3 svg {
+  font-size: 0.625rem;
+}
+
+.c3:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c3:focus-visible {
+  outline: none;
+}
+
+.c3:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c5 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+@media (max-width:68.75rem) {
+  .c23 {
+    grid-column: span;
+  }
+}
+
+@media (max-width:34.375rem) {
+  .c23 {
+    grid-column: span 12;
+  }
+}
+
+<div>
+  <main
+    aria-labelledby="main-content-title"
+    class="c0"
+    id="main-content"
+    tabindex="-1"
+  >
+    <form
+      action="#"
+      novalidate=""
+    >
+      <div
+        style="height: 0px;"
+      >
+        <div
+          class="c1"
+          data-strapi-header="true"
+        >
+          <div
+            class="c2"
+          >
+            <a
+              aria-current="page"
+              class="c3 active"
+              href="/settings/transfer-tokens"
+            >
+              <span
+                aria-hidden="true"
+                class="c4 c5"
+              >
+                <svg
+                  fill="none"
+                  height="1rem"
+                  viewBox="0 0 24 24"
+                  width="1rem"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M24 13.3a.2.2 0 0 1-.2.2H5.74l8.239 8.239a.2.2 0 0 1 0 .282L12.14 23.86a.2.2 0 0 1-.282 0L.14 12.14a.2.2 0 0 1 0-.282L11.86.14a.2.2 0 0 1 .282 0L13.98 1.98a.2.2 0 0 1 0 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6Z"
+                    fill="#212134"
+                  />
+                </svg>
+              </span>
+              <span
+                class="c6"
+              >
+                Back
+              </span>
+            </a>
+          </div>
+          <div
+            class="c7"
+          >
+            <div
+              class="c8 c9"
+            >
+              <h1
+                class="c10 c11"
+              >
+                Create Transfer Token
+              </h1>
+            </div>
+            <div
+              class="c12"
+            >
+              <button
+                aria-disabled="false"
+                class="c13 c12 c14 c15"
+                type="submit"
+              >
+                <div
+                  aria-hidden="true"
+                  class=""
+                >
+                  <svg
+                    fill="none"
+                    height="1rem"
+                    viewBox="0 0 24 24"
+                    width="1rem"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
+                      fill="#212134"
+                    />
+                  </svg>
+                </div>
+                <span
+                  class="c10 c16"
+                >
+                  Save
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="c17"
+      >
+        <div
+          class="c18"
+        >
+          <div
+            class="c19"
+          >
+            <div
+              class="c20"
+            >
+              <h2
+                class="c10 c21"
+              >
+                Details
+              </h2>
+              <div
+                class="c22"
+              >
+                <div
+                  class="c23"
+                >
+                  <div
+                    class=""
+                  >
+                    <div>
+                      <div
+                        class=""
+                      >
+                        <div
+                          class="c24"
+                        >
+                          <label
+                            class="c10 c25"
+                            for="1"
+                          >
+                            <div
+                              class="c9"
+                            >
+                              Name
+                              <span
+                                class="c10 c26 c27"
+                              >
+                                *
+                              </span>
+                            </div>
+                          </label>
+                          <div
+                            class="c7 c28"
+                          >
+                            <input
+                              aria-disabled="false"
+                              aria-invalid="false"
+                              aria-required="true"
+                              class="c29"
+                              id="1"
+                              name="name"
+                              value=""
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c23"
+                >
+                  <div
+                    class=""
+                  >
+                    <div
+                      class="c30"
+                    >
+                      <div
+                        class=""
+                      >
+                        <div
+                          class="c24"
+                        >
+                          <div
+                            class="c9"
+                          >
+                            <label
+                              class="c10 c25"
+                              for="3"
+                            >
+                              <div
+                                class="c9"
+                              >
+                                Description
+                              </div>
+                            </label>
+                          </div>
+                          <div
+                            class="c31"
+                          >
+                            <textarea
+                              aria-invalid="false"
+                              aria-required="false"
+                              class="c32"
+                              id="3"
+                              name="description"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c23"
+                >
+                  <div
+                    class=""
+                  >
+                    <div
+                      class=""
+                    >
+                      <div
+                        class="c24"
+                      >
+                        <label
+                          class="c10 c25"
+                          for="5"
+                        >
+                          <div
+                            class="c9"
+                          >
+                            Token duration
+                            <span
+                              class="c10 c26 c27"
+                            >
+                              *
+                            </span>
+                          </div>
+                        </label>
+                        <div
+                          class="c9 c33"
+                        >
+                          <button
+                            aria-disabled="false"
+                            aria-expanded="false"
+                            aria-haspopup="listbox"
+                            aria-labelledby="5 5-label 5-content"
+                            class="c34"
+                            id="5"
+                            name="lifespan"
+                            type="button"
+                          />
+                          <div
+                            class="c7 c35"
+                          >
+                            <div
+                              class="c9"
+                            >
+                              <div
+                                class="c36"
+                              >
+                                <span
+                                  class="c10 c37"
+                                  id="5-content"
+                                >
+                                  Select
+                                </span>
+                              </div>
+                            </div>
+                            <div
+                              class="c9"
+                            >
+                              <button
+                                aria-hidden="true"
+                                class="c38 c39 c40"
+                                tabindex="-1"
+                                title="Carret Down Button"
+                                type="button"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1rem"
+                                  viewBox="0 0 14 8"
+                                  width="1rem"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                    fill="#32324D"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <span
+                      class="c10 c41"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </main>
+  <div
+    class="c42"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </div>
+</div>
+`;
+
+exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snapshot when editing existing token 1`] = `
+.c8 {
+  min-width: 0;
+}
+
+.c13 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
+}
+
+.c18 {
+  padding-right: 56px;
+  padding-left: 56px;
+}
+
+.c1 {
+  background: #f6f6f9;
+  padding-top: 24px;
+  padding-right: 56px;
+  padding-bottom: 40px;
+  padding-left: 56px;
+}
+
+.c2 {
+  padding-bottom: 8px;
+}
+
+.c20 {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c21 {
+  background: #f6f6f9;
+  padding: 12px;
+  border-radius: 4px;
+}
+
+.c27 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c43 {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.c45 {
+  padding-left: 12px;
+}
+
+.c7 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c9 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c12 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c19 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.c23 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.c28 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.c11 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c16 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c24 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 500;
+  color: #32324d;
+}
+
+.c26 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #666687;
+}
+
+.c29 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c32 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c33 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #d02b20;
+}
+
+.c44 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c48 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c14 {
+  position: relative;
+  outline: none;
+}
+
+.c14 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c14 svg > g,
+.c14 svg path {
+  fill: #ffffff;
+}
+
+.c14[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c14:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c14:focus-visible {
+  outline: none;
+}
+
+.c14:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c49 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c50[aria-disabled='true'] .c10 {
+  color: #666687;
+}
+
+.c50[aria-disabled='true']:active .c10 {
+  color: #666687;
+}
+
+.c15 {
+  height: 2rem;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+}
+
+.c15[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c15[aria-disabled='true'] .c10 {
+  color: #666687;
+}
+
+.c15[aria-disabled='true'] svg > g,.c15[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c15[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c15[aria-disabled='true']:active .c10 {
+  color: #666687;
+}
+
+.c15[aria-disabled='true']:active svg > g,.c15[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c15:hover {
+  background-color: #f6f6f9;
+}
+
+.c15:active {
+  background-color: #eaeaef;
+}
+
+.c15 .c10 {
+  color: #32324d;
+}
+
+.c15 svg > g,
+.c15 svg path {
+  fill: #32324d;
+}
+
+.c17 {
+  height: 2rem;
+}
+
+.c17[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c17[aria-disabled='true'] .c10 {
+  color: #666687;
+}
+
+.c17[aria-disabled='true'] svg > g,.c17[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c17[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c17[aria-disabled='true']:active .c10 {
+  color: #666687;
+}
+
+.c17[aria-disabled='true']:active svg > g,.c17[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c17:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c17:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c17 svg > g,
+.c17 svg path {
+  fill: #ffffff;
+}
+
+.c34 {
+  line-height: 0;
+}
+
+.c36 {
+  border: none;
+  border-radius: 4px;
+  padding-bottom: 0.65625rem;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 0.65625rem;
+  color: #32324d;
+  font-weight: 400;
+  font-size: 0.875rem;
+  display: block;
+  width: 100%;
+  background: inherit;
+}
+
+.c36::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c36::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c36:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c36::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c36[aria-disabled='true'] {
+  color: inherit;
+}
+
+.c36:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.c35 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c35:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c40 {
+  position: relative;
+  border: 1px solid #dcdce4;
+  padding-right: 12px;
+  border-radius: 4px;
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 2.5rem;
+  color: #666687;
+  background: #eaeaef;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c40:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c46 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c46 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c46 svg path {
+  fill: #666687;
+}
+
+.c47 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+  cursor: not-allowed;
+}
+
+.c47 svg {
+  width: 0.375rem;
+}
+
+.c41 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c41:focus {
+  outline: none;
+}
+
+.c41[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c42 {
+  width: 100%;
+}
+
+.c30 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 20px;
+}
+
+.c31 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c0:focus-visible {
+  outline: none;
+}
+
+.c38 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c38:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c39 {
+  display: block;
+  width: 100%;
+  font-weight: 400;
+  font-size: 0.875rem;
+  border: none;
+  color: #32324d;
+  resize: none;
+  background: inherit;
+}
+
+.c39::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c39::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c39:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c39::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c39:focus-within {
+  outline: none;
+}
+
+.c37 textarea {
+  height: 5rem;
+  line-height: 1.25rem;
+}
+
+.c37 textarea::-webkit-input-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c37 textarea::-moz-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c37 textarea:-ms-input-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c37 textarea::placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c22 {
+  margin-right: 24px;
+}
+
+.c22 svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.c25 {
+  word-break: break-all;
+}
+
+.c4 {
+  padding-right: 8px;
+}
+
+.c6 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #4945ff;
+}
+
+.c3 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  position: relative;
+  outline: none;
+}
+
+.c3 svg path {
+  fill: #4945ff;
+}
+
+.c3 svg {
+  font-size: 0.625rem;
+}
+
+.c3:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c3:focus-visible {
+  outline: none;
+}
+
+.c3:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c5 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+@media (max-width:68.75rem) {
+  .c31 {
+    grid-column: span;
+  }
+}
+
+@media (max-width:34.375rem) {
+  .c31 {
+    grid-column: span 12;
+  }
+}
+
+<div>
+  <main
+    aria-labelledby="main-content-title"
+    class="c0"
+    id="main-content"
+    tabindex="-1"
+  >
+    <form
+      action="#"
+      novalidate=""
+    >
+      <div
+        style="height: 0px;"
+      >
+        <div
+          class="c1"
+          data-strapi-header="true"
+        >
+          <div
+            class="c2"
+          >
+            <a
+              aria-current="page"
+              class="c3 active"
+              href="/settings/transfer-tokens"
+            >
+              <span
+                aria-hidden="true"
+                class="c4 c5"
+              >
+                <svg
+                  fill="none"
+                  height="1rem"
+                  viewBox="0 0 24 24"
+                  width="1rem"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M24 13.3a.2.2 0 0 1-.2.2H5.74l8.239 8.239a.2.2 0 0 1 0 .282L12.14 23.86a.2.2 0 0 1-.282 0L.14 12.14a.2.2 0 0 1 0-.282L11.86.14a.2.2 0 0 1 .282 0L13.98 1.98a.2.2 0 0 1 0 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6Z"
+                    fill="#212134"
+                  />
+                </svg>
+              </span>
+              <span
+                class="c6"
+              >
+                Back
+              </span>
+            </a>
+          </div>
+          <div
+            class="c7"
+          >
+            <div
+              class="c8 c9"
+            >
+              <h1
+                class="c10 c11"
+              >
+                My super token
+              </h1>
+            </div>
+            <div
+              class="c12"
+            >
+              <button
+                aria-disabled="false"
+                class="c13 c12 c14 c15"
+                name="regenerate"
+                type="button"
+              >
+                <div
+                  aria-hidden="true"
+                  class=""
+                >
+                  <svg
+                    fill="none"
+                    height="1rem"
+                    viewBox="0 0 24 24"
+                    width="1rem"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      clip-rule="evenodd"
+                      d="M15.681 2.804A9.64 9.64 0 0 0 11.818 2C6.398 2 2 6.48 2 12c0 5.521 4.397 10 9.818 10 2.03 0 4.011-.641 5.67-1.835a9.987 9.987 0 0 0 3.589-4.831 1.117 1.117 0 0 0-.664-1.418 1.086 1.086 0 0 0-1.393.676 7.769 7.769 0 0 1-2.792 3.758 7.546 7.546 0 0 1-4.41 1.428V4.222h.002a7.492 7.492 0 0 1 3.003.625 7.61 7.61 0 0 1 2.5 1.762l.464.551-2.986 3.042a.186.186 0 0 0 .129.316H22V3.317a.188.188 0 0 0-.112-.172.179.179 0 0 0-.199.04l-2.355 2.4-.394-.468-.02-.02a9.791 9.791 0 0 0-3.239-2.293Zm-3.863 1.418V2v2.222Zm0 0v15.556c-4.216 0-7.636-3.484-7.636-7.778s3.42-7.777 7.636-7.778Z"
+                      fill="#212134"
+                      fill-rule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <span
+                  class="c10 c16"
+                >
+                  Regenerate
+                </span>
+              </button>
+              <button
+                aria-disabled="false"
+                class="c13 c12 c14 c17"
+                type="submit"
+              >
+                <div
+                  aria-hidden="true"
+                  class=""
+                >
+                  <svg
+                    fill="none"
+                    height="1rem"
+                    viewBox="0 0 24 24"
+                    width="1rem"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
+                      fill="#212134"
+                    />
+                  </svg>
+                </div>
+                <span
+                  class="c10 c16"
+                >
+                  Save
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="c18"
+      >
+        <div
+          class="c19"
+        >
+          <div
+            class="c20 c9"
+          >
+            <div
+              class="c21 c9 c22"
+            >
+              <svg
+                fill="none"
+                height="1rem"
+                viewBox="0 0 24 24"
+                width="1rem"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M17 14h-4.34a6 6 0 1 1 0-4H23v4h-2v4h-4v-4ZM7 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"
+                  fill="#8E8EA9"
+                />
+              </svg>
+            </div>
+            <div
+              class="c23"
+            >
+              <div
+                class="c9"
+              >
+                <span
+                  class="c10 c24 c25"
+                >
+                  This token isn’t accessible anymore.
+                </span>
+              </div>
+              <span
+                class="c10 c26"
+              >
+                For security reasons, you can only see your token once.
+              </span>
+            </div>
+          </div>
+          <div
+            class="c27"
+          >
+            <div
+              class="c28"
+            >
+              <h2
+                class="c10 c29"
+              >
+                Details
+              </h2>
+              <div
+                class="c30"
+              >
+                <div
+                  class="c31"
+                >
+                  <div
+                    class=""
+                  >
+                    <div>
+                      <div
+                        class=""
+                      >
+                        <div
+                          class="c23"
+                        >
+                          <label
+                            class="c10 c32"
+                            for="8"
+                          >
+                            <div
+                              class="c9"
+                            >
+                              Name
+                              <span
+                                class="c10 c33 c34"
+                              >
+                                *
+                              </span>
+                            </div>
+                          </label>
+                          <div
+                            class="c7 c35"
+                          >
+                            <input
+                              aria-disabled="false"
+                              aria-invalid="false"
+                              aria-required="true"
+                              class="c36"
+                              id="8"
+                              name="name"
+                              value="My super token"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c31"
+                >
+                  <div
+                    class=""
+                  >
+                    <div
+                      class="c37"
+                    >
+                      <div
+                        class=""
+                      >
+                        <div
+                          class="c23"
+                        >
+                          <div
+                            class="c9"
+                          >
+                            <label
+                              class="c10 c32"
+                              for="10"
+                            >
+                              <div
+                                class="c9"
+                              >
+                                Description
+                              </div>
+                            </label>
+                          </div>
+                          <div
+                            class="c38"
+                          >
+                            <textarea
+                              aria-invalid="false"
+                              aria-required="false"
+                              class="c39"
+                              id="10"
+                              name="description"
+                            >
+                              This describe my super token
+                            </textarea>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c31"
+                >
+                  <div
+                    class=""
+                  >
+                    <div
+                      class=""
+                    >
+                      <div
+                        class="c23"
+                      >
+                        <label
+                          class="c10 c32"
+                          for="12"
+                        >
+                          <div
+                            class="c9"
+                          >
+                            Token duration
+                            <span
+                              class="c10 c33 c34"
+                            >
+                              *
+                            </span>
+                          </div>
+                        </label>
+                        <div
+                          class="c9 c40"
+                          disabled=""
+                        >
+                          <button
+                            aria-disabled="true"
+                            aria-expanded="false"
+                            aria-haspopup="listbox"
+                            aria-labelledby="12 12-label 12-content"
+                            class="c41"
+                            id="12"
+                            name="lifespan"
+                            type="button"
+                          />
+                          <div
+                            class="c7 c42"
+                          >
+                            <div
+                              class="c9"
+                            >
+                              <div
+                                class="c43"
+                              >
+                                <span
+                                  class="c10 c44"
+                                  id="12-content"
+                                >
+                                  Select
+                                </span>
+                              </div>
+                            </div>
+                            <div
+                              class="c9"
+                            >
+                              <button
+                                aria-hidden="true"
+                                class="c45 c46 c47"
+                                disabled=""
+                                tabindex="-1"
+                                title="Carret Down Button"
+                                type="button"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1rem"
+                                  viewBox="0 0 14 8"
+                                  width="1rem"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                    fill="#32324D"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <span
+                      class="c10 c48"
+                    >
+                      Expiration date: Unlimited
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </main>
+  <div
+    class="c49"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </div>
+</div>
+`;

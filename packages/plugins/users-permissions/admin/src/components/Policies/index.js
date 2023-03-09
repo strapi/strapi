@@ -1,6 +1,6 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { Typography, Stack, GridItem } from '@strapi/design-system';
+import { Typography, Flex, GridItem } from '@strapi/design-system';
 import { get, isEmpty, without } from 'lodash';
 import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
 import BoundRoute from '../BoundRoute';
@@ -28,14 +28,14 @@ const Policies = () => {
       style={{ minHeight: '100%' }}
     >
       {selectedAction ? (
-        <Stack spacing={2}>
+        <Flex direction="column" alignItems="stretch" gap={2}>
           {displayedRoutes.map((route, key) => (
             // eslint-disable-next-line react/no-array-index-key
             <BoundRoute key={key} route={route} />
           ))}
-        </Stack>
+        </Flex>
       ) : (
-        <Stack spacing={2}>
+        <Flex direction="column" alignItems="stretch" gap={2}>
           <Typography variant="delta" as="h3">
             {formatMessage({
               id: 'users-permissions.Policies.header.title',
@@ -49,7 +49,7 @@ const Policies = () => {
                 "Select the application's actions or the plugin's actions and click on the cog icon to display the bound route",
             })}
           </Typography>
-        </Stack>
+        </Flex>
       )}
     </GridItem>
   );

@@ -6,6 +6,7 @@ import { Transaction, TransactionCallback } from '../../types/utils';
 
 export const createTransaction = (strapi: Strapi): Transaction => {
   const fns: { fn: TransactionCallback; uuid: string }[] = [];
+
   let done = false;
   let resume: null | (() => void) = null;
 
@@ -16,12 +17,27 @@ export const createTransaction = (strapi: Strapi): Transaction => {
   });
 
   e.on('close', () => {
+    e.removeAllListeners('rollback');
+    e.removeAllListeners('spawn');
+
     done = true;
     resume?.();
   });
+
   strapi.db.transaction(async ({ trx, rollback }) => {
-    e.on('rollback', async () => {
-      await rollback();
+    e.once('rollback', async () => {
+      e.removeAllListeners('close');
+      e.removeAllListeners('spawn');
+
+      try {
+        await rollback();
+        e.emit('rollback_completed');
+      } catch {
+        e.emit('rollback_failed');
+      } finally {
+        done = true;
+        resume?.();
+      }
     });
 
     while (!done) {
@@ -65,11 +81,18 @@ export const createTransaction = (strapi: Strapi): Transaction => {
         });
       });
     },
+
     end() {
       return e.emit('close');
     },
+
     rollback() {
-      return e.emit('rollback');
+      return new Promise<boolean>((resolve) => {
+        e.emit('rollback');
+
+        e.once('rollback_failed', () => resolve(false));
+        e.once('rollback_completed', () => resolve(true));
+      });
     },
   };
 };

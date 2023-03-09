@@ -3,7 +3,7 @@
 
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { Box, Grid, GridItem, Stack } from '@strapi/design-system';
+import { Box, Grid, GridItem, Flex } from '@strapi/design-system';
 import { useContentTypeLayout } from '../../hooks';
 import FieldComponent from '../FieldComponent';
 import Inputs from '../Inputs';
@@ -29,7 +29,7 @@ const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, nam
       hasRadius={isNested}
       borderColor={isNested ? 'neutral200' : ''}
     >
-      <Stack spacing={6}>
+      <Flex direction="column" alignItems="stretch" gap={6}>
         {fields.map((fieldRow, key) => {
           return (
             <Grid gap={4} key={key}>
@@ -76,7 +76,7 @@ const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, nam
             </Grid>
           );
         })}
-      </Stack>
+      </Flex>
     </Box>
   );
 };

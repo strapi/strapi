@@ -15,7 +15,7 @@ import {
   Main,
   Button,
   Box,
-  Stack,
+  Flex,
   Typography,
   ToggleInput,
   TextInput,
@@ -91,7 +91,7 @@ const SettingsPage = () => {
                     paddingLeft={7}
                     paddingRight={7}
                   >
-                    <Stack spacing={4}>
+                    <Flex direction="column" alignItems="stretch" gap={4}>
                       <Typography variant="delta" as="h2">
                         {formatMessage({
                           id: 'global.settings',
@@ -168,7 +168,7 @@ const SettingsPage = () => {
                           </GridItem>
                         )}
                       </Grid>
-                    </Stack>
+                    </Flex>
                   </Box>
                 </ContentLayout>
               </Form>

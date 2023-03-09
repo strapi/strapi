@@ -71,6 +71,31 @@ export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
     enabled: !skipWhen,
     staleTime: 0,
     cacheTime: 0,
+    select(data) {
+      if (data?.results && Array.isArray(data.results)) {
+        return {
+          ...data,
+          results: data.results
+            /**
+             * Filter out assets that don't have a name.
+             * So we don't try to render them as assets
+             * and get errors.
+             */
+            .filter((asset) => asset.name)
+            .map((asset) => ({
+              ...asset,
+              /**
+               * Mime and ext cannot be null in the front-end because
+               * we expect them to be strings and use the `includes` method.
+               */
+              mime: asset.mime ?? '',
+              ext: asset.ext ?? '',
+            })),
+        };
+      }
+
+      return data;
+    },
   });
 
   return { data, error, isLoading };

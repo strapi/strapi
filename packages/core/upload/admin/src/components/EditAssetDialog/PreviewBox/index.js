@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Stack, IconButton } from '@strapi/design-system';
+import { Flex, IconButton } from '@strapi/design-system';
 import { Trash, Download as DownloadIcon, Crop as Resize } from '@strapi/icons';
 import { useTracking } from '@strapi/helper-plugin';
 import getTrad from '../../../utils/getTrad';
@@ -150,7 +150,7 @@ export const PreviewBox = ({
         )}
 
         <ActionRow paddingLeft={3} paddingRight={3} justifyContent="flex-end">
-          <Stack spacing={1} horizontal>
+          <Flex gap={1}>
             {canUpdate && !asset.isLocal && (
               <IconButton
                 label={formatMessage({
@@ -182,7 +182,7 @@ export const PreviewBox = ({
                 onClick={handleCropStart}
               />
             )}
-          </Stack>
+          </Flex>
         </ActionRow>
 
         <Wrapper>

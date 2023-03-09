@@ -1,27 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 1`] = `
-.c9 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c10 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c16 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
 .c0 {
   background: #ffffff;
   border-radius: 4px;
@@ -97,6 +76,27 @@ exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 
   -webkit-justify-content: center;
   -ms-flex-pack: center;
   justify-content: center;
+}
+
+.c9 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c10 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c16 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
 }
 
 .c14 {

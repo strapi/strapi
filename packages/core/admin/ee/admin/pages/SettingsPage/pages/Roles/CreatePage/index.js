@@ -20,7 +20,6 @@ import {
   GridItem,
   Main,
   Flex,
-  Stack,
   Typography,
   TextInput,
   Textarea,
@@ -134,7 +133,7 @@ const CreatePage = () => {
             <>
               <HeaderLayout
                 primaryAction={
-                  <Stack horizontal spacing={2}>
+                  <Flex gap={2}>
                     <Button
                       variant="secondary"
                       onClick={() => {
@@ -154,7 +153,7 @@ const CreatePage = () => {
                         defaultMessage: 'Save',
                       })}
                     </Button>
-                  </Stack>
+                  </Flex>
                 }
                 title={formatMessage({
                   id: 'Settings.roles.create.title',
@@ -174,9 +173,9 @@ const CreatePage = () => {
                 }
               />
               <ContentLayout>
-                <Stack spacing={6}>
+                <Flex direction="column" alignItems="stretch" gap={6}>
                   <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-                    <Stack spacing={4}>
+                    <Flex direction="column" alignItems="stretch" gap={4}>
                       <Flex justifyContent="space-between">
                         <Box>
                           <Box>
@@ -234,7 +233,7 @@ const CreatePage = () => {
                           </Textarea>
                         </GridItem>
                       </Grid>
-                    </Stack>
+                    </Flex>
                   </Box>
                   {!isLayoutLoading && !isRoleLoading ? (
                     <Box shadow="filterShadow" hasRadius>
@@ -250,7 +249,7 @@ const CreatePage = () => {
                       <LoadingIndicatorPage />
                     </Box>
                   )}
-                </Stack>
+                </Flex>
               </ContentLayout>
             </>
           </Form>
