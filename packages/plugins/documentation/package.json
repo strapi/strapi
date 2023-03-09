@@ -21,7 +21,7 @@
     }
   ],
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "test:unit": "jest --verbose"
   },
   "dependencies": {
     "@strapi/design-system": "1.6.4",

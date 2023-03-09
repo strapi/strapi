@@ -7,7 +7,7 @@ const pascalCase = require('./pascal-case');
  * @description - Converts types found on attributes to OpenAPI acceptable data types
  *
  * @param {object} attributes - The attributes found on a contentType
- * @param {{ typeMap: Map, isRequest: boolean, addComponentSchema: function, componentSchemaRefName: string }} opts
+ * @param {{ typeMap: Map, isRequest: boolean, didAddStrapiComponentsToSchemas: function, componentSchemaRefName: string }} opts
  * @returns Attributes using OpenAPI acceptable data types
  */
 const cleanSchemaAttributes = (
@@ -15,7 +15,7 @@ const cleanSchemaAttributes = (
   {
     typeMap = new Map(),
     isRequest = false,
-    addComponentSchema = () => {},
+    didAddStrapiComponentsToSchemas = () => {},
     componentSchemaRefName = '',
   } = {}
 ) => {
@@ -107,7 +107,7 @@ const cleanSchemaAttributes = (
         const refComponentSchema = {
           $ref: `#/components/schemas/${pascalCase(attribute.component)}Component`,
         };
-        const componentExists = addComponentSchema(
+        const componentExists = didAddStrapiComponentsToSchemas(
           `${pascalCase(attribute.component)}Component`,
           rawComponentSchema
         );
@@ -133,12 +133,15 @@ const cleanSchemaAttributes = (
               ...cleanSchemaAttributes(componentAttributes, {
                 typeMap,
                 isRequest,
-                addComponentSchema,
+                didAddStrapiComponentsToSchemas,
               }),
             },
           };
           const refComponentSchema = { $ref: `#/components/schemas/${pascalCase(component)}` };
-          const componentExists = addComponentSchema(pascalCase(component), rawComponentSchema);
+          const componentExists = didAddStrapiComponentsToSchemas(
+            pascalCase(component),
+            rawComponentSchema
+          );
           const finalComponentSchema = componentExists ? refComponentSchema : rawComponentSchema;
           return finalComponentSchema;
         });
