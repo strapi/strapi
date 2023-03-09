@@ -14,7 +14,7 @@ const {
 const ora = require('ora');
 const { readableBytes, exitWith } = require('../utils/helpers');
 const strapi = require('../../index');
-const { getParseListWithChoices } = require('../utils/commander');
+const { getParseListWithChoices, parseInteger } = require('../utils/commander');
 
 const pad = (n) => {
   return (n < 10 ? '0' : '') + String(n);
@@ -106,6 +106,13 @@ const createStrapiInstance = async (logLevel = 'error') => {
 };
 
 const transferDataTypes = Object.keys(TransferGroupPresets);
+
+const throttleOption = new Option(
+  '--throttle <max messages per minute>',
+  `Include only these types of data (plus schemas). Available types: ${transferDataTypes.join(',')}`
+)
+  .argParser(parseInteger)
+  .hideHelp();
 
 const excludeOption = new Option(
   '--exclude <comma-separated data types>',
@@ -220,6 +227,7 @@ module.exports = {
   createStrapiInstance,
   excludeOption,
   onlyOption,
+  throttleOption,
   validateExcludeOnly,
   formatDiagnostic,
 };

@@ -7,6 +7,7 @@
 const inquirer = require('inquirer');
 const { InvalidOptionArgumentError, Option } = require('commander');
 const { bold, green, cyan } = require('chalk');
+const { isNaN } = require('lodash/fp');
 const { exitWith } = require('./helpers');
 
 /**
@@ -38,6 +39,18 @@ const getParseListWithChoices = (choices, errorMessage = 'Invalid options:') => 
 
     return list;
   };
+};
+
+/**
+ * argParser: Parse a string as a URL object
+ */
+const parseInteger = (value) => {
+  // parseInt takes a string and a radix
+  const parsedValue = parseInt(value, 10);
+  if (isNaN(parsedValue)) {
+    throw new InvalidOptionArgumentError(`Not an integer: ${value}`);
+  }
+  return parsedValue;
 };
 
 /**
@@ -131,6 +144,7 @@ module.exports = {
   getParseListWithChoices,
   parseList,
   parseURL,
+  parseInteger,
   promptEncryptionKey,
   confirmMessage,
   forceOption,

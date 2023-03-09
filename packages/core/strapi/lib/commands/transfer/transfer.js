@@ -31,6 +31,7 @@ const { exitWith } = require('../utils/helpers');
  * @property {string|undefined} [fromToken] The transfer token for the remote Strapi source
  * @property {(keyof import('@strapi/data-transfer/src/engine').TransferGroupFilter)[]} [only] If present, only include these filtered groups of data
  * @property {(keyof import('@strapi/data-transfer/src/engine').TransferGroupFilter)[]} [exclude] If present, exclude these filtered groups of data
+ * @property {number|undefined} [throttle] Delay in ms after each record
  */
 
 /**
@@ -100,6 +101,7 @@ module.exports = async (opts) => {
     schemaStrategy: 'strict',
     exclude: opts.exclude,
     only: opts.only,
+    throttle: opts.throttle,
     transforms: {
       links: [
         {
