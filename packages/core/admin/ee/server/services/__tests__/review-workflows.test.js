@@ -1,6 +1,7 @@
 'use strict';
 
 const reviewWorkflowsServiceFactory = require('../review-workflows/review-workflows');
+const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 
 const workflowMock = {
   id: 1,
@@ -29,7 +30,37 @@ const stagesServiceMock = {
   createMany: jest.fn(() => stagesMock),
 };
 
+const queryMock = {
+  findOne: jest.fn(),
+};
+
+const contentTypesMock = {
+  test1: {
+    options: {
+      reviewWorkflows: false,
+    },
+    attributes: {},
+  },
+  test2: {
+    options: {
+      reviewWorkflows: true,
+    },
+    attributes: {},
+  },
+};
+
+const containerMock = {
+  get: jest.fn().mockReturnThis(),
+  extend: jest.fn(),
+};
+
+const hookMock = jest.fn().mockReturnValue({ register: jest.fn() });
+
 const strapiMock = {
+  contentTypes: contentTypesMock,
+  container: containerMock,
+  hook: hookMock,
+  query: jest.fn(() => queryMock),
   service(serviceName) {
     switch (serviceName) {
       case 'admin::stages':
@@ -46,7 +77,7 @@ const reviewWorkflowsService = reviewWorkflowsServiceFactory({ strapi: strapiMoc
 
 describe('Review workflows service', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('bootstrap', () => {
@@ -78,6 +109,26 @@ describe('Review workflows service', () => {
 
       expect(stagesServiceMock.createMany).not.toBeCalled();
       expect(workflowsServiceMock.create).not.toBeCalled();
+    });
+  });
+  describe('register', () => {
+    test('Content types with review workflows options should have a new attribute', async () => {
+      await reviewWorkflowsService.register();
+      expect(containerMock.extend).toHaveBeenCalledTimes(1);
+      expect(containerMock.extend).not.toHaveBeenCalledWith('test1', expect.any(Function));
+      expect(containerMock.extend).toHaveBeenCalledWith('test2', expect.any(Function));
+
+      const extendFunc = containerMock.extend.mock.calls[0][1];
+
+      expect(extendFunc({})).toEqual({
+        attributes: {
+          [ENTITY_STAGE_ATTRIBUTE]: expect.objectContaining({
+            relation: 'morphOne',
+            target: 'admin::workflow-stage',
+            type: 'relation',
+          }),
+        },
+      });
     });
   });
 });

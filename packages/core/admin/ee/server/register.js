@@ -5,6 +5,7 @@ const executeCERegister = require('../../server/register');
 const migrateAuditLogsTable = require('./migrations/audit-logs-table');
 const createAuditLogsService = require('./services/audit-logs');
 const reviewWorkflowsMiddlewares = require('./middlewares/review-workflows');
+const { getService } = require('./utils');
 
 module.exports = async ({ strapi }) => {
   if (features.isEnabled('audit-logs')) {
@@ -14,7 +15,10 @@ module.exports = async ({ strapi }) => {
     await auditLogsService.register();
   }
   if (features.isEnabled('review-workflows')) {
+    const reviewWorkflowService = getService('review-workflows');
+
     reviewWorkflowsMiddlewares.contentTypeMiddleware(strapi);
+    await reviewWorkflowService.register();
   }
   await executeCERegister({ strapi });
 };

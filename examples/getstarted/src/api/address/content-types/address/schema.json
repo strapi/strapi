@@ -9,8 +9,7 @@
     "name": "Address"
   },
   "options": {
-    "draftAndPublish": false,
-    "comment": ""
+    "draftAndPublish": false
   },
   "pluginOptions": {},
   "attributes": {
