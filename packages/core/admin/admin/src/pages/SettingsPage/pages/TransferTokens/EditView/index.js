@@ -92,6 +92,8 @@ const TransferTokenCreateView = () => {
         ? parseInt(body.lifespan, 10)
         : null;
 
+    const permissions = body.type.split('-');
+
     try {
       const {
         data: { data: response },
@@ -99,13 +101,13 @@ const TransferTokenCreateView = () => {
         ? await post(`/admin/transfer/tokens`, {
             ...body,
             lifespan: lifespanVal,
-            permissions: ['push'],
+            permissions,
           })
         : await put(`/admin/transfer/tokens/${id}`, {
             name: body.name,
             description: body.description,
             type: body.type,
-            permissions: ['push'],
+            permissions,
           });
 
       unlockApp();
@@ -173,6 +175,7 @@ const TransferTokenCreateView = () => {
           lifespan: transferToken?.lifespan
             ? transferToken.lifespan.toString()
             : transferToken?.lifespan,
+          type: transferToken?.permissions.join('-'),
         }}
         enableReinitialize
         onSubmit={(body, actions) => handleSubmit(body, actions)}
