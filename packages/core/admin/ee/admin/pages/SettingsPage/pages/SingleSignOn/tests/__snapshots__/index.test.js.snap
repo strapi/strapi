@@ -13,7 +13,11 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   padding-left: 56px;
 }
 
-.c9 {
+.c6 {
+  min-width: 0;
+}
+
+.c10 {
   background: #4945ff;
   padding: 8px;
   padding-right: 16px;
@@ -24,12 +28,12 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   cursor: pointer;
 }
 
-.c15 {
+.c16 {
   padding-right: 56px;
   padding-left: 56px;
 }
 
-.c16 {
+.c17 {
   background: #ffffff;
   padding: 24px;
   border-radius: 4px;
@@ -82,7 +86,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   justify-content: space-between;
 }
 
-.c6 {
+.c7 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -96,7 +100,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   flex-direction: row;
 }
 
-.c10 {
+.c11 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -111,7 +115,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   gap: 8px;
 }
 
-.c17 {
+.c18 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -126,7 +130,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   gap: 16px;
 }
 
-.c22 {
+.c23 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -138,6 +142,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 4px;
 }
 
 .c30 {
@@ -158,27 +163,27 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   justify-content: center;
 }
 
-.c8 {
+.c9 {
   font-weight: 600;
   font-size: 2rem;
   line-height: 1.25;
   color: #32324d;
 }
 
-.c13 {
+.c14 {
   font-size: 0.875rem;
   line-height: 1.43;
   font-weight: 600;
   color: #ffffff;
 }
 
-.c14 {
+.c15 {
   font-size: 1rem;
   line-height: 1.5;
   color: #666687;
 }
 
-.c18 {
+.c19 {
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
@@ -224,35 +229,26 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   color: #32324d;
 }
 
-.c23 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c23 > * + * {
-  margin-top: 4px;
-}
-
-.c11 {
+.c12 {
   position: relative;
   outline: none;
 }
 
-.c11 svg {
+.c12 svg {
   height: 12px;
   width: 12px;
 }
 
-.c11 svg > g,
-.c11 svg path {
+.c12 svg > g,
+.c12 svg path {
   fill: #ffffff;
 }
 
-.c11[aria-disabled='true'] {
+.c12[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c11:after {
+.c12:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -267,11 +263,11 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   border: 2px solid transparent;
 }
 
-.c11:focus-visible {
+.c12:focus-visible {
   outline: none;
 }
 
-.c11:focus-visible:after {
+.c12:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -294,48 +290,48 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   width: 1px;
 }
 
-.c12 {
+.c13 {
   height: 2.5rem;
 }
 
-.c12[aria-disabled='true'] {
+.c13[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c12[aria-disabled='true'] .c7 {
+.c13[aria-disabled='true'] .c8 {
   color: #666687;
 }
 
-.c12[aria-disabled='true'] svg > g,.c12[aria-disabled='true'] svg path {
+.c13[aria-disabled='true'] svg > g,.c13[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c12[aria-disabled='true']:active {
+.c13[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c12[aria-disabled='true']:active .c7 {
+.c13[aria-disabled='true']:active .c8 {
   color: #666687;
 }
 
-.c12[aria-disabled='true']:active svg > g,.c12[aria-disabled='true']:active svg path {
+.c13[aria-disabled='true']:active svg > g,.c13[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c12:hover {
+.c13:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c12:active {
+.c13:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c12 svg > g,
-.c12 svg path {
+.c13 svg > g,
+.c13 svg path {
   fill: #ffffff;
 }
 
@@ -412,13 +408,13 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   width: 100%;
 }
 
-.c19 {
+.c20 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
   gap: 16px;
 }
 
-.c20 {
+.c21 {
   grid-column: span 6;
   max-width: 100%;
 }
@@ -503,18 +499,18 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   width: 100%;
 }
 
-.c21 {
+.c22 {
   max-width: 320px;
 }
 
 @media (max-width:68.75rem) {
-  .c20 {
+  .c21 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c20 {
+  .c21 {
     grid-column: span;
   }
 }
@@ -543,17 +539,17 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
               class="c5"
             >
               <div
-                class="c6"
+                class="c6 c7"
               >
                 <h1
-                  class="c7 c8"
+                  class="c8 c9"
                 >
                   Single Sign-On
                 </h1>
               </div>
               <button
                 aria-disabled="true"
-                class="c9 c10 c11 c12"
+                class="c10 c11 c12 c13"
                 data-testid="save-button"
                 disabled=""
                 type="submit"
@@ -576,54 +572,54 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                   </svg>
                 </div>
                 <span
-                  class="c7 c13"
+                  class="c8 c14"
                 >
                   Save
                 </span>
               </button>
             </div>
             <p
-              class="c7 c14"
+              class="c8 c15"
             >
               Configure the settings for the Single Sign-On feature.
             </p>
           </div>
         </div>
         <div
-          class="c15"
+          class="c16"
         >
           <div
-            class="c16 c17"
+            class="c17 c18"
           >
             <h2
-              class="c7 c18"
+              class="c8 c19"
             >
               Settings
             </h2>
             <div
-              class="c19"
+              class="c20"
             >
               <div
-                class="c20"
+                class="c21"
               >
                 <div
                   class=""
                 >
                   <div
-                    class="c21"
+                    class="c22"
                   >
                     <div
-                      class="c22 c23"
+                      class="c23"
                     >
                       <div
-                        class="c6"
+                        class="c7"
                       >
                         <label
-                          class="c7 c24"
+                          class="c8 c24"
                           for="1"
                         >
                           <div
-                            class="c6"
+                            class="c7"
                           >
                             Auto-registration
                           </div>
@@ -646,7 +642,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                             class="c29 c30 c31"
                           >
                             <span
-                              class="c7 c32"
+                              class="c8 c32"
                             >
                               Off
                             </span>
@@ -656,7 +652,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                             class="c29 c30 c33"
                           >
                             <span
-                              class="c7 c34"
+                              class="c8 c34"
                             >
                               On
                             </span>
@@ -676,7 +672,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                         </div>
                       </label>
                       <p
-                        class="c7 c36"
+                        class="c8 c36"
                         id="1-hint"
                       >
                         Create new user on SSO login if no account exists
@@ -686,27 +682,29 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                 </div>
               </div>
               <div
-                class="c20"
+                class="c21"
               >
                 <div
                   class=""
                 >
-                  <div>
+                  <div
+                    class=""
+                  >
                     <div
-                      class="c22 c23"
+                      class="c23"
                     >
                       <label
-                        class="c7 c24"
+                        class="c8 c24"
                         for="3"
                       >
                         <div
-                          class="c6"
+                          class="c7"
                         >
                           Default role
                         </div>
                       </label>
                       <div
-                        class="c6 c37"
+                        class="c7 c37"
                       >
                         <button
                           aria-describedby="3-hint"
@@ -723,13 +721,13 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                           class="c5 c39"
                         >
                           <div
-                            class="c6"
+                            class="c7"
                           >
                             <div
                               class="c40"
                             >
                               <span
-                                class="c7 c41"
+                                class="c8 c41"
                                 id="3-content"
                               >
                                 Editor
@@ -737,7 +735,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                             </div>
                           </div>
                           <div
-                            class="c6"
+                            class="c7"
                           >
                             <button
                               aria-hidden="true"
@@ -765,7 +763,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                         </div>
                       </div>
                       <p
-                        class="c7 c36"
+                        class="c8 c36"
                         id="3-hint"
                       >
                         It will attach the new authenticated user to the selected role
