@@ -12,8 +12,11 @@ module.exports = () => async (ctx, next) => {
   }
 
   if (!hasValidTokenSalt()) {
-    return ctx.notImplemented(
-      'The server configuration for data transfer is invalid. Please contact your server administrator.'
+    return ctx.badRequest(
+      'The server configuration for data transfer is invalid. Please contact your server administrator.',
+      {
+        code: 'INVALID_TOKEN_SALT',
+      }
     );
   }
 
