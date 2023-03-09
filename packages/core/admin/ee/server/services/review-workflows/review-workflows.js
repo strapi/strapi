@@ -108,21 +108,45 @@ function enableReviewWorkflow({ strapi }) {
       const { joinTable } = strapi.db.metadata.get(target).attributes[morphBy];
       const { idColumn, typeColumn } = joinTable.morphColumn;
 
-      // Execute a raw SQL query to insert records into the join table mapping the specified content type with the first stage of the default workflow.
+      const connection = strapi.db.getConnection();
+
+      // Execute an SQL query to insert records into the join table mapping the specified content type with the first stage of the default workflow.
       // Only entities that do not have a record in the join table yet are selected.
-      await strapi.db.connection
-        .raw(`INSERT INTO ${joinTable.name} (${idColumn.name}, field, "order", ${joinTable.joinColumn.name}, ${typeColumn.name})
-                SELECT
-                    entity.id as ${idColumn.name},
-                    '${ENTITY_STAGE_ATTRIBUTE}' as field,
-                    1 as "order",
-                    ${firstStage.id} as ${joinTable.joinColumn.name},
-                    '${contentTypeUID}' as ${typeColumn.name}
-                FROM ${contentTypeMetadata.tableName} entity
-                LEFT JOIN ${joinTable.name} jointable
-                ON  entity.id = jointable.${idColumn.name}
-                AND jointable.${typeColumn.name} = '${contentTypeUID}'
-                WHERE jointable.${idColumn.name} IS NULL`);
+      const selectStatement = connection
+        .select({
+          [idColumn.name]: 'entity.id',
+          field: connection.raw('?', [ENTITY_STAGE_ATTRIBUTE]),
+          order: 1,
+          [joinTable.joinColumn.name]: firstStage.id,
+          [typeColumn.name]: connection.raw('?', [contentTypeUID]),
+        })
+        .leftJoin(`${joinTable.name} AS jointable`, function () {
+          this.on('entity.id', '=', `jointable.${idColumn.name}`).andOn(
+            `jointable.${typeColumn.name}`,
+            '=',
+            connection.raw('?', [contentTypeUID])
+          );
+        })
+        .where(`jointable.${idColumn.name}`, null)
+        .from(`${contentTypeMetadata.tableName} AS entity`)
+        .toSQL();
+
+      const columnsToInsert = [
+        idColumn.name,
+        'field',
+        connection.raw('??', ['order']),
+        joinTable.joinColumn.name,
+        typeColumn.name,
+      ];
+
+      // Insert rows for all entries of the content type that do not have a
+      // default stage
+      await connection(joinTable.name).insert(
+        connection.raw(
+          `(${columnsToInsert.join(',')})  ${selectStatement.sql}`,
+          selectStatement.bindings
+        )
+      );
     };
 
     return pipe([
