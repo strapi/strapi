@@ -22,9 +22,25 @@ const {
 const { exitWith } = require('../utils/helpers');
 
 /**
- * @typedef {import('@strapi/data-transfer').ILocalFileSourceProviderOptions} ILocalFileSourceProviderOptions
+ * @typedef {import('@strapi/data-transfer/src/file/providers').ILocalFileSourceProviderOptions} ILocalFileSourceProviderOptions
  */
 
+/**
+ * @typedef ImportCommandOptions Options given to the CLI import command
+ *
+ * @property {string} [file] The file path to import
+ * @property {string} [key] Encryption key, used when encryption is enabled
+ * @property {(keyof import('@strapi/data-transfer/src/engine').TransferGroupFilter)[]} [only] If present, only include these filtered groups of data
+ * @property {(keyof import('@strapi/data-transfer/src/engine').TransferGroupFilter)[]} [exclude] If present, exclude these filtered groups of data
+ */
+
+/**
+ * Import command.
+ *
+ * It transfers data from a file to a local Strapi instance
+ *
+ * @param {ImportCommandOptions} opts
+ */
 module.exports = async (opts) => {
   // validate inputs from Commander
   if (!isObject(opts)) {
