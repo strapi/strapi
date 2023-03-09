@@ -29,18 +29,11 @@
     "./lib"
   ],
   "scripts": {
-    "build": "tsc",
-    "watch": "yarn build -w --preserveWatchOutput",
-    "clean": "rimraf ./lib",
-    "prepublishOnly": "yarn clean && yarn build",
-    "typedoc": "typedoc src/index.ts"
+    "prepublishOnly": "nx build"
   },
   "dependencies": {
     "lodash": "4.17.21",
     "winston": "3.3.3"
-  },
-  "devDependencies": {
-    "rimraf": "3.0.2"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",

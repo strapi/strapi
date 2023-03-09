@@ -1,8 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "lib",
-    "esModuleInterop": true
+    "outDir": "lib"
   },
   "include": ["src/**/*.ts"]
 }
