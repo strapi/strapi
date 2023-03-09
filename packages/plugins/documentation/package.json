@@ -21,7 +21,8 @@
     }
   ],
   "scripts": {
-    "lint": "run -T eslint ."
+    "lint": "run -T eslint .",
+    "test:unit": "jest --verbose"
   },
   "dependencies": {
     "@strapi/design-system": "1.6.6",
