@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [14, 16, 18]
+        node: [18]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -96,6 +96,26 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./coverage
           flags: front,unit_front
+
+  build:
+    name: 'build (node: ${{ matrix.node }})'
+    needs: [lint, unit_front]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [14, 16, 18]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
+      - run: yarn install --frozen-lockfile
+      - name: Build
+        run: yarn build --scope @strapi/admin --scope @strapi/helper-plugin
 
   api_ce_pg:
     runs-on: ubuntu-latest

@@ -13,16 +13,16 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   padding: 8px;
 }
 
-.c13 {
+.c12 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c15 {
+.c14 {
   padding-left: 12px;
 }
 
-.c20 {
+.c19 {
   padding: 8px;
   border-radius: 4px;
   border-color: #dcdce4;
@@ -32,7 +32,7 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   cursor: pointer;
 }
 
-.c28 {
+.c27 {
   background: #4945ff;
   padding: 8px;
   padding-right: 16px;
@@ -43,13 +43,13 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   cursor: pointer;
 }
 
-.c34 {
+.c33 {
   background: #f6f6f9;
   padding: 8px;
   border-radius: 4px;
 }
 
-.c36 {
+.c35 {
   background: #ffffff;
   padding: 8px;
   border-radius: 4px;
@@ -134,7 +134,7 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   flex-direction: column;
 }
 
-.c21 {
+.c20 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -152,7 +152,7 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   justify-content: center;
 }
 
-.c29 {
+.c28 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -167,7 +167,7 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   gap: 8px;
 }
 
-.c35 {
+.c34 {
   -webkit-align-items: flex-end;
   -webkit-box-align: flex-end;
   -ms-flex-align: flex-end;
@@ -192,7 +192,7 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   color: #32324d;
 }
 
-.c14 {
+.c13 {
   font-size: 0.875rem;
   line-height: 1.43;
   display: block;
@@ -202,44 +202,39 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   color: #666687;
 }
 
-.c31 {
+.c30 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
   color: #ffffff;
 }
 
-.c38 {
+.c37 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #32324d;
 }
 
-.c9 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c22 {
+.c21 {
   position: relative;
   outline: none;
 }
 
-.c22 svg {
+.c21 svg {
   height: 12px;
   width: 12px;
 }
 
-.c22 svg > g,
-.c22 svg path {
+.c21 svg > g,
+.c21 svg path {
   fill: #ffffff;
 }
 
-.c22[aria-disabled='true'] {
+.c21[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c22:after {
+.c21:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -254,11 +249,11 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   border: 2px solid transparent;
 }
 
-.c22:focus-visible {
+.c21:focus-visible {
   outline: none;
 }
 
-.c22:focus-visible:after {
+.c21:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -269,7 +264,7 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c26 {
+.c25 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -281,56 +276,56 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   width: 1px;
 }
 
-.c30 {
+.c29 {
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
 }
 
-.c30[aria-disabled='true'] {
+.c29[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c30[aria-disabled='true'] .c2 {
+.c29[aria-disabled='true'] .c2 {
   color: #666687;
 }
 
-.c30[aria-disabled='true'] svg > g,.c30[aria-disabled='true'] svg path {
+.c29[aria-disabled='true'] svg > g,.c29[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c30[aria-disabled='true']:active {
+.c29[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c30[aria-disabled='true']:active .c2 {
+.c29[aria-disabled='true']:active .c2 {
   color: #666687;
 }
 
-.c30[aria-disabled='true']:active svg > g,.c30[aria-disabled='true']:active svg path {
+.c29[aria-disabled='true']:active svg > g,.c29[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c30:hover {
+.c29:hover {
   background-color: #f6f6f9;
 }
 
-.c30:active {
+.c29:active {
   background-color: #eaeaef;
 }
 
-.c30 .c2 {
+.c29 .c2 {
   color: #32324d;
 }
 
-.c30 svg > g,
-.c30 svg path {
+.c29 svg > g,
+.c29 svg path {
   fill: #32324d;
 }
 
-.c10 {
+.c9 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -346,28 +341,28 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   transition-duration: 0.2s;
 }
 
-.c10:focus-within {
+.c9:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c16 {
+.c15 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c16 svg {
+.c15 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c16 svg path {
+.c15 svg path {
   fill: #666687;
 }
 
-.c17 {
+.c16 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -376,11 +371,11 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   border: none;
 }
 
-.c17 svg {
+.c16 svg {
   width: 0.375rem;
 }
 
-.c11 {
+.c10 {
   position: absolute;
   left: 0;
   right: 0;
@@ -391,85 +386,85 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   border: none;
 }
 
-.c11:focus {
+.c10:focus {
   outline: none;
 }
 
-.c11[aria-disabled='true'] {
+.c10[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c12 {
+.c11 {
   width: 100%;
 }
 
-.c24 svg > g,
-.c24 svg path {
+.c23 svg > g,
+.c23 svg path {
   fill: #8e8ea9;
 }
 
-.c24:hover svg > g,
-.c24:hover svg path {
+.c23:hover svg > g,
+.c23:hover svg path {
   fill: #666687;
 }
 
-.c24:active svg > g,
-.c24:active svg path {
+.c23:active svg > g,
+.c23:active svg path {
   fill: #a5a5ba;
 }
 
-.c24[aria-disabled='true'] svg path {
+.c23[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c18 span:first-child button {
+.c17 span:first-child button {
   border-left: 1px solid #dcdce4;
   border-radius: 4px 0 0 4px;
 }
 
-.c18 span:last-child button {
+.c17 span:last-child button {
   border-radius: 0 4px 4px 0;
 }
 
-.c18 .c23 {
+.c17 .c22 {
   border-radius: 0;
   border-left: none;
 }
 
-.c18 .c23 svg path {
+.c17 .c22 svg path {
   fill: #4a4a6a;
 }
 
-.c18 .c23:hover {
+.c17 .c22:hover {
   background-color: #f6f6f9;
 }
 
-.c18 .c23:hover svg path {
+.c17 .c22:hover svg path {
   fill: #32324d;
 }
 
-.c18 .c23:active {
+.c17 .c22:active {
   background-color: #eaeaef;
 }
 
-.c18 .c23:active svg path {
+.c17 .c22:active svg path {
   fill: #212134;
 }
 
-.c18 .c23[aria-disabled='true'] svg path {
+.c17 .c22[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c33 {
+.c32 {
   cursor: auto;
   height: 100%;
 }
 
-.c33 .CodeMirror-placeholder {
+.c32 .CodeMirror-placeholder {
   color: #666687 !important;
 }
 
-.c33 .CodeMirror {
+.c32 .CodeMirror {
   font-size: 0.875rem;
   height: 290px;
   color: #32324d;
@@ -477,22 +472,22 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell, 'Open Sans','Helvetica Neue',sans-serif;
 }
 
-.c33 .CodeMirror-lines {
+.c32 .CodeMirror-lines {
   padding: 12px 16px;
 }
 
-.c33 .CodeMirror-scrollbar-filler,
-.c33 .CodeMirror-gutter-filler {
+.c32 .CodeMirror-scrollbar-filler,
+.c32 .CodeMirror-gutter-filler {
   background-color: #ffffff;
 }
 
-.c33 .CodeMirror-gutters {
+.c32 .CodeMirror-gutters {
   border-right: 1px solid #ddd;
   background-color: #f7f7f7;
   white-space: nowrap;
 }
 
-.c33 .CodeMirror-linenumber {
+.c32 .CodeMirror-linenumber {
   padding: 0 3px 0 5px;
   min-width: 20px;
   text-align: right;
@@ -500,31 +495,31 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   white-space: nowrap;
 }
 
-.c33 .CodeMirror-guttermarker {
+.c32 .CodeMirror-guttermarker {
   color: black;
 }
 
-.c33 .CodeMirror-guttermarker-subtle {
+.c32 .CodeMirror-guttermarker-subtle {
   color: #999;
 }
 
-.c33 .CodeMirror-cursor {
+.c32 .CodeMirror-cursor {
   border-left: 1px solid black;
   border-right: none;
   width: 0;
 }
 
-.c33 .CodeMirror div.CodeMirror-secondarycursor {
+.c32 .CodeMirror div.CodeMirror-secondarycursor {
   border-left: 1px solid silver;
 }
 
-.c33 .cm-fat-cursor .CodeMirror-cursor {
+.c32 .cm-fat-cursor .CodeMirror-cursor {
   width: auto;
   border: 0 !important;
   background: #7e7;
 }
 
-.c33 .cm-fat-cursor-mark {
+.c32 .cm-fat-cursor-mark {
   background-color: rgba(20,255,20,0.5);
   -webkit-animation: blink 1.06s steps(1) infinite;
   -moz-animation: blink 1.06s steps(1) infinite;
@@ -532,7 +527,7 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   animation: blink 1.06s steps(1) infinite;
 }
 
-.c33 .cm-animate-fat-cursor {
+.c32 .cm-animate-fat-cursor {
   width: auto;
   border: 0;
   -webkit-animation: blink 1.06s steps(1) infinite;
@@ -542,13 +537,13 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   background-color: #7e7;
 }
 
-.c33 .cm-tab {
+.c32 .cm-tab {
   display: inline-block;
   -webkit-text-decoration: inherit;
   text-decoration: inherit;
 }
 
-.c33 .CodeMirror-rulers {
+.c32 .CodeMirror-rulers {
   position: absolute;
   left: 0;
   right: 0;
@@ -557,59 +552,59 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   overflow: hidden;
 }
 
-.c33 .CodeMirror-ruler {
+.c32 .CodeMirror-ruler {
   border-left: 1px solid #ccc;
   top: 0;
   bottom: 0;
   position: absolute;
 }
 
-.c33 .cm-header,
-.c33 .cm-strong {
+.c32 .cm-header,
+.c32 .cm-strong {
   font-weight: bold;
 }
 
-.c33 .cm-em {
+.c32 .cm-em {
   font-style: italic;
 }
 
-.c33 .cm-link {
+.c32 .cm-link {
   -webkit-text-decoration: underline;
   text-decoration: underline;
 }
 
-.c33 .cm-strikethrough {
+.c32 .cm-strikethrough {
   -webkit-text-decoration: line-through;
   text-decoration: line-through;
 }
 
-.c33 .CodeMirror-composing {
+.c32 .CodeMirror-composing {
   border-bottom: 2px solid;
 }
 
-.c33 div.CodeMirror span.CodeMirror-matchingbracket {
+.c32 div.CodeMirror span.CodeMirror-matchingbracket {
   color: #0b0;
 }
 
-.c33 div.CodeMirror span.CodeMirror-nonmatchingbracket {
+.c32 div.CodeMirror span.CodeMirror-nonmatchingbracket {
   color: #a22;
 }
 
-.c33 .CodeMirror-matchingtag {
+.c32 .CodeMirror-matchingtag {
   background: rgba(255,150,0,0.3);
 }
 
-.c33 .CodeMirror-activeline-background {
+.c32 .CodeMirror-activeline-background {
   background: #e8f2ff;
 }
 
-.c33 .CodeMirror {
+.c32 .CodeMirror {
   position: relative;
   overflow: hidden;
   background: #ffffff;
 }
 
-.c33 .CodeMirror-scroll {
+.c32 .CodeMirror-scroll {
   overflow: scroll !important;
   margin-bottom: -50px;
   margin-right: -50px;
@@ -619,47 +614,47 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   position: relative;
 }
 
-.c33 .CodeMirror-sizer {
+.c32 .CodeMirror-sizer {
   position: relative;
   border-right: 50px solid transparent;
 }
 
-.c33 .CodeMirror-vscrollbar,
-.c33 .CodeMirror-hscrollbar,
-.c33 .CodeMirror-scrollbar-filler,
-.c33 .CodeMirror-gutter-filler {
+.c32 .CodeMirror-vscrollbar,
+.c32 .CodeMirror-hscrollbar,
+.c32 .CodeMirror-scrollbar-filler,
+.c32 .CodeMirror-gutter-filler {
   position: absolute;
   z-index: 1;
   display: none;
   outline: none;
 }
 
-.c33 .CodeMirror-vscrollbar {
+.c32 .CodeMirror-vscrollbar {
   right: 0;
   top: 0;
   overflow-x: hidden;
   overflow-y: scroll;
 }
 
-.c33 .CodeMirror-hscrollbar {
+.c32 .CodeMirror-hscrollbar {
   bottom: 0;
   left: 0;
   overflow-y: hidden;
   overflow-x: scroll;
 }
 
-.c33 .CodeMirror-scrollbar-filler {
+.c32 .CodeMirror-scrollbar-filler {
   right: 0;
   bottom: 0;
 }
 
-.c33 .CodeMirror-lines {
+.c32 .CodeMirror-lines {
   cursor: text;
   min-height: 1px;
 }
 
-.c33 .CodeMirror pre.CodeMirror-line,
-.c33 .CodeMirror pre.CodeMirror-line-like {
+.c32 .CodeMirror pre.CodeMirror-line,
+.c32 .CodeMirror pre.CodeMirror-line-like {
   -moz-border-radius: 0;
   -webkit-border-radius: 0;
   border-radius: 0;
@@ -679,18 +674,18 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   font-variant-ligatures: contextual;
 }
 
-.c33 .CodeMirror pre.CodeMirror-line-like {
+.c32 .CodeMirror pre.CodeMirror-line-like {
   z-index: 2;
 }
 
-.c33 .CodeMirror-wrap pre.CodeMirror-line,
-.c33 .CodeMirror-wrap pre.CodeMirror-line-like {
+.c32 .CodeMirror-wrap pre.CodeMirror-line,
+.c32 .CodeMirror-wrap pre.CodeMirror-line-like {
   word-wrap: break-word;
   white-space: pre-wrap;
   word-break: normal;
 }
 
-.c33 .CodeMirror-linebackground {
+.c32 .CodeMirror-linebackground {
   position: absolute;
   left: 0;
   right: 0;
@@ -699,29 +694,29 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   z-index: 0;
 }
 
-.c33 .CodeMirror-linewidget {
+.c32 .CodeMirror-linewidget {
   position: relative;
   padding: 0.1px;
 }
 
-.c33 .CodeMirror-rtl pre {
+.c32 .CodeMirror-rtl pre {
   direction: rtl;
 }
 
-.c33 .CodeMirror-code {
+.c32 .CodeMirror-code {
   outline: none;
 }
 
-.c33 .CodeMirror-scroll,
-.c33 .CodeMirror-sizer,
-.c33 .CodeMirror-gutter,
-.c33 .CodeMirror-gutters,
-.c33 .CodeMirror-linenumber {
+.c32 .CodeMirror-scroll,
+.c32 .CodeMirror-sizer,
+.c32 .CodeMirror-gutter,
+.c32 .CodeMirror-gutters,
+.c32 .CodeMirror-linenumber {
   -moz-box-sizing: content-box;
   box-sizing: content-box;
 }
 
-.c33 .CodeMirror-measure {
+.c32 .CodeMirror-measure {
   position: absolute;
   width: 100%;
   height: 0;
@@ -729,87 +724,87 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   visibility: hidden;
 }
 
-.c33 .CodeMirror-cursor {
+.c32 .CodeMirror-cursor {
   position: absolute;
   pointer-events: none;
   border-color: #32324d;
 }
 
-.c33 .CodeMirror-measure pre {
+.c32 .CodeMirror-measure pre {
   position: static;
 }
 
-.c33 div.CodeMirror-cursors {
+.c32 div.CodeMirror-cursors {
   visibility: hidden;
   position: relative;
 }
 
-.c33 div.CodeMirror-cursors + div {
+.c32 div.CodeMirror-cursors + div {
   z-index: 0 !important;
 }
 
-.c33 div.CodeMirror-dragcursors {
+.c32 div.CodeMirror-dragcursors {
   visibility: visible;
 }
 
-.c33 .CodeMirror-focused div.CodeMirror-cursors {
+.c32 .CodeMirror-focused div.CodeMirror-cursors {
   visibility: visible;
 }
 
-.c33 .CodeMirror-selected {
+.c32 .CodeMirror-selected {
   background: #dcdce4;
 }
 
-.c33 .CodeMirror-crosshair {
+.c32 .CodeMirror-crosshair {
   cursor: crosshair;
 }
 
-.c33 .cm-force-border {
+.c32 .cm-force-border {
   padding-right: 0.1px;
 }
 
-.c33 .cm-tab-wrap-hack:after {
+.c32 .cm-tab-wrap-hack:after {
   content: '';
 }
 
-.c33 span.CodeMirror-selectedtext {
+.c32 span.CodeMirror-selectedtext {
   background: none;
 }
 
-.c33 span {
+.c32 span {
   color: #32324d !important;
 }
 
-.c25 {
+.c24 {
   padding: 8px;
   outline-offset: -2px !important;
 }
 
-.c25 svg {
+.c24 svg {
   width: 1.125rem;
   height: 1.125rem;
 }
 
-.c19 {
+.c18 {
   margin-left: 16px;
 }
 
-.c27 {
+.c26 {
   margin: 0 8px;
   padding: 8px;
 }
 
-.c27 svg {
+.c26 svg {
   width: 1.125rem;
   height: 1.125rem;
 }
 
-.c32 {
+.c31 {
   position: relative;
   height: calc(100% - 48px);
 }
 
-.c37 {
+.c36 {
   background-color: transparent;
   border: none;
   -webkit-align-items: center;
@@ -818,11 +813,11 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   align-items: center;
 }
 
-.c37 svg {
+.c36 svg {
   margin-left: 8px;
 }
 
-.c37 svg path {
+.c36 svg path {
   fill: #4a4a6a;
   width: 0.75rem;
   height: 0.75rem;
@@ -852,33 +847,35 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
         <div
           class="c7"
         >
-          <div>
+          <div
+            class=""
+          >
             <div
-              class="c8 c9"
+              class="c8"
             >
               <div
-                class="c7 c10"
+                class="c7 c9"
               >
                 <button
                   aria-disabled="false"
                   aria-expanded="false"
                   aria-haspopup="listbox"
                   aria-labelledby="selectTitle selectTitle-label selectTitle-content"
-                  class="c11"
+                  class="c10"
                   id="selectTitle"
                   type="button"
                 />
                 <div
-                  class="c6 c12"
+                  class="c6 c11"
                 >
                   <div
                     class="c7"
                   >
                     <div
-                      class="c13"
+                      class="c12"
                     >
                       <span
-                        class="c2 c14"
+                        class="c2 c13"
                         id="selectTitle-content"
                       >
                         Add a title
@@ -890,7 +887,7 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
                   >
                     <button
                       aria-hidden="true"
-                      class="c15 c16 c17"
+                      class="c14 c15 c16"
                       tabindex="-1"
                       title="Carret Down Button"
                       type="button"
@@ -916,20 +913,20 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
             </div>
           </div>
           <div
-            class="c7 c18 c19"
+            class="c7 c17 c18"
           >
             <span>
               <button
                 aria-disabled="false"
                 aria-labelledby="0"
-                class="c20 c21 c22 c23 c24 c25"
+                class="c19 c20 c21 c22 c23 c24"
                 id="Bold"
                 name="Bold"
                 tabindex="0"
                 type="button"
               >
                 <span
-                  class="c26"
+                  class="c25"
                 >
                   Bold
                 </span>
@@ -955,14 +952,14 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
               <button
                 aria-disabled="false"
                 aria-labelledby="1"
-                class="c20 c21 c22 c23 c24 c25"
+                class="c19 c20 c21 c22 c23 c24"
                 id="Italic"
                 name="Italic"
                 tabindex="0"
                 type="button"
               >
                 <span
-                  class="c26"
+                  class="c25"
                 >
                   Italic
                 </span>
@@ -986,14 +983,14 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
               <button
                 aria-disabled="false"
                 aria-labelledby="2"
-                class="c20 c21 c22 c23 c24 c25"
+                class="c19 c20 c21 c22 c23 c24"
                 id="Underline"
                 name="Underline"
                 tabindex="0"
                 type="button"
               >
                 <span
-                  class="c26"
+                  class="c25"
                 >
                   Underline
                 </span>
@@ -1018,13 +1015,13 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
             <button
               aria-disabled="false"
               aria-labelledby="3"
-              class="c20 c21 c22 c23 c24 c27"
+              class="c19 c20 c21 c22 c23 c26"
               id="more"
               tabindex="0"
               type="button"
             >
               <span
-                class="c26"
+                class="c25"
               >
                 More
               </span>
@@ -1047,12 +1044,12 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
         </div>
         <button
           aria-disabled="false"
-          class="c28 c29 c22 c30"
+          class="c27 c28 c21 c29"
           id="preview"
           type="button"
         >
           <span
-            class="c2 c31"
+            class="c2 c30"
           >
             Preview mode
           </span>
@@ -1060,10 +1057,10 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
       </div>
     </div>
     <div
-      class="c32"
+      class="c31"
     >
       <div
-        class="c33"
+        class="c32"
       >
         <textarea
           style="display: none;"
@@ -1162,18 +1159,18 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
       </div>
     </div>
     <div
-      class="c34"
+      class="c33"
     >
       <div
-        class="c35"
+        class="c34"
       >
         <button
-          class="c36 c7 c22 c37"
+          class="c35 c7 c21 c36"
           id="expand"
           type="button"
         >
           <span
-            class="c2 c38"
+            class="c2 c37"
           >
             Expand
           </span>
