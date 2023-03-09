@@ -303,15 +303,22 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     const startAssetsTransferOnce = this.#startStepOnce('assets');
 
     const flush = async () => {
-      await this.#streamStep('assets', batch);
+      const streamError = await this.#streamStep('assets', batch);
       batch = [];
+      return streamError;
     };
 
-    const safePush = async (chunk: client.TransferAssetFlow) => {
+    const safePush = async (
+      chunk: client.TransferAssetFlow,
+      callback: (error?: Error | null) => void
+    ) => {
       batch.push(chunk);
 
       if (batchLength() >= batchSize) {
-        await flush();
+        const streamError = await flush();
+        if (streamError) {
+          return callback(streamError);
+        }
       }
     };
 
@@ -347,13 +354,20 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         const assetID = v4();
         const { filename, filepath, stats, stream } = asset;
 
-        await safePush({ action: 'start', assetID, data: { filename, filepath, stats } });
+        await safePush(
+          {
+            action: 'start',
+            assetID,
+            data: { filename, filepath, stats },
+          },
+          callback
+        );
 
         for await (const chunk of stream) {
-          await safePush({ action: 'stream', assetID, data: chunk });
+          await safePush({ action: 'stream', assetID, data: chunk }, callback);
         }
 
-        await safePush({ action: 'end', assetID });
+        await safePush({ action: 'end', assetID }, callback);
 
         callback();
       },
