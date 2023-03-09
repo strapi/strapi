@@ -11,6 +11,7 @@ describe('Build Component Schema', () => {
   });
 
   it('builds the Response schema', () => {
+    expect(true).toBe(false);
     const apiMocks = [
       {
         name: 'users-permissions',

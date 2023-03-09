@@ -121,7 +121,7 @@ const createAuditLogsService = (strapi) => {
   return {
     async register() {
       // Handle license being enabled
-      if (state.eeEnableUnsubscribe) {
+      if (!state.eeEnableUnsubscribe) {
         state.eeEnableUnsubscribe = strapi.eventHub.once('ee.enable', () => {
           // Recreate the service to use the new license info
           this.destroy();
@@ -130,16 +130,18 @@ const createAuditLogsService = (strapi) => {
       }
 
       // Handle license being updated
-      state.eeUpdateUnsubscribe = strapi.eventHub.on('ee.update', () => {
-        // Recreate the service to use the new license info
-        this.destroy();
-        this.register();
-      });
+      if (!state.eeUpdateUnsubscribe) {
+        state.eeUpdateUnsubscribe = strapi.eventHub.once('ee.update', () => {
+          // Recreate the service to use the new license info
+          this.destroy();
+          this.register();
+        });
+      }
 
       // Handle license being disabled
       state.eeDisableUnsubscribe = strapi.eventHub.on('ee.disable', () => {
         // Turn off service when the license gets disabled
-        // Only the ee.enable listener remains active to recreate the service
+        // Only ee.enable and ee.update listeners remain active to recreate the service
         this.destroy();
       });
 
@@ -194,10 +196,6 @@ const createAuditLogsService = (strapi) => {
     },
 
     unsubscribe() {
-      if (state.eeUpdateUnsubscribe) {
-        state.eeUpdateUnsubscribe();
-      }
-
       if (state.eeDisableUnsubscribe) {
         state.eeDisableUnsubscribe();
       }

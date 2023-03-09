@@ -56,8 +56,7 @@ describe('Audit logs service', () => {
       expect(mockRegister).not.toHaveBeenCalledWith('audit-logs', expect.anything());
     });
 
-    it('should not subscribe to event hub if feature is not enabled', async () => {
-      const eeAdminRegister = require('../../register');
+    it('should not subscribe to events when the license does not allow it', async () => {
       const mockSubscribe = jest.fn();
 
       const strapi = {
@@ -65,21 +64,48 @@ describe('Audit logs service', () => {
           register: jest.fn(),
         },
         config: {
-          get: () => true,
+          get(key) {
+            switch (key) {
+              case 'admin.auditLogs.enabled':
+                return true;
+              case 'admin.auditLogs.retentionDays':
+                return undefined;
+              default:
+                return null;
+            }
+          },
         },
         eventHub: {
+          ...createEventHub(),
           subscribe: mockSubscribe,
-          on: jest.fn(),
-          once: jest.fn(),
         },
         hook: () => ({
           register: jest.fn(),
         }),
       };
 
-      await eeAdminRegister({ strapi });
-
+      // Should not subscribe to events at first
+      const auditLogsService = createAuditLogsService(strapi);
+      await auditLogsService.register();
       expect(mockSubscribe).not.toHaveBeenCalled();
+
+      // Should subscribe to events when license gets enabled
+      features.isEnabled.mockImplementationOnce(() => true);
+      await strapi.eventHub.emit('ee.enable');
+      expect(mockSubscribe).toHaveBeenCalled();
+
+      // Should unsubscribe to events when license gets disabled
+      mockSubscribe.mockClear();
+      features.isEnabled.mockImplementationOnce(() => false);
+      await strapi.eventHub.emit('ee.disable');
+      expect(mockSubscribe).not.toHaveBeenCalled();
+
+      // Should recreate the service when license updates
+      const destroySpy = jest.spyOn(auditLogsService, 'destroy');
+      const registerSpy = jest.spyOn(auditLogsService, 'register');
+      await strapi.eventHub.emit('ee.update');
+      expect(destroySpy).toHaveBeenCalled();
+      expect(registerSpy).toHaveBeenCalled();
     });
   });
 
