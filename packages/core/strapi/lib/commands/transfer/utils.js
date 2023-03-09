@@ -108,11 +108,11 @@ const createStrapiInstance = async (logLevel = 'error') => {
 const transferDataTypes = Object.keys(TransferGroupPresets);
 
 const throttleOption = new Option(
-  '--throttle <max messages per minute>',
-  `Include only these types of data (plus schemas). Available types: ${transferDataTypes.join(',')}`
+  '--throttle <delay after each entity>',
+  `Add a delay in milliseconds between each transferred entity`
 )
   .argParser(parseInteger)
-  .hideHelp();
+  .hideHelp(); // This option is not publicly documented
 
 const excludeOption = new Option(
   '--exclude <comma-separated data types>',
