@@ -50,7 +50,6 @@ const actionsExistSchema = yup
 // exports
 
 module.exports = {
-  // validatedUpdatePermissionsInput,
   validatedUpdatePermissionsInput: validateYupSchema(validators.updatePermissions),
   validatePermissionsExist: validateYupSchema(actionsExistSchema),
   validateCheckPermissionsInput: validateYupSchema(checkPermissionsSchema),
