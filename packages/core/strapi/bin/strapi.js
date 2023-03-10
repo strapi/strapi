@@ -24,6 +24,7 @@ const { exitWith, ifOptions, assertUrlHasProtocol } = require('../lib/commands/u
 const {
   excludeOption,
   onlyOption,
+  throttleOption,
   validateExcludeOnly,
 } = require('../lib/commands/transfer/utils');
 
@@ -295,6 +296,7 @@ program
   .addOption(forceOption)
   .addOption(excludeOption)
   .addOption(onlyOption)
+  .addOption(throttleOption)
   .hook('preAction', validateExcludeOnly)
   // If --from is used, validate the URL and token
   .hook(
@@ -367,6 +369,7 @@ program
   .addOption(new Option('-f, --file <file>', 'name to use for exported file (without extensions)'))
   .addOption(excludeOption)
   .addOption(onlyOption)
+  .addOption(throttleOption)
   .hook('preAction', validateExcludeOnly)
   .hook('preAction', promptEncryptionKey)
   .action(getLocalScript('transfer/export'));
@@ -389,6 +392,7 @@ program
   .addOption(forceOption)
   .addOption(excludeOption)
   .addOption(onlyOption)
+  .addOption(throttleOption)
   .hook('preAction', validateExcludeOnly)
   .hook('preAction', async (thisCommand) => {
     const opts = thisCommand.opts();

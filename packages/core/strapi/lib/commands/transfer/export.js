@@ -33,6 +33,7 @@ const { exitWith } = require('../utils/helpers');
  * @property {boolean} [compress] Used to compress the final archive
  * @property {(keyof import('@strapi/data-transfer/src/engine').TransferGroupFilter)[]} [only] If present, only include these filtered groups of data
  * @property {(keyof import('@strapi/data-transfer/src/engine').TransferGroupFilter)[]} [exclude] If present, exclude these filtered groups of data
+ * @property {number|undefined} [throttle] Delay in ms after each record
  */
 
 const BYTES_IN_MB = 1024 * 1024;
@@ -60,6 +61,7 @@ module.exports = async (opts) => {
     schemaStrategy: 'ignore', // for an export to file, schemaStrategy will always be skipped
     exclude: opts.exclude,
     only: opts.only,
+    throttle: opts.throttle,
     transforms: {
       links: [
         {
