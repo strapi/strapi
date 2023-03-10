@@ -9,8 +9,10 @@ const composeVisitors = (visitors) => {
   */
   return visitors.reduceRight(
     (next, visitor) => {
-      return (...args) => {
-        return visitor(...args, () => next(...args));
+      return async (options, utils) => {
+        await visitor(options, utils);
+        // If the visitor did not remove the key, call the next one.
+        if (options.key in options.data) return next(options, utils);
       };
     },
     () => {}
