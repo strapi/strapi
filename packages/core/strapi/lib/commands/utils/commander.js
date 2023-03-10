@@ -42,7 +42,7 @@ const getParseListWithChoices = (choices, errorMessage = 'Invalid options:') => 
 };
 
 /**
- * argParser: Parse a string as a URL object
+ * argParser: Parse a string as an integer
  */
 const parseInteger = (value) => {
   // parseInt takes a string and a radix
