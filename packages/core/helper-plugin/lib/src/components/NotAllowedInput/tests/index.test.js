@@ -27,14 +27,7 @@ describe('<NotAllowedInput />', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c2 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c6 {
+      .c5 {
         padding-right: 8px;
         padding-left: 12px;
       }
@@ -51,9 +44,10 @@ describe('<NotAllowedInput />', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+        gap: 4px;
       }
 
-      .c3 {
+      .c2 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -67,7 +61,7 @@ describe('<NotAllowedInput />', () => {
         flex-direction: row;
       }
 
-      .c4 {
+      .c3 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -85,16 +79,14 @@ describe('<NotAllowedInput />', () => {
         justify-content: space-between;
       }
 
-      .c1 > * {
-        margin-top: 0;
-        margin-bottom: 0;
+      .c1 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
       }
 
-      .c1 > * + * {
-        margin-top: 4px;
-      }
-
-      .c8 {
+      .c7 {
         border: none;
         border-radius: 4px;
         padding-bottom: 0.65625rem;
@@ -110,36 +102,36 @@ describe('<NotAllowedInput />', () => {
         background: inherit;
       }
 
-      .c8::-webkit-input-placeholder {
+      .c7::-webkit-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c8::-moz-placeholder {
+      .c7::-moz-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c8:-ms-input-placeholder {
+      .c7:-ms-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c8::placeholder {
+      .c7::placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c8[aria-disabled='true'] {
+      .c7[aria-disabled='true'] {
         color: inherit;
       }
 
-      .c8:focus {
+      .c7:focus {
         outline: none;
         box-shadow: none;
       }
 
-      .c5 {
+      .c4 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
@@ -153,47 +145,49 @@ describe('<NotAllowedInput />', () => {
         background: #eaeaef;
       }
 
-      .c5:focus-within {
+      .c4:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c7 > path {
+      .c6 > path {
         fill: #666687;
       }
 
       <div>
-        <div>
+        <div
+          class=""
+        >
           <div
-            class="c0 c1"
+            class="c0"
           >
             <label
-              class="c2"
+              class="c1"
               for="test"
             >
               <div
-                class="c3"
+                class="c2"
               >
                 test
               </div>
             </label>
             <div
-              class="c4 c5"
+              class="c3 c4"
               disabled=""
             >
               <div
-                class="c6"
+                class="c5"
               >
                 <svg
-                  class="c7"
+                  class="c6"
                   fill="none"
-                  height="1em"
+                  height="1rem"
                   viewBox="0 0 24 24"
-                  width="1em"
+                  width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M4.048 6.875L2.103 4.93a1 1 0 111.414-1.415l16.966 16.966a1 1 0 11-1.414 1.415l-2.686-2.686a12.247 12.247 0 01-4.383.788c-3.573 0-6.559-1.425-8.962-3.783a15.842 15.842 0 01-2.116-2.568 11.096 11.096 0 01-.711-1.211 1.145 1.145 0 010-.875c.124-.258.36-.68.711-1.211.58-.876 1.283-1.75 2.116-2.569.326-.32.663-.622 1.01-.906zm10.539 10.539l-1.551-1.551a4.005 4.005 0 01-4.9-4.9L6.584 9.411a6 6 0 008.002 8.002zM7.617 4.787A12.248 12.248 0 0112 3.998c3.572 0 6.559 1.426 8.961 3.783a15.845 15.845 0 012.117 2.569c.351.532.587.954.711 1.211.116.242.115.636 0 .875-.124.257-.36.68-.711 1.211-.58.876-1.283 1.75-2.117 2.568-.325.32-.662.623-1.01.907l-2.536-2.537a6 6 0 00-8.002-8.002L7.617 4.787zm3.347 3.347A4.005 4.005 0 0116 11.998c0 .359-.047.706-.136 1.037l-4.9-4.901z"
+                    d="M4.048 6.875 2.103 4.93a1 1 0 1 1 1.414-1.415l16.966 16.966a1 1 0 1 1-1.414 1.415l-2.686-2.686a12.247 12.247 0 0 1-4.383.788c-3.573 0-6.559-1.425-8.962-3.783a15.842 15.842 0 0 1-2.116-2.568 11.096 11.096 0 0 1-.711-1.211 1.145 1.145 0 0 1 0-.875c.124-.258.36-.68.711-1.211.58-.876 1.283-1.75 2.116-2.569.326-.32.663-.622 1.01-.906Zm10.539 10.539-1.551-1.551a4.005 4.005 0 0 1-4.9-4.9L6.584 9.411a6 6 0 0 0 8.002 8.002ZM7.617 4.787A12.248 12.248 0 0 1 12 3.998c3.572 0 6.559 1.426 8.961 3.783a15.845 15.845 0 0 1 2.117 2.569c.351.532.587.954.711 1.211.116.242.115.636 0 .875-.124.257-.36.68-.711 1.211-.58.876-1.283 1.75-2.117 2.568-.325.32-.662.623-1.01.907l-2.536-2.537a6 6 0 0 0-8.002-8.002L7.617 4.787Zm3.347 3.347A4.005 4.005 0 0 1 16 11.998c0 .359-.047.706-.136 1.037l-4.9-4.901Z"
                     fill="#212134"
                   />
                 </svg>
@@ -202,7 +196,9 @@ describe('<NotAllowedInput />', () => {
                 aria-disabled="true"
                 aria-invalid="false"
                 aria-required="false"
-                class="c8"
+                class="c7"
+                data-disabled=""
+                disabled=""
                 id="test"
                 name="test"
                 placeholder="No permissions to see this field"

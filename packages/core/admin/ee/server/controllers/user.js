@@ -3,7 +3,7 @@
 // eslint-disable-next-line node/no-extraneous-require
 const ee = require('@strapi/strapi/lib/utils/ee');
 const _ = require('lodash');
-const { pick } = require('lodash/fp');
+const { pick, isNil } = require('lodash/fp');
 const { ApplicationError, ForbiddenError } = require('@strapi/utils').errors;
 const { validateUserCreationInput } = require('../validation/user');
 const {
@@ -20,7 +20,7 @@ const hasAdminSeatsAvaialble = async () => {
   }
 
   const permittedSeats = ee.seats;
-  if (!permittedSeats) {
+  if (isNil(permittedSeats)) {
     return true;
   }
 

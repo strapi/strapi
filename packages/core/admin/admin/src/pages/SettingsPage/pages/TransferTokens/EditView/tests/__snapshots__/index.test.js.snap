@@ -1,50 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snapshot when creating token 1`] = `
-.c11 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c17 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c23 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c27 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #d02b20;
-}
-
-.c38 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
-}
-
-.c42 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c2 {
+.c1 {
   background: #f6f6f9;
   padding-top: 24px;
   padding-right: 56px;
@@ -52,20 +9,31 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   padding-left: 56px;
 }
 
-.c3 {
+.c2 {
   padding-bottom: 8px;
 }
 
-.c15 {
-  padding-right: 8px;
+.c8 {
+  min-width: 0;
 }
 
-.c18 {
+.c13 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
+}
+
+.c17 {
   padding-right: 56px;
   padding-left: 56px;
 }
 
-.c21 {
+.c19 {
   background: #ffffff;
   padding-top: 24px;
   padding-right: 32px;
@@ -75,16 +43,16 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c37 {
+.c36 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c39 {
+.c38 {
   padding-left: 12px;
 }
 
-.c8 {
+.c7 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -116,7 +84,22 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   flex-direction: row;
 }
 
-.c19 {
+.c12 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c18 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -128,73 +111,109 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 24px;
 }
 
-.c20 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c20 > * + * {
-  margin-top: 24px;
-}
-
-.c22 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c22 > * + * {
-  margin-top: 16px;
-}
-
-.c26 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c26 > * + * {
-  margin-top: 4px;
-}
-
-.c12 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c12 > * + * {
-  margin-left: 8px;
-}
-
-.c13 {
+.c20 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.c24 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.c11 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c16 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c21 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c25 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c26 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #d02b20;
+}
+
+.c37 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c41 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c14 {
   position: relative;
   outline: none;
 }
 
-.c13 svg {
+.c14 svg {
   height: 12px;
   width: 12px;
 }
 
-.c13 svg > g,
-.c13 svg path {
+.c14 svg > g,
+.c14 svg path {
   fill: #ffffff;
 }
 
-.c13[aria-disabled='true'] {
+.c14[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c13:after {
+.c14:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -209,11 +228,11 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border: 2px solid transparent;
 }
 
-.c13:focus-visible {
+.c14:focus-visible {
   outline: none;
 }
 
-.c13:focus-visible:after {
+.c14:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -224,7 +243,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border: 2px solid #4945ff;
 }
 
-.c43 {
+.c42 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -236,83 +255,56 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   width: 1px;
 }
 
-.c16 {
-  height: 100%;
-}
-
-.c14 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
+.c15 {
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
 }
 
-.c14 .c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c14 .c10 {
-  color: #ffffff;
-}
-
-.c14[aria-disabled='true'] {
+.c15[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c14[aria-disabled='true'] .c10 {
+.c15[aria-disabled='true'] .c10 {
   color: #666687;
 }
 
-.c14[aria-disabled='true'] svg > g,.c14[aria-disabled='true'] svg path {
+.c15[aria-disabled='true'] svg > g,.c15[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c14[aria-disabled='true']:active {
+.c15[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c14[aria-disabled='true']:active .c10 {
+.c15[aria-disabled='true']:active .c10 {
   color: #666687;
 }
 
-.c14[aria-disabled='true']:active svg > g,.c14[aria-disabled='true']:active svg path {
+.c15[aria-disabled='true']:active svg > g,.c15[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c14:hover {
+.c15:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c14:active {
+.c15:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c14 svg > g,
-.c14 svg path {
+.c15 svg > g,
+.c15 svg path {
   fill: #ffffff;
 }
 
-.c28 {
+.c27 {
   line-height: 0;
 }
 
-.c30 {
+.c29 {
   border: none;
   border-radius: 4px;
   padding-bottom: 0.65625rem;
@@ -327,36 +319,36 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   background: inherit;
 }
 
-.c30::-webkit-input-placeholder {
+.c29::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c30::-moz-placeholder {
+.c29::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c30:-ms-input-placeholder {
+.c29:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c30::placeholder {
+.c29::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c30[aria-disabled='true'] {
+.c29[aria-disabled='true'] {
   color: inherit;
 }
 
-.c30:focus {
+.c29:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c29 {
+.c28 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
@@ -368,12 +360,12 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   transition-duration: 0.2s;
 }
 
-.c29:focus-within {
+.c28:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c34 {
+.c33 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -389,28 +381,28 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   transition-duration: 0.2s;
 }
 
-.c34:focus-within {
+.c33:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c40 {
+.c39 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c40 svg {
+.c39 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c40 svg path {
+.c39 svg path {
   fill: #666687;
 }
 
-.c41 {
+.c40 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -419,11 +411,11 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border: none;
 }
 
-.c41 svg {
+.c40 svg {
   width: 0.375rem;
 }
 
-.c35 {
+.c34 {
   position: absolute;
   left: 0;
   right: 0;
@@ -434,25 +426,25 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border: none;
 }
 
-.c35:focus {
+.c34:focus {
   outline: none;
 }
 
-.c35[aria-disabled='true'] {
+.c34[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c36 {
+.c35 {
   width: 100%;
 }
 
-.c24 {
+.c22 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
   gap: 20px;
 }
 
-.c25 {
+.c23 {
   grid-column: span 6;
   max-width: 100%;
 }
@@ -461,7 +453,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   outline: none;
 }
 
-.c32 {
+.c31 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   padding-left: 16px;
@@ -477,12 +469,12 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   transition-duration: 0.2s;
 }
 
-.c32:focus-within {
+.c31:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c33 {
+.c32 {
   display: block;
   width: 100%;
   font-weight: 400;
@@ -493,36 +485,36 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   background: inherit;
 }
 
-.c33::-webkit-input-placeholder {
+.c32::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c33::-moz-placeholder {
+.c32::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c33:-ms-input-placeholder {
+.c32:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c33::placeholder {
+.c32::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c33:focus-within {
+.c32:focus-within {
   outline: none;
 }
 
-.c31 textarea {
+.c30 textarea {
   height: 5rem;
   line-height: 1.25rem;
 }
 
-.c31 textarea::-webkit-input-placeholder {
+.c30 textarea::-webkit-input-placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
@@ -530,7 +522,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   opacity: 1;
 }
 
-.c31 textarea::-moz-placeholder {
+.c30 textarea::-moz-placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
@@ -538,7 +530,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   opacity: 1;
 }
 
-.c31 textarea:-ms-input-placeholder {
+.c30 textarea:-ms-input-placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
@@ -546,7 +538,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   opacity: 1;
 }
 
-.c31 textarea::placeholder {
+.c30 textarea::placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
@@ -554,17 +546,17 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   opacity: 1;
 }
 
-.c5 {
+.c4 {
   padding-right: 8px;
 }
 
-.c7 {
+.c6 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #4945ff;
 }
 
-.c4 {
+.c3 {
   display: -webkit-inline-box;
   display: -webkit-inline-flex;
   display: -ms-inline-flexbox;
@@ -579,15 +571,15 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   outline: none;
 }
 
-.c4 svg path {
+.c3 svg path {
   fill: #4945ff;
 }
 
-.c4 svg {
+.c3 svg {
   font-size: 0.625rem;
 }
 
-.c4:after {
+.c3:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -602,11 +594,11 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border: 2px solid transparent;
 }
 
-.c4:focus-visible {
+.c3:focus-visible {
   outline: none;
 }
 
-.c4:focus-visible:after {
+.c3:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -617,7 +609,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border: 2px solid #4945ff;
 }
 
-.c6 {
+.c5 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -625,13 +617,13 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
 }
 
 @media (max-width:68.75rem) {
-  .c25 {
+  .c23 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c25 {
+  .c23 {
     grid-column: span 12;
   }
 }
@@ -651,46 +643,46 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
         style="height: 0px;"
       >
         <div
-          class="c1 c2"
+          class="c1"
           data-strapi-header="true"
         >
           <div
-            class="c1 c3"
+            class="c2"
           >
             <a
               aria-current="page"
-              class="c4 active"
+              class="c3 active"
               href="/settings/transfer-tokens"
             >
               <span
                 aria-hidden="true"
-                class="c5 c6"
+                class="c4 c5"
               >
                 <svg
                   fill="none"
-                  height="1em"
+                  height="1rem"
                   viewBox="0 0 24 24"
-                  width="1em"
+                  width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M24 13.3a.2.2 0 01-.2.2H5.74l8.239 8.239a.2.2 0 010 .282L12.14 23.86a.2.2 0 01-.282 0L.14 12.14a.2.2 0 010-.282L11.86.14a.2.2 0 01.282 0L13.98 1.98a.2.2 0 010 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6z"
+                    d="M24 13.3a.2.2 0 0 1-.2.2H5.74l8.239 8.239a.2.2 0 0 1 0 .282L12.14 23.86a.2.2 0 0 1-.282 0L.14 12.14a.2.2 0 0 1 0-.282L11.86.14a.2.2 0 0 1 .282 0L13.98 1.98a.2.2 0 0 1 0 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6Z"
                     fill="#212134"
                   />
                 </svg>
               </span>
               <span
-                class="c7"
+                class="c6"
               >
                 Back
               </span>
             </a>
           </div>
           <div
-            class="c1 c8"
+            class="c7"
           >
             <div
-              class="c1 c9"
+              class="c8 c9"
             >
               <h1
                 class="c10 c11"
@@ -699,32 +691,32 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
               </h1>
             </div>
             <div
-              class="c1 c9 c12"
+              class="c12"
             >
               <button
                 aria-disabled="false"
-                class="c13 c14"
+                class="c13 c12 c14 c15"
                 type="submit"
               >
                 <div
                   aria-hidden="true"
-                  class="c1 c15 c16"
+                  class=""
                 >
                   <svg
                     fill="none"
-                    height="1em"
+                    height="1rem"
                     viewBox="0 0 24 24"
-                    width="1em"
+                    width="1rem"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
+                      d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
                       fill="#212134"
                     />
                   </svg>
                 </div>
                 <span
-                  class="c10 c17"
+                  class="c10 c16"
                 >
                   Save
                 </span>
@@ -734,59 +726,61 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
         </div>
       </div>
       <div
-        class="c1 c18"
+        class="c17"
       >
         <div
-          class="c1 c19 c20"
+          class="c18"
         >
           <div
-            class="c1 c21"
+            class="c19"
           >
             <div
-              class="c1 c19 c22"
+              class="c20"
             >
               <h2
-                class="c10 c23"
+                class="c10 c21"
               >
                 Details
               </h2>
               <div
-                class="c1 c24"
+                class="c22"
               >
                 <div
-                  class="c25"
+                  class="c23"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <div>
-                      <div>
+                      <div
+                        class=""
+                      >
                         <div
-                          class="c1 c19 c26"
+                          class="c24"
                         >
                           <label
-                            class="c10 c17"
+                            class="c10 c25"
                             for="1"
                           >
                             <div
-                              class="c1 c9"
+                              class="c9"
                             >
                               Name
                               <span
-                                class="c10 c27 c28"
+                                class="c10 c26 c27"
                               >
                                 *
                               </span>
                             </div>
                           </label>
                           <div
-                            class="c1 c8 c29"
+                            class="c7 c28"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
                               aria-required="true"
-                              class="c30"
+                              class="c29"
                               id="1"
                               name="name"
                               value=""
@@ -798,39 +792,41 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                   </div>
                 </div>
                 <div
-                  class="c25"
+                  class="c23"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <div
-                      class="c31"
+                      class="c30"
                     >
-                      <div>
+                      <div
+                        class=""
+                      >
                         <div
-                          class="c1 c19 c26"
+                          class="c24"
                         >
                           <div
-                            class="c1 c9"
+                            class="c9"
                           >
                             <label
-                              class="c10 c17"
+                              class="c10 c25"
                               for="3"
                             >
                               <div
-                                class="c1 c9"
+                                class="c9"
                               >
                                 Description
                               </div>
                             </label>
                           </div>
                           <div
-                            class="c32"
+                            class="c31"
                           >
                             <textarea
                               aria-invalid="false"
                               aria-required="false"
-                              class="c33"
+                              class="c32"
                               id="3"
                               name="description"
                             />
@@ -841,54 +837,56 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                   </div>
                 </div>
                 <div
-                  class="c25"
+                  class="c23"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
-                    <div>
+                    <div
+                      class=""
+                    >
                       <div
-                        class="c1 c19 c26"
+                        class="c24"
                       >
                         <label
-                          class="c10 c17"
+                          class="c10 c25"
                           for="5"
                         >
                           <div
-                            class="c1 c9"
+                            class="c9"
                           >
                             Token duration
                             <span
-                              class="c10 c27 c28"
+                              class="c10 c26 c27"
                             >
                               *
                             </span>
                           </div>
                         </label>
                         <div
-                          class="c1 c9 c34"
+                          class="c9 c33"
                         >
                           <button
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-labelledby="5 5-label 5-content"
-                            class="c35"
+                            class="c34"
                             id="5"
                             name="lifespan"
                             type="button"
                           />
                           <div
-                            class="c1 c8 c36"
+                            class="c7 c35"
                           >
                             <div
-                              class="c1 c9"
+                              class="c9"
                             >
                               <div
-                                class="c1 c37"
+                                class="c36"
                               >
                                 <span
-                                  class="c10 c38"
+                                  class="c10 c37"
                                   id="5-content"
                                 >
                                   Select
@@ -896,25 +894,25 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                               </div>
                             </div>
                             <div
-                              class="c1 c9"
+                              class="c9"
                             >
                               <button
                                 aria-hidden="true"
-                                class="c1 c39 c40 c41"
+                                class="c38 c39 c40"
                                 tabindex="-1"
                                 title="Carret Down Button"
                                 type="button"
                               >
                                 <svg
                                   fill="none"
-                                  height="1em"
+                                  height="1rem"
                                   viewBox="0 0 14 8"
-                                  width="1em"
+                                  width="1rem"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
                                     clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                     fill="#32324D"
                                     fill-rule="evenodd"
                                   />
@@ -926,7 +924,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                       </div>
                     </div>
                     <span
-                      class="c10 c42"
+                      class="c10 c41"
                     />
                   </div>
                 </div>
@@ -938,7 +936,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
     </form>
   </main>
   <div
-    class="c43"
+    class="c42"
   >
     <p
       aria-live="polite"
@@ -963,72 +961,27 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
 `;
 
 exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snapshot when editing existing token 1`] = `
-.c11 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
+.c8 {
+  min-width: 0;
 }
 
-.c17 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
+.c13 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
 }
 
-.c26 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 500;
-  color: #32324d;
-}
-
-.c28 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #666687;
-}
-
-.c31 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c34 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #d02b20;
-}
-
-.c45 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
-}
-
-.c49 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c15 {
-  padding-right: 8px;
-}
-
-.c19 {
+.c18 {
   padding-right: 56px;
   padding-left: 56px;
 }
 
-.c2 {
+.c1 {
   background: #f6f6f9;
   padding-top: 24px;
   padding-right: 56px;
@@ -1036,24 +989,24 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   padding-left: 56px;
 }
 
-.c3 {
+.c2 {
   padding-bottom: 8px;
 }
 
-.c22 {
+.c20 {
   background: #ffffff;
   padding: 24px;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c23 {
+.c21 {
   background: #f6f6f9;
   padding: 12px;
   border-radius: 4px;
 }
 
-.c29 {
+.c27 {
   background: #ffffff;
   padding-top: 24px;
   padding-right: 32px;
@@ -1063,16 +1016,16 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c44 {
+.c43 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c46 {
+.c45 {
   padding-left: 12px;
 }
 
-.c8 {
+.c7 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1104,7 +1057,22 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   flex-direction: row;
 }
 
-.c20 {
+.c12 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c19 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -1116,73 +1084,122 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 24px;
 }
 
-.c21 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c21 > * + * {
-  margin-top: 24px;
-}
-
-.c25 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c25 > * + * {
-  margin-top: 4px;
-}
-
-.c30 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c30 > * + * {
-  margin-top: 16px;
-}
-
-.c12 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c12 > * + * {
-  margin-left: 8px;
-}
-
-.c13 {
+.c23 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.c28 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.c11 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c16 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c24 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 500;
+  color: #32324d;
+}
+
+.c26 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #666687;
+}
+
+.c29 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c32 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c33 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #d02b20;
+}
+
+.c44 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c48 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c14 {
   position: relative;
   outline: none;
 }
 
-.c13 svg {
+.c14 svg {
   height: 12px;
   width: 12px;
 }
 
-.c13 svg > g,
-.c13 svg path {
+.c14 svg > g,
+.c14 svg path {
   fill: #ffffff;
 }
 
-.c13[aria-disabled='true'] {
+.c14[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c13:after {
+.c14:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -1197,11 +1214,11 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border: 2px solid transparent;
 }
 
-.c13:focus-visible {
+.c14:focus-visible {
   outline: none;
 }
 
-.c13:focus-visible:after {
+.c14:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -1212,7 +1229,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border: 2px solid #4945ff;
 }
 
-.c50 {
+.c49 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -1224,178 +1241,113 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   width: 1px;
 }
 
-.c16 {
-  height: 100%;
-}
-
-.c51 .c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c51 .c10 {
-  color: #ffffff;
-}
-
-.c51[aria-disabled='true'] .c10 {
+.c50[aria-disabled='true'] .c10 {
   color: #666687;
 }
 
-.c51[aria-disabled='true']:active .c10 {
+.c50[aria-disabled='true']:active .c10 {
   color: #666687;
 }
 
-.c14 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
+.c15 {
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
   border: 1px solid #dcdce4;
   background: #ffffff;
 }
 
-.c14 .c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c14 .c10 {
-  color: #ffffff;
-}
-
-.c14[aria-disabled='true'] {
+.c15[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c14[aria-disabled='true'] .c10 {
+.c15[aria-disabled='true'] .c10 {
   color: #666687;
 }
 
-.c14[aria-disabled='true'] svg > g,.c14[aria-disabled='true'] svg path {
+.c15[aria-disabled='true'] svg > g,.c15[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c14[aria-disabled='true']:active {
+.c15[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c14[aria-disabled='true']:active .c10 {
+.c15[aria-disabled='true']:active .c10 {
   color: #666687;
 }
 
-.c14[aria-disabled='true']:active svg > g,.c14[aria-disabled='true']:active svg path {
+.c15[aria-disabled='true']:active svg > g,.c15[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c14:hover {
+.c15:hover {
   background-color: #f6f6f9;
 }
 
-.c14:active {
+.c15:active {
   background-color: #eaeaef;
 }
 
-.c14 .c10 {
+.c15 .c10 {
   color: #32324d;
 }
 
-.c14 svg > g,
-.c14 svg path {
+.c15 svg > g,
+.c15 svg path {
   fill: #32324d;
 }
 
-.c18 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
+.c17 {
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
 }
 
-.c18 .c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c18 .c10 {
-  color: #ffffff;
-}
-
-.c18[aria-disabled='true'] {
+.c17[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c18[aria-disabled='true'] .c10 {
+.c17[aria-disabled='true'] .c10 {
   color: #666687;
 }
 
-.c18[aria-disabled='true'] svg > g,.c18[aria-disabled='true'] svg path {
+.c17[aria-disabled='true'] svg > g,.c17[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c18[aria-disabled='true']:active {
+.c17[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c18[aria-disabled='true']:active .c10 {
+.c17[aria-disabled='true']:active .c10 {
   color: #666687;
 }
 
-.c18[aria-disabled='true']:active svg > g,.c18[aria-disabled='true']:active svg path {
+.c17[aria-disabled='true']:active svg > g,.c17[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c18:hover {
+.c17:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c18:active {
+.c17:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c18 svg > g,
-.c18 svg path {
+.c17 svg > g,
+.c17 svg path {
   fill: #ffffff;
 }
 
-.c35 {
+.c34 {
   line-height: 0;
 }
 
-.c37 {
+.c36 {
   border: none;
   border-radius: 4px;
   padding-bottom: 0.65625rem;
@@ -1410,36 +1362,36 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   background: inherit;
 }
 
-.c37::-webkit-input-placeholder {
+.c36::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c37::-moz-placeholder {
+.c36::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c37:-ms-input-placeholder {
+.c36:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c37::placeholder {
+.c36::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c37[aria-disabled='true'] {
+.c36[aria-disabled='true'] {
   color: inherit;
 }
 
-.c37:focus {
+.c36:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c36 {
+.c35 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
@@ -1451,12 +1403,12 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   transition-duration: 0.2s;
 }
 
-.c36:focus-within {
+.c35:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c41 {
+.c40 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -1474,28 +1426,28 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   transition-duration: 0.2s;
 }
 
-.c41:focus-within {
+.c40:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c47 {
+.c46 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c47 svg {
+.c46 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c47 svg path {
+.c46 svg path {
   fill: #666687;
 }
 
-.c48 {
+.c47 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1505,11 +1457,11 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   cursor: not-allowed;
 }
 
-.c48 svg {
+.c47 svg {
   width: 0.375rem;
 }
 
-.c42 {
+.c41 {
   position: absolute;
   left: 0;
   right: 0;
@@ -1520,25 +1472,25 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border: none;
 }
 
-.c42:focus {
+.c41:focus {
   outline: none;
 }
 
-.c42[aria-disabled='true'] {
+.c41[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c43 {
+.c42 {
   width: 100%;
 }
 
-.c32 {
+.c30 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
   gap: 20px;
 }
 
-.c33 {
+.c31 {
   grid-column: span 6;
   max-width: 100%;
 }
@@ -1547,7 +1499,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   outline: none;
 }
 
-.c39 {
+.c38 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   padding-left: 16px;
@@ -1563,12 +1515,12 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   transition-duration: 0.2s;
 }
 
-.c39:focus-within {
+.c38:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c40 {
+.c39 {
   display: block;
   width: 100%;
   font-weight: 400;
@@ -1579,36 +1531,36 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   background: inherit;
 }
 
-.c40::-webkit-input-placeholder {
+.c39::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c40::-moz-placeholder {
+.c39::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c40:-ms-input-placeholder {
+.c39:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c40::placeholder {
+.c39::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c40:focus-within {
+.c39:focus-within {
   outline: none;
 }
 
-.c38 textarea {
+.c37 textarea {
   height: 5rem;
   line-height: 1.25rem;
 }
 
-.c38 textarea::-webkit-input-placeholder {
+.c37 textarea::-webkit-input-placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
@@ -1616,7 +1568,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   opacity: 1;
 }
 
-.c38 textarea::-moz-placeholder {
+.c37 textarea::-moz-placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
@@ -1624,7 +1576,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   opacity: 1;
 }
 
-.c38 textarea:-ms-input-placeholder {
+.c37 textarea:-ms-input-placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
@@ -1632,7 +1584,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   opacity: 1;
 }
 
-.c38 textarea::placeholder {
+.c37 textarea::placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
@@ -1640,30 +1592,30 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   opacity: 1;
 }
 
-.c24 {
+.c22 {
   margin-right: 24px;
 }
 
-.c24 svg {
+.c22 svg {
   width: 2rem;
   height: 2rem;
 }
 
-.c27 {
+.c25 {
   word-break: break-all;
 }
 
-.c5 {
+.c4 {
   padding-right: 8px;
 }
 
-.c7 {
+.c6 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #4945ff;
 }
 
-.c4 {
+.c3 {
   display: -webkit-inline-box;
   display: -webkit-inline-flex;
   display: -ms-inline-flexbox;
@@ -1678,15 +1630,15 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   outline: none;
 }
 
-.c4 svg path {
+.c3 svg path {
   fill: #4945ff;
 }
 
-.c4 svg {
+.c3 svg {
   font-size: 0.625rem;
 }
 
-.c4:after {
+.c3:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -1701,11 +1653,11 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border: 2px solid transparent;
 }
 
-.c4:focus-visible {
+.c3:focus-visible {
   outline: none;
 }
 
-.c4:focus-visible:after {
+.c3:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -1716,7 +1668,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border: 2px solid #4945ff;
 }
 
-.c6 {
+.c5 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1724,13 +1676,13 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
 }
 
 @media (max-width:68.75rem) {
-  .c33 {
+  .c31 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c33 {
+  .c31 {
     grid-column: span 12;
   }
 }
@@ -1750,46 +1702,46 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
         style="height: 0px;"
       >
         <div
-          class="c1 c2"
+          class="c1"
           data-strapi-header="true"
         >
           <div
-            class="c1 c3"
+            class="c2"
           >
             <a
               aria-current="page"
-              class="c4 active"
+              class="c3 active"
               href="/settings/transfer-tokens"
             >
               <span
                 aria-hidden="true"
-                class="c5 c6"
+                class="c4 c5"
               >
                 <svg
                   fill="none"
-                  height="1em"
+                  height="1rem"
                   viewBox="0 0 24 24"
-                  width="1em"
+                  width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M24 13.3a.2.2 0 01-.2.2H5.74l8.239 8.239a.2.2 0 010 .282L12.14 23.86a.2.2 0 01-.282 0L.14 12.14a.2.2 0 010-.282L11.86.14a.2.2 0 01.282 0L13.98 1.98a.2.2 0 010 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6z"
+                    d="M24 13.3a.2.2 0 0 1-.2.2H5.74l8.239 8.239a.2.2 0 0 1 0 .282L12.14 23.86a.2.2 0 0 1-.282 0L.14 12.14a.2.2 0 0 1 0-.282L11.86.14a.2.2 0 0 1 .282 0L13.98 1.98a.2.2 0 0 1 0 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6Z"
                     fill="#212134"
                   />
                 </svg>
               </span>
               <span
-                class="c7"
+                class="c6"
               >
                 Back
               </span>
             </a>
           </div>
           <div
-            class="c1 c8"
+            class="c7"
           >
             <div
-              class="c1 c9"
+              class="c8 c9"
             >
               <h1
                 class="c10 c11"
@@ -1798,63 +1750,63 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
               </h1>
             </div>
             <div
-              class="c1 c9 c12"
+              class="c12"
             >
               <button
                 aria-disabled="false"
-                class="c13 c14"
+                class="c13 c12 c14 c15"
                 name="regenerate"
                 type="button"
               >
                 <div
                   aria-hidden="true"
-                  class="c1 c15 c16"
+                  class=""
                 >
                   <svg
                     fill="none"
-                    height="1em"
+                    height="1rem"
                     viewBox="0 0 24 24"
-                    width="1em"
+                    width="1rem"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
                       clip-rule="evenodd"
-                      d="M15.681 2.804A9.64 9.64 0 0011.818 2C6.398 2 2 6.48 2 12c0 5.521 4.397 10 9.818 10 2.03 0 4.011-.641 5.67-1.835a9.987 9.987 0 003.589-4.831 1.117 1.117 0 00-.664-1.418 1.086 1.086 0 00-1.393.676 7.769 7.769 0 01-2.792 3.758 7.546 7.546 0 01-4.41 1.428V4.222h.002a7.492 7.492 0 013.003.625 7.61 7.61 0 012.5 1.762l.464.551-2.986 3.042a.186.186 0 00.129.316H22V3.317a.188.188 0 00-.112-.172.179.179 0 00-.199.04l-2.355 2.4-.394-.468-.02-.02a9.791 9.791 0 00-3.239-2.293zm-3.863 1.418V2v2.222zm0 0v15.556c-4.216 0-7.636-3.484-7.636-7.778s3.42-7.777 7.636-7.778z"
+                      d="M15.681 2.804A9.64 9.64 0 0 0 11.818 2C6.398 2 2 6.48 2 12c0 5.521 4.397 10 9.818 10 2.03 0 4.011-.641 5.67-1.835a9.987 9.987 0 0 0 3.589-4.831 1.117 1.117 0 0 0-.664-1.418 1.086 1.086 0 0 0-1.393.676 7.769 7.769 0 0 1-2.792 3.758 7.546 7.546 0 0 1-4.41 1.428V4.222h.002a7.492 7.492 0 0 1 3.003.625 7.61 7.61 0 0 1 2.5 1.762l.464.551-2.986 3.042a.186.186 0 0 0 .129.316H22V3.317a.188.188 0 0 0-.112-.172.179.179 0 0 0-.199.04l-2.355 2.4-.394-.468-.02-.02a9.791 9.791 0 0 0-3.239-2.293Zm-3.863 1.418V2v2.222Zm0 0v15.556c-4.216 0-7.636-3.484-7.636-7.778s3.42-7.777 7.636-7.778Z"
                       fill="#212134"
                       fill-rule="evenodd"
                     />
                   </svg>
                 </div>
                 <span
-                  class="c10 c17"
+                  class="c10 c16"
                 >
                   Regenerate
                 </span>
               </button>
               <button
                 aria-disabled="false"
-                class="c13 c18"
+                class="c13 c12 c14 c17"
                 type="submit"
               >
                 <div
                   aria-hidden="true"
-                  class="c1 c15 c16"
+                  class=""
                 >
                   <svg
                     fill="none"
-                    height="1em"
+                    height="1rem"
                     viewBox="0 0 24 24"
-                    width="1em"
+                    width="1rem"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
+                      d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
                       fill="#212134"
                     />
                   </svg>
                 </div>
                 <span
-                  class="c10 c17"
+                  class="c10 c16"
                 >
                   Save
                 </span>
@@ -1864,97 +1816,99 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
         </div>
       </div>
       <div
-        class="c1 c19"
+        class="c18"
       >
         <div
-          class="c1 c20 c21"
+          class="c19"
         >
           <div
-            class="c1 c22 c9"
+            class="c20 c9"
           >
             <div
-              class="c1 c23 c9 c24"
+              class="c21 c9 c22"
             >
               <svg
                 fill="none"
-                height="1em"
+                height="1rem"
                 viewBox="0 0 24 24"
-                width="1em"
+                width="1rem"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M17 14h-4.34a6 6 0 110-4H23v4h-2v4h-4v-4zM7 14a2 2 0 100-4 2 2 0 000 4z"
+                  d="M17 14h-4.34a6 6 0 1 1 0-4H23v4h-2v4h-4v-4ZM7 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"
                   fill="#8E8EA9"
                 />
               </svg>
             </div>
             <div
-              class="c1 c20 c25"
+              class="c23"
             >
               <div
-                class="c1 c9"
+                class="c9"
               >
                 <span
-                  class="c10 c26 c27"
+                  class="c10 c24 c25"
                 >
                   This token isn’t accessible anymore.
                 </span>
               </div>
               <span
-                class="c10 c28"
+                class="c10 c26"
               >
                 For security reasons, you can only see your token once.
               </span>
             </div>
           </div>
           <div
-            class="c1 c29"
+            class="c27"
           >
             <div
-              class="c1 c20 c30"
+              class="c28"
             >
               <h2
-                class="c10 c31"
+                class="c10 c29"
               >
                 Details
               </h2>
               <div
-                class="c1 c32"
+                class="c30"
               >
                 <div
-                  class="c33"
+                  class="c31"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <div>
-                      <div>
+                      <div
+                        class=""
+                      >
                         <div
-                          class="c1 c20 c25"
+                          class="c23"
                         >
                           <label
-                            class="c10 c17"
+                            class="c10 c32"
                             for="8"
                           >
                             <div
-                              class="c1 c9"
+                              class="c9"
                             >
                               Name
                               <span
-                                class="c10 c34 c35"
+                                class="c10 c33 c34"
                               >
                                 *
                               </span>
                             </div>
                           </label>
                           <div
-                            class="c1 c8 c36"
+                            class="c7 c35"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
                               aria-required="true"
-                              class="c37"
+                              class="c36"
                               id="8"
                               name="name"
                               value="My super token"
@@ -1966,39 +1920,41 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                   </div>
                 </div>
                 <div
-                  class="c33"
+                  class="c31"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <div
-                      class="c38"
+                      class="c37"
                     >
-                      <div>
+                      <div
+                        class=""
+                      >
                         <div
-                          class="c1 c20 c25"
+                          class="c23"
                         >
                           <div
-                            class="c1 c9"
+                            class="c9"
                           >
                             <label
-                              class="c10 c17"
+                              class="c10 c32"
                               for="10"
                             >
                               <div
-                                class="c1 c9"
+                                class="c9"
                               >
                                 Description
                               </div>
                             </label>
                           </div>
                           <div
-                            class="c39"
+                            class="c38"
                           >
                             <textarea
                               aria-invalid="false"
                               aria-required="false"
-                              class="c40"
+                              class="c39"
                               id="10"
                               name="description"
                             >
@@ -2011,32 +1967,34 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                   </div>
                 </div>
                 <div
-                  class="c33"
+                  class="c31"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
-                    <div>
+                    <div
+                      class=""
+                    >
                       <div
-                        class="c1 c20 c25"
+                        class="c23"
                       >
                         <label
-                          class="c10 c17"
+                          class="c10 c32"
                           for="12"
                         >
                           <div
-                            class="c1 c9"
+                            class="c9"
                           >
                             Token duration
                             <span
-                              class="c10 c34 c35"
+                              class="c10 c33 c34"
                             >
                               *
                             </span>
                           </div>
                         </label>
                         <div
-                          class="c1 c9 c41"
+                          class="c9 c40"
                           disabled=""
                         >
                           <button
@@ -2044,22 +2002,22 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-labelledby="12 12-label 12-content"
-                            class="c42"
+                            class="c41"
                             id="12"
                             name="lifespan"
                             type="button"
                           />
                           <div
-                            class="c1 c8 c43"
+                            class="c7 c42"
                           >
                             <div
-                              class="c1 c9"
+                              class="c9"
                             >
                               <div
-                                class="c1 c44"
+                                class="c43"
                               >
                                 <span
-                                  class="c10 c45"
+                                  class="c10 c44"
                                   id="12-content"
                                 >
                                   Select
@@ -2067,11 +2025,11 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                               </div>
                             </div>
                             <div
-                              class="c1 c9"
+                              class="c9"
                             >
                               <button
                                 aria-hidden="true"
-                                class="c1 c46 c47 c48"
+                                class="c45 c46 c47"
                                 disabled=""
                                 tabindex="-1"
                                 title="Carret Down Button"
@@ -2079,14 +2037,14 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                               >
                                 <svg
                                   fill="none"
-                                  height="1em"
+                                  height="1rem"
                                   viewBox="0 0 14 8"
-                                  width="1em"
+                                  width="1rem"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
                                     clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                     fill="#32324D"
                                     fill-rule="evenodd"
                                   />
@@ -2098,7 +2056,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                       </div>
                     </div>
                     <span
-                      class="c10 c49"
+                      class="c10 c48"
                     >
                       Expiration date: Unlimited
                     </span>
@@ -2112,7 +2070,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
     </form>
   </main>
   <div
-    class="c50"
+    class="c49"
   >
     <p
       aria-live="polite"

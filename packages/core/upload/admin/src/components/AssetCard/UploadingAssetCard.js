@@ -12,7 +12,6 @@ import {
   CardSubtitle,
   CardBadge,
   Typography,
-  Stack,
   Box,
   Flex,
 } from '@strapi/design-system';
@@ -86,7 +85,7 @@ export const UploadingAssetCard = ({
   };
 
   return (
-    <Stack spacing={1}>
+    <Flex direction="column" alignItems="stretch" gap={1}>
       <Card borderColor={error ? 'danger600' : 'neutral150'}>
         <CardHeader>
           <UploadProgressWrapper>
@@ -126,7 +125,7 @@ export const UploadingAssetCard = ({
           )}
         </Typography>
       ) : undefined}
-    </Stack>
+    </Flex>
   );
 };
 

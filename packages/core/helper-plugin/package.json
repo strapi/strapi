@@ -1,6 +1,6 @@
 {
   "name": "@strapi/helper-plugin",
-  "version": "4.7.0",
+  "version": "4.7.1",
   "description": "Helper for Strapi plugins development",
   "repository": {
     "type": "git",
@@ -48,10 +48,11 @@
     "formik": "^2.2.6",
     "immer": "9.0.19",
     "lodash": "4.17.21",
+    "prop-types": "^15.7.2",
     "qs": "6.11.0",
     "react-helmet": "^6.1.0",
     "react-intl": "6.2.8",
-    "react-select": "5.6.0"
+    "react-select": "5.7.0"
   },
   "devDependencies": {
     "@storybook/addon-actions": "6.5.10",
@@ -60,13 +61,14 @@
     "@storybook/builder-webpack5": "6.5.15",
     "@storybook/manager-webpack5": "6.5.15",
     "@storybook/react": "^6.5.16",
-    "@strapi/design-system": "1.6.3",
-    "@strapi/icons": "1.6.3",
+    "@strapi/design-system": "1.6.5",
+    "@strapi/icons": "1.6.5",
     "@testing-library/react": "12.1.4",
     "@testing-library/react-hooks": "8.0.1",
     "browserslist-to-esbuild": "1.2.0",
     "cross-env": "^7.0.3",
     "esbuild-loader": "^2.21.0",
+    "history": "^4.9.0",
     "match-sorter": "^4.0.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
@@ -75,11 +77,12 @@
     "rimraf": "3.0.2",
     "styled-components": "5.3.3",
     "typescript": "4.6.2",
-    "webpack": "^5.75.0"
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1"
   },
   "peerDependencies": {
-    "@strapi/design-system": "1.6.3",
-    "@strapi/icons": "1.6.3",
+    "@strapi/design-system": "1.6.5",
+    "@strapi/icons": "1.6.5",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-router-dom": "5.3.4",

@@ -1,18 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Typography, Box, Flex, Stack } from '@strapi/design-system';
+import { Typography, Box, Flex } from '@strapi/design-system';
 import { Wrapper } from './components';
 
 const CustomRadioGroup = ({ intlLabel, name, onChange, radios, value }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Stack spacing={2}>
+    <Flex direction="column" alignItems="stretch" gap={2}>
       <Typography variant="pi" fontWeight="bold" textColor="neutral800" htmlFor={name} as="label">
         {formatMessage(intlLabel)}
       </Typography>
-      <Wrapper horizontal spacing={4} style={{ alignItems: 'stretch' }}>
+      <Wrapper gap={4} alignItems="stretch">
         {radios.map((radio) => {
           return (
             <label htmlFor={radio.value.toString()} key={radio.value} className="container">
@@ -31,19 +31,19 @@ const CustomRadioGroup = ({ intlLabel, name, onChange, radios, value }) => {
                   <Box paddingRight={4}>
                     <span className="checkmark" />
                   </Box>
-                  <Stack spacing={2}>
+                  <Flex direction="column" alignItems="stretch" gap={2}>
                     <Typography fontWeight="bold">{formatMessage(radio.title)}</Typography>
                     <Typography variant="pi" textColor="neutral600">
                       {formatMessage(radio.description)}
                     </Typography>
-                  </Stack>
+                  </Flex>
                 </Flex>
               </Box>
             </label>
           );
         })}
       </Wrapper>
-    </Stack>
+    </Flex>
   );
 };
 

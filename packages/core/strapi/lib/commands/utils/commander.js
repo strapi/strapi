@@ -96,8 +96,9 @@ const promptEncryptionKey = async (thisCommand) => {
  *
  * @param {string} message The message to confirm with user
  * @param {object} options Additional options
+ * @param {string|undefined} options.failMessage The message to display when prompt is not confirmed
  */
-const confirmMessage = (message) => {
+const confirmMessage = (message, { failMessage } = {}) => {
   return async (command) => {
     // if we have a force option, assume yes
     const opts = command.opts();
@@ -116,7 +117,7 @@ const confirmMessage = (message) => {
       },
     ]);
     if (!answers.confirm) {
-      exitWith(0);
+      exitWith(1, failMessage);
     }
   };
 };

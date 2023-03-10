@@ -1,85 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1`] = `
-.c14 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c19 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c20 {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c25 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c37 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #666687;
-  text-transform: uppercase;
-}
-
-.c39 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #4945ff;
-  text-transform: uppercase;
-}
-
-.c41 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #b72b1a;
-  text-transform: uppercase;
-}
-
-.c48 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c52 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c68 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c2 {
+.c1 {
   padding-bottom: 56px;
 }
 
-.c5 {
+.c4 {
   background: #f6f6f9;
   padding-top: 24px;
   padding-right: 56px;
@@ -87,12 +13,23 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   padding-left: 56px;
 }
 
-.c6 {
+.c5 {
   padding-bottom: 8px;
 }
 
-.c17 {
-  padding-right: 8px;
+.c11 {
+  min-width: 0;
+}
+
+.c15 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
 }
 
 .c21 {
@@ -110,7 +47,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c27 {
+.c26 {
   width: 100%;
 }
 
@@ -172,7 +109,17 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   border: 1px solid #eaeaef;
 }
 
-.c11 {
+.c71 {
+  padding: 8px;
+  border-radius: 4px;
+  border-color: #dcdce4;
+  border: 1px solid #dcdce4;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+}
+
+.c10 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -204,6 +151,21 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   flex-direction: row;
 }
 
+.c16 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
 .c23 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
@@ -216,6 +178,41 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 16px;
+}
+
+.c25 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 16px;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c28 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .c35 {
@@ -236,71 +233,122 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   justify-content: center;
 }
 
-.c24 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c24 > * + * {
-  margin-top: 16px;
-}
-
-.c29 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c29 > * + * {
-  margin-top: 4px;
-}
-
-.c26 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c26 > * + * {
-  margin-left: 16px;
-}
-
-.c61 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c61 > * + * {
-  margin-left: 12px;
-}
-
-.c15 {
+.c61 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 12px;
+}
+
+.c14 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c19 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c20 {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666687;
+}
+
+.c24 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c29 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c37 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #666687;
+  text-transform: uppercase;
+}
+
+.c39 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #4945ff;
+  text-transform: uppercase;
+}
+
+.c41 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #b72b1a;
+  text-transform: uppercase;
+}
+
+.c48 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c52 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c68 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c17 {
   position: relative;
   outline: none;
 }
 
-.c15 svg {
+.c17 svg {
   height: 12px;
   width: 12px;
 }
 
-.c15 svg > g,
-.c15 svg path {
+.c17 svg > g,
+.c17 svg path {
   fill: #ffffff;
 }
 
-.c15[aria-disabled='true'] {
+.c17[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c15:after {
+.c17:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -315,11 +363,11 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   border: 2px solid transparent;
 }
 
-.c15:focus-visible {
+.c17:focus-visible {
   outline: none;
 }
 
-.c15:focus-visible:after {
+.c17:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -343,74 +391,47 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
 }
 
 .c18 {
-  height: 100%;
-}
-
-.c16 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
 }
 
-.c16 .c0 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c16 .c13 {
-  color: #ffffff;
-}
-
-.c16[aria-disabled='true'] {
+.c18[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c16[aria-disabled='true'] .c13 {
+.c18[aria-disabled='true'] .c13 {
   color: #666687;
 }
 
-.c16[aria-disabled='true'] svg > g,.c16[aria-disabled='true'] svg path {
+.c18[aria-disabled='true'] svg > g,.c18[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c16[aria-disabled='true']:active {
+.c18[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c16[aria-disabled='true']:active .c13 {
+.c18[aria-disabled='true']:active .c13 {
   color: #666687;
 }
 
-.c16[aria-disabled='true']:active svg > g,.c16[aria-disabled='true']:active svg path {
+.c18[aria-disabled='true']:active svg > g,.c18[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c16:hover {
+.c18:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c16:active {
+.c18:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c16 svg > g,
-.c16 svg path {
+.c18 svg > g,
+.c18 svg path {
   fill: #ffffff;
 }
 
@@ -512,56 +533,35 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   max-width: 100%;
 }
 
-.c71 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-}
-
-.c71 svg > g,
-.c71 svg path {
+.c72 svg > g,
+.c72 svg path {
   fill: #8e8ea9;
 }
 
-.c71:hover svg > g,
-.c71:hover svg path {
+.c72:hover svg > g,
+.c72:hover svg path {
   fill: #666687;
 }
 
-.c71:active svg > g,
-.c71:active svg path {
+.c72:active svg > g,
+.c72:active svg path {
   fill: #a5a5ba;
 }
 
-.c71[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c71[aria-disabled='true'] svg path {
+.c72[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c1 {
+.c0 {
   display: grid;
   grid-template-columns: 1fr;
 }
 
-.c3 {
+.c2 {
   overflow-x: hidden;
 }
 
-.c4:focus-visible {
+.c3:focus-visible {
   outline: none;
 }
 
@@ -632,21 +632,21 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   width: 100%;
 }
 
-.c28 {
+.c27 {
   max-width: 320px;
 }
 
-.c8 {
+.c7 {
   padding-right: 8px;
 }
 
-.c10 {
+.c9 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #4945ff;
 }
 
-.c7 {
+.c6 {
   display: -webkit-inline-box;
   display: -webkit-inline-flex;
   display: -ms-inline-flexbox;
@@ -661,15 +661,15 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   outline: none;
 }
 
-.c7 svg path {
+.c6 svg path {
   fill: #4945ff;
 }
 
-.c7 svg {
+.c6 svg {
   font-size: 0.625rem;
 }
 
-.c7:after {
+.c6:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -684,11 +684,11 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   border: 2px solid transparent;
 }
 
-.c7:focus-visible {
+.c6:focus-visible {
   outline: none;
 }
 
-.c7:focus-visible:after {
+.c6:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -699,7 +699,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   border: 2px solid #4945ff;
 }
 
-.c9 {
+.c8 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -815,15 +815,15 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
 
 <div>
   <div
-    class="c0 c1"
+    class="c0"
   >
     <div
-      class="c0 c2 c3"
+      class="c1 c2"
     >
       <main
         aria-busy="false"
         aria-labelledby="main-content-title"
-        class="c4"
+        class="c3"
         id="main-content"
         tabindex="-1"
       >
@@ -832,46 +832,46 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
             style="height: 0px;"
           >
             <div
-              class="c0 c5"
+              class="c4"
               data-strapi-header="true"
             >
               <div
-                class="c0 c6"
+                class="c5"
               >
                 <a
-                  class="c7"
+                  class="c6"
                   href="/content-manager/undefined/api::restaurant.restaurant?page=1&pageSize=10&sort=id:ASC"
                   id="go-back"
                 >
                   <span
                     aria-hidden="true"
-                    class="c8 c9"
+                    class="c7 c8"
                   >
                     <svg
                       fill="none"
-                      height="1em"
+                      height="1rem"
                       viewBox="0 0 24 24"
-                      width="1em"
+                      width="1rem"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        d="M24 13.3a.2.2 0 01-.2.2H5.74l8.239 8.239a.2.2 0 010 .282L12.14 23.86a.2.2 0 01-.282 0L.14 12.14a.2.2 0 010-.282L11.86.14a.2.2 0 01.282 0L13.98 1.98a.2.2 0 010 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6z"
+                        d="M24 13.3a.2.2 0 0 1-.2.2H5.74l8.239 8.239a.2.2 0 0 1 0 .282L12.14 23.86a.2.2 0 0 1-.282 0L.14 12.14a.2.2 0 0 1 0-.282L11.86.14a.2.2 0 0 1 .282 0L13.98 1.98a.2.2 0 0 1 0 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6Z"
                         fill="#212134"
                       />
                     </svg>
                   </span>
                   <span
-                    class="c10"
+                    class="c9"
                   >
                     Back
                   </span>
                 </a>
               </div>
               <div
-                class="c0 c11"
+                class="c10"
               >
                 <div
-                  class="c0 c12"
+                  class="c11 c12"
                 >
                   <h1
                     class="c13 c14"
@@ -881,23 +881,23 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                 </div>
                 <button
                   aria-disabled="true"
-                  class="c15 c16"
+                  class="c15 c16 c17 c18"
                   disabled=""
                   type="submit"
                 >
                   <div
                     aria-hidden="true"
-                    class="c0 c17 c18"
+                    class=""
                   >
                     <svg
                       fill="none"
-                      height="1em"
+                      height="1rem"
                       viewBox="0 0 24 24"
-                      width="1em"
+                      width="1rem"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
+                        d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
                         fill="#212134"
                       />
                     </svg>
@@ -917,40 +917,40 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
             </div>
           </div>
           <div
-            class="c0 c21"
+            class="c21"
           >
             <div
-              class="c0 c22"
+              class="c22"
             >
               <div
-                class="c0 c23 c24"
+                class="c23"
               >
                 <h2
-                  class="c13 c25"
+                  class="c13 c24"
                 >
                   Settings
                 </h2>
                 <div
-                  class="c0 c11 c26"
+                  class="c25"
                 >
                   <div
-                    class="c0 c27"
+                    class="c26"
                   >
                     <div
-                      class="c28"
+                      class="c27"
                     >
                       <div
-                        class="c0 c23 c29"
+                        class="c28"
                       >
                         <div
-                          class="c0 c12"
+                          class="c12"
                         >
                           <label
-                            class="c13 c19"
+                            class="c13 c29"
                             for="1"
                           >
                             <div
-                              class="c0 c12"
+                              class="c12"
                             >
                               Enable search
                             </div>
@@ -965,12 +965,12 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                             Enable search
                           </div>
                           <div
-                            class="c0 c32 c33"
+                            class="c32 c33"
                             display="flex"
                           >
                             <div
                               aria-hidden="true"
-                              class="c0 c34 c35 c36"
+                              class="c34 c35 c36"
                             >
                               <span
                                 class="c13 c37"
@@ -980,7 +980,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                             </div>
                             <div
                               aria-hidden="true"
-                              class="c0 c34 c35 c38"
+                              class="c34 c35 c38"
                             >
                               <span
                                 class="c13 c39"
@@ -1003,23 +1003,23 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                     </div>
                   </div>
                   <div
-                    class="c0 c27"
+                    class="c26"
                   >
                     <div
-                      class="c28"
+                      class="c27"
                     >
                       <div
-                        class="c0 c23 c29"
+                        class="c28"
                       >
                         <div
-                          class="c0 c12"
+                          class="c12"
                         >
                           <label
-                            class="c13 c19"
+                            class="c13 c29"
                             for="3"
                           >
                             <div
-                              class="c0 c12"
+                              class="c12"
                             >
                               Enable filters
                             </div>
@@ -1034,12 +1034,12 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                             Enable filters
                           </div>
                           <div
-                            class="c0 c32 c33"
+                            class="c32 c33"
                             display="flex"
                           >
                             <div
                               aria-hidden="true"
-                              class="c0 c34 c35 c36"
+                              class="c34 c35 c36"
                             >
                               <span
                                 class="c13 c37"
@@ -1049,7 +1049,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                             </div>
                             <div
                               aria-hidden="true"
-                              class="c0 c34 c35 c38"
+                              class="c34 c35 c38"
                             >
                               <span
                                 class="c13 c39"
@@ -1072,23 +1072,23 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                     </div>
                   </div>
                   <div
-                    class="c0 c27"
+                    class="c26"
                   >
                     <div
-                      class="c28"
+                      class="c27"
                     >
                       <div
-                        class="c0 c23 c29"
+                        class="c28"
                       >
                         <div
-                          class="c0 c12"
+                          class="c12"
                         >
                           <label
-                            class="c13 c19"
+                            class="c13 c29"
                             for="5"
                           >
                             <div
-                              class="c0 c12"
+                              class="c12"
                             >
                               Enable bulk actions
                             </div>
@@ -1103,12 +1103,12 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                             Enable bulk actions
                           </div>
                           <div
-                            class="c0 c32 c33"
+                            class="c32 c33"
                             display="flex"
                           >
                             <div
                               aria-hidden="true"
-                              class="c0 c34 c35 c38"
+                              class="c34 c35 c38"
                             >
                               <span
                                 class="c13 c41"
@@ -1118,7 +1118,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                             </div>
                             <div
                               aria-hidden="true"
-                              class="c0 c34 c35 c36"
+                              class="c34 c35 c36"
                             >
                               <span
                                 class="c13 c37"
@@ -1141,30 +1141,32 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                   </div>
                 </div>
                 <div
-                  class="c0 c42"
+                  class="c42"
                 >
                   <div
                     class="c43"
                   >
                     <div
-                      class="c0 "
+                      class=""
                     >
-                      <div>
+                      <div
+                        class=""
+                      >
                         <div
-                          class="c0 c23 c29"
+                          class="c28"
                         >
                           <label
-                            class="c13 c19"
+                            class="c13 c29"
                             for="7"
                           >
                             <div
-                              class="c0 c12"
+                              class="c12"
                             >
                               Entries per page
                             </div>
                           </label>
                           <div
-                            class="c0 c12 c44"
+                            class="c12 c44"
                           >
                             <button
                               aria-describedby="7-hint"
@@ -1178,13 +1180,13 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                               type="button"
                             />
                             <div
-                              class="c0 c11 c46"
+                              class="c10 c46"
                             >
                               <div
-                                class="c0 c12"
+                                class="c12"
                               >
                                 <div
-                                  class="c0 c47"
+                                  class="c47"
                                 >
                                   <span
                                     class="c13 c48"
@@ -1195,25 +1197,25 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                                 </div>
                               </div>
                               <div
-                                class="c0 c12"
+                                class="c12"
                               >
                                 <button
                                   aria-hidden="true"
-                                  class="c0 c49 c50 c51"
+                                  class="c49 c50 c51"
                                   tabindex="-1"
                                   title="Carret Down Button"
                                   type="button"
                                 >
                                   <svg
                                     fill="none"
-                                    height="1em"
+                                    height="1rem"
                                     viewBox="0 0 14 8"
-                                    width="1em"
+                                    width="1rem"
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path
                                       clip-rule="evenodd"
-                                      d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                      d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                       fill="#32324D"
                                       fill-rule="evenodd"
                                     />
@@ -1236,24 +1238,26 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                     class="c53"
                   >
                     <div
-                      class="c0 "
+                      class=""
                     >
-                      <div>
+                      <div
+                        class=""
+                      >
                         <div
-                          class="c0 c23 c29"
+                          class="c28"
                         >
                           <label
-                            class="c13 c19"
+                            class="c13 c29"
                             for="9"
                           >
                             <div
-                              class="c0 c12"
+                              class="c12"
                             >
                               Default sort attribute
                             </div>
                           </label>
                           <div
-                            class="c0 c12 c44"
+                            class="c12 c44"
                           >
                             <button
                               aria-disabled="false"
@@ -1266,13 +1270,13 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                               type="button"
                             />
                             <div
-                              class="c0 c11 c46"
+                              class="c10 c46"
                             >
                               <div
-                                class="c0 c12"
+                                class="c12"
                               >
                                 <div
-                                  class="c0 c47"
+                                  class="c47"
                                 >
                                   <span
                                     class="c13 c48"
@@ -1283,25 +1287,25 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                                 </div>
                               </div>
                               <div
-                                class="c0 c12"
+                                class="c12"
                               >
                                 <button
                                   aria-hidden="true"
-                                  class="c0 c49 c50 c51"
+                                  class="c49 c50 c51"
                                   tabindex="-1"
                                   title="Carret Down Button"
                                   type="button"
                                 >
                                   <svg
                                     fill="none"
-                                    height="1em"
+                                    height="1rem"
                                     viewBox="0 0 14 8"
-                                    width="1em"
+                                    width="1rem"
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path
                                       clip-rule="evenodd"
-                                      d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                      d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                       fill="#32324D"
                                       fill-rule="evenodd"
                                     />
@@ -1318,24 +1322,26 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                     class="c53"
                   >
                     <div
-                      class="c0 "
+                      class=""
                     >
-                      <div>
+                      <div
+                        class=""
+                      >
                         <div
-                          class="c0 c23 c29"
+                          class="c28"
                         >
                           <label
-                            class="c13 c19"
+                            class="c13 c29"
                             for="11"
                           >
                             <div
-                              class="c0 c12"
+                              class="c12"
                             >
                               Default sort order
                             </div>
                           </label>
                           <div
-                            class="c0 c12 c44"
+                            class="c12 c44"
                           >
                             <button
                               aria-disabled="false"
@@ -1348,13 +1354,13 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                               type="button"
                             />
                             <div
-                              class="c0 c11 c46"
+                              class="c10 c46"
                             >
                               <div
-                                class="c0 c12"
+                                class="c12"
                               >
                                 <div
-                                  class="c0 c47"
+                                  class="c47"
                                 >
                                   <span
                                     class="c13 c48"
@@ -1365,25 +1371,25 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                                 </div>
                               </div>
                               <div
-                                class="c0 c12"
+                                class="c12"
                               >
                                 <button
                                   aria-hidden="true"
-                                  class="c0 c49 c50 c51"
+                                  class="c49 c50 c51"
                                   tabindex="-1"
                                   title="Carret Down Button"
                                   type="button"
                                 >
                                   <svg
                                     fill="none"
-                                    height="1em"
+                                    height="1rem"
                                     viewBox="0 0 14 8"
-                                    width="1em"
+                                    width="1rem"
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path
                                       clip-rule="evenodd"
-                                      d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                      d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                       fill="#32324D"
                                       fill-rule="evenodd"
                                     />
@@ -1399,39 +1405,39 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                 </div>
               </div>
               <div
-                class="c0 c54"
+                class="c54"
               >
                 <hr
-                  class="c0 c55 c56"
+                  class="c55 c56"
                 />
               </div>
               <div
-                class="c0 c57"
+                class="c57"
               >
                 <h2
-                  class="c13 c25"
+                  class="c13 c24"
                 >
                   View
                 </h2>
               </div>
               <div
-                class="c0 c58 c12"
+                class="c58 c12"
               >
                 <div
-                  class="c0 c57 c59 c60"
+                  class="c57 c59 c60"
                   size="1"
                 >
                   <div
-                    class="c0 c12 c61"
+                    class="c61"
                   >
                     <div
-                      class="c0 c62"
+                      class="c62"
                     >
                       <div
-                        class="c0 c63 c11 c64"
+                        class="c63 c10 c64"
                       >
                         <div
-                          class="c0 c12 c61"
+                          class="c61"
                         >
                           <span
                             aria-label="Move id"
@@ -1441,37 +1447,37 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M16.563 5.587a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                d="M16.563 5.587a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574A1.943 1.943 0 0114.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 011.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0017.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM16.563 14.372a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 0 1-2.184-.574A1.943 1.943 0 0 1 14.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 0 1 1.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0 0 17.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006ZM16.563 14.372a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005zM16.563 23.392a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 0 1-2.184-.574 1.943 1.943 0 0 1-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 0 0-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005ZM16.563 23.392a2.503 2.503 0 1 0 0-5.006 2.503 2.503 0 0 0 0 5.006Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM7.378 5.622a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 0 1-2.184-.574 1.943 1.943 0 0 1-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 0 0-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006ZM7.378 5.622a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005zM7.378 14.406a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 0 1 1.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 0 0 8.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005ZM7.378 14.406a2.503 2.503 0 1 0 0-5.006 2.503 2.503 0 0 0 0 5.006Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006zM7.378 23.427a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 0 1 1.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 0 0 8.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006ZM7.378 23.427a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 008.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0z"
+                                d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 0 0 8.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0Z"
                                 fill="#212134"
                               />
                             </svg>
@@ -1483,7 +1489,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           </span>
                         </div>
                         <div
-                          class="c0 c49 c12"
+                          class="c49 c12"
                         >
                           <button
                             aria-label="Edit id"
@@ -1492,14 +1498,14 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 0 1 1.887 0l3.118 3.118ZM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0Z"
                                 fill="#212134"
                                 fill-rule="evenodd"
                               />
@@ -1513,13 +1519,13 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
                                 fill="#212134"
                               />
                             </svg>
@@ -1528,13 +1534,13 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                       </div>
                     </div>
                     <div
-                      class="c0 c62"
+                      class="c62"
                     >
                       <div
-                        class="c0 c63 c11 c64"
+                        class="c63 c10 c64"
                       >
                         <div
-                          class="c0 c12 c61"
+                          class="c61"
                         >
                           <span
                             aria-label="Move address"
@@ -1544,37 +1550,37 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M16.563 5.587a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                d="M16.563 5.587a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574A1.943 1.943 0 0114.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 011.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0017.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM16.563 14.372a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 0 1-2.184-.574A1.943 1.943 0 0 1 14.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 0 1 1.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0 0 17.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006ZM16.563 14.372a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005zM16.563 23.392a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 0 1-2.184-.574 1.943 1.943 0 0 1-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 0 0-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005ZM16.563 23.392a2.503 2.503 0 1 0 0-5.006 2.503 2.503 0 0 0 0 5.006Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM7.378 5.622a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 0 1-2.184-.574 1.943 1.943 0 0 1-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 0 0-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006ZM7.378 5.622a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005zM7.378 14.406a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 0 1 1.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 0 0 8.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005ZM7.378 14.406a2.503 2.503 0 1 0 0-5.006 2.503 2.503 0 0 0 0 5.006Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006zM7.378 23.427a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 0 1 1.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 0 0 8.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006ZM7.378 23.427a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 008.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0z"
+                                d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 0 0 8.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0Z"
                                 fill="#212134"
                               />
                             </svg>
@@ -1586,7 +1592,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           </span>
                         </div>
                         <div
-                          class="c0 c49 c12"
+                          class="c49 c12"
                         >
                           <button
                             aria-label="Edit address"
@@ -1595,14 +1601,14 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 0 1 1.887 0l3.118 3.118ZM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0Z"
                                 fill="#212134"
                                 fill-rule="evenodd"
                               />
@@ -1616,13 +1622,13 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
                                 fill="#212134"
                               />
                             </svg>
@@ -1633,7 +1639,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                   </div>
                 </div>
                 <div
-                  class="c0 c57 c69 c70"
+                  class="c57 c69 c70"
                 >
                   <div>
                     <span>
@@ -1643,7 +1649,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         aria-expanded="false"
                         aria-haspopup="true"
                         aria-labelledby="12"
-                        class="c15 c71"
+                        class="c71 c35 c17 c72"
                         data-testid="add-field"
                         tabindex="0"
                         type="button"
@@ -1657,13 +1663,13 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           aria-hidden="true"
                           fill="none"
                           focusable="false"
-                          height="1em"
+                          height="1rem"
                           viewBox="0 0 24 24"
-                          width="1em"
+                          width="1rem"
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
-                            d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
+                            d="M24 13.604a.3.3 0 0 1-.3.3h-9.795V23.7a.3.3 0 0 1-.3.3h-3.21a.3.3 0 0 1-.3-.3v-9.795H.3a.3.3 0 0 1-.3-.3v-3.21a.3.3 0 0 1 .3-.3h9.795V.3a.3.3 0 0 1 .3-.3h3.21a.3.3 0 0 1 .3.3v9.795H23.7a.3.3 0 0 1 .3.3v3.21Z"
                             fill="#212134"
                           />
                         </svg>
@@ -1704,85 +1710,11 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
 `;
 
 exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
-.c14 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c19 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c20 {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c25 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c37 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #666687;
-  text-transform: uppercase;
-}
-
-.c39 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #4945ff;
-  text-transform: uppercase;
-}
-
-.c41 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #b72b1a;
-  text-transform: uppercase;
-}
-
-.c48 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c52 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c68 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c2 {
+.c1 {
   padding-bottom: 56px;
 }
 
-.c5 {
+.c4 {
   background: #f6f6f9;
   padding-top: 24px;
   padding-right: 56px;
@@ -1790,12 +1722,23 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   padding-left: 56px;
 }
 
-.c6 {
+.c5 {
   padding-bottom: 8px;
 }
 
-.c17 {
-  padding-right: 8px;
+.c11 {
+  min-width: 0;
+}
+
+.c15 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
 }
 
 .c21 {
@@ -1813,7 +1756,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c27 {
+.c26 {
   width: 100%;
 }
 
@@ -1875,7 +1818,17 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   border: 1px solid #eaeaef;
 }
 
-.c11 {
+.c71 {
+  padding: 8px;
+  border-radius: 4px;
+  border-color: #dcdce4;
+  border: 1px solid #dcdce4;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+}
+
+.c10 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1907,6 +1860,21 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   flex-direction: row;
 }
 
+.c16 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
 .c23 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
@@ -1919,6 +1887,41 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 16px;
+}
+
+.c25 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 16px;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c28 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .c35 {
@@ -1939,71 +1942,122 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   justify-content: center;
 }
 
-.c24 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c24 > * + * {
-  margin-top: 16px;
-}
-
-.c29 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c29 > * + * {
-  margin-top: 4px;
-}
-
-.c26 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c26 > * + * {
-  margin-left: 16px;
-}
-
-.c61 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c61 > * + * {
-  margin-left: 12px;
-}
-
-.c15 {
+.c61 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 12px;
+}
+
+.c14 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c19 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c20 {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666687;
+}
+
+.c24 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c29 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c37 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #666687;
+  text-transform: uppercase;
+}
+
+.c39 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #4945ff;
+  text-transform: uppercase;
+}
+
+.c41 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #b72b1a;
+  text-transform: uppercase;
+}
+
+.c48 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c52 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c68 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c17 {
   position: relative;
   outline: none;
 }
 
-.c15 svg {
+.c17 svg {
   height: 12px;
   width: 12px;
 }
 
-.c15 svg > g,
-.c15 svg path {
+.c17 svg > g,
+.c17 svg path {
   fill: #ffffff;
 }
 
-.c15[aria-disabled='true'] {
+.c17[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c15:after {
+.c17:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -2018,11 +2072,11 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   border: 2px solid transparent;
 }
 
-.c15:focus-visible {
+.c17:focus-visible {
   outline: none;
 }
 
-.c15:focus-visible:after {
+.c17:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -2046,74 +2100,47 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
 }
 
 .c18 {
-  height: 100%;
-}
-
-.c16 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
 }
 
-.c16 .c0 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c16 .c13 {
-  color: #ffffff;
-}
-
-.c16[aria-disabled='true'] {
+.c18[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c16[aria-disabled='true'] .c13 {
+.c18[aria-disabled='true'] .c13 {
   color: #666687;
 }
 
-.c16[aria-disabled='true'] svg > g,.c16[aria-disabled='true'] svg path {
+.c18[aria-disabled='true'] svg > g,.c18[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c16[aria-disabled='true']:active {
+.c18[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c16[aria-disabled='true']:active .c13 {
+.c18[aria-disabled='true']:active .c13 {
   color: #666687;
 }
 
-.c16[aria-disabled='true']:active svg > g,.c16[aria-disabled='true']:active svg path {
+.c18[aria-disabled='true']:active svg > g,.c18[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c16:hover {
+.c18:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c16:active {
+.c18:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c16 svg > g,
-.c16 svg path {
+.c18 svg > g,
+.c18 svg path {
   fill: #ffffff;
 }
 
@@ -2215,56 +2242,35 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   max-width: 100%;
 }
 
-.c71 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-}
-
-.c71 svg > g,
-.c71 svg path {
+.c72 svg > g,
+.c72 svg path {
   fill: #8e8ea9;
 }
 
-.c71:hover svg > g,
-.c71:hover svg path {
+.c72:hover svg > g,
+.c72:hover svg path {
   fill: #666687;
 }
 
-.c71:active svg > g,
-.c71:active svg path {
+.c72:active svg > g,
+.c72:active svg path {
   fill: #a5a5ba;
 }
 
-.c71[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c71[aria-disabled='true'] svg path {
+.c72[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c1 {
+.c0 {
   display: grid;
   grid-template-columns: 1fr;
 }
 
-.c3 {
+.c2 {
   overflow-x: hidden;
 }
 
-.c4:focus-visible {
+.c3:focus-visible {
   outline: none;
 }
 
@@ -2335,21 +2341,21 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   width: 100%;
 }
 
-.c28 {
+.c27 {
   max-width: 320px;
 }
 
-.c8 {
+.c7 {
   padding-right: 8px;
 }
 
-.c10 {
+.c9 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #4945ff;
 }
 
-.c7 {
+.c6 {
   display: -webkit-inline-box;
   display: -webkit-inline-flex;
   display: -ms-inline-flexbox;
@@ -2364,15 +2370,15 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   outline: none;
 }
 
-.c7 svg path {
+.c6 svg path {
   fill: #4945ff;
 }
 
-.c7 svg {
+.c6 svg {
   font-size: 0.625rem;
 }
 
-.c7:after {
+.c6:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -2387,11 +2393,11 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   border: 2px solid transparent;
 }
 
-.c7:focus-visible {
+.c6:focus-visible {
   outline: none;
 }
 
-.c7:focus-visible:after {
+.c6:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -2402,7 +2408,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c9 {
+.c8 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2518,15 +2524,15 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
 
 <div>
   <div
-    class="c0 c1"
+    class="c0"
   >
     <div
-      class="c0 c2 c3"
+      class="c1 c2"
     >
       <main
         aria-busy="false"
         aria-labelledby="main-content-title"
-        class="c4"
+        class="c3"
         id="main-content"
         tabindex="-1"
       >
@@ -2535,46 +2541,46 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
             style="height: 0px;"
           >
             <div
-              class="c0 c5"
+              class="c4"
               data-strapi-header="true"
             >
               <div
-                class="c0 c6"
+                class="c5"
               >
                 <a
-                  class="c7"
+                  class="c6"
                   href="/content-manager/undefined/api::restaurant.restaurant?page=1&pageSize=10&sort=id:ASC"
                   id="go-back"
                 >
                   <span
                     aria-hidden="true"
-                    class="c8 c9"
+                    class="c7 c8"
                   >
                     <svg
                       fill="none"
-                      height="1em"
+                      height="1rem"
                       viewBox="0 0 24 24"
-                      width="1em"
+                      width="1rem"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        d="M24 13.3a.2.2 0 01-.2.2H5.74l8.239 8.239a.2.2 0 010 .282L12.14 23.86a.2.2 0 01-.282 0L.14 12.14a.2.2 0 010-.282L11.86.14a.2.2 0 01.282 0L13.98 1.98a.2.2 0 010 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6z"
+                        d="M24 13.3a.2.2 0 0 1-.2.2H5.74l8.239 8.239a.2.2 0 0 1 0 .282L12.14 23.86a.2.2 0 0 1-.282 0L.14 12.14a.2.2 0 0 1 0-.282L11.86.14a.2.2 0 0 1 .282 0L13.98 1.98a.2.2 0 0 1 0 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6Z"
                         fill="#212134"
                       />
                     </svg>
                   </span>
                   <span
-                    class="c10"
+                    class="c9"
                   >
                     Back
                   </span>
                 </a>
               </div>
               <div
-                class="c0 c11"
+                class="c10"
               >
                 <div
-                  class="c0 c12"
+                  class="c11 c12"
                 >
                   <h1
                     class="c13 c14"
@@ -2584,22 +2590,22 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                 </div>
                 <button
                   aria-disabled="false"
-                  class="c15 c16"
+                  class="c15 c16 c17 c18"
                   type="submit"
                 >
                   <div
                     aria-hidden="true"
-                    class="c0 c17 c18"
+                    class=""
                   >
                     <svg
                       fill="none"
-                      height="1em"
+                      height="1rem"
                       viewBox="0 0 24 24"
-                      width="1em"
+                      width="1rem"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
+                        d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
                         fill="#212134"
                       />
                     </svg>
@@ -2619,40 +2625,40 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
             </div>
           </div>
           <div
-            class="c0 c21"
+            class="c21"
           >
             <div
-              class="c0 c22"
+              class="c22"
             >
               <div
-                class="c0 c23 c24"
+                class="c23"
               >
                 <h2
-                  class="c13 c25"
+                  class="c13 c24"
                 >
                   Settings
                 </h2>
                 <div
-                  class="c0 c11 c26"
+                  class="c25"
                 >
                   <div
-                    class="c0 c27"
+                    class="c26"
                   >
                     <div
-                      class="c28"
+                      class="c27"
                     >
                       <div
-                        class="c0 c23 c29"
+                        class="c28"
                       >
                         <div
-                          class="c0 c12"
+                          class="c12"
                         >
                           <label
-                            class="c13 c19"
+                            class="c13 c29"
                             for="33"
                           >
                             <div
-                              class="c0 c12"
+                              class="c12"
                             >
                               Enable search
                             </div>
@@ -2667,12 +2673,12 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                             Enable search
                           </div>
                           <div
-                            class="c0 c32 c33"
+                            class="c32 c33"
                             display="flex"
                           >
                             <div
                               aria-hidden="true"
-                              class="c0 c34 c35 c36"
+                              class="c34 c35 c36"
                             >
                               <span
                                 class="c13 c37"
@@ -2682,7 +2688,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                             </div>
                             <div
                               aria-hidden="true"
-                              class="c0 c34 c35 c38"
+                              class="c34 c35 c38"
                             >
                               <span
                                 class="c13 c39"
@@ -2705,23 +2711,23 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                     </div>
                   </div>
                   <div
-                    class="c0 c27"
+                    class="c26"
                   >
                     <div
-                      class="c28"
+                      class="c27"
                     >
                       <div
-                        class="c0 c23 c29"
+                        class="c28"
                       >
                         <div
-                          class="c0 c12"
+                          class="c12"
                         >
                           <label
-                            class="c13 c19"
+                            class="c13 c29"
                             for="35"
                           >
                             <div
-                              class="c0 c12"
+                              class="c12"
                             >
                               Enable filters
                             </div>
@@ -2736,12 +2742,12 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                             Enable filters
                           </div>
                           <div
-                            class="c0 c32 c33"
+                            class="c32 c33"
                             display="flex"
                           >
                             <div
                               aria-hidden="true"
-                              class="c0 c34 c35 c36"
+                              class="c34 c35 c36"
                             >
                               <span
                                 class="c13 c37"
@@ -2751,7 +2757,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                             </div>
                             <div
                               aria-hidden="true"
-                              class="c0 c34 c35 c38"
+                              class="c34 c35 c38"
                             >
                               <span
                                 class="c13 c39"
@@ -2774,23 +2780,23 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                     </div>
                   </div>
                   <div
-                    class="c0 c27"
+                    class="c26"
                   >
                     <div
-                      class="c28"
+                      class="c27"
                     >
                       <div
-                        class="c0 c23 c29"
+                        class="c28"
                       >
                         <div
-                          class="c0 c12"
+                          class="c12"
                         >
                           <label
-                            class="c13 c19"
+                            class="c13 c29"
                             for="37"
                           >
                             <div
-                              class="c0 c12"
+                              class="c12"
                             >
                               Enable bulk actions
                             </div>
@@ -2805,12 +2811,12 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                             Enable bulk actions
                           </div>
                           <div
-                            class="c0 c32 c33"
+                            class="c32 c33"
                             display="flex"
                           >
                             <div
                               aria-hidden="true"
-                              class="c0 c34 c35 c38"
+                              class="c34 c35 c38"
                             >
                               <span
                                 class="c13 c41"
@@ -2820,7 +2826,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                             </div>
                             <div
                               aria-hidden="true"
-                              class="c0 c34 c35 c36"
+                              class="c34 c35 c36"
                             >
                               <span
                                 class="c13 c37"
@@ -2843,30 +2849,32 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c0 c42"
+                  class="c42"
                 >
                   <div
                     class="c43"
                   >
                     <div
-                      class="c0 "
+                      class=""
                     >
-                      <div>
+                      <div
+                        class=""
+                      >
                         <div
-                          class="c0 c23 c29"
+                          class="c28"
                         >
                           <label
-                            class="c13 c19"
+                            class="c13 c29"
                             for="39"
                           >
                             <div
-                              class="c0 c12"
+                              class="c12"
                             >
                               Entries per page
                             </div>
                           </label>
                           <div
-                            class="c0 c12 c44"
+                            class="c12 c44"
                           >
                             <button
                               aria-describedby="39-hint"
@@ -2880,13 +2888,13 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                               type="button"
                             />
                             <div
-                              class="c0 c11 c46"
+                              class="c10 c46"
                             >
                               <div
-                                class="c0 c12"
+                                class="c12"
                               >
                                 <div
-                                  class="c0 c47"
+                                  class="c47"
                                 >
                                   <span
                                     class="c13 c48"
@@ -2897,25 +2905,25 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                                 </div>
                               </div>
                               <div
-                                class="c0 c12"
+                                class="c12"
                               >
                                 <button
                                   aria-hidden="true"
-                                  class="c0 c49 c50 c51"
+                                  class="c49 c50 c51"
                                   tabindex="-1"
                                   title="Carret Down Button"
                                   type="button"
                                 >
                                   <svg
                                     fill="none"
-                                    height="1em"
+                                    height="1rem"
                                     viewBox="0 0 14 8"
-                                    width="1em"
+                                    width="1rem"
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path
                                       clip-rule="evenodd"
-                                      d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                      d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                       fill="#32324D"
                                       fill-rule="evenodd"
                                     />
@@ -2938,24 +2946,26 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                     class="c53"
                   >
                     <div
-                      class="c0 "
+                      class=""
                     >
-                      <div>
+                      <div
+                        class=""
+                      >
                         <div
-                          class="c0 c23 c29"
+                          class="c28"
                         >
                           <label
-                            class="c13 c19"
+                            class="c13 c29"
                             for="41"
                           >
                             <div
-                              class="c0 c12"
+                              class="c12"
                             >
                               Default sort attribute
                             </div>
                           </label>
                           <div
-                            class="c0 c12 c44"
+                            class="c12 c44"
                           >
                             <button
                               aria-disabled="false"
@@ -2968,13 +2978,13 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                               type="button"
                             />
                             <div
-                              class="c0 c11 c46"
+                              class="c10 c46"
                             >
                               <div
-                                class="c0 c12"
+                                class="c12"
                               >
                                 <div
-                                  class="c0 c47"
+                                  class="c47"
                                 >
                                   <span
                                     class="c13 c48"
@@ -2985,25 +2995,25 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                                 </div>
                               </div>
                               <div
-                                class="c0 c12"
+                                class="c12"
                               >
                                 <button
                                   aria-hidden="true"
-                                  class="c0 c49 c50 c51"
+                                  class="c49 c50 c51"
                                   tabindex="-1"
                                   title="Carret Down Button"
                                   type="button"
                                 >
                                   <svg
                                     fill="none"
-                                    height="1em"
+                                    height="1rem"
                                     viewBox="0 0 14 8"
-                                    width="1em"
+                                    width="1rem"
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path
                                       clip-rule="evenodd"
-                                      d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                      d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                       fill="#32324D"
                                       fill-rule="evenodd"
                                     />
@@ -3020,24 +3030,26 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                     class="c53"
                   >
                     <div
-                      class="c0 "
+                      class=""
                     >
-                      <div>
+                      <div
+                        class=""
+                      >
                         <div
-                          class="c0 c23 c29"
+                          class="c28"
                         >
                           <label
-                            class="c13 c19"
+                            class="c13 c29"
                             for="43"
                           >
                             <div
-                              class="c0 c12"
+                              class="c12"
                             >
                               Default sort order
                             </div>
                           </label>
                           <div
-                            class="c0 c12 c44"
+                            class="c12 c44"
                           >
                             <button
                               aria-disabled="false"
@@ -3050,13 +3062,13 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                               type="button"
                             />
                             <div
-                              class="c0 c11 c46"
+                              class="c10 c46"
                             >
                               <div
-                                class="c0 c12"
+                                class="c12"
                               >
                                 <div
-                                  class="c0 c47"
+                                  class="c47"
                                 >
                                   <span
                                     class="c13 c48"
@@ -3067,25 +3079,25 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                                 </div>
                               </div>
                               <div
-                                class="c0 c12"
+                                class="c12"
                               >
                                 <button
                                   aria-hidden="true"
-                                  class="c0 c49 c50 c51"
+                                  class="c49 c50 c51"
                                   tabindex="-1"
                                   title="Carret Down Button"
                                   type="button"
                                 >
                                   <svg
                                     fill="none"
-                                    height="1em"
+                                    height="1rem"
                                     viewBox="0 0 14 8"
-                                    width="1em"
+                                    width="1rem"
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path
                                       clip-rule="evenodd"
-                                      d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                      d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                       fill="#32324D"
                                       fill-rule="evenodd"
                                     />
@@ -3101,39 +3113,39 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                 </div>
               </div>
               <div
-                class="c0 c54"
+                class="c54"
               >
                 <hr
-                  class="c0 c55 c56"
+                  class="c55 c56"
                 />
               </div>
               <div
-                class="c0 c57"
+                class="c57"
               >
                 <h2
-                  class="c13 c25"
+                  class="c13 c24"
                 >
                   View
                 </h2>
               </div>
               <div
-                class="c0 c58 c12"
+                class="c58 c12"
               >
                 <div
-                  class="c0 c57 c59 c60"
+                  class="c57 c59 c60"
                   size="1"
                 >
                   <div
-                    class="c0 c12 c61"
+                    class="c61"
                   >
                     <div
-                      class="c0 c62"
+                      class="c62"
                     >
                       <div
-                        class="c0 c63 c11 c64"
+                        class="c63 c10 c64"
                       >
                         <div
-                          class="c0 c12 c61"
+                          class="c61"
                         >
                           <span
                             aria-label="Move id"
@@ -3143,37 +3155,37 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M16.563 5.587a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                d="M16.563 5.587a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574A1.943 1.943 0 0114.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 011.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0017.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM16.563 14.372a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 0 1-2.184-.574A1.943 1.943 0 0 1 14.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 0 1 1.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0 0 17.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006ZM16.563 14.372a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005zM16.563 23.392a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 0 1-2.184-.574 1.943 1.943 0 0 1-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 0 0-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005ZM16.563 23.392a2.503 2.503 0 1 0 0-5.006 2.503 2.503 0 0 0 0 5.006Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM7.378 5.622a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 0 1-2.184-.574 1.943 1.943 0 0 1-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 0 0-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006ZM7.378 5.622a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005zM7.378 14.406a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 0 1 1.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 0 0 8.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005ZM7.378 14.406a2.503 2.503 0 1 0 0-5.006 2.503 2.503 0 0 0 0 5.006Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006zM7.378 23.427a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 0 1 1.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 0 0 8.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006ZM7.378 23.427a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 008.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0z"
+                                d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 0 0 8.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0Z"
                                 fill="#212134"
                               />
                             </svg>
@@ -3185,7 +3197,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           </span>
                         </div>
                         <div
-                          class="c0 c49 c12"
+                          class="c49 c12"
                         >
                           <button
                             aria-label="Edit id"
@@ -3194,14 +3206,14 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 0 1 1.887 0l3.118 3.118ZM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0Z"
                                 fill="#212134"
                                 fill-rule="evenodd"
                               />
@@ -3215,13 +3227,13 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
                                 fill="#212134"
                               />
                             </svg>
@@ -3230,13 +3242,13 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                       </div>
                     </div>
                     <div
-                      class="c0 c62"
+                      class="c62"
                     >
                       <div
-                        class="c0 c63 c11 c64"
+                        class="c63 c10 c64"
                       >
                         <div
-                          class="c0 c12 c61"
+                          class="c61"
                         >
                           <span
                             aria-label="Move address"
@@ -3246,37 +3258,37 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M16.563 5.587a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                d="M16.563 5.587a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574A1.943 1.943 0 0114.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 011.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0017.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM16.563 14.372a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 0 1-2.184-.574A1.943 1.943 0 0 1 14.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 0 1 1.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0 0 17.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006ZM16.563 14.372a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005zM16.563 23.392a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 0 1-2.184-.574 1.943 1.943 0 0 1-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 0 0-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005ZM16.563 23.392a2.503 2.503 0 1 0 0-5.006 2.503 2.503 0 0 0 0 5.006Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM7.378 5.622a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 0 1-2.184-.574 1.943 1.943 0 0 1-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 0 0-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006ZM7.378 5.622a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005zM7.378 14.406a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 0 1 1.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 0 0 8.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005ZM7.378 14.406a2.503 2.503 0 1 0 0-5.006 2.503 2.503 0 0 0 0 5.006Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006zM7.378 23.427a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 0 1 1.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 0 0 8.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006ZM7.378 23.427a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 008.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0z"
+                                d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 0 0 8.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0Z"
                                 fill="#212134"
                               />
                             </svg>
@@ -3288,7 +3300,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           </span>
                         </div>
                         <div
-                          class="c0 c49 c12"
+                          class="c49 c12"
                         >
                           <button
                             aria-label="Edit address"
@@ -3297,14 +3309,14 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 0 1 1.887 0l3.118 3.118ZM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0Z"
                                 fill="#212134"
                                 fill-rule="evenodd"
                               />
@@ -3318,13 +3330,13 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
                                 fill="#212134"
                               />
                             </svg>
@@ -3333,13 +3345,13 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                       </div>
                     </div>
                     <div
-                      class="c0 c62"
+                      class="c62"
                     >
                       <div
-                        class="c0 c63 c11 c64"
+                        class="c63 c10 c64"
                       >
                         <div
-                          class="c0 c12 c61"
+                          class="c61"
                         >
                           <span
                             aria-label="Move Cover"
@@ -3349,37 +3361,37 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M16.563 5.587a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                d="M16.563 5.587a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574A1.943 1.943 0 0114.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 011.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0017.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM16.563 14.372a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 0 1-2.184-.574A1.943 1.943 0 0 1 14.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 0 1 1.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0 0 17.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006ZM16.563 14.372a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005zM16.563 23.392a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 0 1-2.184-.574 1.943 1.943 0 0 1-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 0 0-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005ZM16.563 23.392a2.503 2.503 0 1 0 0-5.006 2.503 2.503 0 0 0 0 5.006Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM7.378 5.622a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 0 1-2.184-.574 1.943 1.943 0 0 1-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 0 0-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006ZM7.378 5.622a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005zM7.378 14.406a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 0 1 1.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 0 0 8.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005ZM7.378 14.406a2.503 2.503 0 1 0 0-5.006 2.503 2.503 0 0 0 0 5.006Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006zM7.378 23.427a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 0 1 1.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 0 0 8.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006ZM7.378 23.427a2.503 2.503 0 1 0 0-5.007 2.503 2.503 0 0 0 0 5.007Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 008.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0z"
+                                d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 0 1-2.185-.574 1.943 1.943 0 0 1-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 0 0 8.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0Z"
                                 fill="#212134"
                               />
                             </svg>
@@ -3391,7 +3403,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           </span>
                         </div>
                         <div
-                          class="c0 c49 c12"
+                          class="c49 c12"
                         >
                           <button
                             aria-label="Edit Cover"
@@ -3400,14 +3412,14 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 0 1 1.887 0l3.118 3.118ZM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0Z"
                                 fill="#212134"
                                 fill-rule="evenodd"
                               />
@@ -3421,13 +3433,13 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
                                 fill="#212134"
                               />
                             </svg>
@@ -3438,7 +3450,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c0 c57 c69 c70"
+                  class="c57 c69 c70"
                 >
                   <div>
                     <span>
@@ -3448,7 +3460,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         aria-expanded="true"
                         aria-haspopup="true"
                         aria-labelledby="44"
-                        class="c15 c71"
+                        class="c71 c35 c17 c72"
                         data-testid="add-field"
                         tabindex="0"
                         type="button"
@@ -3462,13 +3474,13 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           aria-hidden="true"
                           fill="none"
                           focusable="false"
-                          height="1em"
+                          height="1rem"
                           viewBox="0 0 24 24"
-                          width="1em"
+                          width="1rem"
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
-                            d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
+                            d="M24 13.604a.3.3 0 0 1-.3.3h-9.795V23.7a.3.3 0 0 1-.3.3h-3.21a.3.3 0 0 1-.3-.3v-9.795H.3a.3.3 0 0 1-.3-.3v-3.21a.3.3 0 0 1 .3-.3h9.795V.3a.3.3 0 0 1 .3-.3h3.21a.3.3 0 0 1 .3.3v9.795H23.7a.3.3 0 0 1 .3.3v3.21Z"
                             fill="#212134"
                           />
                         </svg>

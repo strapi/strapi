@@ -61,42 +61,7 @@ describe('<ListPage />', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c6 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c11 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c12 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c24 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #666687;
-      }
-
-      .c35 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #4945ff;
-      }
-
-      .c2 {
+      .c1 {
         background: #f6f6f9;
         padding-top: 40px;
         padding-right: 56px;
@@ -104,8 +69,19 @@ describe('<ListPage />', () => {
         padding-left: 56px;
       }
 
-      .c9 {
-        padding-right: 8px;
+      .c3 {
+        min-width: 0;
+      }
+
+      .c7 {
+        background: #4945ff;
+        padding: 8px;
+        padding-right: 16px;
+        padding-left: 16px;
+        border-radius: 4px;
+        border-color: #4945ff;
+        border: 1px solid #4945ff;
+        cursor: pointer;
       }
 
       .c13 {
@@ -145,7 +121,7 @@ describe('<ListPage />', () => {
         padding-left: 12px;
       }
 
-      .c3 {
+      .c2 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -177,35 +153,76 @@ describe('<ListPage />', () => {
         flex-direction: row;
       }
 
-      .c7 {
+      .c8 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        gap: 8px;
+      }
+
+      .c6 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c11 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #ffffff;
+      }
+
+      .c12 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c24 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
+      }
+
+      .c35 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #4945ff;
+      }
+
+      .c9 {
         position: relative;
         outline: none;
       }
 
-      .c7 svg {
+      .c9 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c7 svg > g,
-      .c7 svg path {
+      .c9 svg > g,
+      .c9 svg path {
         fill: #ffffff;
       }
 
-      .c7[aria-disabled='true'] {
+      .c9[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c7:after {
+      .c9:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -220,11 +237,11 @@ describe('<ListPage />', () => {
         border: 2px solid transparent;
       }
 
-      .c7:focus-visible {
+      .c9:focus-visible {
         outline: none;
       }
 
-      .c7:focus-visible:after {
+      .c9:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -248,74 +265,47 @@ describe('<ListPage />', () => {
       }
 
       .c10 {
-        height: 100%;
-      }
-
-      .c8 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        background-color: #4945ff;
-        border: 1px solid #4945ff;
         height: 2rem;
-        padding-left: 16px;
-        padding-right: 16px;
       }
 
-      .c8 .c1 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c8 .c5 {
-        color: #ffffff;
-      }
-
-      .c8[aria-disabled='true'] {
+      .c10[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c8[aria-disabled='true'] .c5 {
+      .c10[aria-disabled='true'] .c5 {
         color: #666687;
       }
 
-      .c8[aria-disabled='true'] svg > g,.c8[aria-disabled='true'] svg path {
+      .c10[aria-disabled='true'] svg > g,.c10[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c8[aria-disabled='true']:active {
+      .c10[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c8[aria-disabled='true']:active .c5 {
+      .c10[aria-disabled='true']:active .c5 {
         color: #666687;
       }
 
-      .c8[aria-disabled='true']:active svg > g,.c8[aria-disabled='true']:active svg path {
+      .c10[aria-disabled='true']:active svg > g,.c10[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c8:hover {
+      .c10:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c8:active {
+      .c10:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
-      .c8 svg > g,
-      .c8 svg path {
+      .c10 svg > g,
+      .c10 svg path {
         fill: #ffffff;
       }
 
@@ -454,14 +444,14 @@ describe('<ListPage />', () => {
           style="height: 0px;"
         >
           <div
-            class="c1 c2"
+            class="c1"
             data-strapi-header="true"
           >
             <div
-              class="c1 c3"
+              class="c2"
             >
               <div
-                class="c1 c4"
+                class="c3 c4"
               >
                 <h1
                   class="c5 c6"
@@ -471,22 +461,22 @@ describe('<ListPage />', () => {
               </div>
               <button
                 aria-disabled="false"
-                class="c7 c8"
+                class="c7 c8 c9 c10"
                 type="button"
               >
                 <div
                   aria-hidden="true"
-                  class="c1 c9 c10"
+                  class=""
                 >
                   <svg
                     fill="none"
-                    height="1em"
+                    height="1rem"
                     viewBox="0 0 24 24"
-                    width="1em"
+                    width="1rem"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
+                      d="M24 13.604a.3.3 0 0 1-.3.3h-9.795V23.7a.3.3 0 0 1-.3.3h-3.21a.3.3 0 0 1-.3-.3v-9.795H.3a.3.3 0 0 1-.3-.3v-3.21a.3.3 0 0 1 .3-.3h9.795V.3a.3.3 0 0 1 .3-.3h3.21a.3.3 0 0 1 .3.3v9.795H23.7a.3.3 0 0 1 .3.3v3.21Z"
                       fill="#212134"
                     />
                   </svg>
@@ -506,16 +496,16 @@ describe('<ListPage />', () => {
           </div>
         </div>
         <div
-          class="c1 c13"
+          class="c13"
         >
           <div
-            class="c1 c14 c15"
+            class="c14 c15"
           >
             <div
-              class="c1 c16 c17"
+              class="c16 c17"
             >
               <div
-                class="c1 c18 c19"
+                class="c18 c19"
               >
                 <table
                   aria-colcount="5"
@@ -528,16 +518,16 @@ describe('<ListPage />', () => {
                   >
                     <tr
                       aria-rowindex="1"
-                      class="c1 c22"
+                      class="c22"
                     >
                       <th
                         aria-colindex="1"
-                        class="c1 c23"
+                        class="c23"
                         role="gridcell"
                         tabindex="0"
                       >
                         <div
-                          class="c1 c4"
+                          class="c4"
                         >
                           <span
                             class="c5 c24"
@@ -551,12 +541,12 @@ describe('<ListPage />', () => {
                       </th>
                       <th
                         aria-colindex="2"
-                        class="c1 c23"
+                        class="c23"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <div
-                          class="c1 c4"
+                          class="c4"
                         >
                           <span
                             class="c5 c24"
@@ -570,12 +560,12 @@ describe('<ListPage />', () => {
                       </th>
                       <th
                         aria-colindex="3"
-                        class="c1 c23"
+                        class="c23"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <div
-                          class="c1 c4"
+                          class="c4"
                         >
                           <span
                             class="c5 c24"
@@ -589,12 +579,12 @@ describe('<ListPage />', () => {
                       </th>
                       <th
                         aria-colindex="4"
-                        class="c1 c23"
+                        class="c23"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <div
-                          class="c1 c4"
+                          class="c4"
                         >
                           <div
                             class="c26"
@@ -616,33 +606,33 @@ describe('<ListPage />', () => {
             </div>
             <div>
               <hr
-                class="c1 c28 c29"
+                class="c28 c29"
               />
               <button
-                class="c1 c30 c31"
+                class="c30 c31"
               >
                 <div
-                  class="c1 c4"
+                  class="c4"
                 >
                   <div
                     aria-hidden="true"
-                    class="c1 c32 c33"
+                    class="c32 c33"
                   >
                     <svg
                       fill="none"
-                      height="1em"
+                      height="1rem"
                       viewBox="0 0 24 24"
-                      width="1em"
+                      width="1rem"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
+                        d="M24 13.604a.3.3 0 0 1-.3.3h-9.795V23.7a.3.3 0 0 1-.3.3h-3.21a.3.3 0 0 1-.3-.3v-9.795H.3a.3.3 0 0 1-.3-.3v-3.21a.3.3 0 0 1 .3-.3h9.795V.3a.3.3 0 0 1 .3-.3h3.21a.3.3 0 0 1 .3.3v9.795H23.7a.3.3 0 0 1 .3.3v3.21Z"
                         fill="#212134"
                       />
                     </svg>
                   </div>
                   <div
-                    class="c1 c34"
+                    class="c34"
                   >
                     <span
                       class="c5 c35"

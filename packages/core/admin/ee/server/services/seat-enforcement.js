@@ -2,7 +2,7 @@
 
 // eslint-disable-next-line node/no-extraneous-require
 const ee = require('@strapi/strapi/lib/utils/ee');
-const { take, drop, map, prop, pick, reverse } = require('lodash/fp');
+const { take, drop, map, prop, pick, reverse, isNil } = require('lodash/fp');
 const { getService } = require('../../../server/utils');
 const { SUPER_ADMIN_CODE } = require('../../../server/services/constants');
 
@@ -90,7 +90,7 @@ const syncDisabledUserRecords = async () => {
 
 const seatEnforcementWorkflow = async () => {
   const adminSeats = ee.seats;
-  if (!adminSeats) {
+  if (isNil(adminSeats)) {
     return;
   }
 

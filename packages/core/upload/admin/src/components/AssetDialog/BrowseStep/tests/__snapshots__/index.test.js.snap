@@ -1,73 +1,34 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`BrowseStep renders and match snapshot 1`] = `
-.c8 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c30 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  font-weight: 500;
-  color: #32324d;
-}
-
-.c47 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 500;
-  color: #32324d;
-}
-
-.c49 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
-}
-
-.c62 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c66 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #666687;
-}
-
-.c1 {
+.c0 {
   padding-bottom: 16px;
 }
 
-.c9 {
-  padding-left: 8px;
+.c4 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
 }
 
-.c11 {
-  padding-right: 8px;
+.c14 {
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
 
 .c16 {
-  padding-top: 4px;
-  padding-bottom: 4px;
+  padding: 8px;
+  border-radius: 4px;
+  border-color: #dcdce4;
+  border: 1px solid #dcdce4;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
 }
 
 .c20 {
@@ -93,7 +54,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   cursor: pointer;
 }
 
-.c38 {
+.c37 {
   background: #eaf5ff;
   color: #66b7f1;
   padding-top: 8px;
@@ -103,22 +64,22 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   border-radius: 4px;
 }
 
-.c40 {
+.c39 {
   position: relative;
   overflow: hidden;
   max-width: 100%;
 }
 
-.c43 {
+.c42 {
   padding: 4px;
   max-width: 100%;
 }
 
-.c45 {
+.c44 {
   max-width: 100%;
 }
 
-.c52 {
+.c51 {
   right: 16px;
 }
 
@@ -126,16 +87,20 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   padding-top: 16px;
 }
 
-.c61 {
+.c60 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c63 {
+.c62 {
   padding-left: 12px;
 }
 
-.c2 {
+.c65 {
+  padding-left: 8px;
+}
+
+.c1 {
   -webkit-align-items: flex-start;
   -webkit-box-align: flex-start;
   -ms-flex-align: flex-start;
@@ -153,7 +118,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   justify-content: space-between;
 }
 
-.c3 {
+.c2 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -170,7 +135,22 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   flex-wrap: wrap;
 }
 
-.c13 {
+.c5 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c10 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -184,7 +164,25 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   flex-direction: row;
 }
 
-.c41 {
+.c17 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c40 {
   -webkit-align-items: flex-start;
   -webkit-box-align: flex-start;
   -ms-flex-align: flex-start;
@@ -198,7 +196,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   flex-direction: column;
 }
 
-.c46 {
+.c45 {
   -webkit-align-items: start;
   -webkit-box-align: start;
   -ms-flex-align: start;
@@ -244,49 +242,85 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   flex-direction: column;
 }
 
-.c57 > * {
-  margin-top: 0;
-  margin-bottom: 0;
+.c9 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
 }
 
-.c37 > * {
-  margin-left: 0;
-  margin-right: 0;
+.c30 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  font-weight: 500;
+  color: #32324d;
 }
 
-.c37 > * + * {
-  margin-left: 8px;
+.c46 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  color: #32324d;
 }
 
-.c5 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
+.c48 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c61 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c66 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #666687;
+}
+
+.c72 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c6 {
   position: relative;
   outline: none;
 }
 
-.c5 svg {
+.c6 svg {
   height: 12px;
   width: 12px;
 }
 
-.c5 svg > g,
-.c5 svg path {
+.c6 svg > g,
+.c6 svg path {
   fill: #ffffff;
 }
 
-.c5[aria-disabled='true'] {
+.c6[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c5:after {
+.c6:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -301,11 +335,11 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c5:focus-visible {
+.c6:focus-visible {
   outline: none;
 }
 
-.c5:focus-visible:after {
+.c6:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -328,80 +362,62 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   width: 1px;
 }
 
-.c12 {
-  height: 100%;
-}
-
-.c6 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
+.c7 {
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
   border: 1px solid #dcdce4;
   background: #ffffff;
 }
 
-.c6 .c0 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c6 .c7 {
-  color: #ffffff;
-}
-
-.c6[aria-disabled='true'] {
+.c7[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c6[aria-disabled='true'] .c7 {
+.c7[aria-disabled='true'] .c8 {
   color: #666687;
 }
 
-.c6[aria-disabled='true'] svg > g,.c6[aria-disabled='true'] svg path {
+.c7[aria-disabled='true'] svg > g,.c7[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c6[aria-disabled='true']:active {
+.c7[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c6[aria-disabled='true']:active .c7 {
+.c7[aria-disabled='true']:active .c8 {
   color: #666687;
 }
 
-.c6[aria-disabled='true']:active svg > g,.c6[aria-disabled='true']:active svg path {
+.c7[aria-disabled='true']:active svg > g,.c7[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c6:hover {
+.c7:hover {
   background-color: #f6f6f9;
 }
 
-.c6:active {
+.c7:active {
   background-color: #eaeaef;
 }
 
-.c6 .c7 {
+.c7 .c8 {
   color: #32324d;
 }
 
-.c6 svg > g,
-.c6 svg path {
+.c7 svg > g,
+.c7 svg path {
   fill: #32324d;
+}
+
+.c52 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c52 > * + * {
+  margin-left: 8px;
 }
 
 .c53 {
@@ -409,7 +425,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   top: 12px;
 }
 
-.c58 {
+.c57 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -425,28 +441,28 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   transition-duration: 0.2s;
 }
 
-.c58:focus-within {
+.c57:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c64 {
+.c63 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c64 svg {
+.c63 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c64 svg path {
+.c63 svg path {
   fill: #666687;
 }
 
-.c65 {
+.c64 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -455,11 +471,11 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   border: none;
 }
 
-.c65 svg {
+.c64 svg {
   width: 0.375rem;
 }
 
-.c10 {
+.c11 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -470,12 +486,12 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   align-items: center;
 }
 
-.c10 svg {
+.c11 svg {
   height: 4px;
   width: 6px;
 }
 
-.c59 {
+.c58 {
   position: absolute;
   left: 0;
   right: 0;
@@ -486,15 +502,15 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   border: none;
 }
 
-.c59:focus {
+.c58:focus {
   outline: none;
 }
 
-.c59[aria-disabled='true'] {
+.c58[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c60 {
+.c59 {
   width: 100%;
 }
 
@@ -507,23 +523,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
 .c32 {
   grid-column: span 3;
   max-width: 100%;
-}
-
-.c18 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
 }
 
 .c18 svg > g,
@@ -539,10 +538,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
 .c18:active svg > g,
 .c18:active svg path {
   fill: #a5a5ba;
-}
-
-.c18[aria-disabled='true'] {
-  background-color: #eaeaef;
 }
 
 .c18[aria-disabled='true'] svg path {
@@ -636,27 +631,27 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   text-decoration: none;
 }
 
-.c39 path {
+.c38 path {
   fill: currentColor;
 }
 
-.c51 {
+.c50 {
   display: none;
 }
 
-.c34:hover .c50,
-.c34:focus-within .c50 {
+.c34:hover .c49,
+.c34:focus-within .c49 {
   display: block;
 }
 
-.c42 {
+.c41 {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
 }
 
-.c44:focus {
+.c43:focus {
   outline: 2px solid #4945ff;
   outline-offset: -2px;
 }
@@ -665,7 +660,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   margin-left: 4px;
 }
 
-.c72 {
+.c73 {
   line-height: revert;
 }
 
@@ -779,29 +774,29 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   fill: #c0c0cf;
 }
 
-.c4 > * + * {
+.c3 > * + * {
   margin-left: 8px;
 }
 
-.c14 {
+.c12 {
   margin-left: auto;
 }
 
-.c14 > * + * {
+.c12 > * + * {
   margin-left: 8px;
 }
 
-.c15 {
+.c13 {
   -webkit-flex-shrink: 0;
   -ms-flex-negative: 0;
   flex-shrink: 0;
 }
 
-.c48 {
+.c47 {
   max-width: 100%;
 }
 
-.c17 svg path {
+.c15 svg path {
   fill: #8e8ea9;
 }
 
@@ -819,16 +814,16 @@ exports[`BrowseStep renders and match snapshot 1`] = `
 
 <div>
   <div
-    class="c0 "
+    class=""
   >
     <div
-      class="c0 c1"
+      class="c0"
     >
       <div
-        class="c0 c2"
+        class="c1"
       >
         <div
-          class="c0 c3 c4"
+          class="c2 c3"
           wrap="wrap"
         >
           <div>
@@ -837,33 +832,33 @@ exports[`BrowseStep renders and match snapshot 1`] = `
               aria-disabled="false"
               aria-expanded="false"
               aria-haspopup="true"
-              class="c5 c6"
+              class="c4 c5 c6 c7"
               label="Sort by"
               type="button"
             >
               <span
-                class="c7 c8"
+                class="c8 c9"
               >
                 Sort by
               </span>
               <div
                 aria-hidden="true"
-                class="c0 c9"
+                class="c10"
               >
                 <span
-                  class="c10"
+                  class="c11"
                 >
                   <svg
                     aria-hidden="true"
                     fill="none"
-                    height="1em"
+                    height="1rem"
                     viewBox="0 0 14 8"
-                    width="1em"
+                    width="1rem"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
                       clip-rule="evenodd"
-                      d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                      d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                       fill="#32324D"
                       fill-rule="evenodd"
                     />
@@ -874,46 +869,46 @@ exports[`BrowseStep renders and match snapshot 1`] = `
           </div>
           <button
             aria-disabled="false"
-            class="c5 c6"
+            class="c4 c5 c6 c7"
             type="button"
           >
             <div
               aria-hidden="true"
-              class="c0 c11 c12"
+              class=""
             >
               <svg
                 fill="none"
-                height="1em"
+                height="1rem"
                 viewBox="0 0 24 24"
-                width="1em"
+                width="1rem"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
                   clip-rule="evenodd"
-                  d="M0 4a2 2 0 012-2h20a2 2 0 110 4H2a2 2 0 01-2-2zm4 8a2 2 0 012-2h12a2 2 0 110 4H6a2 2 0 01-2-2zm6 6a2 2 0 100 4h4a2 2 0 100-4h-4z"
+                  d="M0 4a2 2 0 0 1 2-2h20a2 2 0 1 1 0 4H2a2 2 0 0 1-2-2Zm4 8a2 2 0 0 1 2-2h12a2 2 0 1 1 0 4H6a2 2 0 0 1-2-2Zm6 6a2 2 0 1 0 0 4h4a2 2 0 1 0 0-4h-4Z"
                   fill="#32324D"
                   fill-rule="evenodd"
                 />
               </svg>
             </div>
             <span
-              class="c7 c8"
+              class="c8 c9"
             >
               Filters
             </span>
           </button>
         </div>
         <div
-          class="c0 c13 c14 c15"
+          class="c10 c12 c13"
         >
           <div
-            class="c0 c16 c17"
+            class="c14 c15"
           >
             <span>
               <button
                 aria-disabled="false"
                 aria-labelledby="1"
-                class="c5 c18"
+                class="c16 c17 c6 c18"
                 tabindex="0"
                 type="button"
               >
@@ -926,13 +921,13 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                   aria-hidden="true"
                   fill="none"
                   focusable="false"
-                  height="1em"
+                  height="1rem"
                   viewBox="0 0 12 12"
-                  width="1em"
+                  width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M2.4.1l.1-.1h9.4l.1.1v2.2l-.1.1H2.5l-.1-.1V.1zM0 4.9l.1-.1h9.4l.1.1v2.2l-.1.1H.1L0 7.1V4.9zm2.5 4.7l-.1.1v2.2l.1.1h9.4l.1-.1V9.7l-.1-.1H2.5z"
+                    d="m2.4.1.1-.1h9.4l.1.1v2.2l-.1.1H2.5l-.1-.1V.1ZM0 4.9l.1-.1h9.4l.1.1v2.2l-.1.1H.1L0 7.1V4.9Zm2.5 4.7-.1.1v2.2l.1.1h9.4l.1-.1V9.7l-.1-.1H2.5Z"
                     fill="#8E8EA9"
                   />
                 </svg>
@@ -943,7 +938,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
             <button
               aria-disabled="false"
               aria-labelledby="2"
-              class="c5 c18"
+              class="c16 c17 c6 c18"
               tabindex="0"
               type="button"
             >
@@ -956,14 +951,14 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                 aria-hidden="true"
                 fill="none"
                 focusable="false"
-                height="1em"
+                height="1rem"
                 viewBox="0 0 24 24"
-                width="1em"
+                width="1rem"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
                   clip-rule="evenodd"
-                  d="M23.813 20.163l-5.3-5.367a9.792 9.792 0 001.312-4.867C19.825 4.455 15.375 0 9.913 0 4.45 0 0 4.455 0 9.929c0 5.473 4.45 9.928 9.912 9.928a9.757 9.757 0 005.007-1.4l5.275 5.35a.634.634 0 00.913 0l2.706-2.737a.641.641 0 000-.907zM9.91 3.867c3.338 0 6.05 2.718 6.05 6.061s-2.712 6.061-6.05 6.061c-3.337 0-6.05-2.718-6.05-6.06 0-3.344 2.713-6.062 6.05-6.062z"
+                  d="m23.813 20.163-5.3-5.367a9.792 9.792 0 0 0 1.312-4.867C19.825 4.455 15.375 0 9.913 0 4.45 0 0 4.455 0 9.929c0 5.473 4.45 9.928 9.912 9.928a9.757 9.757 0 0 0 5.007-1.4l5.275 5.35a.634.634 0 0 0 .913 0l2.706-2.737a.641.641 0 0 0 0-.907ZM9.91 3.867c3.338 0 6.05 2.718 6.05 6.061s-2.712 6.061-6.05 6.061c-3.337 0-6.05-2.718-6.05-6.06 0-3.344 2.713-6.062 6.05-6.062Z"
                   fill="#32324D"
                   fill-rule="evenodd"
                 />
@@ -974,7 +969,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
       </div>
     </div>
     <div
-      class="c0 c20"
+      class="c20"
     >
       <nav
         aria-label="Folders navigation"
@@ -1041,28 +1036,28 @@ exports[`BrowseStep renders and match snapshot 1`] = `
       </nav>
     </div>
     <div
-      class="c0 "
+      class=""
     >
       <div
-        class="c0 c29"
+        class="c29"
       >
         <h2
-          class="c7 c30"
+          class="c8 c30"
         >
           Folders (1)
         </h2>
       </div>
       <div
-        class="c0 c31"
+        class="c31"
       >
         <div
           class="c32"
         >
           <div
-            class="c0 "
+            class=""
           >
             <div
-              class="c0 c33 c34"
+              class="c33 c34"
               tabindex="0"
             >
               <button
@@ -1073,13 +1068,13 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                 type="button"
               />
               <div
-                class="c0 c36 c13 c37"
+                class="c36 c5"
               >
                 <div
-                  class="c0 c38"
+                  class="c37"
                 >
                   <svg
-                    class="c39"
+                    class="c38"
                     fill="none"
                     height="1.5rem"
                     viewBox="0 0 24 24"
@@ -1087,25 +1082,25 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      d="M12.414 5H21a1 1 0 011 1v14a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1h7.414l2 2z"
+                      d="M12.414 5H21a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h7.414l2 2Z"
                       fill="#212134"
                     />
                   </svg>
                 </div>
                 <div
-                  class="c0 c40 c41 c42"
+                  class="c39 c40 c41"
                   id="folder-1-1-title"
                   overflow="hidden"
                 >
                   <button
-                    class="c0 c43 c44"
+                    class="c42 c43"
                     type="button"
                   >
                     <h2
-                      class="c0 c45 c46"
+                      class="c44 c45"
                     >
                       <span
-                        class="c7 c47 c48"
+                        class="c8 c46 c47"
                       >
                         Folder 1
                         <div
@@ -1115,7 +1110,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                         </div>
                       </span>
                       <span
-                        class="c7 c49 c48"
+                        class="c8 c48 c47"
                       >
                         1 folder, 1 asset
                       </span>
@@ -1123,14 +1118,14 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                   </button>
                 </div>
                 <div
-                  class="c0 c50 c51"
+                  class="c49 c50"
                 >
                   <div
-                    class="c0 c52 c13 c37 c53"
+                    class="c51 c10 c52 c53"
                   >
                     <button
                       aria-disabled="false"
-                      class="c5 c18"
+                      class="c16 c17 c6 c18"
                       type="button"
                     >
                       <span
@@ -1142,14 +1137,14 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                         aria-hidden="true"
                         fill="none"
                         focusable="false"
-                        height="1em"
+                        height="1rem"
                         viewBox="0 0 24 24"
-                        width="1em"
+                        width="1rem"
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
                           clip-rule="evenodd"
-                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 0 1 1.887 0l3.118 3.118ZM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0Z"
                           fill="#212134"
                           fill-rule="evenodd"
                         />
@@ -1164,17 +1159,19 @@ exports[`BrowseStep renders and match snapshot 1`] = `
       </div>
     </div>
     <div
-      class="c0 c54 c55"
+      class="c54 c55"
     >
       <div
-        class="c0 c13"
+        class="c10"
       >
-        <div>
+        <div
+          class=""
+        >
           <div
-            class="c0 c56 c57"
+            class="c56"
           >
             <div
-              class="c0 c13 c58"
+              class="c10 c57"
             >
               <button
                 aria-disabled="false"
@@ -1182,21 +1179,21 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                 aria-haspopup="listbox"
                 aria-label="Entries per page"
                 aria-labelledby="4 4-label 4-content"
-                class="c59"
+                class="c58"
                 id="4"
                 type="button"
               />
               <div
-                class="c0 c55 c60"
+                class="c55 c59"
               >
                 <div
-                  class="c0 c13"
+                  class="c10"
                 >
                   <div
-                    class="c0 c61"
+                    class="c60"
                   >
                     <span
-                      class="c7 c62"
+                      class="c8 c61"
                       id="4-content"
                     >
                       10
@@ -1204,25 +1201,25 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c0 c13"
+                  class="c10"
                 >
                   <button
                     aria-hidden="true"
-                    class="c0 c63 c64 c65"
+                    class="c62 c63 c64"
                     tabindex="-1"
                     title="Carret Down Button"
                     type="button"
                   >
                     <svg
                       fill="none"
-                      height="1em"
+                      height="1rem"
                       viewBox="0 0 14 8"
-                      width="1em"
+                      width="1rem"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
                         clip-rule="evenodd"
-                        d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                        d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                         fill="#32324D"
                         fill-rule="evenodd"
                       />
@@ -1234,10 +1231,10 @@ exports[`BrowseStep renders and match snapshot 1`] = `
           </div>
         </div>
         <div
-          class="c0 c9"
+          class="c65"
         >
           <label
-            class="c7 c66"
+            class="c8 c66"
             for="page-size"
           >
             Entries per page
@@ -1249,7 +1246,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
         class=""
       >
         <ul
-          class="c0 c13 c67"
+          class="c10 c67"
         >
           <li>
             <button
@@ -1266,13 +1263,13 @@ exports[`BrowseStep renders and match snapshot 1`] = `
               <svg
                 aria-hidden="true"
                 fill="none"
-                height="1em"
+                height="1rem"
                 viewBox="0 0 10 16"
-                width="1em"
+                width="1rem"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M9.88 14.12L3.773 8 9.88 1.88 8 0 0 8l8 8 1.88-1.88z"
+                  d="M9.88 14.12 3.773 8 9.88 1.88 8 0 0 8l8 8 1.88-1.88Z"
                   fill="#32324D"
                 />
               </svg>
@@ -1290,7 +1287,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
               </div>
               <span
                 aria-hidden="true"
-                class="c7 c8 c72"
+                class="c8 c72 c73"
               >
                 1
               </span>
@@ -1311,13 +1308,13 @@ exports[`BrowseStep renders and match snapshot 1`] = `
               <svg
                 aria-hidden="true"
                 fill="none"
-                height="1em"
+                height="1rem"
                 viewBox="0 0 10 16"
-                width="1em"
+                width="1rem"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M0 1.88L6.107 8 0 14.12 1.88 16l8-8-8-8L0 1.88z"
+                  d="M0 1.88 6.107 8 0 14.12 1.88 16l8-8-8-8L0 1.88Z"
                   fill="#32324D"
                 />
               </svg>

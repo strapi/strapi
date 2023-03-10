@@ -729,3 +729,5 @@ export const createTransferEngine = <S extends ISourceProvider, D extends IDesti
 ): TransferEngine<S, D> => {
   return new TransferEngine<S, D>(sourceProvider, destinationProvider, options);
 };
+
+export * as errors from './errors';
