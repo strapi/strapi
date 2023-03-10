@@ -47,8 +47,6 @@ module.exports = async (opts) => {
   }
 
   if (!(opts.from || opts.to) || (opts.from && opts.to)) {
-    console.log('from', opts.from);
-    console.log('to', opts.to);
     exitWith(1, 'Exactly one source (from) or destination (to) option must be provided');
   }
 
