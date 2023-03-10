@@ -15,6 +15,7 @@ const FormHead = ({
   isSubmitting,
   backUrl,
   regenerateUrl,
+  onErrorRegenerate,
 }) => {
   const { formatMessage } = useIntl();
   const handleRegenerate = (newKey) => {
@@ -35,6 +36,7 @@ const FormHead = ({
                 backUrl={regenerateUrl}
                 onRegenerate={handleRegenerate}
                 idToRegenerate={token?.id}
+                onError={onErrorRegenerate}
               />
             )}
             <Button
@@ -94,10 +96,12 @@ FormHead.propTypes = {
     label: PropTypes.string,
   }).isRequired,
   regenerateUrl: PropTypes.string.isRequired,
+  onErrorRegenerate: PropTypes.func,
 };
 
 FormHead.defaultProps = {
   token: undefined,
+  onErrorRegenerate: undefined,
 };
 
 export default FormHead;
