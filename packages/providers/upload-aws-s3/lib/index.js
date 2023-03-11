@@ -39,11 +39,15 @@ module.exports = {
             }
 
             // set the bucket file url
-            if (assertUrlProtocol(data.Location)) {
-              file.url = data.Location;
+            if (config.cdn) {
+              file.url='https://' + config.cdn + '/' + data.Key;
             } else {
-              // Default protocol to https protocol
-              file.url = `https://${data.Location}`;
+              if (assertUrlProtocol(data.Location)) {
+                file.url = data.Location;
+              } else {
+                // Default protocol to https protocol
+                file.url = `https://${data.Location}`;
+              }
             }
 
             resolve();
