@@ -1175,8 +1175,6 @@ const createEntityManager = (db) => {
 
     // TODO: Clone polymorphic relations
     // TODO: Excluded relation attributes
-    // TODO: Excluded relations (e.g. don't clone id X )
-    // async cloneRelations(uid, id, cloneId, { transaction: trx }) {
     /**
      *
      * @param {*} uid - uid of the entity to clone
