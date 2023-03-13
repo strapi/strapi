@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "date-fns": "2.30.0",
+    "@strapi/utils": "4.7.1",
     "debug": "4.3.4",
     "fs-extra": "10.0.0",
     "knex": "2.4.0",
