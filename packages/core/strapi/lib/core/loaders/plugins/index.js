@@ -25,6 +25,24 @@ const defaultPlugin = {
   contentTypes: {},
 };
 
+const mergePluginWithDefaultConfig = (plugin, defaultPlugin)=> {
+  for(let [key, value] of Object.entries(defaultPlugin)){
+    // dont trigger getter
+    if(key === 'routes'){
+      continue
+    }
+    if(!plugin[key]){
+      plugin[key] = value;
+      continue
+    }
+    if(typeof plugin[key] === 'function'){
+      continue
+    }
+    plugin[key] = {...value, ...plugin[key]}
+  }
+  return plugin;
+}
+
 const applyUserExtension = async (plugins) => {
   const extensionsDir = strapi.dirs.dist.extensions;
   if (!(await fse.pathExists(extensionsDir))) {
@@ -101,7 +119,7 @@ const loadPlugins = async (strapi) => {
     }
 
     const pluginServer = loadConfigFile(serverEntrypointPath);
-    plugins[pluginName] = defaultsDeep(defaultPlugin, pluginServer);
+    plugins[pluginName] = mergePluginWithDefaultConfig(pluginServer, defaultPlugin)
   }
 
   // TODO: validate plugin format

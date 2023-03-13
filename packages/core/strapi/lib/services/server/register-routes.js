@@ -68,6 +68,7 @@ const registerPluginRoutes = (strapi) => {
       });
     } else {
       _.forEach(plugin.routes, (router) => {
+        router = {...router} // cant set prefix as its a getter so create new object from router
         router.type = router.type || 'admin';
         router.prefix = `/${pluginName}`;
         router.routes.forEach((route) => {
