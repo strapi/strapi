@@ -146,7 +146,7 @@ const GenericInput = ({
           required={required}
           onChange={(json) => {
             // Default to null when the field is not required and there is no input value
-            const value = !attribute.required && !json.length ? 'null' : json;
+            const value = !attribute.required && !json.length ? null : json;
             onChange({ target: { name, value } });
           }}
           minHeight={pxToRem(252)}
