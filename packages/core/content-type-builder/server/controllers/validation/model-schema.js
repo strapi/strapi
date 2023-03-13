@@ -17,6 +17,7 @@ const createSchema = (types, relations, { modelType } = {}) => {
     pluginOptions: yup.object(),
     collectionName: yup.string().nullable().test(isValidCollectionName),
     attributes: createAttributesValidator({ types, relations, modelType }),
+    reviewWorkflows: yup.boolean(),
   };
 
   if (modelType === modelTypes.CONTENT_TYPE) {
