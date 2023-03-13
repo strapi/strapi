@@ -72,6 +72,7 @@ describe('Export', () => {
         },
       };
     }),
+    exitMessageText: jest.fn(),
   };
   jest.mock(
     '../../transfer/utils',

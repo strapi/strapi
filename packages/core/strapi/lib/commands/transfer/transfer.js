@@ -11,7 +11,6 @@ const {
   },
 } = require('@strapi/data-transfer');
 const { isObject } = require('lodash/fp');
-const chalk = require('chalk');
 
 const {
   buildTransferTable,
@@ -19,6 +18,8 @@ const {
   DEFAULT_IGNORED_CONTENT_TYPES,
   formatDiagnostic,
   loadersFactory,
+  exitMessageText,
+  abortTransfer,
 } = require('./utils');
 const { exitWith } = require('../utils/helpers');
 
@@ -141,15 +142,26 @@ module.exports = async (opts) => {
     updateLoader(stage, data);
   });
 
+  progress.on('stage::error', ({ stage, data }) => {
+    updateLoader(stage, data).fail();
+  });
+
   let results;
   try {
     console.log(`Starting transfer...`);
+
+    // Abort transfer if user interrupts process
+    ['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach((signal) => {
+      process.removeAllListeners(signal);
+      process.on(signal, () => abortTransfer({ engine, strapi }));
+    });
+
     results = await engine.transfer();
   } catch (e) {
-    exitWith(1, 'Transfer process failed.');
+    exitWith(1, exitMessageText('transfer', true));
   }
 
   const table = buildTransferTable(results.engine);
   console.log(table.toString());
-  exitWith(0, `${chalk.bold('Transfer process has been completed successfully!')}`);
+  exitWith(0, exitMessageText('transfer'));
 };
