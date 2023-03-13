@@ -30,10 +30,12 @@ const Title = () => {
 const KeyValuePair = ({ label, value }) => {
   return (
     <Flex justifyContent="space-between">
-      <Typography as="dt" fontWeight="bold" textColor="neutral600">
+      <Typography as="dt" fontWeight="bold" textColor="neutral800" variant="pi">
         {label}
       </Typography>
-      <Typography as="dd">{value}</Typography>
+      <Typography as="dd" variant="pi" textColor="neutral600">
+        {value}
+      </Typography>
     </Flex>
   );
 };
@@ -109,7 +111,7 @@ const Body = () => {
 };
 
 const Root = ({ children }) => {
-  return <Stack spacing={6}>{children}</Stack>;
+  return <Stack spacing={4}>{children}</Stack>;
 };
 
 Root.propTypes = {
