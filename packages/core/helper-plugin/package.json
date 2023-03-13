@@ -52,7 +52,7 @@
     "qs": "6.11.0",
     "react-helmet": "^6.1.0",
     "react-intl": "6.2.8",
-    "react-select": "5.6.0"
+    "react-select": "5.7.0"
   },
   "devDependencies": {
     "@storybook/addon-actions": "6.5.10",

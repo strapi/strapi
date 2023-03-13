@@ -275,13 +275,12 @@ program
   .description('Transfer data from one source to another')
   .allowExcessArguments(false)
   .addOption(
-    new Option('--from <sourceURL>', `URL of the remote Strapi instance to get data from`)
-      .argParser(parseURL)
-      .hideHelp() // Hidden until pull feature is released
+    new Option(
+      '--from <sourceURL>',
+      `URL of the remote Strapi instance to get data from`
+    ).argParser(parseURL)
   )
-  .addOption(
-    new Option('--from-token <token>', `Transfer token for the remote Strapi source`).hideHelp() // Hidden until pull feature is released
-  )
+  .addOption(new Option('--from-token <token>', `Transfer token for the remote Strapi source`))
   .addOption(
     new Option(
       '--to <destinationURL>',
@@ -344,13 +343,6 @@ program
       }
     )
   )
-  // .hook(
-  //   'preAction',
-  //   ifOptions(
-  //     (opts) => !opts.from && !opts.to,
-  //     () => exitWith(1, 'At least one source (from) or destination (to) option must be provided')
-  //   )
-  // )
   .action(getLocalScript('transfer/transfer'));
 
 // `$ strapi export`
