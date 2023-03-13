@@ -379,9 +379,103 @@ const cleanOrderColumnsForOldDatabases = async ({
   }
 };
 
+/**
+ * Use this when a relation is added or removed and its inverse order column
+ * needs to be re-calculated
+ *
+ * Example: In this following table
+ *
+ *   | joinColumn      | inverseJoinColumn | order       | inverseOrder       |
+ *   | --------------- | --------          | ----------- | ------------------ |
+ *   | 1               | 1                 | 1           | 1                  |
+ *   | 2               | 1                 | 3           | 2                  |
+ *   | 2               | 2                 | 3           | 1                  |
+ *
+ * You add a new relation { joinColumn: 1, inverseJoinColumn: 2 }
+ *
+ *   | joinColumn      | inverseJoinColumn | order       | inverseOrder       |
+ *   | --------------- | --------          | ----------- | ------------------ |
+ *   | 1               | 1                 | 1           | 1                  |
+ *   | 1               | 2                 | 2           | 1                  | <- inverseOrder should be 2
+ *   | 2               | 1                 | 3           | 2                  |
+ *   | 2               | 2                 | 3           | 1                  |
+ *
+ * This function would make such update, so all inverse order columns related
+ * to the given id (1 in this example) are following a 1, 2, 3 sequence, without gap.
+ *
+ * @param {Object} params
+ * @param {string} params.id - entity id to find which inverse order column to clean
+ * @param {Object} params.attribute - attribute of the relation
+ * @param {Object} params.trx - knex transaction
+ *
+ */
+
+const cleanInverseOrderColumn = async ({ id, attribute, trx }) => {
+  const con = strapi.db.connection;
+  const { joinTable } = attribute;
+  const { joinColumn, inverseJoinColumn, inverseOrderColumnName } = joinTable;
+
+  switch (strapi.db.dialect.client) {
+    /*
+      UPDATE `:joinTableName` AS `t1`
+      JOIN (
+          SELECT
+            `inverseJoinColumn`,
+            MAX(`:inverseOrderColumnName`) AS `max_inv_order`
+          FROM `:joinTableName`
+          GROUP BY `:inverseJoinColumn`
+      ) AS `t2`
+      ON `t1`.`:inverseJoinColumn` = `t2`.`:inverseJoinColumn`
+      SET `t1`.`:inverseOrderColumnNAme` = `t2`.`max_inv_order` + 1
+      WHERE `t1`.`:joinColumnName` = :id;
+    */
+    case 'mysql': {
+      // Group by the inverse join column and get the max value of the inverse order column
+      const subQuery = con(joinTable.name)
+        .select(inverseJoinColumn.name)
+        .max(inverseOrderColumnName, { as: 'max_inv_order' })
+        .groupBy(inverseJoinColumn.name)
+        .as('t2');
+
+      //  Update ids with the new inverse order
+      await con(`${joinTable.name} as t1`)
+        .join(subQuery, `t1.${inverseJoinColumn.name}`, '=', `t2.${inverseJoinColumn.name}`)
+        .where(joinColumn.name, id)
+        .update({
+          [inverseOrderColumnName]: con.raw('t2.max_inv_order + 1'),
+        })
+        .transacting(trx);
+      break;
+    }
+    default: {
+      /*
+        UPDATE `:joinTableName` as `t1`
+        SET `:inverseOrderColumnName` = (
+          SELECT max(`:inverseOrderColumnName`) + 1
+          FROM `:joinTableName` as `t2`
+          WHERE t2.:inverseJoinColumn = t1.:inverseJoinColumn
+        )
+        WHERE `t1`.`:joinColumnName` = :id
+      */
+      // New inverse order will be the max value + 1
+      const selectMaxInverseOrder = con.raw(`max(${inverseOrderColumnName}) + 1`);
+
+      const subQuery = con(`${joinTable.name} as t2`)
+        .select(selectMaxInverseOrder)
+        .whereRaw(`t2.${inverseJoinColumn.name} = t1.${inverseJoinColumn.name}`);
+
+      await con(`${joinTable.name} as t1`)
+        .where(`t1.${joinColumn.name}`, id)
+        .update({ [inverseOrderColumnName]: subQuery })
+        .transacting(trx);
+    }
+  }
+};
+
 module.exports = {
   deletePreviousOneToAnyRelations,
   deletePreviousAnyToOneRelations,
   deleteRelations,
   cleanOrderColumns,
+  cleanInverseOrderColumn,
 };
