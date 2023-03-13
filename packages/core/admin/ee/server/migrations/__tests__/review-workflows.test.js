@@ -3,7 +3,7 @@
 const disableReviewWorkFlows = require('../review-workflows');
 
 describe('disableReviewWorkFlows', () => {
-  test('disableReviewWorkFlows correctly identifies the content types that have had review workflows disabled', () => {
+  test('disableReviewWorkFlows correctly identifies the content types that have had review workflows disabled', async () => {
     const delSpy = jest.fn();
     const whereInSpy = jest.fn(() => ({ del: delSpy }));
 
@@ -26,7 +26,7 @@ describe('disableReviewWorkFlows', () => {
       ['U4', { options: { reviewWorkflows: true } }],
     ]);
 
-    disableReviewWorkFlows({ oldContentTypes, contentTypes });
+    await disableReviewWorkFlows({ oldContentTypes, contentTypes });
 
     expect(whereInSpy).toHaveBeenCalledTimes(1);
     expect(whereInSpy).toHaveBeenCalledWith('related_type', ['U1', 'U3']);

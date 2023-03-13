@@ -19,7 +19,7 @@ const disableReviewWorkFlows = async ({ oldContentTypes, contentTypes }) => {
     }
 
     const oldContentType = oldContentTypes[uid];
-    const contentType = contentTypes[uid];
+    const contentType = contentTypes?.[uid];
 
     if (hasRWEnabled(oldContentType) && !hasRWEnabled(contentType)) {
       // If review workflows has been turned off on a content type
