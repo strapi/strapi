@@ -144,9 +144,8 @@ module.exports = async (opts) => {
     console.error('There was an error displaying the results of the transfer.');
   }
 
-  // TODO: should the archive filename come before the exit text?
-  console.log(exitMessageText('export'));
-  exitWith(0, `Export archive is in ${chalk.green(outFile)}`);
+  console.log(`Export archive is in ${chalk.green(outFile)}`);
+  exitWith(0, exitMessageText('export'));
 };
 
 /**
