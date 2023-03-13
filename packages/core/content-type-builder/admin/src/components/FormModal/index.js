@@ -184,6 +184,7 @@ const FormModal = () => {
           actionType,
           data: {
             draftAndPublish: true,
+            reviewWorkflows: false,
           },
           pluginOptions: {},
         });
@@ -191,16 +192,20 @@ const FormModal = () => {
 
       // Edit content type
       if (modalType === 'contentType' && actionType === 'edit') {
-        const { displayName, draftAndPublish, kind, pluginOptions, pluralName, singularName } = get(
-          allDataSchema,
-          [...pathToSchema, 'schema'],
-          {
-            displayName: null,
-            pluginOptions: {},
-            singularName: null,
-            pluralName: null,
-          }
-        );
+        const {
+          displayName,
+          draftAndPublish,
+          kind,
+          pluginOptions,
+          pluralName,
+          reviewWorkflows,
+          singularName,
+        } = get(allDataSchema, [...pathToSchema, 'schema'], {
+          displayName: null,
+          pluginOptions: {},
+          singularName: null,
+          pluralName: null,
+        });
 
         dispatch({
           type: SET_DATA_TO_EDIT,
@@ -212,6 +217,10 @@ const FormModal = () => {
             kind,
             pluginOptions,
             pluralName,
+            // because review-workflows is an EE feature the attribute does
+            // not always exist, but the component prop-types expect a boolean,
+            // so we have to ensure undefined is casted to false
+            reviewWorkflows: reviewWorkflows ?? false,
             singularName,
           },
         });
