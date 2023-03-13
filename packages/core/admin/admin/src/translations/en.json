@@ -785,6 +785,7 @@
   "content-manager.relation.add": "Add relation",
   "content-manager.relation.publicationState.draft": "Draft",
   "content-manager.relation.publicationState.published": "Published",
+  "content-manager.reviewWorkflows.stage.label": "Review stage",
   "form.button.continue": "Continue",
   "form.button.done": "Done",
   "global.search": "Search",
