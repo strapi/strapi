@@ -14,7 +14,7 @@ if (window.strapi.features.isEnabled(window.strapi.features.SSO)) {
   });
 }
 
-if (window.strapi.isEE) {
+if (window.strapi.features.isEnabled(window.strapi.features.REVIEW_WORKFLOWS)) {
   routes.push({
     async Component() {
       const component = await import(
@@ -28,7 +28,7 @@ if (window.strapi.isEE) {
   });
 }
 
-if (window.strapi.features.isEnabled(strapi.features.AUDIT_LOGS)) {
+if (window.strapi.features.isEnabled(window.strapi.features.AUDIT_LOGS)) {
   routes.push({
     async Component() {
       const component = await import(

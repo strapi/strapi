@@ -28,6 +28,7 @@ import useFormModalNavigation from '../../hooks/useFormModalNavigation';
 import AllowedTypesSelect from '../AllowedTypesSelect';
 import AttributeOptions from '../AttributeOptions';
 import DraftAndPublishToggle from '../DraftAndPublishToggle';
+import ReviewWorkflowsToggle from '../ReviewWorkflowsToggle';
 import FormModalHeader from '../FormModalHeader';
 import FormModalEndActions from '../FormModalEndActions';
 import FormModalSubHeader from '../FormModalSubHeader';
@@ -908,6 +909,7 @@ const FormModal = () => {
       'select-number': SelectNumber,
       'select-date': SelectDateType,
       'toggle-draft-publish': DraftAndPublishToggle,
+      'toggle-review-workflows': ReviewWorkflowsToggle,
       'text-plural': PluralName,
       'text-singular': SingularName,
       'textarea-enum': TextareaEnum,
