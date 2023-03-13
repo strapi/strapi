@@ -61,6 +61,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
 
       return acc;
     }, []);
+
     // Build localization requests schemas
     if (hasLocalizationPath) {
       schemas = {
@@ -95,6 +96,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
       },
     };
   }
+
   // Build the localization response schema
   if (hasLocalizationPath) {
     schemas = {
@@ -122,6 +124,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
       },
     };
   }
+
   // Check for routes that need to return a list
   const hasListOfEntities = routeInfo.routes.filter((route) => hasFindMethod(route.handler)).length;
   if (hasListOfEntities) {
@@ -213,6 +216,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
       },
     },
   };
+
   return { ...schemas };
 };
 
