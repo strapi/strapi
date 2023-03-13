@@ -27,18 +27,18 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
-    "build": "yarn build:ts",
+    "build": "tsc",
     "build:ts": "tsc",
-    "build:clean": "yarn clean && yarn build",
     "clean": "rimraf ./lib",
-    "prepublishOnly": "yarn build:clean",
+    "prepublishOnly": "yarn clean && yarn build",
     "test:unit": "jest --verbose",
-    "watch": "yarn build:ts -w --preserveWatchOutput"
+    "watch": "tsc -w --preserveWatchOutput"
   },
   "directories": {
     "lib": "./lib"
   },
   "dependencies": {
+    "tsconfig": "*",
     "@strapi/logger": "4.7.1",
     "@strapi/strapi": "4.7.1",
     "chalk": "4.1.2",

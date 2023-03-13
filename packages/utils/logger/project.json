@@ -3,30 +3,5 @@
   "namedInputs": {
     "default": ["{projectRoot}/src/**/*.ts", "{projectRoot}/tsconfig.json"],
     "production": ["default"]
-  },
-  "sourceRoot": "packages/utils/logger/src",
-  "root": "packages/utils/logger",
-  "targets": {
-    "build": {
-      "executor": "@nrwl/js:tsc",
-      "options": {
-        "outputPath": "dist/logger",
-        "main": "packages/utils/logger/src/index.ts",
-        "tsConfig": "./packages/utils/logger/tsconfig.json",
-        "rootDir": "packages/utils/logger/src",
-        "clean": true
-      }
-    },
-    "watch": {
-      "executor": "@nrwl/js:tsc",
-      "options": {
-        "outputPath": "packages/utils/logger/lib",
-        "main": "packages/utils/logger/src/index.ts",
-        "tsConfig": "packages/utils/logger/tsconfig.json",
-        "rootDir": "packages/utils/logger/src",
-        "clean": true,
-        "watch": true
-      }
-    }
   }
 }

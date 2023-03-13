@@ -1,7 +1,6 @@
 {
   "namedInputs": {
-    "sharedGlobals": ["{workspaceRoot}/tsconfig.base.json"],
-    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "default": ["{projectRoot}/**/*"],
     "production": [
       "default",
       "!{projectRoot}/**/*.test.ts",
@@ -17,7 +16,7 @@
     },
     "build:ts": {
       "inputs": ["production", "^production"],
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build:ts"],
       "outputs": ["{projectRoot}/lib", "{projectRoot}/build"]
     },
     "test": {
