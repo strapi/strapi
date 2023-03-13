@@ -65,7 +65,7 @@ const getMysqlPackageName = () => {
  * Create connection
  */
 
-// map the best available package to the client name sent to knex that which will make it use that package
+// map the package we're using to the client name that causes knex to use that package
 const clientMap = {
   'better-sqlite3': 'better-sqlite3',
   '@vscode/sqlite3': 'sqlite',
