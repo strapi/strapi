@@ -2,8 +2,6 @@
 
 /* eslint-disable no-nested-ternary */
 
-const chalk = require('chalk');
-
 /**
  * @type {import('./').MiddlewareFactory}
  */
