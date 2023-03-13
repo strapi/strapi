@@ -32,7 +32,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   padding: 16px;
 }
 
-.c19 {
+.c18 {
   background: #4945ff;
   padding: 8px;
   padding-right: 16px;
@@ -88,20 +88,6 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-}
-
-.c20 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
   gap: 8px;
 }
 
@@ -118,42 +104,33 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   color: #32324d;
 }
 
-.c23 {
+.c21 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
   color: #ffffff;
 }
 
-.c18 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c18 > * + * {
-  margin-left: 8px;
-}
-
-.c21 {
+.c19 {
   position: relative;
   outline: none;
 }
 
-.c21 svg {
+.c19 svg {
   height: 12px;
   width: 12px;
 }
 
-.c21 svg > g,
-.c21 svg path {
+.c19 svg > g,
+.c19 svg path {
   fill: #ffffff;
 }
 
-.c21[aria-disabled='true'] {
+.c19[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c21:after {
+.c19:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -168,11 +145,11 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   border: 2px solid transparent;
 }
 
-.c21:focus-visible {
+.c19:focus-visible {
   outline: none;
 }
 
-.c21:focus-visible:after {
+.c19:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -195,10 +172,59 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   width: 1px;
 }
 
-.c22 {
+.c20 {
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
+}
+
+.c20[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c20[aria-disabled='true'] .c8 {
+  color: #666687;
+}
+
+.c20[aria-disabled='true'] svg > g,.c20[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c20[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c20[aria-disabled='true']:active .c8 {
+  color: #666687;
+}
+
+.c20[aria-disabled='true']:active svg > g,.c20[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c20:hover {
+  background-color: #f6f6f9;
+}
+
+.c20:active {
+  background-color: #eaeaef;
+}
+
+.c20 .c8 {
+  color: #32324d;
+}
+
+.c20 svg > g,
+.c20 svg path {
+  fill: #32324d;
+}
+
+.c22 {
+  height: 2rem;
+  border: 1px solid #f5c0b8;
+  background: #fcecea;
 }
 
 .c22[aria-disabled='true'] {
@@ -228,78 +254,29 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
 }
 
 .c22:hover {
-  background-color: #f6f6f9;
-}
-
-.c22:active {
-  background-color: #eaeaef;
-}
-
-.c22 .c8 {
-  color: #32324d;
-}
-
-.c22 svg > g,
-.c22 svg path {
-  fill: #32324d;
-}
-
-.c24 {
-  height: 2rem;
-  border: 1px solid #f5c0b8;
-  background: #fcecea;
-}
-
-.c24[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c24[aria-disabled='true'] .c8 {
-  color: #666687;
-}
-
-.c24[aria-disabled='true'] svg > g,.c24[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c24[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c24[aria-disabled='true']:active .c8 {
-  color: #666687;
-}
-
-.c24[aria-disabled='true']:active svg > g,.c24[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c24:hover {
   background-color: #ffffff;
 }
 
-.c24:active {
+.c22:active {
   background-color: #ffffff;
   border: 1px solid #d02b20;
 }
 
-.c24:active .c8 {
+.c22:active .c8 {
   color: #d02b20;
 }
 
-.c24:active svg > g,
-.c24:active svg path {
+.c22:active svg > g,
+.c22:active svg path {
   fill: #d02b20;
 }
 
-.c24 .c8 {
+.c22 .c8 {
   color: #b72b1a;
 }
 
-.c24 svg > g,
-.c24 svg path {
+.c22 svg > g,
+.c22 svg path {
   fill: #b72b1a;
 }
 
@@ -440,22 +417,22 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
                 class="c15 c16"
               >
                 <div
-                  class="c17 c18"
+                  class="c17"
                 >
                   <button
                     aria-disabled="false"
-                    class="c19 c20 c21 c22"
+                    class="c18 c17 c19 c20"
                     type="button"
                   >
                     <span
-                      class="c8 c23"
+                      class="c8 c21"
                     >
                       Cancel
                     </span>
                   </button>
                   <button
                     aria-disabled="false"
-                    class="c19 c20 c21 c24"
+                    class="c18 c17 c19 c22"
                     id="confirm-delete"
                     type="button"
                   >
@@ -477,7 +454,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
                       </svg>
                     </div>
                     <span
-                      class="c8 c23"
+                      class="c8 c21"
                     >
                       Confirm
                     </span>
