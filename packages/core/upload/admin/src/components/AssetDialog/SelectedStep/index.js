@@ -1,8 +1,7 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
+import { Flex, Typography } from '@strapi/design-system';
 import { AssetGridList } from '../../AssetGridList';
 import getTrad from '../../../utils/getTrad';
 
@@ -10,8 +9,8 @@ export const SelectedStep = ({ selectedAssets, onSelectAsset, onReorderAsset }) 
   const { formatMessage } = useIntl();
 
   return (
-    <Stack spacing={4}>
-      <Stack spacing={0}>
+    <Flex direction="column" alignItems="stretch" gap={4}>
+      <Flex gap={0}>
         <Typography variant="pi" fontWeight="bold" textColor="neutral800">
           {formatMessage(
             {
@@ -28,7 +27,7 @@ export const SelectedStep = ({ selectedAssets, onSelectAsset, onReorderAsset }) 
             defaultMessage: 'Manage the assets before adding them to the Media Library',
           })}
         </Typography>
-      </Stack>
+      </Flex>
 
       <AssetGridList
         size="S"
@@ -37,7 +36,7 @@ export const SelectedStep = ({ selectedAssets, onSelectAsset, onReorderAsset }) 
         selectedAssets={selectedAssets}
         onReorderAsset={onReorderAsset}
       />
-    </Stack>
+    </Flex>
   );
 };
 

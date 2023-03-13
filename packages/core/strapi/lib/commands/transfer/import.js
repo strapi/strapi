@@ -1,16 +1,14 @@
 'use strict';
 
 const {
-  providers: { createLocalFileSourceProvider },
-} = require('@strapi/data-transfer/lib/file');
-const {
-  providers: { createLocalStrapiDestinationProvider, DEFAULT_CONFLICT_STRATEGY },
-} = require('@strapi/data-transfer/lib/strapi');
-const {
-  createTransferEngine,
-  DEFAULT_VERSION_STRATEGY,
-  DEFAULT_SCHEMA_STRATEGY,
-} = require('@strapi/data-transfer/lib/engine');
+  file: {
+    providers: { createLocalFileSourceProvider },
+  },
+  strapi: {
+    providers: { createLocalStrapiDestinationProvider, DEFAULT_CONFLICT_STRATEGY },
+  },
+  engine: { createTransferEngine, DEFAULT_VERSION_STRATEGY, DEFAULT_SCHEMA_STRATEGY },
+} = require('@strapi/data-transfer');
 
 const { isObject } = require('lodash/fp');
 
@@ -19,19 +17,18 @@ const {
   DEFAULT_IGNORED_CONTENT_TYPES,
   createStrapiInstance,
   formatDiagnostic,
+  loadersFactory,
 } = require('./utils');
+const { exitWith } = require('../utils/helpers');
 
 /**
  * @typedef {import('@strapi/data-transfer').ILocalFileSourceProviderOptions} ILocalFileSourceProviderOptions
  */
 
-const logger = console;
-
 module.exports = async (opts) => {
   // validate inputs from Commander
   if (!isObject(opts)) {
-    logger.error('Could not parse arguments');
-    process.exit(1);
+    exitWith(1, 'Could not parse arguments');
   }
 
   /**
@@ -90,6 +87,21 @@ module.exports = async (opts) => {
   engine.diagnostics.onDiagnostic(formatDiagnostic('import'));
 
   const progress = engine.progress.stream;
+
+  const { updateLoader } = loadersFactory();
+
+  progress.on(`stage::start`, ({ stage, data }) => {
+    updateLoader(stage, data).start();
+  });
+
+  progress.on('stage::finish', ({ stage, data }) => {
+    updateLoader(stage, data).succeed();
+  });
+
+  progress.on('stage::progress', ({ stage, data }) => {
+    updateLoader(stage, data);
+  });
+
   const getTelemetryPayload = () => {
     return {
       eventProperties: {
@@ -100,27 +112,30 @@ module.exports = async (opts) => {
   };
 
   progress.on('transfer::start', async () => {
-    logger.info('Starting import...');
+    console.log('Starting import...');
     await strapiInstance.telemetry.send('didDEITSProcessStart', getTelemetryPayload());
   });
 
+  let results;
   try {
-    const results = await engine.transfer();
-    const table = buildTransferTable(results.engine);
-    logger.info(table.toString());
-
-    logger.info('Import process has been completed successfully!');
+    results = await engine.transfer();
   } catch (e) {
     await strapiInstance.telemetry.send('didDEITSProcessFail', getTelemetryPayload());
-    logger.error('Import process failed.');
+    console.error('Import process failed.');
     process.exit(1);
   }
 
-  // Note: Telemetry can't be sent in a finish event, because it runs async after this block but we can't await it, so if process.exit is used it won't send
+  try {
+    const table = buildTransferTable(results.engine);
+    console.log(table.toString());
+  } catch (e) {
+    console.error('There was an error displaying the results of the transfer.');
+  }
+
   await strapiInstance.telemetry.send('didDEITSProcessFinish', getTelemetryPayload());
   await strapiInstance.destroy();
 
-  process.exit(0);
+  exitWith(0, 'Import process has been completed successfully!');
 };
 
 /**

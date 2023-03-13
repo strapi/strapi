@@ -3,15 +3,18 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { useIntl } from 'react-intl';
-import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
-import { Select, Option } from '@strapi/design-system/Select';
-import { Button } from '@strapi/design-system/Button';
-import { Box } from '@strapi/design-system/Box';
-import { Typography } from '@strapi/design-system/Typography';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
-import Duplicate from '@strapi/icons/Duplicate';
+import {
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  Select,
+  Option,
+  Button,
+  Box,
+  Typography,
+  Flex,
+} from '@strapi/design-system';
+import { ExclamationMarkCircle, Duplicate } from '@strapi/icons';
 import { useCMEditViewDataManager, useNotification, useFetchClient } from '@strapi/helper-plugin';
 import { getTrad } from '../../../utils';
 import { cleanData, generateOptions } from './utils';
@@ -127,7 +130,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
       {isOpen && (
         <Dialog onClose={handleToggle} title="Confirmation" isOpen={isOpen}>
           <DialogBody icon={<ExclamationMarkCircle />}>
-            <Stack spacing={2}>
+            <Flex direction="column" alignItems="stretch" gap={2}>
               <Flex justifyContent="center">
                 <CenteredTypography id="confirm-description">
                   {formatMessage({
@@ -154,7 +157,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
                   })}
                 </Select>
               </Box>
-            </Stack>
+            </Flex>
           </DialogBody>
           <DialogFooter
             startAction={

@@ -8,6 +8,7 @@ import uniqBy from 'lodash/uniqBy';
 import merge from 'lodash/merge';
 import castArray from 'lodash/castArray';
 import isNil from 'lodash/isNil';
+import { generateNKeysBetween } from 'fractional-indexing';
 
 import {
   findLeafByPathAndReplace,
@@ -155,17 +156,35 @@ const reducer = (state, action) =>
         const initialDataRelations = get(state, initialDataPath);
         const modifiedDataRelations = get(state, modifiedDataPath);
 
+        const valuesToLoad = !initialDataRelations
+          ? value
+          : value.filter((relation) => {
+              return !initialDataRelations.some((initialDataRelation) => {
+                return initialDataRelation.id === relation.id;
+              });
+            });
+
+        const keys = generateNKeysBetween(
+          null,
+          modifiedDataRelations[0]?.__temp_key__,
+          valuesToLoad.length
+        );
+
         /**
          * Check if the values we're loading are already in initial
          * data if they are then we don't need to load them at all
          */
-        const valuesToLoad = value.filter((relation) => {
-          return !initialDataRelations.some((initialDataRelation) => {
-            return initialDataRelation.id === relation.id;
-          });
-        });
 
-        set(draftState, initialDataPath, uniqBy([...valuesToLoad, ...initialDataRelations], 'id'));
+        const valuesWithKeys = valuesToLoad.map((relation, index) => ({
+          ...relation,
+          __temp_key__: keys[index],
+        }));
+
+        set(
+          draftState,
+          initialDataPath,
+          uniqBy([...valuesWithKeys, ...initialDataRelations], 'id')
+        );
 
         /**
          * We need to set the value also on modifiedData, because initialData
@@ -175,7 +194,7 @@ const reducer = (state, action) =>
         set(
           draftState,
           modifiedDataPath,
-          uniqBy([...valuesToLoad, ...modifiedDataRelations], 'id')
+          uniqBy([...valuesWithKeys, ...modifiedDataRelations], 'id')
         );
 
         break;
@@ -192,7 +211,9 @@ const reducer = (state, action) =>
           set(draftState, path, [value]);
         } else {
           const modifiedDataRelations = get(state, path);
-          const newRelations = [...modifiedDataRelations, value];
+          const [key] = generateNKeysBetween(modifiedDataRelations.at(-1)?.__temp_key__, null, 1);
+
+          const newRelations = [...modifiedDataRelations, { ...value, __temp_key__: key }];
           set(draftState, path, newRelations);
         }
 
@@ -219,8 +240,19 @@ const reducer = (state, action) =>
 
         const newRelations = [...modifiedDataRelations];
 
-        newRelations.splice(oldIndex, 1);
-        newRelations.splice(newIndex, 0, currentItem);
+        if (action.type === 'REORDER_RELATION') {
+          const [newKey] = generateNKeysBetween(
+            modifiedDataRelations[newIndex - 1]?.__temp_key__,
+            modifiedDataRelations[newIndex]?.__temp_key__,
+            1
+          );
+
+          newRelations.splice(oldIndex, 1);
+          newRelations.splice(newIndex, 0, { ...currentItem, __temp_key__: newKey });
+        } else {
+          newRelations.splice(oldIndex, 1);
+          newRelations.splice(newIndex, 0, currentItem);
+        }
 
         set(draftState, path, newRelations);
 
@@ -252,9 +284,7 @@ const reducer = (state, action) =>
          * relationalFieldPaths won't be an array which is what we're expecting
          * Therefore we reset these bits of state to the correct data type
          * which is an array. Hence why we replace those fields.
-         *
          */
-
         const mergeDataWithPreparedRelations = relationalFieldPaths
           .map((path) => path.split('.'))
           .reduce((acc, currentPaths) => {
@@ -271,7 +301,14 @@ const reducer = (state, action) =>
               return result;
             }, existingComponents);
 
-            if (state.modifiedData && get(state.modifiedData, componentName)) {
+            if (
+              state.modifiedData &&
+              get(state.modifiedData, componentName) &&
+              /**
+               * Only replace the state if the entity ids are the same.
+               */
+              state.modifiedData?.id === initialValues?.id
+            ) {
               /**
                * this will be null on initial load, however subsequent calls
                * will have data in them correlating to the names of the relational fields.

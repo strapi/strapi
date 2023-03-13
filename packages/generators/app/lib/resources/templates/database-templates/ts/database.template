@@ -1,6 +1,6 @@
 import path from 'path';
 
-export default = ({ env }) => {
+export default ({ env }) => {
   const client = env('DATABASE_CLIENT', 'sqlite');
 
   const connections = {
@@ -53,6 +53,7 @@ export default = ({ env }) => {
       connection: {
         filename: path.join(
           __dirname,
+          '..',
           '..',
           env('DATABASE_FILENAME', 'data.db')
         ),

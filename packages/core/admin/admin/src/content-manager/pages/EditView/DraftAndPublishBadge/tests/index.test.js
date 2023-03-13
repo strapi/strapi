@@ -84,14 +84,14 @@ describe('<DraftAndPublishBadge />', () => {
         class="c0"
       >
         <div
-          class="c1 sc-ehIJor hBsaKp"
+          class="c1 sc-bdvvtL deFIGY"
         >
           <svg
             class="c2"
             fill="none"
-            height="1em"
+            height="1rem"
             viewBox="0 0 4 4"
-            width="1em"
+            width="1rem"
             xmlns="http://www.w3.org/2000/svg"
           >
             <rect
@@ -184,14 +184,14 @@ describe('<DraftAndPublishBadge />', () => {
         class="c0"
       >
         <div
-          class="c1 sc-ehIJor hBsaKp"
+          class="c1 sc-bdvvtL deFIGY"
         >
           <svg
             class="c2"
             fill="none"
-            height="1em"
+            height="1rem"
             viewBox="0 0 4 4"
-            width="1em"
+            width="1rem"
             xmlns="http://www.w3.org/2000/svg"
           >
             <rect

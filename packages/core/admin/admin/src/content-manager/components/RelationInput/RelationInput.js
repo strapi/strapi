@@ -4,18 +4,22 @@ import styled from 'styled-components';
 import { FixedSizeList as List } from 'react-window';
 
 import { ReactSelect } from '@strapi/helper-plugin';
-import { Status } from '@strapi/design-system/Status';
-import { Box } from '@strapi/design-system/Box';
-import { Link } from '@strapi/design-system/Link';
-import { Icon } from '@strapi/design-system/Icon';
-import { FieldLabel, FieldError, FieldHint, Field } from '@strapi/design-system/Field';
-import { TextButton } from '@strapi/design-system/TextButton';
-import { Typography } from '@strapi/design-system/Typography';
-import { Tooltip } from '@strapi/design-system/Tooltip';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
+import {
+  Status,
+  Box,
+  Link,
+  Icon,
+  FieldLabel,
+  FieldError,
+  FieldHint,
+  Field,
+  TextButton,
+  Typography,
+  Tooltip,
+  VisuallyHidden,
+} from '@strapi/design-system';
 
-import Cross from '@strapi/icons/Cross';
-import Refresh from '@strapi/icons/Refresh';
+import { Cross, Refresh } from '@strapi/icons';
 
 import { Relation } from './components/Relation';
 import { RelationItem } from './components/RelationItem';
@@ -103,8 +107,7 @@ const RelationInput = ({
     [totalNumberOfRelations, numberOfRelationsToDisplay]
   );
 
-  const shouldDisplayLoadMoreButton =
-    (!!labelLoadMore && paginatedRelations.hasNextPage) || paginatedRelations.isLoading;
+  const shouldDisplayLoadMoreButton = !!labelLoadMore && paginatedRelations.hasNextPage;
 
   const options = useMemo(
     () =>

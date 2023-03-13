@@ -6,15 +6,21 @@ import {
   LoadingIndicatorPage,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-import Check from '@strapi/icons/Check';
-import { ContentLayout, HeaderLayout, Layout } from '@strapi/design-system/Layout';
-import { Button } from '@strapi/design-system/Button';
-import { Main } from '@strapi/design-system/Main';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
-import { ToggleInput } from '@strapi/design-system/ToggleInput';
-import { Select, Option } from '@strapi/design-system/Select';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Check } from '@strapi/icons';
+import {
+  ContentLayout,
+  HeaderLayout,
+  Layout,
+  Button,
+  Main,
+  Typography,
+  ToggleInput,
+  Select,
+  Option,
+  Grid,
+  GridItem,
+  Flex,
+} from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import isEqual from 'lodash/isEqual';
 import { getRequestUrl } from '../../../../../../admin/src/utils';
@@ -100,7 +106,15 @@ export const SingleSignOn = () => {
             {showLoader ? (
               <LoadingIndicatorPage />
             ) : (
-              <Stack spacing={4} background="neutral0" padding={6} shadow="filterShadow" hasRadius>
+              <Flex
+                direction="column"
+                alignItems="stretch"
+                gap={4}
+                background="neutral0"
+                padding={6}
+                shadow="filterShadow"
+                hasRadius
+              >
                 <Typography variant="delta" as="h2">
                   {formatMessage({
                     id: 'global.settings',
@@ -176,7 +190,7 @@ export const SingleSignOn = () => {
                     </Select>
                   </GridItem>
                 </Grid>
-              </Stack>
+              </Flex>
             )}
           </ContentLayout>
         </form>

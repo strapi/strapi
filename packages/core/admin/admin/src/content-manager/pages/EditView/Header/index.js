@@ -6,17 +6,18 @@ import isEqualFastCompare from 'react-fast-compare';
 import get from 'lodash/get';
 import isEqual from 'lodash/isEqual';
 import isEmpty from 'lodash/isEmpty';
-import ArrowLeft from '@strapi/icons/ArrowLeft';
+import { ArrowLeft, Check, ExclamationMarkCircle } from '@strapi/icons';
 import { Link } from '@strapi/helper-plugin';
-import { HeaderLayout } from '@strapi/design-system/Layout';
-import { Box } from '@strapi/design-system/Box';
-import { Button } from '@strapi/design-system/Button';
-import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import { Stack } from '@strapi/design-system/Stack';
-import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
-import Check from '@strapi/icons/Check';
+import {
+  HeaderLayout,
+  Box,
+  Button,
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  Flex,
+  Typography,
+} from '@strapi/design-system';
 import styled from 'styled-components';
 import { getTrad } from '../../../utils';
 import { connect, select } from './utils';
@@ -68,7 +69,7 @@ const Header = ({
 
   if (isCreatingEntry && canCreate) {
     primaryAction = (
-      <Stack horizontal spacing={2}>
+      <Flex gap={2}>
         {hasDraftAndPublish && (
           <Button disabled startIcon={<Check />} variant="secondary">
             {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
@@ -80,7 +81,7 @@ const Header = ({
             defaultMessage: 'Save',
           })}
         </Button>
-      </Stack>
+      </Flex>
     );
   }
 
@@ -166,7 +167,7 @@ const Header = ({
         isOpen={showWarningUnpublish}
       >
         <DialogBody icon={<ExclamationMarkCircle />}>
-          <Stack spacing={2}>
+          <Flex direction="column" alignItems="stretch" gap={2}>
             <Flex justifyContent="center" style={{ textAlign: 'center' }}>
               <Typography id="confirm-description">
                 {formatMessage(
@@ -189,7 +190,7 @@ const Header = ({
                 })}
               </Typography>
             </Flex>
-          </Stack>
+          </Flex>
         </DialogBody>
         <DialogFooter
           startAction={
@@ -221,7 +222,7 @@ const Header = ({
         isOpen={showPublishConfirmation}
       >
         <DialogBody icon={<ExclamationMarkCircle />}>
-          <Stack spacing={2}>
+          <Flex direction="column" alignItems="stretch" gap={2}>
             <FlexTextAlign justifyContent="center">
               <Typography id="confirm-description">
                 {draftCount}
@@ -246,7 +247,7 @@ const Header = ({
                 })}
               </Typography>
             </FlexTextAlign>
-          </Stack>
+          </Flex>
         </DialogBody>
         <DialogFooter
           startAction={

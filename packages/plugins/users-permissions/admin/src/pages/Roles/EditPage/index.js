@@ -11,17 +11,20 @@ import {
   useNotification,
   Link,
 } from '@strapi/helper-plugin';
-import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { Button } from '@strapi/design-system/Button';
-import { Stack } from '@strapi/design-system/Stack';
-import { Box } from '@strapi/design-system/Box';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Textarea } from '@strapi/design-system/Textarea';
-import { Typography } from '@strapi/design-system/Typography';
-import ArrowLeft from '@strapi/icons/ArrowLeft';
-import Check from '@strapi/icons/Check';
-import { GridItem, Grid } from '@strapi/design-system/Grid';
+import {
+  ContentLayout,
+  HeaderLayout,
+  Main,
+  Button,
+  Flex,
+  Box,
+  TextInput,
+  Textarea,
+  Typography,
+  GridItem,
+  Grid,
+} from '@strapi/design-system';
+import { ArrowLeft, Check } from '@strapi/icons';
 import UsersPermissions from '../../../components/UsersPermissions';
 import getTrad from '../../../utils/getTrad';
 import pluginId from '../../../pluginId';
@@ -116,7 +119,7 @@ const EditPage = () => {
               }
             />
             <ContentLayout>
-              <Stack spacing={7}>
+              <Flex direction="column" alignItems="stretch" gap={7}>
                 <Box
                   background="neutral0"
                   hasRadius
@@ -126,7 +129,7 @@ const EditPage = () => {
                   paddingLeft={7}
                   paddingRight={7}
                 >
-                  <Stack spacing={4}>
+                  <Flex direction="column" alignItems="stretch" gap={4}>
                     <Typography variant="delta" as="h2">
                       {formatMessage({
                         id: getTrad('EditPage.form.roles'),
@@ -170,7 +173,7 @@ const EditPage = () => {
                         />
                       </GridItem>
                     </Grid>
-                  </Stack>
+                  </Flex>
                 </Box>
                 {!isLoadingPlugins && (
                   <UsersPermissions
@@ -179,7 +182,7 @@ const EditPage = () => {
                     routes={routes}
                   />
                 )}
-              </Stack>
+              </Flex>
             </ContentLayout>
           </Form>
         )}

@@ -1,18 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ContextInfo renders 1`] = `
-.c7 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
 .c0 {
   background: #f6f6f9;
   padding-top: 16px;
@@ -34,15 +22,33 @@ exports[`ContextInfo renders 1`] = `
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 4px;
 }
 
-.c4 > * {
-  margin-top: 0;
-  margin-bottom: 0;
+.c4 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
 }
 
-.c4 > * + * {
-  margin-top: 4px;
+.c5 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #4a4a6a;
+}
+
+.c6 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .c1 {
@@ -54,20 +60,6 @@ exports[`ContextInfo renders 1`] = `
 .c2 {
   grid-column: span 6;
   max-width: 100%;
-}
-
-.c5 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
-.c6 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #4a4a6a;
 }
 
 @media (max-width:68.75rem) {
@@ -96,15 +88,15 @@ exports[`ContextInfo renders 1`] = `
           class=""
         >
           <div
-            class="c3 c4"
+            class="c3"
           >
             <span
-              class="c5"
+              class="c4"
             >
               Label 1
             </span>
             <span
-              class="c6"
+              class="c5"
             >
               value1
             </span>
@@ -118,15 +110,15 @@ exports[`ContextInfo renders 1`] = `
           class=""
         >
           <div
-            class="c3 c4"
+            class="c3"
           >
             <span
-              class="c5"
+              class="c4"
             >
               Label 2
             </span>
             <span
-              class="c6"
+              class="c5"
             >
               value2
             </span>
@@ -140,15 +132,15 @@ exports[`ContextInfo renders 1`] = `
           class=""
         >
           <div
-            class="c3 c4"
+            class="c3"
           >
             <span
-              class="c5"
+              class="c4"
             >
               Label 3
             </span>
             <span
-              class="c6"
+              class="c5"
             >
               value3
             </span>
@@ -158,7 +150,7 @@ exports[`ContextInfo renders 1`] = `
     </div>
   </div>
   <div
-    class="c7"
+    class="c6"
   >
     <p
       aria-live="polite"

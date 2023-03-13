@@ -295,23 +295,6 @@ describe('Content-Manager || RelationInput', () => {
       expect(screen.queryByText('Load more')).not.toBeInTheDocument();
     });
 
-    test('should display load more button loading if there is no next page but loading is true', () => {
-      setup({
-        relations: {
-          data: [],
-          isLoading: true,
-          isSuccess: true,
-          hasNextPage: false,
-          isFetchingNextPage: false,
-        },
-      });
-
-      expect(screen.getByRole('button', { name: 'Load more' })).toHaveAttribute(
-        'aria-disabled',
-        'true'
-      );
-    });
-
     test('should display error state', () => {
       setup({ error: 'This is an error' });
 

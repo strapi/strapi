@@ -70,6 +70,19 @@ describe('ADMIN | pages | SettingsPage', () => {
     const { container } = render(App);
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c11 {
+        padding-bottom: 56px;
+      }
+
+      .c0 {
+        display: grid;
+        grid-template-columns: auto 1fr;
+      }
+
+      .c12 {
+        overflow-x: hidden;
+      }
+
       .c2 {
         padding-top: 24px;
         padding-right: 16px;
@@ -90,8 +103,11 @@ describe('ADMIN | pages | SettingsPage', () => {
         padding-bottom: 16px;
       }
 
-      .c12 {
-        padding-bottom: 56px;
+      .c4 {
+        font-weight: 600;
+        font-size: 1.125rem;
+        line-height: 1.22;
+        color: #32324d;
       }
 
       .c3 {
@@ -124,22 +140,7 @@ describe('ADMIN | pages | SettingsPage', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
-      }
-
-      .c4 {
-        font-weight: 600;
-        font-size: 1.125rem;
-        line-height: 1.22;
-        color: #32324d;
-      }
-
-      .c11 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c11 > * + * {
-        margin-top: 8px;
+        gap: 8px;
       }
 
       .c7 {
@@ -149,15 +150,6 @@ describe('ADMIN | pages | SettingsPage', () => {
         -ms-flex-negative: 0;
         flex-shrink: 0;
         margin: 0;
-      }
-
-      .c0 {
-        display: grid;
-        grid-template-columns: auto 1fr;
-      }
-
-      .c13 {
-        overflow-x: hidden;
       }
 
       .c1 {
@@ -208,12 +200,12 @@ describe('ADMIN | pages | SettingsPage', () => {
             class="c9"
           >
             <ol
-              class="c10 c11"
+              class="c10"
             />
           </div>
         </nav>
         <div
-          class="c12 c13"
+          class="c11 c12"
         >
           <h1>
             App infos

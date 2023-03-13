@@ -1,15 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Table, Thead, Tbody, Tr, Td, Th } from '@strapi/design-system/Table';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { Typography } from '@strapi/design-system/Typography';
-import { IconButton } from '@strapi/design-system/IconButton';
-import { Icon } from '@strapi/design-system/Icon';
-import Pencil from '@strapi/icons/Pencil';
-import Reload from '@strapi/icons/Refresh';
+import {
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Td,
+  Th,
+  Typography,
+  IconButton,
+  Icon,
+  VisuallyHidden,
+} from '@strapi/design-system';
+import { Pencil, Refresh, Check } from '@strapi/icons';
 import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
-import Check from '@strapi/icons/Check';
 import { getTrad } from '../../../utils';
 
 const EmailTable = ({ canUpdate, onEditClick }) => {
@@ -49,7 +54,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
         <Tr {...onRowClick({ fn: () => onEditClick('reset_password') })}>
           <Td>
             <Icon>
-              <Reload
+              <Refresh
                 aria-label={formatMessage({
                   id: 'global.reset-password',
                   defaultMessage: 'Reset password',
