@@ -65,9 +65,7 @@ describe('Transfer', () => {
     },
   };
 
-  jest.mock('@strapi/data-transfer/lib/engine', () => mockDataTransfer.engine, { virtual: true });
-  jest.mock('@strapi/data-transfer/lib/strapi', () => mockDataTransfer.strapi, { virtual: true });
-  jest.mock('@strapi/data-transfer/lib/file', () => mockDataTransfer.file, { virtual: true });
+  jest.mock('@strapi/data-transfer', () => mockDataTransfer);
 
   const transferCommand = require('../../transfer/transfer');
 
