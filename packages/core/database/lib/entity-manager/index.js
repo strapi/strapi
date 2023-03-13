@@ -21,6 +21,7 @@ const {
   difference,
   uniqBy,
 } = require('lodash/fp');
+const { mapAsync } = require('@strapi/utils');
 const types = require('../types');
 const { createField } = require('../fields');
 const { createQueryBuilder } = require('../query');
@@ -40,6 +41,11 @@ const {
   cleanOrderColumns,
 } = require('./regular-relations');
 const { relationsOrderer } = require('./relations-orderer');
+const {
+  replaceRegularRelations,
+  cloneRegularRelations,
+} = require('./relations/cloning/regular-relations');
+const { DatabaseError } = require('../errors');
 
 const toId = (value) => value.id || value;
 const toIds = (value) => castArray(value || []).map(toId);
@@ -1165,6 +1171,52 @@ const createEntityManager = (db) => {
           await deleteRelations({ id, attribute, db, relIdsToDelete: 'all', transaction: trx });
         }
       }
+    },
+
+    // TODO: Clone polymorphic relations
+    // TODO: Excluded relation attributes
+    // TODO: Excluded relations (e.g. don't clone id X )
+    // async cloneRelations(uid, id, cloneId, { transaction: trx }) {
+    /**
+     *
+     * @param {*} uid - uid of the entity to clone
+     * @param {*} id - id of the entity to clone
+     * @param {*} cloneId - id of the cloned entity
+     * @param {object} opt
+     * @param {object} opt.cloneAttrs - key value pair of attributes to clone
+     * @param {object} opt.transaction - transaction to use
+     * @example cloneRelations('article', 1, 2, { cloneAttrs: { categories: true } })
+     */
+    async cloneRelations(uid, id, cloneId, { cloneAttrs = {}, transaction }) {
+      const { attributes } = db.metadata.get(uid);
+
+      if (!attributes) {
+        return;
+      }
+
+      await mapAsync(Object.entries(cloneAttrs), async ([attrName, shouldClone]) => {
+        if (!shouldClone) return;
+        const attribute = attributes[attrName];
+
+        if (attribute.type !== 'relation') {
+          throw new DatabaseError(
+            `Attribute ${attrName} is not a relation attribute. Cloning relations is only supported for relation attributes.`
+          );
+        }
+
+        // TODO: add support for cloning polymorphic relations
+        if (!attribute.joinTable) {
+          throw new DatabaseError(
+            `Cloning relations of type ${attribute.relation} is not supported`
+          );
+        }
+
+        if (isOneToAny(attribute) && isBidirectional(attribute)) {
+          await replaceRegularRelations({ id, cloneId, attribute, transaction });
+        } else {
+          await cloneRegularRelations({ id, cloneId, attribute, transaction });
+        }
+      });
     },
 
     // TODO: add lifecycle events
