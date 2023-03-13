@@ -67,7 +67,9 @@ const App = (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
       <Router history={history}>
-        <TableRows headers={headers} rows={rows} onOpenModal={onModalOpen} />
+        <table>
+          <TableRows headers={headers} rows={rows} onOpenModal={onModalOpen} />
+        </table>
       </Router>
     </IntlProvider>
   </ThemeProvider>

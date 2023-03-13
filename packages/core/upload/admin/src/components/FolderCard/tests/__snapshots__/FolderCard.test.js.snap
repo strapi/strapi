@@ -96,15 +96,6 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   color: #32324d;
 }
 
-.c17 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c17 > * + * {
-  margin-left: 8px;
-}
-
 .c5 {
   height: 18px;
   min-width: 18px;
@@ -183,6 +174,15 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   padding: 0;
   position: absolute;
   width: 1px;
+}
+
+.c17 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c17 > * + * {
+  margin-left: 8px;
 }
 
 .c18 {
@@ -415,15 +415,6 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
   color: #32324d;
 }
 
-.c15 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c15 > * + * {
-  margin-left: 8px;
-}
-
 .c17 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -434,6 +425,15 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
   padding: 0;
   position: absolute;
   width: 1px;
+}
+
+.c15 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c15 > * + * {
+  margin-left: 8px;
 }
 
 .c16 {

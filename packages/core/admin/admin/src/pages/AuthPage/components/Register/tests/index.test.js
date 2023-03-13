@@ -90,11 +90,16 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         padding-left: 8px;
       }
 
-      .c40 {
+      .c34 {
+        background: transparent;
+        border-style: none;
+      }
+
+      .c43 {
         padding-left: 8px;
       }
 
-      .c42 {
+      .c45 {
         background: #4945ff;
         padding: 8px;
         padding-right: 16px;
@@ -165,6 +170,22 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+        gap: 24px;
+      }
+
+      .c24 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        gap: 4px;
       }
 
       .c28 {
@@ -185,7 +206,25 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         justify-content: space-between;
       }
 
-      .c43 {
+      .c35 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: unset;
+        -webkit-justify-content: unset;
+        -ms-flex-pack: unset;
+        justify-content: unset;
+      }
+
+      .c46 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -237,32 +276,23 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         color: #d02b20;
       }
 
-      .c36 {
+      .c39 {
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c37 {
+      .c40 {
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c45 {
+      .c48 {
         font-size: 0.875rem;
         line-height: 1.43;
         font-weight: 600;
         color: #ffffff;
-      }
-
-      .c24 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c24 > * + * {
-        margin-top: 4px;
       }
 
       .c4 {
@@ -314,7 +344,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         border: 2px solid #4945ff;
       }
 
-      .c39 {
+      .c42 {
         height: 18px;
         min-width: 18px;
         margin: 0;
@@ -325,12 +355,12 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         cursor: pointer;
       }
 
-      .c39:checked {
+      .c42:checked {
         background-color: #4945ff;
         border: 1px solid #4945ff;
       }
 
-      .c39:checked:after {
+      .c42:checked:after {
         content: '';
         display: block;
         position: relative;
@@ -344,21 +374,21 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         transform: translateX(-50%) translateY(-50%);
       }
 
-      .c39:checked:disabled:after {
+      .c42:checked:disabled:after {
         background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
       }
 
-      .c39:disabled {
+      .c42:disabled {
         background-color: #dcdce4;
         border: 1px solid #c0c0cf;
       }
 
-      .c39:indeterminate {
+      .c42:indeterminate {
         background-color: #4945ff;
         border: 1px solid #4945ff;
       }
 
-      .c39:indeterminate:after {
+      .c42:indeterminate:after {
         content: '';
         display: block;
         position: relative;
@@ -373,13 +403,25 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         transform: translateX(-50%) translateY(-50%);
       }
 
-      .c39:indeterminate:disabled {
+      .c42:indeterminate:disabled {
         background-color: #dcdce4;
         border: 1px solid #c0c0cf;
       }
 
-      .c39:indeterminate:disabled:after {
+      .c42:indeterminate:disabled:after {
         background-color: #8e8ea9;
+      }
+
+      .c38 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
       }
 
       .c5 {
@@ -432,48 +474,48 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         fill: #8e8ea9;
       }
 
-      .c44 {
+      .c47 {
         height: 2.5rem;
       }
 
-      .c44[aria-disabled='true'] {
+      .c47[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c44[aria-disabled='true'] .c6 {
+      .c47[aria-disabled='true'] .c6 {
         color: #666687;
       }
 
-      .c44[aria-disabled='true'] svg > g,.c44[aria-disabled='true'] svg path {
+      .c47[aria-disabled='true'] svg > g,.c47[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c44[aria-disabled='true']:active {
+      .c47[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c44[aria-disabled='true']:active .c6 {
+      .c47[aria-disabled='true']:active .c6 {
         color: #666687;
       }
 
-      .c44[aria-disabled='true']:active svg > g,.c44[aria-disabled='true']:active svg path {
+      .c47[aria-disabled='true']:active svg > g,.c47[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c44:hover {
+      .c47:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c44:active {
+      .c47:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
-      .c44 svg > g,
-      .c44 svg path {
+      .c47 svg > g,
+      .c47 svg path {
         fill: #ffffff;
       }
 
@@ -586,23 +628,12 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c34 {
-        border: none;
-        background: transparent;
+      .c36 {
         font-size: 1.6rem;
-        width: auto;
         padding: 0;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
-      .c38 {
+      .c41 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -613,7 +644,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         align-items: flex-start;
       }
 
-      .c38 * {
+      .c41 * {
         cursor: pointer;
       }
 
@@ -663,12 +694,12 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         height: 4.5rem;
       }
 
-      .c35 svg {
+      .c37 svg {
         height: 1rem;
         width: 1rem;
       }
 
-      .c35 svg path {
+      .c37 svg path {
         fill: #666687;
       }
 
@@ -676,7 +707,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         text-align: center;
       }
 
-      .c41 {
+      .c44 {
         color: #4945ff;
       }
 
@@ -792,7 +823,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                 </div>
                 <div
                   class="c21"
-                  spacing="6"
                 >
                   <div
                     class="c22"
@@ -804,9 +834,11 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                         class=""
                       >
                         <div>
-                          <div>
+                          <div
+                            class=""
+                          >
                             <div
-                              class="c21 c24"
+                              class="c24"
                             >
                               <label
                                 class="c6 c25"
@@ -848,9 +880,11 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                         class=""
                       >
                         <div>
-                          <div>
+                          <div
+                            class=""
+                          >
                             <div
-                              class="c21 c24"
+                              class="c24"
                             >
                               <label
                                 class="c6 c25"
@@ -882,9 +916,11 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                     </div>
                   </div>
                   <div>
-                    <div>
+                    <div
+                      class=""
+                    >
                       <div
-                        class="c21 c24"
+                        class="c24"
                       >
                         <label
                           class="c6 c25"
@@ -919,9 +955,11 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                     </div>
                   </div>
                   <div>
-                    <div>
+                    <div
+                      class=""
+                    >
                       <div
-                        class="c21 c24"
+                        class="c24"
                       >
                         <label
                           class="c6 c25"
@@ -956,12 +994,18 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                             class="c33"
                           >
                             <button
-                              aria-label="Hide password"
-                              class="c34 c35"
+                              class="c34 c35 c36 c37"
                               type="button"
                             >
+                              <span
+                                class="c38"
+                              >
+                                Hide password
+                              </span>
                               <svg
+                                aria-hidden="true"
                                 fill="none"
+                                focusable="false"
                                 height="1rem"
                                 viewBox="0 0 24 24"
                                 width="1rem"
@@ -976,7 +1020,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                           </div>
                         </div>
                         <p
-                          class="c6 c36"
+                          class="c6 c39"
                           id="8-hint"
                         >
                           Must be at least 8 characters, 1 uppercase, 1 lowercase & 1 number
@@ -985,9 +1029,11 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                     </div>
                   </div>
                   <div>
-                    <div>
+                    <div
+                      class=""
+                    >
                       <div
-                        class="c21 c24"
+                        class="c24"
                       >
                         <label
                           class="c6 c25"
@@ -1021,12 +1067,18 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                             class="c33"
                           >
                             <button
-                              aria-label="Hide password"
-                              class="c34 c35"
+                              class="c34 c35 c36 c37"
                               type="button"
                             >
+                              <span
+                                class="c38"
+                              >
+                                Hide password
+                              </span>
                               <svg
+                                aria-hidden="true"
                                 fill="none"
+                                focusable="false"
                                 height="1rem"
                                 viewBox="0 0 24 24"
                                 width="1rem"
@@ -1043,30 +1095,32 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                       </div>
                     </div>
                   </div>
-                  <div>
+                  <div
+                    class=""
+                  >
                     <div
-                      class="c21 c24"
+                      class="c24"
                     >
                       <label
-                        class="c6 c37 c38"
+                        class="c6 c40 c41"
                       >
                         <div
                           class=""
                         >
                           <input
                             aria-label="news"
-                            class="c39"
+                            class="c42"
                             id="12"
                             name="news"
                             type="checkbox"
                           />
                         </div>
                         <div
-                          class="c40"
+                          class="c43"
                         >
                           Keep me updated about new features & upcoming improvements (by doing this you accept the 
                           <a
-                            class="c41"
+                            class="c44"
                             href="https://strapi.io/terms"
                             rel="noreferrer"
                             target="_blank"
@@ -1075,7 +1129,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                           </a>
                            and the 
                           <a
-                            class="c41"
+                            class="c44"
                             href="https://strapi.io/privacy"
                             rel="noreferrer"
                             target="_blank"
@@ -1089,11 +1143,11 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                   </div>
                   <button
                     aria-disabled="false"
-                    class="c42 c43 c4 c44"
+                    class="c45 c46 c4 c47"
                     type="submit"
                   >
                     <span
-                      class="c6 c45"
+                      class="c6 c48"
                     >
                       Let's start
                     </span>
