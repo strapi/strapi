@@ -32,6 +32,7 @@ const { exitWith } = require('../utils/helpers');
  * @property {string} [key] Encryption key, used when encryption is enabled
  * @property {(keyof import('@strapi/data-transfer/src/engine').TransferGroupFilter)[]} [only] If present, only include these filtered groups of data
  * @property {(keyof import('@strapi/data-transfer/src/engine').TransferGroupFilter)[]} [exclude] If present, exclude these filtered groups of data
+ * @property {number|undefined} [throttle] Delay in ms after each record
  */
 
 /**
@@ -79,6 +80,7 @@ module.exports = async (opts) => {
     schemaStrategy: opts.schemaStrategy || DEFAULT_SCHEMA_STRATEGY,
     exclude: opts.exclude,
     only: opts.only,
+    throttle: opts.throttle,
     rules: {
       links: [
         {
