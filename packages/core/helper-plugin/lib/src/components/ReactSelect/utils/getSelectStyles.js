@@ -75,6 +75,7 @@ const getSelectStyles = (theme, error) => {
 
       return {
         ...base,
+        color: theme.colors.neutral800,
         lineHeight: theme.spaces[5],
         backgroundColor,
         borderRadius: theme.borderRadius,
