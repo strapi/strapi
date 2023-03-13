@@ -164,6 +164,7 @@ jobs:
     strategy:
       matrix:
         node: [14, 16, 18]
+        mysql_pkg: ['mysql2', 'mysql']
     services:
       mysql:
         image: bitnami/mysql:latest
@@ -192,6 +193,8 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
+        env:
+          MYSQL_PKG: ${{ matrix.mysql_pkg }}
         with:
           dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
 
@@ -202,6 +205,7 @@ jobs:
     strategy:
       matrix:
         node: [14, 16, 18]
+        mysql_pkg: ['mysql2', 'mysql']
     services:
       mysql:
         image: bitnami/mysql:5.7
@@ -229,6 +233,8 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
+        env:
+          MYSQL_PKG: ${{ matrix.mysql_pkg }}
         with:
           dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
 
@@ -311,6 +317,7 @@ jobs:
     strategy:
       matrix:
         node: [14, 16, 18]
+        mysql_pkg: ['mysql2', 'mysql']
     services:
       mysql:
         image: bitnami/mysql:latest
@@ -339,6 +346,8 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - uses: ./.github/actions/run-api-tests
+        env:
+          MYSQL_PKG: ${{ matrix.mysql_pkg }}
         with:
           dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
           runEE: true
