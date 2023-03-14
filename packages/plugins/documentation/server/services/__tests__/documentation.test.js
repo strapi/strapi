@@ -65,7 +65,7 @@ describe('Documentation service', () => {
       const docService = documentation({ strapi: global.strapi });
 
       const pluginsToDocument = docService.getPluginsThatNeedDocumentation();
-      const expectededPlugins = ['email', 'upload', 'users-permissions'];
+      const expectededPlugins = ['upload', 'users-permissions'];
       expect(pluginsToDocument).toEqual(expectededPlugins);
 
       await docService.generateFullDoc();
@@ -78,17 +78,17 @@ describe('Documentation service', () => {
     it("generates documentation only for plugins in the user's config", async () => {
       global.strapi.config.get.mockReturnValueOnce({
         ...defaultConfig,
-        'x-strapi-config': { ...defaultConfig['x-strapi-config'], plugins: ['email'] },
+        'x-strapi-config': { ...defaultConfig['x-strapi-config'], plugins: ['upload'] },
       });
       const docService = documentation({ strapi: global.strapi });
 
       const pluginsToDocument = docService.getPluginsThatNeedDocumentation();
-      expect(pluginsToDocument).toEqual(['email']);
+      expect(pluginsToDocument).toEqual(['upload']);
 
       await docService.generateFullDoc();
       const lastMockCall = fse.writeJson.mock.calls[fse.writeJson.mock.calls.length - 1];
       const mockFinalDoc = lastMockCall[1];
-      expect(mockFinalDoc['x-strapi-config'].plugins).toEqual(['email']);
+      expect(mockFinalDoc['x-strapi-config'].plugins).toEqual(['upload']);
     });
 
     it('does not generate documentation for any plugins', async () => {

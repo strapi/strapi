@@ -109,7 +109,7 @@ module.exports = ({ strapi }) => {
 
     getPluginsThatNeedDocumentation() {
       // Default plugins that need documentation generated
-      const defaultPlugins = ['email', 'upload', 'users-permissions'];
+      const defaultPlugins = ['upload', 'users-permissions'];
       // User specified plugins that need documentation generated
       const userPluginsConfig = config['x-strapi-config'].plugins;
 
