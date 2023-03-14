@@ -20,6 +20,10 @@ const mockStrapiInstance = {
   config: {
     get: jest.fn(() => defaultConfig),
   },
+  log: {
+    info: jest.fn(),
+    warn: jest.fn(),
+  },
 };
 
 jest.mock('fs-extra', () => ({
@@ -54,5 +58,85 @@ describe('Documentation service', () => {
     const validatePromise = SwaggerParser.validate(mockFinalDoc);
 
     await expect(validatePromise).resolves.not.toThrow();
+  });
+
+  describe('Determines the plugins that need documentation', () => {
+    it('generates documentation for the default plugins if the user provided nothing in the config', async () => {
+      const docService = documentation({ strapi: global.strapi });
+
+      const pluginsToDocument = docService.getPluginsThatNeedDocumentation();
+      const expectededPlugins = ['email', 'upload', 'users-permissions'];
+      expect(pluginsToDocument).toEqual(expectededPlugins);
+
+      await docService.generateFullDoc();
+      const lastMockCall = fse.writeJson.mock.calls[fse.writeJson.mock.calls.length - 1];
+      const mockFinalDoc = lastMockCall[1];
+
+      expect(mockFinalDoc['x-strapi-config'].plugins).toEqual(expectededPlugins);
+    });
+
+    it("generates documentation only for plugins in the user's config", async () => {
+      global.strapi.config.get.mockReturnValueOnce({
+        ...defaultConfig,
+        'x-strapi-config': { ...defaultConfig['x-strapi-config'], plugins: ['email'] },
+      });
+      const docService = documentation({ strapi: global.strapi });
+
+      const pluginsToDocument = docService.getPluginsThatNeedDocumentation();
+      expect(pluginsToDocument).toEqual(['email']);
+
+      await docService.generateFullDoc();
+      const lastMockCall = fse.writeJson.mock.calls[fse.writeJson.mock.calls.length - 1];
+      const mockFinalDoc = lastMockCall[1];
+      expect(mockFinalDoc['x-strapi-config'].plugins).toEqual(['email']);
+    });
+
+    it('does not generate documentation for any plugins', async () => {
+      global.strapi.config.get.mockReturnValueOnce({
+        ...defaultConfig,
+        'x-strapi-config': { ...defaultConfig['x-strapi-config'], plugins: [] },
+      });
+      const docService = documentation({ strapi: global.strapi });
+
+      const pluginsToDocument = docService.getPluginsThatNeedDocumentation();
+      expect(pluginsToDocument).toEqual([]);
+
+      await docService.generateFullDoc();
+      const lastMockCall = fse.writeJson.mock.calls[fse.writeJson.mock.calls.length - 1];
+      const mockFinalDoc = lastMockCall[1];
+      expect(mockFinalDoc['x-strapi-config'].plugins).toEqual([]);
+    });
+  });
+
+  describe('Handles overrides', () => {
+    it("does not apply an override if the plugin providing the override isn't specified in the x-strapi-config.plugins", async () => {
+      global.strapi.config.get.mockReturnValueOnce({
+        ...defaultConfig,
+        'x-strapi-config': { ...defaultConfig['x-strapi-config'], plugins: [] },
+      });
+      const docService = documentation({ strapi: global.strapi });
+
+      docService.registerDoc(
+        {
+          '/test': {
+            get: {
+              tags: ['Users-Permissions - Users & Roles'],
+              summary: 'Get list of users',
+              responses: {},
+            },
+          },
+        },
+        'users-permissions'
+      );
+
+      expect(global.strapi.log.info).toHaveBeenCalledWith(
+        `@strapi/documentation will not use the override provided by users-permissions since the plugin was not specified in the x-strapi-config.plugins array`
+      );
+
+      await docService.generateFullDoc();
+      const lastMockCall = fse.writeJson.mock.calls[fse.writeJson.mock.calls.length - 1];
+      const mockFinalDoc = lastMockCall[1];
+      expect(mockFinalDoc.paths['/test']).toBeUndefined();
+    });
   });
 });
