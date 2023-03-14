@@ -137,9 +137,11 @@ const cleanSchemaAttributes = (
               }),
             },
           };
-          const refComponentSchema = { $ref: `#/components/schemas/${pascalCase(component)}` };
+          const refComponentSchema = {
+            $ref: `#/components/schemas/${pascalCase(component)}Component`,
+          };
           const componentExists = didAddStrapiComponentsToSchemas(
-            pascalCase(component),
+            `${pascalCase(component)}Component`,
             rawComponentSchema
           );
           const finalComponentSchema = componentExists ? refComponentSchema : rawComponentSchema;
@@ -171,7 +173,10 @@ const cleanSchemaAttributes = (
         attributesCopy[prop] = {
           type: 'object',
           properties: {
-            data: getSchemaData(isListOfEntities, cleanSchemaAttributes(imageAttributes)),
+            data: getSchemaData(
+              isListOfEntities,
+              cleanSchemaAttributes(imageAttributes, { typeMap })
+            ),
           },
         };
         break;
