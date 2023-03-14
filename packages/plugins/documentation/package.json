@@ -21,7 +21,7 @@
     }
   ],
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "test:unit": "jest --verbose"
   },
   "dependencies": {
     "@strapi/design-system": "1.6.5",
@@ -55,6 +55,7 @@
     "styled-components": "5.3.3"
   },
   "devDependencies": {
+    "@apidevtools/swagger-parser": "^10.1.0",
     "@testing-library/react": "12.1.4",
     "history": "^4.9.0",
     "msw": "1.0.1",
