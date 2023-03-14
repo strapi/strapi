@@ -1,6 +1,6 @@
-import { PassThrough, Readable, Transform } from 'stream';
+import { PassThrough, Readable } from 'stream';
 import { WebSocket } from 'ws';
-import { once } from 'lodash/fp';
+
 import type {
   IAsset,
   IMetadata,
@@ -11,7 +11,11 @@ import type {
   TransferStage,
 } from '../../../../types';
 import { client, server } from '../../../../types/remote/protocol';
-import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
+import {
+  ProviderInitializationError,
+  ProviderTransferError,
+  ProviderValidationError,
+} from '../../../errors/providers';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ILocalStrapiSourceProviderOptions } from '../local-source';
 import { createDispatcher } from '../utils';
@@ -168,6 +172,37 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
   async initTransfer(): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       this.ws
+        ?.on('unexpected-response', (_req, res) => {
+          if (res.statusCode === 401) {
+            return reject(
+              new ProviderInitializationError(
+                'Failed to initialize the connexion: Authentication Error'
+              )
+            );
+          }
+
+          if (res.statusCode === 403) {
+            return reject(
+              new ProviderInitializationError(
+                'Failed to initialize the connexion: Authorization Error'
+              )
+            );
+          }
+
+          if (res.statusCode === 404) {
+            return reject(
+              new ProviderInitializationError(
+                'Failed to initialize the connexion: Data transfer is not enabled on the remote host'
+              )
+            );
+          }
+
+          return reject(
+            new ProviderInitializationError(
+              `Failed to initialize the connexion: Unexpected server response ${res.statusCode}`
+            )
+          );
+        })
         ?.once('open', async () => {
           const query = this.dispatcher?.dispatchCommand({
             command: 'init',
@@ -187,7 +222,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     });
   }
 
-  async bootstrap?(): Promise<void> {
+  async bootstrap(): Promise<void> {
     const { url, auth } = this.options;
     let ws: WebSocket;
     this.assertValidProtocol(url);
@@ -243,10 +278,6 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       (await this.dispatcher?.dispatchTransferAction<Strapi.Schemas>('getSchemas')) ?? null;
 
     return schemas;
-  }
-
-  #startStepOnce(stage: client.TransferPullStep) {
-    return once(() => this.#startStep(stage));
   }
 
   async #startStep<T extends client.TransferPullStep>(step: T) {

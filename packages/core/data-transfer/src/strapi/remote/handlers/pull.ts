@@ -1,4 +1,4 @@
-import { Readable, Transform } from 'stream';
+import { Readable } from 'stream';
 import { randomUUID } from 'crypto';
 
 import { Handler } from './abstract';
@@ -62,6 +62,10 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
   async onMessage(this: PullHandler, raw) {
     const msg = JSON.parse(raw.toString());
 
+    if (!isDataTransferMessage(msg)) {
+      return;
+    }
+
     if (!msg.uuid) {
       await this.respond(undefined, new Error('Missing uuid in message'));
     }
@@ -70,12 +74,17 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
 
     // Regular command message (init, end, status)
     if (type === 'command') {
-      const { command, params } = msg;
+      const { command } = msg;
 
       await this.executeAndRespond(uuid, () => {
         this.assertValidTransferCommand(command);
 
-        return this[command](params);
+        // The status command don't have params
+        if (command === 'status') {
+          return this.status();
+        }
+
+        return this[command](msg.params);
       });
     }
 

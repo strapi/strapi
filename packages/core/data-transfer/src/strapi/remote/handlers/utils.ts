@@ -143,15 +143,7 @@ export const handlerControllerFactory =
           },
 
           send(message, cb) {
-            let payload;
-
-            try {
-              payload = JSON.stringify(message);
-            } catch {
-              payload = message;
-            }
-
-            ws.send(payload as string, cb);
+            ws.send(message, cb);
           },
 
           confirm(message) {
