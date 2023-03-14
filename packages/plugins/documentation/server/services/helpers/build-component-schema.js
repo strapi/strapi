@@ -20,13 +20,14 @@ const { hasFindMethod, isLocalizedPath } = require('./utils/routes');
 const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   // Store response and request schemas in an object
   let schemas = {};
+  let strapiComponentSchemas = {};
   // adds a ComponentSchema to the Schemas so it can be used as Ref
   const didAddStrapiComponentsToSchemas = (schemaName, schema) => {
     if (!Object.keys(schema) || !Object.keys(schema.properties)) return false;
 
     // Add the Strapi components to the schema
-    schemas = {
-      ...schemas,
+    strapiComponentSchemas = {
+      ...strapiComponentSchemas,
       [schemaName]: schema,
     };
 
@@ -85,7 +86,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
         required: ['data'],
         properties: {
           data: {
-            required: requiredAttributes,
+            ...(requiredAttributes.length && { required: requiredAttributes }),
             type: 'object',
             properties: cleanSchemaAttributes(attributesForRequest, {
               isRequest: true,
@@ -217,7 +218,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
     },
   };
 
-  return { ...schemas };
+  return { ...schemas, ...strapiComponentSchemas };
 };
 
 const buildComponentSchema = (api) => {
