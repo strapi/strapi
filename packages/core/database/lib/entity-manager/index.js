@@ -1199,11 +1199,14 @@ const createEntityManager = (db) => {
           );
         }
 
-        // TODO: add support for cloning polymorphic relations
+        if (attribute.joinColumn) {
+          // TODO: add support for cloning oneToMany relations on the owning side
+          return;
+        }
+
         if (!attribute.joinTable) {
-          throw new DatabaseError(
-            `Cloning relations of type ${attribute.relation} is not supported`
-          );
+          // TODO: add support for cloning polymorphic relations
+          return;
         }
 
         if (isOneToAny(attribute) && isBidirectional(attribute)) {
