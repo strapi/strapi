@@ -78,6 +78,7 @@ describe('Import', () => {
         },
       };
     }),
+    exitMessageText: jest.fn(),
   };
   jest.mock(
     '../../transfer/utils',

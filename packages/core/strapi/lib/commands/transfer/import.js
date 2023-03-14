@@ -18,6 +18,8 @@ const {
   createStrapiInstance,
   formatDiagnostic,
   loadersFactory,
+  exitMessageText,
+  abortTransfer,
 } = require('./utils');
 const { exitWith } = require('../utils/helpers');
 
@@ -136,11 +138,16 @@ module.exports = async (opts) => {
 
   let results;
   try {
+    // Abort transfer if user interrupts process
+    ['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach((signal) => {
+      process.removeAllListeners(signal);
+      process.on(signal, () => abortTransfer({ engine, strapi }));
+    });
+
     results = await engine.transfer();
   } catch (e) {
     await strapiInstance.telemetry.send('didDEITSProcessFail', getTelemetryPayload());
-    console.error('Import process failed.');
-    process.exit(1);
+    exitWith(1, exitMessageText('import', true));
   }
 
   try {
@@ -153,7 +160,7 @@ module.exports = async (opts) => {
   await strapiInstance.telemetry.send('didDEITSProcessFinish', getTelemetryPayload());
   await strapiInstance.destroy();
 
-  exitWith(0, 'Import process has been completed successfully!');
+  exitWith(0, exitMessageText('import'));
 };
 
 /**

@@ -22,6 +22,7 @@ describe('Transfer', () => {
         },
       };
     }),
+    exitMessageText: jest.fn(),
   };
   jest.mock(
     '../../transfer/utils',
@@ -35,6 +36,9 @@ describe('Transfer', () => {
     strapi: {
       providers: {
         createLocalStrapiSourceProvider: jest.fn().mockReturnValue({ name: 'testLocalSource' }),
+        createLocalStrapiDestinationProvider: jest
+          .fn()
+          .mockReturnValue({ name: 'testLocalDestination' }),
         createRemoteStrapiDestinationProvider: jest
           .fn()
           .mockReturnValue({ name: 'testRemoteDest' }),
@@ -75,8 +79,10 @@ describe('Transfer', () => {
   jest.spyOn(console, 'info').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
 
-  const destinationUrl = new URL('http://strapi.com/admin');
+  const destinationUrl = new URL('http://one.localhost/admin');
   const destinationToken = 'test-token';
+
+  const sourceUrl = new URL('http://two.localhost/admin');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -87,7 +93,19 @@ describe('Transfer', () => {
       await transferCommand({ from: undefined, to: undefined });
     });
 
-    expect(console.error).toHaveBeenCalledWith(expect.stringMatching(/at least one source/i));
+    expect(console.error).toHaveBeenCalledWith(expect.stringMatching(/one source/i));
+
+    expect(
+      mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
+    ).not.toHaveBeenCalled();
+  });
+
+  it('exits with error when both --to and --from are provided', async () => {
+    await expectExit(1, async () => {
+      await transferCommand({ from: sourceUrl, to: destinationUrl });
+    });
+
+    expect(console.error).toHaveBeenCalledWith(expect.stringMatching(/one source/i));
 
     expect(
       mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
@@ -138,6 +156,8 @@ describe('Transfer', () => {
       ).toHaveBeenCalled();
     });
   });
+
+  it.todo('uses local Strapi destination when to is not specified');
 
   it('uses restore as the default strategy', async () => {
     await expectExit(0, async () => {

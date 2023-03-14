@@ -28,10 +28,6 @@ const {
   validateExcludeOnly,
 } = require('../lib/commands/transfer/utils');
 
-process.on('SIGINT', () => {
-  process.exit();
-});
-
 const checkCwdIsStrapiApp = (name) => {
   const logErrorAndExit = () => {
     console.log(
@@ -298,6 +294,14 @@ program
   .addOption(onlyOption)
   .addOption(throttleOption)
   .hook('preAction', validateExcludeOnly)
+  .hook(
+    'preAction',
+    ifOptions(
+      (opts) => !(opts.from || opts.to) || (opts.from && opts.to),
+      () =>
+        exitWith(1, 'Exactly one remote source (from) or destination (to) option must be provided')
+    )
+  )
   // If --from is used, validate the URL and token
   .hook(
     'preAction',
@@ -314,7 +318,7 @@ program
             },
           ]);
           if (!answers.fromToken?.length) {
-            exitWith(1, 'No token entered, aborting transfer.');
+            exitWith(1, 'No token provided for remote source, aborting transfer.');
           }
           thisCommand.opts().fromToken = answers.fromToken;
         }
@@ -337,7 +341,7 @@ program
             },
           ]);
           if (!answers.toToken?.length) {
-            exitWith(1, 'No token entered, aborting transfer.');
+            exitWith(1, 'No token provided for remote destination, aborting transfer.');
           }
           thisCommand.opts().toToken = answers.toToken;
         }
