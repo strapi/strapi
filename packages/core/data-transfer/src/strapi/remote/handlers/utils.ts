@@ -7,6 +7,7 @@ import type { IHandlerOptions, TransferMethod } from './types';
 import { ProviderTransferError } from '../../../errors/providers';
 
 type WSCallback = (client: WebSocket, request: IncomingMessage) => void;
+type BufferLike = Parameters<WebSocket['send']>[0];
 
 const VALID_TRANSFER_COMMANDS = ['init', 'end', 'status'] as const;
 
@@ -85,7 +86,7 @@ export interface Handler {
   /**
    * It sends a message to the client
    */
-  send<T = unknown>(message: T, cb?: (err?: Error) => void): void;
+  send<T extends BufferLike>(message: T, cb?: (err?: Error) => void): void;
 
   /**
    * It sends a message to the client and waits for a confirmation
@@ -185,7 +186,7 @@ export const handlerFactory =
                 return;
               }
 
-              const payload = {
+              const payload = JSON.stringify({
                 uuid,
                 data: data ?? null,
                 error: e
@@ -194,7 +195,7 @@ export const handlerFactory =
                       message: e?.message,
                     }
                   : null,
-              };
+              });
 
               this.send(payload, (error) => (error ? reject(error) : resolve()));
             });
@@ -216,7 +217,7 @@ export const handlerFactory =
             return new Promise((resolve, reject) => {
               const uuid = randomUUID();
 
-              const payload = { uuid, data: message };
+              const payload = JSON.stringify({ uuid, data: message });
 
               this.send(payload, (error) => {
                 if (error) {
