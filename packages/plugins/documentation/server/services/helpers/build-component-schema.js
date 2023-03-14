@@ -20,16 +20,17 @@ const { hasFindMethod, isLocalizedPath } = require('./utils/routes');
 const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   // Store response and request schemas in an object
   let schemas = {};
-  let componentSchemas = {};
+  let strapiComponentSchemas = {};
   // adds a ComponentSchema to the Schemas so it can be used as Ref
-  const addComponentSchema = (schemaName, schema) => {
-    if (!Object.keys(schema) || !Object.keys(schema.properties)) {
-      return false;
-    }
-    componentSchemas = {
-      ...componentSchemas,
+  const didAddStrapiComponentsToSchemas = (schemaName, schema) => {
+    if (!Object.keys(schema) || !Object.keys(schema.properties)) return false;
+
+    // Add the Strapi components to the schema
+    strapiComponentSchemas = {
+      ...strapiComponentSchemas,
       [schemaName]: schema,
     };
+
     return true;
   };
   // Get all the route methods
@@ -38,7 +39,8 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   const hasLocalizationPath = routeInfo.routes.filter((route) =>
     isLocalizedPath(route.path)
   ).length;
-  // When the route methods contain any post or put requests
+
+  // Build the request schemas when the route has POST or PUT methods
   if (routeMethods.includes('POST') || routeMethods.includes('PUT')) {
     const attributesToOmit = [
       'createdAt',
@@ -50,7 +52,6 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
       'localizations',
     ];
     const attributesForRequest = _.omit(attributes, attributesToOmit);
-
     // Get a list of required attribute names
     const requiredAttributes = Object.entries(attributesForRequest).reduce((acc, attribute) => {
       const [attributeKey, attributeValue] = attribute;
@@ -62,6 +63,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
       return acc;
     }, []);
 
+    // Build localization requests schemas
     if (hasLocalizationPath) {
       schemas = {
         ...schemas,
@@ -70,7 +72,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
           type: 'object',
           properties: cleanSchemaAttributes(attributesForRequest, {
             isRequest: true,
-            addComponentSchema,
+            didAddStrapiComponentsToSchemas,
           }),
         },
       };
@@ -84,11 +86,11 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
         required: ['data'],
         properties: {
           data: {
-            required: requiredAttributes,
+            ...(requiredAttributes.length && { required: requiredAttributes }),
             type: 'object',
             properties: cleanSchemaAttributes(attributesForRequest, {
               isRequest: true,
-              addComponentSchema,
+              didAddStrapiComponentsToSchemas,
             }),
           },
         },
@@ -96,6 +98,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
     };
   }
 
+  // Build the localization response schema
   if (hasLocalizationPath) {
     schemas = {
       ...schemas,
@@ -103,7 +106,21 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
         type: 'object',
         properties: {
           id: { type: 'number' },
-          ...cleanSchemaAttributes(attributes, { addComponentSchema }),
+          ...cleanSchemaAttributes(attributes, {
+            didAddStrapiComponentsToSchemas,
+          }),
+        },
+      },
+      [`${pascalCase(uniqueName)}ResponseDataObjectLocalized`]: {
+        type: 'object',
+        properties: {
+          id: { type: 'number' },
+          attributes: {
+            type: 'object',
+            properties: cleanSchemaAttributes(attributes, {
+              didAddStrapiComponentsToSchemas,
+            }),
+          },
         },
       },
     };
@@ -112,6 +129,24 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   // Check for routes that need to return a list
   const hasListOfEntities = routeInfo.routes.filter((route) => hasFindMethod(route.handler)).length;
   if (hasListOfEntities) {
+    // Buld the localized list response schema
+    if (hasLocalizationPath) {
+      schemas = {
+        ...schemas,
+        [`${pascalCase(uniqueName)}ListResponseDataItemLocalized`]: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            attributes: {
+              type: 'object',
+              properties: cleanSchemaAttributes(attributes, {
+                didAddStrapiComponentsToSchemas,
+              }),
+            },
+          },
+        },
+      };
+    }
     // Build the list response schema
     schemas = {
       ...schemas,
@@ -122,21 +157,11 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
           attributes: {
             type: 'object',
             properties: cleanSchemaAttributes(attributes, {
-              addComponentSchema,
+              didAddStrapiComponentsToSchemas,
               componentSchemaRefName: `#/components/schemas/${pascalCase(
                 uniqueName
               )}ListResponseDataItemLocalized`,
             }),
-          },
-        },
-      },
-      [`${pascalCase(uniqueName)}ListResponseDataItemLocalized`]: {
-        type: 'object',
-        properties: {
-          id: { type: 'number' },
-          attributes: {
-            type: 'object',
-            properties: cleanSchemaAttributes(attributes, { addComponentSchema }),
           },
         },
       },
@@ -165,7 +190,6 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
       },
     };
   }
-
   // Build the response schema
   schemas = {
     ...schemas,
@@ -176,21 +200,11 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
         attributes: {
           type: 'object',
           properties: cleanSchemaAttributes(attributes, {
-            addComponentSchema,
+            didAddStrapiComponentsToSchemas,
             componentSchemaRefName: `#/components/schemas/${pascalCase(
               uniqueName
             )}ResponseDataObjectLocalized`,
           }),
-        },
-      },
-    },
-    [`${pascalCase(uniqueName)}ResponseDataObjectLocalized`]: {
-      type: 'object',
-      properties: {
-        id: { type: 'number' },
-        attributes: {
-          type: 'object',
-          properties: cleanSchemaAttributes(attributes, { addComponentSchema }),
         },
       },
     },
@@ -203,7 +217,8 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
       },
     },
   };
-  return { ...schemas, ...componentSchemas };
+
+  return { ...schemas, ...strapiComponentSchemas };
 };
 
 const buildComponentSchema = (api) => {
