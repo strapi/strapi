@@ -30,7 +30,7 @@ export type TransferMap<T> = {
   map: (data: T) => T;
 };
 
-type Stream = Readable | Writable | Duplex | Transform;
+export type Stream = Readable | Writable | Duplex | Transform;
 export type TransformFunction = (chunk: any, encoding?: string) => any;
 export type StreamItem = Stream | TransformFunction;
 
