@@ -35,7 +35,7 @@ const FormTransferTokenContainer = ({
     {
       value: 'push-pull',
       label: {
-        id: 'Settings.transferTokens.types.pull',
+        id: 'Settings.transferTokens.types.push-pull',
         defaultMessage: 'Push & pull',
       },
     },

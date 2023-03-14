@@ -7,15 +7,13 @@ const {
       createRemoteStrapiDestinationProvider,
       createLocalStrapiSourceProvider,
       createLocalStrapiDestinationProvider,
+      createRemoteStrapiSourceProvider,
     },
   },
 } = require('@strapi/data-transfer');
 const { isObject } = require('lodash/fp');
 const chalk = require('chalk');
 
-const {
-  createRemoteStrapiSourceProvider,
-} = require('@strapi/data-transfer/lib/strapi/providers/remote-source');
 const {
   buildTransferTable,
   createStrapiInstance,

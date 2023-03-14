@@ -209,7 +209,7 @@ export const handlerFactory =
               payload = message;
             }
 
-            ws.send(payload, cb);
+            ws.send(payload as string, cb);
           },
 
           confirm(message) {

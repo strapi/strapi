@@ -9,7 +9,6 @@ export type TransferPullMessage = CreateTransferMessage<
   | TransferStepCommands<'assets', TransferAssetFlow | null>
 >;
 
-// TODO Delete duplications
 export type TransferPullStep = TransferPullMessage['step'];
 
 type TransferStepCommands<T extends string, U> = { step: T } & TransferStepFlow<U>;
