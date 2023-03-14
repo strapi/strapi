@@ -316,38 +316,61 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
   });
 
-  describe('Enable review workflows on a content type', () => {
-    test('when enabled on a content type, entries of this type should be added to the first stage of the workflow', async () => {
-      await createEntry(productUID, { name: 'Product' });
-      await createEntry(productUID, { name: 'Product 1' });
-      await createEntry(productUID, { name: 'Product 2' });
+  describe('Enabling/Disabling review workflows on a content type', () => {
+    let response;
 
-      await updateContentType(productUID, {
-        components: [],
-        contentType: { ...model, reviewWorkflows: true },
-      });
-
-      await restart();
-
-      const res = await requests.admin({
-        method: 'GET',
-        url: `/content-type-builder/content-types/api::product.product`,
-      });
-
-      expect(res.body.data.schema.reviewWorkflows).toBeTruthy();
-
-      const connection = strapi.db.getConnection();
-      const RWMorphTableResults = await connection
+    const getRWMorphTableResults = async (connection) =>
+      connection
         .select('*')
         .from('strapi_workflows_stages_related_morphs')
         .where('related_type', productUID);
 
-      expect(RWMorphTableResults.length).toEqual(3);
-      for (let i = 0; i < RWMorphTableResults.length; i += 1) {
-        const entry = RWMorphTableResults[i];
+    beforeAll(async () => {
+      await createEntry(productUID, { name: 'Product' });
+      await createEntry(productUID, { name: 'Product 1' });
+      await createEntry(productUID, { name: 'Product 2' });
+    });
+
+    test('when enabled on a content type, entries of this type should be added to the first stage of the workflow', async () => {
+      await updateContentType(productUID, {
+        components: [],
+        contentType: { ...model, reviewWorkflows: true },
+      });
+      await restart();
+
+      response = await requests.admin({
+        method: 'GET',
+        url: `/content-type-builder/content-types/api::product.product`,
+      });
+
+      expect(response.body.data.schema.reviewWorkflows).toBeTruthy();
+
+      response = await getRWMorphTableResults(strapi.db.getConnection());
+
+      expect(response.length).toEqual(3);
+      for (let i = 0; i < response.length; i += 1) {
+        const entry = response[i];
         expect(entry.related_id).toEqual(i + 1);
         expect(entry.order).toEqual(1);
       }
+    });
+
+    test('when disabled entries in the content type should be removed from any workflow stage', async () => {
+      await updateContentType(productUID, {
+        components: [],
+        contentType: { ...model, reviewWorkflows: false },
+      });
+
+      await restart();
+
+      response = await requests.admin({
+        method: 'GET',
+        url: `/content-type-builder/content-types/api::product.product`,
+      });
+      expect(response.body.data.schema.reviewWorkflows).toBeFalsy();
+
+      response = await getRWMorphTableResults(strapi.db.getConnection());
+      expect(response.length).toEqual(0);
     });
   });
 });
