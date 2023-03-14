@@ -1,17 +1,21 @@
 import type { Context } from 'koa';
 import type { IncomingMessage } from 'http';
+import type { RawData, ServerOptions } from 'ws';
 import { randomUUID } from 'crypto';
-import { WebSocket, WebSocketServer, RawData } from 'ws';
+import { WebSocket, WebSocketServer } from 'ws';
 
-import type { IHandlerOptions, TransferMethod } from './types';
+import type { Handler, TransferState } from './abstract';
+import type { Protocol } from '../../../../types';
 import { ProviderTransferError } from '../../../errors/providers';
+import { VALID_TRANSFER_COMMANDS, ValidTransferCommand } from './constants';
+import { TransferMethod } from '../constants';
 
 type WSCallback = (client: WebSocket, request: IncomingMessage) => void;
-type BufferLike = Parameters<WebSocket['send']>[0];
 
-const VALID_TRANSFER_COMMANDS = ['init', 'end', 'status'] as const;
-
-type TransferCommand = (typeof VALID_TRANSFER_COMMANDS)[number];
+export interface HandlerOptions {
+  verify: (ctx: Context, scope?: TransferMethod) => Promise<void>;
+  server?: ServerOptions;
+}
 
 export const transformUpgradeHeader = (header = '') => {
   return header.split(',').map((s) => s.trim().toLowerCase());
@@ -26,6 +30,24 @@ export const assertValidHeader = (ctx: Context) => {
   if (!upgradeHeader.includes('websocket')) {
     throw new Error('Invalid Header');
   }
+};
+
+export const isDataTransferMessage = (message: unknown): message is Protocol.client.Message => {
+  if (!message || typeof message !== 'object') {
+    return false;
+  }
+
+  const { uuid, type } = message as Record<string, unknown>;
+
+  if (typeof uuid !== 'string' || typeof type !== 'string') {
+    return false;
+  }
+
+  if (!['command', 'transfer'].includes(type)) {
+    return false;
+  }
+
+  return true;
 };
 
 /**
@@ -47,90 +69,9 @@ export const handleWSUpgrade = (wss: WebSocketServer, ctx: Context, callback: WS
 
 // Protocol related functions
 
-interface TransferState {
-  id?: string;
-  startedAt?: number;
-}
-
-export interface Handler {
-  // Transfer ID
-  get transferID(): TransferState['id'];
-  set transferID(id: TransferState['id']);
-
-  // Started At
-  get startedAt(): TransferState['startedAt'];
-  set startedAt(id: TransferState['startedAt']);
-
-  /**
-   * Returns whether a transfer is currently in progress or not
-   */
-  isTransferStarted(): boolean;
-
-  /**
-   * Make sure the current transfer is started and initialized
-   */
-  assertValidTransfer(): void;
-
-  /**
-   * Checks that the given string is a valid transfer command
-   */
-  assertValidTransferCommand(command: string): asserts command is TransferCommand;
-
-  // Messaging utils
-
-  /**
-   * Respond to a specific message
-   */
-  respond<T = unknown>(uuid?: string, e?: Error | null, data?: T): Promise<void>;
-
-  /**
-   * It sends a message to the client
-   */
-  send<T extends BufferLike>(message: T, cb?: (err?: Error) => void): void;
-
-  /**
-   * It sends a message to the client and waits for a confirmation
-   */
-  confirm<T = unknown>(message: T): Promise<void>;
-
-  // Utils
-
-  /**
-   * Check the current auth has the permission for the given scope
-   */
-  verifyAuth(scope?: TransferMethod): Promise<void>;
-
-  /**
-   * Invoke a function and return its result to the client
-   */
-  executeAndRespond<T = unknown>(uuid: string, fn: () => T): Promise<void>;
-
-  // Lifecycles
-
-  /**
-   * Lifecycle called on error or when the ws connection is closed
-   */
-  teardown(): Promise<void> | void;
-
-  /**
-   * Lifecycle called to cleanup the transfer state
-   */
-  cleanup(): Promise<void> | void;
-
-  // Transfer Commands
-  init(...args: unknown[]): unknown;
-  end(...args: unknown[]): unknown;
-  status(...args: unknown[]): unknown;
-
-  // Events
-  onMessage(message: RawData, isBinary: boolean): Promise<void> | void;
-  onClose(code: number, reason: Buffer): Promise<void> | void;
-  onError(err: Error): Promise<void> | void;
-}
-
-export const handlerFactory =
+export const handlerControllerFactory =
   <T extends Partial<Handler>>(implementation: (proto: Handler) => T) =>
-  (options: IHandlerOptions) => {
+  (options: HandlerOptions) => {
     const { verify, server: serverOptions } = options ?? {};
 
     const wss = new WebSocket.Server({ ...serverOptions, noServer: true });
@@ -170,7 +111,7 @@ export const handlerFactory =
             }
           },
 
-          assertValidTransferCommand(command: TransferCommand) {
+          assertValidTransferCommand(command: ValidTransferCommand) {
             const isDefined = typeof this[command] === 'function';
             const isValidTransferCommand = VALID_TRANSFER_COMMANDS.includes(command);
 

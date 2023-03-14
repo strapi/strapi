@@ -1,36 +1,34 @@
 import { Readable, Transform } from 'stream';
 import { randomUUID } from 'crypto';
 
-import { Handler, handlerFactory } from './utils';
+import { Handler } from './abstract';
+import { handlerControllerFactory, isDataTransferMessage } from './utils';
 import { createLocalStrapiSourceProvider, ILocalStrapiSourceProvider } from '../../providers';
-import { GetCommandParams } from '../../../../types/remote/protocol/client';
-import { server } from '../../../../types/remote/protocol';
-import { EndMessage } from '../../../../types/remote/protocol/server';
 import { ProviderTransferError } from '../../../errors/providers';
-import { IAsset, TransferStage } from '../../../../types';
+import type { IAsset, TransferStage, Protocol } from '../../../../types';
 
 const TRANSFER_KIND = 'pull';
 const VALID_TRANSFER_ACTIONS = ['bootstrap', 'close', 'getMetadata', 'getSchemas'] as const;
 
 type PullTransferAction = (typeof VALID_TRANSFER_ACTIONS)[number];
 
-interface PullHandler extends Handler {
+export interface PullHandler extends Handler {
   provider?: ILocalStrapiSourceProvider;
 
   streams?: { [stage in TransferStage]?: Readable };
 
-  assertValidTransferAction(action: PullTransferAction): asserts action is PullTransferAction;
+  assertValidTransferAction(action: string): asserts action is PullTransferAction;
 
-  onTransferMessage(msg: unknown): Promise<unknown> | unknown;
-  onTransferAction(msg: unknown): Promise<unknown> | unknown;
-  onTransferStep(msg: unknown): Promise<unknown> | unknown;
+  onTransferMessage(msg: Protocol.client.TransferMessage): Promise<unknown> | unknown;
+  onTransferAction(msg: Protocol.client.Action): Promise<unknown> | unknown;
+  onTransferStep(msg: Protocol.client.TransferPullMessage): Promise<unknown> | unknown;
 
   createReadableStreamForStep(step: TransferStage): Promise<void>;
 
   flush(stage: TransferStage, id: string): Promise<void> | void;
 }
 
-const createPullHandler = handlerFactory<Partial<PullHandler>>((proto) => ({
+export const createPullController = handlerControllerFactory<Partial<PullHandler>>((proto) => ({
   isTransferStarted(this: PullHandler) {
     return proto.isTransferStarted.call(this) && this.provider !== undefined;
   },
@@ -48,7 +46,10 @@ const createPullHandler = handlerFactory<Partial<PullHandler>>((proto) => ({
   },
 
   assertValidTransferAction(this: PullHandler, action) {
-    if (VALID_TRANSFER_ACTIONS.includes(action)) {
+    // Abstract the constant to string[] to allow looser check on the given action
+    const validActions = VALID_TRANSFER_ACTIONS as unknown as string[];
+
+    if (validActions.includes(action)) {
       return;
     }
 
@@ -96,25 +97,26 @@ const createPullHandler = handlerFactory<Partial<PullHandler>>((proto) => ({
   },
 
   async onTransferMessage(this: PullHandler, msg) {
-    const { kind } = msg as any;
+    const { kind } = msg;
 
     if (kind === 'action') {
       return this.onTransferAction(msg);
     }
 
     if (kind === 'step') {
-      return this.onTransferStep(msg);
+      return this.onTransferStep(msg as Protocol.client.TransferPullMessage);
     }
   },
 
   async onTransferAction(this: PullHandler, msg) {
-    const { action } = msg as any;
+    const { action } = msg;
 
     this.assertValidTransferAction(action);
 
     return this.provider?.[action]();
   },
 
+  // TODO: Optimize performances (batching, client packets reconstruction, etc...)
   async flush(this: PullHandler, stage: TransferStage, id) {
     const stream = this.streams?.[stage];
 
@@ -133,7 +135,7 @@ const createPullHandler = handlerFactory<Partial<PullHandler>>((proto) => ({
     }
   },
 
-  async onTransferStep(this: PullHandler, msg: { action: 'start' | 'end'; step: TransferStage }) {
+  async onTransferStep(this: PullHandler, msg) {
     const { step, action } = msg;
 
     if (action === 'start') {
@@ -224,8 +226,8 @@ const createPullHandler = handlerFactory<Partial<PullHandler>>((proto) => ({
 
   async end(
     this: PullHandler,
-    params: GetCommandParams<'end'>
-  ): Promise<server.Payload<EndMessage>> {
+    params: Protocol.client.GetCommandParams<'end'>
+  ): Promise<Protocol.server.Payload<Protocol.server.EndMessage>> {
     await this.verifyAuth();
 
     if (this.transferID !== params.transferID) {
@@ -252,5 +254,3 @@ const createPullHandler = handlerFactory<Partial<PullHandler>>((proto) => ({
     return { active: false, kind: null, elapsed: null, startedAt: null };
   },
 }));
-
-export default createPullHandler;

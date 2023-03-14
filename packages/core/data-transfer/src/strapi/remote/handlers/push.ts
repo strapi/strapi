@@ -1,15 +1,14 @@
 import { randomUUID } from 'crypto';
 import { Writable, PassThrough } from 'stream';
-import { TransferStage, IAsset } from '../../../../types';
-import type { TransferFlow, Step } from '../flows';
-import { client, server } from '../../../../types/remote/protocol';
-import { GetCommandParams } from '../../../../types/remote/protocol/client';
-import { EndMessage, InitMessage } from '../../../../types/remote/protocol/server';
-import { ProviderTransferError } from '../../../errors/providers';
-import { createFlow, DEFAULT_TRANSFER_FLOW } from '../flows';
 
-import { createLocalStrapiDestinationProvider } from '../../providers/local-destination';
-import { Handler, handlerFactory } from './utils';
+import type { TransferFlow, Step } from '../flows';
+import type { TransferStage, IAsset, Protocol } from '../../../../types';
+
+import { ProviderTransferError } from '../../../errors/providers';
+import { createLocalStrapiDestinationProvider } from '../../providers';
+import { createFlow, DEFAULT_TRANSFER_FLOW } from '../flows';
+import { Handler } from './abstract';
+import { handlerControllerFactory, isDataTransferMessage } from './utils';
 
 const VALID_TRANSFER_ACTIONS = [
   'bootstrap',
@@ -24,7 +23,7 @@ type PushTransferAction = (typeof VALID_TRANSFER_ACTIONS)[number];
 
 const TRANSFER_KIND = 'push';
 
-interface PushHandler extends Handler {
+export interface PushHandler extends Handler {
   /**
    * Local Strapi Destination Provider used to write data to the current Strapi instance
    */
@@ -63,24 +62,24 @@ interface PushHandler extends Handler {
   /**
    * Callback when receiving a regular transfer message
    */
-  onTransferMessage(msg: client.TransferMessage): Promise<unknown> | unknown;
+  onTransferMessage(msg: Protocol.client.TransferMessage): Promise<unknown> | unknown;
 
   /**
    * Callback when receiving a transfer action message
    */
-  onTransferAction(msg: client.Action): Promise<unknown> | unknown;
+  onTransferAction(msg: Protocol.client.Action): Promise<unknown> | unknown;
 
   /**
    * Callback when receiving a transfer step message
    */
-  onTransferStep(msg: client.TransferPushMessage): Promise<unknown> | unknown;
+  onTransferStep(msg: Protocol.client.TransferPushMessage): Promise<unknown> | unknown;
 
   /**
    * Start streaming an asset
    */
   streamAsset(
     this: PushHandler,
-    payload: client.GetTransferPushStreamData<'assets'>
+    payload: Protocol.client.GetTransferPushStreamData<'assets'>
   ): Promise<void>;
 
   // Transfer Flow
@@ -113,7 +112,7 @@ const writeAsync = <T>(stream: Writable, data: T) => {
   });
 };
 
-const createPushHandler = handlerFactory<Partial<PushHandler>>((proto) => ({
+export const createPushController = handlerControllerFactory<Partial<PushHandler>>((proto) => ({
   isTransferStarted(this: PushHandler) {
     return proto.isTransferStarted.call(this) && this.provider !== undefined;
   },
@@ -198,6 +197,10 @@ const createPushHandler = handlerFactory<Partial<PushHandler>>((proto) => ({
   async onMessage(this: PushHandler, raw) {
     const msg = JSON.parse(raw.toString());
 
+    if (!isDataTransferMessage(msg)) {
+      return;
+    }
+
     if (!msg.uuid) {
       await this.respond(undefined, new Error('Missing uuid in message'));
     }
@@ -206,12 +209,17 @@ const createPushHandler = handlerFactory<Partial<PushHandler>>((proto) => ({
 
     // Regular command message (init, end, status)
     if (type === 'command') {
-      const { command, params } = msg;
+      const { command } = msg;
 
       await this.executeAndRespond(uuid, () => {
         this.assertValidTransferCommand(command);
 
-        return this[command](params);
+        // The status command don't have params
+        if (command === 'status') {
+          return this.status();
+        }
+
+        return this[command](msg.params);
       });
     }
 
@@ -240,7 +248,7 @@ const createPushHandler = handlerFactory<Partial<PushHandler>>((proto) => ({
     }
 
     if (kind === 'step') {
-      return this.onTransferStep(msg as client.TransferPushMessage);
+      return this.onTransferStep(msg as Protocol.client.TransferPushMessage);
     }
   },
 
@@ -284,7 +292,7 @@ const createPushHandler = handlerFactory<Partial<PushHandler>>((proto) => ({
     this.flow?.set({ ...nextStep, locked: false });
   },
 
-  async onTransferStep(this: PushHandler, msg: client.TransferPushMessage) {
+  async onTransferStep(this: PushHandler, msg) {
     const { step: stage } = msg;
 
     if (msg.action === 'start') {
@@ -414,8 +422,8 @@ const createPushHandler = handlerFactory<Partial<PushHandler>>((proto) => ({
 
   async init(
     this: PushHandler,
-    params: GetCommandParams<'init'>
-  ): Promise<server.Payload<InitMessage>> {
+    params: Protocol.client.GetCommandParams<'init'>
+  ): Promise<Protocol.server.Payload<Protocol.server.InitMessage>> {
     if (this.transferID || this.provider) {
       throw new Error('Transfer already in progress');
     }
@@ -458,8 +466,8 @@ const createPushHandler = handlerFactory<Partial<PushHandler>>((proto) => ({
 
   async end(
     this: PushHandler,
-    params: GetCommandParams<'end'>
-  ): Promise<server.Payload<EndMessage>> {
+    params: Protocol.client.GetCommandParams<'end'>
+  ): Promise<Protocol.server.Payload<Protocol.server.EndMessage>> {
     await this.verifyAuth();
 
     if (this.transferID !== params.transferID) {
@@ -471,5 +479,3 @@ const createPushHandler = handlerFactory<Partial<PushHandler>>((proto) => ({
     return { ok: true };
   },
 }));
-
-export default createPushHandler;
