@@ -314,7 +314,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
       if (batchLength() >= batchSize) {
         const streamError = await flush();
         if (streamError) {
-          throw new ProviderTransferError(streamError.message);
+          throw streamError;
         }
       }
     };
