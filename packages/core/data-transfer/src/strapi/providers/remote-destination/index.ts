@@ -308,16 +308,13 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
       return streamError;
     };
 
-    const safePush = async (
-      chunk: client.TransferAssetFlow,
-      callback: (error?: Error | null) => void
-    ) => {
+    const safePush = async (chunk: client.TransferAssetFlow) => {
       batch.push(chunk);
 
       if (batchLength() >= batchSize) {
         const streamError = await flush();
         if (streamError) {
-          return callback(streamError);
+          throw new ProviderTransferError(streamError.message);
         }
       }
     };
@@ -354,22 +351,25 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         const assetID = v4();
         const { filename, filepath, stats, stream } = asset;
 
-        await safePush(
-          {
+        try {
+          await safePush({
             action: 'start',
             assetID,
             data: { filename, filepath, stats },
-          },
-          callback
-        );
+          });
 
-        for await (const chunk of stream) {
-          await safePush({ action: 'stream', assetID, data: chunk }, callback);
+          for await (const chunk of stream) {
+            await safePush({ action: 'stream', assetID, data: chunk });
+          }
+
+          await safePush({ action: 'end', assetID });
+
+          callback();
+        } catch (error) {
+          if (error instanceof Error) {
+            callback(error);
+          }
         }
-
-        await safePush({ action: 'end', assetID }, callback);
-
-        callback();
       },
     });
   }
