@@ -100,6 +100,7 @@ module.exports = ({ strapi }) => {
 
     getPluginAndApiInfo() {
       const plugins = _.get(config, 'x-strapi-config.plugins');
+
       const pluginsToDocument = plugins.map((plugin) => {
         return {
           name: plugin,

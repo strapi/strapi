@@ -2,13 +2,54 @@
 
 const _ = require('lodash');
 const buildComponentSchema = require('../helpers/build-component-schema');
-const strapi = require('../__mocks__/strapi');
+
+const strapi = {
+  plugins: {
+    'users-permissions': {
+      contentTypes: {
+        role: {
+          attributes: {
+            name: {
+              type: 'string',
+            },
+          },
+        },
+      },
+      routes: {
+        'content-api': {
+          routes: [],
+        },
+      },
+    },
+  },
+  api: {
+    restaurant: {
+      contentTypes: {
+        restaurant: {
+          attributes: {
+            name: {
+              type: 'string',
+            },
+          },
+        },
+      },
+      routes: {
+        restaurant: { routes: [] },
+      },
+    },
+  },
+  contentType: () => ({ info: {}, attributes: { test: { type: 'string' } } }),
+};
 
 describe('Build Component Schema', () => {
   beforeEach(() => {
     // Reset the mocked strapi instance
     global.strapi = _.cloneDeep(strapi);
-    global.strapi.plugin = jest.fn((name) => _.get(global.strapi.plugins, name));
+  });
+
+  afterAll(() => {
+    // Teardown the mocked strapi instance
+    global.strapi = {};
   });
 
   it('builds the Response schema', () => {
@@ -308,7 +349,6 @@ describe('Build Component Schema', () => {
         required: ['data'],
         properties: {
           data: {
-            required: [],
             type: 'object',
             properties: {
               test: {
@@ -323,7 +363,6 @@ describe('Build Component Schema', () => {
         required: ['data'],
         properties: {
           data: {
-            required: [],
             type: 'object',
             properties: {
               test: {
