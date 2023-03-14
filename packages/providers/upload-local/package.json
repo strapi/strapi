@@ -32,7 +32,8 @@
     "lib": "./lib"
   },
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "test": "echo \"no tests yet\"",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@strapi/utils": "4.7.1",

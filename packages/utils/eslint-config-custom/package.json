@@ -1,0 +1,13 @@
+{
+  "name": "eslint-config-custom",
+  "main": "index.js",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "@babel/eslint-parser": "^7.19.1",
+    "@strapi/eslint-config": "0.1.2",
+    "@typescript-eslint/parser": "5.43.0",
+    "eslint": "8.27.0",
+    "babel-eslint": "10.1.0"
+  }
+}

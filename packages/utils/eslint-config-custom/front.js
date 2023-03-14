@@ -35,6 +35,7 @@ module.exports = {
     },
   },
   rules: {
+    'prettier/prettier': 'off',
     'react/jsx-no-constructed-context-values': 'warn',
     'react/jsx-no-useless-fragment': 'warn',
     'react/no-unstable-nested-components': 'warn',

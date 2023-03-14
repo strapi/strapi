@@ -35,10 +35,9 @@
     "build": "nx run-many --target=build --nx-ignore-cycles",
     "build:ts": "nx run-many --target=build:ts --nx-ignore-cycles",
     "generate": "plop --plopfile ./packages/generators/admin/plopfile.js",
-    "lint": "npm-run-all -p lint:code lint:css",
-    "lint:code": "eslint --cache --cache-strategy content --cache-location ./node_modules/.cache/eslint .",
+    "lint": "nx run-many --target=lint --nx-ignore-cycles",
     "lint:css": "stylelint packages/**/admin/src/**/*.js",
-    "lint:fix": "eslint --fix .",
+    "lint:fix": "nx run-many --target=lint --nx-ignore-cycles -- --fix",
     "lint:other": "npm run prettier:other -- --check",
     "format": "npm-run-all -p format:*",
     "format:code": "npm run prettier:code -- --write",
@@ -59,29 +58,21 @@
   },
   "lint-staged": {
     "*.{js,ts,md,css,scss,yaml,yml}": [
-      "prettier --cache --cache-strategy content --write"
-    ],
-    "*.{js,ts}": [
-      "eslint --cache --cache-strategy content --cache-location ./node_modules/.cache/eslint --fix"
+      "prettier --write"
     ]
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
-    "@babel/eslint-parser": "^7.19.1",
     "@babel/preset-react": "7.18.6",
     "@nrwl/jest": "15.8.3",
-    "@strapi/eslint-config": "0.1.2",
     "@swc/cli": "0.1.62",
     "@swc/core": "1.3.37",
     "@swc/jest": "0.2.24",
-    "@typescript-eslint/parser": "5.43.0",
-    "babel-eslint": "10.1.0",
     "chalk": "4.1.2",
     "chokidar": "3.5.3",
     "core-js": "3.28.0",
     "cross-env": "7.0.3",
     "dotenv": "14.2.0",
-    "eslint": "8.27.0",
     "execa": "1.0.0",
     "fs-extra": "10.1.0",
     "get-port": "5.1.1",

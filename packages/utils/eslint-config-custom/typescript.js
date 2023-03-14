@@ -1,19 +1,22 @@
-'use strict';
+const path = require('path');
 
 module.exports = {
+  root: true,
+  extends: [
+    '@strapi/eslint-config/typescript' /*'plugin:@typescript-eslint/recommended-requiring-type-checking'*/,
+  ],
   parser: '@typescript-eslint/parser',
-  parserOptions: {
-    project: './tsconfig.eslint.json',
-  },
   plugins: ['@typescript-eslint'],
-  extends: ['@strapi/eslint-config/typescript'],
+  parserOptions: {
+    project: ['./tsconfig.eslint.json'],
+  },
   globals: {
     strapi: false,
   },
   rules: {
-    // Instead of extending (which includes values that interfere with this configuration), only take the rules field
-    ...require('./.eslintrc.back.js').rules,
-    'import/no-extraneous-dependencies': ['error', { devDependencies: ['**/*.test.ts'] }],
+    ...require('./back').rules,
+    'node/no-unsupported-features/es-syntax': 'off',
+    'node/no-missing-import': 'off',
     // TODO: The following rules from @strapi/eslint-config/typescript are disabled because they're causing problems we need to solve or fix
     // to be solved in configuration
     'node/no-unsupported-features/es-syntax': 'off',
@@ -24,7 +27,6 @@ module.exports = {
     '@typescript-eslint/no-use-before-define': 'warn',
     '@typescript-eslint/comma-dangle': 'off',
   },
-  // Disable only for tests
   overrides: [
     {
       files: ['**.test.ts'],

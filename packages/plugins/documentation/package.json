@@ -21,7 +21,8 @@
     }
   ],
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "test": "echo \"no tests yet\"",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@strapi/design-system": "1.6.5",

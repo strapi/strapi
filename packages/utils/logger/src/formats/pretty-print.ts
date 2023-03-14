@@ -41,7 +41,7 @@ export default (options: PrettyPrintOptions = {}): Logform.Format => {
 
   handlers.push(
     format.printf(({ level, message, timestamp }) => {
-      return `${timestamps ? `[${timestamp}] ` : ''}${level}: ${message}`;
+      return `${timestamps ? `[${timestamp as string}] ` : ''}${level}: ${message as string}`;
     })
   );
 

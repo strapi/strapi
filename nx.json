@@ -21,13 +21,16 @@
     },
     "test": {
       "dependsOn": ["^build"]
+    },
+    "lint": {
+      "inputs": ["default"]
     }
   },
   "tasksRunnerOptions": {
     "default": {
       "runner": "nx/tasks-runners/default",
       "options": {
-        "cacheableOperations": ["build", "build:ts", "lint", "test", "test:unit", "test:front"]
+        "cacheableOperations": ["build", "build:ts", "lint"]
       }
     }
   }

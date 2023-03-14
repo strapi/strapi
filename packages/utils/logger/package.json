@@ -33,10 +33,10 @@
     "build:ts": "tsc",
     "watch": "tsc -w --preserveWatchOutput",
     "clean": "rimraf ./lib",
-    "prepublishOnly": "yarn clean && yarn build"
+    "prepublishOnly": "yarn clean && yarn build",
+    "lint": "eslint ."
   },
   "dependencies": {
-    "tsconfig": "*",
     "lodash": "4.17.21",
     "winston": "3.3.3"
   },

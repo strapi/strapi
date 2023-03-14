@@ -28,7 +28,8 @@
     "lib": "./lib"
   },
   "scripts": {
-    "test:unit": "jest --verbose"
+    "test:unit": "jest --verbose",
+    "lint": "eslint ."
   },
   "dependencies": {
     "date-fns": "2.29.3",

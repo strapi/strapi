@@ -30,6 +30,9 @@
     "react-router-dom": "5.3.4",
     "styled-components": "5.3.3"
   },
+  "scripts": {
+    "lint": "eslint ."
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/strapi/strapi.git",

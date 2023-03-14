@@ -46,7 +46,8 @@
     "lib": "./lib"
   },
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "test": "echo \"no tests yet\"",
+    "lint": "eslint ."
   },
   "dependencies": {
     "lodash": "4.17.21",

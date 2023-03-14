@@ -76,7 +76,8 @@
   },
   "scripts": {
     "postinstall": "node lib/utils/success.js",
-    "test:unit": "jest --verbose"
+    "test:unit": "jest --verbose",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@koa/cors": "3.4.3",

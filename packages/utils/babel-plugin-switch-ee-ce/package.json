@@ -18,6 +18,9 @@
     }
   ],
   "main": "lib/index.js",
+  "scripts": {
+    "lint": "eslint"
+  },
   "dependencies": {
     "@babel/template": "^7.20.7",
     "reselect": "4.1.7",

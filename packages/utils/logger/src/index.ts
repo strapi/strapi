@@ -1,4 +1,4 @@
-import winston from 'winston';
+import * as winston from 'winston';
 
 import * as formats from './formats';
 import * as configs from './configs';

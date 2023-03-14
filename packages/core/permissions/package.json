@@ -21,7 +21,8 @@
   ],
   "main": "./lib/index.js",
   "scripts": {
-    "test:unit": "jest --verbose"
+    "test:unit": "jest --verbose",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@casl/ability": "5.4.4",
