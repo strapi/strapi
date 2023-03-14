@@ -148,7 +148,9 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
 }
 
 <div>
-  <div>
+  <div
+    class=""
+  >
     <div
       class="c0"
     >

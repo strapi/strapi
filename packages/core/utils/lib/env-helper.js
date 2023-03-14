@@ -71,6 +71,26 @@ const utils = {
     const value = process.env[key];
     return new Date(value);
   },
+
+  /**
+   * Gets a value from env that matches oneOf provided values
+   * @param {string} key
+   * @param {string[]} expectedValues
+   * @param {string|undefined} defaultValue
+   * @returns {string|undefined}
+   */
+  oneOf(key, expectedValues, defaultValue) {
+    if (!expectedValues) {
+      throw new Error(`env.oneOf requires expectedValues`);
+    }
+
+    if (defaultValue && !expectedValues.includes(defaultValue)) {
+      throw new Error(`env.oneOf requires defaultValue to be included in expectedValues`);
+    }
+
+    const rawValue = env(key, defaultValue);
+    return expectedValues.includes(rawValue) ? rawValue : defaultValue;
+  },
 };
 
 Object.assign(env, utils);
