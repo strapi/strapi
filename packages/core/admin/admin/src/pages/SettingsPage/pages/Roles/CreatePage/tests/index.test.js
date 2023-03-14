@@ -10,8 +10,8 @@ import { IntlProvider } from 'react-intl';
 import { Router, Switch, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { lightTheme, darkTheme } from '@strapi/design-system';
-import Theme from '../../../../../../../../admin/src/components/Theme';
-import ThemeToggleProvider from '../../../../../../../../admin/src/components/ThemeToggleProvider';
+import Theme from '../../../../../../components/Theme';
+import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
 
 import { CreatePage } from '../index';
 
