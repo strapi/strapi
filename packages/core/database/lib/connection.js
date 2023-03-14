@@ -46,7 +46,7 @@ const getSqlitePackageName = () => {
  */
 const getMysqlPackageName = () => {
   // allow forcing the package to use (mostly used for testing purposes)
-  if (typeof process.env.STRAPI_MYSQL_PKG !== 'undefined') {
+  if (typeof process.env.MYSQL_PKG !== 'undefined') {
     return process.env.MYSQL_PKG;
   }
 
