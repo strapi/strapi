@@ -275,6 +275,10 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   font-weight: 600;
   font-size: 2rem;
   line-height: 1.25;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: #32324d;
 }
 
@@ -1824,6 +1828,10 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   font-weight: 600;
   font-size: 2rem;
   line-height: 1.25;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: #32324d;
 }
 

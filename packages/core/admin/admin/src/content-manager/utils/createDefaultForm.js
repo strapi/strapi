@@ -5,14 +5,6 @@ const createDefaultForm = (attributes, allComponentsSchema) => {
     const attribute = get(attributes, [current], {});
     const { default: defaultValue, component, type, required, min, repeatable } = attribute;
 
-    if (type === 'json') {
-      acc[current] = null;
-    }
-
-    if (type === 'json' && required === true) {
-      acc[current] = {};
-    }
-
     if (defaultValue !== undefined) {
       acc[current] = defaultValue;
     }
