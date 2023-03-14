@@ -2,7 +2,7 @@ const defaultRoutes = [
   {
     async Component() {
       const component = await import(
-        /* webpackChunkName: "admin-edit-roles-page" */ '../pages/Roles/ProtectedListPage'
+        /* webpackChunkName: "admin-roles-list" */ '../pages/Roles/ProtectedListPage'
       );
 
       return component;
