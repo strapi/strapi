@@ -3,19 +3,9 @@
 'use strict';
 
 const knex = require('knex');
-const path = require('path');
 
 const tryResolvePackage = (packageName) => {
   try {
-    // if this is within a strapi project, make sure it has this driver listed in project dependencies
-    const packageJSON = require(path.resolve('.', 'package.json'));
-    if (
-      packageJSON?.strapi?.uuid &&
-      !Object.keys(packageJSON?.dependencies).includes(packageName)
-    ) {
-      return false;
-    }
-
     require.resolve(packageName);
     return packageName;
   } catch (error) {
