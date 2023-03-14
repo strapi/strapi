@@ -7,9 +7,12 @@ const path = require('path');
 
 const tryResolvePackage = (packageName) => {
   try {
-    // Ensure that the user intends to use this package for consistency between environments
+    // if this is within a strapi project, make sure it has this driver listed in project dependencies
     const packageJSON = require(path.resolve('.', 'package.json'));
-    if (!Object.keys(packageJSON?.dependencies).includes(packageName)) {
+    if (
+      packageJSON?.strapi?.uuid &&
+      !Object.keys(packageJSON?.dependencies).includes(packageName)
+    ) {
       return false;
     }
 
