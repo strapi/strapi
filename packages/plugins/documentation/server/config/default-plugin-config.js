@@ -21,7 +21,7 @@ module.exports = {
     path: '/documentation',
     showGeneratedFiles: true,
     generateDefaultResponse: true,
-    plugins: ['email', 'upload', 'users-permissions'],
+    plugins: null,
   },
   servers: [],
   externalDocs: {
@@ -33,42 +33,4 @@ module.exports = {
       bearerAuth: [],
     },
   ],
-  components: {
-    securitySchemes: {
-      bearerAuth: {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-      },
-    },
-    schemas: {
-      Error: {
-        type: 'object',
-        required: ['error'],
-        properties: {
-          data: {
-            nullable: true,
-            oneOf: [{ type: 'object' }, { type: 'array', items: { type: 'object' } }],
-          },
-          error: {
-            type: 'object',
-            properties: {
-              status: {
-                type: 'integer',
-              },
-              name: {
-                type: 'string',
-              },
-              message: {
-                type: 'string',
-              },
-              details: {
-                type: 'object',
-              },
-            },
-          },
-        },
-      },
-    },
-  },
 };
