@@ -31,7 +31,7 @@
     "pg": "8.8.0",
     "react": "^17.0.2",
     "react-intl": "6.2.8",
-    "sqlite3": "5.1.2"
+    "sqlite3": "5.1.5"
   },
   "strapi": {
     "uuid": "getstarted"
