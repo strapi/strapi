@@ -28,7 +28,7 @@
     },
     "lint": {
       "inputs": ["default"],
-      "dependsOn": ["build"]
+      "dependsOn": ["build:ts"]
     }
   },
   "tasksRunnerOptions": {
