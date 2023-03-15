@@ -6,7 +6,6 @@ import isEqual from 'react-fast-compare';
 import { bindActionCreators, compose } from 'redux';
 import { useIntl } from 'react-intl';
 import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
-import get from 'lodash/get';
 import { stringify } from 'qs';
 import axios from 'axios';
 
@@ -133,7 +132,7 @@ function ListView({
           return;
         }
 
-        const resStatus = get(err, 'response.status', null);
+        const resStatus = err?.response?.status ?? null;
 
         if (resStatus === 403) {
           await fetchPermissionsRef.current();
