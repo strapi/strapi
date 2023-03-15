@@ -64,7 +64,7 @@ const createPermissionChecker =
 
     // Sanitized queries shortcuts
     Object.keys(ACTIONS).forEach((action) => {
-      sanitizedQuery[action] = (query) => sanitizedQuery(query, action);
+      sanitizedQuery[action] = (query) => sanitizedQuery(query, ACTIONS[action]);
     });
 
     // Permission utils shortcuts
