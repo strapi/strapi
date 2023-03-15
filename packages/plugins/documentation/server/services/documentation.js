@@ -13,9 +13,29 @@ module.exports = ({ strapi }) => {
   const config = strapi.config.get('plugin.documentation');
   const registeredDocs = [];
 
+  const getPluginsThatNeedDocumentation = () => {
+    // Default plugins that need documentation generated
+    const defaultPlugins = ['upload', 'users-permissions'];
+    // User specified plugins that need documentation generated
+    const userPluginsConfig = config['x-strapi-config'].plugins;
+
+    if (userPluginsConfig === null) {
+      // The user hasn't specified any plugins to document, use the defaults
+      return defaultPlugins;
+    }
+
+    if (userPluginsConfig.length) {
+      // The user has specified certain plugins to document, use them
+      return userPluginsConfig;
+    }
+
+    // The user has specified that no plugins should be documented
+    return [];
+  };
+
   return {
     registerDoc(doc, pluginOrigin) {
-      const plugins = this.getPluginsThatNeedDocumentation();
+      const plugins = getPluginsThatNeedDocumentation();
       let registeredDoc = doc;
 
       if (pluginOrigin) {
@@ -37,12 +57,22 @@ module.exports = ({ strapi }) => {
       // receive an object we can register it directly
       registeredDocs.push(registeredDoc);
     },
+
     getDocumentationVersion() {
       return _.get(config, 'info.version');
     },
 
     getFullDocumentationPath() {
       return path.join(strapi.dirs.app.extensions, 'documentation', 'documentation');
+    },
+
+    /**
+     *
+     * @deprecated
+     * This method will be removed in the next major release
+     */
+    getCustomDocumentationPath() {
+      return path.join(strapi.dirs.app.extensions, 'documentation', 'config', 'settings.json');
     },
 
     getDocumentationVersions() {
@@ -107,28 +137,8 @@ module.exports = ({ strapi }) => {
       await fs.remove(path.join(this.getFullDocumentationPath(), version));
     },
 
-    getPluginsThatNeedDocumentation() {
-      // Default plugins that need documentation generated
-      const defaultPlugins = ['upload', 'users-permissions'];
-      // User specified plugins that need documentation generated
-      const userPluginsConfig = config['x-strapi-config'].plugins;
-
-      if (userPluginsConfig === null) {
-        // The user hasn't specified any plugins to document, use the defaults
-        return defaultPlugins;
-      }
-
-      if (userPluginsConfig.length) {
-        // The user has specified certain plugins to document, use them
-        return userPluginsConfig;
-      }
-
-      // The user has specified that no plugins should be documented
-      return [];
-    },
-
     getPluginAndApiInfo() {
-      const plugins = this.getPluginsThatNeedDocumentation();
+      const plugins = getPluginsThatNeedDocumentation();
       const pluginsToDocument = plugins.map((plugin) => {
         return {
           name: plugin,
@@ -199,7 +209,7 @@ module.exports = ({ strapi }) => {
       ]);
       _.set(config, ['info', 'x-generation-date'], new Date().toISOString());
       _.set(config, ['info', 'version'], version);
-      _.set(config, ['x-strapi-config', 'plugins'], this.getPluginsThatNeedDocumentation());
+      _.set(config, ['x-strapi-config', 'plugins'], getPluginsThatNeedDocumentation());
       // Prepare final doc with default config and generated paths
       const finalDoc = { ...config, paths };
       // Add the default components to the final doc
@@ -211,16 +221,14 @@ module.exports = ({ strapi }) => {
         // Merge ovveride tags with the generated tags
         finalDoc.tags = finalDoc.tags || [];
         finalDoc.tags.push(...(doc.tags || []));
-        // Merge override paths with the generated paths,
-        // If the override has common properties with the finalDoc,
-        // the properties specificed on the override will replace those found on the final doc
+        // Merge override paths with the generated paths
+        // The override will add a new path or replace the value of an existing path
         _.assign(finalDoc.paths, doc.paths);
         // Add components
         _.forEach(doc.components || {}, (val, key) => {
           finalDoc.components[key] = finalDoc.components[key] || {};
           // Merge override components with the generated components,
-          // If the override has common properties with the finalDoc,
-          // the properties specificed on the override will replace those found on the final doc
+          // The override will add a new component or replace the value of an existing component
           _.assign(finalDoc.components[key], val);
         });
       });
