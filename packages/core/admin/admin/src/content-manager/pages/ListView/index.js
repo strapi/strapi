@@ -72,12 +72,11 @@ function ListView({
   slug,
 }) {
   const { total } = pagination;
+  const { contentType } = layout;
   const {
-    contentType: {
-      metadatas,
-      settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
-    },
-  } = layout;
+    metadatas,
+    settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
+  } = contentType;
 
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
@@ -96,8 +95,7 @@ function ListView({
   const { pathname } = useLocation();
   const { push } = useHistory();
   const { formatMessage } = useIntl();
-  const contentType = layout.contentType;
-  const hasDraftAndPublish = get(contentType, 'options.draftAndPublish', false);
+  const hasDraftAndPublish = contentType.options?.draftAndPublish ?? false;
   const fetchClient = useFetchClient();
   const { post, del } = fetchClient;
 
