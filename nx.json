@@ -20,7 +20,8 @@
       "outputs": ["{projectRoot}/lib", "{projectRoot}/build"]
     },
     "test": {
-      "dependsOn": ["^build"]
+    },
+    "test:watch": {
     },
     "lint": {
       "inputs": ["default"]
@@ -30,7 +31,7 @@
     "default": {
       "runner": "nx/tasks-runners/default",
       "options": {
-        "cacheableOperations": ["build", "build:ts", "lint"]
+        "cacheableOperations": ["build", "build:ts", "lint", "test"]
       }
     }
   }

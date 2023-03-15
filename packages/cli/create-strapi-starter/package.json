@@ -35,7 +35,6 @@
     "create-strapi-starter": "./index.js"
   },
   "scripts": {
-    "test": "echo \"no tests yet\"",
     "lint": "eslint ."
   },
   "dependencies": {

@@ -34,7 +34,6 @@
     "lib": "./lib"
   },
   "scripts": {
-    "test": "echo \"no tests yet\"",
     "lint": "eslint ."
   },
   "dependencies": {
