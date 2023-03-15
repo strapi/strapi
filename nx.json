@@ -28,7 +28,8 @@
         "default",
         "{projectRoot}/jest.config.front.js",
         "{workspaceRoot}/jest-preset.front.js"
-      ]
+      ],
+      "dependsOn": ["^build"]
     },
     "lint": {
       "inputs": [
