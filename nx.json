@@ -20,7 +20,8 @@
       "outputs": ["{projectRoot}/lib", "{projectRoot}/build"]
     },
     "test:unit": {
-      "inputs": ["default"]
+      "inputs": ["default"],
+      "dependsOn": ["build:ts"]
     },
     "test:front": {
       "inputs": ["default"]

@@ -15,6 +15,7 @@ concurrency:
 
 permissions:
   contents: read # to fetch code (actions/checkout)
+  actions: read
 
 jobs:
   lint:
@@ -33,11 +34,15 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
 
+      - uses: nrwl/nx-set-shas@v3
+
+      - run: |
+          echo "BASE: ${{ env.NX_BASE }}"
+          echo "HEAD: ${{ env.NX_HEAD }}"
+
       - run: yarn install --frozen-lockfile
-      - name: Build TypeScript packages # for lint we need to build ts, for rules checking if paths exist
-        run: yarn build
       - name: Run lint
-        run: yarn run -s lint
+        run: yarn nx affected --target=lint --parallel --nx-ignore-cycle
 
   unit_back:
     name: 'unit_back (node: ${{ matrix.node }})'
@@ -56,17 +61,10 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
 
+      - uses: nrwl/nx-set-shas@v3
       - run: yarn install --frozen-lockfile
-      - name: Build TypeScript packages # for unit tests we need to build ts, for finding and mocking ts packages
-        run: yarn build:ts
       - name: Run tests
-        run: yarn run -s test:unit --coverage
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./coverage
-          flags: back,unit_back
+        run: yarn nx affected --target=test:unit --nx-ignore-cycle
 
   unit_front:
     name: 'unit_front (node: ${{ matrix.node }})'
@@ -85,17 +83,10 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
 
+      - uses: nrwl/nx-set-shas@v3
       - run: yarn install --frozen-lockfile
-      - name: Build
-        run: yarn build
       - name: Run test
-        run: yarn run -s test:front --coverage
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./coverage
-          flags: front,unit_front
+        run: yarn nx affected --target=test:front --nx-ignore-cycle
 
   build:
     name: 'build (node: ${{ matrix.node }})'
