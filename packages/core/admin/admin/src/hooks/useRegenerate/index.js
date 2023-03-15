@@ -24,11 +24,7 @@ const useRegenerate = (url, id, onRegenerate, onError) => {
       } else {
         toggleNotification({
           type: 'warning',
-          message: {
-            id: 'notification.error',
-            message: formatAPIError(error),
-            defaultMessage: 'An error occured',
-          },
+          message: formatAPIError(error),
         });
       }
     }

@@ -13,6 +13,7 @@ import {
   useGuidedTour,
   useRBAC,
   useFetchClient,
+  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { ContentLayout, Main, Flex } from '@strapi/design-system';
 import { formatAPIErrors } from '../../../../../utils';
@@ -51,6 +52,8 @@ const TransferTokenCreateView = () => {
   const { get, post, put } = useFetchClient();
 
   const isCreating = id === 'create';
+
+  const { formatAPIError } = useAPIErrorHandler();
 
   useEffect(() => {
     trackUsageRef.current(isCreating ? 'didAddTokenFromList' : 'didEditTokenFromList', {
@@ -190,6 +193,11 @@ const TransferTokenCreateView = () => {
           defaultMessage:
             'You have an invalid configuration, check your server log for more information.',
         },
+      });
+    } else {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(err),
       });
     }
   };
