@@ -6,7 +6,7 @@ export function getPrefixedId(message, callback) {
   // if a prefix function has been passed in it is used to
   // prefix the id, e.g. to allow an error message to be
   // set only for a localization namespace
-  if (callback) {
+  if (typeof callback === 'function') {
     return callback(prefixedMessage);
   }
 
