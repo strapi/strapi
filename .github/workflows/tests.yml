@@ -26,6 +26,8 @@ jobs:
         node: [14, 16, 18]
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
@@ -33,16 +35,10 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
-
       - uses: nrwl/nx-set-shas@v3
-
-      - run: |
-          echo "BASE: ${{ env.NX_BASE }}"
-          echo "HEAD: ${{ env.NX_HEAD }}"
-
       - run: yarn install --frozen-lockfile
       - name: Run lint
-        run: yarn nx affected --target=lint --parallel --nx-ignore-cycle
+        run: yarn nx affected --target=lint --parallel --nx-ignore-cycles
 
   unit_back:
     name: 'unit_back (node: ${{ matrix.node }})'
@@ -60,11 +56,10 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
-
       - uses: nrwl/nx-set-shas@v3
       - run: yarn install --frozen-lockfile
       - name: Run tests
-        run: yarn nx affected --target=test:unit --nx-ignore-cycle
+        run: yarn nx affected --target=test:unit --nx-ignore-cycles
 
   unit_front:
     name: 'unit_front (node: ${{ matrix.node }})'
@@ -82,11 +77,10 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
-
       - uses: nrwl/nx-set-shas@v3
       - run: yarn install --frozen-lockfile
       - name: Run test
-        run: yarn nx affected --target=test:front --nx-ignore-cycle
+        run: yarn nx affected --target=test:front --nx-ignore-cycles
 
   build:
     name: 'build (node: ${{ matrix.node }})'

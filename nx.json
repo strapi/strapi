@@ -12,22 +12,32 @@
     "build": {
       "inputs": ["production", "^production"],
       "dependsOn": ["^build"],
-      "outputs": ["{projectRoot}/lib", "{projectRoot}/build"]
+      "outputs": ["{projectRoot}/lib", "{projectRoot}/build", "{projectRoot}/build"]
     },
     "build:ts": {
-      "inputs": ["production", "^production"],
+      "inputs": ["production", "^production", "{workspaceRoot}/packages/utils/tsconfig/**/*"],
       "dependsOn": ["^build:ts"],
-      "outputs": ["{projectRoot}/lib", "{projectRoot}/build"]
+      "outputs": ["{projectRoot}/lib", "{projectRoot}/build", "{projectRoot}/dist"]
     },
     "test:unit": {
-      "inputs": ["default"],
+      "inputs": ["default", "{projectRoot}/jest.config.js", "{workspaceRoot}/jest-preset.unit.js"],
       "dependsOn": ["build:ts"]
     },
     "test:front": {
-      "inputs": ["default"]
+      "inputs": [
+        "default",
+        "{projectRoot}/jest.config.front.js",
+        "{workspaceRoot}/jest-preset.front.js"
+      ]
     },
     "lint": {
-      "inputs": ["default"],
+      "inputs": [
+        "default",
+        "{projectRoot}/.eslintrc.js",
+        "{projectRoot}/.eslintignore",
+        "{projectRoot}/tsconfig.eslint.json",
+        "{workspaceRoot}/packages/utils/eslint-config-custom/**/*"
+      ],
       "dependsOn": ["build:ts"]
     }
   },
