@@ -379,7 +379,7 @@ describe('Admin User CRUD (api)', () => {
       method: 'GET',
       qs: {
         filters: {
-          email: testData.user.email,
+          username: testData.user.username,
         },
       },
     });

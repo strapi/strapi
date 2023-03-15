@@ -16,7 +16,10 @@ const data = { product: [] };
 
 const getProductDataFields = (fields) => {
   return data.product.map((product) => {
-    return { ...product, attributes: _.pick(product.attributes, fields) };
+    return {
+      ...product,
+      attributes: fields.length > 0 ? _.pick(product.attributes, fields) : product.attributes,
+    };
   });
 };
 
