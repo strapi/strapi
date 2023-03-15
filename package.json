@@ -25,7 +25,8 @@
     "packages/*",
     "packages/*/*",
     "examples/*",
-    ".github/actions/*"
+    ".github/actions/*",
+    "scripts/*"
   ],
   "scripts": {
     "prepare": "husky install",
@@ -44,14 +45,14 @@
     "format:other": "npm run prettier:other -- --write",
     "prettier:code": "prettier --cache --cache-strategy content \"**/*.{js,ts}\"",
     "prettier:other": "prettier --cache --cache-strategy content \"**/*.{md,css,scss,yaml,yml}\"",
-    "test:clean": "rimraf ./coverage",
-    "test:front": "npm run test:clean && cross-env IS_EE=true jest --config ./jest.config.front.js",
-    "test:front:watch": "cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
-    "test:front:update": "cross-env IS_EE=true jest --config ./jest.config.front.js --u",
-    "test:front:ce": "npm run test:clean && cross-env IS_EE=false jest --config ./jest.config.front.js --coverage",
-    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
-    "test:front:update:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --u",
+    "test:front": "cross-env IS_EE=true nx run-many --target=test:front --nx-ignore-cycles --parallel",
+    "test:front:watch": "cross-env IS_EE=true nx run-many --target=test:front:watch --nx-ignore-cycles",
+    "test:front:update": "yarn test:front -u",
+    "test:front:ce": "cross-env IS_EE=false nx run-many --target=test:front --nx-ignore-cycles",
+    "test:front:watch:ce": "cross-env IS_EE=false nx run-many --target=test:front:watch --nx-ignore-cycles",
+    "test:front:update:ce": "yarn test:front:ce -u",
     "test:unit": "nx run-many --target=test:unit --nx-ignore-cycles",
+    "test:unit:watch": "nx run-many --target=test:unit:watch --nx-ignore-cycles",
     "test:api": "node test/api.js",
     "test:generate-app": "node test/create-test-app.js",
     "doc:api": "node scripts/open-api/serve.js"

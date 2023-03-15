@@ -22,6 +22,9 @@
     "test:unit": {
       "inputs": ["default"]
     },
+    "test:front": {
+      "inputs": ["default"]
+    },
     "lint": {
       "inputs": ["default"],
       "dependsOn": ["build"]
@@ -31,7 +34,7 @@
     "default": {
       "runner": "nx/tasks-runners/default",
       "options": {
-        "cacheableOperations": ["build", "build:ts", "lint", "test:unit"]
+        "cacheableOperations": ["build", "build:ts", "lint", "test:unit", "test:front"]
       }
     }
   }
