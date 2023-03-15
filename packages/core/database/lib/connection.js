@@ -28,7 +28,7 @@ class LegacySqliteClient extends SqliteClient {
 }
 
 const getSqlitePackageName = () => {
-  // allow forcing the package to use (mostly used for testing purposes)
+  // NOTE: allow forcing the package to use (mostly used for testing purposes)
   if (typeof process.env.SQLITE_PKG !== 'undefined') {
     return process.env.SQLITE_PKG;
   }
@@ -45,7 +45,7 @@ const getSqlitePackageName = () => {
  * MySQL
  */
 const getMysqlPackageName = () => {
-  // allow forcing the package to use (mostly used for testing purposes)
+  // NOTE: allow forcing the package to use (mostly used for testing purposes)
   if (typeof process.env.MYSQL_PKG !== 'undefined') {
     return process.env.MYSQL_PKG;
   }
