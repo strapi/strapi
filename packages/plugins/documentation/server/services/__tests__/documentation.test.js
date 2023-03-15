@@ -118,11 +118,13 @@ describe('Documentation service', () => {
 
       docService.registerDoc(
         {
-          '/test': {
-            get: {
-              tags: ['Users-Permissions - Users & Roles'],
-              summary: 'Get list of users',
-              responses: {},
+          paths: {
+            '/test': {
+              get: {
+                tags: ['Users-Permissions - Users & Roles'],
+                summary: 'Get list of users',
+                responses: {},
+              },
             },
           },
         },
