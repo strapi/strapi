@@ -4,7 +4,6 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { BaseCheckbox, Flex } from '@strapi/design-system';
 import get from 'lodash/get';
-import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/ContentTypeCollapse/CollapsePropertyMatrix/ActionRow/utils/constants';
 import { usePermissionsDataManager } from '../../../../../../../../../hooks';
 import HiddenAction from '../../../HiddenAction';
 import { cellWidth, rowHeight } from '../../../Permissions/utils/constants';
@@ -133,7 +132,7 @@ const ActionRow = ({
                 return (
                   <Cell key={actionId} justifyContent="center" alignItems="center">
                     <BaseCheckbox
-                      disabled={isFormDisabled || IS_DISABLED}
+                      disabled={isFormDisabled}
                       name={checkboxName.join('..')}
                       aria-label={formatMessage(
                         {
@@ -164,7 +163,7 @@ const ActionRow = ({
               return (
                 <Cell key={label} justifyContent="center" alignItems="center">
                   <BaseCheckbox
-                    disabled={isFormDisabled || IS_DISABLED}
+                    disabled={isFormDisabled}
                     name={checkboxName.join('..')}
                     // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
                     onValueChange={(value) => {
