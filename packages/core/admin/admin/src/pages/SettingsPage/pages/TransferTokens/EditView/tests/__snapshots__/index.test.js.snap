@@ -961,7 +961,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                             aria-labelledby="7 7-label 7-content"
                             class="c34"
                             id="7"
-                            name="type"
+                            name="permissions"
                             type="button"
                           />
                           <div
@@ -2229,7 +2229,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                             aria-labelledby="16 16-label 16-content"
                             class="c42"
                             id="16"
-                            name="type"
+                            name="permissions"
                             type="button"
                           />
                           <div
