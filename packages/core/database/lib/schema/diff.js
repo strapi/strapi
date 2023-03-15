@@ -2,7 +2,11 @@
 
 const _ = require('lodash/fp');
 
-const RESERVED_TABLE_NAMES = ['strapi_migrations', 'strapi_database_schema'];
+const RESERVED_TABLE_NAMES = [
+  'strapi_migrations',
+  'strapi_database_schema',
+  'strapi_reserved_table_names',
+];
 
 const statuses = {
   CHANGED: 'CHANGED',
@@ -322,7 +326,7 @@ module.exports = (db) => {
     };
   };
 
-  const diffSchemas = (srcSchema, destSchema) => {
+  const diffSchemas = async (srcSchema, destSchema) => {
     const addedTables = [];
     const updatedTables = [];
     const unchangedTables = [];
@@ -344,11 +348,18 @@ module.exports = (db) => {
       }
     }
 
+    const reservedTablesFromDB = await db
+      .getConnection()
+      .select('name')
+      .from('strapi_reserved_table_names');
+
+    const reservedTables = [
+      ...RESERVED_TABLE_NAMES,
+      ...reservedTablesFromDB.map((entry) => entry.name),
+    ];
+
     for (const srcTable of srcSchema.tables) {
-      if (
-        !helpers.hasTable(destSchema, srcTable.name) &&
-        !RESERVED_TABLE_NAMES.includes(srcTable.name)
-      ) {
+      if (!helpers.hasTable(destSchema, srcTable.name) && !reservedTables.includes(srcTable.name)) {
         removedTables.push(srcTable);
       }
     }
