@@ -22,6 +22,8 @@ const {
   createStrapiInstance,
   formatDiagnostic,
   loadersFactory,
+  exitMessageText,
+  abortTransfer,
 } = require('./utils');
 const { exitWith } = require('../utils/helpers');
 /**
@@ -112,12 +114,19 @@ module.exports = async (opts) => {
 
   progress.on('transfer::start', async () => {
     console.log(`Starting export...`);
+
     await strapi.telemetry.send('didDEITSProcessStart', getTelemetryPayload());
   });
 
   let results;
   let outFile;
   try {
+    // Abort transfer if user interrupts process
+    ['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach((signal) => {
+      process.removeAllListeners(signal);
+      process.on(signal, () => abortTransfer({ engine, strapi }));
+    });
+
     results = await engine.transfer();
     outFile = results.destination.file.path;
     const outFileExists = await fs.pathExists(outFile);
@@ -126,7 +135,7 @@ module.exports = async (opts) => {
     }
   } catch {
     await strapi.telemetry.send('didDEITSProcessFail', getTelemetryPayload());
-    exitWith(1, 'Export process failed.');
+    exitWith(1, exitMessageText('export', true));
   }
 
   await strapi.telemetry.send('didDEITSProcessFinish', getTelemetryPayload());
@@ -137,8 +146,8 @@ module.exports = async (opts) => {
     console.error('There was an error displaying the results of the transfer.');
   }
 
-  console.log(`${chalk.bold('Export process has been completed successfully!')}`);
-  exitWith(0, `Export archive is in ${chalk.green(outFile)}`);
+  console.log(`Export archive is in ${chalk.green(outFile)}`);
+  exitWith(0, exitMessageText('export'));
 };
 
 /**
