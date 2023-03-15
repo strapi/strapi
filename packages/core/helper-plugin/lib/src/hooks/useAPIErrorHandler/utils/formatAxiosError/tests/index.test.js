@@ -4,6 +4,7 @@ import { formatAxiosError } from '..';
 
 describe('formatAxiosError', () => {
   test('serializes AxiosError', () => {
+    const spy = jest.fn((obj) => obj);
     const error = new AxiosError(
       'Error message',
       '409',
@@ -15,7 +16,9 @@ describe('formatAxiosError', () => {
       }
     );
 
-    expect(formatAxiosError(error, { formatMessage: (obj) => obj })).toStrictEqual({
+    formatAxiosError(error, { formatMessage: spy });
+
+    expect(spy).toHaveBeenCalledWith({
       defaultMessage: 'Error message',
       id: 'apiError.Error message',
       values: {
