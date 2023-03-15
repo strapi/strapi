@@ -19,6 +19,17 @@ module.exports = () => ({
       info: {
         version: '2.0.0',
       },
+      webhooks: {
+        test: {
+          post: {
+            responses: {
+              200: {
+                description: 'Success',
+              },
+            },
+          },
+        },
+      },
     },
   },
   myplugin: {
