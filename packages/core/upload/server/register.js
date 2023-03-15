@@ -7,6 +7,7 @@ const {
 const _ = require('lodash');
 const registerUploadMiddleware = require('./middlewares/upload');
 const { getService } = require('./utils');
+const spec = require('../documentation/content-api.json');
 
 /**
  * Register upload plugin
@@ -21,6 +22,10 @@ module.exports = async ({ strapi }) => {
 
   if (strapi.plugin('graphql')) {
     require('./graphql')({ strapi });
+  }
+
+  if (strapi.plugin('documentation')) {
+    strapi.plugin('documentation').service('documentation').registerDoc(spec, 'upload');
   }
 };
 
