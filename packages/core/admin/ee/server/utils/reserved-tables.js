@@ -1,7 +1,5 @@
 'use strict';
 
-const reservedTableName = 'strapi_reserved_table_names';
-
 /**
  * Finds all tables in the database that start with a prefix
  * @param {string} prefix
@@ -13,45 +11,39 @@ const findTablesThatStartWithPrefix = async (prefix) => {
 };
 
 /**
- * Check whether an entry exists in the DB for a reserved table name
- * If no entry does exist return the tableName to be added to the DB
- * @param {string} tableName
- * @returns {string|undefined}
+ * Get all reserved table names from the core store
+ * @returns {Array}
  */
-const doesReservedTableEntryExist = async (tableName) => {
-  const rows = await strapi.db.getConnection()(reservedTableName).select().where('name', tableName);
-
-  if (rows.length === 0) {
-    return tableName;
-  }
-};
+const getReservedTables = async () =>
+  strapi.store.get({
+    type: 'core',
+    key: 'reserved_tables',
+  });
 
 /**
- * Create entries in the DB for an array of reserved table names
- * @param {Array} tableNames
+ * Add all table names that start with a prefix to the reserved tables in
+ * core store
+ * @param {string} tableNamePrefix
  */
-const createReservedTableEntries = async (tableNames) =>
-  strapi.db
-    .getConnection()(reservedTableName)
-    .insert(tableNames.map((tableName) => ({ name: tableName })));
+const reserveTablesWithPrefix = async (tableNamePrefix) => {
+  const reservedTables = (await getReservedTables()) || [];
 
-/**
- * Create the DB table 'strapi_reserved_table_names' if it does not exist
- * @param {SchemaBuilder} connection to the strapi db
- */
-const createReservedTable = async (connection) => {
-  if (await connection.hasTable(reservedTableName)) {
+  const tableNames = await findTablesThatStartWithPrefix(tableNamePrefix);
+
+  if (!tableNames.length) {
     return;
   }
-  return connection.createTable(reservedTableName, (table) => {
-    table.increments('id');
-    table.string('name');
+
+  reservedTables.push(...tableNames.filter((name) => !reservedTables.includes(name)));
+
+  await strapi.store.set({
+    type: 'core',
+    key: 'reserved_tables',
+    value: reservedTables,
   });
 };
 
 module.exports = {
+  reserveTablesWithPrefix,
   findTablesThatStartWithPrefix,
-  doesReservedTableEntryExist,
-  createReservedTableEntries,
-  createReservedTable,
 };

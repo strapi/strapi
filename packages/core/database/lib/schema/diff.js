@@ -2,11 +2,7 @@
 
 const _ = require('lodash/fp');
 
-const RESERVED_TABLE_NAMES = [
-  'strapi_migrations',
-  'strapi_database_schema',
-  'strapi_reserved_table_names',
-];
+const RESERVED_TABLE_NAMES = ['strapi_migrations', 'strapi_database_schema'];
 
 const statuses = {
   CHANGED: 'CHANGED',
@@ -348,18 +344,18 @@ module.exports = (db) => {
       }
     }
 
-    const reservedTablesFromDB = await db
-      .getConnection()
-      .select('name')
-      .from('strapi_reserved_table_names');
-
-    const reservedTables = [
-      ...RESERVED_TABLE_NAMES,
-      ...reservedTablesFromDB.map((entry) => entry.name),
-    ];
+    const persistedTables = helpers.hasTable(srcSchema, 'strapi_core_store_settings')
+      ? await strapi.store.get({
+          type: 'core',
+          key: 'reserved_tables',
+        })
+      : [];
 
     for (const srcTable of srcSchema.tables) {
-      if (!helpers.hasTable(destSchema, srcTable.name) && !reservedTables.includes(srcTable.name)) {
+      if (
+        !helpers.hasTable(destSchema, srcTable.name) &&
+        ![...RESERVED_TABLE_NAMES, ...persistedTables].includes(srcTable.name)
+      ) {
         removedTables.push(srcTable);
       }
     }
