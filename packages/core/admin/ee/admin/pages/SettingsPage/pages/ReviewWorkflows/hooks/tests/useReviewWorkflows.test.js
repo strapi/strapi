@@ -227,40 +227,4 @@ describe('useReviewWorkflows', () => {
 
     expect(toggleNotification).toBeCalled();
   });
-
-  test('display error notification on a failed entityStageMutation mutation', async () => {
-    const originalError = console.error;
-    console.error = jest.fn();
-
-    const { put } = useFetchClient();
-    const toggleNotification = useNotification();
-    const idFixture = 1;
-    const stageIdFixture = 2;
-
-    put.mockRejectedValue({
-      response: {
-        data: {
-          error: {
-            name: 'ValidationError',
-            message: 'Failed',
-          },
-        },
-      },
-    });
-
-    const { result, waitFor } = await setup(idFixture);
-
-    try {
-      await act(async () => {
-        await result.current.setStageForEntity(idFixture, stageIdFixture);
-      });
-
-      await waitFor(() => result.current.workflows.isLoading);
-    } catch (error) {
-      // mutation is expected to throw an error
-    }
-
-    expect(toggleNotification).toBeCalled();
-    console.error = originalError;
-  });
 });

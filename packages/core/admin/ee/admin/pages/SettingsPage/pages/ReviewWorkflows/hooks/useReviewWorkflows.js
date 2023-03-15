@@ -30,11 +30,11 @@ export function useReviewWorkflows(workflowId) {
     return data;
   }
 
-  async function updateEntityStage({ entityId, stageId }) {
+  async function updateEntityStage({ entityId, stageId, uid }) {
     const {
       data: { data },
       // TODO: endpoint differs for collection-types and single-types
-    } = await put(`${API_CM_BASE_URL}/collection-types/:model_uid/${entityId}/stage`, {
+    } = await put(`${API_CM_BASE_URL}/collection-types/${uid}/${entityId}/stage`, {
       data: { id: stageId },
     });
 
@@ -45,8 +45,8 @@ export function useReviewWorkflows(workflowId) {
     return workflowUpdateMutation.mutateAsync({ workflowId, stages });
   }
 
-  function setStageForEntity(entityId, stageId) {
-    return entityStageMutation.mutateAsync({ entityId, stageId });
+  function setStageForEntity(...args) {
+    return entityStageMutation.mutateAsync(...args);
   }
 
   function refetchWorkflow() {
@@ -71,24 +71,11 @@ export function useReviewWorkflows(workflowId) {
     },
   });
 
-  const entityStageMutation = useMutation(updateEntityStage, {
-    async onError(error) {
-      toggleNotification({
-        type: 'warning',
-        message: formatAPIError(error),
-      });
-    },
-
-    async onSuccess() {
-      toggleNotification({
-        type: 'success',
-        message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
-      });
-    },
-  });
+  const entityStageMutation = useMutation(updateEntityStage);
 
   return {
     workflows,
+    entityStageMutation,
     updateWorkflowStages,
     refetchWorkflow,
     setStageForEntity,
