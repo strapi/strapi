@@ -40,6 +40,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
     const body = {
       name: `transfer_token_${String(currentTokens)}`,
       description: 'generic description',
+      permissions: ['push', 'pull'],
       ...token,
     };
 
@@ -69,7 +70,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
       error: {
         status: 400,
         name: 'ValidationError',
-        message: '2 errors occurred',
+        message: '3 errors occurred',
         details: {
           errors: [
             {
@@ -82,6 +83,11 @@ describe('Admin Transfer Token CRUD (api)', () => {
               name: 'ValidationError',
               message: 'name is a required field',
             },
+            {
+              path: ['permissions'],
+              name: 'ValidationError',
+              message: 'permissions is a required field',
+            },
           ],
         },
       },
@@ -92,6 +98,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
     const body = {
       name: 'transfer-token_tests-no-lifespan',
       description: 'transfer-token_tests-description',
+      permissions: ['push'],
     };
 
     const res = await rq({
@@ -104,7 +111,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
     expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: body.name,
-      permissions: [],
+      permissions: body.permissions,
       description: body.description,
       id: expect.any(Number),
       createdAt: expect.toBeISODate(),
@@ -123,6 +130,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
       name: 'transfer-token_tests-lifespan7',
       description: 'transfer-token_tests-description',
       lifespan: 7 * 24 * 60 * 60 * 1000, // 7 days
+      permissions: ['pull'],
     };
 
     const res = await rq({
@@ -135,7 +143,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
     expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: body.name,
-      permissions: [],
+      permissions: body.permissions,
       description: body.description,
       id: expect.any(Number),
       createdAt: expect.toBeISODate(),
@@ -160,6 +168,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
       name: 'transfer-token_tests-lifespan30',
       description: 'transfer-token_tests-description',
       lifespan: 30 * 24 * 60 * 60 * 1000, // 30 days
+      permissions: ['push'],
     };
 
     const res = await rq({
@@ -172,7 +181,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
     expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: body.name,
-      permissions: [],
+      permissions: body.permissions,
       description: body.description,
       id: expect.any(Number),
       createdAt: expect.toBeISODate(),
@@ -197,6 +206,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
       name: 'transfer-token_tests-lifespan90',
       description: 'transfer-token_tests-description',
       lifespan: 90 * 24 * 60 * 60 * 1000, // 90 days
+      permissions: ['push', 'pull'],
     };
 
     const res = await rq({
@@ -209,7 +219,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
     expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: body.name,
-      permissions: [],
+      permissions: body.permissions,
       description: body.description,
       id: expect.any(Number),
       createdAt: expect.toBeISODate(),
@@ -231,6 +241,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
       name: 'transfer-token_tests-nulllifespan',
       description: 'transfer-token_tests-description',
       lifespan: null,
+      permissions: ['push', 'pull'],
     };
 
     const res = await rq({
@@ -243,7 +254,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
     expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: body.name,
-      permissions: [],
+      permissions: body.permissions,
       description: body.description,
       id: expect.any(Number),
       createdAt: expect.toBeISODate(),
@@ -259,6 +270,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
       name: 'transfer-token_tests-lifespan',
       description: 'transfer-token_tests-description',
       lifespan: -1,
+      permissions: ['push', 'pull'],
     };
 
     const res = await rq({
@@ -286,9 +298,10 @@ describe('Admin Transfer Token CRUD (api)', () => {
     });
   });
 
-  test('Creates an transfer token without a description (successfully)', async () => {
+  test('Creates a transfer token without a description (successfully)', async () => {
     const body = {
       name: 'transfer-token_tests-without-description',
+      permissions: ['push', 'pull'],
     };
 
     const res = await rq({
@@ -301,7 +314,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
     expect(res.body.data).toMatchObject({
       accessKey: expect.any(String),
       name: body.name,
-      permissions: [],
+      permissions: body.permissions,
       description: '',
       id: expect.any(Number),
       createdAt: expect.any(String),
@@ -312,10 +325,11 @@ describe('Admin Transfer Token CRUD (api)', () => {
     });
   });
 
-  test('Creates an transfer token with trimmed description and name (successfully)', async () => {
+  test('Creates a transfer token with trimmed description and name (successfully)', async () => {
     const body = {
       name: '  transfer-token_tests-spaces-at-the-end   ',
       description: '  transfer-token_tests-description-with-spaces-at-the-end   ',
+      permissions: ['push', 'pull'],
     };
 
     const res = await rq({
@@ -328,7 +342,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
     expect(res.body.data).toMatchObject({
       accessKey: expect.any(String),
       name: 'transfer-token_tests-spaces-at-the-end',
-      permissions: [],
+      permissions: body.permissions,
       description: 'transfer-token_tests-description-with-spaces-at-the-end',
       id: expect.any(Number),
       createdAt: expect.any(String),
@@ -377,17 +391,18 @@ describe('Admin Transfer Token CRUD (api)', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.data).toMatchObject({
-      name: token.name,
-      permissions: token.permissions,
-      description: token.description,
-      id: token.id,
-      createdAt: token.createdAt,
-      lastUsedAt: null,
-      updatedAt: expect.any(String),
-      expiresAt: null,
-      lifespan: null,
-    });
+    expect(res.body.data).toEqual(
+      expect.objectContaining({
+        name: token.name,
+        description: token.description,
+        id: token.id,
+        createdAt: token.createdAt,
+        lastUsedAt: null,
+        updatedAt: expect.any(String),
+        expiresAt: null,
+        lifespan: null,
+      })
+    );
   });
 
   test('Does not return an error if the resource to delete does not exist', async () => {
@@ -451,6 +466,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
     const updatedBody = {
       name: 'transfer-token_tests-updated-name',
       description: 'transfer-token_tests-description',
+      permissions: ['push'],
     };
 
     const updatedRes = await rq({
@@ -462,7 +478,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
     expect(updatedRes.statusCode).toBe(200);
     expect(updatedRes.body.data).toMatchObject({
       name: updatedBody.name,
-      permissions: [],
+      permissions: updatedBody.permissions,
       description: updatedBody.description,
       id: token.id,
       createdAt: token.createdAt,
@@ -477,6 +493,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
     const body = {
       name: 'transfer-token_tests-updated-name',
       description: 'transfer-token_tests-updated-description',
+      permissions: ['push'],
     };
 
     const res = await rq({

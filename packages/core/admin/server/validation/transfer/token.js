@@ -31,7 +31,7 @@ const transferTokenUpdateSchema = yup
       .array()
       .min(1)
       .of(yup.string().oneOf(Object.values(constants.TRANSFER_TOKEN_TYPE)))
-      .required(),
+      .nullable(),
   })
   .noUnknown()
   .strict();

@@ -84,8 +84,9 @@ const FormTransferTokenContainer = ({
               token={transferToken}
             />
           </GridItem>
-          <GridItem key="type" col={6} xs={12}>
+          <GridItem key="permissions" col={6} xs={12}>
             <TokenTypeSelect
+              name="permissions"
               values={values}
               errors={errors}
               label={{
@@ -93,7 +94,7 @@ const FormTransferTokenContainer = ({
                 defaultMessage: 'Token type',
               }}
               onChange={(value) => {
-                onChange({ target: { name: 'type', value } });
+                onChange({ target: { name: 'permissions', value } });
               }}
               options={typeOptions}
               canEditInputs={canEditInputs}

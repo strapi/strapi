@@ -92,7 +92,7 @@ const TransferTokenCreateView = () => {
         ? parseInt(body.lifespan, 10)
         : null;
 
-    const permissions = body.type.split('-');
+    const permissions = body.permissions.split('-');
 
     try {
       const {
@@ -106,7 +106,6 @@ const TransferTokenCreateView = () => {
         : await put(`/admin/transfer/tokens/${id}`, {
             name: body.name,
             description: body.description,
-            type: body.type,
             permissions,
           });
 
@@ -132,9 +131,9 @@ const TransferTokenCreateView = () => {
               defaultMessage: 'Transfer Token successfully edited',
             }),
       });
-
+      console.log('transferToken', transferToken);
       trackUsageRef.current(isCreating ? 'didCreateToken' : 'didEditToken', {
-        type: transferToken?.type,
+        type: transferToken?.permissions,
         tokenType: TRANSFER_TOKEN_TYPE,
       });
     } catch (err) {
@@ -175,7 +174,7 @@ const TransferTokenCreateView = () => {
           lifespan: transferToken?.lifespan
             ? transferToken.lifespan.toString()
             : transferToken?.lifespan,
-          type: transferToken?.permissions.join('-'),
+          permissions: transferToken?.permissions.join('-'),
         }}
         enableReinitialize
         onSubmit={(body, actions) => handleSubmit(body, actions)}
