@@ -2,4 +2,4 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 yarn lint-staged
-yarn nx affected:lint --uncommitted
+yarn nx affected:lint --uncommitted --nx-ignore-cycles

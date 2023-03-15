@@ -21,8 +21,8 @@
     }
   ],
   "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch",
+    "test:unit": "jest",
+    "test:unit:watch": "jest --watch",
     "lint": "eslint ."
   },
   "dependencies": {

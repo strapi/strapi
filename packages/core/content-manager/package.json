@@ -20,7 +20,8 @@
     }
   ],
   "scripts": {
-    "test:unit": "jest --verbose",
+    "test:unit": "jest",
+    "test:unit:watch": "jest --watch",
     "lint": "eslint ."
   },
   "dependencies": {

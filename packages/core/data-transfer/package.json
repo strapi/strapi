@@ -31,7 +31,8 @@
     "build:ts": "tsc",
     "clean": "rimraf ./lib",
     "prepublishOnly": "yarn clean && yarn build",
-    "test:unit": "jest --verbose",
+    "test:unit": "jest",
+    "test:unit:watch": "jest --watch",
     "watch": "tsc -w --preserveWatchOutput",
     "lint": "eslint ."
   },

@@ -21,7 +21,6 @@
     }
   ],
   "scripts": {
-    "test": "echo \"no tests yet\"",
     "lint": "eslint ."
   },
   "dependencies": {
