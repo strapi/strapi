@@ -131,7 +131,7 @@ const TransferTokenCreateView = () => {
               defaultMessage: 'Transfer Token successfully edited',
             }),
       });
-      console.log('transferToken', transferToken);
+
       trackUsageRef.current(isCreating ? 'didCreateToken' : 'didEditToken', {
         type: transferToken?.permissions,
         tokenType: TRANSFER_TOKEN_TYPE,
