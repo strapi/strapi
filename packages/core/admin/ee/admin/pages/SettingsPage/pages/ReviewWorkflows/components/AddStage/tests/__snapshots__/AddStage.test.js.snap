@@ -1,13 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Admin | Settings | Review Workflow | AddStage should render a list of stages 1`] = `
-.c6 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #8e8ea9;
-}
-
 .c0 {
   background: #ffffff;
   padding-top: 12px;
@@ -30,6 +23,13 @@ exports[`Admin | Settings | Review Workflow | AddStage should render a list of s
   -ms-flex-direction: row;
   flex-direction: row;
   gap: 8px;
+}
+
+.c6 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #8e8ea9;
 }
 
 .c7 {
@@ -104,9 +104,9 @@ exports[`Admin | Settings | Review Workflow | AddStage should render a list of s
         aria-hidden="true"
         class="c3 c4"
         fill="none"
-        height="1em"
+        height="1rem"
         viewBox="0 0 24 24"
-        width="1em"
+        width="1rem"
         xmlns="http://www.w3.org/2000/svg"
       >
         <circle
@@ -116,7 +116,7 @@ exports[`Admin | Settings | Review Workflow | AddStage should render a list of s
           r="12"
         />
         <path
-          d="M17 12.569c0 .124-.1.224-.225.224h-3.981v3.982c0 .124-.101.225-.226.225h-1.136a.225.225 0 01-.226-.225v-3.981H7.226A.225.225 0 017 12.567v-1.136c0-.125.1-.226.225-.226h3.982V7.226c0-.124.1-.225.224-.225h1.138c.124 0 .224.1.224.225v3.982h3.982c.124 0 .225.1.225.224v1.138z"
+          d="M17 12.569c0 .124-.1.224-.225.224h-3.981v3.982c0 .124-.101.225-.226.225h-1.136a.225.225 0 0 1-.226-.225v-3.981H7.226A.225.225 0 0 1 7 12.567v-1.136c0-.125.1-.226.225-.226h3.982V7.226c0-.124.1-.225.224-.225h1.138c.124 0 .224.1.224.225v3.982h3.982c.124 0 .225.1.225.224v1.138Z"
           fill="#F6F6F9"
         />
       </svg>
