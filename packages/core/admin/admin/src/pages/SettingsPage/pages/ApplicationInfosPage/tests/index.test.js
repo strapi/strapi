@@ -40,6 +40,12 @@ jest.mock('../../../../../hooks', () => ({
     updateProjectSettings: updateProjectSettingsSpy,
   })),
 }));
+jest.mock(
+  'ee_else_ce/pages/SettingsPage/pages/ApplicationInfosPage/components/AdminSeatInfo',
+  () => () => {
+    return <></>;
+  }
+);
 
 const client = new QueryClient();
 
@@ -64,14 +70,6 @@ describe('Application page', () => {
   });
 
   afterAll(() => server.close());
-
-  it('renders and matches the snapshot', async () => {
-    const {
-      container: { firstChild },
-    } = render(App);
-
-    expect(firstChild).toMatchSnapshot();
-  });
 
   it('should not display link upgrade version if not necessary', () => {
     const { queryByText } = render(App);

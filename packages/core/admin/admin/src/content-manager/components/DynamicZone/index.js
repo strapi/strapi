@@ -2,7 +2,7 @@ import React, { memo, useMemo, useState } from 'react';
 import get from 'lodash/get';
 import isEqual from 'react-fast-compare';
 import PropTypes from 'prop-types';
-import { Box, Stack, VisuallyHidden } from '@strapi/design-system';
+import { Box, Flex, VisuallyHidden } from '@strapi/design-system';
 import { NotAllowedInput, useNotification } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
@@ -174,7 +174,7 @@ const DynamicZone = ({
   const ariaDescriptionId = `${name}-item-instructions`;
 
   return (
-    <Stack spacing={6}>
+    <Flex direction="column" alignItems="stretch" gap={6}>
       {dynamicDisplayedComponentsLength > 0 && (
         <Box>
           <DynamicZoneLabel
@@ -228,7 +228,7 @@ const DynamicZone = ({
         components={fieldSchema.components ?? []}
         onClickAddComponent={handleAddComponent}
       />
-    </Stack>
+    </Flex>
   );
 };
 

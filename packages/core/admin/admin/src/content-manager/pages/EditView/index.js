@@ -8,8 +8,7 @@ import {
   LoadingIndicatorPage,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { ContentLayout, Box, Grid, GridItem, Main, Stack } from '@strapi/design-system';
-
+import { ContentLayout, Box, Flex, Grid, GridItem, Main } from '@strapi/design-system';
 import { Pencil, Layer } from '@strapi/icons';
 import InformationBox from 'ee_else_ce/content-manager/pages/EditView/InformationBox';
 import { InjectionZone } from '../../../shared/components';
@@ -114,7 +113,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
               <ContentLayout>
                 <Grid gap={4}>
                   <GridItem col={9} s={12}>
-                    <Stack spacing={6}>
+                    <Flex direction="column" alignItems="stretch" gap={6}>
                       {formattedContentTypeLayout.map((row, index) => {
                         if (isDynamicZone(row)) {
                           const {
@@ -151,7 +150,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
                             paddingBottom={6}
                             borderColor="neutral150"
                           >
-                            <Stack spacing={6}>
+                            <Flex direction="column" alignItems="stretch" gap={6}>
                               {row.map((grid, gridRowIndex) => (
                                 <GridRow
                                   columns={grid}
@@ -159,14 +158,14 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
                                   key={gridRowIndex}
                                 />
                               ))}
-                            </Stack>
+                            </Flex>
                           </Box>
                         );
                       })}
-                    </Stack>
+                    </Flex>
                   </GridItem>
                   <GridItem col={3} s={12}>
-                    <Stack spacing={2}>
+                    <Flex direction="column" alignItems="stretch" gap={2}>
                       <DraftAndPublishBadge />
                       <Box
                         as="aside"
@@ -184,7 +183,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
                         <InjectionZone area="contentManager.editView.informations" />
                       </Box>
                       <Box as="aside" aria-labelledby="links">
-                        <Stack spacing={2}>
+                        <Flex direction="column" alignItems="stretch" gap={2}>
                           <InjectionZone area="contentManager.editView.right-links" slug={slug} />
                           {slug !== 'strapi::administrator' && (
                             <CheckPermissions permissions={ctbPermissions}>
@@ -228,9 +227,9 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
                               onDeleteSucceeded={onDeleteSucceeded}
                             />
                           )}
-                        </Stack>
+                        </Flex>
                       </Box>
-                    </Stack>
+                    </Flex>
                   </GridItem>
                 </Grid>
               </ContentLayout>

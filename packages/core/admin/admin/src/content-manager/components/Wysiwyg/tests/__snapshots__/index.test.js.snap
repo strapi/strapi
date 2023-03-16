@@ -1,62 +1,64 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
-.c25 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
+.c4 {
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #dcdce4;
 }
 
-.c6 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c15 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
-}
-
-.c33 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c8 {
+.c5 {
   background: #f6f6f9;
   padding: 8px;
 }
 
-.c14 {
+.c12 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c16 {
+.c14 {
   padding-left: 12px;
 }
 
-.c30 {
+.c19 {
+  padding: 8px;
+  border-radius: 4px;
+  border-color: #dcdce4;
+  border: 1px solid #dcdce4;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+}
+
+.c27 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
+}
+
+.c33 {
   background: #f6f6f9;
   padding: 8px;
   border-radius: 4px;
 }
 
-.c1 {
+.c35 {
+  background: #ffffff;
+  padding: 8px;
+  border-radius: 4px;
+  border-color: #dcdce4;
+  border: 1px solid #dcdce4;
+  cursor: pointer;
+}
+
+.c0 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -68,9 +70,10 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 4px;
 }
 
-.c3 {
+.c1 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -82,9 +85,10 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
+  gap: 4px;
 }
 
-.c9 {
+.c6 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -102,7 +106,68 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   justify-content: space-between;
 }
 
-.c31 {
+.c7 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c8 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c20 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c28 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c34 {
   -webkit-align-items: flex-end;
   -webkit-box-align: flex-end;
   -ms-flex-align: flex-end;
@@ -120,39 +185,37 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   justify-content: flex-end;
 }
 
-.c2 > * {
-  margin-top: 0;
-  margin-bottom: 0;
+.c3 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
 }
 
-.c2 > * + * {
-  margin-top: 4px;
+.c13 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
 }
 
-.c10 > * {
-  margin-top: 0;
-  margin-bottom: 0;
+.c30 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
 }
 
-.c4 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c4 > * + * {
-  margin-left: 4px;
+.c37 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
 }
 
 .c21 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
   position: relative;
   outline: none;
 }
@@ -201,93 +264,138 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c27 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
+.c25 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c29 {
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
   border: 1px solid #dcdce4;
   background: #ffffff;
 }
 
-.c27 .c0 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c27 .c5 {
-  color: #ffffff;
-}
-
-.c27[aria-disabled='true'] {
+.c29[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c27[aria-disabled='true'] .c5 {
+.c29[aria-disabled='true'] .c2 {
   color: #666687;
 }
 
-.c27[aria-disabled='true'] svg > g,.c27[aria-disabled='true'] svg path {
+.c29[aria-disabled='true'] svg > g,.c29[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c27[aria-disabled='true']:active {
+.c29[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c27[aria-disabled='true']:active .c5 {
+.c29[aria-disabled='true']:active .c2 {
   color: #666687;
 }
 
-.c27[aria-disabled='true']:active svg > g,.c27[aria-disabled='true']:active svg path {
+.c29[aria-disabled='true']:active svg > g,.c29[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c27:hover {
+.c29:hover {
   background-color: #f6f6f9;
 }
 
-.c27:active {
+.c29:active {
   background-color: #eaeaef;
 }
 
-.c27 .c5 {
+.c29 .c2 {
   color: #32324d;
 }
 
-.c27 svg > g,
-.c27 svg path {
+.c29 svg > g,
+.c29 svg path {
   fill: #32324d;
 }
 
-.c23 {
+.c9 {
+  position: relative;
+  border: 1px solid #dcdce4;
+  padding-right: 12px;
+  border-radius: 4px;
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 2rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c9:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c15 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c15 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c15 svg path {
+  fill: #666687;
+}
+
+.c16 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
+  background: none;
+  border: none;
+}
+
+.c16 svg {
+  width: 0.375rem;
+}
+
+.c10 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c10:focus {
+  outline: none;
+}
+
+.c10[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c11 {
+  width: 100%;
 }
 
 .c23 svg > g,
@@ -305,142 +413,58 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   fill: #a5a5ba;
 }
 
-.c23[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
 .c23[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c19 span:first-child button {
+.c17 span:first-child button {
   border-left: 1px solid #dcdce4;
   border-radius: 4px 0 0 4px;
 }
 
-.c19 span:last-child button {
+.c17 span:last-child button {
   border-radius: 0 4px 4px 0;
 }
 
-.c19 .c22 {
+.c17 .c22 {
   border-radius: 0;
   border-left: none;
 }
 
-.c19 .c22 svg path {
+.c17 .c22 svg path {
   fill: #4a4a6a;
 }
 
-.c19 .c22:hover {
+.c17 .c22:hover {
   background-color: #f6f6f9;
 }
 
-.c19 .c22:hover svg path {
+.c17 .c22:hover svg path {
   fill: #32324d;
 }
 
-.c19 .c22:active {
+.c17 .c22:active {
   background-color: #eaeaef;
 }
 
-.c19 .c22:active svg path {
+.c17 .c22:active svg path {
   fill: #212134;
 }
 
-.c19 .c22[aria-disabled='true'] svg path {
+.c17 .c22[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c7 {
-  border-radius: 4px;
-  border-style: solid;
-  border-width: 1px;
-  border-color: #dcdce4;
-}
-
-.c12 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c12:focus {
-  outline: none;
-}
-
-.c12[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c11 {
-  position: relative;
-  border: 1px solid #dcdce4;
-  padding-right: 12px;
-  border-radius: 4px;
-  background: #ffffff;
-  overflow: hidden;
-  min-height: 2rem;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c11:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c17 {
-  background: transparent;
-  border: none;
-  position: relative;
-  z-index: 1;
-}
-
-.c17 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
-}
-
-.c17 svg path {
-  fill: #666687;
-}
-
-.c18 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  background: none;
-  border: none;
-}
-
-.c18 svg {
-  width: 0.375rem;
-}
-
-.c13 {
-  width: 100%;
-}
-
-.c29 {
+.c32 {
   cursor: auto;
   height: 100%;
 }
 
-.c29 .CodeMirror-placeholder {
+.c32 .CodeMirror-placeholder {
   color: #666687 !important;
 }
 
-.c29 .CodeMirror {
+.c32 .CodeMirror {
   font-size: 0.875rem;
   height: 290px;
   color: #32324d;
@@ -448,22 +472,22 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell, 'Open Sans','Helvetica Neue',sans-serif;
 }
 
-.c29 .CodeMirror-lines {
+.c32 .CodeMirror-lines {
   padding: 12px 16px;
 }
 
-.c29 .CodeMirror-scrollbar-filler,
-.c29 .CodeMirror-gutter-filler {
+.c32 .CodeMirror-scrollbar-filler,
+.c32 .CodeMirror-gutter-filler {
   background-color: #ffffff;
 }
 
-.c29 .CodeMirror-gutters {
+.c32 .CodeMirror-gutters {
   border-right: 1px solid #ddd;
   background-color: #f7f7f7;
   white-space: nowrap;
 }
 
-.c29 .CodeMirror-linenumber {
+.c32 .CodeMirror-linenumber {
   padding: 0 3px 0 5px;
   min-width: 20px;
   text-align: right;
@@ -471,31 +495,31 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   white-space: nowrap;
 }
 
-.c29 .CodeMirror-guttermarker {
+.c32 .CodeMirror-guttermarker {
   color: black;
 }
 
-.c29 .CodeMirror-guttermarker-subtle {
+.c32 .CodeMirror-guttermarker-subtle {
   color: #999;
 }
 
-.c29 .CodeMirror-cursor {
+.c32 .CodeMirror-cursor {
   border-left: 1px solid black;
   border-right: none;
   width: 0;
 }
 
-.c29 .CodeMirror div.CodeMirror-secondarycursor {
+.c32 .CodeMirror div.CodeMirror-secondarycursor {
   border-left: 1px solid silver;
 }
 
-.c29 .cm-fat-cursor .CodeMirror-cursor {
+.c32 .cm-fat-cursor .CodeMirror-cursor {
   width: auto;
   border: 0 !important;
   background: #7e7;
 }
 
-.c29 .cm-fat-cursor-mark {
+.c32 .cm-fat-cursor-mark {
   background-color: rgba(20,255,20,0.5);
   -webkit-animation: blink 1.06s steps(1) infinite;
   -moz-animation: blink 1.06s steps(1) infinite;
@@ -503,7 +527,7 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   animation: blink 1.06s steps(1) infinite;
 }
 
-.c29 .cm-animate-fat-cursor {
+.c32 .cm-animate-fat-cursor {
   width: auto;
   border: 0;
   -webkit-animation: blink 1.06s steps(1) infinite;
@@ -513,13 +537,13 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   background-color: #7e7;
 }
 
-.c29 .cm-tab {
+.c32 .cm-tab {
   display: inline-block;
   -webkit-text-decoration: inherit;
   text-decoration: inherit;
 }
 
-.c29 .CodeMirror-rulers {
+.c32 .CodeMirror-rulers {
   position: absolute;
   left: 0;
   right: 0;
@@ -528,59 +552,59 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   overflow: hidden;
 }
 
-.c29 .CodeMirror-ruler {
+.c32 .CodeMirror-ruler {
   border-left: 1px solid #ccc;
   top: 0;
   bottom: 0;
   position: absolute;
 }
 
-.c29 .cm-header,
-.c29 .cm-strong {
+.c32 .cm-header,
+.c32 .cm-strong {
   font-weight: bold;
 }
 
-.c29 .cm-em {
+.c32 .cm-em {
   font-style: italic;
 }
 
-.c29 .cm-link {
+.c32 .cm-link {
   -webkit-text-decoration: underline;
   text-decoration: underline;
 }
 
-.c29 .cm-strikethrough {
+.c32 .cm-strikethrough {
   -webkit-text-decoration: line-through;
   text-decoration: line-through;
 }
 
-.c29 .CodeMirror-composing {
+.c32 .CodeMirror-composing {
   border-bottom: 2px solid;
 }
 
-.c29 div.CodeMirror span.CodeMirror-matchingbracket {
+.c32 div.CodeMirror span.CodeMirror-matchingbracket {
   color: #0b0;
 }
 
-.c29 div.CodeMirror span.CodeMirror-nonmatchingbracket {
+.c32 div.CodeMirror span.CodeMirror-nonmatchingbracket {
   color: #a22;
 }
 
-.c29 .CodeMirror-matchingtag {
+.c32 .CodeMirror-matchingtag {
   background: rgba(255,150,0,0.3);
 }
 
-.c29 .CodeMirror-activeline-background {
+.c32 .CodeMirror-activeline-background {
   background: #e8f2ff;
 }
 
-.c29 .CodeMirror {
+.c32 .CodeMirror {
   position: relative;
   overflow: hidden;
   background: #ffffff;
 }
 
-.c29 .CodeMirror-scroll {
+.c32 .CodeMirror-scroll {
   overflow: scroll !important;
   margin-bottom: -50px;
   margin-right: -50px;
@@ -590,47 +614,47 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   position: relative;
 }
 
-.c29 .CodeMirror-sizer {
+.c32 .CodeMirror-sizer {
   position: relative;
   border-right: 50px solid transparent;
 }
 
-.c29 .CodeMirror-vscrollbar,
-.c29 .CodeMirror-hscrollbar,
-.c29 .CodeMirror-scrollbar-filler,
-.c29 .CodeMirror-gutter-filler {
+.c32 .CodeMirror-vscrollbar,
+.c32 .CodeMirror-hscrollbar,
+.c32 .CodeMirror-scrollbar-filler,
+.c32 .CodeMirror-gutter-filler {
   position: absolute;
   z-index: 1;
   display: none;
   outline: none;
 }
 
-.c29 .CodeMirror-vscrollbar {
+.c32 .CodeMirror-vscrollbar {
   right: 0;
   top: 0;
   overflow-x: hidden;
   overflow-y: scroll;
 }
 
-.c29 .CodeMirror-hscrollbar {
+.c32 .CodeMirror-hscrollbar {
   bottom: 0;
   left: 0;
   overflow-y: hidden;
   overflow-x: scroll;
 }
 
-.c29 .CodeMirror-scrollbar-filler {
+.c32 .CodeMirror-scrollbar-filler {
   right: 0;
   bottom: 0;
 }
 
-.c29 .CodeMirror-lines {
+.c32 .CodeMirror-lines {
   cursor: text;
   min-height: 1px;
 }
 
-.c29 .CodeMirror pre.CodeMirror-line,
-.c29 .CodeMirror pre.CodeMirror-line-like {
+.c32 .CodeMirror pre.CodeMirror-line,
+.c32 .CodeMirror pre.CodeMirror-line-like {
   -moz-border-radius: 0;
   -webkit-border-radius: 0;
   border-radius: 0;
@@ -650,18 +674,18 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   font-variant-ligatures: contextual;
 }
 
-.c29 .CodeMirror pre.CodeMirror-line-like {
+.c32 .CodeMirror pre.CodeMirror-line-like {
   z-index: 2;
 }
 
-.c29 .CodeMirror-wrap pre.CodeMirror-line,
-.c29 .CodeMirror-wrap pre.CodeMirror-line-like {
+.c32 .CodeMirror-wrap pre.CodeMirror-line,
+.c32 .CodeMirror-wrap pre.CodeMirror-line-like {
   word-wrap: break-word;
   white-space: pre-wrap;
   word-break: normal;
 }
 
-.c29 .CodeMirror-linebackground {
+.c32 .CodeMirror-linebackground {
   position: absolute;
   left: 0;
   right: 0;
@@ -670,29 +694,29 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   z-index: 0;
 }
 
-.c29 .CodeMirror-linewidget {
+.c32 .CodeMirror-linewidget {
   position: relative;
   padding: 0.1px;
 }
 
-.c29 .CodeMirror-rtl pre {
+.c32 .CodeMirror-rtl pre {
   direction: rtl;
 }
 
-.c29 .CodeMirror-code {
+.c32 .CodeMirror-code {
   outline: none;
 }
 
-.c29 .CodeMirror-scroll,
-.c29 .CodeMirror-sizer,
-.c29 .CodeMirror-gutter,
-.c29 .CodeMirror-gutters,
-.c29 .CodeMirror-linenumber {
+.c32 .CodeMirror-scroll,
+.c32 .CodeMirror-sizer,
+.c32 .CodeMirror-gutter,
+.c32 .CodeMirror-gutters,
+.c32 .CodeMirror-linenumber {
   -moz-box-sizing: content-box;
   box-sizing: content-box;
 }
 
-.c29 .CodeMirror-measure {
+.c32 .CodeMirror-measure {
   position: absolute;
   width: 100%;
   height: 0;
@@ -700,54 +724,54 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   visibility: hidden;
 }
 
-.c29 .CodeMirror-cursor {
+.c32 .CodeMirror-cursor {
   position: absolute;
   pointer-events: none;
   border-color: #32324d;
 }
 
-.c29 .CodeMirror-measure pre {
+.c32 .CodeMirror-measure pre {
   position: static;
 }
 
-.c29 div.CodeMirror-cursors {
+.c32 div.CodeMirror-cursors {
   visibility: hidden;
   position: relative;
 }
 
-.c29 div.CodeMirror-cursors + div {
+.c32 div.CodeMirror-cursors + div {
   z-index: 0 !important;
 }
 
-.c29 div.CodeMirror-dragcursors {
+.c32 div.CodeMirror-dragcursors {
   visibility: visible;
 }
 
-.c29 .CodeMirror-focused div.CodeMirror-cursors {
+.c32 .CodeMirror-focused div.CodeMirror-cursors {
   visibility: visible;
 }
 
-.c29 .CodeMirror-selected {
+.c32 .CodeMirror-selected {
   background: #dcdce4;
 }
 
-.c29 .CodeMirror-crosshair {
+.c32 .CodeMirror-crosshair {
   cursor: crosshair;
 }
 
-.c29 .cm-force-border {
+.c32 .cm-force-border {
   padding-right: 0.1px;
 }
 
-.c29 .cm-tab-wrap-hack:after {
+.c32 .cm-tab-wrap-hack:after {
   content: '';
 }
 
-.c29 span.CodeMirror-selectedtext {
+.c32 span.CodeMirror-selectedtext {
   background: none;
 }
 
-.c29 span {
+.c32 span {
   color: #32324d !important;
 }
 
@@ -761,7 +785,7 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   height: 1.125rem;
 }
 
-.c20 {
+.c18 {
   margin-left: 16px;
 }
 
@@ -775,12 +799,12 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   height: 1.125rem;
 }
 
-.c28 {
+.c31 {
   position: relative;
   height: calc(100% - 48px);
 }
 
-.c32 {
+.c36 {
   background-color: transparent;
   border: none;
   -webkit-align-items: center;
@@ -789,67 +813,69 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   align-items: center;
 }
 
-.c32 svg {
+.c36 svg {
   margin-left: 8px;
 }
 
-.c32 svg path {
+.c36 svg path {
   fill: #4a4a6a;
   width: 0.75rem;
   height: 0.75rem;
 }
 
 <div
-  class="c0 c1 c2"
+  class="c0"
 >
   <div
-    class="c0 c3 c4"
+    class="c1"
   >
     <span
-      class="c5 c6"
+      class="c2 c3"
     >
       hello world
     </span>
   </div>
   <div
-    class="c7"
+    class="c4"
   >
     <div
-      class="c0 c8"
+      class="c5"
     >
       <div
-        class="c0 c9"
+        class="c6"
       >
         <div
-          class="c0 c3"
+          class="c7"
         >
-          <div>
+          <div
+            class=""
+          >
             <div
-              class="c0 c1 c10"
+              class="c8"
             >
               <div
-                class="c0 c3 c11"
+                class="c7 c9"
               >
                 <button
                   aria-disabled="false"
                   aria-expanded="false"
                   aria-haspopup="listbox"
                   aria-labelledby="selectTitle selectTitle-label selectTitle-content"
-                  class="c12"
+                  class="c10"
                   id="selectTitle"
                   type="button"
                 />
                 <div
-                  class="c0 c9 c13"
+                  class="c6 c11"
                 >
                   <div
-                    class="c0 c3"
+                    class="c7"
                   >
                     <div
-                      class="c0 c14"
+                      class="c12"
                     >
                       <span
-                        class="c5 c15"
+                        class="c2 c13"
                         id="selectTitle-content"
                       >
                         Add a title
@@ -857,25 +883,25 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
                     </div>
                   </div>
                   <div
-                    class="c0 c3"
+                    class="c7"
                   >
                     <button
                       aria-hidden="true"
-                      class="c0 c16 c17 c18"
+                      class="c14 c15 c16"
                       tabindex="-1"
                       title="Carret Down Button"
                       type="button"
                     >
                       <svg
                         fill="none"
-                        height="1em"
+                        height="1rem"
                         viewBox="0 0 14 8"
-                        width="1em"
+                        width="1rem"
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
                           clip-rule="evenodd"
-                          d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                          d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                           fill="#32324D"
                           fill-rule="evenodd"
                         />
@@ -887,13 +913,13 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
             </div>
           </div>
           <div
-            class="c0 c3 c19 c20"
+            class="c7 c17 c18"
           >
             <span>
               <button
                 aria-disabled="false"
                 aria-labelledby="0"
-                class="c21 c22 c23 c24"
+                class="c19 c20 c21 c22 c23 c24"
                 id="Bold"
                 name="Bold"
                 tabindex="0"
@@ -908,14 +934,14 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
                   aria-hidden="true"
                   fill="none"
                   focusable="false"
-                  height="1em"
+                  height="1rem"
                   viewBox="0 0 24 24"
-                  width="1em"
+                  width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
                     clip-rule="evenodd"
-                    d="M7.4 1.2H4.2v21.6h3.2V1.2zm11.6 6a6 6 0 01-1.5 4 6.4 6.4 0 01-3.8 11.6H7.4v-3.2h6.3c1.8 0 3.3-1.4 3.3-3.2 0-1.8-1.5-3.2-3.3-3.2H7.4V10H13a2.8 2.8 0 000-5.6H7.4V1.2H13a6 6 0 016 6z"
+                    d="M7.4 1.2H4.2v21.6h3.2V1.2Zm11.6 6a6 6 0 0 1-1.5 4 6.4 6.4 0 0 1-3.8 11.6H7.4v-3.2h6.3c1.8 0 3.3-1.4 3.3-3.2 0-1.8-1.5-3.2-3.3-3.2H7.4V10H13a2.8 2.8 0 0 0 0-5.6H7.4V1.2H13a6 6 0 0 1 6 6Z"
                     fill="#32324D"
                     fill-rule="evenodd"
                   />
@@ -926,7 +952,7 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
               <button
                 aria-disabled="false"
                 aria-labelledby="1"
-                class="c21 c22 c23 c24"
+                class="c19 c20 c21 c22 c23 c24"
                 id="Italic"
                 name="Italic"
                 tabindex="0"
@@ -941,13 +967,13 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
                   aria-hidden="true"
                   fill="none"
                   focusable="false"
-                  height="1em"
+                  height="1rem"
                   viewBox="0 0 24 24"
-                  width="1em"
+                  width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M19.7 1H9.4v3h3.1l-4 16H4.2v3h10.3v-3h-3.3l4.2-16h4.2V1z"
+                    d="M19.7 1H9.4v3h3.1l-4 16H4.2v3h10.3v-3h-3.3l4.2-16h4.2V1Z"
                     fill="#32324D"
                   />
                 </svg>
@@ -957,7 +983,7 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
               <button
                 aria-disabled="false"
                 aria-labelledby="2"
-                class="c21 c22 c23 c24"
+                class="c19 c20 c21 c22 c23 c24"
                 id="Underline"
                 name="Underline"
                 tabindex="0"
@@ -972,13 +998,13 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
                   aria-hidden="true"
                   fill="none"
                   focusable="false"
-                  height="1em"
+                  height="1rem"
                   viewBox="0 0 24 24"
-                  width="1em"
+                  width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M12 17.3c1.99 0 3.9-.74 5.3-2.07a6.9 6.9 0 002.2-5.01V1h-3v9.22c0 1.13-.47 2.2-1.32 3A4.63 4.63 0 0112 14.48c-1.2 0-2.34-.45-3.18-1.24a4.14 4.14 0 01-1.32-3.01V1h-3v9.22a6.9 6.9 0 002.2 5.01 7.73 7.73 0 005.3 2.08zm9.75 2.14H2.25v2.83h19.5v-2.83z"
+                    d="M12 17.3c1.99 0 3.9-.74 5.3-2.07a6.9 6.9 0 0 0 2.2-5.01V1h-3v9.22c0 1.13-.47 2.2-1.32 3A4.63 4.63 0 0 1 12 14.48c-1.2 0-2.34-.45-3.18-1.24a4.14 4.14 0 0 1-1.32-3.01V1h-3v9.22a6.9 6.9 0 0 0 2.2 5.01 7.73 7.73 0 0 0 5.3 2.08Zm9.75 2.14H2.25v2.83h19.5v-2.83Z"
                     fill="#32324D"
                   />
                 </svg>
@@ -989,7 +1015,7 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
             <button
               aria-disabled="false"
               aria-labelledby="3"
-              class="c21 c22 c23 c26"
+              class="c19 c20 c21 c22 c23 c26"
               id="more"
               tabindex="0"
               type="button"
@@ -1003,13 +1029,13 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
                 aria-hidden="true"
                 fill="none"
                 focusable="false"
-                height="1em"
+                height="1rem"
                 viewBox="0 0 24 24"
-                width="1em"
+                width="1rem"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M3.5 14.6a2.6 2.6 0 100-5.2 2.6 2.6 0 000 5.2zm8.5 0a2.6 2.6 0 100-5.2 2.6 2.6 0 000 5.2zm8.5 0a2.6 2.6 0 100-5.2 2.6 2.6 0 000 5.2z"
+                  d="M3.5 14.6a2.6 2.6 0 1 0 0-5.2 2.6 2.6 0 0 0 0 5.2Zm8.5 0a2.6 2.6 0 1 0 0-5.2 2.6 2.6 0 0 0 0 5.2Zm8.5 0a2.6 2.6 0 1 0 0-5.2 2.6 2.6 0 0 0 0 5.2Z"
                   fill="#32324D"
                 />
               </svg>
@@ -1018,12 +1044,12 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
         </div>
         <button
           aria-disabled="false"
-          class="c21 c27"
+          class="c27 c28 c21 c29"
           id="preview"
           type="button"
         >
           <span
-            class="c5 c6"
+            class="c2 c30"
           >
             Preview mode
           </span>
@@ -1031,10 +1057,10 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
       </div>
     </div>
     <div
-      class="c28"
+      class="c31"
     >
       <div
-        class="c29"
+        class="c32"
       >
         <textarea
           style="display: none;"
@@ -1133,30 +1159,30 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
       </div>
     </div>
     <div
-      class="c0 c30"
+      class="c33"
     >
       <div
-        class="c0 c31"
+        class="c34"
       >
         <button
-          class="c21 c32"
+          class="c35 c7 c21 c36"
           id="expand"
           type="button"
         >
           <span
-            class="c5 c33"
+            class="c2 c37"
           >
             Expand
           </span>
           <svg
             fill="none"
-            height="1em"
+            height="1rem"
             viewBox="0 0 24 24"
-            width="1em"
+            width="1rem"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              d="M15.5 3.5h5v5H23V1h-7.5v2.5zm5 17h-5V23H23v-7.5h-2.5v5zm-17-17h5V1H1v7.5h2.5v-5zM1 23.3h7.5v-2.5h-5v-5H1v7.5z"
+              d="M15.5 3.5h5v5H23V1h-7.5v2.5Zm5 17h-5V23H23v-7.5h-2.5v5Zm-17-17h5V1H1v7.5h2.5v-5ZM1 23.3h7.5v-2.5h-5v-5H1v7.5Z"
               fill="#32324D"
             />
           </svg>

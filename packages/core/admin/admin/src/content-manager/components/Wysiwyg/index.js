@@ -2,9 +2,7 @@ import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
+import { Typography, Box, Flex } from '@strapi/design-system';
 import { prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
 import Editor from './Editor';
 import WysiwygNav from './WysiwygNav';
@@ -127,14 +125,14 @@ const Wysiwyg = ({
 
   return (
     <>
-      <Stack spacing={1}>
-        <Stack horizontal spacing={1}>
+      <Flex direction="column" alignItems="stretch" gap={1}>
+        <Flex gap={1}>
           <Typography variant="pi" fontWeight="bold" textColor="neutral800">
             {label}
             {required && <TypographyAsterisk textColor="danger600">*</TypographyAsterisk>}
           </Typography>
           {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
-        </Stack>
+        </Flex>
 
         <EditorLayout
           isExpandMode={isExpandMode}
@@ -168,7 +166,7 @@ const Wysiwyg = ({
           {!isExpandMode && <WysiwygFooter onToggleExpand={handleToggleExpand} />}
         </EditorLayout>
         <Hint hint={hint} name={name} error={error} />
-      </Stack>
+      </Flex>
 
       {error && (
         <Box paddingTop={1}>

@@ -1,12 +1,8 @@
 import React, { Children, cloneElement, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Button } from '@strapi/design-system/Button';
-import { Typography } from '@strapi/design-system/Typography';
-import { Table as TableCompo } from '@strapi/design-system/Table';
+import { Box, Flex, Button, Typography, Table as TableCompo } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import Trash from '@strapi/icons/Trash';
+import { Trash } from '@strapi/icons';
 import styled from 'styled-components';
 import useQueryParams from '../../hooks/useQueryParams';
 import useTracking from '../../hooks/useTracking';

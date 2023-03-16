@@ -49,11 +49,6 @@ describe('<UploadProgress />', () => {
     } = renderCompo();
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c10 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
       .c0 {
         background: #eaeaef;
       }
@@ -62,7 +57,7 @@ describe('<UploadProgress />', () => {
         width: 100%;
       }
 
-      .c6 {
+      .c5 {
         background: #666687;
         border-radius: 4px;
         position: relative;
@@ -96,27 +91,30 @@ describe('<UploadProgress />', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+        gap: 8px;
       }
 
-      .c5 > * {
-        margin-top: 0;
-        margin-bottom: 0;
+      .c8 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        gap: 8px;
       }
 
-      .c5 > * + * {
-        margin-top: 8px;
+      .c9 {
+        font-size: 0.75rem;
+        line-height: 1.33;
       }
 
-      .c9 > * {
-        margin-left: 0;
-        margin-right: 0;
-      }
-
-      .c9 > * + * {
-        margin-left: 8px;
-      }
-
-      .c7:before {
+      .c6:before {
         background-color: #ffffff;
         border-radius: 4px;
         bottom: 0;
@@ -132,7 +130,7 @@ describe('<UploadProgress />', () => {
         height: 100%;
       }
 
-      .c8 {
+      .c7 {
         border: none;
         background: none;
         width: -webkit-min-content;
@@ -141,17 +139,17 @@ describe('<UploadProgress />', () => {
         color: #666687;
       }
 
-      .c8:hover,
-      .c8:focus {
+      .c7:hover,
+      .c7:focus {
         color: #4a4a6a;
       }
 
-      .c8 svg {
+      .c7 svg {
         height: 10px;
         width: 10px;
       }
 
-      .c8 svg path {
+      .c7 svg path {
         fill: currentColor;
       }
 
@@ -159,39 +157,39 @@ describe('<UploadProgress />', () => {
         class="c0 c1 c2"
       >
         <div
-          class="c3 c4 c5"
+          class="c3 c4"
         >
           <div
             aria-label="0/100%"
             aria-valuemax="100"
             aria-valuemin="0"
             aria-valuenow="0"
-            class="c6 c7"
+            class="c5 c6"
             role="progressbar"
             value="0"
           />
           <button
-            class="c8"
+            class="c7"
             type="button"
           >
             <div
-              class="c1 c9"
+              class="c8"
             >
               <span
-                class="c10"
+                class="c9"
               >
                 Cancel
               </span>
               <svg
                 aria-hidden="true"
                 fill="none"
-                height="1em"
+                height="1rem"
                 viewBox="0 0 24 24"
-                width="1em"
+                width="1rem"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                  d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
                   fill="#212134"
                 />
               </svg>
@@ -242,13 +240,13 @@ describe('<UploadProgress />', () => {
         <svg
           aria-label="Something went wrong"
           fill="none"
-          height="1em"
+          height="1rem"
           viewBox="0 0 24 24"
-          width="1em"
+          width="1rem"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+            d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
             fill="#212134"
           />
         </svg>

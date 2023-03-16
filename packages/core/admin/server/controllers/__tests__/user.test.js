@@ -174,13 +174,29 @@ describe('User Controller', () => {
         pagination,
       }));
 
+      const state = {
+        userAbility: {
+          can: jest.fn(),
+          cannot: jest.fn(() => false),
+        },
+      };
+
       const sanitizeUser = jest.fn((user) => user);
       const ctx = createContext({});
+      ctx.state = state;
+
+      const createPermissionsManager = jest.fn(() => ({
+        ability: state.userAbility,
+        sanitizeQuery: (query) => query,
+      }));
 
       global.strapi = {
         admin: {
           services: {
             user: { findPage, sanitizeUser },
+            permission: {
+              createPermissionsManager,
+            },
           },
         },
       };
@@ -199,13 +215,30 @@ describe('User Controller', () => {
         pagination,
       }));
 
+      const state = {
+        userAbility: {
+          can: jest.fn(),
+          cannot: jest.fn(() => false),
+        },
+      };
+
       const sanitizeUser = jest.fn((user) => user);
       const ctx = createContext({ query: { _q: 'foo' } });
+
+      ctx.state = state;
+
+      const createPermissionsManager = jest.fn(() => ({
+        ability: state.userAbility,
+        sanitizeQuery: (query) => query,
+      }));
 
       global.strapi = {
         admin: {
           services: {
             user: { findPage, sanitizeUser },
+            permission: {
+              createPermissionsManager,
+            },
           },
         },
       };

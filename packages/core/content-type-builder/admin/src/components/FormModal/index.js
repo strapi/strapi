@@ -13,13 +13,20 @@ import has from 'lodash/has';
 import set from 'lodash/set';
 import toLower from 'lodash/toLower';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
-import { Box } from '@strapi/design-system/Box';
-import { Button } from '@strapi/design-system/Button';
-import { Divider } from '@strapi/design-system/Divider';
-import { ModalLayout, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
-import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
+import {
+  Box,
+  Button,
+  Divider,
+  ModalLayout,
+  ModalBody,
+  ModalFooter,
+  Tabs,
+  Tab,
+  TabGroup,
+  TabPanels,
+  TabPanel,
+  Flex,
+} from '@strapi/design-system';
 import { isEqual } from 'lodash';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
@@ -1053,7 +1060,7 @@ const FormModal = () => {
               <Box paddingTop={6}>
                 <TabPanels>
                   <TabPanel>
-                    <Stack spacing={6}>
+                    <Flex direction="column" alignItems="stretch" gap={6}>
                       <TabForm
                         form={baseForm}
                         formErrors={formErrors}
@@ -1061,10 +1068,10 @@ const FormModal = () => {
                         modifiedData={modifiedData}
                         onChange={handleChange}
                       />
-                    </Stack>
+                    </Flex>
                   </TabPanel>
                   <TabPanel>
-                    <Stack spacing={6}>
+                    <Flex direction="column" alignItems="stretch" gap={6}>
                       <TabForm
                         form={advancedForm}
                         formErrors={formErrors}
@@ -1072,7 +1079,7 @@ const FormModal = () => {
                         modifiedData={modifiedData}
                         onChange={handleChange}
                       />
-                    </Stack>
+                    </Flex>
                   </TabPanel>
                 </TabPanels>
               </Box>

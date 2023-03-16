@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { Box, Divider, Flex, Stack, Typography } from '@strapi/design-system';
+import { Box, Divider, Flex, Typography } from '@strapi/design-system';
 
 import { getTrad } from '../../../utils';
 import getUnits from './utils/getUnits';
@@ -12,7 +12,7 @@ const Title = () => {
   const { formatMessage } = useIntl();
 
   return (
-    <Stack spacing={2}>
+    <Flex direction="column" alignItems="stretch" gap={2}>
       <Typography variant="sigma" textColor="neutral600" id="additional-information">
         {formatMessage({
           id: getTrad('containers.Edit.information'),
@@ -23,7 +23,7 @@ const Title = () => {
       <Box>
         <Divider />
       </Box>
-    </Stack>
+    </Flex>
   );
 };
 
@@ -70,8 +70,8 @@ const Body = () => {
   const created = getFieldInfo('createdAt', 'createdBy');
 
   return (
-    <Stack spacing={4}>
-      <Stack spacing={2} as="dl">
+    <Flex direction="column" alignItems="stretch" gap={4}>
+      <Flex direction="column" alignItems="stretch" gap={2} as="dl">
         <KeyValuePair
           label={formatMessage({
             id: getTrad('containers.Edit.information.created'),
@@ -87,9 +87,9 @@ const Body = () => {
           })}
           value={created.by}
         />
-      </Stack>
+      </Flex>
 
-      <Stack spacing={2} as="dl">
+      <Flex direction="column" alignItems="stretch" gap={2} as="dl">
         <KeyValuePair
           label={formatMessage({
             id: getTrad('containers.Edit.information.lastUpdate'),
@@ -105,13 +105,17 @@ const Body = () => {
           })}
           value={updated.by}
         />
-      </Stack>
-    </Stack>
+      </Flex>
+    </Flex>
   );
 };
 
 const Root = ({ children }) => {
-  return <Stack spacing={4}>{children}</Stack>;
+  return (
+    <Flex direction="column" alignItems="stretch" gap={4}>
+      {children}
+    </Flex>
+  );
 };
 
 Root.propTypes = {

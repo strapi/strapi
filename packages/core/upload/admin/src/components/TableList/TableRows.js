@@ -3,12 +3,8 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
-import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import { Flex } from '@strapi/design-system/Flex';
-import { IconButton } from '@strapi/design-system/IconButton';
-import { Tbody, Td, Tr } from '@strapi/design-system/Table';
-import Pencil from '@strapi/icons/Pencil';
-import Eye from '@strapi/icons/Eye';
+import { BaseCheckbox, Flex, IconButton, Tbody, Td, Tr } from '@strapi/design-system';
+import { Pencil, Eye } from '@strapi/icons';
 
 import { CellContent } from './CellContent';
 import { AssetDefinition, FolderDefinition, tableHeaders as cells } from '../../constants';
@@ -78,7 +74,7 @@ export const TableRows = ({
               <Flex justifyContent="flex-end">
                 {contentType === 'folder' && (
                   <IconButton
-                    forwardedAs={folderURL ? Link : undefined}
+                    as={folderURL ? Link : undefined}
                     label={formatMessage({
                       id: getTrad('list.folders.link-label'),
                       defaultMessage: 'Access folder',

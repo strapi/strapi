@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { Button } from '@strapi/design-system/Button';
+import { Button } from '@strapi/design-system';
 import { useQueryParams, useTracking } from '@strapi/helper-plugin';
-import FilterIcon from '@strapi/icons/Filter';
+import { Filter } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import FilterList from '../../../../components/FilterList';
 import FilterPopover from '../../../../components/FilterPopover';
@@ -34,7 +34,7 @@ export const Filters = () => {
       <Button
         variant="tertiary"
         ref={buttonRef}
-        startIcon={<FilterIcon />}
+        startIcon={<Filter />}
         onClick={toggleFilter}
         size="S"
       >

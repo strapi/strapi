@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
+import { Flex, Typography } from '@strapi/design-system';
 
 import { AssetDefinition, FolderDefinition } from '../../../../constants';
 import getTrad from '../../../../utils/getTrad';
@@ -13,7 +12,7 @@ export const BulkActions = ({ selected, onSuccess, currentFolder }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Stack horizontal spacing={2} paddingBottom={5}>
+    <Flex gap={2} paddingBottom={5}>
       <Typography variant="epsilon" textColor="neutral600">
         {formatMessage(
           {
@@ -30,7 +29,7 @@ export const BulkActions = ({ selected, onSuccess, currentFolder }) => {
 
       <BulkDeleteButton selected={selected} onSuccess={onSuccess} />
       <BulkMoveButton currentFolder={currentFolder} selected={selected} onSuccess={onSuccess} />
-    </Stack>
+    </Flex>
   );
 };
 

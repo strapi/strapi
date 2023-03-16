@@ -1,18 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
-.c7 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
 .c0 {
   padding: 4px;
 }
@@ -29,18 +17,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   height: 2rem;
 }
 
-.c6 {
-  padding-left: 8px;
-}
-
-.c4 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c3 {
+.c2 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -52,20 +29,40 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
+  gap: 8px;
 }
 
-.c2 svg {
+.c4 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c6 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c3 > svg {
   height: 0.5rem;
   width: 0.5rem;
 }
 
-.c2 svg path {
+.c3 > svg path {
   fill: #4945ff;
 }
 
 .c5 {
-  border-right: 1px solid #d9d8ff;
   color: inherit;
+  border-right: 1px solid #d9d8ff;
   padding-right: 8px;
 }
 
@@ -75,37 +72,25 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   >
     <button
       aria-disabled="false"
-      class="c1 c2"
+      class="c1 c2 c3"
     >
-      <div
-        class="c3"
+      <span
+        class="c4 c5"
       >
-        <span
-          class="c4 c5"
-        >
-          Boolean is true
-        </span>
-        <div
-          class="c6"
-        >
-          <div
-            class="c3"
-          >
-            <svg
-              fill="none"
-              height="1em"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#212134"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
+        Boolean is true
+      </span>
+      <svg
+        fill="none"
+        height="1rem"
+        viewBox="0 0 24 24"
+        width="1rem"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+          fill="#212134"
+        />
+      </svg>
     </button>
   </div>
   <div
@@ -113,37 +98,25 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   >
     <button
       aria-disabled="false"
-      class="c1 c2"
+      class="c1 c2 c3"
     >
-      <div
-        class="c3"
+      <span
+        class="c4 c5"
       >
-        <span
-          class="c4 c5"
-        >
-          Date is not Wednesday, September 1, 2021
-        </span>
-        <div
-          class="c6"
-        >
-          <div
-            class="c3"
-          >
-            <svg
-              fill="none"
-              height="1em"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#212134"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
+        Date is not Wednesday, September 1, 2021
+      </span>
+      <svg
+        fill="none"
+        height="1rem"
+        viewBox="0 0 24 24"
+        width="1rem"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+          fill="#212134"
+        />
+      </svg>
     </button>
   </div>
   <div
@@ -151,37 +124,25 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   >
     <button
       aria-disabled="false"
-      class="c1 c2"
+      class="c1 c2 c3"
     >
-      <div
-        class="c3"
+      <span
+        class="c4 c5"
       >
-        <span
-          class="c4 c5"
-        >
-          city is null 
-        </span>
-        <div
-          class="c6"
-        >
-          <div
-            class="c3"
-          >
-            <svg
-              fill="none"
-              height="1em"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#212134"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
+        city is null 
+      </span>
+      <svg
+        fill="none"
+        height="1rem"
+        viewBox="0 0 24 24"
+        width="1rem"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+          fill="#212134"
+        />
+      </svg>
     </button>
   </div>
   <div
@@ -189,37 +150,25 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   >
     <button
       aria-disabled="false"
-      class="c1 c2"
+      class="c1 c2 c3"
     >
-      <div
-        class="c3"
+      <span
+        class="c4 c5"
       >
-        <span
-          class="c4 c5"
-        >
-          country is not null 
-        </span>
-        <div
-          class="c6"
-        >
-          <div
-            class="c3"
-          >
-            <svg
-              fill="none"
-              height="1em"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#212134"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
+        country is not null 
+      </span>
+      <svg
+        fill="none"
+        height="1rem"
+        viewBox="0 0 24 24"
+        width="1rem"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+          fill="#212134"
+        />
+      </svg>
     </button>
   </div>
   <div
@@ -227,37 +176,25 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   >
     <button
       aria-disabled="false"
-      class="c1 c2"
+      class="c1 c2 c3"
     >
-      <div
-        class="c3"
+      <span
+        class="c4 c5"
       >
-        <span
-          class="c4 c5"
-        >
-          time contains (case sensitive) 12:45 AM
-        </span>
-        <div
-          class="c6"
-        >
-          <div
-            class="c3"
-          >
-            <svg
-              fill="none"
-              height="1em"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#212134"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
+        time contains (case sensitive) 12:45 AM
+      </span>
+      <svg
+        fill="none"
+        height="1rem"
+        viewBox="0 0 24 24"
+        width="1rem"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+          fill="#212134"
+        />
+      </svg>
     </button>
   </div>
   <div
@@ -265,37 +202,25 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   >
     <button
       aria-disabled="false"
-      class="c1 c2"
+      class="c1 c2 c3"
     >
-      <div
-        class="c3"
+      <span
+        class="c4 c5"
       >
-        <span
-          class="c4 c5"
-        >
-          many to one does not contain (case sensitive) test
-        </span>
-        <div
-          class="c6"
-        >
-          <div
-            class="c3"
-          >
-            <svg
-              fill="none"
-              height="1em"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#212134"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
+        many to one does not contain (case sensitive) test
+      </span>
+      <svg
+        fill="none"
+        height="1rem"
+        viewBox="0 0 24 24"
+        width="1rem"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+          fill="#212134"
+        />
+      </svg>
     </button>
   </div>
   <div
@@ -303,37 +228,25 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   >
     <button
       aria-disabled="false"
-      class="c1 c2"
+      class="c1 c2 c3"
     >
-      <div
-        class="c3"
+      <span
+        class="c4 c5"
       >
-        <span
-          class="c4 c5"
-        >
-          many to one is test
-        </span>
-        <div
-          class="c6"
-        >
-          <div
-            class="c3"
-          >
-            <svg
-              fill="none"
-              height="1em"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#212134"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
+        many to one is test
+      </span>
+      <svg
+        fill="none"
+        height="1rem"
+        viewBox="0 0 24 24"
+        width="1rem"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+          fill="#212134"
+        />
+      </svg>
     </button>
   </div>
   <div
@@ -341,37 +254,25 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   >
     <button
       aria-disabled="false"
-      class="c1 c2"
+      class="c1 c2 c3"
     >
-      <div
-        class="c3"
+      <span
+        class="c4 c5"
       >
-        <span
-          class="c4 c5"
-        >
-          city starts with paris
-        </span>
-        <div
-          class="c6"
-        >
-          <div
-            class="c3"
-          >
-            <svg
-              fill="none"
-              height="1em"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#212134"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
+        city starts with paris
+      </span>
+      <svg
+        fill="none"
+        height="1rem"
+        viewBox="0 0 24 24"
+        width="1rem"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+          fill="#212134"
+        />
+      </svg>
     </button>
   </div>
   <div
@@ -379,37 +280,25 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   >
     <button
       aria-disabled="false"
-      class="c1 c2"
+      class="c1 c2 c3"
     >
-      <div
-        class="c3"
+      <span
+        class="c4 c5"
       >
-        <span
-          class="c4 c5"
-        >
-          country ends with france
-        </span>
-        <div
-          class="c6"
-        >
-          <div
-            class="c3"
-          >
-            <svg
-              fill="none"
-              height="1em"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#212134"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
+        country ends with france
+      </span>
+      <svg
+        fill="none"
+        height="1rem"
+        viewBox="0 0 24 24"
+        width="1rem"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+          fill="#212134"
+        />
+      </svg>
     </button>
   </div>
   <div
@@ -417,37 +306,25 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   >
     <button
       aria-disabled="false"
-      class="c1 c2"
+      class="c1 c2 c3"
     >
-      <div
-        class="c3"
+      <span
+        class="c4 c5"
       >
-        <span
-          class="c4 c5"
-        >
-          number is greater than 2
-        </span>
-        <div
-          class="c6"
-        >
-          <div
-            class="c3"
-          >
-            <svg
-              fill="none"
-              height="1em"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#212134"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
+        number is greater than 2
+      </span>
+      <svg
+        fill="none"
+        height="1rem"
+        viewBox="0 0 24 24"
+        width="1rem"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+          fill="#212134"
+        />
+      </svg>
     </button>
   </div>
   <div
@@ -455,37 +332,25 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   >
     <button
       aria-disabled="false"
-      class="c1 c2"
+      class="c1 c2 c3"
     >
-      <div
-        class="c3"
+      <span
+        class="c4 c5"
       >
-        <span
-          class="c4 c5"
-        >
-          Float is greater than or equal to 1
-        </span>
-        <div
-          class="c6"
-        >
-          <div
-            class="c3"
-          >
-            <svg
-              fill="none"
-              height="1em"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#212134"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
+        Float is greater than or equal to 1
+      </span>
+      <svg
+        fill="none"
+        height="1rem"
+        viewBox="0 0 24 24"
+        width="1rem"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+          fill="#212134"
+        />
+      </svg>
     </button>
   </div>
   <div
@@ -493,37 +358,25 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   >
     <button
       aria-disabled="false"
-      class="c1 c2"
+      class="c1 c2 c3"
     >
-      <div
-        class="c3"
+      <span
+        class="c4 c5"
       >
-        <span
-          class="c4 c5"
-        >
-          Float is lower than or equal to 3
-        </span>
-        <div
-          class="c6"
-        >
-          <div
-            class="c3"
-          >
-            <svg
-              fill="none"
-              height="1em"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#212134"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
+        Float is lower than or equal to 3
+      </span>
+      <svg
+        fill="none"
+        height="1rem"
+        viewBox="0 0 24 24"
+        width="1rem"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+          fill="#212134"
+        />
+      </svg>
     </button>
   </div>
   <div
@@ -531,41 +384,29 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   >
     <button
       aria-disabled="false"
-      class="c1 c2"
+      class="c1 c2 c3"
     >
-      <div
-        class="c3"
+      <span
+        class="c4 c5"
       >
-        <span
-          class="c4 c5"
-        >
-          Float is lower than 4
-        </span>
-        <div
-          class="c6"
-        >
-          <div
-            class="c3"
-          >
-            <svg
-              fill="none"
-              height="1em"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#212134"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
+        Float is lower than 4
+      </span>
+      <svg
+        fill="none"
+        height="1rem"
+        viewBox="0 0 24 24"
+        width="1rem"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+          fill="#212134"
+        />
+      </svg>
     </button>
   </div>
   <div
-    class="c7"
+    class="c6"
   >
     <p
       aria-live="polite"

@@ -88,6 +88,27 @@ const sidebars = {
         },
         {
           type: 'category',
+          label: 'Database',
+          link: {
+            type: 'doc',
+            id: 'core/database/intro',
+          },
+          items: [
+            {
+              type: 'category',
+              label: 'Relations',
+              items: [
+                {
+                  type: 'doc',
+                  label: 'Reordering',
+                  id: 'core/database/relations/reordering',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'category',
           label: 'Helper Plugin',
           items: [
             {
@@ -164,6 +185,15 @@ const sidebars = {
       link: {
         type: 'doc',
         id: 'custom-fields',
+      },
+      items: [],
+    },
+    {
+      type: 'category',
+      label: 'How to install packages in a module',
+      link: {
+        type: 'doc',
+        id: 'how-to-install-packages',
       },
       items: [],
     },

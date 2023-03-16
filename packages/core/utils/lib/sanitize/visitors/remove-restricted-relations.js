@@ -7,6 +7,10 @@ const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = require('../../content-ty
 module.exports =
   (auth) =>
   async ({ data, key, attribute, schema }, { remove, set }) => {
+    if (!attribute) {
+      return;
+    }
+
     const isRelation = attribute.type === 'relation';
 
     if (!isRelation) {

@@ -15,17 +15,18 @@ import {
   getYupInnerErrors,
   Link,
 } from '@strapi/helper-plugin';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { Main } from '@strapi/design-system/Main';
-import { Flex } from '@strapi/design-system/Flex';
-import { Button } from '@strapi/design-system/Button';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Checkbox } from '@strapi/design-system/Checkbox';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Typography } from '@strapi/design-system/Typography';
-import EyeStriked from '@strapi/icons/EyeStriked';
-import Eye from '@strapi/icons/Eye';
+import {
+  Box,
+  Main,
+  Flex,
+  Button,
+  TextInput,
+  Checkbox,
+  Grid,
+  GridItem,
+  Typography,
+} from '@strapi/design-system';
+import { EyeStriked, Eye } from '@strapi/icons';
 import UnauthenticatedLayout, {
   Column,
   LayoutContent,
@@ -157,7 +158,7 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
                       </Typography>
                     </CenteredBox>
                   </Column>
-                  <Stack spacing={6}>
+                  <Flex direction="column" alignItems="stretch" gap={6}>
                     <Grid gap={4}>
                       <GridItem col={6}>
                         <TextInput
@@ -312,7 +313,7 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
                         defaultMessage: "Let's start",
                       })}
                     </Button>
-                  </Stack>
+                  </Flex>
                 </Main>
               </Form>
             );

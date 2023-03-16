@@ -1,12 +1,14 @@
 import React from 'react';
-import { Box } from '@strapi/design-system/Box';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
-import { Textarea } from '@strapi/design-system/Textarea';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Button } from '@strapi/design-system/Button';
+import {
+  Box,
+  Grid,
+  GridItem,
+  Flex,
+  Typography,
+  Textarea,
+  TextInput,
+  Button,
+} from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -15,7 +17,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
 
   return (
     <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-      <Stack spacing={4}>
+      <Flex direction="column" alignItems="stretch" gap={4}>
         <Flex justifyContent="space-between">
           <Box>
             <Box>
@@ -81,7 +83,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
             </Textarea>
           </GridItem>
         </Grid>
-      </Stack>
+      </Flex>
     </Box>
   );
 };

@@ -3,19 +3,19 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';
-import { Button } from '@strapi/design-system/Button';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Flex } from '@strapi/design-system/Flex';
-import { Loader } from '@strapi/design-system/Loader';
 import {
+  Button,
+  Grid,
+  GridItem,
+  Flex,
+  Loader,
   ModalLayout,
   ModalHeader,
   ModalBody,
   ModalFooter,
-} from '@strapi/design-system/ModalLayout';
-import { FieldLabel } from '@strapi/design-system/Field';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
+  FieldLabel,
+  Typography,
+} from '@strapi/design-system';
 import { Form, normalizeAPIError } from '@strapi/helper-plugin';
 
 import { useBulkMove } from '../../hooks/useBulkMove';
@@ -97,7 +97,7 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
             <ModalBody>
               <Grid gap={4}>
                 <GridItem xs={12} col={12}>
-                  <Stack spacing={1}>
+                  <Flex direction="column" alignItems="stretch" gap={1}>
                     <FieldLabel htmlFor="folder-destination">
                       {formatMessage({
                         id: getTrad('form.input.label.folder-location'),
@@ -128,7 +128,7 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
                         {errors.destination}
                       </Typography>
                     )}
-                  </Stack>
+                  </Flex>
                 </GridItem>
               </Grid>
             </ModalBody>

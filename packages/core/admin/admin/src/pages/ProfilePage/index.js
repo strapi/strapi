@@ -17,20 +17,23 @@ import upperFirst from 'lodash/upperFirst';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import pick from 'lodash/pick';
 import { Helmet } from 'react-helmet';
-import { Main } from '@strapi/design-system/Main';
-import { Typography } from '@strapi/design-system/Typography';
-import { Box } from '@strapi/design-system/Box';
-import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { Button } from '@strapi/design-system/Button';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Stack } from '@strapi/design-system/Stack';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import { Select, Option } from '@strapi/design-system/Select';
-import { FieldAction } from '@strapi/design-system/Field';
-import { TextInput } from '@strapi/design-system/TextInput';
-import Eye from '@strapi/icons/Eye';
-import EyeStriked from '@strapi/icons/EyeStriked';
-import Check from '@strapi/icons/Check';
+import {
+  Main,
+  Typography,
+  Box,
+  ContentLayout,
+  HeaderLayout,
+  Button,
+  Grid,
+  GridItem,
+  Flex,
+  useNotifyAT,
+  Select,
+  Option,
+  FieldAction,
+  TextInput,
+} from '@strapi/design-system';
+import { Eye, EyeStriked, Check } from '@strapi/icons';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
 import { useThemeToggle } from '../../hooks';
 import { fetchUser, putUser } from './utils/api';
@@ -205,7 +208,7 @@ const ProfilePage = () => {
               />
               <Box paddingBottom={10}>
                 <ContentLayout>
-                  <Stack spacing={6}>
+                  <Flex direction="column" alignItems="stretch" gap={6}>
                     <Box
                       background="neutral0"
                       hasRadius
@@ -215,7 +218,7 @@ const ProfilePage = () => {
                       paddingLeft={7}
                       paddingRight={7}
                     >
-                      <Stack spacing={4}>
+                      <Flex direction="column" alignItems="stretch" gap={4}>
                         <Typography variant="delta" as="h2">
                           {formatMessage({
                             id: 'global.profile',
@@ -275,7 +278,7 @@ const ProfilePage = () => {
                             />
                           </GridItem>
                         </Grid>
-                      </Stack>
+                      </Flex>
                     </Box>
                     <Box
                       background="neutral0"
@@ -286,7 +289,7 @@ const ProfilePage = () => {
                       paddingLeft={7}
                       paddingRight={7}
                     >
-                      <Stack spacing={4}>
+                      <Flex direction="column" alignItems="stretch" gap={4}>
                         <Typography variant="delta" as="h2">
                           {formatMessage({
                             id: 'global.change-password',
@@ -424,7 +427,7 @@ const ProfilePage = () => {
                             />
                           </GridItem>
                         </Grid>
-                      </Stack>
+                      </Flex>
                     </Box>
                     <Box
                       background="neutral0"
@@ -435,8 +438,8 @@ const ProfilePage = () => {
                       paddingLeft={7}
                       paddingRight={7}
                     >
-                      <Stack spacing={4}>
-                        <Stack spacing={1}>
+                      <Flex direction="column" alignItems="stretch" gap={4}>
+                        <Flex direction="column" alignItems="stretch" gap={1}>
                           <Typography variant="delta" as="h2">
                             {formatMessage({
                               id: 'Settings.profile.form.section.experience.title',
@@ -466,7 +469,7 @@ const ProfilePage = () => {
                               }
                             )}
                           </Typography>
-                        </Stack>
+                        </Flex>
                         <Grid gap={5}>
                           <GridItem s={12} col={6}>
                             <Select
@@ -550,9 +553,9 @@ const ProfilePage = () => {
                             </Select>
                           </GridItem>
                         </Grid>
-                      </Stack>
+                      </Flex>
                     </Box>
-                  </Stack>
+                  </Flex>
                 </ContentLayout>
               </Box>
             </Form>

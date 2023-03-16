@@ -6,14 +6,14 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
 import { NotificationsProvider, useNotification, useFetchClient } from '@strapi/helper-plugin';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import { useNotifyAT } from '@strapi/design-system';
 
 import { useFolders } from '../useFolders';
 
 const notifyStatusMock = jest.fn();
 
-jest.mock('@strapi/design-system/LiveRegions', () => ({
-  ...jest.requireActual('@strapi/design-system/LiveRegions'),
+jest.mock('@strapi/design-system', () => ({
+  ...jest.requireActual('@strapi/design-system'),
   useNotifyAT: () => ({
     notifyStatus: notifyStatusMock,
   }),

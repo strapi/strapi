@@ -7,15 +7,20 @@ import {
   useNotification,
   useFocusWhenNavigate,
   NoPermissions,
+  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
-import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { Button } from '@strapi/design-system/Button';
-import { Main } from '@strapi/design-system/Main';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import Envelop from '@strapi/icons/Envelop';
+import {
+  ActionLayout,
+  ContentLayout,
+  HeaderLayout,
+  Main,
+  useNotifyAT,
+} from '@strapi/design-system';
 import { useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
+import CreateAction from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/CreateAction';
+import useLicenseLimitNotification from 'ee_else_ce/hooks/useLicenseLimitNotification';
 import adminPermissions from '../../../../../permissions';
 import TableRows from './DynamicTable/TableRows';
 import Filters from '../../../components/Filters';
@@ -26,6 +31,7 @@ import displayedFilters from './utils/displayedFilters';
 import tableHeaders from './utils/tableHeaders';
 
 const ListPage = () => {
+  const { formatAPIError } = useAPIErrorHandler();
   const [isModalOpened, setIsModalOpen] = useState(false);
   const {
     allowedActions: { canCreate, canDelete, canRead },
@@ -35,6 +41,7 @@ const ListPage = () => {
   const { formatMessage } = useIntl();
   const { search } = useLocation();
   useFocusWhenNavigate();
+  useLicenseLimitNotification();
   const { notifyStatus } = useNotifyAT();
   const queryName = ['users', search];
 
@@ -65,13 +72,15 @@ const ListPage = () => {
 
   const { status, data, isFetching } = useQuery(queryName, () => fetchData(search, notifyLoad), {
     enabled: canRead,
-    keepPreviousData: true,
     retry: false,
-    staleTime: 1000 * 20,
-    onError() {
+    onError(error) {
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        message: {
+          id: 'notification.error',
+          message: formatAPIError(error),
+          defaultMessage: 'An error occured',
+        },
       });
     },
   });
@@ -82,17 +91,20 @@ const ListPage = () => {
 
   const deleteAllMutation = useMutation((ids) => deleteData(ids), {
     async onSuccess() {
-      await queryClient.invalidateQueries(queryName);
+      await queryClient.refetchQueries(queryName);
+
+      // Toggle enabled/ disabled state on the invite button
+      await queryClient.refetchQueries(['ee', 'license-limit-info']);
     },
-    onError(err) {
-      if (err?.response?.data?.data) {
-        toggleNotification({ type: 'warning', message: err.response.data.data });
-      } else {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occured' },
-        });
-      }
+    onError(error) {
+      toggleNotification({
+        type: 'warning',
+        message: {
+          id: 'notification.error',
+          message: formatAPIError(error),
+          defaultMessage: 'An error occured',
+        },
+      });
     },
   });
 
@@ -100,25 +112,11 @@ const ListPage = () => {
   const isLoading =
     (status !== 'success' && status !== 'error') || (status === 'success' && isFetching);
 
-  const createAction = canCreate ? (
-    <Button
-      data-testid="create-user-button"
-      onClick={handleToggle}
-      startIcon={<Envelop />}
-      size="S"
-    >
-      {formatMessage({
-        id: 'Settings.permissions.users.create',
-        defaultMessage: 'Invite new user',
-      })}
-    </Button>
-  ) : undefined;
-
   return (
     <Main aria-busy={isLoading}>
       <SettingsPageTitle name="Users" />
       <HeaderLayout
-        primaryAction={createAction}
+        primaryAction={canCreate && <CreateAction onClick={handleToggle} />}
         title={title}
         subtitle={formatMessage({
           id: 'Settings.permissions.users.listview.header.subtitle',

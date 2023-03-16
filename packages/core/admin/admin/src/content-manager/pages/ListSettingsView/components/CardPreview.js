@@ -1,12 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import { Stack } from '@strapi/design-system/Stack';
-import Pencil from '@strapi/icons/Pencil';
-import Cross from '@strapi/icons/Cross';
-import Drag from '@strapi/icons/Drag';
+import { Flex, Typography } from '@strapi/design-system';
+import { Pencil, Cross, Drag } from '@strapi/icons';
 import ellipsisCardTitle from '../utils/ellipsisCardTitle';
 
 const ActionBox = styled(Flex)`
@@ -66,12 +62,12 @@ const CardPreview = ({ labelField, transparent, isSibling }) => {
       transparent={transparent}
       isSibling={isSibling}
     >
-      <Stack horizontal spacing={3}>
+      <Flex gap={3}>
         <DragButton alignItems="center">
           <Drag />
         </DragButton>
         <Typography fontWeight="bold">{cardEllipsisTitle}</Typography>
-      </Stack>
+      </Flex>
       <Flex paddingLeft={3}>
         <ActionBox alignItems="center">
           <Pencil />
