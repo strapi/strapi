@@ -61,7 +61,7 @@ export function InformationBoxEE() {
       <Information.Title />
 
       {activeWorkflowStage && (
-        <Field error={formattedError} name={ATTRIBUTE_NAME}>
+        <Field error={formattedError} name={ATTRIBUTE_NAME} id={ATTRIBUTE_NAME}>
           <Flex direction="column" gap={2} alignItems="stretch">
             <FieldLabel>
               {formatMessage({
@@ -83,7 +83,7 @@ export function InformationBoxEE() {
               onChange={handleStageChange}
             />
 
-            {error && <FieldError />}
+            <FieldError />
           </Flex>
         </Field>
       )}
