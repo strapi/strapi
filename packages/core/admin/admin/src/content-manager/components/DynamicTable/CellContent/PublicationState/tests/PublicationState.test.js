@@ -17,14 +17,28 @@ const setup = (props) => render(<ComponentFixture {...props} />);
 
 describe('DynamicTable | PublicationState', () => {
   test('render draft state', () => {
-    const { getByText } = setup({ isPublished: false });
+    const { container, getByText } = setup({ isPublished: false });
 
-    expect(getByText('Draft')).toBeInTheDocument();
+    const statusNode = container.children[0];
+    const statusNodeStyle = window.getComputedStyle(statusNode);
+
+    const textNode = getByText('Draft');
+
+    expect(textNode).toBeInTheDocument();
+    expect(statusNodeStyle).toHaveProperty('background-color', 'rgb(234, 245, 255)');
+    expect(window.getComputedStyle(textNode)).toHaveProperty('color', 'rgb(12, 117, 175)');
   });
 
   test('render published state', () => {
-    const { getByText } = setup({ isPublished: true });
+    const { container, getByText } = setup({ isPublished: true });
 
-    expect(getByText('Published')).toBeInTheDocument();
+    const statusNode = container.children[0];
+    const statusNodeStyle = window.getComputedStyle(statusNode);
+
+    const textNode = getByText('Published');
+
+    expect(textNode).toBeInTheDocument();
+    expect(statusNodeStyle).toHaveProperty('background-color', 'rgb(234, 251, 231)');
+    expect(window.getComputedStyle(textNode)).toHaveProperty('color', 'rgb(50, 128, 72)');
   });
 });
