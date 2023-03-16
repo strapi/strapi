@@ -6,7 +6,6 @@ import isEqual from 'react-fast-compare';
 import { bindActionCreators, compose } from 'redux';
 import { useIntl } from 'react-intl';
 import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
-import get from 'lodash/get';
 import { stringify } from 'qs';
 import axios from 'axios';
 
@@ -72,12 +71,11 @@ function ListView({
   slug,
 }) {
   const { total } = pagination;
+  const { contentType } = layout;
   const {
-    contentType: {
-      metadatas,
-      settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
-    },
-  } = layout;
+    metadatas,
+    settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
+  } = contentType;
 
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
@@ -96,8 +94,7 @@ function ListView({
   const { pathname } = useLocation();
   const { push } = useHistory();
   const { formatMessage } = useIntl();
-  const contentType = layout.contentType;
-  const hasDraftAndPublish = get(contentType, 'options.draftAndPublish', false);
+  const hasDraftAndPublish = contentType.options?.draftAndPublish ?? false;
   const fetchClient = useFetchClient();
   const { post, del } = fetchClient;
 
@@ -135,7 +132,7 @@ function ListView({
           return;
         }
 
-        const resStatus = get(err, 'response.status', null);
+        const resStatus = err?.response?.status ?? null;
 
         if (resStatus === 403) {
           await fetchPermissionsRef.current();

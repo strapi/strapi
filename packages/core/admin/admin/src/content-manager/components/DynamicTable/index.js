@@ -3,10 +3,6 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { DynamicTable as Table, useStrapiApp } from '@strapi/helper-plugin';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components';
-
-import { Status } from '@strapi/design-system/Status';
-import { Typography } from '@strapi/design-system/Typography';
 
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 import { selectDisplayedHeaders } from '../../pages/ListView/selectors';
@@ -14,10 +10,8 @@ import { getTrad } from '../../utils';
 import TableRows from './TableRows';
 import ConfirmDialogDeleteAll from './ConfirmDialogDeleteAll';
 import ConfirmDialogDelete from './ConfirmDialogDelete';
-
-const StyledStatus = styled(Status)`
-  width: min-content;
-`;
+import { PublicationState } from './CellContent/PublicationState/PublicationState';
+import { ReviewWorkflowsStage } from './CellContent/ReviewWorkflowsStage';
 
 const DynamicTable = ({
   canCreate,
@@ -32,7 +26,8 @@ const DynamicTable = ({
   rows,
 }) => {
   const { runHookWaterfall } = useStrapiApp();
-  const hasDraftAndPublish = layout.contentType.options.draftAndPublish || false;
+  const hasDraftAndPublish = layout.contentType.options?.draftAndPublish ?? false;
+  const hasReviewWorkflows = layout.contentType.options?.reviewWorkflows ?? false;
   const { formatMessage } = useIntl();
   const displayedHeaders = useSelector(selectDisplayedHeaders);
 
@@ -43,43 +38,23 @@ const DynamicTable = ({
     });
 
     const formattedHeaders = headers.displayedHeaders.map((header) => {
-      const { metadatas } = header;
-
-      if (header.fieldSchema.type === 'relation') {
-        const sortFieldValue = `${header.name}.${header.metadatas.mainField.name}`;
-
-        return {
-          ...header,
-          metadatas: {
-            ...metadatas,
-            label: formatMessage({
-              id: getTrad(`containers.ListPage.table-headers.${header.name}`),
-              defaultMessage: metadatas.label,
-            }),
-          },
-          name: sortFieldValue,
-        };
-      }
+      const { fieldSchema, metadatas, name } = header;
 
       return {
         ...header,
         metadatas: {
           ...metadatas,
           label: formatMessage({
-            id: getTrad(`containers.ListPage.table-headers.${header.name}`),
+            id: getTrad(`containers.ListPage.table-headers.${name}`),
             defaultMessage: metadatas.label,
           }),
         },
+        name: fieldSchema.type === 'relation' ? `${name}.${metadatas.mainField.name}` : name,
       };
     });
 
-    if (!hasDraftAndPublish) {
-      return formattedHeaders;
-    }
-
-    return [
-      ...formattedHeaders,
-      {
+    if (hasDraftAndPublish) {
+      formattedHeaders.push({
         key: '__published_at_temp_key__',
         name: 'publishedAt',
         fieldSchema: {
@@ -93,24 +68,42 @@ const DynamicTable = ({
           searchable: false,
           sortable: true,
         },
-        cellFormatter(cellData) {
-          const isPublished = cellData.publishedAt;
-          const variant = isPublished ? 'success' : 'secondary';
-
-          return (
-            <StyledStatus showBullet={false} variant={variant} size="S">
-              <Typography fontWeight="bold" textColor={`${variant}700`}>
-                {formatMessage({
-                  id: getTrad(`containers.List.${isPublished ? 'published' : 'draft'}`),
-                  defaultMessage: isPublished ? 'Published' : 'Draft',
-                })}
-              </Typography>
-            </StyledStatus>
-          );
+        cellFormatter({ publishedAt }) {
+          return <PublicationState isPublished={!!publishedAt} />;
         },
-      },
-    ];
-  }, [runHookWaterfall, displayedHeaders, layout, hasDraftAndPublish, formatMessage]);
+      });
+    }
+
+    if (hasReviewWorkflows) {
+      formattedHeaders.push({
+        key: '__strapi_reviewWorkflows_stage_temp_key__',
+        name: 'strapi_reviewWorkflows_stage',
+        fieldSchema: {
+          type: 'custom',
+        },
+        metadatas: {
+          label: formatMessage({
+            id: getTrad(`containers.ListPage.table-headers.reviewWorkflows.stage`),
+            defaultMessage: 'Review stage',
+          }),
+          searchable: false,
+          sortable: false,
+        },
+        cellFormatter({ strapi_reviewWorkflows_stage }) {
+          return <ReviewWorkflowsStage name={strapi_reviewWorkflows_stage.name} />;
+        },
+      });
+    }
+
+    return formattedHeaders;
+  }, [
+    runHookWaterfall,
+    displayedHeaders,
+    layout,
+    hasDraftAndPublish,
+    hasReviewWorkflows,
+    formatMessage,
+  ]);
 
   return (
     <Table
