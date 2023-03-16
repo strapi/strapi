@@ -1177,9 +1177,9 @@ const createEntityManager = (db) => {
     // TODO: Excluded relation attributes
     /**
      *
-     * @param {*} uid - uid of the entity to clone
-     * @param {*} id - id of the entity to clone
-     * @param {*} cloneId - id of the cloned entity
+     * @param {string} uid - uid of the entity to clone
+     * @param {number} id - id of the entity to clone
+     * @param {number} cloneId - id of the cloned entity
      * @param {object} opt
      * @param {object} opt.cloneAttrs - key value pair of attributes to clone
      * @param {object} opt.transaction - transaction to use
