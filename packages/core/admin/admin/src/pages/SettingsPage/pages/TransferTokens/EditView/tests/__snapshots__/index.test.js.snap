@@ -926,6 +926,93 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                     />
                   </div>
                 </div>
+                <div
+                  class="c22"
+                >
+                  <div
+                    class=""
+                  >
+                    <div>
+                      <div
+                        class="c23 c24"
+                      >
+                        <label
+                          class="c9 c25"
+                          for="7"
+                        >
+                          <div
+                            class="c8"
+                          >
+                            Token type
+                            <span
+                              class="c9 c26 c27"
+                            >
+                              *
+                            </span>
+                          </div>
+                        </label>
+                        <div
+                          class="c8 c33"
+                        >
+                          <button
+                            aria-disabled="false"
+                            aria-expanded="false"
+                            aria-haspopup="listbox"
+                            aria-labelledby="7 7-label 7-content"
+                            class="c34"
+                            id="7"
+                            name="permissions"
+                            type="button"
+                          />
+                          <div
+                            class="c7 c35"
+                          >
+                            <div
+                              class="c8"
+                            >
+                              <div
+                                class="c36"
+                              >
+                                <span
+                                  class="c9 c37"
+                                  id="7-content"
+                                >
+                                  Select
+                                </span>
+                              </div>
+                            </div>
+                            <div
+                              class="c8"
+                            >
+                              <button
+                                aria-hidden="true"
+                                class="c38 c39 c40"
+                                tabindex="-1"
+                                title="Carret Down Button"
+                                type="button"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1rem"
+                                  viewBox="0 0 14 8"
+                                  width="1rem"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                    fill="#32324D"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1246,7 +1333,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border: 2px solid #4945ff;
 }
 
-.c50 {
+.c52 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -1258,11 +1345,11 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   width: 1px;
 }
 
-.c51[aria-disabled='true'] .c9 {
+.c53[aria-disabled='true'] .c9 {
   color: #666687;
 }
 
-.c51[aria-disabled='true']:active .c9 {
+.c53[aria-disabled='true']:active .c9 {
   color: #666687;
 }
 
@@ -1448,6 +1535,27 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
+.c50 {
+  position: relative;
+  border: 1px solid #dcdce4;
+  padding-right: 12px;
+  border-radius: 4px;
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 2.5rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c50:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
 .c47 {
   background: transparent;
   border: none;
@@ -1475,6 +1583,19 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
 }
 
 .c48 svg {
+  width: 0.375rem;
+}
+
+.c51 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+}
+
+.c51 svg {
   width: 0.375rem;
 }
 
@@ -1903,7 +2024,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                         >
                           <label
                             class="c9 c33"
-                            for="8"
+                            for="10"
                           >
                             <div
                               class="c8"
@@ -1924,7 +2045,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                               aria-invalid="false"
                               aria-required="true"
                               class="c37"
-                              id="8"
+                              id="10"
                               name="name"
                               value="My super token"
                             />
@@ -1952,7 +2073,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                           >
                             <label
                               class="c9 c33"
-                              for="10"
+                              for="12"
                             >
                               <div
                                 class="c8"
@@ -1968,7 +2089,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                               aria-invalid="false"
                               aria-required="false"
                               class="c40"
-                              id="10"
+                              id="12"
                               name="description"
                             >
                               This describe my super token
@@ -1991,7 +2112,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                       >
                         <label
                           class="c9 c33"
-                          for="12"
+                          for="14"
                         >
                           <div
                             class="c8"
@@ -2012,9 +2133,9 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                             aria-disabled="true"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="12 12-label 12-content"
+                            aria-labelledby="14 14-label 14-content"
                             class="c42"
-                            id="12"
+                            id="14"
                             name="lifespan"
                             type="button"
                           />
@@ -2029,7 +2150,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                               >
                                 <span
                                   class="c9 c45"
-                                  id="12-content"
+                                  id="14-content"
                                 >
                                   Select
                                 </span>
@@ -2073,6 +2194,94 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                     </span>
                   </div>
                 </div>
+                <div
+                  class="c30"
+                >
+                  <div
+                    class=""
+                  >
+                    <div>
+                      <div
+                        class="c31 c32"
+                      >
+                        <label
+                          class="c9 c33"
+                          for="16"
+                        >
+                          <div
+                            class="c8"
+                          >
+                            Token type
+                            <span
+                              class="c9 c34 c35"
+                            >
+                              *
+                            </span>
+                          </div>
+                        </label>
+                        <div
+                          class="c8 c50"
+                        >
+                          <button
+                            aria-disabled="false"
+                            aria-expanded="false"
+                            aria-haspopup="listbox"
+                            aria-labelledby="16 16-label 16-content"
+                            class="c42"
+                            id="16"
+                            name="permissions"
+                            type="button"
+                          />
+                          <div
+                            class="c7 c43"
+                          >
+                            <div
+                              class="c8"
+                            >
+                              <div
+                                class="c44"
+                              >
+                                <span
+                                  class="c9 c45"
+                                  id="16-content"
+                                >
+                                  Select
+                                </span>
+                              </div>
+                            </div>
+                            <div
+                              class="c8"
+                            >
+                              
+                              <button
+                                aria-hidden="true"
+                                class="c46 c47 c51"
+                                tabindex="-1"
+                                title="Carret Down Button"
+                                type="button"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1rem"
+                                  viewBox="0 0 14 8"
+                                  width="1rem"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                    fill="#32324D"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -2081,7 +2290,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
     </form>
   </main>
   <div
-    class="c50"
+    class="c52"
   >
     <p
       aria-live="polite"
