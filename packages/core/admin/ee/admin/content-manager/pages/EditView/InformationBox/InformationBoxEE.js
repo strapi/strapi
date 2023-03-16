@@ -1,7 +1,13 @@
-import React, { useState } from 'react';
-import { ReactSelect, useCMEditViewDataManager, useAPIErrorHandler } from '@strapi/helper-plugin';
+import React from 'react';
+import {
+  ReactSelect,
+  useCMEditViewDataManager,
+  useAPIErrorHandler,
+  useFetchClient,
+} from '@strapi/helper-plugin';
 import { Field, FieldLabel, FieldError, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+import { useMutation } from 'react-query';
 
 import { useReviewWorkflows } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
 import Information from '../../../../../../admin/src/content-manager/pages/EditView/Information';
@@ -14,28 +20,35 @@ export function InformationBoxEE() {
     isCreatingEntry,
     layout: { uid },
   } = useCMEditViewDataManager();
+  const { put } = useFetchClient();
   const activeWorkflowStage = initialData?.[ATTRIBUTE_NAME] ?? null;
   const { formatMessage } = useIntl();
   const { formatAPIError } = useAPIErrorHandler();
+
   const {
     workflows: { data: workflow },
-    entityStageMutation,
-    setStageForEntity,
   } = useReviewWorkflows(activeWorkflowStage?.id);
+
+  const { error, isLoading, mutateAsync } = useMutation(async ({ entityId, stageId, uid }) => {
+    const {
+      data: { data },
+    } = await put(`/admin/content-manager/collection-types/${uid}/${entityId}/stage`, {
+      data: { id: stageId },
+    });
+
+    return data;
+  });
+
   // stages are empty while the workflow is loading
   const options = (workflow?.stages ?? []).map(({ id, name }) => ({ value: id, label: name }));
-  const [error, setError] = useState(null);
+  const formattedError = error ? formatAPIError(error) : null;
 
   const handleStageChange = async ({ value: stageId }) => {
-    try {
-      await setStageForEntity({
-        entityId: initialData.id,
-        stageId,
-        uid,
-      });
-    } catch (error) {
-      setError(formatAPIError(error));
-    }
+    await mutateAsync({
+      entityId: initialData.id,
+      stageId,
+      uid,
+    });
   };
 
   return (
@@ -43,7 +56,7 @@ export function InformationBoxEE() {
       <Information.Title />
 
       {activeWorkflowStage && (
-        <Field error={error} name={ATTRIBUTE_NAME}>
+        <Field error={formattedError} name={ATTRIBUTE_NAME}>
           <Flex direction="column" gap={2} alignItems="stretch">
             <FieldLabel>
               {formatMessage({
@@ -53,13 +66,13 @@ export function InformationBoxEE() {
             </FieldLabel>
 
             <ReactSelect
-              error={error}
+              error={formattedError}
               inputId={ATTRIBUTE_NAME}
               isDisabled={isCreatingEntry}
               options={options}
               name={ATTRIBUTE_NAME}
               defaultValue={{ value: activeWorkflowStage?.id, label: activeWorkflowStage?.name }}
-              isLoading={entityStageMutation.isLoading}
+              isLoading={isLoading}
               isSearchable={false}
               isClearable={false}
               onChange={handleStageChange}

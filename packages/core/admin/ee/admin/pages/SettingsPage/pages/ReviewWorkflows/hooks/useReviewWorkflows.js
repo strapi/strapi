@@ -3,7 +3,6 @@ import { useFetchClient, useNotification, useAPIErrorHandler } from '@strapi/hel
 
 const QUERY_BASE_KEY = 'review-workflows';
 const API_BASE_URL = '/admin/review-workflows';
-const API_CM_BASE_URL = '/admin/content-manager';
 
 export function useReviewWorkflows(workflowId) {
   const { get, put } = useFetchClient();
@@ -30,23 +29,8 @@ export function useReviewWorkflows(workflowId) {
     return data;
   }
 
-  async function updateEntityStage({ entityId, stageId, uid }) {
-    const {
-      data: { data },
-      // TODO: endpoint differs for collection-types and single-types
-    } = await put(`${API_CM_BASE_URL}/collection-types/${uid}/${entityId}/stage`, {
-      data: { id: stageId },
-    });
-
-    return data;
-  }
-
   function updateWorkflowStages(workflowId, stages) {
     return workflowUpdateMutation.mutateAsync({ workflowId, stages });
-  }
-
-  function setStageForEntity(...args) {
-    return entityStageMutation.mutateAsync(...args);
   }
 
   function refetchWorkflow() {
@@ -71,13 +55,9 @@ export function useReviewWorkflows(workflowId) {
     },
   });
 
-  const entityStageMutation = useMutation(updateEntityStage);
-
   return {
     workflows,
-    entityStageMutation,
     updateWorkflowStages,
     refetchWorkflow,
-    setStageForEntity,
   };
 }

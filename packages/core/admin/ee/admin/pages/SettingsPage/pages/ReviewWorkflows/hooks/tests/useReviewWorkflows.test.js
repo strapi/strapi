@@ -197,34 +197,4 @@ describe('useReviewWorkflows', () => {
 
     expect(spy).toBeCalledWith(['review-workflows', 1]);
   });
-
-  test('send put request on the entityStageMutation mutation', async () => {
-    const { put } = useFetchClient();
-    const toggleNotification = useNotification();
-    const idFixture = 1;
-    const stageIdFixture = 2;
-
-    put.mockResolvedValue({
-      data: {},
-    });
-
-    const { result, waitFor } = await setup(idFixture);
-
-    await act(async () => {
-      await result.current.setStageForEntity(idFixture, stageIdFixture);
-    });
-
-    await waitFor(() => expect(result.current.workflows.isLoading).toBe(false));
-
-    expect(put).toBeCalledWith(
-      `/admin/content-manager/collection-types/:model_uid/${idFixture}/stage`,
-      {
-        data: {
-          id: stageIdFixture,
-        },
-      }
-    );
-
-    expect(toggleNotification).toBeCalled();
-  });
 });
