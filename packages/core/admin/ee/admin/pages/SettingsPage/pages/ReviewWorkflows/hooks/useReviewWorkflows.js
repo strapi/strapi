@@ -3,7 +3,6 @@ import { useFetchClient, useNotification, useAPIErrorHandler } from '@strapi/hel
 
 const QUERY_BASE_KEY = 'review-workflows';
 const API_BASE_URL = '/admin/review-workflows';
-const API_CM_BASE_URL = '/admin/content-manager';
 
 export function useReviewWorkflows(workflowId) {
   const { get, put } = useFetchClient();
@@ -30,23 +29,8 @@ export function useReviewWorkflows(workflowId) {
     return data;
   }
 
-  async function updateEntityStage({ entityId, stageId }) {
-    const {
-      data: { data },
-      // TODO: endpoint differs for collection-types and single-types
-    } = await put(`${API_CM_BASE_URL}/collection-types/:model_uid/${entityId}/stage`, {
-      data: { id: stageId },
-    });
-
-    return data;
-  }
-
   function updateWorkflowStages(workflowId, stages) {
     return workflowUpdateMutation.mutateAsync({ workflowId, stages });
-  }
-
-  function setStageForEntity(entityId, stageId) {
-    return entityStageMutation.mutateAsync({ entityId, stageId });
   }
 
   function refetchWorkflow() {
@@ -71,26 +55,9 @@ export function useReviewWorkflows(workflowId) {
     },
   });
 
-  const entityStageMutation = useMutation(updateEntityStage, {
-    async onError(error) {
-      toggleNotification({
-        type: 'warning',
-        message: formatAPIError(error),
-      });
-    },
-
-    async onSuccess() {
-      toggleNotification({
-        type: 'success',
-        message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
-      });
-    },
-  });
-
   return {
     workflows,
     updateWorkflowStages,
     refetchWorkflow,
-    setStageForEntity,
   };
 }
