@@ -14,7 +14,7 @@ if (window.strapi.features.isEnabled(window.strapi.features.SSO)) {
 
 if (window.strapi.features.isEnabled(window.strapi.features.REVIEW_WORKFLOWS)) {
   items.push({
-    intlLabel: { id: 'Settings.review-workflows.title', defaultMessage: 'Review Workflow' },
+    intlLabel: { id: 'Settings.review-workflows.page.title', defaultMessage: 'Review Workflows' },
     to: '/settings/review-workflows',
     id: 'review-workflows',
     isDisplayed: false,
