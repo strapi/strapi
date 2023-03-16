@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Provider } from 'react-redux';
 import { FormikProvider, useFormik } from 'formik';
@@ -10,12 +10,13 @@ import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import configureStore from '../../../../../../../../../admin/src/core/store/configureStore';
 import { Stages } from '../Stages';
 import { reducer } from '../../../reducer';
-import { ACTION_SET_WORKFLOWS, ACTION_ADD_STAGE } from '../../../constants';
-import { addStage } from '../../../actions';
+import { ACTION_SET_WORKFLOWS } from '../../../constants';
+import * as actions from '../../../actions';
 
+// without mocking actions as ESM it is impossible to spy on named exports
 jest.mock('../../../actions', () => ({
+  __esModule: true,
   ...jest.requireActual('../../../actions'),
-  addStage: jest.fn(),
 }));
 
 const STAGES_FIXTURE = [
@@ -87,8 +88,7 @@ describe('Admin | Settings | Review Workflow | Stages', () => {
 
   it('should append a new stage when clicking "add new stage"', async () => {
     const { getByRole } = setup();
-
-    addStage.mockReturnValue({ type: ACTION_ADD_STAGE });
+    const spy = jest.spyOn(actions, 'addStage');
 
     await user.click(
       getByRole('button', {
@@ -96,7 +96,24 @@ describe('Admin | Settings | Review Workflow | Stages', () => {
       })
     );
 
-    expect(addStage).toBeCalledTimes(1);
-    expect(addStage).toBeCalledWith({ name: '' });
+    expect(spy).toBeCalledTimes(1);
+    expect(spy).toBeCalledWith({ name: '' });
+  });
+
+  it('should update the name of a stage by changing the input value', async () => {
+    const { queryByRole, getByRole } = setup();
+    const spy = jest.spyOn(actions, 'updateStage');
+
+    await user.click(getByRole('button', { name: /stage-2/i }));
+
+    const input = queryByRole('textbox', {
+      name: /stage name/i,
+    });
+
+    fireEvent.change(input, { target: { value: 'New name' } });
+
+    expect(spy).toBeCalledWith(2, {
+      name: 'New name',
+    });
   });
 });
