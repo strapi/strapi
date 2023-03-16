@@ -1,17 +1,4 @@
-const ERROR_PREFIX = 'apiError.';
-
-function getPrefixedId(message, callback) {
-  const prefixedMessage = `${ERROR_PREFIX}${message}`;
-
-  // if a prefix function has been passed in it is used to
-  // prefix the id, e.g. to allow an error message to be
-  // set only for a localization namespace
-  if (callback) {
-    return callback(prefixedMessage);
-  }
-
-  return prefixedMessage;
-}
+import { getPrefixedId } from '../getPrefixedId';
 
 function normalizeError(error, { name, intlMessagePrefixCallback }) {
   const { message, path } = error;
