@@ -75,6 +75,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {},
       isCreatingEntry: true,
+      layout: { uid: 'api::articles:articles' },
     });
 
     const { getByText } = setup();
@@ -87,6 +88,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {},
       isCreatingEntry: true,
+      layout: { uid: 'api::articles:articles' },
     });
 
     const { queryByRole } = setup();
@@ -98,6 +100,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {},
       isCreatingEntry: true,
+      layout: { uid: 'api::articles:articles' },
     });
 
     const { queryByRole } = setup();
@@ -111,6 +114,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
         [STAGE_ATTRIBUTE_NAME]: STAGE_FIXTURE,
       },
       isCreatingEntry: true,
+      layout: { uid: 'api::articles:articles' },
     });
 
     const { queryByRole } = setup();
@@ -126,6 +130,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
         [STAGE_ATTRIBUTE_NAME]: STAGE_FIXTURE,
       },
       isCreatingEntry: false,
+      layout: { uid: 'api::articles:articles' },
     });
 
     const { queryByRole } = setup();
@@ -141,6 +146,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
         [STAGE_ATTRIBUTE_NAME]: STAGE_FIXTURE,
       },
       isCreatingEntry: false,
+      layout: { uid: 'api::articles:articles' },
     });
 
     const { queryByRole, getByText } = setup();
