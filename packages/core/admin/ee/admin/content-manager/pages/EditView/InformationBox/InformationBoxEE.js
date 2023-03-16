@@ -44,11 +44,16 @@ export function InformationBoxEE() {
   const formattedError = error ? formatAPIError(error) : null;
 
   const handleStageChange = async ({ value: stageId }) => {
-    await mutateAsync({
-      entityId: initialData.id,
-      stageId,
-      uid,
-    });
+    try {
+      await mutateAsync({
+        entityId: initialData.id,
+        stageId,
+        uid,
+      });
+    } catch (error) {
+      // react-query@v3: the error doesn't have to be handled here
+      // see: https://github.com/TanStack/query/issues/121
+    }
   };
 
   return (
