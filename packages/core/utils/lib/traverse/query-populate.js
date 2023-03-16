@@ -160,6 +160,8 @@ const populate = traverseFactory()
       const { components } = attribute;
       const { on, ...properties } = value;
 
+      const newValue = {};
+
       // Handle legacy DZ params
       let newProperties = properties;
 
@@ -168,11 +170,15 @@ const populate = traverseFactory()
         newProperties = await recurse(visitor, { schema: componentSchema, path }, newProperties);
       }
 
-      // Handle new morph fragment syntax
-      const newOn = await recurse(visitor, { schema, path }, { on });
+      Object.assign(newValue, newProperties);
 
-      // Recompose both syntaxes
-      const newValue = { ...newOn, ...newProperties };
+      // Handle new morph fragment syntax
+      if (on) {
+        const newOn = await recurse(visitor, { schema, path }, { on });
+
+        // Recompose both syntaxes
+        Object.assign(newValue, newOn);
+      }
 
       set(key, newValue);
     } else {
