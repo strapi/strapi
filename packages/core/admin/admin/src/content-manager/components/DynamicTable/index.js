@@ -10,8 +10,8 @@ import { getTrad } from '../../utils';
 import TableRows from './TableRows';
 import ConfirmDialogDeleteAll from './ConfirmDialogDeleteAll';
 import ConfirmDialogDelete from './ConfirmDialogDelete';
-import { PublicationState } from './PublicationState/PublicationState';
-import { ReviewWorkflowsStage } from './ReviewWorkflowsStage';
+import { PublicationState } from './CellContent/PublicationState/PublicationState';
+import { ReviewWorkflowsStage } from './CellContent/ReviewWorkflowsStage';
 
 const DynamicTable = ({
   canCreate,
@@ -90,7 +90,7 @@ const DynamicTable = ({
           sortable: false,
         },
         cellFormatter({ strapi_reviewWorkflows_stage }) {
-          return <ReviewWorkflowsStage {...strapi_reviewWorkflows_stage} />;
+          return <ReviewWorkflowsStage name={strapi_reviewWorkflows_stage.name} />;
         },
       });
     }
